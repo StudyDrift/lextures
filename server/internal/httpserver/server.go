@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/service/cleverauth"
+	drmservice "github.com/lextures/lextures/server/internal/service/drm"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
@@ -43,6 +44,8 @@ type Deps struct {
 	NotifHub *notifevents.Hub
 	// Storage is the object-storage driver (plan 8.1). When nil, falls back to local disk reads.
 	Storage filestorage.Driver
+	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.
+	DRM *drmservice.Service
 }
 
 func (d Deps) effectiveConfig() config.Config {
