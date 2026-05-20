@@ -509,4 +509,7 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Get("/api/v1/admin/provisioning/scim/events", d.handleAdminScimEventsList())
 	r.Get("/api/v1/admin/password-policy", d.handleAdminPasswordPolicyGet())
 	r.Put("/api/v1/admin/password-policy", d.handleAdminPasswordPolicyPut())
+	// DRM / watermarking (plan 8.10)
+	r.Put("/api/v1/admin/files/{object_id}/drm", d.handlePutAdminFileDRM())
+	r.Get("/api/v1/admin/drm/anomalies", d.handleGetAdminDRMAnomalies())
 }

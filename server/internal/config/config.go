@@ -162,6 +162,12 @@ type Config struct {
 
 	// TusUploadTTLHours is how long stalled (incomplete) tus uploads are retained before cleanup (default 48).
 	TusUploadTTLHours int
+
+	// DRMEnabled gates watermarking and DRM features (plan 8.10). Defaults to false; enterprise-only.
+	DRMEnabled bool
+	// DRMHMACSecret is the base64-encoded 32-byte secret used to sign user-bound DRM tokens.
+	// If empty, token signing falls back to a derived value (not suitable for production).
+	DRMHMACSecret string
 }
 
 // Load reads configuration from the environment.
@@ -298,6 +304,9 @@ func Load() Config {
 		StorageMigrateLocal:    boolEnv("STORAGE_MIGRATE_LOCAL"),
 
 		TusUploadTTLHours: tusUploadTTLHours(),
+
+		DRMEnabled:    boolEnv("FEATURE_DRM"),
+		DRMHMACSecret: firstNonEmptyTrimmed("DRM_HMAC_SECRET"),
 	}
 }
 
