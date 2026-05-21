@@ -1,4 +1,9 @@
 /// <reference types="vite/client" />
+
+declare module '*.md?raw' {
+  const content: string
+  export default content
+}
 /// <reference types="vitest/globals" />
 
 /** Injected at build time via Vite `define` in `vite.config.ts`. */

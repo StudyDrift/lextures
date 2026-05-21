@@ -49,11 +49,13 @@ import MfaLogin from './pages/mfa-login'
 import SamlCallback from './pages/saml-callback'
 import SsoError from './pages/sso-error'
 import PrivacyPolicyPage from './pages/privacy-policy-page'
+import PrivacyPolicyHistoryPage from './pages/privacy-policy-history-page'
 import MagicLinkPage from './pages/magic-link'
 import ResetPassword from './pages/reset-password'
 import Signup from './pages/signup'
 import ParentDashboard from './pages/lms/parent/ParentDashboard'
 import TermsOfUsePage from './pages/terms-of-use-page'
+import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import CliAuthPage from './pages/cli-auth'
 
 export default function App() {
@@ -71,7 +73,11 @@ export default function App() {
         location.pathname.startsWith('/login/magic-link') ||
         location.pathname.startsWith('/login/mfa') ||
         location.pathname === '/saml-callback' ||
-        location.pathname === '/sso-error'
+        location.pathname === '/sso-error' ||
+        location.pathname === '/privacy' ||
+        location.pathname.startsWith('/privacy/') ||
+        location.pathname === '/terms' ||
+        location.pathname.startsWith('/terms/')
       ) {
         return
       }
@@ -93,6 +99,10 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/privacy/history" element={<PrivacyPolicyHistoryPage />} />
+      <Route path="/terms" element={<TermsOfUsePage />} />
+      <Route path="/terms/history" element={<TermsOfUseHistoryPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/cli-auth" element={<CliAuthPage />} />
         <Route
@@ -151,8 +161,6 @@ export default function App() {
           <Route path="/settings/ai" element={<Navigate to="/settings/ai/models" replace />} />
           <Route path="/settings/ai/:aiSection" element={<Settings />} />
           <Route path="/settings/:tab" element={<Settings />} />
-          <Route path="/terms" element={<TermsOfUsePage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
