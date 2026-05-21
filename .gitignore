@@ -53,6 +53,14 @@ iac/demo/*.tfvars
 iac/demo/crash.log
 iac/demo/override.tf
 
+# Terraform (iac/production)
+iac/production/.terraform/
+iac/production/*.tfstate
+iac/production/*.tfstate.*
+iac/production/terraform.tfvars
+iac/production/crash.log
+iac/production/override.tf
+
 # Agents
 .agents/
 
