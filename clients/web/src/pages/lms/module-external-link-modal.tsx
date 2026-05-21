@@ -1,10 +1,16 @@
 import { useEffect, useId, useState } from 'react'
 import { X } from 'lucide-react'
+import {
+  GoogleDrivePicker,
+  OneDrivePicker,
+  DropboxPicker,
+  type PickedFile,
+} from '../../services/cloudPicker'
 
 type ModuleExternalLinkModalProps = {
   open: boolean
   onClose: () => void
-  onSave: (title: string, url: string) => void | Promise<void>
+  onSave: (title: string, url: string, provider?: string, externalId?: string, iconUrl?: string) => void | Promise<void>
   saving?: boolean
   errorMessage?: string | null
 }
@@ -25,6 +31,11 @@ function ModuleExternalLinkModalInner({
   const urlFieldId = useId()
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
+  const [provider, setProvider] = useState<string | undefined>()
+  const [externalId, setExternalId] = useState<string | undefined>()
+  const [iconUrl, setIconUrl] = useState<string | undefined>()
+  const [picking, setPicking] = useState<string | null>(null)
+  const [pickError, setPickError] = useState<string | null>(null)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -36,6 +47,55 @@ function ModuleExternalLinkModalInner({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose, saving])
+
+  function handleUrlChange(v: string) {
+    setUrl(v)
+    // Reset cloud provider metadata if user edits URL manually
+    setProvider(undefined)
+    setExternalId(undefined)
+    setIconUrl(undefined)
+  }
+
+  async function handleCloudPick(
+    label: string,
+    providerKey: string,
+    doPick: () => Promise<PickedFile | null>,
+  ) {
+    setPickError(null)
+    setPicking(providerKey)
+    try {
+      const file = await doPick()
+      if (file) {
+        if (!title.trim()) setTitle(file.name)
+        setUrl(file.viewUrl)
+        setProvider(file.provider)
+        setExternalId(file.externalId)
+        setIconUrl(file.iconUrl)
+      }
+    } catch (e) {
+      setPickError(e instanceof Error ? e.message : `Could not open ${label}.`)
+    } finally {
+      setPicking(null)
+    }
+  }
+
+  const cloudButtons = [
+    {
+      label: 'Google Drive',
+      key: 'google_drive',
+      pick: () => new GoogleDrivePicker('', '').pick(),
+    },
+    {
+      label: 'OneDrive',
+      key: 'onedrive',
+      pick: () => new OneDrivePicker('').pick(),
+    },
+    {
+      label: 'Dropbox',
+      key: 'dropbox',
+      pick: () => new DropboxPicker().pick(),
+    },
+  ]
 
   return (
     <div
@@ -69,7 +129,7 @@ function ModuleExternalLinkModalInner({
             const t = title.trim()
             const u = url.trim()
             if (!t || !u || saving) return
-            void onSave(t, u)
+            void onSave(t, u, provider, externalId, iconUrl)
           }}
         >
           <label htmlFor={titleFieldId} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
@@ -96,7 +156,7 @@ function ModuleExternalLinkModalInner({
             type="url"
             inputMode="url"
             value={url}
-            onChange={(e) => setUrl(e.target.value)}
+            onChange={(e) => handleUrlChange(e.target.value)}
             placeholder="https://example.com"
             disabled={saving}
             className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
@@ -105,6 +165,32 @@ function ModuleExternalLinkModalInner({
             Must start with <span className="font-mono">http://</span> or{' '}
             <span className="font-mono">https://</span>. Learners open this link in a new tab.
           </p>
+
+          <div className="mt-4 border-t border-slate-100 pt-4 dark:border-neutral-700">
+            <p className="mb-2 text-xs font-medium text-slate-600 dark:text-neutral-300">
+              Or pick from cloud storage
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {cloudButtons.map((btn) => (
+                <button
+                  key={btn.key}
+                  type="button"
+                  disabled={saving || picking !== null}
+                  aria-haspopup="dialog"
+                  onClick={() => void handleCloudPick(btn.label, btn.key, btn.pick)}
+                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                >
+                  {picking === btn.key ? 'Opening…' : btn.label}
+                </button>
+              ))}
+            </div>
+            {pickError && (
+              <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="alert">
+                {pickError}
+              </p>
+            )}
+          </div>
+
           {errorMessage && (
             <p className="mt-3 text-sm text-rose-700 dark:text-rose-300" role="status">
               {errorMessage}

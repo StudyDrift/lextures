@@ -15,6 +15,7 @@ export type SettingsNavView =
   | 'terms'
   | 'org-branding'
   | 'scim-provisioning'
+  | 'cloud-providers'
 
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (pathname.startsWith('/settings/ai/system-prompts')) return 'ai-prompts'
@@ -33,7 +34,8 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'org-roles' ||
     raw === 'terms' ||
     raw === 'org-branding' ||
-    raw === 'scim-provisioning'
+    raw === 'scim-provisioning' ||
+    raw === 'cloud-providers'
   )
     return raw
   return 'account'

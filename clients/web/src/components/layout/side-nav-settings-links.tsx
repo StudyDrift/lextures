@@ -139,6 +139,13 @@ export function SideNavSettingsLinks() {
                 LTI tools
               </SideNavLink>
               <SideNavLink
+                to="/settings/cloud-providers"
+                className={() => (view === 'cloud-providers' ? sideNavActiveClass : '')}
+                icon={<Link2 className="h-5 w-5" />}
+              >
+                Cloud file pickers
+              </SideNavLink>
+              <SideNavLink
                 to="/settings/platform"
                 className={() => (view === 'platform' ? sideNavActiveClass : '')}
                 icon={<Settings2 className="h-5 w-5" />}

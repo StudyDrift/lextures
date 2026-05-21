@@ -512,4 +512,7 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	// DRM / watermarking (plan 8.10)
 	r.Put("/api/v1/admin/files/{object_id}/drm", d.handlePutAdminFileDRM())
 	r.Get("/api/v1/admin/drm/anomalies", d.handleGetAdminDRMAnomalies())
+	// Cloud file picker providers (plan 8.8)
+	r.Get("/api/v1/admin/cloud-providers", d.handleGetAdminCloudProviders())
+	r.Put("/api/v1/admin/cloud-providers/{provider}", d.handlePutAdminCloudProvider())
 }

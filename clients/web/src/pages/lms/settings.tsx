@@ -21,6 +21,7 @@ import { OrgUnitsPanel } from '../../components/settings/org-units-panel'
 import { TermsSettingsPanel } from '../../components/settings/terms-settings-panel'
 import { PlatformSettingsPanel } from '../../components/settings/platform-settings-panel'
 import { ScimSettingsPanel } from '../../components/settings/scim-settings-panel'
+import { CloudProvidersPanel } from '../../components/settings/cloud-providers-panel'
 import { RolesPermissionsPanel } from '../../components/settings/roles-permissions-panel'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -53,7 +54,8 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/org-units' ||
     pathname === '/settings/terms' ||
     pathname === '/settings/org-branding' ||
-    pathname === '/settings/scim-provisioning'
+    pathname === '/settings/scim-provisioning' ||
+    pathname === '/settings/cloud-providers'
   )
 }
 
@@ -771,7 +773,8 @@ export default function Settings() {
           activeView === 'org-units' ||
           activeView === 'terms' ||
           activeView === 'org-branding' ||
-          activeView === 'scim-provisioning'
+          activeView === 'scim-provisioning' ||
+          activeView === 'cloud-providers'
             ? 'max-w-4xl'
             : activeView === 'ai-prompts'
               ? 'max-w-3xl'
@@ -1436,6 +1439,22 @@ export default function Settings() {
               }
             >
               <ScimSettingsPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'cloud-providers' && (
+          <div>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  You need permission to manage cloud provider settings (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <CloudProvidersPanel />
             </RequirePermission>
           </div>
         )}
