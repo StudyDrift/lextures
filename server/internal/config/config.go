@@ -189,6 +189,13 @@ type Config struct {
 	// StorageDefaultTenantQuotaGB, when > 0, sets a default tenant-level quota in gigabytes
 	// applied at startup. 0 means unlimited unless an admin sets an explicit limit.
 	StorageDefaultTenantQuotaGB int64
+
+	// AvScanningEnabled gates ClamAV malware scanning on uploads (plan 8.6).
+	AvScanningEnabled bool
+	// ClamAVAddr is the clamd TCP address (default localhost:3310).
+	ClamAVAddr string
+	// ClamAVStub when true uses in-process EICAR detection (tests/dev without clamd).
+	ClamAVStub bool
 }
 
 // Load reads configuration from the environment.
@@ -339,6 +346,10 @@ func Load() Config {
 
 		StorageQuotasEnabled:        boolEnv("FEATURE_STORAGE_QUOTAS"),
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
+
+		AvScanningEnabled: boolEnv("FEATURE_AV_SCANNING"),
+		ClamAVAddr:        stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
+		ClamAVStub:        boolEnv("CLAMAV_STUB"),
 	}
 }
 

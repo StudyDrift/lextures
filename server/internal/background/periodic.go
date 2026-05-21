@@ -12,6 +12,8 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/terms"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
+	"github.com/lextures/lextures/server/internal/service/clamav"
+	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
@@ -98,6 +100,17 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 			sweepCaptionJobs(context.Background(), capWorker)
 		})
 		slog.Info("auto-captioning worker started", "backend", string(backend))
+	}
+
+	if cfg.AvScanningEnabled && storage != nil {
+		clam := clamav.NewClient(cfg.ClamAVAddr, cfg.ClamAVStub)
+		avWorker := avscan.New(pool, storage, clam)
+		avWorker.LocalRoot = cfg.CourseFilesRoot
+		avWorker.EmailEnabled = cfg.EmailNotificationsEnabled
+		go runEvery(ctx, 10*time.Second, func() {
+			sweepAVScanJobs(context.Background(), avWorker)
+		})
+		slog.Info("av scanning worker started", "clamav_addr", cfg.ClamAVAddr, "stub", cfg.ClamAVStub)
 	}
 }
 
