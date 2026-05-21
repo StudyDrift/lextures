@@ -120,6 +120,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAVScanRoutes(r)
 	d.registerOERRoutes(r)
 	d.registerLegalRoutes(r)
+	d.registerTrustRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r

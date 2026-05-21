@@ -56,6 +56,7 @@ import Signup from './pages/signup'
 import ParentDashboard from './pages/lms/parent/ParentDashboard'
 import TermsOfUsePage from './pages/terms-of-use-page'
 import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
+import TrustCenterPage from './pages/trust-center-page'
 import CliAuthPage from './pages/cli-auth'
 
 export default function App() {
@@ -77,7 +78,8 @@ export default function App() {
         location.pathname === '/privacy' ||
         location.pathname.startsWith('/privacy/') ||
         location.pathname === '/terms' ||
-        location.pathname.startsWith('/terms/')
+        location.pathname.startsWith('/terms/') ||
+        location.pathname === '/trust'
       ) {
         return
       }
@@ -103,6 +105,7 @@ export default function App() {
       <Route path="/privacy/history" element={<PrivacyPolicyHistoryPage />} />
       <Route path="/terms" element={<TermsOfUsePage />} />
       <Route path="/terms/history" element={<TermsOfUseHistoryPage />} />
+      <Route path="/trust" element={<TrustCenterPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/cli-auth" element={<CliAuthPage />} />
         <Route
