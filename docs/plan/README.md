@@ -22,7 +22,6 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [03 — Submissions, Grading & Academic Integrity](03-submissions-grading-integrity/)
 - [05 — Multi-tenancy, Org Hierarchy & Roles](../completed/05-multi-tenancy-org-roles/) (completed plans)
 - [06 — Communication & Collaboration](06-communication-collaboration/)
-- [07 — Mobile, Offline & Cross-Platform](07-mobile-offline-cross-platform/)
 - [08 — Content, Media & File Handling](08-content-media-files/)
 - [09 — Analytics, Reporting & Insights](09-analytics-reporting/)
 - [10 — Compliance, Privacy & Security](10-compliance-privacy-security/)
@@ -36,4 +35,4 @@ One plan per feature gap identified in `[docs/MISSING_FEATURES.md](../MISSING_FE
 - [18 — Admin Experience](18-admin-experience/)
 - [19 — AI-Specific Capabilities](19-ai-capabilities/)
 - [20 — Documentation & Trust Surfaces](20-docs-trust/)
-- [21 — CLI](21-cli/)
+- [21 — Mobile, Offline & Cross-Platform](21-mobile-offline-cross-platform/)

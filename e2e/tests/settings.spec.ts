@@ -68,7 +68,8 @@ test.describe('Course Settings - General - Course Home', () => {
     // Now change it back to data dashboard (index 0) and verify it stages, saves, and updates the landing.
     await courseHomeRadios.nth(0).click()
     await page.getByRole('button', { name: /^save changes$/i }).first().click()
-    await expect(page.getByText('Course settings saved')).toBeVisible({
+    // Two saves in this test can leave two toasts in the DOM; assert the latest one.
+    await expect(page.getByText('Course settings saved').last()).toBeVisible({
       timeout: 8000,
     })
     await page.goto(`/courses/${seededCourse.courseCode}`)

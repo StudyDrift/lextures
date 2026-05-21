@@ -151,11 +151,76 @@ jobs:
         run: npm run build-storybook
 
   e2e:
-    name: E2E (Playwright via make e2e)
+    name: E2E (Playwright, no Docker)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
+    env:
+      E2E_USE_DOCKER: "0"
+      E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
+      E2E_API_PORT: "8080"
+      E2E_SERVER_BIN: ${{ github.workspace }}/.cache/e2e/server
+      E2E_WEB_MODE: preview
+      E2E_SKIP_DEPS: "1"
+      E2E_HEALTH_POLL_SECS: "1"
+      E2E_HEALTH_MAX_ATTEMPTS: "45"
+      CI: "true"
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: e2e
+          POSTGRES_PASSWORD: e2e
+          POSTGRES_DB: e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U e2e -d e2e"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run full e2e suite (Docker stack + Playwright)
-        run: make e2e
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.10"
+          cache-dependency-path: server/go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: |
+            clients/web/package-lock.json
+            e2e/package-lock.json
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
+      - name: Build API server binary
+        working-directory: server
+        run: |
+          mkdir -p "${{ github.workspace }}/.cache/e2e"
+          go build -trimpath -ldflags="-s -w" -o "${{ env.E2E_SERVER_BIN }}" ./cmd/server
+
+      - name: Install and build web client
+        working-directory: clients/web
+        env:
+          VITE_API_URL: http://localhost:8080
+        run: |
+          npm ci
+          npm run build
+
+      - name: Install e2e dependencies and Playwright browser
+        working-directory: e2e
+        run: |
+          npm ci --prefer-offline --quiet
+          npx playwright install --with-deps chromium
+
+      - name: Run e2e suite (local stack)
+        run: bash e2e/scripts/e2e-local.sh

@@ -11,6 +11,7 @@
 #                      `go run`, Vite dev server for the web client.  Everything cleaned up on exit.
 #
 # Force a strategy: E2E_USE_DOCKER=1 (always Docker) or E2E_USE_DOCKER=0 (always local).
+# GitHub Actions CI sets E2E_USE_DOCKER=0 and uses e2e/scripts/e2e-local.sh with a Postgres service.
 #
 # Why not SQLite?
 #   The server uses jackc/pgx v5 with 653 call sites across 73+ files, plus 140+ migration

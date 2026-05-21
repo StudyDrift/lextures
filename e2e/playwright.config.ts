@@ -5,10 +5,11 @@ const apiURL = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
 export default defineConfig({
   testDir: './tests',
+  // Spec files are isolated (unique users via fixtures); parallelize across files in CI.
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: 1,
+  workers: process.env.CI ? 4 : 1,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL,
