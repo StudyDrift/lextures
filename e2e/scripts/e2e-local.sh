@@ -23,9 +23,17 @@
 #   uuid_generate_v4, advisory locks, pg schemas, etc.).  Ephemeral Postgres
 #   achieves the same "nothing persists" guarantee without touching the server.
 #
-# Requirements:
+# Optional environment (CI sets these; local dev can omit them):
+#   E2E_DATABASE_URL     — skip ephemeral initdb; use an existing Postgres (e.g. GHA service)
+#   E2E_SERVER_BIN       — path to a pre-built API binary (faster than go run)
+#   E2E_WEB_MODE=preview — serve clients/web/dist via vite preview (requires npm run build)
+#   E2E_SKIP_DEPS=1      — skip npm ci and playwright install (deps installed in a prior step)
+#   E2E_API_PORT         — API listen port (default: random free port locally, 8080 in CI)
+#   E2E_HEALTH_POLL_SECS / E2E_HEALTH_MAX_ATTEMPTS — readiness polling tuning
+#
+# Requirements (when E2E_DATABASE_URL is unset):
 #   - PostgreSQL binaries (brew install postgresql@16 / apt install postgresql)
-#   - Go toolchain (go run must work from server/)
+#   - Go toolchain (go run must work from server/) unless E2E_SERVER_BIN is set
 #   - Node.js + npm
 
 set -euo pipefail
@@ -97,6 +105,26 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Poll until an HTTP endpoint returns success (used for API + web readiness).
+wait_for_http() {
+  local url="$1"
+  local label="$2"
+  local max_attempts="${E2E_HEALTH_MAX_ATTEMPTS:-30}"
+  local sleep_secs="${E2E_HEALTH_POLL_SECS:-2}"
+  echo "==> Waiting for ${label} at ${url}"
+  for i in $(seq 1 "${max_attempts}"); do
+    if curl -sf "${url}" &>/dev/null; then
+      echo "    ${label} healthy."
+      return 0
+    fi
+    sleep "${sleep_secs}"
+    if [[ "${i}" -eq "${max_attempts}" ]]; then
+      echo "ERROR: ${label} did not become healthy in time."
+      return 1
+    fi
+  done
+}
+
 # Locate a PostgreSQL binary by searching common installation paths.
 find_pg_bin() {
   local name="$1"
@@ -120,63 +148,69 @@ find_pg_bin() {
 # Use initdb / createdb / pg_ctl from the same directory. Mixing binaries (e.g. initdb from
 # postgresql@16 and pg_ctl from /opt/homebrew/bin) breaks the data directory and yields only
 # “could not start server” with no useful stderr.
-PG_CTL=$(find_pg_bin pg_ctl || true)
-if [[ -z "${PG_CTL}" ]]; then
-  echo "ERROR: pg_ctl not found."
-  echo ""
-  echo "  macOS (Homebrew):  brew install postgresql@16"
-  echo "  Ubuntu/Debian:     sudo apt install postgresql"
-  echo "  Or run with Docker: make e2e  (with Docker Desktop running)"
-  exit 1
-fi
-PG_BINDIR="$(cd "$(dirname "${PG_CTL}")" && pwd)"
-INITDB="${PG_BINDIR}/initdb"
-CREATEDB="${PG_BINDIR}/createdb"
-if [[ ! -x "${INITDB}" || ! -x "${CREATEDB}" ]]; then
-  echo "ERROR: Expected initdb and createdb next to pg_ctl in ${PG_BINDIR}."
-  exit 1
-fi
-
-echo "  PostgreSQL bindir: ${PG_BINDIR}"
-
-# Create a fresh, isolated Postgres cluster in a temp directory.
-PGDATA_DIR=$(mktemp -d /tmp/lextures-e2e-pgdata.XXXXXX)
-echo "==> Initialising ephemeral Postgres in ${PGDATA_DIR}"
-"${INITDB}" -D "${PGDATA_DIR}" \
-  --username="${E2E_PG_USER}" \
-  --no-locale --encoding=UTF8 --auth=trust \
-  > /dev/null
-
-echo "==> Starting Postgres on port ${E2E_PG_PORT}"
-# Keep Unix sockets inside the ephemeral data dir (CI runners often cannot write /var/run/postgresql).
-PG_CTL_OPTS="-p ${E2E_PG_PORT} -c listen_addresses=localhost -c unix_socket_directories=${PGDATA_DIR}"
-if ! "${PG_CTL}" -D "${PGDATA_DIR}" \
-  -l "${PGDATA_DIR}/pg.log" \
-  -o "${PG_CTL_OPTS}" \
-  start; then
-  echo ""
-  echo "ERROR: pg_ctl start failed. Recent log (${PGDATA_DIR}/pg.log):"
-  tail -n 80 "${PGDATA_DIR}/pg.log" 2>/dev/null || echo "  (could not read log file)"
-  echo ""
-  echo "  If you see “Address already in use”, free the port or pick another:"
-  echo "    E2E_PG_PORT=5545 ./e2e/scripts/e2e-local.sh …"
-  exit 1
-fi
-
-# Wait until Postgres is accepting connections.
-for i in $(seq 1 20); do
-  "${PG_CTL}" -D "${PGDATA_DIR}" status &>/dev/null && break
-  sleep 0.5
-  if [[ "${i}" -eq 20 ]]; then
-    echo "ERROR: Postgres did not become ready in time."
-    echo "Recent log (${PGDATA_DIR}/pg.log):"
-    tail -n 80 "${PGDATA_DIR}/pg.log" 2>/dev/null || echo "  (could not read log file)"
+if [[ -n "${E2E_DATABASE_URL:-}" ]]; then
+  DATABASE_URL="${E2E_DATABASE_URL}"
+  echo "==> Using external Postgres (E2E_DATABASE_URL)"
+else
+  PG_CTL=$(find_pg_bin pg_ctl || true)
+  if [[ -z "${PG_CTL}" ]]; then
+    echo "ERROR: pg_ctl not found."
+    echo ""
+    echo "  macOS (Homebrew):  brew install postgresql@16"
+    echo "  Ubuntu/Debian:     sudo apt install postgresql"
+    echo "  Or set E2E_DATABASE_URL to an existing Postgres instance (CI uses a service container)."
+    echo "  Or run with Docker: make e2e  (with Docker Desktop running)"
     exit 1
   fi
-done
+  PG_BINDIR="$(cd "$(dirname "${PG_CTL}")" && pwd)"
+  INITDB="${PG_BINDIR}/initdb"
+  CREATEDB="${PG_BINDIR}/createdb"
+  if [[ ! -x "${INITDB}" || ! -x "${CREATEDB}" ]]; then
+    echo "ERROR: Expected initdb and createdb next to pg_ctl in ${PG_BINDIR}."
+    exit 1
+  fi
 
-"${CREATEDB}" -h localhost -p "${E2E_PG_PORT}" -U "${E2E_PG_USER}" "${E2E_PG_DB}"
-DATABASE_URL="postgres://${E2E_PG_USER}@localhost:${E2E_PG_PORT}/${E2E_PG_DB}?sslmode=disable"
+  echo "  PostgreSQL bindir: ${PG_BINDIR}"
+
+  # Create a fresh, isolated Postgres cluster in a temp directory.
+  PGDATA_DIR=$(mktemp -d /tmp/lextures-e2e-pgdata.XXXXXX)
+  echo "==> Initialising ephemeral Postgres in ${PGDATA_DIR}"
+  "${INITDB}" -D "${PGDATA_DIR}" \
+    --username="${E2E_PG_USER}" \
+    --no-locale --encoding=UTF8 --auth=trust \
+    > /dev/null
+
+  echo "==> Starting Postgres on port ${E2E_PG_PORT}"
+  # Keep Unix sockets inside the ephemeral data dir (CI runners often cannot write /var/run/postgresql).
+  PG_CTL_OPTS="-p ${E2E_PG_PORT} -c listen_addresses=localhost -c unix_socket_directories=${PGDATA_DIR}"
+  if ! "${PG_CTL}" -D "${PGDATA_DIR}" \
+    -l "${PGDATA_DIR}/pg.log" \
+    -o "${PG_CTL_OPTS}" \
+    start; then
+    echo ""
+    echo "ERROR: pg_ctl start failed. Recent log (${PGDATA_DIR}/pg.log):"
+    tail -n 80 "${PGDATA_DIR}/pg.log" 2>/dev/null || echo "  (could not read log file)"
+    echo ""
+    echo "  If you see “Address already in use”, free the port or pick another:"
+    echo "    E2E_PG_PORT=5545 ./e2e/scripts/e2e-local.sh …"
+    exit 1
+  fi
+
+  # Wait until Postgres is accepting connections.
+  for i in $(seq 1 20); do
+    "${PG_CTL}" -D "${PGDATA_DIR}" status &>/dev/null && break
+    sleep 0.5
+    if [[ "${i}" -eq 20 ]]; then
+      echo "ERROR: Postgres did not become ready in time."
+      echo "Recent log (${PGDATA_DIR}/pg.log):"
+      tail -n 80 "${PGDATA_DIR}/pg.log" 2>/dev/null || echo "  (could not read log file)"
+      exit 1
+    fi
+  done
+
+  "${CREATEDB}" -h localhost -p "${E2E_PG_PORT}" -U "${E2E_PG_USER}" "${E2E_PG_DB}"
+  DATABASE_URL="postgres://${E2E_PG_USER}@localhost:${E2E_PG_PORT}/${E2E_PG_DB}?sslmode=disable"
+fi
 
 # Avoid colliding with a dev API already bound to 8080 (curl would pass while `go run` exited).
 E2E_API_PORT="${E2E_API_PORT:-}"
@@ -191,51 +225,57 @@ fi
 # Start the Go API server.
 echo "==> Starting Go API server on port ${E2E_API_PORT}..."
 cd "${REPO_ROOT}/server"
-DATABASE_URL="${DATABASE_URL}" \
-  JWT_SECRET="${E2E_JWT_SECRET}" \
-  BOOTSTRAP_ADMIN_EMAIL="${E2E_ADMIN_EMAIL}" \
-  RUN_MIGRATIONS="true" \
-  COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
-  PORT="${E2E_API_PORT}" \
-  go run ./cmd/server &
+if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
+  if [[ ! -x "${E2E_SERVER_BIN}" ]]; then
+    echo "ERROR: E2E_SERVER_BIN is not executable: ${E2E_SERVER_BIN}"
+    exit 1
+  fi
+  DATABASE_URL="${DATABASE_URL}" \
+    JWT_SECRET="${E2E_JWT_SECRET}" \
+    BOOTSTRAP_ADMIN_EMAIL="${E2E_ADMIN_EMAIL}" \
+    RUN_MIGRATIONS="true" \
+    COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
+    PORT="${E2E_API_PORT}" \
+    "${E2E_SERVER_BIN}" &
+else
+  DATABASE_URL="${DATABASE_URL}" \
+    JWT_SECRET="${E2E_JWT_SECRET}" \
+    BOOTSTRAP_ADMIN_EMAIL="${E2E_ADMIN_EMAIL}" \
+    RUN_MIGRATIONS="true" \
+    COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
+    PORT="${E2E_API_PORT}" \
+    go run ./cmd/server &
+fi
 PIDS+=($!)
 cd "${REPO_ROOT}"
 
-echo "==> Waiting for API server at http://localhost:${E2E_API_PORT}/health"
-for i in $(seq 1 30); do
-  curl -sf "http://localhost:${E2E_API_PORT}/health" &>/dev/null && break
-  sleep 2
-  if [[ "${i}" -eq 30 ]]; then
-    echo "ERROR: API server did not become healthy. Check output above."
-    exit 1
-  fi
-done
-echo "    API server healthy."
+wait_for_http "http://localhost:${E2E_API_PORT}/health" "API server" || exit 1
 
-# Start the Vite web client.
+# Start the web client (Vite dev server locally; production build + preview in CI).
 echo "==> Starting web client on port 5173..."
 cd "${REPO_ROOT}/clients/web"
-VITE_API_URL="http://localhost:${E2E_API_PORT}" npm run dev -- --port 5173 --strictPort &
+if [[ "${E2E_WEB_MODE:-}" == "preview" ]]; then
+  if [[ ! -d dist ]]; then
+    echo "ERROR: E2E_WEB_MODE=preview requires clients/web/dist (run npm run build first)."
+    exit 1
+  fi
+  VITE_API_URL="http://localhost:${E2E_API_PORT}" npm run preview -- --port 5173 --strictPort &
+else
+  VITE_API_URL="http://localhost:${E2E_API_PORT}" npm run dev -- --port 5173 --strictPort &
+fi
 PIDS+=($!)
 cd "${REPO_ROOT}"
 
-echo "==> Waiting for web client at http://localhost:5173"
-for i in $(seq 1 30); do
-  curl -sf http://localhost:5173 &>/dev/null && break
-  sleep 2
-  if [[ "${i}" -eq 30 ]]; then
-    echo "ERROR: Web client did not become healthy."
-    exit 1
-  fi
-done
-echo "    Web client healthy."
+wait_for_http "http://localhost:5173" "web client" || exit 1
 
 # Run Playwright. Optional args are forwarded to `playwright test` (paths relative to
 # e2e/ after cd). Paths given as e2e/tests/... from repo root are normalized.
 echo "==> Running Playwright tests..."
 cd "${REPO_ROOT}/e2e"
-npm ci --prefer-offline --quiet
-npx playwright install --with-deps chromium
+if [[ "${E2E_SKIP_DEPS:-}" != "1" ]]; then
+  npm ci --prefer-offline --quiet
+  npx playwright install --with-deps chromium
+fi
 PLAYWRIGHT_TEST_ARGS=()
 for arg in "$@"; do
   if [[ "${arg}" == e2e/* ]]; then

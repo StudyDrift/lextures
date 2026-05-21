@@ -65,3 +65,10 @@ iac/demo/override.tf
 server/tmp/
 
 .claude/worktrees
+.cache
+data/
+test-results/
+
+# Local dev / IDE tooling (machine-specific)
+.codegraph/
+.antigravitycli/
