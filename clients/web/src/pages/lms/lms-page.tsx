@@ -31,10 +31,10 @@ export function LmsPage({
 }: LmsPageProps) {
   const outerClass =
     omitHeader && fillHeight
-      ? 'flex min-h-0 flex-1 flex-col px-3 pb-3 pt-2 sm:px-4 sm:pb-4 md:px-6 md:pb-5'
+      ? 'flex min-h-0 min-w-0 flex-1 flex-col px-3 pb-3 pt-2 sm:px-4 sm:pb-4 md:px-6 md:pb-5'
       : fillHeight
-        ? 'flex min-h-0 flex-1 flex-col px-4 py-5 sm:p-6 md:p-8'
-        : 'px-4 py-5 sm:p-6 md:p-8'
+        ? 'flex min-h-0 min-w-0 flex-1 flex-col px-4 py-5 sm:p-6 md:p-8'
+        : 'min-w-0 px-4 py-5 sm:p-6 md:p-8'
 
   return (
     <div className={outerClass}>

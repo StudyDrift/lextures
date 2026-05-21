@@ -1108,7 +1108,7 @@ export function GradebookGrid({
   }
 
   return (
-    <div className="mt-6 space-y-3">
+    <div className="mt-6 min-w-0 max-w-full space-y-3">
       <div className="flex flex-wrap items-end gap-4 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900/50">
         <label className="flex min-w-[10rem] flex-1 flex-col gap-1">
           <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Student</span>
@@ -1176,7 +1176,10 @@ export function GradebookGrid({
       )}
 
       {rowCount > 0 && baseColCount > 0 && (
-        <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <div
+          data-testid="gradebook-scroll"
+          className="max-w-full min-w-0 touch-pan-x overflow-x-auto overflow-y-visible rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+        >
           <table
             role="grid"
             aria-label="Grades by student and assignment"

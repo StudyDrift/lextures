@@ -24,6 +24,7 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  ChevronUp,
   CircleHelp,
   ClipboardList,
   ExternalLink,
@@ -585,6 +586,9 @@ type SortableChildRowProps = {
   canManageItemRow: boolean
   busyChildItemId: string | null
   dragHandlesVisible: boolean
+  childOrderIndex: number
+  childCount: number
+  onReorderChildDelta: (childId: string, delta: -1 | 1) => void
   onChildTogglePublished: (child: CourseStructureItem) => void
   onOpenEditChildTitle: (child: CourseStructureItem) => void
   onArchiveChild: (child: CourseStructureItem) => void
@@ -599,6 +603,9 @@ function SortableChildRow({
   canManageItemRow,
   busyChildItemId,
   dragHandlesVisible,
+  childOrderIndex,
+  childCount,
+  onReorderChildDelta,
   onChildTogglePublished,
   onOpenEditChildTitle,
   onArchiveChild,
@@ -625,7 +632,7 @@ function SortableChildRow({
           {(!disabled || dragHandlesVisible || isDragging) && (
             <button
               type="button"
-              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+              className={`hidden h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing md:flex md:h-9 md:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
                 gripAlwaysOn
                   ? 'opacity-100'
                   : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
@@ -637,6 +644,32 @@ function SortableChildRow({
               <GripVertical className="h-4 w-4" strokeWidth={2} aria-hidden />
             </button>
           )}
+          {canManageItemRow && !child.archived && childCount > 1 ? (
+            <div
+              className="flex shrink-0 flex-col gap-1 md:hidden"
+              role="group"
+              aria-label="Reorder item in module"
+            >
+              <button
+                type="button"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                aria-label="Move item up in module"
+                disabled={disabled || childOrderIndex <= 0}
+                onClick={() => onReorderChildDelta(child.id, -1)}
+              >
+                <ChevronUp className="h-5 w-5" strokeWidth={2} aria-hidden />
+              </button>
+              <button
+                type="button"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                aria-label="Move item down in module"
+                disabled={disabled || childOrderIndex >= childCount - 1}
+                onClick={() => onReorderChildDelta(child.id, 1)}
+              >
+                <ChevronDown className="h-5 w-5" strokeWidth={2} aria-hidden />
+              </button>
+            </div>
+          ) : null}
           <div
             className={`min-w-0 flex-1 ${child.archived ? 'opacity-70' : ''}`}
           >
@@ -652,7 +685,7 @@ function SortableChildRow({
         </div>
         {showRowChrome ? (
           <div
-            className={`flex shrink-0 justify-end sm:items-center sm:self-center sm:pl-0 ${!disabled ? 'pl-[3.25rem]' : 'pl-0'}`}
+            className={`flex shrink-0 justify-end md:items-center md:self-center md:pl-0 ${!disabled ? 'pl-0 md:pl-[3.25rem]' : 'pl-0'}`}
           >
             <ModuleItemRowActions
               child={child}
@@ -1031,6 +1064,10 @@ type SortableModuleCardProps = {
   onArchiveChild: (child: CourseStructureItem) => void
   courseAdaptivePathsEnabled: boolean
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
+  moduleOrderIndex: number
+  moduleCount: number
+  onReorderModuleDelta: (delta: -1 | 1) => void
+  onReorderChildDelta: (childId: string, delta: -1 | 1) => void
 }
 
 function SortableModuleCard({
@@ -1053,6 +1090,10 @@ function SortableModuleCard({
   onArchiveChild,
   courseAdaptivePathsEnabled,
   studentGradeContext,
+  moduleOrderIndex,
+  moduleCount,
+  onReorderModuleDelta,
+  onReorderChildDelta,
 }: SortableModuleCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
@@ -1081,7 +1122,7 @@ function SortableModuleCard({
           id={`module-items-${item.id}`}
           className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 pt-4 dark:divide-neutral-700/80 dark:border-neutral-700/80"
         >
-          {children.map((child) => (
+          {children.map((child, cIdx) => (
             <SortableChildRow
               key={child.id}
               child={child}
@@ -1091,6 +1132,9 @@ function SortableModuleCard({
               canManageItemRow={canEditModules}
               busyChildItemId={busyChildItemId}
               dragHandlesVisible={gripsPinned}
+              childOrderIndex={cIdx}
+              childCount={children.length}
+              onReorderChildDelta={onReorderChildDelta}
               onChildTogglePublished={onChildTogglePublished}
               onOpenEditChildTitle={onOpenEditChildTitle}
               onArchiveChild={onArchiveChild}
@@ -1117,19 +1161,45 @@ function SortableModuleCard({
         onOpenModuleSettings={onOpenModuleSettings}
         moduleDragHandle={
           canEditModules ? (
-            <button
-              type="button"
-              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
-                gripsPinned || isDragging
-                  ? 'opacity-100'
-                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
-              }`}
-              aria-label="Drag to reorder module"
-              {...listeners}
-              {...attributes}
-            >
-              <GripVertical className="h-4 w-4" strokeWidth={2} aria-hidden />
-            </button>
+            <>
+              <button
+                type="button"
+                className={`mt-0.5 hidden h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing md:flex md:h-9 md:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+                  gripsPinned || isDragging
+                    ? 'opacity-100'
+                    : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
+                }`}
+                aria-label="Drag to reorder module"
+                {...listeners}
+                {...attributes}
+              >
+                <GripVertical className="h-4 w-4" strokeWidth={2} aria-hidden />
+              </button>
+              <div
+                className="mt-0.5 flex shrink-0 flex-col gap-1 md:hidden"
+                role="group"
+                aria-label="Reorder module"
+              >
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  aria-label="Move module up"
+                  disabled={anyModalBusy || moduleOrderIndex <= 0}
+                  onClick={() => onReorderModuleDelta(-1)}
+                >
+                  <ChevronUp className="h-5 w-5" strokeWidth={2} aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                  aria-label="Move module down"
+                  disabled={anyModalBusy || moduleOrderIndex >= moduleCount - 1}
+                  onClick={() => onReorderModuleDelta(1)}
+                >
+                  <ChevronDown className="h-5 w-5" strokeWidth={2} aria-hidden />
+                </button>
+              </div>
+            </>
           ) : null
         }
         footerExtra={
@@ -1860,6 +1930,40 @@ export default function CourseModules() {
     [courseCode, load],
   )
 
+  const reorderModuleByDelta = useCallback(
+    (moduleId: string, delta: -1 | 1) => {
+      if (!courseCode || reorderSaving) return
+      const idx = moduleIds.indexOf(moduleId)
+      const newIdx = idx + delta
+      if (idx < 0 || newIdx < 0 || newIdx >= moduleIds.length) return
+      const nextModuleOrder = arrayMove(moduleIds, idx, newIdx)
+      const base = buildReorderPayloadFromItems(items)
+      void persistReorder({
+        moduleOrder: nextModuleOrder,
+        childOrderByModule: base.childOrderByModule,
+      })
+    },
+    [courseCode, items, moduleIds, persistReorder, reorderSaving],
+  )
+
+  const reorderChildByDelta = useCallback(
+    (moduleId: string, childId: string, delta: -1 | 1) => {
+      if (!courseCode || reorderSaving) return
+      const childList = moduleChildrenById.get(moduleId) ?? []
+      const childIds = childList.map((c) => c.id)
+      const idx = childIds.indexOf(childId)
+      const newIdx = idx + delta
+      if (idx < 0 || newIdx < 0 || newIdx >= childIds.length) return
+      const nextChildren = arrayMove(childIds, idx, newIdx)
+      const base = buildReorderPayloadFromItems(items)
+      void persistReorder({
+        moduleOrder: base.moduleOrder,
+        childOrderByModule: { ...base.childOrderByModule, [moduleId]: nextChildren },
+      })
+    },
+    [courseCode, items, moduleChildrenById, persistReorder, reorderSaving],
+  )
+
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDragId(String(event.active.id))
     if (event.active.data.current?.type === 'module') {
@@ -2017,7 +2121,7 @@ export default function CourseModules() {
             >
               {sortedTopLevel
                 .filter((i) => i.kind === 'module')
-                .map((item) => (
+                .map((item, moduleIdx) => (
                   <SortableModuleCard
                     key={item.id}
                     item={item}
@@ -2039,6 +2143,10 @@ export default function CourseModules() {
                     onArchiveChild={requestArchiveChild}
                     courseAdaptivePathsEnabled={courseMeta?.adaptivePathsEnabled === true}
                     studentGradeContext={studentGradeContext}
+                    moduleOrderIndex={moduleIdx}
+                    moduleCount={moduleIds.length}
+                    onReorderModuleDelta={(delta) => reorderModuleByDelta(item.id, delta)}
+                    onReorderChildDelta={(childId, delta) => reorderChildByDelta(item.id, childId, delta)}
                   />
                 ))}
             </ul>

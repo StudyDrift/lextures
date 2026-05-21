@@ -1125,7 +1125,7 @@ export function QuizStudentTakePanel({
                     {currentAdaptive.choices.map((label, i) => (
                       <label
                         key={`ad-${i}`}
-                        className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 sm:min-h-0 sm:items-start sm:py-2.5"
                       >
                         <input
                           type="radio"
@@ -1392,7 +1392,7 @@ function StaticTakeBody({
             {choices.map((label, i) => (
               <label
                 key={`${q.id}-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-800/50"
+                className="flex min-h-11 w-full min-w-0 cursor-pointer items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-3 text-sm dark:border-neutral-600 dark:bg-neutral-800/50 sm:min-h-0 sm:items-start sm:py-2.5"
               >
                 <input
                   type="radio"
