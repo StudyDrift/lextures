@@ -48,7 +48,7 @@ func TestLocalDriver_PutGetDelete(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetObject: %v", err)
 	}
-	defer rc.Close()
+	defer func() { _ = rc.Close() }()
 	gotBytes, err := io.ReadAll(rc)
 	if err != nil {
 		t.Fatalf("ReadAll from GetObject: %v", err)

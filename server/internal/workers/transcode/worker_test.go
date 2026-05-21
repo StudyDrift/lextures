@@ -1,6 +1,7 @@
 package transcode_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,16 +123,15 @@ func TestWorker_New(t *testing.T) {
 
 func TestWorker_ProcessNext_NoPool(t *testing.T) {
 	w := transcode.New(nil, nil)
-	_, err := w.ProcessNext(nil) //nolint:staticcheck — intentionally passing nil ctx; nil pool is tested
+	_, err := w.ProcessNext(context.TODO())
 	if err == nil {
 		t.Error("expected error when pool is nil, got nil")
 	}
 }
 
 func TestWorker_ProcessNext_NoStorage(t *testing.T) {
-	// pool is non-nil stub, storage is nil — should return error, not panic
 	w := &transcode.Worker{Pool: nil, Storage: nil, FFmpegPath: "ffmpeg", MaxAttempts: 3}
-	_, err := w.ProcessNext(nil) //nolint:staticcheck
+	_, err := w.ProcessNext(context.TODO())
 	if err == nil {
 		t.Error("expected error when pool is nil, got nil")
 	}

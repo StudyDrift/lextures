@@ -149,7 +149,7 @@ func (w *Worker) downloadSource(ctx context.Context, key, dstPath string) error 
 	if err != nil {
 		return fmt.Errorf("get object %q: %w", key, err)
 	}
-	defer rc.Close()
+	defer func() { _ = rc.Close() }()
 
 	f, err := os.Create(dstPath) //nolint:gosec
 	if err != nil {
@@ -185,17 +185,13 @@ func (w *Worker) transcodeHLS(ctx context.Context, srcPath, outDir string) error
 
 	// Build filter_complex split + scale graph
 	var fb strings.Builder
-	fb.WriteString(fmt.Sprintf("[0:v]split=%d", n))
+	fmt.Fprintf(&fb, "[0:v]split=%d", n)
 	for i := range DefaultRenditions {
-		fb.WriteString(fmt.Sprintf("[v%d]", i))
+		fmt.Fprintf(&fb, "[v%d]", i)
 	}
 	for i, r := range DefaultRenditions {
-		if i > 0 {
-			fb.WriteString(";")
-		} else {
-			fb.WriteString(";")
-		}
-		fb.WriteString(fmt.Sprintf("[v%d]scale=-2:%d[v%dout]", i, r.Height, i))
+		fb.WriteString(";")
+		fmt.Fprintf(&fb, "[v%d]scale=-2:%d[v%dout]", i, r.Height, i)
 	}
 
 	args := []string{"-y", "-i", srcPath, "-filter_complex", fb.String()}
@@ -227,9 +223,9 @@ func writeMasterPlaylist(outDir string) error {
 	var sb strings.Builder
 	sb.WriteString("#EXTM3U\n#EXT-X-VERSION:3\n")
 	for _, r := range DefaultRenditions {
-		sb.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&sb,
 			"#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=x%d,CODECS=\"avc1.64001f,mp4a.40.2\"\n%s.m3u8\n",
-			r.Bandwidth, r.Height, r.Name))
+			r.Bandwidth, r.Height, r.Name)
 	}
 	return os.WriteFile(filepath.Join(outDir, "master.m3u8"), []byte(sb.String()), 0o644)
 }
@@ -264,7 +260,7 @@ func (w *Worker) uploadFile(ctx context.Context, localPath, key, mime string) er
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	info, err := f.Stat()
 	if err != nil {
 		return err
@@ -295,9 +291,9 @@ func BuildMasterPlaylistContent() string {
 	var sb strings.Builder
 	sb.WriteString("#EXTM3U\n#EXT-X-VERSION:3\n")
 	for _, r := range DefaultRenditions {
-		sb.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&sb,
 			"#EXT-X-STREAM-INF:BANDWIDTH=%d,RESOLUTION=x%d,CODECS=\"avc1.64001f,mp4a.40.2\"\n%s.m3u8\n",
-			r.Bandwidth, r.Height, r.Name))
+			r.Bandwidth, r.Height, r.Name)
 	}
 	return sb.String()
 }
