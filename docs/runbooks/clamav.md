@@ -1,5 +1,9 @@
 # ClamAV runbook (plan 8.6)
 
+## Apple Silicon (arm64)
+
+The official `clamav/clamav` image is **amd64-only**. `docker-compose.yml` sets `platform: linux/amd64` so Docker emulates it on Mac/arm64 hosts (first start is slower). For local API dev without real scans, skip the container and use `CLAMAV_STUB=true` (see below).
+
 ## Services
 
 - **clamd** — scans uploaded files via INSTREAM (`CLAMAV_ADDR`, default `localhost:3310`).

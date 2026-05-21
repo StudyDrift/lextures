@@ -28,6 +28,7 @@ services:
 
   clamav:
     image: clamav/clamav:1.4
+    platform: linux/amd64
     healthcheck:
       test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
       interval: 15s
