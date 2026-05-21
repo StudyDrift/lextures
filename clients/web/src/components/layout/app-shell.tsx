@@ -16,6 +16,7 @@ import { TopBar } from './top-bar'
 import { UiThemeSync } from './ui-theme-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { HelpWidget } from './HelpWidget'
+import { LegalUpdateBanner } from '../legal/legal-update-banner'
 import { OfflineBanner } from '../offline-banner'
 
 function AppShellLayout() {
@@ -47,6 +48,7 @@ function AppShellLayout() {
             <TopBar />
           )}
           <OfflineBanner />
+          <LegalUpdateBanner />
           <main className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto dark:bg-neutral-900">
             <Outlet />
           </main>

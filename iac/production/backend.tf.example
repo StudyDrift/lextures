@@ -1,0 +1,11 @@
+# Copy into backend.tf (or use Terraform Cloud block in versions.tf) before remote state.
+
+terraform {
+  backend "s3" {
+    bucket         = "lextures-terraform-state"
+    key            = "production/aws/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "lextures-terraform-locks"
+  }
+}

@@ -13,6 +13,7 @@ import CourseGroupsPage from './pages/lms/course-groups-page'
 import CourseGradebook from './pages/lms/course-gradebook'
 import CourseMyGrades from './pages/lms/course-my-grades'
 import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
+import AdminQuarantinePage from './pages/lms/admin-quarantine-page'
 import CourseCreate from './pages/lms/course-create'
 import CourseDetail from './pages/lms/course-detail'
 import CourseLayout from './pages/lms/course-layout'
@@ -48,11 +49,13 @@ import MfaLogin from './pages/mfa-login'
 import SamlCallback from './pages/saml-callback'
 import SsoError from './pages/sso-error'
 import PrivacyPolicyPage from './pages/privacy-policy-page'
+import PrivacyPolicyHistoryPage from './pages/privacy-policy-history-page'
 import MagicLinkPage from './pages/magic-link'
 import ResetPassword from './pages/reset-password'
 import Signup from './pages/signup'
 import ParentDashboard from './pages/lms/parent/ParentDashboard'
 import TermsOfUsePage from './pages/terms-of-use-page'
+import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import CliAuthPage from './pages/cli-auth'
 
 export default function App() {
@@ -70,7 +73,11 @@ export default function App() {
         location.pathname.startsWith('/login/magic-link') ||
         location.pathname.startsWith('/login/mfa') ||
         location.pathname === '/saml-callback' ||
-        location.pathname === '/sso-error'
+        location.pathname === '/sso-error' ||
+        location.pathname === '/privacy' ||
+        location.pathname.startsWith('/privacy/') ||
+        location.pathname === '/terms' ||
+        location.pathname.startsWith('/terms/')
       ) {
         return
       }
@@ -92,6 +99,10 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/privacy/history" element={<PrivacyPolicyHistoryPage />} />
+      <Route path="/terms" element={<TermsOfUsePage />} />
+      <Route path="/terms/history" element={<TermsOfUseHistoryPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/cli-auth" element={<CliAuthPage />} />
         <Route
@@ -143,14 +154,13 @@ export default function App() {
           </Route>
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
+          <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
           <Route path="/settings/ai" element={<Navigate to="/settings/ai/models" replace />} />
           <Route path="/settings/ai/:aiSection" element={<Settings />} />
           <Route path="/settings/:tab" element={<Settings />} />
-          <Route path="/terms" element={<TermsOfUsePage />} />
-          <Route path="/privacy" element={<PrivacyPolicyPage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

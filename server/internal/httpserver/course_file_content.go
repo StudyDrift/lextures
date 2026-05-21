@@ -45,6 +45,9 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		if !d.gateObjectDownload(w, r, row.StorageKey) {
+			return
+		}
 
 		cfg := d.effectiveConfig()
 

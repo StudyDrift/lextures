@@ -519,4 +519,10 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Get("/api/v1/admin/storage-quotas", d.handleAdminStorageQuotasList())
 	r.Put("/api/v1/admin/storage-quotas/{scope}/{scope_id}", d.handleAdminStorageQuotasPut())
 	r.Post("/api/v1/admin/storage-quotas/reconcile", d.handleAdminStorageQuotasReconcile())
+	// Antivirus / quarantine (plan 8.6)
+	r.Get("/api/v1/admin/quarantine", d.handleAdminListQuarantine())
+	r.Delete("/api/v1/admin/quarantine/{object_id}", d.handleAdminDeleteQuarantine())
+	r.Post("/api/v1/admin/quarantine/{object_id}/release", d.handleAdminReleaseQuarantine())
+	r.Get("/api/v1/admin/quarantine/{object_id}/download", d.handleAdminQuarantineDownload())
+	r.Post("/api/v1/admin/av-scan/bulk", d.handleAdminBulkAVScan())
 }

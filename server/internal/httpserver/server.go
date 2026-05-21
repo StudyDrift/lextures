@@ -117,6 +117,8 @@ func NewHandler(d Deps) http.Handler {
 	d.registerTranscodeRoutes(r)
 	d.registerCaptionRoutes(r)
 	d.registerStorageQuotaRoutes(r)
+	d.registerAVScanRoutes(r)
+	d.registerLegalRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r

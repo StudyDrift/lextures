@@ -20,6 +20,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/organization"
+	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
@@ -415,12 +416,33 @@ func (d Deps) finalizeTusUpload(uploadID uuid.UUID, upload *tusUploadRow, tmpPat
 		"bytes", upload.UploadLength,
 	)
 
-	// Enqueue transcoding job for video uploads (FR-1)
+	cfg := d.effectiveConfig()
 	mime := "application/octet-stream"
 	if upload.MimeType != nil {
 		mime = *upload.MimeType
 	}
-	if d.effectiveConfig().VideoTranscodingEnabled && transcode.IsVideoMIME(mime) {
+
+	// Register storage.objects and queue AV scan (plan 8.6).
+	if d.Pool != nil && cfg.AvScanningEnabled {
+		tenantID, orgErr := organization.OrgIDForUser(ctx, d.Pool, upload.UserID)
+		if orgErr == nil {
+			bucket := cfg.StorageBucket
+			if bucket == "" {
+				bucket = "local"
+			}
+			uploader := upload.UserID
+			objID, regErr := avscan.RegisterAndEnqueue(ctx, d.Pool, tenantID, upload.CourseID,
+				upload.ObjectKey, bucket, mime, upload.UploadLength, &uploader, true)
+			if regErr != nil {
+				slog.Error("tus: register av scan", "upload_id", uploadID, "err", regErr)
+			} else {
+				slog.Info("tus: av scan queued", "upload_id", uploadID, "object_id", objID)
+			}
+		}
+	}
+
+	// Enqueue transcoding job for video uploads (FR-1)
+	if cfg.VideoTranscodingEnabled && transcode.IsVideoMIME(mime) {
 		jobID, enqErr := transcode.EnqueueForObject(ctx, d.Pool, upload.ObjectKey, nil)
 		if enqErr != nil {
 			slog.Error("tus: enqueue transcode", "upload_id", uploadID, "err", enqErr)

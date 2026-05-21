@@ -1,0 +1,18 @@
+# Copy to terraform.tfvars (do not commit secrets). Use Terraform workspaces for staging vs production.
+
+cloud_provider = "aws"
+environment    = "staging"
+aws_region     = "us-east-1"
+
+# Staging-friendly sizing (module defaults also scale by environment)
+eks_node_desired_size = 2
+eks_node_instance_types = ["t3.large"]
+
+# Optional overrides (null = module picks staging/production defaults)
+# db_instance_class        = "db.t4g.medium"
+# redis_num_cache_clusters = 1
+# course_files_bucket_force_destroy = true  # staging destroy only
+
+tags = {
+  Owner = "platform"
+}
