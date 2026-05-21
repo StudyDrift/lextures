@@ -32,6 +32,14 @@ func (d *LocalDriver) PutObject(ctx context.Context, key string, r io.Reader, _ 
 	return f.Close()
 }
 
+func (d *LocalDriver) GetObject(_ context.Context, key string) (io.ReadCloser, error) {
+	f, err := os.Open(d.keyPath(key))
+	if err != nil {
+		return nil, fmt.Errorf("filestorage/local: get %q: %w", key, err)
+	}
+	return f, nil
+}
+
 func (d *LocalDriver) GetPresignedURL(_ context.Context, _ string, _ time.Duration) (string, error) {
 	return "", ErrNoPresignedURL
 }

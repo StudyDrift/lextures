@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,6 +41,20 @@ func TestLocalDriver_PutGetDelete(t *testing.T) {
 	}
 	if !bytes.Equal(got, content) {
 		t.Fatalf("content mismatch: got %q want %q", got, content)
+	}
+
+	// GetObject
+	rc, err := d.GetObject(ctx, key)
+	if err != nil {
+		t.Fatalf("GetObject: %v", err)
+	}
+	defer rc.Close()
+	gotBytes, err := io.ReadAll(rc)
+	if err != nil {
+		t.Fatalf("ReadAll from GetObject: %v", err)
+	}
+	if !bytes.Equal(gotBytes, content) {
+		t.Fatalf("GetObject content mismatch: got %q want %q", gotBytes, content)
 	}
 
 	// GetPresignedURL returns ErrNoPresignedURL

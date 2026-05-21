@@ -10,12 +10,19 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/terms"
+	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
+	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
 // Start launches quiz auto-submit and (when enabled) grade-posting sweeps on a 30s ticker
 // (Rust `server/src/lib.rs`).
 func Start(ctx context.Context, pool *pgxpool.Pool, cfg config.Config) {
+	StartWithStorage(ctx, pool, cfg, nil)
+}
+
+// StartWithStorage is Start extended with an optional storage driver for transcode jobs.
+func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, storage filestorage.Driver) {
 	if pool == nil {
 		return
 	}
@@ -68,6 +75,17 @@ func Start(ctx context.Context, pool *pgxpool.Pool, cfg config.Config) {
 			slog.Info("tus upload cleanup deleted stalled uploads", "count", n)
 		}
 	})
+
+	if cfg.VideoTranscodingEnabled && storage != nil {
+		worker := transcode.New(pool, storage)
+		if cfg.FFmpegPath != "" {
+			worker.FFmpegPath = cfg.FFmpegPath
+		}
+		go runEvery(ctx, 30*time.Second, func() {
+			sweepTranscodeJobs(context.Background(), worker)
+		})
+		slog.Info("video transcoding worker started")
+	}
 }
 
 func runEvery(ctx context.Context, d time.Duration, fn func()) {
