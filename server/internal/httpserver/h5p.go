@@ -124,9 +124,6 @@ func (d Deps) guardH5PAccess(w http.ResponseWriter, r *http.Request, courseCode 
 // handleCreateModuleH5P is POST .../structure/modules/{module_id}/h5p (multipart .h5p upload).
 func (d Deps) handleCreateModuleH5P() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.guardH5PFeature(w) {
-			return
-		}
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -134,6 +131,12 @@ func (d Deps) handleCreateModuleH5P() http.HandlerFunc {
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		if _, ok := d.meUserID(w, r); !ok {
+			return
+		}
+		if !d.guardH5PFeature(w) {
 			return
 		}
 		_, viewer, cid, moduleID, ok := d.beginCreateUnderModule(w, r)

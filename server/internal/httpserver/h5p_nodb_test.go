@@ -18,13 +18,13 @@ func TestH5PFeatureDisabled_returns404(t *testing.T) {
 	}
 }
 
-func TestXAPIFeatureDisabled_returns404(t *testing.T) {
+func TestXAPIFeatureDisabled_unauthenticated_returns401(t *testing.T) {
 	d := Deps{Config: testConfigH5POff()}
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/xapi/statements", nil)
 	rec := httptest.NewRecorder()
 	d.handlePostXAPIStatements()(rec, req)
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("status %d want 404", rec.Code)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status %d want 401", rec.Code)
 	}
 }
 

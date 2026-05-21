@@ -23,10 +23,6 @@ const xapiRateLimitPerMinute = 100
 // handlePostXAPIStatements is POST /api/v1/xapi/statements (H5P iframe + future 9.6).
 func (d Deps) handlePostXAPIStatements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.h5pEnabled() {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
-			return
-		}
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusNoContent)
 			return
@@ -38,6 +34,10 @@ func (d Deps) handlePostXAPIStatements() http.HandlerFunc {
 		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.h5pEnabled() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
 		var body xapiStatementBody
