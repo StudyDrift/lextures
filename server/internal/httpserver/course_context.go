@@ -86,8 +86,31 @@ func (d Deps) handlePostCourseContext() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not record activity.")
 				return
 			}
+		case "equation_inserted", "equation_editor_open":
+			var sidPtr *uuid.UUID
+			if req.StructureItemID != nil && strings.TrimSpace(*req.StructureItemID) != "" {
+				sid, perr := uuid.Parse(strings.TrimSpace(*req.StructureItemID))
+				if perr != nil {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid structureItemId.")
+					return
+				}
+				isPage, err := userauditrepo.StructureItemIsCourseContentPage(r.Context(), d.Pool, *cid, sid)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not verify content item.")
+					return
+				}
+				if !isPage {
+					apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+					return
+				}
+				sidPtr = &sid
+			}
+			if err := userauditrepo.Insert(r.Context(), d.Pool, userID, *cid, sidPtr, kind); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not record activity.")
+				return
+			}
 		default:
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid kind. Expected course_visit, content_open, or content_leave.")
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid kind. Expected course_visit, content_open, content_leave, equation_inserted, or equation_editor_open.")
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

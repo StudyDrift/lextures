@@ -17,6 +17,21 @@ export function isMathRenderingEnabled(): boolean {
   return true
 }
 
+/** When false, equation editor UI is hidden (toolbar, slash command, double-click edit). */
+export function isEquationEditorEnabled(): boolean {
+  const v = import.meta.env.VITE_FEATURE_EQUATION_EDITOR
+  if (v === 'false' || v === '0') return false
+  return isMathRenderingEnabled()
+}
+
+/** Plain-language label for screen readers (not full MathML speech). */
+export function latexAccessibleLabel(latex: string, displayMode: boolean): string {
+  const t = latex.trim()
+  if (!t) return displayMode ? 'Empty display equation' : 'Empty inline equation'
+  const mode = displayMode ? 'Display equation' : 'Inline equation'
+  return `${mode}: ${t}`
+}
+
 export function reportMathRenderError(latex: string, err: unknown): void {
   const msg = err instanceof Error ? err.message : String(err)
   if (import.meta.env.DEV) {

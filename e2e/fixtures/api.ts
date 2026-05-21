@@ -103,6 +103,29 @@ export async function apiCreateContentPage(
   return res.json() as Promise<{ id: string; title: string }>
 }
 
+export async function apiPatchContentPage(
+  token: string,
+  courseCode: string,
+  itemId: string,
+  body: { markdown: string },
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/content-pages/${encodeURIComponent(itemId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Patch content page failed (${res.status}): ${text}`)
+  }
+}
+
 export async function apiCreateModule(
   token: string,
   courseCode: string,

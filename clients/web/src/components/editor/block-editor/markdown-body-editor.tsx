@@ -70,6 +70,8 @@ export type MarkdownBodyEditorProps = {
   uploadCourseImage?: (file: File) => Promise<string>
   /** Compact image control above the editor (e.g. student notebook without a block toolbar). */
   showImagePickerRow?: boolean
+  /** When the user types `/equation`, open the equation editor (caller removes the trigger text). */
+  onEquationSlash?: () => void
 }
 
 type MentionUi = {
@@ -106,6 +108,7 @@ export function MarkdownBodyEditor({
   courseCode,
   uploadCourseImage,
   showImagePickerRow,
+  onEquationSlash,
 }: MarkdownBodyEditorProps) {
   const skipEmit = useRef(false)
   const onChangeRef = useRef(onChange)
@@ -117,6 +120,10 @@ export function MarkdownBodyEditor({
   const imageInputRef = useRef<HTMLInputElement>(null)
   const editorRefForImages = useRef<Editor | null>(null)
   const disabledRef = useRef(!!disabled)
+  const onEquationSlashRef = useRef(onEquationSlash)
+  useEffect(() => {
+    onEquationSlashRef.current = onEquationSlash
+  }, [onEquationSlash])
 
   const listId = useId()
   const [structure, setStructure] = useState<CourseStructureItem[]>([])
@@ -362,6 +369,17 @@ export function MarkdownBodyEditor({
         if (skipEmit.current) {
           skipEmit.current = false
           return
+        }
+        const slash = onEquationSlashRef.current
+        if (slash) {
+          const { from } = ed.state.selection
+          const lookback = Math.max(0, from - 12)
+          const slice = ed.state.doc.textBetween(lookback, from, '\n', '\n')
+          if (slice.endsWith('/equation')) {
+            const start = from - '/equation'.length
+            ed.chain().focus().deleteRange({ from: start, to: from }).run()
+            slash()
+          }
         }
         onChangeRef.current(ed.getMarkdown())
       },

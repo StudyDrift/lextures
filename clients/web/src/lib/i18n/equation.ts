@@ -1,0 +1,25 @@
+/** Equation editor copy (feature 8.11). Externalised for future locale bundles. */
+export const equationI18n = {
+  editorTitle: 'Equation editor',
+  preview: 'Preview',
+  latexInput: 'LaTeX source',
+  insert: 'Insert',
+  update: 'Update',
+  cancel: 'Cancel',
+  inline: 'Inline',
+  block: 'Display block',
+  syntaxError: 'Equation syntax error',
+  syntaxErrorHint: 'Check LaTeX syntax. You can still insert; readers will see the raw source.',
+  loadingPreview: 'Loading preview…',
+  insertMath: 'Insert math',
+  editMath: 'Edit equation',
+  helpLink: 'LaTeX math guide',
+  symbols: 'Symbols',
+  categories: {
+    general: 'General',
+    greek: 'Greek',
+    calculus: 'Calculus',
+    logic: 'Logic',
+    chemistry: 'Chemistry',
+  },
+} as const
