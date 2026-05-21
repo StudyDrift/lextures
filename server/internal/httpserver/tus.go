@@ -19,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
@@ -122,6 +123,27 @@ func (d Deps) handleTusCreate() http.HandlerFunc {
 		if raw := meta["course_id"]; raw != "" {
 			if id, parseErr := uuid.Parse(raw); parseErr == nil {
 				courseID = &id
+			}
+		}
+
+		// Quota check: reject before any bytes are received (FR-3, AC-6).
+		if d.StorageQuota != nil && uploadLength > 0 {
+			tenantID, orgErr := organization.OrgIDForUser(r.Context(), d.Pool, userID)
+			if orgErr != nil {
+				slog.Error("tus: quota org lookup", "err", orgErr)
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify quota.")
+				return
+			}
+			violation, qErr := d.StorageQuota.CheckAndReserve(r.Context(), tenantID, courseID, userID, uploadLength)
+			if qErr != nil {
+				slog.Error("tus: quota check", "err", qErr)
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify quota.")
+				return
+			}
+			if violation != nil {
+				apierr.WriteJSON(w, http.StatusForbidden, CodeQuotaExceeded,
+					"Storage quota exceeded.")
+				return
 			}
 		}
 
@@ -344,6 +366,15 @@ func (d Deps) handleTusDelete() http.HandlerFunc {
 
 		_ = os.Remove(tusTempPath(uploadID))
 		_, _ = d.Pool.Exec(r.Context(), `DELETE FROM storage.tus_uploads WHERE id = $1`, uploadID)
+
+		// Release quota reservation (covers both cancel and post-completion delete).
+		if d.StorageQuota != nil && upload.UploadLength > 0 {
+			tenantID, orgErr := organization.OrgIDForUser(r.Context(), d.Pool, upload.UserID)
+			if orgErr == nil {
+				_ = d.StorageQuota.Release(r.Context(), tenantID, upload.CourseID, upload.UserID, upload.UploadLength)
+			}
+		}
+
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

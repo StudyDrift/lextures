@@ -515,4 +515,8 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	// Cloud file picker providers (plan 8.8)
 	r.Get("/api/v1/admin/cloud-providers", d.handleGetAdminCloudProviders())
 	r.Put("/api/v1/admin/cloud-providers/{provider}", d.handlePutAdminCloudProvider())
+	// Storage quotas (plan 8.5)
+	r.Get("/api/v1/admin/storage-quotas", d.handleAdminStorageQuotasList())
+	r.Put("/api/v1/admin/storage-quotas/{scope}/{scope_id}", d.handleAdminStorageQuotasPut())
+	r.Post("/api/v1/admin/storage-quotas/reconcile", d.handleAdminStorageQuotasReconcile())
 }
