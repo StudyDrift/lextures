@@ -22,7 +22,7 @@ func ExtractZipToStorage(ctx context.Context, storage filestorage.Driver, zipPat
 	if err != nil {
 		return fmt.Errorf("h5p extract: open zip: %w", err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 	prefix := strings.TrimSuffix(assetsPrefix, "/") + "/"
 	for _, f := range r.File {
 		if f.FileInfo().IsDir() {
@@ -99,7 +99,7 @@ func DownloadToTemp(ctx context.Context, storage filestorage.Driver, objectKey s
 	if err != nil {
 		return "", err
 	}
-	defer rc.Close()
+	defer func() { _ = rc.Close() }()
 	f, err := os.CreateTemp("", "h5p-src-*.h5p")
 	if err != nil {
 		return "", err

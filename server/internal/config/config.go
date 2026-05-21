@@ -199,6 +199,11 @@ type Config struct {
 	ClamAVAddr string
 	// ClamAVStub when true uses in-process EICAR detection (tests/dev without clamd).
 	ClamAVStub bool
+
+	// OERLibraryEnabled gates the OER search and import UI (plan 8.9).
+	OERLibraryEnabled bool
+	// OERStub uses embedded catalog data instead of live OER provider APIs (dev/e2e).
+	OERStub bool
 }
 
 // Load reads configuration from the environment.
@@ -355,6 +360,9 @@ func Load() Config {
 		H5PEnabled: boolEnv("FEATURE_H5P"),
 		ClamAVAddr:        stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
 		ClamAVStub:        boolEnv("CLAMAV_STUB"),
+
+		OERLibraryEnabled: boolEnv("FEATURE_OER_LIBRARY"),
+		OERStub:           boolEnv("OER_STUB"),
 	}
 }
 

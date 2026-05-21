@@ -150,7 +150,7 @@ func (d Deps) handleCreateModuleH5P() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing .h5p file.")
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		if !strings.HasSuffix(strings.ToLower(hdr.Filename), ".h5p") {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "File must have a .h5p extension.")
 			return
@@ -391,7 +391,7 @@ func (d Deps) handleGetH5PAsset() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Asset not found.")
 			return
 		}
-		defer rc.Close()
+		defer func() { _ = rc.Close() }()
 		w.Header().Set("Content-Type", h5pMimeForAsset(assetPath))
 		w.Header().Set("Cache-Control", "private, max-age=3600")
 		_, _ = io.Copy(w, rc)
@@ -449,7 +449,7 @@ func (d Deps) handleGetH5PDownload() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
-		defer rc.Close()
+		defer func() { _ = rc.Close() }()
 		w.Header().Set("Content-Type", "application/zip")
 		w.Header().Set("Content-Disposition", `attachment; filename="`+pkg.ID.String()+`.h5p"`)
 		_, _ = io.Copy(w, rc)

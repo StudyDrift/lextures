@@ -2461,6 +2461,9 @@ export type ModuleExternalLinkPayload = {
   provider: string
   externalId: string
   iconUrl: string
+  licenseSpdx: string
+  attributionText: string
+  oerProvider: string
   updatedAt: string
 }
 
@@ -2473,6 +2476,9 @@ function normalizeModuleExternalLinkPayload(raw: unknown): ModuleExternalLinkPay
     provider: String(r.provider ?? 'url'),
     externalId: String(r.externalId ?? ''),
     iconUrl: String(r.iconUrl ?? ''),
+    licenseSpdx: String(r.licenseSpdx ?? ''),
+    attributionText: String(r.attributionText ?? ''),
+    oerProvider: String(r.oerProvider ?? ''),
     updatedAt: String(r.updatedAt ?? ''),
   }
 }

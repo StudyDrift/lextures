@@ -21,6 +21,9 @@ const PROVIDER_LABELS: Record<string, string> = {
   google_drive: 'Google Drive',
   onedrive: 'OneDrive',
   dropbox: 'Dropbox',
+  oer_commons: 'OER Commons',
+  merlot: 'MERLOT',
+  openstax: 'OpenStax',
   url: 'External URL',
 }
 
@@ -215,9 +218,12 @@ export default function CourseModuleExternalLinkPage() {
       : '/courses'
 
   const isCloudLink = data?.provider && data.provider !== 'url'
-  const openLabel = isCloudLink
-    ? `Open in ${PROVIDER_LABELS[data.provider] ?? data.provider}`
-    : 'Open link'
+  const isOerLink = Boolean(data?.oerProvider)
+  const openLabel = isOerLink && data?.provider === 'openstax'
+    ? 'Open in OpenStax'
+    : isCloudLink
+      ? `Open in ${PROVIDER_LABELS[data?.provider ?? ''] ?? data?.provider}`
+      : 'Open link'
 
   return (
     <LmsPage title={data?.title ?? 'External link'}>
@@ -246,10 +252,23 @@ export default function CourseModuleExternalLinkPage() {
                 )}
               </span>
               <div className="min-w-0 flex-1">
-                {isCloudLink ? (
+                {isCloudLink || isOerLink ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <ProviderBadge provider={data.provider} />
+                    <ProviderBadge provider={data.oerProvider || data.provider} />
+                    {data.licenseSpdx ? (
+                      <span
+                        className="inline-flex items-center rounded-full border border-emerald-200/90 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:border-emerald-500/35 dark:bg-emerald-950 dark:text-emerald-200"
+                        aria-label={`Creative Commons ${data.licenseSpdx}`}
+                      >
+                        {data.licenseSpdx}
+                      </span>
+                    ) : null}
                   </div>
+                ) : null}
+                {data.attributionText ? (
+                  <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
+                    <span className="font-medium">Required attribution:</span> {data.attributionText}
+                  </p>
                 ) : null}
                 {!canEdit && data.url ? (
                   <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">

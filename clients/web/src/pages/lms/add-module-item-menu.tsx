@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import {
+  BookOpen,
   ChevronDown,
   CircleHelp,
   ClipboardList,
@@ -22,11 +23,19 @@ export type ModuleItemKind =
 
 type AddModuleItemMenuProps = {
   onAdd: (kind: ModuleItemKind) => void
+  onFindOpenResources?: () => void
+  oerLibraryEnabled?: boolean
   disabled?: boolean
   h5pEnabled?: boolean
 }
 
-export function AddModuleItemMenu({ onAdd, disabled, h5pEnabled }: AddModuleItemMenuProps) {
+export function AddModuleItemMenu({
+  onAdd,
+  onFindOpenResources,
+  oerLibraryEnabled = false,
+  disabled,
+  h5pEnabled,
+}: AddModuleItemMenuProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -133,6 +142,27 @@ export function AddModuleItemMenu({ onAdd, disabled, h5pEnabled }: AddModuleItem
               </span>
             </span>
           </button>
+          {oerLibraryEnabled && onFindOpenResources && (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                onFindOpenResources()
+                setOpen(false)
+              }}
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            >
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-teal-200/90 bg-teal-50 text-teal-700 dark:border-teal-500/40 dark:bg-teal-950 dark:text-teal-200">
+                <BookOpen className="h-4 w-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex flex-col gap-0.5">
+                <span className="font-semibold text-slate-950 dark:text-neutral-100">Find open resources</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400">
+                  Search OER Commons, MERLOT, and OpenStax
+                </span>
+              </span>
+            </button>
+          )}
           <button
             type="button"
             role="menuitem"
