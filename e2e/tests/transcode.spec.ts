@@ -59,6 +59,7 @@ test('POST admin retranscode: non-admin returns 403', async () => {
 // ── Input validation tests ──────────────────────────────────────────────────
 
 test('GET transcode-status: invalid UUID returns 400', async () => {
+  // UUID validation runs before feature-flag and auth checks, so 400 is always returned.
   const token = await getToken()
   const res = await fetch(`${API_BASE}/api/v1/files/not-a-uuid/transcode-status`, {
     headers: { Authorization: `Bearer ${token}` },

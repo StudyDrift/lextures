@@ -38,17 +38,18 @@ type transcodeStatusResponse struct {
 // Returns the transcode job status for the most recent job matching this object.
 func (d Deps) handleGetTranscodeStatus() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Validate UUID before any other check so malformed IDs always return 400.
+		objectID, err := uuid.Parse(chi.URLParam(r, "object_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid object_id.")
+			return
+		}
+
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
 		if !d.effectiveConfig().VideoTranscodingEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Video transcoding is not enabled.")
-			return
-		}
-
-		objectID, err := uuid.Parse(chi.URLParam(r, "object_id"))
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid object_id.")
 			return
 		}
 
@@ -113,17 +114,18 @@ func (d Deps) handleAdminRetranscode() http.HandlerFunc {
 // Streams status updates (queued → processing → done) to the uploader's UI in real time.
 func (d Deps) handleTranscodeWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Validate UUID before auth so malformed IDs always return 400.
+		jobID, err := uuid.Parse(chi.URLParam(r, "job_id"))
+		if err != nil {
+			http.Error(w, "invalid job_id", http.StatusBadRequest)
+			return
+		}
+
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
 		if !d.effectiveConfig().VideoTranscodingEnabled {
 			http.Error(w, "video transcoding not enabled", http.StatusNotFound)
-			return
-		}
-
-		jobID, err := uuid.Parse(chi.URLParam(r, "job_id"))
-		if err != nil {
-			http.Error(w, "invalid job_id", http.StatusBadRequest)
 			return
 		}
 
