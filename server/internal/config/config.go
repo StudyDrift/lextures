@@ -176,6 +176,13 @@ type Config struct {
 	TranscodeRetainSourceDays int
 	// FFmpegPath is the path to the ffmpeg binary. Defaults to "ffmpeg" (from PATH).
 	FFmpegPath string
+
+	// AutoCaptioningEnabled gates auto-captioning via Whisper (plan 8.4). Defaults to false.
+	AutoCaptioningEnabled bool
+	// WhisperBackend selects the ASR backend: whisper-api (default), whisper-local, azure-speech, google-speech, stub.
+	WhisperBackend string
+	// OpenAIAPIKey is the OpenAI API key used when WhisperBackend=whisper-api.
+	OpenAIAPIKey string
 }
 
 // Load reads configuration from the environment.
@@ -319,6 +326,10 @@ func Load() Config {
 		VideoTranscodingEnabled:   boolEnv("FEATURE_VIDEO_TRANSCODING"),
 		TranscodeRetainSourceDays: transcodeRetainSourceDays(),
 		FFmpegPath:                firstNonEmptyTrimmed("FFMPEG_PATH"),
+
+		AutoCaptioningEnabled: boolEnv("FEATURE_AUTO_CAPTIONING"),
+		WhisperBackend:        stringDefault(firstNonEmptyTrimmed("WHISPER_BACKEND"), "whisper-api"),
+		OpenAIAPIKey:          firstNonEmptyTrimmed("OPENAI_API_KEY"),
 	}
 }
 

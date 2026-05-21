@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/terms"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
+	"github.com/lextures/lextures/server/internal/workers/captioning"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
@@ -85,6 +86,18 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 			sweepTranscodeJobs(context.Background(), worker)
 		})
 		slog.Info("video transcoding worker started")
+	}
+
+	if cfg.AutoCaptioningEnabled && storage != nil {
+		backend := captioning.Backend(cfg.WhisperBackend)
+		if backend == "" {
+			backend = captioning.BackendWhisperAPI
+		}
+		capWorker := captioning.New(pool, storage, backend, cfg.OpenAIAPIKey)
+		go runEvery(ctx, 30*time.Second, func() {
+			sweepCaptionJobs(context.Background(), capWorker)
+		})
+		slog.Info("auto-captioning worker started", "backend", string(backend))
 	}
 }
 
