@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   isMathRenderingEnabled,
+  latexAccessibleLabel,
   loadKatex,
   renderKatexLoadingFallback,
   renderKatexSafe,
@@ -58,9 +59,14 @@ export function KatexExpression({ latex, displayMode, className }: KatexExpressi
     ? `my-1 block w-full overflow-x-auto text-center ${className ?? ''}`
     : `inline-block align-middle ${className ?? ''}`
 
+  const aria = latexAccessibleLabel(latex, displayMode)
+
   return (
     <span
-      className={`${wrapperCls} ${failed ? '' : 'katex-wrap'}`}
+      className={`${wrapperCls} ${failed ? 'ring-1 ring-rose-300 dark:ring-rose-800' : 'katex-wrap'}`}
+      role="math"
+      aria-label={aria}
+      title={failed ? 'Equation cannot be rendered — check LaTeX syntax.' : undefined}
       dangerouslySetInnerHTML={{ __html: html }}
     />
   )
