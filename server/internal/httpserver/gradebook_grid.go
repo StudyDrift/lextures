@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	"github.com/lextures/lextures/server/internal/repos/h5pcompletions"
 	"github.com/lextures/lextures/server/internal/repos/crosslisting"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/gradingschemes"
@@ -206,7 +207,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 		var cols []colWork
 		for i := range items {
-			if items[i].Kind != "assignment" && items[i].Kind != "quiz" {
+			if items[i].Kind != "assignment" && items[i].Kind != "quiz" && items[i].Kind != "h5p" {
 				continue
 			}
 			itemID, err := uuid.Parse(items[i].ID)
@@ -304,6 +305,21 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 
 		display := gridDisplayGrades(grades, outCols, parsed, excused)
+		if d.effectiveConfig().H5PEnabled {
+			h5pDisplay, h5pErr := h5pcompletions.DisplayGradesForCourse(r.Context(), d.Pool, courseID)
+			if h5pErr != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load H5P completions.")
+				return
+			}
+			for uid, row := range h5pDisplay {
+				if display[uid] == nil {
+					display[uid] = make(map[string]string)
+				}
+				for itemID, label := range row {
+					display[uid][itemID] = label
+				}
+			}
+		}
 
 		droppedByStudent := make(map[string]map[string]bool)
 		colMeta := make([]gradingdrops.ColMeta, 0, len(cols))

@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/clamav"
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
+	"github.com/lextures/lextures/server/internal/workers/h5pextract"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
@@ -100,6 +101,23 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 			sweepCaptionJobs(context.Background(), capWorker)
 		})
 		slog.Info("auto-captioning worker started", "backend", string(backend))
+	}
+
+	if cfg.H5PEnabled && storage != nil {
+		h5pWorker := h5pextract.New(pool, storage)
+		go runEvery(ctx, 15*time.Second, func() {
+			for {
+				done, err := h5pWorker.ProcessNext(context.Background())
+				if err != nil {
+					slog.Warn("h5p extract sweep: error", "err", err)
+					break
+				}
+				if !done {
+					break
+				}
+			}
+		})
+		slog.Info("h5p extract worker started")
 	}
 
 	if cfg.AvScanningEnabled && storage != nil {

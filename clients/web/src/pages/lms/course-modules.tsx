@@ -28,6 +28,7 @@ import {
   ClipboardList,
   ExternalLink,
   Plug,
+  Puzzle,
   Eye,
   EyeOff,
   FileText,
@@ -45,6 +46,7 @@ import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-t
 import { toast, toastWithUndo } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
 import { ModuleExternalLinkModal } from './module-external-link-modal'
+import { H5PUploadModal } from './h5p-upload-modal'
 import { ModuleLtiLinkModal } from './module-lti-link-modal'
 import { ModuleNameModal } from './module-name-modal'
 import { ModuleSettingsModal } from './module-settings-modal'
@@ -57,6 +59,7 @@ import {
   archiveCourseStructureItem,
   unarchiveCourseStructureItem,
   createModuleExternalLink,
+  createModuleH5P,
   patchModuleExternalLink,
   createModuleLtiLink,
   deleteCourseModule,
@@ -85,6 +88,7 @@ import { useCourseViewAs } from '../../lib/course-view-as'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
+import { h5pFeatureEnabled } from '../../lib/h5p-i18n'
 
 const MODULE_SORT_ID = 'sortable-modules'
 
@@ -126,7 +130,8 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
             i.kind === 'quiz' ||
             i.kind === 'external_link' ||
             i.kind === 'survey' ||
-            i.kind === 'lti_link'),
+            i.kind === 'lti_link' ||
+            i.kind === 'h5p'),
       )
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((c) => c.id)
@@ -460,6 +465,28 @@ function ChildRowContent({
             {studentFooter}
           </div>
         </div>
+      ) : child.kind === 'h5p' ? (
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-teal-200/90 bg-teal-50 text-teal-800 dark:border-teal-500/40 dark:bg-teal-950/55 dark:text-teal-200"
+            aria-hidden
+          >
+            <Puzzle className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link
+                to={`/courses/${encodeURIComponent(courseCode)}/modules/h5p/${encodeURIComponent(child.id)}`}
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                {child.title}
+              </Link>
+              <BlueprintLockIcon locked={child.blueprintLocked} />
+            </div>
+            {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
+            {studentFooter}
+          </div>
+        </div>
       ) : (
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
@@ -697,6 +724,7 @@ type ModuleCardBodyProps = {
   canEditModules: boolean
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
+  h5pEnabled?: boolean
   minified: boolean
   collapsed: boolean
   onToggleCollapsed: () => void
@@ -714,6 +742,7 @@ function ModuleCardBody({
   canEditModules,
   anyModalBusy,
   onModuleItemAdd,
+  h5pEnabled,
   minified,
   collapsed,
   onToggleCollapsed,
@@ -829,6 +858,7 @@ function ModuleCardBody({
             <AddModuleItemMenu
               onAdd={(kind) => onModuleItemAdd(item.id, kind)}
               disabled={anyModalBusy}
+              h5pEnabled={h5pEnabled}
             />
           </div>
         )}
@@ -1018,6 +1048,7 @@ type SortableModuleCardProps = {
   canEditModules: boolean
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
+  h5pEnabled?: boolean
   minified: boolean
   collapsed: boolean
   onToggleCollapsed: (moduleId: string) => void
@@ -1040,6 +1071,7 @@ function SortableModuleCard({
   canEditModules,
   anyModalBusy,
   onModuleItemAdd,
+  h5pEnabled,
   minified,
   collapsed,
   onToggleCollapsed,
@@ -1109,6 +1141,7 @@ function SortableModuleCard({
         canEditModules={canEditModules}
         anyModalBusy={anyModalBusy}
         onModuleItemAdd={onModuleItemAdd}
+        h5pEnabled={h5pEnabled}
         minified={minified}
         collapsed={collapsed}
         onToggleCollapsed={() => onToggleCollapsed(item.id)}
@@ -1242,6 +1275,11 @@ export default function CourseModules() {
   const [externalLinkModuleId, setExternalLinkModuleId] = useState<string | null>(null)
   const [externalLinkSaving, setExternalLinkSaving] = useState(false)
   const [externalLinkSaveError, setExternalLinkSaveError] = useState<string | null>(null)
+  const [h5pModalOpen, setH5pModalOpen] = useState(false)
+  const [h5pModalKey, setH5pModalKey] = useState(0)
+  const [h5pModuleId, setH5pModuleId] = useState<string | null>(null)
+  const [h5pSaving, setH5pSaving] = useState(false)
+  const [h5pSaveError, setH5pSaveError] = useState<string | null>(null)
 
   const [ltiLinkModalOpen, setLtiLinkModalOpen] = useState(false)
   const [ltiLinkModalKey, setLtiLinkModalKey] = useState(0)
@@ -1325,6 +1363,8 @@ export default function CourseModules() {
     quizModalOpen ||
     externalLinkSaving ||
     externalLinkModalOpen ||
+    h5pSaving ||
+    h5pModalOpen ||
     ltiLinkSaving ||
     ltiLinkModalOpen ||
     moduleSettingsSaving ||
@@ -1519,6 +1559,25 @@ export default function CourseModules() {
     [courseCode, externalLinkModuleId, load],
   )
 
+  const saveH5P = useCallback(
+    async (title: string, file: File) => {
+      if (!courseCode || !h5pModuleId) return
+      setH5pSaveError(null)
+      setH5pSaving(true)
+      try {
+        await createModuleH5P(courseCode, h5pModuleId, title, file)
+        await load({ silent: true })
+        setH5pModalOpen(false)
+        setH5pModuleId(null)
+      } catch (e) {
+        setH5pSaveError(e instanceof Error ? e.message : 'Could not upload H5P package.')
+      } finally {
+        setH5pSaving(false)
+      }
+    },
+    [courseCode, h5pModuleId, load],
+  )
+
   const saveLtiLink = useCallback(
     async (input: {
       title: string
@@ -1589,6 +1648,14 @@ export default function CourseModules() {
       setExternalLinkModuleId(moduleId)
       setExternalLinkModalKey((k) => k + 1)
       setExternalLinkModalOpen(true)
+      return
+    }
+    if (kind === 'h5p') {
+      setH5pSaveError(null)
+      setH5pModuleId(moduleId)
+      setH5pModalKey((k) => k + 1)
+      setH5pModalOpen(true)
+      return
     }
     if (kind === 'lti_link') {
       if (!courseCode) return
@@ -1828,7 +1895,8 @@ export default function CourseModules() {
           i.kind === 'quiz' ||
           i.kind === 'external_link' ||
           i.kind === 'survey' ||
-          i.kind === 'lti_link') &&
+          i.kind === 'lti_link' ||
+          i.kind === 'h5p') &&
         i.parentId
       ) {
         const list = m.get(i.parentId) ?? []
@@ -2026,6 +2094,7 @@ export default function CourseModules() {
                     canEditModules
                     anyModalBusy={anyModalBusy}
                     onModuleItemAdd={onModuleItemAdd}
+                    h5pEnabled={h5pFeatureEnabled()}
                     minified={isDraggingModule}
                     collapsed={collapsedModuleIds.has(item.id)}
                     onToggleCollapsed={toggleModuleCollapsed}
@@ -2061,8 +2130,10 @@ export default function CourseModules() {
                         : activeItem.kind === 'external_link'
                           ? 'External link'
                           : activeItem.kind === 'lti_link'
-                            ? 'LTI tool'
-                          : 'Heading'}
+                          ? 'LTI tool'
+                          : activeItem.kind === 'h5p'
+                            ? 'Interactive H5P'
+                            : 'Heading'}
                 </p>
               </div>
             </DragOverlay>
@@ -2170,6 +2241,20 @@ export default function CourseModules() {
         saving={quizSaving}
         errorMessage={quizSaveError}
         mode="quiz"
+      />
+
+      <H5PUploadModal
+        key={`h5p-${h5pModalKey}`}
+        open={h5pModalOpen}
+        onClose={() => {
+          if (!h5pSaving) {
+            setH5pModalOpen(false)
+            setH5pModuleId(null)
+          }
+        }}
+        onSave={(title, file) => saveH5P(title, file)}
+        saving={h5pSaving}
+        errorMessage={h5pSaveError}
       />
 
       <ModuleExternalLinkModal

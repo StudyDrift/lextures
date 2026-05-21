@@ -192,6 +192,9 @@ type Config struct {
 
 	// AvScanningEnabled gates ClamAV malware scanning on uploads (plan 8.6).
 	AvScanningEnabled bool
+
+	// H5PEnabled gates interactive H5P module items and xAPI completion (plan 8.12).
+	H5PEnabled bool
 	// ClamAVAddr is the clamd TCP address (default localhost:3310).
 	ClamAVAddr string
 	// ClamAVStub when true uses in-process EICAR detection (tests/dev without clamd).
@@ -348,6 +351,8 @@ func Load() Config {
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
 
 		AvScanningEnabled: boolEnv("FEATURE_AV_SCANNING"),
+
+		H5PEnabled: boolEnv("FEATURE_H5P"),
 		ClamAVAddr:        stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
 		ClamAVStub:        boolEnv("CLAMAV_STUB"),
 	}

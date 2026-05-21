@@ -1,0 +1,117 @@
+package h5p
+
+import (
+	"archive/zip"
+	"context"
+	"fmt"
+	"io"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+
+	"github.com/lextures/lextures/server/internal/service/filestorage"
+)
+
+// ExtractZipToStorage unpacks a .h5p zip from disk into object storage under assetsPrefix.
+func ExtractZipToStorage(ctx context.Context, storage filestorage.Driver, zipPath, assetsPrefix string) error {
+	if storage == nil {
+		return fmt.Errorf("h5p extract: no storage driver")
+	}
+	r, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return fmt.Errorf("h5p extract: open zip: %w", err)
+	}
+	defer r.Close()
+	prefix := strings.TrimSuffix(assetsPrefix, "/") + "/"
+	for _, f := range r.File {
+		if f.FileInfo().IsDir() {
+			continue
+		}
+		name := filepath.ToSlash(f.Name)
+		if strings.Contains(name, "..") {
+			continue
+		}
+		destKey := prefix + name
+		rc, openErr := f.Open()
+		if openErr != nil {
+			return openErr
+		}
+		ct := mimeForPath(name)
+		putErr := storage.PutObject(ctx, destKey, rc, int64(f.UncompressedSize64), ct)
+		_ = rc.Close()
+		if putErr != nil {
+			return fmt.Errorf("h5p extract: put %s: %w", name, putErr)
+		}
+	}
+	return nil
+}
+
+// WriteTempZip writes data to a temp file and returns its path (caller removes).
+func WriteTempZip(data []byte) (string, error) {
+	f, err := os.CreateTemp("", "h5p-upload-*.h5p")
+	if err != nil {
+		return "", err
+	}
+	if _, err := f.Write(data); err != nil {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+		return "", err
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
+}
+
+func mimeForPath(name string) string {
+	ext := strings.ToLower(path.Ext(name))
+	switch ext {
+	case ".json":
+		return "application/json"
+	case ".js":
+		return "application/javascript"
+	case ".css":
+		return "text/css"
+	case ".png":
+		return "image/png"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".gif":
+		return "image/gif"
+	case ".svg":
+		return "image/svg+xml"
+	case ".woff", ".woff2":
+		return "font/woff2"
+	case ".mp4":
+		return "video/mp4"
+	case ".mp3":
+		return "audio/mpeg"
+	default:
+		return "application/octet-stream"
+	}
+}
+
+// DownloadToTemp downloads an object from storage to a local temp file.
+func DownloadToTemp(ctx context.Context, storage filestorage.Driver, objectKey string) (string, error) {
+	rc, err := storage.GetObject(ctx, objectKey)
+	if err != nil {
+		return "", err
+	}
+	defer rc.Close()
+	f, err := os.CreateTemp("", "h5p-src-*.h5p")
+	if err != nil {
+		return "", err
+	}
+	if _, err := io.Copy(f, rc); err != nil {
+		_ = f.Close()
+		_ = os.Remove(f.Name())
+		return "", err
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(f.Name())
+		return "", err
+	}
+	return f.Name(), nil
+}

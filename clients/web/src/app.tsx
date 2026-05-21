@@ -21,6 +21,7 @@ import CourseModuleAssignmentPage from './pages/lms/course-module-assignment-pag
 import ModerationDashboard from './pages/lms/moderation-dashboard'
 import CourseModuleContentPage from './pages/lms/course-module-content-page'
 import CourseModuleExternalLinkPage from './pages/lms/course-module-external-link-page'
+import CourseModuleH5PPage from './pages/lms/course-module-h5p-page'
 import CourseModuleLtiPage from './pages/lms/course-module-lti-page'
 import CourseModuleQuizPage from './pages/lms/course-module-quiz-page'
 import CourseDiagnosticPage from './pages/lms/course-diagnostic-page'
@@ -137,6 +138,7 @@ export default function App() {
             <Route path="modules/quiz/:itemId" element={<CourseModuleQuizPage />} />
             <Route path="diagnostic" element={<CourseDiagnosticPage />} />
             <Route path="modules/external-link/:itemId" element={<CourseModuleExternalLinkPage />} />
+            <Route path="modules/h5p/:itemId" element={<CourseModuleH5PPage />} />
             <Route path="modules/lti/:itemId" element={<CourseModuleLtiPage />} />
             <Route path="questions" element={<CourseQuestionBankPage />} />
             <Route path="misconception-report" element={<CourseMisconceptionReportPage />} />
