@@ -168,6 +168,14 @@ type Config struct {
 	// DRMHMACSecret is the base64-encoded 32-byte secret used to sign user-bound DRM tokens.
 	// If empty, token signing falls back to a derived value (not suitable for production).
 	DRMHMACSecret string
+
+	// VideoTranscodingEnabled gates HLS transcoding (plan 8.3). Defaults to false.
+	VideoTranscodingEnabled bool
+	// TranscodeRetainSourceDays is how long the original raw upload is kept after a successful
+	// transcode before background deletion. 0 means keep indefinitely (default 30).
+	TranscodeRetainSourceDays int
+	// FFmpegPath is the path to the ffmpeg binary. Defaults to "ffmpeg" (from PATH).
+	FFmpegPath string
 }
 
 // Load reads configuration from the environment.
@@ -307,6 +315,10 @@ func Load() Config {
 
 		DRMEnabled:    boolEnv("FEATURE_DRM"),
 		DRMHMACSecret: firstNonEmptyTrimmed("DRM_HMAC_SECRET"),
+
+		VideoTranscodingEnabled:   boolEnv("FEATURE_VIDEO_TRANSCODING"),
+		TranscodeRetainSourceDays: transcodeRetainSourceDays(),
+		FFmpegPath:                firstNonEmptyTrimmed("FFMPEG_PATH"),
 	}
 }
 
@@ -516,6 +528,18 @@ func storagePresignTTL() int {
 	n, err := strconv.Atoi(raw)
 	if err != nil || n <= 0 {
 		return 3600
+	}
+	return n
+}
+
+func transcodeRetainSourceDays() int {
+	raw := strings.TrimSpace(os.Getenv("TRANSCODE_RETAIN_SOURCE_DAYS"))
+	if raw == "" {
+		return 30
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 0 {
+		return 30
 	}
 	return n
 }

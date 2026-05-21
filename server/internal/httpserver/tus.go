@@ -19,6 +19,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
 const tusVersion = "1.0.0"
@@ -379,6 +380,21 @@ func (d Deps) finalizeTusUpload(uploadID uuid.UUID, upload *tusUploadRow, tmpPat
 		"object_key", upload.ObjectKey,
 		"bytes", upload.UploadLength,
 	)
+
+	// Enqueue transcoding job for video uploads (FR-1)
+	mime := "application/octet-stream"
+	if upload.MimeType != nil {
+		mime = *upload.MimeType
+	}
+	if d.effectiveConfig().VideoTranscodingEnabled && transcode.IsVideoMIME(mime) {
+		jobID, enqErr := transcode.EnqueueForObject(ctx, d.Pool, upload.ObjectKey, nil)
+		if enqErr != nil {
+			slog.Error("tus: enqueue transcode", "upload_id", uploadID, "err", enqErr)
+		} else {
+			slog.Info("tus: transcode job queued", "upload_id", uploadID, "job_id", jobID)
+		}
+	}
+
 	return nil
 }
 

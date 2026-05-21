@@ -14,6 +14,8 @@ var ErrNoPresignedURL = errors.New("filestorage: presigned URLs not supported by
 type Driver interface {
 	// PutObject writes r (of size bytes) to the object at key with the given MIME type.
 	PutObject(ctx context.Context, key string, r io.Reader, size int64, contentType string) error
+	// GetObject returns a reader for the object at key. Caller must close the returned ReadCloser.
+	GetObject(ctx context.Context, key string) (io.ReadCloser, error)
 	// GetPresignedURL returns a short-lived URL for downloading the object.
 	// Returns ErrNoPresignedURL for drivers that serve files directly.
 	GetPresignedURL(ctx context.Context, key string, ttl time.Duration) (string, error)

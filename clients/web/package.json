@@ -39,6 +39,7 @@
     "@tiptap/starter-kit": "^3.22.2",
     "@types/turndown": "^5.0.6",
     "dexie": "^4.4.2",
+    "hls.js": "^1.6.16",
     "katex": "^0.16.45",
     "lib0": "^0.2.104",
     "lucide-react": "^1.7.0",

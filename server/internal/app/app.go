@@ -63,8 +63,6 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		return fmt.Errorf("app: effective configuration invalid (environment + database settings): %w", err)
 	}
 
-	background.Start(ctx, pool, merged)
-
 	storage, storageErr := filestorage.New(filestorage.BackendConfig{
 		Backend:         cfg.StorageBackend,
 		LocalRoot:       cfg.CourseFilesRoot,
@@ -78,6 +76,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	if storageErr != nil {
 		return fmt.Errorf("app: storage: %w", storageErr)
 	}
+
+	background.StartWithStorage(ctx, pool, merged, storage)
 
 	ltiRT := lti.NewFromConfig(merged)
 	brandingResolver := orgbranding.NewResolver(pool, merged.BrandingMultitenantHostSuffix, webHostFromOrigin(merged.PublicWebOrigin))

@@ -54,6 +54,14 @@ func (d *S3Driver) PutObject(ctx context.Context, key string, r io.Reader, size 
 	return nil
 }
 
+func (d *S3Driver) GetObject(ctx context.Context, key string) (io.ReadCloser, error) {
+	obj, err := d.client.GetObject(ctx, d.bucket, key, minio.GetObjectOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("filestorage/s3: get %q: %w", key, err)
+	}
+	return obj, nil
+}
+
 func (d *S3Driver) GetPresignedURL(ctx context.Context, key string, ttl time.Duration) (string, error) {
 	params := make(url.Values)
 	u, err := d.client.PresignedGetObject(ctx, d.bucket, key, ttl, params)
