@@ -306,6 +306,8 @@ export function learnerCourseItemHref(courseCode: string, item: { kind: string; 
       return `/courses/${cc}/modules/external-link/${id}`
     case 'lti_link':
       return `/courses/${cc}/modules/lti/${id}`
+    case 'h5p':
+      return `/courses/${cc}/modules/h5p/${id}`
     default:
       return `/courses/${cc}/modules`
   }
@@ -1487,6 +1489,7 @@ export type CourseStructureItem = {
     | 'external_link'
     | 'survey'
     | 'lti_link'
+    | 'h5p'
   title: string
   /** Set when this row is nested under a module. */
   parentId: string | null
@@ -2306,6 +2309,55 @@ export async function createModuleExternalLink(
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
+}
+
+export type ModuleH5PPayload = {
+  packageId: string
+  itemId?: string
+  title: string
+  contentType: string
+  extractStatus: string
+  assetsBaseUrl: string
+  downloadUrl?: string
+}
+
+export async function fetchModuleH5PByItem(
+  courseCode: string,
+  itemId: string,
+): Promise<ModuleH5PPayload> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/h5p-items/${encodeURIComponent(itemId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const row = raw as Record<string, unknown>
+  return {
+    packageId: String(row.packageId ?? ''),
+    itemId: row.itemId != null ? String(row.itemId) : undefined,
+    title: String(row.title ?? ''),
+    contentType: String(row.contentType ?? ''),
+    extractStatus: String(row.extractStatus ?? ''),
+    assetsBaseUrl: String(row.assetsBaseUrl ?? ''),
+    downloadUrl: row.downloadUrl != null ? String(row.downloadUrl) : undefined,
+  }
+}
+
+export async function createModuleH5P(
+  courseCode: string,
+  moduleId: string,
+  title: string,
+  file: File,
+): Promise<CourseStructureItem> {
+  const form = new FormData()
+  form.append('title', title)
+  form.append('file', file)
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/h5p`,
+    { method: 'POST', body: form },
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))

@@ -48,6 +48,7 @@ services:
       COURSE_FILES_ROOT: /var/course-files
       PORT: "8080"
       FEATURE_AV_SCANNING: ${FEATURE_AV_SCANNING:-false}
+      FEATURE_H5P: ${FEATURE_H5P:-true}
       CLAMAV_ADDR: ${CLAMAV_ADDR:-clamav:3310}
       CLAMAV_STUB: ${CLAMAV_STUB:-true}
       FEATURE_OER_LIBRARY: ${FEATURE_OER_LIBRARY:-true}
@@ -70,6 +71,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: http://localhost:8080
+        VITE_FEATURE_H5P: ${FEATURE_H5P:-true}
         VITE_FEATURE_OER_LIBRARY: ${VITE_FEATURE_OER_LIBRARY:-true}
     ports:
       - "5173:80"

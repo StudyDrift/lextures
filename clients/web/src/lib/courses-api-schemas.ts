@@ -243,6 +243,7 @@ export const courseStructureItemSchema = z
       'external_link',
       'survey',
       'lti_link',
+      'h5p',
     ]),
     title: z.string(),
     parentId: z.string().nullable(),

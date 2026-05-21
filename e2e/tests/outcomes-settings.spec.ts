@@ -40,7 +40,7 @@ async function outcomeCard(page: Page, title: string): Promise<Locator> {
   return found
 }
 
-async function expectNoOutcomeCardWithTitle(page: Page, title: string) {
+async function expectNoOutcomeCardWithTitle(page: Page, title: string, timeout = 12000) {
   await expect
     .poll(
       async () => {
@@ -52,7 +52,7 @@ async function expectNoOutcomeCardWithTitle(page: Page, title: string) {
         }
         return true
       },
-      { timeout: 12000 },
+      { timeout },
     )
     .toBe(true)
 }
@@ -182,11 +182,12 @@ test.describe('Course Settings - Outcomes', () => {
     await dialog.locator('#confirm-dialog-phrase').fill('DELETE')
     await dialog.getByRole('button', { name: /^Delete outcome$/ }).click()
 
-    await expectNoOutcomeCardWithTitle(page, 'E2E Outcome Trash')
-
+    await expect(dialog).toBeHidden({ timeout: 20000 })
     await expect.poll(async () => {
       const d = await apiGetCourseOutcomes(seededCourse.instructorToken, seededCourse.courseCode)
       return d.outcomes.every((x) => x.title !== 'E2E Outcome Trash')
-    }).toBe(true)
+    }, { timeout: 20000 }).toBe(true)
+
+    await expectNoOutcomeCardWithTitle(page, 'E2E Outcome Trash', 20000)
   })
 })

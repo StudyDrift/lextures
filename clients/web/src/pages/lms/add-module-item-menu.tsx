@@ -9,6 +9,7 @@ import {
   Heading,
   Plug,
   Plus,
+  Puzzle,
 } from 'lucide-react'
 
 export type ModuleItemKind =
@@ -18,12 +19,14 @@ export type ModuleItemKind =
   | 'quiz'
   | 'external_link'
   | 'lti_link'
+  | 'h5p'
 
 type AddModuleItemMenuProps = {
   onAdd: (kind: ModuleItemKind) => void
   onFindOpenResources?: () => void
   oerLibraryEnabled?: boolean
   disabled?: boolean
+  h5pEnabled?: boolean
 }
 
 export function AddModuleItemMenu({
@@ -31,6 +34,7 @@ export function AddModuleItemMenu({
   onFindOpenResources,
   oerLibraryEnabled = false,
   disabled,
+  h5pEnabled,
 }: AddModuleItemMenuProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -175,6 +179,24 @@ export function AddModuleItemMenu({
               </span>
             </span>
           </button>
+          {h5pEnabled ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => pick('h5p')}
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            >
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-teal-200/90 bg-teal-50 text-teal-800 dark:border-teal-500/40 dark:bg-teal-950 dark:text-teal-200">
+                <Puzzle className="h-4 w-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex flex-col gap-0.5">
+                <span className="font-semibold text-slate-950 dark:text-neutral-100">Interactive H5P</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400">
+                  Upload an interactive .h5p activity
+                </span>
+              </span>
+            </button>
+          ) : null}
           <button
             type="button"
             role="menuitem"

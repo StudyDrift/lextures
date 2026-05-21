@@ -236,6 +236,9 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
     PORT="${E2E_API_PORT}" \
+    FEATURE_H5P="${FEATURE_H5P:-true}" \
+    FEATURE_OER_LIBRARY="${FEATURE_OER_LIBRARY:-true}" \
+    OER_STUB="${OER_STUB:-true}" \
     "${E2E_SERVER_BIN}" &
 else
   DATABASE_URL="${DATABASE_URL}" \
@@ -244,6 +247,9 @@ else
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
     PORT="${E2E_API_PORT}" \
+    FEATURE_H5P="${FEATURE_H5P:-true}" \
+    FEATURE_OER_LIBRARY="${FEATURE_OER_LIBRARY:-true}" \
+    OER_STUB="${OER_STUB:-true}" \
     go run ./cmd/server &
 fi
 PIDS+=($!)
@@ -285,11 +291,13 @@ for arg in "$@"; do
   fi
 done
 if [[ "${#PLAYWRIGHT_TEST_ARGS[@]}" -gt 0 ]]; then
-  E2E_BASE_URL="http://localhost:5173" \
+  FEATURE_H5P="${FEATURE_H5P:-true}" \
+    E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
     npx playwright test "${PLAYWRIGHT_TEST_ARGS[@]}"
 else
-  E2E_BASE_URL="http://localhost:5173" \
+  FEATURE_H5P="${FEATURE_H5P:-true}" \
+    E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
     npx playwright test
 fi

@@ -6,6 +6,7 @@ export type LastVisitedModuleKind =
   | 'quiz'
   | 'external_link'
   | 'lti_link'
+  | 'h5p'
 
 export type LastVisitedModuleEntry = {
   itemId: string
@@ -96,5 +97,11 @@ export function hrefForLastVisited(courseCode: string, kind: LastVisitedModuleKi
       return `/courses/${cc}/modules/external-link/${id}`
     case 'lti_link':
       return `/courses/${cc}/modules/lti/${id}`
+    case 'h5p':
+      return `/courses/${cc}/modules/h5p/${id}`
+    default: {
+      const _exhaustive: never = kind
+      return _exhaustive
+    }
   }
 }
