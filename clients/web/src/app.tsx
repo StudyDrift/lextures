@@ -13,6 +13,7 @@ import CourseGroupsPage from './pages/lms/course-groups-page'
 import CourseGradebook from './pages/lms/course-gradebook'
 import CourseMyGrades from './pages/lms/course-my-grades'
 import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
+import AdminQuarantinePage from './pages/lms/admin-quarantine-page'
 import CourseCreate from './pages/lms/course-create'
 import CourseDetail from './pages/lms/course-detail'
 import CourseLayout from './pages/lms/course-layout'
@@ -153,6 +154,7 @@ export default function App() {
           </Route>
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
+          <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

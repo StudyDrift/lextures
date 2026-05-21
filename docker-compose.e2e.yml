@@ -26,6 +26,15 @@ services:
       timeout: 5s
       retries: 10
 
+  clamav:
+    image: clamav/clamav:1.4
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/clamdcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
   server:
     build:
       context: ./server
@@ -37,6 +46,9 @@ services:
       RUN_MIGRATIONS: "true"
       COURSE_FILES_ROOT: /var/course-files
       PORT: "8080"
+      FEATURE_AV_SCANNING: ${FEATURE_AV_SCANNING:-false}
+      CLAMAV_ADDR: ${CLAMAV_ADDR:-clamav:3310}
+      CLAMAV_STUB: ${CLAMAV_STUB:-true}
     ports:
       - "8080:8080"
     depends_on:
