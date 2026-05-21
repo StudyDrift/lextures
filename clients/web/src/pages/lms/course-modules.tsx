@@ -44,6 +44,8 @@ import { CourseModulesLoadingSkeleton } from '../../components/ui/lms-content-sk
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { toast, toastWithUndo } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
+import { OERSearchPanel } from '../../components/oer/oer-search-panel'
+import { oerLibraryEnabled } from '../../lib/oer-api'
 import { ModuleExternalLinkModal } from './module-external-link-modal'
 import { ModuleLtiLinkModal } from './module-lti-link-modal'
 import { ModuleNameModal } from './module-name-modal'
@@ -697,6 +699,8 @@ type ModuleCardBodyProps = {
   canEditModules: boolean
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
+  onFindOpenResources?: (moduleId: string) => void
+  oerLibraryEnabled?: boolean
   minified: boolean
   collapsed: boolean
   onToggleCollapsed: () => void
@@ -714,6 +718,8 @@ function ModuleCardBody({
   canEditModules,
   anyModalBusy,
   onModuleItemAdd,
+  onFindOpenResources,
+  oerLibraryEnabled: oerEnabled,
   minified,
   collapsed,
   onToggleCollapsed,
@@ -828,6 +834,10 @@ function ModuleCardBody({
             </button>
             <AddModuleItemMenu
               onAdd={(kind) => onModuleItemAdd(item.id, kind)}
+              onFindOpenResources={
+                onFindOpenResources ? () => onFindOpenResources(item.id) : undefined
+              }
+              oerLibraryEnabled={oerEnabled}
               disabled={anyModalBusy}
             />
           </div>
@@ -1018,6 +1028,8 @@ type SortableModuleCardProps = {
   canEditModules: boolean
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
+  onFindOpenResources?: (moduleId: string) => void
+  oerLibraryEnabled?: boolean
   minified: boolean
   collapsed: boolean
   onToggleCollapsed: (moduleId: string) => void
@@ -1040,6 +1052,8 @@ function SortableModuleCard({
   canEditModules,
   anyModalBusy,
   onModuleItemAdd,
+  onFindOpenResources,
+  oerLibraryEnabled: oerEnabled,
   minified,
   collapsed,
   onToggleCollapsed,
@@ -1109,6 +1123,8 @@ function SortableModuleCard({
         canEditModules={canEditModules}
         anyModalBusy={anyModalBusy}
         onModuleItemAdd={onModuleItemAdd}
+        onFindOpenResources={onFindOpenResources}
+        oerLibraryEnabled={oerEnabled}
         minified={minified}
         collapsed={collapsed}
         onToggleCollapsed={() => onToggleCollapsed(item.id)}
@@ -1242,6 +1258,9 @@ export default function CourseModules() {
   const [externalLinkModuleId, setExternalLinkModuleId] = useState<string | null>(null)
   const [externalLinkSaving, setExternalLinkSaving] = useState(false)
   const [externalLinkSaveError, setExternalLinkSaveError] = useState<string | null>(null)
+  const [oerPanelOpen, setOerPanelOpen] = useState(false)
+  const [oerModuleId, setOerModuleId] = useState<string | null>(null)
+  const oerEnabled = oerLibraryEnabled()
 
   const [ltiLinkModalOpen, setLtiLinkModalOpen] = useState(false)
   const [ltiLinkModalKey, setLtiLinkModalKey] = useState(0)
@@ -1325,6 +1344,7 @@ export default function CourseModules() {
     quizModalOpen ||
     externalLinkSaving ||
     externalLinkModalOpen ||
+    oerPanelOpen ||
     ltiLinkSaving ||
     ltiLinkModalOpen ||
     moduleSettingsSaving ||
@@ -2026,6 +2046,11 @@ export default function CourseModules() {
                     canEditModules
                     anyModalBusy={anyModalBusy}
                     onModuleItemAdd={onModuleItemAdd}
+                    onFindOpenResources={(moduleId) => {
+                      setOerModuleId(moduleId)
+                      setOerPanelOpen(true)
+                    }}
+                    oerLibraryEnabled={oerEnabled}
                     minified={isDraggingModule}
                     collapsed={collapsedModuleIds.has(item.id)}
                     onToggleCollapsed={toggleModuleCollapsed}
@@ -2171,6 +2196,19 @@ export default function CourseModules() {
         errorMessage={quizSaveError}
         mode="quiz"
       />
+
+      {courseCode && oerModuleId && (
+        <OERSearchPanel
+          open={oerPanelOpen}
+          courseCode={courseCode}
+          moduleId={oerModuleId}
+          onClose={() => {
+            setOerPanelOpen(false)
+            setOerModuleId(null)
+          }}
+          onImported={() => load({ silent: true })}
+        />
+      )}
 
       <ModuleExternalLinkModal
         key={`external-link-${externalLinkModalKey}`}

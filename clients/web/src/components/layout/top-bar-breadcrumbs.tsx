@@ -78,6 +78,8 @@ function settingsSubLabel(view: ReturnType<typeof settingsViewFromPathname>): st
       return 'SCIM provisioning'
     case 'cloud-providers':
       return 'Cloud file pickers'
+    case 'oer-providers':
+      return 'OER library'
     default:
       return 'Account'
   }
