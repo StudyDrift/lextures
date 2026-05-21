@@ -246,12 +246,11 @@ export default function CourseModuleExternalLinkPage() {
                 )}
               </span>
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h1 className="text-xl font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
-                    {data.title}
-                  </h1>
-                  {isCloudLink && <ProviderBadge provider={data.provider} />}
-                </div>
+                {isCloudLink ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <ProviderBadge provider={data.provider} />
+                  </div>
+                ) : null}
                 {!canEdit && data.url ? (
                   <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">
                     Opening in a new tab… If nothing opened, use the button below (your browser may
