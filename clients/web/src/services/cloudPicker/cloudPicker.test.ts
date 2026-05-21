@@ -64,13 +64,14 @@ describe('DropboxPicker', () => {
     }
 
     const picker = new DropboxPicker()
+    const origCreate = document.createElement.bind(document)
     vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
       if (tag === 'script') {
-        const el = document.createElement.bind(document)(tag)
+        const el = origCreate(tag)
         setTimeout(() => (el as HTMLScriptElement).onload?.(new Event('load')), 0)
         return el
       }
-      return document.createElement.bind(document)(tag)
+      return origCreate(tag)
     })
     vi.spyOn(document.head, 'appendChild').mockImplementation(() => document.head)
 
