@@ -42,8 +42,11 @@ function loadScript(src: string): Promise<void> {
 
 export class OneDrivePicker implements CloudPickerProvider {
   readonly provider = 'onedrive' as const
+  private readonly clientId: string
 
-  constructor(private readonly clientId: string) {}
+  constructor(clientId: string) {
+    this.clientId = clientId
+  }
 
   async pick(): Promise<PickedFile | null> {
     await loadScript('https://js.live.net/v7.2/OneDrive.js')

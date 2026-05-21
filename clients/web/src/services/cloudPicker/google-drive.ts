@@ -56,11 +56,13 @@ function loadScript(src: string): Promise<void> {
 
 export class GoogleDrivePicker implements CloudPickerProvider {
   readonly provider = 'google_drive' as const
+  private readonly clientId: string
+  private readonly apiKey: string
 
-  constructor(
-    private readonly clientId: string,
-    private readonly apiKey: string,
-  ) {}
+  constructor(clientId: string, apiKey: string) {
+    this.clientId = clientId
+    this.apiKey = apiKey
+  }
 
   async pick(): Promise<PickedFile | null> {
     await loadScript('https://apis.google.com/js/api.js')
