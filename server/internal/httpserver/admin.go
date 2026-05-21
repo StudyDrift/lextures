@@ -512,4 +512,8 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	// DRM / watermarking (plan 8.10)
 	r.Put("/api/v1/admin/files/{object_id}/drm", d.handlePutAdminFileDRM())
 	r.Get("/api/v1/admin/drm/anomalies", d.handleGetAdminDRMAnomalies())
+	// Storage quotas (plan 8.5)
+	r.Get("/api/v1/admin/storage-quotas", d.handleAdminStorageQuotasList())
+	r.Put("/api/v1/admin/storage-quotas/{scope}/{scope_id}", d.handleAdminStorageQuotasPut())
+	r.Post("/api/v1/admin/storage-quotas/reconcile", d.handleAdminStorageQuotasReconcile())
 }

@@ -108,7 +108,10 @@ test.describe('Discussions', () => {
     await composer.fill(replyText)
 
     const postBtn = page.getByRole('button', { name: /post|reply|submit/i }).last()
-    await postBtn.click()
+    // The fixed help-widget button (bottom-right) can overlap the Post button.
+    // Scroll it to the top half of the viewport and force-click to bypass the overlay.
+    await postBtn.scrollIntoViewIfNeeded()
+    await postBtn.click({ force: true })
 
     await expect(page.getByText(replyText)).toBeVisible({ timeout: 10000 })
   })

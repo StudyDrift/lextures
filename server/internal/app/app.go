@@ -29,6 +29,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
+	"github.com/lextures/lextures/server/internal/service/storagequota"
 )
 
 // Run starts the API. Pass the migration file tree (e.g. serverdata.Migrations from the module root).
@@ -81,6 +82,12 @@ func Run(ctx context.Context, fsys fs.FS) error {
 
 	ltiRT := lti.NewFromConfig(merged)
 	brandingResolver := orgbranding.NewResolver(pool, merged.BrandingMultitenantHostSuffix, webHostFromOrigin(merged.PublicWebOrigin))
+
+	var quotaSvc *storagequota.Service
+	if merged.StorageQuotasEnabled {
+		quotaSvc = &storagequota.Service{Pool: pool}
+	}
+
 	deps := httpserver.Deps{
 		Pool:             pool,
 		JWTSigner:        auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
@@ -92,6 +99,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		BrandingResolver: brandingResolver,
 		NotifHub:         notifevents.New(),
 		Storage:          storage,
+		StorageQuota:     quotaSvc,
 	}
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,
