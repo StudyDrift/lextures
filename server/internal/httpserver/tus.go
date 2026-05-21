@@ -219,10 +219,13 @@ func (d Deps) handleTusHead() http.HandlerFunc {
 			return
 		}
 
-		// If the temp file is gone but offset > 0 (e.g. after server restart), reset offset
-		// so the client knows to re-send from the start.
+		// Completed uploads: tus requires Upload-Offset == Upload-Length even though the
+		// temp file is removed after finalize.
 		offset := upload.UploadOffset
-		if offset > 0 {
+		if upload.CompletedAt != nil {
+			offset = upload.UploadLength
+		} else if offset > 0 {
+			// Temp file missing mid-upload (e.g. after server restart): reset so the client re-sends.
 			if _, statErr := os.Stat(tusTempPath(uploadID)); os.IsNotExist(statErr) {
 				offset = 0
 			}
