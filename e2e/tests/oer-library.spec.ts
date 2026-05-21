@@ -110,7 +110,7 @@ test.describe('OER library', () => {
 
     const linkRes = await fetch(
       `${apiBase}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/external-links/${item.id}`,
-      { headers: { Authorization: `Bearer ${seededCourse.instructorToken}` },
+      { headers: { Authorization: `Bearer ${seededCourse.instructorToken}` } },
     )
     expect(linkRes.ok).toBe(true)
     const link = (await linkRes.json()) as Record<string, unknown>
