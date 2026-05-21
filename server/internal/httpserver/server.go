@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/storagequota"
 )
 
 // Deps is the minimal set of server dependencies. Expand with auth, LTI, etc. during the migration.
@@ -46,6 +47,9 @@ type Deps struct {
 	Storage filestorage.Driver
 	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.
 	DRM *drmservice.Service
+	// StorageQuota enforces per-tenant/course/user storage limits (plan 8.5).
+	// When nil, quota endpoints return 501 and upload enforcement is skipped.
+	StorageQuota *storagequota.Service
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -112,6 +116,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerTusRoutes(r)
 	d.registerTranscodeRoutes(r)
 	d.registerCaptionRoutes(r)
+	d.registerStorageQuotaRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r

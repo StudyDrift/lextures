@@ -183,6 +183,12 @@ type Config struct {
 	WhisperBackend string
 	// OpenAIAPIKey is the OpenAI API key used when WhisperBackend=whisper-api.
 	OpenAIAPIKey string
+
+	// StorageQuotasEnabled gates per-course/user storage quota enforcement (plan 8.5).
+	StorageQuotasEnabled bool
+	// StorageDefaultTenantQuotaGB, when > 0, sets a default tenant-level quota in gigabytes
+	// applied at startup. 0 means unlimited unless an admin sets an explicit limit.
+	StorageDefaultTenantQuotaGB int64
 }
 
 // Load reads configuration from the environment.
@@ -330,7 +336,22 @@ func Load() Config {
 		AutoCaptioningEnabled: boolEnv("FEATURE_AUTO_CAPTIONING"),
 		WhisperBackend:        stringDefault(firstNonEmptyTrimmed("WHISPER_BACKEND"), "whisper-api"),
 		OpenAIAPIKey:          firstNonEmptyTrimmed("OPENAI_API_KEY"),
+
+		StorageQuotasEnabled:        boolEnv("FEATURE_STORAGE_QUOTAS"),
+		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
 	}
+}
+
+func storageDefaultTenantQuotaGB() int64 {
+	s := strings.TrimSpace(os.Getenv("STORAGE_DEFAULT_TENANT_QUOTA_GB"))
+	if s == "" {
+		return 0
+	}
+	v, err := strconv.ParseInt(s, 10, 64)
+	if err != nil || v < 0 {
+		return 0
+	}
+	return v
 }
 
 // OIDCGoogleConfigured is true when Google IdP client credentials are present (Rust `OidcState.google` Some).
