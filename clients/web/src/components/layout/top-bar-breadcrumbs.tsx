@@ -76,6 +76,8 @@ function settingsSubLabel(view: ReturnType<typeof settingsViewFromPathname>): st
       return 'Academic terms'
     case 'scim-provisioning':
       return 'SCIM provisioning'
+    case 'cloud-providers':
+      return 'Cloud file pickers'
     default:
       return 'Account'
   }

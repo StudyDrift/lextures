@@ -2406,6 +2406,9 @@ export type ModuleExternalLinkPayload = {
   itemId: string
   title: string
   url: string
+  provider: string
+  externalId: string
+  iconUrl: string
   updatedAt: string
 }
 
@@ -2415,6 +2418,9 @@ function normalizeModuleExternalLinkPayload(raw: unknown): ModuleExternalLinkPay
     itemId: String(r.itemId ?? ''),
     title: String(r.title ?? ''),
     url: String(r.url ?? ''),
+    provider: String(r.provider ?? 'url'),
+    externalId: String(r.externalId ?? ''),
+    iconUrl: String(r.iconUrl ?? ''),
     updatedAt: String(r.updatedAt ?? ''),
   }
 }
@@ -2434,7 +2440,7 @@ export async function fetchModuleExternalLink(
 export async function patchModuleExternalLink(
   courseCode: string,
   itemId: string,
-  body: { url: string },
+  body: { url: string; provider?: string; externalId?: string; iconUrl?: string },
 ): Promise<ModuleExternalLinkPayload> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/external-links/${encodeURIComponent(itemId)}`,
@@ -5217,4 +5223,41 @@ export async function downloadSubmissionAnnotatedPdf(
   a.rel = 'noopener'
   a.click()
   URL.revokeObjectURL(url)
+}
+
+// Cloud provider admin API (plan 8.8)
+export type CloudProviderSetting = {
+  provider: string
+  enabled: boolean
+  updatedAt: string
+}
+
+export async function fetchAdminCloudProviders(): Promise<CloudProviderSetting[]> {
+  const res = await authorizedFetch('/api/v1/admin/cloud-providers')
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  if (!Array.isArray(raw)) return []
+  return raw.map((row) => {
+    const r = row as Record<string, unknown>
+    return {
+      provider: String(r.provider ?? ''),
+      enabled: Boolean(r.enabled),
+      updatedAt: String(r.updatedAt ?? ''),
+    }
+  })
+}
+
+export async function putAdminCloudProvider(provider: string, enabled: boolean): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/cloud-providers/${encodeURIComponent(provider)}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled }),
+    },
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
 }

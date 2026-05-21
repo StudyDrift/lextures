@@ -57,6 +57,7 @@ import {
   archiveCourseStructureItem,
   unarchiveCourseStructureItem,
   createModuleExternalLink,
+  patchModuleExternalLink,
   createModuleLtiLink,
   deleteCourseModule,
   fetchCourseLtiExternalTools,
@@ -1497,12 +1498,15 @@ export default function CourseModules() {
   )
 
   const saveExternalLink = useCallback(
-    async (title: string, url: string) => {
+    async (title: string, url: string, provider?: string, externalId?: string, iconUrl?: string) => {
       if (!courseCode || !externalLinkModuleId) return
       setExternalLinkSaveError(null)
       setExternalLinkSaving(true)
       try {
-        await createModuleExternalLink(courseCode, externalLinkModuleId, { title, url })
+        const item = await createModuleExternalLink(courseCode, externalLinkModuleId, { title, url })
+        if (provider && provider !== 'url') {
+          await patchModuleExternalLink(courseCode, item.id, { url, provider, externalId, iconUrl })
+        }
         await load({ silent: true })
         setExternalLinkModalOpen(false)
         setExternalLinkModuleId(null)
@@ -2177,7 +2181,7 @@ export default function CourseModules() {
             setExternalLinkModuleId(null)
           }
         }}
-        onSave={(title, url) => void saveExternalLink(title, url)}
+        onSave={(title, url, provider, externalId, iconUrl) => void saveExternalLink(title, url, provider, externalId, iconUrl)}
         saving={externalLinkSaving}
         errorMessage={externalLinkSaveError}
       />
