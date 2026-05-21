@@ -88,25 +88,66 @@ WHERE c.course_id = $1 AND c.kind = 'external_link' AND c.id = ANY($2)
 	return out, rows.Err()
 }
 
-func GetForCourseItem(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) (title string, url string, provider string, externalID *string, iconURL *string, updatedAt *time.Time, err error) {
+func GetForCourseItem(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) (
+	title, url, provider string,
+	externalID, iconURL, licenseSPDX, attributionText, oerProvider *string,
+	updatedAt *time.Time,
+	err error,
+) {
 	if pool == nil {
-		return "", "", "", nil, nil, nil, errors.New("db pool is nil")
+		return "", "", "", nil, nil, nil, nil, nil, nil, errors.New("db pool is nil")
 	}
 	var t time.Time
 	var prov string
 	err = pool.QueryRow(ctx, `
-SELECT c.title, m.url, m.provider, m.external_id, m.icon_url, m.updated_at
+SELECT c.title, m.url, m.provider, m.external_id, m.icon_url, m.license_spdx, m.attribution_text, m.oer_provider, m.updated_at
 FROM course.course_structure_items c
 INNER JOIN course.module_external_links m ON m.structure_item_id = c.id
 WHERE c.id = $1 AND c.course_id = $2 AND c.kind = 'external_link'
-`, itemID, courseID).Scan(&title, &url, &prov, &externalID, &iconURL, &t)
+`, itemID, courseID).Scan(&title, &url, &prov, &externalID, &iconURL, &licenseSPDX, &attributionText, &oerProvider, &t)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return "", "", "", nil, nil, nil, nil
+		return "", "", "", nil, nil, nil, nil, nil, nil, nil
 	}
 	if err != nil {
-		return "", "", "", nil, nil, nil, err
+		return "", "", "", nil, nil, nil, nil, nil, nil, err
 	}
-	return title, url, prov, externalID, iconURL, &t, nil
+	return title, url, prov, externalID, iconURL, licenseSPDX, attributionText, oerProvider, &t, nil
+}
+
+// InsertOERMetadata sets OER attribution fields on an existing external link row.
+func InsertOERMetadata(
+	ctx context.Context, pool *pgxpool.Pool,
+	courseID, itemID uuid.UUID,
+	provider, url string,
+	externalID, licenseSPDX, attributionText *string,
+) (*time.Time, error) {
+	if pool == nil {
+		return nil, errors.New("db pool is nil")
+	}
+	var updated time.Time
+	err := pool.QueryRow(ctx, `
+UPDATE course.module_external_links m
+SET url = $3,
+    provider = $4,
+    external_id = $5,
+    license_spdx = $6,
+    attribution_text = $7,
+    oer_provider = $4,
+    updated_at = NOW()
+FROM course.course_structure_items c
+WHERE m.structure_item_id = c.id
+  AND c.id = $1
+  AND c.course_id = $2
+  AND c.kind = 'external_link'
+RETURNING m.updated_at
+`, itemID, courseID, url, provider, externalID, licenseSPDX, attributionText).Scan(&updated)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &updated, nil
 }
 
 func UpdateLink(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, url, provider string, externalID, iconURL *string) (*time.Time, error) {

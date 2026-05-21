@@ -129,13 +129,31 @@ VALUES ($1, '', '[]'::jsonb)
 
 // InsertExternalLinkUnderModule appends an external link row and module_external_links.url.
 func InsertExternalLinkUnderModule(ctx context.Context, pool *pgxpool.Pool, courseID, moduleID uuid.UUID, title, url string) (ItemRow, error) {
+	return InsertExternalLinkUnderModuleWithMeta(ctx, pool, courseID, moduleID, title, url, "url", nil, nil, nil, nil)
+}
+
+// InsertExternalLinkUnderModuleWithMeta creates an external link with optional OER/cloud metadata.
+func InsertExternalLinkUnderModuleWithMeta(
+	ctx context.Context, pool *pgxpool.Pool,
+	courseID, moduleID uuid.UUID,
+	title, url, provider string,
+	externalID, licenseSPDX, attributionText, oerProvider *string,
+) (ItemRow, error) {
 	t := strings.TrimSpace(title)
 	if t == "" {
 		return ItemRow{}, errors.New("coursestructure: external link title is required")
 	}
 	u := strings.TrimSpace(url)
+	prov := strings.TrimSpace(provider)
+	if prov == "" {
+		prov = "url"
+	}
 	return insertModuleChild(ctx, pool, courseID, moduleID, "external_link", t, func(tx pgx.Tx, itemID uuid.UUID) error {
-		_, err := tx.Exec(ctx, `INSERT INTO course.module_external_links (structure_item_id, url) VALUES ($1, $2)`, itemID, u)
+		_, err := tx.Exec(ctx, `
+INSERT INTO course.module_external_links (
+  structure_item_id, url, provider, external_id, license_spdx, attribution_text, oer_provider
+) VALUES ($1, $2, $3, $4, $5, $6, $7)
+`, itemID, u, prov, externalID, licenseSPDX, attributionText, oerProvider)
 		return err
 	})
 }

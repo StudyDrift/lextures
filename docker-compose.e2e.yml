@@ -49,6 +49,8 @@ services:
       FEATURE_AV_SCANNING: ${FEATURE_AV_SCANNING:-false}
       CLAMAV_ADDR: ${CLAMAV_ADDR:-clamav:3310}
       CLAMAV_STUB: ${CLAMAV_STUB:-true}
+      FEATURE_OER_LIBRARY: ${FEATURE_OER_LIBRARY:-true}
+      OER_STUB: ${OER_STUB:-true}
     ports:
       - "8080:8080"
     depends_on:
@@ -67,6 +69,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: http://localhost:8080
+        VITE_FEATURE_OER_LIBRARY: ${VITE_FEATURE_OER_LIBRARY:-true}
     ports:
       - "5173:80"
     depends_on:

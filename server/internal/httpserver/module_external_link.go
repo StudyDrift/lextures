@@ -16,13 +16,16 @@ import (
 )
 
 type moduleExternalLinkResponse struct {
-	ItemID     uuid.UUID `json:"itemId"`
-	Title      string    `json:"title"`
-	URL        string    `json:"url"`
-	Provider   string    `json:"provider"`
-	ExternalID *string   `json:"externalId"`
-	IconURL    *string   `json:"iconUrl"`
-	UpdatedAt  *time.Time `json:"updatedAt"`
+	ItemID          uuid.UUID  `json:"itemId"`
+	Title           string     `json:"title"`
+	URL             string     `json:"url"`
+	Provider        string     `json:"provider"`
+	ExternalID      *string    `json:"externalId"`
+	IconURL         *string    `json:"iconUrl"`
+	LicenseSPDX     *string    `json:"licenseSpdx"`
+	AttributionText *string    `json:"attributionText"`
+	OERProvider     *string    `json:"oerProvider"`
+	UpdatedAt       *time.Time `json:"updatedAt"`
 }
 
 // handleGetModuleExternalLink is GET /api/v1/courses/{course_code}/external-links/{item_id}.
@@ -74,7 +77,8 @@ func (d Deps) handleGetModuleExternalLink() http.HandlerFunc {
 				return
 			}
 		}
-		title, url, provider, externalID, iconURL, updatedAt, err := coursemoduleexternallinks.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
+		title, url, provider, externalID, iconURL, licenseSPDX, attributionText, oerProvider, updatedAt, err :=
+			coursemoduleexternallinks.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load external link.")
 			return
@@ -87,13 +91,16 @@ func (d Deps) handleGetModuleExternalLink() http.HandlerFunc {
 			provider = "url"
 		}
 		out := moduleExternalLinkResponse{
-			ItemID:     itemID,
-			Title:      title,
-			URL:        url,
-			Provider:   provider,
-			ExternalID: externalID,
-			IconURL:    iconURL,
-			UpdatedAt:  updatedAt,
+			ItemID:          itemID,
+			Title:           title,
+			URL:             url,
+			Provider:        provider,
+			ExternalID:      externalID,
+			IconURL:         iconURL,
+			LicenseSPDX:     licenseSPDX,
+			AttributionText: attributionText,
+			OERProvider:     oerProvider,
+			UpdatedAt:       updatedAt,
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
@@ -173,7 +180,7 @@ func (d Deps) handlePatchModuleExternalLink() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
-		title, _, _, _, _, _, err := coursemoduleexternallinks.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
+		title, _, _, _, _, _, _, _, _, err := coursemoduleexternallinks.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to reload external link.")
 			return

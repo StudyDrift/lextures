@@ -4,6 +4,7 @@ import { useOrgRoleCapabilities } from '../../hooks/use-org-role-capabilities'
 import {
   ArrowLeft,
   Bell,
+  BookOpen,
   Bot,
   Building2,
   CalendarRange,
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
+import { oerLibraryEnabled } from '../../lib/oer-api'
 import {
   PERM_RBAC_MANAGE,
   PERM_TENANT_ORG_ROLES_MANAGE,
@@ -145,6 +147,15 @@ export function SideNavSettingsLinks() {
               >
                 Cloud file pickers
               </SideNavLink>
+              {oerLibraryEnabled() && (
+                <SideNavLink
+                  to="/settings/oer-providers"
+                  className={() => (view === 'oer-providers' ? sideNavActiveClass : '')}
+                  icon={<BookOpen className="h-5 w-5" />}
+                >
+                  OER library
+                </SideNavLink>
+              )}
               <SideNavLink
                 to="/settings/platform"
                 className={() => (view === 'platform' ? sideNavActiveClass : '')}

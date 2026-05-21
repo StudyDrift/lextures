@@ -29,6 +29,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/assignments", d.handleCreateModuleAssignment())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/quizzes", d.handleCreateModuleQuiz())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/external-links", d.handleCreateModuleExternalLink())
+	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/oer-import", d.handlePostModuleOERImport())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/lti-links", d.handleCreateModuleLTILink())
 	r.Get("/api/v1/courses/{course_code}/external-links/{item_id}", d.handleGetModuleExternalLink())
 	r.Patch("/api/v1/courses/{course_code}/external-links/{item_id}", d.handlePatchModuleExternalLink())

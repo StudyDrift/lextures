@@ -4,7 +4,9 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 
 ARG VITE_API_URL=http://localhost:8080
+ARG VITE_FEATURE_OER_LIBRARY=false
 ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_FEATURE_OER_LIBRARY=$VITE_FEATURE_OER_LIBRARY
 
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci --ignore-scripts
