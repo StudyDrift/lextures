@@ -109,7 +109,7 @@ test.describe('External link module items', () => {
     )
 
     // Navigate directly to the external link item page (instructor view)
-    await page.goto(`/courses/${seededCourse.courseCode}/modules/${item.id}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/external-link/${item.id}`)
 
     // The page should show the link title
     await expect(page.getByRole('heading', { name: /my reading material/i })).toBeVisible({ timeout: 8000 })
@@ -132,7 +132,7 @@ test.describe('External link module items', () => {
 
     // Log in as student
     await injectToken(page, seededCourse.studentToken)
-    await page.goto(`/courses/${seededCourse.courseCode}/modules/${item.id}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/external-link/${item.id}`)
 
     // The page should show the title
     await expect(page.getByRole('heading', { name: /student reading/i })).toBeVisible({ timeout: 8000 })
@@ -153,7 +153,7 @@ test.describe('External link module items', () => {
       'https://example.com/original',
     )
 
-    await page.goto(`/courses/${seededCourse.courseCode}/modules/${item.id}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/external-link/${item.id}`)
     await expect(page.getByRole('heading', { name: /editable link/i })).toBeVisible({ timeout: 8000 })
 
     // The URL input should be visible to instructors
@@ -182,7 +182,7 @@ test.describe('External link module items', () => {
       'https://example.com/cloud',
     )
 
-    await page.goto(`/courses/${seededCourse.courseCode}/modules/${item.id}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/external-link/${item.id}`)
     await expect(page.getByRole('heading', { name: /cloud link test/i })).toBeVisible({ timeout: 8000 })
 
     // Cloud provider buttons should appear in the edit form
