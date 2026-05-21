@@ -95,8 +95,9 @@ func TestAdminStorageQuotasPut_ThenGetCourseUsage_Pg(t *testing.T) {
 	h := NewHandler(Deps{Pool: pool, JWTSigner: signer, StorageQuota: svc})
 	ctx := context.Background()
 
-	// Create a course.
-	courseCode := fmt.Sprintf("quota-test-%d", time.Now().UnixNano())
+	// Create a course using the required C-XXXXXX format (constraint courses_course_code_format).
+	suffix := fmt.Sprintf("%06X", time.Now().UnixNano()%0xFFFFFF)
+	courseCode := "C-" + suffix
 	var courseID uuid.UUID
 	if err := pool.QueryRow(ctx, `
 		INSERT INTO course.courses (course_code, title, created_by_user_id)
