@@ -4721,7 +4721,12 @@ export async function fetchCourseScopedRoles(courseCode: string): Promise<Course
 }
 
 /** Server: `user.user_audit` via POST `/course-context` (benign path for LMS state). */
-export type CourseContextKind = 'course_visit' | 'content_open' | 'content_leave'
+export type CourseContextKind =
+  | 'course_visit'
+  | 'content_open'
+  | 'content_leave'
+  | 'equation_inserted'
+  | 'equation_editor_open'
 
 export async function postCourseContext(
   courseCode: string,

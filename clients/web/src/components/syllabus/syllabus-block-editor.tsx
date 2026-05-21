@@ -22,7 +22,8 @@ import {
   useBlockEditor,
   type MarkdownEditKind,
 } from '../editor/block-editor'
-import { MathInsertPopover } from '../editor/math-insert-popover'
+import { EquationEditorProvider, useEquationEditor } from '../editor/equation-editor-context'
+import { isEquationEditorEnabled } from '../../lib/math'
 import { BookLoader } from '../quiz/book-loader'
 
 function newLocalId(): string {
@@ -40,6 +41,8 @@ type SyllabusBlockEditorProps = {
   disabled?: boolean
   /** When set, section toolbars can generate Markdown via the course setup model. */
   courseCode?: string
+  /** Content page / assignment structure item for equation audit events. */
+  structureItemId?: string
   /** Sidebar copy: syllabus vs module page / assignment body. */
   documentVariant?: 'syllabus' | 'page'
   /**
@@ -395,6 +398,7 @@ function SyllabusBlockEditorInner({
   onRequireSyllabusAcceptanceChange,
 }: SyllabusBlockEditorInnerProps) {
   const { selectedId, setSelectedId } = useBlockEditor()
+  const equationEditor = useEquationEditor()
   const [activeField, setActiveField] = useState<ActiveField | null>(null)
   const editorRefs = useRef<Record<string, Editor | null>>({})
   const [generateSectionId, setGenerateSectionId] = useState<string | null>(null)
@@ -404,8 +408,8 @@ function SyllabusBlockEditorInner({
   const generateInputRef = useRef<HTMLInputElement>(null)
   const toolbarImageInputRef = useRef<HTMLInputElement>(null)
   const pendingToolbarImageSectionRef = useRef<string | null>(null)
-  const [mathPopoverSectionId, setMathPopoverSectionId] = useState<string | null>(null)
   const mathToolbarAnchorRef = useRef<HTMLButtonElement | null>(null)
+  const equationEditorEnabled = isEquationEditorEnabled()
 
   const handleEditorChange = useCallback((sectionId: string, editor: Editor | null) => {
     editorRefs.current[sectionId] = editor
@@ -588,17 +592,22 @@ function SyllabusBlockEditorInner({
             <MarkdownFormatToolbar
               disabled={disabled || genBusy}
               onApply={(kind) => applyMarkdownForSection(section.id, kind)}
-              mathInsert={{
-                onOpen: () => {
-                  setSelectedId(section.id)
-                  setActiveField({ blockId: section.id, field: 'markdown' })
-                  editorRefs.current[section.id]?.chain().focus().run()
-                  setMathPopoverSectionId(section.id)
-                },
-                registerMathAnchor: (node) => {
-                  mathToolbarAnchorRef.current = node
-                },
-              }}
+              mathInsert={
+                equationEditorEnabled && equationEditor
+                  ? {
+                      onOpen: () => {
+                        setSelectedId(section.id)
+                        setActiveField({ blockId: section.id, field: 'markdown' })
+                        const ed = editorRefs.current[section.id]
+                        ed?.chain().focus().run()
+                        if (ed) equationEditor.openInsert(ed)
+                      },
+                      registerMathAnchor: (node) => {
+                        mathToolbarAnchorRef.current = node
+                      },
+                    }
+                  : undefined
+              }
               courseImage={
                 courseCode
                   ? {
@@ -786,6 +795,16 @@ function SyllabusBlockEditorInner({
                   uploadCourseImage={
                     courseCode ? (file) => uploadCourseFile(courseCode, file).then((r) => r.contentPath) : undefined
                   }
+                  onEquationSlash={
+                    equationEditorEnabled && equationEditor
+                      ? () => {
+                          setSelectedId(section.id)
+                          setActiveField({ blockId: section.id, field: 'markdown' })
+                          const ed = editorRefs.current[section.id]
+                          if (ed) equationEditor.openInsert(ed)
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </div>
@@ -793,12 +812,6 @@ function SyllabusBlockEditorInner({
         ))}
 
         <BlockInsertionRow onAdd={addSection} disabled={disabled} />
-        <MathInsertPopover
-          open={mathPopoverSectionId != null}
-          editor={mathPopoverSectionId ? editorRefs.current[mathPopoverSectionId] : null}
-          onClose={() => setMathPopoverSectionId(null)}
-          anchorRef={mathToolbarAnchorRef}
-        />
       </BlockCanvas>
     </BlockEditorShell>
   )
@@ -809,7 +822,13 @@ export function SyllabusBlockEditor(props: SyllabusBlockEditorProps) {
 
   return (
     <BlockEditorProvider disabled={props.disabled} validBlockIds={validBlockIds}>
-      <SyllabusBlockEditorInner {...props} />
+      <EquationEditorProvider
+        disabled={props.disabled}
+        courseCode={props.courseCode}
+        structureItemId={props.structureItemId}
+      >
+        <SyllabusBlockEditorInner {...props} />
+      </EquationEditorProvider>
     </BlockEditorProvider>
   )
 }

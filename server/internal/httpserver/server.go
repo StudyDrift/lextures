@@ -120,6 +120,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAVScanRoutes(r)
 	r.Post("/api/v1/xapi/statements", d.handlePostXAPIStatements())
 	d.registerLegalRoutes(r)
+	d.registerTrustRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { parseMathDelimitedText } from '../../components/math/math-plain-text-utils'
-import { renderKatexSafe } from '../math'
+import { isEquationEditorEnabled, latexAccessibleLabel, renderKatexSafe } from '../math'
 
 describe('parseMathDelimitedText', () => {
   it('splits inline and display math', () => {
@@ -35,5 +35,29 @@ describe('renderKatexSafe', () => {
     const r = renderKatexSafe(katex, '\\frac{a}{b}', false)
     expect(r.failed).toBe(false)
     expect(r.html).toContain('katex')
+  })
+
+  it('emits MathML in successful render output', async () => {
+    const katex = (await import('katex')).default
+    const r = renderKatexSafe(katex, '\\frac{a}{b}', false)
+    expect(r.failed).toBe(false)
+    expect(r.html).toMatch(/<math/i)
+  })
+})
+
+describe('isEquationEditorEnabled', () => {
+  it('defaults to enabled when math rendering is on', () => {
+    vi.stubEnv('VITE_MATH_RENDERING_ENABLED', 'true')
+    vi.stubEnv('VITE_FEATURE_EQUATION_EDITOR', '')
+    expect(isEquationEditorEnabled()).toBe(true)
+    vi.unstubAllEnvs()
+  })
+})
+
+describe('latexAccessibleLabel', () => {
+  it('describes display vs inline mode', () => {
+    expect(latexAccessibleLabel('\\theta', false)).toContain('Inline')
+    expect(latexAccessibleLabel('\\theta', true)).toContain('Display')
+    expect(latexAccessibleLabel('\\theta', false)).toContain('\\theta')
   })
 })
