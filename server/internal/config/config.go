@@ -208,6 +208,8 @@ type Config struct {
 	// OERStub uses embedded catalog data instead of live OER provider APIs (dev/e2e).
 	OERStub bool
 
+	// ItemAnalysisEnabled gates CTT item analysis statistics for quizzes (plan 9.4).
+	ItemAnalysisEnabled bool
 	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
 	StudentProgressEnabled bool
 }
@@ -372,6 +374,7 @@ func Load() Config {
 		OERLibraryEnabled: boolEnv("FEATURE_OER_LIBRARY"),
 		OERStub:           boolEnv("OER_STUB"),
 
+		ItemAnalysisEnabled:    boolEnv("FEATURE_ITEM_ANALYSIS"),
 		StudentProgressEnabled: boolEnv("FEATURE_STUDENT_PROGRESS"),
 	}
 }
