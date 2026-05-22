@@ -83,7 +83,7 @@ func deliverLRSJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, c
 	if err != nil {
 		return markLRSFailure(ctx, pool, job, now, 0, err.Error())
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	snip, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return lrsforwardjobs.MarkSent(ctx, pool, job.ID, now, resp.StatusCode, string(snip))
