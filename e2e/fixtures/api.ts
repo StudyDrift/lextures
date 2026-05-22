@@ -404,22 +404,6 @@ export async function apiPatchAssignment(
   }
 }
 
-export async function apiListEnrollments(
-  token: string,
-  courseCode: string,
-): Promise<Array<{ userId: string; role: string }>> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  )
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`List enrollments failed (${res.status}): ${body}`)
-  }
-  const raw = (await res.json()) as { enrollments: Array<{ userId: string; role: string }> }
-  return raw.enrollments
-}
-
 export async function apiPutGradingScheme(
   token: string,
   courseCode: string,
