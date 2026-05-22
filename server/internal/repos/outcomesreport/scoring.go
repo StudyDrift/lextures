@@ -34,7 +34,7 @@ func WeightedAvgForStudentLinks(links []courseoutcomes.OutcomeLinkWithItemRow, s
 		if !ok {
 			continue
 		}
-		w := link.OutcomeLinkRow.Weight
+		w := link.Weight
 		if w <= 0 || !isFiniteF32(w) {
 			w = 1
 		}
