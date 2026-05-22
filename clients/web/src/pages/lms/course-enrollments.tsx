@@ -7,7 +7,8 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
+import { studentProgressFeatureEnabled } from '../../lib/student-progress'
 import { Pencil, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
 import { EnrollmentRoleBadge } from './enrollment-role-badge'
 import { EnrollmentGroupsPanel } from './enrollment-groups-panel'
@@ -843,7 +844,18 @@ export default function CourseEnrollments() {
                     className="group border-b border-slate-100 last:border-0"
                   >
                     <td className="px-4 py-3 font-medium text-slate-900">
-                      {e.displayName?.trim() || '—'}
+                      {studentProgressFeatureEnabled() &&
+                      courseCode &&
+                      (er === 'student' || er === 'learner') ? (
+                        <Link
+                          to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
+                          className="text-indigo-700 hover:underline dark:text-indigo-300"
+                        >
+                          {e.displayName?.trim() || '—'}
+                        </Link>
+                      ) : (
+                        e.displayName?.trim() || '—'
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-700">
                       <EnrollmentRoleBadge courseRoleKey={e.role} roleDisplay={e.roleDisplay} />

@@ -9,7 +9,9 @@ import {
   useRef,
   useState,
 } from 'react'
+import { Link } from 'react-router-dom'
 import { createPortal } from 'react-dom'
+import { studentProgressFeatureEnabled } from '../../../lib/student-progress'
 import { ChevronDown, LayoutGrid, Lock, Thermometer, Users } from 'lucide-react'
 import { useUiDensity } from '../../../context/ui-density-context'
 import { EmptyState } from '../../../components/ui/empty-state'
@@ -46,6 +48,7 @@ export type GradebookColumn = {
 export type GradebookStudent = {
   id: string
   name: string
+  enrollmentId?: string
 }
 
 type GradebookGridProps = {
@@ -1338,7 +1341,18 @@ export function GradebookGrid({
                     title={student.name}
                     className={`sticky left-0 z-10 ${STICKY_NAME_WIDTH_CLASS} ${pad} truncate border-r border-slate-200 bg-slate-100 text-left font-medium text-slate-950 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`}
                   >
-                    {student.name}
+                    {studentProgressFeatureEnabled() &&
+                    courseCode &&
+                    student.enrollmentId ? (
+                      <Link
+                        to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(student.enrollmentId)}/progress`}
+                        className="text-indigo-700 hover:underline dark:text-indigo-300"
+                      >
+                        {student.name}
+                      </Link>
+                    ) : (
+                      student.name
+                    )}
                   </th>
                   <td
                     role="gridcell"
