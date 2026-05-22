@@ -53,6 +53,7 @@ type OutcomeLinkRow struct {
 	QuizQuestionID   string
 	MeasurementLevel string
 	IntensityLevel   string
+	Weight           float32
 	CreatedAt        time.Time
 }
 
@@ -92,7 +93,7 @@ ORDER BY sort_order ASC, created_at ASC
 
 func ListLinksForOutcome(ctx context.Context, pool *pgxpool.Pool, courseID, outcomeID uuid.UUID) ([]OutcomeLinkWithItemRow, error) {
 	rows, err := pool.Query(ctx, `
-SELECT l.id, l.outcome_id, l.sub_outcome_id, l.structure_item_id, l.target_kind, l.quiz_question_id, l.measurement_level, l.intensity_level, l.created_at, s.title AS item_title, s.kind AS item_kind
+SELECT l.id, l.outcome_id, l.sub_outcome_id, l.structure_item_id, l.target_kind, l.quiz_question_id, l.measurement_level, l.intensity_level, l.weight, l.created_at, s.title AS item_title, s.kind AS item_kind
 FROM course.course_outcome_links l
 INNER JOIN course.course_learning_outcomes o ON o.id = l.outcome_id
 INNER JOIN course.course_structure_items s ON s.id = l.structure_item_id
@@ -106,7 +107,7 @@ ORDER BY l.created_at ASC
 	var out []OutcomeLinkWithItemRow
 	for rows.Next() {
 		var r OutcomeLinkWithItemRow
-		if err := rows.Scan(&r.ID, &r.OutcomeID, &r.SubOutcomeID, &r.StructureItemID, &r.TargetKind, &r.QuizQuestionID, &r.MeasurementLevel, &r.IntensityLevel, &r.CreatedAt, &r.ItemTitle, &r.ItemKind); err != nil {
+		if err := rows.Scan(&r.ID, &r.OutcomeID, &r.SubOutcomeID, &r.StructureItemID, &r.TargetKind, &r.QuizQuestionID, &r.MeasurementLevel, &r.IntensityLevel, &r.Weight, &r.CreatedAt, &r.ItemTitle, &r.ItemKind); err != nil {
 			return nil, err
 		}
 		out = append(out, r)
@@ -126,6 +127,7 @@ SELECT
     l.quiz_question_id,
     l.measurement_level,
     l.intensity_level,
+    l.weight,
     l.created_at,
     s.title AS item_title,
     s.kind AS item_kind
@@ -142,7 +144,7 @@ ORDER BY l.outcome_id, l.created_at ASC
 	var out []OutcomeLinkWithItemRow
 	for rows.Next() {
 		var r OutcomeLinkWithItemRow
-		if err := rows.Scan(&r.ID, &r.OutcomeID, &r.SubOutcomeID, &r.StructureItemID, &r.TargetKind, &r.QuizQuestionID, &r.MeasurementLevel, &r.IntensityLevel, &r.CreatedAt, &r.ItemTitle, &r.ItemKind); err != nil {
+		if err := rows.Scan(&r.ID, &r.OutcomeID, &r.SubOutcomeID, &r.StructureItemID, &r.TargetKind, &r.QuizQuestionID, &r.MeasurementLevel, &r.IntensityLevel, &r.Weight, &r.CreatedAt, &r.ItemTitle, &r.ItemKind); err != nil {
 			return nil, err
 		}
 		out = append(out, r)
@@ -238,11 +240,11 @@ func DeleteOutcome(ctx context.Context, pool *pgxpool.Pool, courseID, outcomeID 
 func InsertLink(ctx context.Context, pool *pgxpool.Pool, outcomeID uuid.UUID, subOutcomeID *uuid.UUID, structureItemID uuid.UUID, targetKind, quizQuestionID, measurementLevel, intensityLevel string) (*OutcomeLinkRow, error) {
 	var r OutcomeLinkRow
 	err := pool.QueryRow(ctx, `
-INSERT INTO course.course_outcome_links (outcome_id, sub_outcome_id, structure_item_id, target_kind, quiz_question_id, measurement_level, intensity_level)
-VALUES ($1,$2,$3,$4,$5,$6,$7)
-RETURNING id, outcome_id, sub_outcome_id, structure_item_id, target_kind, quiz_question_id, measurement_level, intensity_level, created_at
+INSERT INTO course.course_outcome_links (outcome_id, sub_outcome_id, structure_item_id, target_kind, quiz_question_id, measurement_level, intensity_level, weight)
+VALUES ($1,$2,$3,$4,$5,$6,$7,1.0)
+RETURNING id, outcome_id, sub_outcome_id, structure_item_id, target_kind, quiz_question_id, measurement_level, intensity_level, weight, created_at
 `, outcomeID, subOutcomeID, structureItemID, targetKind, quizQuestionID, measurementLevel, intensityLevel).Scan(
-		&r.ID, &r.OutcomeID, &r.SubOutcomeID, &r.StructureItemID, &r.TargetKind, &r.QuizQuestionID, &r.MeasurementLevel, &r.IntensityLevel, &r.CreatedAt,
+		&r.ID, &r.OutcomeID, &r.SubOutcomeID, &r.StructureItemID, &r.TargetKind, &r.QuizQuestionID, &r.MeasurementLevel, &r.IntensityLevel, &r.Weight, &r.CreatedAt,
 	)
 	if err != nil {
 		// Uniqueness is enforced by partial unique indexes; map to a stable error for services.
