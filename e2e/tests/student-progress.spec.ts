@@ -44,9 +44,15 @@ test.describe('Student progress', () => {
     await page.goto(
       `/courses/${seededCourse.courseCode}/students/${enrollmentId}/progress`,
     )
+    await page.waitForResponse(
+      (res) =>
+        res.url().includes('/api/v1/platform/features') &&
+        res.request().method() === 'GET' &&
+        res.ok(),
+    )
 
     await expect(page.getByRole('heading', { name: /E2E Student/i })).toBeVisible({
-      timeout: 8000,
+      timeout: 15000,
     })
     await expect(page.getByText(/assignments submitted|modules viewed/i).first()).toBeVisible()
 
@@ -85,9 +91,15 @@ test.describe('Student progress', () => {
     expect(probe.ok()).toBeTruthy()
 
     await page.goto(`/courses/${seededCourse.courseCode}/students/${eid}/progress`)
+    await page.waitForResponse(
+      (res) =>
+        res.url().includes('/api/v1/platform/features') &&
+        res.request().method() === 'GET' &&
+        res.ok(),
+    )
 
     await expect(page.getByRole('heading', { name: /E2E Student/i })).toBeVisible({
-      timeout: 8000,
+      timeout: 15000,
     })
     await expect(page.getByRole('tab', { name: /notes/i })).toHaveCount(0)
   })

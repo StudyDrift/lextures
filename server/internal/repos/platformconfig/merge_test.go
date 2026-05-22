@@ -69,5 +69,3 @@ func TestMerge_H5PDefaultOff(t *testing.T) {
 }
 
 func ptr(s string) *string { return &s }
-
-func ptrBool(b bool) *bool { return &b }

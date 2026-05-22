@@ -9,7 +9,7 @@ type Defaults struct {
 	VirtualClassroomEnabled     bool
 }
 
-// DefaultDefaults matches prior env defaults (boolEnvDefaultTrue fields).
+// DefaultDefaults matches prior product defaults for unset platform boolean columns.
 func DefaultDefaults() Defaults {
 	return Defaults{
 		BlindGradingEnabled:         true,

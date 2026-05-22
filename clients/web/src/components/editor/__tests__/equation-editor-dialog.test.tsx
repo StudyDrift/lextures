@@ -1,14 +1,40 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { EquationEditorDialog } from '../equation-editor-dialog'
+import {
+  resetPlatformFeaturesSnapshot,
+  setPlatformFeaturesSnapshot,
+  type PlatformFeaturesSnapshot,
+} from '../../../lib/platform-features'
 
 vi.mock('../../../lib/courses-api', () => ({
   postCourseContext: vi.fn().mockResolvedValue(undefined),
 }))
 
+const baseFeatures: PlatformFeaturesSnapshot = {
+  studentProgressEnabled: false,
+  atRiskAlertsEnabled: false,
+  h5pEnabled: false,
+  oerLibraryEnabled: false,
+  itemAnalysisEnabled: false,
+  equationEditorEnabled: false,
+  storageQuotasEnabled: false,
+  avScanningEnabled: false,
+  virtualClassroomEnabled: true,
+  sessionManagementUiEnabled: false,
+}
+
 describe('EquationEditorDialog', () => {
+  afterEach(() => {
+    resetPlatformFeaturesSnapshot()
+    vi.unstubAllEnvs()
+  })
+
   it('shows syntax error for invalid LaTeX in preview', async () => {
+    vi.stubEnv('VITE_MATH_RENDERING_ENABLED', 'true')
+    setPlatformFeaturesSnapshot({ ...baseFeatures, equationEditorEnabled: true })
+
     const user = userEvent.setup()
     render(
       <EquationEditorDialog
@@ -30,7 +56,9 @@ describe('EquationEditorDialog', () => {
   })
 
   it('is hidden when equation editor feature is disabled', () => {
-    vi.stubEnv('VITE_FEATURE_EQUATION_EDITOR', 'false')
+    vi.stubEnv('VITE_MATH_RENDERING_ENABLED', 'true')
+    setPlatformFeaturesSnapshot({ ...baseFeatures, equationEditorEnabled: false })
+
     const { container } = render(
       <EquationEditorDialog
         open
@@ -44,6 +72,5 @@ describe('EquationEditorDialog', () => {
       />,
     )
     expect(container).toBeEmptyDOMElement()
-    vi.unstubAllEnvs()
   })
 })

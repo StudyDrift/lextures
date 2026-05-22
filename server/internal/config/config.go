@@ -436,19 +436,6 @@ func boolEnv(key string) bool {
 	}
 }
 
-func boolEnvDefaultTrue(key string) bool {
-	v, ok := os.LookupEnv(key)
-	if !ok {
-		return true
-	}
-	switch strings.ToLower(strings.TrimSpace(v)) {
-	case "", "1", "true", "yes", "on":
-		return true
-	default:
-		return false
-	}
-}
-
 func firstNonEmptyTrimmed(keys ...string) string {
 	for _, key := range keys {
 		v := strings.TrimSpace(os.Getenv(key))
