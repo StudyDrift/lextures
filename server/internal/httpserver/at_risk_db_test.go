@@ -87,14 +87,14 @@ LIMIT 1
 	}
 }
 
-func TestAtRisk_List_FeatureDisabled_Nodb(t *testing.T) {
+func TestAtRisk_List_FeatureDisabled_Unauthenticated401_Nodb(t *testing.T) {
 	d := Deps{Config: config.Config{AtRiskAlertsEnabled: false}}
 	h := NewHandler(d)
 	rr := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/api/v1/courses/abc/at-risk", nil)
 	h.ServeHTTP(rr, r)
-	if rr.Code != http.StatusNotFound {
-		t.Fatalf("status %d", rr.Code)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("status %d want 401", rr.Code)
 	}
 }
 

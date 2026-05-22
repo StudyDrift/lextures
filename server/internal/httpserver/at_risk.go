@@ -27,8 +27,12 @@ func (d Deps) atRiskFeatureEnabled(w http.ResponseWriter) bool {
 }
 
 func (d Deps) requireAtRiskInstructor(w http.ResponseWriter, r *http.Request) (string, uuid.UUID, uuid.UUID, bool) {
+	// Auth before feature gate so unauthenticated callers get 401, not 404.
 	courseCode, viewer, ok := d.requireCourseAccess(w, r)
 	if !ok {
+		return "", uuid.UUID{}, uuid.UUID{}, false
+	}
+	if !d.atRiskFeatureEnabled(w) {
 		return "", uuid.UUID{}, uuid.UUID{}, false
 	}
 	has, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":gradebook:view")
@@ -119,9 +123,6 @@ func (d Deps) handleCourseAtRiskList() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.atRiskFeatureEnabled(w) {
-			return
-		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
 		if !ok {
 			return
@@ -166,9 +167,6 @@ func (d Deps) handleCourseAtRiskPatch() http.HandlerFunc {
 		if r.Method != http.MethodPatch {
 			w.Header().Set("Allow", http.MethodPatch)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		if !d.atRiskFeatureEnabled(w) {
 			return
 		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
@@ -241,9 +239,6 @@ func (d Deps) handleEnrollmentAtRiskHistory() http.HandlerFunc {
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		if !d.atRiskFeatureEnabled(w) {
 			return
 		}
 		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
