@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -48,13 +49,14 @@ func TestStudentProgress_InstructorAndStudentAccess_Pg(t *testing.T) {
 	stuID, _ := uuid.Parse(stu.ID)
 	otherID, _ := uuid.Parse(other.ID)
 
+	// courses_course_code_format requires ^C-[A-Z0-9]{6}$
+	courseCode := "C-" + fmt.Sprintf("%06X", time.Now().UnixNano()%0xFFFFFF)
 	var courseID uuid.UUID
-	var courseCode string
 	err = pool.QueryRow(ctx, `
 INSERT INTO course.courses (title, course_code, org_id, created_by_user_id)
-VALUES ('Progress Test', 'prog' || substr(md5(random()::text), 1, 8), (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1), $1)
+VALUES ('Progress Test', $2, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1), $1)
 RETURNING id, course_code
-`, instID).Scan(&courseID, &courseCode)
+`, instID, courseCode).Scan(&courseID, &courseCode)
 	if err != nil {
 		t.Fatalf("course: %v", err)
 	}
