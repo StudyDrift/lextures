@@ -418,9 +418,11 @@ func (d Deps) handleAdminAtRiskConfigPut() http.HandlerFunc {
 		} else {
 			_ = d.Pool.QueryRow(r.Context(), `SELECT id FROM tenant.organizations ORDER BY created_at LIMIT 1`).Scan(&orgID)
 		}
-		cfg := atrisk.DefaultConfig(orgID)
-		existing, _ := atrisk.LoadEffective(r.Context(), d.Pool, orgID)
-		cfg = existing
+		cfg, err := atrisk.LoadEffective(r.Context(), d.Pool, orgID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load config.")
+			return
+		}
 		if b.Threshold != nil {
 			cfg.Threshold = *b.Threshold
 		}
