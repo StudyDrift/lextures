@@ -108,7 +108,9 @@ ORDER BY COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) ASC
 	}
 
 	if len(concepts) == 0 || len(enrollments) == 0 {
-		metas := append([]ConceptMeta(nil), concepts...)
+		// Use a non-nil empty slice so JSON encodes as [] not null.
+		metas := make([]ConceptMeta, 0, len(concepts))
+		metas = append(metas, concepts...)
 		return &HeatmapResult{
 			Concepts: metas,
 			Rows:     []HeatmapRow{},

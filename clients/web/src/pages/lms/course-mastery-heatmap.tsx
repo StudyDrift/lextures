@@ -137,7 +137,7 @@ export default function CourseMasteryHeatmap() {
     }
   }
 
-  const hasData = result && result.concepts.length > 0 && result.rows.length > 0
+  const hasData = Boolean(result && result.concepts?.length && result.rows?.length)
 
   return (
     <LmsPage
