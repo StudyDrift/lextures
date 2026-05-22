@@ -45,7 +45,7 @@ test.describe('Item Analysis — UI', () => {
       seededCourse.courseCode,
       seededCourse.moduleId,
     )
-    await page.goto(`/courses/${seededCourse.courseCode}/quizzes/${itemId}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/quiz/${itemId}`)
     await expect(page.getByRole('heading', { name: /item analysis/i })).toBeVisible({ timeout: 10000 })
   })
 
@@ -58,7 +58,7 @@ test.describe('Item Analysis — UI', () => {
       seededCourse.courseCode,
       seededCourse.moduleId,
     )
-    await page.goto(`/courses/${seededCourse.courseCode}/quizzes/${itemId}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/quiz/${itemId}`)
     // Wait for the panel to load
     await expect(page.getByRole('heading', { name: /item analysis/i })).toBeVisible({ timeout: 10000 })
     // Expect the insufficient-data message (no responses yet)
@@ -74,7 +74,7 @@ test.describe('Item Analysis — UI', () => {
       seededCourse.moduleId,
     )
     await injectToken(page, seededCourse.studentToken)
-    await page.goto(`/courses/${seededCourse.courseCode}/quizzes/${itemId}`)
+    await page.goto(`/courses/${seededCourse.courseCode}/modules/quiz/${itemId}`)
     // Students should not see the item analysis panel
     await expect(page.getByRole('heading', { name: /item analysis/i })).not.toBeVisible({ timeout: 5000 })
   })
