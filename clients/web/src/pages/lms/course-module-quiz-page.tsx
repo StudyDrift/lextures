@@ -58,6 +58,7 @@ import {
 } from './course-module-quiz-utils'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
+import { QuizItemAnalysisPanel } from '../../components/quiz/quiz-item-analysis-panel'
 
 function QuestionTypeDropdown({
   value,
@@ -1381,6 +1382,10 @@ export default function CourseModuleQuizPage() {
               ) : null}
             </aside>
           </div>
+        )}
+
+        {canEdit && !loading && !loadError && !editingContent && courseCode && itemId && (
+          <QuizItemAnalysisPanel courseCode={courseCode} itemId={itemId} />
         )}
       </div>
 

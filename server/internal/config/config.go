@@ -204,6 +204,9 @@ type Config struct {
 	OERLibraryEnabled bool
 	// OERStub uses embedded catalog data instead of live OER provider APIs (dev/e2e).
 	OERStub bool
+
+	// ItemAnalysisEnabled gates CTT item analysis statistics for quizzes (plan 9.4).
+	ItemAnalysisEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -363,6 +366,8 @@ func Load() Config {
 
 		OERLibraryEnabled: boolEnv("FEATURE_OER_LIBRARY"),
 		OERStub:           boolEnv("OER_STUB"),
+
+		ItemAnalysisEnabled: boolEnv("FEATURE_ITEM_ANALYSIS"),
 	}
 }
 

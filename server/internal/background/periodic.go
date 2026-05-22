@@ -8,11 +8,13 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/config"
+	repoitemanalysis "github.com/lextures/lextures/server/internal/repos/itemanalysis"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/terms"
-	"github.com/lextures/lextures/server/internal/service/filestorage"
-	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
 	"github.com/lextures/lextures/server/internal/service/clamav"
+	"github.com/lextures/lextures/server/internal/service/filestorage"
+	"github.com/lextures/lextures/server/internal/service/itemanalysis"
+	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
 	"github.com/lextures/lextures/server/internal/workers/h5pextract"
@@ -103,6 +105,13 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		slog.Info("auto-captioning worker started", "backend", string(backend))
 	}
 
+	if cfg.ItemAnalysisEnabled {
+		go runEvery(ctx, time.Minute, func() {
+			sweepItemAnalysis(context.Background(), pool, time.Now().UTC())
+		})
+		slog.Info("item analysis background sweep started")
+	}
+
 	if cfg.H5PEnabled && storage != nil {
 		h5pWorker := h5pextract.New(pool, storage)
 		go runEvery(ctx, 15*time.Second, func() {
@@ -141,6 +150,21 @@ func runEvery(ctx context.Context, d time.Duration, fn func()) {
 			return
 		case <-t.C:
 			fn()
+		}
+	}
+}
+
+func sweepItemAnalysis(ctx context.Context, pool *pgxpool.Pool, now time.Time) {
+	ids, err := repoitemanalysis.ListStaleQuizzes(ctx, pool, now, itemanalysis.MinResponses, 20, 6*time.Hour)
+	if err != nil {
+		slog.Warn("item analysis sweep: list stale quizzes failed", "err", err)
+		return
+	}
+	for _, id := range ids {
+		if _, err := itemanalysis.Compute(ctx, pool, id); err != nil {
+			slog.Warn("item analysis sweep: compute failed", "quiz_id", id, "err", err)
+		} else {
+			slog.Info("item analysis sweep: computed stats", "quiz_id", id)
 		}
 	}
 }
