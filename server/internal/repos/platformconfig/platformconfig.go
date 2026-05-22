@@ -57,8 +57,10 @@ type Row struct {
 	OERStub                    *bool
 	ItemAnalysisEnabled        *bool
 	StudentProgressEnabled     *bool
+	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
 	ReportExportEnabled        *bool
+	XAPIEmissionEnabled        *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -116,8 +118,10 @@ type Write struct {
 	OERStub                    *bool
 	ItemAnalysisEnabled        *bool
 	StudentProgressEnabled     *bool
+	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
 	ReportExportEnabled        *bool
+	XAPIEmissionEnabled        *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -173,8 +177,10 @@ SELECT
 	oer_stub,
 	item_analysis_enabled,
 	student_progress_enabled,
+	outcomes_report_enabled,
 	equation_editor_enabled,
 	report_export_enabled,
+	xapi_emission_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -225,8 +231,10 @@ WHERE id = 1
 		&r.OERStub,
 		&r.ItemAnalysisEnabled,
 		&r.StudentProgressEnabled,
+		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
 		&r.ReportExportEnabled,
+		&r.XAPIEmissionEnabled,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -317,8 +325,10 @@ INSERT INTO settings.platform_app_settings (
 	oer_stub,
 	item_analysis_enabled,
 	student_progress_enabled,
+	outcomes_report_enabled,
 	equation_editor_enabled,
 	report_export_enabled,
+	xapi_emission_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -331,7 +341,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -374,8 +384,10 @@ ON CONFLICT (id) DO UPDATE SET
 	oer_stub = COALESCE(EXCLUDED.oer_stub, settings.platform_app_settings.oer_stub),
 	item_analysis_enabled = COALESCE(EXCLUDED.item_analysis_enabled, settings.platform_app_settings.item_analysis_enabled),
 	student_progress_enabled = COALESCE(EXCLUDED.student_progress_enabled, settings.platform_app_settings.student_progress_enabled),
+	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
+	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -424,8 +436,10 @@ ON CONFLICT (id) DO UPDATE SET
 		w.OERStub,
 		w.ItemAnalysisEnabled,
 		w.StudentProgressEnabled,
+		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
 		w.ReportExportEnabled,
+		w.XAPIEmissionEnabled,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

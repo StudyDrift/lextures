@@ -80,6 +80,8 @@ type platformSettingsJSON struct {
 	OERStub                    bool `json:"oerStub"`
 	ItemAnalysisEnabled        bool `json:"itemAnalysisEnabled"`
 	StudentProgressEnabled     bool `json:"studentProgressEnabled"`
+	OutcomesReportEnabled      bool `json:"outcomesReportEnabled"`
+	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 
@@ -193,6 +195,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			OERStub:                     merged.OERStub,
 			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
+			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
+			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
@@ -279,6 +283,8 @@ type putPlatformBody struct {
 	OERStub                    *bool `json:"oerStub"`
 	ItemAnalysisEnabled        *bool `json:"itemAnalysisEnabled"`
 	StudentProgressEnabled     *bool `json:"studentProgressEnabled"`
+	OutcomesReportEnabled      *bool `json:"outcomesReportEnabled"`
+	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 
@@ -526,8 +532,10 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("oerstub", body.OERStub, func(v bool) { wr.OERStub = &v })
 		setBool("itemanalysisenabled", body.ItemAnalysisEnabled, func(v bool) { wr.ItemAnalysisEnabled = &v })
 		setBool("studentprogressenabled", body.StudentProgressEnabled, func(v bool) { wr.StudentProgressEnabled = &v })
+		setBool("outcomesreportenabled", body.OutcomesReportEnabled, func(v bool) { wr.OutcomesReportEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
+		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -595,6 +603,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			OERStub:                     merged.OERStub,
 			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
+			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
+			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			MFAEnabled:                  merged.MFAEnabled,

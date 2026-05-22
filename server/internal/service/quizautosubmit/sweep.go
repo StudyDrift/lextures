@@ -8,7 +8,9 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
+	"github.com/lextures/lextures/server/internal/service/learningevents"
 )
 
 const defaultSweepBatch = 200
@@ -16,7 +18,7 @@ const defaultSweepBatch = 200
 // SweepExpiredAttempts finalizes timed quiz attempts past deadline (Rust `quiz_auto_submit::sweep_expired_attempts`).
 // Non-adaptive mastery updates from `learner_state::apply_mastery_from_saved_responses` are not yet ported in Go;
 // scores are still finalized so learners receive credit.
-func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, now time.Time, limit int64) (int, error) {
+func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, now time.Time, limit int64) (int, error) {
 	if pool == nil {
 		return 0, nil
 	}
@@ -60,6 +62,7 @@ func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, now time.Time
 		if ok {
 			n++
 			slog.Info("quiz attempt auto-submitted after deadline", "attempt_id", id)
+			learningevents.EmitQuizGradedAsync(pool, cfg, id)
 		}
 	}
 	return n, nil

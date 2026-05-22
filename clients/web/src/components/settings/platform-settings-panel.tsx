@@ -26,11 +26,13 @@ export type PlatformSettingsPayload = {
   oneRosterEnabled: boolean
   scimEnabled: boolean
   studentProgressEnabled: boolean
+  outcomesReportEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean
   oerLibraryEnabled: boolean
   oerStub: boolean
   itemAnalysisEnabled: boolean
+  xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -104,11 +106,13 @@ function emptyForm(): PlatformSettingsPayload {
     oneRosterEnabled: false,
     scimEnabled: false,
     studentProgressEnabled: false,
+    outcomesReportEnabled: false,
     atRiskAlertsEnabled: false,
     h5pEnabled: false,
     oerLibraryEnabled: false,
     oerStub: false,
     itemAnalysisEnabled: false,
+    xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -320,6 +324,9 @@ export function PlatformSettingsPanel() {
       maybe('studentProgressEnabled', baseline.studentProgressEnabled, form.studentProgressEnabled, () => {
         body.studentProgressEnabled = form.studentProgressEnabled
       })
+      maybe('outcomesReportEnabled', baseline.outcomesReportEnabled, form.outcomesReportEnabled, () => {
+        body.outcomesReportEnabled = form.outcomesReportEnabled
+      })
       maybe('atRiskAlertsEnabled', baseline.atRiskAlertsEnabled, form.atRiskAlertsEnabled, () => {
         body.atRiskAlertsEnabled = form.atRiskAlertsEnabled
       })
@@ -334,6 +341,9 @@ export function PlatformSettingsPanel() {
       })
       maybe('itemAnalysisEnabled', baseline.itemAnalysisEnabled, form.itemAnalysisEnabled, () => {
         body.itemAnalysisEnabled = form.itemAnalysisEnabled
+      })
+      maybe('xapiEmissionEnabled', baseline.xapiEmissionEnabled, form.xapiEmissionEnabled, () => {
+        body.xapiEmissionEnabled = form.xapiEmissionEnabled
       })
       maybe('equationEditorEnabled', baseline.equationEditorEnabled, form.equationEditorEnabled, () => {
         body.equationEditorEnabled = form.equationEditorEnabled
@@ -685,6 +695,12 @@ export function PlatformSettingsPanel() {
               onChange={(v) => update('studentProgressEnabled', v)}
             />
             <FlagRow
+              label="Course outcomes report"
+              src="default"
+              checked={form.outcomesReportEnabled}
+              onChange={(v) => update('outcomesReportEnabled', v)}
+            />
+            <FlagRow
               label="At-risk early-warning alerts"
               src="default"
               checked={form.atRiskAlertsEnabled}
@@ -713,6 +729,12 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.itemAnalysisEnabled}
               onChange={(v) => update('itemAnalysisEnabled', v)}
+            />
+            <FlagRow
+              label="xAPI / Caliper emission"
+              src="default"
+              checked={form.xapiEmissionEnabled}
+              onChange={(v) => update('xapiEmissionEnabled', v)}
             />
             <FlagRow
               label="Equation editor"

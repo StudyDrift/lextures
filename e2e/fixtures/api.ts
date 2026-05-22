@@ -628,6 +628,138 @@ export async function apiGetCourseOutcomes(
   return res.json() as Promise<{ enrolledLearners: number; outcomes: ApiCourseOutcome[] }>
 }
 
+export async function apiCreateOutcome(
+  token: string,
+  courseCode: string,
+  title: string,
+  description = '',
+): Promise<{ id: string; title: string }> {
+  const res = await fetch(`${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/outcomes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ title, description }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Create outcome failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ id: string; title: string }>
+}
+
+export async function apiCreateOutcomeLink(
+  token: string,
+  courseCode: string,
+  outcomeId: string,
+  payload: { structureItemId: string; targetKind: 'assignment' | 'quiz' },
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/outcomes/${encodeURIComponent(outcomeId)}/links`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        structureItemId: payload.structureItemId,
+        targetKind: payload.targetKind,
+      }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Create outcome link failed (${res.status}): ${body}`)
+  }
+}
+
+export interface ApiEnrollmentRow {
+  id: string
+  userId: string
+  role: string
+}
+
+export async function apiGetCourseEnrollments(
+  token: string,
+  courseCode: string,
+): Promise<ApiEnrollmentRow[]> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Get enrollments failed (${res.status}): ${body}`)
+  }
+  const raw = (await res.json()) as { enrollments: ApiEnrollmentRow[] }
+  return raw.enrollments
+}
+
+export interface ApiOutcomesReportOutcome {
+  outcomeId: string
+  title: string
+  nStudents: number
+  nAssessed: number
+  pctMet: number
+  pctNotMet: number
+  noAlignments: boolean
+  improvementNote: string
+}
+
+export async function apiGetOutcomesReport(
+  token: string,
+  courseCode: string,
+): Promise<{ outcomes: ApiOutcomesReportOutcome[]; masteryThreshold: number }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/analytics/outcomes`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Get outcomes report failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ outcomes: ApiOutcomesReportOutcome[]; masteryThreshold: number }>
+}
+
+export async function apiRefreshOutcomesReport(token: string, courseCode: string): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/analytics/outcomes/refresh`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Refresh outcomes report failed (${res.status}): ${body}`)
+  }
+}
+
+export async function apiPostOutcomeImprovementNote(
+  token: string,
+  courseCode: string,
+  outcomeId: string,
+  noteText: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/outcomes/${encodeURIComponent(outcomeId)}/notes`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ noteText }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Save outcome note failed (${res.status}): ${body}`)
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Collaborative documents
 // ---------------------------------------------------------------------------

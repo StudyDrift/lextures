@@ -212,12 +212,18 @@ type Config struct {
 	ItemAnalysisEnabled bool
 	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
 	StudentProgressEnabled bool
+	// OutcomesReportEnabled gates course-level outcomes achievement reporting (plan 9.5).
+	OutcomesReportEnabled bool
 
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool
 
 	// ReportExportEnabled gates PDF export and scheduled report delivery (plan 9.8).
 	ReportExportEnabled bool
+	// XAPIEmissionEnabled gates Caliper/xAPI learning event storage and LRS forwarding (plan 9.6).
+	XAPIEmissionEnabled bool
+	// LRSAnonymizeActors hashes actor mbox emails in emitted xAPI statements (plan 9.6 AC-4).
+	LRSAnonymizeActors bool
 }
 
 // Load reads configuration from the environment.
@@ -347,6 +353,9 @@ func Load() Config {
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
 
 		ClamAVAddr: stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
+
+		XAPIEmissionEnabled: boolEnv("XAPI_EMISSION_ENABLED") || boolEnv("FEATURE_XAPI_EMISSION"),
+		LRSAnonymizeActors:  boolEnv("LRS_ANONYMIZE_ACTORS"),
 	}
 }
 

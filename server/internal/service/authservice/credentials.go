@@ -29,6 +29,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/passwordreset"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/service/learningevents"
 
 	"github.com/lextures/lextures/server/internal/auth/hibp"
 )
@@ -139,7 +140,12 @@ func Login(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, cfg co
 	if err != nil || !ok {
 		return AuthResponse{}, ErrInvalidCredentials
 	}
-	return issueAuthAfterCredentialSuccess(ctx, pool, jwt, cfg, row, MergeClientMeta(req.Client, "password"))
+	res, err := issueAuthAfterCredentialSuccess(ctx, pool, jwt, cfg, row, MergeClientMeta(req.Client, "password"))
+	if err != nil {
+		return AuthResponse{}, err
+	}
+	learningevents.EmitLoginAsync(pool, cfg, row)
+	return res, nil
 }
 
 // Signup creates a password account. The first human user receives Global Admin only when

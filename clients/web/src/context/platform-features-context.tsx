@@ -20,6 +20,8 @@ export type PlatformFeatures = {
   h5pEnabled: boolean
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
+  outcomesReportEnabled: boolean
+  xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -35,6 +37,8 @@ const defaultFeatures: PlatformFeatures = {
   h5pEnabled: false,
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
+  outcomesReportEnabled: false,
+  xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -55,6 +59,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     h5pEnabled: false,
     oerLibraryEnabled: false,
     itemAnalysisEnabled: false,
+    outcomesReportEnabled: false,
+    xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -76,6 +82,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           h5pEnabled: data.h5pEnabled === true,
           oerLibraryEnabled: data.oerLibraryEnabled === true,
           itemAnalysisEnabled: data.itemAnalysisEnabled === true,
+          outcomesReportEnabled: data.outcomesReportEnabled === true,
+          xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,

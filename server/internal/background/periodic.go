@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/clamav"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/itemanalysis"
+	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
@@ -112,6 +113,13 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		slog.Info("item analysis background sweep started")
 	}
 
+	if cfg.XAPIEmissionEnabled {
+		go runEvery(ctx, 15*time.Second, func() {
+			learningevents.SweepForwardJobs(context.Background(), pool, cfg, time.Now().UTC())
+		})
+		slog.Info("xAPI LRS forwarding worker started")
+	}
+
 	if cfg.H5PEnabled && storage != nil {
 		h5pWorker := h5pextract.New(pool, storage)
 		go runEvery(ctx, 15*time.Second, func() {
@@ -180,8 +188,8 @@ func sweepItemAnalysis(ctx context.Context, pool *pgxpool.Pool, now time.Time) {
 	}
 }
 
-func sweepExpiredQuizAttempts(ctx context.Context, pool *pgxpool.Pool, _ config.Config, now time.Time) {
-	n, err := quizautosubmit.SweepExpiredAttempts(ctx, pool, now, 200)
+func sweepExpiredQuizAttempts(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, now time.Time) {
+	n, err := quizautosubmit.SweepExpiredAttempts(ctx, pool, cfg, now, 200)
 	if err != nil {
 		slog.Warn("auto-submit sweep failed", "err", err)
 		return
