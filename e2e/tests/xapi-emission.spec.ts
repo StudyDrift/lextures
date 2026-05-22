@@ -7,8 +7,38 @@
  *   [x] Actor hash hides email when LRS_ANONYMIZE_ACTORS is enabled (unit-tested server-side)
  */
 import { test, expect } from '../fixtures/test.js'
+import { apiCreateContentPage } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
+
+async function postContentOpen(
+  seededCourse: {
+    courseCode: string
+    studentToken: string
+    instructorToken: string
+    moduleId: string
+  },
+): Promise<string> {
+  const page = await apiCreateContentPage(
+    seededCourse.instructorToken,
+    seededCourse.courseCode,
+    seededCourse.moduleId,
+    'E2E Content Page',
+  )
+  const ctxRes = await fetch(
+    `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/course-context`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${seededCourse.studentToken}`,
+      },
+      body: JSON.stringify({ kind: 'content_open', structureItemId: page.id }),
+    },
+  )
+  expect(ctxRes.status).toBe(204)
+  return page.id
+}
 
 test('GET course events: unauthenticated returns 401', async () => {
   const res = await fetch(`${API_BASE}/api/v1/courses/demo/events`)
@@ -24,19 +54,7 @@ test('GET course events: student returns 403', async ({ seededCourse }) => {
 })
 
 test('Event log: content_open appears for instructor', async ({ seededCourse }) => {
-  const pageId = seededCourse.contentPageId
-  const ctxRes = await fetch(
-    `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/course-context`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${seededCourse.studentToken}`,
-      },
-      body: JSON.stringify({ kind: 'content_open', structureItemId: pageId }),
-    },
-  )
-  expect(ctxRes.status).toBe(204)
+  await postContentOpen(seededCourse)
 
   await expect
     .poll(async () => {
@@ -63,20 +81,7 @@ test('Event log: content_open appears for instructor', async ({ seededCourse }) 
 })
 
 test('Event log UI: instructor sees table row', async ({ coursePage: page, seededCourse }) => {
-  await fetch(
-    `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/course-context`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${seededCourse.studentToken}`,
-      },
-      body: JSON.stringify({
-        kind: 'content_open',
-        structureItemId: seededCourse.contentPageId,
-      }),
-    },
-  )
+  await postContentOpen(seededCourse)
 
   await page.goto(`/courses/${seededCourse.courseCode}/event-log`)
   await expect(page.getByRole('heading', { name: 'Event log', exact: true })).toBeVisible({
