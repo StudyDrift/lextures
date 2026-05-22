@@ -108,10 +108,7 @@ ORDER BY COALESCE(NULLIF(TRIM(u.display_name), ''), u.email) ASC
 	}
 
 	if len(concepts) == 0 || len(enrollments) == 0 {
-		metas := make([]ConceptMeta, 0, len(concepts))
-		for _, c := range concepts {
-			metas = append(metas, c)
-		}
+		metas := append([]ConceptMeta(nil), concepts...)
 		return &HeatmapResult{
 			Concepts: metas,
 			Rows:     []HeatmapRow{},
@@ -173,9 +170,7 @@ WHERE c.course_id = $1 AND lcs.user_id = ANY($2::uuid[])
 
 	// 4. Build concept index and summary accumulators.
 	conceptMetas := make([]ConceptMeta, len(concepts))
-	for i, c := range concepts {
-		conceptMetas[i] = c
-	}
+	copy(conceptMetas, concepts)
 
 	type summaryAccum struct {
 		total    float64
@@ -333,9 +328,7 @@ WHERE id = $1 AND course_id = $2 AND active = true
 	}
 
 	conceptMetas := make([]ConceptMeta, len(concepts))
-	for i, c := range concepts {
-		conceptMetas[i] = c
-	}
+	copy(conceptMetas, concepts)
 
 	rows, err := pool.Query(ctx, `
 SELECT h.concept_id, h.mastery_score, h.state_updated_at
