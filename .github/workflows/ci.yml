@@ -209,6 +209,7 @@ jobs:
         working-directory: clients/web
         env:
           VITE_API_URL: http://localhost:8080
+          VITE_FEATURE_STUDENT_PROGRESS: "true"
         run: |
           npm ci
           npm run build

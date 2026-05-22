@@ -172,6 +172,29 @@ export async function apiEnroll(
   }
 }
 
+export type EnrollmentRow = {
+  id: string
+  userId: string
+  displayName?: string | null
+  role: string
+}
+
+export async function apiListEnrollments(
+  token: string,
+  courseCode: string,
+): Promise<EnrollmentRow[]> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`List enrollments failed (${res.status}): ${body}`)
+  }
+  const data = (await res.json()) as { enrollments?: EnrollmentRow[] }
+  return data.enrollments ?? []
+}
+
 export async function apiGetFeedChannels(
   token: string,
   courseCode: string,
