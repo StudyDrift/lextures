@@ -6,6 +6,7 @@ export type PlatformFeaturesSnapshot = {
   h5pEnabled: boolean
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
+  outcomesReportEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
@@ -20,6 +21,7 @@ const defaults: PlatformFeaturesSnapshot = {
   h5pEnabled: false,
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
+  outcomesReportEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
@@ -67,6 +69,10 @@ export function oerLibraryEnabled(): boolean {
 
 export function equationEditorFeatureEnabled(): boolean {
   return loaded && snapshot.equationEditorEnabled
+}
+
+export function outcomesReportFeatureEnabled(): boolean {
+  return loaded && snapshot.outcomesReportEnabled
 }
 
 export function xapiEmissionFeatureEnabled(): boolean {

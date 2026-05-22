@@ -55,6 +55,7 @@ describe('isEquationEditorEnabled', () => {
       h5pEnabled: false,
       oerLibraryEnabled: false,
       itemAnalysisEnabled: false,
+      outcomesReportEnabled: false,
       xapiEmissionEnabled: false,
       equationEditorEnabled: true,
       storageQuotasEnabled: false,

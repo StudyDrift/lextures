@@ -146,4 +146,9 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/analytics/mastery-heatmap/concepts/{concept_id}", d.handleCourseMasteryHeatmapConceptDrillDown())
 	r.Get("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/mastery", d.handleCourseEnrollmentMastery())
 	r.Post("/api/v1/courses/{course_code}/analytics/mastery-heatmap/refresh", d.handleCourseMasteryHeatmapRefresh())
+	// 9.5 Course-level outcomes reporting
+	r.Get("/api/v1/courses/{course_code}/analytics/outcomes", d.handleCourseOutcomesAnalyticsGet())
+	r.Put("/api/v1/courses/{course_code}/analytics/outcomes/settings", d.handleCourseOutcomesAnalyticsSettingsPut())
+	r.Post("/api/v1/courses/{course_code}/analytics/outcomes/refresh", d.handleCourseOutcomesAnalyticsRefreshPost())
+	r.Put("/api/v1/courses/{course_code}/outcomes/{outcome_id}/notes", d.handleCourseOutcomeImprovementNotePut())
 }
