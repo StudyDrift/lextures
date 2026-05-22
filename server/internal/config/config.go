@@ -213,6 +213,9 @@ type Config struct {
 	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
 	StudentProgressEnabled bool
 
+	// EngagementTrackingEnabled gates engagement metrics collection and reporting (plan 9.7).
+	EngagementTrackingEnabled bool
+
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool
 }

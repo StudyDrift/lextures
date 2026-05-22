@@ -80,6 +80,7 @@ type platformSettingsJSON struct {
 	OERStub                    bool `json:"oerStub"`
 	ItemAnalysisEnabled        bool `json:"itemAnalysisEnabled"`
 	StudentProgressEnabled     bool `json:"studentProgressEnabled"`
+	EngagementTrackingEnabled  bool `json:"engagementTrackingEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
@@ -192,6 +193,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			OERStub:                     merged.OERStub,
 			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
+			EngagementTrackingEnabled:   merged.EngagementTrackingEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
@@ -277,6 +279,7 @@ type putPlatformBody struct {
 	OERStub                    *bool `json:"oerStub"`
 	ItemAnalysisEnabled        *bool `json:"itemAnalysisEnabled"`
 	StudentProgressEnabled     *bool `json:"studentProgressEnabled"`
+	EngagementTrackingEnabled  *bool `json:"engagementTrackingEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
@@ -523,6 +526,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("oerstub", body.OERStub, func(v bool) { wr.OERStub = &v })
 		setBool("itemanalysisenabled", body.ItemAnalysisEnabled, func(v bool) { wr.ItemAnalysisEnabled = &v })
 		setBool("studentprogressenabled", body.StudentProgressEnabled, func(v bool) { wr.StudentProgressEnabled = &v })
+		setBool("engagementtrackingenabled", body.EngagementTrackingEnabled, func(v bool) { wr.EngagementTrackingEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
@@ -591,6 +595,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			OERStub:                     merged.OERStub,
 			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
+			EngagementTrackingEnabled:   merged.EngagementTrackingEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,

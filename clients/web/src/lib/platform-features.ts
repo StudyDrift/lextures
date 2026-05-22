@@ -6,6 +6,7 @@ export type PlatformFeaturesSnapshot = {
   h5pEnabled: boolean
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
+  engagementTrackingEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -19,6 +20,7 @@ const defaults: PlatformFeaturesSnapshot = {
   h5pEnabled: false,
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
+  engagementTrackingEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -65,4 +67,8 @@ export function oerLibraryEnabled(): boolean {
 
 export function equationEditorFeatureEnabled(): boolean {
   return loaded && snapshot.equationEditorEnabled
+}
+
+export function engagementTrackingFeatureEnabled(): boolean {
+  return loaded && snapshot.engagementTrackingEnabled
 }
