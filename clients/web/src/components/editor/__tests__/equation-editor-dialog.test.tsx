@@ -18,6 +18,8 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   h5pEnabled: false,
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
+  outcomesReportEnabled: false,
+  engagementTrackingEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,

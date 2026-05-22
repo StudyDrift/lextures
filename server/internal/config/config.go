@@ -212,6 +212,8 @@ type Config struct {
 	ItemAnalysisEnabled bool
 	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
 	StudentProgressEnabled bool
+	// OutcomesReportEnabled gates course-level outcomes achievement reporting (plan 9.5).
+	OutcomesReportEnabled bool
 
 	// EngagementTrackingEnabled gates engagement metrics collection and reporting (plan 9.7).
 	EngagementTrackingEnabled bool

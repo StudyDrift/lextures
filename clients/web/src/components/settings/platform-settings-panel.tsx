@@ -26,6 +26,7 @@ export type PlatformSettingsPayload = {
   oneRosterEnabled: boolean
   scimEnabled: boolean
   studentProgressEnabled: boolean
+  outcomesReportEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean
   oerLibraryEnabled: boolean
@@ -104,6 +105,7 @@ function emptyForm(): PlatformSettingsPayload {
     oneRosterEnabled: false,
     scimEnabled: false,
     studentProgressEnabled: false,
+    outcomesReportEnabled: false,
     atRiskAlertsEnabled: false,
     h5pEnabled: false,
     oerLibraryEnabled: false,
@@ -319,6 +321,9 @@ export function PlatformSettingsPanel() {
       })
       maybe('studentProgressEnabled', baseline.studentProgressEnabled, form.studentProgressEnabled, () => {
         body.studentProgressEnabled = form.studentProgressEnabled
+      })
+      maybe('outcomesReportEnabled', baseline.outcomesReportEnabled, form.outcomesReportEnabled, () => {
+        body.outcomesReportEnabled = form.outcomesReportEnabled
       })
       maybe('atRiskAlertsEnabled', baseline.atRiskAlertsEnabled, form.atRiskAlertsEnabled, () => {
         body.atRiskAlertsEnabled = form.atRiskAlertsEnabled
@@ -683,6 +688,12 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.studentProgressEnabled}
               onChange={(v) => update('studentProgressEnabled', v)}
+            />
+            <FlagRow
+              label="Course outcomes report"
+              src="default"
+              checked={form.outcomesReportEnabled}
+              onChange={(v) => update('outcomesReportEnabled', v)}
             />
             <FlagRow
               label="At-risk early-warning alerts"

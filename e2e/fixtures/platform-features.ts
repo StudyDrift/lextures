@@ -41,6 +41,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       oerLibraryEnabled: true,
       oerStub: true,
       studentProgressEnabled: true,
+      outcomesReportEnabled: true,
       atRiskAlertsEnabled: true,
       equationEditorEnabled: true,
       updateMask: [
@@ -48,6 +49,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'oerLibraryEnabled',
         'oerStub',
         'studentProgressEnabled',
+        'outcomesReportEnabled',
         'atRiskAlertsEnabled',
         'equationEditorEnabled',
       ],

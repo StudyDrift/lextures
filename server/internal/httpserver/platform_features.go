@@ -13,6 +13,7 @@ type platformFeaturesJSON struct {
 	H5PEnabled                 bool `json:"h5pEnabled"`
 	OERLibraryEnabled          bool `json:"oerLibraryEnabled"`
 	ItemAnalysisEnabled        bool `json:"itemAnalysisEnabled"`
+	OutcomesReportEnabled      bool `json:"outcomesReportEnabled"`
 	EngagementTrackingEnabled  bool `json:"engagementTrackingEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
@@ -29,6 +30,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		OERLibraryEnabled:          cfg.OERLibraryEnabled,
 		ItemAnalysisEnabled:        cfg.ItemAnalysisEnabled,
 		EngagementTrackingEnabled:  cfg.EngagementTrackingEnabled,
+		OutcomesReportEnabled:      cfg.OutcomesReportEnabled,
 		EquationEditorEnabled:      cfg.EquationEditorEnabled,
 		StorageQuotasEnabled:       cfg.StorageQuotasEnabled,
 		AvScanningEnabled:          cfg.AvScanningEnabled,
