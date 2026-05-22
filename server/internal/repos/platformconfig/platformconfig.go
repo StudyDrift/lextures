@@ -13,7 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/crypto/appsecrets"
 )
 
-// Row is the optional DB override layer; nil pointers mean "use environment value".
+// Row is the optional DB override layer; nil boolean pointers use documented defaults (see Defaults).
 type Row struct {
 	OpenRouterAPIKey *string
 
@@ -35,6 +35,29 @@ type Row struct {
 	LTIEnabled                  *bool
 	OneRosterEnabled            *bool
 	ScimEnabled                 *bool
+
+	OIDCSSOEnabled             *bool
+	CleverSSOEnabled           *bool
+	ClassLinkSSOEnabled        *bool
+	MagicLinkEnabled           *bool
+	MagicLinkEnrolledOnly      *bool
+	SessionManagementUIEnabled *bool
+	EmailNotificationsEnabled  *bool
+	PushNotificationsEnabled   *bool
+	VirtualClassroomEnabled    *bool
+	DRMEnabled                 *bool
+	VideoTranscodingEnabled    *bool
+	AutoCaptioningEnabled      *bool
+	StorageQuotasEnabled       *bool
+	AtRiskAlertsEnabled        *bool
+	AvScanningEnabled          *bool
+	ClamAVStub                 *bool
+	H5PEnabled                 *bool
+	OERLibraryEnabled          *bool
+	OERStub                    *bool
+	ItemAnalysisEnabled        *bool
+	StudentProgressEnabled     *bool
+	EquationEditorEnabled      *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -71,6 +94,29 @@ type Write struct {
 	OneRosterEnabled            *bool
 	ScimEnabled                 *bool
 
+	OIDCSSOEnabled             *bool
+	CleverSSOEnabled           *bool
+	ClassLinkSSOEnabled        *bool
+	MagicLinkEnabled           *bool
+	MagicLinkEnrolledOnly      *bool
+	SessionManagementUIEnabled *bool
+	EmailNotificationsEnabled  *bool
+	PushNotificationsEnabled   *bool
+	VirtualClassroomEnabled    *bool
+	DRMEnabled                 *bool
+	VideoTranscodingEnabled    *bool
+	AutoCaptioningEnabled      *bool
+	StorageQuotasEnabled       *bool
+	AtRiskAlertsEnabled        *bool
+	AvScanningEnabled          *bool
+	ClamAVStub                 *bool
+	H5PEnabled                 *bool
+	OERLibraryEnabled          *bool
+	OERStub                    *bool
+	ItemAnalysisEnabled        *bool
+	StudentProgressEnabled     *bool
+	EquationEditorEnabled      *bool
+
 	MFAEnabled     *bool
 	MFAEnforcement *string
 
@@ -104,6 +150,28 @@ SELECT
 	lti_enabled,
 	oneroster_enabled,
 	scim_enabled,
+	oidc_sso_enabled,
+	clever_sso_enabled,
+	classlink_sso_enabled,
+	magic_link_enabled,
+	magic_link_enrolled_only,
+	session_management_ui_enabled,
+	email_notifications_enabled,
+	push_notifications_enabled,
+	virtual_classroom_enabled,
+	drm_enabled,
+	video_transcoding_enabled,
+	auto_captioning_enabled,
+	storage_quotas_enabled,
+	at_risk_alerts_enabled,
+	av_scanning_enabled,
+	clamav_stub,
+	h5p_enabled,
+	oer_library_enabled,
+	oer_stub,
+	item_analysis_enabled,
+	student_progress_enabled,
+	equation_editor_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -133,6 +201,28 @@ WHERE id = 1
 		&r.LTIEnabled,
 		&r.OneRosterEnabled,
 		&r.ScimEnabled,
+		&r.OIDCSSOEnabled,
+		&r.CleverSSOEnabled,
+		&r.ClassLinkSSOEnabled,
+		&r.MagicLinkEnabled,
+		&r.MagicLinkEnrolledOnly,
+		&r.SessionManagementUIEnabled,
+		&r.EmailNotificationsEnabled,
+		&r.PushNotificationsEnabled,
+		&r.VirtualClassroomEnabled,
+		&r.DRMEnabled,
+		&r.VideoTranscodingEnabled,
+		&r.AutoCaptioningEnabled,
+		&r.StorageQuotasEnabled,
+		&r.AtRiskAlertsEnabled,
+		&r.AvScanningEnabled,
+		&r.ClamAVStub,
+		&r.H5PEnabled,
+		&r.OERLibraryEnabled,
+		&r.OERStub,
+		&r.ItemAnalysisEnabled,
+		&r.StudentProgressEnabled,
+		&r.EquationEditorEnabled,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -202,6 +292,28 @@ INSERT INTO settings.platform_app_settings (
 	lti_enabled,
 	oneroster_enabled,
 	scim_enabled,
+	oidc_sso_enabled,
+	clever_sso_enabled,
+	classlink_sso_enabled,
+	magic_link_enabled,
+	magic_link_enrolled_only,
+	session_management_ui_enabled,
+	email_notifications_enabled,
+	push_notifications_enabled,
+	virtual_classroom_enabled,
+	drm_enabled,
+	video_transcoding_enabled,
+	auto_captioning_enabled,
+	storage_quotas_enabled,
+	at_risk_alerts_enabled,
+	av_scanning_enabled,
+	clamav_stub,
+	h5p_enabled,
+	oer_library_enabled,
+	oer_stub,
+	item_analysis_enabled,
+	student_progress_enabled,
+	equation_editor_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -212,8 +324,9 @@ INSERT INTO settings.platform_app_settings (
 	updated_at
 ) VALUES (
 	1,
-	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
-	$21, $22, $23, $24, $25,
+	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
+	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
+	$41, $42, $43, $44, $45, $46, $47,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -235,6 +348,28 @@ ON CONFLICT (id) DO UPDATE SET
 	lti_enabled = COALESCE(EXCLUDED.lti_enabled, settings.platform_app_settings.lti_enabled),
 	oneroster_enabled = COALESCE(EXCLUDED.oneroster_enabled, settings.platform_app_settings.oneroster_enabled),
 	scim_enabled = COALESCE(EXCLUDED.scim_enabled, settings.platform_app_settings.scim_enabled),
+	oidc_sso_enabled = COALESCE(EXCLUDED.oidc_sso_enabled, settings.platform_app_settings.oidc_sso_enabled),
+	clever_sso_enabled = COALESCE(EXCLUDED.clever_sso_enabled, settings.platform_app_settings.clever_sso_enabled),
+	classlink_sso_enabled = COALESCE(EXCLUDED.classlink_sso_enabled, settings.platform_app_settings.classlink_sso_enabled),
+	magic_link_enabled = COALESCE(EXCLUDED.magic_link_enabled, settings.platform_app_settings.magic_link_enabled),
+	magic_link_enrolled_only = COALESCE(EXCLUDED.magic_link_enrolled_only, settings.platform_app_settings.magic_link_enrolled_only),
+	session_management_ui_enabled = COALESCE(EXCLUDED.session_management_ui_enabled, settings.platform_app_settings.session_management_ui_enabled),
+	email_notifications_enabled = COALESCE(EXCLUDED.email_notifications_enabled, settings.platform_app_settings.email_notifications_enabled),
+	push_notifications_enabled = COALESCE(EXCLUDED.push_notifications_enabled, settings.platform_app_settings.push_notifications_enabled),
+	virtual_classroom_enabled = COALESCE(EXCLUDED.virtual_classroom_enabled, settings.platform_app_settings.virtual_classroom_enabled),
+	drm_enabled = COALESCE(EXCLUDED.drm_enabled, settings.platform_app_settings.drm_enabled),
+	video_transcoding_enabled = COALESCE(EXCLUDED.video_transcoding_enabled, settings.platform_app_settings.video_transcoding_enabled),
+	auto_captioning_enabled = COALESCE(EXCLUDED.auto_captioning_enabled, settings.platform_app_settings.auto_captioning_enabled),
+	storage_quotas_enabled = COALESCE(EXCLUDED.storage_quotas_enabled, settings.platform_app_settings.storage_quotas_enabled),
+	at_risk_alerts_enabled = COALESCE(EXCLUDED.at_risk_alerts_enabled, settings.platform_app_settings.at_risk_alerts_enabled),
+	av_scanning_enabled = COALESCE(EXCLUDED.av_scanning_enabled, settings.platform_app_settings.av_scanning_enabled),
+	clamav_stub = COALESCE(EXCLUDED.clamav_stub, settings.platform_app_settings.clamav_stub),
+	h5p_enabled = COALESCE(EXCLUDED.h5p_enabled, settings.platform_app_settings.h5p_enabled),
+	oer_library_enabled = COALESCE(EXCLUDED.oer_library_enabled, settings.platform_app_settings.oer_library_enabled),
+	oer_stub = COALESCE(EXCLUDED.oer_stub, settings.platform_app_settings.oer_stub),
+	item_analysis_enabled = COALESCE(EXCLUDED.item_analysis_enabled, settings.platform_app_settings.item_analysis_enabled),
+	student_progress_enabled = COALESCE(EXCLUDED.student_progress_enabled, settings.platform_app_settings.student_progress_enabled),
+	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -262,6 +397,28 @@ ON CONFLICT (id) DO UPDATE SET
 		w.LTIEnabled,
 		w.OneRosterEnabled,
 		w.ScimEnabled,
+		w.OIDCSSOEnabled,
+		w.CleverSSOEnabled,
+		w.ClassLinkSSOEnabled,
+		w.MagicLinkEnabled,
+		w.MagicLinkEnrolledOnly,
+		w.SessionManagementUIEnabled,
+		w.EmailNotificationsEnabled,
+		w.PushNotificationsEnabled,
+		w.VirtualClassroomEnabled,
+		w.DRMEnabled,
+		w.VideoTranscodingEnabled,
+		w.AutoCaptioningEnabled,
+		w.StorageQuotasEnabled,
+		w.AtRiskAlertsEnabled,
+		w.AvScanningEnabled,
+		w.ClamAVStub,
+		w.H5PEnabled,
+		w.OERLibraryEnabled,
+		w.OERStub,
+		w.ItemAnalysisEnabled,
+		w.StudentProgressEnabled,
+		w.EquationEditorEnabled,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,
@@ -276,19 +433,17 @@ ON CONFLICT (id) DO UPDATE SET
 	return Get(ctx, pool)
 }
 
-// Merge applies DB overrides on top of env-backed configuration.
+// Merge applies platform settings from the database (booleans) and optional DB overrides for secrets/URLs.
 func Merge(env config.Config, db *Row) config.Config {
-	if db == nil {
-		return env
-	}
 	out := env
+	applyPlatformBools(&out, db, DefaultDefaults())
+	if db == nil {
+		return out
+	}
 	if db.OpenRouterAPIKey != nil {
 		if strings.TrimSpace(*db.OpenRouterAPIKey) != "" {
 			out.OpenRouterAPIKey = strings.TrimSpace(*db.OpenRouterAPIKey)
 		}
-	}
-	if db.SAMLSSOEnabled != nil {
-		out.SAMLSSOEnabled = *db.SAMLSSOEnabled
 	}
 	if db.SAMLPublicBaseURL != nil && strings.TrimSpace(*db.SAMLPublicBaseURL) != "" {
 		out.SAMLPublicBaseURL = strings.TrimRight(strings.TrimSpace(*db.SAMLPublicBaseURL), "/")
@@ -301,45 +456,6 @@ func Merge(env config.Config, db *Row) config.Config {
 	}
 	if db.SAMLSPPrivateKeyPEM != nil && strings.TrimSpace(*db.SAMLSPPrivateKeyPEM) != "" {
 		out.SAMLSPPrivateKeyPEM = strings.TrimSpace(*db.SAMLSPPrivateKeyPEM)
-	}
-	if db.AnnotationEnabled != nil {
-		out.AnnotationEnabled = *db.AnnotationEnabled
-	}
-	if db.FeedbackMediaEnabled != nil {
-		out.FeedbackMediaEnabled = *db.FeedbackMediaEnabled
-	}
-	if db.BlindGradingEnabled != nil {
-		out.BlindGradingEnabled = *db.BlindGradingEnabled
-	}
-	if db.ModeratedGradingEnabled != nil {
-		out.ModeratedGradingEnabled = *db.ModeratedGradingEnabled
-	}
-	if db.OriginalityDetectionEnabled != nil {
-		out.OriginalityDetectionEnabled = *db.OriginalityDetectionEnabled
-	}
-	if db.OriginalityStubExternal != nil {
-		out.OriginalityStubExternal = *db.OriginalityStubExternal
-	}
-	if db.GradePostingPoliciesEnabled != nil {
-		out.GradePostingPoliciesEnabled = *db.GradePostingPoliciesEnabled
-	}
-	if db.GradebookCSVEnabled != nil {
-		out.GradebookCSVEnabled = *db.GradebookCSVEnabled
-	}
-	if db.ResubmissionWorkflowEnabled != nil {
-		out.ResubmissionWorkflowEnabled = *db.ResubmissionWorkflowEnabled
-	}
-	if db.LTIEnabled != nil {
-		out.LTIEnabled = *db.LTIEnabled
-	}
-	if db.OneRosterEnabled != nil {
-		out.OneRosterEnabled = *db.OneRosterEnabled
-	}
-	if db.ScimEnabled != nil {
-		out.ScimEnabled = *db.ScimEnabled
-	}
-	if db.MFAEnabled != nil {
-		out.MFAEnabled = *db.MFAEnabled
 	}
 	if db.MFAEnforcement != nil && strings.TrimSpace(*db.MFAEnforcement) != "" {
 		out.MFAEnforcement = strings.ToLower(strings.TrimSpace(*db.MFAEnforcement))
@@ -377,6 +493,8 @@ type Source string
 const (
 	SourceEnvironment Source = "environment"
 	SourceDatabase    Source = "database"
+	// SourceDefault means the column is unset and the documented default applies.
+	SourceDefault Source = "default"
 )
 
 // Sources indicates which layer won for mergeable fields (for admin transparency).
@@ -418,24 +536,24 @@ func ResolveSources(env config.Config, db *Row) Sources {
 		return sourcesAllEnvironment(env)
 	}
 	s.OpenRouterAPIKey = sourceString(env.OpenRouterAPIKey, db.OpenRouterAPIKey)
-	s.SAMLSSOEnabled = sourceBool(env.SAMLSSOEnabled, db.SAMLSSOEnabled)
+	s.SAMLSSOEnabled = sourceBoolDB(db.SAMLSSOEnabled)
 	s.SAMLPublicBaseURL = sourceString(env.SAMLPublicBaseURL, db.SAMLPublicBaseURL)
 	s.SAMLSPEntityID = sourceString(env.SAMLSPEntityID, db.SAMLSPEntityID)
 	s.SAMLSPX509PEM = sourceString(env.SAMLSPX509PEM, db.SAMLSPX509PEM)
 	s.SAMLSPPrivateKeyPEM = sourceString(env.SAMLSPPrivateKeyPEM, db.SAMLSPPrivateKeyPEM)
-	s.AnnotationEnabled = sourceBool(env.AnnotationEnabled, db.AnnotationEnabled)
-	s.FeedbackMediaEnabled = sourceBool(env.FeedbackMediaEnabled, db.FeedbackMediaEnabled)
-	s.BlindGradingEnabled = sourceBool(env.BlindGradingEnabled, db.BlindGradingEnabled)
-	s.ModeratedGradingEnabled = sourceBool(env.ModeratedGradingEnabled, db.ModeratedGradingEnabled)
-	s.OriginalityDetectionEnabled = sourceBool(env.OriginalityDetectionEnabled, db.OriginalityDetectionEnabled)
-	s.OriginalityStubExternal = sourceBool(env.OriginalityStubExternal, db.OriginalityStubExternal)
-	s.GradePostingPoliciesEnabled = sourceBool(env.GradePostingPoliciesEnabled, db.GradePostingPoliciesEnabled)
-	s.GradebookCSVEnabled = sourceBool(env.GradebookCSVEnabled, db.GradebookCSVEnabled)
-	s.ResubmissionWorkflowEnabled = sourceBool(env.ResubmissionWorkflowEnabled, db.ResubmissionWorkflowEnabled)
-	s.LTIEnabled = sourceBool(env.LTIEnabled, db.LTIEnabled)
-	s.OneRosterEnabled = sourceBool(env.OneRosterEnabled, db.OneRosterEnabled)
-	s.ScimEnabled = sourceBool(env.ScimEnabled, db.ScimEnabled)
-	s.MFAEnabled = sourceBool(env.MFAEnabled, db.MFAEnabled)
+	s.AnnotationEnabled = sourceBoolDB(db.AnnotationEnabled)
+	s.FeedbackMediaEnabled = sourceBoolDB(db.FeedbackMediaEnabled)
+	s.BlindGradingEnabled = sourceBoolDB(db.BlindGradingEnabled)
+	s.ModeratedGradingEnabled = sourceBoolDB(db.ModeratedGradingEnabled)
+	s.OriginalityDetectionEnabled = sourceBoolDB(db.OriginalityDetectionEnabled)
+	s.OriginalityStubExternal = sourceBoolDB(db.OriginalityStubExternal)
+	s.GradePostingPoliciesEnabled = sourceBoolDB(db.GradePostingPoliciesEnabled)
+	s.GradebookCSVEnabled = sourceBoolDB(db.GradebookCSVEnabled)
+	s.ResubmissionWorkflowEnabled = sourceBoolDB(db.ResubmissionWorkflowEnabled)
+	s.LTIEnabled = sourceBoolDB(db.LTIEnabled)
+	s.OneRosterEnabled = sourceBoolDB(db.OneRosterEnabled)
+	s.ScimEnabled = sourceBoolDB(db.ScimEnabled)
+	s.MFAEnabled = sourceBoolDB(db.MFAEnabled)
 	s.MFAEnforcement = sourceString(env.MFAEnforcement, db.MFAEnforcement)
 	s.SMTPHost = sourceString(env.SMTPHost, db.SMTPHost)
 	s.SMTPPort = sourceSMTPPort(env.SMTPPort, db.SMTPPort)
@@ -449,24 +567,24 @@ func sourcesAllEnvironment(env config.Config) Sources {
 	_ = env
 	return Sources{
 		OpenRouterAPIKey:            SourceEnvironment,
-		SAMLSSOEnabled:              SourceEnvironment,
+		SAMLSSOEnabled:              SourceDefault,
 		SAMLPublicBaseURL:           SourceEnvironment,
 		SAMLSPEntityID:              SourceEnvironment,
 		SAMLSPX509PEM:               SourceEnvironment,
 		SAMLSPPrivateKeyPEM:         SourceEnvironment,
-		AnnotationEnabled:           SourceEnvironment,
-		FeedbackMediaEnabled:        SourceEnvironment,
-		BlindGradingEnabled:         SourceEnvironment,
-		ModeratedGradingEnabled:     SourceEnvironment,
-		OriginalityDetectionEnabled: SourceEnvironment,
-		OriginalityStubExternal:     SourceEnvironment,
-		GradePostingPoliciesEnabled: SourceEnvironment,
-		GradebookCSVEnabled:         SourceEnvironment,
-		ResubmissionWorkflowEnabled: SourceEnvironment,
-		LTIEnabled:                  SourceEnvironment,
-		OneRosterEnabled:            SourceEnvironment,
-		ScimEnabled:                 SourceEnvironment,
-		MFAEnabled:                  SourceEnvironment,
+		AnnotationEnabled:           SourceDefault,
+		FeedbackMediaEnabled:        SourceDefault,
+		BlindGradingEnabled:         SourceDefault,
+		ModeratedGradingEnabled:     SourceDefault,
+		OriginalityDetectionEnabled: SourceDefault,
+		OriginalityStubExternal:     SourceDefault,
+		GradePostingPoliciesEnabled: SourceDefault,
+		GradebookCSVEnabled:         SourceDefault,
+		ResubmissionWorkflowEnabled: SourceDefault,
+		LTIEnabled:                  SourceDefault,
+		OneRosterEnabled:            SourceDefault,
+		ScimEnabled:                 SourceDefault,
+		MFAEnabled:                  SourceDefault,
 		MFAEnforcement:              SourceEnvironment,
 		SMTPHost:                    SourceEnvironment,
 		SMTPPort:                    SourceEnvironment,
@@ -506,9 +624,9 @@ func sourceString(envVal string, dbPtr *string) Source {
 	return SourceEnvironment
 }
 
-func sourceBool(envVal bool, dbPtr *bool) Source {
+func sourceBoolDB(dbPtr *bool) Source {
 	if dbPtr != nil {
 		return SourceDatabase
 	}
-	return SourceEnvironment
+	return SourceDefault
 }

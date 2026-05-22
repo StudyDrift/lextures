@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { parseMathDelimitedText } from '../../components/math/math-plain-text-utils'
 import { isEquationEditorEnabled, latexAccessibleLabel, renderKatexSafe } from '../math'
+import { resetPlatformFeaturesSnapshot, setPlatformFeaturesSnapshot } from '../platform-features'
 
 describe('parseMathDelimitedText', () => {
   it('splits inline and display math', () => {
@@ -46,10 +47,22 @@ describe('renderKatexSafe', () => {
 })
 
 describe('isEquationEditorEnabled', () => {
-  it('defaults to enabled when math rendering is on', () => {
+  it('follows platform snapshot when math rendering is on', () => {
     vi.stubEnv('VITE_MATH_RENDERING_ENABLED', 'true')
-    vi.stubEnv('VITE_FEATURE_EQUATION_EDITOR', '')
+    setPlatformFeaturesSnapshot({
+      studentProgressEnabled: false,
+      atRiskAlertsEnabled: false,
+      h5pEnabled: false,
+      oerLibraryEnabled: false,
+      itemAnalysisEnabled: false,
+      equationEditorEnabled: true,
+      storageQuotasEnabled: false,
+      avScanningEnabled: false,
+      virtualClassroomEnabled: true,
+      sessionManagementUiEnabled: false,
+    })
     expect(isEquationEditorEnabled()).toBe(true)
+    resetPlatformFeaturesSnapshot()
     vi.unstubAllEnvs()
   })
 })

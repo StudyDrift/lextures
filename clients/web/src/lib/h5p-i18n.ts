@@ -12,6 +12,4 @@ export const h5pI18n = {
   menuDescription: 'Upload an interactive .h5p activity',
 } as const
 
-export function h5pFeatureEnabled(): boolean {
-  return import.meta.env.VITE_FEATURE_H5P === 'true'
-}
+export { h5pFeatureEnabled } from './platform-features'

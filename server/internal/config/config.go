@@ -212,6 +212,9 @@ type Config struct {
 	ItemAnalysisEnabled bool
 	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
 	StudentProgressEnabled bool
+
+	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
+	EquationEditorEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -265,28 +268,17 @@ func Load() Config {
 		SMTPPassword: firstNonEmptyTrimmed("SMTP_PASSWORD"),
 		SMTPFrom:     firstNonEmptyTrimmed("SMTP_FROM"),
 
-		LTIEnabled:          boolEnv("LTI_ENABLED"),
 		LTIAPIBaseURL:       ltiBaseURL,
 		LTIRSAPrivateKeyPEM: firstNonEmptyTrimmed("LTI_RSA_PRIVATE_KEY_PEM"),
 		LTIRSAKeyID:         stringDefault(firstNonEmptyTrimmed("LTI_RSA_KEY_ID"), "lti-key-1"),
 
-		AnnotationEnabled:           boolEnv("ANNOTATION_ENABLED"),
-		FeedbackMediaEnabled:        boolEnv("FEEDBACK_MEDIA_ENABLED"),
-		BlindGradingEnabled:         boolEnvDefaultTrue("BLIND_GRADING_ENABLED"),
-		ModeratedGradingEnabled:     boolEnv("MODERATED_GRADING_ENABLED"),
-		OriginalityDetectionEnabled: boolEnv("ORIGINALITY_DETECTION_ENABLED"),
-		OriginalityStubExternal:     boolEnv("ORIGINALITY_STUB_EXTERNAL"),
-		GradePostingPoliciesEnabled: boolEnvDefaultTrue("GRADE_POSTING_POLICIES_ENABLED"),
-		GradebookCSVEnabled:         boolEnv("GRADEBOOK_CSV_ENABLED"),
-		ResubmissionWorkflowEnabled: boolEnv("RESUBMISSION_WORKFLOW_ENABLED"),
-
-		SAMLSSOEnabled:      boolEnv("SAML_SSO_ENABLED"),
+		SAMLSSOEnabled: false,
 		SAMLPublicBaseURL:   samlBaseURL,
 		SAMLSPEntityID:      stringDefault(firstNonEmptyTrimmed("SAML_SP_ENTITY_ID"), samlBaseURL+"/auth/saml/metadata"),
 		SAMLSPX509PEM:       firstNonEmptyTrimmedOrFile("SAML_SP_X509_PEM", "SAML_SP_X509_PATH"),
 		SAMLSPPrivateKeyPEM: firstNonEmptyTrimmedOrFile("SAML_SP_PRIVATE_KEY_PEM", "SAML_SP_PRIVATE_KEY_PATH"),
 
-		OIDCSSOEnabled:            boolEnv("OIDC_SSO_ENABLED"),
+		OIDCSSOEnabled: false,
 		OIDCPublicBaseURL:         oidcBaseURL,
 		OIDCGoogleClientID:        firstNonEmptyTrimmed("OIDC_GOOGLE_CLIENT_ID"),
 		OIDCGoogleClientSecret:    firstNonEmptyTrimmed("OIDC_GOOGLE_CLIENT_SECRET"),
@@ -299,38 +291,30 @@ func Load() Config {
 		OIDCAppleKeyID:            firstNonEmptyTrimmed("OIDC_APPLE_KEY_ID"),
 		OIDCApplePrivateKeyPEM:    firstNonEmptyTrimmedOrFile("OIDC_APPLE_PRIVATE_KEY_PEM", "OIDC_APPLE_PRIVATE_KEY_PATH"),
 
-		CleverSSOEnabled:   boolEnv("CLEVER_SSO_ENABLED"),
+		CleverSSOEnabled: false,
 		CleverClientID:     firstNonEmptyTrimmed("CLEVER_CLIENT_ID", "CLEVER_OIDC_CLIENT_ID"),
 		CleverClientSecret: firstNonEmptyTrimmed("CLEVER_CLIENT_SECRET", "CLEVER_OIDC_CLIENT_SECRET"),
 		CleverDistrictID:   firstNonEmptyTrimmed("CLEVER_DISTRICT_ID"),
 
-		ClassLinkSSOEnabled:       boolEnv("CLASSLINK_SSO_ENABLED"),
+		ClassLinkSSOEnabled: false,
 		ClassLinkOIDCIssuer:       strings.TrimRight(firstNonEmptyTrimmed("CLASSLINK_OIDC_ISSUER"), "/"),
 		ClassLinkOIDCClientID:     firstNonEmptyTrimmed("CLASSLINK_OIDC_CLIENT_ID"),
 		ClassLinkOIDCClientSecret: firstNonEmptyTrimmed("CLASSLINK_OIDC_CLIENT_SECRET"),
 
-		OneRosterEnabled:             boolEnv("ONEROSTER_ENABLED"),
+		OneRosterEnabled: false,
 		OneRosterBearerFallbackToken: firstNonEmptyTrimmed("ONEROSTER_BEARER_FALLBACK_TOKEN"),
 		OneRosterBearerFallbackInst:  strings.TrimSpace(os.Getenv("ONEROSTER_BEARER_FALLBACK_INSTITUTION_ID")),
 
-		ScimEnabled: boolEnv("SCIM_ENABLED"),
+		ScimEnabled: false,
 
-		MFAEnabled:     boolEnv("MFA_ENABLED"),
-		MFAEnforcement: strings.ToLower(strings.TrimSpace(stringDefault(firstNonEmptyTrimmed("MFA_ENFORCEMENT"), "none"))),
+		MFAEnforcement: "none",
 
-		MagicLinkEnabled:      boolEnvDefaultTrue("MAGIC_LINK_ENABLED"),
-		MagicLinkEnrolledOnly: boolEnv("MAGIC_LINK_ENROLLED_ONLY"),
-
-		SessionManagementUIEnabled: boolEnv("SESSION_MANAGEMENT_UI_ENABLED"),
-
-		EmailNotificationsEnabled: boolEnv("EMAIL_NOTIFICATIONS_ENABLED"),
-
-		PushNotificationsEnabled: boolEnv("PUSH_NOTIFICATIONS_ENABLED"),
+		PushNotificationsEnabled: false,
 		VAPIDPublicKey:           firstNonEmptyTrimmed("VAPID_PUBLIC_KEY"),
 		VAPIDPrivateKey:          firstNonEmptyTrimmed("VAPID_PRIVATE_KEY"),
 		VAPIDSubject:             stringDefault(firstNonEmptyTrimmed("VAPID_SUBJECT"), "mailto:admin@lextures.com"),
 
-		VirtualClassroomEnabled: boolEnvDefaultTrue("VIRTUAL_CLASSROOM_ENABLED"),
+		VirtualClassroomEnabled: true,
 		JitsiBaseURL:            stringDefault(firstNonEmptyTrimmed("JITSI_BASE_URL"), "https://meet.jit.si"),
 		JitsiAppID:              firstNonEmptyTrimmed("JITSI_APP_ID"),
 		JitsiAppSecret:          firstNonEmptyTrimmed("JITSI_APP_SECRET"),
@@ -349,33 +333,17 @@ func Load() Config {
 
 		TusUploadTTLHours: tusUploadTTLHours(),
 
-		DRMEnabled:    boolEnv("FEATURE_DRM"),
 		DRMHMACSecret: firstNonEmptyTrimmed("DRM_HMAC_SECRET"),
 
-		VideoTranscodingEnabled:   boolEnv("FEATURE_VIDEO_TRANSCODING"),
 		TranscodeRetainSourceDays: transcodeRetainSourceDays(),
 		FFmpegPath:                firstNonEmptyTrimmed("FFMPEG_PATH"),
 
-		AutoCaptioningEnabled: boolEnv("FEATURE_AUTO_CAPTIONING"),
-		WhisperBackend:        stringDefault(firstNonEmptyTrimmed("WHISPER_BACKEND"), "whisper-api"),
-		OpenAIAPIKey:          firstNonEmptyTrimmed("OPENAI_API_KEY"),
+		WhisperBackend: stringDefault(firstNonEmptyTrimmed("WHISPER_BACKEND"), "whisper-api"),
+		OpenAIAPIKey:   firstNonEmptyTrimmed("OPENAI_API_KEY"),
 
-		StorageQuotasEnabled:        boolEnv("FEATURE_STORAGE_QUOTAS"),
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
 
-		AtRiskAlertsEnabled: boolEnv("FEATURE_AT_RISK_ALERTS"),
-
-		AvScanningEnabled: boolEnv("FEATURE_AV_SCANNING"),
-
-		H5PEnabled: boolEnv("FEATURE_H5P"),
-		ClamAVAddr:        stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
-		ClamAVStub:        boolEnv("CLAMAV_STUB"),
-
-		OERLibraryEnabled: boolEnv("FEATURE_OER_LIBRARY"),
-		OERStub:           boolEnv("OER_STUB"),
-
-		ItemAnalysisEnabled:    boolEnv("FEATURE_ITEM_ANALYSIS"),
-		StudentProgressEnabled: boolEnv("FEATURE_STUDENT_PROGRESS"),
+		ClamAVAddr: stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
 	}
 }
 
@@ -441,7 +409,7 @@ func (c Config) Validate() error {
 		return fmt.Errorf("JWT_SECRET must be at least %d characters", JWTSecretMinLen)
 	}
 	if c.SAMLSSOEnabled && strings.TrimSpace(c.SAMLSPX509PEM) == "" {
-		return fmt.Errorf("SAML_SSO_ENABLED is set but SAML_SP_X509_PEM or SAML_SP_X509_PATH is missing")
+		return fmt.Errorf("SAML SSO is enabled in platform settings but SAML SP X.509 certificate is missing (set SAML_SP_X509_PEM or SAML_SP_X509_PATH in environment)")
 	}
 	return nil
 }

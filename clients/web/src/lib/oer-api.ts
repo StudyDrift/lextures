@@ -35,10 +35,7 @@ export type OERSearchResponse = {
   staleCache?: boolean
 }
 
-export function oerLibraryEnabled(): boolean {
-  const v = import.meta.env.VITE_FEATURE_OER_LIBRARY
-  return v === 'true' || v === '1'
-}
+export { oerLibraryEnabled } from './platform-features'
 
 export async function fetchOERProviders(): Promise<OERProviderId[]> {
   const res = await authorizedFetch('/api/v1/oer/providers')

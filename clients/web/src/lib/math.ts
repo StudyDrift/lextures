@@ -4,6 +4,7 @@
  */
 
 import type katexType from 'katex'
+import { equationEditorFeatureEnabled } from './platform-features'
 
 export type KatexModule = typeof katexType
 
@@ -19,9 +20,8 @@ export function isMathRenderingEnabled(): boolean {
 
 /** When false, equation editor UI is hidden (toolbar, slash command, double-click edit). */
 export function isEquationEditorEnabled(): boolean {
-  const v = import.meta.env.VITE_FEATURE_EQUATION_EDITOR
-  if (v === 'false' || v === '0') return false
-  return isMathRenderingEnabled()
+  if (!isMathRenderingEnabled()) return false
+  return equationEditorFeatureEnabled()
 }
 
 /** Plain-language label for screen readers (not full MathML speech). */

@@ -1,14 +1,32 @@
-import { describe, expect, it, vi } from 'vitest'
-import { studentProgressFeatureEnabled } from '../student-progress'
+import { afterEach, describe, expect, it } from 'vitest'
+import {
+  resetPlatformFeaturesSnapshot,
+  setPlatformFeaturesSnapshot,
+  studentProgressFeatureEnabled,
+} from '../platform-features'
 
 describe('studentProgressFeatureEnabled', () => {
-  it('is false when env unset', () => {
-    vi.stubEnv('VITE_FEATURE_STUDENT_PROGRESS', '')
+  afterEach(() => {
+    resetPlatformFeaturesSnapshot()
+  })
+
+  it('is false before platform features load', () => {
     expect(studentProgressFeatureEnabled()).toBe(false)
   })
 
-  it('is true when env is true', () => {
-    vi.stubEnv('VITE_FEATURE_STUDENT_PROGRESS', 'true')
+  it('is true when platform snapshot enables it', () => {
+    setPlatformFeaturesSnapshot({
+      studentProgressEnabled: true,
+      atRiskAlertsEnabled: false,
+      h5pEnabled: false,
+      oerLibraryEnabled: false,
+      itemAnalysisEnabled: false,
+      equationEditorEnabled: false,
+      storageQuotasEnabled: false,
+      avScanningEnabled: false,
+      virtualClassroomEnabled: true,
+      sessionManagementUiEnabled: false,
+    })
     expect(studentProgressFeatureEnabled()).toBe(true)
   })
 })

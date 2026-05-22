@@ -5,6 +5,7 @@ import { KeyboardShortcutsProvider } from '../keyboard-shortcuts/keyboard-shortc
 import { CourseFeedUnreadProvider } from '../../context/course-feed-unread-provider'
 import { InboxUnreadProvider } from '../../context/inbox-unread-provider'
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
+import { PlatformFeaturesProvider } from '../../context/platform-features-context'
 import { QuizFocusTopBar } from './quiz-focus-top-bar'
 import { ReadingFocusTopBar } from './reading-focus-top-bar'
 import { useQuizShellFocus } from './quiz-shell-focus-context'
@@ -62,6 +63,7 @@ function AppShellLayout() {
 
 export function AppShell() {
   return (
+    <PlatformFeaturesProvider>
     <InboxUnreadProvider>
       <CourseFeedUnreadProvider>
         <CommandPaletteProvider>
@@ -77,5 +79,6 @@ export function AppShell() {
         </CommandPaletteProvider>
       </CourseFeedUnreadProvider>
     </InboxUnreadProvider>
+    </PlatformFeaturesProvider>
   )
 }

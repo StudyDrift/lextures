@@ -32,6 +32,9 @@ var demoChecksumRepairMigrations = []struct {
 }{
 	{120, "120_clever_classlink.sql"},
 	{135, "135_org_role_grants.sql"},
+	{171, "171_mastery_heatmap_cache.sql"},
+	// Idempotent ADD COLUMN IF NOT EXISTS; file may change while feature-flag columns evolve.
+	{172, "172_platform_feature_flags.sql"},
 }
 
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
