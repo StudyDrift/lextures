@@ -106,8 +106,13 @@ func TestLoadDefaults(t *testing.T) {
 	if c.LTIAPIBaseURL != "http://localhost:8080" || c.LTIRSAKeyID != "lti-key-1" {
 		t.Fatalf("LTI defaults: base=%q kid=%q", c.LTIAPIBaseURL, c.LTIRSAKeyID)
 	}
-	if !c.BlindGradingEnabled || !c.GradePostingPoliciesEnabled {
-		t.Fatalf("default-on flags: blind=%v gradePosting=%v", c.BlindGradingEnabled, c.GradePostingPoliciesEnabled)
+	// Feature toggles are not read from the environment; defaults apply after platform DB merge.
+	if c.BlindGradingEnabled || c.GradePostingPoliciesEnabled || c.LTIEnabled {
+		t.Fatalf("feature flags should be off in env-only Load: blind=%v gradePosting=%v lti=%v",
+			c.BlindGradingEnabled, c.GradePostingPoliciesEnabled, c.LTIEnabled)
+	}
+	if !c.VirtualClassroomEnabled {
+		t.Fatalf("VirtualClassroomEnabled: want true in env-only Load")
 	}
 	if c.SAMLPublicBaseURL != "http://localhost:8080" {
 		t.Fatalf("SAMLPublicBaseURL: %q", c.SAMLPublicBaseURL)
@@ -229,21 +234,13 @@ func TestLoadTrimsAndUsesLegacyAliases(t *testing.T) {
 	}
 }
 
-func TestLoadIntegrationsAndFeatureFlags(t *testing.T) {
+func TestLoadIntegrationCredentialsIgnoresFeatureEnv(t *testing.T) {
 	baseEnv(t)
 	t.Setenv("LTI_ENABLED", "true")
 	t.Setenv("LTI_API_BASE_URL", " https://api.example.edu/ ")
 	t.Setenv("LTI_RSA_PRIVATE_KEY_PEM", " key ")
 	t.Setenv("LTI_RSA_KEY_ID", " kid ")
 	t.Setenv("ANNOTATION_ENABLED", "on")
-	t.Setenv("FEEDBACK_MEDIA_ENABLED", "yes")
-	t.Setenv("BLIND_GRADING_ENABLED", "0")
-	t.Setenv("MODERATED_GRADING_ENABLED", "1")
-	t.Setenv("ORIGINALITY_DETECTION_ENABLED", "true")
-	t.Setenv("ORIGINALITY_STUB_EXTERNAL", "true")
-	t.Setenv("GRADE_POSTING_POLICIES_ENABLED", "off")
-	t.Setenv("GRADEBOOK_CSV_ENABLED", "true")
-	t.Setenv("RESUBMISSION_WORKFLOW_ENABLED", "true")
 	t.Setenv("SAML_SSO_ENABLED", "true")
 	t.Setenv("SAML_SP_X509_PEM", " cert ")
 	t.Setenv("SAML_SP_PRIVATE_KEY_PEM", " saml-key ")
@@ -260,23 +257,22 @@ func TestLoadIntegrationsAndFeatureFlags(t *testing.T) {
 	t.Setenv("OIDC_APPLE_PRIVATE_KEY_PEM", " apple-key ")
 
 	c := Load()
-	if !c.LTIEnabled || c.LTIAPIBaseURL != "https://api.example.edu" || c.LTIRSAPrivateKeyPEM != "key" || c.LTIRSAKeyID != "kid" {
-		t.Fatalf("LTI values not loaded as expected: %#v", c)
+	if c.LTIAPIBaseURL != "https://api.example.edu" || c.LTIRSAPrivateKeyPEM != "key" || c.LTIRSAKeyID != "kid" {
+		t.Fatalf("LTI credential env not loaded: %#v", c)
 	}
-	if !c.AnnotationEnabled || !c.FeedbackMediaEnabled || c.BlindGradingEnabled || !c.ModeratedGradingEnabled ||
-		!c.OriginalityDetectionEnabled || !c.OriginalityStubExternal || c.GradePostingPoliciesEnabled ||
-		!c.GradebookCSVEnabled || !c.ResubmissionWorkflowEnabled {
-		t.Fatalf("feature flags not loaded as expected: %#v", c)
+	if c.LTIEnabled || c.AnnotationEnabled || c.SAMLSSOEnabled || c.OIDCSSOEnabled {
+		t.Fatalf("feature toggles must not load from env: lti=%v annotation=%v saml=%v oidc=%v",
+			c.LTIEnabled, c.AnnotationEnabled, c.SAMLSSOEnabled, c.OIDCSSOEnabled)
 	}
-	if !c.SAMLSSOEnabled || c.SAMLPublicBaseURL != "https://api.example.edu" || c.SAMLSPEntityID != "https://api.example.edu/auth/saml/metadata" ||
+	if c.SAMLPublicBaseURL != "https://api.example.edu" || c.SAMLSPEntityID != "https://api.example.edu/auth/saml/metadata" ||
 		c.SAMLSPX509PEM != "cert" || c.SAMLSPPrivateKeyPEM != "saml-key" {
-		t.Fatalf("SAML values not loaded as expected: %#v", c)
+		t.Fatalf("SAML credential env not loaded: %#v", c)
 	}
-	if !c.OIDCSSOEnabled || c.OIDCPublicBaseURL != "https://api.example.edu" || c.OIDCGoogleClientID != "google-id" ||
+	if c.OIDCPublicBaseURL != "https://api.example.edu" || c.OIDCGoogleClientID != "google-id" ||
 		c.OIDCGoogleClientSecret != "google-secret" || c.OIDCGoogleHostedDomain != "example.edu" ||
 		c.OIDCMicrosoftTenant != "tenant" || c.OIDCMicrosoftClientID != "ms-id" || c.OIDCMicrosoftClientSecret != "ms-secret" ||
 		c.OIDCAppleClientID != "apple-id" || c.OIDCAppleTeamID != "team" || c.OIDCAppleKeyID != "apple-kid" || c.OIDCApplePrivateKeyPEM != "apple-key" {
-		t.Fatalf("OIDC values not loaded as expected: %#v", c)
+		t.Fatalf("OIDC credential env not loaded: %#v", c)
 	}
 }
 
