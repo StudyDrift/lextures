@@ -210,7 +210,9 @@ test.describe('Report Export — UI', () => {
     await injectToken(page, seededCourse.instructorToken)
     await page.goto('/reports')
     await mainNav(page).waitFor({ state: 'visible' })
-    const exportBtn = page.getByRole('button', { name: /export pdf/i })
+    const exportBtn = page.getByRole('button', {
+      name: /export learning activity report as pdf/i,
+    })
     // The button may be disabled until report loads — wait for page to settle
     await expect(exportBtn).toBeVisible({ timeout: 12000 })
   })
