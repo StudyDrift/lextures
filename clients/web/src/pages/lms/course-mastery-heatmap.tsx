@@ -183,7 +183,7 @@ export default function CourseMasteryHeatmap() {
         </div>
       )}
 
-      {!loading && !error && hasData && (
+      {!loading && !error && hasData && result && (
         <div className="mt-8 space-y-8">
           {result.refreshedAt && (
             <p className="text-xs text-slate-500 dark:text-neutral-400">
