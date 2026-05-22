@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { authorizedFetch } from '../../lib/api'
+import { studentProgressFeatureEnabled } from '../../lib/student-progress'
 import { usePermissions } from '../../context/use-permissions'
 import {
   courseGradebookViewPermission,
@@ -307,6 +309,7 @@ export default function CourseGradebook() {
   const highlightStudentId = searchParams.get('student')?.trim() || null
   const { allows, loading } = usePermissions()
   const [students, setStudents] = useState<CourseGradebookGridStudent[]>([])
+  const [enrollmentIdByUserId, setEnrollmentIdByUserId] = useState<Record<string, string>>({})
   const [columns, setColumns] = useState<CourseGradebookGridColumn[]>([])
   const [assignmentGroups, setAssignmentGroups] = useState<AssignmentGroup[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -383,8 +386,13 @@ export default function CourseGradebook() {
   }, [courseCode, sectionsEnabled])
 
   const gridStudents: GradebookStudent[] = useMemo(
-    () => students.map((s) => ({ id: s.userId, name: s.displayName })),
-    [students],
+    () =>
+      students.map((s) => ({
+        id: s.userId,
+        name: s.displayName,
+        enrollmentId: enrollmentIdByUserId[s.userId],
+      })),
+    [students, enrollmentIdByUserId],
   )
   const gridColumns: GradebookColumn[] = useMemo(
     () =>
@@ -441,6 +449,25 @@ export default function CourseGradebook() {
         crossList: sectionsEnabled && canEditGrades ? crossListMerge : undefined,
       })
       setStudents(data.students)
+      if (studentProgressFeatureEnabled()) {
+        try {
+          const er = await authorizedFetch(
+            `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
+          )
+          if (er.ok) {
+            const body = (await er.json()) as {
+              enrollments?: { id?: string; userId?: string; role?: string }[]
+            }
+            const map: Record<string, string> = {}
+            for (const row of body.enrollments ?? []) {
+              if (row.userId && row.id) map[row.userId] = row.id
+            }
+            setEnrollmentIdByUserId(map)
+          }
+        } catch {
+          setEnrollmentIdByUserId({})
+        }
+      }
       setColumns(data.columns)
       setGradeHeld(data.gradeHeld)
       const gridSt = data.students.map((s) => ({ id: s.userId, name: s.displayName }))

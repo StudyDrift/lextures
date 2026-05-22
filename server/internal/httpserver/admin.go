@@ -527,4 +527,8 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Post("/api/v1/admin/quarantine/{object_id}/release", d.handleAdminReleaseQuarantine())
 	r.Get("/api/v1/admin/quarantine/{object_id}/download", d.handleAdminQuarantineDownload())
 	r.Post("/api/v1/admin/av-scan/bulk", d.handleAdminBulkAVScan())
+	// At-risk alerts (plan 9.2)
+	r.Post("/api/v1/admin/at-risk/run", d.handleAdminAtRiskRun())
+	r.Get("/api/v1/admin/at-risk/config", d.handleAdminAtRiskConfigGet())
+	r.Put("/api/v1/admin/at-risk/config", d.handleAdminAtRiskConfigPut())
 }

@@ -129,6 +129,10 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		slog.Info("h5p extract worker started")
 	}
 
+	go runEvery(ctx, time.Hour, func() {
+		sweepAtRiskScores(context.Background(), pool, cfg, time.Now().UTC())
+	})
+
 	if cfg.AvScanningEnabled && storage != nil {
 		clam := clamav.NewClient(cfg.ClamAVAddr, cfg.ClamAVStub)
 		avWorker := avscan.New(pool, storage, clam)

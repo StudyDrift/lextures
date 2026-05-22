@@ -42,6 +42,8 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderPasswordResetTemplate(vars, logo, color)
 	case "daily_digest":
 		return renderDailyDigest(vars, logo, color)
+	case "at_risk_alert":
+		return renderAtRiskAlert(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {

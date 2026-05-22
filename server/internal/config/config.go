@@ -190,6 +190,9 @@ type Config struct {
 	// applied at startup. 0 means unlimited unless an admin sets an explicit limit.
 	StorageDefaultTenantQuotaGB int64
 
+	// AtRiskAlertsEnabled gates at-risk scoring, alerts, and instructor UI (plan 9.2).
+	AtRiskAlertsEnabled bool
+
 	// AvScanningEnabled gates ClamAV malware scanning on uploads (plan 8.6).
 	AvScanningEnabled bool
 
@@ -207,6 +210,8 @@ type Config struct {
 
 	// ItemAnalysisEnabled gates CTT item analysis statistics for quizzes (plan 9.4).
 	ItemAnalysisEnabled bool
+	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
+	StudentProgressEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -358,6 +363,8 @@ func Load() Config {
 		StorageQuotasEnabled:        boolEnv("FEATURE_STORAGE_QUOTAS"),
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
 
+		AtRiskAlertsEnabled: boolEnv("FEATURE_AT_RISK_ALERTS"),
+
 		AvScanningEnabled: boolEnv("FEATURE_AV_SCANNING"),
 
 		H5PEnabled: boolEnv("FEATURE_H5P"),
@@ -367,7 +374,8 @@ func Load() Config {
 		OERLibraryEnabled: boolEnv("FEATURE_OER_LIBRARY"),
 		OERStub:           boolEnv("OER_STUB"),
 
-		ItemAnalysisEnabled: boolEnv("FEATURE_ITEM_ANALYSIS"),
+		ItemAnalysisEnabled:    boolEnv("FEATURE_ITEM_ANALYSIS"),
+		StudentProgressEnabled: boolEnv("FEATURE_STUDENT_PROGRESS"),
 	}
 }
 
