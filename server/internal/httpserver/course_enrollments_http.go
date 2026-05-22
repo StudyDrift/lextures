@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
+	"github.com/lextures/lextures/server/internal/service/learningevents"
 )
 
 func parseEnrollmentEmails(raw string) []string {
@@ -291,6 +292,7 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollments.")
 			return
 		}
+		learningevents.EmitEnrollmentAsync(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, added)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(modelenrollment.AddEnrollmentsResponse{
 			Added:           added,

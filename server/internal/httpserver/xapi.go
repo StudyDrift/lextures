@@ -10,6 +10,9 @@ import (
 	"github.com/lextures/lextures/server/internal/h5p"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/h5pcompletions"
+	"github.com/lextures/lextures/server/internal/repos/organization"
+	"github.com/lextures/lextures/server/internal/repos/user"
+	xapisvc "github.com/lextures/lextures/server/internal/service/xapi"
 )
 
 type xapiStatementBody struct {
@@ -93,6 +96,18 @@ func (d Deps) handlePostXAPIStatements() http.HandlerFunc {
 		if err := h5pcompletions.UpsertFromStatement(r.Context(), d.Pool, packageID, viewer, status, scoreRaw, scoreMax, body.Statement); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to record completion.")
 			return
+		}
+		if d.effectiveConfig().XAPIEmissionEnabled {
+			if u, _ := user.FindByID(r.Context(), d.Pool, viewer); u != nil {
+				orgID, _ := organization.OrgIDForUser(r.Context(), d.Pool, viewer)
+				verb := strings.TrimSpace(stmt.Verb.ID)
+				if verb == "" {
+					verb = xapisvc.VerbCompleted
+				}
+				base := strings.TrimRight(strings.TrimSpace(d.effectiveConfig().PublicWebOrigin), "/")
+				objID := base + "/courses/" + courseCode + "/h5p/" + packageID.String()
+				_ = d.learningEmitter().StoreExternalStatement(r.Context(), orgID, &cid, u.Email, "", verb, objID, "H5P activity", body.Statement)
+			}
 		}
 		w.WriteHeader(http.StatusNoContent)
 	}

@@ -147,6 +147,13 @@ export function SideNavSettingsLinks() {
               >
                 Cloud file pickers
               </SideNavLink>
+              <SideNavLink
+                to="/settings/lrs-integrations"
+                className={() => (view === 'lrs-integrations' ? sideNavActiveClass : '')}
+                icon={<Link2 className="h-5 w-5" />}
+              >
+                Learning Record Stores
+              </SideNavLink>
               {oerLibraryEnabled() && (
                 <SideNavLink
                   to="/settings/oer-providers"
