@@ -8,7 +8,7 @@ import { test, expect } from '../fixtures/test.js'
 test.describe('Elements on inbox page', () => {
   test('inbox page loads', async ({ authedPage: page }) => {
     await page.goto('/inbox')
-    await expect(page.getByRole('heading', { name: /inbox/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^inbox$/i })).toBeVisible()
   })
 
   test('Compose button is visible', async ({ authedPage: page }) => {

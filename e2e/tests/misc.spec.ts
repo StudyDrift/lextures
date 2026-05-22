@@ -31,7 +31,8 @@ test.describe('Forgot password', () => {
 test.describe('Inbox', () => {
   test('inbox page loads', async ({ authedPage: page }) => {
     await page.goto('/inbox')
-    await expect(page.getByRole('heading', { name: /inbox/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /^inbox$/i })).toBeVisible()
+    await expect(page.getByRole('searchbox', { name: /search mail/i })).toBeVisible()
   })
 })
 
