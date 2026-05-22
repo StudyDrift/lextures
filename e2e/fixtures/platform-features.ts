@@ -43,6 +43,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       studentProgressEnabled: true,
       atRiskAlertsEnabled: true,
       equationEditorEnabled: true,
+      xapiEmissionEnabled: true,
       updateMask: [
         'h5pEnabled',
         'oerLibraryEnabled',
@@ -50,6 +51,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'studentProgressEnabled',
         'atRiskAlertsEnabled',
         'equationEditorEnabled',
+        'xapiEmissionEnabled',
       ],
     }),
   })

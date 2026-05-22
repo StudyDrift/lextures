@@ -46,4 +46,5 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.ItemAnalysisEnabled = mergeBool(db.ItemAnalysisEnabled, false)
 	out.StudentProgressEnabled = mergeBool(db.StudentProgressEnabled, false)
 	out.EquationEditorEnabled = mergeBool(db.EquationEditorEnabled, false)
+	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, out.XAPIEmissionEnabled)
 }

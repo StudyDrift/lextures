@@ -21,6 +21,7 @@ describe('studentProgressFeatureEnabled', () => {
       h5pEnabled: false,
       oerLibraryEnabled: false,
       itemAnalysisEnabled: false,
+      xapiEmissionEnabled: false,
       equationEditorEnabled: false,
       storageQuotasEnabled: false,
       avScanningEnabled: false,

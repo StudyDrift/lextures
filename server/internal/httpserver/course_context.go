@@ -63,6 +63,7 @@ func (d Deps) handlePostCourseContext() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not record activity.")
 				return
 			}
+			d.emitCourseActivityAsync(userID, courseCode, *cid, "course_visit", nil)
 		case "content_open", "content_leave":
 			if req.StructureItemID == nil || strings.TrimSpace(*req.StructureItemID) == "" {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "content_open and content_leave require structureItemId.")
@@ -85,6 +86,9 @@ func (d Deps) handlePostCourseContext() http.HandlerFunc {
 			if err := userauditrepo.Insert(r.Context(), d.Pool, userID, *cid, &sid, kind); err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not record activity.")
 				return
+			}
+			if kind == "content_open" {
+				d.emitCourseActivityAsync(userID, courseCode, *cid, "content_open", &sid)
 			}
 		case "equation_inserted", "equation_editor_open":
 			var sidPtr *uuid.UUID

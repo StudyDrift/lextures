@@ -45,6 +45,7 @@ import Inbox from './pages/lms/inbox'
 import GlobalNotebookPage from './pages/lms/global-notebook-page'
 import MyNotebooksPage from './pages/lms/my-notebooks-page'
 import Reports from './pages/lms/reports'
+import CourseEventLogPage from './pages/lms/course-event-log'
 import CourseMasteryHeatmap from './pages/lms/course-mastery-heatmap'
 import Settings from './pages/lms/settings'
 import ForgotPassword from './pages/forgot-password'
@@ -156,6 +157,7 @@ export default function App() {
             <Route path="my-grades" element={<CourseMyGrades />} />
             <Route path="gradebook" element={<CourseGradebook />} />
             <Route path="at-risk" element={<CourseAtRiskPage />} />
+            <Route path="event-log" element={<CourseEventLogPage />} />
             <Route path="students/:enrollmentId/progress" element={<StudentProgressPage />} />
             <Route path="standards-gradebook" element={<CourseStandardsGradebook />} />
             <Route path="standards-coverage" element={<CourseStandardsCoveragePage />} />
