@@ -5,7 +5,8 @@
 #   ./e2e/scripts/e2e-local.sh              # full suite (cwd: repo root)
 #   ./e2e/scripts/e2e-local.sh tests/inbox.spec.ts
 #   ./e2e/scripts/e2e-local.sh e2e/tests/inbox.spec.ts   # same; e2e/ prefix is stripped
-# Any extra arguments are passed through to `playwright test` (e.g. --headed, --grep).
+# Any extra arguments are passed through to `playwright test` (e.g. --headed, --grep,
+# --shard=2/4 for CI sharding).
 #
 # Steps:
 #   1. Locate system PostgreSQL binaries (Homebrew, Linux packages, pg_config).
