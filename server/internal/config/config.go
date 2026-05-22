@@ -221,6 +221,8 @@ type Config struct {
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool
 
+	// ReportExportEnabled gates PDF export and scheduled report delivery (plan 9.8).
+	ReportExportEnabled bool
 	// XAPIEmissionEnabled gates Caliper/xAPI learning event storage and LRS forwarding (plan 9.6).
 	XAPIEmissionEnabled bool
 	// LRSAnonymizeActors hashes actor mbox emails in emitted xAPI statements (plan 9.6 AC-4).

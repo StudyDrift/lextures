@@ -84,6 +84,7 @@ type platformSettingsJSON struct {
 	OutcomesReportEnabled      bool `json:"outcomesReportEnabled"`
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
+	ReportExportEnabled        bool `json:"reportExportEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -199,6 +200,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
+			ReportExportEnabled:         merged.ReportExportEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
@@ -287,6 +289,7 @@ type putPlatformBody struct {
 	OutcomesReportEnabled      *bool `json:"outcomesReportEnabled"`
 	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
+	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -535,6 +538,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("engagementtrackingenabled", body.EngagementTrackingEnabled, func(v bool) { wr.EngagementTrackingEnabled = &v })
 		setBool("outcomesreportenabled", body.OutcomesReportEnabled, func(v bool) { wr.OutcomesReportEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
+		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
@@ -607,6 +611,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
+			ReportExportEnabled:         merged.ReportExportEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,

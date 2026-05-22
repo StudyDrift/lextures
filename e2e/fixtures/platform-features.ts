@@ -44,6 +44,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       outcomesReportEnabled: true,
       atRiskAlertsEnabled: true,
       equationEditorEnabled: true,
+      reportExportEnabled: true,
       xapiEmissionEnabled: true,
       updateMask: [
         'h5pEnabled',
@@ -53,6 +54,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'outcomesReportEnabled',
         'atRiskAlertsEnabled',
         'equationEditorEnabled',
+        'reportExportEnabled',
         'xapiEmissionEnabled',
       ],
     }),
