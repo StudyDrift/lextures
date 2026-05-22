@@ -204,6 +204,9 @@ type Config struct {
 	OERLibraryEnabled bool
 	// OERStub uses embedded catalog data instead of live OER provider APIs (dev/e2e).
 	OERStub bool
+
+	// StudentProgressEnabled gates per-student progress dashboards (plan 9.1).
+	StudentProgressEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -363,6 +366,8 @@ func Load() Config {
 
 		OERLibraryEnabled: boolEnv("FEATURE_OER_LIBRARY"),
 		OERStub:           boolEnv("OER_STUB"),
+
+		StudentProgressEnabled: boolEnv("FEATURE_STUDENT_PROGRESS"),
 	}
 }
 
