@@ -14,16 +14,36 @@
  *   [x] Schedule CRUD requires authentication (401)
  *   [x] Invalid cadence returns 400
  */
-import { test, expect } from '../fixtures/test.js'
+import { test, expect, injectToken, mainNav } from '../fixtures/test.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
+const E2E_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
+const E2E_ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
 
-async function enableReportExport(token: string): Promise<void> {
-  await fetch(`${apiBase}/api/v1/settings/platform`, {
+/** Platform settings require global admin; global setup seeds report export, this re-affirms per test file. */
+async function enableReportExport(): Promise<void> {
+  const loginRes = await fetch(`${apiBase}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: E2E_ADMIN_EMAIL, password: E2E_ADMIN_PASSWORD }),
+  })
+  if (!loginRes.ok) {
+    const body = await loginRes.text()
+    throw new Error(`enableReportExport admin login failed (${loginRes.status}): ${body}`)
+  }
+  const { access_token: token } = (await loginRes.json()) as { access_token: string }
+  const res = await fetch(`${apiBase}/api/v1/settings/platform`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ reportExportEnabled: true }),
+    body: JSON.stringify({
+      reportExportEnabled: true,
+      updateMask: ['reportExportEnabled'],
+    }),
   })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`enableReportExport failed (${res.status}): ${body}`)
+  }
 }
 
 test.describe('Report Export — API', () => {
@@ -40,7 +60,7 @@ test.describe('Report Export — API', () => {
   })
 
   test('authenticated request returns PDF when feature enabled', async ({ seededCourse }) => {
-    await enableReportExport(seededCourse.instructorToken)
+    await enableReportExport()
     const res = await fetch(`${apiBase}/api/v1/reports/learning-activity/export.pdf`, {
       headers: { Authorization: `Bearer ${seededCourse.instructorToken}` },
     })
@@ -76,7 +96,7 @@ test.describe('Report Schedules — API', () => {
   })
 
   test('invalid cadence returns 400', async ({ seededCourse }) => {
-    await enableReportExport(seededCourse.instructorToken)
+    await enableReportExport()
     const res = await fetch(`${apiBase}/api/v1/reports/schedules`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${seededCourse.instructorToken}` },
@@ -89,7 +109,7 @@ test.describe('Report Schedules — API', () => {
   })
 
   test('schedule CRUD lifecycle', async ({ seededCourse }) => {
-    await enableReportExport(seededCourse.instructorToken)
+    await enableReportExport()
 
     // Create
     const createRes = await fetch(`${apiBase}/api/v1/reports/schedules`, {
@@ -151,7 +171,7 @@ test.describe('Report Schedules — API', () => {
   })
 
   test('cannot delete another user\'s schedule', async ({ seededCourse }) => {
-    await enableReportExport(seededCourse.instructorToken)
+    await enableReportExport()
 
     // Instructor creates a schedule
     const createRes = await fetch(`${apiBase}/api/v1/reports/schedules`, {
@@ -186,10 +206,10 @@ test.describe('Report Export — UI', () => {
     page,
     seededCourse,
   }) => {
-    await enableReportExport(seededCourse.instructorToken)
-    // Navigate to reports page as instructor
+    await enableReportExport()
+    await injectToken(page, seededCourse.instructorToken)
     await page.goto('/reports')
-    // The button should appear in the actions area
+    await mainNav(page).waitFor({ state: 'visible' })
     const exportBtn = page.getByRole('button', { name: /export pdf/i })
     // The button may be disabled until report loads — wait for page to settle
     await expect(exportBtn).toBeVisible({ timeout: 12000 })
