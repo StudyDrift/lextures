@@ -1,6 +1,6 @@
 import { ArrowLeft, BookOpen, BrainCircuit, GraduationCap, Search } from 'lucide-react'
 import { useState } from 'react'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 
 const LOGIN_URL = 'https://demo.lextures.com/'
 

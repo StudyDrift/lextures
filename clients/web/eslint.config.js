@@ -1,5 +1,3 @@
-// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
-import storybook from "eslint-plugin-storybook";
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 import js from '@eslint/js'
@@ -9,7 +7,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default defineConfig([globalIgnores(['dist', 'coverage', 'storybook-static']), {
+export default defineConfig([globalIgnores(['dist', 'coverage']), {
   files: ['**/*.{ts,tsx}'],
   extends: [
     js.configs.recommended,
@@ -36,4 +34,4 @@ export default defineConfig([globalIgnores(['dist', 'coverage', 'storybook-stati
     'jsx-a11y/aria-unsupported-elements': 'error',
     'jsx-a11y/role-has-required-aria-props': 'error',
   },
-}, ...storybook.configs["flat/recommended"]])
+}])

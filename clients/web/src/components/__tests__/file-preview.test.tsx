@@ -2,10 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { http, HttpResponse } from 'msw'
 import { server } from '../../test/mocks/server'
-import { FilePreview } from '../FilePreview'
+import { FilePreview } from '../file-preview'
 
 // Mock PdfViewer — it relies on PDF.js canvas APIs unavailable in jsdom
-vi.mock('../PdfViewer', () => ({
+vi.mock('../pdf-viewer', () => ({
   PdfViewer: ({ filePath, filename }: { filePath: string; filename: string }) => (
     <div data-testid="pdf-viewer" data-filepath={filePath} data-filename={filename}>
       PDF Viewer Mock

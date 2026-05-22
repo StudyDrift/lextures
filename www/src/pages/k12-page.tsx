@@ -1,5 +1,5 @@
 import { ArrowRight, BarChart3, GraduationCap, RefreshCw, ShieldCheck, Users, Zap } from 'lucide-react'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 
 const LINKS = {
   demo: 'https://demo.lextures.com/',

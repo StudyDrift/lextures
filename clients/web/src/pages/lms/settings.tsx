@@ -36,7 +36,7 @@ import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-acco
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { LmsPage } from './lms-page'
-import OrgBranding from './admin/OrgBranding'
+import OrgBranding from './admin/org-branding'
 import { FALLBACK_IMAGE_MODEL_OPTIONS, FALLBACK_TEXT_MODEL_OPTIONS } from '../../lib/ai-models'
 import { apiUrl, authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'

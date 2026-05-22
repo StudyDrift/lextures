@@ -11,17 +11,17 @@ import {
   Zap,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Header } from './components/Header'
-import { HeroCanvas } from './HeroCanvas'
-import { BlogIndex } from './pages/BlogIndex'
-import { BlogPost } from './pages/BlogPost'
-import { DocsIndex } from './pages/DocsIndex'
-import { DocsPost } from './pages/DocsPost'
-import { GetStartedPage } from './pages/GetStartedPage'
-import { HigherEdPage } from './pages/HigherEdPage'
-import { K12Page } from './pages/K12Page'
-import { PricingPage } from './pages/PricingPage'
-import { SelfLearnerPage } from './pages/SelfLearnerPage'
+import { Header } from './components/header'
+import { HeroCanvas } from './hero-canvas'
+import { BlogIndex } from './pages/blog-index'
+import { BlogPost } from './pages/blog-post'
+import { DocsIndex } from './pages/docs-index'
+import { DocsPost } from './pages/docs-post'
+import { GetStartedPage } from './pages/get-started-page'
+import { HigherEdPage } from './pages/higher-ed-page'
+import { K12Page } from './pages/k12-page'
+import { PricingPage } from './pages/pricing-page'
+import { SelfLearnerPage } from './pages/self-learner-page'
 
 const LINKS = {
   demo: 'https://demo.lextures.com/',

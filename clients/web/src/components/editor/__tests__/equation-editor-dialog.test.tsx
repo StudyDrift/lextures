@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { EquationEditorDialog } from '../EquationEditorDialog'
+import { EquationEditorDialog } from '../equation-editor-dialog'
 
 vi.mock('../../../lib/courses-api', () => ({
   postCourseContext: vi.fn().mockResolvedValue(undefined),

@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 import { formatDate, getArticle } from '../utils/docs'
 
 export function DocsPost({ slug }: { slug: string }) {

@@ -1,5 +1,5 @@
 import { Outlet, useParams } from 'react-router-dom'
-import { TutorPanel } from '../../components/TutorPanel'
+import { TutorPanel } from '../../components/tutor-panel'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { CourseSyllabusAcceptanceOverlay } from './course-syllabus-acceptance-overlay'
 

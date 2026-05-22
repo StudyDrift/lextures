@@ -147,9 +147,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Storybook build
-        run: npm run build-storybook
-
   e2e:
     name: E2E (Playwright, no Docker)
     runs-on: ubuntu-latest

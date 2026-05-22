@@ -11,7 +11,7 @@ import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { getAccessToken } from '../../lib/auth'
 import { collabDocWsUrl } from '../../lib/collab-docs-api'
-import { PresenceBar } from './PresenceBar'
+import { PresenceBar } from './presence-bar'
 import { colorForUser } from './collab-utils'
 
 type Props = {

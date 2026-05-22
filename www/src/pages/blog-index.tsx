@@ -1,11 +1,11 @@
-import { ArrowLeft, ArrowRight, HelpCircle, Search } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Search } from 'lucide-react'
 import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
-import { Header } from '../components/Header'
-import { allArticles, formatDate } from '../utils/docs'
+import { Header } from '../components/header'
+import { allPosts, formatDate } from '../utils/blog'
 
-const ARTICLES_PER_PAGE = 10
+const POSTS_PER_PAGE = 10
 
-export function DocsIndex() {
+export function BlogIndex() {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -13,24 +13,24 @@ export function DocsIndex() {
     window.scrollTo(0, 0)
   }, [currentPage])
 
-  const filteredArticles = useMemo(() => {
+  const filteredPosts = useMemo(() => {
     const query = searchQuery.toLowerCase().trim()
-    if (!query) return allArticles
+    if (!query) return allPosts
 
-    return allArticles.filter(
-      (article) =>
-        article.title.toLowerCase().includes(query) ||
-        article.description.toLowerCase().includes(query) ||
-        article.author.toLowerCase().includes(query) ||
-        article.content.toLowerCase().includes(query)
+    return allPosts.filter(
+      (post) =>
+        post.title.toLowerCase().includes(query) ||
+        post.description.toLowerCase().includes(query) ||
+        post.author.toLowerCase().includes(query) ||
+        post.content.toLowerCase().includes(query)
     )
   }, [searchQuery])
 
-  const totalPages = Math.ceil(filteredArticles.length / ARTICLES_PER_PAGE)
-  const paginatedArticles = useMemo(() => {
-    const start = (currentPage - 1) * ARTICLES_PER_PAGE
-    return filteredArticles.slice(start, start + ARTICLES_PER_PAGE)
-  }, [filteredArticles, currentPage])
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE)
+  const paginatedPosts = useMemo(() => {
+    const start = (currentPage - 1) * POSTS_PER_PAGE
+    return filteredPosts.slice(start, start + POSTS_PER_PAGE)
+  }, [filteredPosts, currentPage])
 
   // Reset to first page when search query changes
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -47,28 +47,28 @@ export function DocsIndex() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-muted/70 text-accent">
-                <HelpCircle className="h-5 w-5" aria-hidden />
+                <BookOpen className="h-5 w-5" aria-hidden />
               </div>
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-stone-500">
-                Lextures Documentation
+                Lextures Blog
               </p>
             </div>
             <h1 className="mt-5 text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
-              Knowledge Base
+              Writing
             </h1>
             <p className="mt-4 max-w-xl text-lg leading-relaxed text-stone-600">
-              Guides, tutorials, and documentation to help you get the most out of Lextures.
+              Thoughts on adaptive learning, educational technology, and building software for institutions that run at scale.
             </p>
 
-            <div className="mt-10 w-full">
-              <div className="relative group">
-                <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                  <Search className="h-5 w-5 text-stone-400 group-focus-within:text-accent transition-colors" aria-hidden />
+            <div className="mt-10 max-w-md">
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <Search className="h-4 w-4 text-stone-400" aria-hidden />
                 </div>
                 <input
                   type="text"
-                  placeholder="Search documentation..."
-                  className="block w-full rounded-full border border-stone-200 bg-white py-3.5 pl-12 pr-6 text-base placeholder-stone-400 shadow-sm outline-none transition-all hover:border-stone-300 hover:shadow-md focus:border-accent focus:ring-2 focus:ring-accent-muted/30 focus:shadow-md"
+                  placeholder="Search articles..."
+                  className="block w-full rounded-lg border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-3 text-sm placeholder-stone-400 outline-none transition-colors focus:border-accent focus:ring-1 focus:ring-accent"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
@@ -79,9 +79,9 @@ export function DocsIndex() {
 
         <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            {filteredArticles.length === 0 ? (
+            {filteredPosts.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-lg text-stone-500">No articles found matching your search.</p>
+                <p className="text-lg text-stone-500">No posts found matching your search.</p>
                 <button
                   onClick={() => setSearchQuery('')}
                   className="mt-4 text-sm font-semibold text-accent hover:underline"
@@ -92,33 +92,33 @@ export function DocsIndex() {
             ) : (
               <>
                 <div className="divide-y divide-stone-200/80">
-                  {paginatedArticles.map((article) => (
-                    <article key={article.slug} className="group py-10 first:pt-0">
+                  {paginatedPosts.map((post) => (
+                    <article key={post.slug} className="group py-10 first:pt-0">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
                         <div className="flex-1">
                           <time
-                            dateTime={article.date}
+                            dateTime={post.date}
                             className="text-xs font-medium uppercase tracking-widest text-stone-400"
                           >
-                            {formatDate(article.date)}
+                            {formatDate(post.date)}
                           </time>
                           <h2 className="mt-2 text-xl font-semibold leading-snug text-stone-900 sm:text-2xl">
                             <a
-                              href={`/docs/${article.slug}`}
+                              href={`#/blog/${post.slug}`}
                               className="no-underline transition-colors hover:text-accent"
                             >
-                              {article.title}
+                              {post.title}
                             </a>
                           </h2>
                           <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">
-                            {article.description}
+                            {post.description}
                           </p>
-                          <p className="mt-2 text-sm text-stone-400">By {article.author}</p>
+                          <p className="mt-2 text-sm text-stone-400">By {post.author}</p>
                         </div>
                         <a
-                          href={`/docs/${article.slug}`}
+                          href={`#/blog/${post.slug}`}
                           className="btn-primary shrink-0 gap-2 self-start"
-                          aria-label={`Read ${article.title}`}
+                          aria-label={`Read ${post.title}`}
                         >
                           Read
                           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -149,11 +149,11 @@ export function DocsIndex() {
                     <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm text-stone-500">
-                          Showing <span className="font-medium">{(currentPage - 1) * ARTICLES_PER_PAGE + 1}</span> to{' '}
+                          Showing <span className="font-medium">{(currentPage - 1) * POSTS_PER_PAGE + 1}</span> to{' '}
                           <span className="font-medium">
-                            {Math.min(currentPage * ARTICLES_PER_PAGE, filteredArticles.length)}
+                            {Math.min(currentPage * POSTS_PER_PAGE, filteredPosts.length)}
                           </span>{' '}
-                          of <span className="font-medium">{filteredArticles.length}</span> results
+                          of <span className="font-medium">{filteredPosts.length}</span> results
                         </p>
                       </div>
                       <div>

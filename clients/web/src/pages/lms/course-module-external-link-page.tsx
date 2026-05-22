@@ -14,7 +14,7 @@ import {
   OneDrivePicker,
   DropboxPicker,
   type PickedFile,
-} from '../../services/cloudPicker'
+} from '../../services/cloud-picker'
 import { LmsPage } from './lms-page'
 
 const PROVIDER_LABELS: Record<string, string> = {

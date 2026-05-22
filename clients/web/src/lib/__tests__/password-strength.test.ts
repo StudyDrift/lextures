@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { passwordStrengthEnglish, passwordStrengthKey } from './password-strength'
+import { passwordStrengthEnglish, passwordStrengthKey } from '../password-strength'
 
 describe('passwordStrengthKey', () => {
   it('marks short passwords weak', () => {

@@ -23,14 +23,14 @@ import {
   type SubmissionFeedbackMediaApi,
   type SubmissionVersionApi,
 } from '../../lib/courses-api'
-import { OriginalityBadge } from '../grading/OriginalityBadge'
-import { OriginalityReportViewer } from '../grading/OriginalityReportViewer'
+import { OriginalityBadge } from '../grading/originality-badge'
+import { OriginalityReportViewer } from '../grading/originality-report-viewer'
 import { getJwtSubject } from '../../lib/auth'
 import { AnnotationCommentPanel } from './annotation-comment-panel'
 import { AnnotationToolbar, type AnnotationTool } from './annotation-toolbar'
 import { AnnotationViewer } from './annotation-viewer'
-import { FeedbackMediaPlayerList } from './FeedbackMediaPlayer'
-import { FeedbackMediaRecorder } from './FeedbackMediaRecorder'
+import { FeedbackMediaPlayerList } from './feedback-media-player'
+import { FeedbackMediaRecorder } from './feedback-media-recorder'
 import { SubmissionNavigator, type GradedFilter } from './submission-navigator'
 
 export type AssignmentAnnotationWorkbenchProps = {

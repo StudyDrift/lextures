@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { VideoPlayer } from './VideoPlayer.js'
-import type { TranscodeStatus } from './VideoPlayer.js'
+import { VideoPlayer } from '../video-player.js'
+import type { TranscodeStatus } from '../video-player.js'
 
 // hls.js is not available in jsdom; mock it so the component loads.
 vi.mock('hls.js', () => {

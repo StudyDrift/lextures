@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import 'fake-indexeddb/auto'
-import { db, addPendingSync, drainPendingSync, evictOldCacheItems, MAX_PENDING_SYNCS } from './schema'
+import { db, addPendingSync, drainPendingSync, evictOldCacheItems, MAX_PENDING_SYNCS } from '../schema'
 
 beforeEach(async () => {
   await db.courses.clear()
