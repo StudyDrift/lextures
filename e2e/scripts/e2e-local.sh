@@ -5,7 +5,8 @@
 #   ./e2e/scripts/e2e-local.sh              # full suite (cwd: repo root)
 #   ./e2e/scripts/e2e-local.sh tests/inbox.spec.ts
 #   ./e2e/scripts/e2e-local.sh e2e/tests/inbox.spec.ts   # same; e2e/ prefix is stripped
-# Any extra arguments are passed through to `playwright test` (e.g. --headed, --grep).
+# Any extra arguments are passed through to `playwright test` (e.g. --headed, --grep,
+# --shard=2/4 for CI sharding).
 #
 # Steps:
 #   1. Locate system PostgreSQL binaries (Homebrew, Linux packages, pg_config).
@@ -226,9 +227,12 @@ fi
 echo "==> Starting Go API server on port ${E2E_API_PORT}..."
 cd "${REPO_ROOT}/server"
 if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
-  if [[ ! -x "${E2E_SERVER_BIN}" ]]; then
-    echo "ERROR: E2E_SERVER_BIN is not executable: ${E2E_SERVER_BIN}"
+  if [[ ! -f "${E2E_SERVER_BIN}" ]]; then
+    echo "ERROR: E2E_SERVER_BIN not found: ${E2E_SERVER_BIN}"
     exit 1
+  fi
+  if [[ ! -x "${E2E_SERVER_BIN}" ]]; then
+    chmod +x "${E2E_SERVER_BIN}"
   fi
   DATABASE_URL="${DATABASE_URL}" \
     JWT_SECRET="${E2E_JWT_SECRET}" \

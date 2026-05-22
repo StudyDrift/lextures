@@ -147,10 +147,57 @@ jobs:
       - name: Build
         run: npm run build
 
-  e2e:
-    name: E2E (Playwright, no Docker)
+  e2e-build:
+    name: E2E build (API + web)
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.10"
+          cache-dependency-path: server/go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: clients/web/package-lock.json
+
+      - name: Build API server binary
+        working-directory: server
+        run: |
+          mkdir -p "${{ github.workspace }}/.cache/e2e"
+          go build -trimpath -ldflags="-s -w" -o "${{ github.workspace }}/.cache/e2e/server" ./cmd/server
+
+      - name: Install and build web client
+        working-directory: clients/web
+        env:
+          VITE_API_URL: http://localhost:8080
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload e2e build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-build
+          path: |
+            .cache/e2e/server
+            clients/web/dist
+          retention-days: 1
+
+  e2e:
+    name: E2E shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+    needs: e2e-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shardIndex: [1, 2, 3, 4]
+        shardTotal: [4]
     env:
       E2E_USE_DOCKER: "0"
       E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
@@ -160,6 +207,7 @@ jobs:
       E2E_SKIP_DEPS: "1"
       E2E_HEALTH_POLL_SECS: "1"
       E2E_HEALTH_MAX_ATTEMPTS: "45"
+      E2E_ADMIN_EMAIL: admin@e2e.test
       CI: "true"
     services:
       postgres:
@@ -178,10 +226,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
+      - name: Download e2e build artifacts
+        uses: actions/download-artifact@v4
         with:
-          go-version: "1.25.10"
-          cache-dependency-path: server/go.sum
+          name: e2e-build
+
+      # upload-artifact does not preserve the executable bit on the API binary.
+      - name: Restore server binary permissions
+        run: chmod +x "${{ github.workspace }}/.cache/e2e/server"
 
       - uses: actions/setup-node@v4
         with:
@@ -199,19 +251,9 @@ jobs:
           restore-keys: |
             playwright-chromium-${{ runner.os }}-
 
-      - name: Build API server binary
-        working-directory: server
-        run: |
-          mkdir -p "${{ github.workspace }}/.cache/e2e"
-          go build -trimpath -ldflags="-s -w" -o "${{ env.E2E_SERVER_BIN }}" ./cmd/server
-
-      - name: Install and build web client
+      - name: Install web client (preview runtime)
         working-directory: clients/web
-        env:
-          VITE_API_URL: http://localhost:8080
-        run: |
-          npm ci
-          npm run build
+        run: npm ci --prefer-offline --quiet
 
       - name: Install e2e dependencies and Playwright browser
         working-directory: e2e
@@ -219,5 +261,50 @@ jobs:
           npm ci --prefer-offline --quiet
           npx playwright install --with-deps chromium
 
-      - name: Run e2e suite (local stack)
-        run: bash e2e/scripts/e2e-local.sh
+      - name: Run e2e shard (local stack)
+        run: bash e2e/scripts/e2e-local.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+
+      - name: Upload blob report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-report-${{ matrix.shardIndex }}
+          path: e2e/blob-report
+          retention-days: 1
+
+  e2e-report:
+    name: E2E report (merge shards)
+    needs: [e2e]
+    if: ${{ !cancelled() && always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: npm ci --prefer-offline --quiet
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: e2e/all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge Playwright reports
+        working-directory: e2e
+        run: npx playwright merge-reports --reporter html ./all-blob-reports
+
+      - name: Upload merged HTML report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 7
