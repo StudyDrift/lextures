@@ -20,9 +20,8 @@ func aid(i int) uuid.UUID {
 	return s
 }
 
-func boolPtr(b bool) *bool      { return &b }
-func intPtr(i int) *int         { return &i }
-func f64Ptr(f float64) *float64 { return &f }
+func boolPtr(b bool) *bool { return &b }
+func intPtr(i int) *int   { return &i }
 
 // makeRow builds an AttemptResponseRow. attemptScorePct is the attempt-level score_percent (0-100).
 func makeRow(attemptIdx, qi int, qtype string, correct bool, choice *int, ptsAwarded, maxPts, attemptScorePct float64) repoitemanalysis.AttemptResponseRow {
