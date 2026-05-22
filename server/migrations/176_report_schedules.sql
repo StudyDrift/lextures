@@ -8,7 +8,7 @@ CREATE SCHEMA IF NOT EXISTS analytics;
 
 CREATE TABLE IF NOT EXISTS analytics.report_schedules (
   id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  owner_id       UUID        NOT NULL REFERENCES "user".user_account(id) ON DELETE CASCADE,
+  owner_id       UUID        NOT NULL REFERENCES "user".users(id) ON DELETE CASCADE,
   course_id      UUID        REFERENCES course.courses(id) ON DELETE CASCADE,
   report_type    TEXT        NOT NULL,
   parameters     JSONB       NOT NULL DEFAULT '{}',
