@@ -1,5 +1,5 @@
 import { ArrowRight, Check, Minus } from 'lucide-react'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 
 const LINKS = {
   demo: 'https://demo.lextures.com/',

@@ -7,7 +7,7 @@ import {
   isoToDatetimeLocalValue,
   makeQuestion,
   quizDateTimeIsSet,
-} from './course-module-quiz-utils'
+} from '../course-module-quiz-utils'
 
 describe('course-module-quiz-utils', () => {
   it('round-trips datetime-local to ISO', () => {

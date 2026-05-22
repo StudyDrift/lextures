@@ -15,7 +15,7 @@ import { SideNav } from './side-nav'
 import { TopBar } from './top-bar'
 import { UiThemeSync } from './ui-theme-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
-import { HelpWidget } from './HelpWidget'
+import { HelpWidget } from './help-widget'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
 import { OfflineBanner } from '../offline-banner'
 

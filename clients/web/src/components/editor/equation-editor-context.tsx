@@ -2,7 +2,7 @@
 import type { Editor } from '@tiptap/core'
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import { postCourseContext } from '../../lib/courses-api'
-import { EquationEditorDialog, type EquationEditorDialogProps } from './EquationEditorDialog'
+import { EquationEditorDialog, type EquationEditorDialogProps } from './equation-editor-dialog'
 
 export type EquationEditTarget = {
   editor: Editor

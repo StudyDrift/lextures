@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { H5PPlayer } from '../../components/H5PPlayer'
+import { H5PPlayer } from '../../components/h5p-player'
 import { fetchModuleH5PByItem, type ModuleH5PPayload } from '../../lib/courses-api'
 import { h5pI18n } from '../../lib/h5p-i18n'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'

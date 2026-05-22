@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, HelpCircle, Search } from 'lucide-react'
 import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 import { allArticles, formatDate } from '../utils/docs'
 
 const ARTICLES_PER_PAGE = 10

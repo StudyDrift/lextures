@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight, BookOpen, Search } from 'lucide-react'
 import { useState, useMemo, useEffect, type ChangeEvent } from 'react'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 import { allPosts, formatDate } from '../utils/blog'
 
 const POSTS_PER_PAGE = 10

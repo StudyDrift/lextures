@@ -1,2 +1,2 @@
-export { VideoPlayer } from './VideoPlayer.js'
-export type { TranscodeStatus } from './VideoPlayer.js'
+export { VideoPlayer } from './video-player.js'
+export type { TranscodeStatus } from './video-player.js'

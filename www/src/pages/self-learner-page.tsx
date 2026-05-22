@@ -1,5 +1,5 @@
 import { ArrowRight, BrainCircuit, RefreshCw, TrendingUp, Zap } from 'lucide-react'
-import { Header } from '../components/Header'
+import { Header } from '../components/header'
 
 const PROBLEMS = [
   {

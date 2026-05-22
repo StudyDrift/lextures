@@ -3,7 +3,7 @@ import { Download, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import { detectPreviewType } from '../lib/file-type'
 import { authorizedFetch } from '../lib/api'
 import { apiUrl } from '../lib/api'
-import { PdfViewer } from './PdfViewer'
+import { PdfViewer } from './pdf-viewer'
 
 export type FilePreviewProps = {
   open: boolean

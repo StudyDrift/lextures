@@ -5,10 +5,10 @@ import { describe, expect, it } from 'vitest'
 import {
   defaultQuizAdvancedSettings,
   type ModuleQuizPayload,
-} from '../../lib/courses-api'
-import { server } from '../../test/mocks/server'
-import { setAccessToken } from '../../lib/auth'
-import { QuizStudentTakePanel } from './quiz-student-take-panel'
+} from '../../../lib/courses-api'
+import { server } from '../../../test/mocks/server'
+import { setAccessToken } from '../../../lib/auth'
+import { QuizStudentTakePanel } from '../quiz-student-take-panel'
 
 function minimalQuiz(overrides: Partial<ModuleQuizPayload> = {}): ModuleQuizPayload {
   const base: ModuleQuizPayload = {

@@ -5,7 +5,7 @@ import {
   OneDrivePicker,
   DropboxPicker,
   type PickedFile,
-} from '../../services/cloudPicker'
+} from '../../services/cloud-picker'
 
 type ModuleExternalLinkModalProps = {
   open: boolean

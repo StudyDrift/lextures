@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { fetchCollabDocs, type CollabDoc } from '../../lib/collab-docs-api'
 import { courseItemCreatePermission, fetchCourse } from '../../lib/courses-api'
 import { usePermissions } from '../../context/use-permissions'
-import { CollabDocsList } from '../../components/collab/CollabDocsList'
+import { CollabDocsList } from '../../components/collab/collab-docs-list'
 import { LmsPage } from './lms-page'
 
 export default function CourseCollabDocsPage() {

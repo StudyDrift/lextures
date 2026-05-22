@@ -41,7 +41,6 @@ Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run de
 | Frontend typecheck | `npm run typecheck` | `clients/web/` |
 | Frontend tests | `npm run test` | `clients/web/` |
 | Frontend dev server | `npm run dev` | `clients/web/` |
-| Storybook | `npm run storybook` | `clients/web/` |
 
 ### Gotchas
 

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { DropboxPicker } from './dropbox'
-import { GoogleDrivePicker } from './google-drive'
-import { OneDrivePicker } from './onedrive'
-import type { PickedFile } from './types'
+import { DropboxPicker } from '../dropbox'
+import { GoogleDrivePicker } from '../google-drive'
+import { OneDrivePicker } from '../onedrive'
+import type { PickedFile } from '../types'
 
 // Shared script loader mock — prevents DOM manipulation in tests
-vi.mock('./dropbox', async (importOriginal) => {
-  const original = await importOriginal<typeof import('./dropbox')>()
+vi.mock('../dropbox', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../dropbox')>()
   return original
 })
 
