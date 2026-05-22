@@ -231,6 +231,10 @@ jobs:
         with:
           name: e2e-build
 
+      # upload-artifact does not preserve the executable bit on the API binary.
+      - name: Restore server binary permissions
+        run: chmod +x "${{ github.workspace }}/.cache/e2e/server"
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"

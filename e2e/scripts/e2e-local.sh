@@ -227,9 +227,12 @@ fi
 echo "==> Starting Go API server on port ${E2E_API_PORT}..."
 cd "${REPO_ROOT}/server"
 if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
-  if [[ ! -x "${E2E_SERVER_BIN}" ]]; then
-    echo "ERROR: E2E_SERVER_BIN is not executable: ${E2E_SERVER_BIN}"
+  if [[ ! -f "${E2E_SERVER_BIN}" ]]; then
+    echo "ERROR: E2E_SERVER_BIN not found: ${E2E_SERVER_BIN}"
     exit 1
+  fi
+  if [[ ! -x "${E2E_SERVER_BIN}" ]]; then
+    chmod +x "${E2E_SERVER_BIN}"
   fi
   DATABASE_URL="${DATABASE_URL}" \
     JWT_SECRET="${E2E_JWT_SECRET}" \
