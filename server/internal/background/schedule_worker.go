@@ -165,7 +165,10 @@ func friendlyReportType(t string) string {
 	case "item-analysis":
 		return "Item Analysis"
 	default:
-		return strings.Title(t)
+		if len(t) == 0 {
+			return t
+		}
+		return strings.ToUpper(t[:1]) + t[1:]
 	}
 }
 
