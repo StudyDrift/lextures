@@ -129,4 +129,9 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/groups/{group_id}/feed/channels/{channel_id}/messages", d.handlePostGroupMessage())
 	r.Get("/api/v1/courses/{course_code}/feed/ws", d.handleFeedWS())
 	r.Get("/api/v1/courses/{course_code}/import/canvas/ws", d.handleCourseImportCanvasWS())
+	// 9.3 Mastery Heatmap
+	r.Get("/api/v1/courses/{course_code}/analytics/mastery-heatmap", d.handleCourseMasteryHeatmap())
+	r.Get("/api/v1/courses/{course_code}/analytics/mastery-heatmap/concepts/{concept_id}", d.handleCourseMasteryHeatmapConceptDrillDown())
+	r.Get("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/mastery", d.handleCourseEnrollmentMastery())
+	r.Post("/api/v1/courses/{course_code}/analytics/mastery-heatmap/refresh", d.handleCourseMasteryHeatmapRefresh())
 }
