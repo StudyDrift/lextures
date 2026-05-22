@@ -215,6 +215,9 @@ type Config struct {
 	// OutcomesReportEnabled gates course-level outcomes achievement reporting (plan 9.5).
 	OutcomesReportEnabled bool
 
+	// EngagementTrackingEnabled gates engagement metrics collection and reporting (plan 9.7).
+	EngagementTrackingEnabled bool
+
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool
 

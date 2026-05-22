@@ -21,6 +21,7 @@ export type PlatformFeatures = {
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
   outcomesReportEnabled: boolean
+  engagementTrackingEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
@@ -38,6 +39,7 @@ const defaultFeatures: PlatformFeatures = {
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
   outcomesReportEnabled: false,
+  engagementTrackingEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
@@ -60,6 +62,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     oerLibraryEnabled: false,
     itemAnalysisEnabled: false,
     outcomesReportEnabled: false,
+    engagementTrackingEnabled: false,
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     storageQuotasEnabled: false,
@@ -83,6 +86,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           oerLibraryEnabled: data.oerLibraryEnabled === true,
           itemAnalysisEnabled: data.itemAnalysisEnabled === true,
           outcomesReportEnabled: data.outcomesReportEnabled === true,
+          engagementTrackingEnabled: data.engagementTrackingEnabled === true,
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
