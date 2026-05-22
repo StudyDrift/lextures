@@ -190,6 +190,9 @@ type Config struct {
 	// applied at startup. 0 means unlimited unless an admin sets an explicit limit.
 	StorageDefaultTenantQuotaGB int64
 
+	// AtRiskAlertsEnabled gates at-risk scoring, alerts, and instructor UI (plan 9.2).
+	AtRiskAlertsEnabled bool
+
 	// AvScanningEnabled gates ClamAV malware scanning on uploads (plan 8.6).
 	AvScanningEnabled bool
 
@@ -354,6 +357,8 @@ func Load() Config {
 
 		StorageQuotasEnabled:        boolEnv("FEATURE_STORAGE_QUOTAS"),
 		StorageDefaultTenantQuotaGB: storageDefaultTenantQuotaGB(),
+
+		AtRiskAlertsEnabled: boolEnv("FEATURE_AT_RISK_ALERTS"),
 
 		AvScanningEnabled: boolEnv("FEATURE_AV_SCANNING"),
 
