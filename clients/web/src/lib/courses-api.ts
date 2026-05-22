@@ -5324,3 +5324,88 @@ export async function putAdminCloudProvider(provider: string, enabled: boolean):
     throw new Error(readApiErrorMessage(raw))
   }
 }
+
+// At-risk alerts (plan 9.2)
+export type AtRiskAlert = {
+  id: string
+  enrollmentId: string
+  userId: string
+  displayName: string
+  score: number
+  status: string
+  topFactor: string
+  topFactorLabel: string
+  snoozeUntil?: string
+  notes?: string
+  triggeredDate: string
+  missingPct?: number
+  quizAvg?: number
+  daysInactive?: number
+}
+
+export async function fetchCourseAtRisk(
+  courseCode: string,
+  includeResolved = false,
+): Promise<{ alerts: AtRiskAlert[]; resolved: AtRiskAlert[] }> {
+  const q = includeResolved ? '?includeResolved=true' : ''
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/at-risk${q}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = raw as { alerts?: unknown[]; resolved?: unknown[] }
+  const mapRow = (row: unknown): AtRiskAlert => {
+    const r = row as Record<string, unknown>
+    return {
+      id: String(r.id ?? ''),
+      enrollmentId: String(r.enrollmentId ?? ''),
+      userId: String(r.userId ?? ''),
+      displayName: String(r.displayName ?? ''),
+      score: Number(r.score ?? 0),
+      status: String(r.status ?? ''),
+      topFactor: String(r.topFactor ?? ''),
+      topFactorLabel: String(r.topFactorLabel ?? ''),
+      snoozeUntil: r.snoozeUntil != null ? String(r.snoozeUntil) : undefined,
+      notes: r.notes != null ? String(r.notes) : undefined,
+      triggeredDate: String(r.triggeredDate ?? ''),
+      missingPct: r.missingPct != null ? Number(r.missingPct) : undefined,
+      quizAvg: r.quizAvg != null ? Number(r.quizAvg) : undefined,
+      daysInactive: r.daysInactive != null ? Number(r.daysInactive) : undefined,
+    }
+  }
+  return {
+    alerts: (body.alerts ?? []).map(mapRow),
+    resolved: (body.resolved ?? []).map(mapRow),
+  }
+}
+
+export async function patchCourseAtRiskAlert(
+  courseCode: string,
+  alertId: string,
+  body: { status?: string; snoozeDays?: number; notes?: string },
+): Promise<AtRiskAlert> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/at-risk/${encodeURIComponent(alertId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const r = raw as Record<string, unknown>
+  return {
+    id: String(r.id ?? alertId),
+    enrollmentId: String(r.enrollmentId ?? ''),
+    userId: String(r.userId ?? ''),
+    displayName: String(r.displayName ?? ''),
+    score: Number(r.score ?? 0),
+    status: String(r.status ?? ''),
+    topFactor: String(r.topFactor ?? ''),
+    topFactorLabel: String(r.topFactorLabel ?? ''),
+    snoozeUntil: r.snoozeUntil != null ? String(r.snoozeUntil) : undefined,
+    notes: r.notes != null ? String(r.notes) : undefined,
+    triggeredDate: String(r.triggeredDate ?? ''),
+  }
+}

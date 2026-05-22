@@ -19,7 +19,9 @@ import {
   Users,
   UsersRound,
   Video,
+  AlertTriangle,
 } from 'lucide-react'
+import { atRiskFeatureEnabled, atRiskI18n } from '../../lib/at-risk-i18n'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -150,6 +152,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       {canViewGradebook && (
         <SideNavLink to={`${base}/gradebook`} icon={<ClipboardList className="h-5 w-5" />}>
           Gradebook
+        </SideNavLink>
+      )}
+      {canViewGradebook && atRiskFeatureEnabled() && (
+        <SideNavLink to={`${base}/at-risk`} icon={<AlertTriangle className="h-5 w-5" />}>
+          {atRiskI18n.title}
         </SideNavLink>
       )}
       {sbgEnabled && canViewGradebook && (

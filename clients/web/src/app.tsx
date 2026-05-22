@@ -11,6 +11,7 @@ import CourseDiscussionsPage from './pages/lms/course-discussions-page'
 import CourseCollabDocsPage from './pages/lms/course-collab-docs-page'
 import CourseGroupsPage from './pages/lms/course-groups-page'
 import CourseGradebook from './pages/lms/course-gradebook'
+import CourseAtRiskPage from './pages/lms/course-at-risk'
 import StudentProgressPage from './pages/lms/student-progress-page'
 import CourseMyGrades from './pages/lms/course-my-grades'
 import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
@@ -153,6 +154,7 @@ export default function App() {
             <Route path="calendar" element={<CourseCalendarPage />} />
             <Route path="my-grades" element={<CourseMyGrades />} />
             <Route path="gradebook" element={<CourseGradebook />} />
+            <Route path="at-risk" element={<CourseAtRiskPage />} />
             <Route path="students/:enrollmentId/progress" element={<StudentProgressPage />} />
             <Route path="standards-gradebook" element={<CourseStandardsGradebook />} />
             <Route path="standards-coverage" element={<CourseStandardsCoveragePage />} />

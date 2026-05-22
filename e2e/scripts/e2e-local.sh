@@ -239,6 +239,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     FEATURE_H5P="${FEATURE_H5P:-true}" \
     FEATURE_OER_LIBRARY="${FEATURE_OER_LIBRARY:-true}" \
     FEATURE_STUDENT_PROGRESS="${FEATURE_STUDENT_PROGRESS:-true}" \
+    FEATURE_AT_RISK_ALERTS="${FEATURE_AT_RISK_ALERTS:-true}" \
     OER_STUB="${OER_STUB:-true}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -251,6 +252,7 @@ else
     FEATURE_H5P="${FEATURE_H5P:-true}" \
     FEATURE_OER_LIBRARY="${FEATURE_OER_LIBRARY:-true}" \
     FEATURE_STUDENT_PROGRESS="${FEATURE_STUDENT_PROGRESS:-true}" \
+    FEATURE_AT_RISK_ALERTS="${FEATURE_AT_RISK_ALERTS:-true}" \
     OER_STUB="${OER_STUB:-true}" \
     go run ./cmd/server &
 fi
@@ -271,6 +273,7 @@ if [[ "${E2E_WEB_MODE:-}" == "preview" ]]; then
 else
   VITE_API_URL="http://localhost:${E2E_API_PORT}" \
     VITE_FEATURE_STUDENT_PROGRESS="${VITE_FEATURE_STUDENT_PROGRESS:-true}" \
+    VITE_FEATURE_AT_RISK_ALERTS="${VITE_FEATURE_AT_RISK_ALERTS:-true}" \
     npm run dev -- --port 5173 --strictPort &
 fi
 PIDS+=($!)
