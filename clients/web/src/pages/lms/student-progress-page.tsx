@@ -14,7 +14,8 @@ import {
   type StudentProgressNote,
   type StudentProgressResponse,
 } from '../../lib/student-progress-api'
-import { studentProgressFeatureEnabled, studentProgressI18n } from '../../lib/student-progress'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { studentProgressI18n } from '../../lib/student-progress'
 
 type TabId = 'overview' | 'activity' | 'assignments' | 'quizzes' | 'notes'
 
@@ -120,6 +121,7 @@ function QuizScoreChart({
 
 export default function StudentProgressPage() {
   const { courseCode, enrollmentId } = useParams<{ courseCode: string; enrollmentId: string }>()
+  const { studentProgressEnabled, loading: featuresLoading } = usePlatformFeatures()
   const tabsId = useId()
   const [tab, setTab] = useState<TabId>('overview')
   const [loadState, setLoadState] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
@@ -154,8 +156,9 @@ export default function StudentProgressPage() {
   }, [courseCode, enrollmentId])
 
   useEffect(() => {
+    if (featuresLoading || !studentProgressEnabled) return
     void load()
-  }, [load])
+  }, [load, featuresLoading, studentProgressEnabled])
 
   const loadActivity = useCallback(
     async (reset: boolean) => {
@@ -197,15 +200,23 @@ export default function StudentProgressPage() {
 
   const chartCaptionId = `${tabsId}-quiz-chart`
 
-  if (!studentProgressFeatureEnabled()) {
-    return <Navigate to={courseCode ? `/courses/${encodeURIComponent(courseCode)}` : '/'} replace />
-  }
-
   if (!courseCode || !enrollmentId) {
     return <Navigate to="/courses" replace />
   }
 
   const title = isSelf ? studentProgressI18n.myProgressTitle : studentProgressI18n.progressTitle
+
+  if (featuresLoading) {
+    return (
+      <LmsPage title={title}>
+        <p className="mt-6 text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+      </LmsPage>
+    )
+  }
+
+  if (!studentProgressEnabled) {
+    return <Navigate to={`/courses/${encodeURIComponent(courseCode)}`} replace />
+  }
 
   async function onSaveNote() {
     if (!courseCode || !enrollmentId || !noteDraft.trim()) return

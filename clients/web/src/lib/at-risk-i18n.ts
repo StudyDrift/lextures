@@ -19,6 +19,4 @@ export const atRiskI18n = {
   notePlaceholder: 'e.g. Student contacted — plans to submit by Friday',
 } as const
 
-export function atRiskFeatureEnabled(): boolean {
-  return import.meta.env.VITE_FEATURE_AT_RISK_ALERTS === 'true'
-}
+export { atRiskFeatureEnabled } from './platform-features'

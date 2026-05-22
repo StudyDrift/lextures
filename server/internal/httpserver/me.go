@@ -176,6 +176,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Get("/api/v1/me/sessions", d.handleListMySessions())
 	r.Delete("/api/v1/me/sessions", d.handleDeleteMyOtherSessions())
 	r.Delete("/api/v1/me/sessions/{id}", d.handleDeleteMySession())
+	r.Get("/api/v1/platform/features", d.handleGetPlatformFeatures())
 	r.Get("/api/v1/me/oidc-identities", d.handleMyOIDCIdentities())
 	r.Delete("/api/v1/me/oidc-identities/{id}", d.handleDeleteMyOIDCIdentity())
 	r.Post("/api/v1/me/notebooks/query", d.handleNotebookQuery())

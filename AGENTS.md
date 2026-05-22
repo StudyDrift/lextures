@@ -26,7 +26,7 @@ Required env vars for the Go API (copy from `server/.env.example` to `server/.en
 - `PUBLIC_WEB_ORIGIN=http://localhost:5173`
 - `COURSE_FILES_ROOT=data/course-files`
 
-Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run dev`).
+Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run dev`). Feature flags are loaded at runtime from `GET /api/v1/platform/features` (backed by Settings → Global platform), not `VITE_FEATURE_*` build vars.
 
 ### Commands reference
 

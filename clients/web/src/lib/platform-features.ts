@@ -1,0 +1,68 @@
+/** Snapshot of GET /api/v1/platform/features; updated by PlatformFeaturesProvider. */
+
+export type PlatformFeaturesSnapshot = {
+  studentProgressEnabled: boolean
+  atRiskAlertsEnabled: boolean
+  h5pEnabled: boolean
+  oerLibraryEnabled: boolean
+  itemAnalysisEnabled: boolean
+  equationEditorEnabled: boolean
+  storageQuotasEnabled: boolean
+  avScanningEnabled: boolean
+  virtualClassroomEnabled: boolean
+  sessionManagementUiEnabled: boolean
+}
+
+const defaults: PlatformFeaturesSnapshot = {
+  studentProgressEnabled: false,
+  atRiskAlertsEnabled: false,
+  h5pEnabled: false,
+  oerLibraryEnabled: false,
+  itemAnalysisEnabled: false,
+  equationEditorEnabled: false,
+  storageQuotasEnabled: false,
+  avScanningEnabled: false,
+  virtualClassroomEnabled: true,
+  sessionManagementUiEnabled: false,
+}
+
+let loaded = false
+let snapshot: PlatformFeaturesSnapshot = { ...defaults }
+
+export function setPlatformFeaturesSnapshot(next: PlatformFeaturesSnapshot): void {
+  snapshot = next
+  loaded = true
+}
+
+export function resetPlatformFeaturesSnapshot(): void {
+  snapshot = { ...defaults }
+  loaded = false
+}
+
+export function platformFeaturesLoaded(): boolean {
+  return loaded
+}
+
+export function getPlatformFeatures(): PlatformFeaturesSnapshot {
+  return snapshot
+}
+
+export function studentProgressFeatureEnabled(): boolean {
+  return loaded && snapshot.studentProgressEnabled
+}
+
+export function atRiskFeatureEnabled(): boolean {
+  return loaded && snapshot.atRiskAlertsEnabled
+}
+
+export function h5pFeatureEnabled(): boolean {
+  return loaded && snapshot.h5pEnabled
+}
+
+export function oerLibraryEnabled(): boolean {
+  return loaded && snapshot.oerLibraryEnabled
+}
+
+export function equationEditorFeatureEnabled(): boolean {
+  return loaded && snapshot.equationEditorEnabled
+}

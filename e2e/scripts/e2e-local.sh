@@ -236,11 +236,6 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
     PORT="${E2E_API_PORT}" \
-    FEATURE_H5P="${FEATURE_H5P:-true}" \
-    FEATURE_OER_LIBRARY="${FEATURE_OER_LIBRARY:-true}" \
-    FEATURE_STUDENT_PROGRESS="${FEATURE_STUDENT_PROGRESS:-true}" \
-    FEATURE_AT_RISK_ALERTS="${FEATURE_AT_RISK_ALERTS:-true}" \
-    OER_STUB="${OER_STUB:-true}" \
     "${E2E_SERVER_BIN}" &
 else
   DATABASE_URL="${DATABASE_URL}" \
@@ -249,11 +244,6 @@ else
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
     PORT="${E2E_API_PORT}" \
-    FEATURE_H5P="${FEATURE_H5P:-true}" \
-    FEATURE_OER_LIBRARY="${FEATURE_OER_LIBRARY:-true}" \
-    FEATURE_STUDENT_PROGRESS="${FEATURE_STUDENT_PROGRESS:-true}" \
-    FEATURE_AT_RISK_ALERTS="${FEATURE_AT_RISK_ALERTS:-true}" \
-    OER_STUB="${OER_STUB:-true}" \
     go run ./cmd/server &
 fi
 PIDS+=($!)
@@ -272,8 +262,6 @@ if [[ "${E2E_WEB_MODE:-}" == "preview" ]]; then
   VITE_API_URL="http://localhost:${E2E_API_PORT}" npm run preview -- --port 5173 --strictPort &
 else
   VITE_API_URL="http://localhost:${E2E_API_PORT}" \
-    VITE_FEATURE_STUDENT_PROGRESS="${VITE_FEATURE_STUDENT_PROGRESS:-true}" \
-    VITE_FEATURE_AT_RISK_ALERTS="${VITE_FEATURE_AT_RISK_ALERTS:-true}" \
     npm run dev -- --port 5173 --strictPort &
 fi
 PIDS+=($!)
@@ -298,13 +286,11 @@ for arg in "$@"; do
   fi
 done
 if [[ "${#PLAYWRIGHT_TEST_ARGS[@]}" -gt 0 ]]; then
-  FEATURE_H5P="${FEATURE_H5P:-true}" \
-    E2E_BASE_URL="http://localhost:5173" \
+  E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
     npx playwright test "${PLAYWRIGHT_TEST_ARGS[@]}"
 else
-  FEATURE_H5P="${FEATURE_H5P:-true}" \
-    E2E_BASE_URL="http://localhost:5173" \
+  E2E_BASE_URL="http://localhost:5173" \
     E2E_API_URL="http://localhost:${E2E_API_PORT}" \
     npx playwright test
 fi

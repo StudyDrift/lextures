@@ -4,6 +4,7 @@ const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:5173'
 const apiURL = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
 export default defineConfig({
+  globalSetup: './global-setup.ts',
   testDir: './tests',
   // Spec files are isolated (unique users via fixtures); parallelize across files in CI.
   fullyParallel: false,

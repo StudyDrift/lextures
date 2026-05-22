@@ -4,7 +4,7 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 
-type FieldSource = 'environment' | 'database'
+type FieldSource = 'environment' | 'database' | 'default'
 
 export type PlatformSettingsPayload = {
   openRouterApiKey: string
@@ -25,6 +25,17 @@ export type PlatformSettingsPayload = {
   ltiEnabled: boolean
   oneRosterEnabled: boolean
   scimEnabled: boolean
+  studentProgressEnabled: boolean
+  atRiskAlertsEnabled: boolean
+  h5pEnabled: boolean
+  oerLibraryEnabled: boolean
+  oerStub: boolean
+  itemAnalysisEnabled: boolean
+  equationEditorEnabled: boolean
+  storageQuotasEnabled: boolean
+  avScanningEnabled: boolean
+  virtualClassroomEnabled: boolean
+  sessionManagementUiEnabled: boolean
   mfaEnabled: boolean
   mfaEnforcement: 'none' | 'all' | 'staff'
   smtpHost: string
@@ -92,6 +103,17 @@ function emptyForm(): PlatformSettingsPayload {
     ltiEnabled: false,
     oneRosterEnabled: false,
     scimEnabled: false,
+    studentProgressEnabled: false,
+    atRiskAlertsEnabled: false,
+    h5pEnabled: false,
+    oerLibraryEnabled: false,
+    oerStub: false,
+    itemAnalysisEnabled: false,
+    equationEditorEnabled: false,
+    storageQuotasEnabled: false,
+    avScanningEnabled: false,
+    virtualClassroomEnabled: true,
+    sessionManagementUiEnabled: false,
     mfaEnabled: false,
     mfaEnforcement: 'none',
     smtpHost: '',
@@ -134,6 +156,13 @@ function sourceBadge(src: FieldSource) {
     return (
       <span className="ml-2 rounded-md bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-200">
         Database
+      </span>
+    )
+  }
+  if (src === 'default') {
+    return (
+      <span className="ml-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
+        Default
       </span>
     )
   }
@@ -288,6 +317,44 @@ export function PlatformSettingsPanel() {
       maybe('scimEnabled', baseline.scimEnabled, form.scimEnabled, () => {
         body.scimEnabled = form.scimEnabled
       })
+      maybe('studentProgressEnabled', baseline.studentProgressEnabled, form.studentProgressEnabled, () => {
+        body.studentProgressEnabled = form.studentProgressEnabled
+      })
+      maybe('atRiskAlertsEnabled', baseline.atRiskAlertsEnabled, form.atRiskAlertsEnabled, () => {
+        body.atRiskAlertsEnabled = form.atRiskAlertsEnabled
+      })
+      maybe('h5pEnabled', baseline.h5pEnabled, form.h5pEnabled, () => {
+        body.h5pEnabled = form.h5pEnabled
+      })
+      maybe('oerLibraryEnabled', baseline.oerLibraryEnabled, form.oerLibraryEnabled, () => {
+        body.oerLibraryEnabled = form.oerLibraryEnabled
+      })
+      maybe('oerStub', baseline.oerStub, form.oerStub, () => {
+        body.oerStub = form.oerStub
+      })
+      maybe('itemAnalysisEnabled', baseline.itemAnalysisEnabled, form.itemAnalysisEnabled, () => {
+        body.itemAnalysisEnabled = form.itemAnalysisEnabled
+      })
+      maybe('equationEditorEnabled', baseline.equationEditorEnabled, form.equationEditorEnabled, () => {
+        body.equationEditorEnabled = form.equationEditorEnabled
+      })
+      maybe('storageQuotasEnabled', baseline.storageQuotasEnabled, form.storageQuotasEnabled, () => {
+        body.storageQuotasEnabled = form.storageQuotasEnabled
+      })
+      maybe('avScanningEnabled', baseline.avScanningEnabled, form.avScanningEnabled, () => {
+        body.avScanningEnabled = form.avScanningEnabled
+      })
+      maybe('virtualClassroomEnabled', baseline.virtualClassroomEnabled, form.virtualClassroomEnabled, () => {
+        body.virtualClassroomEnabled = form.virtualClassroomEnabled
+      })
+      maybe(
+        'sessionManagementUiEnabled',
+        baseline.sessionManagementUiEnabled,
+        form.sessionManagementUiEnabled,
+        () => {
+          body.sessionManagementUiEnabled = form.sessionManagementUiEnabled
+        },
+      )
       maybe('mfaEnabled', baseline.mfaEnabled, form.mfaEnabled, () => {
         body.mfaEnabled = form.mfaEnabled
       })
@@ -610,6 +677,72 @@ export function PlatformSettingsPanel() {
               src={form.sources.scimEnabled}
               checked={form.scimEnabled}
               onChange={(v) => update('scimEnabled', v)}
+            />
+            <FlagRow
+              label="Per-student progress dashboards"
+              src="default"
+              checked={form.studentProgressEnabled}
+              onChange={(v) => update('studentProgressEnabled', v)}
+            />
+            <FlagRow
+              label="At-risk early-warning alerts"
+              src="default"
+              checked={form.atRiskAlertsEnabled}
+              onChange={(v) => update('atRiskAlertsEnabled', v)}
+            />
+            <FlagRow
+              label="Interactive H5P content"
+              src="default"
+              checked={form.h5pEnabled}
+              onChange={(v) => update('h5pEnabled', v)}
+            />
+            <FlagRow
+              label="OER library search"
+              src="default"
+              checked={form.oerLibraryEnabled}
+              onChange={(v) => update('oerLibraryEnabled', v)}
+            />
+            <FlagRow
+              label="OER stub catalog (dev/e2e)"
+              src="default"
+              checked={form.oerStub}
+              onChange={(v) => update('oerStub', v)}
+            />
+            <FlagRow
+              label="Quiz item analysis"
+              src="default"
+              checked={form.itemAnalysisEnabled}
+              onChange={(v) => update('itemAnalysisEnabled', v)}
+            />
+            <FlagRow
+              label="Equation editor"
+              src="default"
+              checked={form.equationEditorEnabled}
+              onChange={(v) => update('equationEditorEnabled', v)}
+            />
+            <FlagRow
+              label="Storage quotas"
+              src="default"
+              checked={form.storageQuotasEnabled}
+              onChange={(v) => update('storageQuotasEnabled', v)}
+            />
+            <FlagRow
+              label="Antivirus scanning (ClamAV)"
+              src="default"
+              checked={form.avScanningEnabled}
+              onChange={(v) => update('avScanningEnabled', v)}
+            />
+            <FlagRow
+              label="Virtual classroom / live sessions"
+              src="default"
+              checked={form.virtualClassroomEnabled}
+              onChange={(v) => update('virtualClassroomEnabled', v)}
+            />
+            <FlagRow
+              label="Active sessions UI"
+              src="default"
+              checked={form.sessionManagementUiEnabled}
+              onChange={(v) => update('sessionManagementUiEnabled', v)}
             />
             <FlagRow
               label="Two-factor authentication (TOTP and passkeys)"

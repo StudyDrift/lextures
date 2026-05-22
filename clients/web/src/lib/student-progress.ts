@@ -1,7 +1,4 @@
-/** Feature flag for per-student progress dashboards (plan 9.1). */
-export function studentProgressFeatureEnabled(): boolean {
-  return import.meta.env.VITE_FEATURE_STUDENT_PROGRESS === 'true'
-}
+export { studentProgressFeatureEnabled } from './platform-features'
 
 export const studentProgressI18n = {
   submitted: 'Assignments submitted',

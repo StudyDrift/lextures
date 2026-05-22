@@ -59,6 +59,29 @@ type platformSettingsJSON struct {
 	OneRosterEnabled            bool `json:"oneRosterEnabled"`
 	ScimEnabled                 bool `json:"scimEnabled"`
 
+	OIDCSSOEnabled             bool `json:"oidcSsoEnabled"`
+	CleverSSOEnabled           bool `json:"cleverSsoEnabled"`
+	ClassLinkSSOEnabled        bool `json:"classlinkSsoEnabled"`
+	MagicLinkEnabled           bool `json:"magicLinkEnabled"`
+	MagicLinkEnrolledOnly      bool `json:"magicLinkEnrolledOnly"`
+	SessionManagementUIEnabled bool `json:"sessionManagementUiEnabled"`
+	EmailNotificationsEnabled  bool `json:"emailNotificationsEnabled"`
+	PushNotificationsEnabled   bool `json:"pushNotificationsEnabled"`
+	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
+	DRMEnabled                 bool `json:"drmEnabled"`
+	VideoTranscodingEnabled    bool `json:"videoTranscodingEnabled"`
+	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
+	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
+	AtRiskAlertsEnabled        bool `json:"atRiskAlertsEnabled"`
+	AvScanningEnabled          bool `json:"avScanningEnabled"`
+	ClamAVStub                 bool `json:"clamavStub"`
+	H5PEnabled                 bool `json:"h5pEnabled"`
+	OERLibraryEnabled          bool `json:"oerLibraryEnabled"`
+	OERStub                    bool `json:"oerStub"`
+	ItemAnalysisEnabled        bool `json:"itemAnalysisEnabled"`
+	StudentProgressEnabled     bool `json:"studentProgressEnabled"`
+	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
+
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
 
@@ -148,6 +171,28 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			LTIEnabled:                  merged.LTIEnabled,
 			OneRosterEnabled:            merged.OneRosterEnabled,
 			ScimEnabled:                 merged.ScimEnabled,
+			OIDCSSOEnabled:              merged.OIDCSSOEnabled,
+			CleverSSOEnabled:            merged.CleverSSOEnabled,
+			ClassLinkSSOEnabled:         merged.ClassLinkSSOEnabled,
+			MagicLinkEnabled:            merged.MagicLinkEnabled,
+			MagicLinkEnrolledOnly:       merged.MagicLinkEnrolledOnly,
+			SessionManagementUIEnabled:  merged.SessionManagementUIEnabled,
+			EmailNotificationsEnabled:   merged.EmailNotificationsEnabled,
+			PushNotificationsEnabled:    merged.PushNotificationsEnabled,
+			VirtualClassroomEnabled:     merged.VirtualClassroomEnabled,
+			DRMEnabled:                  merged.DRMEnabled,
+			VideoTranscodingEnabled:     merged.VideoTranscodingEnabled,
+			AutoCaptioningEnabled:       merged.AutoCaptioningEnabled,
+			StorageQuotasEnabled:        merged.StorageQuotasEnabled,
+			AtRiskAlertsEnabled:         merged.AtRiskAlertsEnabled,
+			AvScanningEnabled:           merged.AvScanningEnabled,
+			ClamAVStub:                  merged.ClamAVStub,
+			H5PEnabled:                  merged.H5PEnabled,
+			OERLibraryEnabled:           merged.OERLibraryEnabled,
+			OERStub:                     merged.OERStub,
+			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
+			StudentProgressEnabled:      merged.StudentProgressEnabled,
+			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
@@ -210,6 +255,29 @@ type putPlatformBody struct {
 	LTIEnabled                  *bool `json:"ltiEnabled"`
 	OneRosterEnabled            *bool `json:"oneRosterEnabled"`
 	ScimEnabled                 *bool `json:"scimEnabled"`
+
+	OIDCSSOEnabled             *bool `json:"oidcSsoEnabled"`
+	CleverSSOEnabled           *bool `json:"cleverSsoEnabled"`
+	ClassLinkSSOEnabled        *bool `json:"classlinkSsoEnabled"`
+	MagicLinkEnabled           *bool `json:"magicLinkEnabled"`
+	MagicLinkEnrolledOnly      *bool `json:"magicLinkEnrolledOnly"`
+	SessionManagementUIEnabled *bool `json:"sessionManagementUiEnabled"`
+	EmailNotificationsEnabled  *bool `json:"emailNotificationsEnabled"`
+	PushNotificationsEnabled   *bool `json:"pushNotificationsEnabled"`
+	VirtualClassroomEnabled    *bool `json:"virtualClassroomEnabled"`
+	DRMEnabled                 *bool `json:"drmEnabled"`
+	VideoTranscodingEnabled    *bool `json:"videoTranscodingEnabled"`
+	AutoCaptioningEnabled      *bool `json:"autoCaptioningEnabled"`
+	StorageQuotasEnabled       *bool `json:"storageQuotasEnabled"`
+	AtRiskAlertsEnabled        *bool `json:"atRiskAlertsEnabled"`
+	AvScanningEnabled          *bool `json:"avScanningEnabled"`
+	ClamAVStub                 *bool `json:"clamavStub"`
+	H5PEnabled                 *bool `json:"h5pEnabled"`
+	OERLibraryEnabled          *bool `json:"oerLibraryEnabled"`
+	OERStub                    *bool `json:"oerStub"`
+	ItemAnalysisEnabled        *bool `json:"itemAnalysisEnabled"`
+	StudentProgressEnabled     *bool `json:"studentProgressEnabled"`
+	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -431,6 +499,31 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			v := *body.ScimEnabled
 			wr.ScimEnabled = &v
 		})
+		setBool := func(field string, ptr *bool, apply func(bool)) {
+			set(field, ptr != nil, func() { apply(*ptr) })
+		}
+		setBool("oidcssoenabled", body.OIDCSSOEnabled, func(v bool) { wr.OIDCSSOEnabled = &v })
+		setBool("cleverssoenabled", body.CleverSSOEnabled, func(v bool) { wr.CleverSSOEnabled = &v })
+		setBool("classlinkssoenabled", body.ClassLinkSSOEnabled, func(v bool) { wr.ClassLinkSSOEnabled = &v })
+		setBool("magiclinkenabled", body.MagicLinkEnabled, func(v bool) { wr.MagicLinkEnabled = &v })
+		setBool("magiclinkenrolledonly", body.MagicLinkEnrolledOnly, func(v bool) { wr.MagicLinkEnrolledOnly = &v })
+		setBool("sessionmanagementuienabled", body.SessionManagementUIEnabled, func(v bool) { wr.SessionManagementUIEnabled = &v })
+		setBool("emailnotificationsenabled", body.EmailNotificationsEnabled, func(v bool) { wr.EmailNotificationsEnabled = &v })
+		setBool("pushnotificationsenabled", body.PushNotificationsEnabled, func(v bool) { wr.PushNotificationsEnabled = &v })
+		setBool("virtualclassroomenabled", body.VirtualClassroomEnabled, func(v bool) { wr.VirtualClassroomEnabled = &v })
+		setBool("drmenabled", body.DRMEnabled, func(v bool) { wr.DRMEnabled = &v })
+		setBool("videotranscodingenabled", body.VideoTranscodingEnabled, func(v bool) { wr.VideoTranscodingEnabled = &v })
+		setBool("autocaptioningenabled", body.AutoCaptioningEnabled, func(v bool) { wr.AutoCaptioningEnabled = &v })
+		setBool("storagequotasenabled", body.StorageQuotasEnabled, func(v bool) { wr.StorageQuotasEnabled = &v })
+		setBool("atriskalertsenabled", body.AtRiskAlertsEnabled, func(v bool) { wr.AtRiskAlertsEnabled = &v })
+		setBool("avscanningenabled", body.AvScanningEnabled, func(v bool) { wr.AvScanningEnabled = &v })
+		setBool("clamavstub", body.ClamAVStub, func(v bool) { wr.ClamAVStub = &v })
+		setBool("h5penabled", body.H5PEnabled, func(v bool) { wr.H5PEnabled = &v })
+		setBool("oerlibraryenabled", body.OERLibraryEnabled, func(v bool) { wr.OERLibraryEnabled = &v })
+		setBool("oerstub", body.OERStub, func(v bool) { wr.OERStub = &v })
+		setBool("itemanalysisenabled", body.ItemAnalysisEnabled, func(v bool) { wr.ItemAnalysisEnabled = &v })
+		setBool("studentprogressenabled", body.StudentProgressEnabled, func(v bool) { wr.StudentProgressEnabled = &v })
+		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -477,6 +570,28 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			LTIEnabled:                  merged.LTIEnabled,
 			OneRosterEnabled:            merged.OneRosterEnabled,
 			ScimEnabled:                 merged.ScimEnabled,
+			OIDCSSOEnabled:              merged.OIDCSSOEnabled,
+			CleverSSOEnabled:            merged.CleverSSOEnabled,
+			ClassLinkSSOEnabled:         merged.ClassLinkSSOEnabled,
+			MagicLinkEnabled:            merged.MagicLinkEnabled,
+			MagicLinkEnrolledOnly:       merged.MagicLinkEnrolledOnly,
+			SessionManagementUIEnabled:  merged.SessionManagementUIEnabled,
+			EmailNotificationsEnabled:   merged.EmailNotificationsEnabled,
+			PushNotificationsEnabled:    merged.PushNotificationsEnabled,
+			VirtualClassroomEnabled:     merged.VirtualClassroomEnabled,
+			DRMEnabled:                  merged.DRMEnabled,
+			VideoTranscodingEnabled:     merged.VideoTranscodingEnabled,
+			AutoCaptioningEnabled:       merged.AutoCaptioningEnabled,
+			StorageQuotasEnabled:        merged.StorageQuotasEnabled,
+			AtRiskAlertsEnabled:         merged.AtRiskAlertsEnabled,
+			AvScanningEnabled:           merged.AvScanningEnabled,
+			ClamAVStub:                  merged.ClamAVStub,
+			H5PEnabled:                  merged.H5PEnabled,
+			OERLibraryEnabled:           merged.OERLibraryEnabled,
+			OERStub:                     merged.OERStub,
+			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
+			StudentProgressEnabled:      merged.StudentProgressEnabled,
+			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,

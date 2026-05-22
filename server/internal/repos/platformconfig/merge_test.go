@@ -52,4 +52,20 @@ func TestMerge_SMTPHostFromDB(t *testing.T) {
 	}
 }
 
+func TestMerge_H5PFromDB(t *testing.T) {
+	env := config.Config{}
+	on := true
+	got := Merge(env, &Row{H5PEnabled: &on})
+	if !got.H5PEnabled {
+		t.Fatal("expected H5P enabled from DB")
+	}
+}
+
+func TestMerge_H5PDefaultOff(t *testing.T) {
+	got := Merge(config.Config{}, nil)
+	if got.H5PEnabled {
+		t.Fatal("expected H5P off when DB unset")
+	}
+}
+
 func ptr(s string) *string { return &s }
