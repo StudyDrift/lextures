@@ -28,7 +28,10 @@ test.describe('Outcomes report — UI', () => {
     await expect(page.getByRole('heading', { name: /outcomes report/i })).toBeVisible({
       timeout: 12000,
     })
-    await expect(page.getByLabel(/mastery threshold/i)).toBeVisible()
+    await expect(page.getByRole('button', { name: /refresh outcomes report/i })).toBeVisible({
+      timeout: 12000,
+    })
+    await expect(page.getByLabel(/mastery threshold/i)).toBeVisible({ timeout: 5000 })
   })
 
   test('shows cohort pct_met after aligning and grading', async ({
@@ -75,9 +78,12 @@ test.describe('Outcomes report — UI', () => {
     await expect(page.getByRole('heading', { name: /outcomes report/i })).toBeVisible({
       timeout: 12000,
     })
-    await expect(page.getByText('E2E Report Outcome')).toBeVisible()
+    await expect(page.getByRole('button', { name: /refresh outcomes report/i })).toBeVisible({
+      timeout: 12000,
+    })
+    await expect(page.getByText('E2E Report Outcome')).toBeVisible({ timeout: 12000 })
     await expect(page.getByText(/100% met/i)).toBeVisible({ timeout: 10000 })
-    await expect(page.getByText(/1 \/ 1/)).toBeVisible()
+    await expect(page.getByText(/1 \/ 1/)).toBeVisible({ timeout: 10000 })
   })
 })
 

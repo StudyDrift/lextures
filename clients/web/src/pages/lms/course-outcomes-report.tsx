@@ -10,7 +10,7 @@ import {
   type OutcomesReport,
   type OutcomesReportOutcome,
 } from '../../lib/outcomes-report-api'
-import { outcomesReportFeatureEnabled } from '../../lib/platform-features'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 function OutcomeAchievementBar({ outcome }: { outcome: OutcomesReportOutcome }) {
   if (outcome.noAlignments) {
@@ -114,7 +114,7 @@ function OutcomeNoteField({
 
 export default function CourseOutcomesReport() {
   const { courseCode } = useParams<{ courseCode: string }>()
-  const enabled = outcomesReportFeatureEnabled()
+  const { outcomesReportEnabled, loading: featuresLoading } = usePlatformFeatures()
   const [report, setReport] = useState<OutcomesReport | null>(null)
   const [threshold, setThreshold] = useState(70)
   const [loading, setLoading] = useState(true)
@@ -122,7 +122,7 @@ export default function CourseOutcomesReport() {
   const [refreshing, setRefreshing] = useState(false)
 
   const load = useCallback(async () => {
-    if (!courseCode || !enabled) return
+    if (!courseCode || !outcomesReportEnabled) return
     setLoading(true)
     setError(null)
     try {
@@ -135,11 +135,12 @@ export default function CourseOutcomesReport() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, enabled])
+  }, [courseCode, outcomesReportEnabled])
 
   useEffect(() => {
+    if (featuresLoading || !outcomesReportEnabled) return
     void load()
-  }, [load])
+  }, [load, featuresLoading, outcomesReportEnabled])
 
   async function handleRefresh() {
     if (!courseCode) return
@@ -175,7 +176,17 @@ export default function CourseOutcomesReport() {
     })
   }
 
-  if (!enabled) {
+  if (featuresLoading) {
+    return (
+      <LmsPage title="Outcomes report" description="Course learning outcomes achievement.">
+        <p className="mt-8 text-sm text-slate-500 dark:text-neutral-400" aria-live="polite">
+          Loading…
+        </p>
+      </LmsPage>
+    )
+  }
+
+  if (!outcomesReportEnabled) {
     return (
       <LmsPage title="Outcomes report" description="Course learning outcomes achievement.">
         <p className="mt-8 text-sm text-slate-600 dark:text-neutral-400">
