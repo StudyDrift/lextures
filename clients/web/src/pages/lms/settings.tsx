@@ -22,6 +22,7 @@ import { TermsSettingsPanel } from '../../components/settings/terms-settings-pan
 import { PlatformSettingsPanel } from '../../components/settings/platform-settings-panel'
 import { ScimSettingsPanel } from '../../components/settings/scim-settings-panel'
 import { CloudProvidersPanel } from '../../components/settings/cloud-providers-panel'
+import { LRSSettingsPanel } from '../../components/settings/lrs-settings-panel'
 import { OERProvidersPanel } from '../../components/settings/oer-providers-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { RolesPermissionsPanel } from '../../components/settings/roles-permissions-panel'
@@ -58,6 +59,7 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/org-branding' ||
     pathname === '/settings/scim-provisioning' ||
     pathname === '/settings/cloud-providers' ||
+    pathname === '/settings/lrs-integrations' ||
     pathname === '/settings/oer-providers'
   )
 }
@@ -778,6 +780,7 @@ export default function Settings() {
           activeView === 'org-branding' ||
           activeView === 'scim-provisioning' ||
           activeView === 'cloud-providers' ||
+          activeView === 'lrs-integrations' ||
           activeView === 'oer-providers'
             ? 'max-w-4xl'
             : activeView === 'ai-prompts'
@@ -1459,6 +1462,22 @@ export default function Settings() {
               }
             >
               <CloudProvidersPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'lrs-integrations' && (
+          <div>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  You need permission to manage LRS integrations (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <LRSSettingsPanel />
             </RequirePermission>
           </div>
         )}

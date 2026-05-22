@@ -531,4 +531,11 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Post("/api/v1/admin/at-risk/run", d.handleAdminAtRiskRun())
 	r.Get("/api/v1/admin/at-risk/config", d.handleAdminAtRiskConfigGet())
 	r.Put("/api/v1/admin/at-risk/config", d.handleAdminAtRiskConfigPut())
+	// xAPI / Caliper emission (plan 9.6)
+	r.Get("/api/v1/admin/lrs-config", d.handleGetAdminLRSConfig())
+	r.Post("/api/v1/admin/lrs-config", d.handlePostAdminLRSConfig())
+	r.Put("/api/v1/admin/lrs-config/{id}", d.handlePutAdminLRSConfig())
+	r.Post("/api/v1/admin/lrs-config/{id}/test", d.handlePostAdminLRSTest())
+	r.Get("/api/v1/admin/lrs-dead-letter", d.handleGetAdminLRSDeadLetter())
+	r.Post("/api/v1/admin/lrs-dead-letter/{id}/retry", d.handlePostAdminLRSDeadLetterRetry())
 }

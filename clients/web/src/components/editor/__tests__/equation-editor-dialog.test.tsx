@@ -20,6 +20,7 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   itemAnalysisEnabled: false,
   outcomesReportEnabled: false,
   engagementTrackingEnabled: false,
+  xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,

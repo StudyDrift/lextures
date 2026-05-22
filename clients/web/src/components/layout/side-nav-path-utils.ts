@@ -16,6 +16,7 @@ export type SettingsNavView =
   | 'org-branding'
   | 'scim-provisioning'
   | 'cloud-providers'
+  | 'lrs-integrations'
   | 'oer-providers'
 
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
@@ -37,6 +38,7 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'org-branding' ||
     raw === 'scim-provisioning' ||
     raw === 'cloud-providers' ||
+    raw === 'lrs-integrations' ||
     raw === 'oer-providers'
   )
     return raw

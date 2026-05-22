@@ -8,6 +8,7 @@ export type PlatformFeaturesSnapshot = {
   itemAnalysisEnabled: boolean
   engagementTrackingEnabled: boolean
   outcomesReportEnabled: boolean
+  xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -23,6 +24,7 @@ const defaults: PlatformFeaturesSnapshot = {
   itemAnalysisEnabled: false,
   engagementTrackingEnabled: false,
   outcomesReportEnabled: false,
+  xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -77,4 +79,8 @@ export function engagementTrackingFeatureEnabled(): boolean {
 
 export function outcomesReportFeatureEnabled(): boolean {
   return loaded && snapshot.outcomesReportEnabled
+}
+
+export function xapiEmissionFeatureEnabled(): boolean {
+  return loaded && snapshot.xapiEmissionEnabled
 }

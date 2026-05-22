@@ -60,6 +60,7 @@ type Row struct {
 	EngagementTrackingEnabled  *bool
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
+	XAPIEmissionEnabled        *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -120,6 +121,7 @@ type Write struct {
 	EngagementTrackingEnabled  *bool
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
+	XAPIEmissionEnabled        *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -178,6 +180,7 @@ SELECT
 	engagement_tracking_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
+	xapi_emission_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -231,6 +234,7 @@ WHERE id = 1
 		&r.EngagementTrackingEnabled,
 		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
+		&r.XAPIEmissionEnabled,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -324,6 +328,7 @@ INSERT INTO settings.platform_app_settings (
 	engagement_tracking_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
+	xapi_emission_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -382,6 +387,7 @@ ON CONFLICT (id) DO UPDATE SET
 	engagement_tracking_enabled = COALESCE(EXCLUDED.engagement_tracking_enabled, settings.platform_app_settings.engagement_tracking_enabled),
 	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
+	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -433,6 +439,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.EngagementTrackingEnabled,
 		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
+		w.XAPIEmissionEnabled,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

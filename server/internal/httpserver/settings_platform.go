@@ -82,6 +82,7 @@ type platformSettingsJSON struct {
 	StudentProgressEnabled     bool `json:"studentProgressEnabled"`
 	EngagementTrackingEnabled  bool `json:"engagementTrackingEnabled"`
 	OutcomesReportEnabled      bool `json:"outcomesReportEnabled"`
+	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
@@ -196,6 +197,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
 			EngagementTrackingEnabled:   merged.EngagementTrackingEnabled,
 			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
+			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
@@ -283,6 +285,7 @@ type putPlatformBody struct {
 	StudentProgressEnabled     *bool `json:"studentProgressEnabled"`
 	EngagementTrackingEnabled  *bool `json:"engagementTrackingEnabled"`
 	OutcomesReportEnabled      *bool `json:"outcomesReportEnabled"`
+	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
@@ -532,6 +535,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("engagementtrackingenabled", body.EngagementTrackingEnabled, func(v bool) { wr.EngagementTrackingEnabled = &v })
 		setBool("outcomesreportenabled", body.OutcomesReportEnabled, func(v bool) { wr.OutcomesReportEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
+		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -601,6 +605,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
 			EngagementTrackingEnabled:   merged.EngagementTrackingEnabled,
 			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
+			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
