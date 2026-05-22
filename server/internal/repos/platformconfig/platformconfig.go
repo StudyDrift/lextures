@@ -58,6 +58,7 @@ type Row struct {
 	ItemAnalysisEnabled        *bool
 	StudentProgressEnabled     *bool
 	EquationEditorEnabled      *bool
+	ReportExportEnabled        *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -116,6 +117,7 @@ type Write struct {
 	ItemAnalysisEnabled        *bool
 	StudentProgressEnabled     *bool
 	EquationEditorEnabled      *bool
+	ReportExportEnabled        *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -172,6 +174,7 @@ SELECT
 	item_analysis_enabled,
 	student_progress_enabled,
 	equation_editor_enabled,
+	report_export_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -223,6 +226,7 @@ WHERE id = 1
 		&r.ItemAnalysisEnabled,
 		&r.StudentProgressEnabled,
 		&r.EquationEditorEnabled,
+		&r.ReportExportEnabled,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -314,6 +318,7 @@ INSERT INTO settings.platform_app_settings (
 	item_analysis_enabled,
 	student_progress_enabled,
 	equation_editor_enabled,
+	report_export_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -326,7 +331,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47,
+	$41, $42, $43, $44, $45, $46, $47, $48,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -370,6 +375,7 @@ ON CONFLICT (id) DO UPDATE SET
 	item_analysis_enabled = COALESCE(EXCLUDED.item_analysis_enabled, settings.platform_app_settings.item_analysis_enabled),
 	student_progress_enabled = COALESCE(EXCLUDED.student_progress_enabled, settings.platform_app_settings.student_progress_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
+	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -419,6 +425,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.ItemAnalysisEnabled,
 		w.StudentProgressEnabled,
 		w.EquationEditorEnabled,
+		w.ReportExportEnabled,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

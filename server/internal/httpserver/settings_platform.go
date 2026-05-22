@@ -81,6 +81,7 @@ type platformSettingsJSON struct {
 	ItemAnalysisEnabled        bool `json:"itemAnalysisEnabled"`
 	StudentProgressEnabled     bool `json:"studentProgressEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
+	ReportExportEnabled        bool `json:"reportExportEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -193,6 +194,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
+			ReportExportEnabled:         merged.ReportExportEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
@@ -278,6 +280,7 @@ type putPlatformBody struct {
 	ItemAnalysisEnabled        *bool `json:"itemAnalysisEnabled"`
 	StudentProgressEnabled     *bool `json:"studentProgressEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
+	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -524,6 +527,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("itemanalysisenabled", body.ItemAnalysisEnabled, func(v bool) { wr.ItemAnalysisEnabled = &v })
 		setBool("studentprogressenabled", body.StudentProgressEnabled, func(v bool) { wr.StudentProgressEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
+		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -592,6 +596,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			ItemAnalysisEnabled:         merged.ItemAnalysisEnabled,
 			StudentProgressEnabled:      merged.StudentProgressEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
+			ReportExportEnabled:         merged.ReportExportEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,

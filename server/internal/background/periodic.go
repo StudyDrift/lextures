@@ -133,6 +133,13 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		sweepAtRiskScores(context.Background(), pool, cfg, time.Now().UTC())
 	})
 
+	if cfg.ReportExportEnabled {
+		go runEvery(ctx, time.Minute, func() {
+			sweepScheduledReports(context.Background(), pool, cfg, time.Now().UTC())
+		})
+		slog.Info("scheduled report delivery worker started")
+	}
+
 	if cfg.AvScanningEnabled && storage != nil {
 		clam := clamav.NewClient(cfg.ClamAVAddr, cfg.ClamAVStub)
 		avWorker := avscan.New(pool, storage, clam)

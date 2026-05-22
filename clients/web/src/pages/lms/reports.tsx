@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, Download } from 'lucide-react'
 import { RequirePermission } from '../../components/require-permission'
 import { LmsPage } from './lms-page'
-import { fetchLearningActivityReport, type LearningActivityReport } from '../../lib/reports-api'
+import {
+  fetchLearningActivityReport,
+  downloadLearningActivityPDF,
+  type LearningActivityReport,
+} from '../../lib/reports-api'
 import { PERM_REPORTS_VIEW } from '../../lib/rbac-api'
 
 type Preset = '7d' | '30d' | '90d'
@@ -46,6 +50,7 @@ export default function Reports() {
   const [report, setReport] = useState<LearningActivityReport | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   const load = useCallback(async (p: Preset) => {
     setLoading(true)
@@ -99,6 +104,25 @@ export default function Reports() {
               {p === '7d' ? '7 days' : p === '30d' ? '30 days' : '90 days'}
             </button>
           ))}
+          <button
+            type="button"
+            disabled={exporting || !report}
+            onClick={async () => {
+              setExporting(true)
+              try {
+                await downloadLearningActivityPDF()
+              } catch {
+                // silently ignore; browser will show native download error
+              } finally {
+                setExporting(false)
+              }
+            }}
+            aria-label="Export learning activity report as PDF"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+          >
+            <Download className="h-4 w-4" aria-hidden />
+            {exporting ? 'Generating…' : 'Export PDF'}
+          </button>
         </div>
       }
     >

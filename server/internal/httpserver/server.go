@@ -86,6 +86,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Get("/api/v1/public/org-branding/{orgId}/{asset}", d.handlePublicOrgBrandAsset())
 	r.Get("/api/v1/search", d.handleSearchIndex())
 	r.Get("/api/v1/reports/learning-activity", d.handleLearningActivityReport())
+	d.registerReportExportRoutes(r)
 	r.Post("/api/v1/recommendations/event", d.handleRecommendationEvent())
 	r.Post("/api/v1/webhooks/originality/{provider}", d.handleOriginalityWebhook())
 	r.Get("/oneroster/v1p2/*", d.handleOneRosterV1P2())

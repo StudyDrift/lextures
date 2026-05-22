@@ -215,6 +215,9 @@ type Config struct {
 
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool
+
+	// ReportExportEnabled gates PDF export and scheduled report delivery (plan 9.8).
+	ReportExportEnabled bool
 }
 
 // Load reads configuration from the environment.
