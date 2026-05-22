@@ -119,6 +119,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerStorageQuotaRoutes(r)
 	d.registerAVScanRoutes(r)
 	r.Post("/api/v1/xapi/statements", d.handlePostXAPIStatements())
+	d.registerEngagementRoutes(r)
 	d.registerOERRoutes(r)
 	d.registerLegalRoutes(r)
 	d.registerTrustRoutes(r)

@@ -19,6 +19,7 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
   outcomesReportEnabled: false,
+  engagementTrackingEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,

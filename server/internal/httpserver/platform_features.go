@@ -8,17 +8,18 @@ import (
 )
 
 type platformFeaturesJSON struct {
-	StudentProgressEnabled   bool `json:"studentProgressEnabled"`
-	AtRiskAlertsEnabled      bool `json:"atRiskAlertsEnabled"`
-	H5PEnabled               bool `json:"h5pEnabled"`
-	OERLibraryEnabled        bool `json:"oerLibraryEnabled"`
-	ItemAnalysisEnabled      bool `json:"itemAnalysisEnabled"`
-	OutcomesReportEnabled    bool `json:"outcomesReportEnabled"`
-	XAPIEmissionEnabled      bool `json:"xapiEmissionEnabled"`
-	EquationEditorEnabled    bool `json:"equationEditorEnabled"`
-	StorageQuotasEnabled     bool `json:"storageQuotasEnabled"`
-	AvScanningEnabled        bool `json:"avScanningEnabled"`
-	VirtualClassroomEnabled  bool `json:"virtualClassroomEnabled"`
+	StudentProgressEnabled     bool `json:"studentProgressEnabled"`
+	AtRiskAlertsEnabled        bool `json:"atRiskAlertsEnabled"`
+	H5PEnabled                 bool `json:"h5pEnabled"`
+	OERLibraryEnabled          bool `json:"oerLibraryEnabled"`
+	ItemAnalysisEnabled        bool `json:"itemAnalysisEnabled"`
+	OutcomesReportEnabled      bool `json:"outcomesReportEnabled"`
+	EngagementTrackingEnabled  bool `json:"engagementTrackingEnabled"`
+	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
+	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
+	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
+	AvScanningEnabled          bool `json:"avScanningEnabled"`
+	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
 	SessionManagementUIEnabled bool `json:"sessionManagementUiEnabled"`
 }
 
@@ -29,6 +30,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		H5PEnabled:                 cfg.H5PEnabled,
 		OERLibraryEnabled:          cfg.OERLibraryEnabled,
 		ItemAnalysisEnabled:        cfg.ItemAnalysisEnabled,
+		EngagementTrackingEnabled:  cfg.EngagementTrackingEnabled,
 		OutcomesReportEnabled:      cfg.OutcomesReportEnabled,
 		XAPIEmissionEnabled:        cfg.XAPIEmissionEnabled,
 		EquationEditorEnabled:      cfg.EquationEditorEnabled,
