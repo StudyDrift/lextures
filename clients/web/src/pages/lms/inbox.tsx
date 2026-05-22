@@ -225,6 +225,7 @@ export default function Inbox() {
 
   return (
     <>
+      <h1 className="sr-only">Inbox</h1>
       <div className="flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden bg-white">
         <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 bg-slate-50/80 px-3 py-2.5 sm:px-4">
           <button
