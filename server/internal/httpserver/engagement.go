@@ -147,7 +147,6 @@ VALUES ($1, $2, $3, $4, $5, $6, $7)
 `, userID, ro.courseID, ro.itemID, ro.itemType, ro.eventType, ro.value, ro.occurredAt)
 	}
 	results := pool.SendBatch(ctx, batch)
-	defer results.Close()
 	stored := 0
 	for range rows {
 		if _, err := results.Exec(); err != nil {
