@@ -236,6 +236,8 @@ type Config struct {
 	FERPAWorkflowEnabled bool
 	// CoppaWorkflowEnabled gates COPPA verifiable parental consent for K-12 deployments (plan 10.2).
 	CoppaWorkflowEnabled bool
+	// GDPRModuleEnabled gates GDPR/UK GDPR DSAR workflow, consent management, and RoPA (plan 10.3).
+	GDPRModuleEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -371,6 +373,7 @@ func Load() Config {
 
 		FERPAWorkflowEnabled: boolEnv("FERPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_FERPA_WORKFLOW"),
 		CoppaWorkflowEnabled: boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
+		GDPRModuleEnabled:    boolEnv("GDPR_MODULE_ENABLED") || boolEnv("FEATURE_GDPR_MODULE"),
 	}
 }
 

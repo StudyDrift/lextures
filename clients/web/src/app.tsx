@@ -65,6 +65,7 @@ import ParentDashboard from './pages/lms/parent/parent-dashboard'
 import TermsOfUsePage from './pages/terms-of-use-page'
 import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import TrustCenterPage from './pages/trust-center-page'
+import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 
 export default function App() {
@@ -124,6 +125,7 @@ export default function App() {
           }
         >
           <Route path="/" element={<Dashboard />} />
+          <Route path="/privacy-centre" element={<PrivacyCentrePage />} />
           <Route path="/me/study-insights" element={<StudyInsightsPage />} />
           <Route path="/parent" element={<ParentDashboard />} />
           <Route path="/ai" element={<AskAiPage />} />
