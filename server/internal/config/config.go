@@ -231,6 +231,9 @@ type Config struct {
 	XAPIEmissionEnabled bool
 	// LRSAnonymizeActors hashes actor mbox emails in emitted xAPI statements (plan 9.6 AC-4).
 	LRSAnonymizeActors bool
+
+	// CoppaWorkflowEnabled gates COPPA verifiable parental consent for K-12 deployments (plan 10.2).
+	CoppaWorkflowEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -363,6 +366,8 @@ func Load() Config {
 
 		XAPIEmissionEnabled: boolEnv("XAPI_EMISSION_ENABLED") || boolEnv("FEATURE_XAPI_EMISSION"),
 		LRSAnonymizeActors:  boolEnv("LRS_ANONYMIZE_ACTORS"),
+
+		CoppaWorkflowEnabled: boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
 	}
 }
 
