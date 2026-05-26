@@ -127,6 +127,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerTrustRoutes(r)
 	d.registerFERPARoutes(r)
 	d.registerCoppaRoutes(r)
+	d.registerGDPRRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r

@@ -65,6 +65,7 @@ type Row struct {
 	XAPIEmissionEnabled        *bool
 	InstructorInsightsEnabled  *bool
 	CoppaWorkflowEnabled       *bool
+	GDPRModuleEnabled          *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -130,6 +131,7 @@ type Write struct {
 	XAPIEmissionEnabled        *bool
 	InstructorInsightsEnabled  *bool
 	CoppaWorkflowEnabled       *bool
+	GDPRModuleEnabled          *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -193,6 +195,7 @@ SELECT
 	xapi_emission_enabled,
 	instructor_insights_enabled,
 	coppa_workflow_enabled,
+	gdpr_module_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -251,6 +254,7 @@ WHERE id = 1
 		&r.XAPIEmissionEnabled,
 		&r.InstructorInsightsEnabled,
 		&r.CoppaWorkflowEnabled,
+		&r.GDPRModuleEnabled,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -349,6 +353,7 @@ INSERT INTO settings.platform_app_settings (
 	xapi_emission_enabled,
 	instructor_insights_enabled,
 	coppa_workflow_enabled,
+	gdpr_module_enabled,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -361,7 +366,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -412,6 +417,7 @@ ON CONFLICT (id) DO UPDATE SET
 	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
 	instructor_insights_enabled = COALESCE(EXCLUDED.instructor_insights_enabled, settings.platform_app_settings.instructor_insights_enabled),
 	coppa_workflow_enabled = COALESCE(EXCLUDED.coppa_workflow_enabled, settings.platform_app_settings.coppa_workflow_enabled),
+	gdpr_module_enabled = COALESCE(EXCLUDED.gdpr_module_enabled, settings.platform_app_settings.gdpr_module_enabled),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -468,6 +474,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.XAPIEmissionEnabled,
 		w.InstructorInsightsEnabled,
 		w.CoppaWorkflowEnabled,
+		w.GDPRModuleEnabled,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,
