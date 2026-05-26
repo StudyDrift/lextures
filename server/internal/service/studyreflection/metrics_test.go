@@ -38,12 +38,12 @@ func TestLoginStreak(t *testing.T) {
 
 func TestStudyEfficiency(t *testing.T) {
 	start, end := 70.0, 78.0
-	r, low, ok := StudyEfficiency(3600, &start, &end)
+	r, _, ok := StudyEfficiency(3600, &start, &end)
 	if !ok || r <= 0 {
 		t.Fatalf("ok=%v ratio=%v", ok, r)
 	}
 	flatEnd := 71.0
-	_, low, ok = StudyEfficiency(8000, &start, &flatEnd)
+	_, low, ok := StudyEfficiency(8000, &start, &flatEnd)
 	if !ok || !low {
 		t.Fatalf("expected low efficiency flag when time is high but scores barely improve")
 	}
