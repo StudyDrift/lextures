@@ -87,6 +87,7 @@ type platformSettingsJSON struct {
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
+	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -205,6 +206,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
+			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
@@ -296,6 +298,7 @@ type putPlatformBody struct {
 	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
+	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -548,6 +551,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
+		setBool("coppaworkflowenabled", body.CoppaWorkflowEnabled, func(v bool) { wr.CoppaWorkflowEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -622,6 +626,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
+			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
