@@ -22,7 +22,7 @@ CREATE INDEX IF NOT EXISTS idx_gdpr_consents_user
     ON compliance.gdpr_consents(user_id, purpose, withdrawn_at NULLS FIRST);
 
 -- Data Subject Access Requests (Articles 15, 17, 20).
--- due_at is a generated column: 30-day statutory deadline.
+-- due_at defaults to 30 days after creation per GDPR Art. 12(3) statutory deadline.
 CREATE TABLE IF NOT EXISTS compliance.dsar_requests (
     id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     org_id           UUID        REFERENCES tenant.organizations(id),
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS compliance.dsar_requests (
     archive_expires_at TIMESTAMPTZ,
     rejection_reason TEXT,
     requested_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    due_at           TIMESTAMPTZ GENERATED ALWAYS AS (requested_at + INTERVAL '30 days') STORED,
+    due_at           TIMESTAMPTZ NOT NULL DEFAULT NOW() + INTERVAL '30 days',
     completed_at     TIMESTAMPTZ,
     actioned_by      UUID        REFERENCES "user".users(id)
 );
