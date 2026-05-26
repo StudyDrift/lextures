@@ -89,9 +89,24 @@ test.describe('Self-reflection coaching', () => {
     await expect(studyStats).toBeVisible({ timeout: 15000 })
     await expect(studyStats.getByText(/studied this week/i)).toBeVisible()
 
+    const journalListRes = await page.request.get(`${apiBase}/api/v1/me/reflection-journal`, {
+      headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
+    })
+    expect(journalListRes.ok()).toBeTruthy()
+    const journalList = (await journalListRes.json()) as { entries: { entryText: string }[] }
+    expect(journalList.entries.some((e) => e.entryText === note)).toBeTruthy()
+
     await page.goto('/me/study-insights')
     await expect(page.getByRole('heading', { name: 'Study insights' })).toBeVisible()
-    await expect(page.getByText(note)).toBeVisible({ timeout: 8000 })
+    await page.waitForResponse(
+      (res) =>
+        res.url().includes('/api/v1/me/reflection-journal') &&
+        res.request().method() === 'GET' &&
+        res.ok(),
+    )
+    await expect(
+      page.getByRole('region', { name: 'Private journal' }).getByText(note),
+    ).toBeVisible({ timeout: 15000 })
 
     const optOutRes = await page.request.put(`${apiBase}/api/v1/me/study-goal`, {
       headers: {
