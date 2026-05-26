@@ -94,7 +94,7 @@ func (d Deps) handleGetCrossSection() http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]any{"sections": rows})
+		_ = json.NewEncoder(w).Encode(rows)
 	}
 }
 

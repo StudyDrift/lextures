@@ -152,7 +152,7 @@ export default function CourseWhatsWorking() {
         fetchCrossSection(courseCode),
       ])
       setInsights(ins)
-      setCrossSection(cs)
+      setCrossSection(Array.isArray(cs) ? cs : [])
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load insights.')
     } finally {
