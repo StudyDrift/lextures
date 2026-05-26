@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -54,7 +55,7 @@ func TestInsights_OK_Pg(t *testing.T) {
 	}
 
 	// Create a course and enroll the instructor.
-	courseCode := "INSIGHTS-" + time.Now().Format("150405000")
+	courseCode := fmt.Sprintf("C-I%05d", time.Now().UnixNano()%100000)
 	var courseID uuid.UUID
 	if err := pool.QueryRow(ctx, `
 INSERT INTO course.courses (course_code, title, created_by_user_id)
