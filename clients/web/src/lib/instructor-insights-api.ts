@@ -15,6 +15,7 @@ export type SignalItem = {
 export type ScatterPoint = {
   itemId: string
   title: string
+  kind: string
   difficulty: number
   engagement: number
   flag: string

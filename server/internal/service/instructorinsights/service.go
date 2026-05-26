@@ -15,41 +15,44 @@ import (
 
 // SignalItem is one entry in the working_well or needs_attention list.
 type SignalItem struct {
-	ItemID         string  `json:"itemId"`
-	ItemTitle      string  `json:"itemTitle"`
-	ItemType       string  `json:"itemType"`
-	CompletionRate float64 `json:"completionRate"`
-	AvgScore       float64 `json:"avgScore"`
-	Composite      float64 `json:"composite"`
-	Narrative      string  `json:"narrative"`
+	ItemID         string   `json:"itemId"`
+	Title          string   `json:"title"`
+	Kind           string   `json:"kind"`
+	CompletionRate float64  `json:"completionRate"`
+	AvgScore       *float64 `json:"avgScore"`
+	Engagement     float64  `json:"engagement"`
+	Difficulty     *float64 `json:"difficulty"`
+	CompositeScore float64  `json:"compositeScore"`
+	Narrative      string   `json:"narrative"`
 }
 
 // ScatterPoint is one item on the difficulty-vs-engagement scatter plot.
 type ScatterPoint struct {
 	ItemID     string  `json:"itemId"`
-	ItemTitle  string  `json:"itemTitle"`
-	ItemType   string  `json:"itemType"`
+	Title      string  `json:"title"`
+	Kind       string  `json:"kind"`
 	Difficulty float64 `json:"difficulty"` // 0–100; higher = harder
 	Engagement float64 `json:"engagement"` // avg seconds on task
-	Flag       string  `json:"flag,omitempty"` // "needs_redesign" when low engagement + high difficulty
+	Flag       string  `json:"flag,omitempty"`
 }
 
 // Insights holds the computed signals stored in analytics.instructor_insights.
 type Insights struct {
-	CourseID       string         `json:"courseId"`
-	WeekOf         string         `json:"weekOf"` // "YYYY-MM-DD"
-	WorkingWell    []SignalItem   `json:"workingWell"`
-	NeedsAttention []SignalItem   `json:"needsAttention"`
-	ScatterData    []ScatterPoint `json:"scatterData"`
-	GeneratedAt    string         `json:"generatedAt"`
+	CourseID       string        `json:"courseId"`
+	WeekOf         string        `json:"weekOf"` // "YYYY-MM-DD"
+	WorkingWell    []SignalItem  `json:"workingWell"`
+	NeedsAttention []SignalItem  `json:"needsAttention"`
+	Scatter        []ScatterPoint `json:"scatter"`
+	GeneratedAt    string        `json:"generatedAt"`
 }
 
 // CrossSectionRow holds comparison data for one section of a course.
 type CrossSectionRow struct {
-	SectionID   string  `json:"sectionId"`
-	SectionName string  `json:"sectionName"`
-	AvgGrade    float64 `json:"avgGrade"`    // avg quiz score_percent (0–100)
-	AtRiskCount int     `json:"atRiskCount"` // enrolled students with no quiz attempts
+	SectionID      string   `json:"sectionId"`
+	SectionName    string   `json:"sectionName"`
+	NStudents      int      `json:"nStudents"`
+	AvgQuizScore   *float64 `json:"avgQuizScore"`
+	CompletionRate float64  `json:"completionRate"`
 }
 
 // Compute derives and persists instructor insights for a course.
@@ -77,7 +80,7 @@ func Compute(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (*Insi
 		WeekOf:         weekOf.Format("2006-01-02"),
 		WorkingWell:    toSignalSlice(working),
 		NeedsAttention: toSignalSlice(attention),
-		ScatterData:    scatter,
+		Scatter:        scatter,
 		GeneratedAt:    time.Now().UTC().Format(time.RFC3339),
 	}
 
@@ -128,7 +131,7 @@ LIMIT 1
 		WeekOf:         weekOf,
 		WorkingWell:    working,
 		NeedsAttention: attention,
-		ScatterData:    scatter,
+		Scatter:        scatter,
 		GeneratedAt:    generatedAt.Format(time.RFC3339),
 	}, nil
 }
@@ -155,9 +158,9 @@ func LoadCrossSection(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUI
 	rows, err := pool.Query(ctx, `
 SELECT
     cs.id::text,
-    COALESCE(cs.name, cs.section_code)         AS section_name,
-    COALESCE(AVG(qa.score_percent), 0)::float8  AS avg_grade,
-    COUNT(DISTINCT ce.user_id)::int             AS at_risk_count
+    COALESCE(cs.name, cs.section_code)  AS section_name,
+    COUNT(DISTINCT ce.user_id)::int      AS n_students,
+    AVG(qa.score_percent)::float8        AS avg_quiz_score
 FROM course.course_sections cs
 JOIN course.course_enrollments ce ON ce.course_id = cs.course_id AND ce.active = true
 LEFT JOIN course.quiz_attempts qa
@@ -178,7 +181,7 @@ ORDER BY section_name
 	var result []CrossSectionRow
 	for rows.Next() {
 		var r CrossSectionRow
-		if err := rows.Scan(&r.SectionID, &r.SectionName, &r.AvgGrade, &r.AtRiskCount); err != nil {
+		if err := rows.Scan(&r.SectionID, &r.SectionName, &r.NStudents, &r.AvgQuizScore); err != nil {
 			continue
 		}
 		result = append(result, r)
@@ -196,19 +199,18 @@ ORDER BY section_name
 
 type itemMetric struct {
 	ItemID         uuid.UUID
-	ItemTitle      string
-	ItemType       string // "quiz" | "assignment" | "content_page"
+	Title          string
+	Kind           string // "quiz" | "assignment" | "content_page"
 	CompletionRate float64
-	AvgScore       float64 // 0–100; 0 for non-scored items
-	Engagement     float64 // avg heartbeat seconds per enrolled student
-	Difficulty     float64 // 0–100; higher = harder
+	AvgScore       *float64 // nil for non-scored items
+	Engagement     float64  // avg heartbeat seconds per enrolled student
+	Difficulty     float64  // 0–100; higher = harder
 	HasScore       bool
-	Narrative      string
 }
 
 func (m itemMetric) composite() float64 {
-	if m.HasScore {
-		return m.CompletionRate * (m.AvgScore / 100.0)
+	if m.HasScore && m.AvgScore != nil {
+		return m.CompletionRate * (*m.AvgScore / 100.0)
 	}
 	return m.CompletionRate * 0.5
 }
@@ -261,9 +263,9 @@ ORDER BY csi.sort_order
 	metrics := make([]itemMetric, 0, len(rawItems))
 	for _, ri := range rawItems {
 		m := itemMetric{
-			ItemID:    ri.id,
-			ItemTitle: ri.title,
-			ItemType:  ri.kind,
+			ItemID: ri.id,
+			Title:  ri.title,
+			Kind:   ri.kind,
 		}
 
 		switch ri.kind {
@@ -286,7 +288,7 @@ WHERE course_id = $1
   AND score_percent IS NOT NULL
 `, courseID, ri.id).Scan(&avgScore)
 			if avgScore != nil {
-				m.AvgScore = *avgScore
+				m.AvgScore = avgScore
 				m.HasScore = true
 			}
 
@@ -299,8 +301,8 @@ WHERE quiz_id = $1 AND p_value IS NOT NULL
 `, ri.id).Scan(&avgP)
 			if avgP != nil {
 				m.Difficulty = (1.0 - *avgP) * 100.0
-			} else if m.HasScore {
-				m.Difficulty = 100.0 - m.AvgScore
+			} else if m.HasScore && m.AvgScore != nil {
+				m.Difficulty = 100.0 - *m.AvgScore
 			} else {
 				m.Difficulty = 50.0
 			}
@@ -337,7 +339,6 @@ WHERE course_id = $1 AND item_id = $2 AND event_type = 'heartbeat'
 `, courseID, ri.id).Scan(&heartbeats)
 		m.Engagement = safeDiv(float64(heartbeats)*30.0, float64(enrolled))
 
-		m.Narrative = buildNarrative(m)
 		metrics = append(metrics, m)
 	}
 	return metrics, nil
@@ -407,8 +408,8 @@ func buildScatter(items []itemMetric) []ScatterPoint {
 	for _, m := range items {
 		pt := ScatterPoint{
 			ItemID:     m.ItemID.String(),
-			ItemTitle:  m.ItemTitle,
-			ItemType:   m.ItemType,
+			Title:      m.Title,
+			Kind:       m.Kind,
 			Difficulty: roundTo1(m.Difficulty),
 			Engagement: roundTo1(m.Engagement),
 		}
@@ -423,14 +424,26 @@ func buildScatter(items []itemMetric) []ScatterPoint {
 func toSignalSlice(items []itemMetric) []SignalItem {
 	out := make([]SignalItem, 0, len(items))
 	for _, m := range items {
+		var diff *float64
+		d := roundTo1(m.Difficulty)
+		diff = &d
+
+		var avgScore *float64
+		if m.AvgScore != nil {
+			v := roundTo1(*m.AvgScore)
+			avgScore = &v
+		}
+
 		out = append(out, SignalItem{
 			ItemID:         m.ItemID.String(),
-			ItemTitle:      m.ItemTitle,
-			ItemType:       m.ItemType,
+			Title:          m.Title,
+			Kind:           m.Kind,
 			CompletionRate: roundTo3(m.CompletionRate),
-			AvgScore:       roundTo1(m.AvgScore),
-			Composite:      roundTo3(m.composite()),
-			Narrative:      m.Narrative,
+			AvgScore:       avgScore,
+			Engagement:     roundTo1(m.Engagement),
+			Difficulty:     diff,
+			CompositeScore: roundTo3(m.composite()),
+			Narrative:      buildNarrative(m),
 		})
 	}
 	if out == nil {
@@ -441,10 +454,10 @@ func toSignalSlice(items []itemMetric) []SignalItem {
 
 func buildNarrative(m itemMetric) string {
 	pct := int(math.Round(m.CompletionRate * 100))
-	if m.HasScore {
+	if m.HasScore && m.AvgScore != nil {
 		return fmt.Sprintf(
 			"%d%% of students completed this item with an average score of %.0f%%.",
-			pct, m.AvgScore,
+			pct, *m.AvgScore,
 		)
 	}
 	return fmt.Sprintf("%d%% of students completed this item.", pct)
@@ -453,7 +466,7 @@ func buildNarrative(m itemMetric) string {
 func persist(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, weekOf time.Time, ins *Insights) error {
 	ww, _ := json.Marshal(ins.WorkingWell)
 	na, _ := json.Marshal(ins.NeedsAttention)
-	sc, _ := json.Marshal(ins.ScatterData)
+	sc, _ := json.Marshal(ins.Scatter)
 	_, err := pool.Exec(ctx, `
 INSERT INTO analytics.instructor_insights (course_id, week_of, working_well, needs_attention, scatter_data)
 VALUES ($1, $2, $3, $4, $5)

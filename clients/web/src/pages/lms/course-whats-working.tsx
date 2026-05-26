@@ -56,8 +56,8 @@ function SignalCard({
   )
 }
 
-function ScatterTable({ points }: { points: Insights['scatter'] }) {
-  if (points.length === 0) return null
+function ScatterTable({ points }: { points: Insights['scatter'] | null | undefined }) {
+  if (!points || points.length === 0) return null
   const flagged = points.filter((p) => p.flag === 'needs_redesign')
   if (flagged.length === 0) return null
 
