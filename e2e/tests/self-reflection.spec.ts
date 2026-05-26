@@ -3,10 +3,15 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { injectToken } from '../fixtures/test.js'
+import { enableEngagementTrackingForE2E } from '../fixtures/platform-features.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
 test.describe('Self-reflection coaching', () => {
+  test.beforeAll(async () => {
+    await enableEngagementTrackingForE2E()
+  })
+
   test('student opts in, sets goal, journals, and sees stats on dashboard', async ({
     page,
     seededCourse,

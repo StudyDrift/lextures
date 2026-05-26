@@ -125,7 +125,7 @@ LEFT JOIN course.course_structure_items mod ON mod.id = si.parent_id AND mod.kin
 WHERE e.user_id = $1
   AND e.occurred_at >= $2 AND e.occurred_at <= $3
   AND e.item_id IS NOT NULL
-GROUP BY COALESCE(mod.id, si.id), COALESCE(mod.title, si.title)
+GROUP BY COALESCE(mod.id, si.id), COALESCE(mod.title, si.title, 'Module')
 HAVING COUNT(*) FILTER (WHERE e.event_type = 'heartbeat') > 0
 ORDER BY minutes DESC
 LIMIT 20
