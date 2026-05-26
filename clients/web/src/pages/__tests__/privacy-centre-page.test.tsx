@@ -1,8 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { server } from '../../test/mocks/server'
 import PrivacyCentrePage from '../privacy-centre-page'
+
+const CONSENTS_URL = '/api/v1/compliance/gdpr/consents'
+const DSAR_URL = '/api/v1/compliance/gdpr/dsar'
 
 const mockConsents = [
   {
@@ -15,104 +20,65 @@ const mockConsents = [
   },
 ]
 
-function setup(overrides?: { consents?: object[]; requests?: object[] }) {
-  const fetchMock = vi.fn().mockImplementation((url: string) => {
-    if (url.includes('/consents')) {
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ consents: overrides?.consents ?? mockConsents }),
-      })
-    }
-    if (url.includes('/dsar') && !url.includes('/download')) {
-      return Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ requests: overrides?.requests ?? [] }),
-      })
-    }
-    return Promise.resolve({ ok: false, json: () => Promise.resolve({}) })
-  })
-  vi.stubGlobal('fetch', fetchMock)
-  return fetchMock
+function setupHandlers(overrides?: { consents?: object[]; requests?: object[] }) {
+  server.use(
+    http.get(CONSENTS_URL, () =>
+      HttpResponse.json({ consents: overrides?.consents ?? mockConsents }),
+    ),
+    http.get(DSAR_URL, () =>
+      HttpResponse.json({ requests: overrides?.requests ?? [] }),
+    ),
+  )
+}
+
+function renderPage() {
+  return render(
+    <MemoryRouter>
+      <PrivacyCentrePage />
+    </MemoryRouter>,
+  )
 }
 
 describe('PrivacyCentrePage', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks()
-  })
-
   it('renders the privacy centre heading', async () => {
-    setup()
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
-    )
+    setupHandlers()
+    renderPage()
     await waitFor(() => {
       expect(screen.getByRole('heading', { level: 1, name: /privacy centre/i })).toBeInTheDocument()
     })
   })
 
   it('renders active consent entries after loading', async () => {
-    setup()
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
-    )
+    setupHandlers()
+    renderPage()
     await waitFor(() => {
       expect(screen.getByText(/ai-assisted tutoring/i)).toBeInTheDocument()
     })
-    expect(screen.getByText(/active/i)).toBeInTheDocument()
+    expect(screen.getByText('Active')).toBeInTheDocument()
   })
 
   it('renders DSAR submit form', async () => {
-    setup()
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
-    )
+    setupHandlers()
+    renderPage()
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /submit request/i })).toBeInTheDocument()
     })
   })
 
   it('shows "No consent records found" when list is empty', async () => {
-    setup({ consents: [] })
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
-    )
+    setupHandlers({ consents: [] })
+    renderPage()
     await waitFor(() => {
       expect(screen.getByText(/no consent records found/i)).toBeInTheDocument()
     })
   })
 
   it('withdraw button calls DELETE on the consent', async () => {
-    const fetchMock = setup()
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ consents: mockConsents }),
-      }),
+    setupHandlers()
+    server.use(
+      http.delete(`${CONSENTS_URL}/c1`, () => HttpResponse.json({ ok: true })),
     )
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ requests: [] }),
-      }),
-    )
-    // Subsequent DELETE call
-    fetchMock.mockImplementationOnce(() =>
-      Promise.resolve({ ok: true, json: () => Promise.resolve({ ok: true }) }),
-    )
-
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
-    )
+    renderPage()
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /withdraw/i })).toBeInTheDocument()
@@ -121,26 +87,22 @@ describe('PrivacyCentrePage', () => {
     await userEvent.click(screen.getByRole('button', { name: /withdraw/i }))
 
     await waitFor(() => {
-      const calls = fetchMock.mock.calls
-      const deleteCall = calls.find(([url, opts]) => opts?.method === 'DELETE')
-      expect(deleteCall).toBeTruthy()
+      expect(screen.getByText(/consent withdrawn successfully/i)).toBeInTheDocument()
     })
   })
 
   it('shows error message when fetch fails', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network error')))
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
+    server.use(
+      http.get(CONSENTS_URL, () => HttpResponse.error()),
     )
+    renderPage()
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument()
     })
   })
 
   it('shows existing DSAR requests', async () => {
-    setup({
+    setupHandlers({
       requests: [
         {
           id: 'd1',
@@ -151,11 +113,7 @@ describe('PrivacyCentrePage', () => {
         },
       ],
     })
-    render(
-      <MemoryRouter>
-        <PrivacyCentrePage />
-      </MemoryRouter>,
-    )
+    renderPage()
     await waitFor(() => {
       expect(screen.getByText(/your requests/i)).toBeInTheDocument()
     })
