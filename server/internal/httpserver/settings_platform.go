@@ -83,6 +83,7 @@ type platformSettingsJSON struct {
 	EngagementTrackingEnabled  bool `json:"engagementTrackingEnabled"`
 	SelfReflectionEnabled      bool `json:"selfReflectionEnabled"`
 	OutcomesReportEnabled      bool `json:"outcomesReportEnabled"`
+	InstructorInsightsEnabled  bool `json:"instructorInsightsEnabled"`
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
@@ -200,6 +201,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			EngagementTrackingEnabled:   merged.EngagementTrackingEnabled,
 			SelfReflectionEnabled:       merged.SelfReflectionEnabled,
 			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
+			InstructorInsightsEnabled:   merged.InstructorInsightsEnabled,
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
@@ -290,6 +292,7 @@ type putPlatformBody struct {
 	EngagementTrackingEnabled  *bool `json:"engagementTrackingEnabled"`
 	SelfReflectionEnabled      *bool `json:"selfReflectionEnabled"`
 	OutcomesReportEnabled      *bool `json:"outcomesReportEnabled"`
+	InstructorInsightsEnabled  *bool `json:"instructorInsightsEnabled"`
 	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
@@ -541,6 +544,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("engagementtrackingenabled", body.EngagementTrackingEnabled, func(v bool) { wr.EngagementTrackingEnabled = &v })
 		setBool("selfreflectionenabled", body.SelfReflectionEnabled, func(v bool) { wr.SelfReflectionEnabled = &v })
 		setBool("outcomesreportenabled", body.OutcomesReportEnabled, func(v bool) { wr.OutcomesReportEnabled = &v })
+		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
@@ -614,6 +618,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			EngagementTrackingEnabled:   merged.EngagementTrackingEnabled,
 			SelfReflectionEnabled:       merged.SelfReflectionEnabled,
 			OutcomesReportEnabled:       merged.OutcomesReportEnabled,
+			InstructorInsightsEnabled:   merged.InstructorInsightsEnabled,
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,

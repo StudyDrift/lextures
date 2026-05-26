@@ -29,6 +29,7 @@ export type PlatformFeatures = {
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
   sessionManagementUiEnabled: boolean
+  instructorInsightsEnabled: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -48,6 +49,7 @@ const defaultFeatures: PlatformFeatures = {
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
   sessionManagementUiEnabled: false,
+  instructorInsightsEnabled: false,
   loading: true,
   refresh: async () => {},
 }
@@ -72,6 +74,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     avScanningEnabled: false,
     virtualClassroomEnabled: true,
     sessionManagementUiEnabled: false,
+    instructorInsightsEnabled: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -97,6 +100,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           avScanningEnabled: data.avScanningEnabled === true,
           virtualClassroomEnabled: data.virtualClassroomEnabled !== false,
           sessionManagementUiEnabled: data.sessionManagementUiEnabled === true,
+          instructorInsightsEnabled: data.instructorInsightsEnabled === true,
         }
         setFeatures(next)
         setPlatformFeaturesSnapshot(next)

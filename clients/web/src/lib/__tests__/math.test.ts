@@ -64,6 +64,7 @@ describe('isEquationEditorEnabled', () => {
       avScanningEnabled: false,
       virtualClassroomEnabled: true,
       sessionManagementUiEnabled: false,
+      instructorInsightsEnabled: false,
     })
     expect(isEquationEditorEnabled()).toBe(true)
     resetPlatformFeaturesSnapshot()

@@ -27,6 +27,7 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
   sessionManagementUiEnabled: false,
+  instructorInsightsEnabled: false,
 }
 
 describe('EquationEditorDialog', () => {

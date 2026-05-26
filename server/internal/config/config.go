@@ -219,6 +219,8 @@ type Config struct {
 	EngagementTrackingEnabled bool
 	// SelfReflectionEnabled gates learner study stats, journal, and coaching tips (plan 9.9).
 	SelfReflectionEnabled bool
+	// InstructorInsightsEnabled gates the "What's Working" instructor signals dashboard (plan 9.10).
+	InstructorInsightsEnabled bool
 
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool

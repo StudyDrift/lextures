@@ -1053,3 +1053,85 @@ export async function apiPutSupportWidgetConfig(
   }
   return res.json() as Promise<SupportWidgetConfig>
 }
+
+// ── Instructor insights ──────────────────────────────────────────────────────
+
+export type ApiSignalItem = {
+  itemId: string
+  title: string
+  kind: string
+  completionRate: number
+  avgScore: number | null
+  engagement: number
+  difficulty: number | null
+  compositeScore: number
+  narrative: string
+}
+
+export type ApiInsights = {
+  courseId: string
+  weekOf: string
+  generatedAt: string
+  workingWell: ApiSignalItem[]
+  needsAttention: ApiSignalItem[]
+  scatter: { itemId: string; title: string; difficulty: number; engagement: number; flag: string }[]
+}
+
+export async function apiGetInsights(token: string, courseCode: string): Promise<ApiInsights> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/analytics/insights`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Get insights failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<ApiInsights>
+}
+
+export async function apiRefreshInsights(token: string, courseCode: string): Promise<ApiInsights> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/analytics/insights/refresh`,
+    { method: 'POST', headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Refresh insights failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<ApiInsights>
+}
+
+export async function apiDismissInsightSignal(
+  token: string,
+  courseCode: string,
+  signalKey: string,
+  reason: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/analytics/insights/dismiss`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ signalKey, reason }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Dismiss insight signal failed (${res.status}): ${body}`)
+  }
+}
+
+export async function apiGetCrossSection(
+  token: string,
+  courseCode: string,
+): Promise<{ sectionId: string; sectionName: string; nStudents: number; avgQuizScore: number | null; completionRate: number }[]> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/analytics/cross-section`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Get cross-section failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ sectionId: string; sectionName: string; nStudents: number; avgQuizScore: number | null; completionRate: number }[]>
+}

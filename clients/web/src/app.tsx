@@ -49,6 +49,7 @@ import Reports from './pages/lms/reports'
 import CourseEventLogPage from './pages/lms/course-event-log'
 import CourseMasteryHeatmap from './pages/lms/course-mastery-heatmap'
 import CourseOutcomesReport from './pages/lms/course-outcomes-report'
+import CourseWhatsWorking from './pages/lms/course-whats-working'
 import Settings from './pages/lms/settings'
 import ForgotPassword from './pages/forgot-password'
 import Login from './pages/login'
@@ -166,6 +167,7 @@ export default function App() {
             <Route path="standards-coverage" element={<CourseStandardsCoveragePage />} />
             <Route path="mastery-heatmap" element={<CourseMasteryHeatmap />} />
             <Route path="outcomes-report" element={<CourseOutcomesReport />} />
+            <Route path="whats-working" element={<CourseWhatsWorking />} />
             <Route path="enrollments" element={<CourseEnrollments />} />
             <Route index element={<CourseDetail />} />
           </Route>

@@ -15,6 +15,7 @@ export type PlatformFeaturesSnapshot = {
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
   sessionManagementUiEnabled: boolean
+  instructorInsightsEnabled: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -32,6 +33,7 @@ const defaults: PlatformFeaturesSnapshot = {
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
   sessionManagementUiEnabled: false,
+  instructorInsightsEnabled: false,
 }
 
 let loaded = false
@@ -89,4 +91,8 @@ export function outcomesReportFeatureEnabled(): boolean {
 
 export function xapiEmissionFeatureEnabled(): boolean {
   return loaded && snapshot.xapiEmissionEnabled
+}
+
+export function instructorInsightsFeatureEnabled(): boolean {
+  return loaded && snapshot.instructorInsightsEnabled
 }
