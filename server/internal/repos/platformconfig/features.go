@@ -52,4 +52,5 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.EquationEditorEnabled = mergeBool(db.EquationEditorEnabled, false)
 	out.ReportExportEnabled = mergeBool(db.ReportExportEnabled, false)
 	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, out.XAPIEmissionEnabled)
+	out.CoppaWorkflowEnabled = mergeBool(db.CoppaWorkflowEnabled, out.CoppaWorkflowEnabled)
 }

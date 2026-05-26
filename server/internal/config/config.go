@@ -234,6 +234,8 @@ type Config struct {
 
 	// FERPAWorkflowEnabled gates FERPA directory opt-out, record-access requests, and disclosure log (plan 10.1).
 	FERPAWorkflowEnabled bool
+	// CoppaWorkflowEnabled gates COPPA verifiable parental consent for K-12 deployments (plan 10.2).
+	CoppaWorkflowEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -368,6 +370,7 @@ func Load() Config {
 		LRSAnonymizeActors:  boolEnv("LRS_ANONYMIZE_ACTORS"),
 
 		FERPAWorkflowEnabled: boolEnv("FERPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_FERPA_WORKFLOW"),
+		CoppaWorkflowEnabled: boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
 	}
 }
 
