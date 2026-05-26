@@ -23,6 +23,7 @@ describe('studentProgressFeatureEnabled', () => {
       itemAnalysisEnabled: false,
       outcomesReportEnabled: false,
       engagementTrackingEnabled: false,
+      selfReflectionEnabled: false,
       xapiEmissionEnabled: false,
       equationEditorEnabled: false,
       storageQuotasEnabled: false,

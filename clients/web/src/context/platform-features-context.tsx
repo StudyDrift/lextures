@@ -22,6 +22,7 @@ export type PlatformFeatures = {
   itemAnalysisEnabled: boolean
   outcomesReportEnabled: boolean
   engagementTrackingEnabled: boolean
+  selfReflectionEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   storageQuotasEnabled: boolean
@@ -40,6 +41,7 @@ const defaultFeatures: PlatformFeatures = {
   itemAnalysisEnabled: false,
   outcomesReportEnabled: false,
   engagementTrackingEnabled: false,
+  selfReflectionEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   storageQuotasEnabled: false,
@@ -63,6 +65,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     itemAnalysisEnabled: false,
     outcomesReportEnabled: false,
     engagementTrackingEnabled: false,
+    selfReflectionEnabled: false,
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     storageQuotasEnabled: false,
@@ -87,6 +90,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           itemAnalysisEnabled: data.itemAnalysisEnabled === true,
           outcomesReportEnabled: data.outcomesReportEnabled === true,
           engagementTrackingEnabled: data.engagementTrackingEnabled === true,
+          selfReflectionEnabled: data.selfReflectionEnabled === true,
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,

@@ -58,6 +58,7 @@ type Row struct {
 	ItemAnalysisEnabled        *bool
 	StudentProgressEnabled     *bool
 	EngagementTrackingEnabled  *bool
+	SelfReflectionEnabled      *bool
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
 	ReportExportEnabled        *bool
@@ -120,6 +121,7 @@ type Write struct {
 	ItemAnalysisEnabled        *bool
 	StudentProgressEnabled     *bool
 	EngagementTrackingEnabled  *bool
+	SelfReflectionEnabled      *bool
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
 	ReportExportEnabled        *bool
@@ -180,6 +182,7 @@ SELECT
 	item_analysis_enabled,
 	student_progress_enabled,
 	engagement_tracking_enabled,
+	self_reflection_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	report_export_enabled,
@@ -235,6 +238,7 @@ WHERE id = 1
 		&r.ItemAnalysisEnabled,
 		&r.StudentProgressEnabled,
 		&r.EngagementTrackingEnabled,
+		&r.SelfReflectionEnabled,
 		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
 		&r.ReportExportEnabled,
@@ -330,6 +334,7 @@ INSERT INTO settings.platform_app_settings (
 	item_analysis_enabled,
 	student_progress_enabled,
 	engagement_tracking_enabled,
+	self_reflection_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	report_export_enabled,
@@ -346,7 +351,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -390,6 +395,7 @@ ON CONFLICT (id) DO UPDATE SET
 	item_analysis_enabled = COALESCE(EXCLUDED.item_analysis_enabled, settings.platform_app_settings.item_analysis_enabled),
 	student_progress_enabled = COALESCE(EXCLUDED.student_progress_enabled, settings.platform_app_settings.student_progress_enabled),
 	engagement_tracking_enabled = COALESCE(EXCLUDED.engagement_tracking_enabled, settings.platform_app_settings.engagement_tracking_enabled),
+	self_reflection_enabled = COALESCE(EXCLUDED.self_reflection_enabled, settings.platform_app_settings.self_reflection_enabled),
 	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
@@ -443,6 +449,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.ItemAnalysisEnabled,
 		w.StudentProgressEnabled,
 		w.EngagementTrackingEnabled,
+		w.SelfReflectionEnabled,
 		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
 		w.ReportExportEnabled,

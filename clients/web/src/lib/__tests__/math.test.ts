@@ -57,6 +57,7 @@ describe('isEquationEditorEnabled', () => {
       itemAnalysisEnabled: false,
       outcomesReportEnabled: false,
       engagementTrackingEnabled: false,
+      selfReflectionEnabled: false,
       xapiEmissionEnabled: false,
       equationEditorEnabled: true,
       storageQuotasEnabled: false,

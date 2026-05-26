@@ -12,6 +12,7 @@ const (
 	EventPasswordReset         = notificationevents.PasswordReset
 	EventWelcomeInvite         = notificationevents.WelcomeInvite
 	EventMeetingReminder       = notificationevents.MeetingReminder
+	EventCoachingTipWeekly     = notificationevents.CoachingTipWeekly
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

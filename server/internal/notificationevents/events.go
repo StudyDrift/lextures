@@ -11,6 +11,7 @@ const (
 	PasswordReset          = "password_reset"
 	WelcomeInvite          = "welcome_invite"
 	MeetingReminder        = "meeting_reminder"
+	CoachingTipWeekly      = "coaching_tip_weekly"
 )
 
 // All is the canonical list for defaults and UI.
@@ -24,4 +25,5 @@ var All = []string{
 	PasswordReset,
 	WelcomeInvite,
 	MeetingReminder,
+	CoachingTipWeekly,
 }

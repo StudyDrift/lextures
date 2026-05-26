@@ -52,6 +52,7 @@ import {
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
 import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { LmsPage } from './lms-page'
 
 type CourseEnrollmentRow = {
@@ -659,6 +660,8 @@ export default function Dashboard() {
               )}
             </section>
           )}
+
+          <StudyStatsCard />
 
           {reviewStats != null && (
             <section aria-label="Spaced repetition review">

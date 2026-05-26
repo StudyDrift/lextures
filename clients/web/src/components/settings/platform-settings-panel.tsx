@@ -26,6 +26,7 @@ export type PlatformSettingsPayload = {
   oneRosterEnabled: boolean
   scimEnabled: boolean
   studentProgressEnabled: boolean
+  selfReflectionEnabled: boolean
   outcomesReportEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean
@@ -106,6 +107,7 @@ function emptyForm(): PlatformSettingsPayload {
     oneRosterEnabled: false,
     scimEnabled: false,
     studentProgressEnabled: false,
+    selfReflectionEnabled: false,
     outcomesReportEnabled: false,
     atRiskAlertsEnabled: false,
     h5pEnabled: false,
@@ -323,6 +325,9 @@ export function PlatformSettingsPanel() {
       })
       maybe('studentProgressEnabled', baseline.studentProgressEnabled, form.studentProgressEnabled, () => {
         body.studentProgressEnabled = form.studentProgressEnabled
+      })
+      maybe('selfReflectionEnabled', baseline.selfReflectionEnabled, form.selfReflectionEnabled, () => {
+        body.selfReflectionEnabled = form.selfReflectionEnabled
       })
       maybe('outcomesReportEnabled', baseline.outcomesReportEnabled, form.outcomesReportEnabled, () => {
         body.outcomesReportEnabled = form.outcomesReportEnabled
@@ -693,6 +698,12 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.studentProgressEnabled}
               onChange={(v) => update('studentProgressEnabled', v)}
+            />
+            <FlagRow
+              label="Learner self-reflection & coaching"
+              src="default"
+              checked={form.selfReflectionEnabled}
+              onChange={(v) => update('selfReflectionEnabled', v)}
             />
             <FlagRow
               label="Course outcomes report"

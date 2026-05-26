@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/itemanalysis"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
+	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
@@ -140,6 +141,17 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 	go runEvery(ctx, time.Hour, func() {
 		sweepAtRiskScores(context.Background(), pool, cfg, time.Now().UTC())
 	})
+
+	if cfg.SelfReflectionEnabled {
+		var orClient *openrouter.Client
+		if cfg.OpenRouterAPIKey != "" {
+			orClient = openrouter.NewClient(cfg.OpenRouterAPIKey)
+		}
+		go runEvery(ctx, 24*time.Hour, func() {
+			sweepWeeklyCoachingTips(context.Background(), pool, cfg, orClient, time.Now().UTC())
+		})
+		slog.Info("weekly coaching tips sweep started")
+	}
 
 	if cfg.ReportExportEnabled {
 		go runEvery(ctx, time.Minute, func() {
