@@ -1,5 +1,5 @@
 -- 10.1 FERPA Workflow: directory opt-out, record-access requests, consent records, disclosure log.
--- Depends on: "user".users (011), org.organizations (127).
+-- Depends on: "user".users (011), tenant.organizations (127).
 
 CREATE SCHEMA IF NOT EXISTS compliance;
 
@@ -9,7 +9,7 @@ ALTER TABLE "user".users
 
 CREATE TABLE IF NOT EXISTS compliance.ferpa_record_requests (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    org_id          UUID NOT NULL REFERENCES org.organizations(id),
+    org_id          UUID NOT NULL REFERENCES tenant.organizations(id),
     student_id      UUID NOT NULL REFERENCES "user".users(id),
     requester_id    UUID NOT NULL REFERENCES "user".users(id),
     request_type    TEXT NOT NULL CHECK (request_type IN ('inspect','amend','hearing')),
@@ -32,7 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_ferpa_record_requests_org_status
 
 CREATE TABLE IF NOT EXISTS compliance.ferpa_consent_records (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    org_id       UUID NOT NULL REFERENCES org.organizations(id),
+    org_id       UUID NOT NULL REFERENCES tenant.organizations(id),
     student_id   UUID NOT NULL REFERENCES "user".users(id),
     granted_by   UUID NOT NULL REFERENCES "user".users(id),
     recipient    TEXT NOT NULL,
@@ -48,7 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_ferpa_consent_student
 
 CREATE TABLE IF NOT EXISTS compliance.ferpa_disclosure_log (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    org_id          UUID NOT NULL REFERENCES org.organizations(id),
+    org_id          UUID NOT NULL REFERENCES tenant.organizations(id),
     accessor_id     UUID NOT NULL REFERENCES "user".users(id),
     student_id      UUID NOT NULL REFERENCES "user".users(id),
     data_type       TEXT NOT NULL,
