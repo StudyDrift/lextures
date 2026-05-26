@@ -7,6 +7,7 @@ export type PlatformFeaturesSnapshot = {
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
   engagementTrackingEnabled: boolean
+  selfReflectionEnabled: boolean
   outcomesReportEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
@@ -23,6 +24,7 @@ const defaults: PlatformFeaturesSnapshot = {
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
   engagementTrackingEnabled: false,
+  selfReflectionEnabled: false,
   outcomesReportEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
@@ -75,6 +77,10 @@ export function equationEditorFeatureEnabled(): boolean {
 
 export function engagementTrackingFeatureEnabled(): boolean {
   return loaded && snapshot.engagementTrackingEnabled
+}
+
+export function selfReflectionFeatureEnabled(): boolean {
+  return loaded && snapshot.selfReflectionEnabled
 }
 
 export function outcomesReportFeatureEnabled(): boolean {

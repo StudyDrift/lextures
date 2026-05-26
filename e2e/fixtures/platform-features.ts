@@ -41,6 +41,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       oerLibraryEnabled: true,
       oerStub: true,
       studentProgressEnabled: true,
+      selfReflectionEnabled: true,
       outcomesReportEnabled: true,
       atRiskAlertsEnabled: true,
       equationEditorEnabled: true,
@@ -51,6 +52,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'oerLibraryEnabled',
         'oerStub',
         'studentProgressEnabled',
+        'selfReflectionEnabled',
         'outcomesReportEnabled',
         'atRiskAlertsEnabled',
         'equationEditorEnabled',
@@ -62,5 +64,34 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
   if (!putRes.ok) {
     const body = await putRes.text()
     throw new Error(`E2E platform settings seed failed (${putRes.status}): ${body}`)
+  }
+}
+
+/** Enable engagement tracking for specs that post heartbeat events (not enabled in global seed). */
+export async function enableEngagementTrackingForE2E(): Promise<void> {
+  const loginRes = await fetch(`${apiBase}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: E2E_ADMIN_EMAIL, password: E2E_ADMIN_PASSWORD }),
+  })
+  if (!loginRes.ok) {
+    const body = await loginRes.text()
+    throw new Error(`E2E admin login failed (${loginRes.status}): ${body}`)
+  }
+  const { access_token: token } = (await loginRes.json()) as { access_token: string }
+  const putRes = await fetch(`${apiBase}/api/v1/settings/platform`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      engagementTrackingEnabled: true,
+      updateMask: ['engagementTrackingEnabled'],
+    }),
+  })
+  if (!putRes.ok) {
+    const body = await putRes.text()
+    throw new Error(`E2E engagement enable failed (${putRes.status}): ${body}`)
   }
 }

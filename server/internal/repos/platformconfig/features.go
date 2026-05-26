@@ -46,6 +46,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.ItemAnalysisEnabled = mergeBool(db.ItemAnalysisEnabled, false)
 	out.StudentProgressEnabled = mergeBool(db.StudentProgressEnabled, false)
 	out.EngagementTrackingEnabled = mergeBool(db.EngagementTrackingEnabled, false)
+	out.SelfReflectionEnabled = mergeBool(db.SelfReflectionEnabled, false)
 	out.OutcomesReportEnabled = mergeBool(db.OutcomesReportEnabled, false)
 	out.EquationEditorEnabled = mergeBool(db.EquationEditorEnabled, false)
 	out.ReportExportEnabled = mergeBool(db.ReportExportEnabled, false)

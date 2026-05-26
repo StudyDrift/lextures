@@ -180,4 +180,5 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Get("/api/v1/me/oidc-identities", d.handleMyOIDCIdentities())
 	r.Delete("/api/v1/me/oidc-identities/{id}", d.handleDeleteMyOIDCIdentity())
 	r.Post("/api/v1/me/notebooks/query", d.handleNotebookQuery())
+	d.registerSelfReflectionRoutes(r)
 }

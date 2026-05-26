@@ -217,6 +217,8 @@ type Config struct {
 
 	// EngagementTrackingEnabled gates engagement metrics collection and reporting (plan 9.7).
 	EngagementTrackingEnabled bool
+	// SelfReflectionEnabled gates learner study stats, journal, and coaching tips (plan 9.9).
+	SelfReflectionEnabled bool
 
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool

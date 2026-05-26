@@ -44,6 +44,8 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderDailyDigest(vars, logo, color)
 	case "at_risk_alert":
 		return renderAtRiskAlert(vars, logo, color)
+	case "coaching_tip":
+		return renderCoachingTip(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {

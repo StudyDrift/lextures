@@ -28,6 +28,7 @@ import {
 } from '../../lib/markdown-theme'
 import { useLmsDarkMode } from '../../hooks/use-lms-dark-mode'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
+import { ReflectionJournalPrompt } from '../../components/study-stats/reflection-journal-prompt'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
@@ -457,6 +458,9 @@ export default function CourseModuleContentPage() {
                   </Link>
                 </div>
               </div>
+            ) : null}
+            {!editing && courseProfile?.id ? (
+              <ReflectionJournalPrompt courseId={courseProfile.id} />
             ) : null}
           </div>
         )}

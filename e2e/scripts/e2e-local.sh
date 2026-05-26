@@ -266,6 +266,7 @@ if [[ "${E2E_WEB_MODE:-}" == "preview" ]]; then
   VITE_API_URL="http://localhost:${E2E_API_PORT}" npm run preview -- --port 5173 --strictPort &
 else
   VITE_API_URL="http://localhost:${E2E_API_PORT}" \
+    VITE_DEV_API_PROXY="http://127.0.0.1:${E2E_API_PORT}" \
     npm run dev -- --port 5173 --strictPort &
 fi
 PIDS+=($!)
