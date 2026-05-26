@@ -91,7 +91,7 @@ func TestSelfReflection_StatsAndJournal_Pg(t *testing.T) {
 	weekStart, _ := studyreflection.WeekBounds(now)
 	_, err = pool.Exec(ctx, `
 INSERT INTO analytics.engagement_events (user_id, event_type, occurred_at)
-SELECT $1, 'heartbeat', $2 + (n || ' minutes')::interval
+SELECT $1::uuid, 'heartbeat'::text, $2::timestamptz + (n * interval '1 minute')
 FROM generate_series(0, 5) AS n
 `, userID, weekStart)
 	if err != nil {
