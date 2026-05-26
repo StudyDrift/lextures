@@ -30,6 +30,7 @@ describe('studentProgressFeatureEnabled', () => {
       avScanningEnabled: false,
       virtualClassroomEnabled: true,
       sessionManagementUiEnabled: false,
+      instructorInsightsEnabled: false,
     })
     expect(studentProgressFeatureEnabled()).toBe(true)
   })
