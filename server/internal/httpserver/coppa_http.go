@@ -205,13 +205,13 @@ func (d Deps) handleCoppaConsentRevoke() http.HandlerFunc {
 		if !d.coppaEnabled(w) {
 			return
 		}
-		parentID, _, ok := d.requireParentViewer(w, r)
-		if !ok {
-			return
-		}
 		consentID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "id")))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid consent id.")
+			return
+		}
+		parentID, _, ok := d.requireParentViewer(w, r)
+		if !ok {
 			return
 		}
 		if err := coppaservice.RevokeConsent(r.Context(), d.Pool, consentID, parentID, time.Now().UTC()); err != nil {

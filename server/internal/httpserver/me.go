@@ -10,6 +10,7 @@ import (
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/repos/oidc"
 	"github.com/lextures/lextures/server/internal/repos/organization"
+	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/meperm"
 )
 
@@ -158,7 +159,30 @@ func (d Deps) handleDeleteMyOIDCIdentity() http.HandlerFunc {
 	}
 }
 
+// handleGetMe is GET /api/v1/me — returns the authenticated user's id, email, and display name.
+func (d Deps) handleGetMe() http.HandlerFunc {
+	type resp struct {
+		ID          string  `json:"id"`
+		Email       string  `json:"email"`
+		DisplayName *string `json:"displayName"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		row, err := user.FindByID(r.Context(), d.Pool, userID)
+		if err != nil || row == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp{ID: row.ID, Email: row.Email, DisplayName: row.DisplayName})
+	}
+}
+
 func (d Deps) registerMeRoutes(r chi.Router) {
+	r.Get("/api/v1/me", d.handleGetMe())
 	r.Get("/api/v1/me/mfa", d.handleListMyMFA())
 	r.Delete("/api/v1/me/mfa/{id}", d.handleDeleteMyMFA())
 	r.Get("/api/v1/me/permissions", d.handleMyPermissions())
