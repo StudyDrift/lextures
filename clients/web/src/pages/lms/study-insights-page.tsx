@@ -30,21 +30,34 @@ export default function StudyInsightsPage() {
   const [journalDraft, setJournalDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [insightsLoaded, setInsightsLoaded] = useState(false)
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (cancelled?: () => boolean) => {
+    const isStale = () => cancelled?.() === true
+
     const goal = await fetchStudyGoal()
+    if (isStale()) return
     setOptedIn(goal.optedIn)
     if (goal.weeklyHours > 0) setWeeklyHours(goal.weeklyHours)
+
+    if (!goal.optedIn) {
+      setStats(null)
+      setJournal([])
+      setTips([])
+      setError(null)
+      setInsightsLoaded(true)
+      return
+    }
 
     const [statsResult, journalResult, tipsResult] = await Promise.allSettled([
       fetchStudyStats(),
       fetchReflectionJournal(),
       fetchCoachingTips(),
     ])
+    if (isStale()) return
 
     if (statsResult.status === 'fulfilled') {
       setStats(statsResult.value)
-      setOptedIn(statsResult.value.optedIn)
       if (statsResult.value.weeklyGoalHours != null) {
         setWeeklyHours(statsResult.value.weeklyGoalHours)
       }
@@ -67,18 +80,28 @@ export default function StudyInsightsPage() {
     } else {
       setError(null)
     }
+    setInsightsLoaded(true)
   }, [])
+
+  const refreshInsights = useCallback(() => reload(), [reload])
 
   useEffect(() => {
     if (featuresLoading || !selfReflectionEnabled) return
-    void reload().catch((e) => setError(e instanceof Error ? e.message : 'Failed to load'))
+    setInsightsLoaded(false)
+    let cancelled = false
+    void reload(() => cancelled).catch((e) => {
+      if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load')
+    })
+    return () => {
+      cancelled = true
+    }
   }, [featuresLoading, selfReflectionEnabled, reload])
 
   async function saveGoals() {
     setSaving(true)
     try {
       await putStudyGoal({ weeklyHours, optedIn })
-      await reload()
+      await refreshInsights()
       setError(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save')
@@ -92,7 +115,7 @@ export default function StudyInsightsPage() {
     if (!text) return
     await createReflectionJournalEntry({ entryText: text })
     setJournalDraft('')
-    await reload()
+    await refreshInsights()
   }
 
   if (featuresLoading) {
@@ -119,6 +142,14 @@ export default function StudyInsightsPage() {
 
   return (
     <LmsPage title="Study insights">
+      <div
+        data-testid="study-insights-loaded"
+        data-ready={insightsLoaded ? 'true' : 'false'}
+        className="sr-only"
+        aria-hidden
+      >
+        {insightsLoaded ? 'loaded' : 'loading'}
+      </div>
       {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
 
       <section className="rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="My goals">
@@ -241,7 +272,7 @@ export default function StudyInsightsPage() {
                     className="mt-2 text-xs text-red-600"
                     onClick={() =>
                       void deleteReflectionJournalEntry(e.id)
-                        .then(reload)
+                        .then(refreshInsights)
                         .catch((err) => setError(String(err)))
                     }
                   >
@@ -270,7 +301,7 @@ export default function StudyInsightsPage() {
                       type="button"
                       aria-label="Helpful"
                       className="text-xs underline"
-                      onClick={() => void rateCoachingTip(tip.id, 1).then(reload)}
+                      onClick={() => void rateCoachingTip(tip.id, 1).then(refreshInsights)}
                     >
                       Helpful
                     </button>
@@ -278,7 +309,7 @@ export default function StudyInsightsPage() {
                       type="button"
                       aria-label="Not helpful"
                       className="text-xs underline"
-                      onClick={() => void rateCoachingTip(tip.id, -1).then(reload)}
+                      onClick={() => void rateCoachingTip(tip.id, -1).then(refreshInsights)}
                     >
                       Not helpful
                     </button>

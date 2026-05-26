@@ -98,21 +98,17 @@ test.describe('Self-reflection coaching', () => {
 
     await page.goto('/me/study-insights')
     await expect(page.getByRole('heading', { name: 'Study insights' })).toBeVisible()
-    await page.waitForResponse(
-      (res) =>
-        res.url().includes('/api/v1/me/study-goal') &&
-        res.request().method() === 'GET' &&
-        res.ok(),
-    )
-    await page.waitForResponse(
-      (res) =>
-        res.url().includes('/api/v1/me/reflection-journal') &&
-        res.request().method() === 'GET' &&
-        res.ok(),
-    )
+    await expect(page.getByTestId('study-insights-loaded')).toHaveAttribute('data-ready', 'true', {
+      timeout: 15000,
+    })
+    await expect(
+      page.getByRole('checkbox', { name: /Enable study stats, coaching tips, and private journal/i }),
+    ).toBeChecked()
     const journalRegion = page.getByRole('region', { name: 'Private journal' })
     await expect(journalRegion).toBeVisible({ timeout: 15000 })
-    await expect(journalRegion.getByTestId('journal-entry').filter({ hasText: note })).toBeVisible()
+    await expect(journalRegion.getByTestId('journal-entry').filter({ hasText: note })).toBeVisible({
+      timeout: 15000,
+    })
 
     const optOutRes = await page.request.put(`${apiBase}/api/v1/me/study-goal`, {
       headers: {
