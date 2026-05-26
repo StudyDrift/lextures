@@ -41,6 +41,12 @@ export async function fetchStudyStats(): Promise<StudyStats> {
   return res.json() as Promise<StudyStats>
 }
 
+export async function fetchStudyGoal(): Promise<{ weeklyHours: number; optedIn: boolean }> {
+  const res = await authorizedFetch('/api/v1/me/study-goal')
+  if (!res.ok) await parseError(res, 'Could not load study goal.')
+  return res.json() as Promise<{ weeklyHours: number; optedIn: boolean }>
+}
+
 export async function putStudyGoal(body: {
   weeklyHours?: number
   optedIn?: boolean

@@ -7,6 +7,7 @@ import {
   deleteReflectionJournalEntry,
   fetchCoachingTips,
   fetchReflectionJournal,
+  fetchStudyGoal,
   fetchStudyStats,
   putStudyGoal,
   rateCoachingTip,
@@ -31,16 +32,41 @@ export default function StudyInsightsPage() {
   const [saving, setSaving] = useState(false)
 
   const reload = useCallback(async () => {
-    const [s, j, t] = await Promise.all([
+    const goal = await fetchStudyGoal()
+    setOptedIn(goal.optedIn)
+    if (goal.weeklyHours > 0) setWeeklyHours(goal.weeklyHours)
+
+    const [statsResult, journalResult, tipsResult] = await Promise.allSettled([
       fetchStudyStats(),
       fetchReflectionJournal(),
       fetchCoachingTips(),
     ])
-    setStats(s)
-    setJournal(j)
-    setTips(t.history)
-    setOptedIn(s.optedIn)
-    if (s.weeklyGoalHours != null) setWeeklyHours(s.weeklyGoalHours)
+
+    if (statsResult.status === 'fulfilled') {
+      setStats(statsResult.value)
+      setOptedIn(statsResult.value.optedIn)
+      if (statsResult.value.weeklyGoalHours != null) {
+        setWeeklyHours(statsResult.value.weeklyGoalHours)
+      }
+    } else {
+      setStats(null)
+    }
+
+    if (journalResult.status === 'fulfilled') {
+      setJournal(journalResult.value)
+    }
+
+    if (tipsResult.status === 'fulfilled') {
+      setTips(tipsResult.value.history)
+    }
+
+    const failures = [statsResult, journalResult, tipsResult].filter((r) => r.status === 'rejected')
+    if (failures.length === 3) {
+      const first = failures[0] as PromiseRejectedResult
+      setError(first.reason instanceof Error ? first.reason.message : 'Failed to load')
+    } else {
+      setError(null)
+    }
   }, [])
 
   useEffect(() => {
@@ -131,44 +157,57 @@ export default function StudyInsightsPage() {
         </button>
       </section>
 
-      {stats && optedIn ? (
+      {optedIn ? (
         <>
-          <section className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="This week">
-            <h2 className="text-lg font-semibold">This week</h2>
-            <p className="mt-2 text-sm" aria-label={`${stats.loginStreakDays}-day study streak`}>
-              Streak: {stats.loginStreakDays} day{stats.loginStreakDays === 1 ? '' : 's'}
-            </p>
-            <p className="mt-1 text-sm">
-              Time on task: {formatHours(hoursStudied)} hours
-              {stats.weeklyGoalHours != null && stats.weeklyGoalHours > 0
-                ? ` (${formatHours(hoursStudied)} of ${formatHours(stats.weeklyGoalHours)} toward your goal)`
-                : ''}
-            </p>
-          </section>
+          {stats ? (
+            <>
+              <section
+                className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+                aria-label="This week"
+              >
+                <h2 className="text-lg font-semibold">This week</h2>
+                <p className="mt-2 text-sm" aria-label={`${stats.loginStreakDays}-day study streak`}>
+                  Streak: {stats.loginStreakDays} day{stats.loginStreakDays === 1 ? '' : 's'}
+                </p>
+                <p className="mt-1 text-sm">
+                  Time on task: {formatHours(hoursStudied)} hours
+                  {stats.weeklyGoalHours != null && stats.weeklyGoalHours > 0
+                    ? ` (${formatHours(hoursStudied)} of ${formatHours(stats.weeklyGoalHours)} toward your goal)`
+                    : ''}
+                </p>
+              </section>
 
-          {stats.timeAllocation.length > 0 ? (
-            <section className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="Time allocation">
-              <h2 className="text-lg font-semibold">Time by module (last 14 days)</h2>
-              <ul className="mt-4 space-y-3">
-                {stats.timeAllocation.map((row) => (
-                  <li key={row.moduleId}>
-                    <div className="flex justify-between text-sm">
-                      <span className="truncate pr-2">{row.moduleTitle}</span>
-                      <span className="shrink-0 text-slate-600">{Math.round(row.minutes)} min</span>
-                    </div>
-                    <div className="mt-1 h-2 rounded-full bg-slate-100 dark:bg-neutral-800">
-                      <div
-                        className="h-full rounded-full bg-indigo-500"
-                        style={{ width: `${Math.round((row.minutes / maxAlloc) * 100)}%` }}
-                      />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
+              {stats.timeAllocation.length > 0 ? (
+                <section
+                  className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+                  aria-label="Time allocation"
+                >
+                  <h2 className="text-lg font-semibold">Time by module (last 14 days)</h2>
+                  <ul className="mt-4 space-y-3">
+                    {stats.timeAllocation.map((row) => (
+                      <li key={row.moduleId}>
+                        <div className="flex justify-between text-sm">
+                          <span className="truncate pr-2">{row.moduleTitle}</span>
+                          <span className="shrink-0 text-slate-600">{Math.round(row.minutes)} min</span>
+                        </div>
+                        <div className="mt-1 h-2 rounded-full bg-slate-100 dark:bg-neutral-800">
+                          <div
+                            className="h-full rounded-full bg-indigo-500"
+                            style={{ width: `${Math.round((row.minutes / maxAlloc) * 100)}%` }}
+                          />
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+            </>
           ) : null}
 
-          <section className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="Private journal">
+          <section
+            className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+            aria-label="Private journal"
+          >
             <h2 className="text-lg font-semibold">Private journal</h2>
             <p className="mt-1 text-xs text-slate-500">Only you can see these entries.</p>
             <textarea
@@ -190,7 +229,11 @@ export default function StudyInsightsPage() {
             </button>
             <ul className="mt-6 space-y-3">
               {journal.map((e) => (
-                <li key={e.id} className="rounded-xl bg-slate-50 px-4 py-3 text-sm dark:bg-neutral-900/60">
+                <li
+                  key={e.id}
+                  data-testid="journal-entry"
+                  className="rounded-xl bg-slate-50 px-4 py-3 text-sm dark:bg-neutral-900/60"
+                >
                   <p className="text-xs text-slate-500">{new Date(e.createdAt).toLocaleString()}</p>
                   <p className="mt-1">{e.entryText}</p>
                   <button
@@ -209,11 +252,17 @@ export default function StudyInsightsPage() {
             </ul>
           </section>
 
-          <section className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="Coaching tips">
+          <section
+            className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
+            aria-label="Coaching tips"
+          >
             <h2 className="text-lg font-semibold">Coaching tip history</h2>
             <ul className="mt-4 space-y-4">
               {tips.map((tip) => (
-                <li key={tip.id} className="rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-sm dark:border-amber-900/40 dark:bg-amber-950/20">
+                <li
+                  key={tip.id}
+                  className="rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-sm dark:border-amber-900/40 dark:bg-amber-950/20"
+                >
                   <p className="text-xs text-slate-500">Week of {tip.weekOf}</p>
                   <p className="mt-1">{tip.tipText}</p>
                   <div className="mt-2 flex gap-2">

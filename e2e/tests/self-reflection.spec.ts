@@ -100,13 +100,19 @@ test.describe('Self-reflection coaching', () => {
     await expect(page.getByRole('heading', { name: 'Study insights' })).toBeVisible()
     await page.waitForResponse(
       (res) =>
+        res.url().includes('/api/v1/me/study-goal') &&
+        res.request().method() === 'GET' &&
+        res.ok(),
+    )
+    await page.waitForResponse(
+      (res) =>
         res.url().includes('/api/v1/me/reflection-journal') &&
         res.request().method() === 'GET' &&
         res.ok(),
     )
-    await expect(
-      page.getByRole('region', { name: 'Private journal' }).getByText(note),
-    ).toBeVisible({ timeout: 15000 })
+    const journalRegion = page.getByRole('region', { name: 'Private journal' })
+    await expect(journalRegion).toBeVisible({ timeout: 15000 })
+    await expect(journalRegion.getByTestId('journal-entry').filter({ hasText: note })).toBeVisible()
 
     const optOutRes = await page.request.put(`${apiBase}/api/v1/me/study-goal`, {
       headers: {

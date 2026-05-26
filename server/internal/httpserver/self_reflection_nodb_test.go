@@ -14,6 +14,7 @@ func TestSelfReflection_FeatureDisabled_Returns404(t *testing.T) {
 
 	for _, path := range []string{
 		"/api/v1/me/study-stats",
+		"/api/v1/me/study-goal",
 		"/api/v1/me/reflection-journal",
 		"/api/v1/me/coaching-tips",
 	} {

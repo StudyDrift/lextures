@@ -25,6 +25,7 @@ func (d Deps) selfReflectionEnabled(w http.ResponseWriter) bool {
 
 func (d Deps) registerSelfReflectionRoutes(r chi.Router) {
 	r.Get("/api/v1/me/study-stats", d.handleGetStudyStats())
+	r.Get("/api/v1/me/study-goal", d.handleGetStudyGoal())
 	r.Put("/api/v1/me/study-goal", d.handlePutStudyGoal())
 	r.Get("/api/v1/me/reflection-journal", d.handleListReflectionJournal())
 	r.Post("/api/v1/me/reflection-journal", d.handlePostReflectionJournal())
@@ -55,6 +56,34 @@ func (d Deps) handleGetStudyStats() http.HandlerFunc {
 type putStudyGoalBody struct {
 	WeeklyHours *float32 `json:"weeklyHours"`
 	OptedIn     *bool    `json:"optedIn"`
+}
+
+func (d Deps) handleGetStudyGoal() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !d.selfReflectionEnabled(w) {
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		goal, err := repo.GetGoal(r.Context(), d.Pool, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load study goal.")
+			return
+		}
+		hours := float32(0)
+		optedIn := false
+		if goal != nil {
+			hours = goal.WeeklyHours
+			optedIn = goal.OptedIn
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"weeklyHours": hours,
+			"optedIn":     optedIn,
+		})
+	}
 }
 
 func (d Deps) handlePutStudyGoal() http.HandlerFunc {
