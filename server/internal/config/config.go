@@ -231,6 +231,9 @@ type Config struct {
 	XAPIEmissionEnabled bool
 	// LRSAnonymizeActors hashes actor mbox emails in emitted xAPI statements (plan 9.6 AC-4).
 	LRSAnonymizeActors bool
+
+	// FERPAWorkflowEnabled gates FERPA directory opt-out, record-access requests, and disclosure log (plan 10.1).
+	FERPAWorkflowEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -363,6 +366,8 @@ func Load() Config {
 
 		XAPIEmissionEnabled: boolEnv("XAPI_EMISSION_ENABLED") || boolEnv("FEATURE_XAPI_EMISSION"),
 		LRSAnonymizeActors:  boolEnv("LRS_ANONYMIZE_ACTORS"),
+
+		FERPAWorkflowEnabled: boolEnv("FERPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_FERPA_WORKFLOW"),
 	}
 }
 
