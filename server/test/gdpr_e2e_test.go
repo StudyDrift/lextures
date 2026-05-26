@@ -128,7 +128,7 @@ func TestGDPR_ConsentGrantAndWithdraw(t *testing.T) {
 			"lawfulBasis":    "consent",
 			"consentVersion": "1.0",
 		}, tok)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("grant consent: status=%d want 201", resp.StatusCode)
 	}
@@ -143,7 +143,7 @@ func TestGDPR_ConsentGrantAndWithdraw(t *testing.T) {
 
 	// List consents — should have one active entry.
 	resp2 := gdprDo(t, env.srv, http.MethodGet, "/api/v1/compliance/gdpr/consents", nil, tok)
-	defer resp2.Body.Close()
+	defer func() { _ = resp2.Body.Close() }()
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("list consents: status=%d want 200", resp2.StatusCode)
 	}
@@ -178,7 +178,7 @@ func TestGDPR_ConsentGrantAndWithdraw(t *testing.T) {
 
 	// Withdraw the consent (AC-3).
 	resp3 := gdprDo(t, env.srv, http.MethodDelete, "/api/v1/compliance/gdpr/consents/"+consentID, nil, tok)
-	defer resp3.Body.Close()
+	defer func() { _ = resp3.Body.Close() }()
 	if resp3.StatusCode != http.StatusOK {
 		t.Fatalf("withdraw consent: status=%d want 200", resp3.StatusCode)
 	}
@@ -192,7 +192,7 @@ func TestGDPR_ConsentGrantAndWithdraw(t *testing.T) {
 
 	// List again — consent should now have withdrawnAt set.
 	resp4 := gdprDo(t, env.srv, http.MethodGet, "/api/v1/compliance/gdpr/consents", nil, tok)
-	defer resp4.Body.Close()
+	defer func() { _ = resp4.Body.Close() }()
 	var listResp2 struct {
 		Consents []struct {
 			ID          string  `json:"id"`
@@ -217,7 +217,7 @@ func TestGDPR_SubmitDSAR(t *testing.T) {
 	// Submit an access request.
 	resp := gdprDo(t, env.srv, http.MethodPost, "/api/v1/compliance/gdpr/dsar",
 		map[string]string{"requestType": "access"}, tok)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("submit DSAR: status=%d want 201", resp.StatusCode)
 	}
@@ -232,7 +232,7 @@ func TestGDPR_SubmitDSAR(t *testing.T) {
 
 	// List own requests — should contain the new one.
 	resp2 := gdprDo(t, env.srv, http.MethodGet, "/api/v1/compliance/gdpr/dsar", nil, tok)
-	defer resp2.Body.Close()
+	defer func() { _ = resp2.Body.Close() }()
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("list DSAR: status=%d want 200", resp2.StatusCode)
 	}
@@ -276,7 +276,7 @@ func TestGDPR_SubmitDSAR(t *testing.T) {
 	// Duplicate submission should return 409.
 	resp3 := gdprDo(t, env.srv, http.MethodPost, "/api/v1/compliance/gdpr/dsar",
 		map[string]string{"requestType": "access"}, tok)
-	defer resp3.Body.Close()
+	defer func() { _ = resp3.Body.Close() }()
 	if resp3.StatusCode != http.StatusConflict {
 		t.Errorf("duplicate DSAR: status=%d want 409", resp3.StatusCode)
 	}
@@ -320,7 +320,7 @@ func TestGDPR_FeatureFlag_Returns404WhenDisabled(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s %s: request failed: %v", p.method, p.path, err)
 		}
-		resp.Body.Close()
+		_ = resp.Body.Close()
 		if resp.StatusCode != http.StatusNotFound {
 			t.Errorf("%s %s: status=%d want 404", p.method, p.path, resp.StatusCode)
 		}
@@ -356,7 +356,7 @@ func TestGDPR_ConsentValidation(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			resp := gdprDo(t, env.srv, http.MethodPost, "/api/v1/compliance/gdpr/consents", tc.body, tok)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			if resp.StatusCode != tc.wantStatus {
 				t.Errorf("status=%d want %d", resp.StatusCode, tc.wantStatus)
 			}
@@ -371,7 +371,7 @@ func TestGDPR_DSARValidation(t *testing.T) {
 
 	resp := gdprDo(t, env.srv, http.MethodPost, "/api/v1/compliance/gdpr/dsar",
 		map[string]string{"requestType": "not-a-type"}, tok)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Errorf("invalid requestType: status=%d want 400", resp.StatusCode)
 	}
@@ -383,7 +383,7 @@ func TestGDPR_DPATemplate(t *testing.T) {
 	tok := env.token(t)
 
 	resp := gdprDo(t, env.srv, http.MethodGet, "/api/v1/compliance/gdpr/dpa-template", nil, tok)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("dpa-template: status=%d want 200", resp.StatusCode)
 	}
