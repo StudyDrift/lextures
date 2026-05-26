@@ -57,7 +57,7 @@ func TestInsights_OK_Pg(t *testing.T) {
 	courseCode := "INSIGHTS-" + time.Now().Format("150405000")
 	var courseID uuid.UUID
 	if err := pool.QueryRow(ctx, `
-INSERT INTO course.courses (course_code, title, created_by)
+INSERT INTO course.courses (course_code, title, created_by_user_id)
 VALUES ($1, 'Insights Test Course', $2)
 RETURNING id
 `, courseCode, uid).Scan(&courseID); err != nil {
