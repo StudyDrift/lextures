@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test'
 
-test.skip(!!process.env.CI, 'docs screenshot generation — run locally only')
+test.skip(
+  !!process.env.CI || !process.env.E2E_SCREENSHOTS,
+  'docs screenshot generation — run locally with E2E_SCREENSHOTS=1',
+)
 
 test('take course creation screenshots', async ({ page }) => {
   // Set standard viewport size

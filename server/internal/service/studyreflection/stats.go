@@ -75,6 +75,9 @@ WHERE user_id = $1 AND event_type = 'heartbeat'
 		return out, err
 	}
 	out.TimeAllocation = allocation
+	if out.TimeAllocation == nil {
+		out.TimeAllocation = []TimeAllocationRow{}
+	}
 
 	scoreStart, scoreEnd, timeAll, err := loadQuizEfficiencyInputs(ctx, pool, userID, weekStart, weekEnd)
 	if err != nil {

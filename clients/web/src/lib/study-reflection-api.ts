@@ -38,7 +38,11 @@ async function parseError(res: Response, fallback: string): Promise<never> {
 export async function fetchStudyStats(): Promise<StudyStats> {
   const res = await authorizedFetch('/api/v1/me/study-stats')
   if (!res.ok) await parseError(res, 'Could not load study stats.')
-  return res.json() as Promise<StudyStats>
+  const data = (await res.json()) as StudyStats
+  return {
+    ...data,
+    timeAllocation: data.timeAllocation ?? [],
+  }
 }
 
 export async function fetchStudyGoal(): Promise<{ weeklyHours: number; optedIn: boolean }> {

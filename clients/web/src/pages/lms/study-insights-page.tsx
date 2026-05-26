@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LmsPage } from './lms-page'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -30,70 +30,84 @@ export default function StudyInsightsPage() {
   const [journalDraft, setJournalDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
-  const [insightsLoaded, setInsightsLoaded] = useState(false)
+  const loadGeneration = useRef(0)
 
-  const reload = useCallback(async (cancelled?: () => boolean) => {
-    const isStale = () => cancelled?.() === true
+  const reload = useCallback(async () => {
+    const generation = ++loadGeneration.current
 
-    const goal = await fetchStudyGoal()
-    if (isStale()) return
-    setOptedIn(goal.optedIn)
-    if (goal.weeklyHours > 0) setWeeklyHours(goal.weeklyHours)
+    const isActive = () => generation === loadGeneration.current
 
-    if (!goal.optedIn) {
-      setStats(null)
-      setJournal([])
-      setTips([])
-      setError(null)
-      setInsightsLoaded(true)
-      return
-    }
+    try {
+      let goalOptedIn = false
+      let goalHours = 0
 
-    const [statsResult, journalResult, tipsResult] = await Promise.allSettled([
-      fetchStudyStats(),
-      fetchReflectionJournal(),
-      fetchCoachingTips(),
-    ])
-    if (isStale()) return
-
-    if (statsResult.status === 'fulfilled') {
-      setStats(statsResult.value)
-      if (statsResult.value.weeklyGoalHours != null) {
-        setWeeklyHours(statsResult.value.weeklyGoalHours)
+      try {
+        const goal = await fetchStudyGoal()
+        if (!isActive()) return
+        goalOptedIn = goal.optedIn
+        if (goal.weeklyHours > 0) goalHours = goal.weeklyHours
+      } catch {
+        const statsProbe = await fetchStudyStats().catch(() => null)
+        if (!isActive()) return
+        if (statsProbe) {
+          goalOptedIn = statsProbe.optedIn
+          if (statsProbe.weeklyGoalHours != null) goalHours = statsProbe.weeklyGoalHours
+        }
       }
-    } else {
-      setStats(null)
-    }
 
-    if (journalResult.status === 'fulfilled') {
-      setJournal(journalResult.value)
-    }
+      setOptedIn(goalOptedIn)
+      if (goalHours > 0) setWeeklyHours(goalHours)
 
-    if (tipsResult.status === 'fulfilled') {
-      setTips(tipsResult.value.history)
-    }
+      if (!goalOptedIn) {
+        setStats(null)
+        setJournal([])
+        setTips([])
+        setError(null)
+        return
+      }
 
-    const failures = [statsResult, journalResult, tipsResult].filter((r) => r.status === 'rejected')
-    if (failures.length === 3) {
-      const first = failures[0] as PromiseRejectedResult
-      setError(first.reason instanceof Error ? first.reason.message : 'Failed to load')
-    } else {
-      setError(null)
+      const [statsResult, journalResult, tipsResult] = await Promise.allSettled([
+        fetchStudyStats(),
+        fetchReflectionJournal(),
+        fetchCoachingTips(),
+      ])
+      if (!isActive()) return
+
+      if (statsResult.status === 'fulfilled') {
+        setStats(statsResult.value)
+        if (statsResult.value.weeklyGoalHours != null) {
+          setWeeklyHours(statsResult.value.weeklyGoalHours)
+        }
+      } else {
+        setStats(null)
+      }
+
+      if (journalResult.status === 'fulfilled') {
+        setJournal(journalResult.value)
+      }
+
+      if (tipsResult.status === 'fulfilled') {
+        setTips(tipsResult.value.history)
+      }
+
+      const failures = [statsResult, journalResult, tipsResult].filter((r) => r.status === 'rejected')
+      if (failures.length === 3) {
+        const first = failures[0] as PromiseRejectedResult
+        setError(first.reason instanceof Error ? first.reason.message : 'Failed to load')
+      } else {
+        setError(null)
+      }
+    } catch (e) {
+      if (!isActive()) return
+      setError(e instanceof Error ? e.message : 'Failed to load')
     }
-    setInsightsLoaded(true)
   }, [])
-
-  const refreshInsights = useCallback(() => reload(), [reload])
 
   useEffect(() => {
     if (featuresLoading || !selfReflectionEnabled) return
-    setInsightsLoaded(false)
-    let cancelled = false
-    void reload(() => cancelled).catch((e) => {
-      if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load')
-    })
+    void reload()
     return () => {
-      cancelled = true
+      loadGeneration.current += 1
     }
   }, [featuresLoading, selfReflectionEnabled, reload])
 
@@ -101,7 +115,7 @@ export default function StudyInsightsPage() {
     setSaving(true)
     try {
       await putStudyGoal({ weeklyHours, optedIn })
-      await refreshInsights()
+      await reload()
       setError(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save')
@@ -115,7 +129,7 @@ export default function StudyInsightsPage() {
     if (!text) return
     await createReflectionJournalEntry({ entryText: text })
     setJournalDraft('')
-    await refreshInsights()
+    await reload()
   }
 
   if (featuresLoading) {
@@ -138,18 +152,11 @@ export default function StudyInsightsPage() {
   }
 
   const hoursStudied = (stats?.timeOnTaskSecondsThisWeek ?? 0) / 3600
-  const maxAlloc = Math.max(...(stats?.timeAllocation.map((r) => r.minutes) ?? [1]), 1)
+  const timeAllocation = stats?.timeAllocation ?? []
+  const maxAlloc = Math.max(1, ...timeAllocation.map((r) => r.minutes))
 
   return (
     <LmsPage title="Study insights">
-      <div
-        data-testid="study-insights-loaded"
-        data-ready={insightsLoaded ? 'true' : 'false'}
-        className="sr-only"
-        aria-hidden
-      >
-        {insightsLoaded ? 'loaded' : 'loading'}
-      </div>
       {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
 
       <section className="rounded-2xl border border-slate-200 p-5 dark:border-neutral-700" aria-label="My goals">
@@ -208,14 +215,14 @@ export default function StudyInsightsPage() {
                 </p>
               </section>
 
-              {stats.timeAllocation.length > 0 ? (
+              {timeAllocation.length > 0 ? (
                 <section
                   className="mt-8 rounded-2xl border border-slate-200 p-5 dark:border-neutral-700"
                   aria-label="Time allocation"
                 >
                   <h2 className="text-lg font-semibold">Time by module (last 14 days)</h2>
                   <ul className="mt-4 space-y-3">
-                    {stats.timeAllocation.map((row) => (
+                    {timeAllocation.map((row) => (
                       <li key={row.moduleId}>
                         <div className="flex justify-between text-sm">
                           <span className="truncate pr-2">{row.moduleTitle}</span>
@@ -272,7 +279,7 @@ export default function StudyInsightsPage() {
                     className="mt-2 text-xs text-red-600"
                     onClick={() =>
                       void deleteReflectionJournalEntry(e.id)
-                        .then(refreshInsights)
+                        .then(reload)
                         .catch((err) => setError(String(err)))
                     }
                   >
@@ -301,7 +308,7 @@ export default function StudyInsightsPage() {
                       type="button"
                       aria-label="Helpful"
                       className="text-xs underline"
-                      onClick={() => void rateCoachingTip(tip.id, 1).then(refreshInsights)}
+                      onClick={() => void rateCoachingTip(tip.id, 1).then(reload)}
                     >
                       Helpful
                     </button>
@@ -309,7 +316,7 @@ export default function StudyInsightsPage() {
                       type="button"
                       aria-label="Not helpful"
                       className="text-xs underline"
-                      onClick={() => void rateCoachingTip(tip.id, -1).then(refreshInsights)}
+                      onClick={() => void rateCoachingTip(tip.id, -1).then(reload)}
                     >
                       Not helpful
                     </button>
