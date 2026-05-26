@@ -85,8 +85,9 @@ test.describe('Self-reflection coaching', () => {
         res.request().method() === 'GET' &&
         res.ok(),
     )
-    await expect(page.getByRole('region', { name: 'Study stats' })).toBeVisible({ timeout: 15000 })
-    await expect(page.getByLabel(/study streak/i).or(page.getByText(/hour/i).first())).toBeVisible()
+    const studyStats = page.getByRole('region', { name: 'Study stats' })
+    await expect(studyStats).toBeVisible({ timeout: 15000 })
+    await expect(studyStats.getByText(/studied this week/i)).toBeVisible()
 
     await page.goto('/me/study-insights')
     await expect(page.getByRole('heading', { name: 'Study insights' })).toBeVisible()
