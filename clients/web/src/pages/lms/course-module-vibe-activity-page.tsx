@@ -4,7 +4,7 @@ import { LmsPage } from './lms-page'
 import { fetchModuleVibeActivityByItem, type ModuleVibeActivityPayload } from '../../lib/courses-api'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { usePermissions } from '../../context/use-permissions'
-import { permCourseItemCreate } from '../../lib/permissions'
+import { permCourseItemCreate } from '../../lib/rbac-api'
 
 export default function CourseModuleVibeActivityPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
