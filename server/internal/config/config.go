@@ -240,6 +240,8 @@ type Config struct {
 	GDPRModuleEnabled bool
 	// CCPAModuleEnabled gates CCPA/CPRA Do Not Sell opt-out, GPC processing, and privacy rights handler (plan 10.4).
 	CCPAModuleEnabled bool
+	// StatePrivacyEnabled gates CA SOPIPA, NY Ed Law 2-d, and IL SOPPA state-specific student data privacy controls (plan 10.6).
+	StatePrivacyEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -377,6 +379,7 @@ func Load() Config {
 		CoppaWorkflowEnabled: boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
 		GDPRModuleEnabled:    boolEnv("GDPR_MODULE_ENABLED") || boolEnv("FEATURE_GDPR_MODULE"),
 		CCPAModuleEnabled:    boolEnv("CCPA_MODULE_ENABLED") || boolEnv("FEATURE_CCPA_MODULE"),
+		StatePrivacyEnabled:  boolEnv("STATE_PRIVACY_ENABLED") || boolEnv("FEATURE_STATE_PRIVACY"),
 	}
 }
 
