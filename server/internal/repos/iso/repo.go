@@ -265,9 +265,12 @@ ON CONFLICT (control_id) DO NOTHING
 `, c.ID, c.Theme, c.Title)
 	}
 	br := pool.SendBatch(ctx, batch)
-	defer br.Close()
 	for range controls {
 		if _, err := br.Exec(); err != nil {
+			closeErr := br.Close()
+			if closeErr != nil {
+				return errors.Join(err, closeErr)
+			}
 			return err
 		}
 	}
