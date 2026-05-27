@@ -131,6 +131,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerCCPARoutes(r)
 	d.registerDPARoutes(r)
 	d.registerStatePrivacyRoutes(r)
+	d.registerISORoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r

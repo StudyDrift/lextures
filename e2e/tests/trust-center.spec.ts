@@ -26,6 +26,14 @@ test.describe('Trust Center — public access', () => {
     await expect(page.getByText(/SOC 2/i).first()).toBeVisible()
     await expect(page.getByText(/FERPA/i).first()).toBeVisible()
     await expect(page.getByText(/GDPR/i).first()).toBeVisible()
+    await expect(page.getByText(/ISO 27701/i).first()).toBeVisible()
+  })
+
+  test('trust ISO API returns 93 Annex A controls', async () => {
+    const res = await fetch(`${apiBase}/api/v1/trust/iso`)
+    expect(res.ok).toBeTruthy()
+    const body = (await res.json()) as { soa?: { total: number } }
+    expect(body.soa?.total).toBe(93)
   })
 
   test('sub-processor table lists Anthropic, OpenAI, and OpenRouter', async ({ page }) => {
