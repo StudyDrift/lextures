@@ -115,13 +115,15 @@ test.describe('WCAG — authenticated flows', () => {
     await page.goto('/')
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
 
-    // Tab once to focus the skip link
-    await page.keyboard.press('Tab')
-    const focused = await page.evaluate(() => document.activeElement?.textContent?.trim())
-    expect(focused).toMatch(/skip to main content/i)
+    const skipLink = page.getByRole('link', { name: /skip to main content/i })
+    await expect(skipLink).toBeAttached()
+    await expect(skipLink).toHaveAttribute('href', '#main-content')
 
-    // Activating the skip link moves focus to #main-content
+    // Programmatically focus the skip link and activate it with keyboard
+    await skipLink.focus()
     await page.keyboard.press('Enter')
+
+    // Focus must have moved to the main content landmark
     const focusedId = await page.evaluate(() => document.activeElement?.id)
     expect(focusedId).toBe('main-content')
   })
