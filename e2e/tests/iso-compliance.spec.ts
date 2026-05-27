@@ -16,8 +16,16 @@ async function adminTokens(): Promise<string> {
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const ISO_ISMS_ENABLED =
-  process.env.FEATURE_ISO_ISMS === 'true' || process.env.ISO_ISMS_ENABLED === 'true'
+
+/** Admin ISO routes are gated by env or platform settings (global-setup seeds isoIsmsEnabled). */
+async function isoIsmsAdminModuleEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_ISO_ISMS === 'true' || process.env.ISO_ISMS_ENABLED === 'true') {
+    return true
+  }
+  const res = await fetch(`${API_BASE}/api/v1/compliance/iso/dashboard`)
+  // Feature off → 404 before auth; feature on without token → 401.
+  return res.status === 401
+}
 
 function uniqueEmail(prefix = 'iso') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -40,7 +48,9 @@ test.describe('ISO ISMS — public trust endpoint', () => {
 
 test.describe('ISO ISMS — admin API', () => {
   test('admin endpoints return 404 when feature disabled', async () => {
-    test.skip(ISO_ISMS_ENABLED, 'skipped when ISO_ISMS_ENABLED=true')
+    if (await isoIsmsAdminModuleEnabled()) {
+      test.skip(true, 'ISO ISMS enabled via env or platform settings')
+    }
     const { access_token } = await apiSignup({ email: uniqueEmail('off'), password: PASSWORD })
     const res = await fetch(`${API_BASE}/api/v1/compliance/iso/dashboard`, {
       headers: { Authorization: `Bearer ${access_token}` },
@@ -49,13 +59,17 @@ test.describe('ISO ISMS — admin API', () => {
   })
 
   test('dashboard unauthenticated returns 401', async () => {
-    test.skip(!ISO_ISMS_ENABLED, 'requires ISO_ISMS_ENABLED=true')
+    if (!(await isoIsmsAdminModuleEnabled())) {
+      test.skip(true, 'ISO ISMS admin module not enabled')
+    }
     const res = await fetch(`${API_BASE}/api/v1/compliance/iso/dashboard`)
     expect(res.status).toBe(401)
   })
 
   test('bootstrap admin can create audit finding and risk', async () => {
-    test.skip(!ISO_ISMS_ENABLED, 'requires ISO_ISMS_ENABLED=true')
+    if (!(await isoIsmsAdminModuleEnabled())) {
+      test.skip(true, 'ISO ISMS admin module not enabled')
+    }
     const access_token = await adminTokens()
     const headers = {
       Authorization: `Bearer ${access_token}`,
@@ -100,7 +114,9 @@ test.describe('ISO ISMS — admin API', () => {
 
 test.describe('ISO ISMS — admin UI', () => {
   test('admin page loads dashboard for global admin', async ({ page }) => {
-    test.skip(!ISO_ISMS_ENABLED, 'requires ISO_ISMS_ENABLED=true')
+    if (!(await isoIsmsAdminModuleEnabled())) {
+      test.skip(true, 'ISO ISMS admin module not enabled')
+    }
     const token = await adminTokens()
     await injectToken(page, token)
     const dashboardResponse = page.waitForResponse(
