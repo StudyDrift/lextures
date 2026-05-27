@@ -69,8 +69,9 @@ test.describe('VPAT content — WCAG 2.1 criteria (FR-1, FR-2)', () => {
   })
 
   test('SC 1.1.1 Non-text Content is present (FR-2)', async ({ page }) => {
-    await expect(page.getByText('1.1.1')).toBeVisible()
-    await expect(page.getByText('Non-text Content')).toBeVisible()
+    // Use exact role+name to avoid matching substrings in the EN 301 549 clause text
+    await expect(page.getByRole('cell', { name: '1.1.1', exact: true }).first()).toBeVisible()
+    await expect(page.getByText('Non-text Content').first()).toBeVisible()
   })
 
   // AC-2: 1.2.2 Captions shows Partially Supports with a specific remark
@@ -84,8 +85,8 @@ test.describe('VPAT content — WCAG 2.1 criteria (FR-1, FR-2)', () => {
   })
 
   test('Level AA criterion 4.1.3 Status Messages is present', async ({ page }) => {
-    await expect(page.getByText('4.1.3')).toBeVisible()
-    await expect(page.getByText('Status Messages')).toBeVisible()
+    await expect(page.getByRole('cell', { name: '4.1.3', exact: true }).first()).toBeVisible()
+    await expect(page.getByText('Status Messages').first()).toBeVisible()
   })
 })
 
@@ -175,7 +176,8 @@ test.describe('VPAT download (FR-3)', () => {
 test.describe('Product version and date (FR-4)', () => {
   test('product information section shows evaluation date', async ({ page }) => {
     await page.goto('/accessibility/vpat')
-    await expect(page.getByText(/May 27, 2026/)).toBeVisible()
+    // Use exact match to target the <dd> with only this date, not surrounding text
+    await expect(page.getByText('May 27, 2026', { exact: true })).toBeVisible()
   })
 
   test('product information section shows product name', async ({ page }) => {
@@ -195,7 +197,8 @@ test.describe('Accessibility support contact (FR-6)', () => {
   // AC-5: contact link pre-populates subject
   test('contact link routes to mailto with pre-populated accommodation subject (AC-5)', async ({ page }) => {
     await page.goto('/accessibility/vpat')
-    const contactLink = page.getByRole('link', { name: /contact accessibility support/i })
+    // Target by href to avoid ambiguity with the TOC anchor that shares the same label
+    const contactLink = page.locator('a[href*="subject=Accessibility%20accommodation%20request"]')
     await expect(contactLink).toBeVisible()
     const href = await contactLink.getAttribute('href')
     expect(href).toContain('accessibility@lextures.com')
