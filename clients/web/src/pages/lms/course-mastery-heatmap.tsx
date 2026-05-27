@@ -241,12 +241,12 @@ export default function CourseMasteryHeatmap() {
                     key={row.enrollmentId}
                     className="hover:bg-slate-50/60 dark:hover:bg-neutral-800/40"
                   >
-                    <td
+                    <th
                       scope="row"
                       className="sticky left-0 z-10 border-r border-slate-200 bg-white px-4 py-2 font-medium text-slate-900 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                     >
                       {studentName(row.displayName)}
-                    </td>
+                    </th>
                     {row.cells.map((cell, ci) => {
                       const concept = result.concepts[ci]!
                       const label = masteryLabel(cell.assessed, cell.masteryScore)

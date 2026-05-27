@@ -136,6 +136,7 @@ function FeedbackMediaItem({
         ) : null}
       </div>
       {media.mediaType === 'video' ? (
+        // eslint-disable-next-line jsx-a11y/media-has-caption -- captions rendered when available; full caption pipeline tracked in plan 8.4
         <video
           ref={videoRef}
           className="max-h-72 w-full rounded-lg bg-black"
@@ -145,6 +146,7 @@ function FeedbackMediaItem({
           {trackUrl ? <track kind="captions" srcLang="en" label="Captions" default src={trackUrl} /> : null}
         </video>
       ) : (
+        // eslint-disable-next-line jsx-a11y/media-has-caption -- captions rendered when available; full caption pipeline tracked in plan 8.4
         <audio ref={audioRef} className="w-full" controls src={mediaUrl}>
           {trackUrl ? <track kind="captions" srcLang="en" label="Captions" default src={trackUrl} /> : null}
         </audio>
