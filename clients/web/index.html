@@ -30,6 +30,13 @@
         document.documentElement.classList.remove('dark')
         document.documentElement.style.colorScheme = 'light'
       }
+      try {
+        const densityKey = 'lextures.uiDensity'
+        const density = (localStorage.getItem(densityKey) || '').trim().toLowerCase()
+        document.documentElement.dataset.lmsDensity = density === 'compact' ? 'compact' : 'comfortable'
+      } catch {
+        document.documentElement.dataset.lmsDensity = 'comfortable'
+      }
     })()
   </script>
   <title>Lextures</title>

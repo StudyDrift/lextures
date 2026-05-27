@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useState } from 'react'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createAdminLRSEndpoint,
   fetchAdminLRSEndpoints,
@@ -8,6 +9,7 @@ import {
 } from '../../lib/lrs-api'
 
 export function LRSSettingsPanel() {
+  const { xapiEmissionEnabled, loading: featuresLoading } = usePlatformFeatures()
   const labelId = useId()
   const urlId = useId()
   const userId = useId()
@@ -27,6 +29,12 @@ export function LRSSettingsPanel() {
   })
 
   const load = useCallback(async () => {
+    if (!xapiEmissionEnabled) {
+      setEndpoints([])
+      setLoading(false)
+      setError(null)
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -36,11 +44,12 @@ export function LRSSettingsPanel() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [xapiEmissionEnabled])
 
   useEffect(() => {
+    if (featuresLoading) return
     void load()
-  }, [load])
+  }, [load, featuresLoading])
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -55,6 +64,32 @@ export function LRSSettingsPanel() {
     } finally {
       setSaving(false)
     }
+  }
+
+  if (featuresLoading) {
+    return (
+      <section>
+        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          Learning Record Stores
+        </h2>
+        <p className="mt-4 text-sm text-slate-500">Loading…</p>
+      </section>
+    )
+  }
+
+  if (!xapiEmissionEnabled) {
+    return (
+      <section>
+        <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+          Learning Record Stores
+        </h2>
+        <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+          xAPI emission is not enabled for this platform. Turn on{' '}
+          <span className="font-medium">xAPI / Caliper emission</span> under Platform settings to
+          configure external LRS endpoints.
+        </p>
+      </section>
+    )
   }
 
   return (

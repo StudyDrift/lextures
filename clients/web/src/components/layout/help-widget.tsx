@@ -16,10 +16,34 @@ export function HelpWidget() {
   const [articles, setArticles] = useState<HelpArticle[]>([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showHelpPopover, setShowHelpPopover] = useState(true)
   const { pathname } = useLocation()
   const panelId = useId()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadSetting() {
+      try {
+        const res = await authorizedFetch('/api/v1/settings/account')
+        if (res.ok && !cancelled) {
+          const data = (await res.json()) as { showHelpPopover?: boolean }
+          if (data.showHelpPopover !== undefined) {
+            setShowHelpPopover(data.showHelpPopover)
+          }
+        }
+      } catch {
+        // ignore, default to true
+      }
+    }
+    void loadSetting()
+    window.addEventListener('studydrift-profile-updated', loadSetting)
+    return () => {
+      cancelled = true
+      window.removeEventListener('studydrift-profile-updated', loadSetting)
+    }
+  }, [])
 
   useEffect(() => {
     if (!open) return
@@ -74,6 +98,8 @@ export function HelpWidget() {
   const handleOpenHelpCenter = () => {
     window.open(HELP_CENTER_URL, '_blank', 'noopener,noreferrer')
   }
+
+  if (!showHelpPopover) return null
 
   return (
     <>

@@ -53,15 +53,16 @@ type SignupRequest struct {
 
 // UserPublic is the API user (camelCase at the HTTP layer).
 type UserPublic struct {
-	ID          string  `json:"id"`
-	Email       string  `json:"email"`
-	DisplayName *string `json:"displayName"`
-	FirstName   *string `json:"firstName"`
-	LastName    *string `json:"lastName"`
-	AvatarURL   *string `json:"avatarUrl"`
-	UITheme     string  `json:"uiTheme"`
-	Sid         *string `json:"sid"`
-	AccountType string  `json:"accountType"`
+	ID              string  `json:"id"`
+	Email           string  `json:"email"`
+	DisplayName     *string `json:"displayName"`
+	FirstName       *string `json:"firstName"`
+	LastName        *string `json:"lastName"`
+	AvatarURL       *string `json:"avatarUrl"`
+	UITheme         string  `json:"uiTheme"`
+	ShowHelpPopover bool    `json:"showHelpPopover"`
+	Sid             *string `json:"sid"`
+	AccountType     string  `json:"accountType"`
 }
 
 // AuthResponse mirrors models/auth AuthResponse (field names are snake_case like the Rust `AuthResponse` struct).
@@ -446,15 +447,16 @@ func userPublicFromRow(row *user.Row) UserPublic {
 		at = user.AccountTypeStandard
 	}
 	return UserPublic{
-		ID:          row.ID,
-		Email:       row.Email,
-		DisplayName: row.DisplayName,
-		FirstName:   row.FirstName,
-		LastName:    row.LastName,
-		AvatarURL:   row.AvatarURL,
-		UITheme:     row.UITheme,
-		Sid:         row.Sid,
-		AccountType: at,
+		ID:              row.ID,
+		Email:           row.Email,
+		DisplayName:     row.DisplayName,
+		FirstName:       row.FirstName,
+		LastName:        row.LastName,
+		AvatarURL:       row.AvatarURL,
+		UITheme:         row.UITheme,
+		ShowHelpPopover: row.ShowHelpPopover,
+		Sid:             row.Sid,
+		AccountType:     at,
 	}
 }
 

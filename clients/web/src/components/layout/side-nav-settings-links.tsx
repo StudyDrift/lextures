@@ -20,6 +20,7 @@ import {
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
 import { oerLibraryEnabled } from '../../lib/oer-api'
+import { xapiEmissionFeatureEnabled } from '../../lib/platform-features'
 import {
   PERM_RBAC_MANAGE,
   PERM_TENANT_ORG_ROLES_MANAGE,
@@ -147,13 +148,15 @@ export function SideNavSettingsLinks() {
               >
                 Cloud file pickers
               </SideNavLink>
-              <SideNavLink
-                to="/settings/lrs-integrations"
-                className={() => (view === 'lrs-integrations' ? sideNavActiveClass : '')}
-                icon={<Link2 className="h-5 w-5" />}
-              >
-                Learning Record Stores
-              </SideNavLink>
+              {xapiEmissionFeatureEnabled() && (
+                <SideNavLink
+                  to="/settings/lrs-integrations"
+                  className={() => (view === 'lrs-integrations' ? sideNavActiveClass : '')}
+                  icon={<Link2 className="h-5 w-5" />}
+                >
+                  Learning Record Stores
+                </SideNavLink>
+              )}
               {oerLibraryEnabled() && (
                 <SideNavLink
                   to="/settings/oer-providers"

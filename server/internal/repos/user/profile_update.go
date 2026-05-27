@@ -16,21 +16,23 @@ func UpdateProfile(
 	pool *pgxpool.Pool,
 	userID uuid.UUID,
 	firstName, lastName, avatarURL, uiTheme *string,
+	showHelpPopover *bool,
 ) (*Row, error) {
 	const q = `UPDATE "user".users
 SET
 	first_name = $2,
 	last_name = $3,
 	avatar_url = $4,
-	ui_theme = COALESCE($5, ui_theme)
+	ui_theme = COALESCE($5, ui_theme),
+	show_help_popover = COALESCE($6, show_help_popover)
 WHERE id = $1
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, sid,
+RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &sid,
+	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {

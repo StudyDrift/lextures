@@ -133,6 +133,23 @@ html.dark {
   content-visibility: auto;
 }
 
+/*
+ * Layout density (Settings → Account). Set on <html data-lms-density="compact"> via ui-density.ts.
+ * Tightens tables and side navigation; gradebook also applies explicit cell classes.
+ */
+html[data-lms-density="compact"] .lms-scope table th,
+html[data-lms-density="compact"] .lms-scope table td {
+  padding-block: 0.25rem;
+  padding-inline: 0.375rem;
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+}
+
+html[data-lms-density="compact"] .lms-scope aside nav a.rounded-xl {
+  padding-block: 0.375rem;
+  font-size: 0.8125rem;
+}
+
 body {
   @apply min-h-screen antialiased text-slate-900 bg-slate-50;
   font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
@@ -207,6 +224,22 @@ body {
 }
 .dark .lms-scope .border-slate-100 {
   @apply border-neutral-700;
+}
+
+/*
+ * Native <select>: replace the OS chevron with an inset icon so it is not flush to the border.
+ * Applies to every single-value dropdown in the LMS shell (settings, gradebook, terms, etc.).
+ */
+.lms-scope select:not([multiple]):not([size]) {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-repeat: no-repeat;
+  background-position: right 0.625rem center;
+  background-size: 1rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+}
+.dark .lms-scope select:not([multiple]):not([size]) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a3a3a3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 /*

@@ -2,10 +2,10 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'vite'
 
-// Relative asset URLs work for GitHub Pages (project or user site) without extra env wiring.
+// Root-relative assets so /docs/* and /blog/* deep links load JS/CSS from /assets/ on GitHub Pages.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: './',
+  base: '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

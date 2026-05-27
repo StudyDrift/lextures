@@ -14,14 +14,15 @@ type SignupRequest struct {
 }
 
 type UserPublic struct {
-	ID          uuid.UUID `json:"id"`
-	Email       string    `json:"email"`
-	DisplayName *string   `json:"displayName"`
-	FirstName   *string   `json:"firstName"`
-	LastName    *string   `json:"lastName"`
-	AvatarURL   *string   `json:"avatarUrl"`
-	UITheme     string    `json:"uiTheme"`
-	SID         *string   `json:"sid"`
+	ID              uuid.UUID `json:"id"`
+	Email           string    `json:"email"`
+	DisplayName     *string   `json:"displayName"`
+	FirstName       *string   `json:"firstName"`
+	LastName        *string   `json:"lastName"`
+	AvatarURL       *string   `json:"avatarUrl"`
+	UITheme         string    `json:"uiTheme"`
+	ShowHelpPopover bool      `json:"showHelpPopover"`
+	SID             *string   `json:"sid"`
 }
 
 type AuthResponse struct {

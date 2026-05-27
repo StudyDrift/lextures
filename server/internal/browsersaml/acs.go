@@ -230,7 +230,7 @@ func HandleACS(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, signe
 			return err
 		}
 		if first != nil || last != nil {
-			_, _ = user.UpdateProfile(ctx, pool, uid, first, last, nil, nil)
+			_, _ = user.UpdateProfile(ctx, pool, uid, first, last, nil, nil, nil)
 		}
 	}
 
