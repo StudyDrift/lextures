@@ -54,4 +54,5 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, out.XAPIEmissionEnabled)
 	out.CoppaWorkflowEnabled = mergeBool(db.CoppaWorkflowEnabled, out.CoppaWorkflowEnabled)
 	out.GDPRModuleEnabled = mergeBool(db.GDPRModuleEnabled, out.GDPRModuleEnabled)
+	out.CCPAModuleEnabled = mergeBool(db.CCPAModuleEnabled, out.CCPAModuleEnabled)
 }
