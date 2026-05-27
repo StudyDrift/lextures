@@ -7,7 +7,7 @@ import (
 // NavigableKind is true for outline items a learner can open (modules omitted).
 func NavigableKind(kind string) bool {
 	switch kind {
-	case "content_page", "assignment", "quiz", "external_link", "survey", "lti_link":
+	case "content_page", "assignment", "quiz", "external_link", "survey", "lti_link", "vibe_activity":
 		return true
 	default:
 		return false

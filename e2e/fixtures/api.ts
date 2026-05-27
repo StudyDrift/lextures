@@ -210,6 +210,30 @@ export async function apiGetFeedChannels(
   return res.json() as Promise<Array<{ id: string; name: string }>>
 }
 
+export async function apiCreateVibeActivity(
+  token: string,
+  courseCode: string,
+  moduleId: string,
+  payload: { title: string; html?: string },
+): Promise<{ id: string; title: string }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/vibe-activities`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Create vibe activity failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ id: string; title: string }>
+}
+
 export async function apiCreateFeedChannel(
   token: string,
   courseCode: string,

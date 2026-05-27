@@ -198,6 +198,14 @@ func cloneBlueprintStructure(
 			`, childCourseID, dst, r.ID); err != nil {
 				return err
 			}
+		case "vibe_activity":
+			if _, err := tx.Exec(ctx, `
+				INSERT INTO course.module_vibe_activities (structure_item_id, html_content, updated_at)
+				SELECT $1::uuid, m.html_content, NOW()
+				FROM course.module_vibe_activities m WHERE m.structure_item_id = $2
+			`, dst, r.ID); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("blueprintsync: unsupported structure kind %q", r.Kind)
 		}
@@ -420,6 +428,17 @@ func replaceKindExtensions(
 			SELECT gen_random_uuid(), $1::uuid, $2::uuid, m.external_tool_id, m.resource_link_id, m.title, m.custom_params, m.line_item_url, NOW()
 			FROM course.lti_resource_links m WHERE m.structure_item_id = $3
 		`, childCourseID, childItemID, bpItemID); err != nil {
+			return err
+		}
+	case "vibe_activity":
+		if _, err := tx.Exec(ctx, `DELETE FROM course.module_vibe_activities WHERE structure_item_id = $1`, childItemID); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO course.module_vibe_activities (structure_item_id, html_content, updated_at)
+			SELECT $1::uuid, m.html_content, NOW()
+			FROM course.module_vibe_activities m WHERE m.structure_item_id = $2
+		`, childItemID, bpItemID); err != nil {
 			return err
 		}
 	default:

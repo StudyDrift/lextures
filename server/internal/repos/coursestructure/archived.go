@@ -9,13 +9,14 @@ import (
 )
 
 var archivedChildKinds = map[string]struct{}{
-	"heading":       {},
-	"content_page":  {},
-	"assignment":    {},
-	"quiz":          {},
-	"external_link": {},
-	"survey":        {},
-	"lti_link":      {},
+	"heading":        {},
+	"content_page":   {},
+	"assignment":     {},
+	"quiz":           {},
+	"external_link":  {},
+	"survey":         {},
+	"lti_link":       {},
+	"vibe_activity":  {},
 }
 
 // ListArchivedStaffStructure returns archived module children plus their parent modules (staff-only list).

@@ -308,6 +308,8 @@ export function learnerCourseItemHref(courseCode: string, item: { kind: string; 
       return `/courses/${cc}/modules/lti/${id}`
     case 'h5p':
       return `/courses/${cc}/modules/h5p/${id}`
+    case 'vibe_activity':
+      return `/courses/${cc}/modules/vibe-activity/${id}`
     default:
       return `/courses/${cc}/modules`
   }
@@ -2358,6 +2360,62 @@ export async function createModuleH5P(
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/h5p`,
     { method: 'POST', body: form },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
+}
+
+export type ModuleVibeActivityPayload = {
+  id: string
+  title: string
+  html: string
+  published?: boolean
+  archived?: boolean
+}
+
+export async function createModuleVibeActivity(
+  courseCode: string,
+  moduleId: string,
+  payload: { title: string; html?: string },
+): Promise<CourseStructureItem> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/vibe-activities`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
+}
+
+export async function fetchModuleVibeActivityByItem(
+  courseCode: string,
+  itemId: string,
+): Promise<ModuleVibeActivityPayload> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/vibe-activities/${encodeURIComponent(itemId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as ModuleVibeActivityPayload
+}
+
+export async function patchModuleVibeActivity(
+  courseCode: string,
+  itemId: string,
+  payload: Partial<{ title: string; published: boolean; html: string }>,
+): Promise<CourseStructureItem> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/vibe-activities/${encodeURIComponent(itemId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    },
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))

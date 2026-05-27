@@ -658,3 +658,190 @@ func (d Deps) handleCreateModuleLTILink() http.HandlerFunc {
 		d.writeCreatedStructureItem(w, r, cid, row)
 	}
 }
+
+// --- Vibe Activity handlers (new module item type) ---
+
+type createVibeActivityBody struct {
+	Title string `json:"title"`
+	HTML  string `json:"html,omitempty"`
+}
+
+// handleCreateModuleVibeActivity is POST .../vibe-activities
+func (d Deps) handleCreateModuleVibeActivity() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		_, _, cid, moduleID, ok := d.beginCreateUnderModule(w, r)
+		if !ok {
+			return
+		}
+		var b createVibeActivityBody
+		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		row, err := coursestructure.InsertVibeActivityUnderModule(r.Context(), d.Pool, cid, moduleID, b.Title, b.HTML)
+		if err != nil {
+			if strings.Contains(err.Error(), "title is required") {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Title is required.")
+				return
+			}
+			if errors.Is(err, pgx.ErrNoRows) {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Module not found.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create vibe activity.")
+			return
+		}
+		d.writeCreatedStructureItem(w, r, cid, row)
+	}
+}
+
+// handleGetModuleVibeActivity is GET /vibe-activities/{item_id}
+func (d Deps) handleGetModuleVibeActivity() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+
+		// Load base structure item (enforces course + kind via query)
+		rowPtr, err := coursestructure.GetItemRow(r.Context(), d.Pool, *cid, itemID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load vibe activity.")
+			return
+		}
+		if rowPtr == nil || rowPtr.ID == uuid.Nil || rowPtr.Kind != "vibe_activity" {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Vibe activity not found.")
+			return
+		}
+		row := *rowPtr
+
+		// Permission: any course member can read
+		_ = viewer
+
+		vibe, err := coursestructure.GetVibeActivity(r.Context(), d.Pool, itemID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load vibe content.")
+			return
+		}
+
+		out := map[string]any{
+			"id":        row.ID.String(),
+			"title":     row.Title,
+			"html":      vibe.HTML,
+			"published": row.Published,
+			"archived":  row.Archived,
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(out)
+	}
+}
+
+type patchVibeActivityBody struct {
+	Title     *string `json:"title"`
+	Published *bool   `json:"published"`
+	HTML      *string `json:"html"`
+}
+
+// handlePatchModuleVibeActivity is PATCH /vibe-activities/{item_id}
+func (d Deps) handlePatchModuleVibeActivity() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPatch {
+			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		hasPerm, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !hasPerm {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to edit this item.")
+			return
+		}
+
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+
+		var b patchVibeActivityBody
+		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+
+		// Update base fields via generic patcher (title/published/archived supported because kind is in patchable list)
+		updatedRow, err := coursestructure.PatchChildStructureItem(r.Context(), d.Pool, *cid, itemID, b.Title, b.Published, nil)
+		if err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Vibe activity not found.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update vibe activity.")
+			return
+		}
+
+		// If HTML provided, update the supporting table
+		if b.HTML != nil {
+			if err := coursestructure.UpdateVibeActivityHTML(r.Context(), d.Pool, itemID, *b.HTML); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update vibe content.")
+				return
+			}
+		}
+
+		// Re-fetch enriched response
+		d.writeCreatedStructureItem(w, r, *cid, updatedRow)
+	}
+}
+
