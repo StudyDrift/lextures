@@ -8,6 +8,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './app'
 import { LmsToaster } from './components/lms-toaster'
+import { AriaAnnouncer } from './components/aria-announcer'
 import { OrgBrandingProvider } from './context/org-branding-context'
 import { PermissionsProvider } from './context/permissions-provider'
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <OrgBrandingProvider>
         <PermissionsProvider>
+          <AriaAnnouncer />
           <App />
           <LmsToaster />
         </PermissionsProvider>

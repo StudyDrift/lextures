@@ -19,12 +19,16 @@ import { LmsExperienceRoot } from './lms-experience-root'
 import { HelpWidget } from './help-widget'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
 import { OfflineBanner } from '../offline-banner'
+import { SkipLink } from '../skip-link'
+import { useFocusOnRoute } from '../../lib/a11y'
 
 function AppShellLayout() {
   const location = useLocation()
   const { focus } = useQuizShellFocus()
   const { readingFocus, setReadingFocus } = useReadingShellFocus()
   const hideChrome = Boolean(focus || readingFocus)
+
+  useFocusOnRoute()
 
   useEffect(() => {
     setReadingFocus(false)
@@ -34,6 +38,7 @@ function AppShellLayout() {
     <CourseNavFeaturesProvider>
       <LmsExperienceRoot>
       <UiThemeSync />
+      <SkipLink />
       <div
         className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
           focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
@@ -50,7 +55,10 @@ function AppShellLayout() {
           )}
           <OfflineBanner />
           <LegalUpdateBanner />
-          <main className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto dark:bg-neutral-900">
+          <main
+            id="main-content"
+            className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto dark:bg-neutral-900"
+          >
             <Outlet />
           </main>
         </div>

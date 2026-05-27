@@ -67,6 +67,7 @@ import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import TrustCenterPage from './pages/trust-center-page'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CaliforniaPrivacyRightsPage from './pages/california-privacy-rights-page'
+import AccessibilityConformancePage from './pages/accessibility-conformance-page'
 import CliAuthPage from './pages/cli-auth'
 
 export default function App() {
@@ -90,6 +91,7 @@ export default function App() {
         location.pathname === '/terms' ||
         location.pathname.startsWith('/terms/') ||
         location.pathname === '/trust' ||
+        location.pathname === '/accessibility' ||
         location.pathname.startsWith('/privacy-rights/')
       ) {
         return
@@ -117,6 +119,7 @@ export default function App() {
       <Route path="/terms" element={<TermsOfUsePage />} />
       <Route path="/terms/history" element={<TermsOfUseHistoryPage />} />
       <Route path="/trust" element={<TrustCenterPage />} />
+      <Route path="/accessibility" element={<AccessibilityConformancePage />} />
       <Route path="/privacy-rights/california" element={<CaliforniaPrivacyRightsPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/cli-auth" element={<CliAuthPage />} />

@@ -196,6 +196,7 @@ export function VideoPlayer({
         />
         <p className="text-sm text-gray-600">Video is processing — check back in a few minutes</p>
         {fallbackSrc && (
+          // eslint-disable-next-line jsx-a11y/media-has-caption -- processing-state fallback; captions unavailable until transcode completes (plan 8.4)
           <video
             ref={videoRef}
             src={fallbackSrc}
@@ -221,6 +222,7 @@ export function VideoPlayer({
           Video processing failed — contact support
         </p>
         {fallbackSrc && (
+          // eslint-disable-next-line jsx-a11y/media-has-caption -- failed-state fallback; no caption file available (plan 8.4)
           <video
             ref={videoRef}
             src={fallbackSrc}
