@@ -1,0 +1,91 @@
+name: VPAT Update
+description: Track the VPAT (Accessibility Conformance Report) update for a new Lextures release
+title: "VPAT update — Lextures vX.Y (YYYY-MM)"
+labels: ["accessibility", "compliance", "vpat"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## VPAT Update Checklist
+
+        Complete this issue after each major/minor Lextures release to keep the VPAT current.
+        See [docs/vpat/VPAT_UPDATE_CHECKLIST.md](../docs/vpat/VPAT_UPDATE_CHECKLIST.md) for the full runbook.
+
+  - type: input
+    id: release_version
+    attributes:
+      label: Release version
+      description: The Lextures version this VPAT update covers (e.g., "1.1")
+      placeholder: "1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: eval_date
+    attributes:
+      label: Evaluation date
+      description: Date this VPAT was evaluated (YYYY-MM-DD)
+      placeholder: "2026-05-27"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: pre_work
+    attributes:
+      label: Pre-work
+      options:
+        - label: Obtained latest axe-core CI report from the release branch run
+        - label: Reviewed screen-reader testing notes from release QA
+        - label: Checked 10.7 audit backlog for recently closed remediation items
+        - label: Noted the new product version and release date
+
+  - type: checkboxes
+    id: vpat_source
+    attributes:
+      label: VPAT source document updated
+      options:
+        - label: New VPAT file created with updated YYYY-MM date slug
+        - label: Product Version and Report Date updated
+        - label: All "Partially Supports" entries reviewed and updated
+        - label: Checked "Supports" entries for regressions
+        - label: New features reviewed for new WCAG exposure
+
+  - type: checkboxes
+    id: web_app
+    attributes:
+      label: Web application updated
+      options:
+        - label: "vpat-data.ts conformance levels updated to match source"
+        - label: EVAL_DATE updated in vpat-page.tsx
+        - label: PRODUCT_VERSION updated in vpat-page.tsx (if version changed)
+        - label: New VPAT file copied to clients/web/public/vpat/
+        - label: Download href updated in vpat-page.tsx
+
+  - type: checkboxes
+    id: qa
+    attributes:
+      label: QA completed
+      options:
+        - label: "npm run lint passes"
+        - label: "npm test passes (VPAT unit tests)"
+        - label: "playwright test vpat.spec.ts passes"
+        - label: "/accessibility/vpat renders correctly in Chrome, Firefox, Safari
+        - label: Download link returns the new VPAT file
+        - label: axe-core scan of /accessibility/vpat shows no new violations
+
+  - type: textarea
+    id: changes_summary
+    attributes:
+      label: Summary of conformance changes
+      description: List any criteria that changed status (e.g., "1.2.2 Captions changed from Partially Supports to Supports — auto-caption feature shipped")
+      placeholder: |
+        - 1.2.2 Captions (Prerecorded): Partially Supports → Supports (auto-caption feature shipped in v1.1)
+    validations:
+      required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        **Assignee:** Accessibility specialist
+        **References:** [VPAT page](/accessibility/vpat) · [Conformance statement](/accessibility) · [docs/vpat/VPAT_UPDATE_CHECKLIST.md](../docs/vpat/VPAT_UPDATE_CHECKLIST.md)
