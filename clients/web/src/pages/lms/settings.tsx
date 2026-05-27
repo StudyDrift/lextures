@@ -112,6 +112,7 @@ type AccountProfile = {
   lastName?: string | null
   avatarUrl?: string | null
   uiTheme?: string | null
+  showHelpPopover?: boolean
   sid?: string | null
   sessionManagementUiEnabled?: boolean
 }
@@ -208,6 +209,7 @@ export default function Settings() {
   const [avatarGenStatus, setAvatarGenStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [avatarGenMessage, setAvatarGenMessage] = useState<string | null>(null)
   const [uiTheme, setUiTheme] = useState<UiTheme>('light')
+  const [showHelpPopover, setShowHelpPopover] = useState(true)
   const [studentId, setStudentId] = useState<string | null>(null)
   const [sessionManagementUiEnabled, setSessionManagementUiEnabled] = useState(false)
   const [sessions, setSessions] = useState<ActiveSessionRow[]>([])
@@ -383,6 +385,9 @@ export default function Settings() {
       setUiTheme(parseUiTheme(data.uiTheme))
       setStudentId(data.sid?.trim() ? data.sid.trim() : null)
       setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
+      if (data.showHelpPopover !== undefined) {
+        setShowHelpPopover(data.showHelpPopover)
+      }
     } catch {
       setAccountError('Could not load account settings.')
     } finally {
@@ -561,6 +566,35 @@ export default function Settings() {
     }
   }
 
+  async function persistShowHelpPopover(next: boolean) {
+    const prev = showHelpPopover
+    setShowHelpPopover(next)
+    setAccountError(null)
+    try {
+      const res = await authorizedFetch('/api/v1/settings/account', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          avatarUrl: avatarUrl.trim() || null,
+          uiTheme,
+          showHelpPopover: next,
+        }),
+      })
+      const raw: unknown = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setShowHelpPopover(prev)
+        setAccountError(readApiErrorMessage(raw))
+        return
+      }
+      window.dispatchEvent(new Event('studydrift-profile-updated'))
+    } catch {
+      setShowHelpPopover(prev)
+      setAccountError('Could not save appearance.')
+    }
+  }
+
   async function onChangePassword(e: FormEvent) {
     e.preventDefault()
     setCpErr(null)
@@ -658,6 +692,7 @@ export default function Settings() {
           lastName,
           avatarUrl: avatarUrl.trim() || null,
           uiTheme,
+          showHelpPopover,
         }),
       })
       const raw: unknown = await res.json().catch(() => ({}))
@@ -673,6 +708,9 @@ export default function Settings() {
       const nextAvatar = data.avatarUrl ?? ''
       setAvatarUrl(nextAvatar)
       setAvatarPreviewUrl(nextAvatar || null)
+      if (data.showHelpPopover !== undefined) {
+        setShowHelpPopover(data.showHelpPopover)
+      }
       setAccountMessage('Saved.')
       toastSaveOk('Account saved')
       window.dispatchEvent(new Event('studydrift-profile-updated'))
@@ -1034,6 +1072,35 @@ export default function Settings() {
                     }`}
                   >
                     Dark
+                  </button>
+                </div>
+
+                <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Help popover</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                  Show or hide the floating help launcher in the bottom-right corner.
+                </p>
+                <div className="mt-3 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-600 dark:bg-neutral-800/50">
+                  <button
+                    type="button"
+                    onClick={() => void persistShowHelpPopover(true)}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                      showHelpPopover
+                        ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
+                    }`}
+                  >
+                    Show
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void persistShowHelpPopover(false)}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                      !showHelpPopover
+                        ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
+                        : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
+                    }`}
+                  >
+                    Hide
                   </button>
                 </div>
               </div>
