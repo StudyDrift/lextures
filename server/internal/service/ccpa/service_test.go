@@ -74,7 +74,6 @@ type CCPARequestStub struct {
 }
 
 func buildApprovalPayloadFromType(requestType string) string {
-	type stub struct{ RequestType string }
 	r := struct{ RequestType string }{RequestType: requestType}
 	switch r.RequestType {
 	case "delete":
