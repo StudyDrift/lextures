@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { applyUiDensityToDocument, readStoredUiDensity, UI_DENSITY_STORAGE_KEY } from '../ui-density'
+import {
+  applyUiDensityToDocument,
+  gradebookCellPad,
+  readStoredUiDensity,
+  UI_DENSITY_STORAGE_KEY,
+} from '../ui-density'
 
 describe('ui-density', () => {
   const storage = new Map<string, string>()
@@ -30,5 +35,11 @@ describe('ui-density', () => {
     applyUiDensityToDocument('compact')
     expect(document.documentElement.dataset.lmsDensity).toBe('compact')
     expect(window.localStorage.getItem(UI_DENSITY_STORAGE_KEY)).toBe('compact')
+  })
+
+  it('gradebookCellPad returns tighter classes for compact', () => {
+    expect(gradebookCellPad('comfortable')).toContain('px-3')
+    expect(gradebookCellPad('compact')).toContain('text-xs')
+    expect(gradebookCellPad('compact')).not.toContain('px-3')
   })
 })

@@ -21,3 +21,23 @@ export function applyUiDensityToDocument(density: UiDensity): void {
   }
   document.documentElement.dataset.lmsDensity = density
 }
+
+/** Gradebook and other spreadsheet UIs — keep in sync with compact table rules in index.css. */
+export function gradebookCellPad(density: UiDensity): string {
+  return density === 'compact' ? 'px-1.5 py-1 text-xs leading-tight' : 'px-3 py-2 text-sm'
+}
+
+export function gradebookStickyNameWidthClass(density: UiDensity): string {
+  return density === 'compact'
+    ? 'w-[10rem] min-w-[10rem] max-w-[10rem]'
+    : 'w-[12rem] min-w-[12rem] max-w-[12rem]'
+}
+
+/** `left` offset for the sticky Final column (matches name column width). */
+export function gradebookStickyFinalLeftClass(density: UiDensity): string {
+  return density === 'compact' ? 'left-[10rem]' : 'left-[12rem]'
+}
+
+export function gradebookAssignmentColMinWidthClass(density: UiDensity): string {
+  return density === 'compact' ? 'min-w-[7rem]' : 'min-w-[9rem]'
+}

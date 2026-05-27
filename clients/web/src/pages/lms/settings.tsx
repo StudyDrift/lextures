@@ -25,6 +25,7 @@ import { CloudProvidersPanel } from '../../components/settings/cloud-providers-p
 import { LRSSettingsPanel } from '../../components/settings/lrs-settings-panel'
 import { OERProvidersPanel } from '../../components/settings/oer-providers-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
+import { xapiEmissionFeatureEnabled } from '../../lib/platform-features'
 import { RolesPermissionsPanel } from '../../components/settings/roles-permissions-panel'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -983,8 +984,8 @@ export default function Settings() {
                 </p>
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Layout density</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-                  Compact tightens spreadsheet-style views (for example the gradebook) for power users on large
-                  rosters. Stored on this device only.
+                  Compact tightens tables, side navigation, and the course gradebook for large rosters. Changes apply
+                  immediately across the app. Stored on this device only.
                 </p>
                 <div className="mt-3 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-600 dark:bg-neutral-800/50">
                   <button
@@ -1466,7 +1467,7 @@ export default function Settings() {
           </div>
         )}
 
-        {activeView === 'lrs-integrations' && (
+        {activeView === 'lrs-integrations' && xapiEmissionFeatureEnabled() && (
           <div>
             <RequirePermission
               permission={PERM_RBAC_MANAGE}
