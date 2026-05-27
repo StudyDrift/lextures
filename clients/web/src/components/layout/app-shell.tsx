@@ -57,7 +57,8 @@ function AppShellLayout() {
           <LegalUpdateBanner />
           <main
             id="main-content"
-            className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto dark:bg-neutral-900"
+            tabIndex={-1}
+            className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto outline-none dark:bg-neutral-900"
           >
             <Outlet />
           </main>

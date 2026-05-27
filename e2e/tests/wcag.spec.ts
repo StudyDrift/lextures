@@ -123,9 +123,9 @@ test.describe('WCAG — authenticated flows', () => {
     await skipLink.focus()
     await page.keyboard.press('Enter')
 
-    // Focus must have moved to the main content landmark
-    const focusedId = await page.evaluate(() => document.activeElement?.id)
-    expect(focusedId).toBe('main-content')
+    // Focus must have moved to the main content landmark.
+    // waitForFunction polls until true so hash-navigation focus settles before we assert.
+    await page.waitForFunction(() => document.activeElement?.id === 'main-content', null, { timeout: 5000 })
   })
 })
 
