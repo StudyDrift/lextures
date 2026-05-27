@@ -14,7 +14,6 @@ export function AriaAnnouncer() {
     <>
       <div
         id="a11y-polite-announcer"
-        role="status"
         aria-live="polite"
         aria-atomic="true"
         className="pointer-events-none fixed -left-[10000px] top-auto h-px w-px overflow-hidden"

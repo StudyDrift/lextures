@@ -9,7 +9,6 @@ describe('AriaAnnouncer', () => {
     expect(polite).toBeTruthy()
     expect(polite).toHaveAttribute('aria-live', 'polite')
     expect(polite).toHaveAttribute('aria-atomic', 'true')
-    expect(polite).toHaveAttribute('role', 'status')
   })
 
   it('renders an assertive live region', () => {

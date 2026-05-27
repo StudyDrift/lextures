@@ -40,15 +40,13 @@ function assertNoViolations(results: Awaited<ReturnType<AxeBuilder['analyze']>>)
 test.describe('WCAG — public pages', () => {
   test('login page has no critical/serious WCAG violations', async ({ page }) => {
     await page.goto('/login')
-    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible()
     const results = await axeScan(page)
     assertNoViolations(results)
   })
 
   test('accessibility conformance page loads and has no violations', async ({ page }) => {
     await page.goto('/accessibility')
-    await page.waitForLoadState('networkidle')
-
     // AC-6: conformance statement lists WCAG criteria
     await expect(page.getByRole('heading', { level: 1, name: /accessibility conformance statement/i })).toBeVisible()
     await expect(page.getByRole('heading', { name: /level a success criteria/i })).toBeVisible()
@@ -60,7 +58,7 @@ test.describe('WCAG — public pages', () => {
 
   test('privacy page has no critical/serious WCAG violations', async ({ page }) => {
     await page.goto('/privacy')
-    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     const results = await axeScan(page)
     assertNoViolations(results)
   })
@@ -85,7 +83,8 @@ test.describe('WCAG — authenticated flows', () => {
   test('dashboard has no critical/serious WCAG violations', async ({ page }) => {
     await injectToken(page, token)
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    // Wait for app shell — same signal used by navigation.spec.ts
+    await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
 
     // AC-1: skip link is present
     const skipLink = page.getByRole('link', { name: /skip to main content/i })
@@ -98,7 +97,7 @@ test.describe('WCAG — authenticated flows', () => {
   test('course view has no critical/serious WCAG violations', async ({ page }) => {
     await injectToken(page, token)
     await page.goto(`/courses/${courseCode}`)
-    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
     const results = await axeScan(page)
     assertNoViolations(results)
   })
@@ -106,7 +105,7 @@ test.describe('WCAG — authenticated flows', () => {
   test('module reorder page has no critical/serious WCAG violations', async ({ page }) => {
     await injectToken(page, token)
     await page.goto(`/courses/${courseCode}/modules`)
-    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
     const results = await axeScan(page)
     assertNoViolations(results)
   })
@@ -114,7 +113,7 @@ test.describe('WCAG — authenticated flows', () => {
   test('skip link is keyboard-reachable and targets main content', async ({ page }) => {
     await injectToken(page, token)
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
 
     // Tab once to focus the skip link
     await page.keyboard.press('Tab')
@@ -144,7 +143,7 @@ test.describe('Accessibility conformance statement', () => {
 
     // Feedback section is present
     await expect(page.getByRole('heading', { name: /feedback/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /accessibility@lextures\.com/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /accessibility@lextures\.com/i }).first()).toBeVisible()
   })
 
   test('page is reachable without authentication', async ({ page }) => {
