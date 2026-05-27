@@ -16,16 +16,18 @@ type accountProfileResponse struct {
 	LastName                     *string `json:"lastName"`
 	AvatarURL                    *string `json:"avatarUrl"`
 	UITheme                      string  `json:"uiTheme"`
+	ShowHelpPopover              bool    `json:"showHelpPopover"`
 	Sid                          *string `json:"sid"`
 	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
 	AccountType                  string  `json:"accountType"`
 }
 
 type patchAccountBody struct {
-	FirstName *string `json:"firstName"`
-	LastName  *string `json:"lastName"`
-	AvatarURL *string `json:"avatarUrl"`
-	UITheme   *string `json:"uiTheme"`
+	FirstName       *string `json:"firstName"`
+	LastName        *string `json:"lastName"`
+	AvatarURL       *string `json:"avatarUrl"`
+	UITheme         *string `json:"uiTheme"`
+	ShowHelpPopover *bool   `json:"showHelpPopover"`
 }
 
 func normalizeName(s *string, label string) (*string, error) {
@@ -109,6 +111,7 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			LastName:                   row.LastName,
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
+			ShowHelpPopover:            row.ShowHelpPopover,
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
@@ -152,7 +155,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme)
+		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update account.")
 			return
@@ -172,6 +175,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			LastName:                   row.LastName,
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
+			ShowHelpPopover:            row.ShowHelpPopover,
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,

@@ -80,3 +80,4 @@ test-results/
 # Local dev / IDE tooling (machine-specific)
 .codegraph/
 .antigravitycli/
+server/bin

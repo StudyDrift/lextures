@@ -1,20 +1,22 @@
 package settingsaccount
 
 type AccountProfileResponse struct {
-	Email       string  `json:"email"`
-	DisplayName *string `json:"displayName"`
-	FirstName   *string `json:"firstName"`
-	LastName    *string `json:"lastName"`
-	AvatarURL   *string `json:"avatarUrl"`
-	UITheme     string  `json:"uiTheme"`
-	SID         *string `json:"sid"`
+	Email           string  `json:"email"`
+	DisplayName     *string `json:"displayName"`
+	FirstName       *string `json:"firstName"`
+	LastName        *string `json:"lastName"`
+	AvatarURL       *string `json:"avatarUrl"`
+	UITheme         string  `json:"uiTheme"`
+	ShowHelpPopover bool    `json:"showHelpPopover"`
+	SID             *string `json:"sid"`
 }
 
 type UpdateAccountProfileRequest struct {
-	FirstName *string `json:"firstName"`
-	LastName  *string `json:"lastName"`
-	AvatarURL *string `json:"avatarUrl"`
-	UITheme   *string `json:"uiTheme"`
+	FirstName       *string `json:"firstName"`
+	LastName        *string `json:"lastName"`
+	AvatarURL       *string `json:"avatarUrl"`
+	UITheme         *string `json:"uiTheme"`
+	ShowHelpPopover *bool   `json:"showHelpPopover"`
 }
 
 type GenerateAvatarRequest struct {
