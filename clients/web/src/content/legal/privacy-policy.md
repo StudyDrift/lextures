@@ -100,6 +100,10 @@ Where data is processed outside your country, we use appropriate safeguards such
 
 We may update this Privacy Policy when practices or legal requirements change. Material changes will update the **effective date** and **version** shown at the top of this page and may prompt in-product acknowledgement for signed-in users.
 
+## Accessibility
+
+Lextures is committed to making its services accessible to users with disabilities. For information about our accessibility conformance status and our Voluntary Product Accessibility Template (VPAT), see our [Accessibility Conformance Report (VPAT)](/accessibility/vpat). To report an accessibility barrier or request an accommodation, email [accessibility@lextures.com](mailto:accessibility@lextures.com).
+
 ## History of Changes
 
 See [History of changes](/privacy/history) for prior versions.

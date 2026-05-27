@@ -67,6 +67,12 @@ export function SideNavFooter() {
             <span className="mx-1 text-slate-400 dark:text-neutral-600" aria-hidden="true">
               ·
             </span>
+            <NavLink to="/accessibility" className={linkClass}>
+              Accessibility
+            </NavLink>
+            <span className="mx-1 text-slate-400 dark:text-neutral-600" aria-hidden="true">
+              ·
+            </span>
             <NavLink to="/privacy-rights/california" className={linkClass}>
               Do Not Sell or Share My Personal Information
             </NavLink>
