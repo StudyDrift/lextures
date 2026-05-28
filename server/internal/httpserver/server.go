@@ -133,6 +133,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerStatePrivacyRoutes(r)
 	d.registerSOC2Routes(r)
 	d.registerISORoutes(r)
+	d.registerAdminAuditLogRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r
