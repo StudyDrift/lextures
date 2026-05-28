@@ -50,6 +50,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       instructorInsightsEnabled: true,
       coppaWorkflowEnabled: true,
       isoIsmsEnabled: true,
+      securityDisclosureModuleEnabled: true,
       updateMask: [
         'h5pEnabled',
         'oerLibraryEnabled',
@@ -64,6 +65,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'instructorInsightsEnabled',
         'coppaWorkflowEnabled',
         'isoIsmsEnabled',
+        'securityDisclosureModuleEnabled',
       ],
     }),
   })
