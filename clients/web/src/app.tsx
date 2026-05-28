@@ -66,6 +66,7 @@ import ParentDashboard from './pages/lms/parent/parent-dashboard'
 import TermsOfUsePage from './pages/terms-of-use-page'
 import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import TrustCenterPage from './pages/trust-center-page'
+import IsoComplianceAdminPage from './pages/iso-compliance-admin-page'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CaliforniaPrivacyRightsPage from './pages/california-privacy-rights-page'
 import AccessibilityConformancePage from './pages/accessibility-conformance-page'
@@ -187,6 +188,7 @@ export default function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
+          <Route path="/admin/compliance/iso" element={<IsoComplianceAdminPage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
