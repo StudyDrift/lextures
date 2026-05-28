@@ -26,6 +26,13 @@ export async function apiSignup(creds: UserCredentials): Promise<AuthTokens> {
     }),
   })
   if (res.status === 409) {
+    // Avoid logging in as an unrelated account that reused this email in parallel CI.
+    if (creds.email.endsWith('@test.invalid')) {
+      return apiSignup({
+        ...creds,
+        email: `e2e-retry-${Date.now()}-${Math.random().toString(36).slice(2, 12)}@test.invalid`,
+      })
+    }
     return apiLogin(creds)
   }
   if (!res.ok) {
