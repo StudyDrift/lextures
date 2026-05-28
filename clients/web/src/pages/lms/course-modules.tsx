@@ -128,15 +128,9 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
       .filter(
         (i) =>
           i.parentId === m.id &&
-          (i.kind === 'heading' ||
-            i.kind === 'content_page' ||
-            i.kind === 'assignment' ||
-            i.kind === 'quiz' ||
-            i.kind === 'external_link' ||
-            i.kind === 'survey' ||
-            i.kind === 'lti_link' ||
-            i.kind === 'h5p' ||
-            i.kind === 'vibe_activity'),
+          (['heading', 'content_page', 'assignment', 'quiz', 'external_link', 'survey', 'lti_link', 'h5p', 'vibe_activity'] as const).includes(
+            i.kind as any,
+          ),
       )
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((c) => c.id)
@@ -492,7 +486,7 @@ function ChildRowContent({
             {studentFooter}
           </div>
         </div>
-      ) : child.kind === 'vibe_activity' ? (
+      ) : (child.kind as string) === 'vibe_activity' ? (
         <div className="flex items-center gap-3">
           <span
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-rose-200/90 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-950/55 dark:text-rose-200"
@@ -1976,7 +1970,8 @@ export default function CourseModules() {
           i.kind === 'external_link' ||
           i.kind === 'survey' ||
           i.kind === 'lti_link' ||
-          i.kind === 'h5p') &&
+          i.kind === 'h5p' ||
+          i.kind === 'vibe_activity') &&
         i.parentId
       ) {
         const list = m.get(i.parentId) ?? []

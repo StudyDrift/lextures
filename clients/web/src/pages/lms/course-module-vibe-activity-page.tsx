@@ -12,8 +12,8 @@ export default function CourseModuleVibeActivityPage() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
-  const { hasPermission } = usePermissions()
-  const canEdit = courseCode ? hasPermission(permCourseItemCreate(courseCode)) : false
+  const { allows } = usePermissions()
+  const canEdit = courseCode ? allows(permCourseItemCreate(courseCode)) : false
 
   const load = useCallback(async () => {
     if (!courseCode || !itemId) return

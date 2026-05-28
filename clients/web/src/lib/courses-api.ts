@@ -1492,6 +1492,7 @@ export type CourseStructureItem = {
     | 'survey'
     | 'lti_link'
     | 'h5p'
+    | 'vibe_activity'
   title: string
   /** Set when this row is nested under a module. */
   parentId: string | null
