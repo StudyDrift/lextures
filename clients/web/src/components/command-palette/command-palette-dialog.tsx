@@ -13,6 +13,7 @@ import {
 } from '../../lib/build-search-items'
 import { buildCommandPaletteGoToItems } from '../../lib/command-palette-go-to'
 import { fetchSearchIndex, type SearchCourseItem, type SearchPersonItem } from '../../lib/search-api'
+import { LiveRegion } from '../a11y/live-region'
 import { useCommandPalette } from './use-command-palette'
 
 const GROUP_ICONS: Record<SearchGroup, typeof BookOpen> = {
@@ -29,6 +30,7 @@ export function CommandPaletteDialog() {
   const navigate = useNavigate()
   const { allows } = usePermissions()
   const inputRef = useRef<HTMLInputElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const activeRowRef = useRef<HTMLButtonElement | null>(null)
 
   const [query, setQuery] = useState('')
@@ -48,8 +50,8 @@ export function CommandPaletteDialog() {
   useEffect(() => {
     void fetchSearchIndex()
       .then((data) => {
-        setCourses(data.courses)
-        setPeople(data.people)
+        setCourses(Array.isArray(data.courses) ? data.courses : [])
+        setPeople(Array.isArray(data.people) ? data.people : [])
         setLoadState('ready')
       })
       .catch(() => {
@@ -64,11 +66,35 @@ export function CommandPaletteDialog() {
     return () => window.clearTimeout(t)
   }, [])
 
+  // Close on Escape; trap focus within the dialog on Tab/Shift+Tab.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault()
         close()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const dialog = dialogRef.current
+      if (!dialog) return
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.closest('[aria-hidden="true"]'))
+      if (focusable.length === 0) return
+      const first = focusable[0]!
+      const last = focusable[focusable.length - 1]!
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
       }
     }
     window.addEventListener('keydown', onKey, true)
@@ -137,17 +163,26 @@ export function CommandPaletteDialog() {
     }
   }
 
+  const resultsAnnouncement =
+    loadState === 'ready'
+      ? filtered.length === 0
+        ? 'No results'
+        : `${filtered.length} ${filtered.length === 1 ? 'result' : 'results'}`
+      : ''
+
   const palette = (
     <div
       className="fixed inset-0 z-[100] flex items-start justify-center px-3 pt-12 pb-[env(safe-area-inset-bottom)] sm:px-4 sm:pt-[min(12vh,8rem)]"
       role="dialog"
       aria-modal="true"
-      aria-label="Search"
+      aria-label="Command Palette"
+      ref={dialogRef}
     >
       <button
         type="button"
         className="absolute inset-0 cursor-default bg-slate-950/55 backdrop-blur-md dark:bg-neutral-950/75"
         aria-label="Close search"
+        tabIndex={-1}
         onClick={() => close()}
       />
       <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/20 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50">
@@ -163,7 +198,8 @@ export function CommandPaletteDialog() {
             }}
             onKeyDown={onInputKeyDown}
             placeholder="Search courses, people, pages, actions…"
-            className="min-w-0 flex-1 border-0 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-500 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            aria-label="Search"
+            className="min-w-0 flex-1 border-0 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-600 dark:text-neutral-100 dark:placeholder:text-neutral-400"
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
@@ -172,19 +208,22 @@ export function CommandPaletteDialog() {
               filtered[safeIndex] ? `cmd-result-${filtered[safeIndex].id}` : undefined
             }
           />
-          <kbd className="hidden shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-500 sm:inline dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+          <kbd className="hidden shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-600 sm:inline dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
             esc
           </kbd>
         </div>
 
+        {/* Polite live region: announces result count to screen readers after each query change. */}
+        <LiveRegion>{resultsAnnouncement}</LiveRegion>
+
         <div
           id="command-palette-results"
           role="listbox"
-          aria-label="Results"
+          aria-label="Search results"
           className="max-h-[min(60vh,420px)] overflow-y-auto px-2 py-2"
         >
           {loadState === 'loading' && (
-            <p className="px-3 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
           )}
           {loadState === 'error' && (
             <p className="px-3 py-8 text-center text-sm text-rose-600 dark:text-rose-400">
@@ -192,7 +231,7 @@ export function CommandPaletteDialog() {
             </p>
           )}
           {loadState === 'ready' && filtered.length === 0 && (
-            <p className="px-3 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">No results.</p>
+            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">No results.</p>
           )}
           {loadState === 'ready' &&
             filtered.map((item, idx) => {
@@ -202,7 +241,10 @@ export function CommandPaletteDialog() {
               return (
                 <div key={item.id}>
                   {showHeader && (
-                    <div className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                    <div
+                      className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400"
+                      aria-hidden="true"
+                    >
                       {SEARCH_GROUP_LABEL[item.group]}
                     </div>
                   )}
@@ -228,7 +270,15 @@ export function CommandPaletteDialog() {
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium leading-snug">{item.title}</span>
-                      <span className="block text-xs text-slate-500 dark:text-neutral-400">{item.subtitle}</span>
+                      <span
+                        className={`block text-xs ${
+                          selected
+                            ? 'text-slate-600 dark:text-neutral-300'
+                            : 'text-slate-600 dark:text-neutral-400'
+                        }`}
+                      >
+                        {item.subtitle}
+                      </span>
                     </span>
                   </button>
                 </div>
@@ -236,7 +286,7 @@ export function CommandPaletteDialog() {
             })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-2 text-[11px] text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-2 text-[11px] text-slate-600 dark:border-neutral-700 dark:text-neutral-400">
           <span className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1">
               <ArrowUp className="h-3.5 w-3.5 opacity-90" aria-hidden />

@@ -37,5 +37,9 @@ export async function fetchSearchIndex(): Promise<SearchIndexResponse> {
   const res = await authorizedFetch('/api/v1/search')
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as SearchIndexResponse
+  const body = raw as Partial<SearchIndexResponse>
+  return {
+    courses: Array.isArray(body.courses) ? body.courses : [],
+    people: Array.isArray(body.people) ? body.people : [],
+  }
 }

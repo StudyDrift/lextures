@@ -1162,6 +1162,7 @@ function MessageBlock({
             <div className="mt-3 space-y-2">
               <textarea
                 value={editDraft}
+                aria-label="Edit message"
                 onChange={(e) => onEditDraft(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {

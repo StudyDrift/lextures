@@ -14,7 +14,6 @@ export function SideNavCommandPaletteTrigger() {
       <SideNavTooltip content="Search">
         <button
           type="button"
-          role="searchbox"
           aria-label="Search courses, people, pages, and actions"
           data-command-palette-anchor="sidebar"
           data-onboarding="command-palette"

@@ -1195,10 +1195,18 @@ export function GradebookGrid({
             <thead>
               <tr
                 ref={headerRowRef}
+                aria-rowindex={1}
                 className="border-b border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800"
               >
                 <th
                   scope="col"
+                  aria-sort={
+                    activeSort?.kind === 'student'
+                      ? /_(az|first)$/.test(activeSort.mode)
+                        ? 'ascending'
+                        : 'descending'
+                      : 'none'
+                  }
                   className={`sticky top-0 start-0 z-30 ${stickyNameWidth} ${pad} border-b border-e border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
                 >
                   <button
@@ -1231,10 +1239,16 @@ export function GradebookGrid({
                 </th>
                 {visibleColumns.map((col) => {
                   const colActive = activeSort?.kind === 'grade' && activeSort.columnId === col.id
+                  const colSort = activeSort?.kind === 'grade' && activeSort.columnId === col.id
+                    ? (['grade_az', 'submitted_first', 'late_first'] as string[]).includes(activeSort.mode)
+                      ? 'ascending' as const
+                      : 'descending' as const
+                    : 'none' as const
                   return (
                     <th
                       key={col.id}
                       scope="col"
+                      aria-sort={colSort}
                       className={`sticky top-0 z-20 ${pad} ${assignmentColMin} border-b border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
                     >
                       <button
@@ -1281,7 +1295,7 @@ export function GradebookGrid({
                   )
                 })}
               </tr>
-              <tr className="border-b border-slate-200 bg-slate-100 text-slate-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
+              <tr aria-rowindex={2} className="border-b border-slate-200 bg-slate-100 text-slate-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
                 <th
                   scope="row"
                   className={`sticky start-0 z-[28] ${stickyNameWidth} ${pad} border-b border-e border-slate-200 bg-slate-100 align-top text-start font-medium shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
@@ -1336,6 +1350,7 @@ export function GradebookGrid({
                 <tr
                   key={student.id}
                   id={`gradebook-row-${student.id}`}
+                  aria-rowindex={row + 3}
                   className={`border-b border-slate-100 last:border-b-0 dark:border-neutral-700/80 ${highlightStudentId && highlightStudentId === student.id
                       ? 'bg-amber-50/90 ring-2 ring-inset ring-amber-300/90 dark:bg-amber-950/25 dark:ring-amber-500/50'
                       : ''
