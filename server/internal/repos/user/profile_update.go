@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 
 	"github.com/google/uuid"
@@ -17,6 +16,7 @@ func UpdateProfile(
 	userID uuid.UUID,
 	firstName, lastName, avatarURL, uiTheme *string,
 	showHelpPopover *bool,
+	timezone *string,
 ) (*Row, error) {
 	const q = `UPDATE "user".users
 SET
@@ -24,40 +24,17 @@ SET
 	last_name = $3,
 	avatar_url = $4,
 	ui_theme = COALESCE($5, ui_theme),
-	show_help_popover = COALESCE($6, show_help_popover)
+	show_help_popover = COALESCE($6, show_help_popover),
+	timezone = COALESCE($7, timezone)
 WHERE id = $1
-RETURNING ` + userRowReturning
-	var r Row
-	var dn, fn, ln, av, timezone, sid sql.NullString
-	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
-		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
-	)
+RETURNING ` + userRowColumns
+	row := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover, timezone)
+	r, err := scanInsertedUserRow(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	r.DisplayName = strPtr(dn)
-	r.FirstName = strPtr(fn)
-	r.LastName = strPtr(ln)
-	r.AvatarURL = strPtr(av)
-	r.Timezone = strPtr(timezone)
-	r.Sid = strPtr(sid)
-	if r.Locale == "" {
-		r.Locale = DefaultLocale
-	}
-	if r.AccountType == "" {
-		r.AccountType = AccountTypeStandard
-	}
-	if r.Locale == "" {
-		r.Locale = "en"
-	}
-	if deactivatedAt.Valid {
-		t := deactivatedAt.Time
-		r.DeactivatedAt = &t
-	}
-	return &r, nil
+	return r, nil
 }

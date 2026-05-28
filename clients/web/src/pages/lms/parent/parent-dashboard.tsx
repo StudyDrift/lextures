@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { formatDateTime } from '../../../lib/format'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Users } from 'lucide-react'
 import {
@@ -215,7 +216,7 @@ export default function ParentDashboard() {
                       </div>
                       {a.dueAt && (
                         <time className="shrink-0 text-xs text-slate-600 dark:text-neutral-400" dateTime={a.dueAt}>
-                          Due {new Date(a.dueAt).toLocaleString()}
+                          Due {formatDateTime(a.dueAt)}
                         </time>
                       )}
                     </div>

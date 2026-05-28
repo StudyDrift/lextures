@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { Library } from 'lucide-react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { EmptyState } from '../../components/ui/empty-state'
@@ -896,7 +897,7 @@ export function CourseQuestionBankPage() {
                     <div>
                       <p className="font-medium text-slate-900 dark:text-neutral-100">Version {v.versionNumber}</p>
                       <p className="text-xs text-slate-600 dark:text-neutral-300">
-                        {new Date(v.createdAt).toLocaleString()} {v.changeNote ? `- ${v.changeNote}` : ''}
+                        {formatDateTime(v.createdAt)} {v.changeNote ? `- ${v.changeNote}` : ''}
                       </p>
                     </div>
                     <button

@@ -1,4 +1,5 @@
 import { authorizedFetch } from './api'
+import { formatDateTime } from './format'
 import { readApiErrorMessage } from './errors'
 
 export type MeetingStatus = 'scheduled' | 'live' | 'ended' | 'cancelled'
@@ -116,10 +117,10 @@ export function formatMeetingTime(meeting: VirtualMeeting): string {
     hour: 'numeric',
     minute: '2-digit',
   }
-  let label = start.toLocaleString(undefined, opts)
+  let label = formatDateTime(start, opts)
   if (meeting.scheduledEnd) {
     const end = new Date(meeting.scheduledEnd)
-    label += ' – ' + end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    label += ' – ' + formatDateTime(end, { hour: 'numeric', minute: '2-digit' })
   }
   return label
 }

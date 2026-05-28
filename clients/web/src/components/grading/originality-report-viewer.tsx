@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ExternalLink, X } from 'lucide-react'
+import { formatDateTime } from '../../lib/format'
 
 import type { OriginalityReportSummary } from '../../lib/courses-api'
 
@@ -97,7 +98,7 @@ export function OriginalityReportViewer({
               {pctLine('Similarity', storedSummary.similarityPct)}
               {pctLine('AI authorship', storedSummary.aiProbability)}
               {storedSummary.detectedAt ? (
-                <li>Report date: {new Date(storedSummary.detectedAt).toLocaleString()}</li>
+                <li>Report date: {formatDateTime(storedSummary.detectedAt)}</li>
               ) : null}
             </ul>
             {storedSummary.fullReportUnavailableMessage ? (

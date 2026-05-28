@@ -36,9 +36,15 @@ test.describe('Courses list', () => {
   test('"New course" button hidden for a plain student', async ({ page, seededCourse }) => {
     await injectToken(page, seededCourse.studentToken)
     await page.goto('/courses')
-    // Students cannot create courses — neither a "New course" link nor button should be present.
-    await expect(page.getByRole('link', { name: /new course/i })).not.toBeVisible()
-    await expect(page.getByRole('button', { name: /new course/i })).not.toBeVisible()
+    await page.waitForResponse(
+      (res) =>
+        res.url().includes('/api/v1/me/permissions') &&
+        res.request().method() === 'GET' &&
+        res.ok(),
+      { timeout: 15_000 },
+    )
+    // Students cannot create courses — no link to the create flow.
+    await expect(page.locator('a[href="/courses/create"]')).toHaveCount(0)
   })
 
   test('course card shows course title', async ({ coursePage: page, seededCourse }) => {

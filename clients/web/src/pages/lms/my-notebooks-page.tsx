@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { formatDate } from '../../lib/format'
 import { Link } from 'react-router-dom'
 import { NotebookPen, Search, Sparkles, X } from 'lucide-react'
 import { EmptyState } from '../../components/ui/empty-state'
@@ -412,7 +413,7 @@ export default function MyNotebooksPage() {
                         <>
                           All courses ·{' '}
                           {new Date(e.updatedAt).getTime() > 0
-                            ? new Date(e.updatedAt).toLocaleDateString(undefined, {
+                            ? formatDate(e.updatedAt, {
                                 month: 'short',
                                 day: 'numeric',
                                 year: 'numeric',
@@ -422,7 +423,7 @@ export default function MyNotebooksPage() {
                       ) : (
                         <>
                           {e.courseCode} ·{' '}
-                          {new Date(e.updatedAt).toLocaleDateString(undefined, {
+                          {formatDate(e.updatedAt, {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',

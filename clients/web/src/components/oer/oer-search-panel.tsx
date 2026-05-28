@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { BookOpen, ExternalLink, Plus, Search, X } from 'lucide-react'
 import {
   fetchOERProviders,
@@ -216,7 +217,7 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
           </form>
           {staleCache && cacheAsOf && (
             <p className="mt-2 text-xs text-amber-800 dark:text-amber-200" role="status">
-              Results may be outdated. As of {new Date(cacheAsOf).toLocaleString()}.
+              Results may be outdated. As of {formatDateTime(cacheAsOf)}.
             </p>
           )}
         </div>

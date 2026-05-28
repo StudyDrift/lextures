@@ -31,7 +31,8 @@ export interface TestFixtures {
 
 let _seq = 0
 export function uniqueEmail(label = 'user'): string {
-  return `e2e-${label}-${Date.now()}-${++_seq}@test.invalid`
+  const worker = process.env.TEST_PARALLEL_INDEX ?? '0'
+  return `e2e-${label}-w${worker}-${Date.now()}-${++_seq}-${Math.random().toString(36).slice(2, 10)}@test.invalid`
 }
 
 /** Inject a JWT and suppress all one-time onboarding modals so they never block tests. */
@@ -81,6 +82,7 @@ export const test = base.extend<TestFixtures>({
         email: studentEmail,
         password: 'E2eTestPass1!',
         displayName: 'E2E Student',
+        accountType: 'parent',
       })
 
       const course = await apiCreateCourse(instructorToken, { title: 'E2E Test Course' })
