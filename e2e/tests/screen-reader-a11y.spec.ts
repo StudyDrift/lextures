@@ -13,7 +13,18 @@
  *   [x] Zero axe-core Critical/Serious violations on each surface (scoped checks)
  */
 import AxeBuilder from '@axe-core/playwright'
+import type { Page } from '@playwright/test'
 import { test, expect } from '../fixtures/test.js'
+
+async function openCommandPalette(page: Page) {
+  await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
+  const trigger = page.locator('[data-command-palette-anchor="sidebar"]')
+  await expect(trigger).toBeVisible({ timeout: 5000 })
+  await trigger.click()
+  await expect(page.getByRole('dialog', { name: /command palette/i })).toBeVisible({
+    timeout: 5000,
+  })
+}
 
 // ---------------------------------------------------------------------------
 // Gradebook Grid
@@ -28,9 +39,11 @@ test.describe('GradebookGrid — ARIA structure', () => {
     await expect(page.getByRole('heading', { name: /gradebook/i })).toBeVisible({ timeout: 15000 })
 
     // With no published assignments there is an empty state instead of a grid.
+    const gridOrEmpty = page
+      .getByRole('grid')
+      .or(page.getByText(/no assignments to grade/i))
+    await expect(gridOrEmpty).toBeVisible({ timeout: 15000 })
     const hasGrid = (await page.locator('[role="grid"]').count()) > 0
-    const hasEmpty = await page.getByText(/no assignments to grade/i).isVisible().catch(() => false)
-    expect(hasGrid || hasEmpty).toBe(true)
 
     if (hasGrid) {
       const grid = page.locator('[role="grid"]').first()
@@ -74,13 +87,10 @@ test.describe('GradebookGrid — ARIA structure', () => {
 // Command Palette
 // ---------------------------------------------------------------------------
 test.describe('CommandPaletteDialog — ARIA structure', () => {
-  test('opens with Ctrl+K and shows a dialog with correct roles', async ({
+  test('opens from the sidebar trigger and shows a dialog with correct roles', async ({
     authedPage: page,
   }) => {
-    // Wait for the app shell to be ready before triggering the palette.
-    await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
-    // Use Ctrl+K — works cross-platform (Mac: both Meta+K and Ctrl+K are handled).
-    await page.keyboard.press('Control+k')
+    await openCommandPalette(page)
 
     const dialog = page.getByRole('dialog', { name: /command palette/i })
     await expect(dialog).toBeVisible({ timeout: 5000 })
@@ -90,23 +100,22 @@ test.describe('CommandPaletteDialog — ARIA structure', () => {
   test('search input is focused and has accessible label', async ({
     authedPage: page,
   }) => {
-    await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
-    await page.keyboard.press('Control+k')
+    await openCommandPalette(page)
 
-    const input = page.getByRole('searchbox', { name: /search/i })
+    const dialog = page.getByRole('dialog', { name: /command palette/i })
+    const input = dialog.getByRole('searchbox', { name: /search/i })
     await expect(input).toBeVisible({ timeout: 5000 })
     await expect(input).toBeFocused()
   })
 
   test('results listbox is present', async ({ authedPage: page }) => {
-    await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
-    await page.keyboard.press('Control+k')
-    await expect(page.getByRole('listbox', { name: /results/i })).toBeVisible({ timeout: 5000 })
+    await openCommandPalette(page)
+    const dialog = page.getByRole('dialog', { name: /command palette/i })
+    await expect(dialog.getByRole('listbox', { name: /results/i })).toBeVisible({ timeout: 5000 })
   })
 
   test('Escape closes dialog', async ({ authedPage: page }) => {
-    await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
-    await page.keyboard.press('Control+k')
+    await openCommandPalette(page)
     await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 })
     await page.keyboard.press('Escape')
     await expect(page.getByRole('dialog')).not.toBeVisible({ timeout: 5000 })
@@ -115,9 +124,7 @@ test.describe('CommandPaletteDialog — ARIA structure', () => {
   test('command palette has no axe Critical/Serious violations while open', async ({
     authedPage: page,
   }) => {
-    await expect(page.getByRole('navigation', { name: /main/i })).toBeVisible({ timeout: 15000 })
-    await page.keyboard.press('Control+k')
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5000 })
+    await openCommandPalette(page)
 
     const results = await new AxeBuilder({ page })
       .include('[role="dialog"]')

@@ -461,6 +461,7 @@ export function FeedComposer({
         <textarea
           ref={taRef}
           value={value}
+          aria-label={placeholder}
           disabled={blocked}
           onChange={(e) => {
             onChange(e.target.value)
@@ -490,6 +491,7 @@ export function FeedComposer({
               type="file"
               accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
               className="sr-only"
+              aria-label="Attach image file"
               tabIndex={-1}
               onChange={(ev) => {
                 const f = ev.target.files?.[0]
