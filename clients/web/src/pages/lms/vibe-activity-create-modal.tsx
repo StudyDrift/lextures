@@ -25,15 +25,18 @@ export function VibeActivityCreateModal({
   const [showPreview, setShowPreview] = useState(true)
   const dialogRef = useRef<HTMLDivElement>(null)
 
-  // Reset internal form state when the modal opens.
-  // Only depend on `open` to avoid the "setState in effect" lint rule and
-  // prevent unnecessary resets while the user is typing.
+  // Track whether the modal was previously open so we only reset state
+  // on the transition from closed -> open (avoids both set-state-in-effect
+  // and exhaustive-deps violations while keeping the desired UX).
+  const wasOpen = useRef(false)
+
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpen.current) {
       setTitle(initialTitle)
       setHtml(initialHtml || defaultTemplate())
     }
-  }, [open])
+    wasOpen.current = open
+  }, [open, initialTitle, initialHtml])
 
   // Close on escape
   useEffect(() => {

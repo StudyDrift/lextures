@@ -118,6 +118,18 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
   moduleOrder: string[]
   childOrderByModule: Record<string, string[]>
 } {
+  const childItemKinds = new Set<CourseStructureItem['kind']>([
+    'heading',
+    'content_page',
+    'assignment',
+    'quiz',
+    'external_link',
+    'survey',
+    'lti_link',
+    'h5p',
+    'vibe_activity',
+  ])
+
   const modules = items
     .filter((i) => i.kind === 'module' && !i.parentId)
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -125,13 +137,7 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
   const childOrderByModule: Record<string, string[]> = {}
   for (const m of modules) {
     childOrderByModule[m.id] = items
-      .filter(
-        (i) =>
-          i.parentId === m.id &&
-          (['heading', 'content_page', 'assignment', 'quiz', 'external_link', 'survey', 'lti_link', 'h5p', 'vibe_activity'] as const).includes(
-            i.kind as any,
-          ),
-      )
+      .filter((i) => i.parentId === m.id && childItemKinds.has(i.kind))
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((c) => c.id)
   }
@@ -486,7 +492,7 @@ function ChildRowContent({
             {studentFooter}
           </div>
         </div>
-      ) : (child.kind as string) === 'vibe_activity' ? (
+      ) : (child.kind as CourseStructureItem['kind']) === 'vibe_activity' ? (
         <div className="flex items-center gap-3">
           <span
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-rose-200/90 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-950/55 dark:text-rose-200"
