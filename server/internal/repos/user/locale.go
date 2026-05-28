@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"strings"
 
@@ -19,37 +18,16 @@ func UpdateLocale(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, loc
 	const q = `UPDATE "user".users
 SET locale = $2
 WHERE id = $1
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, sid,
-  login_blocked, deactivated_at, account_type`
-	var r Row
-	var dn, fn, ln, av, sid sql.NullString
-	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, userID, locale).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &sid,
-		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
-	)
+RETURNING ` + userRowColumns
+	row := pool.QueryRow(ctx, q, userID, locale)
+	r, err := scanInsertedUserRow(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
 		return nil, err
 	}
-	r.DisplayName = strPtr(dn)
-	r.FirstName = strPtr(fn)
-	r.LastName = strPtr(ln)
-	r.AvatarURL = strPtr(av)
-	r.Sid = strPtr(sid)
-	if r.Locale == "" {
-		r.Locale = DefaultLocale
-	}
-	if r.AccountType == "" {
-		r.AccountType = AccountTypeStandard
-	}
-	if deactivatedAt.Valid {
-		t := deactivatedAt.Time
-		r.DeactivatedAt = &t
-	}
-	return &r, nil
+	return r, nil
 }
 
 // NormalizeLocalePrimary returns the primary BCP 47 subtag lowercased, or empty if invalid.

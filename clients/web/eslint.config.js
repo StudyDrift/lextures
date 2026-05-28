@@ -60,6 +60,27 @@ export default defineConfig([globalIgnores(['dist', 'coverage']), {
     'jsx-a11y/iframe-has-title': 'error',
     // SC 1.3.1 — scope attribute only valid on <th>
     'jsx-a11y/scope': 'error',
+
+    // Plan 11.3 — use locale-aware format utilities instead of raw Date#toLocale*.
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector:
+          'CallExpression[callee.property.name=/^toLocale(Date|Time)?String$/][callee.object.type="NewExpression"][callee.object.callee.name="Date"]',
+        message:
+          'Use useLocaleFormat() or helpers from lib/format instead of Date#toLocaleDateString/toLocaleTimeString/toLocaleString.',
+      },
+    ],
+  },
+}, {
+  files: ['src/lib/format/**/*.ts', 'src/lib/format-datetime.ts', 'src/lib/format-time-ago.ts'],
+  rules: {
+    'no-restricted-syntax': 'off',
+  },
+}, {
+  files: ['src/context/locale-format-context.tsx'],
+  rules: {
+    'react-refresh/only-export-components': 'off',
   },
 }, {
   files: ['src/pages/login.tsx'],

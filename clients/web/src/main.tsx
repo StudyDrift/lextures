@@ -10,24 +10,24 @@ import './index.css'
 import App from './app'
 import { LmsToaster } from './components/lms-toaster'
 import { AriaAnnouncer } from './components/aria-announcer'
+import { I18nProvider } from './context/i18n-provider'
+import { LocaleFormatProvider } from './context/locale-format-context'
 import { OrgBrandingProvider } from './context/org-branding-context'
 import { PermissionsProvider } from './context/permissions-provider'
-import { I18nProvider } from './context/i18n-provider'
-import { UserTimezoneProvider } from './context/user-timezone-provider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <I18nProvider>
-      <OrgBrandingProvider>
-        <UserTimezoneProvider>
-        <PermissionsProvider>
-          <AriaAnnouncer />
-          <App />
-          <LmsToaster />
-        </PermissionsProvider>
-        </UserTimezoneProvider>
-      </OrgBrandingProvider>
+        <LocaleFormatProvider>
+          <OrgBrandingProvider>
+            <PermissionsProvider>
+              <AriaAnnouncer />
+              <App />
+              <LmsToaster />
+            </PermissionsProvider>
+          </OrgBrandingProvider>
+        </LocaleFormatProvider>
       </I18nProvider>
     </BrowserRouter>
   </StrictMode>,

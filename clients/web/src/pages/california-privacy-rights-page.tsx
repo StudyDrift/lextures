@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { formatDate } from '../lib/format'
 
 const API = '/api/v1/compliance/ccpa'
 
@@ -333,8 +334,8 @@ export default function CaliforniaPrivacyRightsPage() {
                     {requestTypeLabels[r.requestType] ?? r.requestType}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-neutral-400">
-                    Submitted {new Date(r.requestedAt).toLocaleDateString()} · Due by{' '}
-                    {new Date(r.dueAt).toLocaleDateString()}
+                    Submitted {formatDate(r.requestedAt, { dateStyle: 'medium' })} · Due by{' '}
+                    {formatDate(r.dueAt, { dateStyle: 'medium' })}
                   </p>
                 </div>
                 <span

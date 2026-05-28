@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatDate } from '../../lib/format'
 import { Link } from 'react-router-dom'
 import { FileText, LayoutTemplate, Plus, Trash2 } from 'lucide-react'
 import type { CollabDoc, DocType } from '../../lib/collab-docs-api'
@@ -166,7 +167,7 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
                 </p>
                 <p className="text-xs text-slate-400 dark:text-neutral-500">
                   {doc.docType === 'whiteboard' ? 'Whiteboard' : 'Rich text'} ·{' '}
-                  {new Date(doc.updatedAt).toLocaleDateString()}
+                  {formatDate(doc.updatedAt, { dateStyle: 'medium' })}
                 </p>
               </div>
             </Link>

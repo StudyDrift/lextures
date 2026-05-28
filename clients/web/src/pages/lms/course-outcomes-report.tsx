@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { Link, useParams } from 'react-router-dom'
 import { RefreshCw, Target } from 'lucide-react'
 import { LmsPage } from './lms-page'
@@ -268,7 +269,7 @@ export default function CourseOutcomesReport() {
         <div className="mt-8 space-y-6">
           <p className="text-xs text-slate-500 dark:text-neutral-400">
             Data as of{' '}
-            {new Date(report.dataAsOf).toLocaleString(undefined, {
+            {formatDateTime(report.dataAsOf, {
               dateStyle: 'medium',
               timeStyle: 'short',
             })}

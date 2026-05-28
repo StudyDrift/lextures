@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { useParams } from 'react-router-dom'
 import { RefreshCw, TrendingUp, AlertTriangle, X } from 'lucide-react'
 import { LmsPage } from './lms-page'
@@ -215,7 +216,7 @@ export default function CourseWhatsWorking() {
   }
 
   const generatedAt = insights?.generatedAt
-    ? new Date(insights.generatedAt).toLocaleString(undefined, {
+    ? formatDateTime(insights.generatedAt, {
         dateStyle: 'medium',
         timeStyle: 'short',
       })

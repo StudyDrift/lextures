@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { formatDate, formatDateTime } from '../../lib/format'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ArrowRight,
@@ -742,8 +743,8 @@ export default function Dashboard() {
                       <div>
                         <p className="text-base font-semibold text-slate-900 dark:text-neutral-100">Due this week</p>
                         <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
-                          {weekStart.toLocaleDateString(undefined, { dateStyle: 'medium' })} –{' '}
-                          {weekEnd.toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                          {formatDate(weekStart, { dateStyle: 'medium' })} –{' '}
+                          {formatDate(weekEnd, { dateStyle: 'medium' })}
                         </p>
                       </div>
                       <div className="min-w-[140px] flex-1 max-w-xs">
@@ -933,7 +934,7 @@ export default function Dashboard() {
                             </div>
                             <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
                               {a.channelName} · {a.author} ·{' '}
-                              {new Date(a.createdAt).toLocaleString(undefined, {
+                              {formatDateTime(a.createdAt, {
                                 dateStyle: 'medium',
                                 timeStyle: 'short',
                               })}

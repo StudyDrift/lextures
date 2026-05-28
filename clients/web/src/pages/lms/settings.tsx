@@ -48,7 +48,9 @@ import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey 
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
 import { useUiDensityControls } from '../../context/ui-density-context'
-import { AccountTimezonePanel } from '../../components/settings/account-timezone-panel'
+import { useLocaleFormatContext } from '../../context/locale-format-context'
+import { detectBrowserLocale, detectBrowserTimeZone, formatDateTime } from '../../lib/format'
+import { LocaleFormatSettingsPanel } from '../../components/settings/locale-format-settings-panel'
 import { LocaleSwitcher } from '../../components/settings/locale-switcher'
 import { syncUserLocale } from '../../lib/sync-user-locale'
 
@@ -122,6 +124,7 @@ type AccountProfile = {
   rtlEnabled?: boolean
   sid?: string | null
   sessionManagementUiEnabled?: boolean
+  timezone?: string | null
 }
 
 type ActiveSessionRow = {
@@ -178,6 +181,9 @@ export default function Settings() {
     canManageRbac && activeView === 'scim-provisioning',
   )
   const accountFormId = useId()
+  const { setProfile: setLocaleProfile } = useLocaleFormatContext()
+  const [displayLocale, setDisplayLocale] = useState(detectBrowserLocale())
+  const [displayTimezone, setDisplayTimezone] = useState(detectBrowserTimeZone())
 
   const [systemPrompts, setSystemPrompts] = useState<SystemPromptItem[]>([])
   const [systemPromptKey, setSystemPromptKey] = useState('')
@@ -404,15 +410,25 @@ export default function Settings() {
         }
       }
       if (data.locale?.trim()) {
-        setLocaleTag(data.locale.trim())
-        void syncUserLocale(data.locale)
+        const loc = data.locale.trim()
+        setLocaleTag(loc)
+        setDisplayLocale(loc)
+        void syncUserLocale(loc)
+      } else {
+        setDisplayLocale(detectBrowserLocale())
       }
+      const tz = data.timezone?.trim() || detectBrowserTimeZone()
+      setDisplayTimezone(tz)
+      setLocaleProfile({
+        locale: data.locale?.trim() ?? null,
+        timezone: data.timezone ?? null,
+      })
     } catch {
       setAccountError('Could not load account settings.')
     } finally {
       setAccountLoading(false)
     }
-  }, [])
+  }, [setLocaleProfile])
 
   const loadSessions = useCallback(async () => {
     setSessionsLoading(true)
@@ -585,6 +601,34 @@ export default function Settings() {
     }
   }
 
+  async function persistDisplayTimezone(next: string) {
+    const prev = displayTimezone
+    setDisplayTimezone(next)
+    setAccountError(null)
+    try {
+      const res = await authorizedFetch('/api/v1/settings/account', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timezone: next }),
+      })
+      const raw: unknown = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setDisplayTimezone(prev)
+        setAccountError(readApiErrorMessage(raw))
+        return
+      }
+      const data = raw as AccountProfile
+      setLocaleProfile({
+        locale: data.locale?.trim() ?? displayLocale,
+        timezone: data.timezone ?? null,
+      })
+      window.dispatchEvent(new Event('studydrift-profile-updated'))
+    } catch {
+      setDisplayTimezone(prev)
+      setAccountError('Could not save time zone.')
+    }
+  }
+
   async function persistShowHelpPopover(next: boolean) {
     const prev = showHelpPopover
     setShowHelpPopover(next)
@@ -730,6 +774,11 @@ export default function Settings() {
       if (data.showHelpPopover !== undefined) {
         setShowHelpPopover(data.showHelpPopover)
       }
+      const loc = data.locale?.trim() || detectBrowserLocale()
+      const tz = data.timezone?.trim() || detectBrowserTimeZone()
+      setDisplayLocale(loc)
+      setDisplayTimezone(tz)
+      setLocaleProfile({ locale: data.locale ?? null, timezone: data.timezone ?? null })
       setAccountMessage('Saved.')
       toastSaveOk('Account saved')
       window.dispatchEvent(new Event('studydrift-profile-updated'))
@@ -1094,11 +1143,22 @@ export default function Settings() {
                   </button>
                 </div>
 
-                <AccountTimezonePanel />
+                <LocaleSwitcher
+                  initialLocale={localeTag}
+                  onLocaleChange={(tag) => {
+                    setLocaleTag(tag)
+                    setDisplayLocale(tag)
+                    setLocaleProfile({ locale: tag, timezone: displayTimezone })
+                  }}
+                />
+
+                <LocaleFormatSettingsPanel
+                  timezone={displayTimezone}
+                  onTimezoneChange={(v) => void persistDisplayTimezone(v)}
+                  disabled={accountSaving}
+                />
 
                 <AiProcessingSettingsPanel />
-
-                <LocaleSwitcher initialLocale={localeTag} onLocaleChange={setLocaleTag} />
 
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Help popover</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
@@ -1440,10 +1500,10 @@ export default function Settings() {
                                   {s.location}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
-                                  {new Date(s.createdAt).toLocaleString()}
+                                  {formatDateTime(s.createdAt)}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
-                                  {new Date(s.lastUsedAt).toLocaleString()}
+                                  {formatDateTime(s.lastUsedAt)}
                                 </td>
                                 <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">
                                   {s.authMethod}

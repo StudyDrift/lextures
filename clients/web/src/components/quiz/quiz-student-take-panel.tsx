@@ -10,6 +10,7 @@ import {
 import { Clock, X } from 'lucide-react'
 import { useOptionalQuizShellFocus } from '../layout/quiz-shell-focus-context'
 import type { QuizShellFocusMode, QuizShellLockdownAccent } from '../layout/quiz-shell-focus-context'
+import { formatDateTime } from '../../lib/format'
 import { MathPlainText } from '../math/math-plain-text'
 import { BookLoader } from './book-loader'
 import { MathKeyboard } from './math-keyboard'
@@ -257,7 +258,9 @@ export function QuizStudentTakePanel({
           kioskVisSkipRef.current = false
           return
         }
-        setFocusLossBanner(`A focus-loss event was recorded at ${new Date().toLocaleTimeString()}.`)
+        setFocusLossBanner(
+          `A focus-loss event was recorded at ${formatDateTime(new Date(), { timeStyle: 'medium' })}.`,
+        )
       }
     }
     function onBlur() {

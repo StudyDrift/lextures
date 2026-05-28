@@ -9,6 +9,8 @@ export interface UserCredentials {
   email: string
   password: string
   displayName?: string
+  /** `parent` signup maps to the Student app role (plain signups default to Teacher). */
+  accountType?: 'parent'
 }
 
 export interface AuthTokens {
@@ -23,8 +25,19 @@ export async function apiSignup(creds: UserCredentials): Promise<AuthTokens> {
       email: creds.email,
       password: creds.password,
       display_name: creds.displayName,
+      ...(creds.accountType ? { account_type: creds.accountType } : {}),
     }),
   })
+  if (res.status === 409) {
+    // Avoid logging in as an unrelated account that reused this email in parallel CI.
+    if (creds.email.endsWith('@test.invalid')) {
+      return apiSignup({
+        ...creds,
+        email: `e2e-retry-${Date.now()}-${Math.random().toString(36).slice(2, 12)}@test.invalid`,
+      })
+    }
+    return apiLogin(creds)
+  }
   if (!res.ok) {
     const body = await res.text()
     throw new Error(`Signup failed (${res.status}): ${body}`)

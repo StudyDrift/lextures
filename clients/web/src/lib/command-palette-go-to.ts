@@ -1,4 +1,5 @@
 import { courseItemsCreatePermission } from './courses-api'
+import { formatDate } from './format'
 import type { SearchCourseItem } from './search-api'
 import type { SearchListItem } from './build-search-items'
 
@@ -88,7 +89,7 @@ function formatUsLong(iso: string): string {
   const [y, m, d] = iso.split('-').map((x) => Number.parseInt(x, 10))
   if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return iso
   const dt = new Date(y, m - 1, d)
-  return dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+  return formatDate(dt, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 /**

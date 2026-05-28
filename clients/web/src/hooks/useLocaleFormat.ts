@@ -1,15 +1,32 @@
-import { useMemo } from 'react'
+import { useContext, useMemo } from 'react'
+import { LocaleFormatContext } from '../context/locale-format-context'
 import {
-  formatDateTimeInZone,
+  createLocaleFormatters,
+  detectBrowserLocale,
+  detectBrowserTimeZone,
   formatDeadlineDisplay,
   resolveDisplayTimezone,
-  type FormatDeadlineOptions,
+  type LocaleFormatters,
 } from '../lib/format'
-import { useUserTimezone } from './use-user-timezone'
 
+function formattersForProfile(profile: {
+  locale: string | null
+  timezone: string | null
+}): LocaleFormatters {
+  return createLocaleFormatters({
+    locale: profile.locale ?? detectBrowserLocale(),
+    timeZone: profile.timezone ?? detectBrowserTimeZone(),
+  })
+}
+
+export { useLocaleFormatContext } from '../context/locale-format-context'
+
+/** Locale formatters plus optional course-aware deadline display (plan 11.3 + 11.4). */
 export function useLocaleFormat(courseTimezone?: string | null) {
-  const { timezone: userTimezone } = useUserTimezone()
-  const locale = navigator.language
+  const ctx = useContext(LocaleFormatContext)
+  const formatters = ctx?.formatters ?? formattersForProfile({ locale: null, timezone: null })
+  const userTimezone = ctx?.profile.timezone ?? null
+  const locale = formatters.locale
   const displayTimeZone = useMemo(
     () => resolveDisplayTimezone(userTimezone, courseTimezone),
     [userTimezone, courseTimezone],
@@ -17,14 +34,11 @@ export function useLocaleFormat(courseTimezone?: string | null) {
 
   return useMemo(
     () => ({
+      ...formatters,
       locale,
       userTimezone,
       courseTimezone: courseTimezone ?? null,
       displayTimeZone,
-      formatDateTime: (
-        iso: string | Date,
-        options?: Pick<FormatDeadlineOptions, 'dateStyle' | 'timeStyle'>,
-      ) => formatDateTimeInZone(iso, displayTimeZone, locale, options),
       formatDeadline: (iso: string | Date) =>
         formatDeadlineDisplay(iso, {
           locale,
@@ -32,6 +46,6 @@ export function useLocaleFormat(courseTimezone?: string | null) {
           instructorTimeZone: courseTimezone,
         }),
     }),
-    [locale, userTimezone, courseTimezone, displayTimeZone],
+    [formatters, locale, userTimezone, courseTimezone, displayTimeZone],
   )
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { useParams } from 'react-router-dom'
 import { LmsPage } from './lms-page'
 import { fetchCourseXAPIEvents, type XAPIEventRow } from '../../lib/lrs-api'
@@ -82,7 +83,7 @@ export default function CourseEventLogPage() {
                     onClick={() => setSelected(ev)}
                   >
                     <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-neutral-400">
-                      {new Date(ev.storedAt).toLocaleString()}
+                      {formatDateTime(ev.storedAt)}
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
                       {verbLabel(ev.verb)}

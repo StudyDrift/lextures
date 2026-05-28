@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { formatDate, formatDateTime, formatNumber } from '../../lib/format'
 import { Link } from 'react-router-dom'
 import { BarChart3, Download } from 'lucide-react'
 import { RequirePermission } from '../../components/require-permission'
@@ -35,14 +36,14 @@ function eventKindLabel(kind: string): string {
 
 function formatDay(isoDate: string): string {
   const d = new Date(isoDate + 'T00:00:00Z')
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+  return formatDate(d, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
 function formatRange(from: string, to: string): string {
   const a = new Date(from)
   const b = new Date(to)
   const opts: Intl.DateTimeFormatOptions = { dateStyle: 'medium', timeStyle: 'short' }
-  return `${a.toLocaleString(undefined, opts)} → ${b.toLocaleString(undefined, opts)}`
+  return `${formatDateTime(a, opts)} → ${formatDateTime(b, opts)}`
 }
 
 export default function Reports() {
@@ -167,7 +168,7 @@ export default function Reports() {
                     Total events
                   </p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
-                    {report.summary.totalEvents.toLocaleString()}
+                    {formatNumber(report.summary.totalEvents)}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
@@ -175,7 +176,7 @@ export default function Reports() {
                     Active learners
                   </p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
-                    {report.summary.uniqueUsers.toLocaleString()}
+                    {formatNumber(report.summary.uniqueUsers)}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
@@ -183,7 +184,7 @@ export default function Reports() {
                     Courses with activity
                   </p>
                   <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-100">
-                    {report.summary.uniqueCourses.toLocaleString()}
+                    {formatNumber(report.summary.uniqueCourses)}
                   </p>
                 </div>
               </div>
@@ -252,7 +253,7 @@ export default function Reports() {
                       <div className="flex items-center justify-between gap-4 text-sm">
                         <span className="text-slate-700 dark:text-neutral-300">{eventKindLabel(k.eventKind)}</span>
                         <span className="tabular-nums text-slate-900 dark:text-neutral-100">
-                          {k.count.toLocaleString()} (
+                          {formatNumber(k.count)} (
                           {Math.round((k.count / kindTotal) * 100)}%)
                         </span>
                       </div>
@@ -298,7 +299,7 @@ export default function Reports() {
                           </td>
                           <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">{c.courseCode}</td>
                           <td className="px-4 py-3 text-end tabular-nums text-slate-900 dark:text-neutral-100">
-                            {c.eventCount.toLocaleString()}
+                            {formatNumber(c.eventCount)}
                           </td>
                         </tr>
                       ))}

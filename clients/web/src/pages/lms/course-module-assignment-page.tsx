@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { Link, useParams } from 'react-router-dom'
 import { Pencil } from 'lucide-react'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
@@ -60,7 +61,7 @@ function formatOptionalDateTime(iso: string | null): string {
   if (!iso) return 'Not set'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return 'Not set'
-  return d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  return formatDateTime(d, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 function formatPointsWorth(p: number | null): string {
@@ -538,7 +539,7 @@ export default function CourseModuleAssignmentPage() {
   const description =
     updatedAt == null
       ? ''
-      : `Updated ${new Date(updatedAt).toLocaleString(undefined, {
+      : `Updated ${formatDateTime(updatedAt, {
           dateStyle: 'medium',
           timeStyle: 'short',
         })}`
