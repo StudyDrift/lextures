@@ -66,9 +66,9 @@ describe('Signup', () => {
     await user.click(screen.getByRole('button', { name: /create account/i }))
 
     await waitFor(() => {
-      expect(screen.getByRole('status')).toHaveTextContent(
-        /Could not reach the server\. Is the API running\?/,
-      )
+      expect(
+        screen.getByText(/Could not reach the server\. Is the API running\?/),
+      ).toBeInTheDocument()
     })
   })
 })

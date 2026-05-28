@@ -77,7 +77,7 @@ export function TimezoneSelector({
         placeholder="Search time zones…"
       />
       {loadError && (
-        <p className="text-xs text-rose-600 dark:text-rose-400" role="status">
+        <p className="text-xs text-rose-600 dark:text-rose-400" aria-live="polite">
           {loadError}
         </p>
       )}
