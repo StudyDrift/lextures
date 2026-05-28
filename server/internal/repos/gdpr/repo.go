@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	appcrypto "github.com/lextures/lextures/server/internal/crypto"
 )
 
 // ConsentRecord is one row from compliance.gdpr_consents.
@@ -94,18 +95,18 @@ SELECT EXISTS (
 
 // DSARRequest is one row from compliance.dsar_requests.
 type DSARRequest struct {
-	ID              uuid.UUID
-	OrgID           *uuid.UUID
-	UserID          uuid.UUID
-	RequestType     string
-	Status          string
-	ArchiveURL      *string
+	ID               uuid.UUID
+	OrgID            *uuid.UUID
+	UserID           uuid.UUID
+	RequestType      string
+	Status           string
+	ArchiveURL       *string
 	ArchiveExpiresAt *time.Time
-	RejectionReason *string
-	RequestedAt     time.Time
-	DueAt           time.Time
-	CompletedAt     *time.Time
-	ActionedBy      *uuid.UUID
+	RejectionReason  *string
+	RequestedAt      time.Time
+	DueAt            time.Time
+	CompletedAt      *time.Time
+	ActionedBy       *uuid.UUID
 }
 
 // InsertDSARRequest creates a new DSAR row.
@@ -167,6 +168,14 @@ func UpdateDSARStatus(ctx context.Context, pool *pgxpool.Pool, id, actionedBy uu
 		t := time.Now().UTC()
 		completedAt = &t
 	}
+	var encryptedArchiveURL *string
+	if archiveURL != nil && *archiveURL != "" {
+		encrypted, err := appcrypto.EncryptString(*archiveURL)
+		if err != nil {
+			return err
+		}
+		encryptedArchiveURL = &encrypted
+	}
 	_, err := pool.Exec(ctx, `
 UPDATE compliance.dsar_requests
    SET status            = $2,
@@ -176,7 +185,7 @@ UPDATE compliance.dsar_requests
        completed_at      = COALESCE($6, completed_at),
        actioned_by       = $7
  WHERE id = $1
-`, id, status, archiveURL, archiveExpiresAt, rejectionReason, completedAt, actionedBy)
+`, id, status, encryptedArchiveURL, archiveExpiresAt, rejectionReason, completedAt, actionedBy)
 	return err
 }
 
@@ -298,6 +307,11 @@ func scanDSAR(row pgx.Row) (*DSARRequest, error) {
 	if err != nil {
 		return nil, err
 	}
+	archiveURL, err := appcrypto.MaybeDecryptString(r.ArchiveURL)
+	if err != nil {
+		return nil, err
+	}
+	r.ArchiveURL = archiveURL
 	return &r, nil
 }
 
@@ -317,6 +331,11 @@ func queryDSARs(ctx context.Context, pool *pgxpool.Pool, query string, args ...a
 		); err != nil {
 			return nil, err
 		}
+		archiveURL, err := appcrypto.MaybeDecryptString(r.ArchiveURL)
+		if err != nil {
+			return nil, err
+		}
+		r.ArchiveURL = archiveURL
 		out = append(out, r)
 	}
 	return out, rows.Err()

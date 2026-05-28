@@ -90,6 +90,7 @@ type platformSettingsJSON struct {
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled             bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled       bool `json:"adminAuditLogEnabled"`
+	DataResidencyEnabled       bool `json:"dataResidencyEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -211,6 +212,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:        merged.AdminAuditLogEnabled,
+			DataResidencyEnabled:        merged.DataResidencyEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
@@ -305,6 +307,7 @@ type putPlatformBody struct {
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled             *bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled       *bool `json:"adminAuditLogEnabled"`
+	DataResidencyEnabled       *bool `json:"dataResidencyEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -560,6 +563,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("coppaworkflowenabled", body.CoppaWorkflowEnabled, func(v bool) { wr.CoppaWorkflowEnabled = &v })
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
+		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -637,6 +641,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:        merged.AdminAuditLogEnabled,
+			DataResidencyEnabled:        merged.DataResidencyEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,

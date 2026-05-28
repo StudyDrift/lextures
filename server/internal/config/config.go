@@ -250,6 +250,8 @@ type Config struct {
 	IsoIsmsEnabled bool
 	// AdminAuditLogEnabled gates the admin audit log viewer and export API (plan 10.11). Defaults to true.
 	AdminAuditLogEnabled bool
+	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
+	DataResidencyEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -392,6 +394,7 @@ func Load() Config {
 		SOC2ModuleEnabled:    boolEnv("SOC2_MODULE_ENABLED") || boolEnv("FEATURE_SOC2_MODULE"),
 		IsoIsmsEnabled:       boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
 		AdminAuditLogEnabled: true, // plan 10.11 default on; disable via platform settings
+		DataResidencyEnabled: boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
 	}
 }
 

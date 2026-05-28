@@ -119,7 +119,7 @@ func Create(ctx context.Context, pool *pgxpool.Pool, name, slug string, maxUsers
 	}
 	dr := strings.TrimSpace(dataRegion)
 	if dr == "" {
-		dr = "us-east-1"
+		dr = "us-east"
 	}
 	meta := metadata
 	if len(meta) == 0 {
@@ -186,7 +186,20 @@ WHERE o.id = $1 AND o.status <> 'deleted'
 	return &r, nil
 }
 
-// Patch updates name, status, quotas, data_region, metadata (non-nil fields only).
+// ErrRegionImmutable is returned when a caller attempts to change data_region after provisioning.
+var ErrRegionImmutable = errors.New("organization: data_region cannot be changed after provisioning without a migration workflow")
+
+// GetRegion returns the data_region for an org (for routing and residency checks).
+func GetRegion(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) (string, error) {
+	var region string
+	err := pool.QueryRow(ctx, `SELECT data_region FROM tenant.organizations WHERE id = $1 AND status <> 'deleted'`, orgID).Scan(&region)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", nil
+	}
+	return region, err
+}
+
+// Patch updates name, status, quotas, metadata (non-nil fields only); data_region is immutable after provisioning.
 func Patch(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID, name, status *string, maxUsers, maxCourses *int32, dataRegion *string, metadata *json.RawMessage) (*Row, error) {
 	cur, err := GetByID(ctx, pool, id)
 	if err != nil {
@@ -216,8 +229,8 @@ func Patch(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID, name, status *
 		mc = maxCourses
 	}
 	dr := cur.DataRegion
-	if dataRegion != nil && strings.TrimSpace(*dataRegion) != "" {
-		dr = strings.TrimSpace(*dataRegion)
+	if dataRegion != nil && strings.TrimSpace(*dataRegion) != "" && strings.TrimSpace(*dataRegion) != cur.DataRegion {
+		return nil, ErrRegionImmutable
 	}
 	meta := cur.Metadata
 	if metadata != nil {
