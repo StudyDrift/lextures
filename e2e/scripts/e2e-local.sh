@@ -240,6 +240,15 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
     RTL_ENABLED="true" \
+    FERPA_WORKFLOW_ENABLED="true" \
+    CCPA_MODULE_ENABLED="true" \
+    STATE_PRIVACY_ENABLED="true" \
+    GDPR_MODULE_ENABLED="true" \
+    BACKUP_MODULE_ENABLED="true" \
+    AV_SCANNING_ENABLED="true" \
+    CLAMAV_STUB="true" \
+    STORAGE_QUOTAS_ENABLED="true" \
+    FEATURE_ENGAGEMENT_TRACKING="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -249,6 +258,15 @@ else
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
     RTL_ENABLED="true" \
+    FERPA_WORKFLOW_ENABLED="true" \
+    CCPA_MODULE_ENABLED="true" \
+    STATE_PRIVACY_ENABLED="true" \
+    GDPR_MODULE_ENABLED="true" \
+    BACKUP_MODULE_ENABLED="true" \
+    AV_SCANNING_ENABLED="true" \
+    CLAMAV_STUB="true" \
+    STORAGE_QUOTAS_ENABLED="true" \
+    FEATURE_ENGAGEMENT_TRACKING="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

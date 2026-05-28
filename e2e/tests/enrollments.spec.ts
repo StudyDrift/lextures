@@ -67,10 +67,7 @@ test.describe('Course enrollments', () => {
       await studentRow.hover()
     }
     const removeBtnVis = page.getByRole('button', { name: /remove student enrollment/i })
-    if (await removeBtnVis.count() === 0) {
-      test.skip(true, 'Remove button not accessible — skipping')
-      return
-    }
+    await expect(removeBtnVis).toBeVisible({ timeout: 5000 })
     await removeBtnVis.click()
 
     // Confirm if a dialog appears.

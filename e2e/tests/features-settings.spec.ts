@@ -2,7 +2,22 @@
  * Course Settings → Features: toggle course tools on/off and verify persistence.
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiGetCourse } from '../fixtures/api.js'
+import { apiGetCourse, apiPatchCourseFeatures } from '../fixtures/api.js'
+
+/** Keep common tools on while toggling one feature under test. */
+async function withBaseCourseTools(
+  token: string,
+  courseCode: string,
+  patch: { discussionsEnabled?: boolean; sectionsEnabled?: boolean },
+) {
+  await apiPatchCourseFeatures(token, courseCode, {
+    feedEnabled: true,
+    calendarEnabled: true,
+    questionBankEnabled: true,
+    notebookEnabled: true,
+    ...patch,
+  })
+}
 
 test.describe('Course Settings - Features', () => {
   test('features tab loads with Course tools heading', async ({ coursePage: page, seededCourse }) => {
@@ -12,6 +27,9 @@ test.describe('Course Settings - Features', () => {
   })
 
   test('toggle Discussion forums on and verify Saved message', async ({ coursePage: page, seededCourse }) => {
+    await withBaseCourseTools(seededCourse.instructorToken, seededCourse.courseCode, {
+      discussionsEnabled: false,
+    })
     await page.goto(`/courses/${seededCourse.courseCode}/settings/features`)
     await expect(page.getByRole('heading', { name: /^Course tools$/i })).toBeVisible({ timeout: 12000 })
 
@@ -29,6 +47,9 @@ test.describe('Course Settings - Features', () => {
   })
 
   test('enabled feature persists on the course record', async ({ coursePage: page, seededCourse }) => {
+    await withBaseCourseTools(seededCourse.instructorToken, seededCourse.courseCode, {
+      discussionsEnabled: false,
+    })
     await page.goto(`/courses/${seededCourse.courseCode}/settings/features`)
     await expect(page.getByRole('heading', { name: /^Course tools$/i })).toBeVisible({ timeout: 12000 })
 
@@ -48,6 +69,9 @@ test.describe('Course Settings - Features', () => {
   })
 
   test('Course sections toggle enables sections feature', async ({ coursePage: page, seededCourse }) => {
+    await withBaseCourseTools(seededCourse.instructorToken, seededCourse.courseCode, {
+      sectionsEnabled: false,
+    })
     await page.goto(`/courses/${seededCourse.courseCode}/settings/features`)
     await expect(page.getByRole('heading', { name: /^Course tools$/i })).toBeVisible({ timeout: 12000 })
 

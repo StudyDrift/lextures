@@ -44,17 +44,14 @@ test.describe('Course feed', () => {
       .locator('textarea, [contenteditable="true"]')
       .filter({ hasText: '' })
       .first()
-    if (await composer.count() === 0) {
-      test.skip(true, 'Message composer not visible — skipping')
-      return
-    }
+    await expect(composer).toBeVisible({ timeout: 5000 })
 
     const msgText = `E2E test message ${Date.now()}`
     await composer.click()
     await composer.fill(msgText)
 
     // Submit via button or Enter.
-    const sendBtn = page.getByRole('button', { name: /send|post/i })
+    const sendBtn = page.getByRole('button', { name: /send|post/i }).first()
     if (await sendBtn.count() > 0) {
       await sendBtn.click()
     } else {

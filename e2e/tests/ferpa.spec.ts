@@ -19,10 +19,10 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
+import { isFERPAEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const FERPA_ENABLED = process.env.FEATURE_FERPA_WORKFLOW === 'true' || process.env.FERPA_WORKFLOW_ENABLED === 'true'
 
 function uniqueEmail(prefix = 'ferpa') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -33,13 +33,17 @@ function uniqueEmail(prefix = 'ferpa') {
 // ──────────────────────────────────────────────────────────
 
 test('FERPA: GET directory-opt-out unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/directory-opt-out`)
   expect(res.status).toBe(401)
 })
 
 test('FERPA: PUT directory-opt-out unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/directory-opt-out`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -49,7 +53,9 @@ test('FERPA: PUT directory-opt-out unauthenticated returns 401', async () => {
 })
 
 test('FERPA: POST record-requests unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/record-requests`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -59,19 +65,25 @@ test('FERPA: POST record-requests unauthenticated returns 401', async () => {
 })
 
 test('FERPA: GET record-requests unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/record-requests`)
   expect(res.status).toBe(401)
 })
 
 test('FERPA: GET disclosure-log unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/disclosure-log`)
   expect(res.status).toBe(401)
 })
 
 test('FERPA: POST consent unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/consent`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -81,7 +93,9 @@ test('FERPA: POST consent unauthenticated returns 401', async () => {
 })
 
 test('FERPA: DELETE consent unauthenticated returns 401', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
   const fakeID = '00000000-0000-0000-0000-000000000001'
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/consent/${fakeID}`, {
     method: 'DELETE',
@@ -94,7 +108,9 @@ test('FERPA: DELETE consent unauthenticated returns 401', async () => {
 // ──────────────────────────────────────────────────────────
 
 test('FERPA: All endpoints return 404 when feature disabled', async () => {
-  test.skip(FERPA_ENABLED, 'skipped when FEATURE_FERPA_WORKFLOW=true')
+  if (await isFERPAEnabled()) {
+    test.skip(true, 'skipped when FERPA enabled')
+  }
   const { access_token } = await apiSignup({ email: uniqueEmail('dis'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
   const checks = [
@@ -113,7 +129,9 @@ test('FERPA: All endpoints return 404 when feature disabled', async () => {
 // ──────────────────────────────────────────────────────────
 
 test('FERPA: Student can read and toggle directory opt-out', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const email = uniqueEmail('student')
   const { access_token } = await apiSignup({ email, password: PASSWORD })
@@ -151,7 +169,9 @@ test('FERPA: Student can read and toggle directory opt-out', async () => {
 })
 
 test('FERPA: Non-admin cannot list record requests (403)', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('nonadmin'), password: PASSWORD })
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/record-requests`, {
@@ -161,7 +181,9 @@ test('FERPA: Non-admin cannot list record requests (403)', async () => {
 })
 
 test('FERPA: Non-admin cannot read disclosure log (403)', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('nodiscl'), password: PASSWORD })
   const res = await fetch(`${API_BASE}/api/v1/compliance/ferpa/disclosure-log`, {
@@ -171,7 +193,9 @@ test('FERPA: Non-admin cannot read disclosure log (403)', async () => {
 })
 
 test('FERPA: Student submits record-access request; receives 201', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const studentEmail = uniqueEmail('reqstudent')
   const { access_token } = await apiSignup({ email: studentEmail, password: PASSWORD })
@@ -207,7 +231,9 @@ test('FERPA: Student submits record-access request; receives 201', async () => {
 })
 
 test('FERPA: Student can grant and revoke third-party consent', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('consent'), password: PASSWORD })
 
@@ -264,7 +290,9 @@ test('FERPA: Student can grant and revoke third-party consent', async () => {
 })
 
 test('FERPA: POST record-request with invalid requestType returns 400', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('badtype'), password: PASSWORD })
 
@@ -291,7 +319,9 @@ test('FERPA: POST record-request with invalid requestType returns 400', async ()
 })
 
 test('FERPA: amend request without amendmentField returns 400', async () => {
-  test.skip(!FERPA_ENABLED, 'requires FEATURE_FERPA_WORKFLOW=true')
+  if (!(await isFERPAEnabled())) {
+    test.skip(true, 'requires FERPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('nofield'), password: PASSWORD })
 

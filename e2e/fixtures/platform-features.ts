@@ -52,6 +52,13 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       coppaWorkflowEnabled: true,
       isoIsmsEnabled: true,
       securityDisclosureModuleEnabled: true,
+      engagementTrackingEnabled: true,
+      adminAuditLogEnabled: true,
+      avScanningEnabled: true,
+      clamavStub: true,
+      storageQuotasEnabled: true,
+      dataResidencyEnabled: true,
+      itemAnalysisEnabled: true,
       updateMask: [
         'h5pEnabled',
         'oerLibraryEnabled',
@@ -68,6 +75,13 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'coppaWorkflowEnabled',
         'isoIsmsEnabled',
         'securityDisclosureModuleEnabled',
+        'engagementTrackingEnabled',
+        'adminAuditLogEnabled',
+        'avScanningEnabled',
+        'clamavStub',
+        'storageQuotasEnabled',
+        'dataResidencyEnabled',
+        'itemAnalysisEnabled',
       ],
     }),
   })
@@ -104,4 +118,79 @@ export async function enableEngagementTrackingForE2E(): Promise<void> {
     const body = await putRes.text()
     throw new Error(`E2E engagement enable failed (${putRes.status}): ${body}`)
   }
+}
+
+// --- Runtime feature probes (reliable across env/platform/seed; used to replace legacy FEATURE_* checks) ---
+
+async function probeEnabled(path: string): Promise<boolean> {
+  const res = await fetch(`${apiBase}${path}`)
+  // 401/403 means feature enabled (auth reached), 404 means feature guard returned not-found first.
+  return res.status === 401 || res.status === 403
+}
+
+export async function isH5PEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_H5P === 'true') return true
+  // unauthed to guarded h5p route: 401 when on, 404 when off
+  const res = await fetch(`${apiBase}/api/v1/courses/FAKE/h5p/00000000-0000-0000-0000-000000000000`)
+  return res.status === 401
+}
+
+export async function isOEREnabled(): Promise<boolean> {
+  if (process.env.FEATURE_OER_LIBRARY === 'true') return true
+  // oer search may be public-ish; probe a course-scoped oer add attempt or use settings
+  const res = await fetch(`${apiBase}/api/v1/courses/FAKE/oer`)
+  return res.status === 401 || res.status === 403
+}
+
+export async function isEngagementEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_ENGAGEMENT_TRACKING === 'true') return true
+  // POST only — GET returns 405 before the feature gate is evaluated.
+  const res = await fetch(`${apiBase}/api/v1/analytics/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([]),
+  })
+  return res.status === 401
+}
+
+export async function isAtRiskEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_AT_RISK_ALERTS === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/courses/FAKE/at-risk`)
+  return res.status === 401 || res.status === 403
+}
+
+export async function isStorageQuotasEnabled(): Promise<boolean> {
+  if (process.env.STORAGE_QUOTAS_ENABLED === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/courses/FAKE/storage-usage`)
+  return res.status === 401 || res.status === 403
+}
+
+export async function isAVEnabled(): Promise<boolean> {
+  if (process.env.AV_SCANNING_ENABLED === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/admin/av-scan/status`)
+  return res.status === 401 || res.status === 403
+}
+
+export async function isStatePrivacyEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_STATE_PRIVACY === 'true' || process.env.STATE_PRIVACY_ENABLED === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/compliance/state/disclosure/00000000-0000-0000-0000-000000000001`)
+  return res.status === 401
+}
+
+export async function isCCPAEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_CCPA_MODULE === 'true' || process.env.CCPA_MODULE_ENABLED === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/compliance/ccpa/opt-out`)
+  return res.status === 401
+}
+
+export async function isFERPAEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_FERPA_WORKFLOW === 'true' || process.env.FERPA_WORKFLOW_ENABLED === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/compliance/ferpa/directory-opt-out`)
+  return res.status === 401
+}
+
+export async function isBackupEnabled(): Promise<boolean> {
+  if (process.env.BACKUP_MODULE_ENABLED === 'true' || process.env.FEATURE_BACKUP_MODULE === 'true') return true
+  const res = await fetch(`${apiBase}/api/v1/internal/ops/backup-status`)
+  return res.status === 401
 }

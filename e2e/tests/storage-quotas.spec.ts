@@ -16,10 +16,10 @@
  */
 import { test, expect } from '@playwright/test'
 import { apiSignup } from '../fixtures/api.js'
+import { isStorageQuotasEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const QUOTAS_ENABLED = process.env.STORAGE_QUOTAS_ENABLED === 'true'
 
 function uniqueEmail(prefix = 'quota') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -115,7 +115,11 @@ test.describe('storage-quota non-admin rejection', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('storage-quota enforcement (requires STORAGE_QUOTAS_ENABLED=true)', () => {
-  test.skip(!QUOTAS_ENABLED, 'STORAGE_QUOTAS_ENABLED is not set to true')
+  test.beforeEach(async () => {
+    if (!(await isStorageQuotasEnabled())) {
+      test.skip(true, 'storage quotas not enabled')
+    }
+  })
 
   test('GET /courses/:code/storage-usage returns usage info with auth', async ({ request }) => {
     const { access_token } = await apiSignup({

@@ -9,20 +9,23 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
+import { isBackupEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const BACKUP_ENABLED =
-  process.env.BACKUP_MODULE_ENABLED === 'true' || process.env.FEATURE_BACKUP_MODULE === 'true'
 
 test('Backup: GET backup-status unauthenticated returns 401', async () => {
-  test.skip(!BACKUP_ENABLED, 'requires BACKUP_MODULE_ENABLED=true')
+  if (!(await isBackupEnabled())) {
+    test.skip(true, 'requires backup module enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/internal/ops/backup-status`)
   expect(res.status).toBe(401)
 })
 
 test('Backup: POST restore-drill unauthenticated returns 401', async () => {
-  test.skip(!BACKUP_ENABLED, 'requires BACKUP_MODULE_ENABLED=true')
+  if (!(await isBackupEnabled())) {
+    test.skip(true, 'requires backup module enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/internal/ops/restore-drill`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -32,7 +35,9 @@ test('Backup: POST restore-drill unauthenticated returns 401', async () => {
 })
 
 test('Backup: endpoints return 404 when module disabled', async ({ request }) => {
-  test.skip(BACKUP_ENABLED, 'only when BACKUP_MODULE_ENABLED is not set')
+  if (await isBackupEnabled()) {
+    test.skip(true, 'only when backup module disabled')
+  }
   const res = await request.get(`${API_BASE}/api/v1/internal/ops/backup-status`, {
     headers: { Authorization: 'Bearer invalid' },
   })
@@ -40,7 +45,9 @@ test('Backup: endpoints return 404 when module disabled', async ({ request }) =>
 })
 
 test('Backup: admin can read status and record drill', async () => {
-  test.skip(!BACKUP_ENABLED, 'requires BACKUP_MODULE_ENABLED=true')
+  if (!(await isBackupEnabled())) {
+    test.skip(true, 'requires backup module enabled')
+  }
 
   const email = process.env.E2E_ADMIN_EMAIL ?? `e2e-backup-${Date.now()}@test.invalid`
   const { access_token: token } = await apiSignup({

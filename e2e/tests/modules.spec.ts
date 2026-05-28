@@ -65,28 +65,21 @@ test.describe('Course modules', () => {
     await page.goto(`/courses/${seededCourse.courseCode}/modules`)
     await expect(page.getByText(seededCourse.moduleTitle)).toBeVisible()
 
-    // Each module has a gear/settings button. Click it to open the module settings menu.
     const moduleRow = page.locator('li').filter({ hasText: seededCourse.moduleTitle }).first()
-    // Hover to reveal action buttons (they may be opacity-0 until hovered).
     await moduleRow.hover()
-    const gearBtn = moduleRow.locator('button[aria-haspopup="menu"]').first()
-    if (await gearBtn.count() === 0) {
-      test.skip(true, 'Module settings button not found — skipping archive test')
-      return
-    }
-    await gearBtn.click()
+    await moduleRow.getByRole('button', { name: /module settings/i }).click()
 
-    const archiveItem = page.getByRole('menuitem', { name: /archive/i })
-    if (await archiveItem.count() === 0) {
-      test.skip(true, 'Archive menu item not visible — skipping')
-      return
-    }
-    await archiveItem.click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible({ timeout: 5000 })
+    await dialog.getByRole('button', { name: /delete module/i }).click()
 
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes|archive/i })
-    if (await confirmBtn.count() > 0) await confirmBtn.click()
+    await expect(page.getByRole('heading', { name: /delete module/i })).toBeVisible({ timeout: 5000 })
+    const confirmDelete = page.getByRole('button', { name: /delete module|archive module/i }).last()
+    await expect(confirmDelete).toBeEnabled({ timeout: 10000 })
+    await confirmDelete.click()
 
-    await expect(page.getByText(seededCourse.moduleTitle)).not.toBeVisible({ timeout: 8000 })
+    const activeModuleRow = page.locator('li').filter({ hasText: seededCourse.moduleTitle }).first()
+    await expect(activeModuleRow).not.toBeVisible({ timeout: 8000 })
   })
 
   // --- Vibe Activity tests (new module type) ---
@@ -104,18 +97,12 @@ test.describe('Course modules', () => {
 
     // The Add button inside the module card
     const addBtn = moduleRow.locator('button[aria-haspopup="menu"]', { hasText: /add module item|add item/i }).first()
-    if (await addBtn.count() === 0) {
-      test.skip(true, 'Add module item button not found — skipping vibe test')
-      return
-    }
+    await expect(addBtn).toBeVisible({ timeout: 5000 })
     await addBtn.click()
 
     // Click the new "Vibe Activity" menu item
     const vibeItem = page.getByRole('menuitem', { name: /vibe activity/i })
-    if (await vibeItem.count() === 0) {
-      test.skip(true, 'Vibe Activity menu item not found — skipping')
-      return
-    }
+    await expect(vibeItem).toBeVisible({ timeout: 3000 })
     await vibeItem.click()
 
     // The dedicated Vibe modal should open

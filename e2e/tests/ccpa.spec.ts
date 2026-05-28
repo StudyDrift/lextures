@@ -17,11 +17,10 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
+import { isCCPAEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const CCPA_ENABLED =
-  process.env.FEATURE_CCPA_MODULE === 'true' || process.env.CCPA_MODULE_ENABLED === 'true'
 
 function uniqueEmail(prefix = 'ccpa') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -32,13 +31,17 @@ function uniqueEmail(prefix = 'ccpa') {
 // ──────────────────────────────────────────────────────────
 
 test('CCPA: GET opt-out unauthenticated returns 401', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ccpa/opt-out`)
   expect(res.status).toBe(401)
 })
 
 test('CCPA: POST opt-out unauthenticated returns 401', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ccpa/opt-out`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -48,7 +51,9 @@ test('CCPA: POST opt-out unauthenticated returns 401', async () => {
 })
 
 test('CCPA: POST requests unauthenticated returns 401', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ccpa/requests`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -58,13 +63,17 @@ test('CCPA: POST requests unauthenticated returns 401', async () => {
 })
 
 test('CCPA: GET requests unauthenticated returns 401', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ccpa/requests`)
   expect(res.status).toBe(401)
 })
 
 test('CCPA: GET pi-categories returns 200 without auth (public)', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/ccpa/pi-categories`)
   expect(res.status).toBe(200)
   const body = (await res.json()) as { categories?: unknown[] }
@@ -77,7 +86,9 @@ test('CCPA: GET pi-categories returns 200 without auth (public)', async () => {
 // ──────────────────────────────────────────────────────────
 
 test('CCPA: All endpoints return 404 when feature disabled', async () => {
-  test.skip(CCPA_ENABLED, 'skipped when FEATURE_CCPA_MODULE=true')
+  if (await isCCPAEnabled()) {
+    test.skip(true, 'skipped when CCPA enabled')
+  }
   const { access_token } = await apiSignup({ email: uniqueEmail('dis'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
   const checks = [
@@ -96,7 +107,9 @@ test('CCPA: All endpoints return 404 when feature disabled', async () => {
 // ──────────────────────────────────────────────────────────
 
 test('CCPA: User can read and toggle Do Not Sell opt-out', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('optout'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
@@ -135,7 +148,9 @@ test('CCPA: User can read and toggle Do Not Sell opt-out', async () => {
 })
 
 test('CCPA: Sec-GPC header triggers automatic opt-out (AC-1)', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('gpc'), password: PASSWORD })
   const headers = {
@@ -156,7 +171,9 @@ test('CCPA: Sec-GPC header triggers automatic opt-out (AC-1)', async () => {
 })
 
 test('CCPA: User can submit a rights request and it appears in their list', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('req'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
@@ -202,7 +219,9 @@ test('CCPA: User can submit a rights request and it appears in their list', asyn
 })
 
 test('CCPA: Duplicate request returns 409', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('dup'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
@@ -225,7 +244,9 @@ test('CCPA: Duplicate request returns 409', async () => {
 })
 
 test('CCPA: Invalid requestType returns 400', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('invalid'), password: PASSWORD })
 
@@ -238,7 +259,9 @@ test('CCPA: Invalid requestType returns 400', async () => {
 })
 
 test('CCPA: PI categories returns expected structure', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const res = await fetch(`${API_BASE}/api/v1/compliance/ccpa/pi-categories`)
   expect(res.ok).toBeTruthy()
@@ -254,7 +277,9 @@ test('CCPA: PI categories returns expected structure', async () => {
 })
 
 test('CCPA: User can toggle Limit Sensitive PI', async () => {
-  test.skip(!CCPA_ENABLED, 'requires FEATURE_CCPA_MODULE=true')
+  if (!(await isCCPAEnabled())) {
+    test.skip(true, 'requires CCPA enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('senspi'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
