@@ -49,6 +49,8 @@ import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
 import { useUiDensityControls } from '../../context/ui-density-context'
 import { AccountTimezonePanel } from '../../components/settings/account-timezone-panel'
+import { LocaleSwitcher } from '../../components/settings/locale-switcher'
+import { syncUserLocale } from '../../lib/sync-user-locale'
 
 function isSystemSettingsPath(pathname: string): boolean {
   if (pathname.startsWith('/settings/ai/')) return true
@@ -116,6 +118,7 @@ type AccountProfile = {
   avatarUrl?: string | null
   uiTheme?: string | null
   showHelpPopover?: boolean
+  locale?: string | null
   sid?: string | null
   sessionManagementUiEnabled?: boolean
 }
@@ -213,6 +216,7 @@ export default function Settings() {
   const [avatarGenMessage, setAvatarGenMessage] = useState<string | null>(null)
   const [uiTheme, setUiTheme] = useState<UiTheme>('light')
   const [showHelpPopover, setShowHelpPopover] = useState(true)
+  const [localeTag, setLocaleTag] = useState('en')
   const [studentId, setStudentId] = useState<string | null>(null)
   const [sessionManagementUiEnabled, setSessionManagementUiEnabled] = useState(false)
   const [sessions, setSessions] = useState<ActiveSessionRow[]>([])
@@ -390,6 +394,10 @@ export default function Settings() {
       setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
       if (data.showHelpPopover !== undefined) {
         setShowHelpPopover(data.showHelpPopover)
+      }
+      if (data.locale?.trim()) {
+        setLocaleTag(data.locale.trim())
+        void syncUserLocale(data.locale)
       }
     } catch {
       setAccountError('Could not load account settings.')
@@ -1081,6 +1089,8 @@ export default function Settings() {
                 <AccountTimezonePanel />
 
                 <AiProcessingSettingsPanel />
+
+                <LocaleSwitcher initialLocale={localeTag} onLocaleChange={setLocaleTag} />
 
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Help popover</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">

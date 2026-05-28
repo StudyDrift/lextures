@@ -31,7 +31,7 @@ RETURNING ` + userRowReturning
 	var dn, fn, ln, av, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &timezone, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -49,10 +49,12 @@ RETURNING ` + userRowReturning
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
+	if r.Locale == "" {
+		r.Locale = "en"
+	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
 		r.DeactivatedAt = &t
 	}
 	return &r, nil
 }
-

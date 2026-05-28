@@ -79,31 +79,8 @@ func InsertUserWithClever(ctx context.Context, pool *pgxpool.Pool, email, passwo
 	cid := strings.TrimSpace(cleverID)
 	const q = `INSERT INTO "user".users (email, password_hash, display_name, clever_id, is_minor, org_id)
 VALUES ($1, $2, $3, $4, $5, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
-	RETURNING ` + userRowReturning
-	var r Row
-	var dn, fn, ln, av, timezone, sid sql.NullString
-	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, email, passwordHash, displayName, cid, isMinor).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &timezone, &sid,
-		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
-	)
-	if err != nil {
-		return nil, err
-	}
-	r.DisplayName = strPtr(dn)
-	r.FirstName = strPtr(fn)
-	r.LastName = strPtr(ln)
-	r.AvatarURL = strPtr(av)
-	r.Timezone = strPtr(timezone)
-	r.Sid = strPtr(sid)
-	if r.AccountType == "" {
-		r.AccountType = AccountTypeStandard
-	}
-	if deactivatedAt.Valid {
-		t := deactivatedAt.Time
-		r.DeactivatedAt = &t
-	}
-	return &r, nil
+RETURNING ` + userRowReturning
+	return scanInsertReturning(ctx, pool, q, email, passwordHash, displayName, cid, isMinor)
 }
 
 // InsertUserWithClassLink creates a user with classlink_id.
@@ -111,17 +88,39 @@ func InsertUserWithClassLink(ctx context.Context, pool *pgxpool.Pool, email, pas
 	s := strings.TrimSpace(classlinkSub)
 	const q = `INSERT INTO "user".users (email, password_hash, display_name, classlink_id, org_id)
 VALUES ($1, $2, $3, $4, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
-	RETURNING ` + userRowReturning
+RETURNING ` + userRowReturning
+	return scanInsertReturningClassLink(ctx, pool, q, email, passwordHash, displayName, s)
+}
+
+func scanInsertReturning(ctx context.Context, pool *pgxpool.Pool, q, email, passwordHash string, displayName *string, cleverID string, isMinor bool) (*Row, error) {
 	var r Row
 	var dn, fn, ln, av, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, email, passwordHash, displayName, s).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &timezone, &sid,
+	err := pool.QueryRow(ctx, q, email, passwordHash, displayName, cleverID, isMinor).Scan(
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
 		return nil, err
 	}
+	return finishInsertRow(&r, dn, fn, ln, av, timezone, sid, deactivatedAt)
+}
+
+func scanInsertReturningClassLink(ctx context.Context, pool *pgxpool.Pool, q, email, passwordHash string, displayName *string, classlinkSub string) (*Row, error) {
+	var r Row
+	var dn, fn, ln, av, timezone, sid sql.NullString
+	var deactivatedAt sql.NullTime
+	err := pool.QueryRow(ctx, q, email, passwordHash, displayName, classlinkSub).Scan(
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
+		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return finishInsertRow(&r, dn, fn, ln, av, timezone, sid, deactivatedAt)
+}
+
+func finishInsertRow(r *Row, dn, fn, ln, av, timezone, sid sql.NullString, deactivatedAt sql.NullTime) (*Row, error) {
 	r.DisplayName = strPtr(dn)
 	r.FirstName = strPtr(fn)
 	r.LastName = strPtr(ln)
@@ -131,9 +130,12 @@ VALUES ($1, $2, $3, $4, (SELECT id FROM tenant.organizations WHERE slug = 'defau
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
+	if r.Locale == "" {
+		r.Locale = "en"
+	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
 		r.DeactivatedAt = &t
 	}
-	return &r, nil
+	return r, nil
 }

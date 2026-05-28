@@ -1,0 +1,8 @@
+{
+  "common.locale.label": "Idioma",
+  "common.locale.description": "Elige el idioma de menús, botones y demás textos de la interfaz.",
+  "common.locale.saved": "Preferencia de idioma guardada.",
+  "common.locale.saveError": "No se pudo guardar la preferencia de idioma.",
+  "common.assignmentCount": "{count, plural, one {# tarea} other {# tareas}}",
+  "common.loading": "Cargando…"
+}

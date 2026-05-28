@@ -29,6 +29,7 @@ type Row struct {
 	AvatarURL       *string
 	UITheme         string
 	ShowHelpPopover bool
+	Locale          string
 	Timezone        *string
 	Sid             *string
 	LoginBlocked    bool
@@ -45,11 +46,10 @@ func strPtr(ns sql.NullString) *string {
 	return &s
 }
 
-const userRowSelect = `id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, timezone, sid,
+const userRowSelect = `id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, timezone, sid,
        login_blocked, deactivated_at, account_type`
 
-const userRowReturning = `id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, timezone, sid,
-  login_blocked, deactivated_at, account_type`
+const userRowReturning = userRowSelect
 
 // FindByEmail returns a user by exact email (already normalized) or nil if missing.
 func FindByEmail(ctx context.Context, pool *pgxpool.Pool, email string) (*Row, error) {
@@ -63,7 +63,7 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	var displayName, firstName, lastName, avatar, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, query, arg).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &timezone, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -80,6 +80,9 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	r.Sid = strPtr(sid)
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
+	}
+	if r.Locale == "" {
+		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
@@ -104,7 +107,7 @@ RETURNING ` + userRowReturning
 	var dn, fn, ln, av, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, email, passwordHash, displayName).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &timezone, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -118,6 +121,9 @@ RETURNING ` + userRowReturning
 	r.Sid = strPtr(sid)
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
+	}
+	if r.Locale == "" {
+		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
@@ -135,7 +141,7 @@ RETURNING ` + userRowReturning
 	var dn, fn, ln, av, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := tx.QueryRow(ctx, q, email, passwordHash, displayName).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &timezone, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -149,6 +155,9 @@ RETURNING ` + userRowReturning
 	r.Sid = strPtr(sid)
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
+	}
+	if r.Locale == "" {
+		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time

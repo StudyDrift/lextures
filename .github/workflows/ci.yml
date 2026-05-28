@@ -144,6 +144,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: i18n locale parity
+        run: npm run i18n:check
+
       - name: Build
         run: npm run build
 

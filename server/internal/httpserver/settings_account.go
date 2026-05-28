@@ -17,6 +17,7 @@ type accountProfileResponse struct {
 	AvatarURL                    *string `json:"avatarUrl"`
 	UITheme                      string  `json:"uiTheme"`
 	ShowHelpPopover              bool    `json:"showHelpPopover"`
+	Locale                       string  `json:"locale"`
 	Sid                          *string `json:"sid"`
 	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
 	AccountType                  string  `json:"accountType"`
@@ -113,12 +114,20 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
 			ShowHelpPopover:            row.ShowHelpPopover,
+			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
 			Timezone:                   row.Timezone,
 		})
 	}
+}
+
+func localeOrDefault(locale string) string {
+	if strings.TrimSpace(locale) == "" {
+		return "en"
+	}
+	return locale
 }
 
 func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
@@ -178,6 +187,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
 			ShowHelpPopover:            row.ShowHelpPopover,
+			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
