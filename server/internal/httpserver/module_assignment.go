@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/relativeschedule"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
@@ -51,6 +52,11 @@ type moduleAssignmentGetResponse struct {
 	ReleaseAt                    *time.Time       `json:"releaseAt,omitempty"`
 	NeverDrop                    bool             `json:"neverDrop"`
 	ReplaceWithFinal             bool             `json:"replaceWithFinal"`
+	ReadingLevelFkgl             *float64         `json:"readingLevelFkgl,omitempty"`
+	ReadingLevelFre              *float64         `json:"readingLevelFre,omitempty"`
+	SimplifiedForReadingLevel    bool             `json:"simplifiedForReadingLevel,omitempty"`
+	OriginalMarkdown             *string          `json:"originalMarkdown,omitempty"`
+	ReadingLevelTargetFkgl       *int             `json:"readingLevelTargetFkgl,omitempty"`
 }
 
 func buildModuleAssignmentResponse(
@@ -246,6 +252,7 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 		out := buildModuleAssignmentResponse(
 			itemID, &disp, canEdit, shift, viewerCanReveal, showMod,
 		)
+		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeAssignment, viewer, canEdit, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}
@@ -421,6 +428,9 @@ func (d Deps) handlePatchModuleAssignment() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		if d.readingLevelEnabled() && req.Markdown != "" {
+			_ = rlrepo.ScoreAndPersist(r.Context(), d.Pool, itemID, rlrepo.TypeAssignment, req.Markdown)
+		}
 		row, err := coursemoduleassignments.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load assignment.")
@@ -436,6 +446,7 @@ func (d Deps) handlePatchModuleAssignment() http.HandlerFunc {
 			return
 		}
 		out := buildModuleAssignmentResponse(itemID, row, true, nil, viewerCanReveal, true)
+		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeAssignment, viewer, true, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

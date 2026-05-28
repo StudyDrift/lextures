@@ -26,6 +26,7 @@ describe('studentProgressFeatureEnabled', () => {
       selfReflectionEnabled: false,
       xapiEmissionEnabled: false,
       equationEditorEnabled: false,
+      readingLevelEnabled: false,
       storageQuotasEnabled: false,
       avScanningEnabled: false,
       virtualClassroomEnabled: true,

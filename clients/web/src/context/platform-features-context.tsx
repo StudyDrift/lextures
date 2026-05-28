@@ -25,6 +25,7 @@ export type PlatformFeatures = {
   selfReflectionEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
+  readingLevelEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
@@ -45,6 +46,7 @@ const defaultFeatures: PlatformFeatures = {
   selfReflectionEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
+  readingLevelEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
@@ -70,6 +72,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     selfReflectionEnabled: false,
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
+    readingLevelEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
     virtualClassroomEnabled: true,
@@ -96,6 +99,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           selfReflectionEnabled: data.selfReflectionEnabled === true,
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
+          readingLevelEnabled: data.readingLevelEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,
           virtualClassroomEnabled: data.virtualClassroomEnabled !== false,
