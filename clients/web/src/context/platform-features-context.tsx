@@ -26,6 +26,7 @@ export type PlatformFeatures = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
@@ -48,6 +49,7 @@ const defaultFeatures: PlatformFeatures = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
@@ -75,6 +77,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+    translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
     virtualClassroomEnabled: true,
@@ -103,6 +106,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
+          translationMemoryEnabled: data.translationMemoryEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,
           virtualClassroomEnabled: data.virtualClassroomEnabled !== false,

@@ -226,6 +226,8 @@ type Config struct {
 	EquationEditorEnabled bool
 	// ReadingLevelEnabled gates Flesch-Kincaid scoring and AI content simplification (plan 11.6).
 	ReadingLevelEnabled bool
+	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
+	TranslationMemoryEnabled bool
 
 	// ReportExportEnabled gates PDF export and scheduled report delivery (plan 9.8).
 	ReportExportEnabled bool

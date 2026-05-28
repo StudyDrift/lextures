@@ -13,7 +13,7 @@ func TestRoleMatrixPermissions(t *testing.T) {
 		t.Fatalf("ta: got %d perms", len(ta))
 	}
 	designer := RoleMatrixPermissions(code, "designer")
-	if len(designer) != 2 {
+	if len(designer) != 3 {
 		t.Fatalf("designer: got %d perms", len(designer))
 	}
 	p := "course:" + code + ":"

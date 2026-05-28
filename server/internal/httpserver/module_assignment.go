@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/relativeschedule"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
@@ -253,6 +254,7 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 			itemID, &disp, canEdit, shift, viewerCanReveal, showMod,
 		)
 		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeAssignment, viewer, canEdit, &out)
+		d.enrichModuleItemWithTranslation(r.Context(), *cid, itemID, ctrepo.TypeAssignment, viewer, canEdit, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

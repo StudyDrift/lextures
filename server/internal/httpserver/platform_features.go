@@ -20,6 +20,7 @@ type platformFeaturesJSON struct {
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
+	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
 	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
@@ -41,6 +42,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		XAPIEmissionEnabled:        cfg.XAPIEmissionEnabled,
 		EquationEditorEnabled:      cfg.EquationEditorEnabled,
 		ReadingLevelEnabled:        cfg.ReadingLevelEnabled,
+		TranslationMemoryEnabled:   cfg.TranslationMemoryEnabled,
 		StorageQuotasEnabled:       cfg.StorageQuotasEnabled,
 		AvScanningEnabled:          cfg.AvScanningEnabled,
 		VirtualClassroomEnabled:    cfg.VirtualClassroomEnabled,
