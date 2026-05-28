@@ -21,6 +21,7 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/httpserver"
+	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/migrate"
 	"github.com/lextures/lextures/server/internal/notifevents"
@@ -35,6 +36,12 @@ import (
 // Run starts the API. Pass the migration file tree (e.g. serverdata.Migrations from the module root).
 func Run(ctx context.Context, fsys fs.FS) error {
 	cfg := config.Load()
+	logging.Configure(logging.Settings{
+		DisableRedaction: cfg.DisablePIIRedaction,
+		ExtraFields:      cfg.PIIRedactFields,
+		HMACSecret:       []byte(cfg.JWTSecret),
+		AppEnv:           cfg.AppEnv,
+	})
 	if err := cfg.Validate(); err != nil {
 		return err
 	}
