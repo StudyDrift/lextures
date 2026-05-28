@@ -40,6 +40,13 @@ func (d Deps) handleSearchIndex() http.HandlerFunc {
 			return
 		}
 		people := filterSearchPeopleByRosterRead(grants, peopleRaw)
+		// JSON-encode nil slices as [] so clients can iterate without null checks.
+		if courses == nil {
+			courses = []search.CourseItem{}
+		}
+		if people == nil {
+			people = []search.PersonItem{}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(search.IndexResponse{
 			Courses: courses,

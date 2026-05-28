@@ -50,8 +50,8 @@ export function CommandPaletteDialog() {
   useEffect(() => {
     void fetchSearchIndex()
       .then((data) => {
-        setCourses(data.courses)
-        setPeople(data.people)
+        setCourses(Array.isArray(data.courses) ? data.courses : [])
+        setPeople(Array.isArray(data.people) ? data.people : [])
         setLoadState('ready')
       })
       .catch(() => {
@@ -199,7 +199,7 @@ export function CommandPaletteDialog() {
             onKeyDown={onInputKeyDown}
             placeholder="Search courses, people, pages, actions…"
             aria-label="Search"
-            className="min-w-0 flex-1 border-0 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-500 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            className="min-w-0 flex-1 border-0 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-600 dark:text-neutral-100 dark:placeholder:text-neutral-400"
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
@@ -208,7 +208,7 @@ export function CommandPaletteDialog() {
               filtered[safeIndex] ? `cmd-result-${filtered[safeIndex].id}` : undefined
             }
           />
-          <kbd className="hidden shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-500 sm:inline dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+          <kbd className="hidden shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-600 sm:inline dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
             esc
           </kbd>
         </div>
@@ -223,7 +223,7 @@ export function CommandPaletteDialog() {
           className="max-h-[min(60vh,420px)] overflow-y-auto px-2 py-2"
         >
           {loadState === 'loading' && (
-            <p className="px-3 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
           )}
           {loadState === 'error' && (
             <p className="px-3 py-8 text-center text-sm text-rose-600 dark:text-rose-400">
@@ -231,7 +231,7 @@ export function CommandPaletteDialog() {
             </p>
           )}
           {loadState === 'ready' && filtered.length === 0 && (
-            <p className="px-3 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">No results.</p>
+            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">No results.</p>
           )}
           {loadState === 'ready' &&
             filtered.map((item, idx) => {
@@ -242,7 +242,7 @@ export function CommandPaletteDialog() {
                 <div key={item.id}>
                   {showHeader && (
                     <div
-                      className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400"
+                      className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400"
                       aria-hidden="true"
                     >
                       {SEARCH_GROUP_LABEL[item.group]}
@@ -270,7 +270,15 @@ export function CommandPaletteDialog() {
                     />
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium leading-snug">{item.title}</span>
-                      <span className="block text-xs text-slate-500 dark:text-neutral-400">{item.subtitle}</span>
+                      <span
+                        className={`block text-xs ${
+                          selected
+                            ? 'text-slate-600 dark:text-neutral-300'
+                            : 'text-slate-600 dark:text-neutral-400'
+                        }`}
+                      >
+                        {item.subtitle}
+                      </span>
                     </span>
                   </button>
                 </div>
@@ -278,7 +286,7 @@ export function CommandPaletteDialog() {
             })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-2 text-[11px] text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 px-4 py-2 text-[11px] text-slate-600 dark:border-neutral-700 dark:text-neutral-400">
           <span className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1">
               <ArrowUp className="h-3.5 w-3.5 opacity-90" aria-hidden />
