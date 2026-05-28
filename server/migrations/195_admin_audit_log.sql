@@ -5,7 +5,7 @@
 --             settings.platform_app_settings (036).
 
 CREATE TABLE IF NOT EXISTS compliance.admin_audit_log (
-  event_id      UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_id      UUID          NOT NULL DEFAULT gen_random_uuid(),
   org_id        UUID          REFERENCES tenant.organizations(id),
   event_type    TEXT          NOT NULL,
   actor_id      UUID          NOT NULL REFERENCES "user".users(id),
@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS compliance.admin_audit_log (
   before_value  JSONB,
   after_value   JSONB,
   chain_hash    TEXT,
-  "timestamp"   TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+  "timestamp"   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (event_id, "timestamp")
 ) PARTITION BY RANGE ("timestamp");
 
 -- Monthly partitions for 2026 (automated partition management: see plan 17.4)
@@ -87,6 +88,9 @@ CREATE TRIGGER audit_log_immutable
   FOR EACH ROW EXECUTE FUNCTION compliance.prevent_audit_log_modification();
 
 -- Indexes for common query patterns (FR-8: < 2 s for 90-day date-range queries)
+CREATE INDEX IF NOT EXISTS idx_admin_audit_log_event_id
+  ON compliance.admin_audit_log(event_id);
+
 CREATE INDEX IF NOT EXISTS idx_admin_audit_log_org_ts
   ON compliance.admin_audit_log(org_id, "timestamp" DESC);
 
