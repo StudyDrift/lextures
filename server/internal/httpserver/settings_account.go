@@ -11,18 +11,18 @@ import (
 )
 
 type accountProfileResponse struct {
-	Email                        string  `json:"email"`
-	DisplayName                  *string `json:"displayName"`
-	FirstName                    *string `json:"firstName"`
-	LastName                     *string `json:"lastName"`
-	AvatarURL                    *string `json:"avatarUrl"`
-	UITheme                      string  `json:"uiTheme"`
-	ShowHelpPopover              bool    `json:"showHelpPopover"`
-	Sid                          *string `json:"sid"`
-	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
-	AccountType                  string  `json:"accountType"`
-	Locale                       *string `json:"locale"`
-	Timezone                     *string `json:"timezone"`
+	Email                      string  `json:"email"`
+	DisplayName                *string `json:"displayName"`
+	FirstName                  *string `json:"firstName"`
+	LastName                   *string `json:"lastName"`
+	AvatarURL                  *string `json:"avatarUrl"`
+	UITheme                    string  `json:"uiTheme"`
+	ShowHelpPopover            bool    `json:"showHelpPopover"`
+	Locale                     string  `json:"locale"`
+	Sid                        *string `json:"sid"`
+	SessionManagementUIEnabled bool    `json:"sessionManagementUiEnabled"`
+	AccountType                string  `json:"accountType"`
+	Timezone                   *string `json:"timezone"`
 }
 
 type patchAccountBody struct {
@@ -31,7 +31,6 @@ type patchAccountBody struct {
 	AvatarURL       *string `json:"avatarUrl"`
 	UITheme         *string `json:"uiTheme"`
 	ShowHelpPopover *bool   `json:"showHelpPopover"`
-	Locale          *string `json:"locale"`
 	Timezone        *string `json:"timezone"`
 }
 
@@ -117,13 +116,20 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
 			ShowHelpPopover:            row.ShowHelpPopover,
+			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
-			Locale:                     row.Locale,
 			Timezone:                   row.Timezone,
 		})
 	}
+}
+
+func localeOrDefault(locale string) string {
+	if strings.TrimSpace(locale) == "" {
+		return "en"
+	}
+	return locale
 }
 
 func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
@@ -162,15 +168,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		var localePtr, timezonePtr *string
-		if req.Locale != nil {
-			norm, err := l10n.NormalizeLocale(*req.Locale)
-			if err != nil {
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid BCP 47 locale tag.")
-				return
-			}
-			localePtr = &norm
-		}
+		var timezonePtr *string
 		if req.Timezone != nil {
 			norm, err := l10n.NormalizeTimezone(*req.Timezone)
 			if err != nil {
@@ -179,7 +177,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			}
 			timezonePtr = &norm
 		}
-		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover, localePtr, timezonePtr)
+		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover, timezonePtr)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update account.")
 			return
@@ -200,10 +198,10 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
 			ShowHelpPopover:            row.ShowHelpPopover,
+			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
-			Locale:                     row.Locale,
 			Timezone:                   row.Timezone,
 		})
 	}

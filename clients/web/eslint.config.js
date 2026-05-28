@@ -1,4 +1,5 @@
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import i18next from 'eslint-plugin-i18next'
 
 import js from '@eslint/js'
 import globals from 'globals'
@@ -78,5 +79,17 @@ export default defineConfig([globalIgnores(['dist', 'coverage']), {
   files: ['src/context/locale-format-context.tsx'],
   rules: {
     'react-refresh/only-export-components': 'off',
+  },
+}, {
+  files: ['src/pages/login.tsx'],
+  plugins: { i18next },
+  rules: {
+    'i18next/no-literal-string': [
+      'error',
+      {
+        markupOnly: true,
+        ignoreAttribute: ['className', 'type', 'name', 'autoComplete', 'id', 'role', 'href', 'to', 'minLength', 'placeholder'],
+      },
+    ],
   },
 }])

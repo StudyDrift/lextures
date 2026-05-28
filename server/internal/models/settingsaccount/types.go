@@ -8,6 +8,7 @@ type AccountProfileResponse struct {
 	AvatarURL       *string `json:"avatarUrl"`
 	UITheme         string  `json:"uiTheme"`
 	ShowHelpPopover bool    `json:"showHelpPopover"`
+	Locale          string  `json:"locale"`
 	SID             *string `json:"sid"`
 }
 

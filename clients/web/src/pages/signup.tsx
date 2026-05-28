@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { BrandLogo } from '../components/brand-logo'
 import { OidcSignInButtons } from '../components/oidc-sign-in-buttons'
 import { getAccessToken } from '../lib/auth'
@@ -10,6 +11,7 @@ import { readApiErrorMessage } from '../lib/errors'
 import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey } from '../lib/password-strength'
 import { applyUiTheme, parseUiTheme } from '../lib/ui-theme'
 import { markPostLoginShortcutTip } from '../lib/post-login-shortcut-tip'
+import { syncUserLocale } from '../lib/sync-user-locale'
 import {
   authCardClass,
   authFieldClass,
@@ -19,6 +21,7 @@ import {
 import { PublicAuthShell } from '../components/auth/public-auth-shell'
 
 export default function Signup() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
@@ -101,14 +104,18 @@ export default function Signup() {
         setMessage(readApiErrorMessage(raw))
         return
       }
-      const data = raw as { access_token: string; user?: { uiTheme?: string | null; accountType?: string } }
+      const data = raw as {
+        access_token: string
+        user?: { uiTheme?: string | null; locale?: string | null; accountType?: string }
+      }
       applyAuthTokenResponse(data)
       applyUiTheme(parseUiTheme(data.user?.uiTheme))
+      await syncUserLocale(data.user?.locale)
       markPostLoginShortcutTip()
       navigate(pickPostAuthPath('/'), { replace: true })
     } catch {
       setStatus('error')
-      setMessage('Could not reach the server. Is the API running?')
+      setMessage(t('auth.login.serverUnreachable'))
     }
   }
 
@@ -119,10 +126,10 @@ export default function Signup() {
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
         <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
-          Create your account
+          {t('auth.signup.title')}
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
-          One account for courses, assignments, and messages. If your school uses SSO, you can sign in that way later.
+          {t('auth.signup.subtitle')}
         </p>
       </header>
 
@@ -134,7 +141,10 @@ export default function Signup() {
                 htmlFor="displayName"
                 className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
               >
-                Display name <span className="font-normal text-stone-500 dark:text-neutral-500">(optional)</span>
+                {t('auth.signup.displayName')}{' '}
+                <span className="font-normal text-stone-500 dark:text-neutral-500">
+                  {t('auth.signup.displayNameOptional')}
+                </span>
               </label>
               <input
                 id="displayName"
@@ -144,12 +154,12 @@ export default function Signup() {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 className={authFieldClass}
-                placeholder="Alex"
+                placeholder={t('auth.signup.displayNamePlaceholder')}
               />
             </div>
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200">
-                Email
+                {t('auth.signup.email')}
               </label>
               <input
                 id="email"
@@ -160,7 +170,7 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={authFieldClass}
-                placeholder="you@school.edu"
+                placeholder={t('auth.login.emailPlaceholder')}
               />
             </div>
             <div>
@@ -168,7 +178,7 @@ export default function Signup() {
                 htmlFor="password"
                 className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
               >
-                Password
+                {t('auth.signup.password')}
               </label>
               <ul
                 id="password-requirements"
@@ -224,8 +234,7 @@ export default function Signup() {
                 className="mt-1 h-4 w-4 shrink-0 rounded border-stone-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600"
               />
               <label htmlFor="registerAsParent" className="text-sm leading-snug text-stone-800 dark:text-neutral-200">
-                I am registering as a <span className="font-medium">parent or guardian</span> for read-only access when
-                my school links my account to a student.
+                {t('auth.signup.registerAsParent')}
               </label>
             </div>
 
@@ -236,14 +245,14 @@ export default function Signup() {
             )}
 
             <button type="submit" disabled={status === 'loading'} className={authPrimaryButtonClass}>
-              {status === 'loading' ? 'Creating account…' : 'Create account'}
+              {status === 'loading' ? t('auth.signup.submitting') : t('auth.signup.submit')}
             </button>
           </form>
 
           <p className="mt-6 text-center text-sm text-stone-600 dark:text-neutral-400">
-            Already have an account?{' '}
+            {t('auth.signup.alreadyHave')}{' '}
             <Link to="/login" className={authMutedLinkClass}>
-              Sign in
+              {t('auth.signup.signIn')}
             </Link>
           </p>
         </div>

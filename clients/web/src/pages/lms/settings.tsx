@@ -51,6 +51,8 @@ import { useUiDensityControls } from '../../context/ui-density-context'
 import { useLocaleFormatContext } from '../../context/locale-format-context'
 import { detectBrowserLocale, detectBrowserTimeZone, formatDateTime } from '../../lib/format'
 import { LocaleFormatSettingsPanel } from '../../components/settings/locale-format-settings-panel'
+import { LocaleSwitcher } from '../../components/settings/locale-switcher'
+import { syncUserLocale } from '../../lib/sync-user-locale'
 
 function isSystemSettingsPath(pathname: string): boolean {
   if (pathname.startsWith('/settings/ai/')) return true
@@ -220,6 +222,7 @@ export default function Settings() {
   const [avatarGenMessage, setAvatarGenMessage] = useState<string | null>(null)
   const [uiTheme, setUiTheme] = useState<UiTheme>('light')
   const [showHelpPopover, setShowHelpPopover] = useState(true)
+  const [localeTag, setLocaleTag] = useState('en')
   const [studentId, setStudentId] = useState<string | null>(null)
   const [sessionManagementUiEnabled, setSessionManagementUiEnabled] = useState(false)
   const [sessions, setSessions] = useState<ActiveSessionRow[]>([])
@@ -398,11 +401,20 @@ export default function Settings() {
       if (data.showHelpPopover !== undefined) {
         setShowHelpPopover(data.showHelpPopover)
       }
-      const loc = data.locale?.trim() || detectBrowserLocale()
+      if (data.locale?.trim()) {
+        const loc = data.locale.trim()
+        setLocaleTag(loc)
+        setDisplayLocale(loc)
+        void syncUserLocale(loc)
+      } else {
+        setDisplayLocale(detectBrowserLocale())
+      }
       const tz = data.timezone?.trim() || detectBrowserTimeZone()
-      setDisplayLocale(loc)
       setDisplayTimezone(tz)
-      setLocaleProfile({ locale: data.locale ?? null, timezone: data.timezone ?? null })
+      setLocaleProfile({
+        locale: data.locale?.trim() ?? null,
+        timezone: data.timezone ?? null,
+      })
     } catch {
       setAccountError('Could not load account settings.')
     } finally {
@@ -581,31 +593,6 @@ export default function Settings() {
     }
   }
 
-  async function persistDisplayLocale(next: string) {
-    const prev = displayLocale
-    setDisplayLocale(next)
-    setAccountError(null)
-    try {
-      const res = await authorizedFetch('/api/v1/settings/account', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locale: next }),
-      })
-      const raw: unknown = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setDisplayLocale(prev)
-        setAccountError(readApiErrorMessage(raw))
-        return
-      }
-      const data = raw as AccountProfile
-      setLocaleProfile({ locale: data.locale ?? null, timezone: data.timezone ?? displayTimezone })
-      window.dispatchEvent(new Event('studydrift-profile-updated'))
-    } catch {
-      setDisplayLocale(prev)
-      setAccountError('Could not save locale.')
-    }
-  }
-
   async function persistDisplayTimezone(next: string) {
     const prev = displayTimezone
     setDisplayTimezone(next)
@@ -623,7 +610,10 @@ export default function Settings() {
         return
       }
       const data = raw as AccountProfile
-      setLocaleProfile({ locale: data.locale ?? displayLocale, timezone: data.timezone ?? null })
+      setLocaleProfile({
+        locale: data.locale?.trim() ?? displayLocale,
+        timezone: data.timezone ?? null,
+      })
       window.dispatchEvent(new Event('studydrift-profile-updated'))
     } catch {
       setDisplayTimezone(prev)
@@ -1145,10 +1135,17 @@ export default function Settings() {
                   </button>
                 </div>
 
+                <LocaleSwitcher
+                  initialLocale={localeTag}
+                  onLocaleChange={(tag) => {
+                    setLocaleTag(tag)
+                    setDisplayLocale(tag)
+                    setLocaleProfile({ locale: tag, timezone: displayTimezone })
+                  }}
+                />
+
                 <LocaleFormatSettingsPanel
-                  locale={displayLocale}
                   timezone={displayTimezone}
-                  onLocaleChange={(v) => void persistDisplayLocale(v)}
                   onTimezoneChange={(v) => void persistDisplayTimezone(v)}
                   disabled={accountSaving}
                 />

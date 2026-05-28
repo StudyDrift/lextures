@@ -1,0 +1,21 @@
+import { beforeAll, describe, expect, it } from 'vitest'
+import { i18n } from '../index'
+
+describe('ICU plural forms (plan 11.1 AC-3)', () => {
+  beforeAll(async () => {
+    await i18n.loadLanguages(['en', 'es', 'fr'])
+  })
+
+  it.each([
+    ['en', 1, '1 assignment'],
+    ['en', 2, '2 assignments'],
+    ['es', 1, '1 tarea'],
+    ['es', 2, '2 tareas'],
+    ['fr', 1, '1 devoir'],
+    ['fr', 2, '2 devoirs'],
+  ] as const)('renders %s count=%i as "%s"', async (lng, count, expected) => {
+    await i18n.changeLanguage(lng)
+    const text = i18n.t('common.assignmentCount', { count, ns: 'common' })
+    expect(text).toBe(expected)
+  })
+})

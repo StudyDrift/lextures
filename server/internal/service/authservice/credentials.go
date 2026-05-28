@@ -61,6 +61,7 @@ type UserPublic struct {
 	AvatarURL       *string `json:"avatarUrl"`
 	UITheme         string  `json:"uiTheme"`
 	ShowHelpPopover bool    `json:"showHelpPopover"`
+	Locale          string  `json:"locale"`
 	Sid             *string `json:"sid"`
 	AccountType     string  `json:"accountType"`
 }
@@ -441,6 +442,13 @@ func responseFromRow(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSign
 	return res, nil
 }
 
+func localeOrDefault(locale string) string {
+	if strings.TrimSpace(locale) == "" {
+		return "en"
+	}
+	return locale
+}
+
 func userPublicFromRow(row *user.Row) UserPublic {
 	at := row.AccountType
 	if at == "" {
@@ -455,6 +463,7 @@ func userPublicFromRow(row *user.Row) UserPublic {
 		AvatarURL:       row.AvatarURL,
 		UITheme:         row.UITheme,
 		ShowHelpPopover: row.ShowHelpPopover,
+		Locale:          localeOrDefault(row.Locale),
 		Sid:             row.Sid,
 		AccountType:     at,
 	}
