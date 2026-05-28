@@ -88,3 +88,13 @@ output "course_files_irsa_role_arn" {
   description = "IAM role ARN for Kubernetes service account lextures:api (S3 access)."
   value       = module.irsa_course_files.iam_role_arn
 }
+
+output "backup_bucket_name" {
+  description = "Encrypted S3 bucket for WAL-G and object-storage backups (plan 10.15)."
+  value       = aws_s3_bucket.backups.id
+}
+
+output "backup_writer_policy_arn" {
+  description = "IAM policy for backup cron / WAL-G (write-only to backup bucket)."
+  value       = aws_iam_policy.backup_writer.arn
+}
