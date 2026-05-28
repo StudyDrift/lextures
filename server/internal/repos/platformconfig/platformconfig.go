@@ -69,6 +69,7 @@ type Row struct {
 	CCPAModuleEnabled          *bool
 	StatePrivacyEnabled        *bool
 	IsoIsmsEnabled             *bool
+	AdminAuditLogEnabled       *bool
 	DataResidencyEnabled       *bool
 
 	MFAEnabled     *bool
@@ -139,6 +140,7 @@ type Write struct {
 	CCPAModuleEnabled          *bool
 	StatePrivacyEnabled        *bool
 	IsoIsmsEnabled             *bool
+	AdminAuditLogEnabled       *bool
 	DataResidencyEnabled       *bool
 
 	MFAEnabled     *bool
@@ -207,6 +209,7 @@ SELECT
 	ccpa_module_enabled,
 	state_privacy_enabled,
 	iso_isms_enabled,
+	admin_audit_log_enabled,
 	data_residency_enabled,
 	mfa_enabled,
 	mfa_enforcement,
@@ -270,6 +273,7 @@ WHERE id = 1
 		&r.CCPAModuleEnabled,
 		&r.StatePrivacyEnabled,
 		&r.IsoIsmsEnabled,
+		&r.AdminAuditLogEnabled,
 		&r.DataResidencyEnabled,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
@@ -373,6 +377,7 @@ INSERT INTO settings.platform_app_settings (
 	ccpa_module_enabled,
 	state_privacy_enabled,
 	iso_isms_enabled,
+	admin_audit_log_enabled,
 	data_residency_enabled,
 	mfa_enabled,
 	mfa_enforcement,
@@ -386,7 +391,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -441,6 +446,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ccpa_module_enabled = COALESCE(EXCLUDED.ccpa_module_enabled, settings.platform_app_settings.ccpa_module_enabled),
 	state_privacy_enabled = COALESCE(EXCLUDED.state_privacy_enabled, settings.platform_app_settings.state_privacy_enabled),
 	iso_isms_enabled = COALESCE(EXCLUDED.iso_isms_enabled, settings.platform_app_settings.iso_isms_enabled),
+	admin_audit_log_enabled = COALESCE(EXCLUDED.admin_audit_log_enabled, settings.platform_app_settings.admin_audit_log_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
@@ -502,6 +508,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.CCPAModuleEnabled,
 		w.StatePrivacyEnabled,
 		w.IsoIsmsEnabled,
+		w.AdminAuditLogEnabled,
 		w.DataResidencyEnabled,
 		w.MFAEnabled,
 		w.MFAEnforcement,

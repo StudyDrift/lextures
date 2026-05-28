@@ -57,5 +57,6 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.CCPAModuleEnabled = mergeBool(db.CCPAModuleEnabled, out.CCPAModuleEnabled)
 	out.StatePrivacyEnabled = mergeBool(db.StatePrivacyEnabled, out.StatePrivacyEnabled)
 	out.IsoIsmsEnabled = mergeBool(db.IsoIsmsEnabled, out.IsoIsmsEnabled)
+	out.AdminAuditLogEnabled = mergeBool(db.AdminAuditLogEnabled, out.AdminAuditLogEnabled)
 	out.DataResidencyEnabled = mergeBool(db.DataResidencyEnabled, out.DataResidencyEnabled)
 }

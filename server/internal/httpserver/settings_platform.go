@@ -89,6 +89,7 @@ type platformSettingsJSON struct {
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled             bool `json:"isoIsmsEnabled"`
+	AdminAuditLogEnabled       bool `json:"adminAuditLogEnabled"`
 	DataResidencyEnabled       bool `json:"dataResidencyEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
@@ -210,6 +211,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
+			AdminAuditLogEnabled:        merged.AdminAuditLogEnabled,
 			DataResidencyEnabled:        merged.DataResidencyEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
@@ -304,6 +306,7 @@ type putPlatformBody struct {
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled             *bool `json:"isoIsmsEnabled"`
+	AdminAuditLogEnabled       *bool `json:"adminAuditLogEnabled"`
 	DataResidencyEnabled       *bool `json:"dataResidencyEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
@@ -559,6 +562,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
 		setBool("coppaworkflowenabled", body.CoppaWorkflowEnabled, func(v bool) { wr.CoppaWorkflowEnabled = &v })
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
+		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
@@ -636,6 +640,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
+			AdminAuditLogEnabled:        merged.AdminAuditLogEnabled,
 			DataResidencyEnabled:        merged.DataResidencyEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
