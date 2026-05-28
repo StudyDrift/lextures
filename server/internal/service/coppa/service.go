@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	appcrypto "github.com/lextures/lextures/server/internal/crypto"
 )
 
 // ConsentStatus mirrors the coppa_consent_status CHECK constraint.
@@ -31,10 +32,10 @@ const (
 type ConsentMethod string
 
 const (
-	ConsentMethodEmailSigned        ConsentMethod = "email_signed"
+	ConsentMethodEmailSigned         ConsentMethod = "email_signed"
 	ConsentMethodSchoolAuthorization ConsentMethod = "school_authorization"
-	ConsentMethodUpload             ConsentMethod = "upload"
-	ConsentMethodDirect             ConsentMethod = "direct"
+	ConsentMethodUpload              ConsentMethod = "upload"
+	ConsentMethodDirect              ConsentMethod = "direct"
 )
 
 // ConsentToken is returned when a new signed-link consent is initiated.
@@ -47,16 +48,16 @@ type ConsentToken struct {
 
 // ConsentRecord represents a row in compliance.coppa_consents.
 type ConsentRecord struct {
-	ID                 uuid.UUID
-	OrgID              uuid.UUID
-	StudentID          uuid.UUID
-	ParentEmail        string
-	ConsentMethod      ConsentMethod
-	ConsentedAt        *time.Time
-	RevokedAt          *time.Time
-	PriorRecordID      *uuid.UUID
-	AIFeaturesEnabled  bool
-	CreatedAt          time.Time
+	ID                uuid.UUID
+	OrgID             uuid.UUID
+	StudentID         uuid.UUID
+	ParentEmail       string
+	ConsentMethod     ConsentMethod
+	ConsentedAt       *time.Time
+	RevokedAt         *time.Time
+	PriorRecordID     *uuid.UUID
+	AIFeaturesEnabled bool
+	CreatedAt         time.Time
 }
 
 // UserConsentStatus is the COPPA status of a user account.
@@ -69,9 +70,9 @@ type UserConsentStatus struct {
 
 // BulkImportRow is one row from a district CSV bulk import.
 type BulkImportRow struct {
-	StudentID    uuid.UUID
-	ParentEmail  string
-	ConsentDate  time.Time
+	StudentID     uuid.UUID
+	ParentEmail   string
+	ConsentDate   time.Time
 	ConsentMethod ConsentMethod
 }
 
@@ -83,12 +84,12 @@ type BulkImportResult struct {
 }
 
 var (
-	ErrNotFound          = errors.New("coppa: record not found")
-	ErrAlreadyApproved   = errors.New("coppa: consent already approved")
-	ErrTokenExpired      = errors.New("coppa: consent token expired")
-	ErrTokenInvalid      = errors.New("coppa: invalid consent token")
-	ErrNotMinor          = errors.New("coppa: user is not a coppa_minor")
-	ErrAlreadyRevoked    = errors.New("coppa: consent already revoked")
+	ErrNotFound        = errors.New("coppa: record not found")
+	ErrAlreadyApproved = errors.New("coppa: consent already approved")
+	ErrTokenExpired    = errors.New("coppa: consent token expired")
+	ErrTokenInvalid    = errors.New("coppa: invalid consent token")
+	ErrNotMinor        = errors.New("coppa: user is not a coppa_minor")
+	ErrAlreadyRevoked  = errors.New("coppa: consent already revoked")
 )
 
 // consentTokenTTL is the validity window for email consent links (16 CFR §312.7 security).
@@ -111,14 +112,22 @@ func FlagMinorAccount(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID,
 	if isMinor {
 		status = ConsentStatusPending
 	}
-	_, err := pool.Exec(ctx, `
+	encParentEmail, err := appcrypto.EncryptString(strings.ToLower(strings.TrimSpace(parentEmail)))
+	if err != nil {
+		return err
+	}
+	encDOB, err := appcrypto.EncryptString(dob.Format("2006-01-02"))
+	if err != nil {
+		return err
+	}
+	_, err = pool.Exec(ctx, `
 UPDATE "user".users
    SET coppa_minor          = $2,
        coppa_consent_status = $3,
        parent_email         = $4,
        date_of_birth        = $5
  WHERE id = $1`,
-		userID, isMinor, string(status), strings.ToLower(strings.TrimSpace(parentEmail)), dob.Format("2006-01-02"),
+		userID, isMinor, string(status), encParentEmail, encDOB,
 	)
 	return err
 }
@@ -140,7 +149,11 @@ SELECT coppa_minor, coppa_consent_status, parent_email
 		return nil, err
 	}
 	s.ConsentStatus = ConsentStatus(status)
-	s.ParentEmail = parentEmail
+	decryptedParentEmail, err := appcrypto.MaybeDecryptString(parentEmail)
+	if err != nil {
+		return nil, err
+	}
+	s.ParentEmail = decryptedParentEmail
 
 	// Pull AI opt-in from the active consent record if approved.
 	if s.ConsentStatus == ConsentStatusApproved {
