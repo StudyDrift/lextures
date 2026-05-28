@@ -254,6 +254,8 @@ type Config struct {
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.
 	AiDisclosureEnabled bool
+	// SecurityDisclosureModuleEnabled gates responsible-disclosure report triage APIs (plan 10.16).
+	SecurityDisclosureModuleEnabled bool
 	// BackupModuleEnabled gates backup/restore ops: backup status and restore drill APIs (plan 10.15).
 	BackupModuleEnabled bool
 
@@ -405,9 +407,10 @@ func Load() Config {
 		SOC2ModuleEnabled:    boolEnv("SOC2_MODULE_ENABLED") || boolEnv("FEATURE_SOC2_MODULE"),
 		IsoIsmsEnabled:       boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
 		AdminAuditLogEnabled: true, // plan 10.11 default on; disable via platform settings
-		DataResidencyEnabled: boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
-		AiDisclosureEnabled:  !boolEnv("AI_DISCLOSURE_DISABLED"),
-		BackupModuleEnabled:  boolEnv("BACKUP_MODULE_ENABLED") || boolEnv("FEATURE_BACKUP_MODULE"),
+		DataResidencyEnabled:            boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
+		AiDisclosureEnabled:             !boolEnv("AI_DISCLOSURE_DISABLED"),
+		SecurityDisclosureModuleEnabled: boolEnv("SECURITY_DISCLOSURE_MODULE_ENABLED") || boolEnv("FEATURE_SECURITY_DISCLOSURE"),
+		BackupModuleEnabled:             boolEnv("BACKUP_MODULE_ENABLED") || boolEnv("FEATURE_BACKUP_MODULE"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
