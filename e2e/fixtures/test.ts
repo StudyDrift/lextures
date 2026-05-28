@@ -82,6 +82,7 @@ export const test = base.extend<TestFixtures>({
         email: studentEmail,
         password: 'E2eTestPass1!',
         displayName: 'E2E Student',
+        accountType: 'parent',
       })
 
       const course = await apiCreateCourse(instructorToken, { title: 'E2E Test Course' })

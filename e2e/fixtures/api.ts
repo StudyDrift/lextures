@@ -9,6 +9,8 @@ export interface UserCredentials {
   email: string
   password: string
   displayName?: string
+  /** `parent` signup maps to the Student app role (plain signups default to Teacher). */
+  accountType?: 'parent'
 }
 
 export interface AuthTokens {
@@ -23,6 +25,7 @@ export async function apiSignup(creds: UserCredentials): Promise<AuthTokens> {
       email: creds.email,
       password: creds.password,
       display_name: creds.displayName,
+      ...(creds.accountType ? { account_type: creds.accountType } : {}),
     }),
   })
   if (res.status === 409) {
