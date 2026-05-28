@@ -36,6 +36,17 @@ import { formatAbsolute } from '../../lib/format-datetime'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { LmsPage } from './lms-page'
+import { ReadingLevelBadge } from '../../components/reading-level/reading-level-badge'
+import { SimplifiedContentBanner } from '../../components/reading-level/simplified-content-banner'
+import { SimplifyDiffDialog } from '../../components/reading-level/simplify-diff-dialog'
+import { useSimplifiedContentView } from '../../components/reading-level/use-simplified-content-view'
+import { useSimplifyDialog } from '../../components/reading-level/use-simplify-dialog'
+import {
+  fetchItemReadingLevel,
+  isReadingLevelEnabled,
+  simplifyItemContent,
+  type ReadingLevelInfo,
+} from '../../lib/reading-level-api'
 
 function newLocalId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -60,6 +71,14 @@ export default function CourseModuleContentPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [lastLocalAuthoringSave, setLastLocalAuthoringSave] = useState<string | null>(null)
+  const [readingLevel, setReadingLevel] = useState<ReadingLevelInfo | null>(null)
+  const [pagePayload, setPagePayload] = useState<{
+    simplifiedForReadingLevel?: boolean
+    originalMarkdown?: string | null
+    readingLevelTargetFkgl?: number | null
+  }>({})
+  const simplifyDlg = useSimplifyDialog()
+  const readingLevelOn = isReadingLevelEnabled()
   const [mdPreset, setMdPreset] = useState<string>('classic')
   const [mdCustom, setMdCustom] = useState<MarkdownThemeCustom | null>(null)
   const lmsUiDark = useLmsDarkMode()
@@ -150,6 +169,16 @@ export default function CourseModuleContentPage() {
       setTitle(data.title)
       setMarkdown(data.markdown)
       setUpdatedAt(data.updatedAt)
+      setPagePayload({
+        simplifiedForReadingLevel: data.simplifiedForReadingLevel,
+        originalMarkdown: data.originalMarkdown,
+        readingLevelTargetFkgl: data.readingLevelTargetFkgl,
+      })
+      if (readingLevelOn && courseCode && itemId) {
+        void fetchItemReadingLevel(courseCode, itemId)
+          .then(setReadingLevel)
+          .catch(() => setReadingLevel(null))
+      }
       setMdPreset(courseRow.markdownThemePreset)
       setMdCustom(courseRow.markdownThemeCustom)
       recordLastVisitedModuleItem(courseCode, {
@@ -174,7 +203,7 @@ export default function CourseModuleContentPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, itemId, loadMarkups])
+  }, [courseCode, itemId, loadMarkups, readingLevelOn])
 
   useEffect(() => {
     void load()
@@ -276,6 +305,11 @@ export default function CourseModuleContentPage() {
       })
       setMarkdown(data.markdown)
       setUpdatedAt(data.updatedAt)
+      if (readingLevelOn && courseCode && itemId) {
+        void fetchItemReadingLevel(courseCode, itemId)
+          .then(setReadingLevel)
+          .catch(() => setReadingLevel(null))
+      }
       setLastLocalAuthoringSave(new Date().toISOString())
       setEditing(false)
       setDraft([])
@@ -290,6 +324,16 @@ export default function CourseModuleContentPage() {
     }
   }
 
+  const originalForStudent =
+    pagePayload.originalMarkdown && pagePayload.simplifiedForReadingLevel
+      ? pagePayload.originalMarkdown
+      : markdown
+  const simplifiedView = useSimplifiedContentView(
+    pagePayload.simplifiedForReadingLevel ? markdown : undefined,
+    originalForStudent,
+  )
+  const displayMarkdown = simplifiedView.displayMarkdown
+
   if (!courseCode || !itemId) {
     return (
       <LmsPage title="Content page" description="">
@@ -301,6 +345,26 @@ export default function CourseModuleContentPage() {
   const description = updatedAt == null ? '' : `Updated ${formatAbsolute(updatedAt)}`
 
   const backTo = `/courses/${encodeURIComponent(courseCode)}/modules`
+
+  async function runSimplify(targetGrade: number) {
+    if (!courseCode || !itemId) return
+    const body = sectionsToMarkdown(draft)
+    simplifyDlg.setOpen(true)
+    simplifyDlg.setTargetFkgl(targetGrade)
+    simplifyDlg.setOriginal(body)
+    simplifyDlg.setSimplified('')
+    simplifyDlg.setError(null)
+    simplifyDlg.setLoading(true)
+    try {
+      const res = await simplifyItemContent(courseCode, itemId, targetGrade, body)
+      simplifyDlg.setSimplified(res.simplified)
+      simplifyDlg.setComputedFkgl(res.computedFkgl)
+    } catch (e) {
+      simplifyDlg.setError(e instanceof Error ? e.message : 'Simplification failed')
+    } finally {
+      simplifyDlg.setLoading(false)
+    }
+  }
 
   return (
     <LmsPage
@@ -319,6 +383,32 @@ export default function CourseModuleContentPage() {
             >
               Cancel
             </button>
+            {readingLevelOn && readingLevel?.sufficient && readingLevel.fkgl != null ? (
+              <ReadingLevelBadge
+                fkgl={readingLevel.fkgl}
+                sufficient
+                aboveThreshold={readingLevel.aboveThreshold}
+              />
+            ) : null}
+            {readingLevelOn ? (
+              <select
+                className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                defaultValue=""
+                aria-label="Simplify to grade level"
+                onChange={(e) => {
+                  const v = e.target.value
+                  e.target.value = ''
+                  if (v) void runSimplify(Number(v))
+                }}
+              >
+                <option value="">Simplify to…</option>
+                {['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map((g, i) => (
+                  <option key={g} value={String(i === 0 ? 0 : i)}>
+                    Grade {g}
+                  </option>
+                ))}
+              </select>
+            ) : null}
             <button
               type="button"
               onClick={() => void save()}
@@ -405,10 +495,21 @@ export default function CourseModuleContentPage() {
           </p>
         )}
 
+        {!loading && !loadError && !editing && simplifiedView.hasSimplified && (
+          <SimplifiedContentBanner
+            targetFkgl={pagePayload.readingLevelTargetFkgl ?? undefined}
+            originalMarkdown={originalForStudent}
+            simplifiedMarkdown={markdown}
+            showingOriginal={simplifiedView.showingOriginal}
+            onShowOriginal={simplifiedView.showOriginal}
+            onShowSimplified={simplifiedView.showSimplified}
+          />
+        )}
+
         {!loading && !loadError && !editing && (
           <div className="mt-8 space-y-6 text-[1.0625rem] leading-relaxed">
             <ContentPageReader
-              markdown={markdown}
+              markdown={displayMarkdown}
               theme={mdTheme}
               markups={markups}
               onMarkupsChange={loadMarkups}
@@ -485,6 +586,21 @@ export default function CourseModuleContentPage() {
           </div>
         </div>
       )}
+
+      <SimplifyDiffDialog
+        open={simplifyDlg.open}
+        original={simplifyDlg.original}
+        simplified={simplifyDlg.simplified}
+        targetFkgl={simplifyDlg.targetFkgl}
+        computedFkgl={simplifyDlg.computedFkgl}
+        loading={simplifyDlg.loading}
+        error={simplifyDlg.error}
+        onClose={() => simplifyDlg.setOpen(false)}
+        onAccept={() => {
+          setDraft(markdownToSectionsForEditor(simplifyDlg.simplified, newLocalId))
+          simplifyDlg.setOpen(false)
+        }}
+      />
     </LmsPage>
   )
 }

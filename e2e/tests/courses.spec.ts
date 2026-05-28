@@ -24,7 +24,7 @@ test.describe('Courses list', () => {
     authedPage: page,
   }) => {
     await page.goto('/courses')
-    await expect(page.getByRole('heading', { name: /courses/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /courses/i }).first()).toBeVisible()
     // The courses list shows a "+ New course" button/link in the header (and also in the empty state).
     // Use first() to avoid strict-mode failure when both are visible simultaneously.
     await expect(

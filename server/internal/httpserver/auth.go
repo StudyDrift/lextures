@@ -30,6 +30,7 @@ type signupBody struct {
 	DisplayNameCamel *string `json:"displayName"`
 	AccountTypeSnake *string `json:"account_type"`
 	AccountTypeCamel *string `json:"accountType"`
+	Timezone         *string `json:"timezone"`
 }
 
 type forgotBody struct {
@@ -95,6 +96,7 @@ func (d Deps) handleSignup() http.HandlerFunc {
 			Password:    b.Password,
 			DisplayName: dn,
 			AccountType: at,
+			Timezone:    b.Timezone,
 			Client:      authservice.ClientMetaFromRequest(r),
 		})
 		if err != nil {

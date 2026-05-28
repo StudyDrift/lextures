@@ -19,6 +19,7 @@ type platformFeaturesJSON struct {
 	InstructorInsightsEnabled  bool `json:"instructorInsightsEnabled"`
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
+	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
 	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
@@ -39,6 +40,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		InstructorInsightsEnabled:  cfg.InstructorInsightsEnabled,
 		XAPIEmissionEnabled:        cfg.XAPIEmissionEnabled,
 		EquationEditorEnabled:      cfg.EquationEditorEnabled,
+		ReadingLevelEnabled:        cfg.ReadingLevelEnabled,
 		StorageQuotasEnabled:       cfg.StorageQuotasEnabled,
 		AvScanningEnabled:          cfg.AvScanningEnabled,
 		VirtualClassroomEnabled:    cfg.VirtualClassroomEnabled,

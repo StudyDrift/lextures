@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/relativeschedule"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulecontent"
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 )
@@ -145,6 +146,7 @@ func (d Deps) handleGetModuleContentPage() http.HandlerFunc {
 			}
 		}
 		out := buildModuleContentPageGetResponse(itemID, row, shift)
+		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeContentPage, viewer, canEdit, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}
@@ -244,7 +246,12 @@ func (d Deps) handlePatchModuleContentPage() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		if d.readingLevelEnabled() {
+			_ = rlrepo.ScoreAndPersist(r.Context(), d.Pool, itemID, rlrepo.TypeContentPage, req.Markdown)
+			row, _ = coursemodulecontent.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
+		}
 		out := buildModuleContentPageGetResponse(itemID, row, nil)
+		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeContentPage, viewer, true, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

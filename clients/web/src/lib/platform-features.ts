@@ -11,6 +11,7 @@ export type PlatformFeaturesSnapshot = {
   outcomesReportEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
+  readingLevelEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
@@ -30,6 +31,7 @@ const defaults: PlatformFeaturesSnapshot = {
   outcomesReportEnabled: false,
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
+  readingLevelEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
@@ -77,6 +79,10 @@ export function oerLibraryEnabled(): boolean {
 
 export function equationEditorFeatureEnabled(): boolean {
   return loaded && snapshot.equationEditorEnabled
+}
+
+export function readingLevelFeatureEnabled(): boolean {
+  return loaded && snapshot.readingLevelEnabled
 }
 
 export function engagementTrackingFeatureEnabled(): boolean {

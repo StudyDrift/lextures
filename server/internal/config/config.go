@@ -224,6 +224,8 @@ type Config struct {
 
 	// EquationEditorEnabled gates the visual equation editor in the web client (plan 8.11).
 	EquationEditorEnabled bool
+	// ReadingLevelEnabled gates Flesch-Kincaid scoring and AI content simplification (plan 11.6).
+	ReadingLevelEnabled bool
 
 	// ReportExportEnabled gates PDF export and scheduled report delivery (plan 9.8).
 	ReportExportEnabled bool

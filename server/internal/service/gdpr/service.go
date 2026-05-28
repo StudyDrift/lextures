@@ -4,6 +4,7 @@ package gdpr
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -240,15 +241,21 @@ func compileUserArchive(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUI
 		DisplayName string  `json:"displayName"`
 		FirstName   *string `json:"firstName,omitempty"`
 		LastName    *string `json:"lastName,omitempty"`
+		Timezone    *string `json:"timezone,omitempty"`
 		CreatedAt   string  `json:"createdAt"`
 	}
 	var p profileRow
+	var tz sql.NullString
 	err := pool.QueryRow(ctx, `
-SELECT email, display_name, first_name, last_name, created_at
+SELECT email, display_name, first_name, last_name, timezone, created_at
   FROM "user".users WHERE id = $1
-`, userID).Scan(&p.Email, &p.DisplayName, &p.FirstName, &p.LastName, &p.CreatedAt)
+`, userID).Scan(&p.Email, &p.DisplayName, &p.FirstName, &p.LastName, &tz, &p.CreatedAt)
 	if err != nil {
 		return "", err
+	}
+	if tz.Valid && tz.String != "" {
+		s := tz.String
+		p.Timezone = &s
 	}
 
 	consents, err := repo.ListConsents(ctx, pool, userID)

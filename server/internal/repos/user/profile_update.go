@@ -26,13 +26,12 @@ SET
 	ui_theme = COALESCE($5, ui_theme),
 	show_help_popover = COALESCE($6, show_help_popover)
 WHERE id = $1
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, sid,
-  login_blocked, deactivated_at, account_type`
+RETURNING ` + userRowReturning
 	var r Row
-	var dn, fn, ln, av, sid sql.NullString
+	var dn, fn, ln, av, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -45,12 +44,16 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 	r.FirstName = strPtr(fn)
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
+	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
 	if r.Locale == "" {
 		r.Locale = DefaultLocale
 	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
+	}
+	if r.Locale == "" {
+		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
