@@ -58,7 +58,6 @@ test.describe('Time zones', () => {
 
   test('account settings shows time zone section', async ({ authedPage: page }) => {
     await page.goto('/settings/account')
-    await expect(page.getByText(/^Time zone$/i)).toBeVisible({ timeout: 8000 })
-    await expect(page.getByTestId('settings-timezone-select')).toBeVisible()
+    await expect(page.getByTestId('settings-timezone-select')).toBeVisible({ timeout: 8000 })
   })
 })

@@ -25,6 +25,9 @@ export async function apiSignup(creds: UserCredentials): Promise<AuthTokens> {
       display_name: creds.displayName,
     }),
   })
+  if (res.status === 409) {
+    return apiLogin(creds)
+  }
   if (!res.ok) {
     const body = await res.text()
     throw new Error(`Signup failed (${res.status}): ${body}`)
