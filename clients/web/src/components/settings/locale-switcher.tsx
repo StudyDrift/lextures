@@ -7,7 +7,8 @@ import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { applyDocumentLocale } from '../../i18n/apply-document-locale'
 import { i18n } from '../../i18n'
 import { writeStoredLocaleTag } from '../../i18n/locale-storage'
-import { LOCALE_OPTIONS, resolveResourceLanguage, type SupportedLocale } from '../../i18n/supported-locales'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { LOCALE_OPTIONS, resolveResourceLanguage } from '../../i18n/supported-locales'
 
 type Props = {
   initialLocale?: string | null
@@ -16,6 +17,7 @@ type Props = {
 
 export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
   const { t } = useTranslation('common')
+  const { rtlEnabled } = usePlatformFeatures()
   const selectId = useId()
   const [localeTag, setLocaleTag] = useState(() => initialLocale?.trim() || i18n.language || 'en')
   const [saving, setSaving] = useState(false)
@@ -27,12 +29,15 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
     }
   }, [initialLocale])
 
-  const applyLocale = useCallback(async (tag: string) => {
-    const resourceLang = resolveResourceLanguage(tag)
-    writeStoredLocaleTag(tag)
-    applyDocumentLocale(tag)
-    await i18n.changeLanguage(resourceLang)
-  }, [])
+  const applyLocale = useCallback(
+    async (tag: string) => {
+      const resourceLang = resolveResourceLanguage(tag)
+      writeStoredLocaleTag(tag)
+      applyDocumentLocale(tag, rtlEnabled)
+      await i18n.changeLanguage(resourceLang)
+    },
+    [rtlEnabled],
+  )
 
   const onSelect = useCallback(
     async (tag: string) => {
@@ -72,8 +77,6 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
     [applyLocale, localeTag, onLocaleChange, t],
   )
 
-  const currentResource = resolveResourceLanguage(localeTag) as SupportedLocale
-
   return (
     <div className="mt-8">
       <div className="flex items-center gap-2">
@@ -81,6 +84,12 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
         <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">{t('common.locale.label')}</p>
       </div>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">{t('common.locale.description')}</p>
+      {!rtlEnabled ? (
+        <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">
+          RTL layout mirroring is not enabled on this platform; Arabic and Hebrew use left-to-right chrome until
+          a platform admin enables RTL support.
+        </p>
+      ) : null}
       <label htmlFor={selectId} className="sr-only">
         {t('common.locale.label')}
       </label>
@@ -88,7 +97,7 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
         id={selectId}
         data-testid="locale-switcher"
         className="mt-3 w-full max-w-xs rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-        value={currentResource}
+        value={localeTag}
         disabled={saving}
         onChange={(e) => void onSelect(e.target.value)}
       >

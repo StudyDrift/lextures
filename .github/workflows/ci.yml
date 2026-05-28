@@ -211,6 +211,7 @@ jobs:
       E2E_HEALTH_POLL_SECS: "1"
       E2E_HEALTH_MAX_ATTEMPTS: "45"
       E2E_ADMIN_EMAIL: admin@e2e.test
+      RTL_ENABLED: "true"
       CI: "true"
     services:
       postgres:

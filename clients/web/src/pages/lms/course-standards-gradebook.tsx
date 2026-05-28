@@ -108,7 +108,7 @@ export default function CourseStandardsGradebook() {
             <input
               type="file"
               accept=".csv,text/csv"
-              className="text-xs file:mr-2 file:rounded file:border-0 file:bg-indigo-100 file:px-2 file:py-1 file:text-sm dark:file:bg-indigo-900/80"
+              className="text-xs file:me-2 file:rounded file:border-0 file:bg-indigo-100 file:px-2 file:py-1 file:text-sm dark:file:bg-indigo-900/80"
               onChange={(e) => void onImportFile(e.target.files?.[0] ?? null)}
             />
           </label>
@@ -122,10 +122,10 @@ export default function CourseStandardsGradebook() {
       {loading && <GradebookLoadingSkeleton />}
       {data && canView && (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-600 dark:bg-neutral-900">
-          <table className="w-full min-w-[32rem] border-collapse text-left text-sm">
+          <table className="w-full min-w-[32rem] border-collapse text-start text-sm">
             <thead>
               <tr className="border-b border-slate-200 dark:border-neutral-600">
-                <th className="sticky left-0 z-10 bg-white px-2 py-2 font-medium dark:bg-neutral-900">
+                <th className="sticky start-0 z-10 bg-white px-2 py-2 font-medium dark:bg-neutral-900">
                   Student
                 </th>
                 {data.standards.map((s) => (
@@ -137,7 +137,7 @@ export default function CourseStandardsGradebook() {
                     {s.externalId || s.id.slice(0, 6)}
                   </th>
                 ))}
-                <th className="px-2 py-2 text-right text-xs font-medium text-slate-500">Transcript</th>
+                <th className="px-2 py-2 text-end text-xs font-medium text-slate-500">Transcript</th>
               </tr>
             </thead>
             <tbody>
@@ -146,7 +146,7 @@ export default function CourseStandardsGradebook() {
                   key={stu.userId}
                   className="border-b border-slate-100 dark:border-neutral-800"
                 >
-                  <td className="sticky left-0 z-10 bg-white px-2 py-1 text-slate-900 dark:bg-neutral-900 dark:text-neutral-100">
+                  <td className="sticky start-0 z-10 bg-white px-2 py-1 text-slate-900 dark:bg-neutral-900 dark:text-neutral-100">
                     {stu.displayLabel}
                   </td>
                   {data.standards.map((s) => (
@@ -157,7 +157,7 @@ export default function CourseStandardsGradebook() {
                       standardCode={s.externalId || s.id}
                     />
                   ))}
-                  <td className="px-2 text-right">
+                  <td className="px-2 text-end">
                     <button
                       type="button"
                       className="text-xs text-indigo-600 underline dark:text-indigo-300"

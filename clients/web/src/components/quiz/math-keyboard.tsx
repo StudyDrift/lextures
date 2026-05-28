@@ -100,7 +100,7 @@ export function MathKeyboard({ onInsert, disabled, className }: MathKeyboardProp
         aria-expanded={open}
         aria-controls={`${baseId}-panel`}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 dark:text-neutral-200"
+        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-start text-xs font-medium text-slate-700 dark:text-neutral-200"
       >
         <span>Math symbols</span>
         {open ? <ChevronUp className="h-4 w-4 shrink-0" aria-hidden /> : <ChevronDown className="h-4 w-4 shrink-0" aria-hidden />}

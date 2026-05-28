@@ -95,13 +95,13 @@ export default function SecurityPage() {
               Scope
             </h2>
             <h3 className="mt-3 font-medium text-slate-800 dark:text-neutral-200">In scope</h3>
-            <ul className="mt-1 list-disc pl-5 space-y-1">
+            <ul className="mt-1 list-disc ps-5 space-y-1">
               {IN_SCOPE_ITEMS.map((item) => (
                 <li key={item}>{item}</li>
               ))}
             </ul>
             <h3 className="mt-4 font-medium text-slate-800 dark:text-neutral-200">Out of scope</h3>
-            <ul className="mt-1 list-disc pl-5 space-y-1">
+            <ul className="mt-1 list-disc ps-5 space-y-1">
               {OUT_OF_SCOPE_ITEMS.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -127,14 +127,14 @@ export default function SecurityPage() {
               <table className="min-w-full border-collapse text-sm" aria-label="Patch SLA by severity">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-neutral-700">
-                    <th scope="col" className="py-2 pr-4 text-left font-semibold">Severity</th>
-                    <th scope="col" className="py-2 text-left font-semibold">Target</th>
+                    <th scope="col" className="py-2 pe-4 text-start font-semibold">Severity</th>
+                    <th scope="col" className="py-2 text-start font-semibold">Target</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                   {PATCH_SLA_ROWS.map((row) => (
                     <tr key={row.severity}>
-                      <td className="py-2 pr-4 font-medium text-slate-900 dark:text-neutral-100">{row.severity}</td>
+                      <td className="py-2 pe-4 font-medium text-slate-900 dark:text-neutral-100">{row.severity}</td>
                       <td className="py-2">{row.days}</td>
                     </tr>
                   ))}

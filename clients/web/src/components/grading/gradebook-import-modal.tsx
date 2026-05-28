@@ -133,7 +133,7 @@ export function GradebookImportModal(props: {
             id={`${baseId}-file`}
             type="file"
             accept=".csv,text/csv"
-            className="mt-1 block w-full text-sm text-slate-700 file:mr-2 file:rounded file:border-0 file:bg-slate-100 file:px-2 file:py-1.5 file:text-slate-800 dark:text-neutral-300 dark:file:bg-neutral-800 dark:file:text-neutral-100"
+            className="mt-1 block w-full text-sm text-slate-700 file:me-2 file:rounded file:border-0 file:bg-slate-100 file:px-2 file:py-1.5 file:text-slate-800 dark:text-neutral-300 dark:file:bg-neutral-800 dark:file:text-neutral-100"
             disabled={validating || confirming}
             onChange={(ev) => {
               const f = ev.target.files?.[0] ?? null
@@ -180,7 +180,7 @@ export function GradebookImportModal(props: {
                   role="grid"
                   aria-label="Import preview: score changes by student and assignment"
                 >
-                  <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-700">
+                  <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-700">
                     <thead className="bg-slate-50 dark:bg-neutral-800/60">
                       <tr>
                         <th scope="col" className="px-2 py-2 font-medium">

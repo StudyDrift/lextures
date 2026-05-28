@@ -132,7 +132,7 @@ export function NotificationPreferencesPanel() {
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
         <table className="min-w-full text-sm" data-testid="notification-preferences-table">
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+          <thead className="bg-slate-50 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
             <tr>
               <th className="px-4 py-3" scope="col">
                 Event

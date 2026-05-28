@@ -812,7 +812,7 @@ export default function CourseEnrollments() {
 
       {mainTab === 'roster' && enrollments && enrollments.length > 0 && (
         <div className="mt-8 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="w-full min-w-[16rem] text-left text-sm">
+          <table className="w-full min-w-[16rem] text-start text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3">Name</th>
@@ -820,7 +820,7 @@ export default function CourseEnrollments() {
                 {sectionsEnabled ? <th className="px-4 py-3">Section</th> : null}
                 <th className="px-4 py-3">Last access</th>
                 {canUpdateEnrollments && (
-                  <th className="min-w-[4.5rem] px-2 py-3 text-right font-normal" aria-label="Actions" />
+                  <th className="min-w-[4.5rem] px-2 py-3 text-end font-normal" aria-label="Actions" />
                 )}
               </tr>
             </thead>
@@ -873,7 +873,7 @@ export default function CourseEnrollments() {
                       {formatTimeAgoFromIso(e.lastCourseAccessAt, relativeNowMs)}
                     </td>
                     {canUpdateEnrollments && (
-                      <td className="px-2 py-3 text-right align-middle">
+                      <td className="px-2 py-3 text-end align-middle">
                         {showEdit || showRemove || showGroupAssign || showSectionTransfer ? (
                           <div className="inline-flex items-center justify-end gap-0.5">
                             {showSectionTransfer ? (

@@ -84,7 +84,17 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
     : [StarterKit]
 
   const editor = useEditor(
-    { editable: !readOnly, extensions },
+    {
+      editable: !readOnly,
+      extensions,
+      editorProps: {
+        attributes: {
+          dir: 'auto',
+          class:
+            'prose prose-slate dark:prose-invert mx-auto min-h-full max-w-3xl px-8 py-6 focus:outline-none',
+        },
+      },
+    },
     [session],
   )
 
@@ -114,10 +124,7 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
         )}
       </div>
       <div className="flex-1 overflow-y-auto">
-        <EditorContent
-          editor={editor}
-          className="prose prose-slate dark:prose-invert mx-auto min-h-full max-w-3xl px-8 py-6 focus:outline-none"
-        />
+        <EditorContent editor={editor} className="w-full" />
       </div>
     </div>
   )

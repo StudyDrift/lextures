@@ -120,9 +120,10 @@ type AccountProfile = {
   avatarUrl?: string | null
   uiTheme?: string | null
   showHelpPopover?: boolean
+  locale?: string | null
+  rtlEnabled?: boolean
   sid?: string | null
   sessionManagementUiEnabled?: boolean
-  locale?: string | null
   timezone?: string | null
 }
 
@@ -400,6 +401,13 @@ export default function Settings() {
       setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
       if (data.showHelpPopover !== undefined) {
         setShowHelpPopover(data.showHelpPopover)
+      }
+      if (data.rtlEnabled !== undefined) {
+        try {
+          window.localStorage.setItem('lextures.rtlEnabled', data.rtlEnabled ? '1' : '0')
+        } catch {
+          /* ignore */
+        }
       }
       if (data.locale?.trim()) {
         const loc = data.locale.trim()
@@ -1440,7 +1448,7 @@ export default function Settings() {
                     {!sessionsLoading && sessions.length > 0 && (
                       <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
                         <table
-                          className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-600"
+                          className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600"
                           aria-label="Active sessions"
                         >
                           <thead className="bg-slate-50 dark:bg-neutral-800/80">

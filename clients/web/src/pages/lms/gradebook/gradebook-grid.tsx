@@ -172,7 +172,7 @@ function HeaderSortMenuPortal({
 
 function menuButtonClass(active: boolean) {
   return [
-    'inline-flex w-full max-w-full items-center justify-between gap-1 rounded-md px-1 py-0.5 text-left font-[inherit] transition',
+    'inline-flex w-full max-w-full items-center justify-between gap-1 rounded-md px-1 py-0.5 text-start font-[inherit] transition',
     active
       ? 'bg-indigo-100 text-indigo-950 ring-1 ring-indigo-300 dark:bg-indigo-950/80 dark:text-indigo-100 dark:ring-indigo-600'
       : 'text-inherit hover:bg-slate-200/80 dark:hover:bg-neutral-700/80',
@@ -180,7 +180,7 @@ function menuButtonClass(active: boolean) {
 }
 
 function menuItemClass() {
-  return 'block w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  return 'block w-full px-3 py-2 text-start text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
 }
 
 function normalizeFilter(s: string): string {
@@ -1190,7 +1190,7 @@ export function GradebookGrid({
             aria-label="Grades by student and assignment"
             aria-rowcount={rowCount + 2}
             aria-colcount={2 + colCount}
-            className="w-full min-w-max border-collapse text-left"
+            className="w-full min-w-max border-collapse text-start"
           >
             <thead>
               <tr
@@ -1199,7 +1199,7 @@ export function GradebookGrid({
               >
                 <th
                   scope="col"
-                  className={`sticky top-0 left-0 z-30 ${stickyNameWidth} ${pad} border-b border-r border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky top-0 start-0 z-30 ${stickyNameWidth} ${pad} border-b border-e border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
                 >
                   <button
                     type="button"
@@ -1223,7 +1223,7 @@ export function GradebookGrid({
                 </th>
                 <th
                   scope="col"
-                  className={`sticky top-0 ${stickyFinalLeft} z-25 min-w-[5.5rem] ${pad} border-b border-r border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky top-0 ${stickyFinalLeft} z-25 min-w-[5.5rem] ${pad} border-b border-e border-slate-200 bg-slate-50 align-bottom dark:border-neutral-700 dark:bg-neutral-800`}
                 >
                   <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                     Final
@@ -1251,7 +1251,7 @@ export function GradebookGrid({
                           openHeaderMenu({ kind: 'column', columnId: col.id }, e.currentTarget)
                         }}
                       >
-                        <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 text-left">
+                        <span className="flex min-w-0 flex-1 flex-col items-start gap-0.5 text-start">
                           <span className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{col.title}</span>
                           <span className="text-[0.65rem] font-normal text-slate-500 dark:text-neutral-400">
                             {col.maxPoints != null ? `Out of ${col.maxPoints}` : 'Max points not set'}
@@ -1284,7 +1284,7 @@ export function GradebookGrid({
               <tr className="border-b border-slate-200 bg-slate-100 text-slate-800 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
                 <th
                   scope="row"
-                  className={`sticky left-0 z-[28] ${stickyNameWidth} ${pad} border-b border-r border-slate-200 bg-slate-100 align-top text-left font-medium shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky start-0 z-[28] ${stickyNameWidth} ${pad} border-b border-e border-slate-200 bg-slate-100 align-top text-start font-medium shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
                   style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                 >
                   <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
@@ -1293,7 +1293,7 @@ export function GradebookGrid({
                 </th>
                 <th
                   scope="col"
-                  className={`sticky ${stickyFinalLeft} z-[27] min-w-[5.5rem] ${pad} border-b border-r border-slate-200 bg-slate-100 text-right align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
+                  className={`sticky ${stickyFinalLeft} z-[27] min-w-[5.5rem] ${pad} border-b border-e border-slate-200 bg-slate-100 text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
                   style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                 >
                   <div className="flex flex-col items-end gap-0.5 text-[11px] tabular-nums leading-snug">
@@ -1313,7 +1313,7 @@ export function GradebookGrid({
                     <th
                       key={`stats-${col.id}`}
                       scope="col"
-                      className={`sticky z-[26] ${pad} ${assignmentColMin} border-b border-slate-200 bg-slate-100 text-right align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
+                      className={`sticky z-[26] ${pad} ${assignmentColMin} border-b border-slate-200 bg-slate-100 text-end align-top font-normal shadow-[inset_0_-1px_0_rgba(15,23,42,0.06)] dark:border-neutral-700 dark:bg-neutral-800`}
                       style={{ top: `${headerStickyPx > 0 ? headerStickyPx : 72}px` }}
                     >
                       <div className="flex flex-col items-end gap-0.5 text-[11px] tabular-nums leading-snug">
@@ -1344,7 +1344,7 @@ export function GradebookGrid({
                   <th
                     scope="row"
                     title={student.name}
-                    className={`sticky left-0 z-10 ${stickyNameWidth} ${pad} truncate border-r border-slate-200 bg-slate-100 text-left font-medium text-slate-950 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`}
+                    className={`sticky start-0 z-10 ${stickyNameWidth} ${pad} truncate border-e border-slate-200 bg-slate-100 text-start font-medium text-slate-950 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`}
                   >
                     {studentProgressFeatureEnabled() &&
                     courseCode &&
@@ -1363,7 +1363,7 @@ export function GradebookGrid({
                     role="gridcell"
                     tabIndex={-1}
                     aria-label={`Final course percentage for ${student.name}`}
-                    className={`sticky ${stickyFinalLeft} z-[9] ${pad} min-w-[5.5rem] border-r border-slate-200 bg-slate-50 text-right tabular-nums text-slate-800 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200`}
+                    className={`sticky ${stickyFinalLeft} z-[9] ${pad} min-w-[5.5rem] border-e border-slate-200 bg-slate-50 text-end tabular-nums text-slate-800 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200`}
                   >
                     {formatFinalPercent(finalPercentByStudentId[student.id] ?? null)}
                   </td>
@@ -1453,7 +1453,7 @@ export function GradebookGrid({
                         aria-selected={
                           inRect || showEditor || (isFocusCell && !editing && selectionRect == null)
                         }
-                        className={`relative ${pad} min-w-[5.5rem] border-l border-slate-100 text-right tabular-nums outline-none transition dark:border-neutral-700/80 ${cellSurface} ${fillExtSurface} ${droppedSurface}`}
+                        className={`relative ${pad} min-w-[5.5rem] border-s border-slate-100 text-end tabular-nums outline-none transition dark:border-neutral-700/80 ${cellSurface} ${fillExtSurface} ${droppedSurface}`}
                         title={
                           cellDropped
                             ? 'This score is excluded from the course total by the group’s drop or replace policy.'
@@ -1516,7 +1516,7 @@ export function GradebookGrid({
                             <select
                               ref={editSelectRef}
                               aria-label={`Grade for ${student.name}, ${col.title}`}
-                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-right text-sm text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
+                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
                               onKeyDown={handleInputKeyDown}
@@ -1536,7 +1536,7 @@ export function GradebookGrid({
                               inputMode="decimal"
                               autoComplete="off"
                               aria-label={`Grade for ${student.name}, ${col.title}`}
-                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-right text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
+                              className="m-0 w-full min-w-0 border-0 bg-transparent p-0 text-end text-sm tabular-nums text-slate-950 shadow-none outline-none ring-0 focus:ring-0 dark:text-neutral-100"
                               value={draft}
                               onChange={(e) => setDraft(e.target.value)}
                               onPaste={(e) => {

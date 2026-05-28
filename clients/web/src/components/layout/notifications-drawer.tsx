@@ -74,7 +74,7 @@ export function NotificationsDrawerTrigger({
     >
       <Bell className="h-5 w-5" aria-hidden />
       {badge > 0 ? (
-        <span className="absolute right-1.5 top-1.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-semibold text-white dark:bg-indigo-500">
+        <span className="absolute end-1.5 top-1.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-semibold text-white dark:bg-indigo-500">
           {badge > 99 ? '99+' : badge}
         </span>
       ) : null}
@@ -212,7 +212,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
           transitionProperty: 'transform',
           transitionDuration: reducedMotion ? '0.01ms' : `${NOTIF_DRAWER_MS}ms`,
         }}
-        className={`relative flex h-dvh w-[min(100%,22rem)] flex-col border-l border-slate-200 bg-white shadow-2xl shadow-slate-900/20 will-change-transform dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50 sm:w-[26rem] ${
+        className={`relative flex h-dvh w-[min(100%,22rem)] flex-col border-s border-slate-200 bg-white shadow-2xl shadow-slate-900/20 will-change-transform dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/50 sm:w-[26rem] ${
           entered ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -285,7 +285,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                     <Link
                       to={n.actionUrl || '/'}
                       onClick={onClose}
-                      className={`flex gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
+                      className={`flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
                     >
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
                         <BellRing className="h-5 w-5" aria-hidden />
@@ -332,7 +332,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                   <Link
                     to={row.href}
                     onClick={onClose}
-                    className="flex gap-3 rounded-xl px-2 py-2.5 text-left transition hover:bg-slate-50 dark:hover:bg-neutral-800"
+                    className="flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800"
                   >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
                       <Icon className="h-5 w-5" aria-hidden />
@@ -359,7 +359,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
 
         {loading && items.length > 0 ? (
           <div
-            className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-white dark:bg-neutral-100 dark:text-neutral-900"
+            className="pointer-events-none absolute bottom-3 start-1/2 -translate-x-1/2 rounded-full bg-slate-900/80 px-3 py-1 text-xs font-medium text-white dark:bg-neutral-100 dark:text-neutral-900"
             role="status"
           >
             Updating…

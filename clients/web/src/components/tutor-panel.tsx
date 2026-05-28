@@ -185,7 +185,7 @@ export function TutorPanel({ courseCode }: TutorPanelProps) {
         type="button"
         aria-label="Open AI Tutor"
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-24 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+        className="fixed bottom-6 end-24 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
       >
         <Bot className="h-7 w-7" />
       </button>
@@ -196,7 +196,7 @@ export function TutorPanel({ courseCode }: TutorPanelProps) {
           role="dialog"
           aria-label="AI Tutor"
           aria-modal="true"
-          className="fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-neutral-900 sm:w-96"
+          className="fixed inset-y-0 end-0 z-50 flex w-full flex-col bg-white shadow-2xl dark:bg-neutral-900 sm:w-96"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-800">
@@ -282,7 +282,7 @@ export function TutorPanel({ courseCode }: TutorPanelProps) {
               <div className="mb-3 flex justify-start">
                 <div className="max-w-[85%] rounded-2xl bg-slate-100 px-4 py-2.5 text-sm leading-relaxed text-slate-900 dark:bg-neutral-800 dark:text-neutral-100">
                   {streamedText}
-                  <span className="ml-0.5 inline-block h-3 w-0.5 animate-pulse bg-current" />
+                  <span className="ms-0.5 inline-block h-3 w-0.5 animate-pulse bg-current" />
                 </div>
               </div>
             )}

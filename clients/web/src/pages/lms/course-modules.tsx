@@ -600,7 +600,7 @@ function ModuleItemRowActions({
             id={menuId}
             role="menu"
             aria-label="Module item actions"
-            className="absolute right-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+            className="absolute end-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
           >
             <button
               type="button"
@@ -609,7 +609,7 @@ function ModuleItemRowActions({
                 onEditTitle()
                 setMenuOpen(false)
               }}
-              className="flex w-full px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="flex w-full px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
             >
               Edit title
             </button>
@@ -620,7 +620,7 @@ function ModuleItemRowActions({
                 onArchive()
                 setMenuOpen(false)
               }}
-              className="flex w-full border-t border-slate-100 px-3 py-2.5 text-left text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
+              className="flex w-full border-t border-slate-100 px-3 py-2.5 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
               Delete
             </button>
@@ -706,7 +706,7 @@ function SortableChildRow({
         </div>
         {showRowChrome ? (
           <div
-            className={`flex shrink-0 justify-end sm:items-center sm:self-center sm:pl-0 ${!disabled ? 'pl-[3.25rem]' : 'pl-0'}`}
+            className={`flex shrink-0 justify-end sm:items-center sm:self-center sm:ps-0 ${!disabled ? 'ps-[3.25rem]' : 'ps-0'}`}
           >
             <ModuleItemRowActions
               child={child}
@@ -803,7 +803,7 @@ function ModuleCardBody({
                 onClick={onToggleCollapsed}
                 aria-expanded={!collapsed}
                 aria-controls={moduleItemsRegionId}
-                className="w-full min-w-0 rounded-xl px-1 py-0.5 text-left transition hover:bg-slate-200/40 dark:hover:bg-neutral-700/50"
+                className="w-full min-w-0 rounded-xl px-1 py-0.5 text-start transition hover:bg-slate-200/40 dark:hover:bg-neutral-700/50"
               >
                 <span className="flex items-start gap-2">
                   <span
@@ -982,7 +982,7 @@ function ModuleAdaptivePathPanel({ courseCode, moduleId }: { courseCode: string;
   }
 
   return (
-    <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/40 px-3 py-2 text-left dark:border-indigo-900/40 dark:bg-indigo-950/30">
+    <div className="mt-3 rounded-xl border border-indigo-100 bg-indigo-50/40 px-3 py-2 text-start dark:border-indigo-900/40 dark:bg-indigo-950/30">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}

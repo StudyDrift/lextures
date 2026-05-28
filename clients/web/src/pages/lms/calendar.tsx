@@ -280,7 +280,7 @@ export default function Calendar() {
                   Hide all
                 </button>
               </div>
-              <ul className="mt-4 max-h-64 space-y-2 overflow-y-auto overscroll-contain pr-0.5 lg:max-h-[min(22rem,calc(100vh-12rem))]">
+              <ul className="mt-4 max-h-64 space-y-2 overflow-y-auto overscroll-contain pe-0.5 lg:max-h-[min(22rem,calc(100vh-12rem))]">
                 {eligibleCourses.map((c) => {
                   const enabled = !disabledCourseIds.has(c.id)
                   const label = c.title.trim() || c.courseCode

@@ -189,7 +189,7 @@ export function ScimSettingsPanel() {
         )}
         {instOk && tokens.length > 0 && (
           <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-start text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
                 <tr>
                   <th className="px-3 py-2">Label</th>
@@ -204,7 +204,7 @@ export function ScimSettingsPanel() {
                     <td className="px-3 py-2">{t.label || '—'}</td>
                     <td className="px-3 py-2 font-mono text-xs">{formatDateTime(t.createdAt)}</td>
                     <td className="px-3 py-2">{t.revokedAt ? 'Revoked' : 'Active'}</td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="px-3 py-2 text-end">
                       {!t.revokedAt && (
                         <button
                           type="button"
@@ -230,7 +230,7 @@ export function ScimSettingsPanel() {
         )}
         {instOk && events.length > 0 && (
           <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-start text-sm">
               <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
                 <tr>
                   <th className="px-3 py-2">Time</th>

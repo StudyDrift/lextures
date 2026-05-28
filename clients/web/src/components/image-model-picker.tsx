@@ -129,7 +129,7 @@ export function ImageModelPicker({
         aria-expanded={open}
         aria-controls={open ? `${id}-listbox` : undefined}
         onClick={() => void toggle()}
-        className="flex w-full items-start justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-start justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-start text-sm outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60"
       >
         <span className="min-w-0 flex-1">
           {unknownId ? (
@@ -225,7 +225,7 @@ export function ImageModelPicker({
                       onChange(m.id)
                       setOpen(false)
                     }}
-                    className={`w-full px-3 py-2.5 text-left transition hover:bg-slate-50 ${
+                    className={`w-full px-3 py-2.5 text-start transition hover:bg-slate-50 ${
                       isSel ? 'bg-indigo-50/80' : ''
                     }`}
                   >

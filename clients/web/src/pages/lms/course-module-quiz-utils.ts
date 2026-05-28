@@ -197,8 +197,8 @@ export function defaultTypeConfigFor(questionType: QuestionType): Record<string,
   if (questionType === 'matching') {
     return {
       pairs: [
-        { leftId: 'left-1', rightId: 'right-1', left: 'Item A', right: 'Match A' },
-        { leftId: 'left-2', rightId: 'right-2', left: 'Item B', right: 'Match B' },
+        { leftId: 'start-1', rightId: 'end-1', left: 'Item A', right: 'Match A' },
+        { leftId: 'start-2', rightId: 'end-2', left: 'Item B', right: 'Match B' },
       ],
     }
   }

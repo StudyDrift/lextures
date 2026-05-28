@@ -123,7 +123,7 @@ export default function AccessibilityConformancePage() {
             <p>
               If you encounter an accessibility barrier on Lextures, please contact us:
             </p>
-            <ul className="list-disc pl-6 space-y-1">
+            <ul className="list-disc ps-6 space-y-1">
               <li>
                 Email:{' '}
                 <a href="mailto:accessibility@lextures.com" className="text-indigo-700 underline dark:text-indigo-300">
@@ -176,16 +176,16 @@ function CriteriaTable({ criteria }: { criteria: typeof WCAG_CRITERIA }) {
         </caption>
         <thead className="bg-slate-50 dark:bg-neutral-900">
           <tr className="border-b border-slate-200 dark:border-neutral-700">
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">
               SC
             </th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">
               Title
             </th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">
               Conformance
             </th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">
               Notes
             </th>
           </tr>

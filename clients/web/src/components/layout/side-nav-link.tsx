@@ -35,7 +35,7 @@ export function SideNavLink({ icon, children, badge, className, ...props }: Side
             {badge}
           </span>
         )}
-        {sideNavCollapsed && badge && <span className="absolute right-2 top-2">{badge}</span>}
+        {sideNavCollapsed && badge && <span className="absolute end-2 top-2">{badge}</span>}
       </NavLink>
     </SideNavTooltip>
   )

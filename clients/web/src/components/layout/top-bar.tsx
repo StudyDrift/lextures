@@ -97,7 +97,7 @@ function UserMenu() {
         aria-controls={open ? menuId : undefined}
         aria-label="User menu"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-700"
+        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1.5 ps-1.5 pe-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-700"
       >
         {profile?.avatarUrl ? (
           <img
@@ -122,7 +122,7 @@ function UserMenu() {
           id={menuId}
           role="menu"
           aria-label="Account"
-          className="absolute right-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
         >
           <div className="border-b border-slate-100 px-3 py-2 dark:border-neutral-700">
             <p className="truncate text-sm font-medium text-slate-800 dark:text-neutral-100">{name}</p>
@@ -134,7 +134,7 @@ function UserMenu() {
             to="/settings/account"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
             <User className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Profile
@@ -143,7 +143,7 @@ function UserMenu() {
             type="button"
             role="menuitem"
             onClick={signOut}
-            className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-start text-sm text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
             <LogOut className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Sign out
@@ -194,7 +194,7 @@ function CourseEnrollmentViewDropdown() {
   const label = courseViewMode === 'student' ? 'Student' : 'Teacher'
 
   return (
-    <div ref={rootRef} className="relative shrink-0 text-left">
+    <div ref={rootRef} className="relative shrink-0 text-start">
       <button
         type="button"
         aria-haspopup="menu"
@@ -217,7 +217,7 @@ function CourseEnrollmentViewDropdown() {
           id={menuId}
           role="menu"
           aria-label="View course as"
-          className="absolute right-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
         >
           <button
             type="button"
@@ -226,7 +226,7 @@ function CourseEnrollmentViewDropdown() {
               setCourseViewAs(courseCode, 'teacher')
               setOpen(false)
             }}
-            className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
+            className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
               courseViewMode === 'teacher' ? 'bg-indigo-50 dark:bg-neutral-800' : ''
             }`}
           >
@@ -242,7 +242,7 @@ function CourseEnrollmentViewDropdown() {
               setCourseViewAs(courseCode, 'student')
               setOpen(false)
             }}
-            className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
+            className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
               courseViewMode === 'student' ? 'bg-indigo-50 dark:bg-neutral-800' : ''
             }`}
           >

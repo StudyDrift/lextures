@@ -168,28 +168,28 @@ function CourseImageNodeView(props: NodeViewProps) {
               type="button"
               aria-label="Resize image from corner"
               title="Drag to resize"
-              className={`${handleClass} -left-1.5 -top-1.5 cursor-nwse-resize`}
+              className={`${handleClass} -start-1.5 -top-1.5 cursor-nwse-resize`}
               onPointerDown={beginCornerScale}
             />
             <button
               type="button"
               aria-label="Resize image from corner"
               title="Drag to resize"
-              className={`${handleClass} -right-1.5 -top-1.5 cursor-nesw-resize`}
+              className={`${handleClass} -end-1.5 -top-1.5 cursor-nesw-resize`}
               onPointerDown={beginCornerScale}
             />
             <button
               type="button"
               aria-label="Resize image from corner"
               title="Drag to resize"
-              className={`${handleClass} -bottom-1.5 -left-1.5 cursor-nesw-resize`}
+              className={`${handleClass} -bottom-1.5 -start-1.5 cursor-nesw-resize`}
               onPointerDown={beginCornerScale}
             />
             <button
               type="button"
               aria-label="Resize image from corner"
               title="Drag to resize"
-              className={`${handleClass} -bottom-1.5 -right-1.5 cursor-nwse-resize`}
+              className={`${handleClass} -bottom-1.5 -end-1.5 cursor-nwse-resize`}
               onPointerDown={beginCornerScale}
             />
           </>

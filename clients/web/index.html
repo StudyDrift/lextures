@@ -37,6 +37,17 @@
       } catch {
         document.documentElement.dataset.lmsDensity = 'comfortable'
       }
+      try {
+        const rtlLocales = new Set(['ar', 'he', 'fa', 'ur', 'ps'])
+        const localeRaw = (localStorage.getItem('lextures.locale') || 'en').trim().toLowerCase()
+        const primary = localeRaw.split(/[-_]/)[0] || 'en'
+        const rtlOn = localStorage.getItem('lextures.rtlEnabled') === '1'
+        document.documentElement.lang = primary
+        document.documentElement.dir = rtlOn && rtlLocales.has(primary) ? 'rtl' : 'ltr'
+      } catch {
+        document.documentElement.lang = 'en'
+        document.documentElement.dir = 'ltr'
+      }
     })()
   </script>
   <title>Lextures</title>

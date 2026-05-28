@@ -144,7 +144,7 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
       className="fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none items-stretch justify-end bg-transparent p-0 backdrop:bg-slate-900/40"
       onClose={() => onClose()}
     >
-      <div className="ml-auto flex h-full w-full max-w-lg flex-col border-l border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
+      <div className="ml-auto flex h-full w-full max-w-lg flex-col border-s border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
           <h2 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
             Find open resources
@@ -189,14 +189,14 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
               Search keywords
             </label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+              <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
               <input
                 id="oer-search-q"
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search by keyword…"
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-3 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 ps-9 pe-3 text-sm dark:border-neutral-600 dark:bg-neutral-800"
               />
             </div>
             <label className="text-xs font-medium text-slate-600 dark:text-neutral-400" htmlFor="oer-license-filter">

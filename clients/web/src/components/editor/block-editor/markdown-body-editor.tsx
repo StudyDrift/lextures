@@ -29,9 +29,9 @@ const editorShellClass = [
   'dark:[&_h3]:text-neutral-100',
   '[&_h4]:mt-4 [&_h4]:text-base [&_h4]:font-semibold [&_h4]:text-slate-900',
   'dark:[&_h4]:text-neutral-100',
-  '[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:text-slate-700',
+  '[&_ul]:mt-3 [&_ul]:list-disc [&_ul]:ps-5 [&_ul]:text-slate-700',
   'dark:[&_ul]:text-neutral-300',
-  '[&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:text-slate-700',
+  '[&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:ps-5 [&_ol]:text-slate-700',
   'dark:[&_ol]:text-neutral-300',
   '[&_li]:marker:text-slate-500',
   'dark:[&_li]:marker:text-neutral-500',
@@ -42,7 +42,7 @@ const editorShellClass = [
   '[&_code]:rounded [&_code]:bg-slate-100 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[13px] [&_code]:text-slate-900',
   '[&_code]:dark:bg-neutral-800 [&_code]:dark:text-neutral-100',
   '[&_pre]:mt-3 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:bg-slate-900 [&_pre]:p-3 [&_pre]:font-mono [&_pre]:text-[13px] [&_pre]:text-slate-100',
-  '[&_blockquote]:mt-3 [&_blockquote]:border-l-4 [&_blockquote]:border-slate-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-slate-600',
+  '[&_blockquote]:mt-3 [&_blockquote]:border-s-4 [&_blockquote]:border-slate-300 [&_blockquote]:ps-4 [&_blockquote]:italic [&_blockquote]:text-slate-600',
   '[&_blockquote]:dark:border-neutral-600 [&_blockquote]:dark:text-neutral-400',
   '[&_figure]:my-3',
   '[&_.katex]:text-inherit',
@@ -362,6 +362,7 @@ export function MarkdownBodyEditor({
         attributes: {
           class: editorShellClass,
           'aria-label': placeholder ?? 'Markdown content',
+          dir: 'auto',
         },
         ...editorPasteDropProps,
       },
@@ -710,7 +711,7 @@ export function MarkdownBodyEditor({
                     role="option"
                     id={`${listId}-opt-${idx}`}
                     aria-selected={idx === activeIndex}
-                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm transition ${
+                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition ${
                       idx === activeIndex
                         ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50'
                         : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'

@@ -454,7 +454,7 @@ export function CourseItemPromptEditor({
                 role="option"
                 id={`${listId}-opt-${idx}`}
                 aria-selected={idx === activeIndex}
-                className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm transition ${
+                className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition ${
                   idx === activeIndex ? 'bg-indigo-50 text-indigo-950' : 'text-slate-800 hover:bg-slate-50'
                 }`}
                 onMouseDown={(e) => {

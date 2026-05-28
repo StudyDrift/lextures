@@ -14,7 +14,7 @@ export function SidebarSection({ title, defaultOpen = true, children }: SidebarS
     <div className="border-b border-slate-200 pb-3 last:border-0 dark:border-neutral-700">
       <button
         type="button"
-        className="flex w-full items-center justify-between gap-2 py-2 text-left text-[13px] font-semibold text-slate-800 dark:text-neutral-100"
+        className="flex w-full items-center justify-between gap-2 py-2 text-start text-[13px] font-semibold text-slate-800 dark:text-neutral-100"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
       >

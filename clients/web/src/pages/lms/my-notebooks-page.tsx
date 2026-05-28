@@ -221,7 +221,7 @@ export default function MyNotebooksPage() {
             </label>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
                 aria-hidden
               />
               <input
@@ -231,7 +231,7 @@ export default function MyNotebooksPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search my notes…"
                 autoComplete="off"
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500/50"
+                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 ps-10 pe-3 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition placeholder:text-slate-400 focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500/50"
               />
             </div>
           </div>
@@ -241,7 +241,7 @@ export default function MyNotebooksPage() {
               type="button"
               onClick={() => setAskCardOpen(true)}
               aria-expanded={false}
-              className="flex w-full items-start gap-3 rounded-2xl border border-indigo-200/90 bg-gradient-to-b from-indigo-50/80 to-white p-4 text-left shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-indigo-500/25 dark:from-indigo-950/40 dark:to-neutral-950 dark:hover:border-indigo-400/40 sm:p-5"
+              className="flex w-full items-start gap-3 rounded-2xl border border-indigo-200/90 bg-gradient-to-b from-indigo-50/80 to-white p-4 text-start shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-indigo-500/25 dark:from-indigo-950/40 dark:to-neutral-950 dark:hover:border-indigo-400/40 sm:p-5"
             >
               <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
                 <Sparkles className="h-4 w-4" aria-hidden />
@@ -278,7 +278,7 @@ export default function MyNotebooksPage() {
                       type="button"
                       onClick={() => setAskCardOpen(false)}
                       aria-label="Close ask panel"
-                      className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                      className="-me-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
                     >
                       <X className="h-4 w-4" aria-hidden />
                     </button>

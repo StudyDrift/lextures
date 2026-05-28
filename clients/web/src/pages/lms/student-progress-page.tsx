@@ -87,18 +87,18 @@ function QuizScoreChart({
         Quiz scores by attempt date
       </figcaption>
       <table className="mt-3 w-full text-sm">
-        <caption className="text-left text-xs font-medium text-slate-600 dark:text-neutral-400">
+        <caption className="text-start text-xs font-medium text-slate-600 dark:text-neutral-400">
           Quiz score data (text alternative)
         </caption>
         <thead>
           <tr className="border-b border-slate-200 dark:border-neutral-700">
-            <th scope="col" className="py-1 pr-3 text-left font-medium">
+            <th scope="col" className="py-1 pe-3 text-start font-medium">
               Quiz
             </th>
-            <th scope="col" className="py-1 pr-3 text-left font-medium">
+            <th scope="col" className="py-1 pe-3 text-start font-medium">
               Date
             </th>
-            <th scope="col" className="py-1 text-right font-medium">
+            <th scope="col" className="py-1 text-end font-medium">
               Score %
             </th>
           </tr>
@@ -106,9 +106,9 @@ function QuizScoreChart({
         <tbody>
           {quizzes.map((q) => (
             <tr key={q.attemptId} className="border-b border-slate-100 dark:border-neutral-800">
-              <td className="py-1 pr-3">{q.title}</td>
-              <td className="py-1 pr-3">{formatAbsolute(new Date(q.submittedAt))}</td>
-              <td className="py-1 text-right tabular-nums">
+              <td className="py-1 pe-3">{q.title}</td>
+              <td className="py-1 pe-3">{formatAbsolute(new Date(q.submittedAt))}</td>
+              <td className="py-1 text-end tabular-nums">
                 {q.scorePercent != null ? `${Math.round(q.scorePercent * 10) / 10}%` : '—'}
               </td>
             </tr>
@@ -429,17 +429,17 @@ export default function StudentProgressPage() {
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-slate-200 text-left dark:border-neutral-700">
-                        <th scope="col" className="py-2 pr-4 font-medium">
+                      <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+                        <th scope="col" className="py-2 pe-4 font-medium">
                           Item
                         </th>
-                        <th scope="col" className="py-2 pr-4 font-medium">
+                        <th scope="col" className="py-2 pe-4 font-medium">
                           Due
                         </th>
-                        <th scope="col" className="py-2 pr-4 font-medium">
+                        <th scope="col" className="py-2 pe-4 font-medium">
                           Submitted
                         </th>
-                        <th scope="col" className="py-2 pr-4 font-medium">
+                        <th scope="col" className="py-2 pe-4 font-medium">
                           Grade
                         </th>
                         <th scope="col" className="py-2 font-medium">
@@ -450,14 +450,14 @@ export default function StudentProgressPage() {
                     <tbody>
                       {data.assignments.map((a) => (
                         <tr key={a.itemId} className="border-b border-slate-100 dark:border-neutral-800">
-                          <td className="py-2 pr-4">{a.title}</td>
-                          <td className="py-2 pr-4">
+                          <td className="py-2 pe-4">{a.title}</td>
+                          <td className="py-2 pe-4">
                             {a.dueAt ? formatAbsolute(new Date(a.dueAt)) : '—'}
                           </td>
-                          <td className="py-2 pr-4">
+                          <td className="py-2 pe-4">
                             {a.submittedAt ? formatAbsolute(new Date(a.submittedAt)) : '—'}
                           </td>
-                          <td className="py-2 pr-4 tabular-nums">{a.grade}</td>
+                          <td className="py-2 pe-4 tabular-nums">{a.grade}</td>
                           <td className="py-2">
                             <span
                               className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClass(a.status)}`}
@@ -478,11 +478,11 @@ export default function StudentProgressPage() {
                   <div className="mt-6 overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
-                        <tr className="border-b border-slate-200 text-left dark:border-neutral-700">
-                          <th scope="col" className="py-2 pr-4 font-medium">
+                        <tr className="border-b border-slate-200 text-start dark:border-neutral-700">
+                          <th scope="col" className="py-2 pe-4 font-medium">
                             Quiz
                           </th>
-                          <th scope="col" className="py-2 pr-4 font-medium">
+                          <th scope="col" className="py-2 pe-4 font-medium">
                             Submitted
                           </th>
                           <th scope="col" className="py-2 font-medium">
@@ -493,8 +493,8 @@ export default function StudentProgressPage() {
                       <tbody>
                         {data.quizzes.map((q) => (
                           <tr key={q.attemptId} className="border-b border-slate-100 dark:border-neutral-800">
-                            <td className="py-2 pr-4">{q.title}</td>
-                            <td className="py-2 pr-4">{formatAbsolute(new Date(q.submittedAt))}</td>
+                            <td className="py-2 pe-4">{q.title}</td>
+                            <td className="py-2 pe-4">{formatAbsolute(new Date(q.submittedAt))}</td>
                             <td className="py-2 tabular-nums">
                               {q.scorePercent != null ? `${Math.round(q.scorePercent * 10) / 10}%` : '—'}
                             </td>

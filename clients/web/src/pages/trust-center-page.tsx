@@ -73,7 +73,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left bg-white dark:bg-neutral-900 hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors"
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-start bg-white dark:bg-neutral-900 hover:bg-slate-50 dark:hover:bg-neutral-800 transition-colors"
       >
         <span className="text-base font-semibold text-slate-900 dark:text-neutral-50">{title}</span>
         <svg
@@ -281,9 +281,9 @@ export default function TrustCenterPage() {
                 <caption className="sr-only">Current certification and compliance status</caption>
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-neutral-700">
-                    <th scope="col" className="text-left py-2 pr-4 font-semibold text-slate-700 dark:text-neutral-300">Framework</th>
-                    <th scope="col" className="text-left py-2 pr-4 font-semibold text-slate-700 dark:text-neutral-300">Status</th>
-                    <th scope="col" className="text-left py-2 font-semibold text-slate-700 dark:text-neutral-300">Notes</th>
+                    <th scope="col" className="text-start py-2 pe-4 font-semibold text-slate-700 dark:text-neutral-300">Framework</th>
+                    <th scope="col" className="text-start py-2 pe-4 font-semibold text-slate-700 dark:text-neutral-300">Status</th>
+                    <th scope="col" className="text-start py-2 font-semibold text-slate-700 dark:text-neutral-300">Notes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
@@ -307,8 +307,8 @@ export default function TrustCenterPage() {
                     { name: 'WCAG 2.1 AA', status: 'In Progress', notes: 'Key workflows pass axe-core; full audit planned 2026.' },
                   ].map((row) => (
                     <tr key={row.name}>
-                      <td className="py-2 pr-4 font-medium text-slate-900 dark:text-neutral-100">{row.name}</td>
-                      <td className="py-2 pr-4">
+                      <td className="py-2 pe-4 font-medium text-slate-900 dark:text-neutral-100">{row.name}</td>
+                      <td className="py-2 pe-4">
                         <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${
                           row.status === 'Aligned'
                             ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
@@ -364,28 +364,28 @@ export default function TrustCenterPage() {
                 <caption className="sr-only">Complete list of Lextures sub-processors as of {SUB_PROCESSORS_EFFECTIVE_DATE}</caption>
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-neutral-700">
-                    <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Vendor</th>
-                    <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300">Purpose</th>
-                    <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300">Data Categories</th>
-                    <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">HQ</th>
-                    <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Data Region</th>
-                    <th scope="col" className="text-left py-2 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">DPA Status</th>
+                    <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Vendor</th>
+                    <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300">Purpose</th>
+                    <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300">Data Categories</th>
+                    <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">HQ</th>
+                    <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Data Region</th>
+                    <th scope="col" className="text-start py-2 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">DPA Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                   {SUB_PROCESSORS.map((sp) => (
                     <tr key={sp.name}>
-                      <td className="py-2 pr-3 font-medium text-slate-900 dark:text-neutral-100 whitespace-nowrap">
+                      <td className="py-2 pe-3 font-medium text-slate-900 dark:text-neutral-100 whitespace-nowrap">
                         <a href={sp.privacyUrl} target="_blank" rel="noreferrer" className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300">
                           {sp.name}
                         </a>
                       </td>
-                      <td className="py-2 pr-3 text-slate-700 dark:text-neutral-300">{sp.service}</td>
-                      <td className="py-2 pr-3 text-slate-600 dark:text-neutral-400">
+                      <td className="py-2 pe-3 text-slate-700 dark:text-neutral-300">{sp.service}</td>
+                      <td className="py-2 pe-3 text-slate-600 dark:text-neutral-400">
                         {sp.dataCategories.join(', ')}
                       </td>
-                      <td className="py-2 pr-3 text-slate-600 dark:text-neutral-400">{sp.headquarters}</td>
-                      <td className="py-2 pr-3 text-slate-600 dark:text-neutral-400">{sp.dataRegion}</td>
+                      <td className="py-2 pe-3 text-slate-600 dark:text-neutral-400">{sp.headquarters}</td>
+                      <td className="py-2 pe-3 text-slate-600 dark:text-neutral-400">{sp.dataRegion}</td>
                       <td className="py-2">
                         <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${dpaClass(sp.dpaStatus)}`}>
                           {dpaLabel(sp.dpaStatus)}
@@ -415,26 +415,26 @@ export default function TrustCenterPage() {
                   <caption className="sr-only">History of security and availability incidents</caption>
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-neutral-700">
-                      <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Date</th>
-                      <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300">Severity</th>
-                      <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300">Summary</th>
-                      <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300">Impact</th>
-                      <th scope="col" className="text-left py-2 pr-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Resolved</th>
-                      <th scope="col" className="text-left py-2 font-semibold text-slate-700 dark:text-neutral-300">Status</th>
+                      <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Date</th>
+                      <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300">Severity</th>
+                      <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300">Summary</th>
+                      <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300">Impact</th>
+                      <th scope="col" className="text-start py-2 pe-3 font-semibold text-slate-700 dark:text-neutral-300 whitespace-nowrap">Resolved</th>
+                      <th scope="col" className="text-start py-2 font-semibold text-slate-700 dark:text-neutral-300">Status</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {INCIDENTS.map((inc, i) => (
                       <tr key={i}>
-                        <td className="py-2 pr-3 text-slate-700 dark:text-neutral-300 whitespace-nowrap">{inc.date}</td>
-                        <td className="py-2 pr-3">
+                        <td className="py-2 pe-3 text-slate-700 dark:text-neutral-300 whitespace-nowrap">{inc.date}</td>
+                        <td className="py-2 pe-3">
                           <span className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${severityClass(inc.severity)}`}>
                             {capitalize(inc.severity)}
                           </span>
                         </td>
-                        <td className="py-2 pr-3 text-slate-700 dark:text-neutral-300">{inc.summary}</td>
-                        <td className="py-2 pr-3 text-slate-600 dark:text-neutral-400">{inc.impact}</td>
-                        <td className="py-2 pr-3 text-slate-600 dark:text-neutral-400 whitespace-nowrap">
+                        <td className="py-2 pe-3 text-slate-700 dark:text-neutral-300">{inc.summary}</td>
+                        <td className="py-2 pe-3 text-slate-600 dark:text-neutral-400">{inc.impact}</td>
+                        <td className="py-2 pe-3 text-slate-600 dark:text-neutral-400 whitespace-nowrap">
                           {inc.resolvedDate ?? '—'}
                         </td>
                         <td className="py-2">

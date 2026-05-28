@@ -239,6 +239,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     BOOTSTRAP_ADMIN_EMAIL="${E2E_ADMIN_EMAIL}" \
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
+    RTL_ENABLED="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -247,6 +248,7 @@ else
     BOOTSTRAP_ADMIN_EMAIL="${E2E_ADMIN_EMAIL}" \
     RUN_MIGRATIONS="true" \
     COURSE_FILES_ROOT="${REPO_ROOT}/data/course-files" \
+    RTL_ENABLED="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

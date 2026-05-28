@@ -32,7 +32,7 @@ export function FeatureHelpDock() {
         aria-label="Close help"
         onClick={() => closeHelp()}
       />
-      <aside className="relative z-10 flex h-full w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+      <aside className="relative z-10 flex h-full w-full max-w-md flex-col border-s border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
         <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Help</p>

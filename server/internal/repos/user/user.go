@@ -70,11 +70,11 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	r.AvatarURL = strPtr(avatar)
 	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
-	}
-	if r.Locale == "" {
-		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
@@ -104,7 +104,7 @@ func scanInsertedUserRow(row pgx.Row) (*Row, error) {
 		r.AccountType = AccountTypeStandard
 	}
 	if r.Locale == "" {
-		r.Locale = "en"
+		r.Locale = DefaultLocale
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time

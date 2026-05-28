@@ -121,7 +121,7 @@ function DroppableColumn({
         <button
           type="button"
           onClick={onToggle}
-          className="mb-2 flex w-full items-start justify-between gap-2 shrink-0 border-b border-slate-200 pb-2 text-left dark:border-neutral-700"
+          className="mb-2 flex w-full items-start justify-between gap-2 shrink-0 border-b border-slate-200 pb-2 text-start dark:border-neutral-700"
           aria-expanded={expanded}
         >
           <span>
@@ -189,7 +189,7 @@ function GroupSetActionsMenu({
   }, [open])
 
   return (
-    <div ref={rootRef} className="relative inline-block w-full text-left sm:w-auto">
+    <div ref={rootRef} className="relative inline-block w-full text-start sm:w-auto">
       <button
         type="button"
         disabled={disabled}
@@ -211,7 +211,7 @@ function GroupSetActionsMenu({
           id={menuId}
           role="menu"
           aria-label="Group set actions"
-          className="absolute right-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+          className="absolute end-0 z-50 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
         >
           <button
             type="button"
@@ -221,7 +221,7 @@ function GroupSetActionsMenu({
               onNewSet()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
             New set
@@ -236,7 +236,7 @@ function GroupSetActionsMenu({
                   onRenameSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Rename set
               </button>
@@ -248,7 +248,7 @@ function GroupSetActionsMenu({
                   onDeleteSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-950/40"
               >
                 <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                 Delete set
@@ -262,7 +262,7 @@ function GroupSetActionsMenu({
                   onNewGroup()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 <Plus className="h-4 w-4 shrink-0" aria-hidden />
                 New group
@@ -276,7 +276,7 @@ function GroupSetActionsMenu({
                   onAssignUnassigned()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 <Shuffle className="h-4 w-4 shrink-0" aria-hidden />
                 Assign unassigned students

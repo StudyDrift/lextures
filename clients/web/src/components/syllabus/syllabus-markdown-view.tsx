@@ -194,7 +194,7 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
             <span className="font-medium">Math formatting is paused</span> to save data.{' '}
             <button
               type="button"
-              className="ml-2 font-semibold text-indigo-600 underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
+              className="ms-2 font-semibold text-indigo-600 underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
               onClick={() => setUserForcedMath(true)}
             >
               Load math
@@ -233,7 +233,7 @@ export function SyllabusMarkdownView({ sections, theme = defaultResolved, course
           <span className="font-medium">Math formatting is paused</span> to save data.{' '}
           <button
             type="button"
-            className="ml-2 font-semibold text-indigo-600 underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
+            className="ms-2 font-semibold text-indigo-600 underline decoration-indigo-300 hover:text-indigo-500 dark:text-indigo-400"
             onClick={() => setUserForcedMath(true)}
           >
             Load math

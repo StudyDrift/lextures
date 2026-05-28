@@ -29,6 +29,7 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   virtualClassroomEnabled: true,
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
+  rtlEnabled: false,
 }
 
 describe('EquationEditorDialog', () => {

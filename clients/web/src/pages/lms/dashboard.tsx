@@ -675,7 +675,7 @@ export default function Dashboard() {
                       ? `${reviewStats.dueToday} item${reviewStats.dueToday === 1 ? '' : 's'} due today`
                       : 'No items due right now'}
                     {reviewStats.streak > 0 ? (
-                      <span className="ml-2 inline-flex items-center gap-1 font-medium text-amber-800 dark:text-amber-200">
+                      <span className="ms-2 inline-flex items-center gap-1 font-medium text-amber-800 dark:text-amber-200">
                         <Flame className="h-3.5 w-3.5" aria-hidden />
                         {reviewStats.streak}-day streak
                       </span>
@@ -1007,7 +1007,7 @@ export default function Dashboard() {
                           </div>
                           <div className="flex justify-between gap-3">
                             <dt className="text-slate-500 dark:text-neutral-400">Quizzes in progress</dt>
-                            <dd className="text-right text-xs text-slate-500 dark:text-neutral-400">
+                            <dd className="text-end text-xs text-slate-500 dark:text-neutral-400">
                               Live attempts appear in the gradebook after students submit or auto-submit. Open the quiz
                               or gradebook to review.
                             </dd>

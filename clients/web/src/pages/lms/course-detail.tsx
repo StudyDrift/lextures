@@ -617,7 +617,7 @@ export default function CourseDetail() {
                         <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">
                           {announcement.channelName}
                           {announcement.pinned ? (
-                            <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-900 dark:bg-amber-950 dark:text-amber-100">
+                            <span className="ms-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-amber-900 dark:bg-amber-950 dark:text-amber-100">
                               Pinned
                             </span>
                           ) : null}

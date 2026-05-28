@@ -96,13 +96,13 @@ type CalendarAssignmentHoverOpen = {
 }
 
 const MONTH_CHIP_PALETTE = [
-  'block w-full truncate rounded-md bg-indigo-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-indigo-900 transition hover:bg-indigo-100 hover:ring-1 hover:ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-100 dark:hover:bg-indigo-900/60 dark:hover:ring-indigo-500/40',
-  'block w-full truncate rounded-md bg-violet-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-violet-900 transition hover:bg-violet-100 hover:ring-1 hover:ring-violet-200/80 dark:bg-violet-950/50 dark:text-violet-100 dark:hover:bg-violet-900/60 dark:hover:ring-violet-500/40',
-  'block w-full truncate rounded-md bg-emerald-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-emerald-900 transition hover:bg-emerald-100 hover:ring-1 hover:ring-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-500/40',
-  'block w-full truncate rounded-md bg-amber-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-amber-950 transition hover:bg-amber-100 hover:ring-1 hover:ring-amber-200/80 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-900/60 dark:hover:ring-amber-500/40',
-  'block w-full truncate rounded-md bg-rose-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-rose-900 transition hover:bg-rose-100 hover:ring-1 hover:ring-rose-200/80 dark:bg-rose-950/50 dark:text-rose-100 dark:hover:bg-rose-900/60 dark:hover:ring-rose-500/40',
-  'block w-full truncate rounded-md bg-sky-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-sky-900 transition hover:bg-sky-100 hover:ring-1 hover:ring-sky-200/80 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-900/60 dark:hover:ring-sky-500/40',
-  'block w-full truncate rounded-md bg-fuchsia-50/90 px-1 py-0.5 text-left text-[11px] font-semibold leading-tight text-fuchsia-900 transition hover:bg-fuchsia-100 hover:ring-1 hover:ring-fuchsia-200/80 dark:bg-fuchsia-950/50 dark:text-fuchsia-100 dark:hover:bg-fuchsia-900/60 dark:hover:ring-fuchsia-500/40',
+  'block w-full truncate rounded-md bg-indigo-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-indigo-900 transition hover:bg-indigo-100 hover:ring-1 hover:ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-100 dark:hover:bg-indigo-900/60 dark:hover:ring-indigo-500/40',
+  'block w-full truncate rounded-md bg-violet-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-violet-900 transition hover:bg-violet-100 hover:ring-1 hover:ring-violet-200/80 dark:bg-violet-950/50 dark:text-violet-100 dark:hover:bg-violet-900/60 dark:hover:ring-violet-500/40',
+  'block w-full truncate rounded-md bg-emerald-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-emerald-900 transition hover:bg-emerald-100 hover:ring-1 hover:ring-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-500/40',
+  'block w-full truncate rounded-md bg-amber-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-amber-950 transition hover:bg-amber-100 hover:ring-1 hover:ring-amber-200/80 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-900/60 dark:hover:ring-amber-500/40',
+  'block w-full truncate rounded-md bg-rose-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-rose-900 transition hover:bg-rose-100 hover:ring-1 hover:ring-rose-200/80 dark:bg-rose-950/50 dark:text-rose-100 dark:hover:bg-rose-900/60 dark:hover:ring-rose-500/40',
+  'block w-full truncate rounded-md bg-sky-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-sky-900 transition hover:bg-sky-100 hover:ring-1 hover:ring-sky-200/80 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-900/60 dark:hover:ring-sky-500/40',
+  'block w-full truncate rounded-md bg-fuchsia-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-fuchsia-900 transition hover:bg-fuchsia-100 hover:ring-1 hover:ring-fuchsia-200/80 dark:bg-fuchsia-950/50 dark:text-fuchsia-100 dark:hover:bg-fuchsia-900/60 dark:hover:ring-fuchsia-500/40',
 ] as const
 
 const WEEK_CARD_PALETTE = [
@@ -173,7 +173,7 @@ function AssignmentHoverPortal({ open }: { open: CalendarAssignmentHoverOpen | n
     <div
       ref={popRef}
       role="tooltip"
-      className="pointer-events-none max-h-[min(22rem,calc(100vh-1rem))] overflow-y-auto rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-left text-sm shadow-lg dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+      className="pointer-events-none max-h-[min(22rem,calc(100vh-1rem))] overflow-y-auto rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 text-start text-sm shadow-lg dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
       style={
         pos
           ? { position: 'fixed', top: pos.top, left: pos.left, width: pos.width, zIndex: 80 }
@@ -280,7 +280,7 @@ function CalendarMonthDayCell({
   return (
     <div
       ref={setNodeRef}
-      className={`flex h-full min-h-0 flex-col bg-white p-1.5 text-left dark:bg-neutral-900/95 ${
+      className={`flex h-full min-h-0 flex-col bg-white p-1.5 text-start dark:bg-neutral-900/95 ${
         inMonth ? '' : 'bg-slate-50/90 text-slate-400 dark:bg-neutral-950/80 dark:text-neutral-500'
       } ${canDragReschedule && isOver ? 'ring-2 ring-inset ring-indigo-400/70 dark:ring-indigo-400/50' : ''} ${
         isFocusDay && !isOver ? 'ring-2 ring-inset ring-amber-400/80 dark:ring-amber-500/50' : ''
@@ -602,7 +602,7 @@ export function CourseCalendar({
               </div>
               <DragOverlay dropAnimation={null}>
                 {activeDragAssignment ? (
-                  <div className="max-w-[14rem] truncate rounded-md border border-indigo-200/90 bg-indigo-50 px-2 py-1 text-left text-[11px] font-semibold text-indigo-950 shadow-md dark:border-indigo-700 dark:bg-indigo-950 dark:text-indigo-100">
+                  <div className="max-w-[14rem] truncate rounded-md border border-indigo-200/90 bg-indigo-50 px-2 py-1 text-start text-[11px] font-semibold text-indigo-950 shadow-md dark:border-indigo-700 dark:bg-indigo-950 dark:text-indigo-100">
                     {activeDragAssignment.title || 'Untitled'}
                   </div>
                 ) : null}

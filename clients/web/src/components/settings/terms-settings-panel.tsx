@@ -264,7 +264,7 @@ export function TermsSettingsPanel() {
       )}
 
       <div className="overflow-x-auto rounded-2xl border border-slate-200 dark:border-neutral-700">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-full text-start text-sm">
           <thead className="bg-slate-50 text-slate-700 dark:bg-neutral-900 dark:text-neutral-200">
             <tr>
               <th className="px-4 py-3 font-semibold">Name</th>

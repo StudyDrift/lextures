@@ -130,11 +130,11 @@ export default function SecurityDisclosureAdminPage() {
           <table className="min-w-full text-sm border-collapse" aria-label="Security vulnerability reports">
             <thead>
               <tr className="border-b border-slate-200 dark:border-neutral-700">
-                <th scope="col" className="py-2 pr-3 text-left font-semibold">Date</th>
-                <th scope="col" className="py-2 pr-3 text-left font-semibold">Severity</th>
-                <th scope="col" className="py-2 pr-3 text-left font-semibold">Summary</th>
-                <th scope="col" className="py-2 pr-3 text-left font-semibold">Status</th>
-                <th scope="col" className="py-2 text-left font-semibold">SLA met</th>
+                <th scope="col" className="py-2 pe-3 text-start font-semibold">Date</th>
+                <th scope="col" className="py-2 pe-3 text-start font-semibold">Severity</th>
+                <th scope="col" className="py-2 pe-3 text-start font-semibold">Summary</th>
+                <th scope="col" className="py-2 pe-3 text-start font-semibold">Status</th>
+                <th scope="col" className="py-2 text-start font-semibold">SLA met</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
@@ -145,10 +145,10 @@ export default function SecurityDisclosureAdminPage() {
               ) : (
                 reports.map((r) => (
                   <tr key={r.id}>
-                    <td className="py-2 pr-3 whitespace-nowrap">{r.reportDate}</td>
-                    <td className="py-2 pr-3">{r.severity ?? '—'}</td>
-                    <td className="py-2 pr-3 max-w-md truncate" title={r.summary}>{r.summary}</td>
-                    <td className="py-2 pr-3">{r.status}</td>
+                    <td className="py-2 pe-3 whitespace-nowrap">{r.reportDate}</td>
+                    <td className="py-2 pe-3">{r.severity ?? '—'}</td>
+                    <td className="py-2 pe-3 max-w-md truncate" title={r.summary}>{r.summary}</td>
+                    <td className="py-2 pe-3">{r.status}</td>
                     <td className="py-2">
                       {r.slaMet === undefined || r.slaMet === null ? '—' : r.slaMet ? 'Yes' : 'No'}
                     </td>

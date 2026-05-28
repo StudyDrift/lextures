@@ -85,6 +85,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Get("/health/ready", handleReady(ready))
 	r.Post("/api/v1/public/onboarding/track", d.handlePublicOnboardingTrack())
 	r.Get("/api/v1/public/branding/resolve", d.handlePublicBrandingResolve())
+	r.Get("/api/v1/public/locale-defaults", d.handleGetPublicLocaleDefaults())
 	r.Get("/api/v1/public/org-branding/{orgId}/{asset}", d.handlePublicOrgBrandAsset())
 	r.Get("/api/v1/search", d.handleSearchIndex())
 	r.Get("/api/v1/reports/learning-activity", d.handleLearningActivityReport())

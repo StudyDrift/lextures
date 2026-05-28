@@ -217,7 +217,7 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
                     <span className="font-mono">{m.sectionCode}</span>
                     {m.sectionName ? ` — ${m.sectionName}` : ''}
                     {m.isPrimary ? (
-                      <span className="ml-2 rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
+                      <span className="ms-2 rounded-md bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-200">
                         Primary
                       </span>
                     ) : null}

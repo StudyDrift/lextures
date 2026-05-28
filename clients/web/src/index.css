@@ -10,6 +10,16 @@ html.dark {
   color-scheme: dark;
 }
 
+/* Directional icons mirror in RTL (plan 11.2). */
+[dir='rtl'] .rtl-mirror {
+  transform: scaleX(-1);
+}
+
+/* TipTap / prose blocks honor Unicode bidi when dir="auto" is set on the editor root. */
+.ProseMirror[dir='auto'] {
+  unicode-bidi: plaintext;
+}
+
 @keyframes sidenav-item-in {
   from {
     opacity: 0;

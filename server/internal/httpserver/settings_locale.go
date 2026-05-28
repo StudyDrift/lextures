@@ -14,7 +14,9 @@ var localeBCP47Pattern = regexp.MustCompile(`^[a-z]{2}(-[A-Z]{2})?$`)
 
 var supportedLocales = map[string]struct{}{
 	"en": {}, "es": {}, "fr": {},
+	"ar": {}, "he": {}, "fa": {}, "ur": {}, "ps": {},
 	"en-US": {}, "en-GB": {}, "es-ES": {}, "es-MX": {}, "fr-FR": {}, "fr-CA": {},
+	"ar-SA": {}, "he-IL": {},
 }
 
 type localeResponse struct {

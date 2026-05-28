@@ -120,7 +120,7 @@ export default function BackupOpsAdminPage() {
       {status && status.alerts.length > 0 && (
         <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/40 p-4 text-sm">
           <p className="font-medium text-amber-900 dark:text-amber-200">Active alerts</p>
-          <ul className="mt-2 list-disc pl-5 space-y-1">
+          <ul className="mt-2 list-disc ps-5 space-y-1">
             {status.alerts.map((a) => (
               <li key={`${a.tier}-${a.reason}`}>{a.tier}: {a.reason}</li>
             ))}

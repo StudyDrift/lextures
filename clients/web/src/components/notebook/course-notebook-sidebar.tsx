@@ -75,7 +75,7 @@ function NotebookTreeRow({
   return (
     <li ref={setNodeRef} style={style} className="list-none">
       <div
-        className={`group flex items-center gap-0.5 rounded-lg pr-1 transition ${
+        className={`group flex items-center gap-0.5 rounded-lg pe-1 transition ${
           isSelected ? 'bg-indigo-50 dark:bg-indigo-950/50' : 'hover:bg-slate-100 dark:hover:bg-neutral-800/80'
         }`}
         style={{ paddingLeft: `${8 + depth * 14}px` }}
@@ -96,7 +96,7 @@ function NotebookTreeRow({
             e.preventDefault()
             onStartRename(page.id, page.title)
           }}
-          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md py-1.5 text-left text-sm outline-none ring-indigo-500/30 focus-visible:ring-2"
+          className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md py-1.5 text-start text-sm outline-none ring-indigo-500/30 focus-visible:ring-2"
         >
           <FileText className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
           {isEditing ? (
@@ -306,7 +306,7 @@ export function CourseNotebookSidebar({
   const rootHasPages = useMemo(() => pages.some((p) => p.parentId === null), [pages])
 
   return (
-    <div className="flex h-full min-h-0 w-[min(17rem,42vw)] shrink-0 flex-col border-r border-slate-200 bg-slate-50/90 dark:border-neutral-800 dark:bg-neutral-950/80">
+    <div className="flex h-full min-h-0 w-[min(17rem,42vw)] shrink-0 flex-col border-e border-slate-200 bg-slate-50/90 dark:border-neutral-800 dark:bg-neutral-950/80">
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2.5 dark:border-neutral-800">
         <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
           Pages
@@ -339,7 +339,7 @@ export function CourseNotebookSidebar({
         <button
           type="button"
           onClick={onAddRootPage}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium text-slate-600 transition hover:bg-white hover:text-indigo-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-indigo-200"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium text-slate-600 transition hover:bg-white hover:text-indigo-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-indigo-200"
         >
           <Plus className="h-4 w-4 shrink-0" aria-hidden />
           New page

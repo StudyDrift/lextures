@@ -34,7 +34,7 @@ function DrillDownPanel({ concept, students, onClose }: DrillDownPanelProps) {
       role="dialog"
       aria-modal="true"
       aria-label={`Students for concept: ${concept.name}`}
-      className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950"
+      className="fixed inset-y-0 end-0 z-50 flex w-full max-w-md flex-col border-s border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-950"
     >
       <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
         <div>
@@ -219,7 +219,7 @@ export default function CourseMasteryHeatmap() {
                 <tr className="bg-slate-50 dark:bg-neutral-800/80">
                   <th
                     scope="col"
-                    className="sticky left-0 z-10 min-w-[160px] border-b border-r border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300"
+                    className="sticky start-0 z-10 min-w-[160px] border-b border-e border-slate-200 bg-slate-50 px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300"
                   >
                     Student
                   </th>
@@ -244,7 +244,7 @@ export default function CourseMasteryHeatmap() {
                   >
                     <th
                       scope="row"
-                      className="sticky left-0 z-10 border-r border-slate-200 bg-white px-4 py-2 font-medium text-slate-900 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                      className="sticky start-0 z-10 border-e border-slate-200 bg-white px-4 py-2 font-medium text-slate-900 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                     >
                       {studentName(row.displayName)}
                     </th>
@@ -281,7 +281,7 @@ export default function CourseMasteryHeatmap() {
 
                 {/* Summary row */}
                 <tr className="bg-slate-50 dark:bg-neutral-800/50">
-                  <td className="sticky left-0 z-10 border-r border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-300">
+                  <td className="sticky start-0 z-10 border-e border-t border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/50 dark:text-neutral-300">
                     Class avg
                   </td>
                   {result.summary.map((s) => (

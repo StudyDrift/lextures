@@ -142,7 +142,7 @@ function ToggleRow({
       >
         <span
           className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
-            checked ? 'left-4.5' : 'left-0.5'
+            checked ? 'start-4.5' : 'start-0.5'
           }`}
         />
       </button>
@@ -774,10 +774,10 @@ function cloneRubric(r: RubricDefinition): RubricDefinition {
 const RUBRIC_STICKY_NUM = 'w-10 min-w-10 max-w-10'
 /** Wider so criterion title + description stack comfortably when scrolling horizontally. */
 const RUBRIC_STICKY_CRIT = 'w-[18rem] min-w-[18rem] max-w-[18rem]'
-const RUBRIC_STICKY_LEFT_CRIT = 'left-10'
+const RUBRIC_STICKY_LEFT_CRIT = 'start-10'
 
 const rubricStickyCell =
-  'border-r border-slate-200 bg-slate-50 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]'
+  'border-e border-slate-200 bg-slate-50 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]'
 
 const rubricCellInput =
   'w-full min-w-0 border-0 bg-transparent px-2 py-1.5 text-sm text-slate-900 outline-none ring-0 placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-indigo-400/80 dark:bg-transparent dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:bg-neutral-900/90 dark:focus:ring-indigo-500/70'
@@ -790,17 +790,17 @@ const rubricRatingBandDescInput =
   `${rubricCellInput} min-h-[2.5rem] resize-y text-xs leading-relaxed text-slate-600 placeholder:text-slate-400 dark:text-neutral-400 dark:placeholder:text-neutral-500`
 
 const rubricCellInputNum =
-  `${rubricCellInput} text-right tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`
+  `${rubricCellInput} text-end tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none`
 
 const rubricToolbarBtn =
   'inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800'
 
 const rubricStickyActions =
-  'sticky right-0 z-20 w-[5.25rem] min-w-[5.25rem] max-w-[5.25rem] border-l border-slate-200 bg-slate-50 shadow-[-4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.45)]'
+  'sticky end-0 z-20 w-[5.25rem] min-w-[5.25rem] max-w-[5.25rem] border-s border-slate-200 bg-slate-50 shadow-[-4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-700 dark:bg-neutral-800 dark:shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.45)]'
 
 /** Google Sheets / Excel–style grid lines on all cells */
 const sheetTableClass =
-  'w-full min-w-max border-collapse border border-slate-300 bg-white text-left text-sm dark:border-neutral-600 dark:bg-neutral-950 [&_th]:border [&_th]:border-slate-300 [&_td]:border [&_td]:border-slate-300 dark:[&_th]:border-neutral-600 dark:[&_td]:border-neutral-600'
+  'w-full min-w-max border-collapse border border-slate-300 bg-white text-start text-sm dark:border-neutral-600 dark:bg-neutral-950 [&_th]:border [&_th]:border-slate-300 [&_td]:border [&_td]:border-slate-300 dark:[&_th]:border-neutral-600 dark:[&_td]:border-neutral-600'
 
 const rubricRatingHeaderInput =
   'w-full min-w-0 rounded border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-indigo-500 dark:focus:ring-indigo-500'
@@ -1056,11 +1056,11 @@ function RubricEditorModal({
                   <span className="tabular-nums text-slate-700 dark:text-neutral-300">{pointsWorth}</span>
                   <span className="text-slate-500 dark:text-neutral-500"> pts worth</span>
                   {pointsMismatch ? (
-                    <span className="ml-2 text-xs font-medium text-amber-800 dark:text-amber-200">
+                    <span className="ms-2 text-xs font-medium text-amber-800 dark:text-amber-200">
                       Needs to match before save
                     </span>
                   ) : (
-                    <span className="ml-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                    <span className="ms-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                       OK
                     </span>
                   )}
@@ -1173,7 +1173,7 @@ function RubricEditorModal({
                   </th>
                   <th
                     scope="col"
-                    className={`sticky top-0 z-[40] ${RUBRIC_STICKY_CRIT} ${RUBRIC_STICKY_LEFT_CRIT} ${rubricStickyCell} px-2 py-2 text-left text-xs font-semibold text-slate-800 dark:text-neutral-200`}
+                    className={`sticky top-0 z-[40] ${RUBRIC_STICKY_CRIT} ${RUBRIC_STICKY_LEFT_CRIT} ${rubricStickyCell} px-2 py-2 text-start text-xs font-semibold text-slate-800 dark:text-neutral-200`}
                   >
                     Criterion
                   </th>
@@ -1181,8 +1181,8 @@ function RubricEditorModal({
                     <th
                       key={`rating-h-${ri}`}
                       scope="col"
-                      className={`sticky top-0 z-10 min-w-[9.5rem] bg-[#f3f3f3] px-1.5 py-1.5 text-left align-bottom dark:bg-neutral-800 ${
-                        ri === 0 ? 'border-l-2 border-l-indigo-400 dark:border-l-indigo-500' : ''
+                      className={`sticky top-0 z-10 min-w-[9.5rem] bg-[#f3f3f3] px-1.5 py-1.5 text-start align-bottom dark:bg-neutral-800 ${
+                        ri === 0 ? 'border-s-2 border-s-indigo-400 dark:border-s-indigo-500' : ''
                       }`}
                     >
                       <div className="flex flex-col gap-1">
@@ -1219,7 +1219,7 @@ function RubricEditorModal({
                     <tr key={criterion.id} className={rowBg}>
                       <th
                         scope="row"
-                        className={`sticky left-0 z-[31] ${RUBRIC_STICKY_NUM} ${rubricStickyCell} px-1 py-2 align-top text-center text-[11px] font-normal tabular-nums text-slate-600 dark:text-neutral-400 ${rowBg}`}
+                        className={`sticky start-0 z-[31] ${RUBRIC_STICKY_NUM} ${rubricStickyCell} px-1 py-2 align-top text-center text-[11px] font-normal tabular-nums text-slate-600 dark:text-neutral-400 ${rowBg}`}
                       >
                         {ci + 1}
                       </th>
@@ -1257,7 +1257,7 @@ function RubricEditorModal({
                       {criterion.levels.map((lvl, ri) => (
                         <td
                           key={`${criterion.id}-r-${ri}`}
-                          className={`p-0 align-top ${rowBg} ${ri === 0 ? 'border-l-2 border-l-indigo-300 dark:border-l-indigo-500/50' : ''}`}
+                          className={`p-0 align-top ${rowBg} ${ri === 0 ? 'border-s-2 border-s-indigo-300 dark:border-s-indigo-500/50' : ''}`}
                         >
                           <div className="flex min-h-[5rem] flex-col gap-1.5 px-1.5 py-2">
                             <input
@@ -1331,14 +1331,14 @@ function RubricEditorModal({
                 <tr className="bg-[#ececec] dark:bg-neutral-800/95">
                   <td
                     colSpan={2}
-                    className={`sticky left-0 z-[31] border-r border-slate-300 bg-[#ececec] px-2 py-2 text-xs font-semibold text-slate-800 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-600 dark:bg-neutral-800/95 dark:text-neutral-200 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
+                    className={`sticky start-0 z-[31] border-e border-slate-300 bg-[#ececec] px-2 py-2 text-xs font-semibold text-slate-800 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-600 dark:bg-neutral-800/95 dark:text-neutral-200 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
                   >
                     Max total (highest rating per row)
                   </td>
                   {levelCount > 0 ? (
                     <td
                       colSpan={levelCount}
-                      className="bg-[#ececec] px-2 py-2 text-right text-[0.65rem] font-medium uppercase tracking-wide text-slate-600 dark:bg-neutral-800/95 dark:text-neutral-400"
+                      className="bg-[#ececec] px-2 py-2 text-end text-[0.65rem] font-medium uppercase tracking-wide text-slate-600 dark:bg-neutral-800/95 dark:text-neutral-400"
                     >
                       {pointsWorth != null && pointsWorth > 0 ? (
                         <span>
@@ -1355,14 +1355,14 @@ function RubricEditorModal({
                 <tr className="bg-[#f3f3f3] dark:bg-neutral-800/80">
                   <td
                     colSpan={2}
-                    className={`sticky left-0 z-[31] border-r border-slate-300 bg-[#f3f3f3] px-2 py-2 text-sm font-bold tabular-nums text-slate-900 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-100 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
+                    className={`sticky start-0 z-[31] border-e border-slate-300 bg-[#f3f3f3] px-2 py-2 text-sm font-bold tabular-nums text-slate-900 shadow-[4px_0_6px_-4px_rgba(15,23,42,0.12)] dark:border-neutral-600 dark:bg-neutral-800/80 dark:text-neutral-100 dark:shadow-[4px_0_8px_-4px_rgba(0,0,0,0.45)]`}
                   >
                     {totalMax}
                   </td>
                   {levelCount > 0 ? (
                     <td
                       colSpan={levelCount}
-                      className="bg-[#f3f3f3] px-2 py-2 text-right text-sm font-semibold tabular-nums dark:bg-neutral-800/80"
+                      className="bg-[#f3f3f3] px-2 py-2 text-end text-sm font-semibold tabular-nums dark:bg-neutral-800/80"
                     >
                       {pointsWorth != null && pointsWorth > 0 ? (
                         <span
@@ -1465,7 +1465,7 @@ function AssignmentRubricSection({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0 text-sm text-slate-700 dark:text-neutral-300">
             {draftRubric.title ? (
-              <span className="mr-1 font-medium text-slate-900 dark:text-neutral-100">
+              <span className="me-1 font-medium text-slate-900 dark:text-neutral-100">
                 {draftRubric.title}
                 <span className="font-normal text-slate-400 dark:text-neutral-500"> · </span>
               </span>
@@ -1476,7 +1476,7 @@ function AssignmentRubricSection({
             </span>
             <span className="text-slate-500 dark:text-neutral-500"> · max total {totalMax} pts</span>
             {pointsMismatch ? (
-              <span className="ml-2 text-amber-700 dark:text-amber-300">
+              <span className="ms-2 text-amber-700 dark:text-amber-300">
                 (should match {pointsWorth} pts worth)
               </span>
             ) : null}
