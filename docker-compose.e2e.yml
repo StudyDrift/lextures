@@ -50,6 +50,7 @@ services:
       CLAMAV_ADDR: ${CLAMAV_ADDR:-clamav:3310}
       EMAIL_NOTIFICATIONS_ENABLED: ${EMAIL_NOTIFICATIONS_ENABLED:-false}
       COPPA_WORKFLOW_ENABLED: "true"
+      ISO_ISMS_ENABLED: "true"
     ports:
       - "8080:8080"
     depends_on:

@@ -246,6 +246,8 @@ type Config struct {
 	StatePrivacyEnabled bool
 	// SOC2ModuleEnabled gates the SOC 2 Type II compliance admin UI: access reviews, incident log, vendor risk register (plan 10.9).
 	SOC2ModuleEnabled bool
+	// IsoIsmsEnabled gates ISO 27001/27701 ISMS admin APIs: audit findings, risk register, SoA (plan 10.10).
+	IsoIsmsEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -386,6 +388,7 @@ func Load() Config {
 		DPAPortalEnabled:     boolEnv("DPA_PORTAL_ENABLED") || boolEnv("FEATURE_DPA_PORTAL"),
 		StatePrivacyEnabled:  boolEnv("STATE_PRIVACY_ENABLED") || boolEnv("FEATURE_STATE_PRIVACY"),
 		SOC2ModuleEnabled:    boolEnv("SOC2_MODULE_ENABLED") || boolEnv("FEATURE_SOC2_MODULE"),
+		IsoIsmsEnabled:       boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
 	}
 }
 

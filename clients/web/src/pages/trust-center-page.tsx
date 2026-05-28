@@ -1,4 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
+
+interface TrustISOStatus {
+  scopeStatement: string
+  iso27001Status: string
+  iso27701Status: string
+  iso27001CertUrl?: string
+  iso27001LastAudit?: string
+  soaLastReview?: string
+  soa?: { total: number; implemented: number; planned: number; excluded: number }
+}
+
+function isoStatusLabel(status: string): string {
+  switch (status) {
+    case 'certified': return 'Certified'
+    case 'stage1': return 'Stage 1 complete'
+    case 'in_progress': return 'In Progress'
+    case 'not_started': return 'Not started'
+    default: return status
+  }
+}
 import { Link } from 'react-router-dom'
 import { BrandLogo } from '../components/brand-logo'
 import { SUB_PROCESSORS, SUB_PROCESSORS_EFFECTIVE_DATE, type DpaStatus } from '../content/trust/sub-processors'
@@ -147,8 +167,20 @@ function SubscribeForm() {
 // ── Main page ────────────────────────────────────────────────────────────────
 
 export default function TrustCenterPage() {
+  const [isoStatus, setIsoStatus] = useState<TrustISOStatus | null>(null)
+
   useEffect(() => {
     document.title = 'Trust Center — Lextures'
+    void fetch('/api/v1/trust/iso')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && typeof data === 'object') {
+          setIsoStatus(data as TrustISOStatus)
+        }
+      })
+      .catch(() => {
+        /* static fallback in certifications table */
+      })
   }, [])
 
   return (
@@ -257,7 +289,18 @@ export default function TrustCenterPage() {
                 <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
                   {[
                     { name: 'SOC 2 Type II', status: 'In Progress', notes: 'Evidence collection underway; report expected Q4 2026.' },
-                    { name: 'ISO 27001', status: 'In Progress', notes: 'Gap assessment complete; certification target Q1 2027.' },
+                    {
+                      name: 'ISO 27001',
+                      status: isoStatus ? isoStatusLabel(isoStatus.iso27001Status) : 'In Progress',
+                      notes: isoStatus?.iso27001LastAudit
+                        ? `Last audit: ${isoStatus.iso27001LastAudit}. SoA: ${isoStatus.soa?.implemented ?? 0}/${isoStatus.soa?.total ?? 93} controls implemented.`
+                        : 'Gap assessment complete; certification target Q1 2027.',
+                    },
+                    {
+                      name: 'ISO 27701 (PIMS)',
+                      status: isoStatus ? isoStatusLabel(isoStatus.iso27701Status) : 'In Progress',
+                      notes: 'Privacy extension mapped to GDPR Art. 25 (data protection by design).',
+                    },
                     { name: 'FERPA', status: 'Aligned', notes: 'Data handling follows FERPA requirements. School agreements available on request.' },
                     { name: 'COPPA', status: 'Aligned', notes: 'Student data under 13 requires institutional agreement.' },
                     { name: 'GDPR', status: 'Aligned', notes: 'DPO designated. Data Processing Addendum (DPA) available.' },
@@ -280,6 +323,23 @@ export default function TrustCenterPage() {
                 </tbody>
               </table>
             </div>
+            {isoStatus?.scopeStatement ? (
+              <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">
+                <strong className="text-slate-800 dark:text-neutral-200">ISMS scope:</strong>{' '}
+                {isoStatus.scopeStatement}
+              </p>
+            ) : null}
+            {isoStatus?.iso27001CertUrl ? (
+              <p className="mt-2 text-sm">
+                <a
+                  href={isoStatus.iso27001CertUrl}
+                  className="text-indigo-700 underline dark:text-indigo-300"
+                  rel="noopener noreferrer"
+                >
+                  ISO 27001 certificate
+                </a>
+              </p>
+            ) : null}
             <p className="mt-4 text-sm text-slate-500 dark:text-neutral-500">
               To request a copy of our SOC 2 report (NDA required), email{' '}
               <a href="mailto:security@lextures.com" className="text-indigo-700 underline dark:text-indigo-300">
