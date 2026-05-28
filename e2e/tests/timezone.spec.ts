@@ -19,7 +19,10 @@ test.describe('Time zones', () => {
       timeout: 8000,
     })
     await page.getByRole('button', { name: /create account/i }).click()
-    await page.waitForURL(/\/(dashboard)?/, { timeout: 15000 })
+    await page.waitForFunction(
+      () => localStorage.getItem('studydrift_access_token'),
+      { timeout: 15_000 },
+    )
 
     const token = await page.evaluate(() => localStorage.getItem('studydrift_access_token'))
     expect(token).toBeTruthy()
@@ -55,7 +58,9 @@ test.describe('Time zones', () => {
 
   test('account settings shows time zone section', async ({ authedPage: page }) => {
     await page.goto('/settings/account')
-    await expect(page.getByText('Time zone', { exact: true })).toBeVisible({ timeout: 8000 })
+    await expect(page.getByRole('button', { name: /^Save time zone$/i })).toBeVisible({
+      timeout: 8000,
+    })
     await expect(page.getByRole('searchbox')).toBeVisible()
   })
 })
