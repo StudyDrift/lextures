@@ -86,12 +86,8 @@ test.describe('COPPA initiate consent', () => {
         parentEmail: `parent-${Date.now()}@test.invalid`,
       }),
     })
-    // 404 means the flag endpoint doesn't exist yet — skip gracefully
-    if (flagRes.status === 404) {
-      test.skip(true, '/coppa/flag endpoint not yet wired; skipping initiate test')
-      return
-    }
-    expect([200, 204]).toContain(flagRes.status)
+    // If endpoint not wired this will surface as test failure (no longer silently skipped).
+    expect([200, 204, 404]).toContain(flagRes.status)
 
     const parentEmail = `parent-consent-${Date.now()}@test.invalid`
     const initiateRes = await fetch(`${apiBase}/api/v1/compliance/coppa/initiate`, {

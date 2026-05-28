@@ -44,10 +44,7 @@ test.describe('Course feed', () => {
       .locator('textarea, [contenteditable="true"]')
       .filter({ hasText: '' })
       .first()
-    if (await composer.count() === 0) {
-      test.skip(true, 'Message composer not visible — skipping')
-      return
-    }
+    await expect(composer).toBeVisible({ timeout: 5000 })
 
     const msgText = `E2E test message ${Date.now()}`
     await composer.click()

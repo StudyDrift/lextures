@@ -12,10 +12,10 @@
  */
 import { test, expect } from '@playwright/test'
 import { apiSignup } from '../fixtures/api.js'
+import { isAVEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const AV_ENABLED = process.env.AV_SCANNING_ENABLED === 'true'
 
 function uniqueEmail(prefix = 'avscan') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -49,7 +49,9 @@ test('GET scan-status: invalid UUID returns 400', async () => {
 })
 
 test('GET scan-status: feature off returns 404', async () => {
-  test.skip(AV_ENABLED, 'skipped when AV_SCANNING_ENABLED=true')
+  if (await isAVEnabled()) {
+    test.skip(true, 'skipped when AV scanning enabled')
+  }
   const { access_token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
   const fakeId = '00000000-0000-0000-0000-000000000099'
   const res = await fetch(`${API_BASE}/api/v1/files/${fakeId}/scan-status`, {
@@ -81,7 +83,9 @@ test('POST /admin/av-scan/bulk: non-admin returns 403 or 501', async () => {
 })
 
 test.describe('EICAR quarantine lifecycle', () => {
-  test.skip(!AV_ENABLED, 'requires AV_SCANNING_ENABLED=true and CLAMAV_STUB=true')
+  if (!(await isAVEnabled())) {
+    test.skip(true, 'requires AV scanning enabled')
+  }
 
   test('uploading EICAR via tus quarantines file and blocks download', async () => {
     const { access_token } = await apiSignup({ email: uniqueEmail('eicar'), password: PASSWORD })

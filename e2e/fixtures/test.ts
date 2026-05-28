@@ -2,7 +2,7 @@
  * Extended Playwright fixtures providing pre-authenticated pages and seeded data.
  */
 import { test as base, type Page } from '@playwright/test'
-import { apiSignup, apiCreateCourse, apiCreateModule, apiEnroll } from './api.js'
+import { apiSignup, apiCreateCourse, apiCreateModule, apiEnroll, apiPatchCourseFeatures } from './api.js'
 
 export interface UserCredentials {
   email: string
@@ -90,6 +90,19 @@ export const test = base.extend<TestFixtures>({
       await apiEnroll(instructorToken, course.courseCode, instructorEmail, 'teacher')
       await apiEnroll(instructorToken, course.courseCode, studentEmail, 'student')
       const mod = await apiCreateModule(instructorToken, course.courseCode, 'Unit 1')
+
+      // Enable common course features so UI menus (feed, discussions, collab docs, sections, etc.)
+      // and add-item options are consistently present for e2e tests that rely on them.
+      await apiPatchCourseFeatures(instructorToken, course.courseCode, {
+        feedEnabled: true,
+        calendarEnabled: true,
+        questionBankEnabled: true,
+        discussionsEnabled: true,
+        notebookEnabled: true,
+        collabDocsEnabled: true,
+        groupSpacesEnabled: true,
+        sectionsEnabled: true,
+      }).catch(() => {})
 
       await use({
         courseCode: course.courseCode,

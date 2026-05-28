@@ -9,10 +9,10 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
+import { isOEREnabled } from '../fixtures/platform-features.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const OER_ENABLED = process.env.FEATURE_OER_LIBRARY === 'true'
 
 function uniqueEmail(prefix = 'oer') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -57,8 +57,10 @@ async function apiImportOER(
 }
 
 test.describe('OER library', () => {
-  test.beforeEach(() => {
-    test.skip(!OER_ENABLED, 'Set FEATURE_OER_LIBRARY=true for OER e2e tests')
+  test.beforeEach(async () => {
+    if (!(await isOEREnabled())) {
+      test.skip(true, 'OER library not enabled')
+    }
   })
 
   test('search photosynthesis returns CC BY results from OER Commons', async ({ seededCourse }) => {
@@ -127,14 +129,14 @@ test.describe('OER library', () => {
     await moduleRow.hover()
     const addBtn = moduleRow.getByRole('button', { name: /add item|add content|\+/i }).first()
     if (!(await addBtn.isVisible({ timeout: 3000 }))) {
-      test.skip(true, 'Add item button not visible')
+      await expect(addBtn).toBeVisible({ timeout: 5000 })
       return
     }
     await addBtn.click()
 
     const oerItem = page.getByRole('menuitem', { name: /find open resources/i })
     if (!(await oerItem.isVisible({ timeout: 3000 }))) {
-      test.skip(true, 'OER menu item not visible — is VITE_FEATURE_OER_LIBRARY=true?')
+      await expect(oerItem).toBeVisible({ timeout: 3000 })
       return
     }
     await oerItem.click()

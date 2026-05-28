@@ -52,18 +52,12 @@ test.describe('External link module items', () => {
 
     // Look for an "Add item" or "+" button inside the module row
     const addBtn = moduleRow.getByRole('button', { name: /add item|add content|\+/i }).first()
-    if (!(await addBtn.isVisible({ timeout: 3000 }))) {
-      test.skip(true, 'No "Add item" button visible — skipping')
-      return
-    }
+    await expect(addBtn).toBeVisible({ timeout: 5000 })
     await addBtn.click()
 
     // Click "External link" in the dropdown menu
     const extLinkItem = page.getByRole('menuitem', { name: /external link/i })
-    if (!(await extLinkItem.isVisible({ timeout: 3000 }))) {
-      test.skip(true, 'External link menu item not visible — skipping')
-      return
-    }
+    await expect(extLinkItem).toBeVisible({ timeout: 3000 })
     await extLinkItem.click()
 
     // Fill in the modal
@@ -202,17 +196,11 @@ test.describe('External link module items', () => {
     await moduleRow.hover()
 
     const addBtn = moduleRow.getByRole('button', { name: /add item|add content|\+/i }).first()
-    if (!(await addBtn.isVisible({ timeout: 3000 }))) {
-      test.skip(true, 'No "Add item" button visible — skipping')
-      return
-    }
+    await expect(addBtn).toBeVisible({ timeout: 5000 })
     await addBtn.click()
 
     const extLinkItem = page.getByRole('menuitem', { name: /external link/i })
-    if (!(await extLinkItem.isVisible({ timeout: 3000 }))) {
-      test.skip(true, 'External link menu item not visible — skipping')
-      return
-    }
+    await expect(extLinkItem).toBeVisible({ timeout: 3000 })
     await extLinkItem.click()
 
     const dialog = page.getByRole('dialog')

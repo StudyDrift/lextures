@@ -13,17 +13,19 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup, apiLogin } from '../fixtures/api.js'
+import { isEngagementEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const ENGAGEMENT_ENABLED = process.env.FEATURE_ENGAGEMENT_TRACKING === 'true'
 
 function uniqueEmail(prefix = 'eng') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
 }
 
 test('POST /analytics/events: unauthenticated returns 401 when feature on', async () => {
-  test.skip(!ENGAGEMENT_ENABLED, 'requires FEATURE_ENGAGEMENT_TRACKING=true')
+  if (!(await isEngagementEnabled())) {
+    test.skip(true, 'requires engagement tracking enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/analytics/events`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -33,7 +35,9 @@ test('POST /analytics/events: unauthenticated returns 401 when feature on', asyn
 })
 
 test('POST /analytics/events: feature off returns 404', async () => {
-  test.skip(ENGAGEMENT_ENABLED, 'skipped when FEATURE_ENGAGEMENT_TRACKING=true')
+  if (await isEngagementEnabled()) {
+    test.skip(true, 'skipped when engagement tracking enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/analytics/events`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -43,7 +47,9 @@ test('POST /analytics/events: feature off returns 404', async () => {
 })
 
 test('GET enrollment engagement: unauthenticated returns 401 when feature on', async () => {
-  test.skip(!ENGAGEMENT_ENABLED, 'requires FEATURE_ENGAGEMENT_TRACKING=true')
+  if (!(await isEngagementEnabled())) {
+    test.skip(true, 'requires engagement tracking enabled')
+  }
   const res = await fetch(
     `${API_BASE}/api/v1/courses/any-course/enrollments/00000000-0000-0000-0000-000000000001/engagement`,
   )
@@ -51,7 +57,9 @@ test('GET enrollment engagement: unauthenticated returns 401 when feature on', a
 })
 
 test('GET enrollment engagement: feature off returns 404', async () => {
-  test.skip(ENGAGEMENT_ENABLED, 'skipped when FEATURE_ENGAGEMENT_TRACKING=true')
+  if (await isEngagementEnabled()) {
+    test.skip(true, 'skipped when engagement tracking enabled')
+  }
   const email = uniqueEmail()
   const { access_token } = await apiSignup({ email, password: PASSWORD })
   const res = await fetch(
@@ -69,7 +77,9 @@ test('GET video-dropoff: unauthenticated returns 401', async () => {
 })
 
 test('GET engagement-overview: student returns 403', async ({ seededCourse }) => {
-  test.skip(!ENGAGEMENT_ENABLED, 'requires FEATURE_ENGAGEMENT_TRACKING=true')
+  if (!(await isEngagementEnabled())) {
+    test.skip(true, 'requires engagement tracking enabled')
+  }
   const res = await fetch(
     `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/analytics/engagement-overview`,
     { headers: { Authorization: `Bearer ${seededCourse.studentToken}` } },
@@ -78,7 +88,9 @@ test('GET engagement-overview: student returns 403', async ({ seededCourse }) =>
 })
 
 test('Batch events stored and engagement summary readable', async ({ seededCourse }) => {
-  test.skip(!ENGAGEMENT_ENABLED, 'requires FEATURE_ENGAGEMENT_TRACKING=true')
+  if (!(await isEngagementEnabled())) {
+    test.skip(true, 'requires engagement tracking enabled')
+  }
 
   // Get the student's enrollment id.
   const enrollsRes = await fetch(
@@ -145,7 +157,9 @@ test('Batch events stored and engagement summary readable', async ({ seededCours
 })
 
 test('Video drop-off report returns histogram shape', async ({ seededCourse }) => {
-  test.skip(!ENGAGEMENT_ENABLED, 'requires FEATURE_ENGAGEMENT_TRACKING=true')
+  if (!(await isEngagementEnabled())) {
+    test.skip(true, 'requires engagement tracking enabled')
+  }
 
   const fakeObjectId = '00000000-0000-0000-0000-000000000042'
 
@@ -183,7 +197,9 @@ test('Video drop-off report returns histogram shape', async ({ seededCourse }) =
 })
 
 test('Engagement overview returns list of students', async ({ seededCourse }) => {
-  test.skip(!ENGAGEMENT_ENABLED, 'requires FEATURE_ENGAGEMENT_TRACKING=true')
+  if (!(await isEngagementEnabled())) {
+    test.skip(true, 'requires engagement tracking enabled')
+  }
 
   const overviewRes = await fetch(
     `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/analytics/engagement-overview`,

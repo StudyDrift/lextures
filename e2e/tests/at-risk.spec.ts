@@ -8,10 +8,10 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup, apiLogin } from '../fixtures/api.js'
+import { isAtRiskEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const AT_RISK_ENABLED = process.env.FEATURE_AT_RISK_ALERTS === 'true'
 
 function uniqueEmail(prefix = 'atrisk') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -23,7 +23,9 @@ test('GET at-risk: unauthenticated returns 401', async () => {
 })
 
 test('GET at-risk: feature off returns 404', async () => {
-  test.skip(AT_RISK_ENABLED, 'skipped when FEATURE_AT_RISK_ALERTS=true')
+  if (await isAtRiskEnabled()) {
+    test.skip(true, 'skipped when at-risk alerts enabled')
+  }
   const { access_token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
   const res = await fetch(`${API_BASE}/api/v1/courses/any-course/at-risk`, {
     headers: { Authorization: `Bearer ${access_token}` },
@@ -32,7 +34,9 @@ test('GET at-risk: feature off returns 404', async () => {
 })
 
 test('GET at-risk: student returns 403', async ({ seededCourse }) => {
-  test.skip(!AT_RISK_ENABLED, 'requires FEATURE_AT_RISK_ALERTS=true')
+  if (!(await isAtRiskEnabled())) {
+    test.skip(true, 'requires at-risk alerts enabled')
+  }
   const res = await fetch(
     `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/at-risk`,
     { headers: { Authorization: `Bearer ${seededCourse.studentToken}` } },
@@ -41,7 +45,9 @@ test('GET at-risk: student returns 403', async ({ seededCourse }) => {
 })
 
 test('At-risk tab: scoring, list, dismiss', async ({ coursePage: page, seededCourse }) => {
-  test.skip(!AT_RISK_ENABLED, 'requires FEATURE_AT_RISK_ALERTS=true')
+  if (!(await isAtRiskEnabled())) {
+    test.skip(true, 'requires at-risk alerts enabled')
+  }
 
   const adminEmail = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
   const adminPassword = process.env.E2E_ADMIN_PASSWORD ?? PASSWORD

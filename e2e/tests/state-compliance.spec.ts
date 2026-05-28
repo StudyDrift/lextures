@@ -19,11 +19,10 @@
  */
 import { test, expect } from '../fixtures/test.js'
 import { apiSignup } from '../fixtures/api.js'
+import { isStatePrivacyEnabled } from '../fixtures/platform-features.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
-const STATE_PRIVACY_ENABLED =
-  process.env.FEATURE_STATE_PRIVACY === 'true' || process.env.STATE_PRIVACY_ENABLED === 'true'
 
 function uniqueEmail(prefix = 'sp') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}@test.invalid`
@@ -34,7 +33,9 @@ function uniqueEmail(prefix = 'sp') {
 // ──────────────────────────────────────────────────────────
 
 test('StatePrivacy: GET disclosure unauthenticated returns 401', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
   const res = await fetch(
     `${API_BASE}/api/v1/compliance/state/disclosure/00000000-0000-0000-0000-000000000001`,
   )
@@ -42,7 +43,9 @@ test('StatePrivacy: GET disclosure unauthenticated returns 401', async () => {
 })
 
 test('StatePrivacy: POST deletion-request unauthenticated returns 401', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/state/deletion-request`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -52,19 +55,25 @@ test('StatePrivacy: POST deletion-request unauthenticated returns 401', async ()
 })
 
 test('StatePrivacy: GET checklist unauthenticated returns 401', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/state/checklist`)
   expect(res.status).toBe(401)
 })
 
 test('StatePrivacy: GET dpa-addendum unauthenticated returns 401', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/state/dpa-addendum/CA`)
   expect(res.status).toBe(401)
 })
 
 test('StatePrivacy: GET prohibitions returns 200 without auth (public endpoint)', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
   const res = await fetch(`${API_BASE}/api/v1/compliance/state/prohibitions`)
   expect(res.status).toBe(200)
   const body = (await res.json()) as { prohibitions?: string[] }
@@ -77,7 +86,9 @@ test('StatePrivacy: GET prohibitions returns 200 without auth (public endpoint)'
 // ──────────────────────────────────────────────────────────
 
 test('StatePrivacy: All endpoints return 404 when feature disabled', async () => {
-  test.skip(STATE_PRIVACY_ENABLED, 'skipped when FEATURE_STATE_PRIVACY=true')
+  if (await isStatePrivacyEnabled()) {
+    test.skip(true, 'skipped when state privacy enabled')
+  }
   const { access_token } = await apiSignup({ email: uniqueEmail('dis'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
   const checks = [
@@ -105,7 +116,9 @@ test('StatePrivacy: All endpoints return 404 when feature disabled', async () =>
 // ──────────────────────────────────────────────────────────
 
 test('StatePrivacy: Prohibitions endpoint returns all attestations (feature on)', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const res = await fetch(`${API_BASE}/api/v1/compliance/state/prohibitions`)
   expect(res.ok).toBeTruthy()
@@ -118,7 +131,9 @@ test('StatePrivacy: Prohibitions endpoint returns all attestations (feature on)'
 })
 
 test('StatePrivacy: GET dpa-addendum/CA returns valid CA SOPIPA addendum', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('ca'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}` }
@@ -129,7 +144,9 @@ test('StatePrivacy: GET dpa-addendum/CA returns valid CA SOPIPA addendum', async
 })
 
 test('StatePrivacy: GET dpa-addendum/TX returns 400 (feature on, admin only - tested via 401 path)', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   // Without auth we get 401 before state validation.
   const res = await fetch(`${API_BASE}/api/v1/compliance/state/dpa-addendum/TX`)
@@ -137,7 +154,9 @@ test('StatePrivacy: GET dpa-addendum/TX returns 400 (feature on, admin only - te
 })
 
 test('StatePrivacy: DPA addendum structure is valid for all states (static service test)', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   // This test validates the public prohibitions endpoint (no auth required)
   // to confirm the service layer is correctly returning well-formed data.
@@ -156,7 +175,9 @@ test('StatePrivacy: DPA addendum structure is valid for all states (static servi
 })
 
 test('StatePrivacy: POST deletion-request returns 403 for non-parent user', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('noparent'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
@@ -171,7 +192,9 @@ test('StatePrivacy: POST deletion-request returns 403 for non-parent user', asyn
 })
 
 test('StatePrivacy: GET disclosure returns 403 for non-parent user', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('noparent2'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}` }
@@ -185,7 +208,9 @@ test('StatePrivacy: GET disclosure returns 403 for non-parent user', async () =>
 })
 
 test('StatePrivacy: GET checklist returns 403 for non-admin user', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('noadmin'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}` }
@@ -196,7 +221,9 @@ test('StatePrivacy: GET checklist returns 403 for non-admin user', async () => {
 })
 
 test('StatePrivacy: PATCH deletion-request returns 403 for non-admin user', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('noadmin2'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}`, 'Content-Type': 'application/json' }
@@ -214,7 +241,9 @@ test('StatePrivacy: PATCH deletion-request returns 403 for non-admin user', asyn
 })
 
 test('StatePrivacy: GET deletion-request returns 403 for non-admin non-owner user', async () => {
-  test.skip(!STATE_PRIVACY_ENABLED, 'requires FEATURE_STATE_PRIVACY=true')
+  if (!(await isStatePrivacyEnabled())) {
+    test.skip(true, 'requires state privacy enabled')
+  }
 
   const { access_token } = await apiSignup({ email: uniqueEmail('noadmin3'), password: PASSWORD })
   const headers = { Authorization: `Bearer ${access_token}` }

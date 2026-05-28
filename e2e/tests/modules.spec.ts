@@ -70,17 +70,11 @@ test.describe('Course modules', () => {
     // Hover to reveal action buttons (they may be opacity-0 until hovered).
     await moduleRow.hover()
     const gearBtn = moduleRow.locator('button[aria-haspopup="menu"]').first()
-    if (await gearBtn.count() === 0) {
-      test.skip(true, 'Module settings button not found — skipping archive test')
-      return
-    }
+    await expect(gearBtn).toBeVisible({ timeout: 5000 })
     await gearBtn.click()
 
     const archiveItem = page.getByRole('menuitem', { name: /archive/i })
-    if (await archiveItem.count() === 0) {
-      test.skip(true, 'Archive menu item not visible — skipping')
-      return
-    }
+    await expect(archiveItem).toBeVisible({ timeout: 3000 })
     await archiveItem.click()
 
     const confirmBtn = page.getByRole('button', { name: /confirm|yes|archive/i })
@@ -104,18 +98,12 @@ test.describe('Course modules', () => {
 
     // The Add button inside the module card
     const addBtn = moduleRow.locator('button[aria-haspopup="menu"]', { hasText: /add module item|add item/i }).first()
-    if (await addBtn.count() === 0) {
-      test.skip(true, 'Add module item button not found — skipping vibe test')
-      return
-    }
+    await expect(addBtn).toBeVisible({ timeout: 5000 })
     await addBtn.click()
 
     // Click the new "Vibe Activity" menu item
     const vibeItem = page.getByRole('menuitem', { name: /vibe activity/i })
-    if (await vibeItem.count() === 0) {
-      test.skip(true, 'Vibe Activity menu item not found — skipping')
-      return
-    }
+    await expect(vibeItem).toBeVisible({ timeout: 3000 })
     await vibeItem.click()
 
     // The dedicated Vibe modal should open
