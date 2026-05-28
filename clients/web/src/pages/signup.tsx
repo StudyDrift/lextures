@@ -19,6 +19,8 @@ import {
   authPrimaryButtonClass,
 } from '../components/auth/auth-field-classes'
 import { PublicAuthShell } from '../components/auth/public-auth-shell'
+import { TimezoneSelector } from '../components/timezone/timezone-selector'
+import { detectBrowserTimezone } from '../lib/format'
 
 export default function Signup() {
   const { t } = useTranslation('auth')
@@ -27,6 +29,7 @@ export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [registerAsParent, setRegisterAsParent] = useState(false)
+  const [timezone, setTimezone] = useState(() => detectBrowserTimezone())
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
   const [policy, setPolicy] = useState<{
@@ -91,6 +94,7 @@ export default function Signup() {
           password,
           display_name: displayName || undefined,
           account_type: registerAsParent ? 'parent' : undefined,
+          timezone: timezone.trim() || undefined,
         }),
       })
       let raw: unknown
@@ -222,6 +226,10 @@ export default function Signup() {
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40">
+              <TimezoneSelector value={timezone} onChange={setTimezone} showDetectedHint />
             </div>
 
             <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50/80 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-900/40">

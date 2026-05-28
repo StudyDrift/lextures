@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/terms"
+	"github.com/lextures/lextures/server/internal/validation"
 )
 
 // Parity: server `UpdateCourseRequest` (camelCase JSON).
@@ -32,6 +33,7 @@ type putCourseBody struct {
 	TermID              *string    `json:"termId"`
 	CourseHomeLanding       *string `json:"courseHomeLanding"`
 	CourseHomeContentItemID *string `json:"courseHomeContentItemId"`
+	CourseTimezone          *string `json:"courseTimezone"`
 }
 
 // handlePutCourse is PUT /api/v1/courses/{course_code} (parity: server `update_handler`).
@@ -199,12 +201,28 @@ func (d Deps) handlePutCourse() http.HandlerFunc {
 			homeContentItemID = nil
 		}
 
+		courseTZ := existing.CourseTimezone
+		if body.CourseTimezone != nil {
+			courseTZ = validation.NormalizeTimezone(body.CourseTimezone)
+			if courseTZ != nil {
+				valid, err := validation.ValidIANATimezone(r.Context(), d.Pool, *courseTZ)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate course timezone.")
+					return
+				}
+				if !valid {
+					apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeUnprocessableEntity, "Invalid IANA timezone identifier.")
+					return
+				}
+			}
+		}
+
 		out, err := course.UpdateCourse(
 			r.Context(), d.Pool, courseCode,
 			title, desc, body.Published,
 			startsAt, endsAt, visibleFrom, hiddenAt,
 			outMode, relEndAfter, relHiddenAfter, relAnchor,
-			homeLanding, homeContentItemID,
+			homeLanding, homeContentItemID, courseTZ,
 		)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update course.")

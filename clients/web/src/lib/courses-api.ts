@@ -175,6 +175,8 @@ export type CoursePublic = {
   courseHomeLanding?: string
   /** When `courseHomeLanding` is `content_page`, the module item id. */
   courseHomeContentItemId?: string | null
+  /** Instructor-authoritative IANA timezone for deadline intent (plan 11.4). */
+  courseTimezone?: string | null
 }
 
 export type OrgTerm = {

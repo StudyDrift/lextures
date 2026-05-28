@@ -48,6 +48,7 @@ import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey 
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
 import { useUiDensityControls } from '../../context/ui-density-context'
+import { AccountTimezonePanel } from '../../components/settings/account-timezone-panel'
 import { LocaleSwitcher } from '../../components/settings/locale-switcher'
 import { syncUserLocale } from '../../lib/sync-user-locale'
 
@@ -1084,6 +1085,8 @@ export default function Settings() {
                     Dark
                   </button>
                 </div>
+
+                <AccountTimezonePanel />
 
                 <AiProcessingSettingsPanel />
 

@@ -81,6 +81,15 @@ export const handlers = [
       checkHibp: true,
     })
   }),
+  http.get('http://localhost:8080/api/v1/timezones', () => {
+    return HttpResponse.json({
+      timezones: [
+        { id: 'America/New_York', offsetMinutes: -300 },
+        { id: 'Asia/Tokyo', offsetMinutes: 540 },
+        { id: 'UTC', offsetMinutes: 0 },
+      ],
+    })
+  }),
   http.post('http://localhost:8080/api/v1/auth/change-password', () => {
     return HttpResponse.json({ message: 'Your password has been updated.' })
   }),
