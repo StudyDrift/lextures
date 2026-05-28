@@ -83,9 +83,11 @@ test('POST /admin/av-scan/bulk: non-admin returns 403 or 501', async () => {
 })
 
 test.describe('EICAR quarantine lifecycle', () => {
-  if (!(await isAVEnabled())) {
-    test.skip(true, 'requires AV scanning enabled')
-  }
+  test.beforeEach(async () => {
+    if (!(await isAVEnabled())) {
+      test.skip(true, 'requires AV scanning enabled')
+    }
+  })
 
   test('uploading EICAR via tus quarantines file and blocks download', async () => {
     const { access_token } = await apiSignup({ email: uniqueEmail('eicar'), password: PASSWORD })
