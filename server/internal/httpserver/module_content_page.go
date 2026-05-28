@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/relativeschedule"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulecontent"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
@@ -147,6 +148,7 @@ func (d Deps) handleGetModuleContentPage() http.HandlerFunc {
 		}
 		out := buildModuleContentPageGetResponse(itemID, row, shift)
 		d.enrichModuleItemResponse(r, *cid, itemID, rlrepo.TypeContentPage, viewer, canEdit, &out)
+		d.enrichModuleItemWithTranslation(r.Context(), *cid, itemID, ctrepo.TypeContentPage, viewer, canEdit, &out)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

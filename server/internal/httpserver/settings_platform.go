@@ -87,6 +87,7 @@ type platformSettingsJSON struct {
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
+	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
@@ -212,6 +213,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
+			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
@@ -310,6 +312,7 @@ type putPlatformBody struct {
 	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        *bool `json:"readingLevelEnabled"`
+	TranslationMemoryEnabled   *bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
@@ -568,6 +571,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
+		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
 		setBool("coppaworkflowenabled", body.CoppaWorkflowEnabled, func(v bool) { wr.CoppaWorkflowEnabled = &v })
@@ -650,6 +654,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
+			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,

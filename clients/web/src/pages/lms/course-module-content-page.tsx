@@ -47,6 +47,7 @@ import {
   simplifyItemContent,
   type ReadingLevelInfo,
 } from '../../lib/reading-level-api'
+import { CourseContentLocaleSelector } from '../../components/translation/course-content-locale-selector'
 
 function newLocalId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -433,7 +434,8 @@ export default function CourseModuleContentPage() {
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {courseCode ? <CourseContentLocaleSelector courseCode={courseCode} /> : null}
             {!loading && !loadError && isOnline && (
               <button
                 type="button"

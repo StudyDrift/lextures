@@ -7,9 +7,11 @@ import {
   Info,
   LayoutGrid,
   Scale,
+  Languages,
   SlidersHorizontal,
   Target,
 } from 'lucide-react'
+import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { courseSettingsSectionFromPathname } from './side-nav-path-utils'
 import { sideNavActiveClass } from './side-nav-styles'
 import { SideNavLink } from './side-nav-link'
@@ -66,6 +68,15 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Features
       </SideNavLink>
+      {isTranslationMemoryEnabled() ? (
+        <SideNavLink
+          to={`${base}/translations`}
+          className={() => (section === 'translations' ? sideNavActiveClass : '')}
+          icon={<Languages className="h-5 w-5" />}
+        >
+          Translations
+        </SideNavLink>
+      ) : null}
       <SideNavLink
         to={`${base}/sections`}
         className={() => (section === 'sections' ? sideNavActiveClass : '')}

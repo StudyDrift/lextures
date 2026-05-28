@@ -41,6 +41,7 @@ func ManagedPermissionSuffixes() []string {
 	return []string{
 		"item:create",
 		"items:create",
+		"content:translate",
 		"enrollments:read",
 		"enrollments:update",
 		"gradebook:view",
@@ -67,6 +68,7 @@ func RoleMatrixPermissions(courseCode, role string) []string {
 		return []string{
 			prefix + "item:create",
 			prefix + "items:create",
+			prefix + "content:translate",
 			prefix + "enrollments:read",
 			prefix + "enrollments:update",
 			prefix + "gradebook:view",
@@ -80,6 +82,7 @@ func RoleMatrixPermissions(courseCode, role string) []string {
 		return []string{
 			prefix + "item:create",
 			prefix + "items:create",
+			prefix + "content:translate",
 		}
 	case "auditor":
 		return []string{

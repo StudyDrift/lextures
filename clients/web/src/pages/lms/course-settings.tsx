@@ -34,6 +34,8 @@ import { CourseOutcomesSection } from './course-outcomes-section'
 import { CourseBlueprintSection } from './course-blueprint-settings'
 import { CourseCrossListingSection } from './course-cross-listing-settings'
 import { CourseSectionsSettingsSection } from './course-sections-settings'
+import CourseTranslationsSettings from './course-translations-settings'
+import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 
 function isoToDatetimeLocal(iso: string | null): string {
   if (!iso) return ''
@@ -105,6 +107,7 @@ type SettingsSection =
   | 'grading'
   | 'outcomes'
   | 'features'
+  | 'translations'
   | 'sections'
   | 'import-export'
   | 'blueprint'
@@ -142,6 +145,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   if (seg === 'grading') return 'grading'
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'features') return 'features'
+  if (seg === 'translations') return 'translations'
   if (seg === 'sections') return 'sections'
   if (seg === 'import-export') return 'import-export'
   if (seg === 'blueprint') return 'blueprint'
@@ -689,7 +693,7 @@ export default function CourseSettings() {
   }
 
   const section = parseSettingsSection(courseCode, location.pathname)
-  if (section === 'invalid') {
+  if (section === 'invalid' || (section === 'translations' && !isTranslationMemoryEnabled())) {
     return <Navigate to={`${settingsBase}/general`} replace />
   }
 
@@ -710,7 +714,11 @@ export default function CourseSettings() {
             ? course?.title
               ? `${course.title} — features`
               : 'Features'
-            : section === 'sections'
+            : section === 'translations'
+              ? course?.title
+                ? `${course.title} — translations`
+                : 'Translations'
+              : section === 'sections'
               ? course?.title
                 ? `${course.title} — sections`
                 : 'Sections'
@@ -739,7 +747,9 @@ export default function CourseSettings() {
           ? 'Define learning outcomes, map assignments and quizzes (including individual questions) with measurement and intensity levels, and review class progress from grades and attempts.'
           : section === 'features'
             ? 'Choose which course tools appear in the menu and are available to instructors and learners.'
-            : section === 'sections'
+            : section === 'translations'
+              ? 'Create locale variants, manage glossary terms, and review translation coverage.'
+              : section === 'sections'
               ? 'Create teaching sections, manage rosters, and set per-section assignment due dates.'
               : section === 'import-export'
                 ? 'Download the full course as JSON or restore from a backup file.'
@@ -1248,6 +1258,9 @@ export default function CourseSettings() {
               onCourseUpdated={setCourse}
             />
           )}
+          {section === 'translations' && isTranslationMemoryEnabled() && courseCode ? (
+            <CourseTranslationsSettings />
+          ) : null}
           {section === 'sections' &&
             (course.sectionsEnabled ? (
               <>

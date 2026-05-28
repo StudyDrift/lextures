@@ -36,6 +36,7 @@ export type PlatformSettingsPayload = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
@@ -118,6 +119,7 @@ function emptyForm(): PlatformSettingsPayload {
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+    translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
     virtualClassroomEnabled: true,
@@ -358,6 +360,14 @@ export function PlatformSettingsPanel() {
       maybe('readingLevelEnabled', baseline.readingLevelEnabled, form.readingLevelEnabled, () => {
         body.readingLevelEnabled = form.readingLevelEnabled
       })
+      maybe(
+        'translationMemoryEnabled',
+        baseline.translationMemoryEnabled,
+        form.translationMemoryEnabled,
+        () => {
+          body.translationMemoryEnabled = form.translationMemoryEnabled
+        },
+      )
       maybe('storageQuotasEnabled', baseline.storageQuotasEnabled, form.storageQuotasEnabled, () => {
         body.storageQuotasEnabled = form.storageQuotasEnabled
       })
@@ -763,6 +773,12 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.readingLevelEnabled}
               onChange={(v) => update('readingLevelEnabled', v)}
+            />
+            <FlagRow
+              label="Translation memory (course content)"
+              src="default"
+              checked={form.translationMemoryEnabled}
+              onChange={(v) => update('translationMemoryEnabled', v)}
             />
             <FlagRow
               label="Storage quotas"

@@ -1,33 +1,26 @@
-import { afterEach, describe, expect, it } from 'vitest'
-import {
-  resetPlatformFeaturesSnapshot,
-  setPlatformFeaturesSnapshot,
-  studentProgressFeatureEnabled,
-} from '../platform-features'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { resetPlatformFeaturesSnapshot, setPlatformFeaturesSnapshot } from '../platform-features'
 
-describe('studentProgressFeatureEnabled', () => {
+describe('course-translation-api feature gate', () => {
   afterEach(() => {
     resetPlatformFeaturesSnapshot()
+    vi.resetModules()
   })
 
-  it('is false before platform features load', () => {
-    expect(studentProgressFeatureEnabled()).toBe(false)
-  })
-
-  it('is true when platform snapshot enables it', () => {
+  it('isTranslationMemoryEnabled reflects platform snapshot', async () => {
     setPlatformFeaturesSnapshot({
-      studentProgressEnabled: true,
+      studentProgressEnabled: false,
       atRiskAlertsEnabled: false,
       h5pEnabled: false,
       oerLibraryEnabled: false,
       itemAnalysisEnabled: false,
-      outcomesReportEnabled: false,
       engagementTrackingEnabled: false,
       selfReflectionEnabled: false,
+      outcomesReportEnabled: false,
       xapiEmissionEnabled: false,
       equationEditorEnabled: false,
       readingLevelEnabled: false,
-      translationMemoryEnabled: false,
+      translationMemoryEnabled: true,
       storageQuotasEnabled: false,
       avScanningEnabled: false,
       virtualClassroomEnabled: true,
@@ -35,6 +28,7 @@ describe('studentProgressFeatureEnabled', () => {
       instructorInsightsEnabled: false,
       rtlEnabled: false,
     })
-    expect(studentProgressFeatureEnabled()).toBe(true)
+    const { isTranslationMemoryEnabled } = await import('../course-translation-api')
+    expect(isTranslationMemoryEnabled()).toBe(true)
   })
 })

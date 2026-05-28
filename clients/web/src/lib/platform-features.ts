@@ -12,6 +12,7 @@ export type PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
@@ -32,6 +33,7 @@ const defaults: PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
   virtualClassroomEnabled: true,
@@ -83,6 +85,10 @@ export function equationEditorFeatureEnabled(): boolean {
 
 export function readingLevelFeatureEnabled(): boolean {
   return loaded && snapshot.readingLevelEnabled
+}
+
+export function translationMemoryFeatureEnabled(): boolean {
+  return loaded && snapshot.translationMemoryEnabled
 }
 
 export function engagementTrackingFeatureEnabled(): boolean {
