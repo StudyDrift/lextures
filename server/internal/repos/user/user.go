@@ -19,8 +19,8 @@ const (
 )
 
 // userRowColumns is the canonical SELECT/RETURNING column list for user rows.
-const userRowColumns = `id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, sid,
-       login_blocked, deactivated_at, account_type, timezone`
+const userRowColumns = `id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, timezone, sid,
+       login_blocked, deactivated_at, account_type`
 
 // Row is a users table row for authentication and profile in API responses.
 type Row struct {
@@ -34,12 +34,12 @@ type Row struct {
 	UITheme         string
 	ShowHelpPopover bool
 	Locale          string
+	Timezone        *string
 	Sid             *string
 	LoginBlocked    bool
 	DeactivatedAt   *time.Time
 	// AccountType is "standard" (default) or "parent" (plan 5.10).
 	AccountType string
-	Timezone    *string
 }
 
 func strPtr(ns sql.NullString) *string {
@@ -52,11 +52,11 @@ func strPtr(ns sql.NullString) *string {
 
 func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any) (*Row, error) {
 	var r Row
-	var displayName, firstName, lastName, avatar, sid, timezone sql.NullString
+	var displayName, firstName, lastName, avatar, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, query, arg).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &sid,
-		&r.LoginBlocked, &deactivatedAt, &r.AccountType, &timezone,
+		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
+		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -68,8 +68,8 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	r.FirstName = strPtr(firstName)
 	r.LastName = strPtr(lastName)
 	r.AvatarURL = strPtr(avatar)
-	r.Sid = strPtr(sid)
 	r.Timezone = strPtr(timezone)
+	r.Sid = strPtr(sid)
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
@@ -85,11 +85,11 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 
 func scanInsertedUserRow(row pgx.Row) (*Row, error) {
 	var r Row
-	var dn, fn, ln, av, sid, timezone sql.NullString
+	var dn, fn, ln, av, timezone, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := row.Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &sid,
-		&r.LoginBlocked, &deactivatedAt, &r.AccountType, &timezone,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &timezone, &sid,
+		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
 		return nil, err
@@ -98,8 +98,8 @@ func scanInsertedUserRow(row pgx.Row) (*Row, error) {
 	r.FirstName = strPtr(fn)
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
-	r.Sid = strPtr(sid)
 	r.Timezone = strPtr(timezone)
+	r.Sid = strPtr(sid)
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}

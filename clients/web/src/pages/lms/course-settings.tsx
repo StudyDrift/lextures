@@ -6,6 +6,8 @@ import { usePermissions } from '../../context/use-permissions'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { TimezoneSelector } from '../../components/timezone/timezone-selector'
+import { detectBrowserTimezone } from '../../lib/format'
 import {
   courseItemCreatePermission,
   fetchCourseStructure,
@@ -95,6 +97,7 @@ type SavePayload = {
   relativeHiddenAfter: string | null
   courseHomeLanding: CourseHomeLanding
   courseHomeContentItemId: string | null
+  courseTimezone: string | null
 }
 
 type SettingsSection =
@@ -169,6 +172,7 @@ export default function CourseSettings() {
 
   const [courseHomeLanding, setCourseHomeLanding] = useState<CourseHomeLanding>('data')
   const [courseHomeContentItemId, setCourseHomeContentItemId] = useState('')
+  const [courseTimezone, setCourseTimezone] = useState(() => detectBrowserTimezone())
   const [structureForHomePicker, setStructureForHomePicker] = useState<CourseStructureItem[]>([])
 
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
@@ -225,6 +229,7 @@ export default function CourseSettings() {
       applyScheduleStateFromCourse(c)
       setCourseHomeLanding(normalizeCourseHomeLanding(c.courseHomeLanding))
       setCourseHomeContentItemId((c.courseHomeContentItemId ?? '').trim())
+      setCourseTimezone(c.courseTimezone?.trim() || detectBrowserTimezone())
       setMarkdownThemePreset(c.markdownThemePreset ?? 'default')
       try {
         const items = await fetchCourseStructure(courseCode)
@@ -364,6 +369,7 @@ export default function CourseSettings() {
         courseHomeLanding === 'content_page' && courseHomeContentItemId.trim()
           ? courseHomeContentItemId.trim()
           : null,
+      courseTimezone: courseTimezone.trim() || null,
     }
   }
 
@@ -393,6 +399,7 @@ export default function CourseSettings() {
       published !== course.published ||
       courseHomeLanding !== normalizeCourseHomeLanding(course.courseHomeLanding) ||
       (courseHomeLanding === 'content_page' && courseHomeContentItemId.trim() !== (course.courseHomeContentItemId ?? '').trim()) ||
+      (courseTimezone.trim() || null) !== (course.courseTimezone?.trim() || null) ||
       (course.scheduleMode || 'fixed') !== scheduleMode ||
       (scheduleMode === 'fixed' && (
         datetimeLocalToIso(startsAt) !== normalizeIso(course.startsAt) ||
@@ -445,6 +452,7 @@ export default function CourseSettings() {
             relativeHiddenAfter: payload.relativeHiddenAfter,
             courseHomeLanding: payload.courseHomeLanding,
             courseHomeContentItemId: payload.courseHomeContentItemId,
+            courseTimezone: payload.courseTimezone,
           }),
         })
         const raw: unknown = await res.json().catch(() => ({}))
@@ -796,6 +804,22 @@ export default function CourseSettings() {
                       placeholder="What is this course about?"
                     />
                   </label>
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Course time zone</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+                  Deadlines you set are interpreted in this time zone. Learners see due dates in their own time zone
+                  with this zone shown as the instructor reference.
+                </p>
+                <div className="mt-4 max-w-md">
+                  <TimezoneSelector
+                    value={courseTimezone}
+                    onChange={setCourseTimezone}
+                    label="Instructor time zone"
+                    showDetectedHint={false}
+                  />
                 </div>
               </section>
 

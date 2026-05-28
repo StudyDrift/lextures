@@ -60,6 +60,7 @@ describe('isEquationEditorEnabled', () => {
       selfReflectionEnabled: false,
       xapiEmissionEnabled: false,
       equationEditorEnabled: true,
+      readingLevelEnabled: false,
       storageQuotasEnabled: false,
       avScanningEnabled: false,
       virtualClassroomEnabled: true,

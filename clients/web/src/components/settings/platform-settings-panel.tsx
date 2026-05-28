@@ -35,6 +35,7 @@ export type PlatformSettingsPayload = {
   itemAnalysisEnabled: boolean
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
+  readingLevelEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
   virtualClassroomEnabled: boolean
@@ -116,6 +117,7 @@ function emptyForm(): PlatformSettingsPayload {
     itemAnalysisEnabled: false,
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
+    readingLevelEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
     virtualClassroomEnabled: true,
@@ -352,6 +354,9 @@ export function PlatformSettingsPanel() {
       })
       maybe('equationEditorEnabled', baseline.equationEditorEnabled, form.equationEditorEnabled, () => {
         body.equationEditorEnabled = form.equationEditorEnabled
+      })
+      maybe('readingLevelEnabled', baseline.readingLevelEnabled, form.readingLevelEnabled, () => {
+        body.readingLevelEnabled = form.readingLevelEnabled
       })
       maybe('storageQuotasEnabled', baseline.storageQuotasEnabled, form.storageQuotasEnabled, () => {
         body.storageQuotasEnabled = form.storageQuotasEnabled
@@ -752,6 +757,12 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.equationEditorEnabled}
               onChange={(v) => update('equationEditorEnabled', v)}
+            />
+            <FlagRow
+              label="Reading level adaptation"
+              src="default"
+              checked={form.readingLevelEnabled}
+              onChange={(v) => update('readingLevelEnabled', v)}
             />
             <FlagRow
               label="Storage quotas"

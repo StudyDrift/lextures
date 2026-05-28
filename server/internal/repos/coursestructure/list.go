@@ -9,6 +9,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 )
 
 // ItemRow matches `server/src/models/course_structure::CourseStructureItemRow`.
@@ -48,8 +50,10 @@ type ItemResponse struct {
 	UpdatedAt         time.Time  `json:"updatedAt"`
 	IsAdaptive        *bool      `json:"isAdaptive,omitempty"`
 	PointsPossible    *int       `json:"pointsPossible,omitempty"`
-	PointsWorth       *int       `json:"pointsWorth,omitempty"`
-	ExternalURL       *string    `json:"externalUrl,omitempty"`
+	PointsWorth                *int     `json:"pointsWorth,omitempty"`
+	ExternalURL                *string  `json:"externalUrl,omitempty"`
+	ReadingLevelFkgl           *float64 `json:"readingLevelFkgl,omitempty"`
+	ReadingLevelAboveThreshold bool     `json:"readingLevelAboveThreshold,omitempty"`
 }
 
 var selectItemRow = `SELECT
@@ -380,6 +384,40 @@ func RowsToResponsesWithQuizAdaptive(ctx context.Context, pool *pgxpool.Pool, co
 		out = append(out, item)
 	}
 	return out, nil
+}
+
+// ApplyReadingLevelMetadata sets FKGL badges on content_page and assignment items.
+func ApplyReadingLevelMetadata(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, items []ItemResponse) error {
+	if pool == nil || len(items) == 0 {
+		return nil
+	}
+	ids := make([]uuid.UUID, 0, len(items))
+	for i := range items {
+		if items[i].Kind == "content_page" || items[i].Kind == "assignment" {
+			id, err := uuid.Parse(items[i].ID)
+			if err != nil {
+				continue
+			}
+			ids = append(ids, id)
+		}
+	}
+	levels, err := rlrepo.LoadReadingLevelsForItems(ctx, pool, courseID, ids)
+	if err != nil {
+		return err
+	}
+	warnAt := float64(10) // default grade 8 + 2
+	for i := range items {
+		id, err := uuid.Parse(items[i].ID)
+		if err != nil {
+			continue
+		}
+		if fkgl, ok := levels[id]; ok && fkgl != nil {
+			v := *fkgl
+			items[i].ReadingLevelFkgl = &v
+			items[i].ReadingLevelAboveThreshold = v > warnAt
+		}
+	}
+	return nil
 }
 
 // ListForCourseWithEnrichment loads, filters, and enriches structure for GET /api/v1/courses/…/structure.

@@ -43,6 +43,7 @@ import {
 import { getMostRecentLastVisited, hrefForLastVisited } from '../../lib/last-visited-module-item'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
+import { DeadlineDateTime } from '../../components/timezone/deadline-datetime'
 import { useInboxUnreadCount, useCoursesRevision } from '../../context/use-inbox-unread'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
 import { usePermissions } from '../../context/use-permissions'
@@ -775,13 +776,6 @@ export default function Dashboard() {
                               : it.kind === 'assignment'
                                 ? `${base}/modules/assignment/${encodeURIComponent(it.id)}`
                                 : `${base}/modules/content/${encodeURIComponent(it.id)}`
-                          const dueLabel = formatDateTime(it.dueAt!, {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })
                           return (
                             <li key={`${row.course.courseCode}-${it.id}`}>
                               <Link
@@ -800,7 +794,10 @@ export default function Dashboard() {
                                   </p>
                                   <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400">
                                     <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                                    {dueLabel}
+                                    <DeadlineDateTime
+                                      iso={it.dueAt!}
+                                      courseTimezone={row.course.courseTimezone}
+                                    />
                                   </p>
                                 </div>
                                 {g ? (

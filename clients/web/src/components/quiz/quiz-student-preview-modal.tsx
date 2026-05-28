@@ -13,7 +13,7 @@ import {
 } from '../../lib/courses-api'
 import { shuffleArray, shuffledIndices } from '../../lib/shuffle'
 import type { ResolvedMarkdownTheme } from '../../lib/markdown-theme'
-import { LocaleTime } from '../ui/locale-time'
+import { DeadlineDateTime } from '../timezone/deadline-datetime'
 
 export type QuizStudentPreviewModalProps = {
   open: boolean
@@ -21,6 +21,7 @@ export type QuizStudentPreviewModalProps = {
   quizTitle: string
   markdown: string
   dueAt: string | null
+  courseTimezone?: string | null
   questions: QuizQuestion[]
   theme: ResolvedMarkdownTheme
   courseCode?: string
@@ -883,6 +884,7 @@ function QuizStudentPreviewModalContent({
   quizTitle,
   markdown,
   dueAt,
+  courseTimezone,
   questions,
   theme,
   courseCode,
@@ -933,7 +935,7 @@ function QuizStudentPreviewModalContent({
             {dueAt && (
               <p className="text-sm text-slate-600">
                 <span className="font-medium text-slate-800">Due:</span>{' '}
-                <LocaleTime date={dueAt} data-testid="quiz-due-date" />
+                <DeadlineDateTime iso={dueAt} courseTimezone={courseTimezone} />
               </p>
             )}
             <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm">

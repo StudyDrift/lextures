@@ -25,8 +25,9 @@ const (
 	FeatureAITutor            = "ai_tutor"
 	FeatureRAGNotebook        = "rag_notebook"
 	FeatureSyllabusGeneration = "syllabus_generation"
-	FeatureTranslation        = "translation"
-	FeatureQuizGeneration     = "quiz_generation"
+	FeatureTranslation                 = "translation"
+	FeatureQuizGeneration              = "quiz_generation"
+	FeatureReadingLevelSimplification  = "reading_level_simplification"
 )
 
 // BlockReason explains why a call was blocked.

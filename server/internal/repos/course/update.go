@@ -18,6 +18,7 @@ func UpdateCourse(
 	relativeScheduleAnchorAt *time.Time,
 	courseHomeLanding string,
 	courseHomeContentItemID *uuid.UUID,
+	courseTimezone *string,
 ) (*CoursePublic, error) {
 	const q = `
 		UPDATE course.courses
@@ -35,14 +36,15 @@ func UpdateCourse(
 			relative_schedule_anchor_at = $11,
 			course_home_landing = $12,
 			course_home_content_item_id = $13,
+			course_timezone = $14,
 			updated_at = NOW()
-		WHERE course_code = $14
+		WHERE course_code = $15
 	`
 	tag, err := pool.Exec(ctx, q,
 		title, description, published,
 		startsAt, endsAt, visibleFrom, hiddenAt,
 		scheduleMode, relativeEndAfter, relativeHiddenAfter, relativeScheduleAnchorAt,
-		courseHomeLanding, courseHomeContentItemID,
+		courseHomeLanding, courseHomeContentItemID, courseTimezone,
 		courseCode,
 	)
 	if err != nil {
