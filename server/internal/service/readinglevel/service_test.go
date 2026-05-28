@@ -7,14 +7,6 @@ import (
 	"github.com/lextures/lextures/server/internal/service/readinglevel"
 )
 
-func repeatWords(n int, word string) string {
-	words := make([]string, n)
-	for i := range words {
-		words[i] = word
-	}
-	return strings.Join(words, " ") + ". " + strings.Join(words, " ") + "."
-}
-
 func TestAnalyze_InsufficientText(t *testing.T) {
 	sc := readinglevel.Analyze("short text only here.")
 	if sc.Sufficient {
