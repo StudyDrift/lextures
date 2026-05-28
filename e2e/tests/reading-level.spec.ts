@@ -28,20 +28,11 @@ const longBody =
   'Understanding the water cycle helps explain weather patterns and climate change impacts. '
 
 test.describe('Reading level API', () => {
-  test('GET reading-level returns 404 when platform flag is off', async ({ request }) => {
-    const { access_token } = await apiSignup({
-      email: uniqueEmail('off'),
-      password: PASSWORD,
-      displayName: 'RL Off',
-    })
-    const course = await apiCreateCourse(access_token, { title: 'RL Course' })
-    const mod = await apiCreateModule(access_token, course.courseCode, 'Unit 1')
-    const page = await apiCreateContentPage(access_token, course.courseCode, mod.id, 'Lesson')
+  test('unauthenticated GET reading-level returns 401', async ({ request }) => {
     const res = await request.get(
-      `${API_BASE}/api/v1/courses/${course.courseCode}/items/${page.id}/reading-level`,
-      { headers: authHeaders(access_token) },
+      `${API_BASE}/api/v1/courses/C-TEST01/items/00000000-0000-0000-0000-000000000001/reading-level`,
     )
-    expect([404, 403]).toContain(res.status())
+    expect(res.status()).toBe(401)
   })
 
   test('PATCH content page stores FKGL after save when enabled', async ({ request }) => {
