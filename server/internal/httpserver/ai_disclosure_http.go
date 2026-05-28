@@ -39,10 +39,6 @@ func (d Deps) registerAIDisclosureRoutes(r chi.Router) {
 
 func (d Deps) handlePublicAIDisclosure() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		lang := strings.TrimSpace(r.URL.Query().Get("lang"))
-		if lang == "" {
-			lang = "en"
-		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "public, max-age=3600")
 		_, _ = w.Write(pkgai.PublicDisclosureJSON)

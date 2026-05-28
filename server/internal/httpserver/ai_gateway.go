@@ -2,7 +2,6 @@ package httpserver
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
@@ -75,20 +74,4 @@ func (d Deps) logAIInferenceAllowed(r *http.Request, userID uuid.UUID, feature, 
 		dec.OptInConfirmed = true
 	}
 	_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, aigateway.ProviderOpenRouter, aigateway.ContentHash(contentForHash), false)
-}
-
-func aiFeatureFromPath(path string) string {
-	p := strings.ToLower(path)
-	switch {
-	case strings.Contains(p, "/tutor/"):
-		return aigateway.FeatureAITutor
-	case strings.Contains(p, "/notebooks/query"):
-		return aigateway.FeatureRAGNotebook
-	case strings.Contains(p, "/syllabus") && strings.Contains(p, "generate"):
-		return aigateway.FeatureSyllabusGeneration
-	case strings.Contains(p, "/translate"):
-		return aigateway.FeatureTranslation
-	default:
-		return "ai_unknown"
-	}
 }
