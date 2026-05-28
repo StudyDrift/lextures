@@ -7,7 +7,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
-import { Clock, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Clock, X } from 'lucide-react'
 import { useOptionalQuizShellFocus } from '../layout/quiz-shell-focus-context'
 import type { QuizShellFocusMode, QuizShellLockdownAccent } from '../layout/quiz-shell-focus-context'
 import { formatDateTime } from '../../lib/format'
@@ -223,6 +223,14 @@ export function QuizStudentTakePanel({
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
+
+  useEffect(() => {
+    if (!open) return
+    requestAnimationFrame(() => {
+      const el = panelRef.current?.querySelector<HTMLElement>('button:not([disabled])')
+      el?.focus()
+    })
+  }, [open])
 
   useEffect(() => {
     if (!open || !startMeta?.deadlineAt || uiPhase.kind !== 'static') {
@@ -1616,32 +1624,69 @@ function StaticTakeBody({
               </p>
             ) : (
               orderingItems.map((item, i) => (
-                <div
-                  key={`${q.id}-ordering-${i}-${item}`}
-                  draggable
-                  onDragStart={(e) => {
-                    e.dataTransfer.effectAllowed = 'move'
-                    e.dataTransfer.setData('text/plain', String(i))
-                  }}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => {
-                    const fromRaw = e.dataTransfer.getData('text/plain')
-                    const from = Number(fromRaw)
-                    if (!Number.isFinite(from) || from < 0 || from === i) return
-                    setAnswers((prev) => {
-                      const cur = prev[q.id]?.ordering ?? orderingItemsForQuestion(q)
-                      const next = [...cur]
-                      const [moved] = next.splice(from, 1)
-                      next.splice(i, 0, moved)
-                      return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
-                    })
-                  }}
-                  className="flex cursor-grab items-center justify-between rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-100"
-                >
-                  <span>
-                    {(baseOrderingItems.findIndex((x) => x === item) + 1 || i + 1)}. {item}
-                  </span>
-                  <span className="text-xs text-slate-400 dark:text-neutral-500">Drag</span>
+                <div key={`${q.id}-ordering-${i}-${item}`} className="flex items-center gap-2">
+                  <div
+                    draggable
+                    onDragStart={(e) => {
+                      e.dataTransfer.effectAllowed = 'move'
+                      e.dataTransfer.setData('text/plain', String(i))
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => {
+                      const fromRaw = e.dataTransfer.getData('text/plain')
+                      const from = Number(fromRaw)
+                      if (!Number.isFinite(from) || from < 0 || from === i) return
+                      setAnswers((prev) => {
+                        const cur = prev[q.id]?.ordering ?? orderingItemsForQuestion(q)
+                        const next = [...cur]
+                        const [moved] = next.splice(from, 1)
+                        next.splice(i, 0, moved)
+                        return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
+                      })
+                    }}
+                    className="flex flex-1 cursor-grab items-center justify-between rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-100"
+                  >
+                    <span>
+                      {(baseOrderingItems.findIndex((x) => x === item) + 1 || i + 1)}. {item}
+                    </span>
+                    <span className="text-xs text-slate-400 dark:text-neutral-500">Drag</span>
+                  </div>
+                  <div className="flex flex-col gap-0.5" role="group" aria-label={`Reorder item ${i + 1}`}>
+                    <button
+                      type="button"
+                      disabled={i === 0}
+                      aria-label={`Move item ${i + 1} up`}
+                      onClick={() =>
+                        setAnswers((prev) => {
+                          const cur = prev[q.id]?.ordering ?? orderingItemsForQuestion(q)
+                          const next = [...cur]
+                          const [moved] = next.splice(i, 1)
+                          next.splice(i - 1, 0, moved)
+                          return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
+                        })
+                      }
+                      className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                    >
+                      <ChevronUp className="h-3.5 w-3.5" aria-hidden />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={i === orderingItems.length - 1}
+                      aria-label={`Move item ${i + 1} down`}
+                      onClick={() =>
+                        setAnswers((prev) => {
+                          const cur = prev[q.id]?.ordering ?? orderingItemsForQuestion(q)
+                          const next = [...cur]
+                          const [moved] = next.splice(i, 1)
+                          next.splice(i + 1, 0, moved)
+                          return { ...prev, [q.id]: { ...prev[q.id], ordering: next } }
+                        })
+                      }
+                      className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:border-neutral-600 dark:text-neutral-400 dark:hover:bg-neutral-700"
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                    </button>
+                  </div>
                 </div>
               ))
             )}

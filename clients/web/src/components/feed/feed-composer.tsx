@@ -62,6 +62,7 @@ export function FeedComposer({
 }: FeedComposerProps) {
   const taRef = useRef<HTMLTextAreaElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const toolbarRef = useRef<HTMLDivElement>(null)
   const [imageBusy, setImageBusy] = useState(false)
   const [imageErr, setImageErr] = useState<string | null>(null)
   const [formatBarVisible, setFormatBarVisible] = useState(true)
@@ -270,8 +271,27 @@ export function FeedComposer({
     })
   }, [value, onChange, blocked, syncPicker])
 
+  const handleToolbarKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return
+      const toolbar = toolbarRef.current
+      if (!toolbar) return
+      const btns = Array.from(toolbar.querySelectorAll<HTMLButtonElement>('button:not(:disabled)'))
+      const cur = btns.findIndex((b) => b === document.activeElement)
+      if (cur < 0) return
+      e.preventDefault()
+      let next = cur
+      if (e.key === 'ArrowRight') next = (cur + 1) % btns.length
+      else if (e.key === 'ArrowLeft') next = (cur - 1 + btns.length) % btns.length
+      else if (e.key === 'Home') next = 0
+      else if (e.key === 'End') next = btns.length - 1
+      btns[next]?.focus()
+    },
+    [],
+  )
+
   const fmtBtn =
-    'rounded p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:pointer-events-none disabled:opacity-35 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100'
+    'rounded p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 disabled:pointer-events-none disabled:opacity-35 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100'
 
   const fmtSep = 'mx-0.5 h-5 w-px shrink-0 bg-slate-200 dark:bg-neutral-600'
 
@@ -303,6 +323,12 @@ export function FeedComposer({
         else if (row?.kind === 'person') insertMention(labels.get(row.person.userId)!)
         return
       }
+    }
+
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault()
+      if (!blocked && value.trim()) onSubmit()
+      return
     }
 
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -372,9 +398,11 @@ export function FeedComposer({
       <div className="overflow-hidden rounded-lg border border-slate-300 bg-white shadow-sm transition-[box-shadow,border-color] focus-within:border-indigo-400/90 focus-within:shadow-[0_0_0_1px_rgba(99,102,241,0.25)] dark:border-neutral-600 dark:bg-neutral-900 dark:focus-within:border-indigo-500/70 dark:focus-within:shadow-[0_0_0_1px_rgba(129,140,248,0.2)]">
         {formatBarVisible && (
           <div
+            ref={toolbarRef}
             className="flex flex-wrap items-center gap-0.5 border-b border-slate-200 px-2 py-1.5 dark:border-neutral-700"
             role="toolbar"
             aria-label="Formatting"
+            onKeyDown={handleToolbarKeyDown}
           >
             <button
               type="button"
