@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { authorizedFetch, apiUrl } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
@@ -201,7 +202,7 @@ export function ScimSettingsPanel() {
                 {tokens.map((t) => (
                   <tr key={t.id} className="border-t border-slate-100 dark:border-neutral-700">
                     <td className="px-3 py-2">{t.label || '—'}</td>
-                    <td className="px-3 py-2 font-mono text-xs">{new Date(t.createdAt).toLocaleString()}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{formatDateTime(t.createdAt)}</td>
                     <td className="px-3 py-2">{t.revokedAt ? 'Revoked' : 'Active'}</td>
                     <td className="px-3 py-2 text-right">
                       {!t.revokedAt && (
@@ -241,7 +242,7 @@ export function ScimSettingsPanel() {
               <tbody>
                 {events.map((ev) => (
                   <tr key={ev.id} className="border-t border-slate-100 dark:border-neutral-700">
-                    <td className="px-3 py-2 font-mono text-xs">{new Date(ev.createdAt).toLocaleString()}</td>
+                    <td className="px-3 py-2 font-mono text-xs">{formatDateTime(ev.createdAt)}</td>
                     <td className="px-3 py-2">{ev.operation}</td>
                     <td className="px-3 py-2">{ev.scimResource}</td>
                     <td className="px-3 py-2">{ev.userEmail ?? '—'}</td>

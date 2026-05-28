@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { GradeHistoryEvent } from '../../lib/courses-api'
-import { formatAbsoluteShort } from '../../lib/format-datetime'
+import { LocaleTime } from '../ui/locale-time'
 
 function actionLabel(a: string): string {
   switch (a) {
@@ -83,9 +83,7 @@ export function GradeHistoryPanel({
             className="border-l-2 border-indigo-200 pl-3 dark:border-indigo-800/80"
           >
             <div className="text-xs text-slate-500 dark:text-neutral-500">
-              <time dateTime={e.changedAt} title={e.changedAt}>
-                {formatAbsoluteShort(new Date(e.changedAt))}
-              </time>
+              <LocaleTime date={e.changedAt} dateOnly={false} />
             </div>
             <div className="text-sm font-medium text-slate-900 dark:text-neutral-100">
               {actionLabel(e.action)}

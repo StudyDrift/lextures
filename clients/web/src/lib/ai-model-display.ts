@@ -1,3 +1,5 @@
+import { formatNumber } from './format'
+
 /** Compact token count for labels (e.g. 262144 → "262K"). */
 export function formatContextTokens(n: number | null | undefined): string {
   if (n == null || Number.isNaN(n)) return '—'
@@ -13,7 +15,7 @@ export function formatContextTokens(n: number | null | undefined): string {
     const k = n / 1000
     return `${k % 1 === 0 ? k.toFixed(0) : k.toFixed(1)}K`
   }
-  return n.toLocaleString()
+  return formatNumber(n)
 }
 
 export function formatUsdPerMillion(n: number | null | undefined): string {

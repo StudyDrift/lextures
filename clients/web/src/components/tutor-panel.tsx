@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { formatNumber } from '../lib/format'
 import { Bot, Send, Trash2, X } from 'lucide-react'
 import { authorizedFetch } from '../lib/api'
 
@@ -228,7 +229,7 @@ export function TutorPanel({ courseCode }: TutorPanelProps) {
             <div className="border-b border-slate-100 px-4 py-2 dark:border-neutral-800">
               <div className="mb-1 flex items-center justify-between text-xs text-slate-500 dark:text-neutral-400">
                 <span>
-                  {conv.tokensUsed.toLocaleString()} / {conv.tokenLimit.toLocaleString()} tokens used
+                  {formatNumber(conv.tokensUsed)} / {formatNumber(conv.tokenLimit)} tokens used
                 </span>
                 <span>{conv.periodMonth}</span>
               </div>

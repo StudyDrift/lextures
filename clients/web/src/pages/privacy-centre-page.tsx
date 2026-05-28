@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { formatDate } from '../lib/format'
 
 const API = '/api/v1/compliance/gdpr'
 
@@ -156,7 +157,7 @@ export default function PrivacyCentrePage() {
                   <p className="text-xs text-slate-500 dark:text-neutral-400">
                     Basis: {c.lawfulBasis} · Version {c.consentVersion} ·{' '}
                     {c.withdrawnAt ? (
-                      <span className="text-amber-600 dark:text-amber-400">Withdrawn {new Date(c.withdrawnAt).toLocaleDateString()}</span>
+                      <span className="text-amber-600 dark:text-amber-400">Withdrawn {formatDate(c.withdrawnAt, { dateStyle: 'medium' })}</span>
                     ) : (
                       <span className="text-emerald-600 dark:text-emerald-400">Active</span>
                     )}
@@ -227,7 +228,7 @@ export default function PrivacyCentrePage() {
                 <div>
                   <p className="text-sm font-medium capitalize text-slate-900 dark:text-neutral-50">{r.requestType}</p>
                   <p className="text-xs text-slate-500 dark:text-neutral-400">
-                    Submitted {new Date(r.requestedAt).toLocaleDateString()} · Due {new Date(r.dueAt).toLocaleDateString()}
+                    Submitted {formatDate(r.requestedAt, { dateStyle: 'medium' })} · Due {formatDate(r.dueAt, { dateStyle: 'medium' })}
                   </p>
                 </div>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${

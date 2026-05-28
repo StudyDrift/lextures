@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { Link } from 'react-router-dom'
 import { LmsPage } from './lms-page'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -272,7 +273,7 @@ export default function StudyInsightsPage() {
                   data-testid="journal-entry"
                   className="rounded-xl bg-slate-50 px-4 py-3 text-sm dark:bg-neutral-900/60"
                 >
-                  <p className="text-xs text-slate-500">{new Date(e.createdAt).toLocaleString()}</p>
+                  <p className="text-xs text-slate-500">{formatDateTime(e.createdAt)}</p>
                   <p className="mt-1">{e.entryText}</p>
                   <button
                     type="button"

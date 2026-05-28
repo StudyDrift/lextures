@@ -1,4 +1,5 @@
 import { FileText, Plus } from 'lucide-react'
+import { formatNumber } from '../../lib/format'
 import { marked } from 'marked'
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Editor } from '@tiptap/core'
@@ -173,7 +174,7 @@ function SyllabusDocumentPanel({
         </div>
         <div className="flex justify-between gap-3 border-b border-slate-100 py-2.5 dark:border-neutral-700">
           <dt className="text-slate-500 dark:text-neutral-400">Characters</dt>
-          <dd className="font-medium text-slate-900 dark:text-neutral-100">{chars.toLocaleString()}</dd>
+          <dd className="font-medium text-slate-900 dark:text-neutral-100">{formatNumber(chars)}</dd>
         </div>
       </dl>
       <div className="border-t border-slate-100 pt-3 dark:border-neutral-700">
@@ -295,8 +296,8 @@ function SyllabusBlockPanel({
           Type @ to insert a link to a content page or assignment (the @ is not kept in the text).
         </p>
         <p className="text-xs text-slate-500 dark:text-neutral-400">
-          ~{words.toLocaleString()} word{words === 1 ? '' : 's'} ·{' '}
-          {section.markdown.length.toLocaleString()} characters
+          ~{formatNumber(words)} word{words === 1 ? '' : 's'} ·{' '}
+          {formatNumber(section.markdown.length)} characters
         </p>
       </SidebarSection>
     </div>

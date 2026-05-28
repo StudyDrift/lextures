@@ -17,6 +17,7 @@ func UpdateProfile(
 	userID uuid.UUID,
 	firstName, lastName, avatarURL, uiTheme *string,
 	showHelpPopover *bool,
+	locale, timezone *string,
 ) (*Row, error) {
 	const q = `UPDATE "user".users
 SET
@@ -24,16 +25,18 @@ SET
 	last_name = $3,
 	avatar_url = $4,
 	ui_theme = COALESCE($5, ui_theme),
-	show_help_popover = COALESCE($6, show_help_popover)
+	show_help_popover = COALESCE($6, show_help_popover),
+	locale = COALESCE($7, locale),
+	timezone = COALESCE($8, timezone)
 WHERE id = $1
 RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
-  login_blocked, deactivated_at, account_type`
+  login_blocked, deactivated_at, account_type, locale, timezone`
 	var r Row
-	var dn, fn, ln, av, sid sql.NullString
+	var dn, fn, ln, av, sid, loc, tz sql.NullString
 	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
+	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover, locale, timezone).Scan(
 		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
-		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
+		&r.LoginBlocked, &deactivatedAt, &r.AccountType, &loc, &tz,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -46,6 +49,8 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
 	r.Sid = strPtr(sid)
+	r.Locale = strPtr(loc)
+	r.Timezone = strPtr(tz)
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}

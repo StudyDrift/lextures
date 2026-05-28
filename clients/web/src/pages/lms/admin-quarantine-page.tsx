@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { RequirePermission } from '../../components/require-permission'
 import { LmsPage } from './lms-page'
 import {
@@ -68,7 +69,7 @@ export default function AdminQuarantinePage() {
                       {row.uploader_name ?? row.uploader_email ?? row.uploader_id ?? '—'}
                     </td>
                     <td className="p-2 text-destructive">{row.virus_name ?? 'Unknown'}</td>
-                    <td className="p-2">{new Date(row.uploaded_at).toLocaleString()}</td>
+                    <td className="p-2">{formatDateTime(row.uploaded_at)}</td>
                     <td className="p-2 space-x-2">
                       <button
                         type="button"

@@ -1,4 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { Loader2, Save } from 'lucide-react'
 import {
   deleteBlueprintChildLink,
@@ -25,7 +26,7 @@ type Props = {
 function formatSyncAt(iso: string | null | undefined): string {
   if (!iso) return '—'
   const d = new Date(iso)
-  return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString()
+  return Number.isNaN(d.getTime()) ? '—' : formatDateTime(d)
 }
 
 export function CourseBlueprintSection({ courseCode, course, onCourseUpdated }: Props) {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/l10n"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
@@ -20,6 +21,8 @@ type accountProfileResponse struct {
 	Sid                          *string `json:"sid"`
 	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
 	AccountType                  string  `json:"accountType"`
+	Locale                       *string `json:"locale"`
+	Timezone                     *string `json:"timezone"`
 }
 
 type patchAccountBody struct {
@@ -28,6 +31,8 @@ type patchAccountBody struct {
 	AvatarURL       *string `json:"avatarUrl"`
 	UITheme         *string `json:"uiTheme"`
 	ShowHelpPopover *bool   `json:"showHelpPopover"`
+	Locale          *string `json:"locale"`
+	Timezone        *string `json:"timezone"`
 }
 
 func normalizeName(s *string, label string) (*string, error) {
@@ -115,6 +120,8 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
+			Locale:                     row.Locale,
+			Timezone:                   row.Timezone,
 		})
 	}
 }
@@ -155,7 +162,24 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover)
+		var localePtr, timezonePtr *string
+		if req.Locale != nil {
+			norm, err := l10n.NormalizeLocale(*req.Locale)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid BCP 47 locale tag.")
+				return
+			}
+			localePtr = &norm
+		}
+		if req.Timezone != nil {
+			norm, err := l10n.NormalizeTimezone(*req.Timezone)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput, "Invalid IANA timezone identifier.")
+				return
+			}
+			timezonePtr = &norm
+		}
+		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover, localePtr, timezonePtr)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update account.")
 			return
@@ -179,6 +203,8 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
+			Locale:                     row.Locale,
+			Timezone:                   row.Timezone,
 		})
 	}
 }

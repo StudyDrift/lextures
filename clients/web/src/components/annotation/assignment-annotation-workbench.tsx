@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import {
   deleteSubmissionAnnotation,
   downloadSubmissionAnnotatedPdf,
@@ -804,7 +805,7 @@ export function AssignmentAnnotationWorkbench({
               <span className="text-xs font-medium uppercase text-amber-900/80 dark:text-amber-200/80">
                 Resubmit by:{' '}
               </span>
-              {new Date(mine.revisionDueAt).toLocaleString(undefined, {
+              {formatDateTime(mine.revisionDueAt, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
               })}

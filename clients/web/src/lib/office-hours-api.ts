@@ -1,4 +1,5 @@
 import { authorizedFetch } from './api'
+import { formatDateTime } from './format'
 import { readApiErrorMessage } from './errors'
 
 export type SlotStatus = 'available' | 'booked' | 'cancelled' | 'completed'
@@ -120,8 +121,8 @@ export function formatSlotTime(slot: AppointmentSlot): string {
     minute: '2-digit',
   }
   return (
-    start.toLocaleString(undefined, opts) +
+    formatDateTime(start, opts) +
     ' – ' +
-    end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    formatDateTime(end, { hour: 'numeric', minute: '2-digit' })
   )
 }

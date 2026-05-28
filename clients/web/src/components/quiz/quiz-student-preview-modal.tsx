@@ -13,6 +13,7 @@ import {
 } from '../../lib/courses-api'
 import { shuffleArray, shuffledIndices } from '../../lib/shuffle'
 import type { ResolvedMarkdownTheme } from '../../lib/markdown-theme'
+import { LocaleTime } from '../ui/locale-time'
 
 export type QuizStudentPreviewModalProps = {
   open: boolean
@@ -932,7 +933,7 @@ function QuizStudentPreviewModalContent({
             {dueAt && (
               <p className="text-sm text-slate-600">
                 <span className="font-medium text-slate-800">Due:</span>{' '}
-                {new Date(dueAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                <LocaleTime date={dueAt} data-testid="quiz-due-date" />
               </p>
             )}
             <div className="rounded-xl border border-slate-200/90 bg-white p-4 shadow-sm">

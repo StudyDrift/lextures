@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { formatDate } from '../../lib/format'
 import { Plus, RefreshCw, Shield, X } from 'lucide-react'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -309,7 +310,7 @@ export function OrgRolesPanel() {
                     )}
                   </td>
                   <td className="px-3 py-2.5 text-slate-700 dark:text-neutral-200">
-                    {g.expiresAt ? new Date(g.expiresAt).toLocaleDateString() : '—'}
+                    {g.expiresAt ? formatDate(g.expiresAt, { dateStyle: 'medium' }) : '—'}
                   </td>
                   <td className="px-3 py-2.5">
                     {canManage ? (

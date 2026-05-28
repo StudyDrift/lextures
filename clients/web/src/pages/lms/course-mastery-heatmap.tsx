@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { useParams } from 'react-router-dom'
 import { RefreshCw } from 'lucide-react'
 import { LmsPage } from './lms-page'
@@ -188,7 +189,7 @@ export default function CourseMasteryHeatmap() {
           {result.refreshedAt && (
             <p className="text-xs text-slate-500 dark:text-neutral-400">
               Last updated:{' '}
-              {new Date(result.refreshedAt).toLocaleString(undefined, {
+              {formatDateTime(result.refreshedAt, {
                 dateStyle: 'medium',
                 timeStyle: 'short',
               })}

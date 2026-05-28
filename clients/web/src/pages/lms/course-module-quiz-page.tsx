@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { formatDateTime } from '../../lib/format'
 import { Link, useParams } from 'react-router-dom'
 import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
 import { useOnlineStatus } from '../../hooks/use-online-status'
@@ -981,7 +982,7 @@ export default function CourseModuleQuizPage() {
   const description =
     updatedAt == null
       ? ''
-      : `Updated ${new Date(updatedAt).toLocaleString(undefined, {
+      : `Updated ${formatDateTime(updatedAt, {
           dateStyle: 'medium',
           timeStyle: 'short',
         })}`
@@ -1364,7 +1365,7 @@ export default function CourseModuleQuizPage() {
                             className="rounded border border-slate-100 bg-slate-50/80 px-2 py-1.5 dark:border-neutral-800 dark:bg-neutral-900/60"
                           >
                             <span className="font-mono text-slate-500 dark:text-neutral-500">
-                              {new Date(ev.createdAt).toLocaleString()}
+                              {formatDateTime(ev.createdAt)}
                             </span>{' '}
                             <span className="font-medium">{ev.eventType}</span>
                             {ev.durationMs != null ? (

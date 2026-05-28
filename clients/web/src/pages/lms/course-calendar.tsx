@@ -1,4 +1,5 @@
 import { createPortal } from 'react-dom'
+import { formatDate, formatDateTime } from '../../lib/format'
 import {
   DndContext,
   DragOverlay,
@@ -534,7 +535,7 @@ export function CourseCalendar({
         <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90 md:p-6">
           <div className="mb-4 flex min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
             <h2 className="shrink-0 text-lg font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
-              {monthAnchor.toLocaleString(undefined, { month: 'long', year: 'numeric' })}
+              {formatDateTime(monthAnchor, { month: 'long', year: 'numeric' })}
             </h2>
             <div className="flex min-w-0 flex-1 basis-[12rem] justify-center">{calendarViewTabs}</div>
             <div className="flex shrink-0 items-center gap-1">
@@ -625,8 +626,8 @@ export function CourseCalendar({
                 Week view
               </h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-                {weekStart.toLocaleDateString(undefined, { dateStyle: 'medium' })} —{' '}
-                {new Date(weekEnd.getTime() - 1).toLocaleDateString(undefined, {
+                {formatDate(weekStart, { dateStyle: 'medium' })} —{' '}
+                {formatDate(new Date(weekEnd.getTime() - 1), {
                   dateStyle: 'medium',
                 })}
               </p>
