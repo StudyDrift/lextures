@@ -15,6 +15,7 @@ import { ShellNavProvider } from './shell-nav-context'
 import { SideNav } from './side-nav'
 import { TopBar } from './top-bar'
 import { UiThemeSync } from './ui-theme-sync'
+import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { HelpWidget } from './help-widget'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
@@ -38,6 +39,7 @@ function AppShellLayout() {
     <CourseNavFeaturesProvider>
       <LmsExperienceRoot>
       <UiThemeSync />
+      <LocaleBootstrapSync />
       <SkipLink />
       <div
         className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${

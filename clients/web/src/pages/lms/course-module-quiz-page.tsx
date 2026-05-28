@@ -112,7 +112,7 @@ function QuestionTypeDropdown({
                 onChange(opt.value)
                 setOpen(false)
               }}
-              className="flex w-full items-center justify-between px-3 py-2 text-left text-sm text-slate-800 transition hover:bg-slate-50"
+              className="flex w-full items-center justify-between px-3 py-2 text-start text-sm text-slate-800 transition hover:bg-slate-50"
             >
               <span>{opt.label}</span>
               {opt.value === value ? <Check className="h-4 w-4 text-indigo-600" aria-hidden /> : null}
@@ -174,7 +174,7 @@ function QuizEditorMoreMenu({
           id={menuId}
           role="menu"
           aria-label="More quiz actions"
-          className="absolute right-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
         >
           <button
             type="button"
@@ -183,7 +183,7 @@ function QuizEditorMoreMenu({
               onEditIntro()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Pencil className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Edit
@@ -195,7 +195,7 @@ function QuizEditorMoreMenu({
               onGenerate()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Generate questions
@@ -212,7 +212,7 @@ function QuizEditorMoreMenu({
               onPreview()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Eye className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Preview
@@ -1096,7 +1096,7 @@ export default function CourseModuleQuizPage() {
         )
       }
     >
-      <p className="mt-2 text-left text-sm">
+      <p className="mt-2 text-start text-sm">
         <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500">
           ← Back to modules
         </Link>
@@ -1196,7 +1196,7 @@ export default function CourseModuleQuizPage() {
                   {quizDateTimeIsSet(dueAt) ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Due date</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {formatQuizDateTime(dueAt)}
                       </dd>
                     </div>
@@ -1204,7 +1204,7 @@ export default function CourseModuleQuizPage() {
                   {quizDateTimeIsSet(availableFromAt) ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility start</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {formatQuizDateTime(availableFromAt)}
                       </dd>
                     </div>
@@ -1212,39 +1212,39 @@ export default function CourseModuleQuizPage() {
                   {quizDateTimeIsSet(availableUntilAt) ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility end</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {formatQuizDateTime(availableUntilAt)}
                       </dd>
                     </div>
                   ) : null}
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Unlimited attempts</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {unlimitedAttempts ? 'Yes' : 'No'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">One question at a time</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {oneQuestionAtATime ? 'Yes' : 'No'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Course lockdown feature</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {courseLockdownEnabled ? 'On' : 'Off'}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Delivery mode</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatLockdownModeLabel(lockdownMode)}
                     </dd>
                   </div>
                   {lockdownMode === 'kiosk' ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Focus-loss threshold</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {focusLossThreshold != null ? String(focusLossThreshold) : 'None'}
                       </dd>
                     </div>
@@ -1258,21 +1258,21 @@ export default function CourseModuleQuizPage() {
                   {!unlimitedAttempts ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Max attempts</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {quizAdvanced.maxAttempts}
                       </dd>
                     </div>
                   ) : null}
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Grade uses</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatGradePolicyShort(quizAdvanced.gradeAttemptPolicy)}
                     </dd>
                   </div>
                   {pointsWorth != null ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Points</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {formatItemPointsWorth(pointsWorth)}
                       </dd>
                     </div>
@@ -1280,7 +1280,7 @@ export default function CourseModuleQuizPage() {
                   {assignmentGroupId ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Assignment group</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {assignmentGroupDisplayName(assignmentGroupId, gradingGroups)}
                       </dd>
                     </div>
@@ -1288,7 +1288,7 @@ export default function CourseModuleQuizPage() {
                   {quizAdvanced.passingScorePercent != null ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Passing score</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {`${quizAdvanced.passingScorePercent}%`}
                       </dd>
                     </div>
@@ -1296,27 +1296,27 @@ export default function CourseModuleQuizPage() {
                   {quizAdvanced.timeLimitMinutes != null ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Time limit</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {`${quizAdvanced.timeLimitMinutes} min`}
                       </dd>
                     </div>
                   ) : null}
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Shuffle questions</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {quizAdvanced.shuffleQuestions ? 'Yes' : 'No'}
                     </dd>
                   </div>
                   {quizAdvanced.requiresQuizAccessCode ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Access code</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">Required</dd>
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">Required</dd>
                     </div>
                   ) : null}
                   {isAdaptive ? (
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Adaptive difficulty</dt>
-                      <dd className="min-w-0 text-right font-medium capitalize text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium capitalize text-slate-900 dark:text-neutral-100">
                         {quizAdvanced.adaptiveDifficulty}
                       </dd>
                     </div>
@@ -1638,7 +1638,7 @@ export default function CourseModuleQuizPage() {
                     >
                       <span
                         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
-                          qeAdaptiveOn ? 'left-5' : 'left-0.5'
+                          qeAdaptiveOn ? 'start-5' : 'start-0.5'
                         }`}
                       />
                     </button>
@@ -1708,7 +1708,7 @@ export default function CourseModuleQuizPage() {
                                   />
                                   <span className="min-w-0">
                                     <span className="font-medium">{it.title || 'Untitled'}</span>
-                                    <span className="ml-2 text-xs text-slate-500">({structureKindLabel(it.kind)})</span>
+                                    <span className="ms-2 text-xs text-slate-500">({structureKindLabel(it.kind)})</span>
                                   </span>
                                 </label>
                               ))
@@ -1876,7 +1876,7 @@ export default function CourseModuleQuizPage() {
                             >
                               <span
                                 className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
-                                  q.multipleAnswer ? 'left-4.5' : 'left-0.5'
+                                  q.multipleAnswer ? 'start-4.5' : 'start-0.5'
                                 }`}
                               />
                             </button>
@@ -1900,7 +1900,7 @@ export default function CourseModuleQuizPage() {
                             >
                               <span
                                 className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
-                                  q.answerWithImage ? 'left-4.5' : 'left-0.5'
+                                  q.answerWithImage ? 'start-4.5' : 'start-0.5'
                                 }`}
                               />
                             </button>
@@ -1911,7 +1911,7 @@ export default function CourseModuleQuizPage() {
                           {q.choices.map((choice, choiceIdx) => (
                             <div
                               key={`${q.id}-choice-${choiceIdx}`}
-                              className="group flex items-center gap-2 rounded-lg border border-transparent py-0.5 pl-0.5 pr-1 transition-colors hover:border-slate-100 hover:bg-slate-50/60"
+                              className="group flex items-center gap-2 rounded-lg border border-transparent py-0.5 ps-0.5 pe-1 transition-colors hover:border-slate-100 hover:bg-slate-50/60"
                             >
                               <button
                                 type="button"
@@ -2781,7 +2781,7 @@ export default function CourseModuleQuizPage() {
               {importQuestionsLoading ? 'Searching…' : 'Search'}
             </button>
           </div>
-          <div className="max-h-60 space-y-2 overflow-auto pr-1">
+          <div className="max-h-60 space-y-2 overflow-auto pe-1">
             {!importQuestionsLoading && importRows.length === 0 ? (
               <p className="text-sm text-slate-500">No question bank items found.</p>
             ) : null}

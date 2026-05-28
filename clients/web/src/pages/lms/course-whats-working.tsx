@@ -70,21 +70,21 @@ function ScatterTable({ points }: { points: Insights['scatter'] | null | undefin
         High difficulty + low engagement — students struggle and disengage.
       </p>
       <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-full text-start text-sm">
           <caption className="sr-only">Content flagged for possible redesign</caption>
           <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
             <tr>
               <th scope="col" className="px-4 py-3">Item</th>
-              <th scope="col" className="px-4 py-3 text-right">Difficulty %</th>
-              <th scope="col" className="px-4 py-3 text-right">Engagement (s)</th>
+              <th scope="col" className="px-4 py-3 text-end">Difficulty %</th>
+              <th scope="col" className="px-4 py-3 text-end">Engagement (s)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
             {flagged.map((p) => (
               <tr key={p.itemId}>
                 <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">{p.title}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-700 dark:text-neutral-300">{p.difficulty.toFixed(1)}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-700 dark:text-neutral-300">{p.engagement}</td>
+                <td className="px-4 py-3 text-end tabular-nums text-slate-700 dark:text-neutral-300">{p.difficulty.toFixed(1)}</td>
+                <td className="px-4 py-3 text-end tabular-nums text-slate-700 dark:text-neutral-300">{p.engagement}</td>
               </tr>
             ))}
           </tbody>
@@ -103,25 +103,25 @@ function CrossSectionTable({ rows }: { rows: CrossSectionRow[] }) {
         Cross-section comparison
       </h2>
       <div className="mt-3 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <table className="min-w-full text-left text-sm">
+        <table className="min-w-full text-start text-sm">
           <caption className="sr-only">Cross-section performance comparison</caption>
           <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
             <tr>
               <th scope="col" className="px-4 py-3">Section</th>
-              <th scope="col" className="px-4 py-3 text-right">Students</th>
-              <th scope="col" className="px-4 py-3 text-right">Avg quiz score</th>
-              <th scope="col" className="px-4 py-3 text-right">Completion</th>
+              <th scope="col" className="px-4 py-3 text-end">Students</th>
+              <th scope="col" className="px-4 py-3 text-end">Avg quiz score</th>
+              <th scope="col" className="px-4 py-3 text-end">Completion</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
             {rows.map((row) => (
               <tr key={row.sectionId}>
                 <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">{row.sectionName}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-700 dark:text-neutral-300">{row.nStudents}</td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-700 dark:text-neutral-300">
+                <td className="px-4 py-3 text-end tabular-nums text-slate-700 dark:text-neutral-300">{row.nStudents}</td>
+                <td className="px-4 py-3 text-end tabular-nums text-slate-700 dark:text-neutral-300">
                   {row.avgQuizScore != null ? `${row.avgQuizScore.toFixed(1)}%` : '—'}
                 </td>
-                <td className="px-4 py-3 text-right tabular-nums text-slate-700 dark:text-neutral-300">
+                <td className="px-4 py-3 text-end tabular-nums text-slate-700 dark:text-neutral-300">
                   {(row.completionRate * 100).toFixed(0)}%
                 </td>
               </tr>

@@ -209,7 +209,7 @@ export default function CourseMyGrades() {
             </p>
           ) : (
             <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-              <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-700">
+              <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-700">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-neutral-800/80">
                     <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
@@ -351,7 +351,7 @@ export default function CourseMyGrades() {
           >
             <button
               type="button"
-              className="absolute right-3 top-3 rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+              className="absolute end-3 top-3 rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
               onClick={() => closeGradeHistory()}
             >
               <span className="sr-only">Close</span>✕

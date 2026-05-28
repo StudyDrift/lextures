@@ -183,7 +183,7 @@ export default function CourseDiscussionsPage() {
         className="flex min-h-0 flex-1 flex-col gap-4 md:flex-row"
         data-discussions-root
       >
-        <aside className="flex w-full shrink-0 flex-col gap-2 border-b border-slate-200 pb-4 md:w-56 md:border-b-0 md:border-r md:pb-0 md:pr-4 dark:border-neutral-700">
+        <aside className="flex w-full shrink-0 flex-col gap-2 border-b border-slate-200 pb-4 md:w-56 md:border-b-0 md:border-e md:pb-0 md:pe-4 dark:border-neutral-700">
           <div className="flex items-center justify-between gap-2">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Forums</h2>
             {canModerate ? (
@@ -246,7 +246,7 @@ export default function CourseDiscussionsPage() {
                   setThreadDetail(null)
                   setPosts([])
                 }}
-                className={`rounded-lg px-2 py-1.5 text-left text-sm ${
+                className={`rounded-lg px-2 py-1.5 text-start text-sm ${
                   forumId === f.id
                     ? 'bg-indigo-50 font-medium text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
                     : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
@@ -317,7 +317,7 @@ export default function CourseDiscussionsPage() {
                   <li key={t.id}>
                     <button
                       type="button"
-                      className="flex w-full items-start gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-sm shadow-sm hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800"
+                      className="flex w-full items-start gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-start text-sm shadow-sm hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800"
                       onClick={() => void loadThread(t.id)}
                     >
                       {t.isPinned ? (
@@ -440,8 +440,8 @@ export default function CourseDiscussionsPage() {
                     displayIndent === 0
                       ? ''
                       : displayIndent === 1
-                        ? 'ml-3 md:ml-6'
-                        : 'ml-3 md:ml-12'
+                        ? 'ms-3 md:ms-6'
+                        : 'ms-3 md:ms-12'
                   return (
                     <article
                       key={p.id}

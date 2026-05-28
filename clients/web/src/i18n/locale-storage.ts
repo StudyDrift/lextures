@@ -1,6 +1,7 @@
 import { DEFAULT_LOCALE, resolveResourceLanguage, type SupportedLocale } from './supported-locales'
 
 export const LOCALE_STORAGE_KEY = 'lextures.locale'
+export const RTL_ENABLED_STORAGE_KEY = 'lextures.rtlEnabled'
 
 export function readStoredLocaleTag(): string | null {
   if (typeof window === 'undefined') return null
@@ -19,6 +20,10 @@ export function writeStoredLocaleTag(tag: string): void {
   } catch {
     /* ignore */
   }
+}
+
+export function readStoredLocale(): string {
+  return readStoredLocaleTag() ?? DEFAULT_LOCALE
 }
 
 export function detectBrowserLocale(): SupportedLocale {

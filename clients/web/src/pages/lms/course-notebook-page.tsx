@@ -264,7 +264,7 @@ export default function CourseNotebookPage() {
             onRenamePage={onRenamePage}
             onDeletePage={onDeletePage}
           />
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 dark:border-neutral-800 md:border-l md:border-t-0">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 dark:border-neutral-800 md:border-s md:border-t-0">
             {activePage ? (
               <>
                 <div className="shrink-0 border-b border-slate-100 px-4 py-3 dark:border-neutral-800/80 md:px-6">

@@ -197,7 +197,7 @@ export default function Reports() {
               {report.byDay.length === 0 ? (
                 <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No events in this range.</p>
               ) : (
-                <div className="mt-4 flex max-h-80 flex-col gap-2 overflow-y-auto pr-1">
+                <div className="mt-4 flex max-h-80 flex-col gap-2 overflow-y-auto pe-1">
                   {report.byDay.map((row) => {
                     const total = row.courseVisit + row.contentOpen + row.contentLeave
                     const barPct = maxDayTotal > 0 ? (total / maxDayTotal) * 100 : 0
@@ -220,7 +220,7 @@ export default function Reports() {
                             </div>
                           </div>
                         </div>
-                        <span className="w-10 shrink-0 text-right tabular-nums text-slate-700 dark:text-neutral-200">
+                        <span className="w-10 shrink-0 text-end tabular-nums text-slate-700 dark:text-neutral-200">
                           {total}
                         </span>
                       </div>
@@ -277,12 +277,12 @@ export default function Reports() {
                 <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No course activity in this range.</p>
               ) : (
                 <div className="mt-4 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-                  <table className="min-w-full text-left text-sm">
+                  <table className="min-w-full text-start text-sm">
                     <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
                       <tr>
                         <th className="px-4 py-3">Course</th>
                         <th className="px-4 py-3">Code</th>
-                        <th className="px-4 py-3 text-right">Events</th>
+                        <th className="px-4 py-3 text-end">Events</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
@@ -297,7 +297,7 @@ export default function Reports() {
                             </Link>
                           </td>
                           <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">{c.courseCode}</td>
-                          <td className="px-4 py-3 text-right tabular-nums text-slate-900 dark:text-neutral-100">
+                          <td className="px-4 py-3 text-end tabular-nums text-slate-900 dark:text-neutral-100">
                             {c.eventCount.toLocaleString()}
                           </td>
                         </tr>

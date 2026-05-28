@@ -753,7 +753,7 @@ export default function CourseFeedPage() {
                     key={ch.id}
                     type="button"
                     onClick={() => setActiveChannelId(ch.id)}
-                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium ${
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${
                       ch.id === activeChannelId
                         ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
                         : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-900'
@@ -862,12 +862,12 @@ export default function CourseFeedPage() {
                   <MoreHorizontal className="h-5 w-5" aria-hidden />
                 </summary>
                 <div
-                  className="absolute right-0 top-full z-40 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
+                  className="absolute end-0 top-full z-40 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
                   onMouseDown={(ev) => ev.preventDefault()}
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                     onClick={(e) => {
                       closeParentDetails(e.currentTarget)
                       setNotifPrefsDraft(loadFeedNotificationPrefs(courseCode))
@@ -928,7 +928,7 @@ export default function CourseFeedPage() {
                         <button
                           type="button"
                           onClick={() => toggleRepliesExpanded(m.id)}
-                          className="group/replylink ml-14 mt-3 flex items-center gap-2 rounded-lg py-1.5 pl-1 pr-2 text-left text-sm font-medium text-indigo-600 hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
+                          className="group/replylink ms-14 mt-3 flex items-center gap-2 rounded-lg py-1.5 ps-1 pe-2 text-start text-sm font-medium text-indigo-600 hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
                           aria-expanded={expandedReplyRoots.has(m.id)}
                         >
                           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200/80 transition group-hover/replylink:bg-white group-hover/replylink:text-indigo-600 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700 dark:group-hover/replylink:bg-neutral-900 dark:group-hover/replylink:text-indigo-300">
@@ -939,9 +939,9 @@ export default function CourseFeedPage() {
                             : `${m.replies.length} ${m.replies.length === 1 ? 'reply' : 'replies'}`}
                         </button>
                         {expandedReplyRoots.has(m.id) && (
-                          <div className="ml-3 mt-4 space-y-1 border-l-2 border-slate-200/90 pl-4 dark:border-neutral-700">
+                          <div className="ms-3 mt-4 space-y-1 border-s-2 border-slate-200/90 ps-4 dark:border-neutral-700">
                             {m.replies.map((r) => (
-                              <div key={r.id} className="py-3 pl-1">
+                              <div key={r.id} className="py-3 ps-1">
                               <MessageBlock
                                 message={r}
                                 depth={1}
@@ -1107,18 +1107,18 @@ function MessageBlock({
               </div>
             </div>
             {showActionsMenu && (
-              <details className="group/menu relative shrink-0 -mr-1 -mt-0.5">
+              <details className="group/menu relative shrink-0 -me-1 -mt-0.5">
                 <summary
                   className="list-none cursor-pointer rounded-full p-1.5 text-slate-400 outline-none hover:bg-slate-200/80 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
                   aria-label="Message actions"
                 >
                   <MoreHorizontal className="h-4 w-4" aria-hidden />
                 </summary>
-                <div className="absolute right-0 top-full z-30 mt-1 min-w-[10.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10">
+                <div className="absolute end-0 top-full z-30 mt-1 min-w-[10.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10">
                   {depth === 0 && (
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                       onClick={(e) => {
                         closeParentDetails(e.currentTarget)
                         onReply()
@@ -1131,7 +1131,7 @@ function MessageBlock({
                   {mine && (
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                       onClick={(e) => {
                         closeParentDetails(e.currentTarget)
                         onStartEdit(m)
@@ -1144,7 +1144,7 @@ function MessageBlock({
                   {staff && depth === 0 && (
                     <button
                       type="button"
-                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                       onClick={(e) => {
                         closeParentDetails(e.currentTarget)
                         onTogglePin()

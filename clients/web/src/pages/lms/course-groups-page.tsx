@@ -261,7 +261,7 @@ export default function CourseGroupsPage() {
                     key={g.id}
                     type="button"
                     onClick={() => setActiveGroupId(g.id)}
-                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium ${
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${
                       g.id === activeGroupId
                         ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
                         : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-900'
@@ -304,7 +304,7 @@ export default function CourseGroupsPage() {
                     key={ch.id}
                     type="button"
                     onClick={() => setActiveChannelId(ch.id)}
-                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm font-medium ${
+                    className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium ${
                       ch.id === activeChannelId
                         ? 'bg-indigo-50 text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
                         : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-900'
@@ -389,7 +389,7 @@ export default function CourseGroupsPage() {
                     <span className="shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden>#</span>
                     <span className="min-w-0 truncate">{activeChannel?.name ?? 'Channel'}</span>
                     {activeGroup && (
-                      <span className="ml-1 text-sm font-normal text-slate-400 dark:text-neutral-500">
+                      <span className="ms-1 text-sm font-normal text-slate-400 dark:text-neutral-500">
                         — {activeGroup.name}
                       </span>
                     )}

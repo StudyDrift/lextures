@@ -175,7 +175,7 @@ export function CollabDocsList({ courseCode, docs, canManage, onDocsChanged }: P
                 type="button"
                 onClick={() => { void handleDelete(doc.id) }}
                 aria-label={`Delete "${doc.title}"`}
-                className="ml-4 rounded p-1 text-slate-400 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:text-neutral-500 dark:hover:text-red-400"
+                className="ms-4 rounded p-1 text-slate-400 hover:text-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:text-neutral-500 dark:hover:text-red-400"
               >
                 <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>

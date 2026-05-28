@@ -58,7 +58,7 @@ export default function CourseEventLogPage() {
       )}
       {!loading && !error && (
         <div className="mt-6 overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-full text-start text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-300">
               <tr>
                 <th className="px-4 py-3">Timestamp</th>

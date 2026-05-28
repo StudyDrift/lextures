@@ -241,7 +241,7 @@ export default function Inbox() {
           </button>
           <div className="relative min-w-[12rem] flex-1 sm:max-w-md">
             <Search
-              className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+              className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
               aria-hidden
             />
             <input
@@ -249,7 +249,7 @@ export default function Inbox() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search mail"
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
+              className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20"
               aria-label="Search mail"
             />
           </div>
@@ -263,7 +263,7 @@ export default function Inbox() {
 
         <div className="flex min-h-0 min-w-0 flex-1 flex-col md:flex-row">
           <nav
-            className="flex shrink-0 gap-1 border-b border-slate-200 p-2 md:w-52 md:flex-col md:border-b-0 md:border-r md:p-2"
+            className="flex shrink-0 gap-1 border-b border-slate-200 p-2 md:w-52 md:flex-col md:border-b-0 md:border-e md:p-2"
             aria-label="Mail folders"
           >
             {FOLDERS.map(({ id, label, icon: Icon }) => (
@@ -275,7 +275,7 @@ export default function Inbox() {
                   setSelectedId(null)
                   setMobilePane('list')
                 }}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition md:w-full ${
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-start text-sm font-medium transition md:w-full ${
                   folder === id
                     ? 'bg-indigo-50 text-indigo-800'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -287,9 +287,9 @@ export default function Inbox() {
             ))}
           </nav>
 
-          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col border-slate-200 md:flex-row md:border-l">
+          <div className="relative flex min-h-0 min-w-0 flex-1 flex-col border-slate-200 md:flex-row md:border-s">
             <div
-              className={`flex min-h-0 w-full shrink-0 flex-col border-slate-200 md:w-[min(100%,24rem)] md:border-r ${
+              className={`flex min-h-0 w-full shrink-0 flex-col border-slate-200 md:w-[min(100%,24rem)] md:border-e ${
                 mobilePane === 'list' ? 'flex' : 'hidden'
               } md:flex`}
             >
@@ -341,7 +341,7 @@ export default function Inbox() {
                           role="option"
                           aria-selected={active}
                           onClick={() => void selectMessage(m.id)}
-                          className="flex min-w-0 flex-1 gap-3 px-3 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500/30"
+                          className="flex min-w-0 flex-1 gap-3 px-3 py-3 text-start outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500/30"
                         >
                           <span
                             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-800"

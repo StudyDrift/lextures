@@ -205,25 +205,25 @@ function ItemStatsTable({ items }: { items: ItemStat[] }) {
         </caption>
         <thead>
           <tr className="border-b border-slate-100 dark:border-neutral-700">
-            <th scope="col" className="pb-2 pr-4 text-left text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
               #
             </th>
-            <th scope="col" className="pb-2 pr-4 text-left text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
               Question
             </th>
-            <th scope="col" className="pb-2 pr-4 text-right text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-slate-500 dark:text-neutral-400">
               N
             </th>
-            <th scope="col" className="pb-2 pr-4 text-right text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-slate-500 dark:text-neutral-400">
               Difficulty (p)
             </th>
-            <th scope="col" className="pb-2 pr-4 text-right text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-end text-xs font-semibold text-slate-500 dark:text-neutral-400">
               Discrimination (r<sub>pb</sub>)
             </th>
-            <th scope="col" className="pb-2 pr-4 text-left text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 pe-4 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
               Distractors
             </th>
-            <th scope="col" className="pb-2 text-left text-xs font-semibold text-slate-500 dark:text-neutral-400">
+            <th scope="col" className="pb-2 text-start text-xs font-semibold text-slate-500 dark:text-neutral-400">
               Flag
             </th>
           </tr>
@@ -246,22 +246,22 @@ function ItemRow({ item }: { item: ItemStat }) {
 
   return (
     <tr className="py-1.5 align-top">
-      <td className="py-1.5 pr-4 tabular-nums text-slate-500 dark:text-neutral-400">
+      <td className="py-1.5 pe-4 tabular-nums text-slate-500 dark:text-neutral-400">
         {item.questionIndex + 1}
       </td>
-      <td className="py-1.5 pr-4 text-slate-700 dark:text-neutral-300" title={item.questionText}>
+      <td className="py-1.5 pe-4 text-slate-700 dark:text-neutral-300" title={item.questionText}>
         {truncatedText || <span className="italic text-slate-400">No text</span>}
       </td>
-      <td className="py-1.5 pr-4 text-right tabular-nums text-slate-700 dark:text-neutral-300">
+      <td className="py-1.5 pe-4 text-end tabular-nums text-slate-700 dark:text-neutral-300">
         {item.nResponses}
       </td>
-      <td className="py-1.5 pr-4 text-right">
+      <td className="py-1.5 pe-4 text-end">
         <DifficultyBar pValue={item.pValue} />
       </td>
-      <td className="py-1.5 pr-4 text-right tabular-nums text-slate-700 dark:text-neutral-300">
+      <td className="py-1.5 pe-4 text-end tabular-nums text-slate-700 dark:text-neutral-300">
         {item.rPb != null ? item.rPb.toFixed(3) : '—'}
       </td>
-      <td className="py-1.5 pr-4">
+      <td className="py-1.5 pe-4">
         <DistractorBar freqs={item.distractorFreqs} />
       </td>
       <td className="py-1.5">

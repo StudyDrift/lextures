@@ -127,11 +127,11 @@ func finishInsertRow(r *Row, dn, fn, ln, av, timezone, sid sql.NullString, deact
 	r.AvatarURL = strPtr(av)
 	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
-	}
-	if r.Locale == "" {
-		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time

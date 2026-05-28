@@ -230,7 +230,7 @@ export default function AdminAccommodationsPage() {
                   <button
                     type="button"
                     onClick={() => pickUser(hit)}
-                    className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                    className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   >
                     <span className="font-medium text-slate-900 dark:text-neutral-100">
                       {formatLearnerLabel(hit)}
@@ -374,7 +374,7 @@ export default function AdminAccommodationsPage() {
 
         {rows.length > 0 && (
           <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-start text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-600 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-400">
                 <tr>
                   <th className="px-3 py-2">Scope</th>
@@ -401,7 +401,7 @@ export default function AdminAccommodationsPage() {
                     <td className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
                       {[r.effectiveFrom, r.effectiveUntil].filter(Boolean).join(' → ') || '—'}
                     </td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="px-3 py-2 text-end">
                       <button
                         type="button"
                         className="text-rose-700 hover:underline dark:text-rose-300"

@@ -50,7 +50,7 @@ export default function AdminQuarantinePage() {
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b bg-muted/40 text-left">
+                <tr className="border-b bg-muted/40 text-start">
                   <th className="p-2">File</th>
                   <th className="p-2">Course</th>
                   <th className="p-2">Uploader</th>

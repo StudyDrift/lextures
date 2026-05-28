@@ -865,7 +865,7 @@ export function QuizStudentTakePanel({
               <p id="lockdown-warn-title" className="font-semibold">
                 {quiz.lockdownMode === 'kiosk' ? 'This exam uses kiosk mode.' : 'This exam is delivered one question at a time.'}
               </p>
-              <ul className="mt-2 list-disc space-y-1 pl-5">
+              <ul className="mt-2 list-disc space-y-1 ps-5">
                 <li>You cannot go back to change previous answers after you continue.</li>
                 <li>Hints follow the exam settings and any accommodations on your account.</li>
                 {quiz.lockdownMode === 'kiosk' ? (
@@ -964,7 +964,7 @@ export function QuizStudentTakePanel({
               aria-live={(timeLeftSec ?? 0) <= 60 ? 'assertive' : 'polite'}
             >
               {timeLeftSec !== null && timeLeftSec <= 300 ? (
-                <span className="mr-1.5 inline-flex align-middle" aria-hidden>
+                <span className="me-1.5 inline-flex align-middle" aria-hidden>
                   <Clock className="inline h-3.5 w-3.5" strokeWidth={2.5} />
                 </span>
               ) : null}
@@ -1581,7 +1581,7 @@ function StaticTakeBody({
             </button>
             {codeRunByQuestion[q.id] ? (
               <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-neutral-700" role="table">
-                <table className="min-w-full text-left text-xs">
+                <table className="min-w-full text-start text-xs">
                   <thead className="bg-slate-50 dark:bg-neutral-800">
                     <tr>
                       <th className="px-2 py-1.5 font-semibold">Test</th>
@@ -1732,14 +1732,14 @@ function StaticTakeBody({
             <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
               Upload a file
               {typeof q.typeConfig?.maxMb === 'number' ? (
-                <span className="ml-1 font-normal text-slate-500 dark:text-neutral-400">
+                <span className="ms-1 font-normal text-slate-500 dark:text-neutral-400">
                   (max {q.typeConfig.maxMb} MB)
                 </span>
               ) : null}
             </label>
             <input
               type="file"
-              className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
+              className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 setAnswers((prev) => ({
@@ -1758,7 +1758,7 @@ function StaticTakeBody({
             <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
               Upload audio
               {typeof q.typeConfig?.maxDurationS === 'number' ? (
-                <span className="ml-1 font-normal text-slate-500 dark:text-neutral-400">
+                <span className="ms-1 font-normal text-slate-500 dark:text-neutral-400">
                   (max {q.typeConfig.maxDurationS}s)
                 </span>
               ) : null}
@@ -1766,7 +1766,7 @@ function StaticTakeBody({
             <input
               type="file"
               accept="audio/*"
-              className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
+              className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 setAnswers((prev) => ({
@@ -1785,7 +1785,7 @@ function StaticTakeBody({
             <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
               Upload video
               {typeof q.typeConfig?.maxMb === 'number' ? (
-                <span className="ml-1 font-normal text-slate-500 dark:text-neutral-400">
+                <span className="ms-1 font-normal text-slate-500 dark:text-neutral-400">
                   (max {q.typeConfig.maxMb} MB)
                 </span>
               ) : null}
@@ -1793,7 +1793,7 @@ function StaticTakeBody({
             <input
               type="file"
               accept="video/*"
-              className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
+              className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100 dark:border-neutral-600 dark:text-neutral-300 dark:file:bg-indigo-950/40 dark:file:text-indigo-200"
               onChange={(e) => {
                 const f = e.target.files?.[0]
                 setAnswers((prev) => ({
@@ -1884,7 +1884,7 @@ function StaticTakeBody({
               <MathPlainText text={data.body.trim()} />
             </p>
           ) : null}
-          <ol className="mt-4 list-decimal space-y-3 pl-5 text-sm text-slate-800 dark:text-neutral-100">
+          <ol className="mt-4 list-decimal space-y-3 ps-5 text-sm text-slate-800 dark:text-neutral-100">
             {data.steps.map((s) => (
               <li key={s.number}>
                 <span className="font-medium">Step {s.number}.</span>{' '}

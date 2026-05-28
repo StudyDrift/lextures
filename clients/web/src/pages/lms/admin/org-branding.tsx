@@ -159,7 +159,7 @@ export default function OrgBranding() {
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/svg+xml"
                 aria-label="Upload organization logo"
-                className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium dark:text-neutral-300 dark:file:border-neutral-600 dark:file:bg-neutral-800"
+                className="block w-full text-sm text-slate-600 file:me-4 file:rounded-lg file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium dark:text-neutral-300 dark:file:border-neutral-600 dark:file:bg-neutral-800"
                 onChange={(e) => {
                   const f = e.target.files?.[0]
                   if (f) void upload('logo', f)
@@ -178,7 +178,7 @@ export default function OrgBranding() {
                 type="file"
                 accept="image/png,image/jpeg,image/gif,image/svg+xml"
                 aria-label="Upload favicon"
-                className="block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium dark:text-neutral-300 dark:file:border-neutral-600 dark:file:bg-neutral-800"
+                className="block w-full text-sm text-slate-600 file:me-4 file:rounded-lg file:border file:border-slate-200 file:bg-white file:px-3 file:py-2 file:text-sm file:font-medium dark:text-neutral-300 dark:file:border-neutral-600 dark:file:bg-neutral-800"
                 onChange={(e) => {
                   const f = e.target.files?.[0]
                   if (f) void upload('favicon', f)
@@ -253,7 +253,7 @@ export default function OrgBranding() {
                 This color may not meet WCAG AA contrast requirements against white (need 4.5:1
                 for normal text).
                 {form.contrastRatioPrimary != null && (
-                  <span className="ml-1">
+                  <span className="ms-1">
                     Current ratio (approx.): {form.contrastRatioPrimary.toFixed(2)}:1
                   </span>
                 )}

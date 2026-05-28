@@ -46,6 +46,9 @@ RETURNING ` + userRowReturning
 	r.AvatarURL = strPtr(av)
 	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}

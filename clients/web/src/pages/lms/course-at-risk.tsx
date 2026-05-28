@@ -92,13 +92,13 @@ function AlertRow({
           {menuOpen && (
             <ul
               role="menu"
-              className="absolute right-0 z-10 mt-1 min-w-[10rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+              className="absolute end-0 z-10 mt-1 min-w-[10rem] rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
             >
               <li>
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'dismissed' })}
                 >
@@ -109,7 +109,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'snoozed', snoozeDays: 7 })}
                 >
@@ -120,7 +120,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'snoozed', snoozeDays: 14 })}
                 >
@@ -131,7 +131,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'supported', snoozeDays: 14 })}
                 >
@@ -142,7 +142,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   onClick={() => {
                     setMenuOpen(false)
                     setNoteOpen(true)

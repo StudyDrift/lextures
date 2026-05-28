@@ -18,6 +18,7 @@ type accountProfileResponse struct {
 	UITheme                      string  `json:"uiTheme"`
 	ShowHelpPopover              bool    `json:"showHelpPopover"`
 	Locale                       string  `json:"locale"`
+	RTLEnabled                   bool    `json:"rtlEnabled"`
 	Sid                          *string `json:"sid"`
 	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
 	AccountType                  string  `json:"accountType"`
@@ -82,6 +83,13 @@ func (e apierrValidationError) Error() string { return e.msg }
 
 func apierrError(msg string) error { return apierrValidationError{msg: msg} }
 
+func localeOrDefault(locale string) string {
+	if strings.TrimSpace(locale) == "" {
+		return "en"
+	}
+	return locale
+}
+
 func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -117,17 +125,11 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
+			RTLEnabled:                 d.effectiveConfig().RTLEnabled,
 			AccountType:                at,
 			Timezone:                   row.Timezone,
 		})
 	}
-}
-
-func localeOrDefault(locale string) string {
-	if strings.TrimSpace(locale) == "" {
-		return "en"
-	}
-	return locale
 }
 
 func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
@@ -190,6 +192,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
+			RTLEnabled:                 d.effectiveConfig().RTLEnabled,
 			AccountType:                at,
 			Timezone:                   row.Timezone,
 		})

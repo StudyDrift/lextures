@@ -96,7 +96,7 @@ export default function ModerationDashboard() {
       ) : (
         <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-700">
           <table
-            className="min-w-full border-collapse text-left text-sm"
+            className="min-w-full border-collapse text-start text-sm"
             role="grid"
             aria-label="Moderated grading reconciliation"
           >
@@ -142,7 +142,7 @@ export default function ModerationDashboard() {
                         {r.provisional.map((p) => (
                           <li key={`${p.graderId}-${p.score}`}>
                             {p.score}
-                            <span className="ml-1 text-xs text-slate-400">({p.graderId.slice(0, 8)}…)</span>
+                            <span className="ms-1 text-xs text-slate-400">({p.graderId.slice(0, 8)}…)</span>
                           </li>
                         ))}
                       </ul>
@@ -160,7 +160,7 @@ export default function ModerationDashboard() {
                   <td className="px-3 py-2 text-slate-800 dark:text-neutral-100">
                     {r.finalScore != null ? String(r.finalScore) : '—'}
                     {r.reconciliationSource ? (
-                      <span className="ml-1 text-xs text-slate-400">({r.reconciliationSource})</span>
+                      <span className="ms-1 text-xs text-slate-400">({r.reconciliationSource})</span>
                     ) : null}
                   </td>
                   <td className="px-3 py-2">

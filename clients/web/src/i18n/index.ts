@@ -3,7 +3,7 @@ import HttpBackend from 'i18next-http-backend'
 import { IcuFormatPlugin } from './icu-format-plugin'
 import { initReactI18next } from 'react-i18next'
 import { applyDocumentLocale } from './apply-document-locale'
-import { detectInitialLocale } from './locale-storage'
+import { detectInitialLocale, readStoredLocaleTag } from './locale-storage'
 import { recordMissingTranslationKey } from './missing-key'
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './supported-locales'
 import enAuth from '../../public/locales/en/auth.json'
@@ -65,10 +65,21 @@ void instance.init({
   },
 })
 
-applyDocumentLocale(initialLng)
+function readRtlEnabledFlag(): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    return window.localStorage.getItem('lextures.rtlEnabled') === '1'
+  } catch {
+    return false
+  }
+}
+
+const initialTag = readStoredLocaleTag() ?? initialLng
+applyDocumentLocale(initialTag, readRtlEnabledFlag())
 
 i18n.on('languageChanged', (lng) => {
-  applyDocumentLocale(lng)
+  const tag = readStoredLocaleTag() ?? lng
+  applyDocumentLocale(tag, readRtlEnabledFlag())
 })
 
 export { i18n }

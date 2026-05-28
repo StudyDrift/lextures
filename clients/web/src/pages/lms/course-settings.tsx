@@ -1098,13 +1098,13 @@ export default function CourseSettings() {
                         type="button"
                         onClick={() => selectMarkdownPreset(meta.id)}
                         disabled={saveStatus === 'saving'}
-                        className={`relative flex flex-col rounded-xl border p-4 text-left transition ${selected
+                        className={`relative flex flex-col rounded-xl border p-4 text-start transition ${selected
                           ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:bg-indigo-950/30'
                           : 'border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50/80 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:border-indigo-850 dark:hover:bg-neutral-900/50'
                           } disabled:opacity-60`}
                       >
                         {selected && (
-                          <span className="absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white">
+                          <span className="absolute end-3 top-3 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white">
                             <Check className="h-3.5 w-3.5" aria-hidden />
                           </span>
                         )}
@@ -1273,7 +1273,7 @@ export default function CourseSettings() {
       )}
 
       {section === 'general' && isDirty && (
-        <div className="fixed bottom-6 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-850 dark:bg-neutral-900/90">
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>

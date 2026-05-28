@@ -328,7 +328,7 @@ export function TopBarBreadcrumbs() {
   if (!crumbs.length) return null
 
   return (
-    <nav aria-label="Breadcrumb" className="min-w-0 flex-1 basis-0 overflow-hidden pl-1 sm:pl-0">
+    <nav aria-label="Breadcrumb" className="min-w-0 flex-1 basis-0 overflow-hidden ps-1 sm:ps-0">
       <ol className="m-0 flex list-none items-center gap-0.5 p-0 text-xs text-slate-600 sm:text-sm dark:text-neutral-400">
         {crumbs.map((c, i) => {
           const last = i === crumbs.length - 1

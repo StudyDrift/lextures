@@ -271,7 +271,7 @@ export function OrgRolesPanel() {
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-600" aria-label="Org role grants">
+          <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600" aria-label="Org role grants">
             <thead className="bg-slate-50 dark:bg-neutral-800/80">
               <tr>
                 <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
@@ -376,7 +376,7 @@ export function OrgRolesPanel() {
                       <li key={u.id}>
                         <button
                           type="button"
-                          className="w-full px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-neutral-800"
+                          className="w-full px-3 py-2 text-start hover:bg-slate-50 dark:hover:bg-neutral-800"
                           onClick={() => {
                             setSelectedUser(u)
                             setUserResults([])

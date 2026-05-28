@@ -256,7 +256,7 @@ export function RolesPermissionsPanel() {
         </p>
 
         <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-start text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
                 <th className="px-4 py-3">Permission</th>
@@ -368,7 +368,7 @@ export function RolesPermissionsPanel() {
                   <button
                     type="button"
                     onClick={() => setExpandedRoleId(expanded ? null : role.id)}
-                    className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm font-medium text-slate-950 dark:text-neutral-100"
+                    className="flex min-w-0 flex-1 items-center gap-2 text-start text-sm font-medium text-slate-950 dark:text-neutral-100"
                     aria-expanded={expanded}
                   >
                     {expanded ? (

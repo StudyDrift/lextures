@@ -214,7 +214,7 @@ export default function IsoComplianceAdminPage() {
             findings.map((f) => (
               <li key={f.id} className="py-2">
                 <span className="font-medium">{f.isoClause}</span> — {f.description}
-                <span className="ml-2 text-slate-500">({f.status}, {f.auditCycle})</span>
+                <span className="ms-2 text-slate-500">({f.status}, {f.auditCycle})</span>
               </li>
             ))
           )}
@@ -242,7 +242,7 @@ export default function IsoComplianceAdminPage() {
             risks.map((r) => (
               <li key={r.id} className="py-2">
                 {r.riskTitle}
-                <span className="ml-2 text-slate-500">
+                <span className="ms-2 text-slate-500">
                   score {r.residualScore} · {r.treatment}
                 </span>
               </li>

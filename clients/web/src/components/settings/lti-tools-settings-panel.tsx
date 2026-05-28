@@ -149,7 +149,7 @@ export function LtiToolsSettingsPanel() {
                 <li key={t.id} className="rounded-lg border border-slate-200 px-3 py-2 dark:border-neutral-600">
                   <span className="font-medium">{t.name}</span>
                   {!t.active ? (
-                    <span className="ml-2 text-xs uppercase text-amber-700 dark:text-amber-300">inactive</span>
+                    <span className="ms-2 text-xs uppercase text-amber-700 dark:text-amber-300">inactive</span>
                   ) : null}
                 </li>
               ))}

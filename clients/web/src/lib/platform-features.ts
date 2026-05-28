@@ -17,6 +17,7 @@ export type PlatformFeaturesSnapshot = {
   virtualClassroomEnabled: boolean
   sessionManagementUiEnabled: boolean
   instructorInsightsEnabled: boolean
+  rtlEnabled: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -36,6 +37,7 @@ const defaults: PlatformFeaturesSnapshot = {
   virtualClassroomEnabled: true,
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
+  rtlEnabled: false,
 }
 
 let loaded = false

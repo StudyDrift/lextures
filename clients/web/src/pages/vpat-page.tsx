@@ -42,10 +42,10 @@ function WcagTable({ criteria }: { criteria: typeof WCAG_CRITERIA }) {
         <caption className="sr-only">WCAG 2.1 success criteria with conformance level and notes</caption>
         <thead className="bg-slate-50 dark:bg-neutral-900">
           <tr className="border-b border-slate-200 dark:border-neutral-700">
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">SC</th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Title</th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">Conformance</th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Remarks</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">SC</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Title</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">Conformance</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Remarks</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
@@ -82,10 +82,10 @@ function GenericTable<T extends { conformance: ConformanceLevel; notes: string }
         <caption className="sr-only">{label}</caption>
         <thead className="bg-slate-50 dark:bg-neutral-900">
           <tr className="border-b border-slate-200 dark:border-neutral-700">
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">{idLabel}</th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Criterion</th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">Conformance</th>
-            <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Remarks</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">{idLabel}</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Criterion</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400 whitespace-nowrap">Conformance</th>
+            <th scope="col" className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400">Remarks</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
@@ -115,7 +115,7 @@ export default function VpatPage() {
     <div className="min-h-dvh bg-slate-50 text-slate-900 dark:bg-neutral-950 dark:text-neutral-100">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:ring-2 focus:ring-indigo-500 dark:focus:bg-neutral-900"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:shadow-lg focus:ring-2 focus:ring-indigo-500 dark:focus:bg-neutral-900"
       >
         Skip to main content
       </a>
@@ -211,7 +211,7 @@ export default function VpatPage() {
         {/* Table of contents */}
         <nav aria-label="Report sections" className="mb-10 rounded-lg border border-slate-200 bg-white p-5 dark:border-neutral-800 dark:bg-neutral-900">
           <h2 className="mb-3 text-base font-semibold text-slate-900 dark:text-neutral-50">Contents</h2>
-          <ol className="list-decimal pl-5 text-sm text-indigo-700 space-y-1 dark:text-indigo-300">
+          <ol className="list-decimal ps-5 text-sm text-indigo-700 space-y-1 dark:text-indigo-300">
             <li><a href="#wcag-level-a" className="underline-offset-2 hover:underline">WCAG 2.1 — Level A Success Criteria</a></li>
             <li><a href="#wcag-level-aa" className="underline-offset-2 hover:underline">WCAG 2.1 — Level AA Success Criteria</a></li>
             <li><a href="#sec508-fpc" className="underline-offset-2 hover:underline">Revised Section 508 — Chapter 3: Functional Performance Criteria</a></li>
@@ -382,7 +382,7 @@ export default function VpatPage() {
             <p>
               If you encounter an accessibility barrier, need an accommodation, or have questions about this report:
             </p>
-            <ul className="list-disc pl-6 space-y-1">
+            <ul className="list-disc ps-6 space-y-1">
               <li>
                 <a
                   href="mailto:accessibility@lextures.com?subject=Accessibility%20accommodation%20request"

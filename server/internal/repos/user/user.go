@@ -78,11 +78,11 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	r.AvatarURL = strPtr(avatar)
 	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
-	}
-	if r.Locale == "" {
-		r.Locale = "en"
 	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
@@ -119,6 +119,9 @@ RETURNING ` + userRowReturning
 	r.AvatarURL = strPtr(av)
 	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
@@ -153,6 +156,9 @@ RETURNING ` + userRowReturning
 	r.AvatarURL = strPtr(av)
 	r.Timezone = strPtr(timezone)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}

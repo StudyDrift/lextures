@@ -197,7 +197,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
         <p className="text-sm text-slate-500">No archived content.</p>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
-          <table className="min-w-full text-left text-sm">
+          <table className="min-w-full text-start text-sm">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-800/50">
                 <th className="px-4 py-3 font-semibold text-slate-900 dark:text-neutral-100">
@@ -227,7 +227,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                   <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
                     {row.parentId ? moduleTitleById.get(row.parentId) ?? '—' : '—'}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-end">
                     <button
                       type="button"
                       onClick={() => void onUnarchive(row)}

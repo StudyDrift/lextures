@@ -107,10 +107,10 @@ export default function CourseMisconceptionReportPage() {
           <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-neutral-800">
             <thead className="bg-slate-50 dark:bg-neutral-900">
               <tr>
-                <th className="px-3 py-2 text-left font-medium text-slate-700 dark:text-neutral-200">Misconception</th>
-                <th className="px-3 py-2 text-left font-medium text-slate-700 dark:text-neutral-200">Question</th>
-                <th className="px-3 py-2 text-right font-medium text-slate-700 dark:text-neutral-200">Triggers</th>
-                <th className="px-3 py-2 text-right font-medium text-slate-700 dark:text-neutral-200">Students</th>
+                <th className="px-3 py-2 text-start font-medium text-slate-700 dark:text-neutral-200">Misconception</th>
+                <th className="px-3 py-2 text-start font-medium text-slate-700 dark:text-neutral-200">Question</th>
+                <th className="px-3 py-2 text-end font-medium text-slate-700 dark:text-neutral-200">Triggers</th>
+                <th className="px-3 py-2 text-end font-medium text-slate-700 dark:text-neutral-200">Students</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-neutral-800">
@@ -118,10 +118,10 @@ export default function CourseMisconceptionReportPage() {
                 <tr key={`${r.misconceptionId}-${r.questionId}`}>
                   <td className="px-3 py-2 text-slate-900 dark:text-neutral-100">{r.misconceptionName}</td>
                   <td className="max-w-md px-3 py-2 text-slate-700 dark:text-neutral-300">{r.questionStem}</td>
-                  <td className="px-3 py-2 text-right tabular-nums text-slate-800 dark:text-neutral-200">
+                  <td className="px-3 py-2 text-end tabular-nums text-slate-800 dark:text-neutral-200">
                     {r.triggerCount}
                   </td>
-                  <td className="px-3 py-2 text-right tabular-nums text-slate-800 dark:text-neutral-200">
+                  <td className="px-3 py-2 text-end tabular-nums text-slate-800 dark:text-neutral-200">
                     {r.affectedStudents}
                   </td>
                 </tr>

@@ -842,7 +842,7 @@ export function ContentPageReader({
                 />
                 <div className="mt-3 rounded-lg border border-slate-100 bg-slate-50 p-2 text-xs text-slate-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400">
                   <span className="font-semibold text-slate-700 dark:text-neutral-300">Quote</span>
-                  <blockquote className="mt-1 border-l-2 border-amber-300 pl-2 italic dark:border-amber-600">
+                  <blockquote className="mt-1 border-s-2 border-amber-300 ps-2 italic dark:border-amber-600">
                     {pendingQuote}
                   </blockquote>
                 </div>

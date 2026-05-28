@@ -183,7 +183,7 @@ function SyllabusDocumentPanel({
             <button
               type="button"
               onClick={copyMarkdown}
-              className="min-w-0 flex-1 text-left text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
+              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
             >
               Copy as Markdown
             </button>
@@ -203,7 +203,7 @@ function SyllabusDocumentPanel({
             <button
               type="button"
               onClick={copyHtml}
-              className="min-w-0 flex-1 text-left text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
+              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
             >
               Copy as HTML
             </button>
@@ -225,7 +225,7 @@ function SyllabusDocumentPanel({
                 type="button"
                 onClick={pasteFromClipboard}
                 disabled={disabled}
-                className="min-w-0 flex-1 text-left text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline disabled:no-underline disabled:opacity-40 dark:text-neutral-300 dark:hover:text-indigo-400"
+                className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline disabled:no-underline disabled:opacity-40 dark:text-neutral-300 dark:hover:text-indigo-400"
               >
                 Paste from Clipboard
               </button>
@@ -377,7 +377,7 @@ function BlockInsertionRow({ onAdd, disabled }: { onAdd: () => void; disabled?: 
         type="button"
         disabled={disabled}
         onClick={onAdd}
-        className="mt-4 w-full border-0 bg-transparent py-1 text-left text-[13px] text-slate-400 transition hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
+        className="mt-4 w-full border-0 bg-transparent py-1 text-start text-[13px] text-slate-400 transition hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
       >
         Type / to add a section
       </button>
@@ -722,13 +722,13 @@ function SyllabusBlockEditorInner({
                       }
                       className={[
                         'w-full rounded-md border border-slate-200 bg-white py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500',
-                        generateSubmittingId === section.id ? 'pl-2.5 pr-14' : 'px-2.5',
+                        generateSubmittingId === section.id ? 'ps-2.5 pe-14' : 'px-2.5',
                       ].join(' ')}
                       aria-busy={generateSubmittingId === section.id ? true : undefined}
                     />
                     {generateSubmittingId === section.id ? (
                       <div
-                        className="pointer-events-none absolute inset-y-0 right-1.5 flex items-center justify-end pr-[5px]"
+                        className="pointer-events-none absolute inset-y-0 end-1.5 flex items-center justify-end pe-[5px]"
                         role="status"
                         aria-live="polite"
                         aria-label="Generating section"

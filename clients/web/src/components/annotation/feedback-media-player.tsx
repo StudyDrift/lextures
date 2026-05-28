@@ -106,11 +106,11 @@ function FeedbackMediaItem({
 
   const cap =
     media.captionStatus === 'done' ? (
-      <span className="ml-2 text-xs text-slate-500 dark:text-neutral-400">(captions)</span>
+      <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">(captions)</span>
     ) : media.captionStatus === 'failed' ? (
-      <span className="ml-2 text-xs text-amber-700 dark:text-amber-200">(captions unavailable)</span>
+      <span className="ms-2 text-xs text-amber-700 dark:text-amber-200">(captions unavailable)</span>
     ) : (
-      <span className="ml-2 text-xs text-slate-500 dark:text-neutral-400">(captions generating…)</span>
+      <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">(captions generating…)</span>
     )
 
   return (

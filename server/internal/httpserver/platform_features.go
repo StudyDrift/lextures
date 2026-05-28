@@ -24,6 +24,7 @@ type platformFeaturesJSON struct {
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
 	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
 	SessionManagementUIEnabled bool `json:"sessionManagementUiEnabled"`
+	RTLEnabled                 bool `json:"rtlEnabled"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -44,6 +45,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		AvScanningEnabled:          cfg.AvScanningEnabled,
 		VirtualClassroomEnabled:    cfg.VirtualClassroomEnabled,
 		SessionManagementUIEnabled: cfg.SessionManagementUIEnabled,
+		RTLEnabled:                 cfg.RTLEnabled,
 	}
 }
 
