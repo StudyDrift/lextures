@@ -10,6 +10,7 @@ import {
   Plug,
   Plus,
   Puzzle,
+  Sparkles,
 } from 'lucide-react'
 
 export type ModuleItemKind =
@@ -20,6 +21,7 @@ export type ModuleItemKind =
   | 'external_link'
   | 'lti_link'
   | 'h5p'
+  | 'vibe_activity'
 
 type AddModuleItemMenuProps = {
   onAdd: (kind: ModuleItemKind) => void
@@ -197,6 +199,22 @@ export function AddModuleItemMenu({
               </span>
             </button>
           ) : null}
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => pick('vibe_activity')}
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-3 py-2.5 text-left text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+          >
+            <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-200/90 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-950 dark:text-rose-200">
+              <Sparkles className="h-4 w-4" aria-hidden />
+            </span>
+            <span className="min-w-0 flex flex-col gap-0.5">
+              <span className="font-semibold text-slate-950 dark:text-neutral-100">Vibe Activity</span>
+              <span className="text-xs text-slate-500 dark:text-neutral-400">
+                AI-assisted interactive HTML web activity
+              </span>
+            </span>
+          </button>
           <button
             type="button"
             role="menuitem"

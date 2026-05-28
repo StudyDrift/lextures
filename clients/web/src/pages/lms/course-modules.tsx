@@ -51,6 +51,7 @@ import { ModuleExternalLinkModal } from './module-external-link-modal'
 import { H5PUploadModal } from './h5p-upload-modal'
 import { ModuleLtiLinkModal } from './module-lti-link-modal'
 import { ModuleNameModal } from './module-name-modal'
+import { VibeActivityCreateModal } from './vibe-activity-create-modal'
 import { ModuleSettingsModal } from './module-settings-modal'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -64,6 +65,7 @@ import {
   createModuleH5P,
   patchModuleExternalLink,
   createModuleLtiLink,
+  createModuleVibeActivity,
   deleteCourseModule,
   fetchCourseLtiExternalTools,
   fetchCourseModuleDeletePreview,
@@ -116,6 +118,18 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
   moduleOrder: string[]
   childOrderByModule: Record<string, string[]>
 } {
+  const childItemKinds = new Set<CourseStructureItem['kind']>([
+    'heading',
+    'content_page',
+    'assignment',
+    'quiz',
+    'external_link',
+    'survey',
+    'lti_link',
+    'h5p',
+    'vibe_activity',
+  ])
+
   const modules = items
     .filter((i) => i.kind === 'module' && !i.parentId)
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -123,18 +137,7 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
   const childOrderByModule: Record<string, string[]> = {}
   for (const m of modules) {
     childOrderByModule[m.id] = items
-      .filter(
-        (i) =>
-          i.parentId === m.id &&
-          (i.kind === 'heading' ||
-            i.kind === 'content_page' ||
-            i.kind === 'assignment' ||
-            i.kind === 'quiz' ||
-            i.kind === 'external_link' ||
-            i.kind === 'survey' ||
-            i.kind === 'lti_link' ||
-            i.kind === 'h5p'),
-      )
+      .filter((i) => i.parentId === m.id && childItemKinds.has(i.kind))
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((c) => c.id)
   }
@@ -479,6 +482,28 @@ function ChildRowContent({
             <div className="flex min-w-0 items-center gap-2">
               <Link
                 to={`/courses/${encodeURIComponent(courseCode)}/modules/h5p/${encodeURIComponent(child.id)}`}
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                {child.title}
+              </Link>
+              <BlueprintLockIcon locked={child.blueprintLocked} />
+            </div>
+            {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
+            {studentFooter}
+          </div>
+        </div>
+      ) : (child.kind as CourseStructureItem['kind']) === 'vibe_activity' ? (
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-rose-200/90 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-950/55 dark:text-rose-200"
+            aria-hidden
+          >
+            <Sparkles className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link
+                to={`/courses/${encodeURIComponent(courseCode)}/modules/vibe-activity/${encodeURIComponent(child.id)}`}
                 className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
               >
                 {child.title}
@@ -1296,6 +1321,11 @@ export default function CourseModules() {
   const [h5pModuleId, setH5pModuleId] = useState<string | null>(null)
   const [h5pSaving, setH5pSaving] = useState(false)
   const [h5pSaveError, setH5pSaveError] = useState<string | null>(null)
+  const [vibeActivityModalOpen, setVibeActivityModalOpen] = useState(false)
+  const [vibeActivityModalKey, setVibeActivityModalKey] = useState(0)
+  const [vibeActivityModuleId, setVibeActivityModuleId] = useState<string | null>(null)
+  const [vibeActivitySaving, setVibeActivitySaving] = useState(false)
+  const [vibeActivitySaveError, setVibeActivitySaveError] = useState<string | null>(null)
   const [oerPanelOpen, setOerPanelOpen] = useState(false)
   const [oerModuleId, setOerModuleId] = useState<string | null>(null)
   const oerEnabled = oerLibraryEnabled()
@@ -1387,6 +1417,8 @@ export default function CourseModules() {
     oerPanelOpen ||
     ltiLinkSaving ||
     ltiLinkModalOpen ||
+    vibeActivitySaving ||
+    vibeActivityModalOpen ||
     moduleSettingsSaving ||
     moduleSettingsOpen ||
     editItemSaving ||
@@ -1598,6 +1630,25 @@ export default function CourseModules() {
     [courseCode, h5pModuleId, load],
   )
 
+  const saveVibeActivity = useCallback(
+    async (title: string, html: string) => {
+      if (!courseCode || !vibeActivityModuleId) return
+      setVibeActivitySaveError(null)
+      setVibeActivitySaving(true)
+      try {
+        await createModuleVibeActivity(courseCode, vibeActivityModuleId, { title, html })
+        await load({ silent: true })
+        setVibeActivityModalOpen(false)
+        setVibeActivityModuleId(null)
+      } catch (e) {
+        setVibeActivitySaveError(e instanceof Error ? e.message : 'Could not create vibe activity.')
+      } finally {
+        setVibeActivitySaving(false)
+      }
+    },
+    [courseCode, vibeActivityModuleId, load],
+  )
+
   const saveLtiLink = useCallback(
     async (input: {
       title: string
@@ -1675,6 +1726,15 @@ export default function CourseModules() {
       setH5pModuleId(moduleId)
       setH5pModalKey((k) => k + 1)
       setH5pModalOpen(true)
+      return
+    }
+    if (kind === 'vibe_activity') {
+      // Vibe creation uses a dedicated rich modal (prompt + preview + editor).
+      // For MVP we open the generic name modal then the full editor flow is triggered post-create.
+      setVibeActivitySaveError(null)
+      setVibeActivityModuleId(moduleId)
+      setVibeActivityModalKey((k) => k + 1)
+      setVibeActivityModalOpen(true)
       return
     }
     if (kind === 'lti_link') {
@@ -1916,7 +1976,8 @@ export default function CourseModules() {
           i.kind === 'external_link' ||
           i.kind === 'survey' ||
           i.kind === 'lti_link' ||
-          i.kind === 'h5p') &&
+          i.kind === 'h5p' ||
+          i.kind === 'vibe_activity') &&
         i.parentId
       ) {
         const list = m.get(i.parentId) ?? []
@@ -2323,6 +2384,20 @@ export default function CourseModules() {
         toolsLoading={ltiLinkToolsLoading}
         saving={ltiLinkSaving}
         errorMessage={ltiLinkSaveError}
+      />
+
+      <VibeActivityCreateModal
+        key={`vibe-${vibeActivityModalKey}`}
+        open={vibeActivityModalOpen}
+        onClose={() => {
+          if (!vibeActivitySaving) {
+            setVibeActivityModalOpen(false)
+            setVibeActivityModuleId(null)
+          }
+        }}
+        onSave={(title, html) => void saveVibeActivity(title, html)}
+        saving={vibeActivitySaving}
+        error={vibeActivitySaveError}
       />
 
       <ModuleNameModal

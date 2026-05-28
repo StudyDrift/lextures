@@ -244,6 +244,7 @@ export const courseStructureItemSchema = z
       'survey',
       'lti_link',
       'h5p',
+      'vibe_activity',
     ]),
     title: z.string(),
     parentId: z.string().nullable(),
