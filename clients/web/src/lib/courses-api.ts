@@ -1517,6 +1517,9 @@ export type CourseStructureItem = {
   pointsWorth?: number | null
   /** External link module items: destination URL when set. */
   externalUrl?: string | null
+  /** Plan 11.6 — stored Flesch-Kincaid grade level (instructor view). */
+  readingLevelFkgl?: number | null
+  readingLevelAboveThreshold?: boolean
   createdAt: string
   updatedAt: string
 }
@@ -2147,6 +2150,12 @@ export type ModuleContentPagePayload = {
   /** Plan 3.9 */
   neverDrop?: boolean
   replaceWithFinal?: boolean
+  /** Plan 11.6 */
+  readingLevelFkgl?: number | null
+  readingLevelFre?: number | null
+  simplifiedForReadingLevel?: boolean
+  originalMarkdown?: string | null
+  readingLevelTargetFkgl?: number | null
 }
 
 export type OriginalityDetectionMode = 'disabled' | 'plagiarism' | 'ai' | 'both'
@@ -2231,6 +2240,12 @@ function normalizeModuleContentPagePayload(raw: unknown): ModuleContentPagePaylo
     releaseAt: typeof r.releaseAt === 'string' ? r.releaseAt : null,
     neverDrop: r.neverDrop === true || r.never_drop === true,
     replaceWithFinal: r.replaceWithFinal === true || r.replace_with_final === true,
+    readingLevelFkgl: typeof r.readingLevelFkgl === 'number' ? r.readingLevelFkgl : null,
+    readingLevelFre: typeof r.readingLevelFre === 'number' ? r.readingLevelFre : null,
+    simplifiedForReadingLevel: Boolean(r.simplifiedForReadingLevel),
+    originalMarkdown: typeof r.originalMarkdown === 'string' ? r.originalMarkdown : null,
+    readingLevelTargetFkgl:
+      typeof r.readingLevelTargetFkgl === 'number' ? r.readingLevelTargetFkgl : null,
   }
 }
 

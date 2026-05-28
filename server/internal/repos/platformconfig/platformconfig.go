@@ -61,6 +61,7 @@ type Row struct {
 	SelfReflectionEnabled      *bool
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
+	ReadingLevelEnabled        *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
 	InstructorInsightsEnabled  *bool
@@ -135,6 +136,7 @@ type Write struct {
 	SelfReflectionEnabled      *bool
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
+	ReadingLevelEnabled        *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
 	InstructorInsightsEnabled  *bool
@@ -207,6 +209,7 @@ SELECT
 	self_reflection_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
+	reading_level_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
 	instructor_insights_enabled,
@@ -274,6 +277,7 @@ WHERE id = 1
 		&r.SelfReflectionEnabled,
 		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
+		&r.ReadingLevelEnabled,
 		&r.ReportExportEnabled,
 		&r.XAPIEmissionEnabled,
 		&r.InstructorInsightsEnabled,
@@ -381,6 +385,7 @@ INSERT INTO settings.platform_app_settings (
 	self_reflection_enabled,
 	outcomes_report_enabled,
 	equation_editor_enabled,
+	reading_level_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
 	instructor_insights_enabled,
@@ -406,7 +411,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -453,6 +458,7 @@ ON CONFLICT (id) DO UPDATE SET
 	self_reflection_enabled = COALESCE(EXCLUDED.self_reflection_enabled, settings.platform_app_settings.self_reflection_enabled),
 	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
+	reading_level_enabled = COALESCE(EXCLUDED.reading_level_enabled, settings.platform_app_settings.reading_level_enabled),
 	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
 	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
 	instructor_insights_enabled = COALESCE(EXCLUDED.instructor_insights_enabled, settings.platform_app_settings.instructor_insights_enabled),
@@ -518,6 +524,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.SelfReflectionEnabled,
 		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
+		w.ReadingLevelEnabled,
 		w.ReportExportEnabled,
 		w.XAPIEmissionEnabled,
 		w.InstructorInsightsEnabled,

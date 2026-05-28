@@ -353,6 +353,9 @@ func (d Deps) handleCourseStructure() http.HandlerFunc {
 				}
 			}
 		}
+		if d.readingLevelEnabled() && staffView {
+			_ = coursestructure.ApplyReadingLevelMetadata(r.Context(), d.Pool, *cid, items)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp{Items: items})
 	}
