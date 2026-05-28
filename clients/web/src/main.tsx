@@ -1,4 +1,5 @@
 import { registerServiceWorker } from './lib/push-notifications'
+import './i18n'
 
 void registerServiceWorker()
 
@@ -11,10 +12,12 @@ import { LmsToaster } from './components/lms-toaster'
 import { AriaAnnouncer } from './components/aria-announcer'
 import { OrgBrandingProvider } from './context/org-branding-context'
 import { PermissionsProvider } from './context/permissions-provider'
+import { I18nProvider } from './context/i18n-provider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <I18nProvider>
       <OrgBrandingProvider>
         <PermissionsProvider>
           <AriaAnnouncer />
@@ -22,6 +25,7 @@ createRoot(document.getElementById('root')!).render(
           <LmsToaster />
         </PermissionsProvider>
       </OrgBrandingProvider>
+      </I18nProvider>
     </BrowserRouter>
   </StrictMode>,
 )

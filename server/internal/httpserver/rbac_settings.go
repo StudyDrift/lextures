@@ -544,6 +544,8 @@ func allowGet(w http.ResponseWriter, r *http.Request) {
 func (d Deps) registerSettingsRoutes(r chi.Router) {
 	r.Get("/api/v1/settings/account", d.handleGetSettingsAccount())
 	r.Patch("/api/v1/settings/account", d.handlePatchSettingsAccount())
+	r.Get("/api/v1/settings/locale", d.handleGetSettingsLocale())
+	r.Put("/api/v1/settings/locale", d.handlePutSettingsLocale())
 	r.Get("/api/v1/settings/ai/models", d.handleListAIModels())
 	r.Get("/api/v1/settings/ai", d.handleGetSettingsAI())
 	r.Put("/api/v1/settings/ai", d.handlePutSettingsAI())

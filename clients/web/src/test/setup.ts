@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom/vitest'
+import '../i18n'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { clearAccessToken } from '../lib/auth'
 import { clearRefreshToken } from '../lib/session-tokens'
