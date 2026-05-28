@@ -78,7 +78,8 @@ test.describe('Course modules', () => {
     await expect(confirmDelete).toBeEnabled({ timeout: 10000 })
     await confirmDelete.click()
 
-    await expect(page.getByText(seededCourse.moduleTitle)).not.toBeVisible({ timeout: 8000 })
+    const activeModuleRow = page.locator('li').filter({ hasText: seededCourse.moduleTitle }).first()
+    await expect(activeModuleRow).not.toBeVisible({ timeout: 8000 })
   })
 
   // --- Vibe Activity tests (new module type) ---
