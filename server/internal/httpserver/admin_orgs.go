@@ -183,6 +183,10 @@ func (d Deps) handleAdminOrgItem() http.HandlerFunc {
 					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 					return
 				}
+				if err == organization.ErrRegionImmutable {
+					apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput, "Region cannot be changed after provisioning without a migration workflow.")
+					return
+				}
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update organization.")
 				return
 			}

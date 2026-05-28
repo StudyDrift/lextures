@@ -89,6 +89,7 @@ type platformSettingsJSON struct {
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled             bool `json:"isoIsmsEnabled"`
+	DataResidencyEnabled       bool `json:"dataResidencyEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -209,6 +210,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
+			DataResidencyEnabled:        merged.DataResidencyEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
@@ -302,6 +304,7 @@ type putPlatformBody struct {
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled             *bool `json:"isoIsmsEnabled"`
+	DataResidencyEnabled       *bool `json:"dataResidencyEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -556,6 +559,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
 		setBool("coppaworkflowenabled", body.CoppaWorkflowEnabled, func(v bool) { wr.CoppaWorkflowEnabled = &v })
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
+		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -632,6 +636,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
+			DataResidencyEnabled:        merged.DataResidencyEnabled,
 			MFAEnabled:                  merged.MFAEnabled,
 			MFAEnforcement:              merged.MFAEnforcement,
 			SMTPHost:                    merged.SMTPHost,
