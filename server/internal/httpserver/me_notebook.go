@@ -26,6 +26,11 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
+		// No DB pool: match legacy behavior for misconfigured dev/test handlers (503 before auth).
+		if d.Pool == nil && d.openRouterClient() == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
+			return
+		}
 		var body notebookRagJSON
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")

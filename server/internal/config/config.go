@@ -254,6 +254,13 @@ type Config struct {
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.
 	AiDisclosureEnabled bool
+
+	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
+	AppEnv string
+	// DisablePIIRedaction allows plaintext PII in operational logs for local debugging only (plan 10.14).
+	DisablePIIRedaction bool
+	// PIIRedactFields adds extra structured log field names to the redaction registry (REDACT_FIELDS).
+	PIIRedactFields []string
 }
 
 // Load reads configuration from the environment.
@@ -397,7 +404,11 @@ func Load() Config {
 		IsoIsmsEnabled:       boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
 		AdminAuditLogEnabled: true, // plan 10.11 default on; disable via platform settings
 		DataResidencyEnabled: boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
-		AiDisclosureEnabled: !boolEnv("AI_DISCLOSURE_DISABLED"),
+		AiDisclosureEnabled:  !boolEnv("AI_DISCLOSURE_DISABLED"),
+
+		AppEnv:              appEnv(),
+		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
+		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 	}
 }
 
@@ -465,7 +476,23 @@ func (c Config) Validate() error {
 	if c.SAMLSSOEnabled && strings.TrimSpace(c.SAMLSPX509PEM) == "" {
 		return fmt.Errorf("SAML SSO is enabled in platform settings but SAML SP X.509 certificate is missing (set SAML_SP_X509_PEM or SAML_SP_X509_PATH in environment)")
 	}
+	if err := c.validatePIIRedaction(); err != nil {
+		return err
+	}
 	return nil
+}
+
+func (c Config) validatePIIRedaction() error {
+	if !c.DisablePIIRedaction {
+		return nil
+	}
+	env := strings.ToLower(strings.TrimSpace(c.AppEnv))
+	switch env {
+	case "production", "staging":
+		return fmt.Errorf("PII redaction cannot be disabled in production")
+	default:
+		return nil
+	}
 }
 
 func runMigrations() bool {
@@ -620,6 +647,26 @@ func transcodeRetainSourceDays() int {
 		return 30
 	}
 	return n
+}
+
+func appEnv() string {
+	return stringDefault(strings.ToLower(strings.TrimSpace(firstNonEmptyTrimmed("APP_ENV"))), "local")
+}
+
+func commaSeparatedEnv(key string) []string {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 func storageUseSSL() bool {
