@@ -254,6 +254,8 @@ type Config struct {
 	DataResidencyEnabled bool
 	// SecurityDisclosureModuleEnabled gates responsible-disclosure report triage APIs (plan 10.16).
 	SecurityDisclosureModuleEnabled bool
+	// BackupModuleEnabled gates backup/restore ops: backup status and restore drill APIs (plan 10.15).
+	BackupModuleEnabled bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -405,6 +407,7 @@ func Load() Config {
 		AdminAuditLogEnabled: true, // plan 10.11 default on; disable via platform settings
 		DataResidencyEnabled:            boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
 		SecurityDisclosureModuleEnabled: boolEnv("SECURITY_DISCLOSURE_MODULE_ENABLED") || boolEnv("FEATURE_SECURITY_DISCLOSURE"),
+		BackupModuleEnabled:             boolEnv("BACKUP_MODULE_ENABLED") || boolEnv("FEATURE_BACKUP_MODULE"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
