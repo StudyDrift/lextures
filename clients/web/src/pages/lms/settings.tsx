@@ -37,6 +37,8 @@ import {
 import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-accounts-panel'
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
+import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
+import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
 import { FALLBACK_IMAGE_MODEL_OPTIONS, FALLBACK_TEXT_MODEL_OPTIONS } from '../../lib/ai-models'
@@ -1075,6 +1077,8 @@ export default function Settings() {
                   </button>
                 </div>
 
+                <AiProcessingSettingsPanel />
+
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Help popover</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Show or hide the floating help launcher in the bottom-right corner.
@@ -1618,6 +1622,7 @@ export default function Settings() {
               Logo, colors, optional custom domain, and email sender display name.
             </p>
             <OrgBranding />
+            <AiGovernancePanel />
           </div>
         )}
 

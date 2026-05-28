@@ -252,6 +252,8 @@ type Config struct {
 	AdminAuditLogEnabled bool
 	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
 	DataResidencyEnabled bool
+	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.
+	AiDisclosureEnabled bool
 }
 
 // Load reads configuration from the environment.
@@ -395,6 +397,7 @@ func Load() Config {
 		IsoIsmsEnabled:       boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
 		AdminAuditLogEnabled: true, // plan 10.11 default on; disable via platform settings
 		DataResidencyEnabled: boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
+		AiDisclosureEnabled: !boolEnv("AI_DISCLOSURE_DISABLED"),
 	}
 }
 

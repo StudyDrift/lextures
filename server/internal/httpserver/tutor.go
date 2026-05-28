@@ -14,6 +14,7 @@ import (
 	tutorrepo "github.com/lextures/lextures/server/internal/repos/tutor"
 	"github.com/lextures/lextures/server/internal/repos/userai"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
@@ -143,6 +144,14 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 			return
 		}
 
+		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureAITutor, model, cleaned) {
+			return
+		}
+		gwDec := aigateway.Decision{
+			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID),
+			OptInConfirmed: true,
+		}
+
 		msgs := buildTutorMessages(c.Title, conv, cleaned)
 
 		flusher, canFlush := w.(http.Flusher)
@@ -168,6 +177,9 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 			}
 			return werr
 		})
+		if streamErr == nil {
+			d.logAIInferenceAllowed(r, userID, aigateway.FeatureAITutor, model, cleaned, gwDec)
+		}
 		if streamErr != nil {
 			tutorSSEError(w, flusher, "I'm having trouble right now. Please try again in a moment.")
 			return

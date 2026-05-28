@@ -11,7 +11,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"os"
 
+	pkgai "github.com/lextures/lextures/server/internal/aidisclosure"
+	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 )
@@ -254,10 +257,11 @@ SELECT email, display_name, first_name, last_name, created_at
 	}
 
 	type archiveDoc struct {
-		UserID   string       `json:"userId"`
-		Profile  profileRow   `json:"profile"`
-		Consents []consentSummary `json:"consents"`
-		ExportedAt string     `json:"exportedAt"`
+		UserID            string           `json:"userId"`
+		Profile           profileRow       `json:"profile"`
+		Consents          []consentSummary `json:"consents"`
+		AIInferenceLog    []map[string]any `json:"aiInferenceLog,omitempty"`
+		ExportedAt        string           `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
@@ -272,11 +276,14 @@ SELECT email, display_name, first_name, last_name, created_at
 		})
 	}
 
+	aiLog := dsarAIInferenceSummary(ctx, pool, os.Getenv("JWT_SECRET"), userID)
+
 	doc := archiveDoc{
-		UserID:   userID.String(),
-		Profile:  p,
-		Consents: cs,
-		ExportedAt: time.Now().UTC().Format(time.RFC3339),
+		UserID:         userID.String(),
+		Profile:        p,
+		Consents:       cs,
+		AIInferenceLog: aiLog,
+		ExportedAt:     time.Now().UTC().Format(time.RFC3339),
 	}
 	b, err := json.Marshal(doc)
 	if err != nil {
@@ -306,4 +313,25 @@ func optRFC3339(t *time.Time) *string {
 // In a full implementation this would point to a confirmation page.
 func buildErasureConfirmationURL(requestID uuid.UUID) string {
 	return "erasure-confirmed:" + requestID.String()
+}
+
+func dsarAIInferenceSummary(ctx context.Context, pool *pgxpool.Pool, secret string, userID uuid.UUID) []map[string]any {
+	hash := pkgai.UserIDHash(secret, userID)
+	rows, err := repoaidisclosure.ListLogsByUserHash(ctx, pool, hash, 1000)
+	if err != nil {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, map[string]any{
+			"feature":        r.FeatureName,
+			"modelId":        r.ModelID,
+			"provider":       r.Provider,
+			"contentHash":    r.ContentHash,
+			"optInConfirmed": r.OptInConfirmed,
+			"blocked":        r.Blocked,
+			"timestamp":      r.Timestamp.UTC().Format(time.RFC3339),
+		})
+	}
+	return out
 }

@@ -28,8 +28,10 @@ const (
 	CodeInternal          = "INTERNAL"
 	// CodeUnprocessableEntity is used when the request is well-formed but cannot be applied (e.g. revoke current session).
 	CodeUnprocessableEntity = "UNPROCESSABLE_ENTITY"
-	CodeAiNotConfigured     = "AI_NOT_CONFIGURED"
-	CodeAiGenerationFailed  = "AI_GENERATION_FAILED"
+	CodeAiNotConfigured          = "AI_NOT_CONFIGURED"
+	CodeAiGenerationFailed       = "AI_GENERATION_FAILED"
+	CodeAiProcessingDisabled     = "AI_PROCESSING_DISABLED"
+	CodeTenantAIPolicyDisabled   = "TENANT_AI_POLICY_DISABLED"
 	CodeOrgSuspended        = "ORG_SUSPENDED"
 )
 
