@@ -16,8 +16,8 @@ type accountProfileResponse struct {
 	LastName                     *string `json:"lastName"`
 	AvatarURL                    *string `json:"avatarUrl"`
 	UITheme                      string  `json:"uiTheme"`
-	Locale                       string  `json:"locale"`
 	ShowHelpPopover              bool    `json:"showHelpPopover"`
+	Locale                       string  `json:"locale"`
 	RTLEnabled                   bool    `json:"rtlEnabled"`
 	Sid                          *string `json:"sid"`
 	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
@@ -29,7 +29,6 @@ type patchAccountBody struct {
 	LastName        *string `json:"lastName"`
 	AvatarURL       *string `json:"avatarUrl"`
 	UITheme         *string `json:"uiTheme"`
-	Locale          *string `json:"locale"`
 	ShowHelpPopover *bool   `json:"showHelpPopover"`
 }
 
@@ -83,6 +82,13 @@ func (e apierrValidationError) Error() string { return e.msg }
 
 func apierrError(msg string) error { return apierrValidationError{msg: msg} }
 
+func localeOrDefault(locale string) string {
+	if strings.TrimSpace(locale) == "" {
+		return "en"
+	}
+	return locale
+}
+
 func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -114,8 +120,8 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			LastName:                   row.LastName,
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
-			Locale:                     localeOrDefault(row.Locale),
 			ShowHelpPopover:            row.ShowHelpPopover,
+			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			RTLEnabled:                 d.effectiveConfig().RTLEnabled,
@@ -160,15 +166,6 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		var localePatch *string
-		if req.Locale != nil {
-			normalized, locErr := normalizeUserLocale(req.Locale)
-			if locErr != nil {
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, locErr.Error())
-				return
-			}
-			localePatch = &normalized
-		}
 		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update account.")
@@ -177,17 +174,6 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 		if row == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
 			return
-		}
-		if localePatch != nil {
-			row, err = user.UpdateLocale(r.Context(), d.Pool, userID, *localePatch)
-			if err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update locale.")
-				return
-			}
-			if row == nil {
-				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
-				return
-			}
 		}
 		at := row.AccountType
 		if at == "" {
@@ -200,26 +186,12 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			LastName:                   row.LastName,
 			AvatarURL:                  row.AvatarURL,
 			UITheme:                    row.UITheme,
-			Locale:                     localeOrDefault(row.Locale),
 			ShowHelpPopover:            row.ShowHelpPopover,
+			Locale:                     localeOrDefault(row.Locale),
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			RTLEnabled:                 d.effectiveConfig().RTLEnabled,
 			AccountType:                at,
-		})
-	}
-}
-
-func (d Deps) handleGetPublicLocaleDefaults() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		locale := detectBrowserLocale(r.Header.Get("Accept-Language"))
-		writeJSON(w, http.StatusOK, map[string]string{
-			"locale": locale,
 		})
 	}
 }

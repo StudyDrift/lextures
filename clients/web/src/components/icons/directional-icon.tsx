@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { useLocale } from '../../context/locale-context'
+import { useDocumentDirection } from '../../i18n/use-document-direction'
 
 type DirectionalIconProps = {
   icon: LucideIcon
@@ -12,7 +12,7 @@ type DirectionalIconProps = {
  * Wraps directional Lucide icons so they mirror in RTL reading direction.
  */
 export function DirectionalIcon({ icon: Icon, className, mirror = true }: DirectionalIconProps) {
-  const { dir } = useLocale()
+  const dir = useDocumentDirection()
   const rtlMirror = mirror && dir === 'rtl'
   return (
     <Icon

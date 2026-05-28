@@ -12,10 +12,10 @@ func TestDetectBrowserLocale(t *testing.T) {
 	if got := detectBrowserLocale(""); got != "en" {
 		t.Fatalf("empty: got %q", got)
 	}
-	if got := detectBrowserLocale("ar-SA,ar;q=0.9,en;q=0.8"); got != "ar" {
+	if got := detectBrowserLocale("ar-SA,ar;q=0.9,en;q=0.8"); got != "ar-SA" {
 		t.Fatalf("arabic: got %q", got)
 	}
-	if got := detectBrowserLocale("fr-FR,fr;q=0.9"); got != "fr" {
+	if got := detectBrowserLocale("fr-FR,fr;q=0.9"); got != "fr-FR" {
 		t.Fatalf("french: got %q", got)
 	}
 }
@@ -31,14 +31,13 @@ func TestHandleGetPublicLocaleDefaults(t *testing.T) {
 	}
 }
 
-func TestNormalizeUserLocale(t *testing.T) {
-	raw := "ar-SA"
-	got, err := normalizeUserLocale(&raw)
+func TestNormalizeLocaleInput_rtl(t *testing.T) {
+	got, err := normalizeLocaleInput("ar")
 	if err != nil || got != "ar" {
 		t.Fatalf("got %q err %v", got, err)
 	}
-	bad := "xx"
-	if _, err := normalizeUserLocale(&bad); err == nil {
+	_, err = normalizeLocaleInput("xx")
+	if err == nil {
 		t.Fatal("expected error for unsupported locale")
 	}
 }

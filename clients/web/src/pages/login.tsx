@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { BrandLogo } from '../components/brand-logo'
 import { OidcSignInButtons } from '../components/oidc-sign-in-buttons'
 import { getAccessToken } from '../lib/auth'
@@ -10,6 +11,7 @@ import { readApiErrorMessage } from '../lib/errors'
 import { applyUiTheme, parseUiTheme } from '../lib/ui-theme'
 import { markPostLoginShortcutTip } from '../lib/post-login-shortcut-tip'
 import { setMfaFlow } from '../lib/mfa-flow-storage'
+import { syncUserLocale } from '../lib/sync-user-locale'
 import {
   authCardClass,
   authFieldClass,
@@ -21,6 +23,7 @@ import { MagicLinkRequestForm } from '../components/auth/magic-link-request-form
 import { PublicAuthShell } from '../components/auth/public-auth-shell'
 
 export default function Login() {
+  const { t } = useTranslation('auth')
   const navigate = useNavigate()
   const location = useLocation()
   const state = location.state as { from?: string } | undefined
@@ -102,7 +105,7 @@ export default function Login() {
         mfa_pending_token?: string
         requires_mfa?: boolean
         mfa_setup_required?: boolean
-        user?: { email?: string; uiTheme?: string | null; accountType?: string }
+        user?: { email?: string; uiTheme?: string | null; locale?: string | null; accountType?: string }
       }
       if (data.requires_mfa && data.mfa_pending_token) {
         setMfaFlow({ token: data.mfa_pending_token, mode: 'challenge' })
@@ -116,16 +119,17 @@ export default function Login() {
       }
       if (!data.access_token) {
         setStatus('error')
-        setMessage('Unexpected sign-in response.')
+        setMessage(t('auth.login.unexpectedResponse'))
         return
       }
       applyAuthTokenResponse(data)
       applyUiTheme(parseUiTheme(data.user?.uiTheme))
+      await syncUserLocale(data.user?.locale)
       markPostLoginShortcutTip()
       navigate(pickPostAuthPath(from), { replace: true })
     } catch {
       setStatus('error')
-      setMessage('Could not reach the server. Is the API running?')
+      setMessage(t('auth.login.serverUnreachable'))
     }
   }
 
@@ -136,10 +140,10 @@ export default function Login() {
           <BrandLogo className="mx-auto h-14 w-auto max-w-[min(100%,240px)] object-contain" />
         </div>
         <h1 className="lex-auth-display text-[1.7rem] leading-snug text-stone-900 dark:text-neutral-50">
-          Sign in
+          {t('auth.login.title')}
         </h1>
         <p className="mt-2 text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
-          Use the email your course or school uses. SSO options appear when your organization connects them.
+          {t('auth.login.subtitle')}
         </p>
       </header>
 
@@ -152,22 +156,22 @@ export default function Login() {
               href={apiUrl(
                 `/auth/saml/login?idpId=${encodeURIComponent(saml.idp.id)}&RelayState=${encodeURIComponent(from)}`,
               )}
-              aria-label="Log in with institutional single sign-on"
+              aria-label={t('auth.login.ssoAria')}
             >
-              Log in with {saml.idp.label} SSO
+              {t('auth.login.ssoButton', { label: saml.idp.label })}
             </a>
           </div>
         )}
         {saml?.enabled && saml.idp?.forceSaml && (
           <p className="mb-4 text-center text-sm text-stone-600 dark:text-neutral-400">
-            Your organization requires institutional sign-in.
+            {t('auth.login.ssoRequired')}
           </p>
         )}
         {!saml?.idp?.forceSaml && (
           <form className="space-y-5" onSubmit={onSubmit}>
             <div>
               <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200">
-                Email
+                {t('auth.login.email')}
               </label>
               <input
                 id="email"
@@ -178,7 +182,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={authFieldClass}
-                placeholder="you@school.edu"
+                placeholder={t('auth.login.emailPlaceholder')}
               />
             </div>
             <div>
@@ -186,7 +190,7 @@ export default function Login() {
                 htmlFor="password"
                 className="mb-1.5 block text-sm font-medium text-stone-800 dark:text-neutral-200"
               >
-                Password
+                {t('auth.login.password')}
               </label>
               <input
                 id="password"
@@ -201,7 +205,7 @@ export default function Login() {
               />
               <div className="mt-2 text-end">
                 <Link to="/forgot-password" className={`text-sm ${authMutedLinkClass}`}>
-                  Forgot password?
+                  {t('auth.login.forgotPassword')}
                 </Link>
               </div>
             </div>
@@ -213,7 +217,7 @@ export default function Login() {
             )}
 
             <button type="submit" disabled={status === 'loading'} className={authPrimaryButtonClass}>
-              {status === 'loading' ? 'Signing in…' : 'Sign in'}
+              {status === 'loading' ? t('auth.login.submitting') : t('auth.login.submit')}
             </button>
           </form>
         )}
@@ -222,9 +226,9 @@ export default function Login() {
 
         {!saml?.idp?.forceSaml && (
           <p className="mt-6 text-center text-sm text-stone-600 dark:text-neutral-400">
-            New here?{' '}
+            {t('auth.login.newHere')}{' '}
             <Link to="/signup" className={authMutedLinkClass}>
-              Create an account
+              {t('auth.login.createAccount')}
             </Link>
           </p>
         )}

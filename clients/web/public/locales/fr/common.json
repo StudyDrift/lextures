@@ -1,0 +1,8 @@
+{
+  "common.locale.label": "Langue",
+  "common.locale.description": "Choisissez la langue des menus, boutons et autres textes de l'interface.",
+  "common.locale.saved": "Préférence linguistique enregistrée.",
+  "common.locale.saveError": "Impossible d'enregistrer la préférence linguistique.",
+  "common.assignmentCount": "{count, plural, one {# devoir} other {# devoirs}}",
+  "common.loading": "Chargement…"
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach } from 'vitest'
-import { applyDocumentLocale, documentLocaleFromCode } from '../document-locale'
+import { applyDocumentLocale, documentLocaleFromCode } from '../apply-document-locale'
 
 describe('documentLocaleFromCode', () => {
   it('uses rtl only when feature flag and locale are rtl', () => {
@@ -28,7 +28,8 @@ describe('applyDocumentLocale', () => {
 
   it('sets html lang and dir', () => {
     applyDocumentLocale('he', true)
-    expect(document.documentElement.lang).toBe('he')
+    expect(document.documentElement.lang).toBe('en')
     expect(document.documentElement.dir).toBe('rtl')
+    expect(document.documentElement.getAttribute('data-locale')).toBe('he')
   })
 })

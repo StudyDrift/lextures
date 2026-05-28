@@ -1,0 +1,8 @@
+{
+  "common.locale.label": "Language",
+  "common.locale.description": "Choose the language for menus, buttons, and other interface text.",
+  "common.locale.saved": "Language preference saved.",
+  "common.locale.saveError": "Could not save language preference.",
+  "common.assignmentCount": "{count, plural, one {# assignment} other {# assignments}}",
+  "common.loading": "Loading…"
+}

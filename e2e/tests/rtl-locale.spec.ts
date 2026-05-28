@@ -19,24 +19,24 @@ test.describe('RTL locale API', () => {
     })
     expect(res.status).toBe(200)
     const body = (await res.json()) as { locale?: string }
-    expect(body.locale).toBe('ar')
+    expect(body.locale).toBe('ar-SA')
   })
 
   test('authenticated user can set Arabic locale', async () => {
     const { access_token } = await apiSignup({ email: uniqueEmail(), password: PASSWORD })
-    const patchRes = await fetch(`${API_BASE}/api/v1/settings/account`, {
-      method: 'PATCH',
+    const putRes = await fetch(`${API_BASE}/api/v1/settings/locale`, {
+      method: 'PUT',
       headers: {
         Authorization: `Bearer ${access_token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ locale: 'ar' }),
     })
-    expect(patchRes.status).toBe(200)
-    const patched = (await patchRes.json()) as { locale?: string }
+    expect(putRes.status).toBe(200)
+    const patched = (await putRes.json()) as { locale?: string }
     expect(patched.locale).toBe('ar')
 
-    const getRes = await fetch(`${API_BASE}/api/v1/settings/account`, {
+    const getRes = await fetch(`${API_BASE}/api/v1/settings/locale`, {
       headers: { Authorization: `Bearer ${access_token}` },
     })
     expect(getRes.status).toBe(200)
@@ -56,15 +56,15 @@ test.describe('RTL document direction in browser', () => {
     })
 
     await page.goto('/settings/account')
-    await page.waitForSelector('select', { timeout: 15_000 })
-    const localeSelect = page.locator('select').filter({ has: page.locator('option[value="ar"]') }).first()
+    const localeSelect = page.getByTestId('locale-switcher')
+    await expect(localeSelect).toBeVisible({ timeout: 15_000 })
     await localeSelect.selectOption('ar')
 
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.getAttribute('dir')))
       .toBe('rtl')
     await expect
-      .poll(async () => page.evaluate(() => document.documentElement.getAttribute('lang')))
+      .poll(async () => page.evaluate(() => document.documentElement.getAttribute('data-locale')))
       .toBe('ar')
 
     await localeSelect.selectOption('en')

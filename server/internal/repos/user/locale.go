@@ -14,18 +14,18 @@ import (
 // DefaultLocale is the fallback BCP 47 tag when none is stored.
 const DefaultLocale = "en"
 
-// UpdateLocale sets the user's UI locale (BCP 47 primary subtag, e.g. en, ar).
+// UpdateLocale sets the user's UI locale (BCP 47 tag).
 func UpdateLocale(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, locale string) (*Row, error) {
 	const q = `UPDATE "user".users
 SET locale = $2
 WHERE id = $1
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
+RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, userID, locale).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {

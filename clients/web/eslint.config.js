@@ -1,4 +1,5 @@
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import i18next from 'eslint-plugin-i18next'
 
 import js from '@eslint/js'
 import noPhysicalTailwind from './eslint-rules/no-physical-tailwind.js'
@@ -59,5 +60,17 @@ export default defineConfig([globalIgnores(['dist', 'coverage']), {
     'jsx-a11y/iframe-has-title': 'error',
     // SC 1.3.1 — scope attribute only valid on <th>
     'jsx-a11y/scope': 'error',
+  },
+}, {
+  files: ['src/pages/login.tsx'],
+  plugins: { i18next },
+  rules: {
+    'i18next/no-literal-string': [
+      'error',
+      {
+        markupOnly: true,
+        ignoreAttribute: ['className', 'type', 'name', 'autoComplete', 'id', 'role', 'href', 'to', 'minLength', 'placeholder'],
+      },
+    ],
   },
 }])

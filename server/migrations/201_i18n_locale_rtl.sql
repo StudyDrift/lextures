@@ -1,11 +1,5 @@
--- 11.2 RTL language support: user locale preference and platform rtl_enabled flag (plan 11.2).
--- Depends on: "user".users (011), settings.platform_app_settings.
-
-ALTER TABLE "user".users
-  ADD COLUMN IF NOT EXISTS locale TEXT NOT NULL DEFAULT 'en';
-
-COMMENT ON COLUMN "user".users.locale IS
-  'BCP 47 locale tag for UI language; drives document lang and RTL layout when enabled (plan 11.2).';
+-- 11.2 RTL language support: platform rtl_enabled flag (plan 11.2).
+-- Depends on: 200_user_locale.sql, settings.platform_app_settings.
 
 ALTER TABLE settings.platform_app_settings
   ADD COLUMN IF NOT EXISTS rtl_enabled BOOLEAN;

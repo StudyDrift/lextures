@@ -38,7 +38,6 @@ import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-acco
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
-import { LocaleSettingsPanel } from '../../components/settings/locale-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
@@ -49,6 +48,8 @@ import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey 
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
 import { useUiDensityControls } from '../../context/ui-density-context'
+import { LocaleSwitcher } from '../../components/settings/locale-switcher'
+import { syncUserLocale } from '../../lib/sync-user-locale'
 
 function isSystemSettingsPath(pathname: string): boolean {
   if (pathname.startsWith('/settings/ai/')) return true
@@ -116,6 +117,8 @@ type AccountProfile = {
   avatarUrl?: string | null
   uiTheme?: string | null
   showHelpPopover?: boolean
+  locale?: string | null
+  rtlEnabled?: boolean
   sid?: string | null
   sessionManagementUiEnabled?: boolean
 }
@@ -213,6 +216,7 @@ export default function Settings() {
   const [avatarGenMessage, setAvatarGenMessage] = useState<string | null>(null)
   const [uiTheme, setUiTheme] = useState<UiTheme>('light')
   const [showHelpPopover, setShowHelpPopover] = useState(true)
+  const [localeTag, setLocaleTag] = useState('en')
   const [studentId, setStudentId] = useState<string | null>(null)
   const [sessionManagementUiEnabled, setSessionManagementUiEnabled] = useState(false)
   const [sessions, setSessions] = useState<ActiveSessionRow[]>([])
@@ -390,6 +394,17 @@ export default function Settings() {
       setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
       if (data.showHelpPopover !== undefined) {
         setShowHelpPopover(data.showHelpPopover)
+      }
+      if (data.rtlEnabled !== undefined) {
+        try {
+          window.localStorage.setItem('lextures.rtlEnabled', data.rtlEnabled ? '1' : '0')
+        } catch {
+          /* ignore */
+        }
+      }
+      if (data.locale?.trim()) {
+        setLocaleTag(data.locale.trim())
+        void syncUserLocale(data.locale)
       }
     } catch {
       setAccountError('Could not load account settings.')
@@ -1023,9 +1038,6 @@ export default function Settings() {
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Theme follows your account when signed in; density is stored on this device only.
                 </p>
-                <div className="mt-6">
-                  <LocaleSettingsPanel />
-                </div>
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Layout density</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Compact tightens tables, side navigation, and the course gradebook for large rosters. Changes apply
@@ -1082,6 +1094,8 @@ export default function Settings() {
                 </div>
 
                 <AiProcessingSettingsPanel />
+
+                <LocaleSwitcher initialLocale={localeTag} onLocaleChange={setLocaleTag} />
 
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Help popover</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
