@@ -1,7 +1,7 @@
 /**
  * Reading-level adaptation (plan 11.6)
  */
-import { test, expect } from '@playwright/test'
+import { test, expect } from '../fixtures/test.js'
 import { apiSignup, apiCreateCourse, apiCreateModule, apiCreateContentPage, apiPatchContentPage, apiEnroll } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
