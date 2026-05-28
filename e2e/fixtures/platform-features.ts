@@ -144,7 +144,12 @@ export async function isOEREnabled(): Promise<boolean> {
 
 export async function isEngagementEnabled(): Promise<boolean> {
   if (process.env.FEATURE_ENGAGEMENT_TRACKING === 'true') return true
-  const res = await fetch(`${apiBase}/api/v1/analytics/events`)
+  // POST only — GET returns 405 before the feature gate is evaluated.
+  const res = await fetch(`${apiBase}/api/v1/analytics/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([]),
+  })
   return res.status === 401
 }
 

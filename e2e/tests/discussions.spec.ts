@@ -44,15 +44,12 @@ test.describe('Discussions', () => {
     })
     await page.goto(`/courses/${seededCourse.courseCode}/discussions`)
 
-    const newForumBtn = page.getByRole('button', { name: /new forum|create forum|add forum/i })
+    const newForumBtn = page.getByRole('button', { name: /^New$/i })
     await expect(newForumBtn).toBeVisible({ timeout: 5000 })
     await newForumBtn.click()
 
-    const nameInput = page.getByRole('textbox', { name: /forum name|name/i }).or(
-      page.getByRole('dialog').getByRole('textbox').first()
-    )
-    await nameInput.fill('UI Created Forum')
-    await page.getByRole('button', { name: /create|save/i }).click()
+    await page.getByLabel(/forum name/i).fill('UI Created Forum')
+    await page.getByRole('button', { name: /^Create$/i }).click()
 
     await expect(page.getByText('UI Created Forum')).toBeVisible({ timeout: 8000 })
   })

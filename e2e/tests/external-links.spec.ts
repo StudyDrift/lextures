@@ -51,7 +51,9 @@ test.describe('External link module items', () => {
     await moduleRow.hover()
 
     // Look for an "Add item" or "+" button inside the module row
-    const addBtn = moduleRow.getByRole('button', { name: /add item|add content|\+/i }).first()
+    const addBtn = moduleRow
+      .locator('button[aria-haspopup="menu"]', { hasText: /add module item|add item/i })
+      .first()
     await expect(addBtn).toBeVisible({ timeout: 5000 })
     await addBtn.click()
 
@@ -195,7 +197,9 @@ test.describe('External link module items', () => {
     const moduleRow = page.locator('li').filter({ hasText: seededCourse.moduleTitle }).first()
     await moduleRow.hover()
 
-    const addBtn = moduleRow.getByRole('button', { name: /add item|add content|\+/i }).first()
+    const addBtn = moduleRow
+      .locator('button[aria-haspopup="menu"]', { hasText: /add module item|add item/i })
+      .first()
     await expect(addBtn).toBeVisible({ timeout: 5000 })
     await addBtn.click()
 

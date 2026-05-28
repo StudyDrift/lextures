@@ -9,6 +9,14 @@ test.describe('Course Settings - Sections', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    await apiPatchCourseFeatures(seededCourse.instructorToken, seededCourse.courseCode, {
+      feedEnabled: true,
+      calendarEnabled: true,
+      questionBankEnabled: true,
+      notebookEnabled: true,
+      discussionsEnabled: true,
+      sectionsEnabled: false,
+    })
     await page.goto(`/courses/${seededCourse.courseCode}/settings/sections`)
     // The course has sections disabled by default; show the gate message
     await expect(

@@ -82,7 +82,7 @@ test('At-risk tab: scoring, list, dismiss', async ({ coursePage: page, seededCou
   expect(listRes.ok).toBeTruthy()
   const body = (await listRes.json()) as { alerts: { id: string; displayName: string }[] }
   if (body.alerts.length === 0) {
-    await expect(page.getByText(/no at-risk students|on track/i)).toBeVisible()
+    await expect(page.getByText(/no at-risk students/i)).toBeVisible({ timeout: 10000 })
     return
   }
 

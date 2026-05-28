@@ -65,20 +65,18 @@ test.describe('Course modules', () => {
     await page.goto(`/courses/${seededCourse.courseCode}/modules`)
     await expect(page.getByText(seededCourse.moduleTitle)).toBeVisible()
 
-    // Each module has a gear/settings button. Click it to open the module settings menu.
     const moduleRow = page.locator('li').filter({ hasText: seededCourse.moduleTitle }).first()
-    // Hover to reveal action buttons (they may be opacity-0 until hovered).
     await moduleRow.hover()
-    const gearBtn = moduleRow.locator('button[aria-haspopup="menu"]').first()
-    await expect(gearBtn).toBeVisible({ timeout: 5000 })
-    await gearBtn.click()
+    await moduleRow.getByRole('button', { name: /module settings/i }).click()
 
-    const archiveItem = page.getByRole('menuitem', { name: /archive/i })
-    await expect(archiveItem).toBeVisible({ timeout: 3000 })
-    await archiveItem.click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toBeVisible({ timeout: 5000 })
+    await dialog.getByRole('button', { name: /delete module/i }).click()
 
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes|archive/i })
-    if (await confirmBtn.count() > 0) await confirmBtn.click()
+    await expect(page.getByRole('heading', { name: /delete module/i })).toBeVisible({ timeout: 5000 })
+    const confirmDelete = page.getByRole('button', { name: /delete module|archive module/i }).last()
+    await expect(confirmDelete).toBeEnabled({ timeout: 10000 })
+    await confirmDelete.click()
 
     await expect(page.getByText(seededCourse.moduleTitle)).not.toBeVisible({ timeout: 8000 })
   })

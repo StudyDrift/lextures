@@ -51,7 +51,7 @@ test.describe('Course feed', () => {
     await composer.fill(msgText)
 
     // Submit via button or Enter.
-    const sendBtn = page.getByRole('button', { name: /send|post/i })
+    const sendBtn = page.getByRole('button', { name: /send|post/i }).first()
     if (await sendBtn.count() > 0) {
       await sendBtn.click()
     } else {
