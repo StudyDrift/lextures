@@ -57,6 +57,7 @@ import Login from './pages/login'
 import MfaLogin from './pages/mfa-login'
 import SamlCallback from './pages/saml-callback'
 import SsoError from './pages/sso-error'
+import AiDisclosurePage from './pages/ai-disclosure-page'
 import PrivacyPolicyPage from './pages/privacy-policy-page'
 import PrivacyPolicyHistoryPage from './pages/privacy-policy-history-page'
 import MagicLinkPage from './pages/magic-link'
@@ -122,6 +123,7 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/ai-disclosure" element={<AiDisclosurePage />} />
       <Route path="/privacy" element={<PrivacyPolicyPage />} />
       <Route path="/privacy/history" element={<PrivacyPolicyHistoryPage />} />
       <Route path="/terms" element={<TermsOfUsePage />} />

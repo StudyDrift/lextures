@@ -17,6 +17,7 @@ import {
   subscribeStudentNotebooks,
 } from '../../lib/student-notebook-storage'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
+import { AiDisclosureBanner } from '../../components/ai-disclosure-banner'
 import { LmsPage } from './lms-page'
 
 function snippet(text: string, max = 140): string {
@@ -256,6 +257,7 @@ export default function MyNotebooksPage() {
             </button>
           ) : (
             <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-b from-indigo-50/80 to-white p-4 shadow-sm dark:border-indigo-500/25 dark:from-indigo-950/40 dark:to-neutral-950 sm:p-5">
+              <AiDisclosureBanner featureKey="rag_notebook" modelLabel="Claude 3.5 Sonnet" />
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200">
                   <Sparkles className="h-4 w-4" aria-hidden />

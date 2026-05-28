@@ -1,0 +1,53 @@
+{
+  "version": "2026-05-27",
+  "provider": "openrouter",
+  "models": [
+    {
+      "id": "anthropic/claude-3.5-sonnet",
+      "name": "Claude 3.5 Sonnet",
+      "provider": "Anthropic (via OpenRouter)",
+      "purposes": ["ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation"],
+      "dataSent": "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
+      "retentionDays": 30,
+      "dpaStatus": "sub_processor_under_institutional_DPA",
+      "optOutPath": "/settings/ai"
+    },
+    {
+      "id": "openai/gpt-4o-mini",
+      "name": "GPT-4o mini",
+      "provider": "OpenAI (via OpenRouter)",
+      "purposes": ["translation"],
+      "dataSent": "Text submitted for translation only.",
+      "retentionDays": 30,
+      "dpaStatus": "sub_processor_under_institutional_DPA",
+      "optOutPath": "/settings/ai"
+    }
+  ],
+  "features": [
+    {
+      "key": "ai_tutor",
+      "label": "AI Tutor",
+      "description": "Conversational tutoring within enrolled courses."
+    },
+    {
+      "key": "rag_notebook",
+      "label": "Notebook AI",
+      "description": "Answers questions using your course notebook content."
+    },
+    {
+      "key": "syllabus_generation",
+      "label": "Syllabus generation",
+      "description": "Instructor tool to draft syllabus sections."
+    },
+    {
+      "key": "translation",
+      "label": "Translation",
+      "description": "Translates user-selected text via an AI model."
+    },
+    {
+      "key": "quiz_generation",
+      "label": "Adaptive quiz generation",
+      "description": "Generates quiz items from course materials."
+    }
+  ]
+}

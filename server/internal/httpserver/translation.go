@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/translation"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
@@ -45,7 +46,7 @@ func (d Deps) registerTranslationRoutes(r chi.Router) {
 // Response: { translated, source_lang, cached }
 func (d Deps) handleTranslate() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, ok := d.meUserID(w, r)
+		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
 		}
@@ -102,6 +103,15 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 			return
 		}
 
+		const translationModel = "openai/gpt-4o-mini"
+		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureTranslation, translationModel, req.Text) {
+			return
+		}
+		gwDec := aigateway.Decision{
+			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID),
+			OptInConfirmed: true,
+		}
+
 		translated, sourceLang, err := callLLMTranslation(or, req.Text, req.TargetLang)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Translation temporarily unavailable.")
@@ -109,6 +119,7 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 		}
 
 		_ = translation.Store(ctx, d.Pool, req.ContentType, contentID, sourceLang, req.TargetLang, translated, translationProvider)
+		d.logAIInferenceAllowed(r, userID, aigateway.FeatureTranslation, translationModel, req.Text, gwDec)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(translateResponse{

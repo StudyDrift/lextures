@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/notebookrag"
+	"github.com/lextures/lextures/server/internal/repos/userai"
 )
 
 type notebookRagJSON struct {
@@ -24,8 +26,8 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if d.openRouterClient() == nil {
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// No DB pool: match legacy behavior for misconfigured dev/test handlers (503 before auth).
+		if d.Pool == nil && d.openRouterClient() == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
 			return
 		}
@@ -47,6 +49,25 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 			})
 		}
 		docs = notebookrag.FilterDocs(docs)
+		model := userai.DefaultCourseSetupModelID
+		if m, err := userai.GetCourseSetupModelID(r.Context(), d.Pool, userID); err == nil && m != "" {
+			model = m
+		}
+		contentKey := body.Question
+		for _, doc := range docs {
+			contentKey += doc.Markdown
+		}
+		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureRAGNotebook, model, contentKey) {
+			return
+		}
+		if d.openRouterClient() == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
+			return
+		}
+		gwDec := aigateway.Decision{
+			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID),
+			OptInConfirmed: true,
+		}
 		resp, err := notebookrag.Answer(r.Context(), d.Pool, d.openRouterClient(), userID, body.Question, docs)
 		if err != nil {
 			if notebookrag.IsValidationError(err) {
@@ -64,6 +85,7 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not complete notebook query.")
 			return
 		}
+		d.logAIInferenceAllowed(r, userID, aigateway.FeatureRAGNotebook, model, contentKey, gwDec)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	}

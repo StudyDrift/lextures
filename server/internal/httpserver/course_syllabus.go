@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	userai "github.com/lextures/lextures/server/internal/repos/user"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
@@ -214,6 +215,15 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 			model = userai.DefaultCourseSetupModelID
 		}
 
+		promptMaterial := instructions + existing
+		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureSyllabusGeneration, model, promptMaterial) {
+			return
+		}
+		gwDec := aigateway.Decision{
+			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, viewer),
+			OptInConfirmed: true,
+		}
+
 		const sysPrompt = `You are an expert academic writer helping instructors author course syllabi. When given a section heading and instructions, write clear, concise syllabus content in Markdown. Use the heading level provided (## or ###) if one is given. Write in a professional but accessible tone suitable for university students. Output only the Markdown content — no preamble, no code fences, no commentary.`
 
 		var userMsg strings.Builder
@@ -233,6 +243,7 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
 			return
 		}
+		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureSyllabusGeneration, model, promptMaterial, gwDec)
 
 		markdown := strings.TrimSpace(generated)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
