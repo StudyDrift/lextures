@@ -88,9 +88,10 @@ type platformSettingsJSON struct {
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
-	IsoIsmsEnabled             bool `json:"isoIsmsEnabled"`
-	AdminAuditLogEnabled       bool `json:"adminAuditLogEnabled"`
-	DataResidencyEnabled       bool `json:"dataResidencyEnabled"`
+	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
+	AdminAuditLogEnabled            bool `json:"adminAuditLogEnabled"`
+	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
+	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -210,16 +211,17 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
-			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
-			AdminAuditLogEnabled:        merged.AdminAuditLogEnabled,
-			DataResidencyEnabled:        merged.DataResidencyEnabled,
-			MFAEnabled:                  merged.MFAEnabled,
-			MFAEnforcement:              merged.MFAEnforcement,
-			SMTPHost:                    merged.SMTPHost,
-			SMTPPort:                    int(merged.SMTPPort),
-			SMTPFrom:                    merged.SMTPFrom,
-			SMTPUser:                    merged.SMTPUser,
-			SMTPPassword:                smtpPasswordMasked(dbRow, merged.SMTPPassword),
+			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
+			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
+			DataResidencyEnabled:            merged.DataResidencyEnabled,
+			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
+			MFAEnabled:                      merged.MFAEnabled,
+			MFAEnforcement:                  merged.MFAEnforcement,
+			SMTPHost:                        merged.SMTPHost,
+			SMTPPort:                        int(merged.SMTPPort),
+			SMTPFrom:                        merged.SMTPFrom,
+			SMTPUser:                        merged.SMTPUser,
+			SMTPPassword:                    smtpPasswordMasked(dbRow, merged.SMTPPassword),
 			Sources: platformSourcesJSON{
 				OpenRouterAPIKey:            src(sources.OpenRouterAPIKey),
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
@@ -305,9 +307,10 @@ type putPlatformBody struct {
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
-	IsoIsmsEnabled             *bool `json:"isoIsmsEnabled"`
-	AdminAuditLogEnabled       *bool `json:"adminAuditLogEnabled"`
-	DataResidencyEnabled       *bool `json:"dataResidencyEnabled"`
+	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
+	AdminAuditLogEnabled            *bool `json:"adminAuditLogEnabled"`
+	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
+	SecurityDisclosureModuleEnabled *bool `json:"securityDisclosureModuleEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -564,6 +567,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
+		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -639,16 +643,17 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
-			IsoIsmsEnabled:              merged.IsoIsmsEnabled,
-			AdminAuditLogEnabled:        merged.AdminAuditLogEnabled,
-			DataResidencyEnabled:        merged.DataResidencyEnabled,
-			MFAEnabled:                  merged.MFAEnabled,
-			MFAEnforcement:              merged.MFAEnforcement,
-			SMTPHost:                    merged.SMTPHost,
-			SMTPPort:                    int(merged.SMTPPort),
-			SMTPFrom:                    merged.SMTPFrom,
-			SMTPUser:                    merged.SMTPUser,
-			SMTPPassword:                smtpPasswordMasked(dbRow, merged.SMTPPassword),
+			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
+			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
+			DataResidencyEnabled:            merged.DataResidencyEnabled,
+			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
+			MFAEnabled:                      merged.MFAEnabled,
+			MFAEnforcement:                  merged.MFAEnforcement,
+			SMTPHost:                        merged.SMTPHost,
+			SMTPPort:                        int(merged.SMTPPort),
+			SMTPFrom:                        merged.SMTPFrom,
+			SMTPUser:                        merged.SMTPUser,
+			SMTPPassword:                    smtpPasswordMasked(dbRow, merged.SMTPPassword),
 			Sources: platformSourcesJSON{
 				OpenRouterAPIKey:            src(sources.OpenRouterAPIKey),
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),

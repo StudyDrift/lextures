@@ -136,6 +136,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerSOC2Routes(r)
 	d.registerISORoutes(r)
 	d.registerAdminAuditLogRoutes(r)
+	d.registerSecurityReportsRoutes(r)
 	d.registerDataResidencyRoutes(r)
 	d.registerBackupOpsRoutes(r)
 	d.registerPIIRedactionRoutes(r)

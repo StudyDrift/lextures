@@ -67,6 +67,8 @@ import TermsOfUsePage from './pages/terms-of-use-page'
 import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import TrustCenterPage from './pages/trust-center-page'
 import IsoComplianceAdminPage from './pages/iso-compliance-admin-page'
+import SecurityDisclosureAdminPage from './pages/security-disclosure-admin-page'
+import SecurityPage from './pages/security-page'
 import BackupOpsAdminPage from './pages/backup-ops-admin-page'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CaliforniaPrivacyRightsPage from './pages/california-privacy-rights-page'
@@ -95,6 +97,7 @@ export default function App() {
         location.pathname === '/terms' ||
         location.pathname.startsWith('/terms/') ||
         location.pathname === '/trust' ||
+        location.pathname === '/security' ||
         location.pathname === '/accessibility' ||
         location.pathname.startsWith('/accessibility/') ||
         location.pathname.startsWith('/privacy-rights/')
@@ -124,6 +127,7 @@ export default function App() {
       <Route path="/terms" element={<TermsOfUsePage />} />
       <Route path="/terms/history" element={<TermsOfUseHistoryPage />} />
       <Route path="/trust" element={<TrustCenterPage />} />
+      <Route path="/security" element={<SecurityPage />} />
       <Route path="/accessibility" element={<AccessibilityConformancePage />} />
       <Route path="/accessibility/vpat" element={<VpatPage />} />
       <Route path="/privacy-rights/california" element={<CaliforniaPrivacyRightsPage />} />
@@ -190,6 +194,7 @@ export default function App() {
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/admin/compliance/iso" element={<IsoComplianceAdminPage />} />
+          <Route path="/admin/compliance/security-reports" element={<SecurityDisclosureAdminPage />} />
           <Route path="/admin/compliance/backup" element={<BackupOpsAdminPage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
