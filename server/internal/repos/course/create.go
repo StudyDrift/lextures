@@ -126,7 +126,7 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 			if e1 == nil && e2 == nil {
 				startT := time.Date(start.Year(), start.Month(), start.Day(), 0, 0, 0, 0, time.UTC)
 				endT := time.Date(endDate.Year(), endDate.Month(), endDate.Day(), 23, 59, 59, 999999999, time.UTC)
-				if u, err := UpdateCourse(ctx, pool, courseCode, out.Title, out.Description, out.Published, &startT, &endT, out.VisibleFrom, out.HiddenAt, out.ScheduleMode, out.RelativeEndAfter, out.RelativeHiddenAfter, out.RelativeScheduleAnchorAt, out.CourseHomeLanding, parseOptionalUUIDPtr(out.CourseHomeContentItemID)); err == nil && u != nil {
+				if u, err := UpdateCourse(ctx, pool, courseCode, out.Title, out.Description, out.Published, &startT, &endT, out.VisibleFrom, out.HiddenAt, out.ScheduleMode, out.RelativeEndAfter, out.RelativeHiddenAfter, out.RelativeScheduleAnchorAt, out.CourseHomeLanding, parseOptionalUUIDPtr(out.CourseHomeContentItemID), out.CourseTimezone); err == nil && u != nil {
 					out = u
 				}
 			}

@@ -70,6 +70,7 @@ type CoursePublic struct {
 	BlueprintLastSyncAt           *time.Time       `json:"blueprintLastSyncAt,omitempty"`
 	CourseHomeLanding             string           `json:"courseHomeLanding"`
 	CourseHomeContentItemID       *string          `json:"courseHomeContentItemId,omitempty"`
+	CourseTimezone                *string          `json:"courseTimezone,omitempty"`
 }
 
 // coursePublicSelect is columns for `course.courses` joined to `tenant.terms` (alias `tr`) for public APIs.
@@ -126,6 +127,7 @@ const coursePublicSelect = `
     c.blueprint_last_sync_at,
     c.course_home_landing,
     c.course_home_content_item_id,
+    c.course_timezone,
     c.term_id,
     tr.id,
     tr.name,
@@ -154,6 +156,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 	var bpLastSync sql.NullTime
 	var homeLanding string
 	var homeContentItem pgtype.UUID
+	var courseTZ sql.NullString
 	var termIDCol, trID sql.NullString
 	var trName, trType, trStart, trEnd, trStatus sql.NullString
 
@@ -210,6 +213,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&bpLastSync,
 		&homeLanding,
 		&homeContentItem,
+		&courseTZ,
 		&termIDCol,
 		&trID,
 		&trName,
@@ -249,6 +253,10 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 			s := u.String()
 			p.CourseHomeContentItemID = &s
 		}
+	}
+	if courseTZ.Valid && strings.TrimSpace(courseTZ.String) != "" {
+		s := courseTZ.String
+		p.CourseTimezone = &s
 	}
 	if hero.Valid {
 		s := hero.String

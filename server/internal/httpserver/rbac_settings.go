@@ -544,6 +544,9 @@ func allowGet(w http.ResponseWriter, r *http.Request) {
 func (d Deps) registerSettingsRoutes(r chi.Router) {
 	r.Get("/api/v1/settings/account", d.handleGetSettingsAccount())
 	r.Patch("/api/v1/settings/account", d.handlePatchSettingsAccount())
+	r.Get("/api/v1/settings/timezone", d.handleGetSettingsTimezone())
+	r.Put("/api/v1/settings/timezone", d.handlePutSettingsTimezone())
+	r.Get("/api/v1/timezones", d.handleListTimezones())
 	r.Get("/api/v1/settings/ai/models", d.handleListAIModels())
 	r.Get("/api/v1/settings/ai", d.handleGetSettingsAI())
 	r.Put("/api/v1/settings/ai", d.handlePutSettingsAI())

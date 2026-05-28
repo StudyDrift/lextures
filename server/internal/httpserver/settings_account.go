@@ -20,6 +20,7 @@ type accountProfileResponse struct {
 	Sid                          *string `json:"sid"`
 	SessionManagementUIEnabled   bool    `json:"sessionManagementUiEnabled"`
 	AccountType                  string  `json:"accountType"`
+	Timezone                     *string `json:"timezone"`
 }
 
 type patchAccountBody struct {
@@ -115,6 +116,7 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
+			Timezone:                   row.Timezone,
 		})
 	}
 }
@@ -179,6 +181,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			Sid:                        row.Sid,
 			SessionManagementUIEnabled: d.effectiveConfig().SessionManagementUIEnabled,
 			AccountType:                at,
+			Timezone:                   row.Timezone,
 		})
 	}
 }

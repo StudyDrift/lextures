@@ -291,7 +291,8 @@ UPDATE "user".users
        last_name      = NULL,
        avatar_url     = NULL,
        parent_email   = NULL,
-       date_of_birth  = NULL
+       date_of_birth  = NULL,
+       timezone       = NULL
  WHERE id = $1
 `, userID)
 	return err

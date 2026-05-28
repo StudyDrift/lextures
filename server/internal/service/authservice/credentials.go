@@ -29,6 +29,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/passwordreset"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/validation"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 
 	"github.com/lextures/lextures/server/internal/auth/hibp"
@@ -48,6 +49,7 @@ type SignupRequest struct {
 	Password    string
 	DisplayName *string
 	AccountType string // empty or "parent" (plan 5.10)
+	Timezone    *string
 	Client      *ClientMeta
 }
 
@@ -63,6 +65,7 @@ type UserPublic struct {
 	ShowHelpPopover bool    `json:"showHelpPopover"`
 	Sid             *string `json:"sid"`
 	AccountType     string  `json:"accountType"`
+	Timezone        *string `json:"timezone,omitempty"`
 }
 
 // AuthResponse mirrors models/auth AuthResponse (field names are snake_case like the Rust `AuthResponse` struct).
@@ -221,6 +224,16 @@ WHERE id <> $1::uuid`, communication.PlatformInboxSenderID.String()).Scan(&human
 	}
 	if err := tx.Commit(ctx); err != nil {
 		return AuthResponse{}, err
+	}
+
+	if req.Timezone != nil {
+		tz := strings.TrimSpace(*req.Timezone)
+		if tz != "" {
+			if valid, err := validation.ValidIANATimezone(ctx, pool, tz); err == nil && valid {
+				_, _ = user.SetTimezoneIfUnset(ctx, pool, uid, tz)
+				row.Timezone = &tz
+			}
+		}
 	}
 
 	_ = passwordcreditevents.Insert(ctx, pool, uid, passwordcreditevents.KindSignup, hibpRes.BreachFound, hibpRes.HIBPAvailable)
@@ -457,6 +470,7 @@ func userPublicFromRow(row *user.Row) UserPublic {
 		ShowHelpPopover: row.ShowHelpPopover,
 		Sid:             row.Sid,
 		AccountType:     at,
+		Timezone:        row.Timezone,
 	}
 }
 

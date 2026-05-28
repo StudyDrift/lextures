@@ -11,16 +11,19 @@ import { LmsToaster } from './components/lms-toaster'
 import { AriaAnnouncer } from './components/aria-announcer'
 import { OrgBrandingProvider } from './context/org-branding-context'
 import { PermissionsProvider } from './context/permissions-provider'
+import { UserTimezoneProvider } from './context/user-timezone-provider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <OrgBrandingProvider>
+        <UserTimezoneProvider>
         <PermissionsProvider>
           <AriaAnnouncer />
           <App />
           <LmsToaster />
         </PermissionsProvider>
+        </UserTimezoneProvider>
       </OrgBrandingProvider>
     </BrowserRouter>
   </StrictMode>,
