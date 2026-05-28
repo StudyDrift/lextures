@@ -229,7 +229,7 @@ function RubricGradeForm({
                     key={`${c.id}-${i}`}
                     type="button"
                     onClick={() => setLocal((prev) => ({ ...prev, [c.id]: lvl.points }))}
-                    className={`max-w-full rounded-md border px-2.5 py-1.5 text-left text-xs font-medium transition ${
+                    className={`max-w-full rounded-md border px-2.5 py-1.5 text-start text-xs font-medium transition ${
                       local[c.id] === lvl.points
                         ? 'border-indigo-500 bg-indigo-50 text-indigo-950 dark:border-indigo-400 dark:bg-indigo-950/60 dark:text-indigo-100'
                         : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700'
@@ -949,7 +949,7 @@ export default function CourseGradebook() {
                   </h2>
                   <button
                     type="button"
-                    className="absolute right-3 top-3 rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                    className="absolute end-3 top-3 rounded p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
                     onClick={() => setGradeHistoryOpen(null)}
                   >
                     <span className="sr-only">Close</span>✕

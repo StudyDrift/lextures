@@ -17,14 +17,14 @@ func FindByCleverID(ctx context.Context, pool *pgxpool.Pool, cleverID string) (*
 	if cid == "" {
 		return nil, nil
 	}
-	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
        login_blocked, deactivated_at, account_type
 FROM "user".users WHERE clever_id = $1`
 	var r Row
 	var displayName, firstName, lastName, avatar, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, cid).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -38,6 +38,9 @@ FROM "user".users WHERE clever_id = $1`
 	r.LastName = strPtr(lastName)
 	r.AvatarURL = strPtr(avatar)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
 		r.DeactivatedAt = &t
@@ -54,14 +57,14 @@ func FindByClassLinkID(ctx context.Context, pool *pgxpool.Pool, classlinkSub str
 	if s == "" {
 		return nil, nil
 	}
-	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
        login_blocked, deactivated_at, account_type
 FROM "user".users WHERE classlink_id = $1`
 	var r Row
 	var displayName, firstName, lastName, avatar, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, s).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -75,6 +78,9 @@ FROM "user".users WHERE classlink_id = $1`
 	r.LastName = strPtr(lastName)
 	r.AvatarURL = strPtr(avatar)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if deactivatedAt.Valid {
 		t := deactivatedAt.Time
 		r.DeactivatedAt = &t
@@ -132,13 +138,13 @@ func InsertUserWithClever(ctx context.Context, pool *pgxpool.Pool, email, passwo
 	cid := strings.TrimSpace(cleverID)
 	const q = `INSERT INTO "user".users (email, password_hash, display_name, clever_id, is_minor, org_id)
 VALUES ($1, $2, $3, $4, $5, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
-	RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, email, passwordHash, displayName, cid, isMinor).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -149,6 +155,9 @@ VALUES ($1, $2, $3, $4, $5, (SELECT id FROM tenant.organizations WHERE slug = 'd
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
@@ -164,13 +173,13 @@ func InsertUserWithClassLink(ctx context.Context, pool *pgxpool.Pool, email, pas
 	s := strings.TrimSpace(classlinkSub)
 	const q = `INSERT INTO "user".users (email, password_hash, display_name, classlink_id, org_id)
 VALUES ($1, $2, $3, $4, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
-	RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, email, passwordHash, displayName, s).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -181,6 +190,9 @@ VALUES ($1, $2, $3, $4, (SELECT id FROM tenant.organizations WHERE slug = 'defau
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}

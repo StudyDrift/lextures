@@ -225,7 +225,7 @@ export default function StudyInsightsPage() {
                     {timeAllocation.map((row) => (
                       <li key={row.moduleId}>
                         <div className="flex justify-between text-sm">
-                          <span className="truncate pr-2">{row.moduleTitle}</span>
+                          <span className="truncate pe-2">{row.moduleTitle}</span>
                           <span className="shrink-0 text-slate-600">{Math.round(row.minutes)} min</span>
                         </div>
                         <div className="mt-1 h-2 rounded-full bg-slate-100 dark:bg-neutral-800">

@@ -30,6 +30,7 @@ export type PlatformFeatures = {
   virtualClassroomEnabled: boolean
   sessionManagementUiEnabled: boolean
   instructorInsightsEnabled: boolean
+  rtlEnabled: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -50,6 +51,7 @@ const defaultFeatures: PlatformFeatures = {
   virtualClassroomEnabled: true,
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
+  rtlEnabled: false,
   loading: true,
   refresh: async () => {},
 }
@@ -75,6 +77,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     virtualClassroomEnabled: true,
     sessionManagementUiEnabled: false,
     instructorInsightsEnabled: false,
+    rtlEnabled: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -101,6 +104,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           virtualClassroomEnabled: data.virtualClassroomEnabled !== false,
           sessionManagementUiEnabled: data.sessionManagementUiEnabled === true,
           instructorInsightsEnabled: data.instructorInsightsEnabled === true,
+          rtlEnabled: data.rtlEnabled === true,
         }
         setFeatures(next)
         setPlatformFeaturesSnapshot(next)

@@ -273,13 +273,13 @@ export default function CourseOutcomesReport() {
               timeStyle: 'short',
             })}
             {report.staleMinutes >= 120 && (
-              <span className="ml-2 text-amber-700 dark:text-amber-300">
+              <span className="ms-2 text-amber-700 dark:text-amber-300">
                 (stale — refresh recommended)
               </span>
             )}
           </p>
           <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-start text-sm">
               <caption className="sr-only">
                 Course learning outcomes achievement summary
               </caption>
@@ -288,7 +288,7 @@ export default function CourseOutcomesReport() {
                   <th scope="col" className="px-4 py-3">
                     Outcome
                   </th>
-                  <th scope="col" className="px-4 py-3 text-right">
+                  <th scope="col" className="px-4 py-3 text-end">
                     Assessed
                   </th>
                   <th scope="col" className="px-4 py-3 min-w-[200px]">
@@ -319,7 +319,7 @@ export default function CourseOutcomesReport() {
                         />
                       )}
                     </td>
-                    <td className="px-4 py-4 text-right tabular-nums text-slate-700 dark:text-neutral-300">
+                    <td className="px-4 py-4 text-end tabular-nums text-slate-700 dark:text-neutral-300">
                       {o.nAssessed} / {o.nStudents}
                     </td>
                     <td className="px-4 py-4">

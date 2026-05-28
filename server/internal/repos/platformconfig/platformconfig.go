@@ -72,6 +72,7 @@ type Row struct {
 	AdminAuditLogEnabled              *bool
 	DataResidencyEnabled              *bool
 	AiDisclosureEnabled               *bool
+	RTLEnabled                        *bool
 	SecurityDisclosureModuleEnabled   *bool
 	BackupModuleEnabled               *bool
 
@@ -146,6 +147,7 @@ type Write struct {
 	AdminAuditLogEnabled              *bool
 	DataResidencyEnabled              *bool
 	AiDisclosureEnabled               *bool
+	RTLEnabled                        *bool
 	SecurityDisclosureModuleEnabled   *bool
 	BackupModuleEnabled               *bool
 
@@ -218,6 +220,7 @@ SELECT
 	admin_audit_log_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
+	rtl_enabled,
 	security_disclosure_module_enabled,
 	backup_module_enabled,
 	mfa_enabled,
@@ -285,6 +288,7 @@ WHERE id = 1
 		&r.AdminAuditLogEnabled,
 		&r.DataResidencyEnabled,
 		&r.AiDisclosureEnabled,
+		&r.RTLEnabled,
 		&r.SecurityDisclosureModuleEnabled,
 		&r.BackupModuleEnabled,
 		&r.MFAEnabled,
@@ -392,6 +396,7 @@ INSERT INTO settings.platform_app_settings (
 	admin_audit_log_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
+	rtl_enabled,
 	security_disclosure_module_enabled,
 	backup_module_enabled,
 	mfa_enabled,
@@ -463,6 +468,7 @@ ON CONFLICT (id) DO UPDATE SET
 	iso_isms_enabled = COALESCE(EXCLUDED.iso_isms_enabled, settings.platform_app_settings.iso_isms_enabled),
 	admin_audit_log_enabled = COALESCE(EXCLUDED.admin_audit_log_enabled, settings.platform_app_settings.admin_audit_log_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
+	rtl_enabled = COALESCE(EXCLUDED.rtl_enabled, settings.platform_app_settings.rtl_enabled),
 	ai_disclosure_enabled = COALESCE(EXCLUDED.ai_disclosure_enabled, settings.platform_app_settings.ai_disclosure_enabled),
 	security_disclosure_module_enabled = COALESCE(EXCLUDED.security_disclosure_module_enabled, settings.platform_app_settings.security_disclosure_module_enabled),
 	backup_module_enabled = COALESCE(EXCLUDED.backup_module_enabled, settings.platform_app_settings.backup_module_enabled),
@@ -529,6 +535,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AdminAuditLogEnabled,
 		w.DataResidencyEnabled,
 		w.AiDisclosureEnabled,
+		w.RTLEnabled,
 		w.SecurityDisclosureModuleEnabled,
 		w.BackupModuleEnabled,
 		w.MFAEnabled,

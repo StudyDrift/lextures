@@ -620,25 +620,25 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
           </p>
 
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[40rem] text-left text-sm">
+            <table className="w-full min-w-[40rem] text-start text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-600 dark:border-neutral-600 dark:text-neutral-400">
-                  <th className="pb-2 pr-3 font-medium">Group name</th>
-                  <th className="w-28 pb-2 pr-3 font-medium">Weight (%)</th>
-                  <th className="w-20 pb-2 pr-2 font-medium" title="Drop this many lowest scores in the group">
+                  <th className="pb-2 pe-3 font-medium">Group name</th>
+                  <th className="w-28 pb-2 pe-3 font-medium">Weight (%)</th>
+                  <th className="w-20 pb-2 pe-2 font-medium" title="Drop this many lowest scores in the group">
                     Drop low
                   </th>
-                  <th className="w-20 pb-2 pr-2 font-medium" title="Drop this many highest scores">
+                  <th className="w-20 pb-2 pe-2 font-medium" title="Drop this many highest scores">
                     Drop high
                   </th>
-                  <th className="w-28 pb-2 pr-2 font-medium">Replace low</th>
+                  <th className="w-28 pb-2 pe-2 font-medium">Replace low</th>
                   <th className="w-10 pb-2" aria-hidden />
                 </tr>
               </thead>
               <tbody>
                 {groups.map((g) => (
                   <tr key={g.clientKey} className="border-b border-slate-100 dark:border-neutral-800">
-                    <td className="py-2 pr-3">
+                    <td className="py-2 pe-3">
                       <input
                         type="text"
                         value={g.name}
@@ -654,7 +654,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                         className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400 dark:disabled:bg-neutral-900"
                       />
                     </td>
-                    <td className="py-2 pr-3">
+                    <td className="py-2 pe-3">
                       <input
                         type="text"
                         inputMode="decimal"
@@ -670,7 +670,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                         className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400 dark:disabled:bg-neutral-900"
                       />
                     </td>
-                    <td className="py-2 pr-2">
+                    <td className="py-2 pe-2">
                       <input
                         type="text"
                         inputMode="numeric"
@@ -686,7 +686,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                         className="w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-1.5 tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
                       />
                     </td>
-                    <td className="py-2 pr-2">
+                    <td className="py-2 pe-2">
                       <input
                         type="text"
                         inputMode="numeric"
@@ -702,7 +702,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                         className="w-full min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-1.5 tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
                       />
                     </td>
-                    <td className="py-2 pr-2">
+                    <td className="py-2 pe-2">
                       <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-600 dark:text-neutral-400">
                         <input
                            type="checkbox"
@@ -761,7 +761,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
             Weights sum to{' '}
             <span className="font-semibold tabular-nums">{weightTotal.toFixed(2)}%</span>
             {Math.abs(weightTotal - 100) >= 0.01 && (
-              <span className="ml-1">— usually this should total 100%.</span>
+              <span className="ms-1">— usually this should total 100%.</span>
             )}
           </p>
         </section>
@@ -787,22 +787,22 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
           </p>
         ) : (
           <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[32rem] text-left text-sm">
+            <table className="w-full min-w-[32rem] text-start text-sm">
               <thead>
                 <tr className="border-b border-slate-200 text-slate-600 dark:border-neutral-600 dark:text-neutral-400">
-                  <th className="pb-2 pr-3 font-medium">Item</th>
-                  <th className="w-32 pb-2 pr-3 font-medium">Type</th>
+                  <th className="pb-2 pe-3 font-medium">Item</th>
+                  <th className="w-32 pb-2 pe-3 font-medium">Type</th>
                   <th className="pb-2 font-medium">Assignment group</th>
                 </tr>
               </thead>
               <tbody>
                 {gradableRows.map(({ item, moduleTitle }) => (
                   <tr key={item.id} className="border-b border-slate-100 dark:border-neutral-800">
-                    <td className="py-2 pr-3">
+                    <td className="py-2 pe-3">
                       <div className="text-slate-500 dark:text-neutral-400">{moduleTitle}</div>
                       <div className="font-medium text-slate-900 dark:text-neutral-100">{item.title}</div>
                     </td>
-                    <td className="py-2 pr-3 capitalize text-slate-600 dark:text-neutral-400">
+                    <td className="py-2 pe-3 capitalize text-slate-600 dark:text-neutral-400">
                       {item.kind === 'content_page' ? 'Content' : item.kind === 'quiz' ? 'Quiz' : 'Assignment'}
                     </td>
                     <td className="py-2">
@@ -831,7 +831,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
       </section>
 
       {isDirty && (
-        <div className="fixed bottom-6 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/90">
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>

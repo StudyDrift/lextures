@@ -224,7 +224,7 @@ export function OrgRoleGrantsPanel() {
         )}
         {grants.length > 0 && (
           <div className="mt-3 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
-            <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-600">
+            <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600">
               <thead className="bg-slate-50 dark:bg-neutral-800/80">
                 <tr>
                   <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
@@ -253,7 +253,7 @@ export function OrgRoleGrantsPanel() {
                       {g.orgUnitId ?? '—'}
                     </td>
                     <td className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-300">{g.expiresAt ?? '—'}</td>
-                    <td className="px-3 py-2 text-right">
+                    <td className="px-3 py-2 text-end">
                       <button
                         type="button"
                         className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50 dark:border-neutral-600 dark:text-rose-300 dark:hover:bg-rose-950/40"

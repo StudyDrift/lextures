@@ -181,7 +181,7 @@ export function EquationEditorDialog({
         </header>
 
         <div className="grid min-h-0 flex-1 gap-0 sm:grid-cols-2">
-          <div className="flex min-h-0 flex-col border-b border-slate-100 p-4 sm:border-b-0 sm:border-r dark:border-neutral-700">
+          <div className="flex min-h-0 flex-col border-b border-slate-100 p-4 sm:border-b-0 sm:border-e dark:border-neutral-700">
             <label htmlFor={`${titleId}-latex`} className="text-xs font-medium text-slate-600 dark:text-neutral-300">
               {equationI18n.latexInput}
             </label>

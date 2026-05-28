@@ -26,13 +26,13 @@ SET
 	ui_theme = COALESCE($5, ui_theme),
 	show_help_popover = COALESCE($6, show_help_popover)
 WHERE id = $1
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -46,6 +46,9 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}

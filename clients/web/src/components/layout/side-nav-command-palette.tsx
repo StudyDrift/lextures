@@ -19,8 +19,8 @@ export function SideNavCommandPaletteTrigger() {
           data-command-palette-anchor="sidebar"
           data-onboarding="command-palette"
           onClick={() => open()}
-          className={`flex items-center rounded-full bg-[#E8E9EB] text-left text-sm text-slate-500 outline-none transition hover:bg-[#E0E2E5] focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus-visible:ring-neutral-500/40 ${
-            sideNavCollapsed ? 'h-10 w-10 justify-center p-0 mx-auto' : 'w-full gap-2.5 py-2 pl-3 pr-2'
+          className={`flex items-center rounded-full bg-[#E8E9EB] text-start text-sm text-slate-500 outline-none transition hover:bg-[#E0E2E5] focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus-visible:ring-neutral-500/40 ${
+            sideNavCollapsed ? 'h-10 w-10 justify-center p-0 mx-auto' : 'w-full gap-2.5 py-2 ps-3 pe-2'
           }`}
           title={undefined}
         >

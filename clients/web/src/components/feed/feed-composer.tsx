@@ -317,7 +317,7 @@ export function FeedComposer({
     <div className="relative min-w-0 flex-1">
       {picker && rows.length > 0 && (
         <ul
-          className="absolute bottom-full left-0 z-20 mb-2 max-h-52 w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+          className="absolute bottom-full start-0 z-20 mb-2 max-h-52 w-full max-w-md overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
           role="listbox"
           aria-label="Mention suggestions"
           onMouseDown={(ev) => ev.preventDefault()}
@@ -331,7 +331,7 @@ export function FeedComposer({
                     type="button"
                     role="option"
                     aria-selected={active}
-                    className={`flex w-full px-3 py-2 text-left ${
+                    className={`flex w-full px-3 py-2 text-start ${
                       active ? 'bg-indigo-50 dark:bg-indigo-950/50' : ''
                     }`}
                     onClick={() => insertMention('everyone')}
@@ -339,7 +339,7 @@ export function FeedComposer({
                     <span className="font-medium text-amber-900 dark:text-amber-100">
                       @everyone
                     </span>
-                    <span className="ml-2 text-xs text-slate-500 dark:text-neutral-400">
+                    <span className="ms-2 text-xs text-slate-500 dark:text-neutral-400">
                       Notify the class
                     </span>
                   </button>
@@ -353,7 +353,7 @@ export function FeedComposer({
                   type="button"
                   role="option"
                   aria-selected={active}
-                  className={`flex w-full flex-col px-3 py-2 text-left ${
+                  className={`flex w-full flex-col px-3 py-2 text-start ${
                     active ? 'bg-indigo-50 dark:bg-indigo-950/50' : ''
                   }`}
                   onClick={() => insertMention(lab)}
@@ -567,14 +567,14 @@ export function FeedComposer({
               <SquareSlash className="h-4 w-4" strokeWidth={2} />
             </button>
             {imageBusy && (
-              <span className="ml-1 text-xs text-slate-500 dark:text-neutral-400">Uploading…</span>
+              <span className="ms-1 text-xs text-slate-500 dark:text-neutral-400">Uploading…</span>
             )}
             {imageErr && (
-              <span className="ml-1 text-xs text-rose-600 dark:text-rose-400">{imageErr}</span>
+              <span className="ms-1 text-xs text-rose-600 dark:text-rose-400">{imageErr}</span>
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-0.5 pl-1">
+          <div className="flex shrink-0 items-center gap-0.5 ps-1">
             <button
               type="button"
               disabled={sendDisabled}

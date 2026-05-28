@@ -110,7 +110,7 @@ export function HelpWidget() {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
-        className={`fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
+        className={`fixed bottom-6 end-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 ${
           open
             ? 'bg-indigo-700 text-white hover:bg-indigo-800'
             : 'bg-indigo-600 text-white hover:bg-indigo-700'
@@ -127,7 +127,7 @@ export function HelpWidget() {
           role="dialog"
           aria-modal="true"
           aria-label="Help"
-          className="fixed bottom-20 right-6 z-50 flex w-80 flex-col rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-800 sm:bottom-24 sm:right-6"
+          className="fixed bottom-20 end-6 z-50 flex w-80 flex-col rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-neutral-700 dark:bg-neutral-800 sm:bottom-24 sm:end-6"
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-700">
@@ -179,7 +179,7 @@ export function HelpWidget() {
                       className="flex items-center justify-between rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:text-neutral-200 dark:hover:bg-indigo-900/30 dark:hover:text-indigo-300"
                     >
                       <span className="flex-1 truncate">{article.title}</span>
-                      <ExternalLink className="ml-2 h-3.5 w-3.5 flex-shrink-0 opacity-50" />
+                      <ExternalLink className="ms-2 h-3.5 w-3.5 flex-shrink-0 opacity-50" />
                     </a>
                   </li>
                 ))}

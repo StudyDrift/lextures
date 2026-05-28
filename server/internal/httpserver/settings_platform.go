@@ -91,6 +91,7 @@ type platformSettingsJSON struct {
 	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled            bool `json:"adminAuditLogEnabled"`
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
+	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
@@ -214,6 +215,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
+			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
@@ -310,6 +312,7 @@ type putPlatformBody struct {
 	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled            *bool `json:"adminAuditLogEnabled"`
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
+	RTLEnabled                      *bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled *bool `json:"securityDisclosureModuleEnabled"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
@@ -567,6 +570,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
+		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
@@ -646,6 +650,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
+			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,

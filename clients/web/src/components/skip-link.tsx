@@ -16,7 +16,7 @@ export function SkipLink({ target = '#main-content', label = 'Skip to main conte
       href={target}
       className={[
         // Hidden by default
-        'absolute left-2 top-2 z-[9999]',
+        'absolute start-2 top-2 z-[9999]',
         '-translate-y-20 opacity-0',
         // Visible on focus
         'focus:translate-y-0 focus:opacity-100',

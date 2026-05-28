@@ -31,6 +31,7 @@ describe('studentProgressFeatureEnabled', () => {
       virtualClassroomEnabled: true,
       sessionManagementUiEnabled: false,
       instructorInsightsEnabled: false,
+      rtlEnabled: false,
     })
     expect(studentProgressFeatureEnabled()).toBe(true)
   })

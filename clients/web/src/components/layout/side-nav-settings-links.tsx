@@ -221,7 +221,7 @@ export function SideNavSettingsLinks() {
                     }`}
                   >
                     <div className="min-h-0 overflow-hidden">
-                      <div className="flex flex-col gap-0.5 border-l border-slate-200/80 pl-2 dark:border-neutral-600/80">
+                      <div className="flex flex-col gap-0.5 border-s border-slate-200/80 ps-2 dark:border-neutral-600/80">
                         <SideNavLink
                           to="/settings/ai/models"
                           className={() => (view === 'ai-models' ? sideNavActiveClass : '')}

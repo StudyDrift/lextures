@@ -135,7 +135,7 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
             </p>
           </header>
 
-          <div className="legal-prose max-w-none text-base leading-relaxed text-slate-800 dark:text-neutral-200 [&_a]:text-indigo-700 [&_a]:underline [&_h2]:scroll-mt-24 [&_h2]:border-b [&_h2]:border-slate-100 [&_h2]:pb-2 [&_h2]:pt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:text-lg [&_h3]:font-semibold [&_li]:my-1 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:my-3 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:p-2 [&_th]:border [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-2 [&_ul]:list-disc [&_ul]:pl-6 dark:[&_a]:text-indigo-300 dark:[&_h2]:border-neutral-800 dark:[&_td]:border-neutral-700 dark:[&_th]:border-neutral-700 dark:[&_th]:bg-neutral-900">
+          <div className="legal-prose max-w-none text-base leading-relaxed text-slate-800 dark:text-neutral-200 [&_a]:text-indigo-700 [&_a]:underline [&_h2]:scroll-mt-24 [&_h2]:border-b [&_h2]:border-slate-100 [&_h2]:pb-2 [&_h2]:pt-8 [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:mt-4 [&_h3]:text-lg [&_h3]:font-semibold [&_li]:my-1 [&_ol]:list-decimal [&_ol]:ps-6 [&_p]:my-3 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:p-2 [&_th]:border [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-2 [&_ul]:list-disc [&_ul]:ps-6 dark:[&_a]:text-indigo-300 dark:[&_h2]:border-neutral-800 dark:[&_td]:border-neutral-700 dark:[&_th]:border-neutral-700 dark:[&_th]:bg-neutral-900">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{

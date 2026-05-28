@@ -160,20 +160,20 @@ function emptyForm(): PlatformSettingsPayload {
 function sourceBadge(src: FieldSource) {
   if (src === 'database') {
     return (
-      <span className="ml-2 rounded-md bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-200">
+      <span className="ms-2 rounded-md bg-indigo-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-200">
         Database
       </span>
     )
   }
   if (src === 'default') {
     return (
-      <span className="ml-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
+      <span className="ms-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
         Default
       </span>
     )
   }
   return (
-    <span className="ml-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
+    <span className="ms-2 rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-700 dark:text-neutral-300">
       Environment
     </span>
   )

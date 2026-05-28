@@ -35,7 +35,7 @@ export function gradebookStickyNameWidthClass(density: UiDensity): string {
 
 /** `left` offset for the sticky Final column (matches name column width). */
 export function gradebookStickyFinalLeftClass(density: UiDensity): string {
-  return density === 'compact' ? 'left-[10rem]' : 'left-[12rem]'
+  return density === 'compact' ? 'start-[10rem]' : 'start-[12rem]'
 }
 
 export function gradebookAssignmentColMinWidthClass(density: UiDensity): string {

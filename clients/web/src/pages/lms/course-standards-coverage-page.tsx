@@ -192,7 +192,7 @@ export default function CourseStandardsCoveragePage() {
 
       {!loading && sorted.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-800">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-800">
+          <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-800">
             <thead className="bg-slate-50 dark:bg-neutral-900">
               <tr>
                 <th scope="col" className="px-3 py-2 font-semibold text-slate-900 dark:text-neutral-100">
@@ -246,7 +246,7 @@ export default function CourseStandardsCoveragePage() {
                   <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-slate-900 dark:text-neutral-100">
                     <span aria-label={`Standard code ${r.code}`}>{r.shortCode ?? r.code}</span>
                     {r.superseded ? (
-                      <span className="ml-2 rounded bg-amber-100 px-1.5 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
+                      <span className="ms-2 rounded bg-amber-100 px-1.5 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
                         superseded
                       </span>
                     ) : null}

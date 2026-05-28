@@ -809,7 +809,7 @@ export function AssignmentAnnotationWorkbench({
                 timeStyle: 'short',
               })}
               {Number.isFinite(new Date(mine.revisionDueAt).getTime() - deadlineNow) ? (
-                <span className="ml-2 text-xs text-amber-900/70 dark:text-amber-200/80">
+                <span className="ms-2 text-xs text-amber-900/70 dark:text-amber-200/80">
                   (
                   {new Date(mine.revisionDueAt).getTime() > deadlineNow
                     ? `${Math.max(0, Math.floor((new Date(mine.revisionDueAt).getTime() - deadlineNow) / 60000))} min left`
@@ -827,7 +827,7 @@ export function AssignmentAnnotationWorkbench({
           <label
             className={`text-sm font-medium ${mine?.resubmissionRequested || !mine?.attachmentFileId ? 'text-slate-700 dark:text-neutral-200' : 'text-slate-400 dark:text-neutral-500'}`}
           >
-            <span className="mr-2">
+            <span className="me-2">
               {mine?.resubmissionRequested
                 ? 'Resubmit file'
                 : resubmissionWorkflowEnabled && mine?.attachmentFileId

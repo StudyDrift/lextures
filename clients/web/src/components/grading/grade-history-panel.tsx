@@ -72,7 +72,7 @@ export function GradeHistoryPanel({
         may not show a grader.
       </p>
       <ul
-        className="mt-4 max-h-72 list-none space-y-3 overflow-y-auto pl-0"
+        className="mt-4 max-h-72 list-none space-y-3 overflow-y-auto ps-0"
         role="list"
         aria-labelledby={id}
       >
@@ -80,7 +80,7 @@ export function GradeHistoryPanel({
           <li
             key={e.id}
             role="listitem"
-            className="border-l-2 border-indigo-200 pl-3 dark:border-indigo-800/80"
+            className="border-s-2 border-indigo-200 ps-3 dark:border-indigo-800/80"
           >
             <div className="text-xs text-slate-500 dark:text-neutral-500">
               <time dateTime={e.changedAt} title={e.changedAt}>

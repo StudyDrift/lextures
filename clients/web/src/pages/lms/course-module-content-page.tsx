@@ -374,7 +374,7 @@ export default function CourseModuleContentPage() {
         )
       }
     >
-      <p className="mt-2 text-left text-sm">
+      <p className="mt-2 text-start text-sm">
         <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500">
           ← Back to modules
         </Link>

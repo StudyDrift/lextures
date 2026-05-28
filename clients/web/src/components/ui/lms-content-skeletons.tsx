@@ -121,16 +121,16 @@ export function GradebookLoadingSkeleton() {
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
         <div className="min-w-max">
           <div className="flex border-b border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800">
-            <div className="sticky left-0 z-10 flex w-48 shrink-0 items-end border-r border-slate-200 bg-slate-50 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-800">
+            <div className="sticky start-0 z-10 flex w-48 shrink-0 items-end border-e border-slate-200 bg-slate-50 px-3 py-3 dark:border-neutral-700 dark:bg-neutral-800">
               <Shimmer className="h-4 w-20" />
             </div>
-            <div className="flex w-20 shrink-0 items-end border-r border-slate-200 bg-slate-50 px-2 py-3 dark:border-neutral-700 dark:bg-neutral-800">
+            <div className="flex w-20 shrink-0 items-end border-e border-slate-200 bg-slate-50 px-2 py-3 dark:border-neutral-700 dark:bg-neutral-800">
               <Shimmer className="h-3 w-10" />
             </div>
             {colPlaceholders.map((_, i) => (
               <div
                 key={i}
-                className="flex w-36 shrink-0 items-end border-r border-slate-200 bg-slate-50 px-2 py-3 last:border-r-0 dark:border-neutral-700 dark:bg-neutral-800"
+                className="flex w-36 shrink-0 items-end border-e border-slate-200 bg-slate-50 px-2 py-3 last:border-e-0 dark:border-neutral-700 dark:bg-neutral-800"
               >
                 <Shimmer className="h-8 w-full" />
               </div>
@@ -141,16 +141,16 @@ export function GradebookLoadingSkeleton() {
               key={ri}
               className="flex border-b border-slate-100 last:border-b-0 dark:border-neutral-800"
             >
-              <div className="sticky left-0 z-10 w-48 shrink-0 border-r border-slate-200 bg-white px-3 py-2.5 dark:border-neutral-700 dark:bg-neutral-900">
+              <div className="sticky start-0 z-10 w-48 shrink-0 border-e border-slate-200 bg-white px-3 py-2.5 dark:border-neutral-700 dark:bg-neutral-900">
                 <Shimmer className="h-4 w-32" />
               </div>
-              <div className="flex w-20 shrink-0 items-center border-r border-slate-200 px-2 py-2 dark:border-neutral-700">
+              <div className="flex w-20 shrink-0 items-center border-e border-slate-200 px-2 py-2 dark:border-neutral-700">
                 <Shimmer className="mx-auto h-4 w-10" />
               </div>
               {colPlaceholders.map((_, ci) => (
                 <div
                   key={ci}
-                  className="flex w-36 shrink-0 items-center border-r border-slate-200 px-2 py-2 last:border-r-0 dark:border-neutral-700"
+                  className="flex w-36 shrink-0 items-center border-e border-slate-200 px-2 py-2 last:border-e-0 dark:border-neutral-700"
                 >
                   <Shimmer className="mx-auto h-4 w-14 rounded-sm" />
                 </div>
@@ -179,7 +179,7 @@ export function CourseModulesLoadingSkeleton() {
           </div>
           <ul className="mt-3 space-y-2 border-t border-slate-100 pt-3 dark:border-neutral-800">
             {Array.from({ length: 3 }).map((_, ci) => (
-              <li key={ci} className="flex items-center gap-3 pl-4 sm:pl-8">
+              <li key={ci} className="flex items-center gap-3 ps-4 sm:ps-8">
                 <Shimmer className="h-7 w-7 rounded-md" />
                 <div className="min-w-0 flex-1 space-y-1.5">
                   <Shimmer className="h-4 w-48 max-w-full" />

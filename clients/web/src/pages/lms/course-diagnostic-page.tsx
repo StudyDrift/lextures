@@ -294,7 +294,7 @@ export default function CourseDiagnosticPage() {
                   <button
                     type="button"
                     onClick={() => setChoice(i)}
-                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left text-sm transition ${
+                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-start text-sm transition ${
                       selected
                         ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-600'

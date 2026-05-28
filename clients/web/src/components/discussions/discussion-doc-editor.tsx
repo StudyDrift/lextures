@@ -15,6 +15,7 @@ export function DiscussionReadonlyBody({ docJson }: { docJson: unknown }) {
     editorProps: {
       attributes: {
         class: editorClass,
+        dir: 'auto',
       },
     },
   })
@@ -57,6 +58,7 @@ export function DiscussionDocEditor({
     editorProps: {
       attributes: {
         class: editorClass,
+        dir: 'auto',
       },
     },
   })

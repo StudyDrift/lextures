@@ -38,6 +38,7 @@ import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-acco
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
+import { LocaleSettingsPanel } from '../../components/settings/locale-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
@@ -1022,6 +1023,9 @@ export default function Settings() {
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Theme follows your account when signed in; density is stored on this device only.
                 </p>
+                <div className="mt-6">
+                  <LocaleSettingsPanel />
+                </div>
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Layout density</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
                   Compact tightens tables, side navigation, and the course gradebook for large rosters. Changes apply
@@ -1367,7 +1371,7 @@ export default function Settings() {
                     {!sessionsLoading && sessions.length > 0 && (
                       <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
                         <table
-                          className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-600"
+                          className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600"
                           aria-label="Active sessions"
                         >
                           <thead className="bg-slate-50 dark:bg-neutral-800/80">

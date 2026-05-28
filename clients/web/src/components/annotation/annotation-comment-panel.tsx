@@ -35,7 +35,7 @@ export function AnnotationCommentPanel({
                 <button
                   type="button"
                   onClick={() => onSelect(a.id)}
-                  className={`w-full rounded-lg border px-2 py-2 text-left text-xs transition ${
+                  className={`w-full rounded-lg border px-2 py-2 text-start text-xs transition ${
                     selectedId === a.id
                       ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
                       : 'border-slate-200 hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-900'

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { CommandPaletteProvider } from '../command-palette/command-palette-provider'
 import { KeyboardShortcutsProvider } from '../keyboard-shortcuts/keyboard-shortcuts-provider'
@@ -15,6 +15,9 @@ import { ShellNavProvider } from './shell-nav-context'
 import { SideNav } from './side-nav'
 import { TopBar } from './top-bar'
 import { UiThemeSync } from './ui-theme-sync'
+import { LocaleBootstrapSync } from './locale-sync'
+import { LocaleProvider } from '../../context/locale-context'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { HelpWidget } from './help-widget'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
@@ -38,6 +41,7 @@ function AppShellLayout() {
     <CourseNavFeaturesProvider>
       <LmsExperienceRoot>
       <UiThemeSync />
+      <LocaleBootstrapSync />
       <SkipLink />
       <div
         className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
@@ -70,9 +74,15 @@ function AppShellLayout() {
   )
 }
 
+function AppShellWithLocale({ children }: { children: ReactNode }) {
+  const { rtlEnabled } = usePlatformFeatures()
+  return <LocaleProvider rtlEnabled={rtlEnabled}>{children}</LocaleProvider>
+}
+
 export function AppShell() {
   return (
     <PlatformFeaturesProvider>
+    <AppShellWithLocale>
     <InboxUnreadProvider>
       <CourseFeedUnreadProvider>
         <CommandPaletteProvider>
@@ -88,6 +98,7 @@ export function AppShell() {
         </CommandPaletteProvider>
       </CourseFeedUnreadProvider>
     </InboxUnreadProvider>
+    </AppShellWithLocale>
     </PlatformFeaturesProvider>
   )
 }

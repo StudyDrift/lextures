@@ -28,6 +28,7 @@ type Row struct {
 	LastName        *string
 	AvatarURL       *string
 	UITheme         string
+	Locale          string
 	ShowHelpPopover bool
 	Sid             *string
 	LoginBlocked    bool
@@ -46,7 +47,7 @@ func strPtr(ns sql.NullString) *string {
 
 // FindByEmail returns a user by exact email (already normalized) or nil if missing.
 func FindByEmail(ctx context.Context, pool *pgxpool.Pool, email string) (*Row, error) {
-	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
        login_blocked, deactivated_at, account_type
 FROM "user".users WHERE email = $1`
 	return scanUserRow(ctx, pool, q, email)
@@ -57,7 +58,7 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	var displayName, firstName, lastName, avatar, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, query, arg).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &displayName, &firstName, &lastName, &avatar, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -71,6 +72,9 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 	r.LastName = strPtr(lastName)
 	r.AvatarURL = strPtr(avatar)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
@@ -83,7 +87,7 @@ func scanUserRow(ctx context.Context, pool *pgxpool.Pool, query string, arg any)
 
 // FindByID returns a user by primary key or nil.
 func FindByID(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*Row, error) {
-	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
        login_blocked, deactivated_at, account_type
 FROM "user".users WHERE id = $1`
 	return scanUserRow(ctx, pool, q, id)
@@ -93,13 +97,13 @@ FROM "user".users WHERE id = $1`
 func InsertUser(ctx context.Context, pool *pgxpool.Pool, email, passwordHash string, displayName *string) (*Row, error) {
 	const q = `INSERT INTO "user".users (email, password_hash, display_name, org_id)
 VALUES ($1, $2, $3, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := pool.QueryRow(ctx, q, email, passwordHash, displayName).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -110,6 +114,9 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
@@ -124,13 +131,13 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 func InsertUserTx(ctx context.Context, tx pgx.Tx, email, passwordHash string, displayName *string) (*Row, error) {
 	const q = `INSERT INTO "user".users (email, password_hash, display_name, org_id)
 VALUES ($1, $2, $3, (SELECT id FROM tenant.organizations WHERE slug = 'default' LIMIT 1))
-RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
 	err := tx.QueryRow(ctx, q, email, passwordHash, displayName).Scan(
-		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &sid,
+		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.Locale, &r.ShowHelpPopover, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
 	if err != nil {
@@ -141,6 +148,9 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 	r.LastName = strPtr(ln)
 	r.AvatarURL = strPtr(av)
 	r.Sid = strPtr(sid)
+	if r.Locale == "" {
+		r.Locale = DefaultLocale
+	}
 	if r.AccountType == "" {
 		r.AccountType = AccountTypeStandard
 	}
@@ -175,7 +185,7 @@ func FindByEmailCI(ctx context.Context, pool *pgxpool.Pool, email string) (*Row,
 	if em == "" {
 		return nil, nil
 	}
-	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, sid,
+	const q = `SELECT id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, locale, show_help_popover, sid,
        login_blocked, deactivated_at, account_type
 FROM "user".users WHERE lower(email) = lower($1)`
 	return scanUserRow(ctx, pool, q, em)

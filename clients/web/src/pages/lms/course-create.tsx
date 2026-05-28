@@ -416,7 +416,7 @@ export default function CourseCreate() {
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label
-                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-left shadow-sm transition ${
+                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
                       courseMode === 'traditional'
                         ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -438,7 +438,7 @@ export default function CourseCreate() {
                     </span>
                   </label>
                   <label
-                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-left shadow-sm transition ${
+                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
                       courseMode === 'competency_based'
                         ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -520,7 +520,7 @@ export default function CourseCreate() {
                 <button
                   type="button"
                   onClick={() => setSelectedTemplateId(BLANK_TEMPLATE_ID)}
-                  className={`flex flex-col rounded-2xl border p-4 text-left shadow-sm transition ${
+                  className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
                     selectedTemplateId === BLANK_TEMPLATE_ID
                       ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                       : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -547,7 +547,7 @@ export default function CourseCreate() {
                       key={tmpl.id}
                       type="button"
                       onClick={() => setSelectedTemplateId(tmpl.id)}
-                      className={`flex flex-col rounded-2xl border p-4 text-left shadow-sm transition ${
+                      className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
                         selected
                           ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                           : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'

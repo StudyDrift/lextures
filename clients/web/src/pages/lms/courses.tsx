@@ -113,7 +113,7 @@ function CourseCard({
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
           aria-hidden
         />
-        <span className="absolute left-3 top-3">
+        <span className="absolute start-3 top-3">
           <CourseCatalogStatusPill label={badgeLabel} />
         </span>
         <div className="absolute inset-x-0 bottom-0 p-4 pt-10">
@@ -124,8 +124,8 @@ function CourseCard({
       </Link>
 
       <div className="flex flex-1 flex-col justify-end px-5 pb-4 pt-3">
-        <p className="text-left text-sm leading-snug text-slate-600 line-clamp-4">{descriptionBlurb}</p>
-        <p className="mt-3 text-left text-xs text-slate-400">{formatEditedAgo(course.updatedAt)}</p>
+        <p className="text-start text-sm leading-snug text-slate-600 line-clamp-4">{descriptionBlurb}</p>
+        <p className="mt-3 text-start text-xs text-slate-400">{formatEditedAgo(course.updatedAt)}</p>
       </div>
     </article>
   )

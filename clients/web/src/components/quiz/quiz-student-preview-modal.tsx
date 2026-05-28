@@ -452,7 +452,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
         <div className="mt-4">
           <input
             type="file"
-            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -462,7 +462,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
           <input
             type="file"
             accept="audio/*"
-            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -472,7 +472,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
           <input
             type="file"
             accept="video/*"
-            className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -486,7 +486,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             id={`preview-img-${q.id}`}
             type="file"
             accept="image/*"
-            className="mt-1 block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
+            className="mt-1 block w-full text-sm text-slate-600 file:me-3 file:rounded-lg file:border-0 file:bg-indigo-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-indigo-700 hover:file:bg-indigo-100"
           />
         </div>
       )}
@@ -813,7 +813,7 @@ function AdaptivePreviewPanel({
       </p>
       {phase === 'loading' && (
         <div
-          className="mt-4 flex items-center gap-4 pl-2.5 text-sm leading-snug text-slate-600"
+          className="mt-4 flex items-center gap-4 ps-2.5 text-sm leading-snug text-slate-600"
           role="status"
           aria-busy="true"
           aria-live="polite"

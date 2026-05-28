@@ -16,14 +16,14 @@ export function AriaAnnouncer() {
         id="a11y-polite-announcer"
         aria-live="polite"
         aria-atomic="true"
-        className="pointer-events-none fixed -left-[10000px] top-auto h-px w-px overflow-hidden"
+        className="pointer-events-none fixed -start-[10000px] top-auto h-px w-px overflow-hidden"
       />
       <div
         id="a11y-assertive-announcer"
         role="alert"
         aria-live="assertive"
         aria-atomic="true"
-        className="pointer-events-none fixed -left-[10000px] top-auto h-px w-px overflow-hidden"
+        className="pointer-events-none fixed -start-[10000px] top-auto h-px w-px overflow-hidden"
       />
     </>
   )

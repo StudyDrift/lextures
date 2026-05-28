@@ -542,7 +542,7 @@ export function CourseQuestionBankPage() {
             role="grid"
             aria-label="Question bank"
           >
-            <table className="min-w-full text-left text-sm">
+            <table className="min-w-full text-start text-sm">
               <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300">
                 <tr>
                   <th scope="col" className="px-4 py-3">

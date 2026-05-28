@@ -507,7 +507,7 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
       />
 
       {isDirty && (
-        <div className="fixed bottom-6 left-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
           <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/90">
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>

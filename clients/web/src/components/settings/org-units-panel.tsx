@@ -71,7 +71,7 @@ function TreeBranch({
         )}
       </div>
       {hasKids && open && (
-        <ul role="group" className="list-none border-l border-slate-200 pl-1 dark:border-neutral-700">
+        <ul role="group" className="list-none border-s border-slate-200 ps-1 dark:border-neutral-700">
           {node.children.map((c) => (
             <TreeBranch
               key={c.id}

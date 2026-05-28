@@ -167,7 +167,7 @@ export function OrganizationsPanel() {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-neutral-600">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-sm dark:divide-neutral-600">
+          <table className="min-w-full divide-y divide-slate-200 text-start text-sm dark:divide-neutral-600">
             <thead className="bg-slate-50 dark:bg-neutral-800/80">
               <tr>
                 <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">

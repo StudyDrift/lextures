@@ -598,7 +598,7 @@ export default function CourseModuleAssignmentPage() {
         )
       }
     >
-      <p className="mt-2 text-left text-sm">
+      <p className="mt-2 text-start text-sm">
         <Link to={backTo} className="font-medium text-indigo-600 hover:text-indigo-500">
           ← Back to modules
         </Link>
@@ -619,7 +619,7 @@ export default function CourseModuleAssignmentPage() {
                 {assignmentDateTimeIsSet(dueAt) ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Due date</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatOptionalDateTime(dueAt)}
                     </dd>
                   </div>
@@ -627,7 +627,7 @@ export default function CourseModuleAssignmentPage() {
                 {assignmentDateTimeIsSet(availableFromAt) ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility start</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatOptionalDateTime(availableFromAt)}
                     </dd>
                   </div>
@@ -635,7 +635,7 @@ export default function CourseModuleAssignmentPage() {
                 {assignmentDateTimeIsSet(availableUntilAt) ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Visibility end</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatOptionalDateTime(availableUntilAt)}
                     </dd>
                   </div>
@@ -643,7 +643,7 @@ export default function CourseModuleAssignmentPage() {
                 {submissionTypesAreSet(submissionAllowText, submissionAllowFileUpload, submissionAllowUrl) ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Submission types</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatSubmissionTypes(submissionAllowText, submissionAllowFileUpload, submissionAllowUrl)}
                     </dd>
                   </div>
@@ -652,13 +652,13 @@ export default function CourseModuleAssignmentPage() {
                   <>
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Originality checks</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {formatOriginalityDetection(originalityDetection)}
                       </dd>
                     </div>
                     <div className="flex justify-between gap-4">
                       <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Student score visibility</dt>
-                      <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                      <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                         {formatOriginalityStudentVisibility(originalityStudentVisibility)}
                       </dd>
                     </div>
@@ -666,14 +666,14 @@ export default function CourseModuleAssignmentPage() {
                 ) : null}
                 <div className="flex justify-between gap-4">
                   <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Late submission</dt>
-                  <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                  <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                     {formatLateSubmissionSummary(lateSubmissionPolicy, latePenaltyPercent)}
                   </dd>
                 </div>
                 {pointsWorth != null ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Points</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {formatPointsWorth(pointsWorth)}
                     </dd>
                   </div>
@@ -681,7 +681,7 @@ export default function CourseModuleAssignmentPage() {
                 {assignmentGroupId ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Assignment group</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {assignmentGroupDisplayName(assignmentGroupId, gradingGroups)}
                     </dd>
                   </div>
@@ -689,7 +689,7 @@ export default function CourseModuleAssignmentPage() {
                 {rubric && rubric.criteria.length > 0 ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Rubric</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {`${rubric.criteria.length} criteria`}
                     </dd>
                   </div>
@@ -697,7 +697,7 @@ export default function CourseModuleAssignmentPage() {
                 {blindGrading ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Blind grading</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       {identitiesRevealedAt
                         ? `Identities revealed ${formatOptionalDateTime(identitiesRevealedAt)}`
                         : 'Active (identities hidden)'}
@@ -707,7 +707,7 @@ export default function CourseModuleAssignmentPage() {
                 {viewerIsCourseStaff && moderatedGrading ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Moderated grading</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">
                       Enabled ({moderationThresholdPct}% threshold)
                     </dd>
                   </div>
@@ -715,7 +715,7 @@ export default function CourseModuleAssignmentPage() {
                 {requiresAssignmentAccessCode ? (
                   <div className="flex justify-between gap-4">
                     <dt className="shrink-0 text-slate-500 dark:text-neutral-400">Access code</dt>
-                    <dd className="min-w-0 text-right font-medium text-slate-900 dark:text-neutral-100">Required</dd>
+                    <dd className="min-w-0 text-end font-medium text-slate-900 dark:text-neutral-100">Required</dd>
                   </div>
                 ) : null}
               </dl>

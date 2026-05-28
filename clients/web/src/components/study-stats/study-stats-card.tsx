@@ -53,13 +53,13 @@ export function StudyStatsCard() {
         <div className="relative rounded-2xl border border-amber-100 bg-amber-50/90 px-5 py-4 dark:border-amber-900/40 dark:bg-amber-950/30">
           <button
             type="button"
-            className="absolute right-3 top-3 rounded-lg p-1 text-amber-800 hover:bg-amber-100/80 dark:text-amber-200 dark:hover:bg-amber-900/50"
+            className="absolute end-3 top-3 rounded-lg p-1 text-amber-800 hover:bg-amber-100/80 dark:text-amber-200 dark:hover:bg-amber-900/50"
             aria-label="Dismiss coaching tip"
             onClick={() => setTipDismissed(true)}
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
-          <div className="flex gap-3 pr-8">
+          <div className="flex gap-3 pe-8">
             <Lightbulb className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-300" aria-hidden />
             <div>
               <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Weekly coaching tip</p>

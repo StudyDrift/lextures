@@ -199,7 +199,7 @@ export default function Login() {
                 className={authFieldClass}
                 placeholder="••••••••"
               />
-              <div className="mt-2 text-right">
+              <div className="mt-2 text-end">
                 <Link to="/forgot-password" className={`text-sm ${authMutedLinkClass}`}>
                   Forgot password?
                 </Link>
