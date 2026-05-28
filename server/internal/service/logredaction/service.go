@@ -12,7 +12,7 @@ import (
 )
 
 // ReadPermission gates the redaction status endpoint.
-const ReadPermission = "compliance:ops:redaction:read:*"
+const ReadPermission = "compliance:redaction:read:*"
 
 // Status is returned by GET /api/v1/internal/ops/redaction-status.
 type Status struct {
