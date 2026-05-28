@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/auth/hibp"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
+	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/notifevents"
 	"github.com/lextures/lextures/server/internal/openapi"
@@ -73,6 +74,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	r.Use(logging.AccessLog)
 	ready := d.Ready
 	if ready == nil {
 		ready = defaultReady(d.Pool)
@@ -136,6 +138,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAdminAuditLogRoutes(r)
 	d.registerSecurityReportsRoutes(r)
 	d.registerDataResidencyRoutes(r)
+	d.registerPIIRedactionRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r
