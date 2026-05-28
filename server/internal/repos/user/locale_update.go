@@ -10,28 +10,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// UpdateProfile patches account profile fields for one user.
-func UpdateProfile(
-	ctx context.Context,
-	pool *pgxpool.Pool,
-	userID uuid.UUID,
-	firstName, lastName, avatarURL, uiTheme *string,
-	showHelpPopover *bool,
-) (*Row, error) {
+// UpdateLocale sets the user locale preference.
+func UpdateLocale(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, locale string) (*Row, error) {
 	const q = `UPDATE "user".users
-SET
-	first_name = $2,
-	last_name = $3,
-	avatar_url = $4,
-	ui_theme = COALESCE($5, ui_theme),
-	show_help_popover = COALESCE($6, show_help_popover)
+SET locale = $2
 WHERE id = $1
 RETURNING id::text, email, password_hash, display_name, first_name, last_name, avatar_url, ui_theme, show_help_popover, locale, sid,
   login_blocked, deactivated_at, account_type`
 	var r Row
 	var dn, fn, ln, av, sid sql.NullString
 	var deactivatedAt sql.NullTime
-	err := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover).Scan(
+	err := pool.QueryRow(ctx, q, userID, locale).Scan(
 		&r.ID, &r.Email, &r.PasswordHash, &dn, &fn, &ln, &av, &r.UITheme, &r.ShowHelpPopover, &r.Locale, &sid,
 		&r.LoginBlocked, &deactivatedAt, &r.AccountType,
 	)
@@ -55,4 +44,3 @@ RETURNING id::text, email, password_hash, display_name, first_name, last_name, a
 	}
 	return &r, nil
 }
-
