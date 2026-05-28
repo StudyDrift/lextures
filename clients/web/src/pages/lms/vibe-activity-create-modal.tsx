@@ -21,22 +21,9 @@ export function VibeActivityCreateModal({
   initialHtml = '',
 }: VibeActivityCreateModalProps) {
   const [title, setTitle] = useState(initialTitle)
-  const [html, setHtml] = useState(initialHtml)
+  const [html, setHtml] = useState(() => initialHtml || defaultTemplate())
   const [showPreview, setShowPreview] = useState(true)
   const dialogRef = useRef<HTMLDivElement>(null)
-
-  // Track whether the modal was previously open so we only reset state
-  // on the transition from closed -> open (avoids both set-state-in-effect
-  // and exhaustive-deps violations while keeping the desired UX).
-  const wasOpen = useRef(false)
-
-  useEffect(() => {
-    if (open && !wasOpen.current) {
-      setTitle(initialTitle)
-      setHtml(initialHtml || defaultTemplate())
-    }
-    wasOpen.current = open
-  }, [open, initialTitle, initialHtml])
 
   // Close on escape
   useEffect(() => {
