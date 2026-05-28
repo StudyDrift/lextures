@@ -2144,6 +2144,54 @@ export default function CourseModules() {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
+          accessibility={{
+            announcements: {
+              onDragStart({ active }) {
+                const item = items.find((i) => i.id === String(active.id))
+                if (!item) return
+                if (item.kind === 'module') {
+                  const pos = moduleIds.indexOf(String(active.id)) + 1
+                  return `Picked up module "${item.title}". Current position: ${pos} of ${moduleIds.length}. Press arrow keys to move, Space to drop, Escape to cancel.`
+                }
+                const moduleId = active.data.current?.moduleId as string | undefined
+                const siblings = moduleId ? (moduleChildrenById.get(moduleId) ?? []) : []
+                const pos = siblings.findIndex((c) => c.id === String(active.id)) + 1
+                return `Picked up "${item.title}". Position: ${pos} of ${siblings.length}. Press arrow keys to move, Space to drop, Escape to cancel.`
+              },
+              onDragOver({ active, over }) {
+                if (!over) return
+                const item = items.find((i) => i.id === String(active.id))
+                if (!item) return
+                if (item.kind === 'module') {
+                  const pos = moduleIds.indexOf(String(over.id)) + 1
+                  return `"${item.title}" is now at position ${pos} of ${moduleIds.length}.`
+                }
+                const moduleId = active.data.current?.moduleId as string | undefined
+                const siblings = moduleId ? (moduleChildrenById.get(moduleId) ?? []) : []
+                const pos = siblings.findIndex((c) => c.id === String(over.id)) + 1
+                return `"${item.title}" is now at position ${pos} of ${siblings.length}.`
+              },
+              onDragEnd({ active, over }) {
+                const item = items.find((i) => i.id === String(active.id))
+                if (!item) return
+                if (!over || active.id === over.id) {
+                  return `Dragging cancelled. "${item.title}" returned to its original position.`
+                }
+                if (item.kind === 'module') {
+                  const pos = moduleIds.indexOf(String(over.id)) + 1
+                  return `"${item.title}" dropped at position ${pos} of ${moduleIds.length}.`
+                }
+                const moduleId = active.data.current?.moduleId as string | undefined
+                const siblings = moduleId ? (moduleChildrenById.get(moduleId) ?? []) : []
+                const pos = siblings.findIndex((c) => c.id === String(over.id)) + 1
+                return `"${item.title}" dropped at position ${pos} of ${siblings.length}.`
+              },
+              onDragCancel({ active }) {
+                const item = items.find((i) => i.id === String(active.id))
+                return `Dragging cancelled. "${item?.title ?? 'Item'}" returned to its original position.`
+              },
+            },
+          }}
         >
           {nonModuleTopLevel.length > 0 && (
             <ul className="mt-8 flex w-full max-w-none flex-col gap-3">

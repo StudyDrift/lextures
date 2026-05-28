@@ -4,5 +4,17 @@
   "common.locale.saved": "Language preference saved.",
   "common.locale.saveError": "Could not save language preference.",
   "common.assignmentCount": "{count, plural, one {# assignment} other {# assignments}}",
-  "common.loading": "Loading…"
+  "common.loading": "Loading…",
+  "a11y.editor.canvasRegion": "Block editor canvas",
+  "a11y.editor.settingsRegion": "Editor settings",
+  "a11y.gradebook.gridLabel": "Grades by student and assignment",
+  "a11y.search.dialogLabel": "Command Palette",
+  "a11y.search.inputLabel": "Search",
+  "a11y.search.resultsLabel": "Search results",
+  "a11y.search.resultsCount": "{count, plural, =0 {No results} one {# result} other {# results}}",
+  "a11y.search.closeLabel": "Close search",
+  "a11y.modules.dragPickup": "Picked up \"{title}\". Position: {pos} of {total}. Press arrow keys to move, Space to drop, Escape to cancel.",
+  "a11y.modules.dragOver": "\"{title}\" is now at position {pos} of {total}.",
+  "a11y.modules.dragDrop": "\"{title}\" dropped at position {pos} of {total}.",
+  "a11y.modules.dragCancel": "Dragging cancelled. \"{title}\" returned to its original position."
 }

@@ -1,13 +1,32 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { CommandPaletteContext } from './command-palette-context'
 import { CommandPaletteDialog } from './command-palette-dialog'
 
 export function CommandPaletteProvider({ children }: { children: ReactNode }) {
   const [isOpen, setOpen] = useState(false)
+  const triggerRef = useRef<HTMLElement | null>(null)
 
-  const open = useCallback(() => setOpen(true), [])
-  const close = useCallback(() => setOpen(false), [])
-  const toggle = useCallback(() => setOpen((v) => !v), [])
+  const open = useCallback(() => {
+    triggerRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null
+    setOpen(true)
+  }, [])
+
+  const close = useCallback(() => {
+    setOpen(false)
+  }, [])
+
+  const toggle = useCallback(() => {
+    setOpen((v) => {
+      if (!v) {
+        triggerRef.current = document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null
+      }
+      return !v
+    })
+  }, [])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -15,19 +34,31 @@ export function CommandPaletteProvider({ children }: { children: ReactNode }) {
       const t = e.target as HTMLElement | null
       if (t?.closest?.('[data-no-command-palette]')) return
       e.preventDefault()
-      setOpen((v) => !v)
+      setOpen((v) => {
+        if (!v) {
+          triggerRef.current = document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null
+        }
+        return !v
+      })
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Return focus to the trigger element when the palette closes.
+  useEffect(() => {
+    if (!isOpen && triggerRef.current) {
+      const el = triggerRef.current
+      // Defer so the dialog has fully unmounted before shifting focus.
+      const t = window.setTimeout(() => el.focus(), 0)
+      return () => window.clearTimeout(t)
+    }
+  }, [isOpen])
+
   const value = useMemo(
-    () => ({
-      open,
-      close,
-      toggle,
-      isOpen,
-    }),
+    () => ({ open, close, toggle, isOpen, triggerRef }),
     [open, close, toggle, isOpen],
   )
 

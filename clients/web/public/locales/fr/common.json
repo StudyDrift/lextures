@@ -4,5 +4,17 @@
   "common.locale.saved": "Préférence linguistique enregistrée.",
   "common.locale.saveError": "Impossible d'enregistrer la préférence linguistique.",
   "common.assignmentCount": "{count, plural, one {# devoir} other {# devoirs}}",
-  "common.loading": "Chargement…"
+  "common.loading": "Chargement…",
+  "a11y.editor.canvasRegion": "Canevas de l'éditeur de blocs",
+  "a11y.editor.settingsRegion": "Paramètres de l'éditeur",
+  "a11y.gradebook.gridLabel": "Notes par étudiant et par devoir",
+  "a11y.search.dialogLabel": "Palette de commandes",
+  "a11y.search.inputLabel": "Rechercher",
+  "a11y.search.resultsLabel": "Résultats de recherche",
+  "a11y.search.resultsCount": "{count, plural, =0 {Aucun résultat} one {# résultat} other {# résultats}}",
+  "a11y.search.closeLabel": "Fermer la recherche",
+  "a11y.modules.dragPickup": "Élément \"{title}\" saisi. Position : {pos} sur {total}. Utilisez les flèches pour déplacer, Espace pour déposer, Échap pour annuler.",
+  "a11y.modules.dragOver": "\"{title}\" est maintenant à la position {pos} sur {total}.",
+  "a11y.modules.dragDrop": "\"{title}\" déposé à la position {pos} sur {total}.",
+  "a11y.modules.dragCancel": "Déplacement annulé. \"{title}\" est revenu à sa position d'origine."
 }

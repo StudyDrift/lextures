@@ -13,6 +13,11 @@ class ResizeObserverPolyfill {
 }
 globalThis.ResizeObserver = globalThis.ResizeObserver ?? ResizeObserverPolyfill
 
+/** jsdom does not implement scrollIntoView; components like CommandPaletteDialog use it. */
+if (!window.HTMLElement.prototype.scrollIntoView) {
+  window.HTMLElement.prototype.scrollIntoView = function () {}
+}
+
 /** jsdom does not implement `matchMedia` — used by `NotificationsDrawer` and others. */
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

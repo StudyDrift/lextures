@@ -20,10 +20,17 @@ export function BlockEditorShell({ children, sidebar, className }: BlockEditorSh
       }
     >
       <div className="flex min-h-0 min-w-0 flex-1 flex-col md:flex-row">
-        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-[#f0f0f0] dark:bg-neutral-950">
+        <div
+          role="region"
+          aria-label="Block editor canvas"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto bg-[#f0f0f0] dark:bg-neutral-950"
+        >
           {children}
         </div>
-        <aside className="flex max-h-[min(42vh,420px)] min-h-0 shrink-0 flex-col border-t border-slate-200/90 bg-white dark:border-neutral-700 dark:bg-neutral-900 md:max-h-none md:w-[280px] md:border-s md:border-t-0">
+        <aside
+          aria-label="Editor settings"
+          className="flex max-h-[min(42vh,420px)] min-h-0 shrink-0 flex-col border-t border-slate-200/90 bg-white dark:border-neutral-700 dark:bg-neutral-900 md:max-h-none md:w-[280px] md:border-s md:border-t-0"
+        >
           {sidebar}
         </aside>
       </div>
