@@ -51,6 +51,7 @@ services:
       EMAIL_NOTIFICATIONS_ENABLED: ${EMAIL_NOTIFICATIONS_ENABLED:-false}
       COPPA_WORKFLOW_ENABLED: "true"
       ISO_ISMS_ENABLED: "true"
+      BACKUP_MODULE_ENABLED: "true"
     ports:
       - "8080:8080"
     depends_on:
