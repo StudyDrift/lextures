@@ -530,9 +530,208 @@ func (d Deps) handleOrgParentLinkDelete() http.HandlerFunc {
 	}
 }
 
+// handleParentWeeklySummary is GET /api/v1/parent/weekly-summary
+func (d Deps) handleParentWeeklySummary() http.HandlerFunc {
+	type itemOut struct {
+		ChildName   string  `json:"childName"`
+		CourseCode  string  `json:"courseCode"`
+		CourseTitle string  `json:"courseTitle"`
+		ItemID      string  `json:"itemId"`
+		Kind        string  `json:"kind"`
+		Title       string  `json:"title"`
+		DueAt       *string `json:"dueAt,omitempty"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		parentID, orgID, ok := d.requireParentViewer(w, r)
+		if !ok {
+			return
+		}
+		children, err := parentlinks.ListChildrenForParent(r.Context(), d.Pool, parentID, orgID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list linked students.")
+			return
+		}
+		now := time.Now().UTC()
+		weekStart := now.Truncate(24 * time.Hour).AddDate(0, 0, -int(now.Weekday()))
+		weekEnd := weekStart.AddDate(0, 0, 7)
+		var items []itemOut
+		for _, ln := range children {
+			childName := ln.StudentEmail
+			if ln.StudentDisplay != nil && *ln.StudentDisplay != "" {
+				childName = *ln.StudentDisplay
+			}
+			courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, ln.StudentUserID)
+			if err != nil {
+				continue
+			}
+			for _, c := range courses {
+				cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, c.CourseCode)
+				if err != nil || cid == nil {
+					continue
+				}
+				structItems, err := coursestructure.ListForCourseWithEnrichment(r.Context(), d.Pool, *cid, false)
+				if err != nil {
+					continue
+				}
+				title := c.Title
+				if title == "" {
+					title = c.CourseCode
+				}
+				for _, it := range structItems {
+					if it.Kind != "assignment" && it.Kind != "quiz" {
+						continue
+					}
+					if it.Archived || !it.Published {
+						continue
+					}
+					if it.DueAt == nil {
+						continue
+					}
+					due := it.DueAt.UTC()
+					if due.Before(weekStart) || !due.Before(weekEnd) {
+						continue
+					}
+					s := due.Format(time.RFC3339Nano)
+					items = append(items, itemOut{
+						ChildName:   childName,
+						CourseCode:  c.CourseCode,
+						CourseTitle: title,
+						ItemID:      it.ID,
+						Kind:        it.Kind,
+						Title:       it.Title,
+						DueAt:       &s,
+					})
+				}
+			}
+		}
+		// Sort by due date ascending.
+		for i := 1; i < len(items); i++ {
+			for j := i; j > 0 && *items[j].DueAt < *items[j-1].DueAt; j-- {
+				items[j], items[j-1] = items[j-1], items[j]
+			}
+		}
+		if items == nil {
+			items = []itemOut{}
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"items": items, "weekStart": weekStart.Format(time.RFC3339), "weekEnd": weekEnd.Format(time.RFC3339)})
+	}
+}
+
+// handleParentNotificationPrefs is GET/PATCH /api/v1/parent/notification-prefs
+func (d Deps) handleParentNotificationPrefs() http.HandlerFunc {
+	type prefsOut struct {
+		GradePosted       bool `json:"gradePosted"`
+		MissingAssignment bool `json:"missingAssignment"`
+		LowGradeThreshold *int `json:"lowGradeThreshold"`
+		AttendanceEvent   bool `json:"attendanceEvent"`
+	}
+	loadPrefs := func(ctx context.Context, parentID uuid.UUID) (*prefsOut, error) {
+		row := d.Pool.QueryRow(ctx, `
+SELECT grade_posted, missing_assignment, low_grade_threshold, attendance_event
+FROM "user".parent_notification_prefs
+WHERE parent_id = $1
+`, parentID)
+		var p prefsOut
+		if err := row.Scan(&p.GradePosted, &p.MissingAssignment, &p.LowGradeThreshold, &p.AttendanceEvent); err != nil {
+			t := 70
+			return &prefsOut{GradePosted: true, MissingAssignment: true, LowGradeThreshold: &t, AttendanceEvent: false}, nil
+		}
+		return &p, nil
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		parentID, _, ok := d.requireParentViewer(w, r)
+		if !ok {
+			return
+		}
+		switch r.Method {
+		case http.MethodGet:
+			p, err := loadPrefs(r.Context(), parentID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load notification prefs.")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(p)
+		case http.MethodPatch:
+			var body struct {
+				GradePosted       *bool `json:"gradePosted"`
+				MissingAssignment *bool `json:"missingAssignment"`
+				LowGradeThreshold *int  `json:"lowGradeThreshold"`
+				ClearThreshold    bool  `json:"clearThreshold"`
+				AttendanceEvent   *bool `json:"attendanceEvent"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+				return
+			}
+			if body.LowGradeThreshold != nil && (*body.LowGradeThreshold < 0 || *body.LowGradeThreshold > 100) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "lowGradeThreshold must be 0–100.")
+				return
+			}
+			_, err := d.Pool.Exec(r.Context(), `
+INSERT INTO "user".parent_notification_prefs (parent_id)
+VALUES ($1)
+ON CONFLICT (parent_id) DO NOTHING
+`, parentID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to init prefs.")
+				return
+			}
+			if body.GradePosted != nil {
+				if _, err := d.Pool.Exec(r.Context(), `UPDATE "user".parent_notification_prefs SET grade_posted=$1, updated_at=now() WHERE parent_id=$2`, *body.GradePosted, parentID); err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update prefs.")
+					return
+				}
+			}
+			if body.MissingAssignment != nil {
+				if _, err := d.Pool.Exec(r.Context(), `UPDATE "user".parent_notification_prefs SET missing_assignment=$1, updated_at=now() WHERE parent_id=$2`, *body.MissingAssignment, parentID); err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update prefs.")
+					return
+				}
+			}
+			if body.ClearThreshold {
+				if _, err := d.Pool.Exec(r.Context(), `UPDATE "user".parent_notification_prefs SET low_grade_threshold=NULL, updated_at=now() WHERE parent_id=$1`, parentID); err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update prefs.")
+					return
+				}
+			} else if body.LowGradeThreshold != nil {
+				if _, err := d.Pool.Exec(r.Context(), `UPDATE "user".parent_notification_prefs SET low_grade_threshold=$1, updated_at=now() WHERE parent_id=$2`, *body.LowGradeThreshold, parentID); err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update prefs.")
+					return
+				}
+			}
+			if body.AttendanceEvent != nil {
+				if _, err := d.Pool.Exec(r.Context(), `UPDATE "user".parent_notification_prefs SET attendance_event=$1, updated_at=now() WHERE parent_id=$2`, *body.AttendanceEvent, parentID); err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update prefs.")
+					return
+				}
+			}
+			p, err := loadPrefs(r.Context(), parentID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load prefs.")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(p)
+		default:
+			w.Header().Set("Allow", http.MethodGet+","+http.MethodPatch)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		}
+	}
+}
+
 func (d Deps) registerParentRoutes(r chi.Router) {
 	r.Get("/api/v1/parent/children", d.handleParentChildren())
 	r.Get("/api/v1/parent/students/{sid}/courses", d.handleParentStudentCourses())
 	r.Get("/api/v1/parent/students/{sid}/grades", d.handleParentStudentGrades())
 	r.Get("/api/v1/parent/students/{sid}/assignments", d.handleParentStudentAssignments())
+	r.Get("/api/v1/parent/weekly-summary", d.handleParentWeeklySummary())
+	r.Method(http.MethodGet, "/api/v1/parent/notification-prefs", d.handleParentNotificationPrefs())
+	r.Method(http.MethodPatch, "/api/v1/parent/notification-prefs", d.handleParentNotificationPrefs())
 }
