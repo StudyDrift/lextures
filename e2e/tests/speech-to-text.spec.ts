@@ -2,7 +2,7 @@
  * Speech-to-text input — plan 12.9
  */
 import AxeBuilder from '@axe-core/playwright'
-import { test, expect } from '../fixtures/test.js'
+import { test, expect, injectToken } from '../fixtures/test.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
@@ -19,6 +19,94 @@ async function enableSpeechToText(token: string): Promise<void> {
     }),
   })
   expect(res.ok).toBe(true)
+}
+
+async function seedShortAnswerQuiz(
+  instructorToken: string,
+  courseCode: string,
+  moduleId: string,
+): Promise<string> {
+  const createRes = await fetch(
+    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/quizzes`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${instructorToken}` },
+      body: JSON.stringify({ title: 'E2E STT Quiz' }),
+    },
+  )
+  expect(createRes.ok).toBe(true)
+  const created = (await createRes.json()) as { id: string }
+  const patchRes = await fetch(
+    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(created.id)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${instructorToken}` },
+      body: JSON.stringify({
+        questions: [
+          {
+            id: crypto.randomUUID(),
+            prompt: 'Describe photosynthesis in one sentence.',
+            questionType: 'short_answer',
+            choices: [],
+            correctChoiceIndex: null,
+            multipleAnswer: false,
+            answerWithImage: false,
+            required: true,
+            points: 1,
+            estimatedMinutes: 2,
+          },
+        ],
+      }),
+    },
+  )
+  expect(patchRes.ok).toBe(true)
+  return created.id
+}
+
+function installSpeechRecognitionMock(page: import('@playwright/test').Page, withFinalResult = false) {
+  return page.addInitScript((emitFinal) => {
+    class MockSpeechRecognition {
+      continuous = false
+      interimResults = true
+      lang = 'en-US'
+      maxAlternatives = 1
+      onstart: (() => void) | null = null
+      onend: (() => void) | null = null
+      onerror: ((event: { error: string }) => void) | null = null
+      onresult:
+        | ((event: {
+            resultIndex: number
+            results: Array<{ isFinal: boolean; 0: { transcript: string } }>
+          }) => void)
+        | null = null
+      start() {
+        this.onstart?.()
+        if (emitFinal) {
+          queueMicrotask(() => {
+            this.onresult?.({
+              resultIndex: 0,
+              results: [{ isFinal: true, 0: { transcript: 'Hello world' } }],
+            })
+            this.onend?.()
+          })
+        }
+      }
+      stop() {
+        this.onend?.()
+      }
+      abort() {}
+    }
+    // @ts-expect-error test mock
+    window.SpeechRecognition = MockSpeechRecognition
+    // @ts-expect-error test mock
+    window.webkitSpeechRecognition = MockSpeechRecognition
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
+      },
+    })
+  }, withFinalResult)
 }
 
 test.describe('Speech-to-text API', () => {
@@ -81,98 +169,39 @@ test.describe('Speech-to-text UI', () => {
     await enableSpeechToText(seededCourse.instructorToken)
   })
 
-  test('dictation inserts text into quiz short-answer field', async ({ page, seededCourse, injectToken }) => {
+  test('dictation inserts text into quiz short-answer field', async ({ page, seededCourse }) => {
+    const itemId = await seedShortAnswerQuiz(
+      seededCourse.instructorToken,
+      seededCourse.courseCode,
+      seededCourse.moduleId,
+    )
+    await installSpeechRecognitionMock(page, true)
     await injectToken(page, seededCourse.studentToken)
 
-    await page.addInitScript(() => {
-      class MockSpeechRecognition {
-        continuous = false
-        interimResults = true
-        lang = 'en-US'
-        maxAlternatives = 1
-        onstart: (() => void) | null = null
-        onend: (() => void) | null = null
-        onerror: ((event: { error: string }) => void) | null = null
-        onresult:
-          | ((event: {
-              resultIndex: number
-              results: Array<{ isFinal: boolean; 0: { transcript: string } }>
-            }) => void)
-          | null = null
-        start() {
-          this.onstart?.()
-          queueMicrotask(() => {
-            this.onresult?.({
-              resultIndex: 0,
-              results: [{ isFinal: true, 0: { transcript: 'Hello world' } }],
-            })
-            this.onend?.()
-          })
-        }
-        stop() {
-          this.onend?.()
-        }
-        abort() {}
-      }
-      // @ts-expect-error test mock
-      window.SpeechRecognition = MockSpeechRecognition
-      // @ts-expect-error test mock
-      window.webkitSpeechRecognition = MockSpeechRecognition
-      Object.defineProperty(navigator, 'mediaDevices', {
-        configurable: true,
-        value: {
-          getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
-        },
-      })
-    })
+    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules/quiz/${itemId}`)
+    await page.getByRole('button', { name: /start quiz/i }).click()
 
-    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules`)
-    await page.getByRole('link', { name: /quiz/i }).first().click()
-    await page.getByRole('button', { name: /take quiz|start/i }).first().click()
-
-    const dictationBtn = page.getByRole('button', { name: 'Start dictation' }).first()
+    const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
     await dictationBtn.click()
 
-    const answer = page.getByPlaceholder('Your answer').first()
+    const answer = page.getByPlaceholder('Your answer')
     await expect(answer).toHaveValue(/Hello world/, { timeout: 10_000 })
   })
 
-  test('dictation button passes axe when visible', async ({ page, seededCourse, injectToken }) => {
+  test('dictation button passes axe when visible', async ({ page, seededCourse }) => {
+    const itemId = await seedShortAnswerQuiz(
+      seededCourse.instructorToken,
+      seededCourse.courseCode,
+      seededCourse.moduleId,
+    )
+    await installSpeechRecognitionMock(page, false)
     await injectToken(page, seededCourse.studentToken)
-    await page.addInitScript(() => {
-      class MockSpeechRecognition {
-        continuous = false
-        interimResults = true
-        lang = 'en-US'
-        maxAlternatives = 1
-        onstart: (() => void) | null = null
-        onend: (() => void) | null = null
-        onerror: ((event: { error: string }) => void) | null = null
-        onresult: (() => void) | null = null
-        start() {
-          this.onstart?.()
-        }
-        stop() {
-          this.onend?.()
-        }
-        abort() {}
-      }
-      // @ts-expect-error test mock
-      window.SpeechRecognition = MockSpeechRecognition
-      Object.defineProperty(navigator, 'mediaDevices', {
-        configurable: true,
-        value: {
-          getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
-        },
-      })
-    })
 
-    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules`)
-    await page.getByRole('link', { name: /quiz/i }).first().click()
-    await page.getByRole('button', { name: /take quiz|start/i }).first().click()
+    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules/quiz/${itemId}`)
+    await page.getByRole('button', { name: /start quiz/i }).click()
 
-    const dictationBtn = page.getByRole('button', { name: 'Start dictation' }).first()
+    const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
 
     const results = await new AxeBuilder({ page }).include('main').analyze()
