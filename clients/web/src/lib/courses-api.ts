@@ -5522,6 +5522,72 @@ export async function fetchCourseAtRisk(
   }
 }
 
+export type AtRiskCourseConfig = {
+  threshold: number
+  weightMissing: number
+  weightQuiz: number
+  weightInactive: number
+  weightTrend: number
+  quizAvgThreshold: number
+  inactiveDaysThreshold: number
+  missingPctThreshold: number
+  courseOverride: boolean
+}
+
+function mapAtRiskConfig(raw: unknown): AtRiskCourseConfig {
+  const r = raw as Record<string, unknown>
+  return {
+    threshold: Number(r.threshold ?? 60),
+    weightMissing: Number(r.weightMissing ?? 0.35),
+    weightQuiz: Number(r.weightQuiz ?? 0.25),
+    weightInactive: Number(r.weightInactive ?? 0.25),
+    weightTrend: Number(r.weightTrend ?? 0.15),
+    quizAvgThreshold: Number(r.quizAvgThreshold ?? 60),
+    inactiveDaysThreshold: Number(r.inactiveDaysThreshold ?? 7),
+    missingPctThreshold: Number(r.missingPctThreshold ?? 100),
+    courseOverride: r.courseOverride === true,
+  }
+}
+
+export async function fetchCourseAtRiskConfig(courseCode: string): Promise<AtRiskCourseConfig> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/at-risk/config`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return mapAtRiskConfig(raw)
+}
+
+export async function saveCourseAtRiskConfig(
+  courseCode: string,
+  config: Omit<AtRiskCourseConfig, 'courseOverride'>,
+): Promise<AtRiskCourseConfig> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/at-risk/config`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return mapAtRiskConfig(raw)
+}
+
+export async function runCourseAtRiskScoring(
+  courseCode: string,
+): Promise<{ enrollmentsScored: number }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/at-risk/run`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = raw as { enrollmentsScored?: number }
+  return { enrollmentsScored: Number(body.enrollmentsScored ?? 0) }
+}
+
 export async function patchCourseAtRiskAlert(
   courseCode: string,
   alertId: string,

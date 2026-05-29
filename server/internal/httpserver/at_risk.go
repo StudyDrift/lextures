@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/atrisk"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/service/atriskscoring"
 )
 
@@ -50,6 +51,44 @@ func (d Deps) requireAtRiskInstructor(w http.ResponseWriter, r *http.Request) (s
 		return "", uuid.UUID{}, uuid.UUID{}, false
 	}
 	return courseCode, viewer, *cid, true
+}
+
+// authorizeAtRiskRun allows global admins, or instructors with gradebook:view when courseCode is set.
+func (d Deps) authorizeAtRiskRun(w http.ResponseWriter, r *http.Request, courseCode *string) bool {
+	uid, ok := d.meUserID(w, r)
+	if !ok {
+		return false
+	}
+	if !d.atRiskFeatureEnabled(w) {
+		return false
+	}
+	ctx := r.Context()
+	isAdmin, err := rbac.UserHasPermission(ctx, d.Pool, uid, permGlobalRBACManage)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return false
+	}
+	if isAdmin {
+		return true
+	}
+	cc := ""
+	if courseCode != nil {
+		cc = strings.TrimSpace(*courseCode)
+	}
+	if cc == "" {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+		return false
+	}
+	has, err := courseroles.UserHasPermission(ctx, d.Pool, uid, "course:"+cc+":gradebook:view")
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return false
+	}
+	if !has {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+		return false
+	}
+	return true
 }
 
 type atRiskAlertJSON struct {
@@ -286,6 +325,141 @@ SELECT EXISTS (SELECT 1 FROM course.course_enrollments WHERE id = $1 AND course_
 	}
 }
 
+func atRiskConfigJSON(cfg atrisk.Config, courseOverride bool) map[string]any {
+	return map[string]any{
+		"threshold":             cfg.Threshold,
+		"weightMissing":         cfg.WeightMissing,
+		"weightQuiz":            cfg.WeightQuiz,
+		"weightInactive":        cfg.WeightInactive,
+		"weightTrend":           cfg.WeightTrend,
+		"quizAvgThreshold":      cfg.QuizAvgThreshold,
+		"inactiveDaysThreshold": cfg.InactiveDaysThreshold,
+		"missingPctThreshold":   cfg.MissingPctThreshold,
+		"courseOverride":        courseOverride,
+	}
+}
+
+type atRiskConfigBody struct {
+	Threshold             *float32 `json:"threshold"`
+	WeightMissing         *float32 `json:"weightMissing"`
+	WeightQuiz            *float32 `json:"weightQuiz"`
+	WeightInactive        *float32 `json:"weightInactive"`
+	WeightTrend           *float32 `json:"weightTrend"`
+	QuizAvgThreshold      *float32 `json:"quizAvgThreshold"`
+	InactiveDaysThreshold *int     `json:"inactiveDaysThreshold"`
+	MissingPctThreshold   *float32 `json:"missingPctThreshold"`
+}
+
+func mergeAtRiskConfigBody(base atrisk.Config, b atRiskConfigBody) atrisk.Config {
+	if b.Threshold != nil {
+		base.Threshold = *b.Threshold
+	}
+	if b.WeightMissing != nil {
+		base.WeightMissing = *b.WeightMissing
+	}
+	if b.WeightQuiz != nil {
+		base.WeightQuiz = *b.WeightQuiz
+	}
+	if b.WeightInactive != nil {
+		base.WeightInactive = *b.WeightInactive
+	}
+	if b.WeightTrend != nil {
+		base.WeightTrend = *b.WeightTrend
+	}
+	if b.QuizAvgThreshold != nil {
+		base.QuizAvgThreshold = *b.QuizAvgThreshold
+	}
+	if b.InactiveDaysThreshold != nil {
+		base.InactiveDaysThreshold = *b.InactiveDaysThreshold
+	}
+	if b.MissingPctThreshold != nil {
+		base.MissingPctThreshold = *b.MissingPctThreshold
+	}
+	return base
+}
+
+// handleCourseAtRiskConfigGet is GET /api/v1/courses/{course_code}/at-risk/config
+func (d Deps) handleCourseAtRiskConfigGet() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
+		if !ok {
+			return
+		}
+		cfg, courseOverride, err := atrisk.LoadEffectiveForCourse(r.Context(), d.Pool, courseID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load config.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(atRiskConfigJSON(cfg, courseOverride))
+	}
+}
+
+// handleCourseAtRiskConfigPut is PUT /api/v1/courses/{course_code}/at-risk/config
+func (d Deps) handleCourseAtRiskConfigPut() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			w.Header().Set("Allow", http.MethodPut)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		_, _, courseID, ok := d.requireAtRiskInstructor(w, r)
+		if !ok {
+			return
+		}
+		var body atRiskConfigBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		cfg, _, err := atrisk.LoadEffectiveForCourse(r.Context(), d.Pool, courseID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load config.")
+			return
+		}
+		cfg = mergeAtRiskConfigBody(cfg, body)
+		if err := atrisk.ValidateConfig(cfg); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			return
+		}
+		if err := atrisk.UpsertCourse(r.Context(), d.Pool, courseID, cfg); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save config.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(atRiskConfigJSON(cfg, true))
+	}
+}
+
+// handleCourseAtRiskRun is POST /api/v1/courses/{course_code}/at-risk/run
+func (d Deps) handleCourseAtRiskRun() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		_, _, cid, ok := d.requireAtRiskInstructor(w, r)
+		if !ok {
+			return
+		}
+		day := time.Now().UTC()
+		cfg := d.effectiveConfig()
+		n, err := background.RunAtRiskForCourse(r.Context(), d.Pool, cfg, cid, day)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Scoring job failed.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"enrollmentsScored": n})
+	}
+}
+
 // handleAdminAtRiskRun is POST /api/v1/admin/at-risk/run
 func (d Deps) handleAdminAtRiskRun() http.HandlerFunc {
 	type reqBody struct {
@@ -297,17 +471,14 @@ func (d Deps) handleAdminAtRiskRun() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if _, ok := d.adminRbacUser(w, r); !ok {
-			return
-		}
-		if !d.atRiskFeatureEnabled(w) {
-			return
-		}
 		var body reqBody
 		b, _ := io.ReadAll(r.Body)
 		_ = r.Body.Close()
 		if len(b) > 0 {
 			_ = json.Unmarshal(b, &body)
+		}
+		if !d.authorizeAtRiskRun(w, r, body.CourseCode) {
+			return
 		}
 		day := time.Now().UTC()
 		cfg := d.effectiveConfig()
@@ -377,13 +548,15 @@ SELECT id FROM tenant.organizations ORDER BY created_at LIMIT 1
 
 func (d Deps) handleAdminAtRiskConfigPut() http.HandlerFunc {
 	type body struct {
-		InstitutionID    *string  `json:"institutionId"`
-		Threshold        *float32 `json:"threshold"`
-		WeightMissing    *float32 `json:"weightMissing"`
-		WeightQuiz       *float32 `json:"weightQuiz"`
-		WeightInactive   *float32 `json:"weightInactive"`
-		WeightTrend      *float32 `json:"weightTrend"`
-		QuizAvgThreshold *float32 `json:"quizAvgThreshold"`
+		InstitutionID         *string  `json:"institutionId"`
+		Threshold             *float32 `json:"threshold"`
+		WeightMissing         *float32 `json:"weightMissing"`
+		WeightQuiz            *float32 `json:"weightQuiz"`
+		WeightInactive        *float32 `json:"weightInactive"`
+		WeightTrend           *float32 `json:"weightTrend"`
+		QuizAvgThreshold      *float32 `json:"quizAvgThreshold"`
+		InactiveDaysThreshold *int     `json:"inactiveDaysThreshold"`
+		MissingPctThreshold   *float32 `json:"missingPctThreshold"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPut {
@@ -418,27 +591,18 @@ func (d Deps) handleAdminAtRiskConfigPut() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load config.")
 			return
 		}
-		if b.Threshold != nil {
-			cfg.Threshold = *b.Threshold
-		}
-		if b.WeightMissing != nil {
-			cfg.WeightMissing = *b.WeightMissing
-		}
-		if b.WeightQuiz != nil {
-			cfg.WeightQuiz = *b.WeightQuiz
-		}
-		if b.WeightInactive != nil {
-			cfg.WeightInactive = *b.WeightInactive
-		}
-		if b.WeightTrend != nil {
-			cfg.WeightTrend = *b.WeightTrend
-		}
-		if b.QuizAvgThreshold != nil {
-			cfg.QuizAvgThreshold = *b.QuizAvgThreshold
-		}
-		sum := cfg.WeightMissing + cfg.WeightQuiz + cfg.WeightInactive + cfg.WeightTrend
-		if sum < 0.999 || sum > 1.001 {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Weights must sum to 1.")
+		cfg = mergeAtRiskConfigBody(cfg, atRiskConfigBody{
+			Threshold:             b.Threshold,
+			WeightMissing:         b.WeightMissing,
+			WeightQuiz:            b.WeightQuiz,
+			WeightInactive:        b.WeightInactive,
+			WeightTrend:           b.WeightTrend,
+			QuizAvgThreshold:      b.QuizAvgThreshold,
+			InactiveDaysThreshold: b.InactiveDaysThreshold,
+			MissingPctThreshold:   b.MissingPctThreshold,
+		})
+		if err := atrisk.ValidateConfig(cfg); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
 		if err := atrisk.Upsert(r.Context(), d.Pool, cfg); err != nil {
@@ -451,13 +615,7 @@ func (d Deps) handleAdminAtRiskConfigPut() http.HandlerFunc {
 }
 
 func adminAtRiskConfigJSON(cfg atrisk.Config) map[string]any {
-	return map[string]any{
-		"institutionId":    cfg.OrgID.String(),
-		"threshold":        cfg.Threshold,
-		"weightMissing":    cfg.WeightMissing,
-		"weightQuiz":       cfg.WeightQuiz,
-		"weightInactive":   cfg.WeightInactive,
-		"weightTrend":      cfg.WeightTrend,
-		"quizAvgThreshold": cfg.QuizAvgThreshold,
-	}
+	out := atRiskConfigJSON(cfg, false)
+	out["institutionId"] = cfg.OrgID.String()
+	return out
 }

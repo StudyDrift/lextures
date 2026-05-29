@@ -1,14 +1,30 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { AlertTriangle, ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react'
-import { atRiskI18n, atRiskFeatureEnabled } from '../../lib/at-risk-i18n'
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  RefreshCw,
+  Users,
+} from 'lucide-react'
+import {
+  AtRiskRunConfigDialog,
+  type AtRiskConfigForm,
+} from '../../components/at-risk/at-risk-run-config-dialog'
+import { AtRiskReportRunningOverlay } from '../../components/at-risk/at-risk-report-running-overlay'
+import { atRiskI18n } from '../../lib/at-risk-i18n'
 import {
   courseGradebookViewPermission,
   fetchCourseAtRisk,
   patchCourseAtRiskAlert,
+  runCourseAtRiskScoring,
+  saveCourseAtRiskConfig,
   type AtRiskAlert,
 } from '../../lib/courses-api'
 import { usePermissions } from '../../context/use-permissions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 
 function scoreSeverity(score: number): 'moderate' | 'high' {
@@ -191,36 +207,132 @@ function AlertRow({
   )
 }
 
+const REPORT_LOADER_MIN_MS = 1000
+
+function AtRiskEmptyState({
+  afterReport,
+  onRunReport,
+}: {
+  afterReport: boolean
+  onRunReport: () => void
+}) {
+  if (afterReport) {
+    return (
+      <div
+        className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-6 py-12 text-center dark:border-emerald-900/40 dark:bg-emerald-950/30"
+        role="status"
+      >
+        <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600 dark:text-emerald-400" aria-hidden />
+        <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-neutral-100">
+          {atRiskI18n.emptyAfterReportTitle}
+        </p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-neutral-400">
+          {atRiskI18n.emptyAfterReportDescription}
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 px-6 py-12 text-center dark:border-neutral-700 dark:bg-neutral-900"
+      role="status"
+    >
+      <Users className="mx-auto h-12 w-12 text-indigo-500 dark:text-indigo-400" aria-hidden />
+      <p className="mt-4 text-lg font-semibold text-slate-900 dark:text-neutral-100">
+        {atRiskI18n.emptyInitialTitle}
+      </p>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-600 dark:text-neutral-400">
+        {atRiskI18n.emptyInitialDescription}
+      </p>
+      <button
+        type="button"
+        onClick={onRunReport}
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+      >
+        <RefreshCw className="h-4 w-4" aria-hidden />
+        {atRiskI18n.emptyRunReportCta}
+      </button>
+    </div>
+  )
+}
+
 export default function CourseAtRiskPage() {
   const { courseCode = '' } = useParams()
+  const { atRiskAlertsEnabled, loading: featuresLoading } = usePlatformFeatures()
   const { allows, loading: permLoading } = usePermissions()
-  const canView = !permLoading && allows(courseGradebookViewPermission(courseCode))
+  const canView = allows(courseGradebookViewPermission(courseCode))
   const [alerts, setAlerts] = useState<AtRiskAlert[]>([])
   const [resolved, setResolved] = useState<AtRiskAlert[]>([])
   const [resolvedOpen, setResolvedOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [configOpen, setConfigOpen] = useState(false)
+  const [reportRunning, setReportRunning] = useState(false)
+  const [hasRunReport, setHasRunReport] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    if (!courseCode || !atRiskFeatureEnabled()) return
+    if (!courseCode || !atRiskAlertsEnabled) return
     setLoading(true)
     setError(null)
     try {
       const data = await fetchCourseAtRisk(courseCode, true)
       setAlerts(data.alerts)
       setResolved(data.resolved)
+      if (data.alerts.length > 0 || data.resolved.length > 0) {
+        setHasRunReport(true)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load at-risk alerts')
     } finally {
       setLoading(false)
     }
-  }, [courseCode])
+  }, [courseCode, atRiskAlertsEnabled])
 
   useEffect(() => {
+    if (featuresLoading || !atRiskAlertsEnabled || permLoading || !canView) return
     void load()
-  }, [load])
+  }, [load, featuresLoading, atRiskAlertsEnabled, permLoading, canView])
 
-  if (!atRiskFeatureEnabled()) {
+  const handleRunReport = useCallback(
+    async (form: AtRiskConfigForm) => {
+      if (!courseCode) return
+      setConfigOpen(false)
+      setReportRunning(true)
+      setError(null)
+      const started = Date.now()
+      try {
+        await saveCourseAtRiskConfig(courseCode, form)
+        await runCourseAtRiskScoring(courseCode)
+        const data = await fetchCourseAtRisk(courseCode, true)
+        setAlerts(data.alerts)
+        setResolved(data.resolved)
+        setHasRunReport(true)
+      } catch (e) {
+        setError(e instanceof Error ? e.message : atRiskI18n.runScoringFailed)
+        throw e
+      } finally {
+        const remaining = REPORT_LOADER_MIN_MS - (Date.now() - started)
+        if (remaining > 0) {
+          await new Promise<void>((resolve) => {
+            window.setTimeout(resolve, remaining)
+          })
+        }
+        setReportRunning(false)
+      }
+    },
+    [courseCode],
+  )
+
+  if (featuresLoading || permLoading) {
+    return (
+      <LmsPage title={atRiskI18n.title}>
+        <p className="text-slate-600 dark:text-neutral-400">Loading…</p>
+      </LmsPage>
+    )
+  }
+
+  if (!atRiskAlertsEnabled) {
     return (
       <LmsPage title={atRiskI18n.title}>
         <p className="text-slate-600 dark:text-neutral-400">At-risk alerts are not enabled.</p>
@@ -237,13 +349,43 @@ export default function CourseAtRiskPage() {
   }
 
   return (
-    <LmsPage title={atRiskI18n.title}>
-      {loading && <p className="text-slate-600">Loading…</p>}
-      {error && <p className="text-red-600">{error}</p>}
-      {!loading && !error && alerts.length === 0 && (
-        <p className="text-slate-600 dark:text-neutral-400">{atRiskI18n.empty}</p>
+    <LmsPage
+      title={atRiskI18n.title}
+      actions={
+        <button
+          type="button"
+          onClick={() => setConfigOpen(true)}
+          disabled={loading || reportRunning}
+          aria-label={atRiskI18n.runScoring}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+        >
+          <RefreshCw className="h-4 w-4" aria-hidden />
+          {atRiskI18n.runScoring}
+        </button>
+      }
+    >
+      <AtRiskReportRunningOverlay open={reportRunning} />
+      <AtRiskRunConfigDialog
+        open={configOpen}
+        courseCode={courseCode}
+        onClose={() => setConfigOpen(false)}
+        onRunReport={handleRunReport}
+      />
+      {loading && !reportRunning && (
+        <p className="text-slate-600 dark:text-neutral-400">Loading…</p>
       )}
-      {!loading && alerts.length > 0 && (
+      {error && (
+        <p
+          className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-100"
+          role="alert"
+        >
+          {error}
+        </p>
+      )}
+      {!loading && !reportRunning && !error && alerts.length === 0 && (
+        <AtRiskEmptyState afterReport={hasRunReport} onRunReport={() => setConfigOpen(true)} />
+      )}
+      {!loading && !reportRunning && alerts.length > 0 && (
         <ul role="list" className="flex flex-col gap-3">
           {alerts.map((a) => (
             <AlertRow key={a.id} alert={a} courseCode={courseCode} onUpdated={() => void load()} />
