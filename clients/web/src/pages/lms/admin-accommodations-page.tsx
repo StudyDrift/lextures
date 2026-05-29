@@ -1,12 +1,16 @@
-import { useCallback, useId, useState, type FormEvent } from 'react'
+import { useCallback, useId, useRef, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { ConfirmDialog } from '../../components/confirm-dialog'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   createStudentAccommodation,
   deleteStudentAccommodation,
   fetchStudentAccommodationsForUser,
+  importAccommodationsCSV,
   searchAccommodationUsers,
   type AccommodationUserSearchHit,
+  type AccommodationCsvImportSummary,
   type CreateStudentAccommodationBody,
   type StudentAccommodationRecord,
 } from '../../lib/courses-api'
@@ -25,8 +29,11 @@ function formatLearnerLabel(u: AccommodationUserSearchHit): string {
 
 export default function AdminAccommodationsPage() {
   const formId = useId()
+  const csvInputId = useId()
   const { allows, loading: permLoading } = usePermissions()
+  const { accommodationsEngineEnabled } = usePlatformFeatures()
   const canManage = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
+  const csvInputRef = useRef<HTMLInputElement>(null)
 
   const [searchInput, setSearchInput] = useState('')
   const [searchHits, setSearchHits] = useState<AccommodationUserSearchHit[]>([])
@@ -43,7 +50,16 @@ export default function AdminAccommodationsPage() {
   const [extraAttempts, setExtraAttempts] = useState('0')
   const [hintsAlways, setHintsAlways] = useState(false)
   const [reduced, setReduced] = useState(false)
+  const [speechToText, setSpeechToText] = useState(false)
+  const [tts, setTts] = useState(false)
+  const [dyslexiaDisplay, setDyslexiaDisplay] = useState(false)
+  const [highContrast, setHighContrast] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const [separateSetting, setSeparateSetting] = useState(false)
   const [altFormat, setAltFormat] = useState('')
+  const [csvBusy, setCsvBusy] = useState(false)
+  const [csvError, setCsvError] = useState<string | null>(null)
+  const [csvSummary, setCsvSummary] = useState<AccommodationCsvImportSummary | null>(null)
   const [effectiveFrom, setEffectiveFrom] = useState('')
   const [effectiveUntil, setEffectiveUntil] = useState('')
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -132,6 +148,12 @@ export default function AdminAccommodationsPage() {
         extraAttempts: ex,
         hintsAlwaysEnabled: hintsAlways,
         reducedDistractionMode: reduced,
+        speechToTextEnabled: speechToText,
+        ttsEnabled: tts,
+        dyslexiaDisplayEnabled: dyslexiaDisplay,
+        highContrastEnabled: highContrast,
+        reducedMotionEnabled: reducedMotion,
+        separateSetting,
         alternativeFormat: altFormat.trim() || null,
         effectiveFrom: effectiveFrom.trim() || null,
         effectiveUntil: effectiveUntil.trim() || null,
@@ -177,6 +199,22 @@ export default function AdminAccommodationsPage() {
     )
   }
 
+  async function onCsvImport(file: File) {
+    setCsvBusy(true)
+    setCsvError(null)
+    setCsvSummary(null)
+    try {
+      const summary = await importAccommodationsCSV(file)
+      setCsvSummary(summary)
+      if (selectedUser) await loadList()
+    } catch (err) {
+      setCsvError(err instanceof Error ? err.message : 'CSV import failed.')
+    } finally {
+      setCsvBusy(false)
+      if (csvInputRef.current) csvInputRef.current.value = ''
+    }
+  }
+
   return (
     <LmsPage title="Student accommodations">
       <div className="max-w-3xl space-y-6">
@@ -184,6 +222,16 @@ export default function AdminAccommodationsPage() {
           Create operational accommodation settings per learner. Course-scoped records override global
           (all courses) settings. This page does not store disability documentation.
         </p>
+        {accommodationsEngineEnabled && (
+          <p className="text-sm">
+            <Link
+              to="/admin/accommodations/audit"
+              className="font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+            >
+              View accommodation audit report →
+            </Link>
+          </p>
+        )}
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
           <label
@@ -221,7 +269,11 @@ export default function AdminAccommodationsPage() {
               {searchBusy ? 'Searching…' : 'Search'}
             </button>
           </div>
-          {searchError && <p className="mt-2 text-sm text-rose-700 dark:text-rose-300">{searchError}</p>}
+          {searchError && (
+            <p role="alert" className="mt-2 text-sm text-rose-700 dark:text-rose-300">
+              {searchError}
+            </p>
+          )}
 
           {searchHits.length > 0 && (
             <ul className="mt-3 max-h-60 space-y-1 overflow-y-auto rounded-lg border border-slate-200 dark:border-neutral-700">
@@ -276,8 +328,63 @@ export default function AdminAccommodationsPage() {
               {listBusy ? 'Loading…' : 'Load accommodation records'}
             </button>
           </div>
-          {listError && <p className="mt-2 text-sm text-rose-700 dark:text-rose-300">{listError}</p>}
+          {listError && (
+            <p role="alert" className="mt-2 text-sm text-rose-700 dark:text-rose-300">
+              {listError}
+            </p>
+          )}
         </div>
+
+        {accommodationsEngineEnabled && (
+          <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Bulk CSV import</h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
+              Required columns: <code className="font-mono">student_external_id</code>,{' '}
+              <code className="font-mono">accommodation_type</code>, <code className="font-mono">value</code>.
+              External id may be email or campus SID.
+            </p>
+            <div className="mt-3">
+              <label htmlFor={csvInputId} className="sr-only">
+                Accommodation CSV file
+              </label>
+              <input
+                id={csvInputId}
+                ref={csvInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                disabled={csvBusy}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]
+                  if (f) void onCsvImport(f)
+                }}
+                className="block w-full text-sm text-slate-700 file:me-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold dark:text-neutral-300 dark:file:bg-neutral-800"
+              />
+            </div>
+            {csvError && (
+              <p role="alert" className="mt-2 text-sm text-rose-700 dark:text-rose-300">
+                {csvError}
+              </p>
+            )}
+            {csvSummary && (
+              <p className="mt-2 text-sm text-slate-700 dark:text-neutral-300">
+                Created {csvSummary.created}, updated {csvSummary.updated}
+                {csvSummary.errors.length > 0
+                  ? `; ${csvSummary.errors.length} row error(s).`
+                  : '.'}
+              </p>
+            )}
+            {csvSummary && csvSummary.errors.length > 0 && (
+              <ul
+                role="alert"
+                className="mt-2 max-h-32 list-inside list-disc overflow-y-auto text-xs text-rose-700 dark:text-rose-300"
+              >
+                {csvSummary.errors.slice(0, 20).map((err) => (
+                  <li key={err}>{err}</li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
         <form
           id={formId}
@@ -322,12 +429,78 @@ export default function AdminAccommodationsPage() {
             </div>
             <div className="flex flex-col gap-2 sm:col-span-2">
               <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
-                <input type="checkbox" checked={hintsAlways} onChange={(e) => setHintsAlways(e.target.checked)} />
-                Always allow hints (overrides lockdown for this learner)
+                <input
+                  id={`${formId}-hints`}
+                  type="checkbox"
+                  checked={hintsAlways}
+                  onChange={(e) => setHintsAlways(e.target.checked)}
+                />
+                <span id={`${formId}-hints-label`}>Always allow hints (overrides lockdown for this learner)</span>
               </label>
               <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
-                <input type="checkbox" checked={reduced} onChange={(e) => setReduced(e.target.checked)} />
-                Reduced-distraction quiz layout
+                <input
+                  id={`${formId}-reduced`}
+                  type="checkbox"
+                  checked={reduced}
+                  onChange={(e) => setReduced(e.target.checked)}
+                />
+                <span id={`${formId}-reduced-label`}>Reduced-distraction quiz layout</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <input
+                  id={`${formId}-stt`}
+                  type="checkbox"
+                  checked={speechToText}
+                  onChange={(e) => setSpeechToText(e.target.checked)}
+                />
+                <span id={`${formId}-stt-label`}>Speech-to-text dictation enabled</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <input
+                  id={`${formId}-tts`}
+                  type="checkbox"
+                  checked={tts}
+                  onChange={(e) => setTts(e.target.checked)}
+                />
+                <span id={`${formId}-tts-label`}>Text-to-speech read-aloud enabled</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <input
+                  id={`${formId}-dyslexia`}
+                  type="checkbox"
+                  checked={dyslexiaDisplay}
+                  onChange={(e) => setDyslexiaDisplay(e.target.checked)}
+                />
+                <span id={`${formId}-dyslexia-label`}>Dyslexia-friendly display preset</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <input
+                  id={`${formId}-contrast`}
+                  type="checkbox"
+                  checked={highContrast}
+                  onChange={(e) => setHighContrast(e.target.checked)}
+                />
+                <span id={`${formId}-contrast-label`}>High-contrast theme</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <input
+                  id={`${formId}-motion`}
+                  type="checkbox"
+                  checked={reducedMotion}
+                  onChange={(e) => setReducedMotion(e.target.checked)}
+                />
+                <span id={`${formId}-motion-label`}>Reduced motion</span>
+              </label>
+              <label className="inline-flex items-center gap-2 text-sm text-slate-800 dark:text-neutral-200">
+                <input
+                  id={`${formId}-separate`}
+                  type="checkbox"
+                  checked={separateSetting}
+                  onChange={(e) => setSeparateSetting(e.target.checked)}
+                />
+                <span id={`${formId}-separate-label`}>
+                  Separate testing environment (informational flag)
+                </span>
               </label>
             </div>
             <div className="sm:col-span-2">
@@ -362,7 +535,11 @@ export default function AdminAccommodationsPage() {
               />
             </div>
           </div>
-          {saveError && <p className="text-sm text-rose-700 dark:text-rose-300">{saveError}</p>}
+          {saveError && (
+            <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+              {saveError}
+            </p>
+          )}
           <button
             type="submit"
             disabled={saveBusy || !selectedUser}
@@ -394,7 +571,16 @@ export default function AdminAccommodationsPage() {
                     <td className="px-3 py-2 tabular-nums">{r.timeMultiplier}</td>
                     <td className="px-3 py-2 tabular-nums">{r.extraAttempts}</td>
                     <td className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
-                      {[r.hintsAlwaysEnabled && 'hints', r.reducedDistractionMode && 'reduced']
+                      {[
+                        r.hintsAlwaysEnabled && 'hints',
+                        r.reducedDistractionMode && 'reduced',
+                        r.speechToTextEnabled && 'stt',
+                        r.ttsEnabled && 'tts',
+                        r.dyslexiaDisplayEnabled && 'dyslexia',
+                        r.highContrastEnabled && 'contrast',
+                        r.reducedMotionEnabled && 'motion',
+                        r.separateSetting && 'separate',
+                      ]
                         .filter(Boolean)
                         .join(', ') || '—'}
                     </td>

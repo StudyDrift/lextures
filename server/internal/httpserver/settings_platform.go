@@ -90,8 +90,10 @@ type platformSettingsJSON struct {
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
 	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
-	SpeechToTextEnabled        bool `json:"speechToTextEnabled"`
-	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
+	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
+	AccommodationsEngineEnabled bool `json:"accommodationsEngineEnabled"`
+	FFAccommodationsEngine      bool `json:"ffAccommodationsEngine"`
+	TranslationMemoryEnabled    bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
@@ -220,8 +222,10 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
 			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
-			SpeechToTextEnabled:         merged.SpeechToTextEnabled,
-			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
+			SpeechToTextEnabled:          merged.SpeechToTextEnabled,
+			AccommodationsEngineEnabled:  merged.AccommodationsEngineEnabled,
+			FFAccommodationsEngine:       merged.FFAccommodationsEngine,
+			TranslationMemoryEnabled:     merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
@@ -323,8 +327,10 @@ type putPlatformBody struct {
 	ReadingLevelEnabled        *bool `json:"readingLevelEnabled"`
 	AltTextEnforcementEnabled  *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement       *bool `json:"ffAltTextEnforcement"`
-	SpeechToTextEnabled        *bool `json:"speechToTextEnabled"`
-	TranslationMemoryEnabled   *bool `json:"translationMemoryEnabled"`
+	SpeechToTextEnabled         *bool `json:"speechToTextEnabled"`
+	AccommodationsEngineEnabled *bool `json:"accommodationsEngineEnabled"`
+	FFAccommodationsEngine      *bool `json:"ffAccommodationsEngine"`
+	TranslationMemoryEnabled    *bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
@@ -587,6 +593,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
 		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
+		setBool("accommodationsengineenabled", body.AccommodationsEngineEnabled, func(v bool) { wr.AccommodationsEngineEnabled = &v })
+		setBool("ffaccommodationsengine", body.FFAccommodationsEngine, func(v bool) { wr.FFAccommodationsEngine = &v })
 		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
@@ -673,8 +681,10 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
 			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
-			SpeechToTextEnabled:         merged.SpeechToTextEnabled,
-			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
+			SpeechToTextEnabled:          merged.SpeechToTextEnabled,
+			AccommodationsEngineEnabled:  merged.AccommodationsEngineEnabled,
+			FFAccommodationsEngine:       merged.FFAccommodationsEngine,
+			TranslationMemoryEnabled:     merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,

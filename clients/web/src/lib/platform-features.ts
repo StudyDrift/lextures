@@ -15,6 +15,8 @@ export type PlatformFeaturesSnapshot = {
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
+  accommodationsEngineEnabled: boolean
+  ffAccommodationsEngine: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -41,6 +43,8 @@ const defaults: PlatformFeaturesSnapshot = {
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,
+  accommodationsEngineEnabled: false,
+  ffAccommodationsEngine: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -111,6 +115,14 @@ export function altTextHardBlockEnabled(): boolean {
 
 export function speechToTextFeatureEnabled(): boolean {
   return loaded && snapshot.speechToTextEnabled
+}
+
+export function accommodationsEngineFeatureEnabled(): boolean {
+  return loaded && snapshot.accommodationsEngineEnabled
+}
+
+export function ffAccommodationsEngineEnabled(): boolean {
+  return loaded && snapshot.ffAccommodationsEngine
 }
 
 export function translationMemoryFeatureEnabled(): boolean {

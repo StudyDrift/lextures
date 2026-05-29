@@ -66,6 +66,8 @@ type Row struct {
 	AltTextEnforcementEnabled  *bool
 	FFAltTextEnforcement       *bool
 	SpeechToTextEnabled        *bool
+	AccommodationsEngineEnabled *bool
+	FFAccommodationsEngine      *bool
 	TranslationMemoryEnabled   *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
@@ -147,6 +149,8 @@ type Write struct {
 	AltTextEnforcementEnabled  *bool
 	FFAltTextEnforcement       *bool
 	SpeechToTextEnabled        *bool
+	AccommodationsEngineEnabled *bool
+	FFAccommodationsEngine      *bool
 	TranslationMemoryEnabled   *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
@@ -226,6 +230,8 @@ SELECT
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
+	accommodations_engine_enabled,
+	ff_accommodations_engine,
 	translation_memory_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
@@ -300,6 +306,8 @@ WHERE id = 1
 		&r.AltTextEnforcementEnabled,
 		&r.FFAltTextEnforcement,
 		&r.SpeechToTextEnabled,
+		&r.AccommodationsEngineEnabled,
+		&r.FFAccommodationsEngine,
 		&r.TranslationMemoryEnabled,
 		&r.ReportExportEnabled,
 		&r.XAPIEmissionEnabled,
@@ -414,6 +422,8 @@ INSERT INTO settings.platform_app_settings (
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
+	accommodations_engine_enabled,
+	ff_accommodations_engine,
 	translation_memory_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
@@ -493,6 +503,8 @@ ON CONFLICT (id) DO UPDATE SET
 	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
 	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
 	speech_to_text_enabled = COALESCE(EXCLUDED.speech_to_text_enabled, settings.platform_app_settings.speech_to_text_enabled),
+	accommodations_engine_enabled = COALESCE(EXCLUDED.accommodations_engine_enabled, settings.platform_app_settings.accommodations_engine_enabled),
+	ff_accommodations_engine = COALESCE(EXCLUDED.ff_accommodations_engine, settings.platform_app_settings.ff_accommodations_engine),
 	translation_memory_enabled = COALESCE(EXCLUDED.translation_memory_enabled, settings.platform_app_settings.translation_memory_enabled),
 	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
 	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
@@ -565,6 +577,8 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AltTextEnforcementEnabled,
 		w.FFAltTextEnforcement,
 		w.SpeechToTextEnabled,
+		w.AccommodationsEngineEnabled,
+		w.FFAccommodationsEngine,
 		w.TranslationMemoryEnabled,
 		w.ReportExportEnabled,
 		w.XAPIEmissionEnabled,

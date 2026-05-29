@@ -6,13 +6,11 @@ import (
 	"time"
 )
 
-// AccommodationSummaryPublic is returned for an enrollment (instructor / roster read).
 type AccommodationSummaryPublic struct {
 	HasAccommodation bool     `json:"hasAccommodation"`
 	Flags            []string `json:"flags"`
 }
 
-// UserSearchHit is a learner from /api/v1/accommodations/users.
 type UserSearchHit struct {
 	ID          string  `json:"id"`
 	Email       string  `json:"email"`
@@ -22,57 +20,67 @@ type UserSearchHit struct {
 	Sid         *string `json:"sid,omitempty"`
 }
 
-// UserSearchResponse wraps search hits.
 type UserSearchResponse struct {
 	Users []UserSearchHit `json:"users"`
 }
 
-// StudentAccommodation is the full public row for a learner.
 type StudentAccommodation struct {
-	ID                    string  `json:"id"`
-	UserID                string  `json:"userId"`
-	CourseID              *string `json:"courseId,omitempty"`
-	CourseCode            *string `json:"courseCode,omitempty"`
-	TimeMultiplier        float64 `json:"timeMultiplier"`
-	ExtraAttempts         int32   `json:"extraAttempts"`
-	HintsAlwaysEnabled    bool    `json:"hintsAlwaysEnabled"`
-	ReducedDistraction    bool    `json:"reducedDistractionMode"`
-	SpeechToTextEnabled   bool    `json:"speechToTextEnabled"`
-	AlternativeFormat     *string `json:"alternativeFormat,omitempty"`
-	EffectiveFrom         *string `json:"effectiveFrom,omitempty"`
-	EffectiveUntil        *string `json:"effectiveUntil,omitempty"`
-	CreatedBy             string  `json:"createdBy"`
-	UpdatedBy             *string `json:"updatedBy,omitempty"`
-	CreatedAt             string  `json:"createdAt"`
-	UpdatedAt             string  `json:"updatedAt"`
+	ID                     string  `json:"id"`
+	UserID                 string  `json:"userId"`
+	CourseID               *string `json:"courseId,omitempty"`
+	CourseCode             *string `json:"courseCode,omitempty"`
+	TimeMultiplier         float64 `json:"timeMultiplier"`
+	ExtraAttempts          int32   `json:"extraAttempts"`
+	HintsAlwaysEnabled     bool    `json:"hintsAlwaysEnabled"`
+	ReducedDistraction     bool    `json:"reducedDistractionMode"`
+	SpeechToTextEnabled    bool    `json:"speechToTextEnabled"`
+	TTSEnabled             bool    `json:"ttsEnabled"`
+	DyslexiaDisplayEnabled bool    `json:"dyslexiaDisplayEnabled"`
+	HighContrastEnabled    bool    `json:"highContrastEnabled"`
+	ReducedMotionEnabled   bool    `json:"reducedMotionEnabled"`
+	SeparateSetting        bool    `json:"separateSetting"`
+	AlternativeFormat      *string `json:"alternativeFormat,omitempty"`
+	EffectiveFrom          *string `json:"effectiveFrom,omitempty"`
+	EffectiveUntil         *string `json:"effectiveUntil,omitempty"`
+	CreatedBy              string  `json:"createdBy"`
+	UpdatedBy              *string `json:"updatedBy,omitempty"`
+	CreatedAt              string  `json:"createdAt"`
+	UpdatedAt              string  `json:"updatedAt"`
 }
 
-// CreateRequest is POST /api/v1/users/{id}/accommodations.
 type CreateRequest struct {
-	CourseCode         *string  `json:"courseCode"`
-	TimeMultiplier     *float64 `json:"timeMultiplier"`
-	ExtraAttempts      *int32   `json:"extraAttempts"`
-	HintsAlwaysEnabled *bool    `json:"hintsAlwaysEnabled"`
-	ReducedDistraction *bool    `json:"reducedDistractionMode"`
-	SpeechToText       *bool    `json:"speechToTextEnabled"`
-	AlternativeFormat  *string  `json:"alternativeFormat"`
-	EffectiveFrom      *string  `json:"effectiveFrom"`
-	EffectiveUntil     *string  `json:"effectiveUntil"`
+	CourseCode             *string  `json:"courseCode"`
+	TimeMultiplier         *float64 `json:"timeMultiplier"`
+	ExtraAttempts          *int32   `json:"extraAttempts"`
+	HintsAlwaysEnabled     *bool    `json:"hintsAlwaysEnabled"`
+	ReducedDistraction     *bool    `json:"reducedDistractionMode"`
+	SpeechToText           *bool    `json:"speechToTextEnabled"`
+	TTS                    *bool    `json:"ttsEnabled"`
+	DyslexiaDisplay        *bool    `json:"dyslexiaDisplayEnabled"`
+	HighContrast           *bool    `json:"highContrastEnabled"`
+	ReducedMotion          *bool    `json:"reducedMotionEnabled"`
+	SeparateSetting        *bool    `json:"separateSetting"`
+	AlternativeFormat      *string  `json:"alternativeFormat"`
+	EffectiveFrom          *string  `json:"effectiveFrom"`
+	EffectiveUntil         *string  `json:"effectiveUntil"`
 }
 
-// UpdateRequest is PUT to an accommodation row.
 type UpdateRequest struct {
-	TimeMultiplier     float64 `json:"timeMultiplier"`
-	ExtraAttempts      int32   `json:"extraAttempts"`
-	HintsAlwaysEnabled bool    `json:"hintsAlwaysEnabled"`
-	ReducedDistraction bool    `json:"reducedDistractionMode"`
-	SpeechToTextEnabled bool   `json:"speechToTextEnabled"`
-	AlternativeFormat  *string `json:"alternativeFormat"`
-	EffectiveFrom    *string `json:"effectiveFrom"`
-	EffectiveUntil     *string `json:"effectiveUntil"`
+	TimeMultiplier         float64 `json:"timeMultiplier"`
+	ExtraAttempts          int32   `json:"extraAttempts"`
+	HintsAlwaysEnabled     bool    `json:"hintsAlwaysEnabled"`
+	ReducedDistraction     bool    `json:"reducedDistractionMode"`
+	SpeechToTextEnabled    bool    `json:"speechToTextEnabled"`
+	TTSEnabled             bool    `json:"ttsEnabled"`
+	DyslexiaDisplayEnabled bool    `json:"dyslexiaDisplayEnabled"`
+	HighContrastEnabled    bool    `json:"highContrastEnabled"`
+	ReducedMotionEnabled   bool    `json:"reducedMotionEnabled"`
+	SeparateSetting        bool    `json:"separateSetting"`
+	AlternativeFormat      *string `json:"alternativeFormat"`
+	EffectiveFrom          *string `json:"effectiveFrom"`
+	EffectiveUntil         *string `json:"effectiveUntil"`
 }
 
-// YYYYMMDDFromNull maps a SQL DATE to an API YYYY-MM-DD string.
 func YYYYMMDDFromNull(nt sql.NullTime) *string {
 	if !nt.Valid {
 		return nil
@@ -81,24 +89,26 @@ func YYYYMMDDFromNull(nt sql.NullTime) *string {
 	return &s
 }
 
-// MyResponse is GET /api/v1/me/accommodations.
 type MyResponse struct {
 	Accommodations []MyEntry `json:"accommodations"`
 }
 
-// MyEntry is one active (by effective dates) row for the signed-in user.
 type MyEntry struct {
-	CourseCode                 *string `json:"courseCode,omitempty"`
-	HasExtendedTime            bool    `json:"hasExtendedTime"`
-	HasExtraAttempts           bool    `json:"hasExtraAttempts"`
-	HintsAlwaysAvailable       bool    `json:"hintsAlwaysAvailable"`
-	ReducedDistraction         bool    `json:"reducedDistractionRecommended"`
-	SpeechToTextEnabled        bool    `json:"speechToTextEnabled"`
-	EffectiveFrom              *string `json:"effectiveFrom,omitempty"`
-	EffectiveUntil             *string `json:"effectiveUntil,omitempty"`
+	CourseCode             *string `json:"courseCode,omitempty"`
+	HasExtendedTime        bool    `json:"hasExtendedTime"`
+	HasExtraAttempts       bool    `json:"hasExtraAttempts"`
+	HintsAlwaysAvailable   bool    `json:"hintsAlwaysAvailable"`
+	ReducedDistraction     bool    `json:"reducedDistractionRecommended"`
+	SpeechToTextEnabled    bool    `json:"speechToTextEnabled"`
+	TTSEnabled             bool    `json:"ttsEnabled"`
+	DyslexiaDisplayEnabled bool    `json:"dyslexiaDisplayEnabled"`
+	HighContrastEnabled    bool    `json:"highContrastEnabled"`
+	ReducedMotionEnabled   bool    `json:"reducedMotionEnabled"`
+	SeparateSetting        bool    `json:"separateSetting"`
+	EffectiveFrom          *string `json:"effectiveFrom,omitempty"`
+	EffectiveUntil         *string `json:"effectiveUntil,omitempty"`
 }
 
-// ParseDate parses YYYY-MM-DD; empty or whitespace is nil, nil error.
 func ParseDate(s *string) (*time.Time, error) {
 	if s == nil {
 		return nil, nil

@@ -29,6 +29,8 @@ export type PlatformFeatures = {
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
+  accommodationsEngineEnabled: boolean
+  ffAccommodationsEngine: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -57,6 +59,8 @@ const defaultFeatures: PlatformFeatures = {
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,
+  accommodationsEngineEnabled: false,
+  ffAccommodationsEngine: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -90,6 +94,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     altTextEnforcementEnabled: false,
     ffAltTextEnforcement: false,
     speechToTextEnabled: false,
+    accommodationsEngineEnabled: false,
+    ffAccommodationsEngine: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -124,6 +130,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,
           speechToTextEnabled: data.speechToTextEnabled === true,
+          accommodationsEngineEnabled: data.accommodationsEngineEnabled === true,
+          ffAccommodationsEngine: data.ffAccommodationsEngine === true,
           translationMemoryEnabled: data.translationMemoryEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,

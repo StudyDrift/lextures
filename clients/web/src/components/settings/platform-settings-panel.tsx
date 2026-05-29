@@ -37,6 +37,8 @@ export type PlatformSettingsPayload = {
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
   speechToTextEnabled: boolean
+  accommodationsEngineEnabled: boolean
+  ffAccommodationsEngine: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -121,6 +123,8 @@ function emptyForm(): PlatformSettingsPayload {
     equationEditorEnabled: false,
     readingLevelEnabled: false,
     speechToTextEnabled: false,
+    accommodationsEngineEnabled: false,
+    ffAccommodationsEngine: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -364,6 +368,17 @@ export function PlatformSettingsPanel() {
       })
       maybe('speechToTextEnabled', baseline.speechToTextEnabled, form.speechToTextEnabled, () => {
         body.speechToTextEnabled = form.speechToTextEnabled
+      })
+      maybe(
+        'accommodationsEngineEnabled',
+        baseline.accommodationsEngineEnabled,
+        form.accommodationsEngineEnabled,
+        () => {
+          body.accommodationsEngineEnabled = form.accommodationsEngineEnabled
+        },
+      )
+      maybe('ffAccommodationsEngine', baseline.ffAccommodationsEngine, form.ffAccommodationsEngine, () => {
+        body.ffAccommodationsEngine = form.ffAccommodationsEngine
       })
       maybe(
         'translationMemoryEnabled',
@@ -784,6 +799,18 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.speechToTextEnabled}
               onChange={(v) => update('speechToTextEnabled', v)}
+            />
+            <FlagRow
+              label="Accommodations engine (IEP/504)"
+              src="default"
+              checked={form.accommodationsEngineEnabled}
+              onChange={(v) => update('accommodationsEngineEnabled', v)}
+            />
+            <FlagRow
+              label="Accommodations audit log (engine)"
+              src="default"
+              checked={form.ffAccommodationsEngine}
+              onChange={(v) => update('ffAccommodationsEngine', v)}
             />
             <FlagRow
               label="Translation memory (course content)"

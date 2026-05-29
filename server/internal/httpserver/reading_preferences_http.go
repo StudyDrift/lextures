@@ -8,15 +8,38 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/readingprefs"
+	acsvc "github.com/lextures/lextures/server/internal/service/accommodations"
 )
 
 type readingPreferencesJSON struct {
-	STTEnabled  bool   `json:"sttEnabled"`
-	STTLanguage string `json:"sttLanguage"`
+	STTEnabled             bool `json:"sttEnabled"`
+	STTLanguage            string `json:"sttLanguage"`
+	TTSEnabled             bool `json:"ttsEnabled"`
+	DyslexiaDisplayEnabled bool `json:"dyslexiaDisplayEnabled"`
+	HighContrastEnabled    bool `json:"highContrastEnabled"`
+	ReducedMotionEnabled   bool `json:"reducedMotionEnabled"`
+}
+
+type readingPreferencesResponse struct {
+	readingPreferencesJSON
+	AccommodationOverrides readingprefs.AccommodationOverrides `json:"accommodationOverrides"`
 }
 
 func (d Deps) speechToTextEnabled() bool {
 	return d.effectiveConfig().SpeechToTextEnabled
+}
+
+func (d Deps) readingPreferencesEnabled() bool {
+	cfg := d.effectiveConfig()
+	return cfg.SpeechToTextEnabled || cfg.AccommodationsEngineEnabled
+}
+
+func (d Deps) requireReadingPreferences(w http.ResponseWriter) bool {
+	if !d.readingPreferencesEnabled() {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Reading preferences are not enabled.")
+		return false
+	}
+	return true
 }
 
 func (d Deps) requireSpeechToText(w http.ResponseWriter) bool {
@@ -29,8 +52,12 @@ func (d Deps) requireSpeechToText(w http.ResponseWriter) bool {
 
 func rowToReadingPreferencesJSON(r readingprefs.Row) readingPreferencesJSON {
 	return readingPreferencesJSON{
-		STTEnabled:  r.STTEnabled,
-		STTLanguage: r.STTLanguage,
+		STTEnabled:             r.STTEnabled,
+		STTLanguage:            r.STTLanguage,
+		TTSEnabled:             r.TTSEnabled,
+		DyslexiaDisplayEnabled: r.DyslexiaDisplayEnabled,
+		HighContrastEnabled:    r.HighContrastEnabled,
+		ReducedMotionEnabled:   r.ReducedMotionEnabled,
 	}
 }
 
@@ -41,7 +68,7 @@ func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireSpeechToText(w) {
+		if !d.requireReadingPreferences(w) {
 			return
 		}
 		userID, ok := d.meUserID(w, r)
@@ -53,15 +80,27 @@ func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load reading preferences.")
 			return
 		}
+		overrides := readingprefs.AccommodationOverrides{}
+		if d.accommodationsEngineFeatureEnabled() {
+			eff := acsvc.ResolveEffectiveGlobal(r.Context(), d.Pool, userID)
+			row, overrides = readingprefs.MergeAccommodationOverrides(row, eff)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(rowToReadingPreferencesJSON(row))
+		_ = json.NewEncoder(w).Encode(readingPreferencesResponse{
+			readingPreferencesJSON: rowToReadingPreferencesJSON(row),
+			AccommodationOverrides: overrides,
+		})
 	}
 }
 
 func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 	type body struct {
-		STTEnabled  *bool   `json:"sttEnabled"`
-		STTLanguage *string `json:"sttLanguage"`
+		STTEnabled             *bool   `json:"sttEnabled"`
+		STTLanguage            *string `json:"sttLanguage"`
+		TTSEnabled             *bool   `json:"ttsEnabled"`
+		DyslexiaDisplayEnabled *bool   `json:"dyslexiaDisplayEnabled"`
+		HighContrastEnabled    *bool   `json:"highContrastEnabled"`
+		ReducedMotionEnabled   *bool   `json:"reducedMotionEnabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPatch {
@@ -69,7 +108,7 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireSpeechToText(w) {
+		if !d.requireReadingPreferences(w) {
 			return
 		}
 		userID, ok := d.meUserID(w, r)
@@ -96,13 +135,21 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 				b.STTLanguage = &lang
 			}
 		}
-		row, err := readingprefs.Patch(r.Context(), d.Pool, userID, b.STTEnabled, b.STTLanguage)
+		row, err := readingprefs.Patch(r.Context(), d.Pool, userID,
+			b.STTEnabled, b.STTLanguage, b.TTSEnabled, b.DyslexiaDisplayEnabled, b.HighContrastEnabled, b.ReducedMotionEnabled)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save reading preferences.")
 			return
 		}
+		overrides := readingprefs.AccommodationOverrides{}
+		if d.accommodationsEngineFeatureEnabled() {
+			eff := acsvc.ResolveEffectiveGlobal(r.Context(), d.Pool, userID)
+			row, overrides = readingprefs.MergeAccommodationOverrides(row, eff)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(rowToReadingPreferencesJSON(row))
+		_ = json.NewEncoder(w).Encode(readingPreferencesResponse{
+			readingPreferencesJSON: rowToReadingPreferencesJSON(row),
+			AccommodationOverrides: overrides,
+		})
 	}
 }
-

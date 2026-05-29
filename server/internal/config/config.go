@@ -234,6 +234,10 @@ type Config struct {
 	FFAltTextEnforcement bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
+	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).
+	AccommodationsEngineEnabled bool
+	// FFAccommodationsEngine when true writes accommodation audit log entries (plan 12.10).
+	FFAccommodationsEngine bool
 	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
 	TranslationMemoryEnabled bool
 
