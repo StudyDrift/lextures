@@ -23,6 +23,26 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@layer base {
+  a[href],
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='link']:not([aria-disabled='true']),
+  summary,
+  label[for],
+  input[type='button']:not(:disabled),
+  input[type='submit']:not(:disabled),
+  input[type='reset']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [role='button'][aria-disabled='true'],
+  a[aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}
+
 /* Native pickers (datetime-local, date, time, color) follow color-scheme on the root. */
 html {
   color-scheme: light;

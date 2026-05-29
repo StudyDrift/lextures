@@ -1162,7 +1162,7 @@ export default function Settings() {
 
                 <p className="mt-8 text-sm font-medium text-slate-700 dark:text-neutral-200">Help popover</p>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-                  Show or hide the floating help launcher in the bottom-right corner.
+                  Show or hide the help button in the top menu bar.
                 </p>
                 <div className="mt-3 inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-neutral-600 dark:bg-neutral-800/50">
                   <button
