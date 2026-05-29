@@ -222,3 +222,211 @@ func TestParentLinks_IsolationAndBulk_Pg(t *testing.T) {
 		t.Fatalf("created want 3 got %d", bulkOut.Created)
 	}
 }
+
+func TestParentNotificationPrefs_Pg(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("DATABASE_URL")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	dsn := os.Getenv("DATABASE_URL")
+	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	defer pool.Close()
+
+	defOrg := organization.SeedDefaultOrgID
+	ph, err := auth.HashPassword("longpassword0")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+
+	ts := time.Now().Format("20060102150405.999")
+	emParent := "notifp-par-" + ts + "@e.com"
+	dn := "Notif Parent"
+	parentRow, err := user.InsertUser(ctx, pool, emParent, ph, &dn)
+	if err != nil {
+		t.Fatalf("user: %v", err)
+	}
+	parentID := uuid.MustParse(parentRow.ID)
+	if _, err := pool.Exec(ctx, `UPDATE "user".users SET account_type = 'parent' WHERE id = $1`, parentID); err != nil {
+		t.Fatal(err)
+	}
+	if err := rbac.AssignUserRoleByName(ctx, pool, parentID, "Student"); err != nil {
+		t.Fatal(err)
+	}
+	slugPar, err := organization.OrgSlugForUser(ctx, pool, parentID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
+	parentTok, err := signer.Sign(ctx, parentRow.ID, emParent, defOrg.String(), slugPar, nil)
+	if err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	h := NewHandler(Deps{Pool: pool, JWTSigner: signer})
+
+	// GET defaults (no row yet).
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/parent/notification-prefs", nil)
+	req = req.WithContext(ctx)
+	req.Header.Set("Authorization", "Bearer "+parentTok)
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("GET prefs: %d %s", rr.Code, rr.Body.String())
+	}
+	var prefs struct {
+		GradePosted       bool `json:"gradePosted"`
+		MissingAssignment bool `json:"missingAssignment"`
+		AttendanceEvent   bool `json:"attendanceEvent"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&prefs); err != nil {
+		t.Fatal(err)
+	}
+	if !prefs.GradePosted || !prefs.MissingAssignment {
+		t.Fatalf("unexpected defaults: %+v", prefs)
+	}
+
+	// PATCH to disable grade_posted.
+	patchBody := []byte(`{"gradePosted":false}`)
+	rr2 := httptest.NewRecorder()
+	req2 := httptest.NewRequest(http.MethodPatch, "/api/v1/parent/notification-prefs", bytes.NewReader(patchBody))
+	req2 = req2.WithContext(ctx)
+	req2.Header.Set("Authorization", "Bearer "+parentTok)
+	req2.Header.Set("Content-Type", "application/json")
+	h.ServeHTTP(rr2, req2)
+	if rr2.Code != http.StatusOK {
+		t.Fatalf("PATCH prefs: %d %s", rr2.Code, rr2.Body.String())
+	}
+	var prefs2 struct {
+		GradePosted bool `json:"gradePosted"`
+	}
+	if err := json.NewDecoder(rr2.Body).Decode(&prefs2); err != nil {
+		t.Fatal(err)
+	}
+	if prefs2.GradePosted {
+		t.Fatalf("expected gradePosted=false after PATCH, got true")
+	}
+
+	// GET reflects updated value.
+	rr3 := httptest.NewRecorder()
+	req3 := httptest.NewRequest(http.MethodGet, "/api/v1/parent/notification-prefs", nil)
+	req3 = req3.WithContext(ctx)
+	req3.Header.Set("Authorization", "Bearer "+parentTok)
+	h.ServeHTTP(rr3, req3)
+	if rr3.Code != http.StatusOK {
+		t.Fatalf("GET prefs after PATCH: %d %s", rr3.Code, rr3.Body.String())
+	}
+	var prefs3 struct {
+		GradePosted bool `json:"gradePosted"`
+	}
+	if err := json.NewDecoder(rr3.Body).Decode(&prefs3); err != nil {
+		t.Fatal(err)
+	}
+	if prefs3.GradePosted {
+		t.Fatalf("expected gradePosted=false persisted, got true")
+	}
+
+	// Non-parent gets 403.
+	emOther := "notifp-oth-" + ts + "@e.com"
+	othRow, err := user.InsertUser(ctx, pool, emOther, ph, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := rbac.AssignUserRoleByName(ctx, pool, uuid.MustParse(othRow.ID), "Student"); err != nil {
+		t.Fatal(err)
+	}
+	slugOth, err := organization.OrgSlugForUser(ctx, pool, uuid.MustParse(othRow.ID))
+	if err != nil {
+		t.Fatal(err)
+	}
+	othTok, err := signer.Sign(ctx, othRow.ID, emOther, defOrg.String(), slugOth, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	rr4 := httptest.NewRecorder()
+	req4 := httptest.NewRequest(http.MethodGet, "/api/v1/parent/notification-prefs", nil)
+	req4 = req4.WithContext(ctx)
+	req4.Header.Set("Authorization", "Bearer "+othTok)
+	h.ServeHTTP(rr4, req4)
+	if rr4.Code != http.StatusForbidden {
+		t.Fatalf("non-parent want 403 got %d", rr4.Code)
+	}
+}
+
+func TestParentWeeklySummary_Pg(t *testing.T) {
+	if os.Getenv("DATABASE_URL") == "" {
+		t.Skip("DATABASE_URL")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	dsn := os.Getenv("DATABASE_URL")
+	if err := migrate.RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+		t.Fatalf("migrate: %v", err)
+	}
+	pool, err := db.NewPool(ctx, dsn)
+	if err != nil {
+		t.Fatalf("pool: %v", err)
+	}
+	defer pool.Close()
+
+	defOrg := organization.SeedDefaultOrgID
+	ph, err := auth.HashPassword("longpassword0")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+
+	ts := time.Now().Format("20060102150405.999")
+	emParent := "weekly-par-" + ts + "@e.com"
+	parentRow, err := user.InsertUser(ctx, pool, emParent, ph, nil)
+	if err != nil {
+		t.Fatalf("user: %v", err)
+	}
+	parentID := uuid.MustParse(parentRow.ID)
+	if _, err := pool.Exec(ctx, `UPDATE "user".users SET account_type = 'parent' WHERE id = $1`, parentID); err != nil {
+		t.Fatal(err)
+	}
+	if err := rbac.AssignUserRoleByName(ctx, pool, parentID, "Student"); err != nil {
+		t.Fatal(err)
+	}
+	slugPar, err := organization.OrgSlugForUser(ctx, pool, parentID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
+	parentTok, err := signer.Sign(ctx, parentRow.ID, emParent, defOrg.String(), slugPar, nil)
+	if err != nil {
+		t.Fatalf("sign: %v", err)
+	}
+	h := NewHandler(Deps{Pool: pool, JWTSigner: signer})
+
+	// Weekly summary for a parent with no linked children should return empty items.
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/parent/weekly-summary", nil)
+	req = req.WithContext(ctx)
+	req.Header.Set("Authorization", "Bearer "+parentTok)
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("weekly-summary: %d %s", rr.Code, rr.Body.String())
+	}
+	var out struct {
+		Items     []any  `json:"items"`
+		WeekStart string `json:"weekStart"`
+		WeekEnd   string `json:"weekEnd"`
+	}
+	if err := json.NewDecoder(rr.Body).Decode(&out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Items) != 0 {
+		t.Fatalf("expected 0 items for unlinked parent, got %d", len(out.Items))
+	}
+	if out.WeekStart == "" || out.WeekEnd == "" {
+		t.Fatalf("expected weekStart/weekEnd in response")
+	}
+}

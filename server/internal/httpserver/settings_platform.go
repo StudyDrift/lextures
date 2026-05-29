@@ -103,6 +103,7 @@ type platformSettingsJSON struct {
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
+	FFParentPortal                  bool `json:"ffParentPortal"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -237,6 +238,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
+			FFParentPortal:                  merged.FFParentPortal,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -344,6 +346,7 @@ type putPlatformBody struct {
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      *bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled *bool `json:"securityDisclosureModuleEnabled"`
+	FFParentPortal                  *bool `json:"ffParentPortal"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -612,6 +615,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
+		setBool("ffparentportal", body.FFParentPortal, func(v bool) { wr.FFParentPortal = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -702,6 +706,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
+			FFParentPortal:                  merged.FFParentPortal,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
