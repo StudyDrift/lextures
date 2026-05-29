@@ -14,6 +14,8 @@ export type PlatformFeaturesSnapshot = {
   readingLevelEnabled: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
+  readAloudEnabled: boolean
+  ffReadAloud: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -39,6 +41,8 @@ const defaults: PlatformFeaturesSnapshot = {
   readingLevelEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
+  readAloudEnabled: false,
+  ffReadAloud: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -105,6 +109,10 @@ export function altTextEnforcementFeatureEnabled(): boolean {
 
 export function altTextHardBlockEnabled(): boolean {
   return loaded && snapshot.ffAltTextEnforcement
+}
+
+export function readAloudFeatureEnabled(): boolean {
+  return loaded && snapshot.readAloudEnabled && snapshot.ffReadAloud
 }
 
 export function translationMemoryFeatureEnabled(): boolean {

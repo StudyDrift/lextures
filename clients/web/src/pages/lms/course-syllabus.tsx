@@ -20,6 +20,7 @@ import {
 } from '../../lib/markdown-theme'
 import { useLmsDarkMode } from '../../hooks/use-lms-dark-mode'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
+import { ReadAloudControls } from '../../components/a11y/read-aloud-controls'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { formatAbsolute } from '../../lib/format-datetime'
@@ -202,7 +203,10 @@ export default function CourseSyllabus() {
             </button>
           </div>
         ) : (
-          <ReadingFocusToggle />
+          <div className="flex flex-wrap items-center gap-2">
+            <ReadingFocusToggle />
+            <ReadAloudControls />
+          </div>
         )
       }
     >

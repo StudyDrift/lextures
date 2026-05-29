@@ -30,6 +30,7 @@ import { useLmsDarkMode } from '../../hooks/use-lms-dark-mode'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { ReflectionJournalPrompt } from '../../components/study-stats/reflection-journal-prompt'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
+import { ReadAloudControls } from '../../components/a11y/read-aloud-controls'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { formatAbsolute } from '../../lib/format-datetime'
@@ -476,6 +477,7 @@ export default function CourseModuleContentPage() {
               </button>
             )}
             <ReadingFocusToggle />
+            <ReadAloudControls />
           </div>
         )
       }
