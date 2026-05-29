@@ -71,6 +71,7 @@ type platformSettingsJSON struct {
 	DRMEnabled                 bool `json:"drmEnabled"`
 	VideoTranscodingEnabled    bool `json:"videoTranscodingEnabled"`
 	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
+	VideoCaptionsEnabled       bool `json:"videoCaptionsEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AtRiskAlertsEnabled        bool `json:"atRiskAlertsEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
@@ -199,6 +200,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			DRMEnabled:                  merged.DRMEnabled,
 			VideoTranscodingEnabled:     merged.VideoTranscodingEnabled,
 			AutoCaptioningEnabled:       merged.AutoCaptioningEnabled,
+			VideoCaptionsEnabled:        merged.VideoCaptionsEnabled,
 			StorageQuotasEnabled:        merged.StorageQuotasEnabled,
 			AtRiskAlertsEnabled:         merged.AtRiskAlertsEnabled,
 			AvScanningEnabled:           merged.AvScanningEnabled,
@@ -300,6 +302,7 @@ type putPlatformBody struct {
 	DRMEnabled                 *bool `json:"drmEnabled"`
 	VideoTranscodingEnabled    *bool `json:"videoTranscodingEnabled"`
 	AutoCaptioningEnabled      *bool `json:"autoCaptioningEnabled"`
+	VideoCaptionsEnabled       *bool `json:"videoCaptionsEnabled"`
 	StorageQuotasEnabled       *bool `json:"storageQuotasEnabled"`
 	AtRiskAlertsEnabled        *bool `json:"atRiskAlertsEnabled"`
 	AvScanningEnabled          *bool `json:"avScanningEnabled"`
@@ -562,6 +565,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("drmenabled", body.DRMEnabled, func(v bool) { wr.DRMEnabled = &v })
 		setBool("videotranscodingenabled", body.VideoTranscodingEnabled, func(v bool) { wr.VideoTranscodingEnabled = &v })
 		setBool("autocaptioningenabled", body.AutoCaptioningEnabled, func(v bool) { wr.AutoCaptioningEnabled = &v })
+		setBool("videocaptionsenabled", body.VideoCaptionsEnabled, func(v bool) { wr.VideoCaptionsEnabled = &v })
 		setBool("storagequotasenabled", body.StorageQuotasEnabled, func(v bool) { wr.StorageQuotasEnabled = &v })
 		setBool("atriskalertsenabled", body.AtRiskAlertsEnabled, func(v bool) { wr.AtRiskAlertsEnabled = &v })
 		setBool("avscanningenabled", body.AvScanningEnabled, func(v bool) { wr.AvScanningEnabled = &v })
@@ -646,6 +650,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			DRMEnabled:                  merged.DRMEnabled,
 			VideoTranscodingEnabled:     merged.VideoTranscodingEnabled,
 			AutoCaptioningEnabled:       merged.AutoCaptioningEnabled,
+			VideoCaptionsEnabled:        merged.VideoCaptionsEnabled,
 			StorageQuotasEnabled:        merged.StorageQuotasEnabled,
 			AtRiskAlertsEnabled:         merged.AtRiskAlertsEnabled,
 			AvScanningEnabled:           merged.AvScanningEnabled,

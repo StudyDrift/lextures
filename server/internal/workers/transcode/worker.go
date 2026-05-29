@@ -17,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/repos/transcodejobs"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
+	"github.com/lextures/lextures/server/internal/workers/captioning"
 )
 
 const (
@@ -42,10 +43,12 @@ var DefaultRenditions = []Rendition{
 
 // Worker processes queued transcode jobs from the database.
 type Worker struct {
-	Pool        *pgxpool.Pool
-	Storage     filestorage.Driver
-	FFmpegPath  string
-	MaxAttempts int
+	Pool                 *pgxpool.Pool
+	Storage              filestorage.Driver
+	FFmpegPath           string
+	MaxAttempts          int
+	AutoCaptionOnComplete bool
+	CaptionBackend       string
 }
 
 // New creates a Worker with sensible defaults.
@@ -138,7 +141,19 @@ func (w *Worker) process(ctx context.Context, job *transcodejobs.Job) error {
 		"master_playlist", masterPlaylist,
 	)
 
-	return transcodejobs.MarkDone(ctx, w.Pool, job.ID, outputPrefix, masterPlaylist, posterKey, nil)
+	if err := transcodejobs.MarkDone(ctx, w.Pool, job.ID, outputPrefix, masterPlaylist, posterKey, nil); err != nil {
+		return err
+	}
+	if w.AutoCaptionOnComplete && job.StorageObjectID != nil {
+		backend := w.CaptionBackend
+		if backend == "" {
+			backend = string(captioning.BackendWhisperAPI)
+		}
+		if _, enqErr := captioning.EnqueueForObject(ctx, w.Pool, *job.StorageObjectID, backend); enqErr != nil {
+			slog.Warn("transcode: enqueue caption", "object_id", *job.StorageObjectID, "err", enqErr)
+		}
+	}
+	return nil
 }
 
 func (w *Worker) downloadSource(ctx context.Context, key, dstPath string) error {

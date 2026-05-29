@@ -21,6 +21,8 @@ export type PlatformFeaturesSnapshot = {
   sessionManagementUiEnabled: boolean
   instructorInsightsEnabled: boolean
   rtlEnabled: boolean
+  videoCaptionsEnabled?: boolean
+  autoCaptioningEnabled?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -44,6 +46,8 @@ const defaults: PlatformFeaturesSnapshot = {
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
   rtlEnabled: false,
+  videoCaptionsEnabled: false,
+  autoCaptioningEnabled: false,
 }
 
 let loaded = false
@@ -65,6 +69,10 @@ export function platformFeaturesLoaded(): boolean {
 
 export function getPlatformFeatures(): PlatformFeaturesSnapshot {
   return snapshot
+}
+
+export function videoCaptionsFeatureEnabled(): boolean {
+  return loaded && (snapshot.videoCaptionsEnabled === true || snapshot.autoCaptioningEnabled === true)
 }
 
 export function studentProgressFeatureEnabled(): boolean {

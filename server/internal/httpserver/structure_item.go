@@ -93,6 +93,16 @@ func (d Deps) handlePatchCourseStructureItem() http.HandlerFunc {
 			}
 			title = &t
 		}
+		if body.Published != nil && *body.Published && d.effectiveConfig().VideoCaptionsEnabled {
+			if capErr := validateStructureItemPublishCaptions(r.Context(), d.Pool, *cid, itemID); capErr != nil {
+				if errors.Is(capErr, ErrCaptionRequired) {
+					apierr.WriteJSON(w, http.StatusConflict, apierr.CodeInvalidInput, captionPublishBlockedMsg)
+					return
+				}
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify captions.")
+				return
+			}
+		}
 		row, err := coursestructure.PatchChildStructureItem(
 			r.Context(), d.Pool, *cid, itemID, title, body.Published, body.Archived,
 		)

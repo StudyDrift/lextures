@@ -70,8 +70,8 @@ describe('detectPreviewType', () => {
     expect(detectPreviewType(null, 'sheet.xlsx')).toBe('none')
   })
 
-  it('returns none for video/mp4', () => {
-    expect(detectPreviewType('video/mp4', 'video.mp4')).toBe('none')
+  it('returns video for video/mp4', () => {
+    expect(detectPreviewType('video/mp4', 'video.mp4')).toBe('video')
   })
 
   it('returns none for unknown mime with no extension', () => {

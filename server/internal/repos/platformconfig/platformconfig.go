@@ -48,6 +48,7 @@ type Row struct {
 	DRMEnabled                 *bool
 	VideoTranscodingEnabled    *bool
 	AutoCaptioningEnabled      *bool
+	VideoCaptionsEnabled       *bool
 	StorageQuotasEnabled       *bool
 	AtRiskAlertsEnabled        *bool
 	AvScanningEnabled          *bool
@@ -127,6 +128,7 @@ type Write struct {
 	DRMEnabled                 *bool
 	VideoTranscodingEnabled    *bool
 	AutoCaptioningEnabled      *bool
+	VideoCaptionsEnabled       *bool
 	StorageQuotasEnabled       *bool
 	AtRiskAlertsEnabled        *bool
 	AvScanningEnabled          *bool
@@ -204,6 +206,7 @@ SELECT
 	drm_enabled,
 	video_transcoding_enabled,
 	auto_captioning_enabled,
+	video_captions_enabled,
 	storage_quotas_enabled,
 	at_risk_alerts_enabled,
 	av_scanning_enabled,
@@ -276,6 +279,7 @@ WHERE id = 1
 		&r.DRMEnabled,
 		&r.VideoTranscodingEnabled,
 		&r.AutoCaptioningEnabled,
+		&r.VideoCaptionsEnabled,
 		&r.StorageQuotasEnabled,
 		&r.AtRiskAlertsEnabled,
 		&r.AvScanningEnabled,
@@ -388,6 +392,7 @@ INSERT INTO settings.platform_app_settings (
 	drm_enabled,
 	video_transcoding_enabled,
 	auto_captioning_enabled,
+	video_captions_enabled,
 	storage_quotas_enabled,
 	at_risk_alerts_enabled,
 	av_scanning_enabled,
@@ -465,6 +470,7 @@ ON CONFLICT (id) DO UPDATE SET
 	drm_enabled = COALESCE(EXCLUDED.drm_enabled, settings.platform_app_settings.drm_enabled),
 	video_transcoding_enabled = COALESCE(EXCLUDED.video_transcoding_enabled, settings.platform_app_settings.video_transcoding_enabled),
 	auto_captioning_enabled = COALESCE(EXCLUDED.auto_captioning_enabled, settings.platform_app_settings.auto_captioning_enabled),
+	video_captions_enabled = COALESCE(EXCLUDED.video_captions_enabled, settings.platform_app_settings.video_captions_enabled),
 	storage_quotas_enabled = COALESCE(EXCLUDED.storage_quotas_enabled, settings.platform_app_settings.storage_quotas_enabled),
 	at_risk_alerts_enabled = COALESCE(EXCLUDED.at_risk_alerts_enabled, settings.platform_app_settings.at_risk_alerts_enabled),
 	av_scanning_enabled = COALESCE(EXCLUDED.av_scanning_enabled, settings.platform_app_settings.av_scanning_enabled),
@@ -535,6 +541,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.DRMEnabled,
 		w.VideoTranscodingEnabled,
 		w.AutoCaptioningEnabled,
+		w.VideoCaptionsEnabled,
 		w.StorageQuotasEnabled,
 		w.AtRiskAlertsEnabled,
 		w.AvScanningEnabled,
