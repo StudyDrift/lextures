@@ -48,6 +48,11 @@ import {
   type ReadingLevelInfo,
 } from '../../lib/reading-level-api'
 import { CourseContentLocaleSelector } from '../../components/translation/course-content-locale-selector'
+import {
+  altTextEnforcementFeatureEnabled,
+  altTextHardBlockEnabled,
+} from '../../lib/platform-features'
+import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
 
 function newLocalId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -80,6 +85,14 @@ export default function CourseModuleContentPage() {
   }>({})
   const simplifyDlg = useSimplifyDialog()
   const readingLevelOn = isReadingLevelEnabled()
+  const altTextOn = altTextEnforcementFeatureEnabled()
+  const altTextHardBlock = altTextHardBlockEnabled()
+  const draftAltCoverage = useMemo(
+    () => (editing && altTextOn ? summarizeSectionsAltText(draft) : { withAlt: 0, total: 0, missing: [] }),
+    [altTextOn, draft, editing],
+  )
+  const saveBlockedByAltText =
+    altTextOn && altTextHardBlock && draftAltCoverage.missing.length > 0
   const [mdPreset, setMdPreset] = useState<string>('classic')
   const [mdCustom, setMdCustom] = useState<MarkdownThemeCustom | null>(null)
   const lmsUiDark = useLmsDarkMode()
@@ -413,7 +426,8 @@ export default function CourseModuleContentPage() {
             <button
               type="button"
               onClick={() => void save()}
-              disabled={saving}
+              disabled={saving || saveBlockedByAltText}
+              title={saveBlockedByAltText ? 'Add alt text to all images before saving' : undefined}
               className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}

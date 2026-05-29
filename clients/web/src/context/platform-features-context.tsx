@@ -26,6 +26,8 @@ export type PlatformFeatures = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  altTextEnforcementEnabled: boolean
+  ffAltTextEnforcement: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -49,6 +51,8 @@ const defaultFeatures: PlatformFeatures = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  altTextEnforcementEnabled: false,
+  ffAltTextEnforcement: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -77,6 +81,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+    altTextEnforcementEnabled: false,
+    ffAltTextEnforcement: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -106,6 +112,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
+          altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
+          ffAltTextEnforcement: data.ffAltTextEnforcement === true,
           translationMemoryEnabled: data.translationMemoryEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,

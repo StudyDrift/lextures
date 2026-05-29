@@ -118,6 +118,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Get("/api/v1/help/contextual-articles", d.handleHelpContextualArticles())
 	d.registerTranslationRoutes(r)
 	d.registerReadingLevelRoutes(r)
+	d.registerAltTextRoutes(r)
 	d.registerCourseTranslationRoutes(r)
 	d.registerTusRoutes(r)
 	d.registerTranscodeRoutes(r)

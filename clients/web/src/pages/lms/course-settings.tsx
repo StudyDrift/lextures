@@ -35,7 +35,9 @@ import { CourseBlueprintSection } from './course-blueprint-settings'
 import { CourseCrossListingSection } from './course-cross-listing-settings'
 import { CourseSectionsSettingsSection } from './course-sections-settings'
 import CourseTranslationsSettings from './course-translations-settings'
+import { CourseAccessibilitySettingsSection } from './course-accessibility-settings'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 function isoToDatetimeLocal(iso: string | null): string {
   if (!iso) return ''
@@ -107,6 +109,7 @@ type SettingsSection =
   | 'grading'
   | 'outcomes'
   | 'features'
+  | 'accessibility'
   | 'translations'
   | 'sections'
   | 'import-export'
@@ -145,6 +148,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   if (seg === 'grading') return 'grading'
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'features') return 'features'
+  if (seg === 'accessibility') return 'accessibility'
   if (seg === 'translations') return 'translations'
   if (seg === 'sections') return 'sections'
   if (seg === 'import-export') return 'import-export'
@@ -156,6 +160,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
 export default function CourseSettings() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const { allows, loading: permLoading } = usePermissions()
+  const { altTextEnforcementEnabled, loading: featuresLoading } = usePlatformFeatures()
   const location = useLocation()
   const [course, setCourse] = useState<CoursePublic | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -693,7 +698,11 @@ export default function CourseSettings() {
   }
 
   const section = parseSettingsSection(courseCode, location.pathname)
-  if (section === 'invalid' || (section === 'translations' && !isTranslationMemoryEnabled())) {
+  if (
+    section === 'invalid' ||
+    (section === 'translations' && !isTranslationMemoryEnabled()) ||
+    (section === 'accessibility' && !featuresLoading && !altTextEnforcementEnabled)
+  ) {
     return <Navigate to={`${settingsBase}/general`} replace />
   }
 
@@ -714,6 +723,10 @@ export default function CourseSettings() {
             ? course?.title
               ? `${course.title} — features`
               : 'Features'
+            : section === 'accessibility'
+              ? course?.title
+                ? `${course.title} — accessibility`
+                : 'Accessibility'
             : section === 'translations'
               ? course?.title
                 ? `${course.title} — translations`
@@ -747,6 +760,8 @@ export default function CourseSettings() {
           ? 'Define learning outcomes, map assignments and quizzes (including individual questions) with measurement and intensity levels, and review class progress from grades and attempts.'
           : section === 'features'
             ? 'Choose which course tools appear in the menu and are available to instructors and learners.'
+            : section === 'accessibility'
+              ? 'Review image alt-text coverage and find content that still needs accessibility updates.'
             : section === 'translations'
               ? 'Create locale variants, manage glossary terms, and review translation coverage.'
               : section === 'sections'
@@ -1258,6 +1273,13 @@ export default function CourseSettings() {
               onCourseUpdated={setCourse}
             />
           )}
+          {section === 'accessibility' && (featuresLoading || altTextEnforcementEnabled) ? (
+            featuresLoading ? (
+              <p className="text-sm text-slate-600 dark:text-neutral-300">Loading accessibility settings…</p>
+            ) : (
+              <CourseAccessibilitySettingsSection courseCode={courseCode} />
+            )
+          ) : null}
           {section === 'translations' && isTranslationMemoryEnabled() && courseCode ? (
             <CourseTranslationsSettings />
           ) : null}

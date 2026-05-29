@@ -12,6 +12,8 @@ export type PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  altTextEnforcementEnabled: boolean
+  ffAltTextEnforcement: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -33,6 +35,8 @@ const defaults: PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  altTextEnforcementEnabled: false,
+  ffAltTextEnforcement: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -85,6 +89,14 @@ export function equationEditorFeatureEnabled(): boolean {
 
 export function readingLevelFeatureEnabled(): boolean {
   return loaded && snapshot.readingLevelEnabled
+}
+
+export function altTextEnforcementFeatureEnabled(): boolean {
+  return loaded && snapshot.altTextEnforcementEnabled
+}
+
+export function altTextHardBlockEnabled(): boolean {
+  return loaded && snapshot.ffAltTextEnforcement
 }
 
 export function translationMemoryFeatureEnabled(): boolean {

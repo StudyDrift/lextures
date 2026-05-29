@@ -29,6 +29,7 @@ const (
 	FeatureQuizGeneration              = "quiz_generation"
 	FeatureReadingLevelSimplification  = "reading_level_simplification"
 	FeatureContentTranslation          = "content_translation"
+	FeatureAltTextSuggestion           = "alt_text_suggestion"
 )
 
 // BlockReason explains why a call was blocked.

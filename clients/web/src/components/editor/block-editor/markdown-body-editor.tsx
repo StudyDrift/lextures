@@ -15,6 +15,7 @@ import { filterTaggable, kindLabel } from '../../course-item-prompt-mention'
 import { getBlockMentionRange } from './markdown-body-mention'
 import { CourseAwareTipTapImage } from './course-aware-tip-tap-image'
 import { MathBlock, MathInline } from '../extensions/math-tip-tap'
+import { altTextEnforcementFeatureEnabled } from '../../../lib/platform-features'
 
 const editorShellClass = [
   'tiptap',
@@ -52,6 +53,13 @@ const editorShellClass = [
 
 function sanitizeImageAlt(name: string): string {
   return (name || 'Image').replace(/[[\]]/g, '').slice(0, 200)
+}
+
+function imageInsertAttrs(path: string, fileName: string) {
+  if (altTextEnforcementFeatureEnabled()) {
+    return { src: path, alt: '', decorative: false, altPending: true }
+  }
+  return { src: path, alt: sanitizeImageAlt(fileName) }
 }
 
 export type MarkdownBodyEditorProps = {
@@ -203,7 +211,7 @@ export function MarkdownBodyEditor({
                 .focus()
                 .insertContentAt(pos, {
                   type: 'image',
-                  attrs: { src: path, alt: sanitizeImageAlt(file.name) },
+                  attrs: imageInsertAttrs(path, file.name),
                 })
                 .run()
               pos = ed.state.selection.to
@@ -237,7 +245,7 @@ export function MarkdownBodyEditor({
                 .focus()
                 .insertContentAt(p, {
                   type: 'image',
-                  attrs: { src: path, alt: sanitizeImageAlt(file.name) },
+                  attrs: imageInsertAttrs(path, file.name),
                 })
                 .run()
               p = ed.state.selection.to
@@ -591,7 +599,7 @@ export function MarkdownBodyEditor({
               .focus()
               .insertContentAt(pos, {
                 type: 'image',
-                attrs: { src: path, alt: sanitizeImageAlt(file.name) },
+                attrs: imageInsertAttrs(path, file.name),
               })
               .run()
             pos = editor.state.selection.to
@@ -653,7 +661,7 @@ export function MarkdownBodyEditor({
                       .focus()
                       .insertContentAt(pos, {
                         type: 'image',
-                        attrs: { src: path, alt: sanitizeImageAlt(file.name) },
+                        attrs: imageInsertAttrs(path, file.name),
                       })
                       .run()
                     pos = editor.state.selection.to
