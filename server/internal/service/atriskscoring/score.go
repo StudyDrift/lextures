@@ -41,9 +41,9 @@ func ComputeWeightedScore(in SignalInputs, cfg atrisk.Config) (float32, Componen
 }
 
 func componentScores(in SignalInputs, cfg atrisk.Config) ComponentScores {
-	missing := clamp100(in.MissingPct)
+	missing := missingComponent(in.MissingPct, cfg.MissingPctThreshold)
 	quiz := quizComponent(in.QuizAvg, cfg.QuizAvgThreshold)
-	inactive := inactiveComponent(in.DaysInactive)
+	inactive := inactiveComponent(in.DaysInactive, cfg.InactiveDaysThreshold)
 	trend := clamp100(in.GradeTrend)
 
 	top := "missing"
@@ -80,14 +80,30 @@ func quizComponent(avg *float32, threshold float32) float32 {
 	return clamp100((threshold - *avg) / threshold * 100)
 }
 
-func inactiveComponent(days int) float32 {
+func missingComponent(pct, threshold float32) float32 {
+	if pct <= 0 {
+		return 0
+	}
+	if threshold <= 0 {
+		threshold = 100
+	}
+	if pct >= threshold {
+		return 100
+	}
+	return clamp100(pct / threshold * 100)
+}
+
+func inactiveComponent(days int, thresholdDays int) float32 {
 	if days <= 0 {
 		return 0
 	}
-	if days >= 7 {
+	if thresholdDays <= 0 {
+		thresholdDays = 7
+	}
+	if days >= thresholdDays {
 		return 100
 	}
-	return clamp100(float32(days) / 7 * 100)
+	return clamp100(float32(days) / float32(thresholdDays) * 100)
 }
 
 func clamp100(v float32) float32 {

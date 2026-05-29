@@ -86,6 +86,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/discussion-posts/{post_id}/upvote", d.handleDiscussionPostUpvote())
 	r.Get("/api/v1/courses/{course_code}/events", d.handleGetCourseEvents())
 	r.Post("/api/v1/courses/{course_code}/at-risk/run", d.handleCourseAtRiskRun())
+	r.Get("/api/v1/courses/{course_code}/at-risk/config", d.handleCourseAtRiskConfigGet())
+	r.Put("/api/v1/courses/{course_code}/at-risk/config", d.handleCourseAtRiskConfigPut())
 	r.Get("/api/v1/courses/{course_code}/at-risk", d.handleCourseAtRiskList())
 	r.Patch("/api/v1/courses/{course_code}/at-risk/{alert_id}", d.handleCourseAtRiskPatch())
 	r.Get("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/at-risk-history", d.handleEnrollmentAtRiskHistory())

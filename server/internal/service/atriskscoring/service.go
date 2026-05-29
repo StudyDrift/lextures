@@ -28,11 +28,7 @@ func (s *Service) RunForCourse(ctx context.Context, courseID uuid.UUID, computed
 	if s.Pool == nil {
 		return 0, fmt.Errorf("atriskscoring: pool required")
 	}
-	orgID, err := orgIDForCourse(ctx, s.Pool, courseID)
-	if err != nil {
-		return 0, err
-	}
-	cfg, err := atrisk.LoadEffective(ctx, s.Pool, orgID)
+	cfg, _, err := atrisk.LoadEffectiveForCourse(ctx, s.Pool, courseID)
 	if err != nil {
 		return 0, err
 	}

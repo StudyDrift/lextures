@@ -98,6 +98,17 @@ func TestAtRisk_List_FeatureDisabled_Unauthenticated401_Nodb(t *testing.T) {
 	}
 }
 
+func TestAtRisk_ConfigGet_Unauthorized_Nodb(t *testing.T) {
+	d := Deps{Config: config.Config{AtRiskAlertsEnabled: true}}
+	h := NewHandler(d)
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/courses/abc/at-risk/config", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("status %d want 401, body=%s", rr.Code, rr.Body.String())
+	}
+}
+
 func TestAtRisk_AdminRun_Unauthorized_Nodb(t *testing.T) {
 	d := Deps{Config: config.Config{AtRiskAlertsEnabled: true}}
 	h := NewHandler(d)
