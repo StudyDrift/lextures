@@ -36,6 +36,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.DRMEnabled = mergeBool(db.DRMEnabled, false)
 	out.VideoTranscodingEnabled = mergeBool(db.VideoTranscodingEnabled, false)
 	out.AutoCaptioningEnabled = mergeBool(db.AutoCaptioningEnabled, false)
+	out.VideoCaptionsEnabled = mergeBool(db.VideoCaptionsEnabled, false)
 	out.StorageQuotasEnabled = mergeBool(db.StorageQuotasEnabled, false)
 	out.AtRiskAlertsEnabled = mergeBool(db.AtRiskAlertsEnabled, false)
 	out.AvScanningEnabled = mergeBool(db.AvScanningEnabled, false)

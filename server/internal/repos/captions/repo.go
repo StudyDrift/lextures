@@ -175,6 +175,53 @@ func EnqueueForObjectIfNeeded(ctx context.Context, pool *pgxpool.Pool, objectID 
 	return Enqueue(ctx, pool, objectID, backend)
 }
 
+// Delete removes a caption record by ID.
+func Delete(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) error {
+	_, err := pool.Exec(ctx, `DELETE FROM storage.captions WHERE id = $1`, id)
+	return err
+}
+
+// UpdateVTTContent stores edited VTT, transcript plain text, and marks instructor-reviewed.
+func UpdateVTTContent(ctx context.Context, pool *pgxpool.Pool, id, reviewedBy uuid.UUID, vttContent, transcript, vttKey string) error {
+	_, err := pool.Exec(ctx, `
+		UPDATE storage.captions
+		SET transcript_text = $2, vtt_key = $3,
+		    status = 'instructor_reviewed', reviewed_at = now(), reviewed_by = $4,
+		    has_low_confidence = false
+		WHERE id = $1`,
+		id, transcript, vttKey, reviewedBy)
+	return err
+}
+
+// ObjectHasReadyCaption returns true when a done or instructor_reviewed caption exists for the object.
+func ObjectHasReadyCaption(ctx context.Context, pool *pgxpool.Pool, objectID uuid.UUID) (bool, error) {
+	var ok bool
+	err := pool.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM storage.captions
+			WHERE storage_object_id = $1
+			  AND status IN ('done', 'instructor_reviewed')
+			  AND vtt_key IS NOT NULL AND vtt_key <> ''
+		)`, objectID).Scan(&ok)
+	return ok, err
+}
+
+// ResolveObjectIDByStorageKey looks up storage.objects.id for an object_key (e.g. course file storage_key).
+func ResolveObjectIDByStorageKey(ctx context.Context, pool *pgxpool.Pool, objectKey string) (*uuid.UUID, error) {
+	var id uuid.UUID
+	err := pool.QueryRow(ctx, `
+		SELECT id FROM storage.objects
+		WHERE object_key = $1 AND deleted_at IS NULL
+		LIMIT 1`, objectKey).Scan(&id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
+}
+
 func scanCaption(row pgx.Row) (*Caption, error) {
 	var c Caption
 	err := row.Scan(

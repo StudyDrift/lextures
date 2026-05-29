@@ -1,5 +1,12 @@
 import Hls from 'hls.js'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { CaptionSettings } from '../media/caption-settings'
+import {
+  captionStyleVars,
+  loadCaptionPreferences,
+  saveCaptionPreferences,
+  type CaptionPreferences,
+} from '../../lib/caption-preferences'
 
 export interface TranscodeStatus {
   status: 'queued' | 'processing' | 'done' | 'failed'
@@ -21,6 +28,10 @@ interface VideoPlayerProps {
   transcodeStatus?: TranscodeStatus
   /** ARIA label for the video element. */
   ariaLabel?: string
+  /** Authenticated URL for WebVTT track (plan 12.4). */
+  captionTrackSrc?: string
+  /** BCP-47 language for the track element. */
+  captionLang?: string
   className?: string
 }
 
@@ -32,6 +43,8 @@ export function VideoPlayer({
   posterUrl,
   transcodeStatus,
   ariaLabel = 'Video player',
+  captionTrackSrc,
+  captionLang = 'en',
   className = '',
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -41,6 +54,8 @@ export function VideoPlayer({
   const [duration, setDuration] = useState(0)
   const [levels, setLevels] = useState<QualityLevel[]>([])
   const [currentLevel, setCurrentLevel] = useState<number>(-1) // -1 = auto
+  const [captionPrefs, setCaptionPrefs] = useState<CaptionPreferences>(() => loadCaptionPreferences())
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const status = transcodeStatus?.status
 
@@ -114,6 +129,25 @@ export function VideoPlayer({
     }
   }, [])
 
+  useEffect(() => {
+    saveCaptionPreferences(captionPrefs)
+    const video = videoRef.current
+    if (!video?.textTracks?.length) return
+    for (let i = 0; i < video.textTracks.length; i++) {
+      const track = video.textTracks[i]
+      if (track.kind === 'captions' || track.kind === 'subtitles') {
+        track.mode = captionPrefs.enabled && captionTrackSrc ? 'showing' : 'hidden'
+      }
+    }
+  }, [captionPrefs, captionTrackSrc])
+
+  const captionStatus =
+    captionPrefs.enabled && captionTrackSrc ? 'Captions on' : 'Captions off'
+
+  const toggleCaptions = useCallback(() => {
+    setCaptionPrefs((p) => ({ ...p, enabled: !p.enabled }))
+  }, [])
+
   const togglePlay = useCallback(() => {
     const video = videoRef.current
     if (!video) return
@@ -169,9 +203,16 @@ export function VideoPlayer({
           e.preventDefault()
           toggleFullscreen()
           break
+        case 'c':
+        case 'C':
+          if (captionTrackSrc) {
+            e.preventDefault()
+            toggleCaptions()
+          }
+          break
       }
     },
-    [togglePlay, seek, toggleFullscreen],
+    [togglePlay, seek, toggleFullscreen, toggleCaptions, captionTrackSrc],
   )
 
   const formatTime = (s: number) => {
@@ -237,21 +278,48 @@ export function VideoPlayer({
     )
   }
 
+  const cueStyle = captionStyleVars(captionPrefs)
+
   return (
-    <div className={`relative flex flex-col rounded-lg bg-black ${className}`} onKeyDown={handleKeyDown} tabIndex={0} role="group" aria-label={ariaLabel}>
+    <div
+      className={`relative flex flex-col rounded-lg bg-black ${className}`}
+      style={cueStyle}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+      role="group"
+      aria-label={ariaLabel}
+    >
+      <p className="sr-only" role="status" aria-live="polite">
+        {captionStatus}
+      </p>
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- track injected when captionTrackSrc is set */}
       <video
         ref={videoRef}
         poster={posterUrl}
         playsInline
-        className="w-full rounded-t-lg"
+        className="video-with-captions w-full rounded-t-lg"
         aria-label={ariaLabel}
         tabIndex={-1}
       >
-        <track kind="captions" src="" default />
+        {captionTrackSrc ? (
+          <track
+            kind="captions"
+            src={captionTrackSrc}
+            srcLang={captionLang}
+            label="Captions"
+            default={captionPrefs.enabled}
+          />
+        ) : null}
       </video>
+      <CaptionSettings
+        open={settingsOpen}
+        prefs={captionPrefs}
+        onChange={setCaptionPrefs}
+        onClose={() => setSettingsOpen(false)}
+      />
 
       {/* Custom controls */}
-      <div className="flex items-center gap-2 rounded-b-lg bg-gray-900 px-3 py-2 text-white">
+      <div className="flex flex-wrap items-center gap-2 rounded-b-lg bg-gray-900 px-3 py-2 text-white">
         <button
           onClick={togglePlay}
           aria-label={playing ? 'Pause' : 'Play'}
@@ -279,12 +347,35 @@ export function VideoPlayer({
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
 
+        {captionTrackSrc ? (
+          <>
+            <button
+              type="button"
+              onClick={toggleCaptions}
+              aria-pressed={captionPrefs.enabled}
+              aria-label="Toggle captions"
+              className="rounded px-2 py-0.5 text-sm font-semibold hover:bg-gray-700"
+            >
+              CC
+            </button>
+            <button
+              type="button"
+              onClick={() => setSettingsOpen((o) => !o)}
+              aria-label="Caption settings"
+              aria-haspopup="dialog"
+              className="rounded px-2 py-0.5 text-xs hover:bg-gray-700"
+            >
+              Caption settings
+            </button>
+          </>
+        ) : null}
+
         {/* Quality picker (FR-9) */}
         {levels.length > 0 && (
           <select
             value={currentLevel}
             onChange={(e) => setQuality(Number(e.target.value))}
-            className="ml-auto rounded bg-gray-700 px-1 py-0.5 text-xs"
+            className="ms-auto rounded bg-gray-700 px-1 py-0.5 text-xs"
             aria-label="video.qualityLabel"
           >
             <option value={-1}>Auto</option>

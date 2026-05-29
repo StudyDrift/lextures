@@ -9,7 +9,7 @@ const IMAGE_MIME_TYPES = new Set([
 const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'])
 const PDF_EXTS = new Set(['.pdf'])
 
-export type PreviewType = 'pdf' | 'image' | 'none'
+export type PreviewType = 'pdf' | 'image' | 'video' | 'none'
 
 function fileExt(filename: string): string {
   const i = filename.lastIndexOf('.')
@@ -28,5 +28,6 @@ export function detectPreviewType(
   const ext = filename ? fileExt(filename) : ''
   if (mt === 'application/pdf' || PDF_EXTS.has(ext)) return 'pdf'
   if (IMAGE_MIME_TYPES.has(mt) || IMAGE_EXTS.has(ext)) return 'image'
+  if (mt.startsWith('video/') || ext === '.mp4' || ext === '.webm' || ext === '.mov') return 'video'
   return 'none'
 }

@@ -26,6 +26,8 @@ type platformFeaturesJSON struct {
 	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
 	SessionManagementUIEnabled bool `json:"sessionManagementUiEnabled"`
 	RTLEnabled                 bool `json:"rtlEnabled"`
+	VideoCaptionsEnabled       bool `json:"videoCaptionsEnabled"`
+	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -48,6 +50,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		VirtualClassroomEnabled:    cfg.VirtualClassroomEnabled,
 		SessionManagementUIEnabled: cfg.SessionManagementUIEnabled,
 		RTLEnabled:                 cfg.RTLEnabled,
+		VideoCaptionsEnabled:       cfg.VideoCaptionsEnabled,
+		AutoCaptioningEnabled:      cfg.AutoCaptioningEnabled,
 	}
 }
 

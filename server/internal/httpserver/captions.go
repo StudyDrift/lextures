@@ -21,6 +21,7 @@ func (d Deps) registerCaptionRoutes(r chi.Router) {
 	r.Put("/api/v1/files/{object_id}/captions/{caption_id}", d.handleUpdateCaption())
 	r.Post("/api/v1/files/{object_id}/captions/retrigger", d.handleRetriggerCaption())
 	r.Get("/api/v1/reports/caption-coverage", d.handleCaptionCoverageReport())
+	d.registerCaptionAccessibilityRoutes(r)
 }
 
 type captionResponse struct {
@@ -55,8 +56,8 @@ func (d Deps) handleListCaptions() http.HandlerFunc {
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
-		if !d.effectiveConfig().AutoCaptioningEnabled {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Auto-captioning is not enabled.")
+		if !d.captionsAccessible() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Video captions are not enabled.")
 			return
 		}
 
@@ -89,8 +90,8 @@ func (d Deps) handleGetCaptionVTT() http.HandlerFunc {
 		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
-		if !d.effectiveConfig().AutoCaptioningEnabled {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Auto-captioning is not enabled.")
+		if !d.captionsAccessible() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Video captions are not enabled.")
 			return
 		}
 
@@ -164,8 +165,8 @@ func (d Deps) handleUpdateCaption() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		if !d.effectiveConfig().AutoCaptioningEnabled {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Auto-captioning is not enabled.")
+		if !d.captionsAccessible() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Video captions are not enabled.")
 			return
 		}
 
@@ -232,8 +233,8 @@ func (d Deps) handleRetriggerCaption() http.HandlerFunc {
 			return
 		}
 		cfg := d.effectiveConfig()
-		if !cfg.AutoCaptioningEnabled {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Auto-captioning is not enabled.")
+		if !d.captionsAccessible() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Video captions are not enabled.")
 			return
 		}
 
@@ -276,8 +277,8 @@ func (d Deps) handleCaptionCoverageReport() http.HandlerFunc {
 		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
-		if !d.effectiveConfig().AutoCaptioningEnabled {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Auto-captioning is not enabled.")
+		if !d.captionsAccessible() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Video captions are not enabled.")
 			return
 		}
 
