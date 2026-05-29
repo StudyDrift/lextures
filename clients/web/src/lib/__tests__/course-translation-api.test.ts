@@ -22,6 +22,7 @@ describe('course-translation-api feature gate', () => {
       readingLevelEnabled: false,
       altTextEnforcementEnabled: false,
       ffAltTextEnforcement: false,
+      speechToTextEnabled: false,
       translationMemoryEnabled: true,
       storageQuotasEnabled: false,
       avScanningEnabled: false,

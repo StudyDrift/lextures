@@ -232,6 +232,8 @@ type Config struct {
 	AltTextEnforcementEnabled bool
 	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).
 	FFAltTextEnforcement bool
+	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
+	SpeechToTextEnabled bool
 	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
 	TranslationMemoryEnabled bool
 

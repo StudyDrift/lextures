@@ -11,10 +11,13 @@ import {
 } from 'lucide-react'
 import type { MouseEvent } from 'react'
 import type { MarkdownEditKind } from './markdown-insert'
+import { DictationButton, type DictationButtonProps } from './dictation-button'
 
 export type MarkdownFormatToolbarProps = {
   disabled?: boolean
   onApply: (kind: MarkdownEditKind) => void
+  /** Speech-to-text dictation (plan 12.9). */
+  dictation?: Omit<DictationButtonProps, 'disabled'>
   /** Insert course image: file picker and drag-and-drop onto the button. */
   courseImage?: {
     onPickClick: () => void
@@ -32,7 +35,7 @@ export type MarkdownFormatToolbarProps = {
  * Markdown formatting buttons for use inside BlockFloatingToolbar children.
  * Uses mousedown preventDefault so the textarea keeps focus while clicking.
  */
-export function MarkdownFormatToolbar({ disabled, onApply, courseImage, mathInsert }: MarkdownFormatToolbarProps) {
+export function MarkdownFormatToolbar({ disabled, onApply, dictation, courseImage, mathInsert }: MarkdownFormatToolbarProps) {
   function preventBlur(e: MouseEvent) {
     e.preventDefault()
   }
@@ -160,6 +163,7 @@ export function MarkdownFormatToolbar({ disabled, onApply, courseImage, mathInse
           </button>
         </>
       ) : null}
+      {dictation ? <DictationButton disabled={disabled} {...dictation} /> : null}
     </>
   )
 }
