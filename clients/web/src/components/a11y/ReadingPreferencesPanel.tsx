@@ -1,62 +1,306 @@
-import { useEffect, useRef, useState } from 'react'
-import { authorizedFetch } from '../../lib/api'
-import { applyReadingPrefs, parseReadingPrefs } from '../../lib/reading-prefs'
+import { useEffect, useId, useRef } from 'react'
+import { X } from 'lucide-react'
+import { useReadingPreferences } from '../../context/reading-preferences-context'
 import { LiveRegion } from './live-region'
+import type {
+  FontFace,
+  LetterSpacing,
+  LineHeight,
+  RulerColor,
+  WordSpacing,
+} from '../../lib/reading-preferences'
 
-type Prefs = {
-  highContrast: boolean
-  reduceMotion: boolean
+interface Props {
+  open: boolean
+  onClose: () => void
 }
 
-async function fetchPrefs(): Promise<Prefs> {
-  const res = await authorizedFetch('/api/v1/me/reading-preferences')
-  if (!res.ok) throw new Error('Failed to load preferences')
-  const raw: unknown = await res.json()
-  return parseReadingPrefs(raw)
+const fontOptions: { value: FontFace; label: string; description: string }[] = [
+  { value: 'default',       label: 'Default',               description: 'Plus Jakarta Sans' },
+  { value: 'open-dyslexic', label: 'OpenDyslexic',          description: 'Optimised for dyslexic readers' },
+  { value: 'atkinson',      label: 'Atkinson Hyperlegible',  description: 'High legibility sans-serif' },
+  { value: 'system',        label: 'System font',            description: "Your device's default font" },
+]
+
+const spacingSteps: { value: LetterSpacing; label: string }[] = [
+  { value: 'normal', label: 'Normal' },
+  { value: 'wide',   label: 'Wide' },
+  { value: 'wider',  label: 'Wider' },
+]
+
+const wordSpacingSteps: { value: WordSpacing; label: string }[] = [
+  { value: 'normal', label: 'Normal' },
+  { value: 'wide',   label: 'Wide' },
+  { value: 'wider',  label: 'Wider' },
+]
+
+const lineHeightSteps: { value: LineHeight; label: string }[] = [
+  { value: 'normal', label: 'Normal (1.5×)' },
+  { value: 'tall',   label: 'Tall (1.8×)' },
+  { value: 'taller', label: 'Taller (2.0×)' },
+]
+
+const rulerColorOptions: { value: RulerColor; label: string; bg: string }[] = [
+  { value: 'yellow', label: 'Yellow tint', bg: 'rgba(255, 248, 0, 0.25)' },
+  { value: 'grey',   label: 'Grey tint',   bg: 'rgba(128, 128, 128, 0.2)' },
+]
+
+export function ReadingPreferencesPanel({ open, onClose }: Props) {
+  const { prefs, loading, update } = useReadingPreferences()
+  const panelRef = useRef<HTMLDivElement>(null)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
+  const titleId = useId()
+
+  /* Trap focus + close on Escape */
+  useEffect(() => {
+    if (!open) return
+    closeBtnRef.current?.focus()
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key !== 'Tab') return
+      const panel = panelRef.current
+      if (!panel) return
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      )
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last?.focus()
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault()
+          first?.focus()
+        }
+      }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
+  if (!open) return null
+
+  return (
+    <>
+      {/* Backdrop (click-outside closes) */}
+      <div
+        className="fixed inset-0 z-40"
+        aria-hidden="true"
+        onClick={onClose}
+      />
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-label="Reading Preferences"
+        className="fixed end-4 top-16 z-50 w-80 max-h-[calc(100dvh-5rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/40 sm:w-96"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-neutral-800">
+          <h2 id={titleId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            Reading Preferences
+          </h2>
+          <button
+            ref={closeBtnRef}
+            type="button"
+            aria-label="Close Reading Preferences panel"
+            onClick={onClose}
+            className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+          >
+            <X className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="space-y-4 p-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-8 motion-safe:animate-pulse rounded-lg bg-slate-100 dark:bg-neutral-800" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-5 p-4">
+            {/* Font face */}
+            <fieldset>
+              <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                Font
+              </legend>
+              <div className="space-y-1.5">
+                {fontOptions.map((opt) => (
+                  <label
+                    key={opt.value}
+                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 hover:bg-slate-50 has-[:checked]:border-indigo-200 has-[:checked]:bg-indigo-50 dark:hover:bg-neutral-800 dark:has-[:checked]:border-indigo-800 dark:has-[:checked]:bg-indigo-950/30"
+                  >
+                    <input
+                      type="radio"
+                      name="reading-font-face"
+                      value={opt.value}
+                      checked={prefs.fontFace === opt.value}
+                      onChange={() => update({ fontFace: opt.value })}
+                      className="h-4 w-4 border-slate-300 text-indigo-600 focus:ring-indigo-500/30"
+                      aria-label={`Font: ${opt.label} — ${opt.description}`}
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                        {opt.label}
+                      </span>
+                      <span className="block text-xs text-slate-500 dark:text-neutral-400">
+                        {opt.description}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {/* Letter spacing */}
+            <SpacingControl
+              legend="Letter Spacing"
+              name="reading-letter-spacing"
+              options={spacingSteps}
+              value={prefs.letterSpacing}
+              onChange={(v) => update({ letterSpacing: v as LetterSpacing })}
+            />
+
+            {/* Word spacing */}
+            <SpacingControl
+              legend="Word Spacing"
+              name="reading-word-spacing"
+              options={wordSpacingSteps}
+              value={prefs.wordSpacing}
+              onChange={(v) => update({ wordSpacing: v as WordSpacing })}
+            />
+
+            {/* Line height */}
+            <SpacingControl
+              legend="Line Height"
+              name="reading-line-height"
+              options={lineHeightSteps}
+              value={prefs.lineHeight}
+              onChange={(v) => update({ lineHeight: v as LineHeight })}
+            />
+
+            {/* Reading ruler */}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  Reading Ruler
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={prefs.rulerEnabled}
+                  aria-label={`Reading ruler: ${prefs.rulerEnabled ? 'on' : 'off'}`}
+                  onClick={() => update({ rulerEnabled: !prefs.rulerEnabled })}
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${
+                    prefs.rulerEnabled
+                      ? 'bg-indigo-600 dark:bg-indigo-500'
+                      : 'bg-slate-200 dark:bg-neutral-700'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm ${
+                      prefs.rulerEnabled ? 'translate-x-4' : 'translate-x-0.5'
+                    }`}
+                  />
+                </button>
+              </div>
+              {prefs.rulerEnabled && (
+                <div className="mt-2.5">
+                  <p className="mb-1.5 text-xs text-slate-500 dark:text-neutral-400">Ruler colour</p>
+                  <div className="flex gap-2">
+                    {rulerColorOptions.map((opt) => (
+                      <label key={opt.value} className="flex cursor-pointer items-center gap-1.5">
+                        <input
+                          type="radio"
+                          name="reading-ruler-color"
+                          value={opt.value}
+                          checked={prefs.rulerColor === opt.value}
+                          onChange={() => update({ rulerColor: opt.value })}
+                          className="sr-only"
+                          aria-label={`Ruler colour: ${opt.label}`}
+                        />
+                        <span
+                          aria-hidden="true"
+                          style={{ background: opt.bg }}
+                          className={`h-5 w-8 rounded border-2 ${
+                            prefs.rulerColor === opt.value
+                              ? 'border-indigo-500'
+                              : 'border-slate-200 dark:border-neutral-600'
+                          }`}
+                        />
+                        <span className="text-xs text-slate-600 dark:text-neutral-300">{opt.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Accessibility display — plan 12.7 */}
+            <div className="border-t border-slate-100 pt-4 dark:border-neutral-800">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                Display
+              </p>
+              <LiveRegion politeness="polite" />
+              <div className="space-y-3">
+                <AccessibilityToggle
+                  id="pref-high-contrast"
+                  label="High contrast"
+                  description="Increases contrast to at least 7:1 for text and interactive elements."
+                  checked={prefs.highContrast}
+                  onChange={(v) => update({ highContrast: v })}
+                />
+                <AccessibilityToggle
+                  id="pref-reduce-motion"
+                  label="Reduce motion"
+                  description="Stops animations and transitions to reduce motion-triggered discomfort."
+                  checked={prefs.reduceMotion}
+                  onChange={(v) => update({ reduceMotion: v })}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  )
 }
 
-async function savePrefs(patch: Partial<Prefs>): Promise<Prefs> {
-  const res = await authorizedFetch('/api/v1/me/reading-preferences', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(patch),
-  })
-  if (!res.ok) throw new Error('Failed to save preferences')
-  const raw: unknown = await res.json()
-  return parseReadingPrefs(raw)
-}
-
-type ToggleProps = {
+interface AccessibilityToggleProps {
   id: string
   label: string
   description: string
   checked: boolean
-  disabled: boolean
   onChange: (value: boolean) => void
 }
 
-function PrefToggle({ id, label, description, checked, disabled, onChange }: ToggleProps) {
+function AccessibilityToggle({ id, label, description, checked, onChange }: AccessibilityToggleProps) {
   return (
-    <div className="flex items-start gap-3 py-3">
+    <div className="flex items-start gap-3">
       <button
         id={id}
         role="switch"
         aria-checked={checked}
         aria-describedby={`${id}-desc`}
-        disabled={disabled}
         onClick={() => onChange(!checked)}
-        className="mt-0.5 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent motion-safe:transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
         style={{ backgroundColor: checked ? 'rgb(79 70 229)' : 'rgb(209 213 219)' }}
+        className="mt-0.5 relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
       >
         <span className="sr-only">{label}</span>
         <span
           aria-hidden="true"
-          className="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 motion-safe:transition-transform"
-          style={{ transform: checked ? 'translateX(20px)' : 'translateX(0)' }}
+          className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm motion-safe:transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`}
         />
       </button>
       <div className="min-w-0 flex-1">
-        <label htmlFor={id} className="text-sm font-medium text-slate-900 dark:text-neutral-100 cursor-pointer select-none">
+        <label htmlFor={id} className="cursor-pointer select-none text-sm font-medium text-slate-900 dark:text-neutral-100">
           {label}
         </label>
         <p id={`${id}-desc`} className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
@@ -67,102 +311,43 @@ function PrefToggle({ id, label, description, checked, disabled, onChange }: Tog
   )
 }
 
-type Props = {
-  /** When provided, shows a read-only message instead of toggles. */
-  accommodationLabel?: string
+interface SpacingControlProps {
+  legend: string
+  name: string
+  options: { value: string; label: string }[]
+  value: string
+  onChange: (v: string) => void
 }
 
-export function ReadingPreferencesPanel({ accommodationLabel }: Props) {
-  const [prefs, setPrefs] = useState<Prefs>({ highContrast: false, reduceMotion: false })
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [announcement, setAnnouncement] = useState('')
-  const isMounted = useRef(true)
-
-  useEffect(() => {
-    isMounted.current = true
-    fetchPrefs()
-      .then((p) => {
-        if (isMounted.current) setPrefs(p)
-      })
-      .catch(() => { /* use defaults */ })
-      .finally(() => {
-        if (isMounted.current) setLoading(false)
-      })
-    return () => {
-      isMounted.current = false
-    }
-  }, [])
-
-  async function toggle(field: keyof Prefs, value: boolean) {
-    if (saving) return
-    const next = { ...prefs, [field]: value }
-    setPrefs(next)
-    applyReadingPrefs(next)
-    setSaving(true)
-    try {
-      const saved = await savePrefs({ [field]: value })
-      if (isMounted.current) {
-        setPrefs(saved)
-        applyReadingPrefs(saved)
-        window.dispatchEvent(new CustomEvent('lextures-reading-prefs-updated'))
-        const label =
-          field === 'highContrast'
-            ? saved.highContrast
-              ? 'High contrast enabled'
-              : 'High contrast disabled'
-            : saved.reduceMotion
-            ? 'Reduce motion enabled'
-            : 'Reduce motion disabled'
-        setAnnouncement(label)
-      }
-    } catch {
-      if (isMounted.current) {
-        setPrefs((prev) => ({ ...prev, [field]: !value }))
-        applyReadingPrefs({ ...prefs, [field]: !value })
-      }
-    } finally {
-      if (isMounted.current) setSaving(false)
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="py-4 text-sm text-slate-500 dark:text-neutral-400" aria-busy="true">
-        Loading preferences…
-      </div>
-    )
-  }
-
+function SpacingControl({ legend, name, options, value, onChange }: SpacingControlProps) {
   return (
-    <section aria-labelledby="reading-prefs-heading" className="space-y-1">
-      <LiveRegion politeness="polite">{announcement}</LiveRegion>
-      <h2 id="reading-prefs-heading" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
-        Accessibility display
-      </h2>
-      {accommodationLabel && (
-        <p className="text-xs text-slate-500 dark:text-neutral-400 mb-2" role="note">
-          {accommodationLabel}
-        </p>
-      )}
-      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
-        <PrefToggle
-          id="pref-high-contrast"
-          label="High contrast"
-          description="Increases contrast to at least 7:1 for all text and interactive elements."
-          checked={prefs.highContrast}
-          disabled={saving || !!accommodationLabel}
-          onChange={(v) => toggle('highContrast', v)}
-        />
-        <PrefToggle
-          id="pref-reduce-motion"
-          label="Reduce motion"
-          description="Stops all animations and transitions to reduce motion-triggered discomfort."
-          checked={prefs.reduceMotion}
-          disabled={saving || !!accommodationLabel}
-          onChange={(v) => toggle('reduceMotion', v)}
-        />
+    <fieldset>
+      <legend className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+        {legend}
+      </legend>
+      <div className="flex gap-1.5">
+        {options.map((opt) => (
+          <label
+            key={opt.value}
+            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium ${
+              value === opt.value
+                ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
+                : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-700'
+            }`}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={opt.value}
+              checked={value === opt.value}
+              onChange={() => onChange(opt.value)}
+              className="sr-only"
+              aria-label={`${legend}: ${opt.label}`}
+            />
+            {opt.label}
+          </label>
+        ))}
       </div>
-    </section>
+    </fieldset>
   )
 }
