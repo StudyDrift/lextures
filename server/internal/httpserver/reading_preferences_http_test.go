@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/migrate"
 	"github.com/lextures/lextures/server/internal/platformstate"
+	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 func readAloudDeps(enabled bool) Deps {
@@ -30,9 +31,9 @@ func readAloudDeps(enabled bool) Deps {
 	}
 }
 
-func bearerRequest(t *testing.T, d Deps, method, path string, body []byte) *http.Request {
+func bearerRequest(t *testing.T, ctx context.Context, signer *auth.JWTSigner, userID, email, method, path string, body []byte) *http.Request {
 	t.Helper()
-	tok, err := d.JWTSigner.Sign(context.Background(), "a0000000-0000-4000-8000-000000000099", "tts@test.invalid", "", "", nil)
+	tok, err := signer.Sign(ctx, userID, email, "", "", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,6 +43,7 @@ func bearerRequest(t *testing.T, d Deps, method, path string, body []byte) *http
 	} else {
 		r = httptest.NewRequest(method, path, bytes.NewReader(body))
 	}
+	r = r.WithContext(ctx)
 	r.Header.Set("Authorization", "Bearer "+tok)
 	return r
 }
@@ -58,7 +60,7 @@ func TestReadAloud_GetPreferencesUnauthorized(t *testing.T) {
 func TestReadAloud_TTSSynthesizeFeatureOff(t *testing.T) {
 	d := readAloudDeps(false)
 	w := httptest.NewRecorder()
-	r := bearerRequest(t, d, http.MethodPost, "/api/v1/tts/synthesize", []byte(`{"text":"Hi","lang":"en","speed":1}`))
+	r := bearerRequest(t, context.Background(), d.JWTSigner, "a0000000-0000-4000-8000-000000000099", "tts@test.invalid", http.MethodPost, "/api/v1/tts/synthesize", []byte(`{"text":"Hi","lang":"en","speed":1}`))
 	d.handlePostTTSSynthesize()(w, r)
 	if w.Code != http.StatusNotFound {
 		t.Fatalf("expected 404, got %d", w.Code)
@@ -81,17 +83,28 @@ func TestReadAloud_AuthenticatedHandlersPg(t *testing.T) {
 	}
 	defer pool.Close()
 
+	em := "readaloud-" + time.Now().Format("20060102150405.999999999") + "@e.com"
+	ph, err := auth.HashPassword("longpassword0")
+	if err != nil {
+		t.Fatalf("hash: %v", err)
+	}
+	row, err := user.InsertUser(ctx, pool, em, ph, nil)
+	if err != nil {
+		t.Fatalf("user: %v", err)
+	}
+
 	cfg := config.Config{ReadAloudEnabled: true, FFReadAloud: true}
+	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
 	d := Deps{
 		Pool:      pool,
 		Config:    cfg,
 		Platform:  platformstate.New(cfg),
-		JWTSigner: auth.NewJWTSigner("01234567890123456789012345678901"),
+		JWTSigner: signer,
 	}
 
 	t.Run("patch invalid speed", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r := bearerRequest(t, d, http.MethodPatch, "/api/v1/me/reading-preferences", []byte(`{"ttsSpeed":3}`))
+		r := bearerRequest(t, ctx, signer, row.ID, em, http.MethodPatch, "/api/v1/me/reading-preferences", []byte(`{"ttsSpeed":3}`))
 		d.handlePatchMyReadingPreferences()(w, r)
 		if w.Code != http.StatusBadRequest {
 			t.Fatalf("expected 400, got %d body=%s", w.Code, w.Body.String())
@@ -100,7 +113,7 @@ func TestReadAloud_AuthenticatedHandlersPg(t *testing.T) {
 
 	t.Run("tts synthesize wav", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		r := bearerRequest(t, d, http.MethodPost, "/api/v1/tts/synthesize", []byte(`{"text":"Hello world","lang":"en-US","speed":1}`))
+		r := bearerRequest(t, ctx, signer, row.ID, em, http.MethodPost, "/api/v1/tts/synthesize", []byte(`{"text":"Hello world","lang":"en-US","speed":1}`))
 		d.handlePostTTSSynthesize()(w, r)
 		if w.Code != http.StatusOK {
 			t.Fatalf("expected 200, got %d body=%s", w.Code, w.Body.String())
@@ -116,14 +129,14 @@ func TestReadAloud_AuthenticatedHandlersPg(t *testing.T) {
 	t.Run("preferences round trip", func(t *testing.T) {
 		patchBody, _ := json.Marshal(map[string]any{"ttsEnabled": true, "ttsSpeed": 1.5})
 		w := httptest.NewRecorder()
-		r := bearerRequest(t, d, http.MethodPatch, "/api/v1/me/reading-preferences", patchBody)
+		r := bearerRequest(t, ctx, signer, row.ID, em, http.MethodPatch, "/api/v1/me/reading-preferences", patchBody)
 		d.handlePatchMyReadingPreferences()(w, r)
 		if w.Code != http.StatusOK {
 			t.Fatalf("patch: %d %s", w.Code, w.Body.String())
 		}
 
 		w2 := httptest.NewRecorder()
-		r2 := bearerRequest(t, d, http.MethodGet, "/api/v1/me/reading-preferences", nil)
+		r2 := bearerRequest(t, ctx, signer, row.ID, em, http.MethodGet, "/api/v1/me/reading-preferences", nil)
 		d.handleGetMyReadingPreferences()(w2, r2)
 		if w2.Code != http.StatusOK {
 			t.Fatalf("get: %d", w2.Code)
