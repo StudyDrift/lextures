@@ -371,12 +371,6 @@ func courseTitleByID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID
 	return title, err
 }
 
-func orgIDForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (uuid.UUID, error) {
-	var orgID uuid.UUID
-	err := pool.QueryRow(ctx, `SELECT org_id FROM course.courses WHERE id = $1`, courseID).Scan(&orgID)
-	return orgID, err
-}
-
 func factorLabelForEmail(key string) string {
 	switch key {
 	case "quiz":
