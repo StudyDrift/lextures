@@ -6,6 +6,9 @@ export type ReadingPreferences = {
   ttsEnabled: boolean
   ttsSpeed: number
   ttsVoiceName: string | null
+  dyslexiaDisplayEnabled?: boolean
+  highContrastEnabled?: boolean
+  reducedMotionEnabled?: boolean
   updatedAt?: string | null
 }
 
@@ -29,6 +32,9 @@ export async function fetchReadingPreferences(): Promise<ReadingPreferences> {
     ttsEnabled: body.ttsEnabled ?? false,
     ttsSpeed: body.ttsSpeed ?? 1,
     ttsVoiceName: body.ttsVoiceName ?? null,
+    dyslexiaDisplayEnabled: body.dyslexiaDisplayEnabled,
+    highContrastEnabled: body.highContrastEnabled,
+    reducedMotionEnabled: body.reducedMotionEnabled,
     updatedAt: body.updatedAt ?? null,
   }
 }
@@ -37,7 +43,14 @@ export async function patchReadingPreferences(
   patch: Partial<
     Pick<
       ReadingPreferences,
-      'sttEnabled' | 'sttLanguage' | 'ttsEnabled' | 'ttsSpeed' | 'ttsVoiceName'
+      | 'sttEnabled'
+      | 'sttLanguage'
+      | 'ttsEnabled'
+      | 'ttsSpeed'
+      | 'ttsVoiceName'
+      | 'dyslexiaDisplayEnabled'
+      | 'highContrastEnabled'
+      | 'reducedMotionEnabled'
     >
   >,
 ): Promise<ReadingPreferences> {
@@ -57,6 +70,10 @@ export type MyAccommodationEntry = {
   courseCode?: string
   speechToTextEnabled?: boolean
   ttsEnabled?: boolean
+  dyslexiaDisplayEnabled?: boolean
+  highContrastEnabled?: boolean
+  reducedMotionEnabled?: boolean
+  separateSetting?: boolean
 }
 
 export type MyAccommodationSummary = {

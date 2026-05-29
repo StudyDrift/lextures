@@ -1172,3 +1172,186 @@ export async function apiGetCrossSection(
   }
   return res.json() as Promise<{ sectionId: string; sectionName: string; nStudents: number; avgQuizScore: number | null; completionRate: number }[]>
 }
+
+export async function apiPatchPlatformSettings(
+  token: string,
+  body: Record<string, unknown> & { updateMask: string[] },
+): Promise<void> {
+  const res = await fetch(`${apiBase}/api/v1/settings/platform`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Patch platform settings failed (${res.status}): ${text}`)
+  }
+}
+
+export type StudentAccommodationApi = {
+  id: string
+  userId: string
+  timeMultiplier: number
+}
+
+export async function apiCreateStudentAccommodation(
+  token: string,
+  userId: string,
+  body: {
+    courseCode?: string | null
+    timeMultiplier?: number
+    extraAttempts?: number
+    hintsAlwaysEnabled?: boolean
+    reducedDistractionMode?: boolean
+    speechToTextEnabled?: boolean
+    ttsEnabled?: boolean
+    dyslexiaDisplayEnabled?: boolean
+    highContrastEnabled?: boolean
+    reducedMotionEnabled?: boolean
+    separateSetting?: boolean
+  },
+): Promise<StudentAccommodationApi> {
+  const res = await fetch(`${apiBase}/api/v1/users/${encodeURIComponent(userId)}/accommodations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Create accommodation failed (${res.status}): ${text}`)
+  }
+  return res.json() as Promise<StudentAccommodationApi>
+}
+
+export async function apiCreateTimedQuiz(
+  token: string,
+  courseCode: string,
+  moduleId: string,
+  timeLimitMinutes: number,
+): Promise<{ id: string }> {
+  const createRes = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/quizzes`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ title: 'E2E Accommodations Quiz' }),
+    },
+  )
+  if (!createRes.ok) {
+    const body = await createRes.text()
+    throw new Error(`Create quiz failed (${createRes.status}): ${body}`)
+  }
+  const created = (await createRes.json()) as { id: string }
+  const patchRes = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(created.id)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        timeLimitMinutes,
+        questions: [
+          {
+            id: crypto.randomUUID(),
+            prompt: 'Pick one.',
+            questionType: 'multiple_choice',
+            choices: ['A', 'B'],
+            correctChoiceIndex: 0,
+            multipleAnswer: false,
+            answerWithImage: false,
+            required: true,
+            points: 1,
+            estimatedMinutes: 1,
+          },
+        ],
+      }),
+    },
+  )
+  if (!patchRes.ok) {
+    const body = await patchRes.text()
+    throw new Error(`Patch quiz failed (${patchRes.status}): ${body}`)
+  }
+  return created
+}
+
+export type QuizStartApiResponse = {
+  attemptId: string
+  startedAt: string
+  deadlineAt?: string | null
+  extendedTimeActive?: boolean
+}
+
+export async function apiStartQuiz(
+  token: string,
+  courseCode: string,
+  itemId: string,
+): Promise<QuizStartApiResponse> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/start`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({}),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Quiz start failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<QuizStartApiResponse>
+}
+
+export function effectiveTimeLimitSecondsFromStart(start: QuizStartApiResponse): number | null {
+  if (!start.deadlineAt) return null
+  const ms = new Date(start.deadlineAt).getTime() - new Date(start.startedAt).getTime()
+  return Math.round(ms / 1000)
+}
+
+export type AccommodationAuditEntryApi = {
+  id: string
+  studentId: string
+  accommodationType: string
+  valueApplied: unknown
+  context: string
+  contextId?: string | null
+  appliedAt: string
+}
+
+export async function apiFetchAccommodationAuditLog(
+  token: string,
+  opts?: { studentId?: string; limit?: number },
+): Promise<AccommodationAuditEntryApi[]> {
+  const params = new URLSearchParams()
+  if (opts?.studentId) params.set('studentId', opts.studentId)
+  if (opts?.limit != null) params.set('limit', String(opts.limit))
+  const qs = params.toString()
+  const res = await fetch(`${apiBase}/api/v1/admin/accommodations/audit${qs ? `?${qs}` : ''}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Accommodation audit failed (${res.status}): ${body}`)
+  }
+  const data = (await res.json()) as { entries?: AccommodationAuditEntryApi[] }
+  return data.entries ?? []
+}
+
+export async function apiFetchEnrollmentAccommodationSummary(
+  token: string,
+  enrollmentId: string,
+): Promise<{ hasAccommodation: boolean; flags: string[] }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/enrollments/${encodeURIComponent(enrollmentId)}/accommodation-summary`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Enrollment accommodation summary failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ hasAccommodation: boolean; flags: string[] }>
+}

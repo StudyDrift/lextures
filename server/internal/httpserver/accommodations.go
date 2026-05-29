@@ -26,6 +26,8 @@ import (
 func (d Deps) registerAccommodationRoutes(r chi.Router) {
 	r.Get("/accommodations/users", d.handleAccommodationUserSearch())
 	r.Get("/enrollments/{enrollmentID}/accommodation-summary", d.handleEnrollmentAccommodationSummary())
+	r.Get("/admin/accommodations/audit", d.handleAccommodationAuditLog())
+	r.Post("/admin/accommodations/import", d.handleAccommodationCSVImport())
 	r.Route("/users/{userID}/accommodations", func(ur chi.Router) {
 		ur.Get("/", d.handleListUserAccommodations())
 		ur.Post("/", d.handleCreateUserAccommodation())
@@ -246,10 +248,11 @@ func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 		if b.SpeechToText != nil {
 			stt = *b.SpeechToText
 		}
-		tts := false
-		if b.TTSEnabled != nil {
-			tts = *b.TTSEnabled
-		}
+		tts := boolDefault(b.TTS)
+		dys := boolDefault(b.DyslexiaDisplay)
+		hc := boolDefault(b.HighContrast)
+		rm := boolDefault(b.ReducedMotion)
+		sep := boolDefault(b.SeparateSetting)
 		efrom, euntil, st := parseAccEffectiveDates(b.EffectiveFrom, b.EffectiveUntil, w)
 		if !st {
 			return
@@ -270,7 +273,12 @@ func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 				courseID = cid
 			}
 		}
-		row, err := stac.InsertRow(ctx, d.Pool, tid, courseID, tm, extra, h, rd, stt, tts, b.AlternativeFormat, efrom, euntil, uid)
+		row, err := stac.InsertRow(ctx, d.Pool, tid, courseID, stac.AccommodationWrite{
+			TimeMultiplier: tm, ExtraAttempts: extra, HintsAlwaysEnabled: h, ReducedDistraction: rd,
+			SpeechToTextEnabled: stt, TTSEnabled: tts, DyslexiaDisplayEnabled: dys,
+			HighContrastEnabled: hc, ReducedMotionEnabled: rm, SeparateSetting: sep,
+			AlternativeFormat: b.AlternativeFormat, EffectiveFrom: efrom, EffectiveUntil: euntil,
+		}, uid)
 		if err != nil {
 			if isUniqueViolation(err) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "An accommodation already exists for this learner in that scope.")
@@ -353,8 +361,14 @@ func (d Deps) handleUpdateUserAccommodation() http.HandlerFunc {
 		if !st {
 			return
 		}
-		updated, err := stac.UpdateRow(ctx, d.Pool, aid, tid, b.TimeMultiplier, b.ExtraAttempts,
-			b.HintsAlwaysEnabled, b.ReducedDistraction, b.SpeechToTextEnabled, b.TTSEnabled, b.AlternativeFormat, efrom, euntil, uid)
+		updated, err := stac.UpdateRow(ctx, d.Pool, aid, tid, stac.AccommodationWrite{
+			TimeMultiplier: b.TimeMultiplier, ExtraAttempts: b.ExtraAttempts,
+			HintsAlwaysEnabled: b.HintsAlwaysEnabled, ReducedDistraction: b.ReducedDistraction,
+			SpeechToTextEnabled: b.SpeechToTextEnabled, TTSEnabled: b.TTSEnabled,
+			DyslexiaDisplayEnabled: b.DyslexiaDisplayEnabled, HighContrastEnabled: b.HighContrastEnabled,
+			ReducedMotionEnabled: b.ReducedMotionEnabled, SeparateSetting: b.SeparateSetting,
+			AlternativeFormat: b.AlternativeFormat, EffectiveFrom: efrom, EffectiveUntil: euntil,
+		}, uid)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 			return
@@ -439,14 +453,14 @@ func (d Deps) handleMyAccommodations() http.HandlerFunc {
 				continue
 			}
 			entries = append(entries, acmodel.MyEntry{
-				CourseCode:            rr.CourseCode,
-				HasExtendedTime:        rr.Row.TimeMultiplier > 1.000001,
-				HasExtraAttempts:        rr.Row.ExtraAttempts > 0,
-				ReducedDistraction:    rr.Row.ReducedDistraction,
-				SpeechToTextEnabled:   rr.Row.SpeechToTextEnabled,
-				TTSEnabled:            rr.Row.TTSEnabled,
-				EffectiveFrom:         acmodel.YYYYMMDDFromNull(rr.Row.EffectiveFrom),
-				EffectiveUntil:         acmodel.YYYYMMDDFromNull(rr.Row.EffectiveUntil),
+				CourseCode: rr.CourseCode, HasExtendedTime: rr.Row.TimeMultiplier > 1.000001,
+				HasExtraAttempts: rr.Row.ExtraAttempts > 0, HintsAlwaysAvailable: rr.Row.HintsAlwaysEnabled,
+				ReducedDistraction: rr.Row.ReducedDistraction, SpeechToTextEnabled: rr.Row.SpeechToTextEnabled,
+				TTSEnabled: rr.Row.TTSEnabled, DyslexiaDisplayEnabled: rr.Row.DyslexiaDisplayEnabled,
+				HighContrastEnabled: rr.Row.HighContrastEnabled, ReducedMotionEnabled: rr.Row.ReducedMotionEnabled,
+				SeparateSetting: rr.Row.SeparateSetting,
+				EffectiveFrom: acmodel.YYYYMMDDFromNull(rr.Row.EffectiveFrom),
+				EffectiveUntil: acmodel.YYYYMMDDFromNull(rr.Row.EffectiveUntil),
 			})
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -469,22 +483,22 @@ func rowToAPI(r *stac.Row, courseCode *string) acmodel.StudentAccommodation {
 		ub = &s
 	}
 	return acmodel.StudentAccommodation{
-		ID:                 r.ID.String(),
-		UserID:             r.UserID.String(),
-		CourseID:           cid,
-		CourseCode:         courseCode,
-		TimeMultiplier:     r.TimeMultiplier,
-		ExtraAttempts:      r.ExtraAttempts,
-		HintsAlwaysEnabled: r.HintsAlwaysEnabled,
-		ReducedDistraction:    r.ReducedDistraction,
-		SpeechToTextEnabled:   r.SpeechToTextEnabled,
-		TTSEnabled:            r.TTSEnabled,
-		AlternativeFormat:     r.AlternativeFormat,
-		EffectiveFrom:      acmodel.YYYYMMDDFromNull(r.EffectiveFrom),
-		EffectiveUntil:     acmodel.YYYYMMDDFromNull(r.EffectiveUntil),
-		CreatedBy:          r.CreatedBy.String(),
-		UpdatedBy:          ub,
-		CreatedAt:          r.CreatedAt.UTC().Format(time.RFC3339),
-		UpdatedAt:          r.UpdatedAt.UTC().Format(time.RFC3339),
+		ID: r.ID.String(), UserID: r.UserID.String(), CourseID: cid, CourseCode: courseCode,
+		TimeMultiplier: r.TimeMultiplier, ExtraAttempts: r.ExtraAttempts,
+		HintsAlwaysEnabled: r.HintsAlwaysEnabled, ReducedDistraction: r.ReducedDistraction,
+		SpeechToTextEnabled: r.SpeechToTextEnabled, TTSEnabled: r.TTSEnabled,
+		DyslexiaDisplayEnabled: r.DyslexiaDisplayEnabled, HighContrastEnabled: r.HighContrastEnabled,
+		ReducedMotionEnabled: r.ReducedMotionEnabled, SeparateSetting: r.SeparateSetting,
+		AlternativeFormat: r.AlternativeFormat,
+		EffectiveFrom: acmodel.YYYYMMDDFromNull(r.EffectiveFrom), EffectiveUntil: acmodel.YYYYMMDDFromNull(r.EffectiveUntil),
+		CreatedBy: r.CreatedBy.String(), UpdatedBy: ub,
+		CreatedAt: r.CreatedAt.UTC().Format(time.RFC3339), UpdatedAt: r.UpdatedAt.UTC().Format(time.RFC3339),
 	}
+}
+
+func boolDefault(v *bool) bool {
+	if v == nil {
+		return false
+	}
+	return *v
 }

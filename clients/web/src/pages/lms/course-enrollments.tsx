@@ -22,6 +22,7 @@ import {
   fetchCourse,
   fetchCourseScopedRoles,
   fetchCourseSections,
+  fetchEnrollmentAccommodationSummary,
   fetchEnrollmentGroupsTree,
   patchEnrollmentSection,
   postEnrollmentGroupsEnable,
@@ -96,6 +97,10 @@ export default function CourseEnrollments() {
     courseCode ? courseEnrollmentsUpdatePermission(courseCode) : 'global:app:noop:noop',
   )
   const [enrollments, setEnrollments] = useState<CourseEnrollment[] | null>(null)
+  /** enrollment id → has active accommodations (non-PII indicator for instructors). */
+  const [accommodationActiveByEnrollment, setAccommodationActiveByEnrollment] = useState<
+    Record<string, boolean>
+  >({})
   const [viewerRoles, setViewerRoles] = useState<string[]>([])
   /** Used to gate the page before hitting the enrollments API (must match roster nav rules). */
   const [courseViewerEnrollmentRoles, setCourseViewerEnrollmentRoles] = useState<string[] | null>(
@@ -338,6 +343,43 @@ export default function CourseEnrollments() {
     }, 0)
     return () => window.clearTimeout(id)
   }, [allows, courseCode, loadEnrollments, permLoading])
+
+  useEffect(() => {
+    if (!enrollments?.length) {
+      setAccommodationActiveByEnrollment({})
+      return
+    }
+    let cancelled = false
+    const studentRows = enrollments.filter((e) => {
+      const r = normEnrollmentRole(e.role)
+      return r === 'student' || r === 'learner'
+    })
+    if (studentRows.length === 0) {
+      setAccommodationActiveByEnrollment({})
+      return
+    }
+    void (async () => {
+      const entries = await Promise.all(
+        studentRows.map(async (e) => {
+          try {
+            const summary = await fetchEnrollmentAccommodationSummary(e.id)
+            return [e.id, summary.hasAccommodation] as const
+          } catch {
+            return [e.id, false] as const
+          }
+        }),
+      )
+      if (cancelled) return
+      const next: Record<string, boolean> = {}
+      for (const [id, has] of entries) {
+        if (has) next[id] = true
+      }
+      setAccommodationActiveByEnrollment(next)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [enrollments])
 
   const closeModal = useCallback(() => {
     setModalOpen(false)
@@ -844,18 +886,28 @@ export default function CourseEnrollments() {
                     className="group border-b border-slate-100 last:border-0"
                   >
                     <td className="px-4 py-3 font-medium text-slate-900">
-                      {studentProgressFeatureEnabled() &&
-                      courseCode &&
-                      (er === 'student' || er === 'learner') ? (
-                        <Link
-                          to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
-                          className="text-indigo-700 hover:underline dark:text-indigo-300"
-                        >
-                          {e.displayName?.trim() || '—'}
-                        </Link>
-                      ) : (
-                        e.displayName?.trim() || '—'
-                      )}
+                      <div className="flex flex-wrap items-center gap-2">
+                        {studentProgressFeatureEnabled() &&
+                        courseCode &&
+                        (er === 'student' || er === 'learner') ? (
+                          <Link
+                            to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
+                            className="text-indigo-700 hover:underline dark:text-indigo-300"
+                          >
+                            {e.displayName?.trim() || '—'}
+                          </Link>
+                        ) : (
+                          <span>{e.displayName?.trim() || '—'}</span>
+                        )}
+                        {accommodationActiveByEnrollment[e.id] && (
+                          <span
+                            className="inline-flex rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-800 dark:border-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-200"
+                            title="This learner has active accommodations in this course (details are not shown for privacy)."
+                          >
+                            Has active accommodations
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-slate-700">
                       <EnrollmentRoleBadge courseRoleKey={e.role} roleDisplay={e.roleDisplay} />

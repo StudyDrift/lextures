@@ -14,10 +14,16 @@ import (
 
 // Effective holds operational settings for quiz / UI (mirrors Rust EffectiveAccommodations).
 type Effective struct {
-	TimeMultiplier     float64
-	ExtraAttempts      int32
-	HintsAlwaysEnabled bool
-	ReducedDistraction bool
+	TimeMultiplier      float64
+	ExtraAttempts       int32
+	HintsAlwaysEnabled  bool
+	ReducedDistraction  bool
+	TTSEnabled          bool
+	DyslexiaDisplay     bool
+	HighContrast        bool
+	ReducedMotion       bool
+	SeparateSetting     bool
+	SpeechToTextEnabled bool
 }
 
 // FromRow builds effective state from a DB row.
@@ -34,10 +40,16 @@ func FromRow(r *studentaccommodations.Row) Effective {
 		ea = 0
 	}
 	return Effective{
-		TimeMultiplier:     tm,
-		ExtraAttempts:      ea,
-		HintsAlwaysEnabled: r.HintsAlwaysEnabled,
-		ReducedDistraction: r.ReducedDistraction,
+		TimeMultiplier:      tm,
+		ExtraAttempts:       ea,
+		HintsAlwaysEnabled:  r.HintsAlwaysEnabled,
+		ReducedDistraction:  r.ReducedDistraction,
+		TTSEnabled:          r.TTSEnabled,
+		DyslexiaDisplay:     r.DyslexiaDisplayEnabled,
+		HighContrast:        r.HighContrastEnabled,
+		ReducedMotion:       r.ReducedMotionEnabled,
+		SeparateSetting:     r.SeparateSetting,
+		SpeechToTextEnabled: r.SpeechToTextEnabled,
 	}
 }
 
@@ -46,7 +58,15 @@ func (e Effective) HasOperationalSettings() bool {
 	return e.TimeMultiplier > 1.000001 ||
 		e.ExtraAttempts > 0 ||
 		e.HintsAlwaysEnabled ||
-		e.ReducedDistraction
+		e.ReducedDistraction ||
+		e.HasDisplayAccommodations() ||
+		e.SeparateSetting ||
+		e.SpeechToTextEnabled
+}
+
+// HasDisplayAccommodations is true when any reading/display override is active.
+func (e Effective) HasDisplayAccommodations() bool {
+	return e.TTSEnabled || e.DyslexiaDisplay || e.HighContrast || e.ReducedMotion
 }
 
 // ResolveEffectiveForCourse prefers a course-specific row, else global, else zero defaults.
@@ -62,6 +82,21 @@ func ResolveEffectiveForCourse(ctx context.Context, pool *pgxpool.Pool, userID, 
 		return FromRow(r), nil
 	}
 	return Effective{TimeMultiplier: 1, ExtraAttempts: 0}, nil
+}
+
+// ResolveEffectiveGlobal returns the global (all courses) accommodation profile.
+func ResolveEffectiveGlobal(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) Effective {
+	if r, err := studentaccommodations.FindActiveGlobal(ctx, pool, userID); err != nil {
+		prefix := userID.String()
+		if len(prefix) > 8 {
+			prefix = prefix[:8]
+		}
+		log.Printf("accommodation global lookup failed; using defaults (user_id_prefix=%s err=%v)", prefix, err)
+		return Effective{TimeMultiplier: 1, ExtraAttempts: 0}
+	} else if r != nil {
+		return FromRow(r)
+	}
+	return Effective{TimeMultiplier: 1, ExtraAttempts: 0}
 }
 
 // ResolveEffectiveOrDefault never fails the caller: logs DB errors and returns zero defaults.
@@ -92,6 +127,24 @@ func InstructorFlagLabels(e Effective) []string {
 	}
 	if e.HintsAlwaysEnabled {
 		v = append(v, "always_allow_hints")
+	}
+	if e.TTSEnabled {
+		v = append(v, "tts")
+	}
+	if e.SpeechToTextEnabled {
+		v = append(v, "speech_to_text")
+	}
+	if e.DyslexiaDisplay {
+		v = append(v, "dyslexia_display")
+	}
+	if e.HighContrast {
+		v = append(v, "high_contrast")
+	}
+	if e.ReducedMotion {
+		v = append(v, "reduced_motion")
+	}
+	if e.SeparateSetting {
+		v = append(v, "separate_setting")
 	}
 	return v
 }

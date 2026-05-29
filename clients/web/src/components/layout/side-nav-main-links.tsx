@@ -10,6 +10,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   PERM_ACCOMMODATIONS_MANAGE,
@@ -21,6 +22,7 @@ import { SideNavLink } from './side-nav-link'
 export function SideNavMainLinks() {
   const unreadInboxCount = useInboxUnreadCount()
   const { allows, loading: permLoading } = usePermissions()
+  const { accommodationsEngineEnabled } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
@@ -62,6 +64,11 @@ export function SideNavMainLinks() {
       {canManageAccommodations && (
         <SideNavLink to="/admin/accommodations" icon={<Accessibility className="h-5 w-5" />}>
           Accommodations
+        </SideNavLink>
+      )}
+      {canManageAccommodations && accommodationsEngineEnabled && (
+        <SideNavLink to="/admin/accommodations/audit" icon={<Accessibility className="h-5 w-5" />}>
+          Accommodation audit
         </SideNavLink>
       )}
       <SideNavLink
