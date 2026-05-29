@@ -62,20 +62,20 @@ const INTEGRATIONS = [
 
 export function HigherEdPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 text-slate-700">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <Header />
 
       <main>
         {/* Hero */}
-        <section className="border-b border-stone-200/90 bg-white py-20 sm:py-28">
+        <section className="border-b border-slate-200 bg-white py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-stone-500">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
               Higher Education
             </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-[3.25rem]">
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]">
               Assessment infrastructure built for how universities actually run
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-stone-600">
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
               Adaptive quizzing at section scale, LTI integration with every major LMS, and grading records that hold up under accreditation review—without replacing the tools your faculty already use.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
@@ -93,14 +93,14 @@ export function HigherEdPage() {
         {/* Challenges */}
         <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Where higher education assessment actually breaks down
             </h2>
             <div className="mt-10 grid gap-5 sm:grid-cols-3">
               {CHALLENGES.map(({ title, body }) => (
-                <div key={title} className="rounded-xl border border-stone-200/90 bg-white p-6">
-                  <h3 className="font-semibold text-stone-900">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">{body}</p>
+                <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <h3 className="font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{body}</p>
                 </div>
               ))}
             </div>
@@ -108,24 +108,24 @@ export function HigherEdPage() {
         </section>
 
         {/* Features */}
-        <section className="border-t border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-stone-500">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
                 How Lextures helps
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                 Built around the workflows that break first at scale
               </h2>
             </div>
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map(({ icon: Icon, title, body }) => (
                 <article key={title} className="feature-card">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-muted/70 text-accent">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
                     <Icon className="h-5 w-5" aria-hidden />
                   </div>
-                  <h3 className="mt-5 text-base font-semibold text-stone-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{body}</p>
+                  <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
                 </article>
               ))}
             </div>
@@ -133,28 +133,28 @@ export function HigherEdPage() {
         </section>
 
         {/* Multi-section callout */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-20">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                   Course blueprints for multi-section departments
                 </h2>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   When ten instructors teach the same course, consistency is a policy problem, not a technical one. Course blueprints let a department coordinator maintain a master template and push updates to every child section simultaneously—syllabus changes, new question bank items, updated rubrics—without requiring individual faculty action.
                 </p>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   Each section retains the ability to add local content while inheriting the shared foundation. Gradebook exports from all sections roll up into a single outcome report for accreditation.
                 </p>
               </div>
-              <div className="rounded-xl border border-stone-200/90 bg-white p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-stone-500">
+              <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.6)]">
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Design principle
                 </p>
-                <p className="mt-4 text-xl font-medium leading-snug text-stone-900">
+                <p className="mt-4 text-xl font-medium leading-snug text-slate-900">
                   If a registrar would wince at the data model, it does not ship.
                 </p>
-                <p className="mt-4 text-sm leading-relaxed text-stone-500">
+                <p className="mt-4 text-sm leading-relaxed text-slate-500">
                   Every schema decision in Lextures is made with the assumption that the data will eventually need to be exported, audited, or explained to someone outside your institution.
                 </p>
               </div>
@@ -163,24 +163,24 @@ export function HigherEdPage() {
         </section>
 
         {/* Integrations */}
-        <section className="border-t border-stone-200/90 bg-white py-14">
+        <section className="border-t border-slate-200 bg-white py-14">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="text-sm font-semibold text-stone-900">Standards and protocols supported</p>
+            <p className="text-sm font-semibold text-slate-900">Standards and protocols supported</p>
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
               {INTEGRATIONS.map((tag) => (
-                <span key={tag} className="text-sm font-medium text-stone-500">{tag}</span>
+                <span key={tag} className="text-sm font-medium text-slate-500">{tag}</span>
               ))}
             </div>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Walk the instructor and learner flows
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-stone-600">
+            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-600">
               The live demo includes a full course with adaptive quizzes, gradebook, and LMS integration flows you can explore without a login.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

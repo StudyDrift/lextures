@@ -40,36 +40,36 @@ export function DocsIndex() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 text-slate-700">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <Header />
 
       <main>
-        <section className="border-b border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-b border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-muted/70 text-accent">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
                 <HelpCircle className="h-5 w-5" aria-hidden />
               </div>
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-stone-500">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
                 Lextures Documentation
               </p>
             </div>
-            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
+            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
               Knowledge Base
             </h1>
-            <p className="mt-4 max-w-xl text-lg leading-relaxed text-stone-600">
+            <p className="mt-4 max-w-xl text-lg leading-relaxed text-slate-600">
               Guides, tutorials, and documentation to help you get the most out of Lextures.
             </p>
 
             <div className="mt-10 w-full">
               <div className="relative group">
                 <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-                  <Search className="h-5 w-5 text-stone-400 group-focus-within:text-accent transition-colors" aria-hidden />
+                  <Search className="h-5 w-5 text-slate-400 group-focus-within:text-accent transition-colors" aria-hidden />
                 </div>
                 <input
                   type="text"
                   placeholder="Search documentation..."
-                  className="block w-full rounded-full border border-stone-200 bg-white py-3.5 pl-12 pr-6 text-base placeholder-stone-400 shadow-sm outline-none transition-all hover:border-stone-300 hover:shadow-md focus:border-accent focus:ring-2 focus:ring-accent-muted/30 focus:shadow-md"
+                  className="block w-full rounded-full border border-slate-200 bg-white py-3.5 pl-12 pr-6 text-base placeholder-stone-400 shadow-sm outline-none transition-all hover:border-stone-300 hover:shadow-md focus:border-indigo-500 focus:ring-2 focus:ring-accent-muted/30 focus:shadow-md"
                   value={searchQuery}
                   onChange={handleSearchChange}
                 />
@@ -82,7 +82,7 @@ export function DocsIndex() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             {filteredArticles.length === 0 ? (
               <div className="py-20 text-center">
-                <p className="text-lg text-stone-500">No articles found matching your search.</p>
+                <p className="text-lg text-slate-500">No articles found matching your search.</p>
                 <button
                   onClick={() => setSearchQuery('')}
                   className="mt-4 text-sm font-semibold text-accent hover:underline"
@@ -99,11 +99,11 @@ export function DocsIndex() {
                         <div className="flex-1">
                           <time
                             dateTime={article.date}
-                            className="text-xs font-medium uppercase tracking-widest text-stone-400"
+                            className="text-xs font-medium uppercase tracking-widest text-slate-400"
                           >
                             {formatDate(article.date)}
                           </time>
-                          <h2 className="mt-2 text-xl font-semibold leading-snug text-stone-900 sm:text-2xl">
+                          <h2 className="mt-2 text-xl font-semibold leading-snug text-slate-900 sm:text-2xl">
                             <a
                               href={`/docs/${article.slug}`}
                               className="no-underline transition-colors hover:text-accent"
@@ -111,10 +111,10 @@ export function DocsIndex() {
                               {article.title}
                             </a>
                           </h2>
-                          <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-600">
+                          <p className="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
                             {article.description}
                           </p>
-                          <p className="mt-2 text-sm text-stone-400">By {article.author}</p>
+                          <p className="mt-2 text-sm text-slate-400">By {article.author}</p>
                         </div>
                         <a
                           href={`/docs/${article.slug}`}
@@ -130,7 +130,7 @@ export function DocsIndex() {
                 </div>
 
                 {totalPages > 1 && (
-                  <nav className="mt-16 flex items-center justify-between border-t border-stone-200 pt-8" aria-label="Pagination">
+                  <nav className="mt-16 flex items-center justify-between border-t border-slate-200 pt-8" aria-label="Pagination">
                     <div className="flex flex-1 justify-between sm:hidden">
                       <button
                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
@@ -149,7 +149,7 @@ export function DocsIndex() {
                     </div>
                     <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
                       <div>
-                        <p className="text-sm text-stone-500">
+                        <p className="text-sm text-slate-500">
                           Showing <span className="font-medium">{(currentPage - 1) * ARTICLES_PER_PAGE + 1}</span> to{' '}
                           <span className="font-medium">
                             {Math.min(currentPage * ARTICLES_PER_PAGE, filteredArticles.length)}
@@ -162,7 +162,7 @@ export function DocsIndex() {
                           <button
                             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                             disabled={currentPage === 1}
-                            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-stone-400 ring-1 ring-inset ring-stone-200 hover:bg-stone-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                            className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
                           >
                             <span className="sr-only">Previous</span>
                             <ArrowLeft className="h-5 w-5" aria-hidden />
@@ -177,7 +177,7 @@ export function DocsIndex() {
                               Math.abs(pageNumber - currentPage) > 1
                             ) {
                               if (Math.abs(pageNumber - currentPage) === 2) {
-                                return <span key={pageNumber} className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-stone-400 ring-1 ring-inset ring-stone-200 focus:outline-offset-0">...</span>
+                                return <span key={pageNumber} className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-400 ring-1 ring-inset ring-stone-200 focus:outline-offset-0">...</span>
                               }
                               return null
                             }
@@ -187,10 +187,10 @@ export function DocsIndex() {
                                 key={pageNumber}
                                 onClick={() => setCurrentPage(pageNumber)}
                                 aria-current={currentPage === pageNumber ? 'page' : undefined}
-                                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                                className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 ${
                                   currentPage === pageNumber
-                                    ? 'z-10 bg-accent text-white focus-visible:outline-accent'
-                                    : 'text-stone-900 ring-1 ring-inset ring-stone-200 hover:bg-stone-50 focus:outline-offset-0'
+                                    ? 'z-10 bg-accent text-white focus-visible:outline-indigo-500'
+                                    : 'text-slate-900 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:outline-offset-0'
                                 }`}
                               >
                                 {pageNumber}
@@ -200,7 +200,7 @@ export function DocsIndex() {
                           <button
                             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                             disabled={currentPage === totalPages}
-                            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-stone-400 ring-1 ring-inset ring-stone-200 hover:bg-stone-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
+                            className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-stone-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
                           >
                             <span className="sr-only">Next</span>
                             <ArrowRight className="h-5 w-5" aria-hidden />

@@ -1,63 +1,93 @@
+import { Github } from 'lucide-react'
 import { SITE_LINKS } from '../lib/site-links'
+
+const NAV_COLUMNS = [
+  {
+    heading: 'Product',
+    links: [
+      { label: 'Pricing', href: '/pricing' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Documentation', href: '/docs' },
+      { label: 'Live Demo', href: SITE_LINKS.demo },
+    ],
+  },
+  {
+    heading: 'Solutions',
+    links: [
+      { label: 'Higher Education', href: '/higher-ed' },
+      { label: 'K–12', href: '/k-12' },
+      { label: 'Self-Learner', href: '/self-learner' },
+      { label: 'Get Started', href: '/get-started' },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { label: 'Privacy Policy', href: SITE_LINKS.privacy },
+      { label: 'Terms of Service', href: SITE_LINKS.terms },
+      { label: 'Security', href: SITE_LINKS.security },
+      { label: 'Accessibility', href: SITE_LINKS.accessibility },
+      { label: 'California Privacy Rights', href: SITE_LINKS.californiaPrivacyRights },
+    ],
+  },
+]
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-stone-200/90 bg-white py-12">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 lg:px-8">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <img src="/logo.svg" className="h-8 w-8" alt="" aria-hidden />
-            <span className="text-base font-semibold text-stone-900">Lextures</span>
+    <footer className="bg-[#020617] text-slate-400">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        {/* Main grid */}
+        <div className="grid gap-10 border-b border-slate-800 py-14 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
+          {/* Brand column */}
+          <div>
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                <img src="/logo.svg" className="h-4 w-4 brightness-0 invert" alt="" aria-hidden />
+              </span>
+              <span className="text-[0.9375rem] font-semibold text-white">Lextures</span>
+            </div>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
+              Open-source adaptive LMS for courses, assessments, and institutional workflows.
+              Built in public under AGPL-3.0.
+            </p>
+            <a
+              href={SITE_LINKS.github}
+              className="mt-5 inline-flex items-center gap-2 text-sm text-slate-500 no-underline transition-colors hover:text-slate-300"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Lextures on GitHub"
+            >
+              <Github className="h-4 w-4" />
+              GitHub
+            </a>
           </div>
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-stone-500">
-            Open-source LMS for courses, assessments, and institutional workflows. Developed in public
-            on GitHub.
-          </p>
-          <p className="mt-4 text-sm text-stone-400">© {new Date().getFullYear()} Lextures contributors</p>
+
+          {/* Nav columns */}
+          {NAV_COLUMNS.map(({ heading, links }) => (
+            <div key={heading}>
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                {heading}
+              </p>
+              <ul className="mt-4 space-y-3">
+                {links.map(({ label, href }) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      className="text-sm text-slate-500 no-underline transition-colors hover:text-slate-200"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm font-medium text-stone-500">
-          <a href={SITE_LINKS.demo} className="no-underline transition-colors hover:text-stone-900">
-            Live demo
-          </a>
-          <a href={SITE_LINKS.github} className="no-underline transition-colors hover:text-stone-900">
-            GitHub
-          </a>
-          <a href="/features" className="no-underline transition-colors hover:text-stone-900">
-            Features
-          </a>
-          <a href="/higher-ed" className="no-underline transition-colors hover:text-stone-900">
-            Higher Education
-          </a>
-          <a href="/k-12" className="no-underline transition-colors hover:text-stone-900">
-            K–12
-          </a>
-          <a href="/self-learner" className="no-underline transition-colors hover:text-stone-900">
-            Self-Learner
-          </a>
-          <a href="/pricing" className="no-underline transition-colors hover:text-stone-900">
-            Pricing
-          </a>
-          <a href="/blog" className="no-underline transition-colors hover:text-stone-900">
-            Blog
-          </a>
-          <a href="/docs" className="no-underline transition-colors hover:text-stone-900">
-            Documentation
-          </a>
-          <a href={SITE_LINKS.privacy} className="no-underline transition-colors hover:text-stone-900">
-            Privacy Policy
-          </a>
-          <a href={SITE_LINKS.terms} className="no-underline transition-colors hover:text-stone-900">
-            Terms of Service
-          </a>
-          <a href={SITE_LINKS.security} className="no-underline transition-colors hover:text-stone-900">
-            Security
-          </a>
-          <a href={SITE_LINKS.accessibility} className="no-underline transition-colors hover:text-stone-900">
-            Accessibility
-          </a>
-          <a href={SITE_LINKS.californiaPrivacyRights} className="no-underline transition-colors hover:text-stone-900">
-            California Privacy Rights
-          </a>
+
+        {/* Bottom bar */}
+        <div className="flex flex-col items-center justify-between gap-3 py-6 text-xs text-slate-600 sm:flex-row">
+          <p>© {new Date().getFullYear()} Lextures contributors. Released under AGPL-3.0.</p>
+          <p>Built in public · Self-host for free</p>
         </div>
       </div>
     </footer>

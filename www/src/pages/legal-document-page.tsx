@@ -70,7 +70,7 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
   }, [doc.title, showHistory])
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 text-slate-700">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <LegalJsonLd legalDoc={doc} />
       <Header />
 
@@ -79,9 +79,9 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
           <aside className="lg:w-56 lg:shrink-0">
             <nav
               aria-label="Table of contents"
-              className="sticky top-24 rounded-xl border border-stone-200/90 bg-white p-4 text-sm shadow-sm"
+              className="sticky top-24 rounded-xl border border-slate-200 bg-white p-4 text-sm shadow-sm"
             >
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-stone-500">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 On this page
               </p>
               <ol className="space-y-1.5">
@@ -89,7 +89,7 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
                   <li key={entry.id}>
                     <a
                       href={`#${entry.id}`}
-                      className="text-stone-700 no-underline underline-offset-2 transition-colors hover:text-accent hover:underline"
+                      className="text-slate-700 no-underline underline-offset-2 transition-colors hover:text-accent hover:underline"
                     >
                       {entry.title}
                     </a>
@@ -97,7 +97,7 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
                 ))}
               </ol>
               {doc.id === 'privacy_policy' ? (
-                <p className="mt-4 border-t border-stone-100 pt-3">
+                <p className="mt-4 border-t border-slate-100 pt-3">
                   <a
                     href="#your-rights-under-gdpr"
                     className="font-medium text-accent no-underline underline-offset-2 hover:underline"
@@ -111,13 +111,13 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
         ) : null}
 
         <article className="min-w-0 flex-1">
-          <header className="mb-6 border-b border-stone-200/90 pb-6">
+          <header className="mb-6 border-b border-slate-200 pb-6">
             <LegalNav />
-            <h1 className="font-display text-3xl font-normal tracking-tight text-stone-900 sm:text-4xl">
+            <h1 className="font-display text-3xl font-normal tracking-tight text-slate-900 sm:text-4xl">
               {showHistory ? `${doc.title} — History of changes` : doc.title}
             </h1>
             {!showHistory ? (
-              <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
+              <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
                 <div>
                   <dt className="inline font-medium text-stone-800">Effective date: </dt>
                   <dd className="inline">{doc.effectiveDateLabel}</dd>
@@ -138,7 +138,7 @@ export function LegalDocumentPage({ document: doc, showHistory }: LegalDocumentP
             </p>
           </header>
 
-          <div className="prose-content legal-prose [&_h2]:scroll-mt-28 [&_h2]:border-b [&_h2]:border-stone-200/90 [&_h2]:pb-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-stone-200 [&_td]:p-2 [&_th]:border [&_th]:border-stone-200 [&_th]:bg-stone-50 [&_th]:p-2">
+          <div className="prose-content legal-prose [&_h2]:scroll-mt-28 [&_h2]:border-b [&_h2]:border-slate-200 [&_h2]:pb-2 [&_table]:w-full [&_table]:border-collapse [&_td]:border [&_td]:border-slate-200 [&_td]:p-2 [&_th]:border [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-2">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
