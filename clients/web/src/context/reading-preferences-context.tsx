@@ -15,6 +15,8 @@ import {
   defaultReadingPreferences,
   type ReadingPreferences,
 } from '../lib/reading-preferences'
+import { readingPreferencesApiEnabled } from '../lib/platform-features'
+import { usePlatformFeatures } from './platform-features-context'
 
 interface ReadingPreferencesContextValue {
   prefs: ReadingPreferences
@@ -31,12 +33,25 @@ export const ReadingPreferencesContext = createContext<ReadingPreferencesContext
 const DEBOUNCE_MS = 500
 
 export function ReadingPreferencesProvider({ children }: { children: ReactNode }) {
+  const platformFeatures = usePlatformFeatures()
   const [prefs, setPrefs] = useState<ReadingPreferences>(defaultReadingPreferences)
   const [loading, setLoading] = useState(true)
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingPatch = useRef<Partial<ReadingPreferences>>({})
+  const apiEnabledRef = useRef(false)
+  const featuresReady = !platformFeatures.loading
+  const apiEnabled = featuresReady && readingPreferencesApiEnabled(platformFeatures)
 
   useEffect(() => {
+    apiEnabledRef.current = apiEnabled
+    if (!featuresReady) {
+      return
+    }
+    if (!apiEnabled) {
+      setLoading(false)
+      return
+    }
+
     let cancelled = false
     async function load() {
       try {
@@ -55,7 +70,7 @@ export function ReadingPreferencesProvider({ children }: { children: ReactNode }
     }
     void load()
     return () => { cancelled = true }
-  }, [])
+  }, [featuresReady, apiEnabled])
 
   const update = useCallback((patch: Partial<ReadingPreferences>) => {
     setPrefs((prev) => {
@@ -63,6 +78,9 @@ export function ReadingPreferencesProvider({ children }: { children: ReactNode }
       applyReadingPreferences(next)
       return next
     })
+    if (!apiEnabledRef.current) {
+      return
+    }
     pendingPatch.current = { ...pendingPatch.current, ...patch }
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
