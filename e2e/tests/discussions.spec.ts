@@ -74,33 +74,28 @@ test.describe('Discussions', () => {
       'Reply Test Thread',
     )
 
-    await page.goto(`/courses/${seededCourse.courseCode}/discussions`)
+    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/discussions`)
 
-    // Click on the forum name to navigate into it.
-    await page.getByText(forum.name).click()
-    // Click on the thread title.
-    await page.getByText(thread.title).click()
+    await expect(page.getByRole('button', { name: forum.name })).toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: forum.name }).click()
 
-    // Find and fill the reply composer.
-    const replyArea = page
-      .locator('[contenteditable="true"], textarea')
-      .filter({ hasText: '' })
-      .first()
-    if (await replyArea.count() === 0) {
-      // Try clicking a "Reply" button first.
-      const replyBtn = page.getByRole('button', { name: /reply/i }).first()
-      if (await replyBtn.count() > 0) await replyBtn.click()
-    }
+    const threadBtn = page.getByRole('button', { name: new RegExp(thread.title) })
+    await expect(threadBtn).toBeVisible({ timeout: 10_000 })
+    await threadBtn.click()
 
-    const composer = page.locator('[contenteditable="true"], textarea').first()
-    await expect(composer).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('heading', { level: 1, name: thread.title })).toBeVisible({
+      timeout: 10_000,
+    })
+
+    const postBtn = page.getByRole('button', { name: /^Post$/i })
+    await expect(postBtn).toBeVisible({ timeout: 15_000 })
+
+    const composer = page.locator('[contenteditable="true"].ProseMirror').last()
+    await expect(composer).toBeVisible({ timeout: 10_000 })
     await composer.click()
     const replyText = `E2E reply ${Date.now()}`
     await composer.fill(replyText)
 
-    const postBtn = page.getByRole('button', { name: /post|reply|submit/i }).last()
-    // The fixed help-widget button (bottom-right) can overlap the Post button.
-    // Scroll it to the top half of the viewport and force-click to bypass the overlay.
     await postBtn.scrollIntoViewIfNeeded()
     await postBtn.click({ force: true })
 
