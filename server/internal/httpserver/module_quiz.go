@@ -222,3 +222,97 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 		_ = json.NewEncoder(w).Encode(out)
 	}
 }
+
+// handlePatchModuleQuiz is PATCH /api/v1/courses/{course_code}/quizzes/{item_id}.
+func (d Deps) handlePatchModuleQuiz() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPatch {
+			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+			return
+		}
+		perm := "course:" + courseCode + ":item:create"
+		canEdit, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, perm)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !canEdit {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+			return
+		}
+		var req struct {
+			TimeLimitMinutes *int32                         `json:"timeLimitMinutes"`
+			Questions        *[]coursemodulequiz.QuizQuestion `json:"questions"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		if req.TimeLimitMinutes == nil && req.Questions == nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide at least one field to update.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		if !d.guardCourseItemCreateBlueprint(w, r, courseCode, viewer, *cid, itemID) {
+			return
+		}
+		okWrite, err := coursemodulequizzes.PatchForCourseItem(r.Context(), d.Pool, *cid, itemID, coursemodulequizzes.PatchWrite{
+			TimeLimitMinutes: req.TimeLimitMinutes,
+			Questions:        req.Questions,
+		})
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save quiz.")
+			return
+		}
+		if !okWrite {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		row, err := coursemodulequizzes.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load quiz.")
+			return
+		}
+		if row == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		meta, err := course.GetCourseQuizMeta(r.Context(), d.Pool, *cid)
+		if err != nil || meta == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		resolved, usesServer, err := questionbank.ResolveDeliveryQuestionsForGet(
+			r.Context(), d.Pool, *cid, itemID, meta.QuestionBankEnabled, row.Questions, nil, true,
+		)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			return
+		}
+		out := buildModuleQuizResponse(itemID, row, true, nil, meta, resolved, usesServer)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(out)
+	}
+}
