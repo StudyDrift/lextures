@@ -1347,7 +1347,7 @@ export async function apiFetchEnrollmentAccommodationSummary(
 ): Promise<{ hasAccommodation: boolean; flags: string[] }> {
   const res = await fetch(
     `${apiBase}/api/v1/enrollments/${encodeURIComponent(enrollmentId)}/accommodation-summary`,
-    { headers: { Authorization: `Bearer ${token}` },
+    { headers: { Authorization: `Bearer ${token}` } },
   )
   if (!res.ok) {
     const body = await res.text()
