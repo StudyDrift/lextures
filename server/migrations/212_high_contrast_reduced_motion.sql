@@ -5,7 +5,7 @@
 -- ff_high_contrast_reduced_motion gates the API and panel UI (default off).
 
 CREATE TABLE IF NOT EXISTS settings.user_reading_preferences (
-    user_id     UUID        NOT NULL PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+    user_id     UUID        NOT NULL PRIMARY KEY REFERENCES "user".users(id) ON DELETE CASCADE,
     high_contrast  BOOLEAN NOT NULL DEFAULT false,
     reduce_motion  BOOLEAN NOT NULL DEFAULT false,
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
