@@ -73,6 +73,9 @@ import SecurityDisclosureAdminPage from './pages/security-disclosure-admin-page'
 import SecurityPage from './pages/security-page'
 import BackupOpsAdminPage from './pages/backup-ops-admin-page'
 import CaptionComplianceReportPage from './pages/admin/caption-compliance-report'
+import AttendanceDashboard from './pages/admin/AttendanceDashboard'
+import AttendanceExport from './pages/admin/AttendanceExport'
+import CourseAttendance from './pages/lms/CourseAttendance'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CaliforniaPrivacyRightsPage from './pages/california-privacy-rights-page'
 import AccessibilityConformancePage from './pages/accessibility-conformance-page'
@@ -192,6 +195,7 @@ export default function App() {
             <Route path="outcomes-report" element={<CourseOutcomesReport />} />
             <Route path="whats-working" element={<CourseWhatsWorking />} />
             <Route path="enrollments" element={<CourseEnrollments />} />
+            <Route path="attendance" element={<CourseAttendance />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />
@@ -202,6 +206,8 @@ export default function App() {
           <Route path="/admin/compliance/security-reports" element={<SecurityDisclosureAdminPage />} />
           <Route path="/admin/compliance/backup" element={<BackupOpsAdminPage />} />
           <Route path="/admin/caption-compliance" element={<CaptionComplianceReportPage />} />
+          <Route path="/admin/attendance/dashboard" element={<AttendanceDashboard />} />
+          <Route path="/admin/attendance/export" element={<AttendanceExport />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
