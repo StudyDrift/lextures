@@ -26,17 +26,6 @@ async function adminTokens(): Promise<string> {
 }
 
 test.describe('Security disclosure — public', () => {
-  test('/security page loads without login', async ({ page }) => {
-    await page.goto('/security')
-    await expect(page.getByRole('heading', { level: 1, name: /security.*responsible disclosure/i })).toBeVisible({
-      timeout: 8000,
-    })
-    await expect(page.getByText(/security@lextures\.io/i).first()).toBeVisible()
-    await expect(page.getByText(/safe harbor/i).first()).toBeVisible()
-    await expect(page.getByText(/90-day/i).first()).toBeVisible()
-    await expect(page.getByRole('link', { name: /trust/i }).first()).toBeVisible()
-  })
-
   test('GET /api/v1/trust/security returns policy without auth', async () => {
     const res = await fetch(`${API_BASE}/api/v1/trust/security`)
     expect(res.ok).toBeTruthy()
@@ -45,9 +34,12 @@ test.describe('Security disclosure — public', () => {
     expect(body.coordinatedDisclosureDays).toBe(90)
   })
 
-  test('trust center links to responsible disclosure policy', async ({ page }) => {
+  test('trust center links to responsible disclosure policy on marketing site', async ({ page }) => {
     await page.goto('/trust')
-    await expect(page.getByRole('link', { name: /responsible disclosure policy/i })).toHaveAttribute('href', '/security')
+    await expect(page.getByRole('link', { name: /responsible disclosure policy/i })).toHaveAttribute(
+      'href',
+      'https://lextures.com/security',
+    )
   })
 })
 
@@ -118,6 +110,6 @@ test.describe('Security disclosure — admin UI', () => {
     await injectToken(page, access_token)
     await page.goto('/admin/compliance/security-reports')
     await expect(page.getByRole('heading', { name: /security reports/i })).toBeVisible({ timeout: 10000 })
-    await expect(page.getByRole('link', { name: /\/security/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /lextures\.com\/security/i })).toBeVisible()
   })
 })

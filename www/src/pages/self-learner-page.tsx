@@ -1,5 +1,6 @@
 import { ArrowRight, BrainCircuit, RefreshCw, TrendingUp, Zap } from 'lucide-react'
 import { Header } from '../components/header'
+import { SiteFooter } from '../components/site-footer'
 
 const PROBLEMS = [
   {
@@ -203,11 +204,7 @@ export function SelfLearnerPage() {
         </section>
       </main>
 
-      <footer className="border-t border-stone-200/90 bg-white py-10">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="text-sm text-stone-400">© {new Date().getFullYear()} Lextures contributors</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

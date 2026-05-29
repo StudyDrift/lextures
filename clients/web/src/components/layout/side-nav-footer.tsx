@@ -1,8 +1,9 @@
-import { NavLink } from 'react-router-dom'
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { RELEASE_VERSION } from '../../lib/release-version'
 import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
+
+import { MARKETING_SITE_URLS } from '../../lib/marketing-site'
 
 const linkClass =
   'text-slate-700 underline decoration-slate-300 underline-offset-2 transition hover:text-slate-900 hover:decoration-slate-500 dark:text-neutral-400 dark:decoration-neutral-600 dark:hover:text-neutral-100 dark:hover:decoration-neutral-400'
@@ -55,27 +56,27 @@ export function SideNavFooter() {
             </span>
           </p>
           <p className="mt-1">
-            <NavLink to="/terms" className={linkClass}>
+            <a href={MARKETING_SITE_URLS.terms} className={linkClass}>
               Terms of use
-            </NavLink>
+            </a>
             <span className="mx-1 text-slate-400 dark:text-neutral-600" aria-hidden="true">
               ·
             </span>
-            <NavLink to="/privacy" className={linkClass}>
+            <a href={MARKETING_SITE_URLS.privacy} className={linkClass}>
               Privacy policy
-            </NavLink>
+            </a>
             <span className="mx-1 text-slate-400 dark:text-neutral-600" aria-hidden="true">
               ·
             </span>
-            <NavLink to="/accessibility" className={linkClass}>
+            <a href={MARKETING_SITE_URLS.accessibility} className={linkClass}>
               Accessibility
-            </NavLink>
+            </a>
             <span className="mx-1 text-slate-400 dark:text-neutral-600" aria-hidden="true">
               ·
             </span>
-            <NavLink to="/privacy-rights/california" className={linkClass}>
+            <a href={MARKETING_SITE_URLS.californiaPrivacyRights} className={linkClass}>
               Do Not Sell or Share My Personal Information
-            </NavLink>
+            </a>
           </p>
         </>
       )}

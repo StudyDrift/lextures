@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Header } from '../components/header'
+import { SiteFooter } from '../components/site-footer'
 import { formatDate, getPost } from '../utils/blog'
 
 export function BlogPost({ slug }: { slug: string }) {
@@ -70,11 +71,7 @@ export function BlogPost({ slug }: { slug: string }) {
         </div>
       </main>
 
-      <footer className="border-t border-stone-200/90 bg-white py-10">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="text-sm text-stone-400">© {new Date().getFullYear()} Lextures contributors</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

@@ -59,52 +59,31 @@ import MfaLogin from './pages/mfa-login'
 import SamlCallback from './pages/saml-callback'
 import SsoError from './pages/sso-error'
 import AiDisclosurePage from './pages/ai-disclosure-page'
-import PrivacyPolicyPage from './pages/privacy-policy-page'
-import PrivacyPolicyHistoryPage from './pages/privacy-policy-history-page'
 import MagicLinkPage from './pages/magic-link'
 import ResetPassword from './pages/reset-password'
 import Signup from './pages/signup'
 import ParentDashboard from './pages/lms/parent/parent-dashboard'
-import TermsOfUsePage from './pages/terms-of-use-page'
-import TermsOfUseHistoryPage from './pages/terms-of-use-history-page'
 import TrustCenterPage from './pages/trust-center-page'
 import IsoComplianceAdminPage from './pages/iso-compliance-admin-page'
 import SecurityDisclosureAdminPage from './pages/security-disclosure-admin-page'
-import SecurityPage from './pages/security-page'
 import BackupOpsAdminPage from './pages/backup-ops-admin-page'
 import CaptionComplianceReportPage from './pages/admin/caption-compliance-report'
 import PrivacyCentrePage from './pages/privacy-centre-page'
-import CaliforniaPrivacyRightsPage from './pages/california-privacy-rights-page'
-import AccessibilityConformancePage from './pages/accessibility-conformance-page'
-import VpatPage from './pages/vpat-page'
 import CliAuthPage from './pages/cli-auth'
+import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
 
 export default function App() {
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
+    applyDocumentScrollMode(location.pathname)
+  }, [location.pathname])
+
+  useEffect(() => {
     function onAuthRequired() {
       const from = `${location.pathname}${location.search}${location.hash}`
-      if (
-        location.pathname === '/login' ||
-        location.pathname === '/signup' ||
-        location.pathname === '/forgot-password' ||
-        location.pathname === '/reset-password' ||
-        location.pathname.startsWith('/login/magic-link') ||
-        location.pathname.startsWith('/login/mfa') ||
-        location.pathname === '/saml-callback' ||
-        location.pathname === '/sso-error' ||
-        location.pathname === '/privacy' ||
-        location.pathname.startsWith('/privacy/') ||
-        location.pathname === '/terms' ||
-        location.pathname.startsWith('/terms/') ||
-        location.pathname === '/trust' ||
-        location.pathname === '/security' ||
-        location.pathname === '/accessibility' ||
-        location.pathname.startsWith('/accessibility/') ||
-        location.pathname.startsWith('/privacy-rights/')
-      ) {
+      if (isStandalonePublicRoute(location.pathname)) {
         return
       }
       navigate('/login', { replace: true, state: { from } })
@@ -126,15 +105,7 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/ai-disclosure" element={<AiDisclosurePage />} />
-      <Route path="/privacy" element={<PrivacyPolicyPage />} />
-      <Route path="/privacy/history" element={<PrivacyPolicyHistoryPage />} />
-      <Route path="/terms" element={<TermsOfUsePage />} />
-      <Route path="/terms/history" element={<TermsOfUseHistoryPage />} />
       <Route path="/trust" element={<TrustCenterPage />} />
-      <Route path="/security" element={<SecurityPage />} />
-      <Route path="/accessibility" element={<AccessibilityConformancePage />} />
-      <Route path="/accessibility/vpat" element={<VpatPage />} />
-      <Route path="/privacy-rights/california" element={<CaliforniaPrivacyRightsPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/cli-auth" element={<CliAuthPage />} />
         <Route

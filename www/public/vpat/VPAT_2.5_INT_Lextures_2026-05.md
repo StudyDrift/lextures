@@ -130,7 +130,7 @@ Note: Section 508 501.1 incorporates WCAG 2.0 Level A and AA by reference. See W
 |---|---|---|
 | 502.2.1 User Control of Accessibility Features | Supports | Platform-level accessibility features (OS dark mode, high contrast, zoom) are honored. The application does not override or disable AT settings. |
 | 502.2.2 No Disruption of Accessibility Features | Supports | The application does not disrupt or override platform accessibility services. |
-| 502.3 Documented Accessibility Features | Supports | Accessibility features are documented in this VPAT and at /accessibility. |
+| 502.3 Documented Accessibility Features | Supports | Accessibility features are documented in this VPAT and at https://lextures.com/accessibility. |
 | 503.2 User Preferences | Supports | The application respects OS dark mode preference via prefers-color-scheme and provides in-app density and contrast settings. |
 | 503.3 Alternative User Interfaces | Not Applicable | No alternative UI is provided; the standard web interface supports AT directly. |
 | 503.4 User Controls for Captions and Audio Description | Not Applicable | Captions are controlled via standard HTML5 video player controls. |
@@ -139,7 +139,7 @@ Note: Section 508 501.1 incorporates WCAG 2.0 Level A and AA by reference. See W
 
 | Criterion | Conformance Level | Remarks |
 |---|---|---|
-| 602.2 Accessibility and Compatibility Features | Supports | This VPAT and the /accessibility page document accessibility features and known limitations. |
+| 602.2 Accessibility and Compatibility Features | Supports | This VPAT and the https://lextures.com/accessibility page document accessibility features and known limitations. |
 | 602.3 Electronic Support Documentation | Supports | All support documentation is provided in accessible HTML format. This VPAT page meets WCAG 2.1 AA. |
 | 602.4 Alternate Formats for Non-Electronic Support Documentation | Not Applicable | All documentation is provided electronically; no print-only documentation is distributed. |
 | 603.2 Information on Accessibility and Compatibility Features | Supports | Accessibility support information available at accessibility@lextures.com. |
@@ -166,7 +166,7 @@ EN 301 549 Clauses 9.1.1.1 – 9.4.1.3 incorporate WCAG 2.1 success criteria by 
 
 | Clause | Title | Conformance Level | Remarks |
 |---|---|---|---|
-| 12.1.1 | Accessibility and Compatibility Features (Documentation) | Supports | This VPAT and the /accessibility page document accessibility features and known issues. |
+| 12.1.1 | Accessibility and Compatibility Features (Documentation) | Supports | This VPAT and the https://lextures.com/accessibility page document accessibility features and known issues. |
 | 12.2.2 | Information on Accessibility and Compatibility Features (Support) | Supports | Support staff are informed of accessibility features and limitations. Contact: accessibility@lextures.com. |
 | 12.2.3 | Effective Communication | Supports | Support is available by email. Responses accommodate users with disabilities on a case-by-case basis. |
 | 12.2.4 | Accessible Documentation | Supports | All product documentation is in accessible HTML format meeting WCAG 2.1 AA. |

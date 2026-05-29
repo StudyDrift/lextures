@@ -21,18 +21,6 @@ describe('App routing', () => {
     expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument()
   })
 
-  it('renders privacy policy at /privacy without authentication', () => {
-    render(
-      <MemoryRouter initialEntries={['/privacy']}>
-        <PermissionsProvider>
-          <App />
-        </PermissionsProvider>
-      </MemoryRouter>,
-    )
-    expect(screen.getByRole('heading', { level: 1, name: /privacy policy/i })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /ferpa and student education records/i })).toBeInTheDocument()
-  })
-
   it('renders signup at /signup', () => {
     render(
       <MemoryRouter initialEntries={['/signup']}>
