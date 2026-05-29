@@ -5,8 +5,22 @@ import AxeBuilder from '@axe-core/playwright'
 import { test, expect, injectToken } from '../fixtures/test.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
+const E2E_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
+const E2E_ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
 
-async function enableSpeechToText(token: string): Promise<void> {
+/** Platform settings require global admin; global E2E seed enables STT by default. */
+async function adminToken(): Promise<string> {
+  const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: E2E_ADMIN_EMAIL, password: E2E_ADMIN_PASSWORD }),
+  })
+  expect(loginRes.ok).toBe(true)
+  const { access_token } = (await loginRes.json()) as { access_token: string }
+  return access_token
+}
+
+async function patchSpeechToTextEnabled(token: string, enabled: boolean): Promise<void> {
   const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
     method: 'PUT',
     headers: {
@@ -14,11 +28,15 @@ async function enableSpeechToText(token: string): Promise<void> {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      speechToTextEnabled: true,
+      speechToTextEnabled: enabled,
       updateMask: ['speechToTextEnabled'],
     }),
   })
   expect(res.ok).toBe(true)
+}
+
+async function enableSpeechToText(): Promise<void> {
+  await patchSpeechToTextEnabled(await adminToken(), true)
 }
 
 async function seedShortAnswerQuiz(
@@ -111,14 +129,20 @@ function installSpeechRecognitionMock(page: import('@playwright/test').Page, wit
 
 test.describe('Speech-to-text API', () => {
   test('reading-preferences returns 404 when feature disabled', async ({ seededCourse }) => {
-    const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
-      headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
-    })
-    expect(res.status).toBe(404)
+    const admin = await adminToken()
+    await patchSpeechToTextEnabled(admin, false)
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
+        headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
+      })
+      expect(res.status).toBe(404)
+    } finally {
+      await patchSpeechToTextEnabled(admin, true)
+    }
   })
 
   test('reading-preferences round-trip when enabled', async ({ seededCourse }) => {
-    await enableSpeechToText(seededCourse.instructorToken)
+    await enableSpeechToText()
     const getRes = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
       headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
     })
@@ -165,8 +189,8 @@ test.describe('Speech-to-text API', () => {
 })
 
 test.describe('Speech-to-text UI', () => {
-  test.beforeEach(async ({ seededCourse }) => {
-    await enableSpeechToText(seededCourse.instructorToken)
+  test.beforeEach(async () => {
+    await enableSpeechToText()
   })
 
   test('dictation inserts text into quiz short-answer field', async ({ page, seededCourse }) => {
