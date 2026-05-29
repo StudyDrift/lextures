@@ -43,6 +43,7 @@ export type PlatformFeatures = {
   videoCaptionsEnabled: boolean
   autoCaptioningEnabled: boolean
   ffReadingPreferences: boolean
+  ffHighContrastReducedMotion: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -76,6 +77,7 @@ const defaultFeatures: PlatformFeatures = {
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
+  ffHighContrastReducedMotion: false,
   loading: true,
   refresh: async () => {},
 }
@@ -114,6 +116,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     videoCaptionsEnabled: false,
     autoCaptioningEnabled: false,
     ffReadingPreferences: false,
+    ffHighContrastReducedMotion: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -153,12 +156,14 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           videoCaptionsEnabled: data.videoCaptionsEnabled === true,
           autoCaptioningEnabled: data.autoCaptioningEnabled === true,
           ffReadingPreferences: data.ffReadingPreferences === true,
+          ffHighContrastReducedMotion: data.ffHighContrastReducedMotion === true,
         }
         setFeatures({
           ...next,
           videoCaptionsEnabled: next.videoCaptionsEnabled === true,
           autoCaptioningEnabled: next.autoCaptioningEnabled === true,
           ffReadingPreferences: next.ffReadingPreferences === true,
+          ffHighContrastReducedMotion: next.ffHighContrastReducedMotion === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

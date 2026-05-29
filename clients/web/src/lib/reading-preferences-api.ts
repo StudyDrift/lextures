@@ -1,4 +1,5 @@
 import { authorizedFetch } from './api'
+import { readingPreferencesApiEnabled } from './platform-features'
 
 export type ReadingPreferences = {
   sttEnabled: boolean
@@ -21,6 +22,9 @@ const defaults: ReadingPreferences = {
 }
 
 export async function fetchReadingPreferences(): Promise<ReadingPreferences> {
+  if (!readingPreferencesApiEnabled()) {
+    return defaults
+  }
   const res = await authorizedFetch('/api/v1/me/reading-preferences')
   if (!res.ok) {
     return defaults
