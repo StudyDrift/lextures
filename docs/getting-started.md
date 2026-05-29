@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) with Compose, **or**
-- [Go](https://go.dev/dl/) 1.25+, [Node.js](https://nodejs.org/) (current LTS), PostgreSQL, and MongoDB if you run services locally.
+- [Go](https://go.dev/dl/) 1.25+, [Node.js](https://nodejs.org/) (current LTS), and PostgreSQL if you run services locally.
 
 ## Run with Docker (recommended for development)
 
@@ -15,7 +15,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 
 - **Web (Vite, HMR)**: [http://localhost:5173](http://localhost:5173)
 - **API**: [http://localhost:8080](http://localhost:8080)
-- **PostgreSQL**: `localhost:5432` · **MongoDB**: `localhost:27017` (defaults match `docker-compose.yml`)
+- **PostgreSQL**: `localhost:5432` (defaults match `docker-compose.yml`)
 
 Optional: create a `.env` next to `docker-compose.yml` with `OPEN_ROUTER_API_KEY=...` for AI-related features.
 
@@ -31,7 +31,7 @@ The web app is served on [http://localhost:3000](http://localhost:3000) (API sti
 
 ## Local development without full Docker (outline)
 
-1. Start PostgreSQL and MongoDB (or use only Postgres if you skip Mongo-dependent features).
+1. Start PostgreSQL (e.g. `docker compose -f docker-compose.yml up -d postgres`).
 2. Copy [`server/.env.example`](../server/.env.example) to `server/.env` and set `DATABASE_URL`, `JWT_SECRET`, and optionally `OPENROUTER_API_KEY`.
 3. In `server/`: `go run ./cmd/server` (or use [Air](https://github.com/air-verse/air) with `Dockerfile.dev` via `docker compose -f docker-compose.yml -f docker-compose.dev.yml`).
 4. In `clients/web/`: `npm install` then `npm run dev` (set `VITE_API_URL` if the API is not at `http://localhost:8080`).

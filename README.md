@@ -46,7 +46,7 @@ Open-source learning platform for running courses end to end: structured modules
 - **AI-ready**: Optional OpenRouter integration for AI-assisted quiz generation, misconception detection, and automated hint scaffolding.
 - **14+ question types**: From multiple choice and essays to live code execution and audio/video responses.
 - **Fast, typed stack**: Go 1.25 API (Chi) + React 19 SPA (Vite, TypeScript, Tailwind CSS v4).
-- **Data layer**: PostgreSQL 16 (relational) and MongoDB 7 (documents).
+- **Data layer**: PostgreSQL 16.
 
 ## Tech stack 
 
@@ -55,7 +55,7 @@ Open-source learning platform for running courses end to end: structured modules
 | ----------------- | ------------------------------------------------------------------------- |
 | **Web app**       | React 19, Vite, TypeScript, Tailwind CSS v4, React Router, TipTap, Vitest |
 | **API**           | Go 1.25, Chi, pgx, Argon2id passwords, JWT access tokens                  |
-| **Data**          | PostgreSQL 16, MongoDB 7                                                  |
+| **Data**          | PostgreSQL 16                                                             |
 | **AI (optional)** | OpenRouter API (`OPEN_ROUTER_API_KEY` / `OPENROUTER_API_KEY`)             |
 
 
