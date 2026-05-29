@@ -11,6 +11,8 @@ export interface ReadingPreferences {
   lineHeight: LineHeight
   rulerEnabled: boolean
   rulerColor: RulerColor
+  highContrastEnabled: boolean
+  reducedMotionEnabled: boolean
   updatedAt?: string
 }
 
@@ -21,6 +23,8 @@ export const defaultReadingPreferences: ReadingPreferences = {
   lineHeight: 'normal',
   rulerEnabled: false,
   rulerColor: 'yellow',
+  highContrastEnabled: false,
+  reducedMotionEnabled: false,
 }
 
 const fontFamilyMap: Record<FontFace, string> = {
@@ -54,6 +58,12 @@ export function applyReadingPreferences(prefs: ReadingPreferences): void {
   root.style.setProperty('--reading-letter-spacing', letterSpacingMap[prefs.letterSpacing])
   root.style.setProperty('--reading-word-spacing',   wordSpacingMap[prefs.wordSpacing])
   root.style.setProperty('--reading-line-height',    lineHeightMap[prefs.lineHeight])
+  root.classList.toggle('high-contrast', prefs.highContrastEnabled)
+  root.classList.toggle('reduced-motion', prefs.reducedMotionEnabled)
+  try {
+    localStorage.setItem('lextures.highContrast', prefs.highContrastEnabled ? '1' : '0')
+    localStorage.setItem('lextures.reduceMotion', prefs.reducedMotionEnabled ? '1' : '0')
+  } catch { /* ignore */ }
 }
 
 export function clearReadingPreferences(): void {

@@ -43,7 +43,8 @@ func (d Deps) readingPreferencesEnabled() bool {
 	return cfg.SpeechToTextEnabled ||
 		cfg.AccommodationsEngineEnabled ||
 		(cfg.ReadAloudEnabled && cfg.FFReadAloud) ||
-		cfg.FFReadingPreferences
+		cfg.FFReadingPreferences ||
+		cfg.FFHighContrastReducedMotion
 }
 
 func (d Deps) requireReadingPreferences(w http.ResponseWriter) bool {

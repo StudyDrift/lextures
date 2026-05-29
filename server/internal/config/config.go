@@ -232,6 +232,8 @@ type Config struct {
 	AltTextEnforcementEnabled bool
 	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).
 	FFAltTextEnforcement bool
+	// FFHighContrastReducedMotion enables the high-contrast/reduced-motion preference panel and API (plan 12.7).
+	FFHighContrastReducedMotion bool
 	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
 	SpeechToTextEnabled bool
 	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).

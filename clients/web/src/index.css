@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles/high-contrast.css";
 
 /* Video caption styling (plan 12.4) — uses CSS variables from VideoPlayer */
 .video-with-captions::cue {
@@ -144,6 +145,30 @@ html.dark {
   }
 }
 
+/*
+ * Comprehensive reduced-motion: suppress all custom keyframe animations and transitions.
+ * Activated by OS prefers-reduced-motion OR the html.reduced-motion class (manual override, plan 12.7).
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* Logged-out auth: restrained backdrop (avoid centered “glow” templates). */
 .lex-auth-scene {
   background-color: rgb(250 250 249);
@@ -185,6 +210,9 @@ html.dark {
   .lex-help-clip {
     animation: none;
   }
+}
+html.reduced-motion .lex-help-clip {
+  animation: none;
 }
 
 /* prefers-reduced-data: defer heavy hero imagery until needed (see clients/web courses grid). */

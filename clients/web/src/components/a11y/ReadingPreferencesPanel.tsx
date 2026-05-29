@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useReadingPreferences } from '../../context/reading-preferences-context'
+import { LiveRegion } from './live-region'
 import type {
   FontFace,
   LetterSpacing,
@@ -49,6 +50,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
   const titleId = useId()
+  const [liveAnnouncement, setLiveAnnouncement] = useState('')
 
   /* Trap focus + close on Escape */
   useEffect(() => {
@@ -111,7 +113,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
             type="button"
             aria-label="Close Reading Preferences panel"
             onClick={onClose}
-            className="rounded-lg p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
@@ -120,7 +122,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
         {loading ? (
           <div className="space-y-4 p-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-8 animate-pulse rounded-lg bg-slate-100 dark:bg-neutral-800" />
+              <div key={i} className="h-8 motion-safe:animate-pulse rounded-lg bg-slate-100 dark:bg-neutral-800" />
             ))}
           </div>
         ) : (
@@ -134,7 +136,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                 {fontOptions.map((opt) => (
                   <label
                     key={opt.value}
-                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 transition hover:bg-slate-50 has-[:checked]:border-indigo-200 has-[:checked]:bg-indigo-50 dark:hover:bg-neutral-800 dark:has-[:checked]:border-indigo-800 dark:has-[:checked]:bg-indigo-950/30"
+                    className="flex cursor-pointer items-center gap-3 rounded-lg border border-transparent px-3 py-2 hover:bg-slate-50 has-[:checked]:border-indigo-200 has-[:checked]:bg-indigo-50 dark:hover:bg-neutral-800 dark:has-[:checked]:border-indigo-800 dark:has-[:checked]:bg-indigo-950/30"
                   >
                     <input
                       type="radio"
@@ -197,14 +199,14 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                   aria-checked={prefs.rulerEnabled}
                   aria-label={`Reading ruler: ${prefs.rulerEnabled ? 'on' : 'off'}`}
                   onClick={() => update({ rulerEnabled: !prefs.rulerEnabled })}
-                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${
+                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40 ${
                     prefs.rulerEnabled
                       ? 'bg-indigo-600 dark:bg-indigo-500'
                       : 'bg-slate-200 dark:bg-neutral-700'
                   }`}
                 >
                   <span
-                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition ${
+                    className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm ${
                       prefs.rulerEnabled ? 'translate-x-4' : 'translate-x-0.5'
                     }`}
                   />
@@ -228,7 +230,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                         <span
                           aria-hidden="true"
                           style={{ background: opt.bg }}
-                          className={`h-5 w-8 rounded border-2 transition ${
+                          className={`h-5 w-8 rounded border-2 ${
                             prefs.rulerColor === opt.value
                               ? 'border-indigo-500'
                               : 'border-slate-200 dark:border-neutral-600'
@@ -241,10 +243,78 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
                 </div>
               )}
             </div>
+
+            {/* Accessibility display — plan 12.7 */}
+            <div className="border-t border-slate-100 pt-4 dark:border-neutral-800">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                Display
+              </p>
+              <LiveRegion politeness="polite">{liveAnnouncement}</LiveRegion>
+              <div className="space-y-3">
+                <AccessibilityToggle
+                  id="pref-high-contrast"
+                  label="High contrast"
+                  description="Increases contrast to at least 7:1 for text and interactive elements."
+                  checked={prefs.highContrastEnabled}
+                  onChange={(v) => {
+                    update({ highContrastEnabled: v })
+                    setLiveAnnouncement(v ? 'High contrast enabled' : 'High contrast disabled')
+                  }}
+                />
+                <AccessibilityToggle
+                  id="pref-reduce-motion"
+                  label="Reduce motion"
+                  description="Stops animations and transitions to reduce motion-triggered discomfort."
+                  checked={prefs.reducedMotionEnabled}
+                  onChange={(v) => {
+                    update({ reducedMotionEnabled: v })
+                    setLiveAnnouncement(v ? 'Reduce motion enabled' : 'Reduce motion disabled')
+                  }}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
     </>
+  )
+}
+
+interface AccessibilityToggleProps {
+  id: string
+  label: string
+  description: string
+  checked: boolean
+  onChange: (value: boolean) => void
+}
+
+function AccessibilityToggle({ id, label, description, checked, onChange }: AccessibilityToggleProps) {
+  return (
+    <div className="flex items-start gap-3">
+      <button
+        id={id}
+        role="switch"
+        aria-checked={checked}
+        aria-describedby={`${id}-desc`}
+        onClick={() => onChange(!checked)}
+        style={{ backgroundColor: checked ? 'rgb(79 70 229)' : 'rgb(209 213 219)' }}
+        className="mt-0.5 relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/40"
+      >
+        <span className="sr-only">{label}</span>
+        <span
+          aria-hidden="true"
+          className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm motion-safe:transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`}
+        />
+      </button>
+      <div className="min-w-0 flex-1">
+        <label htmlFor={id} className="cursor-pointer select-none text-sm font-medium text-slate-900 dark:text-neutral-100">
+          {label}
+        </label>
+        <p id={`${id}-desc`} className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+          {description}
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -266,7 +336,7 @@ function SpacingControl({ legend, name, options, value, onChange }: SpacingContr
         {options.map((opt) => (
           <label
             key={opt.value}
-            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium transition ${
+            className={`flex flex-1 cursor-pointer items-center justify-center rounded-lg border px-2 py-1.5 text-xs font-medium ${
               value === opt.value
                 ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-700'
