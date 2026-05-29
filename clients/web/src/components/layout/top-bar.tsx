@@ -16,6 +16,7 @@ import {
 } from './top-bar-utils'
 import { useShellNav } from './use-shell-nav'
 import { TopBarBreadcrumbs } from './top-bar-breadcrumbs'
+import { HelpWidgetMenu } from './help-widget'
 import { NotificationsDrawer, NotificationsDrawerTrigger } from './notifications-drawer'
 import { TopBarMobileCommandPaletteButton } from './side-nav-command-palette'
 import { ReadingPreferencesPanel } from '../a11y/ReadingPreferencesPanel'
@@ -299,6 +300,7 @@ export function TopBar() {
             Aa
           </button>
         )}
+        <HelpWidgetMenu />
         <NotificationsDrawerTrigger open={notificationsOpen} onOpen={() => setNotificationsOpen(true)} />
         <CourseEnrollmentViewDropdown />
         <UserMenu />

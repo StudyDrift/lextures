@@ -1,6 +1,6 @@
 /**
  * KaTeX helpers: lazy loading, MathML-capable output, and safe fallbacks.
- * See docs/completed/2.3-math-rendering-input.md (feature 2.3).
+ * See docs/completed/02-assessment-and-authoring/2.3-math-rendering-input.md (feature 2.3).
  */
 
 import type katexType from 'katex'

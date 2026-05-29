@@ -18,7 +18,6 @@ import { TopBar } from './top-bar'
 import { UiThemeSync } from './ui-theme-sync'
 import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
-import { HelpWidget } from './help-widget'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
@@ -69,7 +68,6 @@ function AppShellLayout() {
           </main>
         </div>
       </div>
-      <HelpWidget />
       </LmsExperienceRoot>
     </CourseNavFeaturesProvider>
   )
