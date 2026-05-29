@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { acknowledgeLegalDocument, fetchPendingLegalDocuments, type PendingLegalDocument } from '../../lib/legal-api'
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../../lib/legal-documents'
 
-const DOC_LINKS: Record<string, { label: string; path: string }> = {
-  privacy_policy: { label: PRIVACY_POLICY.title, path: PRIVACY_POLICY.path },
-  terms_of_service: { label: TERMS_OF_SERVICE.title, path: TERMS_OF_SERVICE.path },
+const DOC_LINKS: Record<string, { label: string; href: string }> = {
+  privacy_policy: { label: PRIVACY_POLICY.title, href: PRIVACY_POLICY.url },
+  terms_of_service: { label: TERMS_OF_SERVICE.title, href: TERMS_OF_SERVICE.url },
 }
 
 export function LegalUpdateBanner() {
@@ -61,9 +60,9 @@ export function LegalUpdateBanner() {
           {link ? (
             <>
               Please review the{' '}
-              <Link to={link.path} className="font-medium underline underline-offset-2">
+              <a href={link.href} className="font-medium underline underline-offset-2">
                 {link.label}
-              </Link>
+              </a>
               {pending.length > 1 ? ' and other updated policies' : ''} (effective{' '}
               {primary.effectiveDate}).
             </>

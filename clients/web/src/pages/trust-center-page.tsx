@@ -21,6 +21,7 @@ function isoStatusLabel(status: string): string {
 }
 import { Link } from 'react-router-dom'
 import { BrandLogo } from '../components/brand-logo'
+import { MARKETING_LEGAL_URLS } from '../lib/marketing-site'
 import { SUB_PROCESSORS, SUB_PROCESSORS_EFFECTIVE_DATE, type DpaStatus } from '../content/trust/sub-processors'
 import { INCIDENTS, type IncidentSeverity, type IncidentStatus } from '../content/trust/incidents'
 
@@ -193,8 +194,8 @@ export default function TrustCenterPage() {
             <span className="sr-only">Lextures home</span>
           </Link>
           <nav aria-label="Legal" className="flex flex-wrap gap-3 text-sm">
-            <Link to="/privacy" className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300">Privacy</Link>
-            <Link to="/terms" className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300">Terms</Link>
+            <a href={MARKETING_LEGAL_URLS.privacy} className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300">Privacy</a>
+            <a href={MARKETING_LEGAL_URLS.terms} className="text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300">Terms</a>
             <Link to="/login" className="text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100">Sign in</Link>
           </nav>
         </div>
@@ -467,7 +468,7 @@ export default function TrustCenterPage() {
                 <p className="font-semibold text-slate-900 dark:text-neutral-100 mb-1">Responsible disclosure</p>
                 <p>
                   We welcome vulnerability reports from security researchers. Please review our{' '}
-                  <a href="/security" className="text-indigo-700 underline dark:text-indigo-300">
+                  <a href={MARKETING_LEGAL_URLS.security} className="text-indigo-700 underline dark:text-indigo-300">
                     responsible disclosure policy
                   </a>{' '}
                   before reporting. We commit to a 90-day disclosure timeline and will acknowledge valid reports
@@ -492,9 +493,9 @@ export default function TrustCenterPage() {
                     privacy@lextures.com
                   </a>
                   . See our{' '}
-                  <Link to="/privacy" className="text-indigo-700 underline dark:text-indigo-300">
+                  <a href={MARKETING_LEGAL_URLS.privacy} className="text-indigo-700 underline dark:text-indigo-300">
                     Privacy Policy
-                  </Link>{' '}
+                  </a>{' '}
                   for full details.
                 </p>
               </div>
@@ -506,9 +507,9 @@ export default function TrustCenterPage() {
       <footer className="mt-12 border-t border-slate-200 dark:border-neutral-800 py-6 px-4 text-center text-xs text-slate-500 dark:text-neutral-500 print:hidden">
         <p>
           &copy; {new Date().getFullYear()} Lextures, Inc. &middot;{' '}
-          <Link to="/privacy" className="underline-offset-2 hover:underline">Privacy Policy</Link>
+          <a href={MARKETING_LEGAL_URLS.privacy} className="underline-offset-2 hover:underline">Privacy Policy</a>
           {' '}&middot;{' '}
-          <Link to="/terms" className="underline-offset-2 hover:underline">Terms of Service</Link>
+          <a href={MARKETING_LEGAL_URLS.terms} className="underline-offset-2 hover:underline">Terms of Service</a>
         </p>
       </footer>
     </div>

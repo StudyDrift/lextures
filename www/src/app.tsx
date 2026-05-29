@@ -22,6 +22,17 @@ import { HigherEdPage } from './pages/higher-ed-page'
 import { K12Page } from './pages/k12-page'
 import { PricingPage } from './pages/pricing-page'
 import { SelfLearnerPage } from './pages/self-learner-page'
+import {
+  PrivacyPolicyHistoryPage,
+  PrivacyPolicyPage,
+  TermsOfServiceHistoryPage,
+  TermsOfServicePage,
+} from './pages/legal-pages'
+import { SecurityPage } from './pages/security-page'
+import { AccessibilityConformancePage } from './pages/accessibility-conformance-page'
+import { CaliforniaPrivacyRightsPage } from './pages/california-privacy-rights-page'
+import { VpatPage } from './pages/vpat-page'
+import { SiteFooter } from './components/site-footer'
 
 const LINKS = {
   demo: 'https://demo.lextures.com/',
@@ -361,33 +372,7 @@ function HomePage() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-stone-200/90 bg-white py-12">
-        <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 sm:flex-row sm:items-start sm:justify-between sm:px-6 lg:px-8">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <img src="/logo.svg" className="h-8 w-8" alt="" aria-hidden />
-              <span className="text-base font-semibold text-stone-900">Lextures</span>
-            </div>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-stone-500">
-              Open-source LMS for courses, assessments, and institutional workflows. Developed in public
-              on GitHub.
-            </p>
-            <p className="mt-4 text-sm text-stone-400">© {new Date().getFullYear()} Lextures contributors</p>
-          </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm font-medium text-stone-500">
-            <a href={LINKS.demo} className="no-underline transition-colors hover:text-stone-900">Live demo</a>
-            <a href={LINKS.github} className="no-underline transition-colors hover:text-stone-900">GitHub</a>
-            <a href="/features" className="no-underline transition-colors hover:text-stone-900">Features</a>
-            <a href="/higher-ed" className="no-underline transition-colors hover:text-stone-900">Higher Education</a>
-            <a href="/k-12" className="no-underline transition-colors hover:text-stone-900">K–12</a>
-            <a href="/self-learner" className="no-underline transition-colors hover:text-stone-900">Self-Learner</a>
-            <a href="/pricing" className="no-underline transition-colors hover:text-stone-900">Pricing</a>
-            <a href="/blog" className="no-underline transition-colors hover:text-stone-900">Blog</a>
-            <a href="/docs" className="no-underline transition-colors hover:text-stone-900">Documentation</a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
@@ -408,5 +393,13 @@ export default function App() {
   if (route.startsWith('/blog/')) return <BlogPost slug={route.slice('/blog/'.length)} />
   if (route === '/docs') return <DocsIndex />
   if (route.startsWith('/docs/')) return <DocsPost slug={route.slice('/docs/'.length)} />
+  if (route === '/privacy') return <PrivacyPolicyPage />
+  if (route === '/privacy/history') return <PrivacyPolicyHistoryPage />
+  if (route === '/terms') return <TermsOfServicePage />
+  if (route === '/terms/history') return <TermsOfServiceHistoryPage />
+  if (route === '/security') return <SecurityPage />
+  if (route === '/accessibility') return <AccessibilityConformancePage />
+  if (route === '/accessibility/vpat') return <VpatPage />
+  if (route === '/privacy-rights/california') return <CaliforniaPrivacyRightsPage />
   return <HomePage />
 }

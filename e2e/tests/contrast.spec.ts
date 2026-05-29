@@ -103,21 +103,6 @@ test.describe('Color contrast — public pages', () => {
     assertNoContrastViolations(results, 'login/dark')
   })
 
-  test('accessibility conformance page passes axe color-contrast', async ({ page }) => {
-    await page.goto('/accessibility')
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-
-    const results = await axeContrastScan(page)
-    assertNoContrastViolations(results, 'accessibility-page')
-  })
-
-  test('privacy page passes axe color-contrast', async ({ page }) => {
-    await page.goto('/privacy')
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-
-    const results = await axeContrastScan(page)
-    assertNoContrastViolations(results, 'privacy-page')
-  })
 })
 
 // ── Computed-style validation (light theme body) ──────────────────────────────

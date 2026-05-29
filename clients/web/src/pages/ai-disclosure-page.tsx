@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { aiDisclosureI18n } from '../lib/ai-disclosure-i18n'
+import { MARKETING_LEGAL_URLS } from '../lib/marketing-site'
 
 type DisclosureDoc = {
   version: string
@@ -44,9 +45,9 @@ export default function AiDisclosurePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10 text-slate-800 dark:text-neutral-100">
       <nav className="text-sm text-slate-500 dark:text-neutral-400">
-        <Link to="/privacy" className="underline-offset-2 hover:underline">
+        <a href={MARKETING_LEGAL_URLS.privacy} className="underline-offset-2 hover:underline">
           Privacy
-        </Link>
+        </a>
         <span aria-hidden="true"> / </span>
         <span>{aiDisclosureI18n.pageTitle}</span>
       </nav>

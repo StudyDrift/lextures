@@ -1,6 +1,7 @@
 import { ArrowLeft, BookOpen, BrainCircuit, GraduationCap, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Header } from '../components/header'
+import { SiteFooter } from '../components/site-footer'
 
 const LOGIN_URL = 'https://demo.lextures.com/'
 
@@ -176,11 +177,7 @@ export function GetStartedPage() {
         )}
       </main>
 
-      <footer className="border-t border-stone-200/90 bg-white py-10">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="text-sm text-stone-400">© {new Date().getFullYear()} Lextures contributors</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

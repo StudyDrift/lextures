@@ -119,9 +119,6 @@ function staticCrumbsFromPathname(pathname: string, courseCode: string | null): 
     ]
   }
 
-  if (pathname === '/terms') return [{ key: 'terms', label: 'Terms of Use' }]
-  if (pathname === '/privacy') return [{ key: 'privacy', label: 'Privacy Policy' }]
-
   if (pathname.startsWith('/settings')) {
     const view = settingsViewFromPathname(pathname)
     return [

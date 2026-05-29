@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
+import { MARKETING_SITE_URLS } from '../lib/marketing-site'
 
 const API = '/api/v1/compliance/security-reports'
 
@@ -77,8 +77,10 @@ export default function SecurityDisclosureAdminPage() {
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-neutral-50">Security reports</h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
-            Responsible disclosure triage (plan 10.16). Public policy:{' '}
-            <Link to="/security" className="text-indigo-700 underline dark:text-indigo-300">/security</Link>
+            Public policy:{' '}
+            <a href={MARKETING_SITE_URLS.security} className="text-indigo-700 underline dark:text-indigo-300">
+              {MARKETING_SITE_URLS.security}
+            </a>
           </p>
         </div>
         <button

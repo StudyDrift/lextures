@@ -96,7 +96,7 @@ export interface Sec508SoftwareCriterion {
 export const SEC508_SOFTWARE_CRITERIA: Sec508SoftwareCriterion[] = [
   { id: '502.2.1', title: 'User Control of Accessibility Features', conformance: 'Supports', notes: 'Platform-level accessibility features (OS dark mode, high contrast, zoom) are honored. The application does not override or disable AT settings.' },
   { id: '502.2.2', title: 'No Disruption of Accessibility Features', conformance: 'Supports', notes: 'The application does not disrupt or override platform accessibility services.' },
-  { id: '502.3', title: 'Documented Accessibility Features', conformance: 'Supports', notes: 'Accessibility features are documented in this VPAT and on the Accessibility Conformance Statement page at /accessibility.' },
+  { id: '502.3', title: 'Documented Accessibility Features', conformance: 'Supports', notes: 'Accessibility features are documented in this VPAT and on the Accessibility Conformance Statement page at https://lextures.com/accessibility.' },
   { id: '503.2', title: 'User Preferences', conformance: 'Supports', notes: 'The application respects OS dark mode preference via prefers-color-scheme and provides in-app density and contrast settings.' },
   { id: '503.3', title: 'Alternative User Interfaces', conformance: 'Not Applicable', notes: 'No alternative UI is provided; the standard web interface supports AT directly.' },
   { id: '503.4', title: 'User Controls for Captions and Audio Description', conformance: 'Not Applicable', notes: 'Captions are controlled via standard HTML5 video player controls. The platform does not deliver its own video content.' },
@@ -110,7 +110,7 @@ export interface Sec508SupportCriterion {
 }
 
 export const SEC508_SUPPORT_CRITERIA: Sec508SupportCriterion[] = [
-  { id: '602.2', title: 'Accessibility and Compatibility Features', conformance: 'Supports', notes: 'This VPAT and the /accessibility conformance statement describe accessibility features and known limitations, including remediation timelines for partial supports.' },
+  { id: '602.2', title: 'Accessibility and Compatibility Features', conformance: 'Supports', notes: 'This VPAT and the https://lextures.com/accessibility conformance statement describe accessibility features and known limitations, including remediation timelines for partial supports.' },
   { id: '602.3', title: 'Electronic Support Documentation', conformance: 'Supports', notes: 'All support documentation is provided in accessible HTML format. This VPAT page meets WCAG 2.1 AA.' },
   { id: '602.4', title: 'Alternate Formats for Non-Electronic Support Documentation', conformance: 'Not Applicable', notes: 'All documentation is provided electronically; no print-only documentation is distributed.' },
   { id: '603.2', title: 'Information on Accessibility and Compatibility Features', conformance: 'Supports', notes: 'Accessibility support information is available at accessibility@lextures.com. Support staff can describe known limitations and workarounds.' },
@@ -132,7 +132,7 @@ export const EN301549_SOFTWARE_CRITERIA: En301549Criterion[] = [
 ]
 
 export const EN301549_SUPPORT_CRITERIA: En301549Criterion[] = [
-  { clause: '12.1.1', title: 'Accessibility and Compatibility Features (Documentation)', conformance: 'Supports', notes: 'This VPAT and the /accessibility page document accessibility features and known issues.' },
+  { clause: '12.1.1', title: 'Accessibility and Compatibility Features (Documentation)', conformance: 'Supports', notes: 'This VPAT and the https://lextures.com/accessibility page document accessibility features and known issues.' },
   { clause: '12.2.2', title: 'Information on Accessibility and Compatibility Features (Support)', conformance: 'Supports', notes: 'Support staff are informed of accessibility features and limitations. Contact: accessibility@lextures.com.' },
   { clause: '12.2.3', title: 'Effective Communication', conformance: 'Supports', notes: 'Support is available by email. Responses accommodate users with disabilities on a case-by-case basis.' },
   { clause: '12.2.4', title: 'Accessible Documentation', conformance: 'Supports', notes: 'All product documentation is in accessible HTML format meeting WCAG 2.1 AA.' },

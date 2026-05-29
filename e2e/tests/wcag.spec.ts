@@ -45,23 +45,6 @@ test.describe('WCAG — public pages', () => {
     assertNoViolations(results)
   })
 
-  test('accessibility conformance page loads and has no violations', async ({ page }) => {
-    await page.goto('/accessibility')
-    // AC-6: conformance statement lists WCAG criteria
-    await expect(page.getByRole('heading', { level: 1, name: /accessibility conformance statement/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /level a success criteria/i })).toBeVisible()
-    await expect(page.getByRole('heading', { name: /level aa success criteria/i })).toBeVisible()
-
-    const results = await axeScan(page)
-    assertNoViolations(results)
-  })
-
-  test('privacy page has no critical/serious WCAG violations', async ({ page }) => {
-    await page.goto('/privacy')
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    const results = await axeScan(page)
-    assertNoViolations(results)
-  })
 })
 
 // ── authenticated flows ───────────────────────────────────────────────────────
@@ -126,40 +109,5 @@ test.describe('WCAG — authenticated flows', () => {
     // Focus must have moved to the main content landmark.
     // waitForFunction polls until true so hash-navigation focus settles before we assert.
     await page.waitForFunction(() => document.activeElement?.id === 'main-content', null, { timeout: 5000 })
-  })
-})
-
-// ── conformance statement content checks ─────────────────────────────────────
-
-test.describe('Accessibility conformance statement', () => {
-  test('lists Level A and Level AA sections with criteria table', async ({ page }) => {
-    await page.goto('/accessibility')
-    await page.waitForLoadState('networkidle')
-
-    // Both tables must be present
-    const tables = page.getByRole('table', { name: /wcag success criteria/i })
-    await expect(tables.first()).toBeVisible()
-
-    // At least one "Supports" badge in each table
-    await expect(page.getByText('Supports').first()).toBeVisible()
-
-    // Feedback section is present
-    await expect(page.getByRole('heading', { name: /feedback/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /accessibility@lextures\.com/i }).first()).toBeVisible()
-  })
-
-  test('page is reachable without authentication', async ({ page }) => {
-    // Must not redirect to login
-    await page.goto('/accessibility')
-    await expect(page).toHaveURL('/accessibility')
-    await expect(page.getByRole('heading', { level: 1 })).toContainText('Accessibility Conformance Statement')
-  })
-
-  test('header contains navigation back to home and legal pages', async ({ page }) => {
-    await page.goto('/accessibility')
-    const nav = page.getByRole('navigation', { name: 'Legal' })
-    await expect(nav).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Privacy' })).toBeVisible()
-    await expect(nav.getByRole('link', { name: 'Terms' })).toBeVisible()
   })
 })
