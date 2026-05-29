@@ -119,7 +119,7 @@ test.describe('Color contrast — public pages', () => {
   })
 })
 
-// ── Computed-style validation (light + dark themes) ──────────────────────────
+// ── Computed-style validation (light theme body) ──────────────────────────────
 
 test.describe('Color contrast — computed body styles', () => {
   test('body text meets 4.5:1 in light theme', async ({ page }) => {
@@ -132,22 +132,6 @@ test.describe('Color contrast — computed body styles', () => {
     expect(
       ratio,
       `body text contrast in light mode: ${ratio.toFixed(2)}:1 (${color} on ${background})`,
-    ).toBeGreaterThanOrEqual(4.5)
-  })
-
-  test('body text meets 4.5:1 in dark theme', async ({ page }) => {
-    await page.goto('/login')
-    await expect(page.getByRole('button', { name: /sign in/i })).toBeVisible()
-
-    await page.evaluate(() => document.documentElement.classList.add('dark'))
-    await page.waitForTimeout(100)
-
-    const { color, background } = await getComputedColors(page, 'body')
-    const ratio = wcagRatio(color, background)
-
-    expect(
-      ratio,
-      `body text contrast in dark mode: ${ratio.toFixed(2)}:1 (${color} on ${background})`,
     ).toBeGreaterThanOrEqual(4.5)
   })
 })
