@@ -60,6 +60,8 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       storageQuotasEnabled: true,
       dataResidencyEnabled: true,
       itemAnalysisEnabled: true,
+      videoCaptionsEnabled: true,
+      autoCaptioningEnabled: true,
       updateMask: [
         'h5pEnabled',
         'oerLibraryEnabled',
@@ -84,6 +86,8 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'storageQuotasEnabled',
         'dataResidencyEnabled',
         'itemAnalysisEnabled',
+        'videoCaptionsEnabled',
+        'autoCaptioningEnabled',
       ],
     }),
   })

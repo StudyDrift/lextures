@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* Video caption styling (plan 12.4) — uses CSS variables from VideoPlayer */
+.video-with-captions::cue {
+  font-size: var(--caption-font-size, 1.05rem);
+  color: var(--caption-color, #fff);
+  background: var(--caption-bg, rgba(0, 0, 0, 0.75));
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Native pickers (datetime-local, date, time, color) follow color-scheme on the root. */

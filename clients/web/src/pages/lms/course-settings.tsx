@@ -30,6 +30,7 @@ import { CourseArchivedContentSection } from './course-archived-content-section'
 import { CourseExportImportSection } from './course-export-import-section'
 import { CourseGradingSettingsSection } from './course-grading-settings'
 import { CourseFeaturesSection } from './course-features-section'
+import { CourseCaptionPolicySection } from './course-caption-policy-section'
 import { CourseOutcomesSection } from './course-outcomes-section'
 import { CourseBlueprintSection } from './course-blueprint-settings'
 import { CourseCrossListingSection } from './course-cross-listing-settings'
@@ -1252,11 +1253,18 @@ export default function CourseSettings() {
           {section === 'grading' && <CourseGradingSettingsSection courseCode={courseCode} />}
           {section === 'outcomes' && <CourseOutcomesSection courseCode={courseCode} />}
           {section === 'features' && (
-            <CourseFeaturesSection
-              courseCode={courseCode}
-              course={course}
-              onCourseUpdated={setCourse}
-            />
+            <>
+              <CourseCaptionPolicySection
+                courseCode={courseCode}
+                course={course}
+                onCourseUpdated={setCourse}
+              />
+              <CourseFeaturesSection
+                courseCode={courseCode}
+                course={course}
+                onCourseUpdated={setCourse}
+              />
+            </>
           )}
           {section === 'translations' && isTranslationMemoryEnabled() && courseCode ? (
             <CourseTranslationsSettings />

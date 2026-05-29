@@ -179,6 +179,8 @@ type Config struct {
 
 	// AutoCaptioningEnabled gates auto-captioning via Whisper (plan 8.4). Defaults to false.
 	AutoCaptioningEnabled bool
+	// VideoCaptionsEnabled gates caption editor, player controls, and compliance UI (plan 12.4).
+	VideoCaptionsEnabled bool
 	// WhisperBackend selects the ASR backend: whisper-api (default), whisper-local, azure-speech, google-speech, stub.
 	WhisperBackend string
 	// OpenAIAPIKey is the OpenAI API key used when WhisperBackend=whisper-api.

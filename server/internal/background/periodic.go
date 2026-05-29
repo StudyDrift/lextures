@@ -89,6 +89,8 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		if cfg.FFmpegPath != "" {
 			worker.FFmpegPath = cfg.FFmpegPath
 		}
+		worker.AutoCaptionOnComplete = cfg.AutoCaptioningEnabled
+		worker.CaptionBackend = cfg.WhisperBackend
 		go runEvery(ctx, 30*time.Second, func() {
 			sweepTranscodeJobs(context.Background(), worker)
 		})

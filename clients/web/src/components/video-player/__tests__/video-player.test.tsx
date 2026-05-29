@@ -99,4 +99,15 @@ describe('VideoPlayer', () => {
     const video = document.querySelector('video')
     expect(video?.getAttribute('aria-label')).toBe('Lecture recording')
   })
+
+  it('shows CC control when caption track is provided', () => {
+    render(
+      <VideoPlayer
+        fallbackSrc="https://example.com/video.mp4"
+        captionTrackSrc="https://example.com/captions.vtt"
+      />,
+    )
+    expect(screen.getByRole('button', { name: /toggle captions/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /caption settings/i })).toBeInTheDocument()
+  })
 })

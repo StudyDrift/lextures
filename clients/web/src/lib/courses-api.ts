@@ -143,6 +143,8 @@ export type CoursePublic = {
   aiTutorEnabled?: boolean
   /** Plan 6.10 — Translate button on feed/discussion/inbox messages (default off when omitted). */
   multilingualMessagingEnabled?: boolean
+  /** Plan 12.4 — block publishing video content without ready captions. */
+  requireCaptions?: boolean
   /** `traditional` or `competency_based` (server default when omitted: traditional). */
   courseType?: string
   createdAt: string

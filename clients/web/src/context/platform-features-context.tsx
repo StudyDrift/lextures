@@ -33,6 +33,8 @@ export type PlatformFeatures = {
   sessionManagementUiEnabled: boolean
   instructorInsightsEnabled: boolean
   rtlEnabled: boolean
+  videoCaptionsEnabled: boolean
+  autoCaptioningEnabled: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -56,6 +58,8 @@ const defaultFeatures: PlatformFeatures = {
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
   rtlEnabled: false,
+  videoCaptionsEnabled: false,
+  autoCaptioningEnabled: false,
   loading: true,
   refresh: async () => {},
 }
@@ -84,6 +88,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     sessionManagementUiEnabled: false,
     instructorInsightsEnabled: false,
     rtlEnabled: false,
+    videoCaptionsEnabled: false,
+    autoCaptioningEnabled: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -113,8 +119,14 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           sessionManagementUiEnabled: data.sessionManagementUiEnabled === true,
           instructorInsightsEnabled: data.instructorInsightsEnabled === true,
           rtlEnabled: data.rtlEnabled === true,
+          videoCaptionsEnabled: data.videoCaptionsEnabled === true,
+          autoCaptioningEnabled: data.autoCaptioningEnabled === true,
         }
-        setFeatures(next)
+        setFeatures({
+          ...next,
+          videoCaptionsEnabled: next.videoCaptionsEnabled === true,
+          autoCaptioningEnabled: next.autoCaptioningEnabled === true,
+        })
         setPlatformFeaturesSnapshot(next)
       }
     } catch {
