@@ -18,7 +18,7 @@ export function SideNavCommandPaletteTrigger() {
           data-command-palette-anchor="sidebar"
           data-onboarding="command-palette"
           onClick={() => open()}
-          className={`flex items-center rounded-full bg-[#E8E9EB] text-start text-sm text-slate-600 outline-none transition hover:bg-[#E0E2E5] focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus-visible:ring-neutral-500/40 ${
+          className={`flex items-center rounded-full bg-[#E8E9EB] text-start text-sm text-slate-700 outline-none transition hover:bg-[#E0E2E5] focus-visible:ring-2 focus-visible:ring-slate-400/35 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:focus-visible:ring-neutral-500/40 ${
             sideNavCollapsed ? 'h-10 w-10 justify-center p-0 mx-auto' : 'w-full gap-2.5 py-2 ps-3 pe-2'
           }`}
           title={undefined}
@@ -32,7 +32,7 @@ export function SideNavCommandPaletteTrigger() {
         />
         {!sideNavCollapsed && (
           <>
-            <span className="min-w-0 flex-1 truncate font-medium text-slate-600 dark:text-neutral-400">
+            <span className="min-w-0 flex-1 truncate font-medium text-slate-700 dark:text-neutral-400">
               Search
             </span>
             <kbd className="pointer-events-none flex h-7 min-w-[1.75rem] shrink-0 items-center justify-center rounded-lg border border-black/[0.06] bg-white px-2 font-mono text-[11px] font-medium text-slate-500 shadow-sm dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-400">

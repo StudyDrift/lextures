@@ -26,9 +26,11 @@
     "indigo-700":   "#4338ca",
     "red-600":      "#dc2626",
     "amber-500":    "#f59e0b",
+    "amber-700":    "#b45309",
     "green-600":    "#16a34a",
     "green-700":    "#15803d",
-    "emerald-500":  "#10b981"
+    "emerald-500":  "#10b981",
+    "sidebar-bg":   "#f2f2f2"
   },
   "pairs": {
     "light": [
@@ -115,6 +117,18 @@
         "background": "slate-100",
         "minRatio": 4.5,
         "usage": "text on table row alternates and hover states"
+      },
+      {
+        "foreground": "slate-700",
+        "background": "sidebar-bg",
+        "minRatio": 4.5,
+        "usage": "sidebar inactive nav link text on #F2F2F2 shell background"
+      },
+      {
+        "foreground": "white",
+        "background": "amber-700",
+        "minRatio": 4.5,
+        "usage": "review CTA button text on dashboard"
       }
     ],
     "dark": [

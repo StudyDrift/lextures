@@ -684,7 +684,7 @@ export default function Dashboard() {
                 </div>
                 <Link
                   to="/review"
-                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-500"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600"
                 >
                   {reviewStats.dueToday > 0 ? 'Start review' : 'Open review'}
                   <ArrowRight className="h-4 w-4" aria-hidden />
