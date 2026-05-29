@@ -4,7 +4,7 @@
 
 ALTER TABLE settings.platform_app_settings
     ADD COLUMN IF NOT EXISTS alt_text_enforcement_enabled BOOLEAN,
-    ADD COLUMN IF NOT EXISTS ff_alt_text_enforcement BOOLEAN NOT NULL DEFAULT FALSE;
+    ADD COLUMN IF NOT EXISTS ff_alt_text_enforcement BOOLEAN;
 
 COMMENT ON COLUMN settings.platform_app_settings.alt_text_enforcement_enabled IS
     'Plan 12.5: Enables alt-text prompts, AI suggestions, and accessibility coverage in course authoring.';
