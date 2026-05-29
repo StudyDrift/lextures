@@ -17,6 +17,8 @@ export type PlatformFeaturesSnapshot = {
   speechToTextEnabled: boolean
   accommodationsEngineEnabled: boolean
   ffAccommodationsEngine: boolean
+  readAloudEnabled: boolean
+  ffReadAloud: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -26,6 +28,7 @@ export type PlatformFeaturesSnapshot = {
   rtlEnabled: boolean
   videoCaptionsEnabled?: boolean
   autoCaptioningEnabled?: boolean
+  ffReadingPreferences?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -45,6 +48,8 @@ const defaults: PlatformFeaturesSnapshot = {
   speechToTextEnabled: false,
   accommodationsEngineEnabled: false,
   ffAccommodationsEngine: false,
+  readAloudEnabled: false,
+  ffReadAloud: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -54,6 +59,7 @@ const defaults: PlatformFeaturesSnapshot = {
   rtlEnabled: false,
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
+  ffReadingPreferences: false,
 }
 
 let loaded = false
@@ -125,6 +131,10 @@ export function ffAccommodationsEngineEnabled(): boolean {
   return loaded && snapshot.ffAccommodationsEngine
 }
 
+export function readAloudFeatureEnabled(): boolean {
+  return loaded && snapshot.readAloudEnabled && snapshot.ffReadAloud
+}
+
 export function translationMemoryFeatureEnabled(): boolean {
   return loaded && snapshot.translationMemoryEnabled
 }
@@ -147,4 +157,8 @@ export function xapiEmissionFeatureEnabled(): boolean {
 
 export function instructorInsightsFeatureEnabled(): boolean {
   return loaded && snapshot.instructorInsightsEnabled
+}
+
+export function readingPreferencesFeatureEnabled(): boolean {
+  return loaded && snapshot.ffReadingPreferences === true
 }

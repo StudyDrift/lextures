@@ -613,7 +613,7 @@ export function ContentPageReader({
   )
 
   return (
-    <div className="relative">
+    <div className="relative" data-content-reader>
       <div className="relative min-w-0">
         <MarkdownArticleView
           ref={articleRef}

@@ -8,16 +8,6 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 )
 
-func TestSpeechToText_DisabledReturns404(t *testing.T) {
-	d := Deps{Config: config.Config{SpeechToTextEnabled: false}}
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/me/reading-preferences", nil)
-	rec := httptest.NewRecorder()
-	d.handleGetMyReadingPreferences()(rec, req)
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("expected 404, got %d", rec.Code)
-	}
-}
-
 func TestSTTTranscribe_UnauthenticatedReturns401(t *testing.T) {
 	d := Deps{Config: config.Config{SpeechToTextEnabled: true}}
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/stt/transcribe", nil)

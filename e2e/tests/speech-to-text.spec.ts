@@ -5,8 +5,22 @@ import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from '../fixtures/test.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
+const E2E_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
+const E2E_ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
 
-async function enableSpeechToText(token: string): Promise<void> {
+/** Platform settings require global admin; global E2E seed enables STT by default. */
+async function adminToken(): Promise<string> {
+  const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: E2E_ADMIN_EMAIL, password: E2E_ADMIN_PASSWORD }),
+  })
+  expect(loginRes.ok).toBe(true)
+  const { access_token } = (await loginRes.json()) as { access_token: string }
+  return access_token
+}
+
+async function patchSpeechToTextEnabled(token: string, enabled: boolean): Promise<void> {
   const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
     method: 'PUT',
     headers: {
@@ -14,23 +28,95 @@ async function enableSpeechToText(token: string): Promise<void> {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
-      speechToTextEnabled: true,
+      speechToTextEnabled: enabled,
       updateMask: ['speechToTextEnabled'],
     }),
   })
   expect(res.ok).toBe(true)
 }
 
-test.describe('Speech-to-text API', () => {
-  test('reading-preferences returns 404 when feature disabled', async ({ seededCourse }) => {
-    const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
-      headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
+async function enableSpeechToText(): Promise<void> {
+  await patchSpeechToTextEnabled(await adminToken(), true)
+}
+
+function installSpeechRecognitionMock(page: import('@playwright/test').Page, withFinalResult = false) {
+  return page.addInitScript((emitFinal) => {
+    class MockSpeechRecognition {
+      continuous = false
+      interimResults = true
+      lang = 'en-US'
+      maxAlternatives = 1
+      onstart: (() => void) | null = null
+      onend: (() => void) | null = null
+      onerror: ((event: { error: string }) => void) | null = null
+      onresult:
+        | ((event: {
+            resultIndex: number
+            results: Array<{ isFinal: boolean; 0: { transcript: string } }>
+          }) => void)
+        | null = null
+      start() {
+        this.onstart?.()
+        if (emitFinal) {
+          queueMicrotask(() => {
+            this.onresult?.({
+              resultIndex: 0,
+              results: [{ isFinal: true, 0: { transcript: 'Hello world' } }],
+            })
+            this.onend?.()
+          })
+        }
+      }
+      stop() {
+        this.onend?.()
+      }
+      abort() {}
+    }
+    // @ts-expect-error test mock
+    window.SpeechRecognition = MockSpeechRecognition
+    // @ts-expect-error test mock
+    window.webkitSpeechRecognition = MockSpeechRecognition
+    Object.defineProperty(navigator, 'mediaDevices', {
+      configurable: true,
+      value: {
+        getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
+      },
     })
-    expect(res.status).toBe(404)
+  }, withFinalResult)
+}
+
+async function openSyllabusEditor(page: import('@playwright/test').Page, courseCode: string) {
+  await page.goto(`/courses/${encodeURIComponent(courseCode)}/syllabus`)
+  await page.getByRole('button', { name: /^edit$/i }).click()
+  const editor = page.locator('[contenteditable="true"]').first()
+  await expect(editor).toBeVisible({ timeout: 15_000 })
+  await editor.click()
+  return editor
+}
+
+test.describe('Speech-to-text API', () => {
+  test('reading-preferences PATCH returns 404 for stt fields when feature disabled', async ({
+    seededCourse,
+  }) => {
+    const admin = await adminToken()
+    await patchSpeechToTextEnabled(admin, false)
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${seededCourse.studentToken}`,
+        },
+        body: JSON.stringify({ sttEnabled: true, sttLanguage: 'en-US' }),
+      })
+      expect(res.status).toBe(404)
+    } finally {
+      await patchSpeechToTextEnabled(admin, true)
+    }
   })
 
   test('reading-preferences round-trip when enabled', async ({ seededCourse }) => {
-    await enableSpeechToText(seededCourse.instructorToken)
+    await enableSpeechToText()
     const getRes = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
       headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
     })
@@ -77,105 +163,31 @@ test.describe('Speech-to-text API', () => {
 })
 
 test.describe('Speech-to-text UI', () => {
-  test.beforeEach(async ({ seededCourse }) => {
-    await enableSpeechToText(seededCourse.instructorToken)
+  test.beforeEach(async () => {
+    await enableSpeechToText()
   })
 
-  test('dictation inserts text into quiz short-answer field', async ({ page, seededCourse, injectToken }) => {
-    await injectToken(page, seededCourse.studentToken)
+  test('dictation inserts text into syllabus block editor', async ({ coursePage: page, seededCourse }) => {
+    await installSpeechRecognitionMock(page, true)
+    const editor = await openSyllabusEditor(page, seededCourse.courseCode)
 
-    await page.addInitScript(() => {
-      class MockSpeechRecognition {
-        continuous = false
-        interimResults = true
-        lang = 'en-US'
-        maxAlternatives = 1
-        onstart: (() => void) | null = null
-        onend: (() => void) | null = null
-        onerror: ((event: { error: string }) => void) | null = null
-        onresult:
-          | ((event: {
-              resultIndex: number
-              results: Array<{ isFinal: boolean; 0: { transcript: string } }>
-            }) => void)
-          | null = null
-        start() {
-          this.onstart?.()
-          queueMicrotask(() => {
-            this.onresult?.({
-              resultIndex: 0,
-              results: [{ isFinal: true, 0: { transcript: 'Hello world' } }],
-            })
-            this.onend?.()
-          })
-        }
-        stop() {
-          this.onend?.()
-        }
-        abort() {}
-      }
-      // @ts-expect-error test mock
-      window.SpeechRecognition = MockSpeechRecognition
-      // @ts-expect-error test mock
-      window.webkitSpeechRecognition = MockSpeechRecognition
-      Object.defineProperty(navigator, 'mediaDevices', {
-        configurable: true,
-        value: {
-          getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
-        },
-      })
-    })
-
-    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules`)
-    await page.getByRole('link', { name: /quiz/i }).first().click()
-    await page.getByRole('button', { name: /take quiz|start/i }).first().click()
-
-    const dictationBtn = page.getByRole('button', { name: 'Start dictation' }).first()
+    const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
     await dictationBtn.click()
 
-    const answer = page.getByPlaceholder('Your answer').first()
-    await expect(answer).toHaveValue(/Hello world/, { timeout: 10_000 })
+    await expect(editor).toContainText(/Hello world/, { timeout: 10_000 })
   })
 
-  test('dictation button passes axe when visible', async ({ page, seededCourse, injectToken }) => {
-    await injectToken(page, seededCourse.studentToken)
-    await page.addInitScript(() => {
-      class MockSpeechRecognition {
-        continuous = false
-        interimResults = true
-        lang = 'en-US'
-        maxAlternatives = 1
-        onstart: (() => void) | null = null
-        onend: (() => void) | null = null
-        onerror: ((event: { error: string }) => void) | null = null
-        onresult: (() => void) | null = null
-        start() {
-          this.onstart?.()
-        }
-        stop() {
-          this.onend?.()
-        }
-        abort() {}
-      }
-      // @ts-expect-error test mock
-      window.SpeechRecognition = MockSpeechRecognition
-      Object.defineProperty(navigator, 'mediaDevices', {
-        configurable: true,
-        value: {
-          getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }),
-        },
-      })
-    })
+  test('dictation button passes axe when visible', async ({ coursePage: page, seededCourse }) => {
+    await installSpeechRecognitionMock(page, false)
+    await openSyllabusEditor(page, seededCourse.courseCode)
 
-    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules`)
-    await page.getByRole('link', { name: /quiz/i }).first().click()
-    await page.getByRole('button', { name: /take quiz|start/i }).first().click()
-
-    const dictationBtn = page.getByRole('button', { name: 'Start dictation' }).first()
+    const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
 
-    const results = await new AxeBuilder({ page }).include('main').analyze()
+    const results = await new AxeBuilder({ page })
+      .include('[aria-label="Start dictation"]')
+      .analyze()
     expect(results.violations).toEqual([])
   })
 })

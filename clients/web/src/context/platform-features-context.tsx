@@ -31,6 +31,8 @@ export type PlatformFeatures = {
   speechToTextEnabled: boolean
   accommodationsEngineEnabled: boolean
   ffAccommodationsEngine: boolean
+  readAloudEnabled: boolean
+  ffReadAloud: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -40,6 +42,7 @@ export type PlatformFeatures = {
   rtlEnabled: boolean
   videoCaptionsEnabled: boolean
   autoCaptioningEnabled: boolean
+  ffReadingPreferences: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -61,6 +64,8 @@ const defaultFeatures: PlatformFeatures = {
   speechToTextEnabled: false,
   accommodationsEngineEnabled: false,
   ffAccommodationsEngine: false,
+  readAloudEnabled: false,
+  ffReadAloud: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -70,6 +75,7 @@ const defaultFeatures: PlatformFeatures = {
   rtlEnabled: false,
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
+  ffReadingPreferences: false,
   loading: true,
   refresh: async () => {},
 }
@@ -96,6 +102,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     speechToTextEnabled: false,
     accommodationsEngineEnabled: false,
     ffAccommodationsEngine: false,
+    readAloudEnabled: false,
+    ffReadAloud: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -105,6 +113,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     rtlEnabled: false,
     videoCaptionsEnabled: false,
     autoCaptioningEnabled: false,
+    ffReadingPreferences: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -132,6 +141,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           speechToTextEnabled: data.speechToTextEnabled === true,
           accommodationsEngineEnabled: data.accommodationsEngineEnabled === true,
           ffAccommodationsEngine: data.ffAccommodationsEngine === true,
+          readAloudEnabled: data.readAloudEnabled === true,
+          ffReadAloud: data.ffReadAloud === true,
           translationMemoryEnabled: data.translationMemoryEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,
@@ -141,11 +152,13 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           rtlEnabled: data.rtlEnabled === true,
           videoCaptionsEnabled: data.videoCaptionsEnabled === true,
           autoCaptioningEnabled: data.autoCaptioningEnabled === true,
+          ffReadingPreferences: data.ffReadingPreferences === true,
         }
         setFeatures({
           ...next,
           videoCaptionsEnabled: next.videoCaptionsEnabled === true,
           autoCaptioningEnabled: next.autoCaptioningEnabled === true,
+          ffReadingPreferences: next.ffReadingPreferences === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

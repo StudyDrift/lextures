@@ -7,14 +7,56 @@
   background: var(--caption-bg, rgba(0, 0, 0, 0.75));
 }
 
+/* Read-aloud sentence highlight (plan 12.8 — WCAG SC 1.4.1: not color-only) */
+.tts-sentence-highlight {
+  background-color: rgb(254 240 138 / 0.85);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+  border-radius: 0.125rem;
+}
+.dark .tts-sentence-highlight {
+  background-color: rgb(202 138 4 / 0.35);
+  text-decoration-color: rgb(250 204 21);
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* Native pickers (datetime-local, date, time, color) follow color-scheme on the root. */
 html {
   color-scheme: light;
+  /* Plan 12.6: reading preferences — overridden at runtime by useReadingPreferences. */
+  --reading-font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --reading-letter-spacing: normal;
+  --reading-word-spacing: normal;
+  --reading-line-height: 1.5;
 }
 html.dark {
   color-scheme: dark;
+}
+
+/* Apply reading preferences to main content only (not nav/chrome). */
+.lms-scope {
+  font-family: var(--reading-font-family);
+  letter-spacing: var(--reading-letter-spacing);
+  word-spacing: var(--reading-word-spacing);
+  line-height: var(--reading-line-height);
+}
+
+/* Plan 12.6: OpenDyslexic and Atkinson Hyperlegible font faces (self-host in production). */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/opendyslexic@0.0.3/fonts/OpenDyslexic-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Atkinson Hyperlegible';
+  src: url('https://fonts.gstatic.com/s/atkinsonhyperlegible/v11/9Bt43C1KxNDXMspQ1lPyU89-1h6O5CpRz3lJvxA.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 /* Directional icons mirror in RTL (plan 11.2). */

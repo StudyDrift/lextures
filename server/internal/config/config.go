@@ -238,6 +238,10 @@ type Config struct {
 	AccommodationsEngineEnabled bool
 	// FFAccommodationsEngine when true writes accommodation audit log entries (plan 12.10).
 	FFAccommodationsEngine bool
+	// ReadAloudEnabled gates in-context read-aloud on course content pages (plan 12.8).
+	ReadAloudEnabled bool
+	// FFReadAloud when true exposes read-aloud controls to learners (plan 12.8).
+	FFReadAloud bool
 	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
 	TranslationMemoryEnabled bool
 
@@ -276,6 +280,8 @@ type Config struct {
 	BackupModuleEnabled bool
 	// RTLEnabled gates mirrored RTL layout for RTL locales (plan 11.2). Defaults to false until audit complete.
 	RTLEnabled bool
+	// FFReadingPreferences gates the reading preferences panel UI (plan 12.6). Default false; flip after QA sign-off.
+	FFReadingPreferences bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -430,6 +436,7 @@ func Load() Config {
 		SecurityDisclosureModuleEnabled: boolEnv("SECURITY_DISCLOSURE_MODULE_ENABLED") || boolEnv("FEATURE_SECURITY_DISCLOSURE"),
 		BackupModuleEnabled:             boolEnv("BACKUP_MODULE_ENABLED") || boolEnv("FEATURE_BACKUP_MODULE"),
 		RTLEnabled:                      boolEnv("RTL_ENABLED") || boolEnv("FEATURE_RTL_ENABLED"),
+		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

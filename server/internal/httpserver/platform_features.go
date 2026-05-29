@@ -25,6 +25,8 @@ type platformFeaturesJSON struct {
 	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
 	AccommodationsEngineEnabled bool `json:"accommodationsEngineEnabled"`
 	FFAccommodationsEngine      bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled            bool `json:"readAloudEnabled"`
+	FFReadAloud                 bool `json:"ffReadAloud"`
 	TranslationMemoryEnabled    bool `json:"translationMemoryEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
@@ -33,6 +35,7 @@ type platformFeaturesJSON struct {
 	RTLEnabled                 bool `json:"rtlEnabled"`
 	VideoCaptionsEnabled       bool `json:"videoCaptionsEnabled"`
 	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
+	FFReadingPreferences       bool `json:"ffReadingPreferences"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -54,6 +57,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		SpeechToTextEnabled:         cfg.SpeechToTextEnabled,
 		AccommodationsEngineEnabled: cfg.AccommodationsEngineEnabled,
 		FFAccommodationsEngine:      cfg.FFAccommodationsEngine,
+		ReadAloudEnabled:            cfg.ReadAloudEnabled,
+		FFReadAloud:                 cfg.FFReadAloud,
 		TranslationMemoryEnabled:    cfg.TranslationMemoryEnabled,
 		StorageQuotasEnabled:       cfg.StorageQuotasEnabled,
 		AvScanningEnabled:          cfg.AvScanningEnabled,
@@ -62,6 +67,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		RTLEnabled:                 cfg.RTLEnabled,
 		VideoCaptionsEnabled:       cfg.VideoCaptionsEnabled,
 		AutoCaptioningEnabled:      cfg.AutoCaptioningEnabled,
+		FFReadingPreferences:       cfg.FFReadingPreferences,
 	}
 }
 

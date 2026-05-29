@@ -57,6 +57,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.SpeechToTextEnabled = mergeBool(db.SpeechToTextEnabled, false)
 	out.AccommodationsEngineEnabled = mergeBool(db.AccommodationsEngineEnabled, false)
 	out.FFAccommodationsEngine = mergeBool(db.FFAccommodationsEngine, false)
+	out.ReadAloudEnabled = mergeBool(db.ReadAloudEnabled, false)
+	out.FFReadAloud = mergeBool(db.FFReadAloud, false)
 	out.TranslationMemoryEnabled = mergeBool(db.TranslationMemoryEnabled, false)
 	out.ReportExportEnabled = mergeBool(db.ReportExportEnabled, false)
 	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, out.XAPIEmissionEnabled)

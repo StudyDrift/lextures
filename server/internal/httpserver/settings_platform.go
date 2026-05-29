@@ -93,6 +93,8 @@ type platformSettingsJSON struct {
 	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
 	AccommodationsEngineEnabled bool `json:"accommodationsEngineEnabled"`
 	FFAccommodationsEngine      bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled            bool `json:"readAloudEnabled"`
+	FFReadAloud                 bool `json:"ffReadAloud"`
 	TranslationMemoryEnabled    bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
@@ -225,6 +227,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			SpeechToTextEnabled:          merged.SpeechToTextEnabled,
 			AccommodationsEngineEnabled:  merged.AccommodationsEngineEnabled,
 			FFAccommodationsEngine:       merged.FFAccommodationsEngine,
+			ReadAloudEnabled:             merged.ReadAloudEnabled,
+			FFReadAloud:                  merged.FFReadAloud,
 			TranslationMemoryEnabled:     merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
@@ -330,6 +334,8 @@ type putPlatformBody struct {
 	SpeechToTextEnabled         *bool `json:"speechToTextEnabled"`
 	AccommodationsEngineEnabled *bool `json:"accommodationsEngineEnabled"`
 	FFAccommodationsEngine      *bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled            *bool `json:"readAloudEnabled"`
+	FFReadAloud                 *bool `json:"ffReadAloud"`
 	TranslationMemoryEnabled    *bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
@@ -595,6 +601,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
 		setBool("accommodationsengineenabled", body.AccommodationsEngineEnabled, func(v bool) { wr.AccommodationsEngineEnabled = &v })
 		setBool("ffaccommodationsengine", body.FFAccommodationsEngine, func(v bool) { wr.FFAccommodationsEngine = &v })
+		setBool("readaloudenabled", body.ReadAloudEnabled, func(v bool) { wr.ReadAloudEnabled = &v })
+		setBool("ffreadaloud", body.FFReadAloud, func(v bool) { wr.FFReadAloud = &v })
 		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
@@ -684,6 +692,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			SpeechToTextEnabled:          merged.SpeechToTextEnabled,
 			AccommodationsEngineEnabled:  merged.AccommodationsEngineEnabled,
 			FFAccommodationsEngine:       merged.FFAccommodationsEngine,
+			ReadAloudEnabled:             merged.ReadAloudEnabled,
+			FFReadAloud:                  merged.FFReadAloud,
 			TranslationMemoryEnabled:     merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,

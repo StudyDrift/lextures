@@ -66,6 +66,8 @@ describe('isEquationEditorEnabled', () => {
       speechToTextEnabled: false,
       accommodationsEngineEnabled: false,
       ffAccommodationsEngine: false,
+      readAloudEnabled: false,
+      ffReadAloud: false,
       translationMemoryEnabled: false,
       storageQuotasEnabled: false,
       avScanningEnabled: false,
