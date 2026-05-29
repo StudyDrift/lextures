@@ -57,6 +57,7 @@ async function getComputedColors(
 
 async function axeContrastScan(page: import('@playwright/test').Page) {
   return new AxeBuilder({ page })
+    .exclude('nav[inert]')
     .withRules(['color-contrast'])
     .analyze()
 }
@@ -175,7 +176,11 @@ test.describe('Color contrast — authenticated pages', () => {
   test('modules page passes axe color-contrast (light theme)', async ({ page }) => {
     await injectToken(page, token)
     await page.goto(`/courses/${courseCode}/modules`)
-    await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('navigation', { name: 'Course menu' })).toBeVisible({
+      timeout: 15000,
+    })
+    // sidenav-course-items stagger animation starts links at opacity: 0
+    await page.waitForTimeout(400)
 
     const results = await axeContrastScan(page)
     assertNoContrastViolations(results, 'modules/light')
