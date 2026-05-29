@@ -2,7 +2,7 @@
  * Speech-to-text input — plan 12.9
  */
 import AxeBuilder from '@axe-core/playwright'
-import { test, expect, injectToken } from '../fixtures/test.js'
+import { test, expect } from '../fixtures/test.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const E2E_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
@@ -37,48 +37,6 @@ async function patchSpeechToTextEnabled(token: string, enabled: boolean): Promis
 
 async function enableSpeechToText(): Promise<void> {
   await patchSpeechToTextEnabled(await adminToken(), true)
-}
-
-async function seedShortAnswerQuiz(
-  instructorToken: string,
-  courseCode: string,
-  moduleId: string,
-): Promise<string> {
-  const createRes = await fetch(
-    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/quizzes`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${instructorToken}` },
-      body: JSON.stringify({ title: 'E2E STT Quiz' }),
-    },
-  )
-  expect(createRes.ok).toBe(true)
-  const created = (await createRes.json()) as { id: string }
-  const patchRes = await fetch(
-    `${API_BASE}/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(created.id)}`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${instructorToken}` },
-      body: JSON.stringify({
-        questions: [
-          {
-            id: crypto.randomUUID(),
-            prompt: 'Describe photosynthesis in one sentence.',
-            questionType: 'short_answer',
-            choices: [],
-            correctChoiceIndex: null,
-            multipleAnswer: false,
-            answerWithImage: false,
-            required: true,
-            points: 1,
-            estimatedMinutes: 2,
-          },
-        ],
-      }),
-    },
-  )
-  expect(patchRes.ok).toBe(true)
-  return created.id
 }
 
 function installSpeechRecognitionMock(page: import('@playwright/test').Page, withFinalResult = false) {
@@ -127,13 +85,29 @@ function installSpeechRecognitionMock(page: import('@playwright/test').Page, wit
   }, withFinalResult)
 }
 
+async function openSyllabusEditor(page: import('@playwright/test').Page, courseCode: string) {
+  await page.goto(`/courses/${encodeURIComponent(courseCode)}/syllabus`)
+  await page.getByRole('button', { name: /^edit$/i }).click()
+  const editor = page.locator('[contenteditable="true"]').first()
+  await expect(editor).toBeVisible({ timeout: 15_000 })
+  await editor.click()
+  return editor
+}
+
 test.describe('Speech-to-text API', () => {
-  test('reading-preferences returns 404 when feature disabled', async ({ seededCourse }) => {
+  test('reading-preferences PATCH returns 404 for stt fields when feature disabled', async ({
+    seededCourse,
+  }) => {
     const admin = await adminToken()
     await patchSpeechToTextEnabled(admin, false)
     try {
       const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
-        headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${seededCourse.studentToken}`,
+        },
+        body: JSON.stringify({ sttEnabled: true, sttLanguage: 'en-US' }),
       })
       expect(res.status).toBe(404)
     } finally {
@@ -193,37 +167,20 @@ test.describe('Speech-to-text UI', () => {
     await enableSpeechToText()
   })
 
-  test('dictation inserts text into quiz short-answer field', async ({ page, seededCourse }) => {
-    const itemId = await seedShortAnswerQuiz(
-      seededCourse.instructorToken,
-      seededCourse.courseCode,
-      seededCourse.moduleId,
-    )
+  test('dictation inserts text into syllabus block editor', async ({ coursePage: page, seededCourse }) => {
     await installSpeechRecognitionMock(page, true)
-    await injectToken(page, seededCourse.studentToken)
-
-    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules/quiz/${itemId}`)
-    await page.getByRole('button', { name: /start quiz/i }).click()
+    const editor = await openSyllabusEditor(page, seededCourse.courseCode)
 
     const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
     await dictationBtn.click()
 
-    const answer = page.getByPlaceholder('Your answer')
-    await expect(answer).toHaveValue(/Hello world/, { timeout: 10_000 })
+    await expect(editor).toContainText(/Hello world/, { timeout: 10_000 })
   })
 
-  test('dictation button passes axe when visible', async ({ page, seededCourse }) => {
-    const itemId = await seedShortAnswerQuiz(
-      seededCourse.instructorToken,
-      seededCourse.courseCode,
-      seededCourse.moduleId,
-    )
+  test('dictation button passes axe when visible', async ({ coursePage: page, seededCourse }) => {
     await installSpeechRecognitionMock(page, false)
-    await injectToken(page, seededCourse.studentToken)
-
-    await page.goto(`/courses/${encodeURIComponent(seededCourse.courseCode)}/modules/quiz/${itemId}`)
-    await page.getByRole('button', { name: /start quiz/i }).click()
+    await openSyllabusEditor(page, seededCourse.courseCode)
 
     const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
