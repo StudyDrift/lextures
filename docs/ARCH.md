@@ -14,7 +14,7 @@ Each item includes: **Problem**, **Recommendation**, **Scope**, **Success criter
 
 ## Snapshot of Current Architecture
 
-- **Backend**: Go + chi v5, pgx/v5 against PostgreSQL 16 (MongoDB wired but unused), goroutine-based concurrency. ~67K LOC across 690 files. Routes/Services/Repos/Models four-layer split. JWT + custom RBAC. `log/slog` for structured logs. Two periodic background tasks (quiz auto-submit, grade release).
+- **Backend**: Go + chi v5, pgx/v5 against PostgreSQL 16, goroutine-based concurrency. ~67K LOC across 690 files. Routes/Services/Repos/Models four-layer split. JWT + custom RBAC. `log/slog` for structured logs. Two periodic background tasks (quiz auto-submit, grade release).
 - **Frontend**: React 19 + Vite 8 + TypeScript + Tailwind v4. React Router v7. ~265 `.tsx` files, largest pages 2–3K LOC. Hand-written API client modules, no codegen. 7 Context providers, no global store.
 - **Shared contracts**: None. OpenAPI skeleton exists but only `/health` is documented. Frontend types hand-maintained.
 - **Infra**: Docker Compose (dev / prod / deploy variants), GitHub Actions CI, Terraform-style `iac/` dirs. Local-filesystem file storage. Env-var config.
@@ -177,7 +177,7 @@ Decide between React Native, PWA, or native. Current `docs/MOBILE_DESIGN.md` is 
 AI code (recommendations, hints, adaptive path) is scattered across services. Extract into a single `server/internal/service/ai/` subpackage with a pluggable provider interface. Makes the OpenRouter dependency replaceable.
 
 ### P3.4 — Drop Unused Dependencies
-MongoDB is wired but unused. Either commit to a use case (media metadata, analytics) or remove it. Same audit for any dead Go module dependencies.
+MongoDB was removed from local Docker Compose (see [ADR 0001](adr/0001-remove-mongodb.md)). Continue auditing dead Go module dependencies.
 
 ### P3.5 — Security Hardening
 - Rotate `JWT_SECRET` via a key-ID (kid) header so rotation is non-breaking.
@@ -207,5 +207,4 @@ MongoDB is wired but unused. Either commit to a use case (media metadata, analyt
 1. **Tenancy model** (P2.1): shared-schema with `tenant_id`, or schema-per-tenant? This decision affects every new migration.
 2. **Real-time protocol** (P2.2): raw WebSocket + custom events, or Server-Sent Events for the read-only cases?
 3. **Hosting target**: are we optimizing for self-hosters (Docker Compose, Helm) or a managed offering (Fly/Render/K8s)? Different infra investments.
-4. **MongoDB**: commit to a use case or remove?
-5. **Acceptable downtime for migrations**: this drives whether P2.1 needs an online-migration strategy.
+4. **Acceptable downtime for migrations**: this drives whether P2.1 needs an online-migration strategy.

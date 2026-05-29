@@ -33,34 +33,6 @@ services:
       retries: 5
       start_period: 120s
 
-  mongo:
-    image: mongo:7
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: studydrift
-      MONGO_INITDB_ROOT_PASSWORD: studydrift
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "mongosh",
-          "-u",
-          "studydrift",
-          "-p",
-          "studydrift",
-          "--authenticationDatabase",
-          "admin",
-          "--quiet",
-          "--eval",
-          "db.adminCommand('ping')",
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
   server:
     build:
       context: ./server
@@ -84,8 +56,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      mongo:
-        condition: service_healthy
 
   web:
     build:
@@ -98,4 +68,3 @@ services:
 
 volumes:
   postgres_data:
-  mongo_data:

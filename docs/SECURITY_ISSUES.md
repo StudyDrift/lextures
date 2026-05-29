@@ -159,9 +159,9 @@ The themes that matter for a "ShinyHunters-style" intrusion are: **token theft s
 
 ### M9. Hardcoded dev DB credentials in the default `docker-compose.yml`
 - **File:** [docker-compose.yml:10-12,26-27](../docker-compose.yml#L10), [docker-compose.dev.yml](../docker-compose.dev.yml)
-- **Detail:** `postgres` and `mongo` use `studydrift / studydrift`, both exposed on the host (`5432`, `27017`). On a developer laptop on a coffee-shop wifi this is reachable to anyone on the local network.
+- **Detail:** `postgres` uses `studydrift / studydrift`, exposed on the host (`5432`). On a developer laptop on a coffee-shop wifi this is reachable to anyone on the local network.
 - **Risk:** Lateral exfil of test data; if a developer ever copies prod data into local for debugging, that data is on the network.
-- **Fix:** Bind ports to `127.0.0.1:5432`/`127.0.0.1:27017`. Generate per-developer credentials in a `.env.local`.
+- **Fix:** Bind ports to `127.0.0.1:5432`. Generate per-developer credentials in a `.env.local`.
 
 ---
 
