@@ -21,6 +21,7 @@ type Row struct {
 	ExtraAttempts        int32
 	HintsAlwaysEnabled   bool
 	ReducedDistraction   bool
+	TTSEnabled           bool
 	AlternativeFormat  *string
 	EffectiveFrom      sql.NullTime
 	EffectiveUntil     sql.NullTime
@@ -41,7 +42,7 @@ func ListForUserWithCourse(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 	const q = `
 SELECT sa.id, sa.user_id, sa.course_id,
        (sa.time_multiplier)::double precision AS time_multiplier,
-       sa.extra_attempts, sa.hints_always_enabled, sa.reduced_distraction_mode,
+       sa.extra_attempts, sa.hints_always_enabled, sa.reduced_distraction_mode, sa.tts_enabled,
        sa.alternative_format, sa.effective_from, sa.effective_until,
        sa.created_by, sa.updated_by, sa.created_at, sa.updated_at,
        c.course_code AS course_code
@@ -63,7 +64,7 @@ ORDER BY sa.course_id NULLS LAST, sa.created_at ASC`
 		var cc sql.NullString
 		if err := rows.Scan(
 			&r.Row.ID, &r.Row.UserID, &courseID,
-			&r.Row.TimeMultiplier, &r.Row.ExtraAttempts, &r.Row.HintsAlwaysEnabled, &r.Row.ReducedDistraction,
+			&r.Row.TimeMultiplier, &r.Row.ExtraAttempts, &r.Row.HintsAlwaysEnabled, &r.Row.ReducedDistraction, &r.Row.TTSEnabled,
 			&alt, &r.Row.EffectiveFrom, &r.Row.EffectiveUntil,
 			&r.Row.CreatedBy, &updatedBy, &r.Row.CreatedAt, &r.Row.UpdatedAt,
 			&cc,
@@ -87,7 +88,7 @@ func FindActiveForCourse(ctx context.Context, pool *pgxpool.Pool, userID, course
 	return findOne(ctx, pool, `
 SELECT id, user_id, course_id,
        (time_multiplier)::double precision,
-       extra_attempts, hints_always_enabled, reduced_distraction_mode,
+       extra_attempts, hints_always_enabled, reduced_distraction_mode, tts_enabled,
        alternative_format, effective_from, effective_until,
        created_by, updated_by, created_at, updated_at
 FROM course.student_accommodations
@@ -102,7 +103,7 @@ func FindActiveGlobal(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID)
 	return findOne(ctx, pool, `
 SELECT id, user_id, course_id,
        (time_multiplier)::double precision,
-       extra_attempts, hints_always_enabled, reduced_distraction_mode,
+       extra_attempts, hints_always_enabled, reduced_distraction_mode, tts_enabled,
        alternative_format, effective_from, effective_until,
        created_by, updated_by, created_at, updated_at
 FROM course.student_accommodations
@@ -120,7 +121,7 @@ func findOne(ctx context.Context, pool *pgxpool.Pool, q string, args ...any) (*R
 	var effF, effU sql.NullTime
 	err := pool.QueryRow(ctx, q, args...).Scan(
 		&r.ID, &r.UserID, &courseID,
-		&r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction,
+		&r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction, &r.TTSEnabled,
 		&alt, &effF, &effU,
 		&r.CreatedBy, &updatedBy, &r.CreatedAt, &r.UpdatedAt,
 	)
@@ -145,7 +146,7 @@ func InsertRow(
 	courseID *uuid.UUID,
 	timeMultiplier float64,
 	extraAttempts int32,
-	hints, reduced bool,
+	hints, reduced, tts bool,
 	alternativeFormat *string,
 	effectiveFrom, effectiveUntil *time.Time,
 	createdBy uuid.UUID,
@@ -153,12 +154,12 @@ func InsertRow(
 	const q = `
 INSERT INTO course.student_accommodations (
   user_id, course_id, time_multiplier, extra_attempts,
-  hints_always_enabled, reduced_distraction_mode, alternative_format,
+  hints_always_enabled, reduced_distraction_mode, tts_enabled, alternative_format,
   effective_from, effective_until, created_by, updated_by
-) VALUES ($1, $2, $3::numeric, $4, $5, $6, $7, $8, $9, $10, $10)
+) VALUES ($1, $2, $3::numeric, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 RETURNING id, user_id, course_id,
   (time_multiplier)::double precision,
-  extra_attempts, hints_always_enabled, reduced_distraction_mode,
+  extra_attempts, hints_always_enabled, reduced_distraction_mode, tts_enabled,
   alternative_format, effective_from, effective_until,
   created_by, updated_by, created_at, updated_at`
 	var r Row
@@ -167,10 +168,10 @@ RETURNING id, user_id, course_id,
 	var alt sql.NullString
 	var effF, effU sql.NullTime
 	err := pool.QueryRow(ctx, q,
-		userID, courseID, timeMultiplier, extraAttempts, hints, reduced, alternativeFormat,
-		effectiveFrom, effectiveUntil, createdBy,
+		userID, courseID, timeMultiplier, extraAttempts, hints, reduced, tts, alternativeFormat,
+		effectiveFrom, effectiveUntil, createdBy, createdBy,
 	).Scan(
-		&r.ID, &r.UserID, &courseOut, &r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction,
+		&r.ID, &r.UserID, &courseOut, &r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction, &r.TTSEnabled,
 		&alt, &effF, &effU, &r.CreatedBy, &updatedBy, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if err != nil {
@@ -188,7 +189,7 @@ RETURNING id, user_id, course_id,
 func UpdateRow(
 	ctx context.Context, pool *pgxpool.Pool,
 	id, userID uuid.UUID,
-	timeMultiplier float64, extra int32, hints, reduced bool,
+	timeMultiplier float64, extra int32, hints, reduced, tts bool,
 	alternativeFormat *string,
 	effectiveFrom, effectiveUntil *time.Time,
 	updatedBy uuid.UUID,
@@ -199,15 +200,16 @@ SET time_multiplier = $3::numeric,
     extra_attempts = $4,
     hints_always_enabled = $5,
     reduced_distraction_mode = $6,
-    alternative_format = $7,
-    effective_from = $8,
-    effective_until = $9,
-    updated_by = $10,
+    tts_enabled = $7,
+    alternative_format = $8,
+    effective_from = $9,
+    effective_until = $10,
+    updated_by = $11,
     updated_at = NOW()
 WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, course_id,
   (time_multiplier)::double precision,
-  extra_attempts, hints_always_enabled, reduced_distraction_mode,
+  extra_attempts, hints_always_enabled, reduced_distraction_mode, tts_enabled,
   alternative_format, effective_from, effective_until,
   created_by, updated_by, created_at, updated_at`
 	var r Row
@@ -216,10 +218,10 @@ RETURNING id, user_id, course_id,
 	var alt sql.NullString
 	var effF, effU sql.NullTime
 	err := pool.QueryRow(ctx, q,
-		id, userID, timeMultiplier, extra, hints, reduced, alternativeFormat,
+		id, userID, timeMultiplier, extra, hints, reduced, tts, alternativeFormat,
 		effectiveFrom, effectiveUntil, updatedBy,
 	).Scan(
-		&r.ID, &r.UserID, &courseID, &r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction,
+		&r.ID, &r.UserID, &courseID, &r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction, &r.TTSEnabled,
 		&alt, &effF, &effU, &r.CreatedBy, &uby, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
