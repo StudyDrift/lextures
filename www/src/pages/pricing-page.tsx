@@ -73,7 +73,7 @@ function FeatureLine({ label }: { label: string }) {
   return (
     <li className="flex items-start gap-2.5">
       <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
-      <span className="text-sm text-stone-700">{label}</span>
+      <span className="text-sm text-slate-700">{label}</span>
     </li>
   )
 }
@@ -85,27 +85,27 @@ function ComparisonCell({ included }: { included: boolean }) {
     </td>
   ) : (
     <td className="px-6 py-3.5 text-center">
-      <Minus className="mx-auto h-4 w-4 text-stone-300" aria-label="Not included" />
+      <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="Not included" />
     </td>
   )
 }
 
 export function PricingPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 text-slate-700">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <Header />
 
       <main>
         {/* Hero */}
-        <section className="border-b border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-b border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-stone-500">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
               Pricing
             </p>
-            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-stone-900 sm:text-5xl">
+            <h1 className="mt-5 text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
               Free until you need to scale
             </h1>
-            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-stone-600">
+            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-slate-600">
               Full-featured for small courses. Pay only when you grow beyond 30 students or 5 courses—and then only $9.99 per student per year.
             </p>
           </div>
@@ -117,26 +117,26 @@ export function PricingPage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
 
               {/* Free */}
-              <div className="rounded-2xl border border-stone-200/90 bg-white p-8 shadow-[0_1px_4px_rgba(28,25,23,0.06)]">
+              <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-[0_1px_4px_rgba(28,25,23,0.06)]">
                 <div>
-                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-stone-400">Free</p>
+                  <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-slate-400">Free</p>
                   <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-5xl font-semibold tracking-tight text-stone-900">$0</span>
-                    <span className="text-sm text-stone-500">forever</span>
+                    <span className="text-5xl font-semibold tracking-tight text-slate-900">$0</span>
+                    <span className="text-sm text-slate-500">forever</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-500">
+                  <p className="mt-3 text-sm leading-relaxed text-slate-500">
                     No trial period, no credit card required. Ideal for a single class section or a pilot course.
                   </p>
                 </div>
 
-                <div className="mt-6 space-y-2 rounded-lg bg-stone-50 px-4 py-3 text-sm">
+                <div className="mt-6 space-y-2 rounded-lg bg-slate-50 px-4 py-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-stone-600">Students per course</span>
-                    <span className="font-semibold text-stone-900">Up to 30</span>
+                    <span className="text-slate-600">Students per course</span>
+                    <span className="font-semibold text-slate-900">Up to 30</span>
                   </div>
-                  <div className="flex justify-between border-t border-stone-100 pt-2">
-                    <span className="text-stone-600">Courses</span>
-                    <span className="font-semibold text-stone-900">Up to 5</span>
+                  <div className="flex justify-between border-t border-slate-100 pt-2">
+                    <span className="text-slate-600">Courses</span>
+                    <span className="font-semibold text-slate-900">Up to 5</span>
                   </div>
                 </div>
 
@@ -159,29 +159,29 @@ export function PricingPage() {
                     </span>
                   </div>
                   <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-5xl font-semibold tracking-tight text-stone-900">$9.99</span>
-                    <span className="text-sm text-stone-500">/ student / year</span>
+                    <span className="text-5xl font-semibold tracking-tight text-slate-900">$9.99</span>
+                    <span className="text-sm text-slate-500">/ student / year</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-500">
+                  <p className="mt-3 text-sm leading-relaxed text-slate-500">
                     Billed annually based on unique enrolled students across all your courses. Unlimited courses included.
                   </p>
                 </div>
 
-                <div className="mt-6 space-y-2 rounded-lg bg-stone-50 px-4 py-3 text-sm">
+                <div className="mt-6 space-y-2 rounded-lg bg-slate-50 px-4 py-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-stone-600">Students per course</span>
-                    <span className="font-semibold text-stone-900">Unlimited</span>
+                    <span className="text-slate-600">Students per course</span>
+                    <span className="font-semibold text-slate-900">Unlimited</span>
                   </div>
-                  <div className="flex justify-between border-t border-stone-100 pt-2">
-                    <span className="text-stone-600">Courses</span>
-                    <span className="font-semibold text-stone-900">Unlimited</span>
+                  <div className="flex justify-between border-t border-slate-100 pt-2">
+                    <span className="text-slate-600">Courses</span>
+                    <span className="font-semibold text-slate-900">Unlimited</span>
                   </div>
                 </div>
 
                 <ul className="mt-6 space-y-3">
                   {FREE_FEATURES.map((f) => <FeatureLine key={f} label={f} />)}
-                  <li className="border-t border-stone-100 pt-3">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-stone-400">
+                  <li className="border-t border-slate-100 pt-3">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-slate-400">
                       Also includes
                     </p>
                     <ul className="space-y-3">
@@ -198,11 +198,11 @@ export function PricingPage() {
             </div>
 
             {/* Example calculation */}
-            <div className="mt-10 rounded-xl border border-stone-200/90 bg-white px-6 py-5">
-              <p className="text-sm font-semibold text-stone-900">Example</p>
-              <p className="mt-1 text-sm leading-relaxed text-stone-600">
+            <div className="mt-10 rounded-xl border border-slate-200 bg-white px-6 py-5">
+              <p className="text-sm font-semibold text-slate-900">Example</p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-600">
                 An instructor with 3 courses and 90 unique enrolled students pays{' '}
-                <span className="font-semibold text-stone-900">90 × $9.99 = $897.10 / year</span>.
+                <span className="font-semibold text-slate-900">90 × $9.99 = $897.10 / year</span>.
                 A student taking two of those courses counts as one.
               </p>
             </div>
@@ -210,24 +210,24 @@ export function PricingPage() {
         </section>
 
         {/* Feature comparison table */}
-        <section className="border-t border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Full feature comparison
             </h2>
-            <div className="mt-8 overflow-x-auto rounded-xl border border-stone-200/90">
+            <div className="mt-8 overflow-x-auto rounded-xl border border-slate-200">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-stone-200/90 bg-stone-50">
-                    <th className="px-6 py-4 text-left font-semibold text-stone-900">Feature</th>
-                    <th className="px-6 py-4 text-center font-semibold text-stone-900">Free</th>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    <th className="px-6 py-4 text-left font-semibold text-slate-900">Feature</th>
+                    <th className="px-6 py-4 text-center font-semibold text-slate-900">Free</th>
                     <th className="px-6 py-4 text-center font-semibold text-accent">Education</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-slate-100">
                   {COMPARISON.map((row) => (
-                    <tr key={row.label} className="bg-white transition-colors hover:bg-stone-50/60">
-                      <td className="px-6 py-3.5 text-stone-700">{row.label}</td>
+                    <tr key={row.label} className="bg-white transition-colors hover:bg-slate-50/60">
+                      <td className="px-6 py-3.5 text-slate-700">{row.label}</td>
                       <ComparisonCell included={row.free} />
                       <ComparisonCell included={row.education} />
                     </tr>
@@ -239,16 +239,16 @@ export function PricingPage() {
         </section>
 
         {/* FAQ */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Common questions
             </h2>
-            <dl className="mt-8 divide-y divide-stone-200/90">
+            <dl className="mt-8 divide-y divide-slate-200">
               {FAQS.map(({ q, a }) => (
                 <div key={q} className="py-6">
-                  <dt className="font-semibold text-stone-900">{q}</dt>
-                  <dd className="mt-2 text-sm leading-relaxed text-stone-600">{a}</dd>
+                  <dt className="font-semibold text-slate-900">{q}</dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-slate-600">{a}</dd>
                 </div>
               ))}
             </dl>
@@ -256,12 +256,12 @@ export function PricingPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-t border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               See it before you commit
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-stone-600">
+            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-600">
               The live demo has full instructor and learner flows — quizzes, gradebook, imports, and adaptive delivery.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

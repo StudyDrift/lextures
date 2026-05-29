@@ -59,20 +59,20 @@ const STANDARDS = ['CCSS', 'NGSS', 'Custom standards', 'Clever SSO', 'ClassLink 
 
 export function K12Page() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 text-slate-700">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <Header />
 
       <main>
         {/* Hero */}
-        <section className="border-b border-stone-200/90 bg-white py-20 sm:py-28">
+        <section className="border-b border-slate-200 bg-white py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-stone-500">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
               K–12
             </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-[3.25rem]">
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]">
               Built for the standards, systems, and realities of K–12
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-stone-600">
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
               Standards-aligned assessments, automatic roster sync from your district SIS, and accommodations that apply without teacher intervention—so the administrative layer of teaching gets out of the way.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
@@ -90,14 +90,14 @@ export function K12Page() {
         {/* Challenges */}
         <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Where K–12 assessment tools usually fall short
             </h2>
             <div className="mt-10 grid gap-5 sm:grid-cols-3">
               {CHALLENGES.map(({ title, body }) => (
-                <div key={title} className="rounded-xl border border-stone-200/90 bg-white p-6">
-                  <h3 className="font-semibold text-stone-900">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">{body}</p>
+                <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <h3 className="font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{body}</p>
                 </div>
               ))}
             </div>
@@ -105,24 +105,24 @@ export function K12Page() {
         </section>
 
         {/* Features */}
-        <section className="border-t border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-stone-500">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
                 How Lextures helps
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                 Compliance built in. Insight built up.
               </h2>
             </div>
             <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {FEATURES.map(({ icon: Icon, title, body }) => (
                 <article key={title} className="feature-card">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-muted/70 text-accent">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
                     <Icon className="h-5 w-5" aria-hidden />
                   </div>
-                  <h3 className="mt-5 text-base font-semibold text-stone-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{body}</p>
+                  <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
                 </article>
               ))}
             </div>
@@ -130,17 +130,17 @@ export function K12Page() {
         </section>
 
         {/* Spaced repetition callout */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-20">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                   Retention across the school year, not just the unit
                 </h2>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   The forgetting curve is not a metaphor. Content mastered in a September unit test is largely gone by the time state assessments arrive in spring. Spaced repetition scheduling (SRS) attacks this directly: the system schedules short, low-stakes review at scientifically optimal intervals—close together at first, then increasingly spaced as the student demonstrates retention.
                 </p>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   For teachers, this means the platform is doing active instructional work between formal class sessions. Students who stay engaged with scheduled review arrive at high-stakes tests having maintained mastery, not scrambling to re-learn.
                 </p>
               </div>
@@ -151,9 +151,9 @@ export function K12Page() {
                   { label: 'December', desc: 'Second review, now spaced two months out. Still retained.' },
                   { label: 'April', desc: 'State assessment. No cramming required.' },
                 ].map(({ label, desc }) => (
-                  <div key={label} className="flex gap-4 rounded-xl border border-stone-200/90 bg-white px-5 py-4">
+                  <div key={label} className="flex gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
                     <span className="mt-0.5 text-xs font-semibold uppercase tracking-widest text-accent">{label}</span>
-                    <span className="text-sm leading-relaxed text-stone-600">{desc}</span>
+                    <span className="text-sm leading-relaxed text-slate-600">{desc}</span>
                   </div>
                 ))}
               </div>
@@ -162,24 +162,24 @@ export function K12Page() {
         </section>
 
         {/* Standards tags */}
-        <section className="border-t border-stone-200/90 bg-white py-14">
+        <section className="border-t border-slate-200 bg-white py-14">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="text-sm font-semibold text-stone-900">Standards, identity, and roster protocols supported</p>
+            <p className="text-sm font-semibold text-slate-900">Standards, identity, and roster protocols supported</p>
             <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
               {STANDARDS.map((tag) => (
-                <span key={tag} className="text-sm font-medium text-stone-500">{tag}</span>
+                <span key={tag} className="text-sm font-medium text-slate-500">{tag}</span>
               ))}
             </div>
           </div>
         </section>
 
         {/* CTA */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               See what your teachers and students would actually use
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-stone-600">
+            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-600">
               The live demo walks through both the instructor and learner experience—standards alignment, adaptive quizzes, and the teacher dashboard included.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

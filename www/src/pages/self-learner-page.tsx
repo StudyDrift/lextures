@@ -42,20 +42,20 @@ const FEATURES = [
 
 export function SelfLearnerPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-stone-50 text-slate-700">
+    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
       <Header />
 
       <main>
         {/* Hero */}
-        <section className="border-b border-stone-200/90 bg-white py-20 sm:py-28">
+        <section className="border-b border-slate-200 bg-white py-20 sm:py-28">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-stone-500">
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
               Self-Learner
             </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-5xl lg:text-[3.25rem]">
+            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]">
               Stop guessing what to study next
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-stone-600">
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
               An adaptive engine that builds a model of exactly what you know, schedules review before you forget, and always puts the right question in front of you—without an instructor in the loop.
             </p>
             <div className="mt-10 flex flex-wrap gap-4">
@@ -73,14 +73,14 @@ export function SelfLearnerPage() {
         {/* Problems */}
         <section className="py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Why self-directed studying usually fails
             </h2>
             <div className="mt-10 grid gap-5 sm:grid-cols-3">
               {PROBLEMS.map(({ title, body }) => (
-                <div key={title} className="rounded-xl border border-stone-200/90 bg-white p-6">
-                  <h3 className="font-semibold text-stone-900">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">{body}</p>
+                <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <h3 className="font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{body}</p>
                 </div>
               ))}
             </div>
@@ -88,24 +88,24 @@ export function SelfLearnerPage() {
         </section>
 
         {/* Features */}
-        <section className="border-t border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-stone-500">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
                 How it works
               </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                 A system that works the way your memory actually works
               </h2>
             </div>
             <div className="mt-12 grid gap-5 sm:grid-cols-2">
               {FEATURES.map(({ icon: Icon, title, body }) => (
                 <article key={title} className="feature-card">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-muted/70 text-accent">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
                     <Icon className="h-5 w-5" aria-hidden />
                   </div>
-                  <h3 className="mt-5 text-base font-semibold text-stone-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-stone-600">{body}</p>
+                  <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
                 </article>
               ))}
             </div>
@@ -113,20 +113,20 @@ export function SelfLearnerPage() {
         </section>
 
         {/* How it fits into a study session */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-20">
               <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
                   What a study session actually looks like
                 </h2>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   You open Lextures. The dashboard shows you what is due for review today—concepts you learned earlier that are approaching the edge of your predicted recall window. You answer fifteen questions in twelve minutes. Ten are review; five are new material calibrated to your current ability level.
                 </p>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   After each session, your ability estimates update. The concepts you answered correctly push their next review further out. The ones you missed come back sooner. Tomorrow\'s session is shorter because today\'s was efficient.
                 </p>
-                <p className="mt-4 text-base leading-relaxed text-stone-600">
+                <p className="mt-4 text-base leading-relaxed text-slate-600">
                   There is no syllabus to follow, no chapter to "finish." The system tracks what you know and builds toward what you want to know—at whatever pace fits your schedule.
                 </p>
               </div>
@@ -137,13 +137,13 @@ export function SelfLearnerPage() {
                   { step: '3', title: 'Come back for scheduled review', desc: 'The SRS engine queues up the right concepts at the right time. Sessions stay short because they stay targeted.' },
                   { step: '4', title: 'Watch mastery accumulate', desc: 'Ability estimates update in real time. Your dashboard shows where you stand on every concept, not just your last score.' },
                 ].map(({ step, title, desc }) => (
-                  <div key={step} className="flex gap-4 rounded-xl border border-stone-200/90 bg-white px-5 py-4">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
+                  <div key={step} className="flex gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
                       {step}
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-stone-900">{title}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-stone-500">{desc}</p>
+                      <p className="text-sm font-semibold text-slate-900">{title}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-500">{desc}</p>
                     </div>
                   </div>
                 ))}
@@ -153,9 +153,9 @@ export function SelfLearnerPage() {
         </section>
 
         {/* Use cases */}
-        <section className="border-t border-stone-200/90 bg-white py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Who uses Lextures as a self-learner
             </h2>
             <div className="mt-8 grid gap-5 sm:grid-cols-3">
@@ -173,9 +173,9 @@ export function SelfLearnerPage() {
                   desc: 'Working through a textbook, an online course, or a structured curriculum on your own timeline—with the scaffolding of an adaptive system rather than just a reading list.',
                 },
               ].map(({ label, desc }) => (
-                <div key={label} className="rounded-xl border border-stone-200/90 bg-stone-50 p-6">
-                  <h3 className="font-semibold text-stone-900">{label}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-stone-600">{desc}</p>
+                <div key={label} className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+                  <h3 className="font-semibold text-slate-900">{label}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{desc}</p>
                 </div>
               ))}
             </div>
@@ -183,12 +183,12 @@ export function SelfLearnerPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-t border-stone-200/90 bg-stone-50 py-16 sm:py-20">
+        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
               Free for your first five courses
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-stone-600">
+            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-600">
               Create an account, import your materials, and start a study session today. No credit card required.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
