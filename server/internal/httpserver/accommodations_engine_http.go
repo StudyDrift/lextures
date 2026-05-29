@@ -121,7 +121,7 @@ func (d Deps) handleAccommodationCSVImport() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing file field.")
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		reader := csv.NewReader(io.LimitReader(file, 4<<20))
 		reader.TrimLeadingSpace = true
 		records, err := reader.ReadAll()
