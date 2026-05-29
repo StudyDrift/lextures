@@ -150,6 +150,27 @@ jobs:
       - name: Build
         run: npm run build
 
+  contrast-check:
+    name: Design-token contrast (WCAG AA)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: clients/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline --quiet
+
+      - name: Validate design-token contrast pairs (WCAG 2.1 AA)
+        run: npm run contrast:check
+
   e2e-build:
     name: E2E build (API + web)
     runs-on: ubuntu-latest
