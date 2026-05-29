@@ -242,6 +242,10 @@ func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 		if b.ReducedDistraction != nil {
 			rd = *b.ReducedDistraction
 		}
+		tts := false
+		if b.TTSEnabled != nil {
+			tts = *b.TTSEnabled
+		}
 		efrom, euntil, st := parseAccEffectiveDates(b.EffectiveFrom, b.EffectiveUntil, w)
 		if !st {
 			return
@@ -262,7 +266,7 @@ func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 				courseID = cid
 			}
 		}
-		row, err := stac.InsertRow(ctx, d.Pool, tid, courseID, tm, extra, h, rd, b.AlternativeFormat, efrom, euntil, uid)
+		row, err := stac.InsertRow(ctx, d.Pool, tid, courseID, tm, extra, h, rd, tts, b.AlternativeFormat, efrom, euntil, uid)
 		if err != nil {
 			if isUniqueViolation(err) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "An accommodation already exists for this learner in that scope.")
@@ -346,7 +350,7 @@ func (d Deps) handleUpdateUserAccommodation() http.HandlerFunc {
 			return
 		}
 		updated, err := stac.UpdateRow(ctx, d.Pool, aid, tid, b.TimeMultiplier, b.ExtraAttempts,
-			b.HintsAlwaysEnabled, b.ReducedDistraction, b.AlternativeFormat, efrom, euntil, uid)
+			b.HintsAlwaysEnabled, b.ReducedDistraction, b.TTSEnabled, b.AlternativeFormat, efrom, euntil, uid)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 			return
@@ -436,6 +440,7 @@ func (d Deps) handleMyAccommodations() http.HandlerFunc {
 				HasExtraAttempts:        rr.Row.ExtraAttempts > 0,
 				HintsAlwaysAvailable:   rr.Row.HintsAlwaysEnabled,
 				ReducedDistraction:     rr.Row.ReducedDistraction,
+				TTSEnabled:             rr.Row.TTSEnabled,
 				EffectiveFrom:          acmodel.YYYYMMDDFromNull(rr.Row.EffectiveFrom),
 				EffectiveUntil:         acmodel.YYYYMMDDFromNull(rr.Row.EffectiveUntil),
 			})
@@ -468,6 +473,7 @@ func rowToAPI(r *stac.Row, courseCode *string) acmodel.StudentAccommodation {
 		ExtraAttempts:      r.ExtraAttempts,
 		HintsAlwaysEnabled: r.HintsAlwaysEnabled,
 		ReducedDistraction: r.ReducedDistraction,
+		TTSEnabled:           r.TTSEnabled,
 		AlternativeFormat:  r.AlternativeFormat,
 		EffectiveFrom:      acmodel.YYYYMMDDFromNull(r.EffectiveFrom),
 		EffectiveUntil:     acmodel.YYYYMMDDFromNull(r.EffectiveUntil),

@@ -234,6 +234,10 @@ type Config struct {
 	FFAltTextEnforcement bool
 	// FFHighContrastReducedMotion enables the high-contrast/reduced-motion preference panel and API (plan 12.7).
 	FFHighContrastReducedMotion bool
+	// ReadAloudEnabled gates in-context read-aloud on course content pages (plan 12.8).
+	ReadAloudEnabled bool
+	// FFReadAloud when true exposes read-aloud controls to learners (plan 12.8).
+	FFReadAloud bool
 	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
 	TranslationMemoryEnabled bool
 
