@@ -189,6 +189,8 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Get("/api/v1/me/org-role-capabilities", d.handleMeOrgRoleCapabilities())
 	r.Get("/api/v1/me/notification-preferences", d.handleGetMyNotificationPreferences())
 	r.Put("/api/v1/me/notification-preferences", d.handlePutMyNotificationPreferences())
+	r.Get("/api/v1/me/reading-preferences", d.handleGetMyReadingPreferences())
+	r.Patch("/api/v1/me/reading-preferences", d.handlePatchMyReadingPreferences())
 	r.Get("/api/unsubscribe", d.handleUnsubscribe())
 	r.Get("/api/v1/push/vapid-public-key", d.handleGetVAPIDPublicKey())
 	r.Post("/api/v1/me/push-subscriptions", d.handlePostMyPushSubscription())

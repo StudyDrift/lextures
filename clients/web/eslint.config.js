@@ -3,6 +3,7 @@ import i18next from 'eslint-plugin-i18next'
 
 import js from '@eslint/js'
 import noPhysicalTailwind from './eslint-rules/no-physical-tailwind.js'
+import bareAnimateGuard from './eslint-rules/bare-animate-guard.js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
@@ -26,9 +27,10 @@ export default defineConfig([globalIgnores(['dist', 'coverage']), {
   },
 }, {
   files: ['src/**/*.{ts,tsx}'],
-  plugins: { 'jsx-a11y': jsxA11y, 'lextures-i18n': { rules: { 'no-physical-tailwind': noPhysicalTailwind } } },
+  plugins: { 'jsx-a11y': jsxA11y, 'lextures-i18n': { rules: { 'no-physical-tailwind': noPhysicalTailwind, 'bare-animate-guard': bareAnimateGuard } } },
   rules: {
     'lextures-i18n/no-physical-tailwind': 'warn',
+    'lextures-i18n/bare-animate-guard': 'warn',
     // LMS-focused jsx-a11y: enforce valid ARIA usage without the full recommended preset.
     // Excluded patterns (tracked in plan 10.7 phase 2):
     //   - label nesting / label-has-associated-control: LMS forms use aria-labelledby extensively

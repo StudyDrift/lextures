@@ -1,0 +1,188 @@
+/*
+ * Plan 12.7 — High-contrast theme layer.
+ *
+ * Activated by html.high-contrast (manual in-app toggle) OR prefers-contrast: more (OS setting).
+ * All text/background pairs meet WCAG SC 1.4.6 AAA (7:1 minimum).
+ * Windows Forced Colors compatibility via forced-colors: active system color fallbacks.
+ *
+ * @layer ensures low specificity so Tailwind utilities added in component code can override
+ * intentional interactive-state exceptions (e.g. focus rings that are already clearly visible).
+ */
+
+@layer high-contrast {
+  :where(html.high-contrast) body,
+  @media (prefers-contrast: more) {
+    body {
+      background-color: #000 !important;
+      color: #fff !important;
+    }
+  }
+}
+
+html.high-contrast,
+@media (prefers-contrast: more) {
+  html {
+    --hc-bg: #000;
+    --hc-text: #fff;
+    --hc-border: #fff;
+    --hc-link: #ffff00;
+    --hc-focus: #00ffff;
+    --hc-muted: #e0e0e0;
+    --hc-surface: #111;
+    --hc-surface-alt: #222;
+    --hc-btn-bg: #000;
+    --hc-btn-text: #fff;
+    --hc-btn-border: #fff;
+  }
+}
+
+html.high-contrast body,
+@media (prefers-contrast: more) {
+  body {
+    background-color: var(--hc-bg) !important;
+    color: var(--hc-text) !important;
+  }
+}
+
+/*
+ * Scope high-contrast overrides to Lextures-owned selectors only (.lms-scope and root elements).
+ * Third-party embedded components (charts, video players) are excluded intentionally.
+ */
+html.high-contrast .lms-scope,
+html.high-contrast .lms-scope * {
+  --tw-text-opacity: 1;
+  --tw-bg-opacity: 1;
+}
+
+/* Background surfaces */
+html.high-contrast .lms-scope .bg-white,
+html.high-contrast .lms-scope .bg-slate-50,
+html.high-contrast .lms-scope .bg-slate-100,
+html.high-contrast .lms-scope .bg-neutral-900,
+html.high-contrast .lms-scope .bg-neutral-950,
+html.high-contrast .lms-scope .bg-neutral-800 {
+  background-color: var(--hc-bg) !important;
+}
+
+html.high-contrast .lms-scope .bg-white\/90,
+html.high-contrast .lms-scope .bg-white\/80,
+html.high-contrast .lms-scope .bg-white\/70,
+html.high-contrast .lms-scope .bg-slate-50\/90,
+html.high-contrast .lms-scope .bg-slate-50\/80,
+html.high-contrast .lms-scope .bg-slate-50\/70,
+html.high-contrast .lms-scope .bg-slate-50\/60,
+html.high-contrast .lms-scope .bg-slate-50\/50 {
+  background-color: var(--hc-bg) !important;
+}
+
+/* Card / panel surfaces — use a near-black rather than pure black for visual separation */
+html.high-contrast .lms-scope [class*="rounded"][class*="shadow"],
+html.high-contrast .lms-scope [class*="rounded"][class*="border"] {
+  background-color: var(--hc-surface) !important;
+  border-color: var(--hc-border) !important;
+}
+
+/* Text */
+html.high-contrast .lms-scope .text-slate-900,
+html.high-contrast .lms-scope .text-slate-800,
+html.high-contrast .lms-scope .text-slate-700,
+html.high-contrast .lms-scope .text-slate-600,
+html.high-contrast .lms-scope .text-slate-500,
+html.high-contrast .lms-scope .text-neutral-100,
+html.high-contrast .lms-scope .text-neutral-200,
+html.high-contrast .lms-scope .text-neutral-300,
+html.high-contrast .lms-scope .text-neutral-400 {
+  color: var(--hc-text) !important;
+}
+
+/* Muted / secondary text — still meets 7:1 on #000 background (#e0e0e0 = 15.3:1) */
+html.high-contrast .lms-scope .text-slate-400,
+html.high-contrast .lms-scope .text-slate-300 {
+  color: var(--hc-muted) !important;
+}
+
+/* Borders */
+html.high-contrast .lms-scope .border-slate-200,
+html.high-contrast .lms-scope .border-slate-100,
+html.high-contrast .lms-scope .border-neutral-700 {
+  border-color: var(--hc-border) !important;
+}
+
+/* Links */
+html.high-contrast .lms-scope a {
+  color: var(--hc-link) !important;
+  text-decoration: underline !important;
+}
+
+html.high-contrast .lms-scope a:visited {
+  color: #ff9900 !important;
+}
+
+/* Focus rings — use a highly visible cyan ring */
+html.high-contrast .lms-scope *:focus-visible {
+  outline: 3px solid var(--hc-focus) !important;
+  outline-offset: 2px !important;
+}
+
+/* Buttons */
+html.high-contrast .lms-scope button,
+html.high-contrast .lms-scope [role="button"] {
+  background-color: var(--hc-btn-bg) !important;
+  color: var(--hc-btn-text) !important;
+  border: 2px solid var(--hc-btn-border) !important;
+}
+
+/* Auth scene: replace gradient with solid background */
+html.high-contrast .lex-auth-scene {
+  background-color: var(--hc-bg) !important;
+  background-image: none !important;
+}
+
+/* Decorative backgrounds: remove gradients */
+html.high-contrast .lms-scope [class*="from-"],
+html.high-contrast .lms-scope [class*="via-"],
+html.high-contrast .lms-scope [class*="to-"],
+html.high-contrast .lms-scope [class*="bg-gradient"] {
+  background-image: none !important;
+  background-color: var(--hc-bg) !important;
+}
+
+/* TipTap placeholder */
+html.high-contrast .tiptap p.is-empty::before {
+  color: var(--hc-muted) !important;
+}
+
+/* Select chevron — replace with a white version */
+html.high-contrast .lms-scope select:not([multiple]):not([size]) {
+  background-color: var(--hc-bg) !important;
+  color: var(--hc-text) !important;
+  border-color: var(--hc-border) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+}
+
+/*
+ * Windows Forced Colors (High Contrast mode) compatibility.
+ * Use CSS system color keywords so the OS theme wins over our overrides.
+ */
+@media (forced-colors: active) {
+  .lms-scope a {
+    color: LinkText !important;
+  }
+  .lms-scope button,
+  .lms-scope [role="button"] {
+    background-color: ButtonFace !important;
+    color: ButtonText !important;
+    border-color: ButtonText !important;
+  }
+  .lms-scope *:focus-visible {
+    outline-color: Highlight !important;
+  }
+  .lms-scope [class*="bg-"],
+  .lms-scope body {
+    background-color: Canvas !important;
+    color: CanvasText !important;
+  }
+  .lms-scope [class*="border-"] {
+    border-color: ButtonText !important;
+  }
+}

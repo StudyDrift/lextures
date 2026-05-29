@@ -232,6 +232,8 @@ type Config struct {
 	AltTextEnforcementEnabled bool
 	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).
 	FFAltTextEnforcement bool
+	// FFHighContrastReducedMotion enables the high-contrast/reduced-motion preference panel and API (plan 12.7).
+	FFHighContrastReducedMotion bool
 	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
 	TranslationMemoryEnabled bool
 

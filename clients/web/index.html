@@ -48,6 +48,16 @@
         document.documentElement.lang = 'en'
         document.documentElement.dir = 'ltr'
       }
+      try {
+        if (localStorage.getItem('lextures.highContrast') === '1') {
+          document.documentElement.classList.add('high-contrast')
+        }
+        if (localStorage.getItem('lextures.reduceMotion') === '1') {
+          document.documentElement.classList.add('reduced-motion')
+        }
+      } catch {
+        /* ignore */
+      }
     })()
   </script>
   <title>Lextures</title>
