@@ -5522,6 +5522,20 @@ export async function fetchCourseAtRisk(
   }
 }
 
+export async function runCourseAtRiskScoring(
+  courseCode: string,
+): Promise<{ enrollmentsScored: number }> {
+  const res = await authorizedFetch('/api/v1/admin/at-risk/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ courseCode }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = raw as { enrollmentsScored?: number }
+  return { enrollmentsScored: Number(body.enrollmentsScored ?? 0) }
+}
+
 export async function patchCourseAtRiskAlert(
   courseCode: string,
   alertId: string,

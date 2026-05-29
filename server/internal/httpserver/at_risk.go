@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/atrisk"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/service/atriskscoring"
 )
 
@@ -50,6 +51,44 @@ func (d Deps) requireAtRiskInstructor(w http.ResponseWriter, r *http.Request) (s
 		return "", uuid.UUID{}, uuid.UUID{}, false
 	}
 	return courseCode, viewer, *cid, true
+}
+
+// authorizeAtRiskRun allows global admins, or instructors with gradebook:view when courseCode is set.
+func (d Deps) authorizeAtRiskRun(w http.ResponseWriter, r *http.Request, courseCode *string) bool {
+	uid, ok := d.meUserID(w, r)
+	if !ok {
+		return false
+	}
+	if !d.atRiskFeatureEnabled(w) {
+		return false
+	}
+	ctx := r.Context()
+	isAdmin, err := rbac.UserHasPermission(ctx, d.Pool, uid, permGlobalRBACManage)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return false
+	}
+	if isAdmin {
+		return true
+	}
+	cc := ""
+	if courseCode != nil {
+		cc = strings.TrimSpace(*courseCode)
+	}
+	if cc == "" {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+		return false
+	}
+	has, err := courseroles.UserHasPermission(ctx, d.Pool, uid, "course:"+cc+":gradebook:view")
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return false
+	}
+	if !has {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+		return false
+	}
+	return true
 }
 
 type atRiskAlertJSON struct {
@@ -286,6 +325,30 @@ SELECT EXISTS (SELECT 1 FROM course.course_enrollments WHERE id = $1 AND course_
 	}
 }
 
+// handleCourseAtRiskRun is POST /api/v1/courses/{course_code}/at-risk/run
+func (d Deps) handleCourseAtRiskRun() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		_, _, cid, ok := d.requireAtRiskInstructor(w, r)
+		if !ok {
+			return
+		}
+		day := time.Now().UTC()
+		cfg := d.effectiveConfig()
+		n, err := background.RunAtRiskForCourse(r.Context(), d.Pool, cfg, cid, day)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Scoring job failed.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"enrollmentsScored": n})
+	}
+}
+
 // handleAdminAtRiskRun is POST /api/v1/admin/at-risk/run
 func (d Deps) handleAdminAtRiskRun() http.HandlerFunc {
 	type reqBody struct {
@@ -297,17 +360,14 @@ func (d Deps) handleAdminAtRiskRun() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if _, ok := d.adminRbacUser(w, r); !ok {
-			return
-		}
-		if !d.atRiskFeatureEnabled(w) {
-			return
-		}
 		var body reqBody
 		b, _ := io.ReadAll(r.Body)
 		_ = r.Body.Close()
 		if len(b) > 0 {
 			_ = json.Unmarshal(b, &body)
+		}
+		if !d.authorizeAtRiskRun(w, r, body.CourseCode) {
+			return
 		}
 		day := time.Now().UTC()
 		cfg := d.effectiveConfig()

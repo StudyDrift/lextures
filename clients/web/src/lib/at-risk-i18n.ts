@@ -17,6 +17,9 @@ export const atRiskI18n = {
   severityHigh: 'High risk',
   primaryFactor: 'Primary concern',
   notePlaceholder: 'e.g. Student contacted — plans to submit by Friday',
+  runScoring: 'Run scoring',
+  runningScoring: 'Running scoring…',
+  runScoringFailed: 'Scoring run failed.',
 } as const
 
 export { atRiskFeatureEnabled } from './platform-features'

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { AlertTriangle, ChevronDown, ChevronUp, MoreHorizontal } from 'lucide-react'
-import { atRiskI18n, atRiskFeatureEnabled } from '../../lib/at-risk-i18n'
+import { AlertTriangle, ChevronDown, ChevronUp, MoreHorizontal, RefreshCw } from 'lucide-react'
+import { atRiskI18n } from '../../lib/at-risk-i18n'
 import {
   courseGradebookViewPermission,
   fetchCourseAtRisk,
   patchCourseAtRiskAlert,
+  runCourseAtRiskScoring,
   type AtRiskAlert,
 } from '../../lib/courses-api'
 import { usePermissions } from '../../context/use-permissions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 
 function scoreSeverity(score: number): 'moderate' | 'high' {
@@ -193,16 +195,18 @@ function AlertRow({
 
 export default function CourseAtRiskPage() {
   const { courseCode = '' } = useParams()
+  const { atRiskAlertsEnabled, loading: featuresLoading } = usePlatformFeatures()
   const { allows, loading: permLoading } = usePermissions()
-  const canView = !permLoading && allows(courseGradebookViewPermission(courseCode))
+  const canView = allows(courseGradebookViewPermission(courseCode))
   const [alerts, setAlerts] = useState<AtRiskAlert[]>([])
   const [resolved, setResolved] = useState<AtRiskAlert[]>([])
   const [resolvedOpen, setResolvedOpen] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [runningScoring, setRunningScoring] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    if (!courseCode || !atRiskFeatureEnabled()) return
+    if (!courseCode || !atRiskAlertsEnabled) return
     setLoading(true)
     setError(null)
     try {
@@ -214,13 +218,36 @@ export default function CourseAtRiskPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode])
+  }, [courseCode, atRiskAlertsEnabled])
 
   useEffect(() => {
+    if (featuresLoading || !atRiskAlertsEnabled || permLoading || !canView) return
     void load()
-  }, [load])
+  }, [load, featuresLoading, atRiskAlertsEnabled, permLoading, canView])
 
-  if (!atRiskFeatureEnabled()) {
+  async function handleRunScoring() {
+    if (!courseCode) return
+    setRunningScoring(true)
+    setError(null)
+    try {
+      await runCourseAtRiskScoring(courseCode)
+      await load()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : atRiskI18n.runScoringFailed)
+    } finally {
+      setRunningScoring(false)
+    }
+  }
+
+  if (featuresLoading || permLoading) {
+    return (
+      <LmsPage title={atRiskI18n.title}>
+        <p className="text-slate-600 dark:text-neutral-400">Loading…</p>
+      </LmsPage>
+    )
+  }
+
+  if (!atRiskAlertsEnabled) {
     return (
       <LmsPage title={atRiskI18n.title}>
         <p className="text-slate-600 dark:text-neutral-400">At-risk alerts are not enabled.</p>
@@ -237,7 +264,21 @@ export default function CourseAtRiskPage() {
   }
 
   return (
-    <LmsPage title={atRiskI18n.title}>
+    <LmsPage
+      title={atRiskI18n.title}
+      actions={
+        <button
+          type="button"
+          onClick={() => void handleRunScoring()}
+          disabled={runningScoring || loading}
+          aria-label={atRiskI18n.runScoring}
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+        >
+          <RefreshCw className={`h-4 w-4 ${runningScoring ? 'animate-spin' : ''}`} aria-hidden />
+          {runningScoring ? atRiskI18n.runningScoring : atRiskI18n.runScoring}
+        </button>
+      }
+    >
       {loading && <p className="text-slate-600">Loading…</p>}
       {error && <p className="text-red-600">{error}</p>}
       {!loading && !error && alerts.length === 0 && (
