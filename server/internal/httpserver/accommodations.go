@@ -242,6 +242,10 @@ func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 		if b.ReducedDistraction != nil {
 			rd = *b.ReducedDistraction
 		}
+		stt := false
+		if b.SpeechToText != nil {
+			stt = *b.SpeechToText
+		}
 		tts := false
 		if b.TTSEnabled != nil {
 			tts = *b.TTSEnabled
@@ -266,7 +270,7 @@ func (d Deps) handleCreateUserAccommodation() http.HandlerFunc {
 				courseID = cid
 			}
 		}
-		row, err := stac.InsertRow(ctx, d.Pool, tid, courseID, tm, extra, h, rd, tts, b.AlternativeFormat, efrom, euntil, uid)
+		row, err := stac.InsertRow(ctx, d.Pool, tid, courseID, tm, extra, h, rd, stt, tts, b.AlternativeFormat, efrom, euntil, uid)
 		if err != nil {
 			if isUniqueViolation(err) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "An accommodation already exists for this learner in that scope.")
@@ -350,7 +354,7 @@ func (d Deps) handleUpdateUserAccommodation() http.HandlerFunc {
 			return
 		}
 		updated, err := stac.UpdateRow(ctx, d.Pool, aid, tid, b.TimeMultiplier, b.ExtraAttempts,
-			b.HintsAlwaysEnabled, b.ReducedDistraction, b.TTSEnabled, b.AlternativeFormat, efrom, euntil, uid)
+			b.HintsAlwaysEnabled, b.ReducedDistraction, b.SpeechToTextEnabled, b.TTSEnabled, b.AlternativeFormat, efrom, euntil, uid)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 			return
@@ -438,10 +442,10 @@ func (d Deps) handleMyAccommodations() http.HandlerFunc {
 				CourseCode:            rr.CourseCode,
 				HasExtendedTime:        rr.Row.TimeMultiplier > 1.000001,
 				HasExtraAttempts:        rr.Row.ExtraAttempts > 0,
-				HintsAlwaysAvailable:   rr.Row.HintsAlwaysEnabled,
-				ReducedDistraction:     rr.Row.ReducedDistraction,
-				TTSEnabled:             rr.Row.TTSEnabled,
-				EffectiveFrom:          acmodel.YYYYMMDDFromNull(rr.Row.EffectiveFrom),
+				ReducedDistraction:    rr.Row.ReducedDistraction,
+				SpeechToTextEnabled:   rr.Row.SpeechToTextEnabled,
+				TTSEnabled:            rr.Row.TTSEnabled,
+				EffectiveFrom:         acmodel.YYYYMMDDFromNull(rr.Row.EffectiveFrom),
 				EffectiveUntil:         acmodel.YYYYMMDDFromNull(rr.Row.EffectiveUntil),
 			})
 		}
@@ -472,9 +476,10 @@ func rowToAPI(r *stac.Row, courseCode *string) acmodel.StudentAccommodation {
 		TimeMultiplier:     r.TimeMultiplier,
 		ExtraAttempts:      r.ExtraAttempts,
 		HintsAlwaysEnabled: r.HintsAlwaysEnabled,
-		ReducedDistraction: r.ReducedDistraction,
-		TTSEnabled:           r.TTSEnabled,
-		AlternativeFormat:  r.AlternativeFormat,
+		ReducedDistraction:    r.ReducedDistraction,
+		SpeechToTextEnabled:   r.SpeechToTextEnabled,
+		TTSEnabled:            r.TTSEnabled,
+		AlternativeFormat:     r.AlternativeFormat,
 		EffectiveFrom:      acmodel.YYYYMMDDFromNull(r.EffectiveFrom),
 		EffectiveUntil:     acmodel.YYYYMMDDFromNull(r.EffectiveUntil),
 		CreatedBy:          r.CreatedBy.String(),

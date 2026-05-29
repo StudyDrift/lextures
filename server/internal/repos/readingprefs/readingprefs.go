@@ -1,4 +1,4 @@
-// Package readingprefs manages per-user reading preferences: dyslexia display (12.6) and TTS (12.8).
+// Package readingprefs manages per-user reading preferences: dyslexia display (12.6), TTS (12.8), STT (12.9).
 package readingprefs
 
 import (
@@ -12,6 +12,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const defaultSTTLanguage = "en-US"
+
 // Row holds a user's reading preferences.
 type Row struct {
 	FontFace      string    `json:"fontFace"`
@@ -23,6 +25,8 @@ type Row struct {
 	TTSEnabled    bool      `json:"ttsEnabled"`
 	TTSSpeed      float64   `json:"ttsSpeed"`
 	TTSVoiceName  *string   `json:"ttsVoiceName,omitempty"`
+	STTEnabled    bool      `json:"sttEnabled"`
+	STTLanguage   string    `json:"sttLanguage"`
 	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
@@ -36,6 +40,8 @@ func defaults() Row {
 		RulerColor:    "yellow",
 		TTSEnabled:    false,
 		TTSSpeed:      1.0,
+		STTEnabled:    false,
+		STTLanguage:   defaultSTTLanguage,
 		UpdatedAt:     time.Now(),
 	}
 }
@@ -46,13 +52,15 @@ func Get(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*Row, error
 	var voice *string
 	err := pool.QueryRow(ctx, `
 SELECT font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
-       tts_enabled, (tts_speed)::double precision, tts_voice_name, updated_at
+       tts_enabled, (tts_speed)::double precision, tts_voice_name,
+       stt_enabled, stt_language, updated_at
 FROM settings.user_reading_preferences
 WHERE user_id = $1
 `, userID).Scan(
 		&r.FontFace, &r.LetterSpacing, &r.WordSpacing, &r.LineHeight,
 		&r.RulerEnabled, &r.RulerColor,
-		&r.TTSEnabled, &r.TTSSpeed, &voice, &r.UpdatedAt,
+		&r.TTSEnabled, &r.TTSSpeed, &voice,
+		&r.STTEnabled, &r.STTLanguage, &r.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -75,6 +83,8 @@ type Patch struct {
 	TTSEnabled    *bool
 	TTSSpeed      *float64
 	TTSVoiceName  **string
+	STTEnabled    *bool
+	STTLanguage   *string
 }
 
 var validFontFace = map[string]bool{
@@ -149,14 +159,25 @@ func Upsert(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p Patch) 
 	if p.TTSVoiceName != nil {
 		current.TTSVoiceName = *p.TTSVoiceName
 	}
+	if p.STTEnabled != nil {
+		current.STTEnabled = *p.STTEnabled
+	}
+	if p.STTLanguage != nil {
+		lang := *p.STTLanguage
+		if lang == "" {
+			lang = defaultSTTLanguage
+		}
+		current.STTLanguage = lang
+	}
 
 	var out Row
 	var voice *string
 	err = pool.QueryRow(ctx, `
-INSERT INTO settings.user_reading_preferences
-    (user_id, font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
-     tts_enabled, tts_speed, tts_voice_name, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::numeric, $10, now())
+INSERT INTO settings.user_reading_preferences (
+    user_id, font_face, letter_spacing, word_spacing, line_height,
+    ruler_enabled, ruler_color, tts_enabled, tts_speed, tts_voice_name,
+    stt_enabled, stt_language, updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::numeric, $10, $11, $12, now())
 ON CONFLICT (user_id) DO UPDATE
     SET font_face       = excluded.font_face,
         letter_spacing  = excluded.letter_spacing,
@@ -167,17 +188,22 @@ ON CONFLICT (user_id) DO UPDATE
         tts_enabled     = excluded.tts_enabled,
         tts_speed       = excluded.tts_speed,
         tts_voice_name  = excluded.tts_voice_name,
+        stt_enabled     = excluded.stt_enabled,
+        stt_language    = excluded.stt_language,
         updated_at      = now()
 RETURNING font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
-          tts_enabled, (tts_speed)::double precision, tts_voice_name, updated_at
+          tts_enabled, (tts_speed)::double precision, tts_voice_name,
+          stt_enabled, stt_language, updated_at
 `, userID,
 		current.FontFace, current.LetterSpacing, current.WordSpacing, current.LineHeight,
 		current.RulerEnabled, current.RulerColor,
 		current.TTSEnabled, current.TTSSpeed, current.TTSVoiceName,
+		current.STTEnabled, current.STTLanguage,
 	).Scan(
 		&out.FontFace, &out.LetterSpacing, &out.WordSpacing, &out.LineHeight,
 		&out.RulerEnabled, &out.RulerColor,
-		&out.TTSEnabled, &out.TTSSpeed, &voice, &out.UpdatedAt,
+		&out.TTSEnabled, &out.TTSSpeed, &voice,
+		&out.STTEnabled, &out.STTLanguage, &out.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err

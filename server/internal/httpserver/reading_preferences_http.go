@@ -28,6 +28,18 @@ var (
 	ttsRateByUser = map[uuid.UUID]ttsRateEntry{}
 )
 
+func (d Deps) speechToTextEnabled() bool {
+	return d.effectiveConfig().SpeechToTextEnabled
+}
+
+func (d Deps) requireSpeechToText(w http.ResponseWriter) bool {
+	if !d.speechToTextEnabled() {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Speech-to-text is not enabled.")
+		return false
+	}
+	return true
+}
+
 func (d Deps) readAloudEnabled() bool {
 	cfg := d.effectiveConfig()
 	return cfg.ReadAloudEnabled && cfg.FFReadAloud
@@ -72,13 +84,15 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 		TTSEnabled    *bool    `json:"ttsEnabled"`
 		TTSSpeed      *float64 `json:"ttsSpeed"`
 		TTSVoiceName  *string  `json:"ttsVoiceName"`
+		STTEnabled    *bool    `json:"sttEnabled"`
+		STTLanguage   *string  `json:"sttLanguage"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
 		}
-		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<16))
+		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")
 			return
@@ -87,6 +101,22 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 		if err := json.Unmarshal(payload, &b); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
+		}
+		if b.STTEnabled != nil || b.STTLanguage != nil {
+			if !d.speechToTextEnabled() {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Speech-to-text is not enabled.")
+				return
+			}
+			if b.STTLanguage != nil {
+				lang := strings.TrimSpace(*b.STTLanguage)
+				if lang != "" && len(lang) > 20 {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "sttLanguage is too long.")
+					return
+				}
+				if lang != "" {
+					b.STTLanguage = &lang
+				}
+			}
 		}
 		if b.TTSSpeed != nil {
 			rounded := math.Round(*b.TTSSpeed*100) / 100
@@ -107,6 +137,8 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			TTSEnabled:    b.TTSEnabled,
 			TTSSpeed:      b.TTSSpeed,
 			TTSVoiceName:  voicePtr,
+			STTEnabled:    b.STTEnabled,
+			STTLanguage:   b.STTLanguage,
 		}
 		if err := p.Validate(); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())

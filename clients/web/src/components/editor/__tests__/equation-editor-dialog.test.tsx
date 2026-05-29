@@ -26,6 +26,7 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   readingLevelEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
+  speechToTextEnabled: false,
   readAloudEnabled: false,
   ffReadAloud: false,
   translationMemoryEnabled: false,

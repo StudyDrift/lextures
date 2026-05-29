@@ -36,6 +36,7 @@ export type PlatformSettingsPayload = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  speechToTextEnabled: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -119,6 +120,7 @@ function emptyForm(): PlatformSettingsPayload {
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+    speechToTextEnabled: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -359,6 +361,9 @@ export function PlatformSettingsPanel() {
       })
       maybe('readingLevelEnabled', baseline.readingLevelEnabled, form.readingLevelEnabled, () => {
         body.readingLevelEnabled = form.readingLevelEnabled
+      })
+      maybe('speechToTextEnabled', baseline.speechToTextEnabled, form.speechToTextEnabled, () => {
+        body.speechToTextEnabled = form.speechToTextEnabled
       })
       maybe(
         'translationMemoryEnabled',
@@ -773,6 +778,12 @@ export function PlatformSettingsPanel() {
               src="default"
               checked={form.readingLevelEnabled}
               onChange={(v) => update('readingLevelEnabled', v)}
+            />
+            <FlagRow
+              label="Speech-to-text dictation"
+              src="default"
+              checked={form.speechToTextEnabled}
+              onChange={(v) => update('speechToTextEnabled', v)}
             />
             <FlagRow
               label="Translation memory (course content)"

@@ -14,6 +14,8 @@ import { formatDateTime } from '../../lib/format'
 import { MathPlainText } from '../math/math-plain-text'
 import { BookLoader } from './book-loader'
 import { MathKeyboard } from './math-keyboard'
+import { TextFieldDictation } from './text-field-dictation'
+import { useSpeechToTextAvailability } from '../../hooks/use-speech-to-text-availability'
 import {
   fetchModuleQuiz,
   fetchQuizCurrentQuestion,
@@ -127,6 +129,7 @@ export function QuizStudentTakePanel({
     currentQuestionId: string
   } | null>(null)
   const [flaggedQuestionIds, setFlaggedQuestionIds] = useState(() => new Set<string>())
+  const sttAvailability = useSpeechToTextAvailability(courseCode)
   const panelRef = useRef<HTMLDivElement | null>(null)
 
   const [staticQuestions, setStaticQuestions] = useState<QuizQuestion[]>([])
@@ -1070,6 +1073,9 @@ export function QuizStudentTakePanel({
                   advanceOnly
                   hintToolsEnabled={hintToolsEnabled}
                   onLearnerMessage={setError}
+                  speechToTextEnabled={sttAvailability.enabled}
+                  sttLanguage={sttAvailability.language}
+                  sttAccommodationTooltip={sttAvailability.accommodationTooltip}
                 />
               ) : null}
               {srvCompleted ? (
@@ -1109,6 +1115,9 @@ export function QuizStudentTakePanel({
               suppressInlineQuestionProgress={immersiveChrome}
               hintToolsEnabled={hintToolsEnabled}
               onLearnerMessage={setError}
+              speechToTextEnabled={sttAvailability.enabled}
+              sttLanguage={sttAvailability.language}
+              sttAccommodationTooltip={sttAvailability.accommodationTooltip}
             />
           )}
 
@@ -1263,6 +1272,9 @@ function StaticTakeBody({
   suppressInlineQuestionProgress,
   hintToolsEnabled = false,
   onLearnerMessage,
+  speechToTextEnabled = false,
+  sttLanguage = 'en-US',
+  sttAccommodationTooltip,
 }: {
   questions: QuizQuestion[]
   oneQuestionAtATime: boolean
@@ -1286,6 +1298,9 @@ function StaticTakeBody({
   suppressInlineQuestionProgress?: boolean
   hintToolsEnabled?: boolean
   onLearnerMessage?: (msg: string | null) => void
+  speechToTextEnabled?: boolean
+  sttLanguage?: string
+  sttAccommodationTooltip?: string
 }) {
   const [step, setStep] = useState(0)
   const textInputRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({})
@@ -1508,6 +1523,20 @@ function StaticTakeBody({
                 })
               }}
             />
+            {speechToTextEnabled ? (
+              <TextFieldDictation
+                getInput={() => textInputRefs.current[q.id] ?? null}
+                value={a.text ?? ''}
+                language={sttLanguage}
+                accommodationTooltip={sttAccommodationTooltip}
+                onChange={(next) =>
+                  setAnswers((prev) => ({
+                    ...prev,
+                    [q.id]: { ...prev[q.id], text: next },
+                  }))
+                }
+              />
+            ) : null}
           </>
         )}
         {q.questionType === 'numeric' && (

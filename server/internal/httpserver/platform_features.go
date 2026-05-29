@@ -22,6 +22,7 @@ type platformFeaturesJSON struct {
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
 	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
+	SpeechToTextEnabled        bool `json:"speechToTextEnabled"`
 	ReadAloudEnabled           bool `json:"readAloudEnabled"`
 	FFReadAloud                bool `json:"ffReadAloud"`
 	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
@@ -51,6 +52,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		ReadingLevelEnabled:        cfg.ReadingLevelEnabled,
 		AltTextEnforcementEnabled:  cfg.AltTextEnforcementEnabled,
 		FFAltTextEnforcement:       cfg.FFAltTextEnforcement,
+		SpeechToTextEnabled:        cfg.SpeechToTextEnabled,
 		ReadAloudEnabled:           cfg.ReadAloudEnabled,
 		FFReadAloud:                cfg.FFReadAloud,
 		TranslationMemoryEnabled:   cfg.TranslationMemoryEnabled,

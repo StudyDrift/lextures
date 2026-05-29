@@ -37,6 +37,7 @@ type StudentAccommodation struct {
 	ExtraAttempts         int32   `json:"extraAttempts"`
 	HintsAlwaysEnabled    bool    `json:"hintsAlwaysEnabled"`
 	ReducedDistraction    bool    `json:"reducedDistractionMode"`
+	SpeechToTextEnabled   bool    `json:"speechToTextEnabled"`
 	TTSEnabled            bool    `json:"ttsEnabled"`
 	AlternativeFormat     *string `json:"alternativeFormat,omitempty"`
 	EffectiveFrom         *string `json:"effectiveFrom,omitempty"`
@@ -54,6 +55,7 @@ type CreateRequest struct {
 	ExtraAttempts      *int32   `json:"extraAttempts"`
 	HintsAlwaysEnabled *bool    `json:"hintsAlwaysEnabled"`
 	ReducedDistraction *bool    `json:"reducedDistractionMode"`
+	SpeechToText       *bool    `json:"speechToTextEnabled"`
 	TTSEnabled         *bool    `json:"ttsEnabled"`
 	AlternativeFormat  *string  `json:"alternativeFormat"`
 	EffectiveFrom      *string  `json:"effectiveFrom"`
@@ -66,6 +68,7 @@ type UpdateRequest struct {
 	ExtraAttempts      int32   `json:"extraAttempts"`
 	HintsAlwaysEnabled bool    `json:"hintsAlwaysEnabled"`
 	ReducedDistraction bool    `json:"reducedDistractionMode"`
+	SpeechToTextEnabled bool   `json:"speechToTextEnabled"`
 	TTSEnabled         bool    `json:"ttsEnabled"`
 	AlternativeFormat  *string `json:"alternativeFormat"`
 	EffectiveFrom    *string `json:"effectiveFrom"`
@@ -93,6 +96,7 @@ type MyEntry struct {
 	HasExtraAttempts           bool    `json:"hasExtraAttempts"`
 	HintsAlwaysAvailable       bool    `json:"hintsAlwaysAvailable"`
 	ReducedDistraction         bool    `json:"reducedDistractionRecommended"`
+	SpeechToTextEnabled        bool    `json:"speechToTextEnabled"`
 	TTSEnabled                 bool    `json:"ttsEnabled"`
 	EffectiveFrom              *string `json:"effectiveFrom,omitempty"`
 	EffectiveUntil             *string `json:"effectiveUntil,omitempty"`

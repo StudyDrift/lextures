@@ -32,6 +32,12 @@ import {
   altTextEnforcementFeatureEnabled,
   altTextHardBlockEnabled,
 } from '../../lib/platform-features'
+import { useSpeechToTextAvailability } from '../../hooks/use-speech-to-text-availability'
+import {
+  commitTipTapDictationFinal,
+  insertTipTapDictationInterim,
+  type InterimRange,
+} from '../../lib/stt/text-insert'
 import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
 import { toastMutationError } from '../../lib/lms-toast'
 
@@ -421,6 +427,8 @@ function SyllabusBlockEditorInner({
   const equationEditorEnabled = isEquationEditorEnabled()
   const altTextOn = altTextEnforcementFeatureEnabled()
   const altTextHardBlock = altTextHardBlockEnabled()
+  const sttAvailability = useSpeechToTextAvailability(courseCode)
+  const dictationInterimRef = useRef<Record<string, InterimRange>>({})
   const altCoverage = useMemo(
     () => (altTextOn ? summarizeSectionsAltText(sections) : { withAlt: 0, total: 0, missing: [] }),
     [altTextOn, sections],
@@ -648,6 +656,33 @@ function SyllabusBlockEditorInner({
                         setActiveField({ blockId: section.id, field: 'markdown' })
                         editorRefs.current[section.id]?.chain().focus().run()
                         insertImagesIntoSection(section.id, files)
+                      },
+                    }
+                  : undefined
+              }
+              dictation={
+                sttAvailability.enabled
+                  ? {
+                      language: sttAvailability.language,
+                      accommodationTooltip: sttAvailability.accommodationTooltip,
+                      onInterimResult: (text) => {
+                        const editor = editorRefs.current[section.id]
+                        if (!editor) return
+                        dictationInterimRef.current[section.id] = insertTipTapDictationInterim(
+                          editor,
+                          text,
+                          dictationInterimRef.current[section.id] ?? null,
+                        )
+                      },
+                      onFinalResult: (text) => {
+                        const editor = editorRefs.current[section.id]
+                        if (!editor) return
+                        commitTipTapDictationFinal(
+                          editor,
+                          text,
+                          dictationInterimRef.current[section.id] ?? null,
+                        )
+                        dictationInterimRef.current[section.id] = null
                       },
                     }
                   : undefined
