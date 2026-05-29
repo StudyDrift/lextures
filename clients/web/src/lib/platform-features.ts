@@ -29,6 +29,7 @@ export type PlatformFeaturesSnapshot = {
   videoCaptionsEnabled?: boolean
   autoCaptioningEnabled?: boolean
   ffReadingPreferences?: boolean
+  ffHighContrastReducedMotion?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -60,6 +61,7 @@ const defaults: PlatformFeaturesSnapshot = {
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
+  ffHighContrastReducedMotion: false,
 }
 
 let loaded = false
@@ -161,4 +163,19 @@ export function instructorInsightsFeatureEnabled(): boolean {
 
 export function readingPreferencesFeatureEnabled(): boolean {
   return loaded && snapshot.ffReadingPreferences === true
+}
+
+/** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */
+export function readingPreferencesApiEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return false
+  }
+  return (
+    snap.speechToTextEnabled ||
+    snap.accommodationsEngineEnabled ||
+    (snap.readAloudEnabled && snap.ffReadAloud) ||
+    snap.ffReadingPreferences === true ||
+    snap.ffHighContrastReducedMotion === true
+  )
 }

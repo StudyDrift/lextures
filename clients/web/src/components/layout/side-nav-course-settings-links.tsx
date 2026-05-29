@@ -13,6 +13,7 @@ import {
   Eye,
 } from 'lucide-react'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { courseSettingsSectionFromPathname } from './side-nav-path-utils'
 import { sideNavActiveClass } from './side-nav-styles'
@@ -27,6 +28,7 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
   const location = useLocation()
   const { sideNavCollapsed } = useShellNav()
   const { altTextEnforcementEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const { sectionsEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
 
@@ -89,13 +91,15 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
           Translations
         </SideNavLink>
       ) : null}
-      <SideNavLink
-        to={`${base}/sections`}
-        className={() => (section === 'sections' ? sideNavActiveClass : '')}
-        icon={<LayoutGrid className="h-5 w-5" />}
-      >
-        Sections
-      </SideNavLink>
+      {!courseFeaturesLoading && sectionsEnabled ? (
+        <SideNavLink
+          to={`${base}/sections`}
+          className={() => (section === 'sections' ? sideNavActiveClass : '')}
+          icon={<LayoutGrid className="h-5 w-5" />}
+        >
+          Sections
+        </SideNavLink>
+      ) : null}
       <SideNavLink
         to={`${base}/import-export`}
         className={() => (section === 'import-export' ? sideNavActiveClass : '')}

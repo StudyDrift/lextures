@@ -35,8 +35,9 @@ type platformFeaturesJSON struct {
 	RTLEnabled                 bool `json:"rtlEnabled"`
 	VideoCaptionsEnabled       bool `json:"videoCaptionsEnabled"`
 	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
-	FFReadingPreferences       bool `json:"ffReadingPreferences"`
-	FFParentPortal             bool `json:"ffParentPortal"`
+	FFReadingPreferences            bool `json:"ffReadingPreferences"`
+	FFHighContrastReducedMotion     bool `json:"ffHighContrastReducedMotion"`
+	FFParentPortal                  bool `json:"ffParentPortal"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -68,8 +69,9 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		RTLEnabled:                 cfg.RTLEnabled,
 		VideoCaptionsEnabled:       cfg.VideoCaptionsEnabled,
 		AutoCaptioningEnabled:      cfg.AutoCaptioningEnabled,
-		FFReadingPreferences:       cfg.FFReadingPreferences,
-		FFParentPortal:             cfg.FFParentPortal,
+		FFReadingPreferences:        cfg.FFReadingPreferences,
+		FFHighContrastReducedMotion: cfg.FFHighContrastReducedMotion,
+		FFParentPortal:              cfg.FFParentPortal,
 	}
 }
 
