@@ -15,6 +15,7 @@ import CourseAtRiskPage from './pages/lms/course-at-risk'
 import StudentProgressPage from './pages/lms/student-progress-page'
 import CourseMyGrades from './pages/lms/course-my-grades'
 import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
+import AccommodationAuditPage from './pages/lms/accommodation-audit-page'
 import AdminQuarantinePage from './pages/lms/admin-quarantine-page'
 import CourseCreate from './pages/lms/course-create'
 import CourseDetail from './pages/lms/course-detail'
@@ -195,6 +196,7 @@ export default function App() {
           </Route>
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
+          <Route path="/admin/accommodations/audit" element={<AccommodationAuditPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/admin/compliance/iso" element={<IsoComplianceAdminPage />} />
           <Route path="/admin/compliance/security-reports" element={<SecurityDisclosureAdminPage />} />

@@ -90,9 +90,12 @@ type platformSettingsJSON struct {
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
 	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
-	ReadAloudEnabled           bool `json:"readAloudEnabled"`
-	FFReadAloud                bool `json:"ffReadAloud"`
-	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
+	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
+	AccommodationsEngineEnabled bool `json:"accommodationsEngineEnabled"`
+	FFAccommodationsEngine      bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled            bool `json:"readAloudEnabled"`
+	FFReadAloud                 bool `json:"ffReadAloud"`
+	TranslationMemoryEnabled    bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
@@ -221,9 +224,12 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
 			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
-			ReadAloudEnabled:            merged.ReadAloudEnabled,
-			FFReadAloud:                 merged.FFReadAloud,
-			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
+			SpeechToTextEnabled:          merged.SpeechToTextEnabled,
+			AccommodationsEngineEnabled:  merged.AccommodationsEngineEnabled,
+			FFAccommodationsEngine:       merged.FFAccommodationsEngine,
+			ReadAloudEnabled:             merged.ReadAloudEnabled,
+			FFReadAloud:                  merged.FFReadAloud,
+			TranslationMemoryEnabled:     merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
@@ -325,9 +331,12 @@ type putPlatformBody struct {
 	ReadingLevelEnabled        *bool `json:"readingLevelEnabled"`
 	AltTextEnforcementEnabled  *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement       *bool `json:"ffAltTextEnforcement"`
-	ReadAloudEnabled           *bool `json:"readAloudEnabled"`
-	FFReadAloud                *bool `json:"ffReadAloud"`
-	TranslationMemoryEnabled   *bool `json:"translationMemoryEnabled"`
+	SpeechToTextEnabled         *bool `json:"speechToTextEnabled"`
+	AccommodationsEngineEnabled *bool `json:"accommodationsEngineEnabled"`
+	FFAccommodationsEngine      *bool `json:"ffAccommodationsEngine"`
+	ReadAloudEnabled            *bool `json:"readAloudEnabled"`
+	FFReadAloud                 *bool `json:"ffReadAloud"`
+	TranslationMemoryEnabled    *bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
@@ -589,6 +598,9 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
+		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
+		setBool("accommodationsengineenabled", body.AccommodationsEngineEnabled, func(v bool) { wr.AccommodationsEngineEnabled = &v })
+		setBool("ffaccommodationsengine", body.FFAccommodationsEngine, func(v bool) { wr.FFAccommodationsEngine = &v })
 		setBool("readaloudenabled", body.ReadAloudEnabled, func(v bool) { wr.ReadAloudEnabled = &v })
 		setBool("ffreadaloud", body.FFReadAloud, func(v bool) { wr.FFReadAloud = &v })
 		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
@@ -677,9 +689,12 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
 			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
-			ReadAloudEnabled:            merged.ReadAloudEnabled,
-			FFReadAloud:                 merged.FFReadAloud,
-			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
+			SpeechToTextEnabled:          merged.SpeechToTextEnabled,
+			AccommodationsEngineEnabled:  merged.AccommodationsEngineEnabled,
+			FFAccommodationsEngine:       merged.FFAccommodationsEngine,
+			ReadAloudEnabled:             merged.ReadAloudEnabled,
+			FFReadAloud:                  merged.FFReadAloud,
+			TranslationMemoryEnabled:     merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,

@@ -6,12 +6,12 @@ import {
 } from '../reading-preferences'
 
 describe('defaultReadingPreferences', () => {
-  it('has highContrast false by default', () => {
-    expect(defaultReadingPreferences.highContrast).toBe(false)
+  it('has highContrastEnabled false by default', () => {
+    expect(defaultReadingPreferences.highContrastEnabled).toBe(false)
   })
 
-  it('has reduceMotion false by default', () => {
-    expect(defaultReadingPreferences.reduceMotion).toBe(false)
+  it('has reducedMotionEnabled false by default', () => {
+    expect(defaultReadingPreferences.reducedMotionEnabled).toBe(false)
   })
 })
 
@@ -30,30 +30,30 @@ describe('applyReadingPreferences — HC/RM classes', () => {
     applyReadingPreferences({ ...defaultReadingPreferences, ...overrides })
   }
 
-  it('adds high-contrast class when highContrast is true', () => {
+  it('adds high-contrast class when highContrastEnabled is true', () => {
     clean()
-    apply({ highContrast: true })
+    apply({ highContrastEnabled: true })
     expect(root.classList.contains('high-contrast')).toBe(true)
     expect(root.classList.contains('reduced-motion')).toBe(false)
   })
 
-  it('adds reduced-motion class when reduceMotion is true', () => {
+  it('adds reduced-motion class when reducedMotionEnabled is true', () => {
     clean()
-    apply({ reduceMotion: true })
+    apply({ reducedMotionEnabled: true })
     expect(root.classList.contains('reduced-motion')).toBe(true)
     expect(root.classList.contains('high-contrast')).toBe(false)
   })
 
   it('removes classes when prefs are false', () => {
     root.classList.add('high-contrast', 'reduced-motion')
-    apply({ highContrast: false, reduceMotion: false })
+    apply({ highContrastEnabled: false, reducedMotionEnabled: false })
     expect(root.classList.contains('high-contrast')).toBe(false)
     expect(root.classList.contains('reduced-motion')).toBe(false)
   })
 
   it('adds both classes when both are true', () => {
     clean()
-    apply({ highContrast: true, reduceMotion: true })
+    apply({ highContrastEnabled: true, reducedMotionEnabled: true })
     expect(root.classList.contains('high-contrast')).toBe(true)
     expect(root.classList.contains('reduced-motion')).toBe(true)
   })

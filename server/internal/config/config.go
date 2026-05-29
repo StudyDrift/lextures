@@ -234,6 +234,12 @@ type Config struct {
 	FFAltTextEnforcement bool
 	// FFHighContrastReducedMotion enables the high-contrast/reduced-motion preference panel and API (plan 12.7).
 	FFHighContrastReducedMotion bool
+	// SpeechToTextEnabled gates browser dictation in block editor and quiz fields (plan 12.9).
+	SpeechToTextEnabled bool
+	// AccommodationsEngineEnabled gates the K-12 accommodations engine (plan 12.10).
+	AccommodationsEngineEnabled bool
+	// FFAccommodationsEngine when true writes accommodation audit log entries (plan 12.10).
+	FFAccommodationsEngine bool
 	// ReadAloudEnabled gates in-context read-aloud on course content pages (plan 12.8).
 	ReadAloudEnabled bool
 	// FFReadAloud when true exposes read-aloud controls to learners (plan 12.8).

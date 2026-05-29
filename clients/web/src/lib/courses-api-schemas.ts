@@ -709,6 +709,12 @@ export const studentAccommodationRecordSchema = z.object({
   extraAttempts: z.number(),
   hintsAlwaysEnabled: z.boolean(),
   reducedDistractionMode: z.boolean(),
+  speechToTextEnabled: z.boolean().optional(),
+  ttsEnabled: z.boolean().optional(),
+  dyslexiaDisplayEnabled: z.boolean().optional(),
+  highContrastEnabled: z.boolean().optional(),
+  reducedMotionEnabled: z.boolean().optional(),
+  separateSetting: z.boolean().optional(),
   alternativeFormat: z.string().nullable().optional(),
   effectiveFrom: z.string().nullable().optional(),
   effectiveUntil: z.string().nullable().optional(),
@@ -719,6 +725,26 @@ export const studentAccommodationRecordSchema = z.object({
 })
 
 export const studentAccommodationRecordsListSchema = z.array(studentAccommodationRecordSchema)
+
+export const accommodationAuditEntrySchema = z.object({
+  id: z.string(),
+  studentId: z.string(),
+  accommodationType: z.string(),
+  valueApplied: z.unknown(),
+  context: z.string(),
+  contextId: z.string().nullable().optional(),
+  appliedAt: z.string(),
+})
+
+export const accommodationAuditLogResponseSchema = z.object({
+  entries: z.array(accommodationAuditEntrySchema).optional(),
+})
+
+export const accommodationCsvImportSummarySchema = z.object({
+  created: z.number(),
+  updated: z.number(),
+  errors: z.array(z.string()),
+})
 
 export const contentPageMarkupSchema = z.object({
   id: z.string(),

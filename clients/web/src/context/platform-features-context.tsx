@@ -28,6 +28,9 @@ export type PlatformFeatures = {
   readingLevelEnabled: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
+  speechToTextEnabled: boolean
+  accommodationsEngineEnabled: boolean
+  ffAccommodationsEngine: boolean
   readAloudEnabled: boolean
   ffReadAloud: boolean
   translationMemoryEnabled: boolean
@@ -58,6 +61,9 @@ const defaultFeatures: PlatformFeatures = {
   readingLevelEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
+  speechToTextEnabled: false,
+  accommodationsEngineEnabled: false,
+  ffAccommodationsEngine: false,
   readAloudEnabled: false,
   ffReadAloud: false,
   translationMemoryEnabled: false,
@@ -93,6 +99,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     readingLevelEnabled: false,
     altTextEnforcementEnabled: false,
     ffAltTextEnforcement: false,
+    speechToTextEnabled: false,
+    accommodationsEngineEnabled: false,
+    ffAccommodationsEngine: false,
     readAloudEnabled: false,
     ffReadAloud: false,
     translationMemoryEnabled: false,
@@ -129,6 +138,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           readingLevelEnabled: data.readingLevelEnabled === true,
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,
+          speechToTextEnabled: data.speechToTextEnabled === true,
+          accommodationsEngineEnabled: data.accommodationsEngineEnabled === true,
+          ffAccommodationsEngine: data.ffAccommodationsEngine === true,
           readAloudEnabled: data.readAloudEnabled === true,
           ffReadAloud: data.ffReadAloud === true,
           translationMemoryEnabled: data.translationMemoryEnabled === true,

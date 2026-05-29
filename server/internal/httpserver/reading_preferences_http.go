@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/readingprefs"
+	acsvc "github.com/lextures/lextures/server/internal/service/accommodations"
 	ttssvc "github.com/lextures/lextures/server/internal/service/tts"
 )
 
@@ -27,6 +28,40 @@ var (
 	ttsRateMu     sync.Mutex
 	ttsRateByUser = map[uuid.UUID]ttsRateEntry{}
 )
+
+type readingPreferencesResponse struct {
+	readingprefs.Row
+	AccommodationOverrides readingprefs.AccommodationOverrides `json:"accommodationOverrides,omitempty"`
+}
+
+func (d Deps) speechToTextEnabled() bool {
+	return d.effectiveConfig().SpeechToTextEnabled
+}
+
+func (d Deps) readingPreferencesEnabled() bool {
+	cfg := d.effectiveConfig()
+	return cfg.SpeechToTextEnabled ||
+		cfg.AccommodationsEngineEnabled ||
+		(cfg.ReadAloudEnabled && cfg.FFReadAloud) ||
+		cfg.FFReadingPreferences ||
+		cfg.FFHighContrastReducedMotion
+}
+
+func (d Deps) requireReadingPreferences(w http.ResponseWriter) bool {
+	if !d.readingPreferencesEnabled() {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Reading preferences are not enabled.")
+		return false
+	}
+	return true
+}
+
+func (d Deps) requireSpeechToText(w http.ResponseWriter) bool {
+	if !d.speechToTextEnabled() {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Speech-to-text is not enabled.")
+		return false
+	}
+	return true
+}
 
 func (d Deps) readAloudEnabled() bool {
 	cfg := d.effectiveConfig()
@@ -45,10 +80,25 @@ func (d Deps) registerTTSRoutes(r chi.Router) {
 	r.Post("/api/v1/tts/synthesize", d.handlePostTTSSynthesize())
 }
 
+func (d Deps) encodeReadingPreferences(w http.ResponseWriter, row *readingprefs.Row, overrides readingprefs.AccommodationOverrides) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if d.accommodationsEngineFeatureEnabled() {
+		_ = json.NewEncoder(w).Encode(readingPreferencesResponse{
+			Row:                    *row,
+			AccommodationOverrides: overrides,
+		})
+		return
+	}
+	_ = json.NewEncoder(w).Encode(row)
+}
+
 func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireReadingPreferences(w) {
 			return
 		}
 		row, err := readingprefs.Get(r.Context(), d.Pool, userID)
@@ -56,31 +106,41 @@ func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load reading preferences.")
 			return
 		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(row)
+		overrides := readingprefs.AccommodationOverrides{}
+		if d.accommodationsEngineFeatureEnabled() {
+			eff := acsvc.ResolveEffectiveGlobal(r.Context(), d.Pool, userID)
+			row, overrides = readingprefs.MergeAccommodationOverrides(row, eff)
+		}
+		d.encodeReadingPreferences(w, row, overrides)
 	}
 }
 
 func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 	type body struct {
-		FontFace      *string  `json:"fontFace"`
-		LetterSpacing *string  `json:"letterSpacing"`
-		WordSpacing   *string  `json:"wordSpacing"`
-		LineHeight    *string  `json:"lineHeight"`
-		RulerEnabled  *bool    `json:"rulerEnabled"`
-		RulerColor    *string  `json:"rulerColor"`
-		HighContrast  *bool    `json:"highContrast"`
-		ReduceMotion  *bool    `json:"reduceMotion"`
-		TTSEnabled    *bool    `json:"ttsEnabled"`
-		TTSSpeed      *float64 `json:"ttsSpeed"`
-		TTSVoiceName  *string  `json:"ttsVoiceName"`
+		FontFace               *string  `json:"fontFace"`
+		LetterSpacing          *string  `json:"letterSpacing"`
+		WordSpacing            *string  `json:"wordSpacing"`
+		LineHeight             *string  `json:"lineHeight"`
+		RulerEnabled           *bool    `json:"rulerEnabled"`
+		RulerColor             *string  `json:"rulerColor"`
+		TTSEnabled             *bool    `json:"ttsEnabled"`
+		TTSSpeed               *float64 `json:"ttsSpeed"`
+		TTSVoiceName           *string  `json:"ttsVoiceName"`
+		STTEnabled             *bool    `json:"sttEnabled"`
+		STTLanguage            *string  `json:"sttLanguage"`
+		DyslexiaDisplayEnabled *bool    `json:"dyslexiaDisplayEnabled"`
+		HighContrastEnabled    *bool    `json:"highContrastEnabled"`
+		ReducedMotionEnabled   *bool    `json:"reducedMotionEnabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
 		}
-		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<16))
+		if !d.requireReadingPreferences(w) {
+			return
+		}
+		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")
 			return
@@ -89,6 +149,22 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 		if err := json.Unmarshal(payload, &b); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
+		}
+		if b.STTEnabled != nil || b.STTLanguage != nil {
+			if !d.speechToTextEnabled() {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Speech-to-text is not enabled.")
+				return
+			}
+			if b.STTLanguage != nil {
+				lang := strings.TrimSpace(*b.STTLanguage)
+				if lang != "" && len(lang) > 20 {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "sttLanguage is too long.")
+					return
+				}
+				if lang != "" {
+					b.STTLanguage = &lang
+				}
+			}
 		}
 		if b.TTSSpeed != nil {
 			rounded := math.Round(*b.TTSSpeed*100) / 100
@@ -100,17 +176,20 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			voicePtr = &v
 		}
 		p := readingprefs.Patch{
-			FontFace:      b.FontFace,
-			LetterSpacing: b.LetterSpacing,
-			WordSpacing:   b.WordSpacing,
-			LineHeight:    b.LineHeight,
-			RulerEnabled:  b.RulerEnabled,
-			RulerColor:    b.RulerColor,
-			HighContrast:  b.HighContrast,
-			ReduceMotion:  b.ReduceMotion,
-			TTSEnabled:    b.TTSEnabled,
-			TTSSpeed:      b.TTSSpeed,
-			TTSVoiceName:  voicePtr,
+			FontFace:               b.FontFace,
+			LetterSpacing:          b.LetterSpacing,
+			WordSpacing:            b.WordSpacing,
+			LineHeight:             b.LineHeight,
+			RulerEnabled:           b.RulerEnabled,
+			RulerColor:             b.RulerColor,
+			TTSEnabled:             b.TTSEnabled,
+			TTSSpeed:               b.TTSSpeed,
+			TTSVoiceName:           voicePtr,
+			STTEnabled:             b.STTEnabled,
+			STTLanguage:            b.STTLanguage,
+			DyslexiaDisplayEnabled: b.DyslexiaDisplayEnabled,
+			HighContrastEnabled:    b.HighContrastEnabled,
+			ReducedMotionEnabled:   b.ReducedMotionEnabled,
 		}
 		if err := p.Validate(); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
@@ -121,8 +200,12 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save reading preferences.")
 			return
 		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(row)
+		overrides := readingprefs.AccommodationOverrides{}
+		if d.accommodationsEngineFeatureEnabled() {
+			eff := acsvc.ResolveEffectiveGlobal(r.Context(), d.Pool, userID)
+			row, overrides = readingprefs.MergeAccommodationOverrides(row, eff)
+		}
+		d.encodeReadingPreferences(w, row, overrides)
 	}
 }
 

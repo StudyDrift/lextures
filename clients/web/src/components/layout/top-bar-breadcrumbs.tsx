@@ -104,6 +104,14 @@ function staticCrumbsFromPathname(pathname: string, courseCode: string | null): 
   if (pathname === '/inbox') return [{ key: 'inbox', label: 'Inbox' }]
   if (pathname === '/reports') return [{ key: 'reports', label: 'Reports' }]
 
+  if (pathname === '/admin/accommodations/audit') {
+    return [
+      { key: 'admin', label: 'Admin' },
+      { key: 'acc', label: 'Accommodations', to: '/admin/accommodations' },
+      { key: 'audit', label: 'Audit report' },
+    ]
+  }
+
   if (pathname === '/admin/accommodations') {
     return [
       { key: 'admin', label: 'Admin' },

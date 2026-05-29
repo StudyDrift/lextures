@@ -1,5 +1,4 @@
-// Package readingprefs manages per-user reading preferences: dyslexia display (12.6),
-// high-contrast/reduced-motion (12.7), and text-to-speech (12.8).
+// Package readingprefs manages per-user reading preferences: dyslexia display (12.6), TTS (12.8), STT (12.9), accommodations overrides (12.10).
 package readingprefs
 
 import (
@@ -11,22 +10,38 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	acsvc "github.com/lextures/lextures/server/internal/service/accommodations"
 )
+
+const defaultSTTLanguage = "en-US"
 
 // Row holds a user's reading preferences.
 type Row struct {
-	FontFace      string    `json:"fontFace"`
-	LetterSpacing string    `json:"letterSpacing"`
-	WordSpacing   string    `json:"wordSpacing"`
-	LineHeight    string    `json:"lineHeight"`
-	RulerEnabled  bool      `json:"rulerEnabled"`
-	RulerColor    string    `json:"rulerColor"`
-	HighContrast  bool      `json:"highContrast"`
-	ReduceMotion  bool      `json:"reduceMotion"`
-	TTSEnabled    bool      `json:"ttsEnabled"`
-	TTSSpeed      float64   `json:"ttsSpeed"`
-	TTSVoiceName  *string   `json:"ttsVoiceName,omitempty"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	FontFace               string    `json:"fontFace"`
+	LetterSpacing          string    `json:"letterSpacing"`
+	WordSpacing            string    `json:"wordSpacing"`
+	LineHeight             string    `json:"lineHeight"`
+	RulerEnabled           bool      `json:"rulerEnabled"`
+	RulerColor             string    `json:"rulerColor"`
+	TTSEnabled             bool      `json:"ttsEnabled"`
+	TTSSpeed               float64   `json:"ttsSpeed"`
+	TTSVoiceName           *string   `json:"ttsVoiceName,omitempty"`
+	STTEnabled             bool      `json:"sttEnabled"`
+	STTLanguage            string    `json:"sttLanguage"`
+	DyslexiaDisplayEnabled bool      `json:"dyslexiaDisplayEnabled"`
+	HighContrastEnabled    bool      `json:"highContrastEnabled"`
+	ReducedMotionEnabled   bool      `json:"reducedMotionEnabled"`
+	UpdatedAt              time.Time `json:"updatedAt"`
+}
+
+// AccommodationOverrides marks fields forced by an active accommodation plan.
+type AccommodationOverrides struct {
+	TTSEnabled             bool `json:"ttsEnabled,omitempty"`
+	DyslexiaDisplayEnabled bool `json:"dyslexiaDisplayEnabled,omitempty"`
+	HighContrastEnabled    bool `json:"highContrastEnabled,omitempty"`
+	ReducedMotionEnabled   bool `json:"reducedMotionEnabled,omitempty"`
+	STTEnabled             bool `json:"sttEnabled,omitempty"`
 }
 
 func defaults() Row {
@@ -37,10 +52,10 @@ func defaults() Row {
 		LineHeight:    "normal",
 		RulerEnabled:  false,
 		RulerColor:    "yellow",
-		HighContrast:  false,
-		ReduceMotion:  false,
 		TTSEnabled:    false,
 		TTSSpeed:      1.0,
+		STTEnabled:    false,
+		STTLanguage:   defaultSTTLanguage,
 		UpdatedAt:     time.Now(),
 	}
 }
@@ -51,15 +66,19 @@ func Get(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*Row, error
 	var voice *string
 	err := pool.QueryRow(ctx, `
 SELECT font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
-       high_contrast, reduce_motion,
-       tts_enabled, (tts_speed)::double precision, tts_voice_name, updated_at
+       tts_enabled, (tts_speed)::double precision, tts_voice_name,
+       stt_enabled, stt_language,
+       dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
+       updated_at
 FROM settings.user_reading_preferences
 WHERE user_id = $1
 `, userID).Scan(
 		&r.FontFace, &r.LetterSpacing, &r.WordSpacing, &r.LineHeight,
 		&r.RulerEnabled, &r.RulerColor,
-		&r.HighContrast, &r.ReduceMotion,
-		&r.TTSEnabled, &r.TTSSpeed, &voice, &r.UpdatedAt,
+		&r.TTSEnabled, &r.TTSSpeed, &voice,
+		&r.STTEnabled, &r.STTLanguage,
+		&r.DyslexiaDisplayEnabled, &r.HighContrastEnabled, &r.ReducedMotionEnabled,
+		&r.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -73,17 +92,20 @@ WHERE user_id = $1
 
 // Patch holds optional field updates; nil fields are unchanged.
 type Patch struct {
-	FontFace      *string
-	LetterSpacing *string
-	WordSpacing   *string
-	LineHeight    *string
-	RulerEnabled  *bool
-	RulerColor    *string
-	HighContrast  *bool
-	ReduceMotion  *bool
-	TTSEnabled    *bool
-	TTSSpeed      *float64
-	TTSVoiceName  **string
+	FontFace               *string
+	LetterSpacing          *string
+	WordSpacing            *string
+	LineHeight             *string
+	RulerEnabled           *bool
+	RulerColor             *string
+	TTSEnabled             *bool
+	TTSSpeed               *float64
+	TTSVoiceName           **string
+	STTEnabled             *bool
+	STTLanguage            *string
+	DyslexiaDisplayEnabled *bool
+	HighContrastEnabled    *bool
+	ReducedMotionEnabled   *bool
 }
 
 var validFontFace = map[string]bool{
@@ -149,12 +171,6 @@ func Upsert(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p Patch) 
 	if p.RulerColor != nil {
 		current.RulerColor = *p.RulerColor
 	}
-	if p.HighContrast != nil {
-		current.HighContrast = *p.HighContrast
-	}
-	if p.ReduceMotion != nil {
-		current.ReduceMotion = *p.ReduceMotion
-	}
 	if p.TTSEnabled != nil {
 		current.TTSEnabled = *p.TTSEnabled
 	}
@@ -164,44 +180,112 @@ func Upsert(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p Patch) 
 	if p.TTSVoiceName != nil {
 		current.TTSVoiceName = *p.TTSVoiceName
 	}
+	if p.STTEnabled != nil {
+		current.STTEnabled = *p.STTEnabled
+	}
+	if p.STTLanguage != nil {
+		lang := *p.STTLanguage
+		if lang == "" {
+			lang = defaultSTTLanguage
+		}
+		current.STTLanguage = lang
+	}
+	if p.DyslexiaDisplayEnabled != nil {
+		current.DyslexiaDisplayEnabled = *p.DyslexiaDisplayEnabled
+	}
+	if p.HighContrastEnabled != nil {
+		current.HighContrastEnabled = *p.HighContrastEnabled
+	}
+	if p.ReducedMotionEnabled != nil {
+		current.ReducedMotionEnabled = *p.ReducedMotionEnabled
+	}
 
 	var out Row
 	var voice *string
 	err = pool.QueryRow(ctx, `
-INSERT INTO settings.user_reading_preferences
-    (user_id, font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
-     high_contrast, reduce_motion, tts_enabled, tts_speed, tts_voice_name, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::numeric, $12, now())
+INSERT INTO settings.user_reading_preferences (
+    user_id, font_face, letter_spacing, word_spacing, line_height,
+    ruler_enabled, ruler_color, tts_enabled, tts_speed, tts_voice_name,
+    stt_enabled, stt_language,
+    dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
+    updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::numeric, $10, $11, $12, $13, $14, $15, now())
 ON CONFLICT (user_id) DO UPDATE
-    SET font_face       = excluded.font_face,
-        letter_spacing  = excluded.letter_spacing,
-        word_spacing    = excluded.word_spacing,
-        line_height     = excluded.line_height,
-        ruler_enabled   = excluded.ruler_enabled,
-        ruler_color     = excluded.ruler_color,
-        high_contrast   = excluded.high_contrast,
-        reduce_motion   = excluded.reduce_motion,
-        tts_enabled     = excluded.tts_enabled,
-        tts_speed       = excluded.tts_speed,
-        tts_voice_name  = excluded.tts_voice_name,
-        updated_at      = now()
+    SET font_face                = excluded.font_face,
+        letter_spacing           = excluded.letter_spacing,
+        word_spacing             = excluded.word_spacing,
+        line_height              = excluded.line_height,
+        ruler_enabled            = excluded.ruler_enabled,
+        ruler_color              = excluded.ruler_color,
+        tts_enabled              = excluded.tts_enabled,
+        tts_speed                = excluded.tts_speed,
+        tts_voice_name           = excluded.tts_voice_name,
+        stt_enabled              = excluded.stt_enabled,
+        stt_language             = excluded.stt_language,
+        dyslexia_display_enabled = excluded.dyslexia_display_enabled,
+        high_contrast_enabled    = excluded.high_contrast_enabled,
+        reduced_motion_enabled   = excluded.reduced_motion_enabled,
+        updated_at               = now()
 RETURNING font_face, letter_spacing, word_spacing, line_height, ruler_enabled, ruler_color,
-          high_contrast, reduce_motion,
-          tts_enabled, (tts_speed)::double precision, tts_voice_name, updated_at
+          tts_enabled, (tts_speed)::double precision, tts_voice_name,
+          stt_enabled, stt_language,
+          dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
+          updated_at
 `, userID,
 		current.FontFace, current.LetterSpacing, current.WordSpacing, current.LineHeight,
 		current.RulerEnabled, current.RulerColor,
-		current.HighContrast, current.ReduceMotion,
 		current.TTSEnabled, current.TTSSpeed, current.TTSVoiceName,
+		current.STTEnabled, current.STTLanguage,
+		current.DyslexiaDisplayEnabled, current.HighContrastEnabled, current.ReducedMotionEnabled,
 	).Scan(
 		&out.FontFace, &out.LetterSpacing, &out.WordSpacing, &out.LineHeight,
 		&out.RulerEnabled, &out.RulerColor,
-		&out.HighContrast, &out.ReduceMotion,
-		&out.TTSEnabled, &out.TTSSpeed, &voice, &out.UpdatedAt,
+		&out.TTSEnabled, &out.TTSSpeed, &voice,
+		&out.STTEnabled, &out.STTLanguage,
+		&out.DyslexiaDisplayEnabled, &out.HighContrastEnabled, &out.ReducedMotionEnabled,
+		&out.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 	out.TTSVoiceName = voice
 	return &out, nil
+}
+
+// MergeAccommodationOverrides applies active accommodation display settings over user prefs.
+func MergeAccommodationOverrides(row *Row, eff acsvc.Effective) (*Row, AccommodationOverrides) {
+	out := *row
+	var overrides AccommodationOverrides
+	if eff.TTSEnabled {
+		out.TTSEnabled = true
+		overrides.TTSEnabled = true
+	}
+	if eff.DyslexiaDisplay {
+		out.DyslexiaDisplayEnabled = true
+		overrides.DyslexiaDisplayEnabled = true
+	}
+	if eff.HighContrast {
+		out.HighContrastEnabled = true
+		overrides.HighContrastEnabled = true
+	}
+	if eff.ReducedMotion {
+		out.ReducedMotionEnabled = true
+		overrides.ReducedMotionEnabled = true
+	}
+	if eff.SpeechToTextEnabled {
+		out.STTEnabled = true
+		overrides.STTEnabled = true
+	}
+	return &out, overrides
+}
+
+// EffectiveForCourse loads prefs and merges course-scoped accommodations.
+func EffectiveForCourse(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) (*Row, AccommodationOverrides, error) {
+	row, err := Get(ctx, pool, userID)
+	if err != nil {
+		return nil, AccommodationOverrides{}, err
+	}
+	eff := acsvc.ResolveEffectiveOrDefault(ctx, pool, userID, courseID)
+	merged, overrides := MergeAccommodationOverrides(row, eff)
+	return merged, overrides, nil
 }

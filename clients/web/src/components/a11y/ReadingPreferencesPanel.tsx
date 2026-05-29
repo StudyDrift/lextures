@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { X } from 'lucide-react'
 import { useReadingPreferences } from '../../context/reading-preferences-context'
 import { LiveRegion } from './live-region'
@@ -50,6 +50,7 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
   const panelRef = useRef<HTMLDivElement>(null)
   const closeBtnRef = useRef<HTMLButtonElement>(null)
   const titleId = useId()
+  const [liveAnnouncement, setLiveAnnouncement] = useState('')
 
   /* Trap focus + close on Escape */
   useEffect(() => {
@@ -248,21 +249,27 @@ export function ReadingPreferencesPanel({ open, onClose }: Props) {
               <p className="mb-3 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">
                 Display
               </p>
-              <LiveRegion politeness="polite" />
+              <LiveRegion politeness="polite">{liveAnnouncement}</LiveRegion>
               <div className="space-y-3">
                 <AccessibilityToggle
                   id="pref-high-contrast"
                   label="High contrast"
                   description="Increases contrast to at least 7:1 for text and interactive elements."
-                  checked={prefs.highContrast}
-                  onChange={(v) => update({ highContrast: v })}
+                  checked={prefs.highContrastEnabled}
+                  onChange={(v) => {
+                    update({ highContrastEnabled: v })
+                    setLiveAnnouncement(v ? 'High contrast enabled' : 'High contrast disabled')
+                  }}
                 />
                 <AccessibilityToggle
                   id="pref-reduce-motion"
                   label="Reduce motion"
                   description="Stops animations and transitions to reduce motion-triggered discomfort."
-                  checked={prefs.reduceMotion}
-                  onChange={(v) => update({ reduceMotion: v })}
+                  checked={prefs.reducedMotionEnabled}
+                  onChange={(v) => {
+                    update({ reducedMotionEnabled: v })
+                    setLiveAnnouncement(v ? 'Reduce motion enabled' : 'Reduce motion disabled')
+                  }}
                 />
               </div>
             </div>

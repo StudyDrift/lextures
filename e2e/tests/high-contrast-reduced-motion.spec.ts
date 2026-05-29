@@ -39,7 +39,7 @@ test('PATCH reading-preferences: unauthenticated returns 401', async () => {
   const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ highContrast: true }),
+    body: JSON.stringify({ highContrastEnabled: true }),
   })
   expect(res.status).toBe(401)
 })
@@ -63,7 +63,7 @@ test('PATCH reading-preferences: feature flag off returns 404', async () => {
   const res = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     method: 'PATCH',
     headers: authHeaders(access_token),
-    body: JSON.stringify({ highContrast: true }),
+    body: JSON.stringify({ highContrastEnabled: true }),
   })
   if (res.status === 200) {
     test.skip(true, 'ff_high_contrast_reduced_motion is on in this environment — skipping 404 check')
@@ -94,19 +94,19 @@ test('PATCH persists high-contrast preference', async () => {
   const patchRes = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     method: 'PATCH',
     headers: authHeaders(access_token),
-    body: JSON.stringify({ highContrast: true }),
+    body: JSON.stringify({ highContrastEnabled: true }),
   })
   expect(patchRes.status).toBe(200)
-  const patched = (await patchRes.json()) as { highContrast: boolean; reduceMotion: boolean }
-  expect(patched.highContrast).toBe(true)
-  expect(patched.reduceMotion).toBe(false)
+  const patched = (await patchRes.json()) as { highContrastEnabled: boolean; reducedMotionEnabled: boolean }
+  expect(patched.highContrastEnabled).toBe(true)
+  expect(patched.reducedMotionEnabled).toBe(false)
 
   const getRes = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     headers: authHeaders(access_token),
   })
   expect(getRes.status).toBe(200)
-  const fetched = (await getRes.json()) as { highContrast: boolean; reduceMotion: boolean }
-  expect(fetched.highContrast).toBe(true)
+  const fetched = (await getRes.json()) as { highContrastEnabled: boolean; reducedMotionEnabled: boolean }
+  expect(fetched.highContrastEnabled).toBe(true)
 })
 
 test('PATCH persists reduce-motion preference', async () => {
@@ -119,12 +119,12 @@ test('PATCH persists reduce-motion preference', async () => {
   const patchRes = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     method: 'PATCH',
     headers: authHeaders(access_token),
-    body: JSON.stringify({ reduceMotion: true }),
+    body: JSON.stringify({ reducedMotionEnabled: true }),
   })
   expect(patchRes.status).toBe(200)
-  const patched = (await patchRes.json()) as { highContrast: boolean; reduceMotion: boolean }
-  expect(patched.reduceMotion).toBe(true)
-  expect(patched.highContrast).toBe(false)
+  const patched = (await patchRes.json()) as { highContrastEnabled: boolean; reducedMotionEnabled: boolean }
+  expect(patched.reducedMotionEnabled).toBe(true)
+  expect(patched.highContrastEnabled).toBe(false)
 })
 
 test('PATCH partial update merges with existing values', async () => {
@@ -137,18 +137,18 @@ test('PATCH partial update merges with existing values', async () => {
   await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     method: 'PATCH',
     headers: authHeaders(access_token),
-    body: JSON.stringify({ highContrast: true, reduceMotion: true }),
+    body: JSON.stringify({ highContrastEnabled: true, reducedMotionEnabled: true }),
   })
 
   const patchRes = await fetch(`${API_BASE}/api/v1/me/reading-preferences`, {
     method: 'PATCH',
     headers: authHeaders(access_token),
-    body: JSON.stringify({ highContrast: false }),
+    body: JSON.stringify({ highContrastEnabled: false }),
   })
   expect(patchRes.status).toBe(200)
-  const patched = (await patchRes.json()) as { highContrast: boolean; reduceMotion: boolean }
-  expect(patched.highContrast).toBe(false)
-  expect(patched.reduceMotion).toBe(true)
+  const patched = (await patchRes.json()) as { highContrastEnabled: boolean; reducedMotionEnabled: boolean }
+  expect(patched.highContrastEnabled).toBe(false)
+  expect(patched.reducedMotionEnabled).toBe(true)
 })
 
 // ── Browser-level CSS tests ─────────────────────────────────────────────────

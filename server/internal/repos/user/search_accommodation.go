@@ -3,9 +3,11 @@ package user
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -32,6 +34,22 @@ func SearchForAccommodationLookup(ctx context.Context, pool *pgxpool.Pool, q str
 		return nil, nil
 	}
 	return searchByPattern(ctx, pool, t)
+}
+
+func LookupIDByEmailOrSID(ctx context.Context, pool *pgxpool.Pool, emailOrSID string) (*uuid.UUID, error) {
+	var id uuid.UUID
+	err := pool.QueryRow(ctx, `
+SELECT id FROM "user".users
+WHERE LOWER(email) = LOWER($1) OR sid = $1
+LIMIT 1
+`, strings.TrimSpace(emailOrSID)).Scan(&id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &id, nil
 }
 
 func searchByExactID(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) ([]AccommodationSearchRow, error) {

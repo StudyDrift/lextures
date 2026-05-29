@@ -54,6 +54,8 @@ import {
   restoreVersionResponseSchema,
   structurePathRuleSchema,
   structurePathRulesResponseSchema,
+  accommodationAuditLogResponseSchema,
+  accommodationCsvImportSummarySchema,
   studentAccommodationRecordSchema,
   studentAccommodationRecordsListSchema,
   syllabusAcceptanceStatusSchema,
@@ -3608,6 +3610,12 @@ export type StudentAccommodationRecord = {
   extraAttempts: number
   hintsAlwaysEnabled: boolean
   reducedDistractionMode: boolean
+  speechToTextEnabled?: boolean
+  ttsEnabled?: boolean
+  dyslexiaDisplayEnabled?: boolean
+  highContrastEnabled?: boolean
+  reducedMotionEnabled?: boolean
+  separateSetting?: boolean
   alternativeFormat?: string | null
   effectiveFrom?: string | null
   effectiveUntil?: string | null
@@ -3623,6 +3631,12 @@ export type CreateStudentAccommodationBody = {
   extraAttempts?: number
   hintsAlwaysEnabled?: boolean
   reducedDistractionMode?: boolean
+  speechToTextEnabled?: boolean
+  ttsEnabled?: boolean
+  dyslexiaDisplayEnabled?: boolean
+  highContrastEnabled?: boolean
+  reducedMotionEnabled?: boolean
+  separateSetting?: boolean
   alternativeFormat?: string | null
   effectiveFrom?: string | null
   effectiveUntil?: string | null
@@ -3656,9 +3670,60 @@ export type UpdateStudentAccommodationBody = {
   extraAttempts: number
   hintsAlwaysEnabled: boolean
   reducedDistractionMode: boolean
+  speechToTextEnabled?: boolean
+  ttsEnabled?: boolean
+  dyslexiaDisplayEnabled?: boolean
+  highContrastEnabled?: boolean
+  reducedMotionEnabled?: boolean
+  separateSetting?: boolean
   alternativeFormat?: string | null
   effectiveFrom?: string | null
   effectiveUntil?: string | null
+}
+
+export type AccommodationAuditEntry = {
+  id: string
+  studentId: string
+  accommodationType: string
+  valueApplied: unknown
+  context: string
+  contextId?: string | null
+  appliedAt: string
+}
+
+export type AccommodationCsvImportSummary = {
+  created: number
+  updated: number
+  errors: string[]
+}
+
+export async function fetchAccommodationAuditLog(opts?: {
+  studentId?: string
+  limit?: number
+}): Promise<AccommodationAuditEntry[]> {
+  const params = new URLSearchParams()
+  if (opts?.studentId?.trim()) params.set('studentId', opts.studentId.trim())
+  if (opts?.limit != null && opts.limit > 0) params.set('limit', String(opts.limit))
+  const qs = params.toString()
+  const res = await authorizedFetch(
+    `/api/v1/admin/accommodations/audit${qs ? `?${qs}` : ''}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = parseApiResponse('fetchAccommodationAuditLog', accommodationAuditLogResponseSchema, raw)
+  return o.entries ?? []
+}
+
+export async function importAccommodationsCSV(file: File): Promise<AccommodationCsvImportSummary> {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await authorizedFetch('/api/v1/admin/accommodations/import', {
+    method: 'POST',
+    body: form,
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('importAccommodationsCSV', accommodationCsvImportSummarySchema, raw)
 }
 
 export async function updateStudentAccommodation(
