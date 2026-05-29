@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/readingpreferences"
+	"github.com/lextures/lextures/server/internal/repos/readingprefs"
 	ttssvc "github.com/lextures/lextures/server/internal/service/tts"
 )
 
@@ -41,68 +41,39 @@ func (d Deps) requireReadAloud(w http.ResponseWriter) bool {
 	return true
 }
 
-func (d Deps) registerReadingPreferencesRoutes(r chi.Router) {
-	r.Get("/api/v1/me/reading-preferences", d.handleGetMyReadingPreferences())
-	r.Patch("/api/v1/me/reading-preferences", d.handlePatchMyReadingPreferences())
-}
-
 func (d Deps) registerTTSRoutes(r chi.Router) {
 	r.Post("/api/v1/tts/synthesize", d.handlePostTTSSynthesize())
 }
 
-type readingPreferencesJSON struct {
-	TTSEnabled   bool     `json:"ttsEnabled"`
-	TTSSpeed     float64  `json:"ttsSpeed"`
-	TTSVoiceName *string  `json:"ttsVoiceName,omitempty"`
-	UpdatedAt    *string  `json:"updatedAt,omitempty"`
-}
-
-func rowToReadingPrefsJSON(r readingpreferences.Row) readingPreferencesJSON {
-	out := readingPreferencesJSON{
-		TTSEnabled:   r.TTSEnabled,
-		TTSSpeed:     r.TTSSpeed,
-		TTSVoiceName: r.TTSVoiceName,
-	}
-	if !r.UpdatedAt.IsZero() {
-		s := r.UpdatedAt.UTC().Format(time.RFC3339)
-		out.UpdatedAt = &s
-	}
-	return out
-}
-
 func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
 		}
-		row, err := readingpreferences.Get(r.Context(), d.Pool, userID)
+		row, err := readingprefs.Get(r.Context(), d.Pool, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load reading preferences.")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(rowToReadingPrefsJSON(row))
+		_ = json.NewEncoder(w).Encode(row)
 	}
 }
 
 func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 	type body struct {
-		TTSEnabled   *bool    `json:"ttsEnabled"`
-		TTSSpeed     *float64 `json:"ttsSpeed"`
-		TTSVoiceName *string  `json:"ttsVoiceName"`
+		FontFace      *string  `json:"fontFace"`
+		LetterSpacing *string  `json:"letterSpacing"`
+		WordSpacing   *string  `json:"wordSpacing"`
+		LineHeight    *string  `json:"lineHeight"`
+		RulerEnabled  *bool    `json:"rulerEnabled"`
+		RulerColor    *string  `json:"rulerColor"`
+		TTSEnabled    *bool    `json:"ttsEnabled"`
+		TTSSpeed      *float64 `json:"ttsSpeed"`
+		TTSVoiceName  *string  `json:"ttsVoiceName"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -118,12 +89,7 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			return
 		}
 		if b.TTSSpeed != nil {
-			s := *b.TTSSpeed
-			if s < 0.75 || s > 2.0 {
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "ttsSpeed must be between 0.75 and 2.0.")
-				return
-			}
-			rounded := math.Round(s*100) / 100
+			rounded := math.Round(*b.TTSSpeed*100) / 100
 			b.TTSSpeed = &rounded
 		}
 		var voicePtr **string
@@ -131,13 +97,28 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			v := b.TTSVoiceName
 			voicePtr = &v
 		}
-		row, err := readingpreferences.Patch(r.Context(), d.Pool, userID, b.TTSEnabled, b.TTSSpeed, voicePtr)
+		p := readingprefs.Patch{
+			FontFace:      b.FontFace,
+			LetterSpacing: b.LetterSpacing,
+			WordSpacing:   b.WordSpacing,
+			LineHeight:    b.LineHeight,
+			RulerEnabled:  b.RulerEnabled,
+			RulerColor:    b.RulerColor,
+			TTSEnabled:    b.TTSEnabled,
+			TTSSpeed:      b.TTSSpeed,
+			TTSVoiceName:  voicePtr,
+		}
+		if err := p.Validate(); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			return
+		}
+		row, err := readingprefs.Upsert(r.Context(), d.Pool, userID, p)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save reading preferences.")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(rowToReadingPrefsJSON(row))
+		_ = json.NewEncoder(w).Encode(row)
 	}
 }
 

@@ -25,6 +25,7 @@ export type PlatformFeaturesSnapshot = {
   rtlEnabled: boolean
   videoCaptionsEnabled?: boolean
   autoCaptioningEnabled?: boolean
+  ffReadingPreferences?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -52,6 +53,7 @@ const defaults: PlatformFeaturesSnapshot = {
   rtlEnabled: false,
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
+  ffReadingPreferences: false,
 }
 
 let loaded = false
@@ -137,4 +139,8 @@ export function xapiEmissionFeatureEnabled(): boolean {
 
 export function instructorInsightsFeatureEnabled(): boolean {
   return loaded && snapshot.instructorInsightsEnabled
+}
+
+export function readingPreferencesFeatureEnabled(): boolean {
+  return loaded && snapshot.ffReadingPreferences === true
 }

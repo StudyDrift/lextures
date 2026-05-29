@@ -39,6 +39,7 @@ export type PlatformFeatures = {
   rtlEnabled: boolean
   videoCaptionsEnabled: boolean
   autoCaptioningEnabled: boolean
+  ffReadingPreferences: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -68,6 +69,7 @@ const defaultFeatures: PlatformFeatures = {
   rtlEnabled: false,
   videoCaptionsEnabled: false,
   autoCaptioningEnabled: false,
+  ffReadingPreferences: false,
   loading: true,
   refresh: async () => {},
 }
@@ -102,6 +104,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     rtlEnabled: false,
     videoCaptionsEnabled: false,
     autoCaptioningEnabled: false,
+    ffReadingPreferences: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -137,11 +140,13 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           rtlEnabled: data.rtlEnabled === true,
           videoCaptionsEnabled: data.videoCaptionsEnabled === true,
           autoCaptioningEnabled: data.autoCaptioningEnabled === true,
+          ffReadingPreferences: data.ffReadingPreferences === true,
         }
         setFeatures({
           ...next,
           videoCaptionsEnabled: next.videoCaptionsEnabled === true,
           autoCaptioningEnabled: next.autoCaptioningEnabled === true,
+          ffReadingPreferences: next.ffReadingPreferences === true,
         })
         setPlatformFeaturesSnapshot(next)
       }
