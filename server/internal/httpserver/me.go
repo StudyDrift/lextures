@@ -203,6 +203,8 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Get("/api/v1/platform/features", d.handleGetPlatformFeatures())
 	r.Get("/api/v1/me/oidc-identities", d.handleMyOIDCIdentities())
 	r.Delete("/api/v1/me/oidc-identities/{id}", d.handleDeleteMyOIDCIdentity())
+	r.Get("/api/v1/me/reading-preferences", d.handleGetMyReadingPreferences())
+	r.Patch("/api/v1/me/reading-preferences", d.handlePatchMyReadingPreferences())
 	r.Post("/api/v1/me/notebooks/query", d.handleNotebookQuery())
 	d.registerSelfReflectionRoutes(r)
 }

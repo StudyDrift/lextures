@@ -18,6 +18,8 @@ import { useShellNav } from './use-shell-nav'
 import { TopBarBreadcrumbs } from './top-bar-breadcrumbs'
 import { NotificationsDrawer, NotificationsDrawerTrigger } from './notifications-drawer'
 import { TopBarMobileCommandPaletteButton } from './side-nav-command-palette'
+import { ReadingPreferencesPanel } from '../a11y/ReadingPreferencesPanel'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 function UserMenu() {
   const navigate = useNavigate()
@@ -260,6 +262,8 @@ function CourseEnrollmentViewDropdown() {
 export function TopBar() {
   const { mobileNavOpen, setMobileNavOpen } = useShellNav()
   const [notificationsOpen, setNotificationsOpen] = useState(false)
+  const [readingPanelOpen, setReadingPanelOpen] = useState(false)
+  const { ffReadingPreferences } = usePlatformFeatures()
 
   return (
     <header className="lms-chrome flex h-14 shrink-0 items-center gap-1.5 border-b border-slate-200 bg-white px-2 shadow-sm shadow-slate-900/5 print:hidden sm:gap-3 sm:px-4 md:gap-4 md:px-6 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/20">
@@ -277,12 +281,32 @@ export function TopBar() {
         <TopBarBreadcrumbs />
       </div>
       <TopBarMobileCommandPaletteButton />
-      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+      <div className="ms-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+        {ffReadingPreferences && (
+          <button
+            type="button"
+            aria-label="Open Reading Preferences"
+            aria-expanded={readingPanelOpen}
+            aria-haspopup="dialog"
+            onClick={() => setReadingPanelOpen((o) => !o)}
+            data-testid="reading-preferences-trigger"
+            className={`inline-flex h-9 w-9 items-center justify-center rounded-xl text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
+              readingPanelOpen
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+                : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+            }`}
+          >
+            Aa
+          </button>
+        )}
         <NotificationsDrawerTrigger open={notificationsOpen} onOpen={() => setNotificationsOpen(true)} />
         <CourseEnrollmentViewDropdown />
         <UserMenu />
       </div>
       <NotificationsDrawer open={notificationsOpen} onClose={() => setNotificationsOpen(false)} />
+      {ffReadingPreferences && (
+        <ReadingPreferencesPanel open={readingPanelOpen} onClose={() => setReadingPanelOpen(false)} />
+      )}
     </header>
   )
 }
