@@ -6,6 +6,7 @@ import { CourseFeedUnreadProvider } from '../../context/course-feed-unread-provi
 import { InboxUnreadProvider } from '../../context/inbox-unread-provider'
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
 import { PlatformFeaturesProvider } from '../../context/platform-features-context'
+import { ReadingPreferencesProvider } from '../../context/reading-preferences-context'
 import { QuizFocusTopBar } from './quiz-focus-top-bar'
 import { ReadingFocusTopBar } from './reading-focus-top-bar'
 import { useQuizShellFocus } from './quiz-shell-focus-context'
@@ -22,6 +23,7 @@ import { LegalUpdateBanner } from '../legal/legal-update-banner'
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
 import { useFocusOnRoute } from '../../lib/a11y'
+import { ReadingRuler } from '../a11y/ReadingRuler'
 
 function AppShellLayout() {
   const location = useLocation()
@@ -40,6 +42,7 @@ function AppShellLayout() {
       <LmsExperienceRoot>
       <UiThemeSync />
       <LocaleBootstrapSync />
+      <ReadingRuler />
       <SkipLink />
       <div
         className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
@@ -75,6 +78,7 @@ function AppShellLayout() {
 export function AppShell() {
   return (
     <PlatformFeaturesProvider>
+    <ReadingPreferencesProvider>
     <InboxUnreadProvider>
       <CourseFeedUnreadProvider>
         <CommandPaletteProvider>
@@ -90,6 +94,7 @@ export function AppShell() {
         </CommandPaletteProvider>
       </CourseFeedUnreadProvider>
     </InboxUnreadProvider>
+    </ReadingPreferencesProvider>
     </PlatformFeaturesProvider>
   )
 }

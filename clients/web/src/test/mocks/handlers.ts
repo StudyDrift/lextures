@@ -123,6 +123,29 @@ export const handlers = [
   http.delete('http://localhost:8080/api/v1/settings/roles/:roleId/users/:userId', () => {
     return new HttpResponse(null, { status: 204 })
   }),
+  http.get('http://localhost:8080/api/v1/me/reading-preferences', () => {
+    return HttpResponse.json({
+      fontFace: 'default',
+      letterSpacing: 'normal',
+      wordSpacing: 'normal',
+      lineHeight: 'normal',
+      rulerEnabled: false,
+      rulerColor: 'yellow',
+      updatedAt: new Date().toISOString(),
+    })
+  }),
+  http.patch('http://localhost:8080/api/v1/me/reading-preferences', async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>
+    return HttpResponse.json({
+      fontFace: body.fontFace ?? 'default',
+      letterSpacing: body.letterSpacing ?? 'normal',
+      wordSpacing: body.wordSpacing ?? 'normal',
+      lineHeight: body.lineHeight ?? 'normal',
+      rulerEnabled: body.rulerEnabled ?? false,
+      rulerColor: body.rulerColor ?? 'yellow',
+      updatedAt: new Date().toISOString(),
+    })
+  }),
   communicationMailboxWs.addEventListener('connection', () => {
     /* Accept mailbox WS; client only needs connect + optional auth message. */
   }),

@@ -10,11 +10,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/readingprefs"
 )
 
-type readingPreferencesJSON struct {
-	STTEnabled  bool   `json:"sttEnabled"`
-	STTLanguage string `json:"sttLanguage"`
-}
-
 func (d Deps) speechToTextEnabled() bool {
 	return d.effectiveConfig().SpeechToTextEnabled
 }
@@ -27,23 +22,8 @@ func (d Deps) requireSpeechToText(w http.ResponseWriter) bool {
 	return true
 }
 
-func rowToReadingPreferencesJSON(r readingprefs.Row) readingPreferencesJSON {
-	return readingPreferencesJSON{
-		STTEnabled:  r.STTEnabled,
-		STTLanguage: r.STTLanguage,
-	}
-}
-
 func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			w.Header().Set("Allow", http.MethodGet)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		if !d.requireSpeechToText(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -54,24 +34,22 @@ func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(rowToReadingPreferencesJSON(row))
+		_ = json.NewEncoder(w).Encode(row)
 	}
 }
 
 func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 	type body struct {
-		STTEnabled  *bool   `json:"sttEnabled"`
-		STTLanguage *string `json:"sttLanguage"`
+		FontFace      *string `json:"fontFace"`
+		LetterSpacing *string `json:"letterSpacing"`
+		WordSpacing   *string `json:"wordSpacing"`
+		LineHeight    *string `json:"lineHeight"`
+		RulerEnabled  *bool   `json:"rulerEnabled"`
+		RulerColor    *string `json:"rulerColor"`
+		STTEnabled    *bool   `json:"sttEnabled"`
+		STTLanguage   *string `json:"sttLanguage"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
-		if !d.requireSpeechToText(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
@@ -86,23 +64,42 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		if b.STTLanguage != nil {
-			lang := strings.TrimSpace(*b.STTLanguage)
-			if lang != "" && len(lang) > 20 {
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "sttLanguage is too long.")
+		if b.STTEnabled != nil || b.STTLanguage != nil {
+			if !d.speechToTextEnabled() {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Speech-to-text is not enabled.")
 				return
 			}
-			if lang != "" {
-				b.STTLanguage = &lang
+			if b.STTLanguage != nil {
+				lang := strings.TrimSpace(*b.STTLanguage)
+				if lang != "" && len(lang) > 20 {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "sttLanguage is too long.")
+					return
+				}
+				if lang != "" {
+					b.STTLanguage = &lang
+				}
 			}
 		}
-		row, err := readingprefs.Patch(r.Context(), d.Pool, userID, b.STTEnabled, b.STTLanguage)
+		p := readingprefs.Patch{
+			FontFace:      b.FontFace,
+			LetterSpacing: b.LetterSpacing,
+			WordSpacing:   b.WordSpacing,
+			LineHeight:    b.LineHeight,
+			RulerEnabled:  b.RulerEnabled,
+			RulerColor:    b.RulerColor,
+			STTEnabled:    b.STTEnabled,
+			STTLanguage:   b.STTLanguage,
+		}
+		if err := p.Validate(); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			return
+		}
+		row, err := readingprefs.Upsert(r.Context(), d.Pool, userID, p)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save reading preferences.")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(rowToReadingPreferencesJSON(row))
+		_ = json.NewEncoder(w).Encode(row)
 	}
 }
-

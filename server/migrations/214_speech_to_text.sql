@@ -1,4 +1,5 @@
 -- Plan 12.9: Speech-to-text input for student responses (WCAG SC 2.1.1, 4.1.2, 4.1.3).
+-- Extends plan 12.6 user_reading_preferences table (migration 211).
 
 ALTER TABLE settings.platform_app_settings
     ADD COLUMN IF NOT EXISTS speech_to_text_enabled BOOLEAN;
@@ -6,15 +7,10 @@ ALTER TABLE settings.platform_app_settings
 COMMENT ON COLUMN settings.platform_app_settings.speech_to_text_enabled IS
     'Plan 12.9: Enables speech-to-text dictation in the block editor and quiz short-answer fields.';
 
-CREATE TABLE IF NOT EXISTS settings.user_reading_preferences (
-    user_id UUID PRIMARY KEY REFERENCES "user".users (id) ON DELETE CASCADE,
-    stt_enabled BOOLEAN NOT NULL DEFAULT false,
-    stt_language TEXT NOT NULL DEFAULT 'en-US',
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
+ALTER TABLE settings.user_reading_preferences
+    ADD COLUMN IF NOT EXISTS stt_enabled BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN IF NOT EXISTS stt_language TEXT NOT NULL DEFAULT 'en-US';
 
-COMMENT ON TABLE settings.user_reading_preferences IS
-    'Per-user reading and accessibility display preferences (extended by plans 12.6–12.8).';
 COMMENT ON COLUMN settings.user_reading_preferences.stt_enabled IS
     'Plan 12.9: User opt-in for speech-to-text dictation controls.';
 COMMENT ON COLUMN settings.user_reading_preferences.stt_language IS
