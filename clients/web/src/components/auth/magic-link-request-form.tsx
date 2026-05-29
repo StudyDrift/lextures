@@ -49,18 +49,18 @@ export function MagicLinkRequestForm({ redirectTo, defaultEmail = '' }: Props) {
 
   if (status === 'sent') {
     return (
-      <p className="text-sm text-slate-700" role="status" aria-live="polite">
+      <p className="text-sm text-slate-700 dark:text-neutral-300" role="status" aria-live="polite">
         {message}
       </p>
     )
   }
 
   return (
-    <form className="space-y-4 border-t border-slate-200 pt-5" onSubmit={onSubmit}>
-      <p className="text-sm font-medium text-slate-800">Email me a magic link</p>
-      <p className="text-xs text-slate-500">We will email you a one-time link that signs you in without a password.</p>
+    <form className="space-y-4 border-t border-slate-200 dark:border-neutral-700 pt-5" onSubmit={onSubmit}>
+      <p className="text-sm font-medium text-slate-800 dark:text-neutral-200">Email me a magic link</p>
+      <p className="text-xs text-slate-500 dark:text-neutral-400">We will email you a one-time link that signs you in without a password.</p>
       <div>
-        <label htmlFor="magic-link-email" className="mb-1.5 block text-sm font-medium text-slate-700">
+        <label htmlFor="magic-link-email" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
           Email for magic link
         </label>
         <input

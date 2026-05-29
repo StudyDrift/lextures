@@ -5,7 +5,7 @@ import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
 
 const linkClass =
-  'text-slate-600 underline decoration-slate-300 underline-offset-2 transition hover:text-slate-900 hover:decoration-slate-500 dark:text-neutral-400 dark:decoration-neutral-600 dark:hover:text-neutral-100 dark:hover:decoration-neutral-400'
+  'text-slate-700 underline decoration-slate-300 underline-offset-2 transition hover:text-slate-900 hover:decoration-slate-500 dark:text-neutral-400 dark:decoration-neutral-600 dark:hover:text-neutral-100 dark:hover:decoration-neutral-400'
 
 function versionLabel(version: string) {
   const trimmed = version.trim()
@@ -19,7 +19,7 @@ export function SideNavFooter() {
 
   return (
     <footer
-      className={`shrink-0 border-t border-slate-200/80 px-3 py-2.5 text-[11px] leading-snug text-slate-500 dark:border-neutral-800 dark:text-neutral-500 ${
+      className={`shrink-0 border-t border-slate-200/80 px-3 py-2.5 text-[11px] leading-snug text-slate-700 dark:border-neutral-800 dark:text-neutral-400 ${
         sideNavCollapsed ? 'flex justify-center' : ''
       }`}
     >
@@ -27,7 +27,7 @@ export function SideNavFooter() {
         <button
           type="button"
           onClick={toggleSideNav}
-          className={`mb-2 flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:bg-white/80 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-800/90 dark:hover:text-neutral-50 ${
+          className={`mb-2 flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-white/80 hover:text-slate-900 dark:text-neutral-400 dark:hover:bg-neutral-800/90 dark:hover:text-neutral-50 ${
             sideNavCollapsed ? 'justify-center' : ''
           }`}
           title={!sideNavCollapsed ? 'Collapse sidebar' : undefined}
@@ -45,10 +45,10 @@ export function SideNavFooter() {
 
       {!sideNavCollapsed && (
         <>
-          <p className="flex min-w-0 items-baseline justify-between gap-2 text-slate-600 dark:text-neutral-400">
+          <p className="flex min-w-0 items-baseline justify-between gap-2 text-slate-700 dark:text-neutral-400">
             <span className="min-w-0 shrink">© {year} Lextures</span>
             <span
-              className="shrink-0 text-slate-500 tabular-nums dark:text-neutral-500"
+              className="shrink-0 text-slate-700 tabular-nums dark:text-neutral-400"
               title="App version"
             >
               {versionLabel(RELEASE_VERSION)}

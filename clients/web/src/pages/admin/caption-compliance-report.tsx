@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchCaptionCompliance, type CaptionCoverageRow } from '../../lib/captions-api'
-import { videoCaptionsFeatureEnabled } from '../../lib/platform-features'
 
 export default function CaptionComplianceReportPage() {
   const titleId = useId()
+  const { videoCaptionsEnabled, autoCaptioningEnabled, loading: featuresLoading } =
+    usePlatformFeatures()
+  const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
   const [rows, setRows] = useState<CaptionCoverageRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,10 +26,24 @@ export default function CaptionComplianceReportPage() {
   }, [])
 
   useEffect(() => {
+    if (featuresLoading || !captionsEnabled) return
     void load()
-  }, [load])
+  }, [captionsEnabled, featuresLoading, load])
 
-  if (!videoCaptionsFeatureEnabled()) {
+  if (featuresLoading) {
+    return (
+      <main className="mx-auto max-w-4xl p-6">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-neutral-100">
+          Caption compliance report
+        </h1>
+        <p className="mt-6 text-sm" role="status">
+          Loading…
+        </p>
+      </main>
+    )
+  }
+
+  if (!captionsEnabled) {
     return (
       <main className="mx-auto max-w-3xl p-6">
         <p className="text-sm text-slate-600 dark:text-neutral-400">

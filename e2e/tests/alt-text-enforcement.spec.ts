@@ -94,7 +94,9 @@ test.describe('Alt-text enforcement UI', () => {
     } catch {
       test.skip(true, 'Authenticated LMS shell unavailable in this environment')
     }
-    await expect(page.getByText(/alt-text coverage/i)).toBeVisible({ timeout: 15000 })
+    await expect(
+      page.getByRole('heading', { name: 'Image alt-text coverage' }),
+    ).toBeVisible({ timeout: 15000 })
 
     const results = await new AxeBuilder({ page })
       .include('main')

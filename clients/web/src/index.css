@@ -326,13 +326,15 @@ body {
 .tiptap p.is-empty::before {
   content: attr(data-placeholder);
   float: left;
-  color: rgb(148 163 184);
+  /* slate-500 (#64748b) on white gives 4.76:1 — meets WCAG SC 1.4.3 AA */
+  color: rgb(100 116 139);
   pointer-events: none;
   height: 0;
 }
 
 .dark .tiptap p.is-empty::before {
-  color: rgb(115 115 115);
+  /* neutral-400 (#a3a3a3) on neutral-950 gives 7.85:1 — meets WCAG SC 1.4.3 AA */
+  color: rgb(163 163 163);
 }
 
 /* Clipboard “Copied” feedback in syllabus/page sidebar actions */
