@@ -48,6 +48,7 @@ type Row struct {
 	DRMEnabled                 *bool
 	VideoTranscodingEnabled    *bool
 	AutoCaptioningEnabled      *bool
+	VideoCaptionsEnabled       *bool
 	StorageQuotasEnabled       *bool
 	AtRiskAlertsEnabled        *bool
 	AvScanningEnabled          *bool
@@ -62,6 +63,8 @@ type Row struct {
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
 	ReadingLevelEnabled        *bool
+	AltTextEnforcementEnabled  *bool
+	FFAltTextEnforcement       *bool
 	TranslationMemoryEnabled   *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
@@ -125,6 +128,7 @@ type Write struct {
 	DRMEnabled                 *bool
 	VideoTranscodingEnabled    *bool
 	AutoCaptioningEnabled      *bool
+	VideoCaptionsEnabled       *bool
 	StorageQuotasEnabled       *bool
 	AtRiskAlertsEnabled        *bool
 	AvScanningEnabled          *bool
@@ -139,6 +143,8 @@ type Write struct {
 	OutcomesReportEnabled      *bool
 	EquationEditorEnabled      *bool
 	ReadingLevelEnabled        *bool
+	AltTextEnforcementEnabled  *bool
+	FFAltTextEnforcement       *bool
 	TranslationMemoryEnabled   *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
@@ -200,6 +206,7 @@ SELECT
 	drm_enabled,
 	video_transcoding_enabled,
 	auto_captioning_enabled,
+	video_captions_enabled,
 	storage_quotas_enabled,
 	at_risk_alerts_enabled,
 	av_scanning_enabled,
@@ -214,6 +221,8 @@ SELECT
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	reading_level_enabled,
+	alt_text_enforcement_enabled,
+	ff_alt_text_enforcement,
 	translation_memory_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
@@ -270,6 +279,7 @@ WHERE id = 1
 		&r.DRMEnabled,
 		&r.VideoTranscodingEnabled,
 		&r.AutoCaptioningEnabled,
+		&r.VideoCaptionsEnabled,
 		&r.StorageQuotasEnabled,
 		&r.AtRiskAlertsEnabled,
 		&r.AvScanningEnabled,
@@ -284,6 +294,8 @@ WHERE id = 1
 		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
 		&r.ReadingLevelEnabled,
+		&r.AltTextEnforcementEnabled,
+		&r.FFAltTextEnforcement,
 		&r.TranslationMemoryEnabled,
 		&r.ReportExportEnabled,
 		&r.XAPIEmissionEnabled,
@@ -380,6 +392,7 @@ INSERT INTO settings.platform_app_settings (
 	drm_enabled,
 	video_transcoding_enabled,
 	auto_captioning_enabled,
+	video_captions_enabled,
 	storage_quotas_enabled,
 	at_risk_alerts_enabled,
 	av_scanning_enabled,
@@ -394,6 +407,8 @@ INSERT INTO settings.platform_app_settings (
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	reading_level_enabled,
+	alt_text_enforcement_enabled,
+	ff_alt_text_enforcement,
 	translation_memory_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
@@ -421,7 +436,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -455,6 +470,7 @@ ON CONFLICT (id) DO UPDATE SET
 	drm_enabled = COALESCE(EXCLUDED.drm_enabled, settings.platform_app_settings.drm_enabled),
 	video_transcoding_enabled = COALESCE(EXCLUDED.video_transcoding_enabled, settings.platform_app_settings.video_transcoding_enabled),
 	auto_captioning_enabled = COALESCE(EXCLUDED.auto_captioning_enabled, settings.platform_app_settings.auto_captioning_enabled),
+	video_captions_enabled = COALESCE(EXCLUDED.video_captions_enabled, settings.platform_app_settings.video_captions_enabled),
 	storage_quotas_enabled = COALESCE(EXCLUDED.storage_quotas_enabled, settings.platform_app_settings.storage_quotas_enabled),
 	at_risk_alerts_enabled = COALESCE(EXCLUDED.at_risk_alerts_enabled, settings.platform_app_settings.at_risk_alerts_enabled),
 	av_scanning_enabled = COALESCE(EXCLUDED.av_scanning_enabled, settings.platform_app_settings.av_scanning_enabled),
@@ -469,6 +485,8 @@ ON CONFLICT (id) DO UPDATE SET
 	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	reading_level_enabled = COALESCE(EXCLUDED.reading_level_enabled, settings.platform_app_settings.reading_level_enabled),
+	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
+	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
 	translation_memory_enabled = COALESCE(EXCLUDED.translation_memory_enabled, settings.platform_app_settings.translation_memory_enabled),
 	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
 	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
@@ -523,6 +541,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.DRMEnabled,
 		w.VideoTranscodingEnabled,
 		w.AutoCaptioningEnabled,
+		w.VideoCaptionsEnabled,
 		w.StorageQuotasEnabled,
 		w.AtRiskAlertsEnabled,
 		w.AvScanningEnabled,
@@ -537,6 +556,8 @@ ON CONFLICT (id) DO UPDATE SET
 		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
 		w.ReadingLevelEnabled,
+		w.AltTextEnforcementEnabled,
+		w.FFAltTextEnforcement,
 		w.TranslationMemoryEnabled,
 		w.ReportExportEnabled,
 		w.XAPIEmissionEnabled,

@@ -10,8 +10,10 @@ import {
   Languages,
   SlidersHorizontal,
   Target,
+  Eye,
 } from 'lucide-react'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { courseSettingsSectionFromPathname } from './side-nav-path-utils'
 import { sideNavActiveClass } from './side-nav-styles'
 import { SideNavLink } from './side-nav-link'
@@ -24,6 +26,7 @@ type SideNavCourseSettingsLinksProps = {
 export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettingsLinksProps) {
   const location = useLocation()
   const { sideNavCollapsed } = useShellNav()
+  const { altTextEnforcementEnabled, loading: featuresLoading } = usePlatformFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
 
@@ -68,6 +71,15 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Features
       </SideNavLink>
+      {!featuresLoading && altTextEnforcementEnabled ? (
+        <SideNavLink
+          to={`${base}/accessibility`}
+          className={() => (section === 'accessibility' ? sideNavActiveClass : '')}
+          icon={<Eye className="h-5 w-5" />}
+        >
+          Accessibility
+        </SideNavLink>
+      ) : null}
       {isTranslationMemoryEnabled() ? (
         <SideNavLink
           to={`${base}/translations`}

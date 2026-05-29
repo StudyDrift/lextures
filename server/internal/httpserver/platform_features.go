@@ -20,12 +20,16 @@ type platformFeaturesJSON struct {
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
+	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
 	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
 	VirtualClassroomEnabled    bool `json:"virtualClassroomEnabled"`
 	SessionManagementUIEnabled bool `json:"sessionManagementUiEnabled"`
 	RTLEnabled                 bool `json:"rtlEnabled"`
+	VideoCaptionsEnabled       bool `json:"videoCaptionsEnabled"`
+	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -42,12 +46,16 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		XAPIEmissionEnabled:        cfg.XAPIEmissionEnabled,
 		EquationEditorEnabled:      cfg.EquationEditorEnabled,
 		ReadingLevelEnabled:        cfg.ReadingLevelEnabled,
+		AltTextEnforcementEnabled:  cfg.AltTextEnforcementEnabled,
+		FFAltTextEnforcement:       cfg.FFAltTextEnforcement,
 		TranslationMemoryEnabled:   cfg.TranslationMemoryEnabled,
 		StorageQuotasEnabled:       cfg.StorageQuotasEnabled,
 		AvScanningEnabled:          cfg.AvScanningEnabled,
 		VirtualClassroomEnabled:    cfg.VirtualClassroomEnabled,
 		SessionManagementUIEnabled: cfg.SessionManagementUIEnabled,
 		RTLEnabled:                 cfg.RTLEnabled,
+		VideoCaptionsEnabled:       cfg.VideoCaptionsEnabled,
+		AutoCaptioningEnabled:      cfg.AutoCaptioningEnabled,
 	}
 }
 

@@ -71,6 +71,7 @@ type platformSettingsJSON struct {
 	DRMEnabled                 bool `json:"drmEnabled"`
 	VideoTranscodingEnabled    bool `json:"videoTranscodingEnabled"`
 	AutoCaptioningEnabled      bool `json:"autoCaptioningEnabled"`
+	VideoCaptionsEnabled       bool `json:"videoCaptionsEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AtRiskAlertsEnabled        bool `json:"atRiskAlertsEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
@@ -87,6 +88,8 @@ type platformSettingsJSON struct {
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
+	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
 	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
@@ -197,6 +200,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			DRMEnabled:                  merged.DRMEnabled,
 			VideoTranscodingEnabled:     merged.VideoTranscodingEnabled,
 			AutoCaptioningEnabled:       merged.AutoCaptioningEnabled,
+			VideoCaptionsEnabled:        merged.VideoCaptionsEnabled,
 			StorageQuotasEnabled:        merged.StorageQuotasEnabled,
 			AtRiskAlertsEnabled:         merged.AtRiskAlertsEnabled,
 			AvScanningEnabled:           merged.AvScanningEnabled,
@@ -213,6 +217,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
+			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
+			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
 			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
@@ -296,6 +302,7 @@ type putPlatformBody struct {
 	DRMEnabled                 *bool `json:"drmEnabled"`
 	VideoTranscodingEnabled    *bool `json:"videoTranscodingEnabled"`
 	AutoCaptioningEnabled      *bool `json:"autoCaptioningEnabled"`
+	VideoCaptionsEnabled       *bool `json:"videoCaptionsEnabled"`
 	StorageQuotasEnabled       *bool `json:"storageQuotasEnabled"`
 	AtRiskAlertsEnabled        *bool `json:"atRiskAlertsEnabled"`
 	AvScanningEnabled          *bool `json:"avScanningEnabled"`
@@ -312,6 +319,8 @@ type putPlatformBody struct {
 	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        *bool `json:"readingLevelEnabled"`
+	AltTextEnforcementEnabled  *bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement       *bool `json:"ffAltTextEnforcement"`
 	TranslationMemoryEnabled   *bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
@@ -556,6 +565,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("drmenabled", body.DRMEnabled, func(v bool) { wr.DRMEnabled = &v })
 		setBool("videotranscodingenabled", body.VideoTranscodingEnabled, func(v bool) { wr.VideoTranscodingEnabled = &v })
 		setBool("autocaptioningenabled", body.AutoCaptioningEnabled, func(v bool) { wr.AutoCaptioningEnabled = &v })
+		setBool("videocaptionsenabled", body.VideoCaptionsEnabled, func(v bool) { wr.VideoCaptionsEnabled = &v })
 		setBool("storagequotasenabled", body.StorageQuotasEnabled, func(v bool) { wr.StorageQuotasEnabled = &v })
 		setBool("atriskalertsenabled", body.AtRiskAlertsEnabled, func(v bool) { wr.AtRiskAlertsEnabled = &v })
 		setBool("avscanningenabled", body.AvScanningEnabled, func(v bool) { wr.AvScanningEnabled = &v })
@@ -571,6 +581,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
+		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
+		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
 		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
@@ -638,6 +650,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			DRMEnabled:                  merged.DRMEnabled,
 			VideoTranscodingEnabled:     merged.VideoTranscodingEnabled,
 			AutoCaptioningEnabled:       merged.AutoCaptioningEnabled,
+			VideoCaptionsEnabled:        merged.VideoCaptionsEnabled,
 			StorageQuotasEnabled:        merged.StorageQuotasEnabled,
 			AtRiskAlertsEnabled:         merged.AtRiskAlertsEnabled,
 			AvScanningEnabled:           merged.AvScanningEnabled,
@@ -654,6 +667,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
+			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
+			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
 			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,

@@ -12,6 +12,8 @@ export type PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  altTextEnforcementEnabled: boolean
+  ffAltTextEnforcement: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -19,6 +21,8 @@ export type PlatformFeaturesSnapshot = {
   sessionManagementUiEnabled: boolean
   instructorInsightsEnabled: boolean
   rtlEnabled: boolean
+  videoCaptionsEnabled?: boolean
+  autoCaptioningEnabled?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -33,6 +37,8 @@ const defaults: PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  altTextEnforcementEnabled: false,
+  ffAltTextEnforcement: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -40,6 +46,8 @@ const defaults: PlatformFeaturesSnapshot = {
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
   rtlEnabled: false,
+  videoCaptionsEnabled: false,
+  autoCaptioningEnabled: false,
 }
 
 let loaded = false
@@ -61,6 +69,10 @@ export function platformFeaturesLoaded(): boolean {
 
 export function getPlatformFeatures(): PlatformFeaturesSnapshot {
   return snapshot
+}
+
+export function videoCaptionsFeatureEnabled(): boolean {
+  return loaded && (snapshot.videoCaptionsEnabled === true || snapshot.autoCaptioningEnabled === true)
 }
 
 export function studentProgressFeatureEnabled(): boolean {
@@ -85,6 +97,14 @@ export function equationEditorFeatureEnabled(): boolean {
 
 export function readingLevelFeatureEnabled(): boolean {
   return loaded && snapshot.readingLevelEnabled
+}
+
+export function altTextEnforcementFeatureEnabled(): boolean {
+  return loaded && snapshot.altTextEnforcementEnabled
+}
+
+export function altTextHardBlockEnabled(): boolean {
+  return loaded && snapshot.ffAltTextEnforcement
 }
 
 export function translationMemoryFeatureEnabled(): boolean {

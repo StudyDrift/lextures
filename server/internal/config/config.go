@@ -179,6 +179,8 @@ type Config struct {
 
 	// AutoCaptioningEnabled gates auto-captioning via Whisper (plan 8.4). Defaults to false.
 	AutoCaptioningEnabled bool
+	// VideoCaptionsEnabled gates caption editor, player controls, and compliance UI (plan 12.4).
+	VideoCaptionsEnabled bool
 	// WhisperBackend selects the ASR backend: whisper-api (default), whisper-local, azure-speech, google-speech, stub.
 	WhisperBackend string
 	// OpenAIAPIKey is the OpenAI API key used when WhisperBackend=whisper-api.
@@ -226,6 +228,10 @@ type Config struct {
 	EquationEditorEnabled bool
 	// ReadingLevelEnabled gates Flesch-Kincaid scoring and AI content simplification (plan 11.6).
 	ReadingLevelEnabled bool
+	// AltTextEnforcementEnabled gates alt-text prompts, AI suggestions, and coverage reporting (plan 12.5).
+	AltTextEnforcementEnabled bool
+	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).
+	FFAltTextEnforcement bool
 	// TranslationMemoryEnabled gates course content translation workflow and TM (plan 11.5).
 	TranslationMemoryEnabled bool
 

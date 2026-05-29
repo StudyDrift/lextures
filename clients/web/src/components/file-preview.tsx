@@ -230,6 +230,60 @@ function UnsupportedFileView({ filePath, filename }: { filePath: string; filenam
   )
 }
 
+function VideoFileViewer({ filePath, filename }: { filePath: string; filename: string }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let url: string | null = null
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await authorizedFetch(filePath)
+        if (!res.ok) throw new Error('Failed to load video.')
+        const blob = await res.blob()
+        if (cancelled) return
+        url = URL.createObjectURL(blob)
+        setBlobUrl(url)
+      } catch {
+        if (!cancelled) setError('Could not load the video.')
+      }
+    })()
+    return () => {
+      cancelled = true
+      if (url) URL.revokeObjectURL(url)
+    }
+  }, [filePath])
+
+  if (error) {
+    return (
+      <p className="p-6 text-sm text-rose-700 dark:text-rose-200" role="alert">
+        {error}
+      </p>
+    )
+  }
+  if (!blobUrl) {
+    return (
+      <div className="flex h-full items-center justify-center" role="status">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-full flex-col p-4">
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- course-file preview; attach captions when storage object is linked */}
+      <video
+        className="max-h-full w-full rounded-lg bg-black"
+        controls
+        playsInline
+        src={blobUrl}
+        aria-label={filename}
+      />
+    </div>
+  )
+}
+
 // ── FilePreview modal ────────────────────────────────────────────────────────
 
 export function FilePreview({ open, filePath, filename, mimeType, onClose }: FilePreviewProps) {
@@ -310,6 +364,9 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
           )}
           {previewType === 'image' && (
             <ImageViewer filePath={filePath} filename={filename} />
+          )}
+          {previewType === 'video' && (
+            <VideoFileViewer filePath={filePath} filename={filename} />
           )}
           {previewType === 'none' && (
             <UnsupportedFileView filePath={filePath} filename={filename} />

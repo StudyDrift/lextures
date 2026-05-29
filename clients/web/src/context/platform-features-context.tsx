@@ -26,6 +26,8 @@ export type PlatformFeatures = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  altTextEnforcementEnabled: boolean
+  ffAltTextEnforcement: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
@@ -33,6 +35,8 @@ export type PlatformFeatures = {
   sessionManagementUiEnabled: boolean
   instructorInsightsEnabled: boolean
   rtlEnabled: boolean
+  videoCaptionsEnabled: boolean
+  autoCaptioningEnabled: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -49,6 +53,8 @@ const defaultFeatures: PlatformFeatures = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  altTextEnforcementEnabled: false,
+  ffAltTextEnforcement: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
@@ -56,6 +62,8 @@ const defaultFeatures: PlatformFeatures = {
   sessionManagementUiEnabled: false,
   instructorInsightsEnabled: false,
   rtlEnabled: false,
+  videoCaptionsEnabled: false,
+  autoCaptioningEnabled: false,
   loading: true,
   refresh: async () => {},
 }
@@ -77,6 +85,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+    altTextEnforcementEnabled: false,
+    ffAltTextEnforcement: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -84,6 +94,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     sessionManagementUiEnabled: false,
     instructorInsightsEnabled: false,
     rtlEnabled: false,
+    videoCaptionsEnabled: false,
+    autoCaptioningEnabled: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -106,6 +118,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
+          altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
+          ffAltTextEnforcement: data.ffAltTextEnforcement === true,
           translationMemoryEnabled: data.translationMemoryEnabled === true,
           storageQuotasEnabled: data.storageQuotasEnabled === true,
           avScanningEnabled: data.avScanningEnabled === true,
@@ -113,8 +127,14 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           sessionManagementUiEnabled: data.sessionManagementUiEnabled === true,
           instructorInsightsEnabled: data.instructorInsightsEnabled === true,
           rtlEnabled: data.rtlEnabled === true,
+          videoCaptionsEnabled: data.videoCaptionsEnabled === true,
+          autoCaptioningEnabled: data.autoCaptioningEnabled === true,
         }
-        setFeatures(next)
+        setFeatures({
+          ...next,
+          videoCaptionsEnabled: next.videoCaptionsEnabled === true,
+          autoCaptioningEnabled: next.autoCaptioningEnabled === true,
+        })
         setPlatformFeaturesSnapshot(next)
       }
     } catch {

@@ -20,6 +20,8 @@ describe('course-translation-api feature gate', () => {
       xapiEmissionEnabled: false,
       equationEditorEnabled: false,
       readingLevelEnabled: false,
+      altTextEnforcementEnabled: false,
+      ffAltTextEnforcement: false,
       translationMemoryEnabled: true,
       storageQuotasEnabled: false,
       avScanningEnabled: false,
