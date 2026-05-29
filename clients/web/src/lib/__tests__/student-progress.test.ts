@@ -30,6 +30,8 @@ describe('studentProgressFeatureEnabled', () => {
       altTextEnforcementEnabled: false,
       ffAltTextEnforcement: false,
       speechToTextEnabled: false,
+      readAloudEnabled: false,
+      ffReadAloud: false,
       translationMemoryEnabled: false,
       storageQuotasEnabled: false,
       avScanningEnabled: false,

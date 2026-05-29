@@ -207,5 +207,6 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Patch("/api/v1/me/reading-preferences", d.handlePatchMyReadingPreferences())
 	r.Post("/api/v1/me/notebooks/query", d.handleNotebookQuery())
 	r.Post("/api/v1/stt/transcribe", d.handlePostSTTTranscribe())
+	d.registerTTSRoutes(r)
 	d.registerSelfReflectionRoutes(r)
 }

@@ -23,6 +23,8 @@ type platformFeaturesJSON struct {
 	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled        bool `json:"speechToTextEnabled"`
+	ReadAloudEnabled           bool `json:"readAloudEnabled"`
+	FFReadAloud                bool `json:"ffReadAloud"`
 	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
 	StorageQuotasEnabled       bool `json:"storageQuotasEnabled"`
 	AvScanningEnabled          bool `json:"avScanningEnabled"`
@@ -51,6 +53,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		AltTextEnforcementEnabled:  cfg.AltTextEnforcementEnabled,
 		FFAltTextEnforcement:       cfg.FFAltTextEnforcement,
 		SpeechToTextEnabled:        cfg.SpeechToTextEnabled,
+		ReadAloudEnabled:           cfg.ReadAloudEnabled,
+		FFReadAloud:                cfg.FFReadAloud,
 		TranslationMemoryEnabled:   cfg.TranslationMemoryEnabled,
 		StorageQuotasEnabled:       cfg.StorageQuotasEnabled,
 		AvScanningEnabled:          cfg.AvScanningEnabled,

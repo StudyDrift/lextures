@@ -66,6 +66,8 @@ type Row struct {
 	AltTextEnforcementEnabled  *bool
 	FFAltTextEnforcement       *bool
 	SpeechToTextEnabled        *bool
+	ReadAloudEnabled           *bool
+	FFReadAloud                *bool
 	TranslationMemoryEnabled   *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
@@ -147,6 +149,8 @@ type Write struct {
 	AltTextEnforcementEnabled  *bool
 	FFAltTextEnforcement       *bool
 	SpeechToTextEnabled        *bool
+	ReadAloudEnabled           *bool
+	FFReadAloud                *bool
 	TranslationMemoryEnabled   *bool
 	ReportExportEnabled        *bool
 	XAPIEmissionEnabled        *bool
@@ -226,6 +230,8 @@ SELECT
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
+	read_aloud_enabled,
+	ff_read_aloud,
 	translation_memory_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
@@ -300,6 +306,8 @@ WHERE id = 1
 		&r.AltTextEnforcementEnabled,
 		&r.FFAltTextEnforcement,
 		&r.SpeechToTextEnabled,
+		&r.ReadAloudEnabled,
+		&r.FFReadAloud,
 		&r.TranslationMemoryEnabled,
 		&r.ReportExportEnabled,
 		&r.XAPIEmissionEnabled,
@@ -414,6 +422,8 @@ INSERT INTO settings.platform_app_settings (
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
+	read_aloud_enabled,
+	ff_read_aloud,
 	translation_memory_enabled,
 	report_export_enabled,
 	xapi_emission_enabled,
@@ -441,7 +451,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -493,6 +503,8 @@ ON CONFLICT (id) DO UPDATE SET
 	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
 	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
 	speech_to_text_enabled = COALESCE(EXCLUDED.speech_to_text_enabled, settings.platform_app_settings.speech_to_text_enabled),
+	read_aloud_enabled = COALESCE(EXCLUDED.read_aloud_enabled, settings.platform_app_settings.read_aloud_enabled),
+	ff_read_aloud = COALESCE(EXCLUDED.ff_read_aloud, settings.platform_app_settings.ff_read_aloud),
 	translation_memory_enabled = COALESCE(EXCLUDED.translation_memory_enabled, settings.platform_app_settings.translation_memory_enabled),
 	report_export_enabled = COALESCE(EXCLUDED.report_export_enabled, settings.platform_app_settings.report_export_enabled),
 	xapi_emission_enabled = COALESCE(EXCLUDED.xapi_emission_enabled, settings.platform_app_settings.xapi_emission_enabled),
@@ -565,6 +577,8 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AltTextEnforcementEnabled,
 		w.FFAltTextEnforcement,
 		w.SpeechToTextEnabled,
+		w.ReadAloudEnabled,
+		w.FFReadAloud,
 		w.TranslationMemoryEnabled,
 		w.ReportExportEnabled,
 		w.XAPIEmissionEnabled,

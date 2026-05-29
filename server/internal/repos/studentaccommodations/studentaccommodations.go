@@ -14,21 +14,22 @@ import (
 
 // Row is a single accommodation record.
 type Row struct {
-	ID                 uuid.UUID
-	UserID             uuid.UUID
-	CourseID           *uuid.UUID
-	TimeMultiplier     float64
-	ExtraAttempts      int32
-	HintsAlwaysEnabled bool
-	ReducedDistraction bool
+	ID                  uuid.UUID
+	UserID              uuid.UUID
+	CourseID            *uuid.UUID
+	TimeMultiplier      float64
+	ExtraAttempts       int32
+	HintsAlwaysEnabled  bool
+	ReducedDistraction  bool
 	SpeechToTextEnabled bool
-	AlternativeFormat  *string
-	EffectiveFrom      sql.NullTime
-	EffectiveUntil     sql.NullTime
-	CreatedBy          uuid.UUID
-	UpdatedBy          *uuid.UUID
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
+	TTSEnabled          bool
+	AlternativeFormat   *string
+	EffectiveFrom       sql.NullTime
+	EffectiveUntil      sql.NullTime
+	CreatedBy           uuid.UUID
+	UpdatedBy           *uuid.UUID
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 // ListRow is a row joined to course code.
@@ -37,13 +38,20 @@ type ListRow struct {
 	CourseCode *string
 }
 
+const rowSelectCols = `
+       (time_multiplier)::double precision,
+       extra_attempts, hints_always_enabled, reduced_distraction_mode,
+       speech_to_text_enabled, tts_enabled,
+       alternative_format, effective_from, effective_until,
+       created_by, updated_by, created_at, updated_at`
+
 // ListForUserWithCourse returns all rows for a user with optional course code.
 func ListForUserWithCourse(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]ListRow, error) {
 	const q = `
 SELECT sa.id, sa.user_id, sa.course_id,
        (sa.time_multiplier)::double precision AS time_multiplier,
        sa.extra_attempts, sa.hints_always_enabled, sa.reduced_distraction_mode,
-       sa.speech_to_text_enabled,
+       sa.speech_to_text_enabled, sa.tts_enabled,
        sa.alternative_format, sa.effective_from, sa.effective_until,
        sa.created_by, sa.updated_by, sa.created_at, sa.updated_at,
        c.course_code AS course_code
@@ -66,7 +74,7 @@ ORDER BY sa.course_id NULLS LAST, sa.created_at ASC`
 		if err := rows.Scan(
 			&r.Row.ID, &r.Row.UserID, &courseID,
 			&r.Row.TimeMultiplier, &r.Row.ExtraAttempts, &r.Row.HintsAlwaysEnabled, &r.Row.ReducedDistraction,
-			&r.Row.SpeechToTextEnabled,
+			&r.Row.SpeechToTextEnabled, &r.Row.TTSEnabled,
 			&alt, &r.Row.EffectiveFrom, &r.Row.EffectiveUntil,
 			&r.Row.CreatedBy, &updatedBy, &r.Row.CreatedAt, &r.Row.UpdatedAt,
 			&cc,
@@ -84,13 +92,6 @@ ORDER BY sa.course_id NULLS LAST, sa.created_at ASC`
 	}
 	return out, rows.Err()
 }
-
-const rowSelectCols = `
-       (time_multiplier)::double precision,
-       extra_attempts, hints_always_enabled, reduced_distraction_mode,
-       speech_to_text_enabled,
-       alternative_format, effective_from, effective_until,
-       created_by, updated_by, created_at, updated_at`
 
 // FindActiveForCourse is the course-specific or nil row active by server date.
 func FindActiveForCourse(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) (*Row, error) {
@@ -123,7 +124,7 @@ func findOne(ctx context.Context, pool *pgxpool.Pool, q string, args ...any) (*R
 	err := pool.QueryRow(ctx, q, args...).Scan(
 		&r.ID, &r.UserID, &courseID,
 		&r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction,
-		&r.SpeechToTextEnabled,
+		&r.SpeechToTextEnabled, &r.TTSEnabled,
 		&alt, &effF, &effU,
 		&r.CreatedBy, &updatedBy, &r.CreatedAt, &r.UpdatedAt,
 	)
@@ -148,7 +149,7 @@ func InsertRow(
 	courseID *uuid.UUID,
 	timeMultiplier float64,
 	extraAttempts int32,
-	hints, reduced, speechToText bool,
+	hints, reduced, speechToText, tts bool,
 	alternativeFormat *string,
 	effectiveFrom, effectiveUntil *time.Time,
 	createdBy uuid.UUID,
@@ -156,9 +157,9 @@ func InsertRow(
 	const q = `
 INSERT INTO course.student_accommodations (
   user_id, course_id, time_multiplier, extra_attempts,
-  hints_always_enabled, reduced_distraction_mode, speech_to_text_enabled, alternative_format,
+  hints_always_enabled, reduced_distraction_mode, speech_to_text_enabled, tts_enabled, alternative_format,
   effective_from, effective_until, created_by, updated_by
-) VALUES ($1, $2, $3::numeric, $4, $5, $6, $7, $8, $9, $10, $11, $11)
+) VALUES ($1, $2, $3::numeric, $4, $5, $6, $7, $8, $9, $10, $11, $12, $12)
 RETURNING id, user_id, course_id,` + rowSelectCols
 	var r Row
 	var courseOut *uuid.UUID
@@ -166,11 +167,11 @@ RETURNING id, user_id, course_id,` + rowSelectCols
 	var alt sql.NullString
 	var effF, effU sql.NullTime
 	err := pool.QueryRow(ctx, q,
-		userID, courseID, timeMultiplier, extraAttempts, hints, reduced, speechToText, alternativeFormat,
+		userID, courseID, timeMultiplier, extraAttempts, hints, reduced, speechToText, tts, alternativeFormat,
 		effectiveFrom, effectiveUntil, createdBy,
 	).Scan(
 		&r.ID, &r.UserID, &courseOut, &r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction,
-		&r.SpeechToTextEnabled,
+		&r.SpeechToTextEnabled, &r.TTSEnabled,
 		&alt, &effF, &effU, &r.CreatedBy, &updatedBy, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if err != nil {
@@ -188,7 +189,7 @@ RETURNING id, user_id, course_id,` + rowSelectCols
 func UpdateRow(
 	ctx context.Context, pool *pgxpool.Pool,
 	id, userID uuid.UUID,
-	timeMultiplier float64, extra int32, hints, reduced, speechToText bool,
+	timeMultiplier float64, extra int32, hints, reduced, speechToText, tts bool,
 	alternativeFormat *string,
 	effectiveFrom, effectiveUntil *time.Time,
 	updatedBy uuid.UUID,
@@ -200,10 +201,11 @@ SET time_multiplier = $3::numeric,
     hints_always_enabled = $5,
     reduced_distraction_mode = $6,
     speech_to_text_enabled = $7,
-    alternative_format = $8,
-    effective_from = $9,
-    effective_until = $10,
-    updated_by = $11,
+    tts_enabled = $8,
+    alternative_format = $9,
+    effective_from = $10,
+    effective_until = $11,
+    updated_by = $12,
     updated_at = NOW()
 WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, course_id,` + rowSelectCols
@@ -213,11 +215,11 @@ RETURNING id, user_id, course_id,` + rowSelectCols
 	var alt sql.NullString
 	var effF, effU sql.NullTime
 	err := pool.QueryRow(ctx, q,
-		id, userID, timeMultiplier, extra, hints, reduced, speechToText, alternativeFormat,
+		id, userID, timeMultiplier, extra, hints, reduced, speechToText, tts, alternativeFormat,
 		effectiveFrom, effectiveUntil, updatedBy,
 	).Scan(
 		&r.ID, &r.UserID, &courseID, &r.TimeMultiplier, &r.ExtraAttempts, &r.HintsAlwaysEnabled, &r.ReducedDistraction,
-		&r.SpeechToTextEnabled,
+		&r.SpeechToTextEnabled, &r.TTSEnabled,
 		&alt, &effF, &effU, &r.CreatedBy, &uby, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {

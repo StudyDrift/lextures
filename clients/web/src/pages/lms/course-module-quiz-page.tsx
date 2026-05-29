@@ -5,6 +5,7 @@ import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, Pencil, Plus, 
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
+import { ReadAloudControls } from '../../components/a11y/read-aloud-controls'
 import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
 import { usePermissions } from '../../context/use-permissions'
@@ -1062,6 +1063,7 @@ export default function CourseModuleQuizPage() {
               ) : null
             ) : (
               <div className="flex items-center gap-2">
+                <ReadAloudControls />
                 {isOnline && (
                   <button
                     type="button"

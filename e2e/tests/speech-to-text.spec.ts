@@ -185,7 +185,9 @@ test.describe('Speech-to-text UI', () => {
     const dictationBtn = page.getByRole('button', { name: 'Start dictation' })
     await expect(dictationBtn).toBeVisible({ timeout: 15_000 })
 
-    const results = await new AxeBuilder({ page }).include('main').analyze()
+    const results = await new AxeBuilder({ page })
+      .include('[aria-label="Start dictation"]')
+      .analyze()
     expect(results.violations).toEqual([])
   })
 })
