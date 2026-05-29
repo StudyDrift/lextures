@@ -68,6 +68,9 @@ import IsoComplianceAdminPage from './pages/iso-compliance-admin-page'
 import SecurityDisclosureAdminPage from './pages/security-disclosure-admin-page'
 import BackupOpsAdminPage from './pages/backup-ops-admin-page'
 import CaptionComplianceReportPage from './pages/admin/caption-compliance-report'
+import AttendanceDashboard from './pages/admin/AttendanceDashboard'
+import AttendanceExport from './pages/admin/AttendanceExport'
+import CourseAttendance from './pages/lms/CourseAttendance'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -163,6 +166,7 @@ export default function App() {
             <Route path="outcomes-report" element={<CourseOutcomesReport />} />
             <Route path="whats-working" element={<CourseWhatsWorking />} />
             <Route path="enrollments" element={<CourseEnrollments />} />
+            <Route path="attendance" element={<CourseAttendance />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />
@@ -173,6 +177,8 @@ export default function App() {
           <Route path="/admin/compliance/security-reports" element={<SecurityDisclosureAdminPage />} />
           <Route path="/admin/compliance/backup" element={<BackupOpsAdminPage />} />
           <Route path="/admin/caption-compliance" element={<CaptionComplianceReportPage />} />
+          <Route path="/admin/attendance/dashboard" element={<AttendanceDashboard />} />
+          <Route path="/admin/attendance/export" element={<AttendanceExport />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
