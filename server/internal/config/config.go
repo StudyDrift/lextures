@@ -284,6 +284,8 @@ type Config struct {
 	RTLEnabled bool
 	// FFReadingPreferences gates the reading preferences panel UI (plan 12.6). Default false; flip after QA sign-off.
 	FFReadingPreferences bool
+	// FFParentPortal enables the K-12 parent/guardian portal: parent-student linking, read-only grade access, and notification prefs (plan 13.1).
+	FFParentPortal bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string

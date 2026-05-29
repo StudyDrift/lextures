@@ -62,3 +62,56 @@ export async function fetchParentStudentAssignments(
   }
   return (await res.json()) as ParentAssignmentsResponse
 }
+
+export type ParentWeeklySummaryItem = {
+  childName: string
+  courseCode: string
+  courseTitle: string
+  itemId: string
+  kind: string
+  title: string
+  dueAt?: string | null
+}
+
+export type ParentWeeklySummaryResponse = {
+  items: ParentWeeklySummaryItem[]
+  weekStart: string
+  weekEnd: string
+}
+
+export async function fetchParentWeeklySummary(): Promise<ParentWeeklySummaryResponse> {
+  const res = await authorizedFetch('/api/v1/parent/weekly-summary')
+  if (!res.ok) {
+    throw new Error(`Failed to load weekly summary (${res.status})`)
+  }
+  return (await res.json()) as ParentWeeklySummaryResponse
+}
+
+export type ParentNotificationPrefs = {
+  gradePosted: boolean
+  missingAssignment: boolean
+  lowGradeThreshold: number | null
+  attendanceEvent: boolean
+}
+
+export async function fetchParentNotificationPrefs(): Promise<ParentNotificationPrefs> {
+  const res = await authorizedFetch('/api/v1/parent/notification-prefs')
+  if (!res.ok) {
+    throw new Error(`Failed to load notification prefs (${res.status})`)
+  }
+  return (await res.json()) as ParentNotificationPrefs
+}
+
+export async function updateParentNotificationPrefs(
+  patch: Partial<ParentNotificationPrefs> & { clearThreshold?: boolean },
+): Promise<ParentNotificationPrefs> {
+  const res = await authorizedFetch('/api/v1/parent/notification-prefs', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  })
+  if (!res.ok) {
+    throw new Error(`Failed to update notification prefs (${res.status})`)
+  }
+  return (await res.json()) as ParentNotificationPrefs
+}
