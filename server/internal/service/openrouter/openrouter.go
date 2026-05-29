@@ -45,6 +45,24 @@ type Message struct {
 	Content string `json:"content"`
 }
 
+// ContentPart is a multimodal message segment (text or image URL).
+type ContentPart struct {
+	Type     string            `json:"type"`
+	Text     string            `json:"text,omitempty"`
+	ImageURL *ContentPartImage `json:"image_url,omitempty"`
+}
+
+// ContentPartImage references an image for vision models.
+type ContentPartImage struct {
+	URL string `json:"url"`
+}
+
+// VisionMessage is a chat message with multimodal content.
+type VisionMessage struct {
+	Role    string        `json:"role"`
+	Content []ContentPart `json:"content"`
+}
+
 // ChatCompletion sends a non-streaming chat request and returns the assistant text, if any.
 func (c *Client) ChatCompletion(model string, messages []Message) (string, error) {
 	if c == nil {
@@ -56,6 +74,83 @@ func (c *Client) ChatCompletion(model string, messages []Message) (string, error
 	base := c.baseURL
 	if base == "" {
 		base = DefaultBaseURL
+	}
+	body := map[string]any{
+		"model":    model,
+		"messages": messages,
+		"stream":   false,
+	}
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return "", err
+	}
+	u := base + "/chat/completions"
+	req, err := http.NewRequest(http.MethodPost, u, bytes.NewReader(buf))
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+c.apiKey)
+	client := c.HTTP
+	if client == nil {
+		client = http.DefaultClient
+	}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = res.Body.Close() }()
+	b, err := io.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		msg := string(b)
+		if len(msg) > 2000 {
+			msg = msg[:2000]
+		}
+		return "", fmt.Errorf("openrouter: status %d: %s", res.StatusCode, msg)
+	}
+	var parsed struct {
+		Choices []struct {
+			Message struct {
+				Content *string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+	if err := json.Unmarshal(b, &parsed); err != nil {
+		return "", fmt.Errorf("openrouter: parse response: %w", err)
+	}
+	if len(parsed.Choices) == 0 {
+		return "", fmt.Errorf("openrouter: no choices in response")
+	}
+	if parsed.Choices[0].Message.Content == nil {
+		return "", nil
+	}
+	return *parsed.Choices[0].Message.Content, nil
+}
+
+// VisionCompletion sends a vision-capable chat request with one image URL.
+func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string) (string, error) {
+	if c == nil {
+		return "", fmt.Errorf("openrouter: nil client")
+	}
+	if c.apiKey == "" {
+		return "", fmt.Errorf("openrouter: missing API key")
+	}
+	base := c.baseURL
+	if base == "" {
+		base = DefaultBaseURL
+	}
+	messages := []VisionMessage{
+		{Role: "system", Content: []ContentPart{{Type: "text", Text: systemPrompt}}},
+		{
+			Role: "user",
+			Content: []ContentPart{
+				{Type: "text", Text: userText},
+				{Type: "image_url", ImageURL: &ContentPartImage{URL: imageURL}},
+			},
+		},
 	}
 	body := map[string]any{
 		"model":    model,

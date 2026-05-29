@@ -88,6 +88,8 @@ type platformSettingsJSON struct {
 	XAPIEmissionEnabled        bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        bool `json:"readingLevelEnabled"`
+	AltTextEnforcementEnabled  bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement       bool `json:"ffAltTextEnforcement"`
 	TranslationMemoryEnabled   bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       bool `json:"coppaWorkflowEnabled"`
@@ -215,6 +217,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
+			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
+			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
 			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,
@@ -315,6 +319,8 @@ type putPlatformBody struct {
 	XAPIEmissionEnabled        *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled      *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled        *bool `json:"readingLevelEnabled"`
+	AltTextEnforcementEnabled  *bool `json:"altTextEnforcementEnabled"`
+	FFAltTextEnforcement       *bool `json:"ffAltTextEnforcement"`
 	TranslationMemoryEnabled   *bool `json:"translationMemoryEnabled"`
 	ReportExportEnabled        *bool `json:"reportExportEnabled"`
 	CoppaWorkflowEnabled       *bool `json:"coppaWorkflowEnabled"`
@@ -575,6 +581,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
+		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
+		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
 		setBool("translationmemoryenabled", body.TranslationMemoryEnabled, func(v bool) { wr.TranslationMemoryEnabled = &v })
 		setBool("reportexportenabled", body.ReportExportEnabled, func(v bool) { wr.ReportExportEnabled = &v })
 		setBool("xapiemissionenabled", body.XAPIEmissionEnabled, func(v bool) { wr.XAPIEmissionEnabled = &v })
@@ -659,6 +667,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:         merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:       merged.EquationEditorEnabled,
 			ReadingLevelEnabled:         merged.ReadingLevelEnabled,
+			AltTextEnforcementEnabled:   merged.AltTextEnforcementEnabled,
+			FFAltTextEnforcement:        merged.FFAltTextEnforcement,
 			TranslationMemoryEnabled:    merged.TranslationMemoryEnabled,
 			ReportExportEnabled:         merged.ReportExportEnabled,
 			CoppaWorkflowEnabled:        merged.CoppaWorkflowEnabled,

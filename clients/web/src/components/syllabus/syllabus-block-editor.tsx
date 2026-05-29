@@ -26,6 +26,14 @@ import {
 import { EquationEditorProvider, useEquationEditor } from '../editor/equation-editor-context'
 import { isEquationEditorEnabled } from '../../lib/math'
 import { BookLoader } from '../quiz/book-loader'
+import { AltTextEnforcementProvider } from '../editor/block-editor/alt-text-enforcement-context'
+import { AltTextWarningBanner } from '../editor/block-editor/alt-text-warning-banner'
+import {
+  altTextEnforcementFeatureEnabled,
+  altTextHardBlockEnabled,
+} from '../../lib/platform-features'
+import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
+import { toastMutationError } from '../../lib/lms-toast'
 
 function newLocalId(): string {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
@@ -411,6 +419,25 @@ function SyllabusBlockEditorInner({
   const pendingToolbarImageSectionRef = useRef<string | null>(null)
   const mathToolbarAnchorRef = useRef<HTMLButtonElement | null>(null)
   const equationEditorEnabled = isEquationEditorEnabled()
+  const altTextOn = altTextEnforcementFeatureEnabled()
+  const altTextHardBlock = altTextHardBlockEnabled()
+  const altCoverage = useMemo(
+    () => (altTextOn ? summarizeSectionsAltText(sections) : { withAlt: 0, total: 0, missing: [] }),
+    [altTextOn, sections],
+  )
+
+  const imageInsertAttrs = useCallback(
+    (path: string, fileName: string) => {
+      if (altTextOn) {
+        return { src: path, alt: '', decorative: false, altPending: true }
+      }
+      return {
+        src: path,
+        alt: (fileName || 'Image').replace(/[[\]]/g, '').slice(0, 200),
+      }
+    },
+    [altTextOn],
+  )
 
   const handleEditorChange = useCallback((sectionId: string, editor: Editor | null) => {
     editorRefs.current[sectionId] = editor
@@ -431,10 +458,7 @@ function SyllabusBlockEditorInner({
               .focus()
               .insertContentAt(pos, {
                 type: 'image',
-                attrs: {
-                  src: path,
-                  alt: (file.name || 'Image').replace(/[[\]]/g, '').slice(0, 200),
-                },
+                attrs: imageInsertAttrs(path, file.name),
               })
               .run()
             pos = editor.state.selection.to
@@ -444,7 +468,7 @@ function SyllabusBlockEditorInner({
         }
       })()
     },
-    [courseCode],
+    [courseCode, imageInsertAttrs],
   )
 
   /** Ignore stale field state when another block is selected (no sync effect). */
@@ -652,6 +676,16 @@ function SyllabusBlockEditorInner({
   }
 
   return (
+    <AltTextEnforcementProvider
+      value={{
+        enabled: altTextOn,
+        hardBlock: altTextHardBlock,
+        courseCode,
+        onAiUnavailable: () => {
+          toastMutationError('AI suggestion unavailable — please enter alt text manually.')
+        },
+      }}
+    >
     <BlockEditorShell
       sidebar={
         <SyllabusSidebar
@@ -683,6 +717,9 @@ function SyllabusBlockEditorInner({
             insertImagesIntoSection(sid, [...list])
           }}
         />
+        {altTextOn ? (
+          <AltTextWarningBanner coverage={altCoverage} hardBlock={altTextHardBlock} />
+        ) : null}
         {sections.map((section, index) => (
           <BlockFrame key={section.id} blockId={section.id} toolbar={renderToolbar(section, index)}>
             <div className="pb-8 pt-0.5">
@@ -815,6 +852,7 @@ function SyllabusBlockEditorInner({
         <BlockInsertionRow onAdd={addSection} disabled={disabled} />
       </BlockCanvas>
     </BlockEditorShell>
+    </AltTextEnforcementProvider>
   )
 }
 

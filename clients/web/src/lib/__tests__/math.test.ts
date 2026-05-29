@@ -61,6 +61,8 @@ describe('isEquationEditorEnabled', () => {
       xapiEmissionEnabled: false,
       equationEditorEnabled: true,
       readingLevelEnabled: false,
+      altTextEnforcementEnabled: false,
+      ffAltTextEnforcement: false,
       translationMemoryEnabled: false,
       storageQuotasEnabled: false,
       avScanningEnabled: false,

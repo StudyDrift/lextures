@@ -24,6 +24,8 @@ const baseFeatures: PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  altTextEnforcementEnabled: false,
+  ffAltTextEnforcement: false,
   translationMemoryEnabled: false,
   storageQuotasEnabled: false,
   avScanningEnabled: false,
