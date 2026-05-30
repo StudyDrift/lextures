@@ -75,17 +75,24 @@ func (d Deps) handleGetSettingsAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
 			return
 		}
+		flashcards, err := user.GetNotebookFlashcardsModelID(r.Context(), d.Pool, uid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
+			return
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{
-			"imageModelId":       img,
-			"courseSetupModelId": course,
+			"imageModelId":                img,
+			"courseSetupModelId":          course,
+			"notebookFlashcardsModelId":   flashcards,
 		})
 	}
 }
 
 type putSettingsAIBody struct {
-	ImageModelID       string `json:"imageModelId"`
-	CourseSetupModelID string `json:"courseSetupModelId"`
+	ImageModelID                string `json:"imageModelId"`
+	CourseSetupModelID          string `json:"courseSetupModelId"`
+	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
 }
 
 // handlePutSettingsAI is PUT /api/v1/settings/ai
@@ -121,15 +128,20 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Choose a course setup model.")
 			return
 		}
-		imgOut, courseOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course)
+		flashcards := strings.TrimSpace(in.NotebookFlashcardsModelID)
+		if flashcards == "" {
+			flashcards = user.DefaultNotebookFlashcardsModelID
+		}
+		imgOut, courseOut, flashcardsOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course, flashcards)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save AI settings.")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{
-			"imageModelId":       imgOut,
-			"courseSetupModelId": courseOut,
+			"imageModelId":                imgOut,
+			"courseSetupModelId":          courseOut,
+			"notebookFlashcardsModelId":   flashcardsOut,
 		})
 	}
 }

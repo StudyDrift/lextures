@@ -1,13 +1,15 @@
 package settingsai
 
 type AiSettingsUpdateRequest struct {
-	ImageModelID       string `json:"imageModelId"`
-	CourseSetupModelID string `json:"courseSetupModelId"`
+	ImageModelID                string `json:"imageModelId"`
+	CourseSetupModelID          string `json:"courseSetupModelId"`
+	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
 }
 
 type AiSettingsResponse struct {
-	ImageModelID       string `json:"imageModelId"`
-	CourseSetupModelID string `json:"courseSetupModelId"`
+	ImageModelID                string `json:"imageModelId"`
+	CourseSetupModelID          string `json:"courseSetupModelId"`
+	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
 }
 
 type AiModelOption struct {
