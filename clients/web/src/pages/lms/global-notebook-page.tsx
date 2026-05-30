@@ -1,9 +1,12 @@
 /* eslint-disable react-hooks/set-state-in-effect -- sync localStorage notebook on load */
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { ChevronDown, Sparkles } from 'lucide-react'
+
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { MarkdownBodyEditor } from '../../components/editor/block-editor/markdown-body-editor'
 import { CourseNotebookSidebar } from '../../components/notebook/course-notebook-sidebar'
+import { FlashcardsModal } from '../../components/notebook/flashcards-modal'
 import {
   addNotebookPage,
   deleteNotebookPage,
@@ -30,6 +33,9 @@ export default function GlobalNotebookPage() {
   const [headerTitleDraft, setHeaderTitleDraft] = useState('')
   const contentSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dataRef = useRef<CourseNotebookStore | null>(null)
+  const [flashcardsOpen, setFlashcardsOpen] = useState(false)
+  const [actionsOpen, setActionsOpen] = useState(false)
+  const actionsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     dataRef.current = data
@@ -171,6 +177,17 @@ export default function GlobalNotebookPage() {
     [scheduleContentSave],
   )
 
+  useEffect(() => {
+    if (!actionsOpen) return
+    function handleClickOutside(e: MouseEvent) {
+      if (actionsRef.current && !actionsRef.current.contains(e.target as Node)) {
+        setActionsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [actionsOpen])
+
   const commitHeaderTitle = useCallback(() => {
     const d = dataRef.current
     if (!d?.activePageId) return
@@ -213,7 +230,7 @@ export default function GlobalNotebookPage() {
           <div className="flex min-h-0 min-w-0 flex-1 flex-col border-t border-slate-200 dark:border-neutral-800 md:border-s md:border-t-0">
             {activePage ? (
               <>
-                <div className="shrink-0 border-b border-slate-100 px-4 py-3 dark:border-neutral-800/80 md:px-6">
+                <div className="shrink-0 flex items-center gap-2 border-b border-slate-100 px-4 py-3 dark:border-neutral-800/80 md:px-6">
                   <label htmlFor="global-notebook-page-title" className="sr-only">
                     Page title
                   </label>
@@ -228,9 +245,34 @@ export default function GlobalNotebookPage() {
                         ;(e.target as HTMLInputElement).blur()
                       }
                     }}
-                    className="w-full border-0 bg-transparent text-lg font-semibold tracking-tight text-slate-900 outline-none ring-indigo-500/25 placeholder:text-slate-400 focus:ring-2 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+                    className="flex-1 min-w-0 border-0 bg-transparent text-lg font-semibold tracking-tight text-slate-900 outline-none ring-indigo-500/25 placeholder:text-slate-400 focus:ring-2 dark:text-neutral-100 dark:placeholder:text-neutral-500"
                     placeholder="Untitled page"
                   />
+                  <div className="relative shrink-0" ref={actionsRef}>
+                    <button
+                      type="button"
+                      onClick={() => setActionsOpen((v) => !v)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    >
+                      Actions
+                      <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                    </button>
+                    {actionsOpen && (
+                      <div className="absolute right-0 top-full mt-1 z-20 w-52 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActionsOpen(false)
+                            setFlashcardsOpen(true)
+                          }}
+                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        >
+                          <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
+                          Create Flash Cards
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="mx-auto min-h-0 w-full max-w-[72ch] flex-1 overflow-y-auto px-4 py-4 text-[1.0625rem] leading-relaxed md:px-6 md:py-5">
                   <MarkdownBodyEditor
@@ -269,6 +311,13 @@ export default function GlobalNotebookPage() {
           setDeletePageId(null)
           setDeleteTyped('')
         }}
+      />
+
+      <FlashcardsModal
+        open={flashcardsOpen}
+        notes={activePage?.contentMd ?? ''}
+        pageTitle={activePage?.title ?? ''}
+        onClose={() => setFlashcardsOpen(false)}
       />
     </LmsPage>
   )
