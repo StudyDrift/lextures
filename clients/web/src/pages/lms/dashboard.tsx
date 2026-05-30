@@ -845,6 +845,7 @@ export default function Dashboard() {
                           assignmentGroupId: c.assignmentGroupId ?? null,
                           neverDrop: c.neverDrop === true,
                           replaceWithFinal: c.replaceWithFinal === true,
+                          dueAt: c.dueAt ?? null,
                         }))
                       const weights: AssignmentGroupWeight[] = (row.myGrades?.assignmentGroups ?? []).map((g) => ({
                         id: g.id,

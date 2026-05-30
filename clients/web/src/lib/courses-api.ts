@@ -1579,6 +1579,7 @@ export type CourseGradebookGridColumn = {
   /** Plan 3.8 */
   postingPolicy?: string | null
   releaseAt?: string | null
+  dueAt?: string | null
   neverDrop?: boolean
   replaceWithFinal?: boolean
 }

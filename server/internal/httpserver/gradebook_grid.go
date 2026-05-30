@@ -37,6 +37,7 @@ type gradebookGridColumn struct {
 	EffectiveDisplayType  string          `json:"effectiveDisplayType,omitempty"`
 	PostingPolicy         *string         `json:"postingPolicy,omitempty"`
 	ReleaseAt             *string         `json:"releaseAt,omitempty"`
+	DueAt                 *string         `json:"dueAt,omitempty"`
 	NeverDrop             bool            `json:"neverDrop"`
 	ReplaceWithFinal      bool            `json:"replaceWithFinal"`
 }
@@ -228,6 +229,10 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 				AssignmentGroupID: ag,
 				NeverDrop:         df.NeverDrop,
 				ReplaceWithFinal:  df.ReplaceWithFinal,
+			}
+			if items[i].DueAt != nil {
+				s := items[i].DueAt.UTC().Format("2006-01-02T15:04:05.000Z")
+				c.DueAt = &s
 			}
 			if raw, ok := rubricMap[itemID]; ok && len(raw) > 0 {
 				c.Rubric = append(json.RawMessage(nil), raw...)

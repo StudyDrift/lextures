@@ -330,6 +330,7 @@ export const courseGradebookGridColumnSchema = z.object({
   effectiveDisplayType: z.string().optional(),
   postingPolicy: z.string().nullable().optional(),
   releaseAt: z.string().nullable().optional(),
+  dueAt: z.string().nullable().optional(),
   neverDrop: z.boolean().optional().default(false),
   replaceWithFinal: z.boolean().optional().default(false),
 })

@@ -136,6 +136,7 @@ export default function CourseMyGrades() {
           assignmentGroupId: c.assignmentGroupId ?? null,
           neverDrop: c.neverDrop === true,
           replaceWithFinal: c.replaceWithFinal === true,
+          dueAt: c.dueAt ?? null,
         })),
     [columns, heldSet],
   )

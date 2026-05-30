@@ -6,6 +6,7 @@ export type GradebookColumnForFinal = {
   assignmentGroupId?: string | null
   neverDrop?: boolean
   replaceWithFinal?: boolean
+  dueAt?: string | null
 }
 
 export type AssignmentGroupWeight = {
@@ -110,12 +111,17 @@ export function groupEffectiveEarnedAndMax(
 /**
  * Course final as a percentage (0–100) with assignment-group drop / replace policy (3.9).
  * Ungrouped columns are summed without drops.
+ *
+ * Only includes assignments that (a) have a grade entered for the student, or (b) are past their
+ * due date (missing work counts as 0 toward the average). Future/not-due assignments with no
+ * grade are excluded from the denominator and numerator.
  */
 export function computeCourseFinalPercent(
   columns: GradebookColumnForFinal[],
   gradesByItemId: Record<string, string>,
   assignmentGroups: AssignmentGroupWeight[],
   excusedByItemId: Record<string, boolean> = {},
+  now: Date | string | number = new Date(),
 ): number | null {
   const settingsIds = new Set(assignmentGroups.map((g) => g.id))
   const polByG = new Map<string, GroupPolicy>()
@@ -133,10 +139,27 @@ export function computeCourseFinalPercent(
   const byGroup: Map<string, { itemId: string; max: number; earned: number; neverDrop: boolean; isFinal: boolean }[]> =
     new Map()
 
+  const nowDate = now instanceof Date ? now : new Date(now)
+  const nowMs = nowDate.getTime()
+
   for (const col of columns) {
     const max = col.maxPoints
     if (max == null || max <= 0) continue
     if (excusedByItemId[col.id] === true) continue
+
+    // New rule: only count assignments with a grade entered OR that are past due (missing).
+    // This excludes "not yet taken" future assignments from the current final grade calc.
+    const gradeStr = gradesByItemId[col.id]
+    const hasGrade = typeof gradeStr === 'string' && gradeStr.trim() !== ''
+    let isPastDue = false
+    if (col.dueAt) {
+      const d = new Date(col.dueAt)
+      if (!Number.isNaN(d.getTime())) {
+        isPastDue = d.getTime() < nowMs
+      }
+    }
+    if (!hasGrade && !isPastDue) continue
+
     const earned = parseEarned(gradesByItemId[col.id])
     const gid = col.assignmentGroupId?.trim()
     const bucket = gid && settingsIds.has(gid) ? gid : UNGROUPED
