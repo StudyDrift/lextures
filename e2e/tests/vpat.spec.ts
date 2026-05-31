@@ -24,6 +24,9 @@ test.describe('Sidebar footer Accessibility link (authenticated)', () => {
     await page.goto('/')
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
 
+    // The accessibility link lives inside the "Legal Agreements" dropdown — open it first.
+    await page.locator('footer').getByRole('button', { name: /legal agreements/i }).click()
+
     const sideNavFooter = page.locator('footer').filter({ hasText: /accessibility/i })
     const link = sideNavFooter.getByRole('link', { name: /accessibility/i })
     await expect(link).toBeVisible()

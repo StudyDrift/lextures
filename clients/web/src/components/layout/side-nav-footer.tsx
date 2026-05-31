@@ -76,7 +76,7 @@ export function SideNavFooter() {
 
       {!sideNavCollapsed && (
         <div className="relative flex flex-col gap-1.5 pt-0.5 motion-safe:animate-in motion-safe:fade-in duration-200">
-          <div className="flex items-center justify-between text-slate-500 dark:text-neutral-500">
+          <div className="flex items-center justify-between text-slate-600 dark:text-neutral-400">
             <span>© {year} Lextures</span>
             <span
               className="tabular-nums text-[10px]"
