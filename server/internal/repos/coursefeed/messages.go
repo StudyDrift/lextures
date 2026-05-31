@@ -232,3 +232,68 @@ func CreateMessage(ctx context.Context, pool *pgxpool.Pool, channelID, authorID 
 	return id, nil
 }
 
+// MessageBelongsToCourse returns whether the message exists in any channel of the given course.
+func MessageBelongsToCourse(ctx context.Context, pool *pgxpool.Pool, courseID, messageID uuid.UUID) (bool, error) {
+	var ok bool
+	err := pool.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1 FROM course.feed_messages m
+			JOIN course.feed_channels ch ON ch.id = m.channel_id
+			WHERE m.id = $1 AND ch.course_id = $2
+		)
+	`, messageID, courseID).Scan(&ok)
+	return ok, err
+}
+
+// GetMessageAuthorAndIsRoot returns the author and whether the message is a root (top-level) post.
+func GetMessageAuthorAndIsRoot(ctx context.Context, pool *pgxpool.Pool, messageID uuid.UUID) (author uuid.UUID, isRoot bool, err error) {
+	err = pool.QueryRow(ctx, `
+		SELECT author_user_id, (parent_message_id IS NULL)
+		FROM course.feed_messages WHERE id = $1
+	`, messageID).Scan(&author, &isRoot)
+	return author, isRoot, err
+}
+
+// UpdateMessageBody edits a message body (and sets edited_at) iff the caller is the original author.
+func UpdateMessageBody(ctx context.Context, pool *pgxpool.Pool, messageID, authorID uuid.UUID, body string) error {
+	_, err := pool.Exec(ctx, `
+		UPDATE course.feed_messages SET body = $1, edited_at = NOW()
+		WHERE id = $2 AND author_user_id = $3
+	`, body, messageID, authorID)
+	return err
+}
+
+// SetMessagePinned pins or unpins a message (only roots should be pinned per UI).
+func SetMessagePinned(ctx context.Context, pool *pgxpool.Pool, messageID uuid.UUID, pinned bool, actorID uuid.UUID) error {
+	if pinned {
+		_, err := pool.Exec(ctx, `
+			UPDATE course.feed_messages
+			SET pinned_at = NOW(), pinned_by_user_id = $2
+			WHERE id = $1
+		`, messageID, actorID)
+		return err
+	}
+	_, err := pool.Exec(ctx, `
+		UPDATE course.feed_messages SET pinned_at = NULL, pinned_by_user_id = NULL WHERE id = $1
+	`, messageID)
+	return err
+}
+
+// AddLike inserts a like idempotently (no-op if already liked).
+func AddLike(ctx context.Context, pool *pgxpool.Pool, messageID, userID uuid.UUID) error {
+	_, err := pool.Exec(ctx, `
+		INSERT INTO course.feed_message_likes (message_id, user_id)
+		VALUES ($1, $2)
+		ON CONFLICT (message_id, user_id) DO NOTHING
+	`, messageID, userID)
+	return err
+}
+
+// RemoveLike deletes a like idempotently.
+func RemoveLike(ctx context.Context, pool *pgxpool.Pool, messageID, userID uuid.UUID) error {
+	_, err := pool.Exec(ctx, `
+		DELETE FROM course.feed_message_likes WHERE message_id = $1 AND user_id = $2
+	`, messageID, userID)
+	return err
+}
+

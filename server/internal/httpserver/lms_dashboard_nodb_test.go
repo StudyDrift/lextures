@@ -65,3 +65,53 @@ func TestLMSDashboard_feedRosterUnauthorized(t *testing.T) {
 		t.Fatalf("feed roster: %d", rr.Code)
 	}
 }
+
+func TestLMSDashboard_feedMessageLikeUnauthorized(t *testing.T) {
+	h := NewHandler(Deps{Pool: nil})
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/api/v1/courses/C-TEST/feed/messages/00000000-0000-0000-0000-000000000001/like", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("feed like: %d body=%s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestLMSDashboard_feedMessageUnlikeUnauthorized(t *testing.T) {
+	h := NewHandler(Deps{Pool: nil})
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodDelete, "/api/v1/courses/C-TEST/feed/messages/00000000-0000-0000-0000-000000000001/like", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("feed unlike: %d", rr.Code)
+	}
+}
+
+func TestLMSDashboard_feedMessagePatchUnauthorized(t *testing.T) {
+	h := NewHandler(Deps{Pool: nil})
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPatch, "/api/v1/courses/C-TEST/feed/messages/00000000-0000-0000-0000-000000000001", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("feed patch: %d", rr.Code)
+	}
+}
+
+func TestLMSDashboard_feedMessagePinUnauthorized(t *testing.T) {
+	h := NewHandler(Deps{Pool: nil})
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPatch, "/api/v1/courses/C-TEST/feed/messages/00000000-0000-0000-0000-000000000001/pin", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("feed pin: %d", rr.Code)
+	}
+}
+
+func TestLMSDashboard_feedUploadImageUnauthorized(t *testing.T) {
+	h := NewHandler(Deps{Pool: nil})
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/api/v1/courses/C-TEST/feed/upload-image", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("feed upload-image: %d", rr.Code)
+	}
+}

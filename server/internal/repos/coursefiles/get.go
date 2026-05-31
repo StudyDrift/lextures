@@ -38,3 +38,14 @@ func GetForCourse(ctx context.Context, pool *pgxpool.Pool, courseCode string, fi
 	}
 	return &r, nil
 }
+
+// Create inserts a row for a newly-uploaded course file (used by feed image uploads, etc.).
+func Create(ctx context.Context, pool *pgxpool.Pool, courseID, uploadedBy uuid.UUID, storageKey, originalFilename, mimeType string, byteSize int64) (uuid.UUID, error) {
+	var id uuid.UUID
+	err := pool.QueryRow(ctx, `
+		INSERT INTO course.course_files (course_id, storage_key, original_filename, mime_type, byte_size, uploaded_by)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id
+	`, courseID, storageKey, originalFilename, mimeType, byteSize, uploadedBy).Scan(&id)
+	return id, err
+}

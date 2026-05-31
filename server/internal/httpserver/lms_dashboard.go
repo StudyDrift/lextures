@@ -2,7 +2,10 @@ package httpserver
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -13,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefeed"
+	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
@@ -729,5 +733,334 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp{Enrollments: out})
+	}
+}
+
+// handlePatchFeedMessage is PATCH /api/v1/courses/{course_code}/feed/messages/{message_id}
+func (d Deps) handlePatchFeedMessage() http.HandlerFunc {
+	type req struct {
+		Body string `json:"body"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPatch {
+			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		messageID, err := uuid.Parse(chi.URLParam(r, "message_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid message id.")
+			return
+		}
+		belongs, err := coursefeed.MessageBelongsToCourse(r.Context(), d.Pool, *cid, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate message.")
+			return
+		}
+		if !belongs {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		author, _, err := coursefeed.GetMessageAuthorAndIsRoot(r.Context(), d.Pool, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load message.")
+			return
+		}
+		if author != viewer {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only the author can edit this message.")
+			return
+		}
+		var in req
+		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		body := strings.TrimSpace(in.Body)
+		if body == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Message body is required.")
+			return
+		}
+		if len(body) > 8000 {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Message body is too long.")
+			return
+		}
+		if err := coursefeed.UpdateMessageBody(r.Context(), d.Pool, messageID, viewer, body); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update message.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+	}
+}
+
+// handlePinFeedMessage is PATCH /api/v1/courses/{course_code}/feed/messages/{message_id}/pin
+func (d Deps) handlePinFeedMessage() http.HandlerFunc {
+	type req struct {
+		Pinned bool `json:"pinned"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPatch {
+			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		messageID, err := uuid.Parse(chi.URLParam(r, "message_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid message id.")
+			return
+		}
+		belongs, err := coursefeed.MessageBelongsToCourse(r.Context(), d.Pool, *cid, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate message.")
+			return
+		}
+		if !belongs {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		_, isRoot, err := coursefeed.GetMessageAuthorAndIsRoot(r.Context(), d.Pool, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load message.")
+			return
+		}
+		if !isRoot {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Only root messages can be pinned.")
+			return
+		}
+		canMod, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !canMod {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only course staff can pin messages.")
+			return
+		}
+		var in req
+		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		if err := coursefeed.SetMessagePinned(r.Context(), d.Pool, messageID, in.Pinned, viewer); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update pin.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+	}
+}
+
+// handleLikeFeedMessage is POST /api/v1/courses/{course_code}/feed/messages/{message_id}/like
+func (d Deps) handleLikeFeedMessage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		messageID, err := uuid.Parse(chi.URLParam(r, "message_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid message id.")
+			return
+		}
+		belongs, err := coursefeed.MessageBelongsToCourse(r.Context(), d.Pool, *cid, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate message.")
+			return
+		}
+		if !belongs {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		if err := coursefeed.AddLike(r.Context(), d.Pool, messageID, viewer); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to like message.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+	}
+}
+
+// handleUnlikeFeedMessage is DELETE /api/v1/courses/{course_code}/feed/messages/{message_id}/like
+func (d Deps) handleUnlikeFeedMessage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodDelete {
+			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		messageID, err := uuid.Parse(chi.URLParam(r, "message_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid message id.")
+			return
+		}
+		belongs, err := coursefeed.MessageBelongsToCourse(r.Context(), d.Pool, *cid, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate message.")
+			return
+		}
+		if !belongs {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		if err := coursefeed.RemoveLike(r.Context(), d.Pool, messageID, viewer); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to unlike message.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+	}
+}
+
+// handleUploadFeedImage is POST /api/v1/courses/{course_code}/feed/upload-image
+// Accepts multipart file, stores under course files (same as other uploads), records metadata,
+// and returns the usable content_path for use in markdown inside feed posts.
+func (d Deps) handleUploadFeedImage() http.HandlerFunc {
+	type resp struct {
+		ID          string `json:"id"`
+		ContentPath string `json:"content_path"`
+		MimeType    string `json:"mime_type"`
+		ByteSize    int64  `json:"byte_size"`
+	}
+	const maxImageSize = 10 * 1024 * 1024 // 10 MiB
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+
+		// Parse multipart (limit total ~12MB to account for overhead)
+		if err := r.ParseMultipartForm(12 << 20); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid form or file too large.")
+			return
+		}
+		f, header, err := r.FormFile("file")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing 'file' part.")
+			return
+		}
+		defer f.Close()
+
+		ct := strings.TrimSpace(header.Header.Get("Content-Type"))
+		if ct == "" {
+			ct = "application/octet-stream"
+		}
+		if !strings.HasPrefix(ct, "image/") {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Only image/* uploads are allowed.")
+			return
+		}
+		if header.Size > maxImageSize || header.Size <= 0 {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Image exceeds 10MB limit.")
+			return
+		}
+
+		ext := filepath.Ext(header.Filename)
+		if ext == "" {
+			ext = ".jpg" // fallback
+		}
+		fileUUID := uuid.New().String()
+		storageKey := fmt.Sprintf("files/%s/%s%s", courseCode, fileUUID, ext)
+
+		cfg := d.effectiveConfig()
+		if d.Storage != nil {
+			if perr := d.Storage.PutObject(r.Context(), storageKey, f, header.Size, ct); perr != nil {
+				log.Printf("feed-upload-image: PutObject key=%s err=%v", storageKey, perr)
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to store image.")
+				return
+			}
+		} else {
+			root := strings.TrimSpace(cfg.CourseFilesRoot)
+			if root == "" {
+				root = "data/course-files"
+			}
+			p := coursefiles.BlobDiskPath(root, courseCode, storageKey)
+			if werr := writeLocalFile(p, f); werr != nil {
+				log.Printf("feed-upload-image: local write key=%s err=%v", storageKey, werr)
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to store image.")
+				return
+			}
+		}
+
+		fileID, err := coursefiles.Create(r.Context(), d.Pool, *cid, viewer, storageKey, header.Filename, ct, header.Size)
+		if err != nil {
+			log.Printf("feed-upload-image: db insert err=%v", err)
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to record upload.")
+			return
+		}
+
+		contentPath := fmt.Sprintf("/api/v1/courses/%s/course-files/%s/content", courseCode, fileID.String())
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp{
+			ID:          fileID.String(),
+			ContentPath: contentPath,
+			MimeType:    ct,
+			ByteSize:    header.Size,
+		})
 	}
 }
