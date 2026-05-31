@@ -51,9 +51,10 @@ describe('computeCourseFinalPercent', () => {
     expect(pct).toBeCloseTo(0.5 * 90 + 0.5 * 70, 5)
   })
 
-  it('treats blank cells as 0 earned', () => {
+  it('treats blank cells as 0 earned when past due (missing work)', () => {
+    const past = '2000-01-01T00:00:00Z'
     const pct = computeCourseFinalPercent(
-      [{ id: 'a', maxPoints: 100, assignmentGroupId: 'g' }],
+      [{ id: 'a', maxPoints: 100, assignmentGroupId: 'g', dueAt: past }],
       { a: '' },
       [{ id: 'g', weightPercent: 100 }],
     )
@@ -81,5 +82,61 @@ describe('computeCourseFinalPercent', () => {
       [{ id: 'g', weightPercent: 100, dropLowest: 1, dropHighest: 0, replaceLowestWithFinal: false }],
     )
     expect(pct).toBeCloseTo(80, 5)
+  })
+
+  it('excludes future-due assignments with no grade from the final calculation', () => {
+    const future = '2099-01-01T00:00:00Z'
+    const pct = computeCourseFinalPercent(
+      [
+        { id: 'past', maxPoints: 100, assignmentGroupId: 'g', dueAt: '2000-01-01T00:00:00Z' },
+        { id: 'future', maxPoints: 100, assignmentGroupId: 'g', dueAt: future },
+      ],
+      { past: '80', future: '' }, // no grade on future
+      [{ id: 'g', weightPercent: 100 }],
+    )
+    // only the past one (80/100) should count; future excluded entirely
+    expect(pct).toBeCloseTo(80, 5)
+  })
+
+  it('excludes non-due assignments with no grade (no dueAt at all)', () => {
+    const pct = computeCourseFinalPercent(
+      [{ id: 'nodue', maxPoints: 100, assignmentGroupId: 'g' }],
+      { nodue: '' },
+      [{ id: 'g', weightPercent: 100 }],
+    )
+    expect(pct).toBeNull() // nothing qualified for the average
+  })
+
+  it('includes a graded assignment even if its due date is in the future', () => {
+    const future = '2099-01-01T00:00:00Z'
+    const pct = computeCourseFinalPercent(
+      [{ id: 'early', maxPoints: 100, assignmentGroupId: 'g', dueAt: future }],
+      { early: '95' },
+      [{ id: 'g', weightPercent: 100 }],
+    )
+    expect(pct).toBeCloseTo(95, 5)
+  })
+
+  it('respects explicit now parameter for due date decisions', () => {
+    const borderline = '2025-06-01T12:00:00Z'
+    // now is before due => no grade => exclude
+    const before = computeCourseFinalPercent(
+      [{ id: 'x', maxPoints: 100, dueAt: borderline }],
+      { x: '' },
+      [],
+      {},
+      '2025-05-01T00:00:00Z',
+    )
+    expect(before).toBeNull()
+
+    // now after due => include as 0
+    const after = computeCourseFinalPercent(
+      [{ id: 'x', maxPoints: 100, dueAt: borderline }],
+      { x: '' },
+      [],
+      {},
+      '2025-07-01T00:00:00Z',
+    )
+    expect(after).toBe(0)
   })
 })

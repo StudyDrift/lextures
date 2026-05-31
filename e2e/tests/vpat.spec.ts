@@ -24,8 +24,11 @@ test.describe('Sidebar footer Accessibility link (authenticated)', () => {
     await page.goto('/')
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeVisible({ timeout: 15000 })
 
-    const sideNavFooter = page.locator('footer').filter({ hasText: /accessibility/i })
-    const link = sideNavFooter.getByRole('link', { name: /accessibility/i })
+    // The accessibility entry lives inside the "Legal Agreements" dropdown — open it first.
+    const sideNavFooter = page.locator('footer').first()
+    await sideNavFooter.getByRole('button', { name: /legal agreements/i }).click()
+
+    const link = sideNavFooter.getByRole('menuitem', { name: /accessibility/i })
     await expect(link).toBeVisible()
     await expect(link).toHaveAttribute('href', 'https://lextures.com/accessibility')
   })

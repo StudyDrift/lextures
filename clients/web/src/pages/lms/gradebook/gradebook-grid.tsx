@@ -47,6 +47,7 @@ export type GradebookColumn = {
   /** Plan 3.8 */
   postingPolicy?: string | null
   releaseAt?: string | null
+  dueAt?: string | null
   neverDrop?: boolean
   replaceWithFinal?: boolean
 }
@@ -383,6 +384,7 @@ export function GradebookGrid({
         assignmentGroupId: c.assignmentGroupId ?? null,
         neverDrop: c.neverDrop === true,
         replaceWithFinal: c.replaceWithFinal === true,
+        dueAt: c.dueAt ?? null,
       })),
     [columns],
   )

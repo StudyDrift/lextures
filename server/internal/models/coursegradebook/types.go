@@ -55,6 +55,7 @@ type CourseGradebookGridColumn struct {
 	EffectiveDisplayType string                           `json:"effectiveDisplayType"`
 	PostingPolicy        *string                          `json:"postingPolicy,omitempty"`
 	ReleaseAt            *time.Time                       `json:"releaseAt,omitempty"`
+	DueAt                *time.Time                       `json:"dueAt,omitempty"`
 	NeverDrop            bool                             `json:"neverDrop"`
 	ReplaceWithFinal     bool                             `json:"replaceWithFinal"`
 }
