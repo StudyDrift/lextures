@@ -1005,7 +1005,7 @@ func (d Deps) handleUploadFeedImage() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing 'file' part.")
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		ct := strings.TrimSpace(header.Header.Get("Content-Type"))
 		if ct == "" {
