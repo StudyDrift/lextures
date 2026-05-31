@@ -12,7 +12,6 @@ import {
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { EmptyState } from '../../components/ui/empty-state'
 import { CourseFileMarkdownImage } from '../../components/syllabus/course-file-markdown-image'
 import { FeedComposer } from '../../components/feed/feed-composer'
 import { TranslateButton } from '../../components/feed/translate-button'
@@ -38,7 +37,7 @@ import { fetchCourse, type CoursePublic } from '../../lib/courses-api'
 import { getAccessToken, getJwtSubject } from '../../lib/auth'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
-import { formatAbsolute, formatRelativeCompact } from '../../lib/format-datetime'
+import { formatAbsolute, formatRelative, formatRelativeCompact } from '../../lib/format-datetime'
 import { TabPresenceHint } from '../../components/presence/tab-presence-hint'
 import { LmsPage } from './lms-page'
 
@@ -86,11 +85,16 @@ function FeedAvatar({
 }: {
   userId: string
   name: string
-  size?: 'sm' | 'md'
+  size?: 'xs' | 'sm' | 'md'
 }) {
   const h = hueFromString(userId.toLowerCase())
   const h2 = (h + 48) % 360
-  const dim = size === 'sm' ? 'h-9 w-9 text-[0.7rem]' : 'h-10 w-10 text-sm'
+  const dim =
+    size === 'xs'
+      ? 'h-6 w-6 text-[0.625rem]'
+      : size === 'sm'
+        ? 'h-7 w-7 text-[0.65rem]'
+        : 'h-8 w-8 text-xs'
   return (
     <div
       className={`flex shrink-0 select-none items-center justify-center rounded-full font-semibold text-white shadow-sm ring-2 ring-white dark:ring-neutral-950 ${dim}`}
@@ -843,31 +847,29 @@ export default function CourseFeedPage() {
             </div>
           )}
 
-          <section className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none">
-            <div className="flex shrink-0 flex-col gap-1 border-b border-slate-100 px-3 py-2 sm:px-4 dark:border-neutral-800">
-              <div className="flex items-center justify-between gap-2">
-              <h2 className="flex min-w-0 items-baseline gap-1.5 truncate text-base font-semibold tracking-tight text-slate-900 dark:text-neutral-50">
-                <span className="shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden>
-                  #
-                </span>
-                <span className="min-w-0 truncate">
-                  {channels.find((c) => c.id === activeChannelId)?.name ?? 'Channel'}
-                </span>
-              </h2>
+          <section className="feed-container flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-neutral-200 bg-neutral-50 shadow-sm dark:border-neutral-800 dark:bg-neutral-900 dark:shadow-none">
+            {/* Channel Header inside the feed container */}
+            <div className="channel-header flex shrink-0 items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-neutral-900">
+              <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-neutral-400 dark:text-neutral-500">#</span>
+                <h2 className="truncate text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                  {channels.find((c) => c.id === activeChannelId)?.name ?? 'general'}
+                </h2>
+              </div>
               <details className="group/feed-channel-menu relative shrink-0">
                 <summary
-                  className="list-none cursor-pointer rounded-lg p-1.5 text-slate-400 outline-none hover:bg-slate-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+                  className="list-none cursor-pointer rounded p-1 text-neutral-500 outline-none hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
                   aria-label="Channel menu"
                 >
-                  <MoreHorizontal className="h-5 w-5" aria-hidden />
+                  <MoreHorizontal className="h-4 w-4" aria-hidden />
                 </summary>
                 <div
-                  className="absolute end-0 top-full z-40 mt-1 min-w-[14rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
+                  className="absolute end-0 top-full z-40 mt-1 min-w-[14rem] overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
                   onMouseDown={(ev) => ev.preventDefault()}
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-start text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
                     onClick={(e) => {
                       closeParentDetails(e.currentTarget)
                       setNotifPrefsDraft(loadFeedNotificationPrefs(courseCode))
@@ -879,9 +881,8 @@ export default function CourseFeedPage() {
                   </button>
                 </div>
               </details>
-              </div>
-              <TabPresenceHint channelKey={courseCode} />
             </div>
+            <TabPresenceHint channelKey={courseCode} />
 
             <div className="flex min-h-0 flex-1 flex-col">
               <div
@@ -894,93 +895,114 @@ export default function CourseFeedPage() {
                 }}
                 className="min-h-0 flex-1 overflow-y-auto px-3 py-1 sm:px-4"
               >
-                {messages.map((m) => (
-                  <article
-                    key={m.id}
-                    className="border-b border-slate-100 py-3.5 last:border-b-0 last:pb-3 dark:border-neutral-800/80"
-                  >
-                    <MessageBlock
-                      message={m}
-                      depth={0}
-                      roster={roster}
-                      peopleById={peopleById}
-                      viewerId={viewerId}
-                      staff={staff}
-                      editingId={editingId}
-                      editDraft={editDraft}
-                      onStartEdit={(msg) => {
-                        setEditingId(msg.id)
-                        setEditDraft(msg.body)
-                      }}
-                      onEditDraft={setEditDraft}
-                      onCancelEdit={() => setEditingId(null)}
-                      onSaveEdit={() => void saveEdit(m.id)}
-                      onReply={() => {
-                        setExpandedReplyRoots((s) => new Set(s).add(m.id))
-                        setReplyTo(m)
-                      }}
-                      onToggleLike={() => void toggleLike(m.id, m.viewerHasLiked)}
-                      onTogglePin={() => void togglePin(m.id, !m.pinnedAt)}
-                      showTranslate={course?.multilingualMessagingEnabled === true}
-                    />
+                {/* Message spooling + rendering */}
+                {messages.map((m, index) => {
+                  const prev = index > 0 ? messages[index - 1] : null
+                  const sameAuthor = prev && prev.authorUserId === m.authorUserId
+                  const timeDiff = prev ? (new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime()) : Infinity
+                  const withinWindow = timeDiff < 5 * 60 * 1000 // 5 minutes (practical spooling window)
+                  const showAuthorForThis = !(sameAuthor && withinWindow)
+
+                  return (
+                    <article
+                      key={m.id}
+                      className="border-b border-neutral-100 py-2 last:border-b-0 last:pb-1.5 dark:border-neutral-800/70"
+                    >
+                      <MessageBlock
+                        message={m}
+                        depth={0}
+                        roster={roster}
+                        peopleById={peopleById}
+                        viewerId={viewerId}
+                        staff={staff}
+                        editingId={editingId}
+                        editDraft={editDraft}
+                        onStartEdit={(msg) => {
+                          setEditingId(msg.id)
+                          setEditDraft(msg.body)
+                        }}
+                        onEditDraft={setEditDraft}
+                        onCancelEdit={() => setEditingId(null)}
+                        onSaveEdit={() => void saveEdit(m.id)}
+                        onReply={() => {
+                          setExpandedReplyRoots((s) => new Set(s).add(m.id))
+                          setReplyTo(m)
+                        }}
+                        onToggleLike={() => void toggleLike(m.id, m.viewerHasLiked)}
+                        onTogglePin={() => void togglePin(m.id, !m.pinnedAt)}
+                        showTranslate={course?.multilingualMessagingEnabled === true}
+                        showAuthor={showAuthorForThis}
+                      />
+
                     {m.replies.length > 0 && (
                       <>
                         <button
                           type="button"
                           onClick={() => toggleRepliesExpanded(m.id)}
-                          className="group/replylink ms-14 mt-3 flex items-center gap-2 rounded-lg py-1.5 ps-1 pe-2 text-start text-sm font-medium text-indigo-600 hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
+                          className="group/replylink ms-14 mt-1 flex items-center gap-1.5 rounded-lg py-0.5 ps-1 pe-1.5 text-start text-xs font-medium text-indigo-600 hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
                           aria-expanded={expandedReplyRoots.has(m.id)}
                         >
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200/80 transition group-hover/replylink:bg-white group-hover/replylink:text-indigo-600 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700 dark:group-hover/replylink:bg-neutral-900 dark:group-hover/replylink:text-indigo-300">
-                            <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200/80 transition group-hover/replylink:bg-white group-hover/replylink:text-indigo-600 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700 dark:group-hover/replylink:bg-neutral-900 dark:group-hover/replylink:text-indigo-300">
+                            <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
                           </span>
                           {expandedReplyRoots.has(m.id)
-                            ? 'Hide replies'
+                            ? 'Hide'
                             : `${m.replies.length} ${m.replies.length === 1 ? 'reply' : 'replies'}`}
                         </button>
                         {expandedReplyRoots.has(m.id) && (
-                          <div className="ms-3 mt-4 space-y-1 border-s-2 border-slate-200/90 ps-4 dark:border-neutral-700">
-                            {m.replies.map((r) => (
-                              <div key={r.id} className="py-3 ps-1">
-                              <MessageBlock
-                                message={r}
-                                depth={1}
-                                roster={roster}
-                                peopleById={peopleById}
-                                viewerId={viewerId}
-                                staff={staff}
-                                editingId={editingId}
-                                editDraft={editDraft}
-                                onStartEdit={(msg) => {
-                                  setEditingId(msg.id)
-                                  setEditDraft(msg.body)
-                                }}
-                                onEditDraft={setEditDraft}
-                                onCancelEdit={() => setEditingId(null)}
-                                onSaveEdit={() => void saveEdit(r.id)}
-                                onReply={() => {
-                                  setExpandedReplyRoots((s) => new Set(s).add(m.id))
-                                  setReplyTo(m)
-                                }}
-                                onToggleLike={() => void toggleLike(r.id, r.viewerHasLiked)}
-                                onTogglePin={() => {}}
-                                showTranslate={course?.multilingualMessagingEnabled === true}
-                              />
+                          <div className="ms-14 mt-0.5">
+                            {/* Discord-style thread continuation */}
+                            <div className="relative pl-4">
+                              {/* Vertical thread line (Discord style) */}
+                              <div className="absolute left-[5px] top-0 bottom-0 w-px bg-neutral-600 dark:bg-neutral-700" />
+                              {/* Small horizontal connector hook at the top */}
+                              <div className="absolute left-[5px] top-[3px] h-px w-2.5 bg-neutral-600 dark:bg-neutral-700" />
+
+                              <div className="space-y-0.5">
+                                {m.replies.map((r) => (
+                                  <div key={r.id} className="py-0.5 group/replyrow">
+                                    <MessageBlock
+                                      message={r}
+                                      depth={1}
+                                      roster={roster}
+                                      peopleById={peopleById}
+                                      viewerId={viewerId}
+                                      staff={staff}
+                                      editingId={editingId}
+                                      editDraft={editDraft}
+                                      onStartEdit={(msg) => {
+                                        setEditingId(msg.id)
+                                        setEditDraft(msg.body)
+                                      }}
+                                      onEditDraft={setEditDraft}
+                                      onCancelEdit={() => setEditingId(null)}
+                                      onSaveEdit={() => void saveEdit(r.id)}
+                                      onReply={() => {
+                                        setExpandedReplyRoots((s) => new Set(s).add(m.id))
+                                        setReplyTo(m)
+                                      }}
+                                      onToggleLike={() => void toggleLike(r.id, r.viewerHasLiked)}
+                                      onTogglePin={() => {}}
+                                      showTranslate={course?.multilingualMessagingEnabled === true}
+                                    />
+                                  </div>
+                                ))}
                               </div>
-                            ))}
+                            </div>
                           </div>
                         )}
                       </>
                     )}
                   </article>
-                ))}
+                  )
+                })}
                 {messages.length === 0 && (
-                  <EmptyState
-                    icon={MessageCircle}
-                    title="No messages in this channel yet"
-                    body="Start the thread with the composer below — classmates and instructors can reply, react, and pin important updates."
-                    className="my-3"
-                  />
+                  <div className="flex flex-col items-center justify-center py-12 text-center text-sm text-neutral-500 dark:text-neutral-400">
+                    <div className="mb-2 text-base font-medium text-neutral-600 dark:text-neutral-300">
+                      You&apos;re at the beginning of #{channels.find((c) => c.id === activeChannelId)?.name ?? 'general'}
+                    </div>
+                    <div>No messages yet. Say hello!</div>
+                  </div>
                 )}
               </div>
 
@@ -1007,7 +1029,7 @@ export default function CourseFeedPage() {
                   roster={roster}
                   viewerUserId={viewerId}
                   staff={staff}
-                  placeholder={replyTo ? 'Write a reply…' : 'Message this channel…'}
+                  placeholder={replyTo ? 'Write a reply…' : `Send a message to #${channels.find((c) => c.id === activeChannelId)?.name ?? 'general'}`}
                   disabled={sending}
                   onSubmit={() => void sendMessage()}
                 />
@@ -1037,6 +1059,7 @@ type MessageBlockProps = {
   onToggleLike: () => void
   onTogglePin: () => void
   showTranslate?: boolean
+  showAuthor?: boolean   // for message spooling (same author within time window)
 }
 
 function MessageBlock({
@@ -1056,196 +1079,290 @@ function MessageBlock({
   onToggleLike,
   onTogglePin,
   showTranslate,
+  showAuthor = true,
 }: MessageBlockProps) {
   const mine =
     viewerId !== null && m.authorUserId.toLowerCase() === viewerId.toLowerCase()
   const editing = editingId === m.id
   const showActionsMenu = !editing && (depth === 0 || mine)
   const author = authorLabel(m)
-  const avatarSize = depth === 0 ? 'md' : 'sm'
+  const isReply = depth > 0
+  const avatarSize: 'xs' | 'sm' | 'md' = depth === 0 ? 'md' : 'xs'
+  const isRootWithoutAuthor = depth === 0 && !showAuthor
 
   return (
-    <div className="group/msg rounded-xl px-1 py-0.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-900">
-      <div className="flex gap-3">
-        <FeedAvatar userId={m.authorUserId} name={author} size={avatarSize} />
-        <div className="min-w-0 flex-1 pt-0.5">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                <span className="truncate text-[0.9375rem] font-semibold text-slate-900 dark:text-neutral-50">
-                  {author}
-                </span>
-                <span className="text-slate-300 dark:text-neutral-600" aria-hidden>
-                  ·
-                </span>
-                <time
-                  className="shrink-0 text-xs font-medium text-slate-400 dark:text-neutral-500"
-                  dateTime={m.createdAt}
-                  title={formatAbsolute(m.createdAt)}
-                >
-                  {formatRelativeCompact(m.createdAt)}
-                </time>
-                {m.editedAt && (
-                  <span className="text-xs font-medium text-slate-400 dark:text-neutral-500">
-                    · edited
-                  </span>
-                )}
-                {m.pinnedAt && (
-                  <span
-                    className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-px text-[0.65rem] font-medium text-amber-800 ring-1 ring-amber-200/60 dark:bg-amber-950/50 dark:text-amber-200 dark:ring-amber-800/50"
-                    title="Pinned"
-                  >
-                    <Pin className="h-2.5 w-2.5" aria-hidden />
-                    Pinned
-                  </span>
-                )}
-                {m.mentionsEveryone && (
-                  <span className="rounded-full bg-amber-100 px-2 py-px text-[0.65rem] font-semibold text-amber-900 ring-1 ring-amber-200/70 dark:bg-amber-950/45 dark:text-amber-100 dark:ring-amber-800/40">
-                    @everyone
-                  </span>
-                )}
-              </div>
-            </div>
-            {showActionsMenu && (
-              <details className="group/menu relative shrink-0 -me-1 -mt-0.5">
-                <summary
-                  className="list-none cursor-pointer rounded-full p-1.5 text-slate-400 outline-none hover:bg-slate-200/80 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
-                  aria-label="Message actions"
-                >
-                  <MoreHorizontal className="h-4 w-4" aria-hidden />
-                </summary>
-                <div className="absolute end-0 top-full z-30 mt-1 min-w-[10.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10">
-                  {depth === 0 && (
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                      onClick={(e) => {
-                        closeParentDetails(e.currentTarget)
-                        onReply()
-                      }}
-                    >
-                      <MessageCircle className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                      Reply
-                    </button>
-                  )}
-                  {mine && (
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                      onClick={(e) => {
-                        closeParentDetails(e.currentTarget)
-                        onStartEdit(m)
-                      }}
-                    >
-                      <Pencil className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                      Edit
-                    </button>
-                  )}
-                  {staff && depth === 0 && (
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
-                      onClick={(e) => {
-                        closeParentDetails(e.currentTarget)
-                        onTogglePin()
-                      }}
-                    >
-                      <Pin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
-                      {m.pinnedAt ? 'Unpin' : 'Pin'}
-                    </button>
-                  )}
-                </div>
-              </details>
-            )}
-          </div>
-          {editing ? (
-            <div className="mt-3 space-y-2">
-              <textarea
-                value={editDraft}
-                aria-label="Edit message"
-                onChange={(e) => onEditDraft(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    onSaveEdit()
-                  }
-                }}
-                rows={3}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner dark:border-neutral-700 dark:bg-neutral-900"
-                maxLength={8000}
-              />
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
-                  onClick={onSaveEdit}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-neutral-700"
-                  onClick={onCancelEdit}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="mt-1.5">
-              <FeedMessageBody body={m.body} peopleById={peopleById} roster={roster} />
-              {showTranslate && (
-                <TranslateButton
-                  contentType="feed_post"
-                  contentId={m.id}
-                  text={m.body}
-                />
+    <div
+      className={
+        isReply
+          ? 'group/msg flex gap-2 rounded px-1 py-0.5 transition-colors group-hover/replyrow:bg-neutral-800/60 dark:group-hover/replyrow:bg-neutral-700/50'
+          : isRootWithoutAuthor
+            ? 'group/msg flex gap-2 px-1 py-0.5'
+            : 'group/msg rounded-xl px-1 py-0.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-900'
+      }
+    >
+      {isReply ? (
+        // Discord-style compact reply row
+        <>
+          <FeedAvatar userId={m.authorUserId} name={author} size={avatarSize} />
+          <div className="min-w-0 flex-1 pt-0.5">
+            {/* Header: username + tiny timestamp + badges + reaction pill */}
+            <div className="flex items-baseline gap-x-1.5 leading-none">
+              <span className="truncate font-semibold text-[13px] text-slate-900 dark:text-neutral-100">
+                {author}
+              </span>
+              <time
+                className="shrink-0 text-[10px] font-medium text-neutral-500 dark:text-neutral-400"
+                dateTime={m.createdAt}
+                title={formatAbsolute(m.createdAt)}
+              >
+                {formatRelativeCompact(m.createdAt)}
+              </time>
+              {m.editedAt && (
+                <span className="text-[10px] text-neutral-500 dark:text-neutral-400">edited</span>
               )}
-            </div>
-          )}
-          {!editing && (
-            <div className="mt-3 flex flex-wrap items-center gap-1">
+              {m.mentionsEveryone && (
+                <span className="rounded bg-amber-400/20 px-1 py-px text-[9px] font-medium text-amber-700 dark:text-amber-300">
+                  @everyone
+                </span>
+              )}
+
+              {/* Subtle reaction / like pill (Discord reaction style) */}
               <button
                 type="button"
                 onClick={onToggleLike}
-                title={m.viewerHasLiked ? 'Unlike' : 'Like'}
-                aria-label={
-                  m.likeCount > 0
-                    ? `${m.viewerHasLiked ? 'Unlike' : 'Like'}, ${m.likeCount}`
-                    : m.viewerHasLiked
-                      ? 'Unlike'
-                      : 'Like'
-                }
-                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium transition-colors ${
+                className={`ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[10px] font-medium transition-all ${
                   m.viewerHasLiked
-                    ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/35 dark:text-rose-400 dark:hover:bg-rose-950/55'
-                    : m.likeCount > 0
-                      ? 'text-rose-500/95 hover:bg-rose-50 dark:text-rose-400/90 dark:hover:bg-rose-950/30'
-                      : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
+                    ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
+                    : 'bg-neutral-700/60 text-neutral-400 hover:bg-neutral-600 hover:text-neutral-200 opacity-70 group-hover/replyrow:opacity-100'
                 }`}
+                title={m.viewerHasLiked ? 'Unlike' : 'Like'}
               >
-                <Heart
-                  className={`h-4 w-4 shrink-0 ${m.viewerHasLiked ? 'fill-current' : ''}`}
-                  aria-hidden
-                />
-                {m.likeCount > 0 ? (
-                  <span className="tabular-nums">{m.likeCount}</span>
-                ) : null}
+                <Heart className={`h-2.5 w-2.5 ${m.viewerHasLiked ? 'fill-current' : ''}`} aria-hidden />
+                {m.likeCount > 0 && <span className="tabular-nums">{m.likeCount}</span>}
               </button>
-              {depth === 0 && (
-                <button
-                  type="button"
-                  onClick={onReply}
-                  className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
-                >
-                  <MessageCircle className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
-                  Reply
-                </button>
+
+              {showActionsMenu && (
+                <details className="group/menu relative ml-1 shrink-0">
+                  <summary
+                    className="list-none cursor-pointer rounded p-0.5 text-neutral-500 hover:bg-neutral-700/60 hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+                    aria-label="Message actions"
+                  >
+                    <MoreHorizontal className="h-3 w-3" aria-hidden />
+                  </summary>
+                  <div className="absolute end-0 top-full z-30 mt-1 min-w-[8rem] overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900 py-0.5 text-xs shadow-xl ring-1 ring-black/20">
+                    {mine && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-1 text-start text-neutral-200 hover:bg-neutral-800"
+                        onClick={(e) => {
+                          closeParentDetails(e.currentTarget)
+                          onStartEdit(m)
+                        }}
+                      >
+                        <Pencil className="h-3 w-3" aria-hidden />
+                        Edit
+                      </button>
+                    )}
+                  </div>
+                </details>
               )}
             </div>
+
+            {/* Body */}
+            <div className="mt-0.5 text-[13px] leading-snug text-slate-800 dark:text-neutral-200">
+              <FeedMessageBody body={m.body} peopleById={peopleById} roster={roster} />
+            </div>
+          </div>
+        </>
+      ) : (
+        // Original root post layout (unchanged)
+        <div className="flex gap-3">
+          {isRootWithoutAuthor ? (
+            <div className="w-8 shrink-0 pt-0.5 text-right text-[10px] font-medium text-neutral-400 dark:text-neutral-500 tabular-nums">
+              {formatRelative(m.createdAt)}
+            </div>
+          ) : (
+            <FeedAvatar userId={m.authorUserId} name={author} size={avatarSize} />
           )}
+          <div className="min-w-0 flex-1 pt-0.5">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+                  <span className="truncate text-[0.9375rem] font-semibold text-slate-900 dark:text-neutral-50">
+                    {author}
+                  </span>
+                  <span className="text-slate-300 dark:text-neutral-600" aria-hidden>
+                    ·
+                  </span>
+                  <time
+                    className="shrink-0 text-xs font-medium text-slate-400 dark:text-neutral-500"
+                    dateTime={m.createdAt}
+                    title={formatAbsolute(m.createdAt)}
+                  >
+                    {formatRelativeCompact(m.createdAt)}
+                  </time>
+                  {m.editedAt && (
+                    <span className="text-xs font-medium text-slate-400 dark:text-neutral-500">
+                      · edited
+                    </span>
+                  )}
+                  {m.pinnedAt && (
+                    <span
+                      className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 px-1.5 py-px text-[0.65rem] font-medium text-amber-800 ring-1 ring-amber-200/60 dark:bg-amber-950/50 dark:text-amber-200 dark:ring-amber-800/50"
+                      title="Pinned"
+                    >
+                      <Pin className="h-2.5 w-2.5" aria-hidden />
+                      Pinned
+                    </span>
+                  )}
+                  {m.mentionsEveryone && (
+                    <span className="rounded-full bg-amber-100 px-2 py-px text-[0.65rem] font-semibold text-amber-900 ring-1 ring-amber-200/70 dark:bg-amber-950/45 dark:text-amber-100 dark:ring-amber-800/40">
+                      @everyone
+                    </span>
+                  )}
+                </div>
+              </div>
+              {showActionsMenu && (
+                <details className="group/menu relative shrink-0 -me-1 -mt-0.5">
+                  <summary
+                    className="list-none cursor-pointer rounded-full p-1.5 text-slate-400 outline-none hover:bg-slate-200/80 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300 [&::-webkit-details-marker]:hidden"
+                    aria-label="Message actions"
+                  >
+                    <MoreHorizontal className="h-4 w-4" aria-hidden />
+                  </summary>
+                  <div className="absolute end-0 top-full z-30 mt-1 min-w-[10.5rem] overflow-hidden rounded-xl border border-slate-200/90 bg-white py-1 text-sm shadow-lg ring-1 ring-black/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10">
+                    {depth === 0 && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        onClick={(e) => {
+                          closeParentDetails(e.currentTarget)
+                          onReply()
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                        Reply
+                      </button>
+                    )}
+                    {mine && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        onClick={(e) => {
+                          closeParentDetails(e.currentTarget)
+                          onStartEdit(m)
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                        Edit
+                      </button>
+                    )}
+                    {staff && depth === 0 && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        onClick={(e) => {
+                          closeParentDetails(e.currentTarget)
+                          onTogglePin()
+                        }}
+                      >
+                        <Pin className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                        {m.pinnedAt ? 'Unpin' : 'Pin'}
+                      </button>
+                    )}
+                  </div>
+                </details>
+              )}
+            </div>
+            {editing ? (
+              <div className="mt-3 space-y-2">
+                <textarea
+                  value={editDraft}
+                  aria-label="Edit message"
+                  onChange={(e) => onEditDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      onSaveEdit()
+                    }
+                  }}
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-inner dark:border-neutral-700 dark:bg-neutral-900"
+                  maxLength={8000}
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500"
+                    onClick={onSaveEdit}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium dark:border-neutral-700"
+                    onClick={onCancelEdit}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-1.5">
+                <FeedMessageBody body={m.body} peopleById={peopleById} roster={roster} />
+                {showTranslate && (
+                  <TranslateButton
+                    contentType="feed_post"
+                    contentId={m.id}
+                    text={m.body}
+                  />
+                )}
+              </div>
+            )}
+            {!editing && (
+              <div className="mt-3 flex flex-wrap items-center gap-1">
+                <button
+                  type="button"
+                  onClick={onToggleLike}
+                  title={m.viewerHasLiked ? 'Unlike' : 'Like'}
+                  aria-label={
+                    m.likeCount > 0
+                      ? `${m.viewerHasLiked ? 'Unlike' : 'Like'}, ${m.likeCount}`
+                      : m.viewerHasLiked
+                        ? 'Unlike'
+                        : 'Like'
+                  }
+                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium transition-colors ${
+                    m.viewerHasLiked
+                      ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/35 dark:text-rose-400 dark:hover:bg-rose-950/55'
+                      : m.likeCount > 0
+                        ? 'text-rose-500/95 hover:bg-rose-50 dark:text-rose-400/90 dark:hover:bg-rose-950/30'
+                        : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300'
+                  }`}
+                >
+                  <Heart
+                    className={`h-4 w-4 shrink-0 ${m.viewerHasLiked ? 'fill-current' : ''}`}
+                    aria-hidden
+                  />
+                  {m.likeCount > 0 ? (
+                    <span className="tabular-nums">{m.likeCount}</span>
+                  ) : null}
+                </button>
+                {depth === 0 && (
+                  <button
+                    type="button"
+                    onClick={onReply}
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+                  >
+                    <MessageCircle className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                    Reply
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
