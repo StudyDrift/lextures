@@ -206,6 +206,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Get("/api/v1/me/oidc-identities", d.handleMyOIDCIdentities())
 	r.Delete("/api/v1/me/oidc-identities/{id}", d.handleDeleteMyOIDCIdentity())
 	r.Post("/api/v1/me/notebooks/query", d.handleNotebookQuery())
+	r.Post("/api/v1/me/notebooks/flashcards", d.handleGenerateNotebookFlashcards())
 	r.Post("/api/v1/stt/transcribe", d.handlePostSTTTranscribe())
 	d.registerTTSRoutes(r)
 	d.registerSelfReflectionRoutes(r)

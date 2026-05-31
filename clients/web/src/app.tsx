@@ -70,7 +70,9 @@ import BackupOpsAdminPage from './pages/backup-ops-admin-page'
 import CaptionComplianceReportPage from './pages/admin/caption-compliance-report'
 import AttendanceDashboard from './pages/admin/AttendanceDashboard'
 import AttendanceExport from './pages/admin/AttendanceExport'
+import BehaviorDashboard from './pages/admin/BehaviorDashboard'
 import CourseAttendance from './pages/lms/CourseAttendance'
+import CourseBehavior from './pages/lms/CourseBehavior'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -167,6 +169,7 @@ export default function App() {
             <Route path="whats-working" element={<CourseWhatsWorking />} />
             <Route path="enrollments" element={<CourseEnrollments />} />
             <Route path="attendance" element={<CourseAttendance />} />
+            <Route path="behavior" element={<CourseBehavior />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />
@@ -179,6 +182,7 @@ export default function App() {
           <Route path="/admin/caption-compliance" element={<CaptionComplianceReportPage />} />
           <Route path="/admin/attendance/dashboard" element={<AttendanceDashboard />} />
           <Route path="/admin/attendance/export" element={<AttendanceExport />} />
+          <Route path="/admin/behavior/dashboard" element={<BehaviorDashboard />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

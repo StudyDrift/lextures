@@ -195,6 +195,7 @@ export default function Settings() {
 
   const [imageModelId, setImageModelId] = useState('')
   const [courseSetupModelId, setCourseSetupModelId] = useState('')
+  const [notebookFlashcardsModelId, setNotebookFlashcardsModelId] = useState('')
   const [aiLoading, setAiLoading] = useState(true)
   const [aiSaving, setAiSaving] = useState(false)
   const [aiMessage, setAiMessage] = useState<string | null>(null)
@@ -324,9 +325,10 @@ export default function Settings() {
         if (!settingsRes.ok) {
           if (!cancelled) setAiError(readApiErrorMessage(settingsRaw))
         } else {
-          const data = settingsRaw as { imageModelId?: string; courseSetupModelId?: string }
+          const data = settingsRaw as { imageModelId?: string; courseSetupModelId?: string; notebookFlashcardsModelId?: string }
           if (!cancelled && data.imageModelId) setImageModelId(data.imageModelId)
           if (!cancelled && data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
+          if (!cancelled && data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
         }
         if (!cancelled) await loadModels()
       } catch {
@@ -359,6 +361,7 @@ export default function Settings() {
         body: JSON.stringify({
           imageModelId,
           courseSetupModelId,
+          notebookFlashcardsModelId,
         }),
       })
       const raw: unknown = await res.json().catch(() => ({}))
@@ -366,9 +369,10 @@ export default function Settings() {
         setAiError(readApiErrorMessage(raw))
         return
       }
-      const data = raw as { imageModelId?: string; courseSetupModelId?: string }
+      const data = raw as { imageModelId?: string; courseSetupModelId?: string; notebookFlashcardsModelId?: string }
       if (data.imageModelId) setImageModelId(data.imageModelId)
       if (data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
+      if (data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
       setAiMessage('Saved.')
       toastSaveOk('AI defaults saved')
     } catch {
@@ -790,7 +794,7 @@ export default function Settings() {
     }
   }
 
-  const saveDisabled = aiSaving || !imageModelId || !courseSetupModelId
+  const saveDisabled = aiSaving || !imageModelId || !courseSetupModelId || !notebookFlashcardsModelId
 
   async function onSaveSystemPrompt(e: FormEvent) {
     e.preventDefault()
@@ -961,6 +965,22 @@ export default function Settings() {
                     shows the display name, model id, then modalities, context window, and
                     input/output price per 1M tokens (USD). Use{' '}
                     <span className="font-medium">Refresh list</span> to reload from OpenRouter.
+                  </p>
+                </div>
+
+                <div>
+                  <ImageModelPicker
+                    id="notebook-flashcards-model"
+                    label="Notebook flashcards model"
+                    models={textModels}
+                    value={notebookFlashcardsModelId}
+                    onChange={setNotebookFlashcardsModelId}
+                    disabled={aiSaving}
+                    onRefresh={refreshModels}
+                    refreshing={modelsRefreshing}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Text-to-text model used when generating AI study flashcards from notebook notes.
                   </p>
                 </div>
 
