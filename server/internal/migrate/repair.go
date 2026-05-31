@@ -22,10 +22,10 @@ func migrateRepairChecksumsEnabled() bool {
 }
 
 // demoChecksumRepairMigrations lists versions whose SQL files may legitimately drift
-// from what the demo droplet recorded (abbreviated deploys, follow-up PR edits) while
-// remaining idempotent (IF NOT EXISTS / ON CONFLICT DO NOTHING). When
-// MIGRATE_REPAIR_CHECKSUMS is enabled (docker-compose.deploy.yml), stored checksums
-// are updated to match the embedded files so migrate can proceed.
+// from what the demo droplet (or a persistent dev DB) recorded (abbreviated deploys,
+// follow-up PR edits) while remaining idempotent (IF NOT EXISTS / ON CONFLICT DO NOTHING).
+// When MIGRATE_REPAIR_CHECKSUMS is enabled (docker-compose.yml and docker-compose.deploy.yml),
+// stored checksums are updated to match the embedded files so migrate can proceed.
 var demoChecksumRepairMigrations = []struct {
 	version int64
 	file    string
@@ -35,6 +35,8 @@ var demoChecksumRepairMigrations = []struct {
 	{171, "171_mastery_heatmap_cache.sql"},
 	// Idempotent ADD COLUMN IF NOT EXISTS; file may change while feature-flag columns evolve.
 	{172, "172_platform_feature_flags.sql"},
+	// Idempotent (CREATE ... IF NOT EXISTS + ADD COLUMN IF NOT EXISTS); file drifted on persistent dev/demo DBs.
+	{220, "220_behavior_pbis.sql"},
 }
 
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
