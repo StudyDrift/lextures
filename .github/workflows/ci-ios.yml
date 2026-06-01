@@ -1,0 +1,54 @@
+# Lint, build, and test the iOS app on PRs that touch clients/ios/.
+name: CI — iOS
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'clients/ios/**'
+
+concurrency:
+  group: ci-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: iOS
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: clients/ios
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Lint
+        run: swiftlint lint --reporter github-actions-logging
+
+      - name: Build (simulator)
+        run: |
+          set -o pipefail
+          xcodebuild build \
+            -project Lextures.xcodeproj \
+            -scheme Lextures \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty
+
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Lextures.xcodeproj \
+            -scheme Lextures \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty

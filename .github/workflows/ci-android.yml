@@ -1,0 +1,55 @@
+# Lint, test, and build the Android app on PRs that touch clients/android/.
+name: CI — Android
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'clients/android/**'
+
+concurrency:
+  group: ci-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/android
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('clients/android/**/*.gradle.kts', 'clients/android/gradle/libs.versions.toml', 'clients/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Lint
+        run: ./gradlew lint --no-daemon
+
+      - name: Upload lint report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: android-lint-report
+          path: clients/android/app/build/reports/lint-results-debug.html
+          retention-days: 7
+
+      - name: Test
+        run: ./gradlew test --no-daemon
+
+      - name: Build (debug)
+        run: ./gradlew assembleDebug --no-daemon
