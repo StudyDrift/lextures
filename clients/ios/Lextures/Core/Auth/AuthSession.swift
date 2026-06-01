@@ -33,7 +33,7 @@ final class AuthSession {
     }
 
     func applyTokenResponse(_ response: AuthTokenResponse) throws {
-        if response.requiresMFA == true, let _ = response.mfaPendingToken {
+        if response.requiresMFA == true, response.mfaPendingToken != nil {
             mfaRequired = response.mfaSetupRequired == true ? .setup : .challenge
             throw AuthSessionError.mfaRequired
         }

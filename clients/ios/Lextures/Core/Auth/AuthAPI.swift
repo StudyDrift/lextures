@@ -18,13 +18,13 @@ struct PasswordPolicy: Decodable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        minLength = try c.decodeIfPresent(Int.self, forKey: .minLength) ?? 8
-        requireUpper = try c.decodeIfPresent(Bool.self, forKey: .requireUpper) ?? false
-        requireLower = try c.decodeIfPresent(Bool.self, forKey: .requireLower) ?? false
-        requireDigit = try c.decodeIfPresent(Bool.self, forKey: .requireDigit) ?? false
-        requireSpecial = try c.decodeIfPresent(Bool.self, forKey: .requireSpecial) ?? false
-        checkHibp = try c.decodeIfPresent(Bool.self, forKey: .checkHibp) ?? true
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        minLength = try container.decodeIfPresent(Int.self, forKey: .minLength) ?? 8
+        requireUpper = try container.decodeIfPresent(Bool.self, forKey: .requireUpper) ?? false
+        requireLower = try container.decodeIfPresent(Bool.self, forKey: .requireLower) ?? false
+        requireDigit = try container.decodeIfPresent(Bool.self, forKey: .requireDigit) ?? false
+        requireSpecial = try container.decodeIfPresent(Bool.self, forKey: .requireSpecial) ?? false
+        checkHibp = try container.decodeIfPresent(Bool.self, forKey: .checkHibp) ?? true
     }
 
     static let fallback = PasswordPolicy(
