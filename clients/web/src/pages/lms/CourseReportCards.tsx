@@ -1,0 +1,483 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import {
+  fetchCourseReportCards,
+  patchReportCard,
+  releaseReportCards,
+  fetchAICommentSuggestion,
+  fetchCommentBank,
+  type ReportCard,
+  type CommentBankEntry,
+} from '../../lib/report-cards-api'
+import { authorizedFetch } from '../../lib/api'
+
+type RosterEntry = { userId: string; email: string; displayName?: string | null }
+
+function studentLabel(s: RosterEntry): string {
+  return s.displayName?.trim() || s.email
+}
+
+function currentQuarter(): string {
+  const now = new Date()
+  const q = Math.ceil((now.getMonth() + 1) / 3)
+  return `Q${q}-${now.getFullYear()}`
+}
+
+export default function CourseReportCards() {
+  const { courseCode } = useParams<{ courseCode: string }>()
+  const [period, setPeriod] = useState<string>(currentQuarter())
+  const [cards, setCards] = useState<ReportCard[]>([])
+  const [roster, setRoster] = useState<RosterEntry[]>([])
+  const [commentBank, setCommentBank] = useState<CommentBankEntry[]>([])
+  const [orgId, setOrgId] = useState<string | null>(null)
+  const [courseName, setCourseName] = useState<string>('')
+
+  const [editingCardId, setEditingCardId] = useState<string | null>(null)
+  const [draftComments, setDraftComments] = useState<Record<string, string>>({})
+  const [aiLoading, setAiLoading] = useState<string | null>(null)
+  const [saving, setSaving] = useState<string | null>(null)
+  const [releasing, setReleasing] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [bankCategory, setBankCategory] = useState<string>('all')
+  const announceRef = useRef<HTMLDivElement>(null)
+
+  function announce(msg: string) {
+    if (announceRef.current) announceRef.current.textContent = msg
+  }
+
+  // Load current user's org and course info
+  useEffect(() => {
+    void (async () => {
+      try {
+        const res = await authorizedFetch('/api/v1/me')
+        if (!res.ok) return
+        const me = (await res.json()) as { orgId?: string }
+        if (me.orgId) setOrgId(me.orgId)
+      } catch { /* ignore */ }
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (!courseCode) return
+    void (async () => {
+      try {
+        const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}`)
+        if (!res.ok) return
+        const body = (await res.json()) as { name?: string }
+        setCourseName(body.name ?? courseCode)
+      } catch { /* ignore */ }
+    })()
+  }, [courseCode])
+
+  // Load roster
+  useEffect(() => {
+    if (!courseCode) return
+    void (async () => {
+      try {
+        const res = await authorizedFetch(
+          `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
+        )
+        if (!res.ok) return
+        const body = (await res.json()) as {
+          enrollments?: Array<{ userId: string; email: string; displayName?: string | null; role: string }>
+        }
+        const students = (body.enrollments ?? [])
+          .filter((e) => e.role === 'student' || e.role === 'learner')
+          .map((e) => ({ userId: e.userId, email: e.email, displayName: e.displayName }))
+        setRoster(students)
+      } catch { /* ignore */ }
+    })()
+  }, [courseCode])
+
+  // Load comment bank
+  useEffect(() => {
+    if (!orgId) return
+    void (async () => {
+      try {
+        const data = await fetchCommentBank(orgId)
+        setCommentBank(data.entries)
+      } catch { /* comment bank may not be seeded */ }
+    })()
+  }, [orgId])
+
+  // Load report cards for this course + period
+  const loadCards = useCallback(async () => {
+    if (!courseCode || !period) return
+    setLoading(true)
+    setError(null)
+    try {
+      const data = await fetchCourseReportCards(courseCode, period)
+      setCards(data.reportCards)
+      // Seed drafts from existing comments
+      const drafts: Record<string, string> = {}
+      for (const c of data.reportCards) {
+        drafts[c.id] = c.comment ?? ''
+      }
+      setDraftComments(drafts)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load report cards.')
+    } finally {
+      setLoading(false)
+    }
+  }, [courseCode, period])
+
+  useEffect(() => {
+    void loadCards()
+  }, [loadCards])
+
+  const cardForStudent = (studentId: string) => cards.find((c) => c.studentId === studentId)
+
+  const handleSaveComment = async (cardId: string) => {
+    setSaving(cardId)
+    try {
+      const updated = await patchReportCard(cardId, { comment: draftComments[cardId] ?? '' })
+      setCards((prev) => prev.map((c) => (c.id === cardId ? updated : c)))
+      setEditingCardId(null)
+      announce('Comment saved.')
+      setSuccessMsg('Comment saved.')
+      setTimeout(() => setSuccessMsg(null), 3000)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save comment.')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handleSubmitCard = async (cardId: string) => {
+    setSaving(cardId)
+    try {
+      const updated = await patchReportCard(cardId, {
+        comment: draftComments[cardId] ?? '',
+        status: 'submitted',
+      })
+      setCards((prev) => prev.map((c) => (c.id === cardId ? updated : c)))
+      announce('Report card submitted for review.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to submit.')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handleApproveCard = async (cardId: string) => {
+    setSaving(cardId)
+    try {
+      const updated = await patchReportCard(cardId, { status: 'approved' })
+      setCards((prev) => prev.map((c) => (c.id === cardId ? updated : c)))
+      announce('Report card approved.')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to approve.')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handleRelease = async () => {
+    if (!courseCode) return
+    setReleasing(true)
+    setError(null)
+    try {
+      const result = await releaseReportCards(courseCode, period)
+      setSuccessMsg(result.message)
+      announce(result.message)
+      await loadCards()
+      setTimeout(() => setSuccessMsg(null), 5000)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to release report cards.')
+    } finally {
+      setReleasing(false)
+    }
+  }
+
+  const handleAISuggest = async (studentId: string, cardId: string) => {
+    const card = cards.find((c) => c.id === cardId)
+    if (!card) return
+    setAiLoading(cardId)
+    try {
+      const absences = 0 // TODO: wire from attendance summary
+      const suggestion = await fetchAICommentSuggestion(
+        courseName,
+        card.finalGradePct ?? 0,
+        absences,
+      )
+      setDraftComments((prev) => ({ ...prev, [cardId]: suggestion }))
+      announce('AI suggestion inserted. Review and edit before saving.')
+    } catch {
+      setError('AI comment suggestion is unavailable.')
+    } finally {
+      setAiLoading(null)
+    }
+  }
+
+  const insertBankPhrase = (cardId: string, text: string) => {
+    setDraftComments((prev) => ({
+      ...prev,
+      [cardId]: prev[cardId] ? prev[cardId] + ' ' + text : text,
+    }))
+    announce('Phrase inserted.')
+  }
+
+  const bankCategories = ['all', ...Array.from(new Set(commentBank.map((e) => e.category))).sort()]
+  const filteredBank =
+    bankCategory === 'all' ? commentBank : commentBank.filter((e) => e.category === bankCategory)
+
+  const approvedCount = cards.filter((c) => c.status === 'approved').length
+  const releasedCount = cards.filter((c) => c.status === 'released').length
+
+  return (
+    <main className="p-4 max-w-5xl mx-auto" aria-label="Report Card Authoring">
+      <div
+        ref={announceRef}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      />
+
+      <h1 className="text-2xl font-bold mb-4">Report Cards</h1>
+
+      {/* Period selector */}
+      <div className="flex flex-wrap gap-3 items-center mb-6">
+        <label htmlFor="grading-period" className="font-medium text-sm">
+          Grading Period:
+        </label>
+        <input
+          id="grading-period"
+          type="text"
+          value={period}
+          onChange={(e) => setPeriod(e.target.value)}
+          className="border rounded px-2 py-1 text-sm w-32"
+          placeholder="Q1-2026"
+          aria-describedby="period-hint"
+        />
+        <span id="period-hint" className="text-xs text-gray-500">
+          e.g. Q1-2026, S1-2026
+        </span>
+        <span className="ms-auto text-sm text-gray-600">
+          {approvedCount} approved · {releasedCount} released of {roster.length} students
+        </span>
+      </div>
+
+      {error && (
+        <div role="alert" className="bg-red-50 border border-red-300 text-red-700 rounded p-3 mb-4 text-sm">
+          {error}
+        </div>
+      )}
+      {successMsg && (
+        <div role="status" className="bg-green-50 border border-green-300 text-green-700 rounded p-3 mb-4 text-sm">
+          {successMsg}
+        </div>
+      )}
+
+      {/* Comment bank sidebar */}
+      {commentBank.length > 0 && editingCardId && (
+        <aside
+          aria-label="Comment Bank"
+          className="mb-4 border rounded p-3 bg-gray-50 text-sm"
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <strong>Comment Bank</strong>
+            <select
+              value={bankCategory}
+              onChange={(e) => setBankCategory(e.target.value)}
+              className="text-xs border rounded px-1 py-0.5"
+              aria-label="Filter by category"
+            >
+              {bankCategories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat === 'all' ? 'All categories' : cat}
+                </option>
+              ))}
+            </select>
+          </div>
+          <ul className="flex flex-col gap-1 max-h-40 overflow-y-auto">
+            {filteredBank.map((entry) => (
+              <li key={entry.id}>
+                <button
+                  type="button"
+                  onClick={() => insertBankPhrase(editingCardId, entry.text)}
+                  className="text-start text-blue-700 hover:underline text-xs w-full"
+                  aria-label={`Insert: ${entry.text}`}
+                >
+                  {entry.text}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )}
+
+      {loading && <p className="text-sm text-gray-500">Loading report cards…</p>}
+
+      {/* Student table */}
+      {!loading && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm border-collapse" role="grid" aria-label="Report cards">
+            <thead>
+              <tr className="bg-gray-100 text-start">
+                <th scope="col" className="px-3 py-2 border font-medium">Student</th>
+                <th scope="col" className="px-3 py-2 border font-medium">Final %</th>
+                <th scope="col" className="px-3 py-2 border font-medium">Letter</th>
+                <th scope="col" className="px-3 py-2 border font-medium">Status</th>
+                <th scope="col" className="px-3 py-2 border font-medium">Comment</th>
+                <th scope="col" className="px-3 py-2 border font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {roster.map((student) => {
+                const card = cardForStudent(student.userId)
+                const isEditing = card && editingCardId === card.id
+                const isSaving = card && saving === card.id
+                const isAILoading = card && aiLoading === card.id
+                return (
+                  <tr key={student.userId} className="border-b hover:bg-gray-50">
+                    <td className="px-3 py-2 border">{studentLabel(student)}</td>
+                    <td className="px-3 py-2 border">
+                      {card?.finalGradePct != null ? `${card.finalGradePct.toFixed(1)}%` : '—'}
+                    </td>
+                    <td className="px-3 py-2 border">{card?.letterGrade ?? '—'}</td>
+                    <td className="px-3 py-2 border">
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          card?.status === 'released'
+                            ? 'bg-green-100 text-green-700'
+                            : card?.status === 'approved'
+                              ? 'bg-blue-100 text-blue-700'
+                              : card?.status === 'submitted'
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {card?.status ?? 'not started'}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 border max-w-xs">
+                      {isEditing && card ? (
+                        <textarea
+                          rows={3}
+                          className="w-full border rounded px-2 py-1 text-xs resize-y"
+                          value={draftComments[card.id] ?? ''}
+                          onChange={(e) =>
+                            setDraftComments((prev) => ({ ...prev, [card.id]: e.target.value }))
+                          }
+                          aria-label={`Comment for ${studentLabel(student)}`}
+                          autoFocus
+                        />
+                      ) : (
+                        <span className="text-xs text-gray-600 line-clamp-2">
+                          {card?.comment || <em className="text-gray-400">No comment</em>}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 border">
+                      {card ? (
+                        <div className="flex flex-wrap gap-1">
+                          {isEditing ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => void handleSaveComment(card.id)}
+                                disabled={!!isSaving}
+                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded disabled:opacity-50"
+                              >
+                                {isSaving ? 'Saving…' : 'Save'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void handleSubmitCard(card.id)}
+                                disabled={!!isSaving}
+                                className="px-2 py-1 bg-green-600 text-white text-xs rounded disabled:opacity-50"
+                              >
+                                Submit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => void handleAISuggest(student.userId, card.id)}
+                                disabled={!!isAILoading}
+                                className="px-2 py-1 bg-purple-600 text-white text-xs rounded disabled:opacity-50"
+                                aria-label="Get AI comment suggestion"
+                              >
+                                {isAILoading ? 'AI…' : 'AI Suggest'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingCardId(null)}
+                                className="px-2 py-1 border text-xs rounded"
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              {(card.status === 'draft' || card.status === 'submitted') && (
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingCardId(card.id)}
+                                  className="px-2 py-1 border text-xs rounded hover:bg-gray-100"
+                                >
+                                  Edit
+                                </button>
+                              )}
+                              {card.status === 'submitted' && (
+                                <button
+                                  type="button"
+                                  onClick={() => void handleApproveCard(card.id)}
+                                  disabled={!!isSaving}
+                                  className="px-2 py-1 bg-blue-600 text-white text-xs rounded disabled:opacity-50"
+                                >
+                                  Approve
+                                </button>
+                              )}
+                              {card.pdfUrl && (
+                                <a
+                                  href={`/api/v1/report-cards/${card.id}/pdf`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="px-2 py-1 bg-gray-600 text-white text-xs rounded"
+                                >
+                                  PDF
+                                </a>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">No card yet</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })}
+              {roster.length === 0 && !loading && (
+                <tr>
+                  <td colSpan={6} className="text-center py-6 text-sm text-gray-400">
+                    No students enrolled.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Release action */}
+      {approvedCount > 0 && (
+        <div className="mt-4 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => void handleRelease()}
+            disabled={releasing}
+            className="px-4 py-2 bg-green-700 text-white rounded text-sm font-medium disabled:opacity-50"
+          >
+            {releasing ? 'Releasing…' : `Release ${approvedCount} Approved Card(s) to Parents`}
+          </button>
+          <span className="text-xs text-gray-500">
+            Parents will see released report cards in the parent portal.
+          </span>
+        </div>
+      )}
+    </main>
+  )
+}

@@ -117,6 +117,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Route("/api/v1", func(s chi.Router) { d.registerAccommodationRoutes(s) })
 	d.registerAttendanceRoutes(r)
 	d.registerBehaviorRoutes(r)
+	d.registerReportCardRoutes(r)
 	r.Get("/api/v1/help/contextual-articles", d.handleHelpContextualArticles())
 	d.registerTranslationRoutes(r)
 	d.registerReadingLevelRoutes(r)

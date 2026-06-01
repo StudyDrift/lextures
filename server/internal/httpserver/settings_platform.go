@@ -104,6 +104,7 @@ type platformSettingsJSON struct {
 	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
 	FFParentPortal                  bool `json:"ffParentPortal"`
+	FFReportCards                   bool `json:"ffReportCards"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -239,6 +240,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
 			FFParentPortal:                  merged.FFParentPortal,
+				FFReportCards:                   merged.FFReportCards,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -347,6 +349,7 @@ type putPlatformBody struct {
 	RTLEnabled                      *bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled *bool `json:"securityDisclosureModuleEnabled"`
 	FFParentPortal                  *bool `json:"ffParentPortal"`
+	FFReportCards                   *bool `json:"ffReportCards"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -616,6 +619,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
 		setBool("ffparentportal", body.FFParentPortal, func(v bool) { wr.FFParentPortal = &v })
+		setBool("ffreportcards", body.FFReportCards, func(v bool) { wr.FFReportCards = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -707,6 +711,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
 			FFParentPortal:                  merged.FFParentPortal,
+				FFReportCards:                   merged.FFReportCards,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

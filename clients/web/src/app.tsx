@@ -73,6 +73,7 @@ import AttendanceExport from './pages/admin/AttendanceExport'
 import BehaviorDashboard from './pages/admin/BehaviorDashboard'
 import CourseAttendance from './pages/lms/CourseAttendance'
 import CourseBehavior from './pages/lms/CourseBehavior'
+import CourseReportCards from './pages/lms/CourseReportCards'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -170,6 +171,7 @@ export default function App() {
             <Route path="enrollments" element={<CourseEnrollments />} />
             <Route path="attendance" element={<CourseAttendance />} />
             <Route path="behavior" element={<CourseBehavior />} />
+            <Route path="report-cards" element={<CourseReportCards />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />

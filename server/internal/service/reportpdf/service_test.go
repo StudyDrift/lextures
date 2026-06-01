@@ -110,3 +110,55 @@ func TestBuildLearningActivityPDF_Empty(t *testing.T) {
 		t.Fatal("expected non-empty PDF bytes")
 	}
 }
+
+// ── Report Card PDF tests (plan 13.4) ─────────────────────────────────────────
+
+func TestBuildReportCardPDF_WithComment(t *testing.T) {
+	pct := 94.5
+	letter := "A"
+	comment := "Shows strong effort and improvement throughout the quarter."
+	in := ReportCardInput{
+		InstitutionName: "Springfield Elementary",
+		CourseName:      "Mathematics Grade 5",
+		CourseCode:      "MATH5",
+		GradingPeriod:   "Q1-2026",
+		GeneratedAt:     time.Date(2026, 10, 15, 12, 0, 0, 0, time.UTC),
+		Student: ReportCardStudent{
+			DisplayName:   "Alice Smith",
+			StudentID:     "STU-001",
+			FinalGradePct: &pct,
+			LetterGrade:   letter,
+			Comment:       comment,
+			Absences:      2,
+		},
+	}
+	b, err := BuildReportCardPDF(in)
+	if err != nil {
+		t.Fatalf("BuildReportCardPDF: %v", err)
+	}
+	if len(b) == 0 {
+		t.Fatal("expected non-empty PDF bytes")
+	}
+	if string(b[:5]) != "%PDF-" {
+		t.Errorf("output does not start with PDF header, got: %q", string(b[:10]))
+	}
+}
+
+func TestBuildReportCardPDF_NoGrade(t *testing.T) {
+	in := ReportCardInput{
+		CourseName:    "Science",
+		CourseCode:    "SCI",
+		GradingPeriod: "S1-2026",
+		GeneratedAt:   time.Now().UTC(),
+		Student: ReportCardStudent{
+			DisplayName: "Bob Jones",
+		},
+	}
+	b, err := BuildReportCardPDF(in)
+	if err != nil {
+		t.Fatalf("BuildReportCardPDF no grade: %v", err)
+	}
+	if len(b) == 0 {
+		t.Fatal("expected non-empty PDF bytes even without grade data")
+	}
+}
