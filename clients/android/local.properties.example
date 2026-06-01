@@ -1,0 +1,7 @@
+# Copy to local.properties (gitignored). Android Studio creates this file automatically for sdk.dir.
+#
+# Prefer the shared mobile dev setup from the repo root:
+#   bash clients/scripts/setup-mobile-dev.sh
+#
+# Or set the API URL manually (10.0.2.2 is the emulator alias for the host machine's localhost):
+# API_BASE_URL=http://10.0.2.2:8080

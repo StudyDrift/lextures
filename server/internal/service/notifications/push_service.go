@@ -95,6 +95,16 @@ func (s *PushService) EnqueueMeetingReminder(ctx context.Context, studentIDs []u
 	}
 }
 
+// EnqueueCanvasCourseImported notifies the importer that a Canvas course was copied into Lextures.
+func (s *PushService) EnqueueCanvasCourseImported(ctx context.Context, userID uuid.UUID, courseName, courseCode string) {
+	link := fmt.Sprintf("/courses/%s", courseCode)
+	title := "Course imported from Canvas"
+	body := fmt.Sprintf("%s is ready in Lextures.", courseName)
+	if err := s.Enqueue(ctx, userID, EventCanvasCourseImported, title, body, link); err != nil {
+		slog.Warn("push.canvas_course_imported", "err", err, "user_id", userID, "course_code", courseCode)
+	}
+}
+
 // EnqueueDiscussionReply creates an in-app + push notification for a discussion reply.
 func (s *PushService) EnqueueDiscussionReply(ctx context.Context, recipientIDs []uuid.UUID, courseName, threadTitle, courseCode, threadID string) {
 	link := fmt.Sprintf("%s/courses/%s/discussions/threads/%s", s.publicWebOrigin(), courseCode, threadID)

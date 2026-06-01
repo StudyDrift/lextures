@@ -110,7 +110,7 @@ struct AuthTextField: View {
     var isSecure = false
     var keyboard: UIKeyboardType = .default
     var textContentType: UITextContentType?
-    var autocapitalization: TextInputAutocapitalization = .never
+    var autocapitalization: UITextAutocapitalizationType = .none
 
     @Environment(\.colorScheme) private var colorScheme
     @FocusState private var focused: Bool
@@ -121,16 +121,14 @@ struct AuthTextField: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
 
-            Group {
-                if isSecure {
-                    SecureField(placeholder, text: $text)
-                } else {
-                    TextField(placeholder, text: $text)
-                        .keyboardType(keyboard)
-                        .textInputAutocapitalization(autocapitalization)
-                }
-            }
-            .textContentType(textContentType)
+            AuthFieldRepresentable(
+                text: $text,
+                placeholder: placeholder,
+                isSecure: isSecure,
+                keyboard: keyboard,
+                textContentType: textContentType,
+                autocapitalization: isSecure ? .none : autocapitalization
+            )
             .focused($focused)
             .padding(.horizontal, 12)
             .padding(.vertical, 10)

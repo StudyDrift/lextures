@@ -17,12 +17,22 @@ Select the **Lextures** scheme and an iPhone simulator or device. Set your **Dev
 
 ## API URL
 
-Debug builds default to `http://127.0.0.1:8080` (Simulator → Mac localhost). Override via:
+Local development uses the shared mobile config at `clients/mobile-dev.env` (copy from `mobile-dev.env.example`):
 
-- Xcode scheme environment variable `API_BASE_URL`, or
-- Target build setting `API_BASE_URL`
+```bash
+bash clients/scripts/setup-mobile-dev.sh
+```
 
-The app allows local HTTP networking for development (`NSAllowsLocalNetworking`).
+This points both native apps at your local Go API on port **8080**:
+
+| Platform | Default URL | Notes |
+|----------|-------------|-------|
+| iOS Simulator | `http://127.0.0.1:8080` | Maps `localhost` from `mobile-dev.env` |
+| Android Emulator | `http://10.0.2.2:8080` | Emulator alias for the host machine's `localhost` |
+
+On a **physical device**, set `API_HOST` in `mobile-dev.env` to your machine's LAN IP and re-run the setup script.
+
+Cleartext HTTP to localhost is allowed for development (`NSAllowsLocalNetworking`).
 
 ## Regenerating the Xcode project
 

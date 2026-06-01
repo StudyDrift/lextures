@@ -4928,6 +4928,33 @@ export async function postCourseImport(
   }
 }
 
+export type CanvasCourseListItem = {
+  id: number
+  name: string
+  courseCode?: string
+  workflowState?: string
+  termName?: string
+}
+
+/** POST /api/v1/integrations/canvas/courses — list teacher courses from Canvas (token not stored). */
+export async function fetchCanvasCourses(body: {
+  canvasBaseUrl: string
+  accessToken: string
+}): Promise<CanvasCourseListItem[]> {
+  const res = await authorizedFetch('/api/v1/integrations/canvas/courses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      canvasBaseUrl: body.canvasBaseUrl.trim(),
+      accessToken: body.accessToken.trim(),
+    }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const data = raw as { courses?: CanvasCourseListItem[] }
+  return data.courses ?? []
+}
+
 /** Mirrors server `CanvasImportInclude`; all default true when omitted. */
 export type CanvasImportInclude = {
   modules: boolean
@@ -4964,6 +4991,8 @@ function courseCanvasImportWebSocketUrl(courseCode: string): string | null {
   return `${u.origin}/api/v1/courses/${encodeURIComponent(courseCode)}/import/canvas/ws`
 }
 
+export const CANVAS_IMPORT_CANCELLED_MESSAGE = 'Import cancelled.'
+
 /**
  * Pulls course data from the Canvas REST API (via our server) and applies it like a JSON import.
  * Uses a WebSocket for progress messages (`onProgress`); the Canvas token is sent once and is not stored.
@@ -4972,6 +5001,7 @@ export async function postCourseImportCanvas(
   courseCode: string,
   body: PostCourseImportCanvasBody,
   onProgress?: (message: string) => void,
+  options?: { signal?: AbortSignal },
 ): Promise<void> {
   const url = courseCanvasImportWebSocketUrl(courseCode)
   const authToken = getAccessToken()
@@ -4982,9 +5012,12 @@ export async function postCourseImportCanvas(
     throw new Error('Sign in to import from Canvas.')
   }
 
+  const signal = options?.signal
+
   await new Promise<void>((resolve, reject) => {
     const ws = new WebSocket(url)
     let settled = false
+    let aborted = false
 
     const fail = (msg: string) => {
       if (settled) return
@@ -4992,7 +5025,21 @@ export async function postCourseImportCanvas(
       reject(new Error(msg))
     }
 
+    const onAbort = () => {
+      aborted = true
+      if (settled) return
+      settled = true
+      ws.close()
+      reject(new Error(CANVAS_IMPORT_CANCELLED_MESSAGE))
+    }
+
+    signal?.addEventListener('abort', onAbort, { once: true })
+
     ws.onopen = () => {
+      if (signal?.aborted) {
+        onAbort()
+        return
+      }
       ws.send(
         JSON.stringify({
           authToken,
@@ -5038,7 +5085,7 @@ export async function postCourseImportCanvas(
     }
 
     ws.onclose = () => {
-      if (!settled) {
+      if (!settled && !aborted) {
         fail('Connection closed before import finished.')
       }
     }

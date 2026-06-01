@@ -47,6 +47,8 @@ def main() -> None:
     app_group = gen_id()
     assets_ref = gen_id()
     info_plist_ref = gen_id()
+    dev_xcconfig_ref = gen_id()
+    config_group = gen_id()
     assets_build = gen_id()
 
     file_refs: dict[str, str] = {}
@@ -91,6 +93,9 @@ def main() -> None:
     )
     w(
         f"\t\t{info_plist_ref} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};"
+    )
+    w(
+        f"\t\t{dev_xcconfig_ref} /* Development.xcconfig */ = {{isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = \"<group>\"; }};"
     )
     w("/* End PBXFileReference section */")
 
@@ -157,10 +162,20 @@ def main() -> None:
     w('\t\t\tsourceTree = "<group>";')
     w("\t\t};")
 
+    w(f"\t\t{config_group} /* Config */ = {{")
+    w("\t\t\tisa = PBXGroup;")
+    w("\t\t\tchildren = (")
+    w(f"\t\t\t\t{dev_xcconfig_ref} /* Development.xcconfig */,")
+    w("\t\t\t);")
+    w("\t\t\tpath = Config;")
+    w('\t\t\tsourceTree = "<group>";')
+    w("\t\t};")
+
     w(f"\t\t{main_group} = {{")
     w("\t\t\tisa = PBXGroup;")
     w("\t\t\tchildren = (")
     w(f"\t\t\t\t{app_group} /* {APP_NAME} */,")
+    w(f"\t\t\t\t{config_group} /* Config */,")
     w(f"\t\t\t\t{products_group} /* Products */,")
     w("\t\t\t);")
     w('\t\t\tsourceTree = "<group>";')
@@ -268,8 +283,8 @@ def main() -> None:
     for cfg_id, name in ((target_debug, "Debug"), (target_release, "Release")):
         w(f"\t\t{cfg_id} /* {name} */ = {{")
         w("\t\t\tisa = XCBuildConfiguration;")
+        w(f"\t\t\tbaseConfigurationReference = {dev_xcconfig_ref} /* Development.xcconfig */;")
         w("\t\t\tbuildSettings = {")
-        w(f'\t\t\t\tAPI_BASE_URL = "http://127.0.0.1:8080";')
         w(f'\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;')
         w(f'\t\t\t\tASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;')
         w(f'\t\t\t\tCODE_SIGN_STYLE = Automatic;')
@@ -374,13 +389,6 @@ def main() -> None:
             ReferencedContainer = "container:{APP_NAME}.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "API_BASE_URL"
-            value = "http://127.0.0.1:8080"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
    </LaunchAction>
 </Scheme>
 """,

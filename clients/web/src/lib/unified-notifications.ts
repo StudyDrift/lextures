@@ -16,7 +16,12 @@ import {
   type CourseStructureItem,
 } from './courses-api'
 
-export type UnifiedNotificationKind = 'inbox' | 'feed_mention' | 'announcement' | 'graded'
+export type UnifiedNotificationKind =
+  | 'inbox'
+  | 'feed_mention'
+  | 'announcement'
+  | 'graded'
+  | 'alert'
 
 export type UnifiedNotification = {
   id: string
@@ -26,6 +31,44 @@ export type UnifiedNotification = {
   title: string
   subtitle: string
   href: string
+  /** Persisted inbox alert (settings.notifications); used for mark-read. */
+  alertId?: string
+  isRead?: boolean
+}
+
+/** Normalizes API action URLs to in-app router paths. */
+export function notificationActionHref(actionUrl: string): string {
+  const u = actionUrl.trim()
+  if (!u) return '/'
+  if (u.startsWith('/')) return u
+  try {
+    const parsed = new URL(u)
+    return `${parsed.pathname}${parsed.search}`
+  } catch {
+    return '/'
+  }
+}
+
+export type InboxAlertNotification = {
+  id: string
+  title: string
+  body: string
+  actionUrl: string
+  isRead: boolean
+  createdAt: string
+}
+
+export function inboxAlertsToUnified(alerts: InboxAlertNotification[]): UnifiedNotification[] {
+  return alerts.map((n) => ({
+    id: `alert:${n.id}`,
+    kind: 'alert' as const,
+    sortAt: n.createdAt,
+    title: n.title,
+    subtitle: n.body,
+    href: notificationActionHref(n.actionUrl),
+    alertId: n.id,
+    isRead: n.isRead,
+  }))
 }
 
 const FEED_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000

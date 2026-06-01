@@ -31,6 +31,10 @@ func normalizedLexturesEmailGuessFromCanvasUserMap(u map[string]any) string {
 	if strings.Contains(lid, "@") {
 		return lid
 	}
+	sis := strings.ToLower(strings.TrimSpace(strAt(u, "sis_user_id", "")))
+	if strings.Contains(sis, "@") {
+		return sis
+	}
 	return ""
 }
 
@@ -81,8 +85,29 @@ func canvasListCourseStudentUsersForGradeMatch(
 	return canvasGetArrayPaginated(ctx, client, canvasBase, accessToken, path, q)
 }
 
-// buildCanvasUserIDToLexturesUserID maps Canvas roster user ids → Lextures user ids using email/login.
-// Enrollment rows augment the roster when roster rows are unavailable or omit some learners (same lookup rules as enrollment import).
+func canvasMapCanvasUserToLextures(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	out map[int64]uuid.UUID,
+	canvasUID int64,
+	email string,
+) {
+	if canvasUID <= 0 || out == nil {
+		return
+	}
+	if _, dup := out[canvasUID]; dup {
+		return
+	}
+	em := strings.TrimSpace(email)
+	if em == "" {
+		return
+	}
+	if userID, ok := lexturesUUIDForMatchedCanvasEmail(ctx, pool, em); ok {
+		out[canvasUID] = userID
+	}
+}
+
+// buildCanvasUserIDToLexturesUserID maps Canvas user ids → Lextures user ids using roster/enrollment emails.
 func buildCanvasUserIDToLexturesUserID(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -90,84 +115,37 @@ func buildCanvasUserIDToLexturesUserID(
 	canvasBase, accessToken string,
 	canvasCourseID int64,
 	enrollmentRows []map[string]any,
+	rosterEmailByCanvasUID map[int64]string,
 ) map[int64]uuid.UUID {
-	// #region agent log
-	rosterLen := 0
-	rosterFetchErr := false
-	rosterEmailGuessRows := 0
-	// #endregion agent log
-
 	out := make(map[int64]uuid.UUID)
 	if pool == nil {
-		// #region agent log
-		canvasAgentDebugLog("canvas-import", "H1", "canvas_grade_import.go:buildCanvasUserIDToLexturesUserID", "user map skipped (nil pool)", map[string]any{
-			"finalMappingSize": 0,
-		})
-		// #endregion agent log
 		return out
 	}
-	if client != nil {
-		roster, err := canvasListCourseStudentUsersForGradeMatch(ctx, client, canvasBase, accessToken, canvasCourseID)
-		if err != nil {
-			// #region agent log
-			rosterFetchErr = true
-			// #endregion agent log
-		} else {
-			// #region agent log
-			rosterLen = len(roster)
-			// #endregion agent log
-			for _, u := range roster {
-				canvasUID := int64At(u, "id")
-				if canvasUID <= 0 {
-					continue
-				}
-				if eg := normalizedLexturesEmailGuessFromCanvasUserMap(u); eg != "" {
-					// #region agent log
-					rosterEmailGuessRows++
-					// #endregion agent log
-					if userID, ok := lexturesUUIDForMatchedCanvasEmail(ctx, pool, eg); ok {
-						out[canvasUID] = userID
-					}
-				}
-			}
-		}
+	for canvasUID, email := range rosterEmailByCanvasUID {
+		canvasMapCanvasUserToLextures(ctx, pool, out, canvasUID, email)
 	}
-
-	// #region agent log
-	enrollmentEmailGuessRows := 0
-	// #endregion agent log
 	for _, e := range enrollmentRows {
 		u := objAt(e, "user")
-		if u == nil {
-			continue
-		}
 		canvasUID := int64At(u, "id")
-		if canvasUID <= 0 {
-			continue
+		email := rosterEmailByCanvasUID[canvasUID]
+		if email == "" {
+			email = normalizedLexturesEmailGuessFromCanvasUserMap(u)
 		}
-		if _, dup := out[canvasUID]; dup {
-			continue
-		}
-		if eg := normalizedLexturesEmailGuessFromCanvasUserMap(u); eg != "" {
-			// #region agent log
-			enrollmentEmailGuessRows++
-			// #endregion agent log
-			if userID, ok := lexturesUUIDForMatchedCanvasEmail(ctx, pool, eg); ok {
-				out[canvasUID] = userID
+		canvasMapCanvasUserToLextures(ctx, pool, out, canvasUID, email)
+	}
+	if client != nil && len(out) == 0 {
+		roster, err := canvasListCourseStudentUsersForGradeMatch(ctx, client, canvasBase, accessToken, canvasCourseID)
+		if err == nil {
+			for _, u := range roster {
+				canvasUID := int64At(u, "id")
+				email := rosterEmailByCanvasUID[canvasUID]
+				if email == "" {
+					email = normalizedLexturesEmailGuessFromCanvasUserMap(u)
+				}
+				canvasMapCanvasUserToLextures(ctx, pool, out, canvasUID, email)
 			}
 		}
 	}
-
-	// #region agent log
-	canvasAgentDebugLog("canvas-import", "H1", "canvas_grade_import.go:buildCanvasUserIDToLexturesUserID", "canvas→lextures user mapping summary", map[string]any{
-		"rosterLen":                 rosterLen,
-		"rosterFetchErr":            rosterFetchErr,
-		"rosterRowsWithEmailGuess":  rosterEmailGuessRows,
-		"enrollmentRows":            len(enrollmentRows),
-		"enrollmentRowsEmailGuess":  enrollmentEmailGuessRows,
-		"finalMappingSize":          len(out),
-	})
-	// #endregion agent log
 	return out
 }
 

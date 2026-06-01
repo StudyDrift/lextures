@@ -41,7 +41,7 @@ services:
       # sslmode=disable avoids TLS negotiation issues with the local Postgres container.
       DATABASE_URL: postgres://studydrift:studydrift@postgres:5432/studydrift?sslmode=disable
       JWT_SECRET: change-me-in-production-use-a-long-random-string
-      # First password Global Admin only when signup email matches (see docs/SECURITY_ISSUES.md C2).
+      # First password Global Admin only when signup email matches (see docs/getting-started.md, .env.example).
       BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       RUN_MIGRATIONS: "true"
       # Reconcile _sqlx_migrations checksums for listed idempotent migrations after SQL edits in dev.

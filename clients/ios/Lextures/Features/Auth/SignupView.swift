@@ -103,7 +103,7 @@ struct SignupView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 24)
         }
-        .scrollDismissesKeyboard(.interactively)
+        .scrollDismissesKeyboard(.automatic)
         .task {
             policy = await AuthAPI.fetchPasswordPolicy()
         }

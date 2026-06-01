@@ -1,5 +1,6 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Download, GraduationCap, Upload } from 'lucide-react'
+import { CanvasReadOnlyNotice } from '../../components/canvas/canvas-read-only-notice'
 import { BookLoader } from '../../components/quiz/book-loader'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -253,14 +254,14 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
           <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
             From Canvas LMS
           </h3>
-          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-            Use a Canvas personal access token. Choose what to pull below (all are on by default).
-            We map Canvas into this course; anyone with a matching email gets enrolled when
-            enrollments are included; if they do not have a Lexters account yet, one is created with
-            a random password (they can use password reset to sign in, if your deployment offers it).
-            The token is sent once for the import (HTTPS and WebSocket); Lextures does not store
-            it on the server. You can optionally keep the URL and token in this browser for the next
-            course import.
+          <CanvasReadOnlyNotice className="mt-3" />
+          <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+            Use a Canvas personal access token with read-only access. Choose what to pull below (all
+            are on by default). We map Canvas into this course; roster members with an email in
+            Canvas get a Lextures account when needed and are enrolled when enrollments are included.
+            The token is sent once for the import (HTTPS and
+            WebSocket); Lextures does not store it on the server. You can optionally keep the URL
+            and token in this browser for the next course import.
           </p>
           <fieldset className="mt-4 rounded-xl border border-slate-200 p-4 dark:border-neutral-600">
             <legend className="px-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
@@ -272,11 +273,15 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                   ['modules', 'Modules', 'Outline, wiki pages, discussions, links, and other module items (not assignments/quizzes).'] as const,
                   ['assignments', 'Assignments', 'Assignment prompts, due dates, and submission settings.'] as const,
                   ['quizzes', 'Quizzes', 'Quizzes and questions when Canvas exposes them.'] as const,
-                  ['enrollments', 'Enrollments', 'Active and invited roster (matched by email).'] as const,
+                  [
+                    'enrollments',
+                    'Enrollments',
+                    'Active and invited roster; creates Lextures accounts from Canvas emails when needed.',
+                  ] as const,
                   [
                     'grades',
                     'Grades',
-                    'Per-learner scores on imported assignments and quizzes (max points + gradebook cells). Only students whose Canvas email matches a Lextures account are included.',
+                    'Per-learner scores on imported assignments and quizzes (max points + gradebook cells). Learners need an email in Canvas; accounts are created when missing.',
                   ] as const,
                   ['settings', 'Settings', 'Course title, overview, dates, visibility, and syllabus sections.'] as const,
                 ] as const

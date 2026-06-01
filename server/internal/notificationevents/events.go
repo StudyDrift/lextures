@@ -12,6 +12,7 @@ const (
 	WelcomeInvite          = "welcome_invite"
 	MeetingReminder        = "meeting_reminder"
 	CoachingTipWeekly      = "coaching_tip_weekly"
+	CanvasCourseImported   = "canvas_course_imported"
 )
 
 // All is the canonical list for defaults and UI.
@@ -26,4 +27,5 @@ var All = []string{
 	WelcomeInvite,
 	MeetingReminder,
 	CoachingTipWeekly,
+	CanvasCourseImported,
 }

@@ -15,6 +15,14 @@ func (d Deps) notificationsService() *notifications.Service {
 	return &notifications.Service{Pool: d.Pool, Config: d.effectiveConfig()}
 }
 
+func (d Deps) pushNotificationService() *notifications.PushService {
+	return &notifications.PushService{
+		Pool:   d.Pool,
+		Config: d.effectiveConfig(),
+		SSEHub: d.NotifHub,
+	}
+}
+
 func (d Deps) emitDiscussionReplyNotifications(ctx context.Context, courseID uuid.UUID, courseCode string, threadID, authorID uuid.UUID, threadTitle string) {
 	ns := d.notificationsService()
 	if !ns.Config.EmailNotificationsEnabled {

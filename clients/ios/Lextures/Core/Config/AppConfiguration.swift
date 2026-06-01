@@ -1,6 +1,6 @@
 import Foundation
 
-/// Runtime API configuration. Override `API_BASE_URL` in the Xcode scheme or Info.plist for staging/production.
+/// Runtime API configuration. Debug builds read `API_BASE_URL` from `Config/Development.xcconfig` (see `clients/scripts/setup-mobile-dev.sh`).
 enum AppConfiguration {
     private static let defaultAPIBase = "http://127.0.0.1:8080"
 
