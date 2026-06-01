@@ -60,6 +60,16 @@ bash clients/android/scripts/export-app-icon.sh
 
 Access and refresh tokens are stored in EncryptedSharedPreferences. MFA-required accounts show a message until a dedicated MFA screen is implemented.
 
+## CI
+
+The `.github/workflows/ci-android.yml` workflow runs on every PR that touches `clients/android/`. It performs three steps in order:
+
+1. **Lint** — `./gradlew lint` (Android built-in lint; HTML report uploaded as a workflow artifact)
+2. **Test** — `./gradlew test` (JVM unit tests)
+3. **Build** — `./gradlew assembleDebug`
+
+No secrets or signing config are required for the debug build.
+
 ## Next features (planned)
 
 - Dashboard and course navigation

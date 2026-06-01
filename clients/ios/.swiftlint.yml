@@ -1,0 +1,9 @@
+disabled_rules:
+  # Trailing commas in collection literals are intentional — they produce
+  # cleaner diffs when items are added or reordered.
+  - trailing_comma
+
+line_length:
+  warning: 150
+  error: 200
+  ignores_comments: true

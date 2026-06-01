@@ -63,6 +63,16 @@ bash clients/ios/scripts/export-app-icon.sh
 
 Access and refresh tokens are stored in the Keychain. MFA-required accounts show a message until a dedicated MFA screen is implemented.
 
+## CI
+
+The `.github/workflows/ci-ios.yml` workflow runs on every PR that touches `clients/ios/`. It performs three steps in order:
+
+1. **Lint** — `swiftlint lint` with inline GitHub annotations on the PR diff
+2. **Build** — `xcodebuild build` targeting `generic/platform=iOS Simulator` (`CODE_SIGNING_ALLOWED=NO`)
+3. **Test** — `xcodebuild test` on an iPhone 16 simulator (`CODE_SIGNING_ALLOWED=NO`)
+
+No provisioning profile or Apple developer account is needed for simulator builds.
+
 ## Next features (planned)
 
 - Dashboard and course navigation
