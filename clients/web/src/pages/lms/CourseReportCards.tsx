@@ -191,7 +191,7 @@ export default function CourseReportCards() {
     }
   }
 
-  const handleAISuggest = async (studentId: string, cardId: string) => {
+  const handleAISuggest = async (_studentId: string, cardId: string) => {
     const card = cards.find((c) => c.id === cardId)
     if (!card) return
     setAiLoading(cardId)
