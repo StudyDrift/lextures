@@ -37,7 +37,7 @@ jobs:
           xcodebuild build \
             -project Lextures.xcodeproj \
             -scheme Lextures \
-            -destination 'generic/platform=iOS Simulator' \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
             -configuration Debug \
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty
