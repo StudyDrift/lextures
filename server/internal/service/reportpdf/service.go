@@ -1,4 +1,4 @@
-// Package reportpdf generates formatted PDF reports using gofpdf (plan 9.8).
+// Package reportpdf generates formatted PDF reports using gofpdf (plans 9.8, 13.4).
 package reportpdf
 
 import (
@@ -218,4 +218,95 @@ func truncate(s string, max int) string {
 		return s
 	}
 	return s[:max-1] + "…"
+}
+
+// ── Report Card PDF (plan 13.4) ───────────────────────────────────────────────
+
+// ReportCardStudent is one student row in a report card PDF.
+type ReportCardStudent struct {
+	DisplayName   string
+	StudentID     string
+	FinalGradePct *float64
+	LetterGrade   string
+	Comment       string
+	Absences      int
+}
+
+// ReportCardInput describes one report card document (one student, one course, one period).
+type ReportCardInput struct {
+	InstitutionName string
+	CourseName      string
+	CourseCode      string
+	GradingPeriod   string
+	GeneratedAt     time.Time
+	Student         ReportCardStudent
+}
+
+// BuildReportCardPDF renders a single student report card as PDF bytes.
+func BuildReportCardPDF(in ReportCardInput) ([]byte, error) {
+	pdf := newPDF()
+	title := "Report Card"
+	subtitle := fmt.Sprintf("%s (%s)  —  %s", in.CourseName, in.CourseCode, in.GradingPeriod)
+	addHeaderPage(pdf, in.InstitutionName, title, subtitle, in.GeneratedAt, true)
+
+	// Student info block
+	pdf.SetFont("Helvetica", "B", 10)
+	pdf.SetXY(marginL, pdf.GetY()+4)
+	pdf.Cell(40, 7, "Student:")
+	pdf.SetFont("Helvetica", "", 10)
+	pdf.Cell(contentW-40, 7, in.Student.DisplayName)
+	pdf.Ln(7)
+
+	if in.Student.StudentID != "" {
+		pdf.SetFont("Helvetica", "B", 10)
+		pdf.SetXY(marginL, pdf.GetY())
+		pdf.Cell(40, 7, "Student ID:")
+		pdf.SetFont("Helvetica", "", 10)
+		pdf.Cell(contentW-40, 7, in.Student.StudentID)
+		pdf.Ln(7)
+	}
+
+	pdf.SetXY(marginL, pdf.GetY()+2)
+	pdf.SetDrawColor(180, 180, 180)
+	pdf.Line(marginL, pdf.GetY(), pageW-marginR, pdf.GetY())
+	pdf.Ln(4)
+
+	// Grade summary table
+	pdf.SetFont("Helvetica", "B", 9)
+	colW := []float64{70, 40, 40, 30}
+	drawRow(pdf, colW, []string{"Course", "Final %", "Letter Grade", "Absences"}, true)
+	pdf.SetFont("Helvetica", "", 9)
+
+	pctStr := "—"
+	if in.Student.FinalGradePct != nil {
+		pctStr = fmt.Sprintf("%.1f%%", *in.Student.FinalGradePct)
+	}
+	letterStr := in.Student.LetterGrade
+	if letterStr == "" {
+		letterStr = "—"
+	}
+	absStr := fmt.Sprintf("%d", in.Student.Absences)
+	drawRow(pdf, colW, []string{truncate(in.CourseName, 38), pctStr, letterStr, absStr}, false)
+	pdf.Ln(6)
+
+	// Comment section
+	if strings.TrimSpace(in.Student.Comment) != "" {
+		pdf.SetFont("Helvetica", "B", 10)
+		pdf.SetXY(marginL, pdf.GetY()+2)
+		pdf.Cell(contentW, 7, "Teacher Comment:")
+		pdf.Ln(7)
+		pdf.SetFont("Helvetica", "", 9)
+		pdf.SetXY(marginL, pdf.GetY())
+		pdf.MultiCell(contentW, 5, in.Student.Comment, "1", "L", false)
+		pdf.Ln(4)
+	}
+
+	// Signature line
+	pdf.SetXY(marginL, pdf.GetY()+10)
+	pdf.SetFont("Helvetica", "", 9)
+	pdf.Cell(80, 5, "Teacher Signature: ____________________")
+	pdf.Cell(80, 5, "Date: ____________________")
+	pdf.Ln(10)
+
+	return renderPDF(pdf)
 }
