@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,7 +7,19 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-val apiBaseUrl: String = (project.findProperty("API_BASE_URL") as String?)?.trim().orEmpty()
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
+val apiBaseUrl: String = sequenceOf(
+    localProperties.getProperty("API_BASE_URL"),
+    project.findProperty("API_BASE_URL") as String?,
+)
+    .mapNotNull { value -> value?.trim()?.takeIf { it.isNotEmpty() } }
+    .firstOrNull()
+    .orEmpty()
 
 android {
     namespace = "com.lextures.android"

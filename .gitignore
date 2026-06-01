@@ -80,3 +80,7 @@ test-results/
 # Local dev / IDE tooling (machine-specific)
 .antigravitycli/
 server/bin
+
+# Native mobile local API configuration
+clients/mobile-dev.env
+clients/ios/Config/Development.local.xcconfig

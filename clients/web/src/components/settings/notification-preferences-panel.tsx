@@ -21,6 +21,7 @@ const EVENT_LABELS: Record<string, string> = {
   assignment_due_reminder: 'Assignment due reminder',
   password_reset: 'Password reset',
   welcome_invite: 'Welcome / invite',
+  canvas_course_imported: 'Canvas course imported',
 }
 
 const DIGEST_OPTIONS: { value: PreferenceRow['digestMode']; label: string }[] = [

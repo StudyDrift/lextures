@@ -499,22 +499,23 @@ function HomePage() {
                     <span className="text-indigo-300">cd</span>{' '}
                     <span className="text-slate-300">lextures</span>
                   </p>
-                  <p className="mt-2 text-slate-500"># Start with Docker Compose</p>
+                  <p className="mt-2 text-slate-500"># First admin (before signup)</p>
                   <p>
                     <span className="text-emerald-400">$</span>{' '}
-                    <span className="text-indigo-300">docker compose up</span>{' '}
-                    <span className="text-slate-500">-d</span>
+                    <span className="text-indigo-300">echo</span>{' '}
+                    <span className="text-amber-200/90">&apos;BOOTSTRAP_ADMIN_EMAIL=you@example.com&apos;</span>{' '}
+                    <span className="text-indigo-300">&gt;&gt; .env</span>
                   </p>
-                  <p className="mt-2 text-slate-500"># Or run locally</p>
+                  <p className="mt-2 text-slate-500"># Dev stack (web :5173, API :8080)</p>
                   <p>
                     <span className="text-emerald-400">$</span>{' '}
-                    <span className="text-indigo-300">make</span>{' '}
-                    <span className="text-slate-300">dev</span>
+                    <span className="text-indigo-300">docker compose</span>{' '}
+                    <span className="text-slate-300">-f docker-compose.yml -f docker-compose.dev.yml up --build -d</span>
                   </p>
                   <p className="mt-2">
                     <span className="text-slate-500">✓</span>{' '}
-                    <span className="text-emerald-400">Server running on</span>{' '}
-                    <span className="text-indigo-400 underline underline-offset-2">http://localhost:8080</span>
+                    <span className="text-emerald-400">Sign up at</span>{' '}
+                    <span className="text-indigo-400 underline underline-offset-2">http://localhost:5173</span>
                   </p>
                 </div>
               </div>

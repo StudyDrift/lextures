@@ -3,6 +3,7 @@ package com.lextures.android.core.auth
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.network.ApiError
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,7 +65,7 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
     }
 
     fun serverUnreachableMessage(): String =
-        "Could not reach the server. Is the API running?"
+        "Could not reach the server at ${AppConfiguration.apiBaseUrl}. Is the API running?"
 
     fun mapError(error: Throwable): String {
         return when (error) {

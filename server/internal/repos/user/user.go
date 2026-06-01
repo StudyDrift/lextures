@@ -145,6 +145,15 @@ RETURNING ` + userRowColumns
 	return scanInsertedUserRow(row)
 }
 
+// InsertUserInOrgTx creates a user in a specific organization (Canvas import provisioning).
+func InsertUserInOrgTx(ctx context.Context, tx pgx.Tx, orgID uuid.UUID, email, passwordHash string, displayName *string) (*Row, error) {
+	const q = `INSERT INTO "user".users (email, password_hash, display_name, org_id)
+VALUES ($1, $2, $3, $4)
+RETURNING ` + userRowColumns
+	row := tx.QueryRow(ctx, q, email, passwordHash, displayName, orgID)
+	return scanInsertedUserRow(row)
+}
+
 // SetPasswordHash updates the user's password hash (Argon2id PHC string).
 func SetPasswordHash(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, passwordHash string) error {
 	const q = `UPDATE "user".users SET password_hash = $2 WHERE id = $1::uuid`

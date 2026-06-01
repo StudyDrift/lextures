@@ -4,6 +4,8 @@ import { Bell, BellRing, ClipboardCheck, Inbox, Megaphone, MessageCircle, X } fr
 import { Link } from 'react-router-dom'
 import {
   fetchUnifiedNotifications,
+  inboxAlertsToUnified,
+  notificationActionHref,
   type UnifiedNotification,
   type UnifiedNotificationKind,
 } from '../../lib/unified-notifications'
@@ -49,6 +51,8 @@ function kindIcon(kind: UnifiedNotificationKind) {
       return Megaphone
     case 'graded':
       return ClipboardCheck
+    case 'alert':
+      return BellRing
   }
 }
 
@@ -95,7 +99,13 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const mailboxRevision = useMailboxRevision()
-  const { notifications: alertItems, unreadCount: alertsUnread, markAllRead, refresh: refreshAlerts } = useInboxNotifications()
+  const {
+    notifications: alertItems,
+    unreadCount: alertsUnread,
+    markRead: markAlertRead,
+    markAllRead,
+    refresh: refreshAlerts,
+  } = useInboxNotifications()
 
   useEffect(() => {
     if (open) return
@@ -178,10 +188,18 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
     return () => window.clearTimeout(t)
   }, [entered])
 
+  const mergedAll = useMemo(() => {
+    const alerts = inboxAlertsToUnified(alertItems)
+    const combined = [...alerts, ...items]
+    combined.sort((a, b) => new Date(b.sortAt).getTime() - new Date(a.sortAt).getTime())
+    return combined
+  }, [alertItems, items])
+
   const filtered = useMemo(() => {
-    if (filter === 'all' || filter === 'alerts') return items
+    if (filter === 'all') return mergedAll
+    if (filter === 'alerts') return []
     return items.filter((i) => i.kind === filter)
-  }, [items, filter])
+  }, [filter, mergedAll, items])
 
   if (!open && !portalVisible) return null
 
@@ -283,8 +301,11 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                 {alertItems.map((n) => (
                   <li key={n.id}>
                     <Link
-                      to={n.actionUrl || '/'}
-                      onClick={onClose}
+                      to={notificationActionHref(n.actionUrl)}
+                      onClick={() => {
+                        if (!n.isRead) void markAlertRead(n.id)
+                        onClose()
+                      }}
                       className={`flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
                     >
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
@@ -327,18 +348,36 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
           <ul className="flex flex-col gap-1 pb-[env(safe-area-inset-bottom)]">
             {filtered.map((row) => {
               const Icon = kindIcon(row.kind)
+              const unreadAlert = row.kind === 'alert' && !row.isRead
               return (
                 <li key={row.id}>
                   <Link
                     to={row.href}
-                    onClick={onClose}
-                    className="flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800"
+                    onClick={() => {
+                      if (row.alertId && !row.isRead) {
+                        void markAlertRead(row.alertId)
+                      }
+                      onClose()
+                    }}
+                    className={[
+                      'flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800',
+                      unreadAlert ? '' : row.kind === 'alert' ? 'opacity-60' : '',
+                    ].join(' ')}
                   >
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
                       <Icon className="h-5 w-5" aria-hidden />
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="line-clamp-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+                      <span
+                        className={[
+                          'line-clamp-2 text-sm font-medium',
+                          unreadAlert
+                            ? 'text-slate-900 dark:text-neutral-100'
+                            : row.kind === 'alert'
+                              ? 'text-slate-500 dark:text-neutral-400'
+                              : 'text-slate-900 dark:text-neutral-100',
+                        ].join(' ')}
+                      >
                         {row.title}
                       </span>
                       <span className="mt-0.5 line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
@@ -348,6 +387,9 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                         {formatTimeAgoFromIso(row.sortAt)}
                       </span>
                     </span>
+                    {unreadAlert ? (
+                      <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-hidden />
+                    ) : null}
                   </Link>
                 </li>
               )

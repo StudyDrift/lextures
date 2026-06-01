@@ -1,5 +1,4 @@
-import type { LucideIcon } from 'lucide-react'
-import { useId, type ReactNode } from 'react'
+import { useId, type ComponentType, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 
 export type EmptyStateAction =
@@ -7,7 +6,7 @@ export type EmptyStateAction =
   | { label: string; onClick: () => void }
 
 export type EmptyStateProps = {
-  icon: LucideIcon
+  icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' }>
   title: string
   body?: ReactNode
   primaryAction?: EmptyStateAction

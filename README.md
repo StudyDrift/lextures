@@ -63,7 +63,7 @@ For architecture notes (Compose port layout, dev vs prod web, testing convention
 
 ## Getting started
 
-See **[Getting started](docs/getting-started.md)** for prerequisites, Docker commands, and local development without full Docker.
+See **[Getting started](docs/getting-started.md)** for prerequisites, Docker commands, **first Global Admin setup** (`BOOTSTRAP_ADMIN_EMAIL`), and local development without full Docker. The marketing site also publishes [Self-hosting](https://lextures.com/docs/self-hosting) (source: [`www/src/docs/self-hosting.md`](www/src/docs/self-hosting.md)).
 
 ## Contributing
 

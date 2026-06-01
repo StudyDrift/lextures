@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject, type SVGProps } from 'react'
 import { Link } from 'react-router-dom'
 import {
   closestCorners,
@@ -18,6 +18,8 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { BookOpen, Plus } from 'lucide-react'
+import { CanvasImportCoursesModal } from './canvas-import-courses-modal'
+import { CourseCatalogImportMenu } from './course-catalog-import-menu'
 import { EmptyState } from '../../components/ui/empty-state'
 import { CoursesCatalogSkeleton } from '../../components/ui/lms-content-skeletons'
 import { LmsPage } from './lms-page'
@@ -35,6 +37,36 @@ import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
 
 export type { CoursePublic } from '../../lib/courses-api'
+
+function CreateCourseIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
+      {/* Left page */}
+      <path
+        d="M12 20.5C10.4 19.7 8.4 19.5 6 19.5C4.3 19.5 3 19.7 2 20V5.5C3 5.2 4.3 5 6 5C8.5 5 10.5 5.3 12 6V20.5Z"
+        fill="#e0e7ff"
+        stroke="#6366f1"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      {/* Right page */}
+      <path
+        d="M12 20.5C13.6 19.7 15.6 19.5 18 19.5C19.7 19.5 21 19.7 22 20V5.5C21 5.2 19.7 5 18 5C15.5 5 13.5 5.3 12 6V20.5Z"
+        fill="#c7d2fe"
+        stroke="#6366f1"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      {/* Lines on left page */}
+      <path d="M4.5 10H9.5" stroke="#6366f1" strokeWidth="1" strokeLinecap="round" />
+      <path d="M4.5 13H9.5" stroke="#6366f1" strokeWidth="1" strokeLinecap="round" />
+      <path d="M4.5 16H7" stroke="#6366f1" strokeWidth="1" strokeLinecap="round" />
+      {/* Plus on right page */}
+      <path d="M18 10.5V15.5" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M15.5 13H20.5" stroke="#6366f1" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
 
 const COURSE_GRID_SORT_ID = 'course-catalog-grid'
 
@@ -169,6 +201,7 @@ export default function Courses() {
   const coursesRevision = useCoursesRevision()
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [canvasImportOpen, setCanvasImportOpen] = useState(false)
   const [termFilter, setTermFilter] = useState<string>('')
   const [termList, setTermList] = useState<OrgTerm[]>([])
   const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
@@ -297,13 +330,16 @@ export default function Courses() {
       description="Browse and open your enrolled courses. Drag a card to reorder your catalog."
       actions={
         <RequirePermission permission={PERM_COURSE_CREATE} fallback={null}>
-          <Link
-            to="/courses/create"
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 sm:w-auto"
-          >
-            <Plus className="h-4 w-4" aria-hidden />
-            New course
-          </Link>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <CourseCatalogImportMenu onImportCanvas={() => setCanvasImportOpen(true)} />
+            <Link
+              to="/courses/create"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
+              New course
+            </Link>
+          </div>
         </RequirePermission>
       }
     >
@@ -341,7 +377,7 @@ export default function Courses() {
         <div className="mt-8">
           {!permLoading && allows(PERM_COURSE_CREATE) ? (
             <EmptyState
-              icon={BookOpen}
+              icon={CreateCourseIcon}
               title="Create your first course"
               body="You do not have any courses in your catalog yet. Add a title and description to get started, then invite learners from the course dashboard."
               primaryAction={{ label: 'New course', to: '/courses/create' }}
@@ -413,6 +449,10 @@ export default function Courses() {
           </SortableContext>
         </DndContext>
       )}
+      <CanvasImportCoursesModal
+        open={canvasImportOpen}
+        onClose={() => setCanvasImportOpen(false)}
+      />
     </LmsPage>
   )
 }

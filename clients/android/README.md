@@ -19,16 +19,22 @@ Select an emulator or device and run the **app** configuration.
 
 ## API URL
 
-Debug builds default to `http://10.0.2.2:8080` (emulator → host `localhost`). On a physical device, use your machine's LAN IP.
-
-Override via Gradle property:
+Local development uses the shared mobile config at `clients/mobile-dev.env` (copy from `mobile-dev.env.example`):
 
 ```bash
-cd clients/android
-./gradlew assembleDebug -PAPI_BASE_URL=http://192.168.1.42:8080
+bash clients/scripts/setup-mobile-dev.sh
 ```
 
-Or set `API_BASE_URL` in `gradle.properties`.
+This points both native apps at your local Go API on port **8080**:
+
+| Platform | Default URL | Notes |
+|----------|-------------|-------|
+| Android Emulator | `http://10.0.2.2:8080` | Emulator alias for the host machine's `localhost` |
+| iOS Simulator | `http://127.0.0.1:8080` | See `clients/ios/README.md` |
+
+On a **physical device**, set `API_HOST` in `mobile-dev.env` to your machine's LAN IP and re-run the setup script.
+
+Override per build: `./gradlew -PAPI_BASE_URL=http://192.168.1.42:8080 assembleDebug`
 
 Cleartext HTTP to localhost is allowed for development (`res/xml/network_security_config.xml`), matching iOS `NSAllowsLocalNetworking`.
 

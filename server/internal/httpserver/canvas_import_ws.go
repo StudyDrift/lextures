@@ -22,7 +22,6 @@ import (
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/courseroles"
-	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 // handleCourseImportCanvasWS is GET /api/v1/courses/{course_code}/import/canvas/ws.
@@ -98,7 +97,7 @@ func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 		if !emit("Connecting to Canvas...") {
 			return
 		}
-		err = d.runCanvasImport(r.Context(), courseCode, req.Mode, req.CanvasBaseURL, req.CanvasCourseID, req.AccessToken, include, emit)
+		err = d.runCanvasImport(r.Context(), uid, courseCode, req.Mode, req.CanvasBaseURL, req.CanvasCourseID, req.AccessToken, include, emit)
 		if err != nil {
 			_ = wsWriteJSON(r.Context(), c, map[string]any{"type": "error", "message": err.Error()})
 			return
@@ -142,6 +141,7 @@ func wsWriteJSON(ctx context.Context, c *websocket.Conn, v any) error {
 
 func (d Deps) runCanvasImport(
 	ctx context.Context,
+	importerUserID uuid.UUID,
 	courseCode, mode, canvasBaseURL, canvasCourseIDRaw, accessToken string,
 	include canvasImportInclude,
 	progress func(string) bool,
@@ -160,7 +160,7 @@ func (d Deps) runCanvasImport(
 	if err != nil {
 		return errors.New("Canvas course id must be a number (the id from the Canvas course URL).")
 	}
-	client := &http.Client{Timeout: 180 * time.Second}
+	client := canvasHTTPClient()
 
 	course, err := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d", canvasCourseID), url.Values{"include[]": []string{"syllabus_body"}})
 	if err != nil {
@@ -181,43 +181,25 @@ func (d Deps) runCanvasImport(
 	}
 	enrollmentRows := []map[string]any{}
 	rosterEmailByCanvasUID := make(map[int64]string)
-	if include.Enrollments {
+	needEnrollmentRows := include.Enrollments || include.Grades
+	if needEnrollmentRows {
 		if !progress("Loading Canvas enrollments...") {
 			return context.Canceled
 		}
-		enrollmentRows, err = canvasGetArrayPaginated(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/enrollments", canvasCourseID), url.Values{"state[]": []string{"active", "invited", "creation_pending"}})
+		enrollmentRows, err = canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+			fmt.Sprintf("courses/%d/enrollments", canvasCourseID), canvasEnrollmentListQuery())
 		if err != nil {
 			return err
 		}
-		// Load the full user roster so we can resolve emails; Canvas enrollment
-		// mini-user objects often omit the email field entirely.
-		if rosterUsers, re := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
-			fmt.Sprintf("courses/%d/users", canvasCourseID),
-			url.Values{"include[]": []string{"email"}}); re == nil {
-			for _, ru := range rosterUsers {
-				uid := int64At(ru, "id")
-				if uid > 0 {
-					if eg := normalizedLexturesEmailGuessFromCanvasUserMap(ru); eg != "" {
-						rosterEmailByCanvasUID[uid] = eg
-					}
-				}
-			}
+		rosterEmailByCanvasUID, err = canvasRosterEmailsByCanvasUserID(ctx, client, canvasBase, accessToken, canvasCourseID)
+		if err != nil {
+			return err
 		}
 	}
 
-	rowsForUserMatch := enrollmentRows
-	if include.Grades && !include.Enrollments {
-		if !progress("Loading Canvas enrollments to match grades to learner accounts...") {
-			return context.Canceled
-		}
-		rowsForUserMatch, err = canvasGetArrayPaginated(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/enrollments", canvasCourseID), url.Values{"state[]": []string{"active", "invited", "creation_pending"}})
-		if err != nil {
-			return err
-		}
-	}
 	var canvasUserToLocal map[int64]uuid.UUID
 	if include.Grades {
-		canvasUserToLocal = buildCanvasUserIDToLexturesUserID(ctx, d.Pool, client, canvasBase, accessToken, canvasCourseID, rowsForUserMatch)
+		canvasUserToLocal = buildCanvasUserIDToLexturesUserID(ctx, d.Pool, client, canvasBase, accessToken, canvasCourseID, enrollmentRows, rosterEmailByCanvasUID)
 	}
 
 	tx, err := d.Pool.Begin(ctx)
@@ -233,6 +215,10 @@ func (d Deps) runCanvasImport(
 	}
 	if err != nil {
 		return errors.New("Failed to load course.")
+	}
+	var orgID uuid.UUID
+	if err = tx.QueryRow(ctx, `SELECT org_id FROM course.courses WHERE id = $1`, courseID).Scan(&orgID); err != nil {
+		return errors.New("Failed to load course organization.")
 	}
 
 	if include.Settings {
@@ -388,45 +374,54 @@ func (d Deps) runCanvasImport(
 		if !progress("Applying enrollments from Canvas...") {
 			return context.Canceled
 		}
+		var enrollStats canvasEnrollmentImportStats
 		for _, e := range enrollmentRows {
 			u := objAt(e, "user")
 			canvasUID := int64At(u, "id")
-			// Prefer full-roster email; enrollment mini-user objects often omit it.
 			email := rosterEmailByCanvasUID[canvasUID]
 			if email == "" {
 				email = normalizedLexturesEmailGuessFromCanvasUserMap(u)
 			}
-			if !strings.Contains(email, "@") {
-				continue
+			userID, err := canvasResolveLexturesUserForEnrollment(ctx, d.Pool, tx, orgID, email, u, &enrollStats)
+			if err != nil {
+				return err
 			}
-			usr, ue := user.FindByEmailCI(ctx, d.Pool, email)
-			if ue != nil || usr == nil {
-				continue
-			}
-			userID, pe := uuid.Parse(usr.ID)
-			if pe != nil {
+			if userID == uuid.Nil {
 				continue
 			}
 			role := canvasEnrollmentTypeToRole(strAt(e, "type", ""))
-			// Use the three-column unique constraint (course_id, user_id, role) that
-			// replaced the old two-column one in migration 041. Skip owner rows so we
-			// never overwrite the course creator's ownership grant.
-			tag, ie := tx.Exec(ctx, `
-				INSERT INTO course.course_enrollments (course_id, user_id, role)
-				SELECT $1, $2, $3
-				WHERE NOT EXISTS (
-					SELECT 1 FROM course.course_enrollments
-					WHERE course_id = $1 AND user_id = $2 AND role = 'owner'
-				)
-				ON CONFLICT (course_id, user_id, role) DO NOTHING
-			`, courseID, userID, role)
-			if ie == nil && tag.RowsAffected() > 0 {
-				_ = courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, userID, courseID, courseCode)
+			if include.Grades && canvasUID > 0 {
+				canvasUserToLocal[canvasUID] = userID
 			}
+			if err := canvasApplyEnrollment(ctx, tx, courseID, courseCode, userID, role, &enrollStats); err != nil {
+				return errors.New("Failed to apply enrollment from Canvas.")
+			}
+		}
+		msg := fmt.Sprintf("Applied %d enrollment(s) from Canvas.", enrollStats.Enrolled)
+		if enrollStats.AccountsCreated > 0 {
+			msg += fmt.Sprintf(" Created %d new Lextures account(s) from Canvas emails.", enrollStats.AccountsCreated)
+		}
+		if enrollStats.SkippedNoEmail > 0 {
+			msg += fmt.Sprintf(" Skipped %d without an email in Canvas.", enrollStats.SkippedNoEmail)
+		}
+		if !progress(msg) {
+			return context.Canceled
 		}
 	}
 
 	if include.Grades {
+		if canvasUserToLocal == nil {
+			canvasUserToLocal = make(map[int64]uuid.UUID)
+		}
+		var gradeUserStats canvasEnrollmentImportStats
+		if err := canvasFillGradeUserMap(ctx, d.Pool, tx, orgID, enrollmentRows, rosterEmailByCanvasUID, canvasUserToLocal, &gradeUserStats); err != nil {
+			return err
+		}
+		if !include.Enrollments && gradeUserStats.AccountsCreated > 0 {
+			if !progress(fmt.Sprintf("Created %d Lextures account(s) to match Canvas grades.", gradeUserStats.AccountsCreated)) {
+				return context.Canceled
+			}
+		}
 		if !progress("Importing assignment and quiz grades from Canvas...") {
 			return context.Canceled
 		}
@@ -451,7 +446,21 @@ func (d Deps) runCanvasImport(
 	if err = tx.Commit(ctx); err != nil {
 		return errors.New("Something went wrong while saving the import.")
 	}
+
+	courseTitle := strAt(course, "name", "")
+	if courseTitle == "" {
+		_ = d.Pool.QueryRow(ctx, `SELECT title FROM course.courses WHERE id = $1`, courseID).Scan(&courseTitle)
+	}
+	if courseTitle == "" {
+		courseTitle = courseCode
+	}
+	d.pushNotificationService().EnqueueCanvasCourseImported(ctx, importerUserID, courseTitle, courseCode)
+
 	return nil
+}
+
+func canvasHTTPClient() *http.Client {
+	return &http.Client{Timeout: 180 * time.Second}
 }
 
 func normalizeCanvasBaseURL(raw string, allowedHostSuffixes []string) (string, error) {
@@ -535,6 +544,7 @@ func canvasGetObject(ctx context.Context, client *http.Client, base, token, path
 	return m, nil
 }
 
+// canvasGetJSON is the only Canvas REST entry point. It must stay GET-only so imports never mutate Canvas.
 func canvasGetJSON(ctx context.Context, client *http.Client, base, token, path string, q url.Values) (any, error) {
 	u := fmt.Sprintf("%s/api/v1/%s", strings.TrimRight(base, "/"), strings.TrimLeft(path, "/"))
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
