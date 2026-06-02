@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
+import { formatAbsoluteShort } from '../../lib/format-datetime'
 import { courseItemCreatePermission } from '../../lib/courses-api'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -518,7 +519,7 @@ function FolderRow({
       </td>
       <td className="px-3 py-2.5 text-slate-400 dark:text-neutral-500">—</td>
       <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">
-        {new Date(folder.updatedAt).toLocaleDateString()}
+        {formatAbsoluteShort(folder.updatedAt)}
       </td>
       {canManage && (
         <td className="py-2.5 pl-3 pr-4 text-right">
@@ -588,7 +589,7 @@ function FileRow({
       </td>
       <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">{formatBytes(file.byteSize)}</td>
       <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">
-        {new Date(file.updatedAt).toLocaleDateString()}
+        {formatAbsoluteShort(file.updatedAt)}
       </td>
       {canManage && (
         <td className="py-2.5 pl-3 pr-4 text-right">
