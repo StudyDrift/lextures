@@ -75,7 +75,9 @@ type GradebookGridProps = {
   onOpenGradeHistory?: (studentId: string, columnId: string) => void
   /** Used for empty-state links back to modules or enrollments. */
   courseCode?: string
-  /** Highlights and scrolls a learner row (e.g. from command palette `?student=`). */
+  /** Highlights and scrolls a learner row (e.g. from command palette, progress, or enrollments `?student=`).
+   * Also pre-populates the student name filter so the gradebook is filtered down to that specific student.
+   */
   highlightStudentId?: string | null
   /** Active course grading scheme (letter bands, pass threshold, etc.). */
   gradingScheme?: { type: string; scaleJson: unknown } | null
@@ -274,7 +276,13 @@ export function GradebookGrid({
   )
   const [activeSort, setActiveSort] = useState<GradebookActiveSort | null>(null)
   const [headerMenu, setHeaderMenu] = useState<HeaderMenuState>(null)
-  const [studentFilter, setStudentFilter] = useState('')
+  const [studentFilter, setStudentFilter] = useState(() => {
+    if (highlightStudentId && (students?.length ?? 0) > 0) {
+      const hi = students.find((s) => s.id === highlightStudentId)
+      if (hi?.name) return hi.name
+    }
+    return ''
+  })
   const [assignmentFilter, setAssignmentFilter] = useState('')
   const [focusRow, setFocusRow] = useState(0)
   const [focusCol, setFocusCol] = useState(0)
@@ -471,7 +479,7 @@ export function GradebookGrid({
     setGrades(structuredClone(initialGrades))
     setActiveSort(null)
     setHeaderMenu(null)
-    setStudentFilter('')
+    setStudentFilter((prev) => (highlightStudentId ? prev : ''))
     setAssignmentFilter('')
     setFocusRow(0)
     setFocusCol(0)
@@ -482,11 +490,26 @@ export function GradebookGrid({
     setFillDrag(null)
     focusStudentIdRef.current = students[0]?.id ?? null
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [initialGrades, students, columns])
+  }, [initialGrades, students, columns, highlightStudentId])
 
   useEffect(() => {
     onGradesChange?.(grades)
   }, [grades, onGradesChange])
+
+  // When ?student= is present (e.g. grade icon from enrollments, or person search), pre-populate
+  // the student filter input with the student's name. This "predefines the filter down to that
+  // specific student". The initializer + reset guard (preserve prev when highlight) + this effect
+  // ensure it survives mount/reset sequencing. Only sets if currently empty.
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- pre-populate student filter from ?student= URL param + loaded data (initializer handles keyed mount; this is safety net for updates; guard prevents loops) */
+    if (!highlightStudentId) return
+    if (studentFilter.trim() !== '') return
+    const hi = sortedStudents.find((s) => s.id === highlightStudentId)
+    if (hi?.name) {
+      setStudentFilter(hi.name)
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [highlightStudentId, sortedStudents]) // eslint-disable-line react-hooks/exhaustive-deps -- intentional: studentFilter in guard would cause re-runs/loops on set; we only want to react to highlight + data arrival
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- clear grade sort when its column is removed or filtered out */
