@@ -47,6 +47,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/lti-external-tools", d.handleCourseLtiExternalTools())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}", d.handleGetModuleAssignment())
 	r.Patch("/api/v1/courses/{course_code}/assignments/{item_id}", d.handlePatchModuleAssignment())
+	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grades/{student_id}/history", d.handleGetAssignmentGradeHistory())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}", d.handleGetModuleQuiz())
 	r.Patch("/api/v1/courses/{course_code}/quizzes/{item_id}", d.handlePatchModuleQuiz())
 	d.registerQuizDeliveryRoutes(r)
