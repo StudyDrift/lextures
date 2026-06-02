@@ -51,6 +51,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}", d.handleGetModuleQuiz())
 	r.Patch("/api/v1/courses/{course_code}/quizzes/{item_id}", d.handlePatchModuleQuiz())
 	d.registerQuizDeliveryRoutes(r)
+	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/analytics", d.handleGetQuizAnalytics())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/item-analysis", d.handleGetItemAnalysis())
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/item-analysis/compute", d.handleComputeItemAnalysis())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/item-analysis/export.csv", d.handleExportItemAnalysisCSV())

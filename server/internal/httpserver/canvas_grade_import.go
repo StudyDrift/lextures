@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
@@ -543,6 +544,7 @@ func canvasImportAllCanvasGrades(
 	courseID uuid.UUID,
 	canvasAssignToItem map[int64]uuid.UUID,
 	canvasQuizToItem map[int64]uuid.UUID,
+	canvasQuizToQuestions map[int64][]coursemodulequiz.QuizQuestion,
 	canvasUserToLocal map[int64]uuid.UUID,
 ) error {
 	// #region agent log
@@ -562,6 +564,9 @@ func canvasImportAllCanvasGrades(
 		return err
 	}
 	if err := canvasImportQuizGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasUserToLocal); err != nil {
+		return err
+	}
+	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal); err != nil {
 		return err
 	}
 	return nil

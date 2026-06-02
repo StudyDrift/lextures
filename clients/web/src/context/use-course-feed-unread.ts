@@ -9,6 +9,7 @@ export function useCourseFeedUnread() {
     return {
       feedUnreadForChannel: () => 0,
       clearFeedChannelUnread: noop,
+      clearAllFeedUnread: noop,
       setViewedFeedChannel: noop,
       totalFeedUnread: 0,
     } as const

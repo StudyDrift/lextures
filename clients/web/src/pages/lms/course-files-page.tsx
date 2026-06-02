@@ -1,4 +1,20 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import {
+  Archive,
+  ChevronDown,
+  FileText,
+  Film,
+  FolderOpen,
+  FolderPlus,
+  Image,
+  Music,
+  Paperclip,
+  Presentation,
+  Search,
+  Sheet,
+  Trash2,
+  Upload,
+} from 'lucide-react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { formatAbsoluteShort } from '../../lib/format-datetime'
 import { courseItemCreatePermission } from '../../lib/courses-api'
@@ -16,7 +32,6 @@ import {
   deleteFile,
   getFileContentUrl,
   formatBytes,
-  fileIconForMime,
   type FileFolder,
   type FileItem,
   type FolderContents,
@@ -26,6 +41,20 @@ import { LmsPage } from './lms-page'
 type ContextMenu =
   | { kind: 'folder'; item: FileFolder; x: number; y: number }
   | { kind: 'file'; item: FileItem; x: number; y: number }
+
+type SelectedItemKey = `folder:${string}` | `file:${string}`
+
+function selectedItemKey(kind: 'folder' | 'file', id: string): SelectedItemKey {
+  return `${kind}:${id}`
+}
+
+function matchesSearchQuery(name: string, query: string): boolean {
+  return name.toLowerCase().includes(query.trim().toLowerCase())
+}
+
+const CHECKBOX_COLUMN_CLASS = 'w-11 px-4 py-2.5 align-middle text-left'
+const CHECKBOX_INPUT_CLASS =
+  'block h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900'
 
 export default function CourseFilesPage() {
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
@@ -54,6 +83,8 @@ export default function CourseFilesPage() {
 
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
   const [movingFile, setMovingFile] = useState<FileItem | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedItems, setSelectedItems] = useState<Set<SelectedItemKey>>(new Set())
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -72,6 +103,119 @@ export default function CourseFilesPage() {
   }, [courseCode, folderId])
 
   useEffect(() => { void load() }, [load])
+
+  useEffect(() => {
+    setSelectedItems(new Set())
+    setSearchQuery('')
+  }, [folderId])
+
+  const filteredFolders = useMemo(() => {
+    if (!contents) return []
+    const q = searchQuery.trim()
+    if (!q) return contents.folders
+    return contents.folders.filter(folder => matchesSearchQuery(folder.name, q))
+  }, [contents, searchQuery])
+
+  const filteredFiles = useMemo(() => {
+    if (!contents) return []
+    const q = searchQuery.trim()
+    if (!q) return contents.files
+    return contents.files.filter(file => matchesSearchQuery(file.displayName, q))
+  }, [contents, searchQuery])
+
+  const visibleItemKeys = useMemo(() => {
+    const keys: SelectedItemKey[] = []
+    for (const folder of filteredFolders) keys.push(selectedItemKey('folder', folder.id))
+    for (const file of filteredFiles) keys.push(selectedItemKey('file', file.id))
+    return keys
+  }, [filteredFolders, filteredFiles])
+
+  const allVisibleSelected =
+    visibleItemKeys.length > 0 && visibleItemKeys.every(key => selectedItems.has(key))
+
+  const someVisibleSelected =
+    visibleItemKeys.some(key => selectedItems.has(key)) && !allVisibleSelected
+
+  function toggleItemSelection(key: SelectedItemKey) {
+    setSelectedItems(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  function toggleSelectAllVisible() {
+    setSelectedItems(prev => {
+      if (allVisibleSelected) {
+        const next = new Set(prev)
+        for (const key of visibleItemKeys) next.delete(key)
+        return next
+      }
+      const next = new Set(prev)
+      for (const key of visibleItemKeys) next.add(key)
+      return next
+    })
+  }
+
+  function clearSelection() {
+    setSelectedItems(new Set())
+  }
+
+  function getSelectedFolderAndFile() {
+    if (!contents || selectedItems.size !== 1) return null
+    const key = [...selectedItems][0]
+    const [kind, id] = key.split(':') as ['folder' | 'file', string]
+    if (kind === 'folder') {
+      const folder = contents.folders.find(f => f.id === id)
+      return folder ? { kind: 'folder' as const, folder } : null
+    }
+    const file = contents.files.find(f => f.id === id)
+    return file ? { kind: 'file' as const, file } : null
+  }
+
+  async function handleDeleteSelected() {
+    if (!contents || selectedItems.size === 0) return
+    const foldersToDelete = contents.folders.filter(f =>
+      selectedItems.has(selectedItemKey('folder', f.id)),
+    )
+    const filesToDelete = contents.files.filter(f =>
+      selectedItems.has(selectedItemKey('file', f.id)),
+    )
+    const total = foldersToDelete.length + filesToDelete.length
+    const message =
+      total === 1
+        ? foldersToDelete.length === 1
+          ? `Delete folder "${foldersToDelete[0].name}" and all its contents? This cannot be undone.`
+          : `Delete "${filesToDelete[0].displayName}"? This cannot be undone.`
+        : `Delete ${total} selected items? Folders and their contents will be removed. This cannot be undone.`
+    if (!confirm(message)) return
+
+    try {
+      for (const folder of foldersToDelete) {
+        await deleteFolder(courseCode, folder.id)
+      }
+      for (const file of filesToDelete) {
+        await deleteFile(courseCode, file.id)
+      }
+      clearSelection()
+      void load()
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Could not delete selected items.')
+    }
+  }
+
+  function handleRenameSelected() {
+    const selected = getSelectedFolderAndFile()
+    if (!selected) return
+    if (selected.kind === 'folder') {
+      setRenamingFolder(selected.folder)
+      setRenameValue(selected.folder.name)
+      return
+    }
+    setRenamingFile(selected.file)
+    setRenameValue(selected.file.displayName)
+  }
 
   // Keep breadcrumb trail in sync when folderId changes
   useEffect(() => {
@@ -247,7 +391,8 @@ export default function CourseFilesPage() {
               onClick={() => setShowNewFolder(v => !v)}
               className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
-              📁 New folder
+              <FolderPlus className="h-4 w-4" aria-hidden />
+              New folder
             </button>
             <button
               type="button"
@@ -255,7 +400,14 @@ export default function CourseFilesPage() {
               onClick={() => fileInputRef.current?.click()}
               className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60"
             >
-              {uploading ? (uploadProgress ?? 'Uploading…') : '⬆ Upload'}
+              {uploading ? (
+                uploadProgress ?? 'Uploading…'
+              ) : (
+                <>
+                  <Upload className="h-4 w-4" aria-hidden />
+                  Upload
+                </>
+              )}
             </button>
             <input
               ref={fileInputRef}
@@ -297,6 +449,42 @@ export default function CourseFilesPage() {
         </div>
       )}
 
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[12rem] flex-1 sm:max-w-md">
+          <Search
+            className="pointer-events-none absolute start-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+            aria-hidden
+          />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search files and folders…"
+            aria-label="Search files and folders"
+            className="w-full rounded-lg border border-slate-200 bg-white py-2 ps-9 pe-3 text-sm text-slate-900 outline-none placeholder:text-slate-500 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+          />
+        </div>
+        {canManage && selectedItems.size > 0 && (
+          <div className="flex shrink-0 items-center gap-2">
+            <span className="text-sm text-slate-600 dark:text-neutral-300">
+              {selectedItems.size} selected
+            </span>
+            <SelectionActionsMenu
+              canRename={selectedItems.size === 1}
+              onRename={handleRenameSelected}
+              onDelete={() => void handleDeleteSelected()}
+            />
+            <button
+              type="button"
+              onClick={clearSelection}
+              className="text-sm text-slate-500 hover:text-slate-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
@@ -308,23 +496,51 @@ export default function CourseFilesPage() {
         </div>
       ) : !contents || (contents.folders.length === 0 && contents.files.length === 0) ? (
         <EmptyState canManage={canManage} onUpload={() => fileInputRef.current?.click()} />
+      ) : filteredFolders.length === 0 && filteredFiles.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-16 text-center dark:border-neutral-800 dark:bg-neutral-950">
+          <Search className="mb-3 h-10 w-10 text-slate-300 dark:text-neutral-600" aria-hidden />
+          <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">No matching files or folders</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            Try a different search term.
+          </p>
+        </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
-          <table className="min-w-full divide-y divide-slate-100 text-sm dark:divide-neutral-800">
+          <table className="min-w-full table-fixed divide-y divide-slate-100 text-sm dark:divide-neutral-800">
+            {canManage && (
+              <colgroup>
+                <col className="w-11" />
+                <col />
+                <col className="w-28" />
+                <col className="w-36" />
+                <col className="w-36" />
+              </colgroup>
+            )}
             <thead>
               <tr className="bg-slate-50 dark:bg-neutral-900">
-                <th className="py-2.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Name</th>
+                {canManage && (
+                  <th className={CHECKBOX_COLUMN_CLASS}>
+                    <SelectAllCheckbox
+                      checked={allVisibleSelected}
+                      indeterminate={someVisibleSelected}
+                      onChange={toggleSelectAllVisible}
+                    />
+                  </th>
+                )}
+                <th className={`py-2.5 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400 ${canManage ? 'pl-2' : 'pl-4'}`}>Name</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Size</th>
                 <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Modified</th>
                 {canManage && <th className="py-2.5 pl-3 pr-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">Actions</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-neutral-800/60">
-              {contents.folders.map(folder => (
+              {filteredFolders.map(folder => (
                 <FolderRow
                   key={folder.id}
                   folder={folder}
                   canManage={canManage}
+                  selected={selectedItems.has(selectedItemKey('folder', folder.id))}
+                  onToggleSelect={() => toggleItemSelection(selectedItemKey('folder', folder.id))}
                   renamingFolder={renamingFolder}
                   renameValue={renameValue}
                   setRenameValue={setRenameValue}
@@ -336,12 +552,14 @@ export default function CourseFilesPage() {
                   onContextMenu={e => openContextMenu(e, folder, 'folder')}
                 />
               ))}
-              {contents.files.map(file => (
+              {filteredFiles.map(file => (
                 <FileRow
                   key={file.id}
                   file={file}
                   courseCode={courseCode}
                   canManage={canManage}
+                  selected={selectedItems.has(selectedItemKey('file', file.id))}
+                  onToggleSelect={() => toggleItemSelection(selectedItemKey('file', file.id))}
                   renamingFile={renamingFile}
                   renameValue={renameValue}
                   setRenameValue={setRenameValue}
@@ -445,10 +663,134 @@ export default function CourseFilesPage() {
   )
 }
 
+function FileMimeIcon({ mimeType }: { mimeType: string }) {
+  const className = 'h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500'
+  if (mimeType.startsWith('image/')) return <Image className={className} aria-hidden />
+  if (mimeType === 'application/pdf') return <FileText className={className} aria-hidden />
+  if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) {
+    return <Sheet className={className} aria-hidden />
+  }
+  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) {
+    return <Presentation className={className} aria-hidden />
+  }
+  if (mimeType.includes('word') || mimeType.includes('document')) {
+    return <FileText className={className} aria-hidden />
+  }
+  if (mimeType.startsWith('video/')) return <Film className={className} aria-hidden />
+  if (mimeType.startsWith('audio/')) return <Music className={className} aria-hidden />
+  if (mimeType.includes('zip') || mimeType.includes('archive') || mimeType.includes('compressed')) {
+    return <Archive className={className} aria-hidden />
+  }
+  return <Paperclip className={className} aria-hidden />
+}
+
+function SelectAllCheckbox({
+  checked,
+  indeterminate,
+  onChange,
+}: {
+  checked: boolean
+  indeterminate: boolean
+  onChange: () => void
+}) {
+  const ref = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (ref.current) ref.current.indeterminate = indeterminate
+  }, [indeterminate])
+
+  return (
+    <input
+      ref={ref}
+      type="checkbox"
+      checked={checked}
+      onChange={onChange}
+      aria-label="Select all visible items"
+      className={CHECKBOX_INPUT_CLASS}
+    />
+  )
+}
+
+function SelectionActionsMenu({
+  canRename,
+  onRename,
+  onDelete,
+}: {
+  canRename: boolean
+  onRename: () => void
+  onDelete: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuId = useId()
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  return (
+    <div ref={rootRef} className="relative inline-block">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+      >
+        Actions
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label="Selected file actions"
+          className="absolute start-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            disabled={!canRename}
+            onClick={() => {
+              onRename()
+              setOpen(false)
+            }}
+            className="flex w-full items-center px-4 py-2 text-start text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
+          >
+            Rename
+          </button>
+          <hr className="my-1 border-slate-100 dark:border-neutral-700" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onDelete()
+              setOpen(false)
+            }}
+            className="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+          >
+            <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
+            Delete
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function EmptyState({ canManage, onUpload }: { canManage: boolean; onUpload: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-neutral-700">
-      <span className="mb-3 text-4xl">📁</span>
+      <FolderOpen className="mb-3 h-12 w-12 text-slate-300 dark:text-neutral-600" aria-hidden />
       <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">No files yet</p>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
         {canManage ? 'Upload files or create folders to organize course materials.' : 'No files have been uploaded to this course yet.'}
@@ -469,6 +811,8 @@ function EmptyState({ canManage, onUpload }: { canManage: boolean; onUpload: () 
 type FolderRowProps = {
   folder: FileFolder
   canManage: boolean
+  selected: boolean
+  onToggleSelect: () => void
   renamingFolder: FileFolder | null
   renameValue: string
   setRenameValue: (v: string) => void
@@ -481,7 +825,7 @@ type FolderRowProps = {
 }
 
 function FolderRow({
-  folder, canManage, renamingFolder, renameValue, setRenameValue,
+  folder, canManage, selected, onToggleSelect, renamingFolder, renameValue, setRenameValue,
   onNavigate, onRenameStart, onRenameSubmit, onRenameCancel, onDelete, onContextMenu,
 }: FolderRowProps) {
   const isRenaming = renamingFolder?.id === folder.id
@@ -490,13 +834,25 @@ function FolderRow({
       className="group cursor-pointer hover:bg-slate-50 dark:hover:bg-neutral-900/50"
       onContextMenu={onContextMenu}
     >
-      <td className="py-2.5 pl-4 pr-3">
+      {canManage && (
+        <td className={CHECKBOX_COLUMN_CLASS}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            onClick={e => e.stopPropagation()}
+            aria-label={`Select folder ${folder.name}`}
+            className={CHECKBOX_INPUT_CLASS}
+          />
+        </td>
+      )}
+      <td className={`py-2.5 pr-3 ${canManage ? 'pl-2' : 'pl-4'}`}>
         {isRenaming ? (
           <form
             className="flex items-center gap-2"
             onSubmit={e => { e.preventDefault(); onRenameSubmit() }}
           >
-            <span className="text-base">📁</span>
+            <FolderOpen className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
             <input
               autoFocus
               value={renameValue}
@@ -512,7 +868,7 @@ function FolderRow({
             className="flex items-center gap-2 text-left text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
             onClick={onNavigate}
           >
-            <span className="text-base">📁</span>
+            <FolderOpen className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
             {folder.name}
           </button>
         )}
@@ -537,6 +893,8 @@ type FileRowProps = {
   file: FileItem
   courseCode: string
   canManage: boolean
+  selected: boolean
+  onToggleSelect: () => void
   renamingFile: FileItem | null
   renameValue: string
   setRenameValue: (v: string) => void
@@ -549,7 +907,7 @@ type FileRowProps = {
 }
 
 function FileRow({
-  file, courseCode, canManage, renamingFile, renameValue, setRenameValue,
+  file, courseCode, canManage, selected, onToggleSelect, renamingFile, renameValue, setRenameValue,
   onRenameStart, onRenameSubmit, onRenameCancel, onDelete, onMove, onContextMenu,
 }: FileRowProps) {
   const isRenaming = renamingFile?.id === file.id
@@ -558,13 +916,25 @@ function FileRow({
       className="group cursor-default hover:bg-slate-50 dark:hover:bg-neutral-900/50"
       onContextMenu={onContextMenu}
     >
-      <td className="py-2.5 pl-4 pr-3">
+      {canManage && (
+        <td className={CHECKBOX_COLUMN_CLASS}>
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onToggleSelect}
+            onClick={e => e.stopPropagation()}
+            aria-label={`Select file ${file.displayName}`}
+            className={CHECKBOX_INPUT_CLASS}
+          />
+        </td>
+      )}
+      <td className={`py-2.5 pr-3 ${canManage ? 'pl-2' : 'pl-4'}`}>
         {isRenaming ? (
           <form
             className="flex items-center gap-2"
             onSubmit={e => { e.preventDefault(); onRenameSubmit() }}
           >
-            <span className="text-base">{fileIconForMime(file.mimeType)}</span>
+            <FileMimeIcon mimeType={file.mimeType} />
             <input
               autoFocus
               value={renameValue}
@@ -582,7 +952,7 @@ function FileRow({
             rel="noreferrer"
             className="flex items-center gap-2 text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
           >
-            <span className="text-base">{fileIconForMime(file.mimeType)}</span>
+            <FileMimeIcon mimeType={file.mimeType} />
             {file.displayName}
           </a>
         )}
@@ -629,7 +999,8 @@ function MovePicker({
               className={`flex w-full items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800 ${currentFolderId === null ? 'font-semibold text-indigo-600' : ''}`}
               onClick={() => onMove(null)}
             >
-              📁 Root (top level)
+              <FolderOpen className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+              Root (top level)
             </button>
           </li>
           {folders.map(f => (
@@ -638,7 +1009,8 @@ function MovePicker({
                 className={`flex w-full items-center gap-2 px-4 py-2.5 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800 ${currentFolderId === f.id ? 'font-semibold text-indigo-600' : ''}`}
                 onClick={() => onMove(f.id)}
               >
-                📁 {f.name}
+                <FolderOpen className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+                {f.name}
               </button>
             </li>
           ))}

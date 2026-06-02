@@ -62,6 +62,10 @@ export function CourseFeedUnreadProvider({ children }: { children: ReactNode }) 
     })
   }, [])
 
+  const clearAllFeedUnread = useCallback(() => {
+    setCounts({})
+  }, [])
+
   const feedUnreadForChannel = useCallback(
     (code: string, channelId: string) => counts[code]?.[channelId.toLowerCase()] ?? 0,
     [counts],
@@ -142,10 +146,11 @@ export function CourseFeedUnreadProvider({ children }: { children: ReactNode }) 
     () => ({
       feedUnreadForChannel,
       clearFeedChannelUnread,
+      clearAllFeedUnread,
       setViewedFeedChannel,
       totalFeedUnread,
     }),
-    [feedUnreadForChannel, clearFeedChannelUnread, setViewedFeedChannel, totalFeedUnread],
+    [feedUnreadForChannel, clearFeedChannelUnread, clearAllFeedUnread, setViewedFeedChannel, totalFeedUnread],
   )
 
   return (

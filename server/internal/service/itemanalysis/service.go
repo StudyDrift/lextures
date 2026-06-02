@@ -166,14 +166,12 @@ func computeStats(quizID uuid.UUID, rows []repoitemanalysis.AttemptResponseRow, 
 			continue
 		}
 
-		// p-value
-		correctCount := 0
+		// p-value: average proportion of max points earned on this item.
+		var sumFrac float64
 		for _, o := range observations {
-			if o.isCorrect {
-				correctCount++
-			}
+			sumFrac += o.itemFrac
 		}
-		pval := float64(correctCount) / float64(len(observations))
+		pval := sumFrac / float64(len(observations))
 
 		// point-biserial r_pb
 		var rpbPtr *float64

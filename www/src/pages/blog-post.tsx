@@ -14,7 +14,7 @@ export function BlogPost({ slug }: { slug: string }) {
         <Header />
         <main className="mx-auto max-w-3xl px-4 py-24 sm:px-6 lg:px-8">
           <p className="text-slate-500">Post not found.</p>
-          <a href="#/blog" className="btn-secondary mt-6 inline-flex gap-2">
+          <a href="/blog" className="btn-secondary mt-6 inline-flex gap-2">
             <ArrowLeft className="h-4 w-4" aria-hidden />
             Back to blog
           </a>
@@ -32,7 +32,7 @@ export function BlogPost({ slug }: { slug: string }) {
         <div className="border-b border-slate-200 bg-white py-12 sm:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
             <a
-              href="#/blog"
+              href="/blog"
               className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 no-underline transition-colors hover:text-slate-900"
             >
               <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
@@ -62,7 +62,7 @@ export function BlogPost({ slug }: { slug: string }) {
             </div>
 
             <div className="mt-16 border-t border-slate-200/80 pt-10">
-              <a href="#/blog" className="btn-secondary inline-flex gap-2">
+              <a href="/blog" className="btn-secondary inline-flex gap-2">
                 <ArrowLeft className="h-4 w-4" aria-hidden />
                 Back to all posts
               </a>

@@ -36,6 +36,14 @@ func TestCanvasImportInclude_WithDefaults_PartialUnchanged(t *testing.T) {
 	}
 }
 
+func TestCanvasImportInclude_WithDefaults_LegacyAllExceptFiles(t *testing.T) {
+	legacy := canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true}
+	got := legacy.withDefaults()
+	if !got.Files {
+		t.Fatalf("legacy all-true include should default Files=true, got %+v", got)
+	}
+}
+
 func TestMarkdownFromHTML_ConvertsBasicFormatting(t *testing.T) {
 	md := markdownFromHTML("<h2>Title</h2><p>Hello <strong>world</strong> and <a href=\"https://example.com\">link</a>.</p>")
 	if !strings.Contains(md, "## Title") {

@@ -105,7 +105,7 @@ export function BlogIndex() {
                           </time>
                           <h2 className="mt-2 text-xl font-semibold leading-snug text-slate-900 sm:text-2xl">
                             <a
-                              href={`#/blog/${post.slug}`}
+                              href={`/blog/${post.slug}`}
                               className="no-underline transition-colors hover:text-accent"
                             >
                               {post.title}
@@ -117,7 +117,7 @@ export function BlogIndex() {
                           <p className="mt-2 text-sm text-slate-400">By {post.author}</p>
                         </div>
                         <a
-                          href={`#/blog/${post.slug}`}
+                          href={`/blog/${post.slug}`}
                           className="btn-primary shrink-0 gap-2 self-start"
                           aria-label={`Read ${post.title}`}
                         >

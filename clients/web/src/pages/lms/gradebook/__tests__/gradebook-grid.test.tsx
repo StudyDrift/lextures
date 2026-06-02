@@ -1,4 +1,5 @@
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { UiDensityProvider } from '../../../../context/ui-density-context'
@@ -105,5 +106,18 @@ describe('GradebookGrid — accessibility', () => {
     const cells = screen.getAllByRole('gridcell')
     // (1 final + 2 assignment) × 2 students = 6 cells
     expect(cells.length).toBeGreaterThanOrEqual(students.length * (1 + columns.length))
+  })
+
+  it('toggles transposed layout when Transpose is clicked', async () => {
+    const user = userEvent.setup()
+    renderGrid()
+    expect(screen.getByRole('grid', { name: /grades by student and assignment/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /^transpose$/i }))
+
+    expect(screen.getByRole('grid', { name: /grades by assignment and student/i })).toBeInTheDocument()
+    expect(screen.queryByRole('grid', { name: /grades by student and assignment/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^transpose$/i })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: /resize assignment column/i })).toBeInTheDocument()
   })
 })

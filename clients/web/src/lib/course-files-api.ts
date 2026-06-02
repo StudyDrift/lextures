@@ -225,15 +225,3 @@ export function formatBytes(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
-
-export function fileIconForMime(mimeType: string): string {
-  if (mimeType.startsWith('image/')) return '🖼'
-  if (mimeType === 'application/pdf') return '📄'
-  if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || mimeType.includes('csv')) return '📊'
-  if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return '📋'
-  if (mimeType.includes('word') || mimeType.includes('document')) return '📝'
-  if (mimeType.startsWith('video/')) return '🎬'
-  if (mimeType.startsWith('audio/')) return '🎵'
-  if (mimeType.includes('zip') || mimeType.includes('archive') || mimeType.includes('compressed')) return '📦'
-  return '📎'
-}
