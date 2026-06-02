@@ -501,13 +501,15 @@ export function GradebookGrid({
   // specific student". The initializer + reset guard (preserve prev when highlight) + this effect
   // ensure it survives mount/reset sequencing. Only sets if currently empty.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- pre-populate student filter from ?student= URL param + loaded data (initializer handles keyed mount; this is safety net for updates; guard prevents loops) */
     if (!highlightStudentId) return
     if (studentFilter.trim() !== '') return
     const hi = sortedStudents.find((s) => s.id === highlightStudentId)
     if (hi?.name) {
       setStudentFilter(hi.name)
     }
-  }, [highlightStudentId, sortedStudents])
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [highlightStudentId, sortedStudents]) // eslint-disable-line react-hooks/exhaustive-deps -- intentional: studentFilter in guard would cause re-runs/loops on set; we only want to react to highlight + data arrival
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- clear grade sort when its column is removed or filtered out */
