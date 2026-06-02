@@ -23,7 +23,7 @@ func TestCanvasEnrollmentTypeToRole_OtherMapsToStudent(t *testing.T) {
 
 func TestCanvasImportInclude_WithDefaults_AllFalseGivesAll(t *testing.T) {
 	got := (canvasImportInclude{}).withDefaults()
-	want := canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true}
+	want := canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true, Files: true}
 	if got != want {
 		t.Fatalf("withDefaults on zero include = %+v, want %+v", got, want)
 	}

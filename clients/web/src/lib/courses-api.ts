@@ -145,6 +145,8 @@ export type CoursePublic = {
   aiTutorEnabled?: boolean
   /** Plan 6.10 — Translate button on feed/discussion/inbox messages (default off when omitted). */
   multilingualMessagingEnabled?: boolean
+  /** Course Files space — Drive-like file manager (default true when omitted). */
+  filesEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
   requireCaptions?: boolean
   /** `traditional` or `competency_based` (server default when omitted: traditional). */
@@ -748,6 +750,7 @@ export async function patchCourseFeatures(
     officeHoursEnabled?: boolean
     aiTutorEnabled?: boolean
     multilingualMessagingEnabled?: boolean
+    filesEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -773,6 +776,7 @@ export async function patchCourseFeatures(
         ...(body.officeHoursEnabled !== undefined ? { officeHoursEnabled: body.officeHoursEnabled } : {}),
         ...(body.aiTutorEnabled !== undefined ? { aiTutorEnabled: body.aiTutorEnabled } : {}),
         ...(body.multilingualMessagingEnabled !== undefined ? { multilingualMessagingEnabled: body.multilingualMessagingEnabled } : {}),
+        ...(body.filesEnabled !== undefined ? { filesEnabled: body.filesEnabled } : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },

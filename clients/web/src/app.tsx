@@ -9,6 +9,7 @@ import CourseEnrollments from './pages/lms/course-enrollments'
 import CourseFeedPage from './pages/lms/course-feed-page'
 import CourseDiscussionsPage from './pages/lms/course-discussions-page'
 import CourseCollabDocsPage from './pages/lms/course-collab-docs-page'
+import CourseFilesPage from './pages/lms/course-files-page'
 import CourseGroupsPage from './pages/lms/course-groups-page'
 import CourseGradebook from './pages/lms/course-gradebook'
 import CourseAtRiskPage from './pages/lms/course-at-risk'
@@ -137,6 +138,7 @@ export default function App() {
             <Route path="discussions" element={<CourseDiscussionsPage />} />
             <Route path="collab-docs" element={<CourseCollabDocsPage />} />
             <Route path="collab-docs/:docId" element={<CourseCollabDocsPage />} />
+            <Route path="files" element={<CourseFilesPage />} />
             <Route path="groups" element={<CourseGroupsPage />} />
             <Route path="syllabus" element={<CourseSyllabus />} />
             <Route path="modules/content/:itemId" element={<CourseModuleContentPage />} />

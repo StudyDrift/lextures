@@ -163,6 +163,9 @@ function staticCrumbsFromPathname(pathname: string, courseCode: string | null): 
   if (pathname === `${base}/syllabus`) {
     return [courseCrumb(courseCode, true), { key: 'syl', label: 'Syllabus' }]
   }
+  if (pathname.startsWith(`${base}/files`)) {
+    return [courseCrumb(courseCode, true), { key: 'files', label: 'Files' }]
+  }
   if (pathname === `${base}/modules`) {
     return [courseCrumb(courseCode, true), { key: 'mod', label: 'Modules' }]
   }

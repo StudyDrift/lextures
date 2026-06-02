@@ -73,6 +73,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const officeHoursEnabled = course.officeHoursEnabled === true
   const aiTutorEnabled = course.aiTutorEnabled === true
   const multilingualMessagingEnabled = course.multilingualMessagingEnabled === true
+  const filesEnabled = course.filesEnabled !== false
 
   const persist = useCallback(
     async (patch: {
@@ -94,6 +95,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       officeHoursEnabled?: boolean
       aiTutorEnabled?: boolean
       multilingualMessagingEnabled?: boolean
+      filesEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -120,6 +122,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           officeHoursEnabled: patch.officeHoursEnabled ?? officeHoursEnabled,
           aiTutorEnabled: patch.aiTutorEnabled ?? aiTutorEnabled,
           multilingualMessagingEnabled: patch.multilingualMessagingEnabled ?? multilingualMessagingEnabled,
+          filesEnabled: patch.filesEnabled ?? filesEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -147,6 +150,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       officeHoursEnabled,
       aiTutorEnabled,
       multilingualMessagingEnabled,
+      filesEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -168,6 +172,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       </p>
 
       <div className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
+        <FeatureToggleRow
+          label="Files"
+          description="Course file space where instructors and students can upload, organize, and share documents, presentations, and other materials."
+          enabled={filesEnabled}
+          disabled={saving}
+          onToggle={() => void persist({ filesEnabled: !filesEnabled })}
+        />
         <FeatureToggleRow
           label="Notebook"
           description="Personal notes workspace for this course (stored in the browser for each learner)."
