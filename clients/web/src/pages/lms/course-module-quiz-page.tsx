@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
 import { Link, useParams } from 'react-router-dom'
-import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
+import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
@@ -60,7 +60,7 @@ import {
 } from './course-module-quiz-utils'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
-import { QuizItemAnalysisPanel } from '../../components/quiz/quiz-item-analysis-panel'
+import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
 
 function QuestionTypeDropdown({
   value,
@@ -131,11 +131,13 @@ function QuizEditorMoreMenu({
   onPreview,
   onEditIntro,
   onGenerate,
+  onAnalytics,
 }: {
   disabled: boolean
   onPreview: () => void
   onEditIntro: () => void
   onGenerate: () => void
+  onAnalytics: () => void
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -201,6 +203,18 @@ function QuizEditorMoreMenu({
           >
             <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Generate questions
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onAnalytics()
+              setOpen(false)
+            }}
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            <BarChart3 className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            Analytics
           </button>
           <div
             role="separator"
@@ -314,6 +328,7 @@ export default function CourseModuleQuizPage() {
   const [generateBusy, setGenerateBusy] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
+  const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [studentQuizPayload, setStudentQuizPayload] = useState<ModuleQuizPayload | null>(null)
   const [studentTakeOpen, setStudentTakeOpen] = useState(false)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
@@ -1050,6 +1065,7 @@ export default function CourseModuleQuizPage() {
                     onPreview={() => setPreviewOpen(true)}
                     onEditIntro={beginEditContent}
                     onGenerate={openGenerateModal}
+                    onAnalytics={() => setAnalyticsOpen(true)}
                   />
                   <button
                     type="button"
@@ -1386,10 +1402,6 @@ export default function CourseModuleQuizPage() {
             </aside>
           </div>
         )}
-
-        {canEdit && !loading && !loadError && !editingContent && courseCode && itemId && (
-          <QuizItemAnalysisPanel courseCode={courseCode} itemId={itemId} />
-        )}
       </div>
 
       {!loading && !loadError && editingContent && (
@@ -1548,6 +1560,14 @@ export default function CourseModuleQuizPage() {
           </div>
         </div>
       )}
+
+      <QuizAnalyticsModal
+        open={analyticsOpen}
+        onClose={() => setAnalyticsOpen(false)}
+        courseCode={courseCode ?? ''}
+        itemId={itemId ?? ''}
+        quizTitle={title || 'Quiz'}
+      />
 
       <QuizStudentPreviewModal
         open={previewOpen}

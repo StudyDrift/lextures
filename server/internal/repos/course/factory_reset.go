@@ -11,8 +11,9 @@ import (
 )
 
 type FactoryResetCourseOutcome struct {
-	Course                       *CoursePublic
-	RemovedCourseFileStorageKeys []string
+	Course                          *CoursePublic
+	RemovedCourseFileStorageKeys    []string
+	RemovedFileManagerStorageKeys   []string
 }
 
 // FactoryResetCourse matches Rust `course::factory_reset_course` behavior.
@@ -63,7 +64,19 @@ func FactoryResetCourse(ctx context.Context, pool *pgxpool.Pool, courseCode stri
 		return nil, err
 	}
 
+	fileManagerKeys, err := listStorageKeysForFileManager(ctx, tx, *courseID)
+	if err != nil {
+		log.Printf("factory-reset: list file manager keys failed course=%q err=%v", courseCode, err)
+		return nil, err
+	}
+
 	if err = execResetStep(ctx, tx, courseCode, "delete course_files", `DELETE FROM course.course_files WHERE course_id = $1`, *courseID); err != nil {
+		return nil, err
+	}
+	if err = execResetStep(ctx, tx, courseCode, "delete file_items", `DELETE FROM course.file_items WHERE course_id = $1`, *courseID); err != nil {
+		return nil, err
+	}
+	if err = execResetStep(ctx, tx, courseCode, "delete file_folders", `DELETE FROM course.file_folders WHERE course_id = $1`, *courseID); err != nil {
 		return nil, err
 	}
 	if err = execResetStep(ctx, tx, courseCode, "delete syllabus_acceptances", `DELETE FROM course.syllabus_acceptances WHERE course_id = $1`, *courseID); err != nil {
@@ -141,10 +154,16 @@ func FactoryResetCourse(ctx context.Context, pool *pgxpool.Pool, courseCode stri
 		log.Printf("factory-reset: course missing after reset course=%q", courseCode)
 		return nil, nil
 	}
-	log.Printf("factory-reset: committed course=%q file_keys=%d", courseCode, len(fileKeys))
+	log.Printf(
+		"factory-reset: committed course=%q legacy_file_keys=%d file_manager_keys=%d",
+		courseCode,
+		len(fileKeys),
+		len(fileManagerKeys),
+	)
 	return &FactoryResetCourseOutcome{
-		Course:                       resetCourse,
-		RemovedCourseFileStorageKeys: fileKeys,
+		Course:                        resetCourse,
+		RemovedCourseFileStorageKeys:  fileKeys,
+		RemovedFileManagerStorageKeys: fileManagerKeys,
 	}, nil
 }
 
@@ -159,6 +178,23 @@ func execResetStep(ctx context.Context, tx pgx.Tx, courseCode, step, sql string,
 
 func listStorageKeysForCourseFiles(ctx context.Context, tx pgx.Tx, courseID uuid.UUID) ([]string, error) {
 	rows, err := tx.Query(ctx, `SELECT storage_key FROM course.course_files WHERE course_id = $1`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	keys := make([]string, 0)
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, err
+		}
+		keys = append(keys, key)
+	}
+	return keys, rows.Err()
+}
+
+func listStorageKeysForFileManager(ctx context.Context, tx pgx.Tx, courseID uuid.UUID) ([]string, error) {
+	rows, err := tx.Query(ctx, `SELECT storage_key FROM course.file_items WHERE course_id = $1`, courseID)
 	if err != nil {
 		return nil, err
 	}

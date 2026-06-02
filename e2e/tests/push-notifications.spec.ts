@@ -198,8 +198,9 @@ test.describe('Push Notifications UI', () => {
 
     const bell = page.getByRole('button', { name: /notifications/i })
     await bell.click()
+    await expect(page.getByRole('dialog', { name: /notifications/i })).toBeVisible()
 
-    // Alerts tab should be visible
-    await expect(page.getByRole('button', { name: /alerts/i })).toBeVisible()
+    // Alerts filter tab should be visible
+    await expect(page.getByRole('tab', { name: /alerts/i })).toBeVisible()
   })
 })

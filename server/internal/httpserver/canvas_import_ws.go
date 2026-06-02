@@ -134,6 +134,10 @@ func (i canvasImportInclude) withDefaults() canvasImportInclude {
 	if !i.Modules && !i.Assignments && !i.Quizzes && !i.Enrollments && !i.Grades && !i.Settings && !i.Files {
 		return canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true, Files: true}
 	}
+	// Legacy clients send every category except files; treat that as "import everything".
+	if i.Modules && i.Assignments && i.Quizzes && i.Enrollments && i.Grades && i.Settings && !i.Files {
+		i.Files = true
+	}
 	return i
 }
 
@@ -268,6 +272,7 @@ func (d Deps) runCanvasImport(
 	_ = tx.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), -1) + 1 FROM course.course_structure_items WHERE course_id = $1`, courseID).Scan(&nextSort)
 	canvasAssignToItem := make(map[int64]uuid.UUID)
 	canvasQuizToItem := make(map[int64]uuid.UUID)
+	canvasQuizToQuestions := make(map[int64][]coursemodulequiz.QuizQuestion)
 	canvasPageSlugToItem := make(map[string]uuid.UUID)
 	if include.Modules {
 		if !progress("Importing modules and items...") {
@@ -357,6 +362,7 @@ func (d Deps) runCanvasImport(
 							return fmt.Errorf("Failed to load quiz questions from Canvas (quiz id %d): %w", cid, qe)
 						}
 						questions = qq
+						canvasQuizToQuestions[cid] = questions
 					}
 					qJSON, mj := json.Marshal(questions)
 					if mj != nil {
@@ -433,6 +439,9 @@ func (d Deps) runCanvasImport(
 		if !progress("Importing assignment and quiz grades from Canvas...") {
 			return context.Canceled
 		}
+		if !progress("Importing quiz attempt responses from Canvas...") {
+			return context.Canceled
+		}
 		// #region agent log
 		canvasAgentDebugLog("canvas-import", "H2", "canvas_import_ws.go:runCanvasImport", "invoking aggregated grade import (post-module maps)", map[string]any{
 			"includeModules":     include.Modules,
@@ -443,7 +452,7 @@ func (d Deps) runCanvasImport(
 			"userMapLen":         len(canvasUserToLocal),
 		})
 		// #endregion agent log
-		if err := canvasImportAllCanvasGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasQuizToItem, canvasUserToLocal); err != nil {
+		if err := canvasImportAllCanvasGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal); err != nil {
 			return err
 		}
 	}

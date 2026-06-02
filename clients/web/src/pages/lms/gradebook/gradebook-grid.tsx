@@ -12,13 +12,14 @@ import {
 import { Link } from 'react-router-dom'
 import { createPortal } from 'react-dom'
 import { studentProgressFeatureEnabled } from '../../../lib/student-progress'
-import { ChevronDown, LayoutGrid, Lock, Thermometer, Users } from 'lucide-react'
+import { ChevronDown, ArrowLeftRight, LayoutGrid, Lock, Thermometer, Users } from 'lucide-react'
 import { useUiDensity } from '../../../context/ui-density-context'
 import {
   gradebookAssignmentColMinWidthClass,
   gradebookCellPad,
   gradebookStickyFinalLeftClass,
   gradebookStickyNameWidthClass,
+  gradebookStickyNameWidthPx,
 } from '../../../lib/ui-density'
 import { EmptyState } from '../../../components/ui/empty-state'
 import {
@@ -33,30 +34,11 @@ import {
   formatFinalPercent,
   type AssignmentGroupWeight,
 } from './compute-course-final-percent'
-import type { AssignmentGroup, RubricDefinition } from '../../../lib/courses-api'
+import { GradebookTransposedTable } from './gradebook-grid-transposed'
+import type { AssignmentGroup } from '../../../lib/courses-api'
+import type { GradebookColumn, GradebookStudent } from './gradebook-grid-types'
 
-export type GradebookColumn = {
-  id: string
-  title: string
-  maxPoints: number | null
-  kind?: string
-  assignmentGroupId?: string | null
-  rubric?: RubricDefinition | null
-  /** Plan 3.6 — resolved display mode for this column. */
-  effectiveDisplayType?: string
-  /** Plan 3.8 */
-  postingPolicy?: string | null
-  releaseAt?: string | null
-  dueAt?: string | null
-  neverDrop?: boolean
-  replaceWithFinal?: boolean
-}
-
-export type GradebookStudent = {
-  id: string
-  name: string
-  enrollmentId?: string
-}
+export type { GradebookColumn, GradebookStudent } from './gradebook-grid-types'
 
 type GradebookGridProps = {
   columns: GradebookColumn[]
@@ -316,6 +298,7 @@ export function GradebookGrid({
   const headerRowRef = useRef<HTMLTableRowElement>(null)
   const [headerStickyPx, setHeaderStickyPx] = useState(0)
   const [colorScaleEnabled, setColorScaleEnabled] = useState(false)
+  const [transposed, setTransposed] = useState(false)
 
   const baseRowCount = students.length
   const baseColCount = columns.length
@@ -1078,6 +1061,17 @@ export function GradebookGrid({
     setAssignmentFilter('')
   }, [])
 
+  const handleTransposedGradeChange = useCallback(
+    (studentId: string, columnId: string, value: string) => {
+      setGrades((prev) => {
+        const next = structuredClone(prev)
+        next[studentId] = { ...next[studentId], [columnId]: value }
+        return next
+      })
+    },
+    [],
+  )
+
   const modulesHref =
     courseCode != null && courseCode !== ''
       ? `/courses/${encodeURIComponent(courseCode)}/modules`
@@ -1179,8 +1173,40 @@ export function GradebookGrid({
         {rowCount > 0 && colCount > 0 && (
           <button
             type="button"
+            aria-pressed={transposed}
+            title={
+              transposed
+                ? 'Show students as rows and assignments as columns'
+                : 'Show assignments as rows and students as columns'
+            }
+            className={[
+              'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition',
+              transposed
+                ? 'border-indigo-300 bg-indigo-50 text-indigo-950 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-100'
+                : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80',
+            ].join(' ')}
+            onClick={() => {
+              setTransposed((v) => !v)
+              setHeaderMenu(null)
+              setEditing(null)
+              setSelectionAnchor(null)
+              setFillDrag(null)
+              fillDragRef.current = null
+            }}
+          >
+            <ArrowLeftRight className="size-4 shrink-0 opacity-80" aria-hidden />
+            Transpose
+          </button>
+        )}
+        {rowCount > 0 && colCount > 0 && (
+          <button
+            type="button"
             aria-pressed={colorScaleEnabled}
-            title="Color each score cell from cool (low) to warm (high) within its column"
+            title={
+              transposed
+                ? 'Color each score cell from cool (low) to warm (high) within its row'
+                : 'Color each score cell from cool (low) to warm (high) within its column'
+            }
             className={[
               'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition',
               colorScaleEnabled
@@ -1208,7 +1234,34 @@ export function GradebookGrid({
         </p>
       )}
 
-      {rowCount > 0 && baseColCount > 0 && (
+      {rowCount > 0 && baseColCount > 0 && transposed && (
+        <GradebookTransposedTable
+          columns={visibleColumns}
+          students={filteredStudents}
+          grades={grades}
+          onGradeChange={handleTransposedGradeChange}
+          readOnly={readOnly}
+          gradingScheme={gradingScheme}
+          gradeExcused={gradeExcused}
+          gradeHeld={gradeHeld}
+          droppedGrades={droppedGrades}
+          finalPercentByStudentId={finalPercentByStudentId}
+          assignmentStats={classSummaryStats.columns}
+          colorScaleEnabled={colorScaleEnabled}
+          courseCode={courseCode}
+          highlightStudentId={highlightStudentId}
+          onRubricClick={onRubricClick}
+          onOpenGradeHistory={onOpenGradeHistory}
+          onToggleExcused={onToggleExcused}
+          onPostAssignmentGrades={onPostAssignmentGrades}
+          postGradesPending={postGradesPending}
+          pad={pad}
+          defaultAssignmentColWidthPx={gradebookStickyNameWidthPx(density)}
+          studentColMin={assignmentColMin}
+        />
+      )}
+
+      {rowCount > 0 && baseColCount > 0 && !transposed && (
         <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
           <table
             role="grid"

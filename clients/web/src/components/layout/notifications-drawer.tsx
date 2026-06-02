@@ -1,17 +1,30 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Bell, BellRing, ClipboardCheck, Inbox, Megaphone, MessageCircle, X } from 'lucide-react'
+import {
+  Bell,
+  BellRing,
+  ClipboardCheck,
+  Inbox,
+  LayoutGrid,
+  Megaphone,
+  MessageCircle,
+  type LucideIcon,
+  X,
+} from 'lucide-react'
 import { Link } from 'react-router-dom'
 import {
   fetchUnifiedNotifications,
   inboxAlertsToUnified,
   notificationActionHref,
+  parseFeedNotificationChannel,
+  parseInboxNotificationMessageId,
   type UnifiedNotification,
   type UnifiedNotificationKind,
 } from '../../lib/unified-notifications'
+import { markAllInboxMessagesRead, patchMailbox } from '../../lib/communication-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
-import { useInboxUnreadCount, useMailboxRevision } from '../../context/use-inbox-unread'
+import { useInboxUnreadCount, useMailboxRevision, useRefreshInboxUnread } from '../../context/use-inbox-unread'
 import { useInboxNotifications } from '../../context/use-push-notifications'
 
 /** Easing: strong deceleration (not linear) for panel + backdrop. */
@@ -32,14 +45,16 @@ function usePrefersReducedMotion(): boolean {
   return reduced
 }
 
-const FILTER_TABS: { id: 'all' | UnifiedNotificationKind | 'alerts'; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'alerts', label: 'Alerts' },
-  { id: 'inbox', label: 'Inbox' },
-  { id: 'feed_mention', label: 'Feed' },
-  { id: 'graded', label: 'Grades' },
-  { id: 'announcement', label: 'Announcements' },
-]
+const FILTER_OPTIONS = [
+  { id: 'all', label: 'All notifications', icon: LayoutGrid },
+  { id: 'alerts', label: 'Alerts', icon: BellRing },
+  { id: 'inbox', label: 'Inbox', icon: Inbox },
+  { id: 'feed_mention', label: 'Feed', icon: MessageCircle },
+  { id: 'graded', label: 'Grades', icon: ClipboardCheck },
+  { id: 'announcement', label: 'Announcements', icon: Megaphone },
+] as const satisfies ReadonlyArray<{ id: string; label: string; icon: LucideIcon }>
+
+type NotificationFilter = (typeof FILTER_OPTIONS)[number]['id']
 
 function kindIcon(kind: UnifiedNotificationKind) {
   switch (kind) {
@@ -94,11 +109,14 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
   const reducedMotion = usePrefersReducedMotion()
   const [portalVisible, setPortalVisible] = useState(open)
   const [entered, setEntered] = useState(false)
-  const [filter, setFilter] = useState<'all' | UnifiedNotificationKind | 'alerts'>('all')
+  const [filter, setFilter] = useState<NotificationFilter>('all')
   const [items, setItems] = useState<UnifiedNotification[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const mailboxRevision = useMailboxRevision()
+  const refreshInboxUnread = useRefreshInboxUnread()
+  const inboxUnread = useInboxUnreadCount()
+  const { totalFeedUnread, clearFeedChannelUnread, clearAllFeedUnread } = useCourseFeedUnread()
   const {
     notifications: alertItems,
     unreadCount: alertsUnread,
@@ -106,6 +124,32 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
     markAllRead,
     refresh: refreshAlerts,
   } = useInboxNotifications()
+  const [markAllBusy, setMarkAllBusy] = useState(false)
+
+  const totalUnread = inboxUnread + totalFeedUnread + alertsUnread
+
+  const filterHasUnread = useCallback(
+    (id: NotificationFilter) => {
+      switch (id) {
+        case 'all':
+          return totalUnread > 0
+        case 'alerts':
+          return alertsUnread > 0
+        case 'inbox':
+          return inboxUnread > 0
+        case 'feed_mention':
+          return totalFeedUnread > 0
+        case 'graded':
+        case 'announcement':
+          return false
+        default: {
+          const _exhaustive: never = id
+          return _exhaustive
+        }
+      }
+    },
+    [totalUnread, alertsUnread, inboxUnread, totalFeedUnread],
+  )
 
   useEffect(() => {
     if (open) return
@@ -195,11 +239,67 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
     return combined
   }, [alertItems, items])
 
+  const handleNotificationOpen = useCallback(
+    (row: UnifiedNotification) => {
+      if (row.kind === 'alert' && row.alertId && !row.isRead) {
+        void markAlertRead(row.alertId)
+        return
+      }
+      if (row.kind === 'inbox') {
+        const messageId = parseInboxNotificationMessageId(row.id)
+        if (messageId) {
+          void patchMailbox(messageId, { read: true })
+            .then(() => refreshInboxUnread())
+            .catch(() => {})
+          setItems((prev) => prev.filter((item) => item.id !== row.id))
+        }
+        return
+      }
+      if (row.kind === 'feed_mention' || row.kind === 'announcement') {
+        const feed = parseFeedNotificationChannel(row.id)
+        if (feed) clearFeedChannelUnread(feed.courseCode, feed.channelId)
+      }
+    },
+    [markAlertRead, refreshInboxUnread, clearFeedChannelUnread],
+  )
+
+  const handleMarkAllAsRead = useCallback(async () => {
+    if (markAllBusy || totalUnread === 0) return
+    setMarkAllBusy(true)
+    try {
+      await Promise.all([
+        markAllRead(),
+        markAllInboxMessagesRead().then(() => refreshInboxUnread()),
+      ])
+      clearAllFeedUnread()
+      setItems((prev) => prev.filter((item) => item.kind !== 'inbox'))
+      await load()
+      await refreshAlerts()
+    } catch {
+      /* ignore partial failures; refresh to reconcile */
+      void load()
+      void refreshAlerts()
+      void refreshInboxUnread()
+    } finally {
+      setMarkAllBusy(false)
+    }
+  }, [
+    markAllBusy,
+    totalUnread,
+    markAllRead,
+    refreshInboxUnread,
+    clearAllFeedUnread,
+    load,
+    refreshAlerts,
+  ])
+
   const filtered = useMemo(() => {
     if (filter === 'all') return mergedAll
     if (filter === 'alerts') return []
     return items.filter((i) => i.kind === filter)
   }, [filter, mergedAll, items])
+
+  const activeFilterLabel = FILTER_OPTIONS.find((option) => option.id === filter)?.label ?? 'All notifications'
 
   if (!open && !portalVisible) return null
 
@@ -235,12 +335,26 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
         }`}
       >
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
-          <div className="min-w-0">
-            <h2 id={titleId} className="text-base font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
-              Notifications
-            </h2>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 id={titleId} className="text-base font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+                Notifications
+              </h2>
+              {totalUnread > 0 ? (
+                <button
+                  type="button"
+                  disabled={markAllBusy}
+                  onClick={() => void handleMarkAllAsRead()}
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 disabled:opacity-60 dark:text-indigo-400 dark:hover:bg-neutral-800"
+                >
+                  {markAllBusy ? 'Marking…' : 'Mark all as read'}
+                </button>
+              ) : null}
+            </div>
             <p id={descId} className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
-              Inbox, alerts, feed, grades, and announcements.
+              {filter === 'all'
+                ? 'Inbox, alerts, feed, grades, and announcements.'
+                : `Showing ${activeFilterLabel.toLowerCase()} only.`}
             </p>
           </div>
           <button
@@ -255,25 +369,43 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
         </div>
 
         <div
-          role="group"
+          role="tablist"
           aria-label="Filter notifications by type"
-          className="flex shrink-0 gap-1 overflow-x-auto border-b border-slate-100 px-2 py-2 dark:border-neutral-800"
+          className="grid shrink-0 grid-cols-6 border-b border-slate-100 dark:border-neutral-800"
         >
-          {FILTER_TABS.map((tab) => {
-            const active = filter === tab.id
+          {FILTER_OPTIONS.map(({ id, label, icon: Icon }) => {
+            const active = filter === id
+            const hasUnread = filterHasUnread(id)
             return (
               <button
-                key={tab.id}
+                key={id}
                 type="button"
-                aria-pressed={active}
-                onClick={() => setFilter(tab.id)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                role="tab"
+                aria-selected={active}
+                aria-label={label}
+                title={label}
+                onClick={() => setFilter(id)}
+                className={`relative flex flex-col items-center justify-center gap-1 py-2.5 transition ${
                   active
-                    ? 'bg-indigo-600 text-white dark:bg-indigo-500'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700'
+                    ? 'text-indigo-600 dark:text-indigo-400'
+                    : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800/60 dark:hover:text-neutral-200'
                 }`}
               >
-                {tab.label}
+                <span className="relative">
+                  <Icon className="h-[18px] w-[18px]" strokeWidth={active ? 2.25 : 1.75} aria-hidden />
+                  {hasUnread && !active ? (
+                    <span
+                      className="absolute -end-0.5 -top-0.5 h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-neutral-900"
+                      aria-hidden
+                    />
+                  ) : null}
+                </span>
+                {active ? (
+                  <span
+                    className="absolute inset-x-2 bottom-0 h-0.5 rounded-full bg-indigo-600 dark:bg-indigo-400"
+                    aria-hidden
+                  />
+                ) : null}
               </button>
             )
           })}
@@ -283,17 +415,6 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
           {/* Alerts tab — system/push notifications from the notifications inbox */}
           {filter === 'alerts' ? (
             <div>
-              {alertsUnread > 0 ? (
-                <div className="mb-2 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => void markAllRead()}
-                    className="rounded-lg px-3 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-neutral-800"
-                  >
-                    Mark all read
-                  </button>
-                </div>
-              ) : null}
               {alertItems.length === 0 ? (
                 <p className="px-2 py-8 text-center text-sm text-slate-500 dark:text-neutral-400">No alerts.</p>
               ) : null}
@@ -354,9 +475,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                   <Link
                     to={row.href}
                     onClick={() => {
-                      if (row.alertId && !row.isRead) {
-                        void markAlertRead(row.alertId)
-                      }
+                      handleNotificationOpen(row)
                       onClose()
                     }}
                     className={[

@@ -3,6 +3,8 @@ package httpserver
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 )
 
 func TestCanvasQuestionToQuizQuestion_MultipleChoice(t *testing.T) {
@@ -76,5 +78,90 @@ func TestCanvasMatchingPairsJSON(t *testing.T) {
 	}
 	if len(wrap.Pairs) != 1 || wrap.Pairs[0].LeftID != "l0" || wrap.Pairs[0].RightID != "r0" {
 		t.Fatalf("%+v", wrap)
+	}
+}
+
+func TestCanvasQuestionIDFromLocalID(t *testing.T) {
+	id, ok := canvasQuestionIDFromLocalID("canvas-42")
+	if !ok || id != 42 {
+		t.Fatalf("got %d ok=%v", id, ok)
+	}
+	if _, ok := canvasQuestionIDFromLocalID("local-1"); ok {
+		t.Fatal("expected false for non-canvas id")
+	}
+}
+
+func TestCanvasParseSubmissionData(t *testing.T) {
+	raw := []any{
+		map[string]any{
+			"question_id": float64(10),
+			"answer":      float64(55),
+			"points":      float64(1),
+			"correct":     "true",
+		},
+	}
+	answers := canvasParseSubmissionData(raw)
+	if len(answers) != 1 || answers[0].CanvasQuestionID != 10 {
+		t.Fatalf("unexpected: %+v", answers)
+	}
+	if answers[0].Points == nil || *answers[0].Points != 1 {
+		t.Fatalf("points: %+v", answers[0].Points)
+	}
+}
+
+func TestCanvasUnwrapQuizSubmission(t *testing.T) {
+	wrapped := map[string]any{
+		"quiz_submissions": []any{
+			map[string]any{
+				"id": float64(99),
+				"submission_data": []any{
+					map[string]any{
+						"question_id": float64(5),
+						"points":      float64(2),
+						"correct":     true,
+					},
+				},
+			},
+		},
+	}
+	unwrapped := canvasUnwrapQuizSubmission(wrapped)
+	if int64At(unwrapped, "id") != 99 {
+		t.Fatalf("expected id 99, got %+v", unwrapped)
+	}
+	answers := canvasParseSubmissionData(unwrapped["submission_data"])
+	if len(answers) != 1 || answers[0].CanvasQuestionID != 5 || answers[0].Points == nil || *answers[0].Points != 2 {
+		t.Fatalf("unexpected answers: %+v", answers)
+	}
+}
+
+func TestCanvasParseSubmissionDataMap(t *testing.T) {
+	raw := map[string]any{
+		"101": map[string]any{"score": float64(1), "correct": "true"},
+	}
+	answers := canvasParseSubmissionData(raw)
+	if len(answers) != 1 || answers[0].CanvasQuestionID != 101 {
+		t.Fatalf("unexpected: %+v", answers)
+	}
+}
+
+func TestCanvasGradeImportedMultipleChoice(t *testing.T) {
+	correct := uint(1)
+	q := coursemodulequiz.QuizQuestion{
+		ID:                 "canvas-7",
+		QuestionType:       "multiple_choice",
+		CorrectChoiceIndex: &correct,
+		Points:             2,
+	}
+	choiceMaps := map[int64]int{100: 0, 200: 1}
+	answer := canvasQuizSubmissionAnswer{
+		CanvasQuestionID: 7,
+		Answer:           float64(200),
+	}
+	_, isCorrect, pts, max := canvasGradeImportedQuestion(q, answer, choiceMaps, nil)
+	if isCorrect == nil || !*isCorrect {
+		t.Fatalf("expected correct, got %v", isCorrect)
+	}
+	if pts != 2 || max != 2 {
+		t.Fatalf("points earned=%v max=%v", pts, max)
 	}
 }

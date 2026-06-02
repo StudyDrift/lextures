@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { inboxAlertsToUnified, notificationActionHref } from '../unified-notifications'
+import {
+  inboxAlertsToUnified,
+  notificationActionHref,
+  parseFeedNotificationChannel,
+  parseInboxNotificationMessageId,
+} from '../unified-notifications'
 
 describe('notificationActionHref', () => {
   it('keeps app-relative paths', () => {
@@ -33,5 +38,31 @@ describe('inboxAlertsToUnified', () => {
     expect(rows[0]?.kind).toBe('alert')
     expect(rows[0]?.alertId).toBe('n1')
     expect(rows[0]?.href).toBe('/courses/C-TEST01')
+  })
+})
+
+describe('parseInboxNotificationMessageId', () => {
+  it('extracts mailbox message id', () => {
+    expect(parseInboxNotificationMessageId('inbox:msg-123')).toBe('msg-123')
+  })
+
+  it('returns null for other kinds', () => {
+    expect(parseInboxNotificationMessageId('alert:abc')).toBeNull()
+  })
+})
+
+describe('parseFeedNotificationChannel', () => {
+  it('extracts course and channel from mention ids', () => {
+    expect(parseFeedNotificationChannel('feed:mention:C-ABC:ch-1:msg-9')).toEqual({
+      courseCode: 'C-ABC',
+      channelId: 'ch-1',
+    })
+  })
+
+  it('extracts course and channel from announcement ids', () => {
+    expect(parseFeedNotificationChannel('feed:announce:C-ABC:ch-1:msg-9')).toEqual({
+      courseCode: 'C-ABC',
+      channelId: 'ch-1',
+    })
   })
 })

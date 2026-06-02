@@ -46,6 +46,9 @@ test.describe('Item Analysis — UI', () => {
       seededCourse.moduleId,
     )
     await page.goto(`/courses/${seededCourse.courseCode}/modules/quiz/${itemId}`)
+    await page.getByRole('button', { name: 'More' }).click()
+    await page.getByRole('menuitem', { name: 'Analytics' }).click()
+    await expect(page.getByRole('dialog', { name: /quiz analytics/i })).toBeVisible({ timeout: 10000 })
     await expect(page.getByRole('heading', { name: 'Item Analysis', exact: true })).toBeVisible({ timeout: 10000 })
   })
 
@@ -59,7 +62,10 @@ test.describe('Item Analysis — UI', () => {
       seededCourse.moduleId,
     )
     await page.goto(`/courses/${seededCourse.courseCode}/modules/quiz/${itemId}`)
-    // Wait for the panel to load
+    await page.getByRole('button', { name: 'More' }).click()
+    await page.getByRole('menuitem', { name: 'Analytics' }).click()
+    await expect(page.getByRole('dialog', { name: /quiz analytics/i })).toBeVisible({ timeout: 10000 })
+    // Wait for the panel to load inside the analytics modal
     await expect(page.getByRole('heading', { name: 'Item Analysis', exact: true })).toBeVisible({ timeout: 10000 })
     // Expect the insufficient-data message (no responses yet)
     await expect(

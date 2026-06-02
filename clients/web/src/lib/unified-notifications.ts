@@ -71,6 +71,24 @@ export function inboxAlertsToUnified(alerts: InboxAlertNotification[]): UnifiedN
   }))
 }
 
+export function parseInboxNotificationMessageId(id: string): string | null {
+  if (!id.startsWith('inbox:')) return null
+  const messageId = id.slice('inbox:'.length).trim()
+  return messageId || null
+}
+
+export function parseFeedNotificationChannel(
+  id: string,
+): { courseCode: string; channelId: string } | null {
+  const parts = id.split(':')
+  if (parts.length < 5 || parts[0] !== 'feed') return null
+  if (parts[1] !== 'announce' && parts[1] !== 'mention') return null
+  const courseCode = parts[2]?.trim()
+  const channelId = parts[3]?.trim()
+  if (!courseCode || !channelId) return null
+  return { courseCode, channelId }
+}
+
 const FEED_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000
 const MAX_CHANNELS_PER_COURSE = 6
 const MAX_FEED_NODES_PER_COURSE = 200

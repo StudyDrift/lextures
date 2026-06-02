@@ -284,6 +284,11 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                     'Per-learner scores on imported assignments and quizzes (max points + gradebook cells). Learners need an email in Canvas; accounts are created when missing.',
                   ] as const,
                   ['settings', 'Settings', 'Course title, overview, dates, visibility, and syllabus sections.'] as const,
+                  [
+                    'files',
+                    'Files',
+                    'Course file folders and attachments from Canvas Files (shown on the course Files page).',
+                  ] as const,
                 ] as const
               ).map(([key, label, hint]) => (
                 <label

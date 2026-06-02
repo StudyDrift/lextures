@@ -70,6 +70,12 @@ export async function patchMailbox(
   }
 }
 
+export async function markAllInboxMessagesRead(): Promise<void> {
+  const messages = await fetchMailboxMessages('inbox', '')
+  const unread = messages.filter((m) => m.folder === 'inbox' && !m.read)
+  await Promise.all(unread.map((m) => patchMailbox(m.id, { read: true })))
+}
+
 export async function sendMessage(
   body: { to_email?: string; subject: string; body: string; draft?: boolean },
 ): Promise<string> {

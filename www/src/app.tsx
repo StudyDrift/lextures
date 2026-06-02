@@ -575,12 +575,21 @@ function HomePage() {
 /* ─────────────────────────────────────────────────────────
    ROUTER
    ───────────────────────────────────────────────────────── */
+function resolveRoute(pathname: string, hash: string): string {
+  if (hash.startsWith('#/')) {
+    const hashRoute = hash.slice(1)
+    // e.g. /blog + #/blog/my-post — pathname wins today and breaks post links
+    if (pathname !== '/' && hashRoute.startsWith(`${pathname}/`)) {
+      return hashRoute
+    }
+    if (pathname === '/') return hashRoute
+  }
+  return pathname !== '/' ? pathname : '/'
+}
+
 export default function App() {
   const hash = useHashRoute()
-  const path = window.location.pathname
-  const route = path !== '/'
-    ? path
-    : (hash.startsWith('#/') ? hash.slice(1) : '/')
+  const route = resolveRoute(window.location.pathname, hash)
 
   if (route === '/get-started') return <GetStartedPage />
   if (route === '/higher-ed') return <HigherEdPage />

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 import { CommandPaletteProvider } from '../command-palette/command-palette-provider'
 import { KeyboardShortcutsProvider } from '../keyboard-shortcuts/keyboard-shortcuts-provider'
 import { CourseFeedUnreadProvider } from '../../context/course-feed-unread-provider'
+import { InboxNotificationsProvider } from '../../context/inbox-notifications-provider'
 import { InboxUnreadProvider } from '../../context/inbox-unread-provider'
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
 import { PlatformFeaturesProvider } from '../../context/platform-features-context'
@@ -78,6 +79,7 @@ export function AppShell() {
     <PlatformFeaturesProvider>
     <ReadingPreferencesProvider>
     <InboxUnreadProvider>
+      <InboxNotificationsProvider>
       <CourseFeedUnreadProvider>
         <CommandPaletteProvider>
           <KeyboardShortcutsProvider>
@@ -91,6 +93,7 @@ export function AppShell() {
           </KeyboardShortcutsProvider>
         </CommandPaletteProvider>
       </CourseFeedUnreadProvider>
+      </InboxNotificationsProvider>
     </InboxUnreadProvider>
     </ReadingPreferencesProvider>
     </PlatformFeaturesProvider>
