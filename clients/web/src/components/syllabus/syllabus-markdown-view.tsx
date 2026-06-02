@@ -1,10 +1,13 @@
 import type { Components } from 'react-markdown'
 import { forwardRef, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
+import { Download } from 'lucide-react'
 import 'katex/dist/katex.min.css'
+import { FilePreview } from '../file-preview'
 import { CourseFileMarkdownImage } from './course-file-markdown-image'
 import { normalizeMarkdownLists } from './normalize-markdown-lists'
 import { remarkMergeAdjacentLists } from './remark-merge-adjacent-lists'
@@ -14,7 +17,69 @@ import { resolveMarkdownTheme } from '../../lib/markdown-theme'
 import { useReducedData } from '../../context/reduced-data-context'
 import { isMathRenderingEnabled } from '../../lib/math'
 import { sectionsToMarkdown } from './syllabus-section-markdown'
+import { apiUrl } from '../../lib/api'
 import type { PluggableList } from 'unified'
+
+// Matches Lextures course-file content URLs: /api/v1/courses/{code}/files/items/{id}/content
+const lexturesCourseFileRe = /^\/api\/v1\/courses\/[^/]+\/files\/items\/[^/]+\/content/
+
+function CourseFileLink({
+  href,
+  children,
+  className,
+  style,
+}: {
+  href: string
+  children: React.ReactNode
+  className?: string
+  style?: React.CSSProperties
+}) {
+  const [previewOpen, setPreviewOpen] = useState(false)
+  const { filePath, filename } = useMemo(() => {
+    try {
+      const u = new URL(href, window.location.origin)
+      return {
+        filePath: u.pathname,
+        filename: u.searchParams.get('name') || String(children) || 'file',
+      }
+    } catch {
+      return { filePath: href, filename: String(children) || 'file' }
+    }
+  }, [href, children])
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setPreviewOpen(true)}
+        className={className}
+        style={style}
+      >
+        {children}
+      </button>
+      {' '}
+      <a
+        href={apiUrl(filePath)}
+        download={filename}
+        className="inline-flex items-center text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"
+        title={`Download ${filename}`}
+        aria-label={`Download ${filename}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Download className="h-3 w-3" aria-hidden />
+      </a>
+      {previewOpen && (
+        <FilePreview
+          open={previewOpen}
+          filePath={filePath}
+          filename={filename}
+          mimeType={null}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
+    </>
+  )
+}
 
 const katexRehypePlugins: PluggableList = [
   [rehypeKatex, { output: 'htmlAndMathml', strict: 'ignore' }],
@@ -71,17 +136,27 @@ function createMarkdownComponents(
         {children}
       </li>
     ),
-    a: ({ children, href }) => (
-      <a
-        href={href}
-        className={c.a}
-        style={o.a}
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        {children}
-      </a>
-    ),
+    a: ({ children, href }) => {
+      if (href && lexturesCourseFileRe.test(href)) {
+        return (
+          <CourseFileLink href={href} className={c.a} style={o.a}>
+            {children}
+          </CourseFileLink>
+        )
+      }
+      if (href?.startsWith('/courses/')) {
+        return (
+          <Link to={href} className={c.a} style={o.a}>
+            {children}
+          </Link>
+        )
+      }
+      return (
+        <a href={href} className={c.a} style={o.a} target="_blank" rel="noreferrer noopener">
+          {children}
+        </a>
+      )
+    },
     blockquote: ({ children }) => (
       <blockquote className={c.blockquote} style={o.blockquote}>
         {children}
