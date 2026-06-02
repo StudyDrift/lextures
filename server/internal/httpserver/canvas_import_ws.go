@@ -14,14 +14,18 @@ import (
 	"strings"
 	"time"
 
+	"log"
+	"path/filepath"
+
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/coder/websocket"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
-	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/filemanager"
 )
 
 // handleCourseImportCanvasWS is GET /api/v1/courses/{course_code}/import/canvas/ws.
@@ -122,11 +126,12 @@ type canvasImportInclude struct {
 	Enrollments bool `json:"enrollments"`
 	Grades      bool `json:"grades"`
 	Settings    bool `json:"settings"`
+	Files       bool `json:"files"`
 }
 
 func (i canvasImportInclude) withDefaults() canvasImportInclude {
-	if !i.Modules && !i.Assignments && !i.Quizzes && !i.Enrollments && !i.Grades && !i.Settings {
-		return canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true}
+	if !i.Modules && !i.Assignments && !i.Quizzes && !i.Enrollments && !i.Grades && !i.Settings && !i.Files {
+		return canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true, Files: true}
 	}
 	return i
 }
@@ -447,6 +452,24 @@ func (d Deps) runCanvasImport(
 		return errors.New("Something went wrong while saving the import.")
 	}
 
+	if include.Files {
+		if !progress("Importing course files from Canvas...") {
+			return context.Canceled
+		}
+		fileCount, fileErr := d.importCanvasFiles(ctx, client, canvasBase, accessToken, canvasCourseID, courseID, courseCode, &importerUserID, progress)
+		if fileErr != nil {
+			// Non-fatal: log but let the import succeed overall
+			log.Printf("canvas-import: file import failed course=%q err=%v", courseCode, fileErr)
+			if !progress(fmt.Sprintf("Note: file import encountered an error: %v", fileErr)) {
+				return context.Canceled
+			}
+		} else if fileCount > 0 {
+			if !progress(fmt.Sprintf("Imported %d file(s) from Canvas.", fileCount)) {
+				return context.Canceled
+			}
+		}
+	}
+
 	courseTitle := strAt(course, "name", "")
 	if courseTitle == "" {
 		_ = d.Pool.QueryRow(ctx, `SELECT title FROM course.courses WHERE id = $1`, courseID).Scan(&courseTitle)
@@ -723,4 +746,150 @@ func mapCanvasTypeToKind(t string) (kind string, bodyTable string) {
 	default:
 		return "", ""
 	}
+}
+
+// importCanvasFiles downloads all files from a Canvas course and stores them in the
+// course's file manager (course.file_folders + course.file_items). Returns the count
+// of files successfully imported.
+func (d Deps) importCanvasFiles(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID int64,
+	courseID uuid.UUID,
+	courseCode string,
+	importerUserID *uuid.UUID,
+	progress func(string) bool,
+) (int, error) {
+	// Fetch all folders
+	folderRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/folders", canvasCourseID), nil)
+	if err != nil {
+		return 0, fmt.Errorf("fetching Canvas folders: %w", err)
+	}
+
+	// Map canvas folder ID -> our UUID; skip the root "course files" folder
+	canvasFolderToLocal := make(map[int64]uuid.UUID)
+	// Sort by full_name length so parents are created before children
+	for i := 0; i < len(folderRows); i++ {
+		for j := i + 1; j < len(folderRows); j++ {
+			if len(strAt(folderRows[i], "full_name", "")) > len(strAt(folderRows[j], "full_name", "")) {
+				folderRows[i], folderRows[j] = folderRows[j], folderRows[i]
+			}
+		}
+	}
+	for _, f := range folderRows {
+		fullName := strAt(f, "full_name", "")
+		name := strAt(f, "name", "folder")
+		canvasID := int64At(f, "id")
+		if canvasID == 0 {
+			continue
+		}
+		// The root canvas folder ("course files") maps to our virtual root (nil parent)
+		if strings.EqualFold(fullName, "course files") || strings.EqualFold(name, "course files") {
+			canvasFolderToLocal[canvasID] = uuid.Nil // sentinel: this is the root
+			continue
+		}
+		parentCanvasID := int64At(f, "parent_folder_id")
+		var localParentID *uuid.UUID
+		if parentCanvasID != 0 {
+			if pid, ok := canvasFolderToLocal[parentCanvasID]; ok && pid != uuid.Nil {
+				localParentID = &pid
+			}
+			// If parent is root (uuid.Nil sentinel), localParentID stays nil → top-level folder
+		}
+		folder, createErr := filemanager.CreateFolder(ctx, d.Pool, courseID, localParentID, name, importerUserID)
+		if createErr != nil {
+			log.Printf("canvas-import-files: create folder %q err=%v", name, createErr)
+			continue
+		}
+		canvasFolderToLocal[canvasID] = folder.ID
+	}
+
+	// Fetch all files
+	fileRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/files", canvasCourseID), url.Values{"include[]": []string{"user"}})
+	if err != nil {
+		return 0, fmt.Errorf("fetching Canvas files: %w", err)
+	}
+
+	cfg := d.effectiveConfig()
+	imported := 0
+	for _, f := range fileRows {
+		canvasFileID := int64At(f, "id")
+		if canvasFileID == 0 {
+			continue
+		}
+		displayName := strAt(f, "display_name", strAt(f, "filename", "file"))
+		filename := strAt(f, "filename", displayName)
+		mimeType := strAt(f, "content-type", "application/octet-stream")
+		fileSize := int64At(f, "size")
+		downloadURL := strAt(f, "url", "")
+		if downloadURL == "" {
+			continue
+		}
+		canvasFolderID := int64At(f, "folder_id")
+		var localFolderID *uuid.UUID
+		if canvasFolderID != 0 {
+			if fid, ok := canvasFolderToLocal[canvasFolderID]; ok && fid != uuid.Nil {
+				localFolderID = &fid
+			}
+		}
+		ext := filepath.Ext(filename)
+		objectKey := fmt.Sprintf("managed-files/%s/%s%s", courseCode, uuid.New().String(), ext)
+
+		// Download from Canvas
+		req, reqErr := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+		if reqErr != nil {
+			log.Printf("canvas-import-files: build request file=%d err=%v", canvasFileID, reqErr)
+			continue
+		}
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+		resp, dlErr := client.Do(req)
+		if dlErr != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {
+			if resp != nil {
+				_ = resp.Body.Close()
+			}
+			log.Printf("canvas-import-files: download file=%d status=%v err=%v", canvasFileID, resp, dlErr)
+			continue
+		}
+
+		// Store blob
+		if d.Storage != nil {
+			storeErr := d.Storage.PutObject(ctx, objectKey, resp.Body, fileSize, mimeType)
+			_ = resp.Body.Close()
+			if storeErr != nil {
+				log.Printf("canvas-import-files: store file=%d key=%q err=%v", canvasFileID, objectKey, storeErr)
+				continue
+			}
+		} else {
+			root := strings.TrimSpace(cfg.CourseFilesRoot)
+			if root == "" {
+				root = "data/course-files"
+			}
+			p := root + "/" + courseCode + "/" + objectKey
+			if writeErr := writeLocalFile(p, resp.Body); writeErr != nil {
+				_ = resp.Body.Close()
+				log.Printf("canvas-import-files: write file=%d path=%q err=%v", canvasFileID, p, writeErr)
+				continue
+			}
+			_ = resp.Body.Close()
+		}
+
+		// Register metadata
+		_, dbErr := filemanager.CreateFileItemWithCanvas(
+			ctx, d.Pool, courseID, localFolderID,
+			objectKey, filename, displayName, mimeType, fileSize, importerUserID, canvasFileID,
+		)
+		if dbErr != nil {
+			log.Printf("canvas-import-files: db insert file=%d err=%v", canvasFileID, dbErr)
+			continue
+		}
+		imported++
+
+		if !progress(fmt.Sprintf("Importing files… (%d so far)", imported)) {
+			return imported, context.Canceled
+		}
+	}
+	return imported, nil
 }

@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Clock,
   FileText,
+  FolderOpen,
   Layers,
   LayoutDashboard,
   Lightbulb,
@@ -64,6 +65,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     liveSessionsEnabled,
     groupSpacesEnabled,
     officeHoursEnabled,
+    filesEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const courseViewPreview = useCourseViewAs(courseCode)
@@ -117,6 +119,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       <SideNavLink to={`${base}/syllabus`} icon={<FileText className="h-5 w-5" />}>
         Syllabus
       </SideNavLink>
+      {filesEnabled && (
+        <SideNavLink to={`${base}/files`} icon={<FolderOpen className="h-5 w-5" />}>
+          Files
+        </SideNavLink>
+      )}
       <SideNavLink to={`${base}/modules`} icon={<Layers className="h-5 w-5" />}>
         Modules
       </SideNavLink>

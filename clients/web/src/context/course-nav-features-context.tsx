@@ -32,6 +32,8 @@ export type CourseNavFeatures = {
   aiTutorEnabled: boolean
   /** Plan 5.4 — section-scoped rosters and gradebook filtering. */
   sectionsEnabled: boolean
+  /** Course Files space — Drive-like file manager (default true). */
+  filesEnabled: boolean
   /** True while loading or re-fetching flags for the active course. */
   loading: boolean
   /** Re-load feature flags from the server (e.g. after saving settings). */
@@ -52,6 +54,7 @@ const defaultFeatures: CourseNavFeatures = {
   officeHoursEnabled: false,
   aiTutorEnabled: false,
   sectionsEnabled: false,
+  filesEnabled: true,
   loading: false,
   refresh: async () => {},
 }
@@ -77,6 +80,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [officeHoursEnabled, setOfficeHoursEnabled] = useState(false)
   const [aiTutorEnabled, setAiTutorEnabled] = useState(false)
   const [sectionsEnabled, setSectionsEnabled] = useState(false)
+  const [filesEnabled, setFilesEnabled] = useState(true)
   const [loading, setLoading] = useState(false)
 
   const refresh = useCallback(async () => {
@@ -94,6 +98,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setOfficeHoursEnabled(false)
       setAiTutorEnabled(false)
       setSectionsEnabled(false)
+      setFilesEnabled(true)
       return
     }
     setLoading(true)
@@ -112,6 +117,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setOfficeHoursEnabled(c.officeHoursEnabled === true)
       setAiTutorEnabled(c.aiTutorEnabled === true)
       setSectionsEnabled(c.sectionsEnabled === true)
+      setFilesEnabled(c.filesEnabled !== false)
     } catch {
       setNotebookEnabled(true)
       setFeedEnabled(true)
@@ -126,6 +132,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setOfficeHoursEnabled(false)
       setAiTutorEnabled(false)
       setSectionsEnabled(false)
+      setFilesEnabled(true)
     } finally {
       setLoading(false)
     }
@@ -150,6 +157,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       officeHoursEnabled,
       aiTutorEnabled,
       sectionsEnabled,
+      filesEnabled,
       loading,
       refresh,
     }),
@@ -167,6 +175,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       officeHoursEnabled,
       aiTutorEnabled,
       sectionsEnabled,
+      filesEnabled,
       loading,
       refresh,
     ],

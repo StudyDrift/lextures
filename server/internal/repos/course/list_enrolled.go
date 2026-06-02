@@ -54,6 +54,7 @@ type CoursePublic struct {
 	OfficeHoursEnabled            bool             `json:"officeHoursEnabled"`
 	AiTutorEnabled                bool             `json:"aiTutorEnabled"`
 	MultilingualMessagingEnabled  bool             `json:"multilingualMessagingEnabled"`
+	FilesEnabled                  bool             `json:"filesEnabled"`
 	RequireCaptions               bool             `json:"requireCaptions"`
 	CourseType                    string           `json:"courseType"`
 	CreatedAt                     time.Time        `json:"createdAt"`
@@ -115,6 +116,7 @@ const coursePublicSelect = `
     c.office_hours_enabled,
     c.ai_tutor_enabled,
     c.multilingual_messaging_enabled,
+    c.files_enabled,
     c.require_captions,
     c.course_type,
     c.created_at,
@@ -202,6 +204,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&p.OfficeHoursEnabled,
 		&p.AiTutorEnabled,
 		&p.MultilingualMessagingEnabled,
+		&p.FilesEnabled,
 		&p.RequireCaptions,
 		&p.CourseType,
 		&p.CreatedAt,
