@@ -317,7 +317,7 @@ func (d Deps) runCanvasImport(
 					if kind == "content_page" {
 						pageURL := strAt(it, "page_url", "")
 						if pageURL != "" {
-							canvasPageSlugToItem[pageURL] = itemID
+							canvasPageSlugToItem[strings.ToLower(strings.TrimSpace(pageURL))] = itemID
 							page, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/pages/%s", canvasCourseID, url.PathEscape(pageURL)), nil)
 							if e == nil {
 								md = markdownFromHTML(strAt(page, "body", ""))
@@ -490,15 +490,18 @@ func (d Deps) runCanvasImport(
 		if !progress("Updating internal links…") {
 			return context.Canceled
 		}
+		enrichCanvasLinkMaps(ctx, client, canvasBase, accessToken, canvasCourseID, d.Pool, courseID,
+			canvasAssignToItem, canvasQuizToItem, canvasPageSlugToItem)
 		rc := &canvasLinkRewriteCtx{
-			CanvasBase:     canvasBase,
-			CanvasCourseID: canvasCourseID,
-			CourseCode:     courseCode,
-			Assignments:    canvasAssignToItem,
-			Quizzes:        canvasQuizToItem,
-			PageSlugs:      canvasPageSlugToItem,
-			FileIDs:        canvasFileIDs,
-			FileNames:      canvasFileNames,
+			CanvasBase:            canvasBase,
+			CanvasCourseID:        canvasCourseID,
+			CourseCode:            courseCode,
+			Assignments:           canvasAssignToItem,
+			Quizzes:               canvasQuizToItem,
+			PageSlugs:             canvasPageSlugToItem,
+			FileIDs:               canvasFileIDs,
+			FileNames:             canvasFileNames,
+			AllowedHostSuffixes:   d.effectiveConfig().CanvasAllowedHostSuffixes,
 		}
 		if err := rewriteCanvasLinksInCourseMarkdown(ctx, d.Pool, courseID, rc); err != nil {
 			log.Printf("canvas-import: link rewrite err=%v", err)
@@ -759,24 +762,162 @@ func htmlToPlainText(html string) string {
 // canvasLinkRewriteCtx holds ID mappings used to convert Canvas-internal URLs
 // embedded in imported content into their Lextures equivalents.
 type canvasLinkRewriteCtx struct {
-	CanvasBase     string
-	CanvasCourseID int64
-	CourseCode     string
-	Assignments    map[int64]uuid.UUID // canvas assignment ID → lextures item UUID
-	Quizzes        map[int64]uuid.UUID // canvas quiz ID → lextures item UUID
-	PageSlugs      map[string]uuid.UUID // canvas page_url slug → lextures item UUID
-	FileIDs        map[int64]uuid.UUID // canvas file ID → lextures file-item UUID
-	FileNames      map[int64]string   // canvas file ID → display name
+	CanvasBase            string
+	CanvasCourseID        int64
+	CourseCode            string
+	Assignments           map[int64]uuid.UUID // canvas assignment ID → lextures item UUID
+	Quizzes               map[int64]uuid.UUID // canvas quiz ID → lextures item UUID
+	PageSlugs             map[string]uuid.UUID // canvas page_url slug → lextures item UUID
+	FileIDs               map[int64]uuid.UUID // canvas file ID → lextures file-item UUID
+	FileNames             map[int64]string   // canvas file ID → display name
+	AllowedHostSuffixes   []string
 }
 
 var (
-	canvasFilePathRe   = regexp.MustCompile(`(?i)^/courses/(\d+)/files/(\d+)`)
-	canvasAssignPathRe = regexp.MustCompile(`(?i)^/courses/(\d+)/assignments/(\d+)`)
-	canvasQuizPathRe   = regexp.MustCompile(`(?i)^/courses/(\d+)/quizzes/(\d+)`)
-	canvasPagePathRe   = regexp.MustCompile(`(?i)^/courses/(\d+)/pages/([^/?#\s]+)`)
-	canvasModulePathRe = regexp.MustCompile(`(?i)^/courses/(\d+)/modules`)
-	markdownLinkRe     = regexp.MustCompile(`(!?)\[([^\]]*)\]\(([^)]+)\)`)
+	canvasFilePathRe    = regexp.MustCompile(`(?i)^/courses/(\d+)/files/(\d+)`)
+	canvasAssignPathRe  = regexp.MustCompile(`(?i)^/courses/(\d+)/assignments/(\d+)`)
+	canvasQuizPathRe    = regexp.MustCompile(`(?i)^/courses/(\d+)/quizzes/(\d+)`)
+	canvasPagePathRe    = regexp.MustCompile(`(?i)^/courses/(\d+)/pages/([^/?#\s]+)`)
+	canvasModulePathRe  = regexp.MustCompile(`(?i)^/courses/(\d+)/modules`)
+	markdownLinkRe      = regexp.MustCompile(`(!?)\[([^\]]*)\]\(([^)]+)\)`)
+	markdownAngleLinkRe = regexp.MustCompile(`<(https?://[^>\s]+)>`)
+	htmlAnchorTagRe     = regexp.MustCompile(`(?i)<a\s([^>]*?)>`)
+	htmlAnchorHrefRe    = regexp.MustCompile(`(?i)href\s*=\s*["']([^"']+)["']`)
 )
+
+func normalizeLinkMatchTitle(title string) string {
+	return strings.ToLower(strings.TrimSpace(title))
+}
+
+func canvasURLHostMatches(host, canvasBase string, allowedHostSuffixes []string) bool {
+	if host == "" {
+		return true
+	}
+	base, err := url.Parse(canvasBase)
+	if err == nil && strings.EqualFold(host, base.Host) {
+		return true
+	}
+	hostname := strings.ToLower(host)
+	if i := strings.Index(hostname, ":"); i >= 0 {
+		hostname = hostname[:i]
+	}
+	for _, suffix := range allowedHostSuffixes {
+		s := strings.ToLower(strings.TrimPrefix(strings.TrimPrefix(strings.TrimSpace(suffix), "*."), "."))
+		if s != "" && (hostname == s || strings.HasSuffix(hostname, "."+s)) {
+			return true
+		}
+	}
+	return false
+}
+
+// enrichCanvasLinkMaps fills Canvas→Lextures ID maps using the full Canvas course
+// catalog matched to existing module items by title (and page slug). Module import
+// only records content_id for module items; links often target other course resources.
+func enrichCanvasLinkMaps(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID int64,
+	pool *pgxpool.Pool,
+	courseID uuid.UUID,
+	assignments, quizzes map[int64]uuid.UUID,
+	pageSlugs map[string]uuid.UUID,
+) {
+	rows, err := pool.Query(ctx, `
+		SELECT id, kind, title FROM course.course_structure_items
+		WHERE course_id = $1 AND archived = false
+		  AND kind IN ('assignment', 'quiz', 'content_page')`,
+		courseID)
+	if err != nil {
+		log.Printf("canvas-link-rewrite: load local items: %v", err)
+		return
+	}
+	defer rows.Close()
+	byKindTitle := make(map[string]map[string][]uuid.UUID)
+	for rows.Next() {
+		var id uuid.UUID
+		var kind, title string
+		if err := rows.Scan(&id, &kind, &title); err != nil {
+			continue
+		}
+		t := normalizeLinkMatchTitle(title)
+		if t == "" {
+			continue
+		}
+		if byKindTitle[kind] == nil {
+			byKindTitle[kind] = make(map[string][]uuid.UUID)
+		}
+		byKindTitle[kind][t] = append(byKindTitle[kind][t], id)
+	}
+	uniqueByKindTitle := func(kind, title string) (uuid.UUID, bool) {
+		ids := byKindTitle[kind][normalizeLinkMatchTitle(title)]
+		if len(ids) != 1 {
+			return uuid.Nil, false
+		}
+		return ids[0], true
+	}
+
+	assignRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/assignments", canvasCourseID), nil)
+	if err != nil {
+		log.Printf("canvas-link-rewrite: list assignments: %v", err)
+	} else {
+		for _, a := range assignRows {
+			cid := int64At(a, "id")
+			if cid <= 0 {
+				continue
+			}
+			if _, ok := assignments[cid]; ok {
+				continue
+			}
+			if id, ok := uniqueByKindTitle("assignment", strAt(a, "name", "")); ok {
+				assignments[cid] = id
+			}
+		}
+	}
+
+	quizRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/quizzes", canvasCourseID), nil)
+	if err != nil {
+		log.Printf("canvas-link-rewrite: list quizzes: %v", err)
+	} else {
+		for _, q := range quizRows {
+			cid := int64At(q, "id")
+			if cid <= 0 {
+				continue
+			}
+			if _, ok := quizzes[cid]; ok {
+				continue
+			}
+			if id, ok := uniqueByKindTitle("quiz", strAt(q, "title", "")); ok {
+				quizzes[cid] = id
+			}
+		}
+	}
+
+	pageRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/pages", canvasCourseID), nil)
+	if err != nil {
+		log.Printf("canvas-link-rewrite: list pages: %v", err)
+	} else {
+		for _, p := range pageRows {
+			slug := strings.ToLower(strings.TrimSpace(strAt(p, "url", "")))
+			if slug == "" {
+				continue
+			}
+			if _, ok := pageSlugs[slug]; ok {
+				continue
+			}
+			if id, ok := uniqueByKindTitle("content_page", strAt(p, "title", "")); ok {
+				pageSlugs[slug] = id
+				continue
+			}
+			if id, ok := uniqueByKindTitle("content_page", slug); ok {
+				pageSlugs[slug] = id
+			}
+		}
+	}
+}
 
 // rewriteURL returns the Lextures equivalent of a Canvas-internal URL, or the
 // original URL unchanged if it points to a different domain or resource type.
@@ -785,12 +926,9 @@ func (rc *canvasLinkRewriteCtx) rewriteURL(rawURL string) string {
 	if err != nil {
 		return rawURL
 	}
-	// For absolute URLs, only process those pointing at the Canvas host.
-	if u.Host != "" {
-		base, perr := url.Parse(rc.CanvasBase)
-		if perr != nil || !strings.EqualFold(u.Host, base.Host) {
-			return rawURL
-		}
+	// For absolute URLs, only process those pointing at an allowed Canvas host.
+	if u.Host != "" && !canvasURLHostMatches(u.Host, rc.CanvasBase, rc.AllowedHostSuffixes) {
+		return rawURL
 	}
 	path := u.Path
 
@@ -843,6 +981,7 @@ func (rc *canvasLinkRewriteCtx) rewriteURL(rawURL string) string {
 			return rawURL
 		}
 		slug, _ := url.PathUnescape(m[2])
+		slug = strings.ToLower(strings.TrimSpace(slug))
 		if localID, ok := rc.PageSlugs[slug]; ok {
 			return fmt.Sprintf("/courses/%s/modules/content/%s",
 				url.PathEscape(rc.CourseCode), localID)
@@ -860,10 +999,10 @@ func (rc *canvasLinkRewriteCtx) rewriteURL(rawURL string) string {
 	return rawURL
 }
 
-// rewriteMarkdown rewrites all Markdown link/image URLs that point into the
-// Canvas course to their Lextures equivalents.
+// rewriteMarkdown rewrites Markdown links, autolinks, and any leftover HTML
+// anchors that point into the Canvas course to their Lextures equivalents.
 func (rc *canvasLinkRewriteCtx) rewriteMarkdown(markdown string) string {
-	return markdownLinkRe.ReplaceAllStringFunc(markdown, func(match string) string {
+	s := markdownLinkRe.ReplaceAllStringFunc(markdown, func(match string) string {
 		subs := markdownLinkRe.FindStringSubmatch(match)
 		if len(subs) < 4 {
 			return match
@@ -874,6 +1013,30 @@ func (rc *canvasLinkRewriteCtx) rewriteMarkdown(markdown string) string {
 			return match
 		}
 		return fmt.Sprintf("%s[%s](%s)", bang, text, newURL)
+	})
+	s = markdownAngleLinkRe.ReplaceAllStringFunc(s, func(match string) string {
+		subs := markdownAngleLinkRe.FindStringSubmatch(match)
+		if len(subs) < 2 {
+			return match
+		}
+		newURL := rc.rewriteURL(subs[1])
+		if newURL == subs[1] {
+			return match
+		}
+		return "<" + newURL + ">"
+	})
+	return htmlAnchorTagRe.ReplaceAllStringFunc(s, func(tag string) string {
+		return htmlAnchorHrefRe.ReplaceAllStringFunc(tag, func(hrefPart string) string {
+			subs := htmlAnchorHrefRe.FindStringSubmatch(hrefPart)
+			if len(subs) < 2 {
+				return hrefPart
+			}
+			newURL := rc.rewriteURL(subs[1])
+			if newURL == subs[1] {
+				return hrefPart
+			}
+			return `href="` + newURL + `"`
+		})
 	})
 }
 

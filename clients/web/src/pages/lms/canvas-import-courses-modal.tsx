@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Search, X } from 'lucide-react'
+import { CanvasImportProgressLog } from '../../components/canvas/canvas-import-progress-log'
+import { useCanvasImportProgressLog } from '../../hooks/use-canvas-import-progress-log'
 import { CanvasReadOnlyNotice } from '../../components/canvas/canvas-read-only-notice'
 import { BookLoader } from '../../components/quiz/book-loader'
 import {
@@ -48,12 +50,8 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [importStatus, setImportStatus] = useState<string | null>(null)
-  const [importDone, setImportDone] = useState<{
-    ok: number
-    failed: string[]
-    cancelled: boolean
-  } | null>(null)
+  const { entries: importLog, append: appendImportLog, clear: clearImportLog } =
+    useCanvasImportProgressLog()
   const importCancelledRef = useRef(false)
   const activeCourseImportAbortRef = useRef<AbortController | null>(null)
   const [nameFilter, setNameFilter] = useState('')
@@ -85,14 +83,13 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
     setSelected(new Set())
     setBusy(false)
     setError(null)
-    setImportStatus(null)
-    setImportDone(null)
+    clearImportLog()
     setNameFilter('')
     setHideUnpublished(false)
     importCancelledRef.current = false
     activeCourseImportAbortRef.current?.abort()
     activeCourseImportAbortRef.current = null
-  }, [])
+  }, [clearImportLog])
 
   useEffect(() => {
     if (!open) return
@@ -179,13 +176,13 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
   function requestCancelImport() {
     importCancelledRef.current = true
     activeCourseImportAbortRef.current?.abort()
-    setImportStatus('Stopping import…')
+    appendImportLog('Stopping import…')
   }
 
   async function onImport() {
     if (coursesToImport.length === 0) return
     setError(null)
-    setImportDone(null)
+    clearImportLog()
     importCancelledRef.current = false
     activeCourseImportAbortRef.current = null
     setStep('importing')
@@ -194,12 +191,11 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
     const token = canvasToken.trim()
     const toImport = coursesToImport
     let ok = 0
-    const failed: string[] = []
 
     for (let i = 0; i < toImport.length; i++) {
       if (importCancelledRef.current) break
       const canvasCourse = toImport[i]!
-      setImportStatus(`Importing ${i + 1} of ${toImport.length}: ${canvasCourse.name}`)
+      appendImportLog(`Importing ${i + 1} of ${toImport.length}: ${canvasCourse.name}`)
       try {
         const created = await createCourse({
           title: canvasCourse.name,
@@ -217,7 +213,7 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
             accessToken: token,
             include: CANVAS_IMPORT_INCLUDE_ALL,
           },
-          (message) => setImportStatus(`${canvasCourse.name}: ${message}`),
+          (message) => appendImportLog(`${canvasCourse.name}: ${message}`),
           { signal: courseAbort.signal },
         )
         ok++
@@ -226,18 +222,16 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
         if (msg === CANVAS_IMPORT_CANCELLED_MESSAGE || importCancelledRef.current) {
           break
         }
-        failed.push(`${canvasCourse.name}: ${msg}`)
+        appendImportLog(`${canvasCourse.name}: ${msg}`)
       } finally {
         activeCourseImportAbortRef.current = null
       }
     }
 
-    const cancelled = importCancelledRef.current
-    setImportDone({ ok, failed, cancelled })
-    setImportStatus(null)
     setBusy(false)
     if (ok > 0) onImported?.()
     if (!rememberCredentials) setCanvasToken('')
+    onClose()
   }
 
   if (!open) return null
@@ -482,51 +476,20 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
           )}
 
           {step === 'importing' && (
-            <div className="flex min-h-[280px] flex-col items-center justify-center gap-6 overflow-visible py-10">
-              {busy && !importDone && (
-                <>
-                  <div className="overflow-visible px-6 pt-8" aria-hidden>
-                    <span className="inline-flex origin-center scale-[0.65] sm:scale-[0.75]">
-                      <BookLoader className="![--quiz-book-loader-color:rgb(79,70,229)] dark:![--quiz-book-loader-color:rgb(129,140,248)]" />
-                    </span>
-                  </div>
-                  {importStatus && (
-                    <p
-                      className="canvas-import-status-in max-w-sm text-center text-sm text-slate-600 dark:text-neutral-400"
-                      role="status"
-                      aria-live="polite"
-                    >
-                      {importStatus}
-                    </p>
-                  )}
-                </>
-              )}
-              {importDone && (
-                <div className="w-full space-y-3 text-sm">
-                  {importDone.cancelled ? (
-                    <p className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-slate-800 dark:border-neutral-600 dark:bg-neutral-800/60 dark:text-neutral-200">
-                      Import stopped.
-                      {importDone.ok > 0
-                        ? ` ${importDone.ok} course${importDone.ok === 1 ? ' was' : 's were'} imported before you cancelled.`
-                        : ' No courses were fully imported.'}
-                    </p>
-                  ) : importDone.ok > 0 ? (
-                    <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200">
-                      Imported {importDone.ok} course{importDone.ok === 1 ? '' : 's'} successfully.
-                    </p>
-                  ) : null}
-                  {importDone.failed.length > 0 && (
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-                      <p className="font-medium">Some imports failed:</p>
-                      <ul className="mt-2 list-inside list-disc space-y-1 text-xs">
-                        {importDone.failed.map((line) => (
-                          <li key={line}>{line}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+            <div className="flex min-h-[280px] flex-col gap-4 py-2">
+              {busy && (
+                <div className="flex shrink-0 justify-center overflow-visible px-6 pt-4" aria-hidden>
+                  <span className="inline-flex origin-center scale-[0.65] sm:scale-[0.75]">
+                    <BookLoader className="![--quiz-book-loader-color:rgb(79,70,229)] dark:![--quiz-book-loader-color:rgb(129,140,248)]" />
+                  </span>
                 </div>
               )}
+              <CanvasImportProgressLog
+                entries={importLog}
+                active={busy}
+                maxHeightClassName="max-h-72"
+                className="min-h-0 w-full"
+              />
             </div>
           )}
         </div>
@@ -577,22 +540,13 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
               </button>
             </>
           )}
-          {step === 'importing' && busy && !importDone && (
+          {step === 'importing' && busy && (
             <button
               type="button"
               onClick={requestCancelImport}
               className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               Cancel import
-            </button>
-          )}
-          {step === 'importing' && importDone && (
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-            >
-              Done
             </button>
           )}
         </div>

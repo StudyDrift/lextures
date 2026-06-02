@@ -1,6 +1,8 @@
 import { type ChangeEvent, useEffect, useRef, useState } from 'react'
 import { Download, GraduationCap, Upload } from 'lucide-react'
 import { CanvasReadOnlyNotice } from '../../components/canvas/canvas-read-only-notice'
+import { CanvasImportProgressLog } from '../../components/canvas/canvas-import-progress-log'
+import { useCanvasImportProgressLog } from '../../hooks/use-canvas-import-progress-log'
 import { BookLoader } from '../../components/quiz/book-loader'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -30,10 +32,8 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
   const [canvasCourseId, setCanvasCourseId] = useState('')
   const [canvasToken, setCanvasToken] = useState('')
   const [canvasInclude, setCanvasInclude] = useState<CanvasImportInclude>(CANVAS_IMPORT_INCLUDE_ALL)
-  const [canvasImportStatus, setCanvasImportStatus] = useState<{
-    key: number
-    text: string
-  } | null>(null)
+  const { entries: canvasImportLog, append: appendCanvasImportLog, clear: clearCanvasImportLog } =
+    useCanvasImportProgressLog()
   const [rememberCanvasCredentials, setRememberCanvasCredentials] = useState(false)
 
   useEffect(() => {
@@ -108,7 +108,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
 
   async function onCanvasImport() {
     setFeedback(null)
-    setCanvasImportStatus(null)
+    clearCanvasImportLog()
     setBusy('importingCanvas')
     try {
       await postCourseImportCanvas(
@@ -120,12 +120,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
           accessToken: canvasToken.trim(),
           include: canvasInclude,
         },
-        (message) => {
-          setCanvasImportStatus((prev) => ({
-            key: (prev?.key ?? 0) + 1,
-            text: message,
-          }))
-        },
+        (message) => appendCanvasImportLog(message),
       )
       setFeedback({
         kind: 'ok',
@@ -141,7 +136,6 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
       })
     } finally {
       setBusy('idle')
-      setCanvasImportStatus(null)
     }
   }
 
@@ -413,16 +407,11 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               {busy === 'importingCanvas' ? 'Importing from Canvas…' : 'Import from Canvas'}
             </button>
           </div>
-          {canvasImportStatus && (
-            <p
-              key={canvasImportStatus.key}
-              className="canvas-import-status-in mt-3 text-sm text-slate-600 dark:text-neutral-400"
-              role="status"
-              aria-live="polite"
-            >
-              {canvasImportStatus.text}
-            </p>
-          )}
+          <CanvasImportProgressLog
+            entries={canvasImportLog}
+            active={busy === 'importingCanvas'}
+            className="mt-3"
+          />
         </div>
 
         <div className="mt-8 border-t border-slate-200 pt-8 dark:border-neutral-600">
