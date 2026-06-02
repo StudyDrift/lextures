@@ -9,7 +9,7 @@ import {
 } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { studentProgressFeatureEnabled } from '../../lib/student-progress'
-import { Pencil, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
+import { ClipboardList, Pencil, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
 import { EnrollmentRoleBadge } from './enrollment-role-badge'
 import { EnrollmentGroupsPanel } from './enrollment-groups-panel'
 import { EnrollmentsActionsMenu } from './enrollments-actions-menu'
@@ -19,6 +19,7 @@ import { authorizedFetch } from '../../lib/api'
 import {
   courseEnrollmentsReadPermission,
   courseEnrollmentsUpdatePermission,
+  courseGradebookViewPermission,
   fetchCourse,
   fetchCourseScopedRoles,
   fetchCourseSections,
@@ -96,6 +97,10 @@ export default function CourseEnrollments() {
   const canUpdateEnrollments = usePermission(
     courseCode ? courseEnrollmentsUpdatePermission(courseCode) : 'global:app:noop:noop',
   )
+  const canViewGradebook = usePermission(
+    courseCode ? courseGradebookViewPermission(courseCode) : 'global:app:noop:noop',
+  )
+  const showActionsColumn = canUpdateEnrollments || canViewGradebook
   const [enrollments, setEnrollments] = useState<CourseEnrollment[] | null>(null)
   /** enrollment id → has active accommodations (non-PII indicator for instructors). */
   const [accommodationActiveByEnrollment, setAccommodationActiveByEnrollment] = useState<
@@ -861,7 +866,7 @@ export default function CourseEnrollments() {
                 <th className="px-4 py-3">Role</th>
                 {sectionsEnabled ? <th className="px-4 py-3">Section</th> : null}
                 <th className="px-4 py-3">Last access</th>
-                {canUpdateEnrollments && (
+                {showActionsColumn && (
                   <th className="min-w-[4.5rem] px-2 py-3 text-end font-normal" aria-label="Actions" />
                 )}
               </tr>
@@ -880,6 +885,7 @@ export default function CourseEnrollments() {
                   enrollmentGroupsEnabled && canUpdateEnrollments && er === 'student'
                 const showSectionTransfer =
                   sectionsEnabled && canUpdateEnrollments && er === 'student' && sections.length > 1
+                const showGradebook = courseCode != null && er === 'student' && canViewGradebook
                 return (
                   <tr
                     key={e.id}
@@ -924,9 +930,9 @@ export default function CourseEnrollments() {
                     <td className="px-4 py-3 text-slate-600">
                       {formatTimeAgoFromIso(e.lastCourseAccessAt, relativeNowMs)}
                     </td>
-                    {canUpdateEnrollments && (
+                    {showActionsColumn && (
                       <td className="px-2 py-3 text-end align-middle">
-                        {showEdit || showRemove || showGroupAssign || showSectionTransfer ? (
+                        {showEdit || showRemove || showGroupAssign || showSectionTransfer || showGradebook ? (
                           <div className="inline-flex items-center justify-end gap-0.5">
                             {showSectionTransfer ? (
                               <button
@@ -963,6 +969,15 @@ export default function CourseEnrollments() {
                               >
                                 <Pencil className="h-4 w-4" aria-hidden />
                               </button>
+                            ) : null}
+                            {showGradebook ? (
+                              <Link
+                                to={`/courses/${encodeURIComponent(courseCode)}/gradebook?student=${encodeURIComponent(e.userId)}`}
+                                className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                aria-label={`View gradebook for ${e.displayName?.trim() || 'this student'}`}
+                              >
+                                <ClipboardList className="h-4 w-4" aria-hidden />
+                              </Link>
                             ) : null}
                             {showRemove ? (
                               <button
