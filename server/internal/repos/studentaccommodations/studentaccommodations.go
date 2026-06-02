@@ -69,10 +69,20 @@ const rowSelectCols = `
        alternative_format, effective_from, effective_until,
        created_by, updated_by, created_at, updated_at`
 
+// rowSelectColsSA qualifies columns for queries that JOIN course.courses (both have created_at).
+const rowSelectColsSA = `
+       (sa.time_multiplier)::double precision,
+       sa.extra_attempts, sa.hints_always_enabled, sa.reduced_distraction_mode,
+       sa.speech_to_text_enabled,
+       sa.tts_enabled, sa.dyslexia_display_enabled, sa.high_contrast_enabled,
+       sa.reduced_motion_enabled, sa.separate_setting, sa.active,
+       sa.alternative_format, sa.effective_from, sa.effective_until,
+       sa.created_by, sa.updated_by, sa.created_at, sa.updated_at`
+
 // ListForUserWithCourse returns active rows for a user with optional course code.
 func ListForUserWithCourse(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]ListRow, error) {
 	const q = `
-SELECT sa.id, sa.user_id, sa.course_id,` + rowSelectCols + `,
+SELECT sa.id, sa.user_id, sa.course_id,` + rowSelectColsSA + `,
        c.course_code AS course_code
 FROM course.student_accommodations sa
 LEFT JOIN course.courses c ON c.id = sa.course_id

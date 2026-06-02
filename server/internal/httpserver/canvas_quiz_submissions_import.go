@@ -114,16 +114,6 @@ func canvasLoadQuizAnswerMetadata(
 	return choiceMaps, correctAnswerIDs, nil
 }
 
-func canvasLoadQuizAnswerChoiceMaps(
-	ctx context.Context,
-	client *http.Client,
-	canvasBase, accessToken string,
-	canvasCourseID, canvasQuizID int64,
-) (map[int64]map[int64]int, error) {
-	choiceMaps, _, err := canvasLoadQuizAnswerMetadata(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizID)
-	return choiceMaps, err
-}
-
 func canvasGetQuizSubmissionDetail(
 	ctx context.Context,
 	client *http.Client,
@@ -255,11 +245,11 @@ func canvasParseSubmissionDataEntry(m map[string]any) []canvasQuizSubmissionAnsw
 	case bool:
 		correct = &c
 	case string:
-		s := strings.ToLower(strings.TrimSpace(c))
-		if s == "true" || s == "1" {
+		switch strings.ToLower(strings.TrimSpace(c)) {
+		case "true", "1":
 			b := true
 			correct = &b
-		} else if s == "false" || s == "0" {
+		case "false", "0":
 			b := false
 			correct = &b
 		}
