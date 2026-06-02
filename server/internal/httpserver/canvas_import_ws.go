@@ -22,6 +22,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
@@ -267,6 +268,7 @@ func (d Deps) runCanvasImport(
 	_ = tx.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), -1) + 1 FROM course.course_structure_items WHERE course_id = $1`, courseID).Scan(&nextSort)
 	canvasAssignToItem := make(map[int64]uuid.UUID)
 	canvasQuizToItem := make(map[int64]uuid.UUID)
+	canvasPageSlugToItem := make(map[string]uuid.UUID)
 	if include.Modules {
 		if !progress("Importing modules and items...") {
 			return context.Canceled
@@ -310,6 +312,7 @@ func (d Deps) runCanvasImport(
 					if kind == "content_page" {
 						pageURL := strAt(it, "page_url", "")
 						if pageURL != "" {
+							canvasPageSlugToItem[pageURL] = itemID
 							page, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/pages/%s", canvasCourseID, url.PathEscape(pageURL)), nil)
 							if e == nil {
 								md = markdownFromHTML(strAt(page, "body", ""))
@@ -452,11 +455,15 @@ func (d Deps) runCanvasImport(
 		return errors.New("Something went wrong while saving the import.")
 	}
 
+	var canvasFileIDs map[int64]uuid.UUID
+	var canvasFileNames map[int64]string
 	if include.Files {
 		if !progress("Importing course files from Canvas...") {
 			return context.Canceled
 		}
-		fileCount, fileErr := d.importCanvasFiles(ctx, client, canvasBase, accessToken, canvasCourseID, courseID, courseCode, &importerUserID, progress)
+		var fileCount int
+		var fileErr error
+		fileCount, canvasFileIDs, canvasFileNames, fileErr = d.importCanvasFiles(ctx, client, canvasBase, accessToken, canvasCourseID, courseID, courseCode, &importerUserID, progress)
 		if fileErr != nil {
 			// Non-fatal: log but let the import succeed overall
 			log.Printf("canvas-import: file import failed course=%q err=%v", courseCode, fileErr)
@@ -467,6 +474,25 @@ func (d Deps) runCanvasImport(
 			if !progress(fmt.Sprintf("Imported %d file(s) from Canvas.", fileCount)) {
 				return context.Canceled
 			}
+		}
+	}
+
+	if include.Modules {
+		if !progress("Updating internal links…") {
+			return context.Canceled
+		}
+		rc := &canvasLinkRewriteCtx{
+			CanvasBase:     canvasBase,
+			CanvasCourseID: canvasCourseID,
+			CourseCode:     courseCode,
+			Assignments:    canvasAssignToItem,
+			Quizzes:        canvasQuizToItem,
+			PageSlugs:      canvasPageSlugToItem,
+			FileIDs:        canvasFileIDs,
+			FileNames:      canvasFileNames,
+		}
+		if err := rewriteCanvasLinksInCourseMarkdown(ctx, d.Pool, courseID, rc); err != nil {
+			log.Printf("canvas-import: link rewrite err=%v", err)
 		}
 	}
 
@@ -719,6 +745,219 @@ func htmlToPlainText(html string) string {
 	return strings.TrimSpace(b.String())
 }
 
+// ── Canvas link rewriting ─────────────────────────────────────────────────────
+
+// canvasLinkRewriteCtx holds ID mappings used to convert Canvas-internal URLs
+// embedded in imported content into their Lextures equivalents.
+type canvasLinkRewriteCtx struct {
+	CanvasBase     string
+	CanvasCourseID int64
+	CourseCode     string
+	Assignments    map[int64]uuid.UUID // canvas assignment ID → lextures item UUID
+	Quizzes        map[int64]uuid.UUID // canvas quiz ID → lextures item UUID
+	PageSlugs      map[string]uuid.UUID // canvas page_url slug → lextures item UUID
+	FileIDs        map[int64]uuid.UUID // canvas file ID → lextures file-item UUID
+	FileNames      map[int64]string   // canvas file ID → display name
+}
+
+var (
+	canvasFilePathRe   = regexp.MustCompile(`(?i)^/courses/(\d+)/files/(\d+)`)
+	canvasAssignPathRe = regexp.MustCompile(`(?i)^/courses/(\d+)/assignments/(\d+)`)
+	canvasQuizPathRe   = regexp.MustCompile(`(?i)^/courses/(\d+)/quizzes/(\d+)`)
+	canvasPagePathRe   = regexp.MustCompile(`(?i)^/courses/(\d+)/pages/([^/?#\s]+)`)
+	canvasModulePathRe = regexp.MustCompile(`(?i)^/courses/(\d+)/modules`)
+	markdownLinkRe     = regexp.MustCompile(`(!?)\[([^\]]*)\]\(([^)]+)\)`)
+)
+
+// rewriteURL returns the Lextures equivalent of a Canvas-internal URL, or the
+// original URL unchanged if it points to a different domain or resource type.
+func (rc *canvasLinkRewriteCtx) rewriteURL(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	// For absolute URLs, only process those pointing at the Canvas host.
+	if u.Host != "" {
+		base, perr := url.Parse(rc.CanvasBase)
+		if perr != nil || !strings.EqualFold(u.Host, base.Host) {
+			return rawURL
+		}
+	}
+	path := u.Path
+
+	if m := canvasFilePathRe.FindStringSubmatch(path); m != nil {
+		cid, _ := strconv.ParseInt(m[1], 10, 64)
+		if cid != rc.CanvasCourseID {
+			return rawURL
+		}
+		fid, _ := strconv.ParseInt(m[2], 10, 64)
+		if localID, ok := rc.FileIDs[fid]; ok {
+			target := fmt.Sprintf("/api/v1/courses/%s/files/items/%s/content",
+				url.PathEscape(rc.CourseCode), localID)
+			if name := rc.FileNames[fid]; name != "" {
+				target += "?name=" + url.QueryEscape(name)
+			}
+			return target
+		}
+		return rawURL
+	}
+
+	if m := canvasAssignPathRe.FindStringSubmatch(path); m != nil {
+		cid, _ := strconv.ParseInt(m[1], 10, 64)
+		if cid != rc.CanvasCourseID {
+			return rawURL
+		}
+		aid, _ := strconv.ParseInt(m[2], 10, 64)
+		if localID, ok := rc.Assignments[aid]; ok {
+			return fmt.Sprintf("/courses/%s/modules/assignment/%s",
+				url.PathEscape(rc.CourseCode), localID)
+		}
+		return rawURL
+	}
+
+	if m := canvasQuizPathRe.FindStringSubmatch(path); m != nil {
+		cid, _ := strconv.ParseInt(m[1], 10, 64)
+		if cid != rc.CanvasCourseID {
+			return rawURL
+		}
+		qid, _ := strconv.ParseInt(m[2], 10, 64)
+		if localID, ok := rc.Quizzes[qid]; ok {
+			return fmt.Sprintf("/courses/%s/modules/quiz/%s",
+				url.PathEscape(rc.CourseCode), localID)
+		}
+		return rawURL
+	}
+
+	if m := canvasPagePathRe.FindStringSubmatch(path); m != nil {
+		cid, _ := strconv.ParseInt(m[1], 10, 64)
+		if cid != rc.CanvasCourseID {
+			return rawURL
+		}
+		slug, _ := url.PathUnescape(m[2])
+		if localID, ok := rc.PageSlugs[slug]; ok {
+			return fmt.Sprintf("/courses/%s/modules/content/%s",
+				url.PathEscape(rc.CourseCode), localID)
+		}
+		return rawURL
+	}
+
+	if m := canvasModulePathRe.FindStringSubmatch(path); m != nil {
+		cid, _ := strconv.ParseInt(m[1], 10, 64)
+		if cid == rc.CanvasCourseID {
+			return fmt.Sprintf("/courses/%s/modules", url.PathEscape(rc.CourseCode))
+		}
+	}
+
+	return rawURL
+}
+
+// rewriteMarkdown rewrites all Markdown link/image URLs that point into the
+// Canvas course to their Lextures equivalents.
+func (rc *canvasLinkRewriteCtx) rewriteMarkdown(markdown string) string {
+	return markdownLinkRe.ReplaceAllStringFunc(markdown, func(match string) string {
+		subs := markdownLinkRe.FindStringSubmatch(match)
+		if len(subs) < 4 {
+			return match
+		}
+		bang, text, rawURL := subs[1], subs[2], subs[3]
+		newURL := rc.rewriteURL(rawURL)
+		if newURL == rawURL {
+			return match
+		}
+		return fmt.Sprintf("%s[%s](%s)", bang, text, newURL)
+	})
+}
+
+// rewriteCanvasLinksInCourseMarkdown updates all stored markdown bodies for the
+// given course, rewriting Canvas-internal URLs to Lextures equivalents.
+// Individual row failures are logged but do not abort the operation.
+func rewriteCanvasLinksInCourseMarkdown(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	courseID uuid.UUID,
+	rc *canvasLinkRewriteCtx,
+) error {
+	if len(rc.Assignments) == 0 && len(rc.Quizzes) == 0 &&
+		len(rc.PageSlugs) == 0 && len(rc.FileIDs) == 0 {
+		return nil
+	}
+
+	type rowUpdate struct {
+		id uuid.UUID
+		md string
+	}
+
+	rewriteTable := func(table, idCol, mdCol string) {
+		query := fmt.Sprintf(
+			`SELECT t.%s, t.%s FROM %s t
+			 JOIN course.course_structure_items csi ON csi.id = t.%s
+			 WHERE csi.course_id = $1`, idCol, mdCol, table, idCol)
+		rows, err := pool.Query(ctx, query, courseID)
+		if err != nil {
+			log.Printf("canvas-link-rewrite: query %s: %v", table, err)
+			return
+		}
+		var updates []rowUpdate
+		for rows.Next() {
+			var id uuid.UUID
+			var md string
+			if err := rows.Scan(&id, &md); err != nil {
+				continue
+			}
+			if newMD := rc.rewriteMarkdown(md); newMD != md {
+				updates = append(updates, rowUpdate{id, newMD})
+			}
+		}
+		rows.Close()
+		upd := fmt.Sprintf(`UPDATE %s SET %s = $1 WHERE %s = $2`, table, mdCol, idCol)
+		for _, u := range updates {
+			if _, err := pool.Exec(ctx, upd, u.md, u.id); err != nil {
+				log.Printf("canvas-link-rewrite: update %s id=%s: %v", table, u.id, err)
+			}
+		}
+	}
+
+	rewriteTable("course.module_content_pages", "structure_item_id", "markdown")
+	rewriteTable("course.module_assignments", "structure_item_id", "markdown")
+	rewriteTable("course.module_quizzes", "structure_item_id", "markdown")
+	rewriteSyllabusMarkdown(ctx, pool, courseID, rc)
+	return nil
+}
+
+// rewriteSyllabusMarkdown updates the markdown fields inside the JSON sections
+// blob stored in course.course_syllabus.
+func rewriteSyllabusMarkdown(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, rc *canvasLinkRewriteCtx) {
+	var sectionsRaw []byte
+	if err := pool.QueryRow(ctx, `SELECT sections FROM course.course_syllabus WHERE course_id = $1`, courseID).Scan(&sectionsRaw); err != nil || len(sectionsRaw) == 0 {
+		return
+	}
+	var sections []map[string]any
+	if err := json.Unmarshal(sectionsRaw, &sections); err != nil {
+		return
+	}
+	changed := false
+	for _, sec := range sections {
+		if md, ok := sec["markdown"].(string); ok {
+			if newMD := rc.rewriteMarkdown(md); newMD != md {
+				sec["markdown"] = newMD
+				changed = true
+			}
+		}
+	}
+	if !changed {
+		return
+	}
+	newJSON, err := json.Marshal(sections)
+	if err != nil {
+		return
+	}
+	if _, err := pool.Exec(ctx, `UPDATE course.course_syllabus SET sections = $1 WHERE course_id = $2`, newJSON, courseID); err != nil {
+		log.Printf("canvas-link-rewrite: update syllabus course=%s: %v", courseID, err)
+	}
+}
+
+// ── End Canvas link rewriting ─────────────────────────────────────────────────
+
 // canvasEnrollmentTypeToRole converts a Canvas enrollment type string (e.g.
 // "TeacherEnrollment", "TaEnrollment") to the Lextures course role it maps to.
 func canvasEnrollmentTypeToRole(canvasType string) string {
@@ -750,7 +989,8 @@ func mapCanvasTypeToKind(t string) (kind string, bodyTable string) {
 
 // importCanvasFiles downloads all files from a Canvas course and stores them in the
 // course's file manager (course.file_folders + course.file_items). Returns the count
-// of files successfully imported.
+// of files successfully imported, a mapping of canvas file ID → local file-item UUID,
+// and a mapping of canvas file ID → display name (for link rewriting).
 func (d Deps) importCanvasFiles(
 	ctx context.Context,
 	client *http.Client,
@@ -760,12 +1000,12 @@ func (d Deps) importCanvasFiles(
 	courseCode string,
 	importerUserID *uuid.UUID,
 	progress func(string) bool,
-) (int, error) {
+) (int, map[int64]uuid.UUID, map[int64]string, error) {
 	// Fetch all folders
 	folderRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
 		fmt.Sprintf("courses/%d/folders", canvasCourseID), nil)
 	if err != nil {
-		return 0, fmt.Errorf("fetching Canvas folders: %w", err)
+		return 0, nil, nil, fmt.Errorf("fetching Canvas folders: %w", err)
 	}
 
 	// Map canvas folder ID -> our UUID; skip the root "course files" folder
@@ -810,11 +1050,13 @@ func (d Deps) importCanvasFiles(
 	fileRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
 		fmt.Sprintf("courses/%d/files", canvasCourseID), url.Values{"include[]": []string{"user"}})
 	if err != nil {
-		return 0, fmt.Errorf("fetching Canvas files: %w", err)
+		return 0, nil, nil, fmt.Errorf("fetching Canvas files: %w", err)
 	}
 
 	cfg := d.effectiveConfig()
 	imported := 0
+	canvasFileIDs := make(map[int64]uuid.UUID)
+	canvasFileNames := make(map[int64]string)
 	for _, f := range fileRows {
 		canvasFileID := int64At(f, "id")
 		if canvasFileID == 0 {
@@ -877,7 +1119,7 @@ func (d Deps) importCanvasFiles(
 		}
 
 		// Register metadata
-		_, dbErr := filemanager.CreateFileItemWithCanvas(
+		fi, dbErr := filemanager.CreateFileItemWithCanvas(
 			ctx, d.Pool, courseID, localFolderID,
 			objectKey, filename, displayName, mimeType, fileSize, importerUserID, canvasFileID,
 		)
@@ -885,11 +1127,13 @@ func (d Deps) importCanvasFiles(
 			log.Printf("canvas-import-files: db insert file=%d err=%v", canvasFileID, dbErr)
 			continue
 		}
+		canvasFileIDs[canvasFileID] = fi.ID
+		canvasFileNames[canvasFileID] = displayName
 		imported++
 
 		if !progress(fmt.Sprintf("Importing files… (%d so far)", imported)) {
-			return imported, context.Canceled
+			return imported, canvasFileIDs, canvasFileNames, context.Canceled
 		}
 	}
-	return imported, nil
+	return imported, canvasFileIDs, canvasFileNames, nil
 }
