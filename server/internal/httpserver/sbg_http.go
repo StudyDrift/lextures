@@ -195,7 +195,7 @@ func (d Deps) handleImportStandards() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "file field is required.")
 				return
 			}
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 			csvReader = f
 		}
 
@@ -467,23 +467,6 @@ SELECT EXISTS(
 		method := sbgaggregation.ParseMethod(r.URL.Query().Get("method"))
 		aggregated := sbgaggregation.AggregateForReport(scores, method)
 
-		// Build flat output: per course_id → per standard_id → score.
-		type studentStdScore struct {
-			CourseID   string `json:"courseId"`
-			StandardID string `json:"standardId"`
-			ScoreValue int    `json:"scoreValue"`
-		}
-		var out []studentStdScore
-		for sid, stds := range aggregated {
-			for stdID, val := range stds {
-				out = append(out, studentStdScore{
-					CourseID:   sid.String(), // note: sid is StudentID here, courseID tracked separately
-					StandardID: stdID.String(),
-					ScoreValue: val,
-				})
-			}
-		}
-		// Build a simpler flat list keyed by standardId.
 		type flatScore struct {
 			StandardID string `json:"standardId"`
 			ScoreValue int    `json:"scoreValue"`
