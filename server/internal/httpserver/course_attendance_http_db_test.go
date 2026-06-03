@@ -54,7 +54,7 @@ func TestCourseAttendance_RollCallAndGradebook_Pg(t *testing.T) {
 	teacherID, _ := uuid.Parse(teacherRow.ID)
 	studentID, _ := uuid.Parse(studentRow.ID)
 
-	cc := fmt.Sprintf("C-ATT%05d", time.Now().UnixNano()%100000)
+	cc := "C-" + fmt.Sprintf("%06X", time.Now().UnixNano()%0xFFFFFF)
 	var courseID uuid.UUID
 	if err := pool.QueryRow(ctx, `
 INSERT INTO course.courses (course_code, title, created_by_user_id, attendance_enabled)
@@ -210,7 +210,7 @@ func TestCourseAttendance_SelfReport_Pg(t *testing.T) {
 	studentRow, _ := user.InsertUser(ctx, pool, studentEmail, ph, nil)
 	teacherID, _ := uuid.Parse(teacherRow.ID)
 	studentID, _ := uuid.Parse(studentRow.ID)
-	cc := fmt.Sprintf("C-AT2%05d", time.Now().UnixNano()%100000)
+	cc := "C-" + fmt.Sprintf("%06X", time.Now().UnixNano()%0xFFFFFF)
 	var courseID uuid.UUID
 	if err := pool.QueryRow(ctx, `
 INSERT INTO course.courses (course_code, title, created_by_user_id, attendance_enabled)
