@@ -347,6 +347,7 @@ func resolveColorNodeDirect(node *pptxXMLNode, theme *pptxTheme) string {
 
 // shapeStyleFill reads the shape's fill color from p:style/a:fillRef,
 // which is how layout/master background shapes get their theme color.
+// idx=1 → first fillStyleLst entry (solidFill), idx>=2 → gradients, idx>=1001 → bgFillStyleLst.
 func shapeStyleFill(sp *pptxXMLNode, theme *pptxTheme) string {
 	styleEl := sp.child("style")
 	if styleEl == nil {
@@ -356,13 +357,40 @@ func shapeStyleFill(sp *pptxXMLNode, theme *pptxTheme) string {
 	if fillRef == nil {
 		return ""
 	}
-	// idx=0 means no fill
-	if fillRef.attr("idx") == "0" {
+	idxStr := fillRef.attr("idx")
+	if idxStr == "" || idxStr == "0" {
 		return ""
 	}
-	clr := resolveColorNode(fillRef, theme)
-	if clr != "" {
-		return "background-color:" + clr + ";"
+	idx := parseEMU(idxStr)
+
+	// Resolve the placeholder color (the schemeClr/srgbClr inside fillRef itself).
+	phClrHex := ""
+	if clr := resolveColorNode(fillRef, theme); clr != "" {
+		phClrHex = strings.TrimPrefix(clr, "#")
+	}
+
+	// Pick the fill style list entry: idx 1..N → fillStyleLst, idx 1001+ → bgFillStyleLst.
+	var fillNode *pptxXMLNode
+	if idx >= 1001 {
+		i := int(idx - 1001)
+		if i < len(theme.bgFillStyles) {
+			fillNode = theme.bgFillStyles[i]
+		}
+	} else {
+		i := int(idx - 1)
+		if i >= 0 && i < len(theme.fillStyles) {
+			fillNode = theme.fillStyles[i]
+		}
+	}
+
+	if fillNode != nil && phClrHex != "" {
+		if css := renderThemeFillCSS(fillNode, phClrHex, theme); css != "" {
+			return "background:" + css + ";"
+		}
+	}
+	// Fall back to flat color when the fill style isn't gradient-renderable.
+	if phClrHex != "" {
+		return "background-color:#" + phClrHex + ";"
 	}
 	return ""
 }
@@ -739,10 +767,14 @@ func parseSlideBgCSS(cSld *pptxXMLNode, theme *pptxTheme) string {
 // ----- Theme color resolution -----
 
 type pptxTheme struct {
-	colors map[string]string // scheme name → RRGGBB hex (no #)
+	colors        map[string]string // scheme name → RRGGBB hex (no #)
+	clrMap        map[string]string // bg1/tx1/bg2/tx2/etc → dk1/lt1/... per slide master clrMap
+	fillStyles    []*pptxXMLNode    // fmtScheme/fillStyleLst entries (1-indexed by fillRef idx)
+	bgFillStyles  []*pptxXMLNode    // fmtScheme/bgFillStyleLst entries (1001+ idx)
 }
 
-var schemeClrAlias = map[string]string{
+// defaultClrMap is the standard mapping used when a master doesn't define its own.
+var defaultClrMap = map[string]string{
 	"bg1": "lt1",
 	"bg2": "lt2",
 	"tx1": "dk1",
@@ -750,6 +782,7 @@ var schemeClrAlias = map[string]string{
 }
 
 func loadPptxTheme(zr *zip.Reader) *pptxTheme {
+	theme := &pptxTheme{colors: make(map[string]string), clrMap: defaultClrMap}
 	for _, name := range []string{"ppt/theme/theme1.xml", "ppt/theme/theme2.xml", "ppt/theme/theme3.xml"} {
 		data, err := readZipFile(zr, name)
 		if err != nil {
@@ -771,9 +804,42 @@ func loadPptxTheme(zr *zip.Reader) *pptxTheme {
 				colors[schemeName] = hex
 			}
 		}
-		return &pptxTheme{colors: colors}
+		theme.colors = colors
+		// Also cache fillStyleLst / bgFillStyleLst entries for fillRef idx resolution.
+		if fmtScheme := root.findDeep("fmtScheme"); fmtScheme != nil {
+			if fsl := fmtScheme.child("fillStyleLst"); fsl != nil {
+				for i := range fsl.Children {
+					c := &fsl.Children[i]
+					theme.fillStyles = append(theme.fillStyles, c)
+				}
+			}
+			if bfsl := fmtScheme.child("bgFillStyleLst"); bfsl != nil {
+				for i := range bfsl.Children {
+					c := &bfsl.Children[i]
+					theme.bgFillStyles = append(theme.bgFillStyles, c)
+				}
+			}
+		}
+		break
 	}
-	return &pptxTheme{colors: make(map[string]string)}
+	// Read the first slide master's clrMap, if present. Most decks have one master,
+	// and its clrMap can swap the standard bg/tx mappings (e.g., dark-themed templates).
+	if data, err := readZipFile(zr, "ppt/slideMasters/slideMaster1.xml"); err == nil {
+		if root, err := parsePptxXML(data); err == nil {
+			if cm := root.findDeep("clrMap"); cm != nil {
+				m := make(map[string]string, len(cm.Attrs))
+				for _, a := range cm.Attrs {
+					if a.Value != "" {
+						m[a.Name.Local] = a.Value
+					}
+				}
+				if len(m) > 0 {
+					theme.clrMap = m
+				}
+			}
+		}
+	}
+	return theme
 }
 
 func extractSingleColorHex(node *pptxXMLNode) string {
@@ -791,8 +857,10 @@ func extractSingleColorHex(node *pptxXMLNode) string {
 }
 
 func (t *pptxTheme) resolveScheme(name string) string {
-	if alias, ok := schemeClrAlias[name]; ok {
-		name = alias
+	if t.clrMap != nil {
+		if alias, ok := t.clrMap[name]; ok && alias != "" {
+			name = alias
+		}
 	}
 	return t.colors[name]
 }
@@ -853,12 +921,20 @@ func prstColorHex(name string) string {
 }
 
 func applyColorTransforms(hex string, node *pptxXMLNode) string {
+	rgba := applyColorTransformsRGBA(hex, node)
+	return fmt.Sprintf("%02X%02X%02X", rgba[0], rgba[1], rgba[2])
+}
+
+// applyColorTransformsRGBA applies OOXML color transforms and returns RGBA with
+// alpha in [0,255]. Alpha defaults to 255 unless an <a:alpha> transform is present.
+func applyColorTransformsRGBA(hex string, node *pptxXMLNode) [4]uint8 {
 	if len(hex) != 6 {
-		return hex
+		return [4]uint8{0, 0, 0, 255}
 	}
 	r := hexByteU8(hex, 0)
 	g := hexByteU8(hex, 2)
 	b := hexByteU8(hex, 4)
+	alpha := uint8(255)
 
 	for _, child := range node.Children {
 		val := parseEMU(child.attr("val"))
@@ -881,9 +957,99 @@ func applyColorTransforms(hex string, node *pptxXMLNode) string {
 			h, l, s := rgbToHLS(r, g, b)
 			l = clampF(l + float64(val)/100000)
 			r, g, b = hlsToRGB(h, l, s)
+		case "satMod":
+			h, l, s := rgbToHLS(r, g, b)
+			s = clampF(s * float64(val) / 100000)
+			r, g, b = hlsToRGB(h, l, s)
+		case "satOff":
+			h, l, s := rgbToHLS(r, g, b)
+			s = clampF(s + float64(val)/100000)
+			r, g, b = hlsToRGB(h, l, s)
+		case "alpha":
+			f := float64(val) / 100000
+			alpha = uint8(clampF(f) * 255)
 		}
 	}
-	return fmt.Sprintf("%02X%02X%02X", r, g, b)
+	return [4]uint8{r, g, b, alpha}
+}
+
+// renderThemeFillCSS renders a theme fillStyleLst entry (solidFill or gradFill)
+// as a CSS `background:` declaration value (without trailing semicolon), with
+// `phClr` substituted by the supplied placeholder color (hex without `#`).
+// Returns "" if the fill kind isn't supported.
+func renderThemeFillCSS(fillNode *pptxXMLNode, phClrHex string, theme *pptxTheme) string {
+	if fillNode == nil || phClrHex == "" {
+		return ""
+	}
+	switch fillNode.XMLName.Local {
+	case "solidFill":
+		clr := fillNode.child("schemeClr")
+		if clr == nil {
+			return ""
+		}
+		rgba := applyColorTransformsRGBA(phClrHex, clr)
+		return formatColorCSS(rgba)
+	case "gradFill":
+		gsLst := fillNode.child("gsLst")
+		if gsLst == nil {
+			return ""
+		}
+		type stop struct {
+			pos  float64 // 0..100
+			rgba [4]uint8
+		}
+		var stops []stop
+		for i := range gsLst.Children {
+			gs := &gsLst.Children[i]
+			if gs.XMLName.Local != "gs" {
+				continue
+			}
+			pos := float64(parseEMU(gs.attr("pos"))) / 1000
+			var clrNode *pptxXMLNode
+			if c := gs.child("schemeClr"); c != nil {
+				clrNode = c
+			} else if c := gs.child("srgbClr"); c != nil {
+				clrNode = c
+			}
+			if clrNode == nil {
+				continue
+			}
+			base := phClrHex
+			if clrNode.XMLName.Local == "srgbClr" {
+				if v := clrNode.attr("val"); v != "" {
+					base = strings.ToUpper(v)
+				}
+			}
+			stops = append(stops, stop{pos: pos, rgba: applyColorTransformsRGBA(base, clrNode)})
+		}
+		if len(stops) < 2 {
+			if len(stops) == 1 {
+				return formatColorCSS(stops[0].rgba)
+			}
+			return ""
+		}
+		// Angle: OOXML lin ang is in 60000ths of a degree, 0 = pointing right, CW.
+		// CSS linear-gradient angle: 0deg = pointing up, CW. So CSS = ang/60000 + 90.
+		cssAngle := 90.0
+		if lin := fillNode.child("lin"); lin != nil {
+			cssAngle = float64(parseEMU(lin.attr("ang")))/60000 + 90
+		}
+		var b strings.Builder
+		fmt.Fprintf(&b, "linear-gradient(%.2fdeg", cssAngle)
+		for _, s := range stops {
+			fmt.Fprintf(&b, ", %s %.2f%%", formatColorCSS(s.rgba), s.pos)
+		}
+		b.WriteString(")")
+		return b.String()
+	}
+	return ""
+}
+
+func formatColorCSS(rgba [4]uint8) string {
+	if rgba[3] == 255 {
+		return fmt.Sprintf("#%02X%02X%02X", rgba[0], rgba[1], rgba[2])
+	}
+	return fmt.Sprintf("rgba(%d,%d,%d,%.3f)", rgba[0], rgba[1], rgba[2], float64(rgba[3])/255)
 }
 
 func hexByteU8(hex string, offset int) uint8 {

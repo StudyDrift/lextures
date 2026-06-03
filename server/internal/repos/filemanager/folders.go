@@ -138,6 +138,51 @@ func RenameFolder(ctx context.Context, db *pgxpool.Pool, courseID, folderID uuid
 	return GetFolder(ctx, db, courseID, folderID)
 }
 
+func MoveFolder(ctx context.Context, db *pgxpool.Pool, courseID, folderID uuid.UUID, parentID *uuid.UUID) (*Folder, error) {
+	if parentID != nil {
+		if *parentID == folderID {
+			return nil, errors.New("cannot move a folder into itself")
+		}
+		var parentExists bool
+		err := db.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM course.file_folders WHERE id = $1 AND course_id = $2)`, *parentID, courseID).Scan(&parentExists)
+		if err != nil {
+			return nil, err
+		}
+		if !parentExists {
+			return nil, errors.New("target folder not found")
+		}
+
+		var isDescendant bool
+		err = db.QueryRow(ctx, `
+			WITH RECURSIVE tree AS (
+				SELECT id FROM course.file_folders WHERE id = $1 AND course_id = $2
+				UNION ALL
+				SELECT f.id FROM course.file_folders f JOIN tree t ON f.parent_id = t.id
+			)
+			SELECT EXISTS(SELECT 1 FROM tree WHERE id = $3)
+		`, folderID, courseID, *parentID).Scan(&isDescendant)
+		if err != nil {
+			return nil, err
+		}
+		if isDescendant {
+			return nil, errors.New("cannot move a folder into one of its subfolders")
+		}
+	}
+
+	tag, err := db.Exec(ctx, `
+		UPDATE course.file_folders SET parent_id = $1, updated_at = $2
+		WHERE id = $3 AND course_id = $4
+	`, parentID, time.Now(), folderID, courseID)
+	if err != nil {
+		return nil, err
+	}
+	if tag.RowsAffected() == 0 {
+		return nil, nil
+	}
+	return GetFolder(ctx, db, courseID, folderID)
+}
+
+
 func DeleteFolder(ctx context.Context, db *pgxpool.Pool, courseID, folderID uuid.UUID) (bool, error) {
 	tag, err := db.Exec(ctx, `
 		DELETE FROM course.file_folders WHERE id = $1 AND course_id = $2
