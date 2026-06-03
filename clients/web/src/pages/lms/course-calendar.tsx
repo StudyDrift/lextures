@@ -532,7 +532,7 @@ export function CourseCalendar({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {view === 'month' && (
-        <div className="flex min-h-0 flex-1 flex-col rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90 md:p-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90 md:p-6">
           <div className="mb-4 flex min-w-0 shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
             <h2 className="shrink-0 text-lg font-semibold tracking-tight text-slate-950 dark:text-neutral-100">
               {formatDateTime(monthAnchor, { month: 'long', year: 'numeric' })}
@@ -562,7 +562,7 @@ export function CourseCalendar({
               {rescheduleError}
             </p>
           ) : null}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain rounded-xl">
             <DndContext
               sensors={dragSensors}
               collisionDetection={pointerWithin}
@@ -571,12 +571,12 @@ export function CourseCalendar({
               onDragCancel={onDragCancel}
             >
               <div
-                className={`grid min-h-0 flex-1 grid-cols-7 grid-rows-[auto_repeat(6,minmax(4rem,1fr))] gap-px rounded-xl bg-slate-200/90 dark:bg-neutral-700/90 ${rescheduleBusy ? 'pointer-events-none opacity-60' : ''}`}
+                className={`grid min-h-full grid-cols-7 grid-rows-[auto_repeat(6,minmax(5rem,1fr))] gap-px rounded-xl bg-slate-200/90 dark:bg-neutral-700/90 ${rescheduleBusy ? 'pointer-events-none opacity-60' : ''}`}
               >
                 {WEEKDAY_LABELS.map((w) => (
                   <div
                     key={w}
-                    className="bg-slate-50 px-1 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-800 dark:text-neutral-400"
+                    className="sticky top-0 z-10 bg-slate-50 px-1 py-2 text-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-800 dark:text-neutral-400"
                   >
                     {w}
                   </div>

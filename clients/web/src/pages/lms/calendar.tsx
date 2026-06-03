@@ -312,7 +312,7 @@ export default function Calendar() {
               </ul>
             </div>
           </aside>
-          <div className="flex min-h-[28rem] min-w-0 flex-1 flex-col lg:min-h-0">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             {enabledCourses.length === 0 ? (
               <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-950/40 dark:text-neutral-300">
                 Turn on at least one course to load its schedule.
