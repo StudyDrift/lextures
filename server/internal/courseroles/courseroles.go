@@ -45,6 +45,7 @@ func ManagedPermissionSuffixes() []string {
 		"enrollments:read",
 		"enrollments:update",
 		"gradebook:view",
+		"attendance:manage",
 	}
 }
 
@@ -72,11 +73,13 @@ func RoleMatrixPermissions(courseCode, role string) []string {
 			prefix + "enrollments:read",
 			prefix + "enrollments:update",
 			prefix + "gradebook:view",
+			prefix + "attendance:manage",
 		}
 	case "ta":
 		return []string{
 			prefix + "enrollments:read",
 			prefix + "gradebook:view",
+			prefix + "attendance:manage",
 		}
 	case "designer":
 		return []string{

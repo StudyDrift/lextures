@@ -147,6 +147,8 @@ export type CoursePublic = {
   multilingualMessagingEnabled?: boolean
   /** Course Files space — Drive-like file manager (default true when omitted). */
   filesEnabled?: boolean
+  /** Course attendance sessions — roll call and self report (default off). */
+  attendanceEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
   requireCaptions?: boolean
   /** `traditional` or `competency_based` (server default when omitted: traditional). */
@@ -751,6 +753,7 @@ export async function patchCourseFeatures(
     aiTutorEnabled?: boolean
     multilingualMessagingEnabled?: boolean
     filesEnabled?: boolean
+    attendanceEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -777,6 +780,7 @@ export async function patchCourseFeatures(
         ...(body.aiTutorEnabled !== undefined ? { aiTutorEnabled: body.aiTutorEnabled } : {}),
         ...(body.multilingualMessagingEnabled !== undefined ? { multilingualMessagingEnabled: body.multilingualMessagingEnabled } : {}),
         ...(body.filesEnabled !== undefined ? { filesEnabled: body.filesEnabled } : {}),
+        ...(body.attendanceEnabled !== undefined ? { attendanceEnabled: body.attendanceEnabled } : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },

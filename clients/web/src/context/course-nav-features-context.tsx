@@ -34,6 +34,8 @@ export type CourseNavFeatures = {
   sectionsEnabled: boolean
   /** Course Files space — Drive-like file manager (default true). */
   filesEnabled: boolean
+  /** Course attendance sessions (roll call / self report). */
+  attendanceEnabled: boolean
   /** True while loading or re-fetching flags for the active course. */
   loading: boolean
   /** Re-load feature flags from the server (e.g. after saving settings). */
@@ -55,6 +57,7 @@ const defaultFeatures: CourseNavFeatures = {
   aiTutorEnabled: false,
   sectionsEnabled: false,
   filesEnabled: true,
+  attendanceEnabled: false,
   loading: false,
   refresh: async () => {},
 }
@@ -81,6 +84,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [aiTutorEnabled, setAiTutorEnabled] = useState(false)
   const [sectionsEnabled, setSectionsEnabled] = useState(false)
   const [filesEnabled, setFilesEnabled] = useState(true)
+  const [attendanceEnabled, setAttendanceEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const refresh = useCallback(async () => {
@@ -99,6 +103,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setAiTutorEnabled(false)
       setSectionsEnabled(false)
       setFilesEnabled(true)
+      setAttendanceEnabled(false)
       return
     }
     setLoading(true)
@@ -118,6 +123,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setAiTutorEnabled(c.aiTutorEnabled === true)
       setSectionsEnabled(c.sectionsEnabled === true)
       setFilesEnabled(c.filesEnabled !== false)
+      setAttendanceEnabled(c.attendanceEnabled === true)
     } catch {
       setNotebookEnabled(true)
       setFeedEnabled(true)
@@ -133,6 +139,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setAiTutorEnabled(false)
       setSectionsEnabled(false)
       setFilesEnabled(true)
+      setAttendanceEnabled(false)
     } finally {
       setLoading(false)
     }
@@ -158,6 +165,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       aiTutorEnabled,
       sectionsEnabled,
       filesEnabled,
+      attendanceEnabled,
       loading,
       refresh,
     }),
@@ -176,6 +184,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       aiTutorEnabled,
       sectionsEnabled,
       filesEnabled,
+      attendanceEnabled,
       loading,
       refresh,
     ],

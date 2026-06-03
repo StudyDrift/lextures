@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/gradingdisplay"
 	"github.com/lextures/lextures/server/internal/gradingdrops"
+	"github.com/lextures/lextures/server/internal/repos/attendancesessions"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursegrading"
@@ -171,11 +172,18 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 
 		var assignIDs []uuid.UUID
+		var attendanceIDs []uuid.UUID
 		for i := range items {
 			if items[i].Kind == "assignment" {
 				id, e := uuid.Parse(items[i].ID)
 				if e == nil {
 					assignIDs = append(assignIDs, id)
+				}
+			}
+			if items[i].Kind == "attendance" {
+				id, e := uuid.Parse(items[i].ID)
+				if e == nil {
+					attendanceIDs = append(attendanceIDs, id)
 				}
 			}
 		}
@@ -200,6 +208,11 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load drop flags.")
 			return
 		}
+		attendancePoints, err := attendancesessions.LoadPointsByStructureItemIDs(r.Context(), d.Pool, attendanceIDs)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load attendance points.")
+			return
+		}
 
 		type colWork struct {
 			out    gradebookGridColumn
@@ -208,7 +221,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 		var cols []colWork
 		for i := range items {
-			if items[i].Kind != "assignment" && items[i].Kind != "quiz" && items[i].Kind != "h5p" {
+			if items[i].Kind != "assignment" && items[i].Kind != "quiz" && items[i].Kind != "h5p" && items[i].Kind != "attendance" {
 				continue
 			}
 			itemID, err := uuid.Parse(items[i].ID)
@@ -216,6 +229,12 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 				continue
 			}
 			mp := gradebookMaxPoints(&items[i])
+			if items[i].Kind == "attendance" {
+				if pts, ok := attendancePoints[itemID]; ok {
+					v := pts
+					mp = &v
+				}
+			}
 			var ag *string
 			if items[i].AssignmentGroupID != nil {
 				ag = items[i].AssignmentGroupID
