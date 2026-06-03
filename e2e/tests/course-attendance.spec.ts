@@ -196,6 +196,7 @@ test.describe('Course Attendance UI', () => {
     await injectToken(page, token)
     await page.goto(`/courses/${course.courseCode}/attendance`)
     await expect(page.getByRole('heading', { name: /^Attendance$/i })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByRole('heading', { name: /new session/i })).toBeVisible({ timeout: 15000 })
     await expect(page.getByRole('button', { name: /start session/i })).toBeVisible()
   })
 

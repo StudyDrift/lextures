@@ -274,7 +274,17 @@ export default function CourseAttendance() {
     return <p className="p-4 text-red-600">No course selected.</p>
   }
 
-  if (!featuresLoading && !attendanceEnabled) {
+  if (featuresLoading || permLoading) {
+    return (
+      <LmsPage title="Attendance">
+        <p className="text-sm text-slate-500" aria-busy="true">
+          Loading…
+        </p>
+      </LmsPage>
+    )
+  }
+
+  if (!attendanceEnabled) {
     return <Navigate to={`/courses/${encodeURIComponent(courseCode)}`} replace />
   }
 

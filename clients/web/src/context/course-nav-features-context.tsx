@@ -85,7 +85,11 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [sectionsEnabled, setSectionsEnabled] = useState(false)
   const [filesEnabled, setFilesEnabled] = useState(true)
   const [attendanceEnabled, setAttendanceEnabled] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(!!courseCode)
+
+  useEffect(() => {
+    setLoading(!!courseCode)
+  }, [courseCode])
 
   const refresh = useCallback(async () => {
     if (!courseCode) {
@@ -104,6 +108,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setSectionsEnabled(false)
       setFilesEnabled(true)
       setAttendanceEnabled(false)
+      setLoading(false)
       return
     }
     setLoading(true)
