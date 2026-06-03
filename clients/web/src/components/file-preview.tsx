@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Download, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
+import { Download, Music, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import { detectPreviewType } from '../lib/file-type'
 import { authorizedFetch } from '../lib/api'
 import { apiUrl } from '../lib/api'
@@ -195,13 +195,22 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
 // ── Unsupported file fallback ────────────────────────────────────────────────
 
 function UnsupportedFileView({ filePath, filename }: { filePath: string; filename: string }) {
-  const handleDownload = () => {
-    const a = document.createElement('a')
-    a.href = apiUrl(filePath)
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+  const handleDownload = async () => {
+    try {
+      const res = await authorizedFetch(filePath)
+      if (!res.ok) throw new Error()
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      /* noop */
+    }
   }
 
   return (
@@ -219,7 +228,7 @@ function UnsupportedFileView({ filePath, filename }: { filePath: string; filenam
       </div>
       <button
         type="button"
-        onClick={handleDownload}
+        onClick={() => void handleDownload()}
         className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
         aria-label="Download to view"
       >
@@ -284,6 +293,168 @@ function VideoFileViewer({ filePath, filename }: { filePath: string; filename: s
   )
 }
 
+// ── Audio player ─────────────────────────────────────────────────────────────
+
+function AudioViewer({ filePath, filename }: { filePath: string; filename: string }) {
+  const [src, setSrc] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const blobUrlRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await authorizedFetch(filePath)
+        if (!res.ok) throw new Error('Failed to load audio.')
+        const apiOrigin = new URL(apiUrl(filePath)).origin
+        if (new URL(res.url).origin !== apiOrigin) {
+          // S3 presigned URL — use directly so the browser can stream
+          if (!cancelled) setSrc(res.url)
+          return
+        }
+        const blob = await res.blob()
+        if (cancelled) return
+        const url = URL.createObjectURL(blob)
+        blobUrlRef.current = url
+        setSrc(url)
+      } catch {
+        if (!cancelled) setError('Could not load the audio file.')
+      }
+    })()
+    return () => {
+      cancelled = true
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current)
+    }
+  }, [filePath])
+
+  if (error) {
+    return (
+      <div className="flex h-full items-center justify-center p-6">
+        <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">{error}</p>
+      </div>
+    )
+  }
+  if (!src) {
+    return (
+      <div className="flex h-full items-center justify-center" role="status">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-6 bg-neutral-50 p-8 dark:bg-neutral-950">
+      <div className="rounded-2xl bg-indigo-100 p-8 dark:bg-indigo-950">
+        <Music className="h-12 w-12 text-indigo-600 dark:text-indigo-400" aria-hidden />
+      </div>
+      <p className="text-sm font-medium text-slate-700 dark:text-neutral-300">{filename}</p>
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+      <audio controls src={src} className="w-full max-w-md" aria-label={filename} />
+    </div>
+  )
+}
+
+// ── Office document viewer (Nutrient SDK) ────────────────────────────────────
+
+function OfficeViewer({ filePath, filename }: { filePath: string; filename: string }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function load() {
+      try {
+        const res = await authorizedFetch(filePath)
+        if (!res.ok) throw new Error('Failed to load file.')
+        const arrayBuffer = await res.arrayBuffer()
+        if (cancelled || !containerRef.current) return
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const NutrientViewer = await import('@nutrient-sdk/viewer') as any
+        if (cancelled || !containerRef.current) return
+
+        await NutrientViewer.load({
+          document: arrayBuffer,
+          container: containerRef.current,
+          baseUrl: `${window.location.origin}/`,
+        })
+
+        if (!cancelled) setLoading(false)
+      } catch {
+        if (!cancelled) setError('Could not render this file.')
+      }
+    }
+
+    void load()
+
+    return () => {
+      cancelled = true
+      const el = containerRef.current
+      if (el) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        import('@nutrient-sdk/viewer').then((NutrientViewer: any) => {
+          NutrientViewer.unload(el)
+        }).catch(() => { /* noop */ })
+      }
+    }
+  }, [filePath])
+
+  const handleDownload = async () => {
+    try {
+      const res = await authorizedFetch(filePath)
+      if (!res.ok) throw new Error()
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      /* noop */
+    }
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
+        <div className="rounded-2xl bg-slate-100 p-6 dark:bg-neutral-800">
+          <svg className="h-12 w-12 text-slate-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-medium text-slate-700 dark:text-neutral-300">{filename}</p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">{error}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleDownload()}
+          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+        >
+          <Download className="h-4 w-4" />
+          Download to view
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative h-full w-full">
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center" role="status">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+        </div>
+      )}
+      <div ref={containerRef} className="h-full w-full" />
+    </div>
+  )
+}
+
 // ── FilePreview modal ────────────────────────────────────────────────────────
 
 export function FilePreview({ open, filePath, filename, mimeType, onClose }: FilePreviewProps) {
@@ -317,7 +488,7 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
 
   return (
     <div
-      className="fixed inset-0 z-[500] flex items-stretch justify-center p-0 md:items-center md:p-4"
+      className="fixed inset-0 z-[500] flex items-stretch justify-center p-0 md:items-center md:p-2"
       role="presentation"
     >
       {/* Backdrop */}
@@ -334,8 +505,8 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative z-10 flex w-full max-w-5xl flex-col overflow-hidden rounded-none bg-white shadow-2xl dark:bg-neutral-900 md:rounded-2xl"
-        style={{ height: 'min(90vh, 900px)', maxHeight: '100dvh' }}
+        className="relative z-10 flex w-full flex-col overflow-hidden rounded-none bg-white shadow-2xl dark:bg-neutral-900 md:rounded-xl"
+        style={{ width: 'min(95vw, 1440px)', height: 'min(95vh, 1080px)', maxHeight: '100dvh' }}
       >
         {/* Dialog header */}
         <div className="flex shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-4 py-3 dark:border-neutral-700 dark:bg-neutral-900">
@@ -367,6 +538,12 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
           )}
           {previewType === 'video' && (
             <VideoFileViewer filePath={filePath} filename={filename} />
+          )}
+          {previewType === 'audio' && (
+            <AudioViewer filePath={filePath} filename={filename} />
+          )}
+          {previewType === 'office' && (
+            <OfficeViewer filePath={filePath} filename={filename} />
           )}
           {previewType === 'none' && (
             <UnsupportedFileView filePath={filePath} filename={filename} />

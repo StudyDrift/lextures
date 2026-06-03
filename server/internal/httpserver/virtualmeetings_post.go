@@ -22,6 +22,7 @@ type createMeetingBody struct {
 	ScheduledStart *string `json:"scheduledStart"`
 	ScheduledEnd   *string `json:"scheduledEnd"`
 	SectionID      *string `json:"sectionId"`
+	JoinURL        *string `json:"joinUrl"`
 }
 
 // handleCreateMeeting is POST /api/v1/courses/{course_code}/meetings.
@@ -136,6 +137,11 @@ func (d Deps) handleCreateMeeting() http.HandlerFunc {
 				}
 				joinURL = &urls.JoinURL
 				hostURL = &urls.HostURL
+			}
+		default:
+			if body.JoinURL != nil && strings.TrimSpace(*body.JoinURL) != "" {
+				u := strings.TrimSpace(*body.JoinURL)
+				joinURL = &u
 			}
 		}
 

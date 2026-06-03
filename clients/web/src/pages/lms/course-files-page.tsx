@@ -36,6 +36,8 @@ import {
   type FileItem,
   type FolderContents,
 } from '../../lib/course-files-api'
+import { authorizedFetch } from '../../lib/api'
+import { FilePreview } from '../../components/file-preview'
 import { LmsPage } from './lms-page'
 
 type ContextMenu =
@@ -85,6 +87,7 @@ export default function CourseFilesPage() {
   const [movingFile, setMovingFile] = useState<FileItem | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<SelectedItemKey>>(new Set())
+  const [previewFile, setPreviewFile] = useState<FileItem | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -313,6 +316,24 @@ export default function CourseFilesPage() {
     }
   }
 
+  async function handleDownloadFile(file: FileItem) {
+    try {
+      const res = await authorizedFetch(getFileContentUrl(courseCode, file.id))
+      if (!res.ok) throw new Error()
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.displayName
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      /* noop */
+    }
+  }
+
   async function handleFilesSelected(files: FileList | null) {
     if (!files || files.length === 0) return
     setUploading(true)
@@ -348,7 +369,7 @@ export default function CourseFilesPage() {
   }
 
   return (
-    <LmsPage title="Files" fillHeight>
+    <LmsPage title="Files">
       {/* dismiss context menu on outside click */}
       {contextMenu && (
         <div
@@ -389,7 +410,7 @@ export default function CourseFilesPage() {
             <button
               type="button"
               onClick={() => setShowNewFolder(v => !v)}
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               <FolderPlus className="h-4 w-4" aria-hidden />
               New folder
@@ -556,7 +577,6 @@ export default function CourseFilesPage() {
                 <FileRow
                   key={file.id}
                   file={file}
-                  courseCode={courseCode}
                   canManage={canManage}
                   selected={selectedItems.has(selectedItemKey('file', file.id))}
                   onToggleSelect={() => toggleItemSelection(selectedItemKey('file', file.id))}
@@ -568,6 +588,7 @@ export default function CourseFilesPage() {
                   onRenameCancel={() => setRenamingFile(null)}
                   onDelete={() => void handleDeleteFile(file)}
                   onMove={() => setMovingFile(file)}
+                  onPreview={() => setPreviewFile(file)}
                   onContextMenu={e => openContextMenu(e, file, 'file')}
                 />
               ))}
@@ -612,15 +633,18 @@ export default function CourseFilesPage() {
           )}
           {contextMenu.kind === 'file' && (
             <>
-              <a
-                href={getFileContentUrl(courseCode, contextMenu.item.id)}
-                target="_blank"
-                rel="noreferrer"
+              <button
                 className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
-                onClick={() => setContextMenu(null)}
+                onClick={() => { setPreviewFile(contextMenu.item as FileItem); setContextMenu(null) }}
+              >
+                Preview
+              </button>
+              <button
+                className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                onClick={() => { void handleDownloadFile(contextMenu.item as FileItem); setContextMenu(null) }}
               >
                 Download
-              </a>
+              </button>
               {canManage && (
                 <>
                   <button
@@ -659,6 +683,14 @@ export default function CourseFilesPage() {
           onCancel={() => setMovingFile(null)}
         />
       )}
+
+      <FilePreview
+        open={previewFile !== null}
+        filePath={previewFile ? getFileContentUrl(courseCode, previewFile.id) : ''}
+        filename={previewFile?.displayName ?? ''}
+        mimeType={previewFile?.mimeType ?? null}
+        onClose={() => setPreviewFile(null)}
+      />
     </LmsPage>
   )
 }
@@ -741,7 +773,7 @@ function SelectionActionsMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
       >
         Actions
         <ChevronDown
@@ -764,7 +796,7 @@ function SelectionActionsMenu({
               onRename()
               setOpen(false)
             }}
-            className="flex w-full items-center px-4 py-2 text-start text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
+            className="flex w-full items-center px-2.5 py-2 text-start text-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
           >
             Rename
           </button>
@@ -776,7 +808,7 @@ function SelectionActionsMenu({
               onDelete()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-4 py-2 text-start text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
           >
             <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
             Delete
@@ -891,7 +923,6 @@ function FolderRow({
 
 type FileRowProps = {
   file: FileItem
-  courseCode: string
   canManage: boolean
   selected: boolean
   onToggleSelect: () => void
@@ -903,12 +934,13 @@ type FileRowProps = {
   onRenameCancel: () => void
   onDelete: () => void
   onMove: () => void
+  onPreview: () => void
   onContextMenu: (e: React.MouseEvent) => void
 }
 
 function FileRow({
-  file, courseCode, canManage, selected, onToggleSelect, renamingFile, renameValue, setRenameValue,
-  onRenameStart, onRenameSubmit, onRenameCancel, onDelete, onMove, onContextMenu,
+  file, canManage, selected, onToggleSelect, renamingFile, renameValue, setRenameValue,
+  onRenameStart, onRenameSubmit, onRenameCancel, onDelete, onMove, onPreview, onContextMenu,
 }: FileRowProps) {
   const isRenaming = renamingFile?.id === file.id
   return (
@@ -946,15 +978,14 @@ function FileRow({
             <button type="button" onClick={onRenameCancel} className="text-xs text-slate-400 hover:underline">Cancel</button>
           </form>
         ) : (
-          <a
-            href={getFileContentUrl(courseCode, file.id)}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
+          <button
+            type="button"
+            onClick={onPreview}
+            className="flex items-center gap-2 text-left text-sm font-medium text-slate-800 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-400"
           >
             <FileMimeIcon mimeType={file.mimeType} />
             {file.displayName}
-          </a>
+          </button>
         )}
       </td>
       <td className="px-3 py-2.5 text-slate-500 dark:text-neutral-400">{formatBytes(file.byteSize)}</td>

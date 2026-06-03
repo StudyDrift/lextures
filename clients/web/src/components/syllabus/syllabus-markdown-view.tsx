@@ -17,7 +17,7 @@ import { resolveMarkdownTheme } from '../../lib/markdown-theme'
 import { useReducedData } from '../../context/reduced-data-context'
 import { isMathRenderingEnabled } from '../../lib/math'
 import { sectionsToMarkdown } from './syllabus-section-markdown'
-import { apiUrl } from '../../lib/api'
+import { authorizedFetch } from '../../lib/api'
 import type { PluggableList } from 'unified'
 
 // Matches Lextures course-file content URLs: /api/v1/courses/{code}/files/items/{id}/content
@@ -58,16 +58,30 @@ function CourseFileLink({
         {children}
       </button>
       {' '}
-      <a
-        href={apiUrl(filePath)}
-        download={filename}
+      <button
+        type="button"
         className="inline-flex items-center text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"
         title={`Download ${filename}`}
         aria-label={`Download ${filename}`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={async (e) => {
+          e.stopPropagation()
+          try {
+            const res = await authorizedFetch(filePath)
+            if (!res.ok) return
+            const blob = await res.blob()
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = filename
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            setTimeout(() => URL.revokeObjectURL(url), 1000)
+          } catch { /* noop */ }
+        }}
       >
         <Download className="h-3 w-3" aria-hidden />
-      </a>
+      </button>
       {previewOpen && (
         <FilePreview
           open={previewOpen}

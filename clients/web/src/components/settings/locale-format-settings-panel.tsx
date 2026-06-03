@@ -35,7 +35,7 @@ export function LocaleFormatSettingsPanel({
           value={timezone}
           disabled={disabled}
           onChange={(e) => onTimezoneChange(e.target.value)}
-          className="mt-3 w-full max-w-md rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+          className="mt-3 w-full max-w-md rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
           data-testid="settings-timezone-select"
         >
           {TIMEZONE_OPTIONS.map((o) => (

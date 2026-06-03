@@ -11,7 +11,7 @@ type Props = {
 }
 
 const fieldClass =
-  'w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-teal-500 dark:focus:ring-teal-500/20'
+  'w-full rounded-lg border border-stone-300 bg-white px-2 py-1.5 text-sm text-stone-900 shadow-sm outline-none transition placeholder:text-stone-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-teal-500 dark:focus:ring-teal-500/20'
 
 function formatTimezoneLabel(id: string): string {
   return id.replace(/_/g, ' ')
@@ -125,7 +125,7 @@ export function TimezoneSelector({
           className="max-h-48 overflow-y-auto rounded-lg border border-stone-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-950"
         >
           {!query.trim() && entries.length > 80 && (
-            <li className="border-b border-stone-100 px-3 py-2 text-xs text-stone-500 dark:border-neutral-800 dark:text-neutral-500">
+            <li className="border-b border-stone-100 px-2.5 py-1.5 text-xs text-stone-500 dark:border-neutral-800 dark:text-neutral-500">
               Showing the first 80 zones — type to search the full list.
             </li>
           )}
@@ -136,7 +136,7 @@ export function TimezoneSelector({
                 <button
                   type="button"
                   disabled={disabled}
-                  className={`flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-stone-900 hover:bg-stone-100 dark:text-neutral-100 dark:hover:bg-neutral-800 ${
+                  className={`flex w-full items-center justify-between gap-3 px-2.5 py-1.5 text-left text-sm text-stone-900 hover:bg-stone-100 dark:text-neutral-100 dark:hover:bg-neutral-800 ${
                     isSelected ? 'bg-teal-50 font-medium dark:bg-teal-950/50' : ''
                   }`}
                   onMouseDown={(ev) => ev.preventDefault()}

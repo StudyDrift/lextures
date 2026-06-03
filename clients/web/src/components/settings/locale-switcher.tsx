@@ -96,7 +96,7 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
       <select
         id={selectId}
         data-testid="locale-switcher"
-        className="mt-3 w-full max-w-xs rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+        className="mt-3 w-full max-w-xs rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
         value={localeTag}
         disabled={saving}
         onChange={(e) => void onSelect(e.target.value)}

@@ -407,7 +407,7 @@ export default function CourseModuleContentPage() {
             ) : null}
             {readingLevelOn ? (
               <select
-                className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+                className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-800"
                 defaultValue=""
                 aria-label="Simplify to grade level"
                 onChange={(e) => {

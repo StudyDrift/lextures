@@ -496,7 +496,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                 disabled={!canEdit}
                 value={schemeType}
                 onChange={(e) => setSchemeType(e.target.value)}
-                className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400"
+                className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400"
               >
                 {GRADING_SCHEME_DISPLAY_TYPES.map((opt) => (
                   <option key={opt.id} value={opt.id}>
@@ -533,7 +533,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                   disabled={!canEdit}
                   value={passMinPct}
                   onChange={(e) => setPassMinPct(e.target.value)}
-                  className="mt-1 w-32 rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400"
+                  className="mt-1 w-32 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400"
                 />
               </div>
             )}
@@ -549,7 +549,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                   disabled={!canEdit}
                   value={completeMinPct}
                   onChange={(e) => setCompleteMinPct(e.target.value)}
-                  className="mt-1 w-32 rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400"
+                  className="mt-1 w-32 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm tabular-nums text-slate-900 outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-400"
                 />
               </div>
             )}
@@ -584,7 +584,7 @@ export function CourseGradingSettingsSection({ courseCode }: { courseCode: strin
                     disabled={!canEdit}
                     value={sbgRule}
                     onChange={(e) => setSbgRule(e.target.value)}
-                    className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950"
+                    className="mt-1 w-full max-w-md rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950"
                   >
                     <option value="most_recent">Most recent evidence</option>
                     <option value="highest">Highest</option>

@@ -400,7 +400,7 @@ export function OrgRolesPanel() {
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as GrantRow['role'])}
-                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                     disabled={saving}
                   >
                     <option value="org_viewer">org_viewer</option>
@@ -416,7 +416,7 @@ export function OrgRolesPanel() {
                     type="date"
                     value={expiresAt}
                     onChange={(e) => setExpiresAt(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                     disabled={saving}
                   />
                 </label>
@@ -428,7 +428,7 @@ export function OrgRolesPanel() {
                   <select
                     value={orgUnitId}
                     onChange={(e) => setOrgUnitId(e.target.value)}
-                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                     disabled={saving}
                   >
                     <option value="">Select a unit…</option>

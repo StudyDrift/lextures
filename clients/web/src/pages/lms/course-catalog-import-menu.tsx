@@ -27,7 +27,7 @@ export function CourseCatalogImportMenu({ onImportCanvas }: Props) {
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
       >
         <Download className="h-4 w-4 shrink-0" aria-hidden />
         <span>Import</span>
@@ -51,7 +51,7 @@ export function CourseCatalogImportMenu({ onImportCanvas }: Props) {
               onImportCanvas()
               setOpen(false)
             }}
-            className="flex w-full flex-col gap-0.5 px-3 py-2.5 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
           >
             <span className="font-semibold text-slate-950 dark:text-neutral-100">Canvas LMS</span>
             <span className="text-xs text-slate-500 dark:text-neutral-400">

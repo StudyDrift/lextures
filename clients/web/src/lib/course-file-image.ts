@@ -19,7 +19,10 @@ export function stripImageDisplayFragment(src: string): {
 /** True when `src` (ignoring `#w=&h=` fragment) points at a course file blob that requires `Authorization`. */
 export function needsAuthenticatedCourseImageSrc(src: string): boolean {
   const { base } = stripImageDisplayFragment(src)
-  return base.includes('/course-files/') && base.endsWith('/content')
+  return (
+    (base.includes('/course-files/') || base.includes('/files/items/')) &&
+    base.endsWith('/content')
+  )
 }
 
 /** Path for `authorizedFetch` (path-only `/api/…`); strips display-size fragment. */

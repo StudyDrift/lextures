@@ -869,7 +869,7 @@ export default function CourseFeedPage() {
                 >
                   <button
                     type="button"
-                    className="flex w-full items-center gap-2 px-3 py-2 text-start text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-neutral-700 hover:bg-neutral-100 dark:text-neutral-200 dark:hover:bg-neutral-800"
                     onClick={(e) => {
                       closeParentDetails(e.currentTarget)
                       setNotifPrefsDraft(loadFeedNotificationPrefs(courseCode))
@@ -1234,7 +1234,7 @@ function MessageBlock({
                     {depth === 0 && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onReply()
@@ -1247,7 +1247,7 @@ function MessageBlock({
                     {mine && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onStartEdit(m)
@@ -1260,7 +1260,7 @@ function MessageBlock({
                     {staff && depth === 0 && (
                       <button
                         type="button"
-                        className="flex w-full items-center gap-2 px-3 py-2 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
                         onClick={(e) => {
                           closeParentDetails(e.currentTarget)
                           onTogglePin()

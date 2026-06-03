@@ -1065,7 +1065,7 @@ export default function CourseEnrollments() {
                             [set.id]: ev.target.value,
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                         disabled={groupAssignStatus === 'loading'}
                       >
                         <option value="">Unassigned</option>
@@ -1155,7 +1155,7 @@ export default function CourseEnrollments() {
                 <select
                   value={sectionTransferPick}
                   onChange={(ev) => setSectionTransferPick(ev.target.value)}
-                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                   aria-label="Select section to transfer this student into"
                   disabled={sectionTransferStatus === 'loading'}
                 >
@@ -1247,7 +1247,7 @@ export default function CourseEnrollments() {
                     id="edit-builtin-course-role"
                     value={editBuiltinCourseRole}
                     onChange={(e) => setEditBuiltinCourseRole(e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                     disabled={editSaveStatus === 'loading' || demoteStatus === 'loading'}
                   >
                     <option value="student">Student</option>
@@ -1349,7 +1349,7 @@ export default function CourseEnrollments() {
                   'One per line, or separated by commas or spaces.\n' +
                   'example@school.edu, other@school.edu'
                 }
-                className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+                className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
                 disabled={addStatus === 'loading'}
               />
               <p className="mt-2 text-xs text-slate-500">
@@ -1369,7 +1369,7 @@ export default function CourseEnrollments() {
                     id="enrollment-builtin-role"
                     value={addCourseRole}
                     onChange={(e) => setAddCourseRole(e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                     disabled={addStatus === 'loading'}
                   >
                     <option value="">— Use app role below —</option>
@@ -1407,7 +1407,7 @@ export default function CourseEnrollments() {
                       id="enrollment-app-role"
                       value={selectedAppRoleId}
                       onChange={(e) => setSelectedAppRoleId(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
                       disabled={addStatus === 'loading'}
                     >
                       {courseScopedRoles.map((r) => (

@@ -200,7 +200,7 @@ function GroupSetActionsMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-4"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <span>Actions</span>
         <ChevronDown className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -221,7 +221,7 @@ function GroupSetActionsMenu({
               onNewSet()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
             New set
@@ -236,7 +236,7 @@ function GroupSetActionsMenu({
                   onRenameSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Rename set
               </button>
@@ -248,7 +248,7 @@ function GroupSetActionsMenu({
                   onDeleteSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-950/40"
               >
                 <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                 Delete set
@@ -262,7 +262,7 @@ function GroupSetActionsMenu({
                   onNewGroup()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 <Plus className="h-4 w-4 shrink-0" aria-hidden />
                 New group
@@ -276,7 +276,7 @@ function GroupSetActionsMenu({
                   onAssignUnassigned()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 <Shuffle className="h-4 w-4 shrink-0" aria-hidden />
                 Assign unassigned students
@@ -641,7 +641,7 @@ export function EnrollmentGroupsPanel({ courseCode, enrollments, canEdit }: Prop
             id="enrollment-group-set"
             value={selectedSetId ?? ''}
             onChange={(e) => setSelectedSetId(e.target.value || null)}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
           >
             {tree.groupSets.map((s) => (
               <option key={s.id} value={s.id}>

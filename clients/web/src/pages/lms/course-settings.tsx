@@ -954,7 +954,7 @@ export default function CourseSettings() {
                     <select
                       value={courseHomeContentItemId}
                       onChange={(e) => setCourseHomeContentItemId(e.target.value)}
-                      className="w-full max-w-lg rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-50"
+                      className="w-full max-w-lg rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-50"
                     >
                       <option value="">Select a page…</option>
                       {structureForHomePicker
@@ -1228,7 +1228,7 @@ export default function CourseSettings() {
                             articleWidth: e.target.value as MarkdownThemeCustom['articleWidth'],
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
                       >
                         <option value="narrow">Narrow</option>
                         <option value="comfortable">Comfortable</option>
@@ -1246,7 +1246,7 @@ export default function CourseSettings() {
                             fontFamily: e.target.value as MarkdownThemeCustom['fontFamily'],
                           }))
                         }
-                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
                       >
                         <option value="sans">Sans-serif</option>
                         <option value="serif">Serif</option>
@@ -1670,7 +1670,7 @@ function RelativeDurationField({
           aria-label={`${label} unit`}
           value={unit}
           onChange={(e) => onUnitChange(e.target.value as RelativeDurationUnit)}
-          className="w-36 shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+          className="w-36 shrink-0 rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
         >
           <option value="D">Days</option>
           <option value="W">Weeks</option>

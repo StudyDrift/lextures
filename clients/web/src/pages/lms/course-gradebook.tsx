@@ -796,7 +796,7 @@ export default function CourseGradebook() {
                 aria-label="Filter by section"
                 value={gradebookSectionId}
                 onChange={(e) => setGradebookSectionId(e.target.value)}
-                className="min-w-[12rem] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                className="min-w-[12rem] rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
               >
                 <option value="">All sections</option>
                 {sections.map((s) => (

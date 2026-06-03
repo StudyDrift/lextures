@@ -819,7 +819,7 @@ export function ContentPageReader({
                 </label>
                 <select
                   id="nb-page"
-                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
                   value={notePageId}
                   onChange={(e) => setNotePageId(e.target.value)}
                 >

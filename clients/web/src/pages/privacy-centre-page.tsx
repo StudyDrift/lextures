@@ -193,7 +193,7 @@ export default function PrivacyCentrePage() {
               id="dsar-type"
               value={dsarType}
               onChange={(e) => setDsarType(e.target.value)}
-              className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-2 text-sm text-slate-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="block w-full rounded-md border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-2 py-1.5 text-sm text-slate-900 dark:text-neutral-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="access">Access (download my data)</option>
               <option value="portability">Portability (machine-readable export)</option>

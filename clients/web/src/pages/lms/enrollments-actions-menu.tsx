@@ -50,7 +50,7 @@ export function EnrollmentsActionsMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-4"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <span>Actions</span>
         <ChevronDown
@@ -75,7 +75,7 @@ export function EnrollmentsActionsMenu({
                 onEnrollAsStudent()
                 setOpen(false)
               }}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
             >
               <GraduationCap className="h-4 w-4 shrink-0" aria-hidden />
               {enrollAsStudentBusy ? 'Enrolling…' : 'Enroll as Student'}
@@ -89,7 +89,7 @@ export function EnrollmentsActionsMenu({
               onAddEnrollment()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
           >
             <UserPlus className="h-4 w-4 shrink-0" aria-hidden />
             Add enrollment
@@ -107,7 +107,7 @@ export function EnrollmentsActionsMenu({
                   onEnableGroups()
                   setOpen(false)
                 }}
-                className="flex w-full items-start gap-2 px-3 py-2.5 text-start text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700/80"
               >
                 <span
                   className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${

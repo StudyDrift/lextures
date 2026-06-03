@@ -92,7 +92,7 @@ function QuestionTypeDropdown({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50"
+        className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50"
       >
         <span>{selectedLabel}</span>
         <ChevronDown className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -114,7 +114,7 @@ function QuestionTypeDropdown({
                 onChange(opt.value)
                 setOpen(false)
               }}
-              className="flex w-full items-center justify-between px-3 py-2 text-start text-sm text-slate-800 transition hover:bg-slate-50"
+              className="flex w-full items-center justify-between px-2.5 py-2 text-start text-sm text-slate-800 transition hover:bg-slate-50"
             >
               <span>{opt.label}</span>
               {opt.value === value ? <Check className="h-4 w-4 text-indigo-600" aria-hidden /> : null}
@@ -168,7 +168,7 @@ function QuizEditorMoreMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
         More
         <ChevronDown className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
@@ -187,7 +187,7 @@ function QuizEditorMoreMenu({
               onEditIntro()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Pencil className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Edit
@@ -199,7 +199,7 @@ function QuizEditorMoreMenu({
               onGenerate()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Generate questions
@@ -211,7 +211,7 @@ function QuizEditorMoreMenu({
               onAnalytics()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <BarChart3 className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Analytics
@@ -228,7 +228,7 @@ function QuizEditorMoreMenu({
               onPreview()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Eye className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Preview
@@ -1529,7 +1529,7 @@ export default function CourseModuleQuizPage() {
                   value={generateCount}
                   onChange={(e) => setGenerateCount(Number(e.target.value))}
                   disabled={generateBusy}
-                  className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                  className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                 />
                 <p className="mt-1 text-xs text-slate-500">Between 1 and 30.</p>
               </div>
@@ -1679,7 +1679,7 @@ export default function CourseModuleQuizPage() {
                         value={qeAdaptiveDeliveryMode}
                         disabled={questionsSaving}
                         onChange={(e) => setQeAdaptiveDeliveryMode(e.target.value === 'cat' ? 'cat' : 'ai')}
-                        className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                        className="w-full max-w-md rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                       >
                         <option value="ai">AI-generated (OpenRouter)</option>
                         <option value="cat" disabled={!courseQuestionBankEnabled}>
@@ -1776,7 +1776,7 @@ export default function CourseModuleQuizPage() {
                             value={qeAdaptiveQuestionCount}
                             onChange={(e) => setQeAdaptiveQuestionCount(Number(e.target.value))}
                             disabled={questionsSaving}
-                            className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                            className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                           />
                           <p className="mt-1 text-xs text-slate-500">Between 1 and 30 per attempt.</p>
                         </div>
@@ -1797,7 +1797,7 @@ export default function CourseModuleQuizPage() {
                           value={qeAdaptiveQuestionCount}
                           onChange={(e) => setQeAdaptiveQuestionCount(Number(e.target.value))}
                           disabled={questionsSaving}
-                          className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
+                          className="w-full max-w-[8rem] rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 disabled:opacity-60"
                         />
                         <p className="mt-1 text-xs text-slate-500">How many pool items to administer per attempt.</p>
                       </div>
@@ -1836,7 +1836,7 @@ export default function CourseModuleQuizPage() {
                         }
                         rows={2}
                         placeholder="Enter question prompt"
-                        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                        className="w-full rounded-xl border border-slate-200 px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
                       />
                       <div className="max-w-sm">
                         <QuestionTypeDropdown
@@ -1979,7 +1979,7 @@ export default function CourseModuleQuizPage() {
                                   )
                                 }
                                 placeholder={`Choice ${choiceIdx + 1}`}
-                                className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                                className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
                               />
                               <button
                                 type="button"
@@ -2069,7 +2069,7 @@ export default function CourseModuleQuizPage() {
                                 )
                               }
                               placeholder={`Ordering item ${itemIdx + 1}`}
-                              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+                              className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
                             />
                             <button
                               type="button"
@@ -2773,12 +2773,12 @@ export default function CourseModuleQuizPage() {
               value={importQuestionsQuery}
               onChange={(e) => setImportQuestionsQuery(e.target.value)}
               placeholder="Search question bank..."
-              className="min-w-[14rem] flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+              className="min-w-[14rem] flex-1 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
             />
             <select
               value={importQuestionsType}
               onChange={(e) => setImportQuestionsType(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30"
             >
               <option value="all">All types</option>
               <option value="mc_single">Multiple choice (single)</option>
