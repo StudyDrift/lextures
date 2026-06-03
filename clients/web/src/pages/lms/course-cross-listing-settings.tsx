@@ -161,7 +161,7 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
                 id="cl-primary"
                 value={primaryPick}
                 onChange={(e) => setPrimaryPick(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
                 required
               >
                 <option value="">Choose section…</option>
@@ -182,7 +182,7 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="e.g. HIST/WMST 301 combined"
-                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
               />
             </div>
           </div>
@@ -247,7 +247,7 @@ export function CourseCrossListingSection({ courseCode, courseId, orgId }: Props
                   id="cl-add"
                   value={addPick}
                   onChange={(e) => setAddPick(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
                 >
                   <option value="">Choose section…</option>
                   {addCandidates.map((s) => (

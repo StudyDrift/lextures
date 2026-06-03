@@ -61,13 +61,12 @@ describe('detectPreviewType', () => {
     expect(detectPreviewType(undefined, 'icon.svg')).toBe('image')
   })
 
-  // Unsupported types
-  it('returns none for DOCX', () => {
-    expect(detectPreviewType('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'doc.docx')).toBe('none')
+  it('returns office for DOCX', () => {
+    expect(detectPreviewType('application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'doc.docx')).toBe('office')
   })
 
-  it('returns none for XLSX extension', () => {
-    expect(detectPreviewType(null, 'sheet.xlsx')).toBe('none')
+  it('returns office for XLSX extension', () => {
+    expect(detectPreviewType(null, 'sheet.xlsx')).toBe('office')
   })
 
   it('returns video for video/mp4', () => {

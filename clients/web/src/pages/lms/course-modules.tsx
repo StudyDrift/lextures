@@ -608,7 +608,7 @@ function ModuleItemRowActions({
                 onEditTitle()
                 setMenuOpen(false)
               }}
-              className="flex w-full px-3 py-2.5 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
             >
               Edit title
             </button>
@@ -619,7 +619,7 @@ function ModuleItemRowActions({
                 onArchive()
                 setMenuOpen(false)
               }}
-              className="flex w-full border-t border-slate-100 px-3 py-2.5 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
+              className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
               Delete
             </button>

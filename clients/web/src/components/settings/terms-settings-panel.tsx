@@ -146,7 +146,7 @@ export function TermsSettingsPanel() {
       <label className="flex flex-col gap-1 text-sm">
         <span className="font-medium text-slate-700 dark:text-neutral-200">Organization</span>
         <select
-          className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+          className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
           value={orgId}
           onChange={(e) => setOrgId(e.target.value)}
           aria-label="Organization for terms"
@@ -207,7 +207,7 @@ export function TermsSettingsPanel() {
           <label className="flex flex-col gap-1 text-sm">
             <span>Type</span>
             <select
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900"
               value={newType}
               onChange={(e) => setNewType(e.target.value)}
               aria-label="Term type"

@@ -638,7 +638,7 @@ function RoleSettingsModal({ role, onClose, onSaved }: RoleSettingsModalProps) {
                 aria-labelledby="role-settings-scope-label"
                 value={scope}
                 onChange={(e) => setScope(e.target.value as RoleScope)}
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
+                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
                 disabled={saving}
               >
                 <option value="global">Global</option>

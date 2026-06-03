@@ -63,8 +63,14 @@ describe('FilePreview', () => {
     expect(screen.getByTestId('pdf-viewer')).toBeInTheDocument()
   })
 
-  it('renders download button for unsupported file types', () => {
+  it('renders office viewer for DOCX files', () => {
     render(<FilePreview {...defaultProps} mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" filename="document.docx" />)
+    expect(screen.queryByTestId('pdf-viewer')).toBeNull()
+    expect(screen.queryByText(/cannot be previewed/i)).toBeNull()
+  })
+
+  it('renders download button for truly unsupported file types', () => {
+    render(<FilePreview {...defaultProps} mimeType="application/octet-stream" filename="archive.zip" />)
     expect(screen.queryByTestId('pdf-viewer')).toBeNull()
     expect(screen.getByRole('button', { name: /download to view/i })).toBeInTheDocument()
     expect(screen.getByText(/cannot be previewed/i)).toBeInTheDocument()

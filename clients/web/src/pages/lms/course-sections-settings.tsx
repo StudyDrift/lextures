@@ -189,7 +189,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             <input
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
               placeholder="001"
               required
             />
@@ -199,7 +199,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
               placeholder="Morning lab"
             />
           </label>
@@ -227,7 +227,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             <select
               value={overrideSectionId}
               onChange={(e) => setOverrideSectionId(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             >
               <option value="">Select…</option>
               {(sections ?? []).filter((s) => s.status === 'active').map((s) => (
@@ -243,7 +243,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
             <select
               value={overrideItemId}
               onChange={(e) => setOverrideItemId(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             >
               <option value="">Select…</option>
               {assignments.map((a) => (
@@ -259,7 +259,7 @@ export function CourseSectionsSettingsSection({ courseCode }: Props) {
               type="datetime-local"
               value={overrideDue}
               onChange={(e) => setOverrideDue(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900"
             />
           </label>
           <button

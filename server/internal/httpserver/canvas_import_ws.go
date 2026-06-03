@@ -335,27 +335,40 @@ func (d Deps) runCanvasImport(
 				case "assignment":
 					markdown := ""
 					var pointsWorth *int
+					var dueAt, availFrom, availUntil *time.Time
 					if cid := int64At(it, "content_id"); cid > 0 {
 						canvasAssignToItem[cid] = itemID
 						obj, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/assignments/%d", canvasCourseID, cid), nil)
 						if e == nil && obj != nil {
 							markdown = markdownFromHTML(strAt(obj, "description", ""))
 							pointsWorth = optionalPointsWorthFromCanvas(obj, "points_possible")
+							dueAt = canvasTimeAt(obj, "due_at")
+							availFrom = canvasTimeAt(obj, "unlock_at")
+							availUntil = canvasTimeAt(obj, "lock_at")
 						}
 					}
-					if _, err = tx.Exec(ctx, `INSERT INTO course.module_assignments (structure_item_id, markdown, points_worth) VALUES ($1, $2, $3)`, itemID, markdown, pointsWorth); err != nil {
+					if _, err = tx.Exec(ctx, `INSERT INTO course.module_assignments (structure_item_id, markdown, points_worth, available_from, available_until) VALUES ($1, $2, $3, $4, $5)`, itemID, markdown, pointsWorth, availFrom, availUntil); err != nil {
 						return errors.New("Failed to save imported assignment.")
+					}
+					if dueAt != nil {
+						if _, err = tx.Exec(ctx, `UPDATE course.course_structure_items SET due_at = $1 WHERE id = $2`, dueAt, itemID); err != nil {
+							return errors.New("Failed to save imported assignment due date.")
+						}
 					}
 				case "quiz":
 					markdown := ""
 					var questions []coursemodulequiz.QuizQuestion
 					var pointsWorth *int
+					var dueAt, availFrom, availUntil *time.Time
 					if cid := int64At(it, "content_id"); cid > 0 {
 						canvasQuizToItem[cid] = itemID
 						obj, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/quizzes/%d", canvasCourseID, cid), nil)
 						if e == nil && obj != nil {
 							markdown = markdownFromHTML(strAt(obj, "description", ""))
 							pointsWorth = optionalPointsWorthFromCanvas(obj, "points_possible")
+							dueAt = canvasTimeAt(obj, "due_at")
+							availFrom = canvasTimeAt(obj, "unlock_at")
+							availUntil = canvasTimeAt(obj, "lock_at")
 						}
 						qq, qe := canvasImportQuizQuestions(ctx, client, canvasBase, accessToken, canvasCourseID, cid)
 						if qe != nil {
@@ -368,8 +381,13 @@ func (d Deps) runCanvasImport(
 					if mj != nil {
 						return errors.New("Failed to encode imported quiz questions.")
 					}
-					if _, err = tx.Exec(ctx, `INSERT INTO course.module_quizzes (structure_item_id, markdown, questions_json, points_worth) VALUES ($1, $2, $3, $4)`, itemID, markdown, qJSON, pointsWorth); err != nil {
+					if _, err = tx.Exec(ctx, `INSERT INTO course.module_quizzes (structure_item_id, markdown, questions_json, points_worth, available_from, available_until) VALUES ($1, $2, $3, $4, $5, $6)`, itemID, markdown, qJSON, pointsWorth, availFrom, availUntil); err != nil {
 						return errors.New("Failed to save imported quiz.")
+					}
+					if dueAt != nil {
+						if _, err = tx.Exec(ctx, `UPDATE course.course_structure_items SET due_at = $1 WHERE id = $2`, dueAt, itemID); err != nil {
+							return errors.New("Failed to save imported quiz due date.")
+						}
 					}
 				case "external":
 					raw := strAt(it, "external_url", "")
@@ -683,6 +701,21 @@ func int64At(m map[string]any, k string) int64 {
 	default:
 		return 0
 	}
+}
+
+func canvasTimeAt(m map[string]any, k string) *time.Time {
+	if m == nil {
+		return nil
+	}
+	s, ok := m[k].(string)
+	if !ok || strings.TrimSpace(s) == "" {
+		return nil
+	}
+	t, err := time.Parse(time.RFC3339, strings.TrimSpace(s))
+	if err != nil {
+		return nil
+	}
+	return &t
 }
 
 func objAt(m map[string]any, k string) map[string]any {

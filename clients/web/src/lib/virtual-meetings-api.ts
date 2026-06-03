@@ -27,6 +27,7 @@ export type CreateMeetingInput = {
   scheduledStart?: string | null
   scheduledEnd?: string | null
   sectionId?: string | null
+  joinUrl?: string | null
 }
 
 export type PatchMeetingInput = {

@@ -502,7 +502,7 @@ export function CourseQuestionBankPage() {
               id={searchId}
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+              className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
               placeholder="Keywords…"
             />
           </div>
@@ -647,7 +647,7 @@ export function CourseQuestionBankPage() {
                 value={draft.stem}
                 onChange={(e) => setDraft((prev) => ({ ...prev, stem: e.target.value }))}
                 rows={4}
-                className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
               />
               <div className="grid gap-3 sm:grid-cols-3">
                 <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
@@ -655,7 +655,7 @@ export function CourseQuestionBankPage() {
                   <select
                     value={draft.questionType}
                     onChange={(e) => setDraft((prev) => ({ ...prev, questionType: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
                   >
                     {QUESTION_TYPE_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -674,7 +674,7 @@ export function CourseQuestionBankPage() {
                         status: e.target.value as QuestionDraft['status'],
                       }))
                     }
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
                   >
                     <option value="draft">Draft</option>
                     <option value="active">Active</option>
@@ -689,7 +689,7 @@ export function CourseQuestionBankPage() {
                     step="0.25"
                     value={draft.points}
                     onChange={(e) => setDraft((prev) => ({ ...prev, points: e.target.value }))}
-                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                    className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
                   />
                 </label>
               </div>
@@ -731,7 +731,7 @@ export function CourseQuestionBankPage() {
                   value={draft.explanation}
                   onChange={(e) => setDraft((prev) => ({ ...prev, explanation: e.target.value }))}
                   rows={2}
-                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
                 />
               </label>
               <label className="block text-xs font-medium text-slate-700 dark:text-neutral-200">
@@ -759,7 +759,7 @@ export function CourseQuestionBankPage() {
                 <input
                   value={draft.changeNote}
                   onChange={(e) => setDraft((prev) => ({ ...prev, changeNote: e.target.value }))}
-                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-950"
+                  className="mt-1 w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-950"
                   placeholder="Describe why this revision was made"
                 />
               </label>

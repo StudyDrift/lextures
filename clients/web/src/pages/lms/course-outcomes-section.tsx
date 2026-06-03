@@ -688,7 +688,7 @@ function OutcomeCard({
                 <input
                   value={draftTitle}
                   onChange={(e) => onTitleChange(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm font-semibold text-slate-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
                 />
               </label>
               <label className="block">
@@ -699,7 +699,7 @@ function OutcomeCard({
                   value={draftDescription}
                   onChange={(e) => onDescriptionChange(e.target.value)}
                   rows={2}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
                 />
               </label>
             </div>
@@ -821,7 +821,7 @@ function OutcomeCard({
                   setItemId(e.target.value)
                   setQuizScope('whole')
                 }}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
               >
                 <option value="">Choose from the course…</option>
                 {gradableOptions.map((g) => (
@@ -871,7 +871,7 @@ function OutcomeCard({
                       <select
                         value={questionId}
                         onChange={(e) => setQuestionId(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
                       >
                         {quizQuestions.length === 0 ? (
                           <option value="">No questions found</option>
@@ -896,7 +896,7 @@ function OutcomeCard({
               <select
                 value={measurementLevel}
                 onChange={(e) => setMeasurementLevel(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
               >
                 {OUTCOME_MEASUREMENT_LEVEL_IDS.map((id) => (
                   <option key={id} value={id}>
@@ -916,7 +916,7 @@ function OutcomeCard({
               <select
                 value={intensityLevel}
                 onChange={(e) => setIntensityLevel(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+                className="w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
               >
                 {OUTCOME_INTENSITY_LEVEL_IDS.map((id) => (
                   <option key={id} value={id}>

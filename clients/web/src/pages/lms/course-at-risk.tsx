@@ -98,7 +98,7 @@ function AlertRow({
         <div className="relative">
           <button
             type="button"
-            className="rounded p-1 hover:bg-slate-100 dark:hover:bg-neutral-800"
+            className="rounded p-0.5 hover:bg-slate-100 dark:hover:bg-neutral-800"
             aria-label="Actions"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
@@ -114,7 +114,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'dismissed' })}
                 >
@@ -125,7 +125,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'snoozed', snoozeDays: 7 })}
                 >
@@ -136,7 +136,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'snoozed', snoozeDays: 14 })}
                 >
@@ -147,7 +147,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   disabled={busy}
                   onClick={() => patch({ status: 'supported', snoozeDays: 14 })}
                 >
@@ -158,7 +158,7 @@ function AlertRow({
                 <button
                   type="button"
                   role="menuitem"
-                  className="w-full px-3 py-2 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
+                  className="w-full px-2.5 py-1.5 text-start text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
                   onClick={() => {
                     setMenuOpen(false)
                     setNoteOpen(true)

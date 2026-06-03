@@ -137,7 +137,7 @@ function UserMenu() {
             to="/settings/account"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-start text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
             <User className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Profile
@@ -146,7 +146,7 @@ function UserMenu() {
             type="button"
             role="menuitem"
             onClick={signOut}
-            className="flex w-full items-center gap-2 border-t border-slate-100 px-3 py-2.5 text-start text-sm text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="flex w-full items-center gap-2 border-t border-slate-100 px-2.5 py-2 text-start text-sm text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
             <LogOut className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Sign out
@@ -205,7 +205,7 @@ function CourseEnrollmentViewDropdown() {
         aria-controls={open ? menuId : undefined}
         aria-label={`View course as ${label}. Open menu to switch between teacher and student preview.`}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex max-w-full items-center gap-1.5 rounded-xl bg-indigo-600 px-2.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:focus-visible:ring-neutral-400/40 md:gap-2 md:px-4 md:py-2.5 md:text-sm"
+        className="inline-flex max-w-full items-center gap-1.5 rounded-xl bg-indigo-600 px-2 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:focus-visible:ring-neutral-400/40 md:gap-2 md:px-3 md:py-2 md:text-sm"
       >
         <span className="max-md:sr-only">View as: </span>
         {label}
@@ -229,7 +229,7 @@ function CourseEnrollmentViewDropdown() {
               setCourseViewAs(courseCode, 'teacher')
               setOpen(false)
             }}
-            className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
+            className={`flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
               courseViewMode === 'teacher' ? 'bg-indigo-50 dark:bg-neutral-800' : ''
             }`}
           >
@@ -245,7 +245,7 @@ function CourseEnrollmentViewDropdown() {
               setCourseViewAs(courseCode, 'student')
               setOpen(false)
             }}
-            className={`flex w-full flex-col gap-0.5 px-3 py-2.5 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
+            className={`flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700 ${
               courseViewMode === 'student' ? 'bg-indigo-50 dark:bg-neutral-800' : ''
             }`}
           >

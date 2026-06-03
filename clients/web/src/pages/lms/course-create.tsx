@@ -474,7 +474,7 @@ export default function CourseCreate() {
                     id="course-term"
                     value={selectedTermId}
                     onChange={(e) => setSelectedTermId(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
                     aria-label="Academic term for default schedule dates"
                   >
                     <option value="">No term — self-paced or ongoing</option>
@@ -820,7 +820,7 @@ export default function CourseCreate() {
                                     ),
                                   )
                                 }}
-                                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
                               >
                                 <option value="quiz">Quiz</option>
                                 <option value="assignment">Assignment</option>

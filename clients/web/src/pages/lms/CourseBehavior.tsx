@@ -216,7 +216,7 @@ export default function CourseBehavior() {
               id="pbis-category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             >
               <option value="">Select a positive category…</option>
               {positiveCategories.map((c) => (
@@ -237,7 +237,7 @@ export default function CourseBehavior() {
               value={awardNote}
               onChange={(e) => setAwardNote(e.target.value)}
               placeholder="e.g., Great participation today!"
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             />
           </div>
 
@@ -311,7 +311,7 @@ export default function CourseBehavior() {
               id="ref-student"
               value={refStudent}
               onChange={(e) => setRefStudent(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             >
               <option value="">Select a student…</option>
               {roster.map((s) => (
@@ -330,7 +330,7 @@ export default function CourseBehavior() {
               id="ref-category"
               value={refCategory}
               onChange={(e) => setRefCategory(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             >
               <option value="">Select a category…</option>
               <optgroup label="Negative">
@@ -360,7 +360,7 @@ export default function CourseBehavior() {
               value={refLocation}
               onChange={(e) => setRefLocation(e.target.value)}
               placeholder="e.g., Classroom, Hallway"
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             />
           </div>
 
@@ -374,7 +374,7 @@ export default function CourseBehavior() {
               onChange={(e) => setRefDescription(e.target.value)}
               rows={3}
               placeholder="Describe the incident…"
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             />
           </div>
 
@@ -388,7 +388,7 @@ export default function CourseBehavior() {
               value={refResponse}
               onChange={(e) => setRefResponse(e.target.value)}
               placeholder="e.g., Verbal warning, parent contact"
-              className="w-full border rounded px-3 py-2 text-sm"
+              className="w-full border rounded px-2 py-1.5 text-sm"
             />
           </div>
 

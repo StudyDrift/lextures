@@ -165,7 +165,7 @@ function menuButtonClass(active: boolean) {
 }
 
 function menuItemClass() {
-  return 'block w-full px-3 py-2 text-start text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  return 'block w-full px-2.5 py-1.5 text-start text-sm text-slate-800 hover:bg-slate-100 dark:text-neutral-100 dark:hover:bg-neutral-800'
 }
 
 function normalizeFilter(s: string): string {

@@ -367,7 +367,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
                         [key]: e.target.value,
                       }))
                     }
-                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
+                    className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900"
                   >
                     <option value="">Select match...</option>
                     {options.map((opt, optIdx) => (

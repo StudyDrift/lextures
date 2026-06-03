@@ -156,11 +156,14 @@ interface CreateMeetingModalProps {
 function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingModalProps) {
   const [title, setTitle] = useState('')
   const [provider, setProvider] = useState<MeetingProvider>('jitsi')
+  const [joinUrl, setJoinUrl] = useState('')
   const [scheduledStart, setScheduledStart] = useState('')
   const [scheduledEnd, setScheduledEnd] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const titleRef = useRef<HTMLInputElement>(null)
+
+  const needsUrl = provider === 'zoom' || provider === 'meet' || provider === 'custom'
 
   useEffect(() => {
     titleRef.current?.focus()
@@ -171,11 +174,17 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
       e.preventDefault()
       setSaving(true)
       setError(null)
+      if (needsUrl && !joinUrl.trim()) {
+        setError('A meeting link is required for this provider.')
+        setSaving(false)
+        return
+      }
       const input: CreateMeetingInput = {
         title: title.trim(),
         provider,
         scheduledStart: scheduledStart || null,
         scheduledEnd: scheduledEnd || null,
+        joinUrl: needsUrl ? joinUrl.trim() : null,
       }
       try {
         const m = await createMeeting(courseCode, input)
@@ -185,7 +194,7 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
         setSaving(false)
       }
     },
-    [courseCode, title, provider, scheduledStart, scheduledEnd, onCreated],
+    [courseCode, title, provider, joinUrl, needsUrl, scheduledStart, scheduledEnd, onCreated],
   )
 
   return (
@@ -216,7 +225,7 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
               onChange={(e) => setTitle(e.target.value)}
               required
               placeholder="e.g. Monday Lecture"
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
             />
           </div>
           <div>
@@ -225,8 +234,8 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
             </label>
             <select
               value={provider}
-              onChange={(e) => setProvider(e.target.value as MeetingProvider)}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              onChange={(e) => { setProvider(e.target.value as MeetingProvider); setJoinUrl('') }}
+              className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
             >
               <option value="jitsi">Jitsi Meet</option>
               <option value="bbb">BigBlueButton</option>
@@ -235,6 +244,30 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
               <option value="custom">Custom URL</option>
             </select>
           </div>
+          {needsUrl && (
+            <div>
+              <label
+                htmlFor="meeting-join-url"
+                className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+              >
+                Meeting Link
+              </label>
+              <input
+                id="meeting-join-url"
+                type="url"
+                value={joinUrl}
+                onChange={(e) => setJoinUrl(e.target.value)}
+                placeholder={
+                  provider === 'zoom'
+                    ? 'https://zoom.us/j/...'
+                    : provider === 'meet'
+                      ? 'https://meet.google.com/...'
+                      : 'https://...'
+                }
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+              />
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
@@ -244,7 +277,7 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
                 type="datetime-local"
                 value={scheduledStart}
                 onChange={(e) => setScheduledStart(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
             </div>
             <div>
@@ -255,7 +288,7 @@ function CreateMeetingModal({ onClose, onCreated, courseCode }: CreateMeetingMod
                 type="datetime-local"
                 value={scheduledEnd}
                 onChange={(e) => setScheduledEnd(e.target.value)}
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="w-full rounded-lg border border-neutral-300 px-2 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
             </div>
           </div>

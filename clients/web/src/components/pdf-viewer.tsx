@@ -2,8 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { getDocument, GlobalWorkerOptions, TextLayer } from 'pdfjs-dist'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
-import { getAccessToken } from '../lib/auth'
-import { apiUrl } from '../lib/api'
+import { authorizedFetch } from '../lib/api'
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from 'lucide-react'
 
 GlobalWorkerOptions.workerSrc = workerSrc
@@ -84,12 +83,10 @@ export function PdfViewer({ filePath, filename }: PdfViewerProps) {
       pageObjsRef.current = []
 
       try {
-        const token = getAccessToken()
-        const doc = await getDocument({
-          url: apiUrl(filePath),
-          httpHeaders: token ? { Authorization: `Bearer ${token}` } : undefined,
-          withCredentials: false,
-        }).promise
+        const res = await authorizedFetch(filePath)
+        if (!res.ok) throw new Error('Failed to load PDF.')
+        const data = new Uint8Array(await res.arrayBuffer())
+        const doc = await getDocument({ data }).promise
 
         if (cancelled) {
           await doc.destroy().catch(() => {})
@@ -234,13 +231,20 @@ export function PdfViewer({ filePath, filename }: PdfViewerProps) {
     [numPages],
   )
 
-  const handleDownload = useCallback(() => {
-    const a = document.createElement('a')
-    a.href = apiUrl(filePath)
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
+  const handleDownload = useCallback(async () => {
+    try {
+      const res = await authorizedFetch(filePath)
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch { /* noop */ }
   }, [filePath, filename])
 
   const commitPageInput = useCallback(() => {
@@ -265,7 +269,7 @@ export function PdfViewer({ filePath, filename }: PdfViewerProps) {
         </p>
         <button
           type="button"
-          onClick={handleDownload}
+          onClick={() => void handleDownload()}
           className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
         >
           Download instead
@@ -355,7 +359,7 @@ export function PdfViewer({ filePath, filename }: PdfViewerProps) {
 
         <button
           type="button"
-          onClick={handleDownload}
+          onClick={() => void handleDownload()}
           className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
           aria-label={`Download ${filename}`}
         >

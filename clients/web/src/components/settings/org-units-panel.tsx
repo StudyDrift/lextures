@@ -238,7 +238,7 @@ export function OrgUnitsPanel() {
           <select
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+            className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
           >
             {orgs.map((o) => (
               <option key={o.id} value={o.id}>
@@ -284,7 +284,7 @@ export function OrgUnitsPanel() {
               <input
                 value={rootName}
                 onChange={(e) => setRootName(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
                 placeholder="Lincoln High"
               />
             </label>
@@ -293,7 +293,7 @@ export function OrgUnitsPanel() {
               <select
                 value={rootType}
                 onChange={(e) => setRootType(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
               >
                 {UNIT_TYPES.map((t) => (
                   <option key={t} value={t}>
@@ -327,7 +327,7 @@ export function OrgUnitsPanel() {
               <input
                 value={childName}
                 onChange={(e) => setChildName(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
                 placeholder="Math department"
               />
             </label>
@@ -336,7 +336,7 @@ export function OrgUnitsPanel() {
               <select
                 value={childType}
                 onChange={(e) => setChildType(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-neutral-600 dark:bg-neutral-900"
               >
                 {UNIT_TYPES.map((t) => (
                   <option key={t} value={t}>

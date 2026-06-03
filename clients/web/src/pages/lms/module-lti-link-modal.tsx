@@ -113,7 +113,7 @@ function ModuleLtiLinkModalInner({
             value={externalToolId}
             onChange={(e) => setExternalToolId(e.target.value)}
             disabled={saving || toolsLoading || tools.length === 0}
-            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+            className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none focus:border-indigo-400 focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
           >
             <option value="">{toolsLoading ? 'Loading…' : 'Select a registered tool'}</option>
             {tools.map((t) => (
