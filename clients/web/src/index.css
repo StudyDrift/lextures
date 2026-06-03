@@ -413,6 +413,35 @@ body {
   @apply min-w-0;
 }
 
+/* File preview modal: dark-mode readability for classic markdown theme */
+.dark .markdown-file-preview .text-slate-900 {
+  @apply text-neutral-100;
+}
+.dark .markdown-file-preview .text-slate-800 {
+  @apply text-neutral-200;
+}
+.dark .markdown-file-preview .text-slate-700 {
+  @apply text-neutral-300;
+}
+.dark .markdown-file-preview .text-slate-600 {
+  @apply text-neutral-400;
+}
+.dark .markdown-file-preview .text-indigo-600 {
+  @apply text-indigo-400;
+}
+.dark .markdown-file-preview .bg-slate-50 {
+  @apply bg-neutral-900;
+}
+.dark .markdown-file-preview .bg-slate-100 {
+  @apply bg-neutral-800;
+}
+.dark .markdown-file-preview .border-slate-200 {
+  @apply border-neutral-700;
+}
+.dark .markdown-file-preview .border-slate-100 {
+  @apply border-neutral-800;
+}
+
 /* TipTap placeholder (ProseMirror decorations) */
 .tiptap p.is-empty::before {
   content: attr(data-placeholder);

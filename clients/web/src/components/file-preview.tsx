@@ -3,7 +3,10 @@ import { Download, Music, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react'
 import { detectPreviewType } from '../lib/file-type'
 import { authorizedFetch } from '../lib/api'
 import { apiUrl } from '../lib/api'
+import { CodeFilePreview } from './code-file-preview'
+import { OfficeHtmlPreview } from './office-html-preview'
 import { PdfViewer } from './pdf-viewer'
+import { TextFilePreview } from './text-file-preview'
 
 export type FilePreviewProps = {
   open: boolean
@@ -354,107 +357,6 @@ function AudioViewer({ filePath, filename }: { filePath: string; filename: strin
   )
 }
 
-// ── Office document viewer (Nutrient SDK) ────────────────────────────────────
-
-function OfficeViewer({ filePath, filename }: { filePath: string; filename: string }) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      try {
-        const res = await authorizedFetch(filePath)
-        if (!res.ok) throw new Error('Failed to load file.')
-        const arrayBuffer = await res.arrayBuffer()
-        if (cancelled || !containerRef.current) return
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const NutrientViewer = await import('@nutrient-sdk/viewer') as any
-        if (cancelled || !containerRef.current) return
-
-        await NutrientViewer.load({
-          document: arrayBuffer,
-          container: containerRef.current,
-          baseUrl: `${window.location.origin}/`,
-        })
-
-        if (!cancelled) setLoading(false)
-      } catch {
-        if (!cancelled) setError('Could not render this file.')
-      }
-    }
-
-    void load()
-
-    return () => {
-      cancelled = true
-      const el = containerRef.current
-      if (el) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        import('@nutrient-sdk/viewer').then((NutrientViewer: any) => {
-          NutrientViewer.unload(el)
-        }).catch(() => { /* noop */ })
-      }
-    }
-  }, [filePath])
-
-  const handleDownload = async () => {
-    try {
-      const res = await authorizedFetch(filePath)
-      if (!res.ok) throw new Error()
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
-    } catch {
-      /* noop */
-    }
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
-        <div className="rounded-2xl bg-slate-100 p-6 dark:bg-neutral-800">
-          <svg className="h-12 w-12 text-slate-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <div className="text-center">
-          <p className="text-sm font-medium text-slate-700 dark:text-neutral-300">{filename}</p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">{error}</p>
-        </div>
-        <button
-          type="button"
-          onClick={() => void handleDownload()}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-        >
-          <Download className="h-4 w-4" />
-          Download to view
-        </button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="relative h-full w-full">
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center" role="status">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
-        </div>
-      )}
-      <div ref={containerRef} className="h-full w-full" />
-    </div>
-  )
-}
-
 // ── FilePreview modal ────────────────────────────────────────────────────────
 
 export function FilePreview({ open, filePath, filename, mimeType, onClose }: FilePreviewProps) {
@@ -543,7 +445,13 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
             <AudioViewer filePath={filePath} filename={filename} />
           )}
           {previewType === 'office' && (
-            <OfficeViewer filePath={filePath} filename={filename} />
+            <OfficeHtmlPreview filePath={filePath} filename={filename} />
+          )}
+          {previewType === 'text' && (
+            <TextFilePreview filePath={filePath} filename={filename} mimeType={mimeType} />
+          )}
+          {previewType === 'code' && (
+            <CodeFilePreview filePath={filePath} filename={filename} />
           )}
           {previewType === 'none' && (
             <UnsupportedFileView filePath={filePath} filename={filename} />

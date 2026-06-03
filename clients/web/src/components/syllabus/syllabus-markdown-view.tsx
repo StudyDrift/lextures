@@ -18,6 +18,7 @@ import { useReducedData } from '../../context/reduced-data-context'
 import { isMathRenderingEnabled } from '../../lib/math'
 import { sectionsToMarkdown } from './syllabus-section-markdown'
 import { authorizedFetch } from '../../lib/api'
+import { createThemedMarkdownComponents } from '../markdown/markdown-themed-components'
 import type { PluggableList } from 'unified'
 
 // Matches Lextures course-file content URLs: /api/v1/courses/{code}/files/items/{id}/content
@@ -114,42 +115,9 @@ function createMarkdownComponents(
 ): Components {
   const o = theme.styleOverrides
   const c = theme.classes
+  const base = createThemedMarkdownComponents(theme)
   return {
-    h1: ({ children }) => (
-      <h1 className={c.h1} style={o.h1}>
-        {children}
-      </h1>
-    ),
-    h2: ({ children }) => (
-      <h2 className={c.h2} style={o.h2}>
-        {children}
-      </h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className={c.h3} style={o.h3}>
-        {children}
-      </h3>
-    ),
-    p: ({ children }) => (
-      <p className={c.p} style={o.p}>
-        {children}
-      </p>
-    ),
-    ul: ({ children }) => (
-      <ul className={c.ul} style={o.ul}>
-        {children}
-      </ul>
-    ),
-    ol: ({ children }) => (
-      <ol className={c.ol} style={o.ol}>
-        {children}
-      </ol>
-    ),
-    li: ({ children }) => (
-      <li className={c.li} style={o.li}>
-        {children}
-      </li>
-    ),
+    ...base,
     a: ({ children, href }) => {
       if (href && lexturesCourseFileRe.test(href)) {
         return (
@@ -171,50 +139,6 @@ function createMarkdownComponents(
         </a>
       )
     },
-    blockquote: ({ children }) => (
-      <blockquote className={c.blockquote} style={o.blockquote}>
-        {children}
-      </blockquote>
-    ),
-    code: ({ className, children }) => {
-      const inline = !className
-      if (inline) {
-        return (
-          <code className={c.codeInline} style={o.codeInline}>
-            {children}
-          </code>
-        )
-      }
-      return <code className={className}>{children}</code>
-    },
-    pre: ({ children }) => (
-      <pre className={c.pre} style={o.pre}>
-        {children}
-      </pre>
-    ),
-    table: ({ children }) => (
-      <div className={c.tableWrap}>
-        <table className={c.table} style={o.table}>
-          {children}
-        </table>
-      </div>
-    ),
-    thead: ({ children }) => (
-      <thead className={c.thead} style={o.thead}>
-        {children}
-      </thead>
-    ),
-    th: ({ children }) => (
-      <th className={c.th} style={o.th}>
-        {children}
-      </th>
-    ),
-    td: ({ children }) => (
-      <td className={c.td} style={o.td}>
-        {children}
-      </td>
-    ),
-    hr: () => <hr className={c.hr} style={o.hr} />,
     img: ({ src, alt }) =>
       opts?.useCourseFileImages ? (
         <CourseFileMarkdownImage

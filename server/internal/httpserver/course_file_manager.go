@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -617,18 +618,39 @@ func (d Deps) handleGetCourseFileItemContent() http.HandlerFunc {
 				ttl = time.Hour
 			}
 			presignURL, presignErr := d.Storage.GetPresignedURL(r.Context(), item.StorageKey, ttl)
-			if presignErr == nil && presignURL != "" {
+			if presignErr != nil && !errors.Is(presignErr, filestorage.ErrNoPresignedURL) {
+				log.Printf("course-file-item-content: presign key=%q err=%v", item.StorageKey, presignErr)
+				apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "File temporarily unavailable — try again in a moment.")
+				return
+			}
+			if presignURL != "" {
 				http.Redirect(w, r, presignURL, http.StatusFound)
 				return
 			}
+			rc, getErr := d.Storage.GetObject(r.Context(), item.StorageKey)
+			if getErr == nil {
+				defer func() { _ = rc.Close() }()
+				ct := strings.TrimSpace(item.MimeType)
+				if ct == "" {
+					ct = "application/octet-stream"
+				}
+				w.Header().Set("Content-Type", ct)
+				w.Header().Set("Cache-Control", "private, max-age=86400")
+				_, _ = io.Copy(w, rc)
+				return
+			}
 		}
-		// Local driver
+		// Legacy on-disk layout when Storage is nil (courseCode prefix before object key).
 		root := strings.TrimSpace(cfg.CourseFilesRoot)
 		if root == "" {
 			root = "data/course-files"
 		}
-		p := root + "/" + courseCode + "/" + item.StorageKey
-		http.ServeFile(w, r, p)
+		legacyPath := filepath.Join(root, courseCode, item.StorageKey)
+		if _, statErr := os.Stat(legacyPath); statErr == nil {
+			http.ServeFile(w, r, legacyPath)
+			return
+		}
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "File not found.")
 	}
 }
 

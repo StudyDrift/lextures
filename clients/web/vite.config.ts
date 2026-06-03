@@ -6,7 +6,6 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { VitePWA } from 'vite-plugin-pwa'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const packageVersion = (
@@ -33,7 +32,7 @@ export default defineConfig({
       },
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
-        globIgnores: ['**/stats.html', '**/nutrient-viewer*.js'],
+        globIgnores: ['**/stats.html'],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
@@ -50,14 +49,6 @@ export default defineConfig({
           { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-    }),
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/@nutrient-sdk/viewer/dist/nutrient-viewer-lib',
-          dest: '.',
-        },
-      ],
     }),
     ...(process.env.ANALYZE === 'true' || process.env.ANALYZE === '1'
       ? [

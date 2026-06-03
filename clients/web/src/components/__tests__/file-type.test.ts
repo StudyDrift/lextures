@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectPreviewType } from '../../lib/file-type'
+import { detectPreviewType, isMarkdownFilename } from '../../lib/file-type'
 
 describe('detectPreviewType', () => {
   // PDF detection
@@ -69,8 +69,28 @@ describe('detectPreviewType', () => {
     expect(detectPreviewType(null, 'sheet.xlsx')).toBe('office')
   })
 
+  it('returns none for legacy .doc', () => {
+    expect(detectPreviewType('application/msword', 'legacy.doc')).toBe('none')
+  })
+
   it('returns video for video/mp4', () => {
     expect(detectPreviewType('video/mp4', 'video.mp4')).toBe('video')
+  })
+
+  it('returns text for text/plain', () => {
+    expect(detectPreviewType('text/plain', 'notes.txt')).toBe('text')
+  })
+
+  it('returns text for text/markdown', () => {
+    expect(detectPreviewType('text/markdown', 'readme.md')).toBe('text')
+  })
+
+  it('returns text for .md extension with null mime type', () => {
+    expect(detectPreviewType(null, 'readme.md')).toBe('text')
+  })
+
+  it('returns text for .txt extension with octet-stream mime', () => {
+    expect(detectPreviewType('application/octet-stream', 'notes.txt')).toBe('text')
   })
 
   it('returns none for unknown mime with no extension', () => {
@@ -98,5 +118,19 @@ describe('detectPreviewType', () => {
 
   it('falls back to extension when mime type is octet-stream', () => {
     expect(detectPreviewType('application/octet-stream', 'photo.png')).toBe('image')
+  })
+})
+
+describe('isMarkdownFilename', () => {
+  it('returns true for .md extension', () => {
+    expect(isMarkdownFilename('readme.md', null)).toBe(true)
+  })
+
+  it('returns true for text/markdown mime', () => {
+    expect(isMarkdownFilename('notes.txt', 'text/markdown')).toBe(true)
+  })
+
+  it('returns false for plain .txt', () => {
+    expect(isMarkdownFilename('notes.txt', 'text/plain')).toBe(false)
   })
 })

@@ -218,6 +218,17 @@ export function getFileContentUrl(courseCode: string, itemId: string): string {
   return `/api/v1/courses/${encodeURIComponent(courseCode)}/files/items/${encodeURIComponent(itemId)}/content`
 }
 
+export function getFilePreviewUrl(courseCode: string, itemId: string): string {
+  return `/api/v1/courses/${encodeURIComponent(courseCode)}/files/items/${encodeURIComponent(itemId)}/preview`
+}
+
+/** Builds the server HTML preview URL from a file content URL. */
+export function fileContentUrlToPreviewUrl(contentUrl: string): string | null {
+  const suffix = '/content'
+  if (!contentUrl.endsWith(suffix)) return null
+  return `${contentUrl.slice(0, -suffix.length)}/preview`
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B'
   const k = 1024
