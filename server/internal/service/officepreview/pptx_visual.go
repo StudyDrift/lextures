@@ -38,6 +38,44 @@ type pptxVisualLayer struct {
 	// image layers
 	dataURI string
 	alt     string
+	// shape geometry
+	borderRadiusPx float64
+}
+
+// readShapeBorderRadiusPx extracts a CSS border-radius for known preset geometries.
+// Returns 0 if the shape is not a rounded rectangle.
+func readShapeBorderRadiusPx(n *pptxXMLNode, cx, cy int64) float64 {
+	spPr := n.child("spPr")
+	if spPr == nil {
+		return 0
+	}
+	prstGeom := spPr.child("prstGeom")
+	if prstGeom == nil {
+		return 0
+	}
+	prst := prstGeom.attr("prst")
+	if prst != "roundRect" && prst != "round1Rect" && prst != "round2SameRect" && prst != "round2DiagRect" {
+		return 0
+	}
+	// adj is a fraction of the shorter side, scaled by 100000. Default 16667 (~1/6).
+	adj := int64(16667)
+	if avLst := prstGeom.child("avLst"); avLst != nil {
+		if gd := avLst.child("gd"); gd != nil {
+			if fmla := gd.attr("fmla"); strings.HasPrefix(fmla, "val ") {
+				if v := parseEMU(strings.TrimPrefix(fmla, "val ")); v > 0 {
+					adj = v
+				}
+			}
+		}
+	}
+	minSide := cx
+	if cy < minSide {
+		minSide = cy
+	}
+	if minSide <= 0 {
+		return 0
+	}
+	return emuToPx(minSide) * float64(adj) / 100000
 }
 
 func convertPptxToVisualHTML(data []byte, filename, mimeType string) (string, error) {
@@ -421,6 +459,7 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 			left: left, top: top, cx: cx, cy: cy,
 			rotDeg: xfrm.rotDeg, flipH: xfrm.flipH,
 			kind: "text", background: bg, border: border,
+			borderRadiusPx: readShapeBorderRadiusPx(n, cx, cy),
 		}, true
 	}
 
@@ -443,7 +482,13 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 		fontPt = 14
 	}
 	if color == "" {
-		color = "#1e3a5f"
+		// Fall back to the theme's body text color (tx1, mapped via clrMap).
+		// Use inherit if even that's missing so the document CSS can take over.
+		if hex := theme.resolveScheme("tx1"); hex != "" {
+			color = "#" + hex
+		} else {
+			color = "inherit"
+		}
 	}
 	title := shapeIsTitle(n)
 	if title && fontPt < 20 {
@@ -481,6 +526,7 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 		fontPx: ptToPx(fontPt), color: color, bold: bold, isTitle: title,
 		background: bg, border: border, vertAlign: vertAlign,
 		vert: vert, noWrap: noWrap,
+		borderRadiusPx: readShapeBorderRadiusPx(n, cx, cy),
 	}, true
 }
 
@@ -538,6 +584,9 @@ func renderPptxVisualLayer(layer pptxVisualLayer) string {
 	}
 
 	posCSS := fmt.Sprintf("left:%.2fpx;top:%.2fpx;width:%.2fpx;height:%.2fpx;z-index:%d;", left, top, width, height, z)
+	if layer.borderRadiusPx > 0 {
+		posCSS += fmt.Sprintf("border-radius:%.2fpx;", layer.borderRadiusPx)
+	}
 
 	if layer.kind == "image" {
 		return fmt.Sprintf(

@@ -203,6 +203,26 @@ export async function moveFile(
   return raw as FileItem
 }
 
+/** Move a folder to a different folder. Pass null/empty to move to root. */
+export async function moveFolder(
+  courseCode: string,
+  folderId: string,
+  parentId: string | null,
+): Promise<FileFolder> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/files/folders/${encodeURIComponent(folderId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parentId: parentId ?? '' }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as FileFolder
+}
+
+
 export async function deleteFile(courseCode: string, itemId: string): Promise<void> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/files/items/${encodeURIComponent(itemId)}`,

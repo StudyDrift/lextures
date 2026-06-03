@@ -181,7 +181,8 @@ func (d Deps) handlePatchCourseFilesFolder() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			Name *string `json:"name"`
+			Name     *string `json:"name"`
+			ParentID *string `json:"parentId"` // empty string = move to root
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -211,7 +212,30 @@ func (d Deps) handlePatchCourseFilesFolder() http.HandlerFunc {
 			_ = json.NewEncoder(w).Encode(folder)
 			return
 		}
-		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide name to update.")
+		if body.ParentID != nil {
+			var parentID *uuid.UUID
+			if *body.ParentID != "" {
+				fid, parseErr := uuid.Parse(*body.ParentID)
+				if parseErr != nil {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid parentId.")
+					return
+				}
+				parentID = &fid
+			}
+			folder, moveErr := filemanager.MoveFolder(r.Context(), d.Pool, courseID, folderID, parentID)
+			if moveErr != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, moveErr.Error())
+				return
+			}
+			if folder == nil {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Folder not found.")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			_ = json.NewEncoder(w).Encode(folder)
+			return
+		}
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide name or parentId to update.")
 	}
 }
 
