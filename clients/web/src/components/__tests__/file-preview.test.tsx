@@ -13,6 +13,18 @@ vi.mock('../pdf-viewer', () => ({
   ),
 }))
 
+vi.mock('../office-html-preview', () => ({
+  OfficeHtmlPreview: ({ filename }: { filename: string }) => (
+    <div data-testid="office-html-preview">{filename}</div>
+  ),
+}))
+
+vi.mock('../text-file-preview', () => ({
+  TextFilePreview: ({ filename }: { filename: string }) => (
+    <div data-testid="text-file-preview">{filename}</div>
+  ),
+}))
+
 const PNG_1X1 = new Uint8Array([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
@@ -63,10 +75,22 @@ describe('FilePreview', () => {
     expect(screen.getByTestId('pdf-viewer')).toBeInTheDocument()
   })
 
-  it('renders office viewer for DOCX files', () => {
+  it('renders server HTML office preview for DOCX files', () => {
     render(<FilePreview {...defaultProps} mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" filename="document.docx" />)
     expect(screen.queryByTestId('pdf-viewer')).toBeNull()
+    expect(screen.getByTestId('office-html-preview')).toHaveTextContent('document.docx')
     expect(screen.queryByText(/cannot be previewed/i)).toBeNull()
+  })
+
+  it('renders text preview for .txt files', () => {
+    render(<FilePreview {...defaultProps} mimeType="text/plain" filename="notes.txt" />)
+    expect(screen.getByTestId('text-file-preview')).toHaveTextContent('notes.txt')
+    expect(screen.queryByText(/cannot be previewed/i)).toBeNull()
+  })
+
+  it('renders text preview for .md files', () => {
+    render(<FilePreview {...defaultProps} mimeType={null} filename="readme.md" />)
+    expect(screen.getByTestId('text-file-preview')).toHaveTextContent('readme.md')
   })
 
   it('renders download button for truly unsupported file types', () => {

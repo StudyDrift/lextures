@@ -77,6 +77,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Patch("/api/v1/courses/{course_code}/files/items/{item_id}", d.handlePatchCourseFileItem())
 	r.Delete("/api/v1/courses/{course_code}/files/items/{item_id}", d.handleDeleteCourseFileItem())
 	r.Get("/api/v1/courses/{course_code}/files/items/{item_id}/content", d.handleGetCourseFileItemContent())
+	r.Get("/api/v1/courses/{course_code}/files/items/{item_id}/preview", d.handleGetCourseFileItemPreview())
 	r.Patch("/api/v1/courses/{course_code}/caption-policy", d.handlePatchCourseCaptionPolicy())
 	// DRM: license endpoint for protected files (plan 8.10)
 	r.Post("/api/v1/files/{object_id}/license", d.handlePostFileLicense())
