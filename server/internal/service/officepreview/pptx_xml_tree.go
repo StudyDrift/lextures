@@ -135,12 +135,6 @@ func readShapeXfrm(node *pptxXMLNode) pptxShapeXfrm {
 	return r
 }
 
-// Kept for backward compatibility with pptx.go.
-func readXfrmBox(node *pptxXMLNode) (left, top, cx, cy int64) {
-	x := readShapeXfrm(node)
-	return x.left, x.top, x.cx, x.cy
-}
-
 // ----- Group transform -----
 
 type pptxGroupTransform struct {
@@ -406,23 +400,6 @@ func parseShapeBorder(spPr *pptxXMLNode, theme *pptxTheme) string {
 
 // ----- Text extraction -----
 
-func extractTxBodyParagraphs(txBody *pptxXMLNode) []string {
-	var lines []string
-	for _, p := range txBody.findAllDeep("p") {
-		var runs []string
-		for _, t := range p.findAllDeep("t") {
-			if text := strings.TrimSpace(collectText(t)); text != "" {
-				runs = append(runs, text)
-			}
-		}
-		line := strings.TrimSpace(strings.Join(runs, ""))
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	return lines
-}
-
 func collectText(n *pptxXMLNode) string {
 	if strings.TrimSpace(n.Content) != "" {
 		return n.Content
@@ -520,13 +497,6 @@ func hexByte(hex string, offset int) string {
 		return "0"
 	}
 	return strconv.FormatInt(i, 10)
-}
-
-func fmtPercent(v, total int64) string {
-	if total <= 0 {
-		return "0"
-	}
-	return fmt.Sprintf("%.4f", float64(v)/float64(total)*100)
 }
 
 // ----- Per-paragraph / per-run styled HTML -----

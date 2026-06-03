@@ -57,12 +57,12 @@ func convertPptxToHTMLText(data []byte, filename, mimeType string) (string, erro
 		md, usedImages := replacePptxImagePlaceholders(md, images)
 		inner := markdownFragmentToHTML(md)
 		imgHTML := pptxSlideImagesHTML(images[usedImages:])
-		htmlSlides.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&htmlSlides,
 			`<section class="slide"><header class="slide-header">Slide %d</header><div class="slide-body">%s%s</div></section>`,
 			i+1,
 			inner,
 			imgHTML,
-		))
+		)
 	}
 
 	return wrapHTMLDocument(htmlSlides.String()), nil
@@ -90,11 +90,11 @@ func pptxSlideImagesHTML(images []pptxImage) string {
 	}
 	var b strings.Builder
 	for _, img := range images {
-		b.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&b,
 			`<figure class="slide-figure"><img src="%s" alt="%s"/></figure>`,
 			img.dataURI,
 			escapeAttr(img.alt),
-		))
+		)
 	}
 	return sanitizeHTML(b.String())
 }

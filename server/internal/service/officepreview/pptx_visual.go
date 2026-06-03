@@ -225,12 +225,12 @@ func renderPptxVisualSlide(zr *zip.Reader, slidePath string, slideNum int, size 
 
 	var b strings.Builder
 	b.WriteString(`<article class="pptx-slide-wrap">`)
-	b.WriteString(fmt.Sprintf(`<p class="pptx-slide-label">Slide %d</p>`, slideNum))
-	b.WriteString(fmt.Sprintf(`<div class="pptx-canvas" style="%s">`, canvasStyle))
+	fmt.Fprintf(&b, `<p class="pptx-slide-label">Slide %d</p>`, slideNum)
+	fmt.Fprintf(&b, `<div class="pptx-canvas" style="%s">`, canvasStyle)
 	if bgURI != "" {
-		b.WriteString(fmt.Sprintf(`<img class="pptx-canvas-bg" src="%s" alt="" role="presentation"/>`, bgURI))
+		fmt.Fprintf(&b, `<img class="pptx-canvas-bg" src="%s" alt="" role="presentation"/>`, bgURI)
 	}
-	b.WriteString(fmt.Sprintf(`<div class="pptx-inner" data-w="%.2f" style="width:%.2fpx;height:%.2fpx">`, slideWpx, slideWpx, slideHpx))
+	fmt.Fprintf(&b, `<div class="pptx-inner" data-w="%.2f" style="width:%.2fpx;height:%.2fpx">`, slideWpx, slideWpx, slideHpx)
 	for _, layer := range layers {
 		b.WriteString(renderPptxVisualLayer(layer))
 	}
@@ -493,33 +493,12 @@ func resolveShapeFill(sp, spPr *pptxXMLNode, theme *pptxTheme) string {
 	return shapeStyleFill(sp, theme)
 }
 
-type pptxPartRef struct {
-	path     string
-	relsPath string
-	isLayout bool
-}
-
 func pptxPartRelsPath(partPath string) string {
 	dir, base := path.Split(partPath)
 	if dir == "" {
 		return "_rels/" + base + ".rels"
 	}
 	return dir + "_rels/" + base + ".rels"
-}
-
-func pptxSlidePartChain(zr *zip.Reader, slidePath string, slideRels map[string]packageRel) []pptxPartRef {
-	var chain []pptxPartRef
-	layoutPath := pptxRelatedPartPath(slideRels, slidePath, "slideLayout")
-	if layoutPath != "" {
-		layoutRels, _ := parsePackageRels(zr, pptxPartRelsPath(layoutPath))
-		masterPath := pptxRelatedPartPath(layoutRels, layoutPath, "slideMaster")
-		if masterPath != "" {
-			chain = append(chain, pptxPartRef{path: masterPath, relsPath: pptxPartRelsPath(masterPath)})
-		}
-		chain = append(chain, pptxPartRef{path: layoutPath, relsPath: pptxPartRelsPath(layoutPath), isLayout: true})
-	}
-	chain = append(chain, pptxPartRef{path: slidePath, relsPath: pptxSlideRelsPath(slidePath)})
-	return chain
 }
 
 func resolvePptxEmbed(zr *zip.Reader, slidePath string, rels map[string]packageRel, embedID string) string {
@@ -581,7 +560,7 @@ func renderPptxVisualLayer(layer pptxVisualLayer) string {
 			continue
 		}
 		if para.style != "" {
-			textHTML.WriteString(fmt.Sprintf(`<p style="%s">`, para.style))
+			fmt.Fprintf(&textHTML, `<p style="%s">`, para.style)
 		} else {
 			textHTML.WriteString("<p>")
 		}
