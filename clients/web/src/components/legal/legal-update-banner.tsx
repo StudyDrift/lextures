@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { acknowledgeLegalDocument, fetchPendingLegalDocuments, type PendingLegalDocument } from '../../lib/legal-api'
 import { PRIVACY_POLICY, TERMS_OF_SERVICE } from '../../lib/legal-documents'
 
@@ -12,19 +12,13 @@ export function LegalUpdateBanner() {
   const [dismissing, setDismissing] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const load = useCallback(async () => {
-    try {
-      const docs = await fetchPendingLegalDocuments()
-      setPending(docs)
-      setError(null)
-    } catch {
-      setPending([])
-    }
-  }, [])
-
   useEffect(() => {
-    void load()
-  }, [load])
+    let active = true
+    fetchPendingLegalDocuments()
+      .then(docs => { if (active) { setPending(docs); setError(null) } })
+      .catch(() => { if (active) setPending([]) })
+    return () => { active = false }
+  }, [])
 
   if (pending.length === 0) {
     return null
