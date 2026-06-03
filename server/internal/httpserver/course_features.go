@@ -30,6 +30,7 @@ type patchCourseFeaturesBody struct {
 	AiTutorEnabled                *bool `json:"aiTutorEnabled"`
 	MultilingualMessagingEnabled  *bool `json:"multilingualMessagingEnabled"`
 	FilesEnabled                  *bool `json:"filesEnabled"`
+	AttendanceEnabled             *bool `json:"attendanceEnabled"`
 }
 
 // handlePatchCourseFeatures is PATCH /api/v1/courses/{course_code}/features.
@@ -123,13 +124,17 @@ func (d Deps) handlePatchCourseFeatures() http.HandlerFunc {
 		if req.FilesEnabled != nil {
 			filesEnabled = *req.FilesEnabled
 		}
+		attendanceEnabled := existing.AttendanceEnabled
+		if req.AttendanceEnabled != nil {
+			attendanceEnabled = *req.AttendanceEnabled
+		}
 
 		out, err := course.PatchFeatures(
 			r.Context(), d.Pool, courseCode,
 			req.NotebookEnabled, req.FeedEnabled, req.CalendarEnabled, req.QuestionBankEnabled,
 			req.LockdownModeEnabled, standards, adaptivePaths, srs, diagnostic, hint, misconception,
 			req.DiscussionsEnabled, collabDocs, liveSessions, groupSpaces, officeHours, aiTutor,
-			multilingualMessaging, filesEnabled,
+			multilingualMessaging, filesEnabled, attendanceEnabled,
 		)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to patch course features.")

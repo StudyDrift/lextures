@@ -9,7 +9,7 @@ import (
 func TestRoleMatrixPermissions(t *testing.T) {
 	code := "C-TEST1"
 	ta := RoleMatrixPermissions(code, "ta")
-	if len(ta) != 2 {
+	if len(ta) != 3 {
 		t.Fatalf("ta: got %d perms", len(ta))
 	}
 	designer := RoleMatrixPermissions(code, "designer")
@@ -17,7 +17,7 @@ func TestRoleMatrixPermissions(t *testing.T) {
 		t.Fatalf("designer: got %d perms", len(designer))
 	}
 	p := "course:" + code + ":"
-	if !contains(ta, p+"gradebook:view") || contains(ta, p+"item:create") {
+	if !contains(ta, p+"gradebook:view") || !contains(ta, p+"attendance:manage") || contains(ta, p+"item:create") {
 		t.Fatalf("unexpected ta matrix: %v", ta)
 	}
 	if !contains(designer, p+"item:create") || contains(designer, p+"gradebook:view") {

@@ -66,6 +66,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     groupSpacesEnabled,
     officeHoursEnabled,
     filesEnabled,
+    attendanceEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const courseViewPreview = useCourseViewAs(courseCode)
@@ -135,6 +136,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       {officeHoursEnabled && (
         <SideNavLink to={`${base}/office-hours`} icon={<Clock className="h-5 w-5" />}>
           Office Hours
+        </SideNavLink>
+      )}
+      {attendanceEnabled && (
+        <SideNavLink to={`${base}/attendance`} icon={<ClipboardList className="h-5 w-5" />}>
+          Attendance
         </SideNavLink>
       )}
       {canManageQuestionBank && questionBankEnabled && (

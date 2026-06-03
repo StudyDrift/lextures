@@ -74,6 +74,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const aiTutorEnabled = course.aiTutorEnabled === true
   const multilingualMessagingEnabled = course.multilingualMessagingEnabled === true
   const filesEnabled = course.filesEnabled !== false
+  const attendanceEnabled = course.attendanceEnabled === true
 
   const persist = useCallback(
     async (patch: {
@@ -96,6 +97,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       aiTutorEnabled?: boolean
       multilingualMessagingEnabled?: boolean
       filesEnabled?: boolean
+      attendanceEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -123,6 +125,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           aiTutorEnabled: patch.aiTutorEnabled ?? aiTutorEnabled,
           multilingualMessagingEnabled: patch.multilingualMessagingEnabled ?? multilingualMessagingEnabled,
           filesEnabled: patch.filesEnabled ?? filesEnabled,
+          attendanceEnabled: patch.attendanceEnabled ?? attendanceEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -151,6 +154,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       aiTutorEnabled,
       multilingualMessagingEnabled,
       filesEnabled,
+      attendanceEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -294,6 +298,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           enabled={officeHoursEnabled}
           disabled={saving}
           onToggle={() => void persist({ officeHoursEnabled: !officeHoursEnabled })}
+        />
+        <FeatureToggleRow
+          label="Attendance"
+          description="Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
+          enabled={attendanceEnabled}
+          disabled={saving}
+          onToggle={() => void persist({ attendanceEnabled: !attendanceEnabled })}
         />
         <FeatureToggleRow
           label="AI Tutor"

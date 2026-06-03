@@ -30,6 +30,7 @@ func PatchFeatures(
 	aiTutorEnabled bool,
 	multilingualMessagingEnabled bool,
 	filesEnabled bool,
+	attendanceEnabled bool,
 ) (*CoursePublic, error) {
 	const q = `
 		UPDATE course.courses
@@ -53,8 +54,9 @@ func PatchFeatures(
 			ai_tutor_enabled = $17,
 			multilingual_messaging_enabled = $18,
 			files_enabled = $19,
+			attendance_enabled = $20,
 			updated_at = NOW()
-		WHERE course_code = $20
+		WHERE course_code = $21
 	`
 
 	tag, err := pool.Exec(ctx, q,
@@ -63,6 +65,7 @@ func PatchFeatures(
 		diagnosticAssessmentsEnabled, hintScaffoldingEnabled, misconceptionDetectionEnabled,
 		discussionsEnabled, collabDocsEnabled, liveSessionsEnabled, groupSpacesEnabled,
 		officeHoursEnabled, aiTutorEnabled, multilingualMessagingEnabled, filesEnabled,
+		attendanceEnabled,
 		courseCode,
 	)
 	if err != nil {

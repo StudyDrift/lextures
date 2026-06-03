@@ -18,6 +18,7 @@ func SeedTeacherCourseGrants(ctx context.Context, tx pgx.Tx, userID, courseID uu
 		prefix + "enrollments:read",
 		prefix + "enrollments:update",
 		prefix + "gradebook:view",
+		prefix + "attendance:manage",
 	}
 	for _, perm := range perms {
 		if _, err := tx.Exec(ctx, `
