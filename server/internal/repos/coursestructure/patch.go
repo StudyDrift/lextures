@@ -3,6 +3,7 @@ package coursestructure
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -49,6 +50,28 @@ func ItemResponseForRow(ctx context.Context, pool *pgxpool.Pool, courseID uuid.U
 		return ItemResponse{}, errors.New("coursestructure: expected one enriched item")
 	}
 	return resp[0], nil
+}
+
+// PatchChildStructureItemDueAt updates only the due_at column for a module child item.
+func PatchChildStructureItemDueAt(
+	ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, dueAt *time.Time,
+) error {
+	tag, err := pool.Exec(ctx, `
+		UPDATE course.course_structure_items
+		SET due_at = $1, updated_at = NOW()
+		WHERE id = $2
+		  AND course_id = $3
+		  AND parent_id IS NOT NULL
+		  AND kind `+patchableChildKindsSQL,
+		dueAt, itemID, courseID,
+	)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
 }
 
 // ArchiveChildStructureItem sets archived = true for a child row.

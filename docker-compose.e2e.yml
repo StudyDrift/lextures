@@ -57,7 +57,6 @@ services:
       CCPA_MODULE_ENABLED: "true"
       STATE_PRIVACY_ENABLED: "true"
       GDPR_MODULE_ENABLED: "true"
-      BACKUP_MODULE_ENABLED: "true"
       AV_SCANNING_ENABLED: "true"
       CLAMAV_STUB: "true"
       STORAGE_QUOTAS_ENABLED: "true"
