@@ -204,6 +204,7 @@ export default function Courses() {
   const [canvasImportOpen, setCanvasImportOpen] = useState(false)
   const [termFilter, setTermFilter] = useState<string>('')
   const [termList, setTermList] = useState<OrgTerm[]>([])
+  const [gradeLevelFilter, setGradeLevelFilter] = useState<string>('')
   const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
 
   useEffect(() => {
@@ -228,9 +229,10 @@ export default function Courses() {
     ;(async () => {
       setError(null)
       try {
-        const qs = termFilter && termFilter !== ''
-          ? `?term_id=${encodeURIComponent(termFilter)}`
-          : ''
+        const params = new URLSearchParams()
+        if (termFilter) params.set('term_id', termFilter)
+        if (gradeLevelFilter) params.set('grade_level', gradeLevelFilter)
+        const qs = params.toString() ? `?${params.toString()}` : ''
         const res = await authorizedFetch(`/api/v1/courses${qs}`)
         const raw: unknown = await res.json().catch(() => ({}))
         if (!res.ok) {
@@ -250,7 +252,7 @@ export default function Courses() {
     return () => {
       cancelled = true
     }
-  }, [termFilter, coursesRevision])
+  }, [termFilter, gradeLevelFilter, coursesRevision])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -349,27 +351,61 @@ export default function Courses() {
         </p>
       )}
 
-      {orgId && termList.length > 0 && (
-        <div className="mt-6 max-w-md">
-          <label htmlFor="course-catalog-term-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
-            Term
+      <div className="mt-6 flex flex-wrap gap-4">
+        {orgId && termList.length > 0 && (
+          <div className="min-w-48 max-w-sm flex-1">
+            <label htmlFor="course-catalog-term-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+              Term
+            </label>
+            <select
+              id="course-catalog-term-filter"
+              value={termFilter}
+              onChange={(e) => setTermFilter(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+              aria-label="Filter courses by academic term"
+            >
+              <option value="">All terms</option>
+              {termList.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="min-w-48 max-w-sm flex-1">
+          <label htmlFor="course-catalog-grade-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+            Grade level
           </label>
           <select
-            id="course-catalog-term-filter"
-            value={termFilter}
-            onChange={(e) => setTermFilter(e.target.value)}
+            id="course-catalog-grade-filter"
+            value={gradeLevelFilter}
+            onChange={(e) => setGradeLevelFilter(e.target.value)}
             className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
-            aria-label="Filter courses by academic term"
+            aria-label="Filter courses by grade level"
           >
-            <option value="">All courses</option>
-            {termList.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
+            <option value="">All grade levels</option>
+            <option value="K">Kindergarten</option>
+            <option value="1">Grade 1</option>
+            <option value="2">Grade 2</option>
+            <option value="3">Grade 3</option>
+            <option value="4">Grade 4</option>
+            <option value="5">Grade 5</option>
+            <option value="6">Grade 6</option>
+            <option value="7">Grade 7</option>
+            <option value="8">Grade 8</option>
+            <option value="9">Grade 9</option>
+            <option value="10">Grade 10</option>
+            <option value="11">Grade 11</option>
+            <option value="12">Grade 12</option>
+            <option value="K-2">K–2 (multi-grade)</option>
+            <option value="3-5">3–5 (multi-grade)</option>
+            <option value="6-8">6–8 (multi-grade)</option>
+            <option value="9-12">9–12 (multi-grade)</option>
+            <option value="K-12">K–12 (all grades)</option>
           </select>
         </div>
-      )}
+      </div>
 
       {courses === null && !error && <CoursesCatalogSkeleton />}
 

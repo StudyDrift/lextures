@@ -46,7 +46,15 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 		if termFilter != nil {
 			slog.Info("course list filtered by term", "term_id", termFilter.String())
 		}
-		courses, err := course.ListForEnrolledUser(ctx, d.Pool, userID)
+		var gradeLevelFilter *string
+		if glStr := strings.TrimSpace(r.URL.Query().Get("grade_level")); glStr != "" {
+			if !course.ValidGradeLevel(glStr) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid grade_level query parameter.")
+				return
+			}
+			gradeLevelFilter = &glStr
+		}
+		courses, err := course.ListForEnrolledUser(ctx, d.Pool, userID, gradeLevelFilter)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
@@ -69,14 +77,14 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 			}
 			if len(subtrees) > 0 {
 				if termFilter != nil {
-					unitScoped, err := course.ListForEnrolledUserInOrgUnitsByTerm(ctx, d.Pool, userID, subtrees, *termFilter)
+					unitScoped, err := course.ListForEnrolledUserInOrgUnitsByTerm(ctx, d.Pool, userID, subtrees, *termFilter, gradeLevelFilter)
 					if err != nil {
 						apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 						return
 					}
 					courses = unitScoped
 				} else {
-					unitScoped, err := course.ListForEnrolledUserInOrgUnits(ctx, d.Pool, userID, subtrees)
+					unitScoped, err := course.ListForEnrolledUserInOrgUnits(ctx, d.Pool, userID, subtrees, gradeLevelFilter)
 					if err != nil {
 						apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 						return
@@ -84,7 +92,7 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 					courses = unitScoped
 				}
 			} else if termFilter != nil {
-				filtered, err := course.ListForEnrolledUserByTerm(ctx, d.Pool, userID, *termFilter)
+				filtered, err := course.ListForEnrolledUserByTerm(ctx, d.Pool, userID, *termFilter, gradeLevelFilter)
 				if err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 					return
@@ -92,7 +100,7 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 				courses = filtered
 			}
 		} else if termFilter != nil {
-			filtered, err := course.ListForEnrolledUserByTerm(ctx, d.Pool, userID, *termFilter)
+			filtered, err := course.ListForEnrolledUserByTerm(ctx, d.Pool, userID, *termFilter, gradeLevelFilter)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 				return

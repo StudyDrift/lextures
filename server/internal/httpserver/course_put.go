@@ -34,6 +34,7 @@ type putCourseBody struct {
 	CourseHomeLanding       *string `json:"courseHomeLanding"`
 	CourseHomeContentItemID *string `json:"courseHomeContentItemId"`
 	CourseTimezone          *string `json:"courseTimezone"`
+	GradeLevel              *string `json:"gradeLevel"`
 }
 
 // handlePutCourse is PUT /api/v1/courses/{course_code} (parity: server `update_handler`).
@@ -274,6 +275,25 @@ func (d Deps) handlePutCourse() http.HandlerFunc {
 				if out2 != nil {
 					out = out2
 				}
+			}
+		}
+		if body.GradeLevel != nil {
+			gl := strings.TrimSpace(*body.GradeLevel)
+			var glPtr *string
+			if gl != "" {
+				if !course.ValidGradeLevel(gl) {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid gradeLevel value.")
+					return
+				}
+				glPtr = &gl
+			}
+			updated, err := course.SetGradeLevel(r.Context(), d.Pool, courseCode, glPtr)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update grade level.")
+				return
+			}
+			if updated != nil {
+				out = updated
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

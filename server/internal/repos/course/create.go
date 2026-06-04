@@ -32,6 +32,7 @@ func CreateCourse(
 	courseType string,
 	orgUnitID *uuid.UUID,
 	termID *uuid.UUID,
+	gradeLevel *string,
 ) (*CoursePublic, error) {
 	if courseType == "" {
 		courseType = defaultCourseType
@@ -42,7 +43,7 @@ func CreateCourse(
 		if err != nil {
 			return nil, err
 		}
-		out, retry, err := createCourseOnce(ctx, pool, createdByUserID, title, description, courseType, courseCode, orgUnitID, termID)
+		out, retry, err := createCourseOnce(ctx, pool, createdByUserID, title, description, courseType, courseCode, orgUnitID, termID, gradeLevel)
 		if err != nil {
 			return nil, err
 		}
@@ -64,6 +65,7 @@ func createCourseOnce(
 	courseCode string,
 	orgUnitID *uuid.UUID,
 	termID *uuid.UUID,
+	gradeLevel *string,
 ) (*CoursePublic, bool, error) {
 	tx, err := pool.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
@@ -82,10 +84,11 @@ INSERT INTO course.courses (
 	created_by_user_id,
 	org_id,
 	org_unit_id,
-	term_id
-) VALUES ($1, $2, $3, $4, $5, (SELECT org_id FROM "user".users WHERE id = $5), $6, $7)
+	term_id,
+	grade_level
+) VALUES ($1, $2, $3, $4, $5, (SELECT org_id FROM "user".users WHERE id = $5), $6, $7, $8)
 RETURNING id, course_code
-`, courseCode, title, description, courseType, createdByUserID, orgUnitID, termID).Scan(&courseID, &courseCodeOut)
+`, courseCode, title, description, courseType, createdByUserID, orgUnitID, termID, gradeLevel).Scan(&courseID, &courseCodeOut)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {

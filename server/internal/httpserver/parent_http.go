@@ -148,7 +148,7 @@ func (d Deps) handleParentStudentCourses() http.HandlerFunc {
 		if _, ok := d.requireParentLink(w, r, parentID, orgID, studentID); !ok {
 			return
 		}
-		courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, studentID)
+		courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, studentID, nil)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
@@ -182,7 +182,7 @@ func (d Deps) handleParentStudentGrades() http.HandlerFunc {
 		if _, ok := d.requireParentLink(w, r, parentID, orgID, studentID); !ok {
 			return
 		}
-		courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, studentID)
+		courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, studentID, nil)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
@@ -240,7 +240,7 @@ func (d Deps) handleParentStudentAssignments() http.HandlerFunc {
 		if _, ok := d.requireParentLink(w, r, parentID, orgID, studentID); !ok {
 			return
 		}
-		courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, studentID)
+		courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, studentID, nil)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return
@@ -565,7 +565,7 @@ func (d Deps) handleParentWeeklySummary() http.HandlerFunc {
 			if ln.StudentDisplay != nil && *ln.StudentDisplay != "" {
 				childName = *ln.StudentDisplay
 			}
-			courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, ln.StudentUserID)
+			courses, err := course.ListForEnrolledUser(r.Context(), d.Pool, ln.StudentUserID, nil)
 			if err != nil {
 				continue
 			}
