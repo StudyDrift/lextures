@@ -26,4 +26,6 @@ func (d Deps) registerOrgRoutes(r chi.Router) {
 	r.Get("/api/v1/orgs/{orgId}/users", d.handleOrgUsersSearch())
 	r.Get("/api/v1/orgs/{orgId}/settings/support-widget", d.handleOrgSupportWidgetItem())
 	r.Put("/api/v1/orgs/{orgId}/settings/support-widget", d.handleOrgSupportWidgetItem())
+	r.Get("/api/v1/orgs/{orgId}/settings/org-type", d.handleOrgTypeItem())
+	r.Put("/api/v1/orgs/{orgId}/settings/org-type", d.handleOrgTypeItem())
 }

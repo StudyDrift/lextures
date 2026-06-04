@@ -28,6 +28,7 @@ import { usePermissions } from '../../context/use-permissions'
 import { useCoursesRevision } from '../../context/use-inbox-unread'
 import { authorizedFetch } from '../../lib/api'
 import { putCourseCatalogOrder, type CoursePublic, fetchOrgTerms, type OrgTerm } from '../../lib/courses-api'
+import { type OrgType } from '../../components/settings/org-units-panel'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
 import { getAccessToken } from '../../lib/auth'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -205,6 +206,8 @@ export default function Courses() {
   const [termFilter, setTermFilter] = useState<string>('')
   const [termList, setTermList] = useState<OrgTerm[]>([])
   const [gradeLevelFilter, setGradeLevelFilter] = useState<string>('')
+  const [orgType, setOrgType] = useState<OrgType>('higher-ed')
+  void orgType
   const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
 
   useEffect(() => {
@@ -217,6 +220,22 @@ export default function Courses() {
       .catch(() => {
         if (!cancelled) setTermList([])
       })
+    return () => {
+      cancelled = true
+    }
+  }, [orgId])
+
+  useEffect(() => {
+    if (!orgId) return
+    let cancelled = false
+    void authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/settings/org-type`)
+      .then((r) => r.json())
+      .then((data: { orgType?: OrgType }) => {
+        if (!cancelled && (data.orgType === 'k-12' || data.orgType === 'higher-ed')) {
+          setOrgType(data.orgType)
+        }
+      })
+      .catch(() => {})
     return () => {
       cancelled = true
     }
@@ -373,38 +392,40 @@ export default function Courses() {
             </select>
           </div>
         )}
-        <div className="min-w-48 max-w-sm flex-1">
-          <label htmlFor="course-catalog-grade-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
-            Grade level
-          </label>
-          <select
-            id="course-catalog-grade-filter"
-            value={gradeLevelFilter}
-            onChange={(e) => setGradeLevelFilter(e.target.value)}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
-            aria-label="Filter courses by grade level"
-          >
-            <option value="">All grade levels</option>
-            <option value="K">Kindergarten</option>
-            <option value="1">Grade 1</option>
-            <option value="2">Grade 2</option>
-            <option value="3">Grade 3</option>
-            <option value="4">Grade 4</option>
-            <option value="5">Grade 5</option>
-            <option value="6">Grade 6</option>
-            <option value="7">Grade 7</option>
-            <option value="8">Grade 8</option>
-            <option value="9">Grade 9</option>
-            <option value="10">Grade 10</option>
-            <option value="11">Grade 11</option>
-            <option value="12">Grade 12</option>
-            <option value="K-2">K–2 (multi-grade)</option>
-            <option value="3-5">3–5 (multi-grade)</option>
-            <option value="6-8">6–8 (multi-grade)</option>
-            <option value="9-12">9–12 (multi-grade)</option>
-            <option value="K-12">K–12 (all grades)</option>
-          </select>
-        </div>
+        {orgType === 'k-12' && (
+          <div className="min-w-48 max-w-sm flex-1">
+            <label htmlFor="course-catalog-grade-filter" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+              Grade level
+            </label>
+            <select
+              id="course-catalog-grade-filter"
+              value={gradeLevelFilter}
+              onChange={(e) => setGradeLevelFilter(e.target.value)}
+              className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+              aria-label="Filter courses by grade level"
+            >
+              <option value="">All grade levels</option>
+              <option value="K">Kindergarten</option>
+              <option value="1">Grade 1</option>
+              <option value="2">Grade 2</option>
+              <option value="3">Grade 3</option>
+              <option value="4">Grade 4</option>
+              <option value="5">Grade 5</option>
+              <option value="6">Grade 6</option>
+              <option value="7">Grade 7</option>
+              <option value="8">Grade 8</option>
+              <option value="9">Grade 9</option>
+              <option value="10">Grade 10</option>
+              <option value="11">Grade 11</option>
+              <option value="12">Grade 12</option>
+              <option value="K-2">K–2 (multi-grade)</option>
+              <option value="3-5">3–5 (multi-grade)</option>
+              <option value="6-8">6–8 (multi-grade)</option>
+              <option value="9-12">9–12 (multi-grade)</option>
+              <option value="K-12">K–12 (all grades)</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {courses === null && !error && <CoursesCatalogSkeleton />}

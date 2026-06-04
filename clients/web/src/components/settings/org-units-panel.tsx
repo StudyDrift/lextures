@@ -8,6 +8,8 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { usePermissions } from '../../context/use-permissions'
 
+export type OrgType = 'higher-ed' | 'k-12'
+
 type OrgRow = {
   id: string
   name: string
@@ -109,6 +111,9 @@ export function OrgUnitsPanel() {
   const [childType, setChildType] = useState<string>('department')
   const [creatingChild, setCreatingChild] = useState(false)
 
+  const [orgType, setOrgType] = useState<OrgType>('higher-ed')
+  const [orgTypeSaving, setOrgTypeSaving] = useState(false)
+
   const loadOrgs = useCallback(async () => {
     if (!canRbac) return
     try {
@@ -155,6 +160,16 @@ export function OrgUnitsPanel() {
   useEffect(() => {
     if (orgId && canUnits) void loadTree()
   }, [orgId, canUnits, loadTree])
+
+  useEffect(() => {
+    if (!orgId) return
+    void authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/settings/org-type`)
+      .then((r) => r.json())
+      .then((data: { orgType?: OrgType }) => {
+        if (data.orgType === 'k-12' || data.orgType === 'higher-ed') setOrgType(data.orgType)
+      })
+      .catch(() => {})
+  }, [orgId])
 
   async function createRoot(e: FormEvent) {
     e.preventDefault()
@@ -206,6 +221,26 @@ export function OrgUnitsPanel() {
     }
   }
 
+  async function saveOrgType(newType: OrgType) {
+    if (!orgId) return
+    setOrgTypeSaving(true)
+    try {
+      const res = await authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/settings/org-type`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orgType: newType }),
+      })
+      const raw: unknown = await res.json().catch(() => ({}))
+      if (!res.ok) throw new Error(readApiErrorMessage(raw))
+      setOrgType(newType)
+      toastSaveOk('Institution type saved.')
+    } catch (err) {
+      toastMutationError(err instanceof Error ? err.message : 'Request failed.')
+    } finally {
+      setOrgTypeSaving(false)
+    }
+  }
+
   if (!canUnits) {
     return (
       <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
@@ -216,6 +251,30 @@ export function OrgUnitsPanel() {
 
   return (
     <div className="mt-6 space-y-6">
+      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-neutral-600 dark:bg-neutral-800/40">
+        <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Institution type</h3>
+        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          Determines which features are available. K-12 enables grade-level filtering on the course catalog.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-3">
+          {(['higher-ed', 'k-12'] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              disabled={orgTypeSaving}
+              onClick={() => void saveOrgType(t)}
+              className={`rounded-xl border px-4 py-2 text-sm font-medium transition disabled:opacity-50 ${
+                orgType === t
+                  ? 'border-indigo-600 bg-indigo-600 text-white'
+                  : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+              }`}
+            >
+              {t === 'higher-ed' ? 'Higher Education' : 'K-12'}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-600 dark:text-neutral-400">
           Structure your tenant with nested schools and departments. Course catalog visibility can be limited to a unit

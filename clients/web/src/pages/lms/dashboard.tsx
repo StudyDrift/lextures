@@ -10,7 +10,6 @@ import {
   Megaphone,
   MessageCircle,
   Sparkles,
-  Users,
   Flame,
   ChevronDown,
   ChevronUp,
@@ -22,7 +21,6 @@ import { fetchFeedChannels, fetchFeedMessages } from '../../lib/course-feed-api'
 import { getCourseViewAs } from '../../lib/course-view-as'
 import { getAccountType, getJwtSubject } from '../../lib/auth'
 import {
-  courseEnrollmentsReadPermission,
   courseGradebookViewPermission,
   fetchCourse,
   fetchCourseGradebookGrid,
@@ -42,7 +40,6 @@ import {
 } from '../../lib/courses-api'
 import { getMostRecentLastVisited, hrefForLastVisited } from '../../lib/last-visited-module-item'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
-import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { DeadlineDateTime } from '../../components/timezone/deadline-datetime'
 import { useInboxUnreadCount, useCoursesRevision } from '../../context/use-inbox-unread'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
@@ -56,13 +53,6 @@ import {
 import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { LmsPage } from './lms-page'
-
-type CourseEnrollmentRow = {
-  userId: string
-  displayName: string | null
-  role: string
-  lastCourseAccessAt?: string | null
-}
 
 function startOfWeekMonday(now = new Date()): Date {
   const d = new Date(now)
@@ -234,7 +224,6 @@ export default function Dashboard() {
     {
       course: CoursePublic
       emptyGradeCells: number | null
-      recentLearners: { name: string; lastAt: string | null }[] | null
     }[]
   >([])
 
@@ -390,53 +379,7 @@ export default function Dashboard() {
               emptyGradeCells = null
             }
           }
-          let recentLearners: { name: string; lastAt: string | null }[] | null = null
-          if (allows(courseEnrollmentsReadPermission(code))) {
-            try {
-              const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(code)}/enrollments`)
-              const raw: unknown = await res.json().catch(() => ({}))
-              if (res.ok) {
-                const data = raw as { enrollments?: unknown[] }
-                const rows = Array.isArray(data.enrollments) ? data.enrollments : []
-                const mapped: CourseEnrollmentRow[] = rows.map((row) => {
-                  const o = row as Record<string, unknown>
-                  const userId =
-                    typeof o.userId === 'string'
-                      ? o.userId
-                      : typeof o.user_id === 'string'
-                        ? o.user_id
-                        : ''
-                  const displayName =
-                    typeof o.displayName === 'string'
-                      ? o.displayName
-                      : typeof o.display_name === 'string'
-                        ? o.display_name
-                        : null
-                  const role = typeof o.role === 'string' ? o.role : 'Student'
-                  const lastCourseAccessAt =
-                    typeof o.lastCourseAccessAt === 'string'
-                      ? o.lastCourseAccessAt
-                      : typeof o.last_course_access_at === 'string'
-                        ? o.last_course_access_at
-                        : null
-                  return { userId, displayName, role, lastCourseAccessAt }
-                })
-                const studentsOnly = mapped.filter((e) => e.role.toLowerCase() === 'student')
-                const sorted = [...studentsOnly].sort((a, b) => {
-                  const ta = a.lastCourseAccessAt ? new Date(a.lastCourseAccessAt).getTime() : 0
-                  const tb = b.lastCourseAccessAt ? new Date(b.lastCourseAccessAt).getTime() : 0
-                  return tb - ta
-                })
-                recentLearners = sorted.slice(0, 5).map((e) => ({
-                  name: e.displayName?.trim() || 'Student',
-                  lastAt: e.lastCourseAccessAt ?? null,
-                }))
-              }
-            } catch {
-              recentLearners = null
-            }
-          }
-          return { course, emptyGradeCells, recentLearners }
+          return { course, emptyGradeCells }
         })
 
         if (detailGenRef.current !== gen) return
@@ -1028,35 +971,6 @@ export default function Dashboard() {
                             Modules
                           </Link>
                         </div>
-                        {row.recentLearners && row.recentLearners.length > 0 && (
-                          <div className="mt-5 border-t border-slate-100 pt-4 dark:border-neutral-800">
-                            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
-                              <Users className="h-3.5 w-3.5" aria-hidden />
-                              Recent roster activity
-                            </p>
-                            <ul className="mt-2 space-y-1.5">
-                              {row.recentLearners.map((p, i) => (
-                                <li
-                                  key={`${p.name}-${i}`}
-                                  className="flex justify-between gap-2 text-xs text-slate-600 dark:text-neutral-300"
-                                >
-                                  <span className="truncate font-medium text-slate-800 dark:text-neutral-100">
-                                    {p.name}
-                                  </span>
-                                  <span className="shrink-0 text-slate-400 dark:text-neutral-500">
-                                    {formatTimeAgoFromIso(p.lastAt)}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                            <Link
-                              to={`${base}/enrollments`}
-                              className="mt-3 inline-block text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-                            >
-                              Full roster
-                            </Link>
-                          </div>
-                        )}
                       </div>
                     )
                   })}
