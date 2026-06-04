@@ -89,6 +89,7 @@ type Row struct {
 	FFParentPortal                    *bool
 	FFReportCards                     *bool
 	FFSBGReportCards                  *bool
+	FFSISIntegration                  *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -178,6 +179,7 @@ type Write struct {
 	FFParentPortal                    *bool
 	FFReportCards                     *bool
 	FFSBGReportCards                  *bool
+	FFSISIntegration                  *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -265,6 +267,7 @@ SELECT
 	ff_parent_portal,
 	ff_report_cards,
 	ff_sbg_report_cards,
+	ff_sis_integration,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -347,6 +350,7 @@ WHERE id = 1
 		&r.FFParentPortal,
 		&r.FFReportCards,
 		&r.FFSBGReportCards,
+		&r.FFSISIntegration,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -469,6 +473,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_parent_portal,
 	ff_report_cards,
 	ff_sbg_report_cards,
+	ff_sis_integration,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -481,7 +486,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -556,6 +561,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_parent_portal = COALESCE(EXCLUDED.ff_parent_portal, settings.platform_app_settings.ff_parent_portal),
 	ff_report_cards = COALESCE(EXCLUDED.ff_report_cards, settings.platform_app_settings.ff_report_cards),
 	ff_sbg_report_cards = COALESCE(EXCLUDED.ff_sbg_report_cards, settings.platform_app_settings.ff_sbg_report_cards),
+	ff_sis_integration = COALESCE(EXCLUDED.ff_sis_integration, settings.platform_app_settings.ff_sis_integration),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -636,6 +642,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFParentPortal,
 		w.FFReportCards,
 		w.FFSBGReportCards,
+		w.FFSISIntegration,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

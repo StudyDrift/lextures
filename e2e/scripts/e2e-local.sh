@@ -249,6 +249,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     CLAMAV_STUB="true" \
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
+    FF_SIS_INTEGRATION="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -267,6 +268,7 @@ else
     CLAMAV_STUB="true" \
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
+    FF_SIS_INTEGRATION="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

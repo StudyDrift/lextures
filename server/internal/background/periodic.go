@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
 	"github.com/lextures/lextures/server/internal/workers/h5pextract"
+	"github.com/lextures/lextures/server/internal/workers/sissync"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
@@ -143,6 +144,13 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 	go runEvery(ctx, time.Hour, func() {
 		sweepAtRiskScores(context.Background(), pool, cfg, time.Now().UTC())
 	})
+
+	if cfg.FFSISIntegration {
+		go runEvery(ctx, time.Hour, func() {
+			sissync.SweepScheduled(context.Background(), pool)
+		})
+		slog.Info("sis integration sync worker started")
+	}
 
 	if cfg.SelfReflectionEnabled {
 		var orClient *openrouter.Client
