@@ -290,6 +290,8 @@ type Config struct {
 	FFReportCards bool
 	// FFSISIntegration enables SIS vendor connections (PowerSchool, Infinite Campus, Skyward, Aeries) and nightly sync (plan 13.7).
 	FFSISIntegration bool
+	// FFLibrary enables the school library catalog, student reading log, and reading dashboard (plan 13.8).
+	FFLibrary bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -446,6 +448,7 @@ func Load() Config {
 		RTLEnabled:                      boolEnv("RTL_ENABLED") || boolEnv("FEATURE_RTL_ENABLED"),
 		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
 		FFSISIntegration:                boolEnv("FF_SIS_INTEGRATION"),
+		FFLibrary:                       boolEnv("FF_LIBRARY"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

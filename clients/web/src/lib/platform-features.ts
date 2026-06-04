@@ -30,6 +30,7 @@ export type PlatformFeaturesSnapshot = {
   autoCaptioningEnabled?: boolean
   ffReadingPreferences?: boolean
   ffHighContrastReducedMotion?: boolean
+  ffLibrary?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -62,6 +63,7 @@ const defaults: PlatformFeaturesSnapshot = {
   autoCaptioningEnabled: false,
   ffReadingPreferences: false,
   ffHighContrastReducedMotion: false,
+  ffLibrary: false,
 }
 
 let loaded = false
@@ -159,6 +161,10 @@ export function xapiEmissionFeatureEnabled(): boolean {
 
 export function instructorInsightsFeatureEnabled(): boolean {
   return loaded && snapshot.instructorInsightsEnabled
+}
+
+export function libraryFeatureEnabled(): boolean {
+  return loaded && snapshot.ffLibrary === true
 }
 
 export function readingPreferencesFeatureEnabled(): boolean {
