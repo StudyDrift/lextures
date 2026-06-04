@@ -77,6 +77,7 @@ export const courseSchema = z
     annotationsEnabled: z.boolean().optional(),
     feedbackMediaEnabled: z.boolean().optional(),
     termId: z.string().nullable().optional(),
+    gradeLevel: z.string().nullable().optional(),
     term: z
       .object({
         id: z.string(),

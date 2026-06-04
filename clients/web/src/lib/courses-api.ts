@@ -185,6 +185,8 @@ export type CoursePublic = {
   courseHomeContentItemId?: string | null
   /** Instructor-authoritative IANA timezone for deadline intent (plan 11.4). */
   courseTimezone?: string | null
+  /** K-12 grade level (plan 13.6). Values: K, 1-12, K-2, 3-5, 6-8, 9-12, K-12. Null for non-K12. */
+  gradeLevel?: string | null
 }
 
 export type OrgTerm = {
@@ -1178,6 +1180,7 @@ export async function createCourse(body: {
   description: string
   courseType?: 'traditional' | 'competency_based'
   termId?: string | null
+  gradeLevel?: string | null
 }): Promise<CoursePublic> {
   const res = await authorizedFetch('/api/v1/courses', {
     method: 'POST',
@@ -1204,6 +1207,7 @@ export async function putCourse(
     relativeEndAfter: string | null
     relativeHiddenAfter: string | null
     termId?: string | null
+    gradeLevel?: string | null
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}`, {
@@ -1221,6 +1225,7 @@ export async function putCourse(
       relativeEndAfter: body.relativeEndAfter,
       relativeHiddenAfter: body.relativeHiddenAfter,
       ...(body.termId !== undefined ? { termId: body.termId } : {}),
+      ...(body.gradeLevel !== undefined ? { gradeLevel: body.gradeLevel } : {}),
     }),
   })
   const raw = await parseJson(res)

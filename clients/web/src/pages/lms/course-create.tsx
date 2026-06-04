@@ -93,6 +93,7 @@ export default function CourseCreate() {
   const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
   const [termOptions, setTermOptions] = useState<OrgTerm[]>([])
   const [selectedTermId, setSelectedTermId] = useState<string>('')
+  const [selectedGradeLevel, setSelectedGradeLevel] = useState<string>('')
 
   useEffect(() => {
     if (!orgId) return
@@ -135,6 +136,7 @@ export default function CourseCreate() {
           description: description.trim(),
           courseType: courseMode,
           ...(selectedTermId ? { termId: selectedTermId } : {}),
+          ...(selectedGradeLevel ? { gradeLevel: selectedGradeLevel } : {}),
         })
         setCreatedCourse(course)
       }
@@ -490,6 +492,42 @@ export default function CourseCreate() {
                   </p>
                 </div>
               )}
+
+              <div>
+                <label
+                  htmlFor="course-grade-level"
+                  className="text-sm font-medium text-slate-700 dark:text-neutral-200"
+                >
+                  Grade level <span className="font-normal text-slate-500">(optional)</span>
+                </label>
+                <select
+                  id="course-grade-level"
+                  value={selectedGradeLevel}
+                  onChange={(e) => setSelectedGradeLevel(e.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  aria-label="Grade level"
+                >
+                  <option value="">No grade level — higher ed or unspecified</option>
+                  <option value="K">Kindergarten</option>
+                  <option value="1">Grade 1</option>
+                  <option value="2">Grade 2</option>
+                  <option value="3">Grade 3</option>
+                  <option value="4">Grade 4</option>
+                  <option value="5">Grade 5</option>
+                  <option value="6">Grade 6</option>
+                  <option value="7">Grade 7</option>
+                  <option value="8">Grade 8</option>
+                  <option value="9">Grade 9</option>
+                  <option value="10">Grade 10</option>
+                  <option value="11">Grade 11</option>
+                  <option value="12">Grade 12</option>
+                  <option value="K-2">K–2 (multi-grade)</option>
+                  <option value="3-5">3–5 (multi-grade)</option>
+                  <option value="6-8">6–8 (multi-grade)</option>
+                  <option value="9-12">9–12 (multi-grade)</option>
+                  <option value="K-12">K–12 (all grades)</option>
+                </select>
+              </div>
 
               <div className="flex flex-wrap gap-3">
                 <button

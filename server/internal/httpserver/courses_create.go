@@ -20,6 +20,7 @@ type createCourseBody struct {
 	CourseType  *string `json:"courseType"`
 	OrgUnitID   *string `json:"orgUnitId"`
 	TermID      *string `json:"termId"`
+	GradeLevel  *string `json:"gradeLevel"`
 }
 
 // handleCreateCourse is POST /api/v1/courses.
@@ -134,7 +135,16 @@ func (d Deps) handleCreateCourse() http.HandlerFunc {
 			termIDPtr = &tid
 		}
 
-		out, err := course.CreateCourse(ctx, d.Pool, userID, title, description, courseType, orgUnitID, termIDPtr)
+		var gradeLevelPtr *string
+		if body.GradeLevel != nil && strings.TrimSpace(*body.GradeLevel) != "" {
+			gl := strings.TrimSpace(*body.GradeLevel)
+			if !course.ValidGradeLevel(gl) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid gradeLevel value.")
+				return
+			}
+			gradeLevelPtr = &gl
+		}
+		out, err := course.CreateCourse(ctx, d.Pool, userID, title, description, courseType, orgUnitID, termIDPtr, gradeLevelPtr)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create course.")
 			return

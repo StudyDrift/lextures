@@ -74,6 +74,7 @@ type CoursePublic struct {
 	CourseHomeLanding             string           `json:"courseHomeLanding"`
 	CourseHomeContentItemID       *string          `json:"courseHomeContentItemId,omitempty"`
 	CourseTimezone                *string          `json:"courseTimezone,omitempty"`
+	GradeLevel                    *string          `json:"gradeLevel,omitempty"`
 }
 
 // coursePublicSelect is columns for `course.courses` joined to `tenant.terms` (alias `tr`) for public APIs.
@@ -134,6 +135,7 @@ const coursePublicSelect = `
     c.course_home_landing,
     c.course_home_content_item_id,
     c.course_timezone,
+    c.grade_level,
     c.term_id,
     tr.id,
     tr.name,
@@ -163,6 +165,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 	var homeLanding string
 	var homeContentItem pgtype.UUID
 	var courseTZ sql.NullString
+	var gradeLevel sql.NullString
 	var termIDCol, trID sql.NullString
 	var trName, trType, trStart, trEnd, trStatus sql.NullString
 
@@ -223,6 +226,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&homeLanding,
 		&homeContentItem,
 		&courseTZ,
+		&gradeLevel,
 		&termIDCol,
 		&trID,
 		&trName,
@@ -266,6 +270,10 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 	if courseTZ.Valid && strings.TrimSpace(courseTZ.String) != "" {
 		s := courseTZ.String
 		p.CourseTimezone = &s
+	}
+	if gradeLevel.Valid && strings.TrimSpace(gradeLevel.String) != "" {
+		s := gradeLevel.String
+		p.GradeLevel = &s
 	}
 	if hero.Valid {
 		s := hero.String
@@ -332,7 +340,8 @@ WHERE c.course_code = $1
 
 // ListForEnrolledUser returns non-archived courses the user is enrolled in, in catalog order (parity with Rust `list_for_enrolled_user`).
 // Relative-schedule “materialization” for students is not applied here yet.
-func ListForEnrolledUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]CoursePublic, error) {
+// gradeLevel filters by course.grade_level when non-nil; nil returns all grades.
+func ListForEnrolledUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
 INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
@@ -340,8 +349,9 @@ LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
   AND c.archived = false
+  AND ($2::text IS NULL OR c.grade_level = $2::text)
 ORDER BY o.sort_order NULLS LAST, c.title ASC
-`, userID)
+`, userID, gradeLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -359,7 +369,8 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 }
 
 // ListForEnrolledUserInOrgUnits returns enrolled courses whose org_unit_id is in allowed (non-null only).
-func ListForEnrolledUserInOrgUnits(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allowed []uuid.UUID) ([]CoursePublic, error) {
+// gradeLevel filters by course.grade_level when non-nil.
+func ListForEnrolledUserInOrgUnits(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allowed []uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	if len(allowed) == 0 {
 		return []CoursePublic{}, nil
 	}
@@ -372,8 +383,9 @@ WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_
   AND c.archived = false
   AND c.org_unit_id IS NOT NULL
   AND c.org_unit_id = ANY($2::uuid[])
+  AND ($3::text IS NULL OR c.grade_level = $3::text)
 ORDER BY o.sort_order NULLS LAST, c.title ASC
-`, userID, allowed)
+`, userID, allowed, gradeLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -391,7 +403,8 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 }
 
 // ListForEnrolledUserByTerm filters enrolled courses by term_id (must belong to user's org).
-func ListForEnrolledUserByTerm(ctx context.Context, pool *pgxpool.Pool, userID, termID uuid.UUID) ([]CoursePublic, error) {
+// gradeLevel filters by course.grade_level when non-nil.
+func ListForEnrolledUserByTerm(ctx context.Context, pool *pgxpool.Pool, userID, termID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
 INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
@@ -400,8 +413,9 @@ LEFT JOIN course.user_course_catalog_order o
 WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
   AND c.archived = false
   AND c.term_id = $2
+  AND ($3::text IS NULL OR c.grade_level = $3::text)
 ORDER BY o.sort_order NULLS LAST, c.title ASC
-`, userID, termID)
+`, userID, termID, gradeLevel)
 	if err != nil {
 		return nil, err
 	}
@@ -418,7 +432,8 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 }
 
 // ListForEnrolledUserInOrgUnitsByTerm is ListForEnrolledUserInOrgUnits with term filter.
-func ListForEnrolledUserInOrgUnitsByTerm(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allowed []uuid.UUID, termID uuid.UUID) ([]CoursePublic, error) {
+// gradeLevel filters by course.grade_level when non-nil.
+func ListForEnrolledUserInOrgUnitsByTerm(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allowed []uuid.UUID, termID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	if len(allowed) == 0 {
 		return []CoursePublic{}, nil
 	}
@@ -432,8 +447,9 @@ WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_
   AND c.org_unit_id IS NOT NULL
   AND c.org_unit_id = ANY($2::uuid[])
   AND c.term_id = $3
+  AND ($4::text IS NULL OR c.grade_level = $4::text)
 ORDER BY o.sort_order NULLS LAST, c.title ASC
-`, userID, allowed, termID)
+`, userID, allowed, termID, gradeLevel)
 	if err != nil {
 		return nil, err
 	}
