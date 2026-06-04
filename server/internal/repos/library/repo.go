@@ -184,7 +184,7 @@ JOIN "user".users u ON u.id = ce.user_id
 LEFT JOIN library.reading_log_entries e ON e.student_id = u.id
 WHERE ce.course_id = $1
   AND ce.role = 'student'
-  AND ce.state = 'active'
+  AND ce.active
 GROUP BY u.id, u.display_name, u.email
 ORDER BY u.email ASC
 `, courseID)
