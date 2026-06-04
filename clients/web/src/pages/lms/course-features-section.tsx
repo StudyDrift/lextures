@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { patchCourseFeatures } from '../../lib/courses-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
@@ -54,6 +54,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
 
   const notebookEnabled = course.notebookEnabled !== false
   const feedEnabled = course.feedEnabled !== false
@@ -75,6 +76,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const multilingualMessagingEnabled = course.multilingualMessagingEnabled === true
   const filesEnabled = course.filesEnabled !== false
   const attendanceEnabled = course.attendanceEnabled === true
+  const whiteboardEnabled = course.whiteboardEnabled === true
 
   const persist = useCallback(
     async (patch: {
@@ -98,6 +100,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       multilingualMessagingEnabled?: boolean
       filesEnabled?: boolean
       attendanceEnabled?: boolean
+      whiteboardEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -126,6 +129,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           multilingualMessagingEnabled: patch.multilingualMessagingEnabled ?? multilingualMessagingEnabled,
           filesEnabled: patch.filesEnabled ?? filesEnabled,
           attendanceEnabled: patch.attendanceEnabled ?? attendanceEnabled,
+          whiteboardEnabled: patch.whiteboardEnabled ?? whiteboardEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -155,6 +159,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       multilingualMessagingEnabled,
       filesEnabled,
       attendanceEnabled,
+      whiteboardEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -167,6 +172,194 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
     ],
   )
 
+  const allFeatures = useMemo(
+    () =>
+      [
+        {
+          label: 'Adaptive learning paths',
+          description:
+            'Allow mastery-based branching between modules (requires learner model on the server). Instructors configure rules on each module in the course outline.',
+          enabled: adaptivePathsEnabled,
+          onToggle: () => void persist({ adaptivePathsEnabled: !adaptivePathsEnabled }),
+        },
+        {
+          label: 'AI Tutor',
+          description:
+            'Conversational AI tutor side-panel available on all course pages — students can ask questions grounded in course context with a per-student monthly token budget (plan 6.9).',
+          enabled: aiTutorEnabled,
+          onToggle: () => void persist({ aiTutorEnabled: !aiTutorEnabled }),
+        },
+        {
+          label: 'Attendance',
+          description:
+            'Take roll call or run self-report check-ins; optionally add sessions to the gradebook.',
+          enabled: attendanceEnabled,
+          onToggle: () => void persist({ attendanceEnabled: !attendanceEnabled }),
+        },
+        {
+          label: 'Calendar',
+          description:
+            'Month, week, and agenda views of assignment and content due dates for this course.',
+          enabled: calendarEnabled,
+          onToggle: () => void persist({ calendarEnabled: !calendarEnabled }),
+        },
+        {
+          label: 'Collaborative documents',
+          description:
+            'Real-time co-editing with Y.js CRDT — shared rich-text docs and whiteboards for group work and classroom brainstorming (plan 6.5).',
+          enabled: collabDocsEnabled,
+          onToggle: () => void persist({ collabDocsEnabled: !collabDocsEnabled }),
+        },
+        {
+          label: 'Course sections',
+          description:
+            'Split one course into multiple sections with separate rosters, section instructors, and optional per-section due dates. Disable to hide section APIs and UI.',
+          enabled: sectionsEnabled,
+          onToggle: () => void persist({ sectionsEnabled: !sectionsEnabled }),
+        },
+        {
+          label: 'Discussion forums',
+          description:
+            'Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation (plan 6.1).',
+          enabled: discussionsEnabled,
+          onToggle: () => void persist({ discussionsEnabled: !discussionsEnabled }),
+        },
+        {
+          label: 'Feed',
+          description:
+            'Course-wide channels and messages, including uploads and real-time updates.',
+          enabled: feedEnabled,
+          onToggle: () => void persist({ feedEnabled: !feedEnabled }),
+        },
+        {
+          label: 'Files',
+          description:
+            'Course file space where instructors and students can upload, organize, and share documents, presentations, and other materials.',
+          enabled: filesEnabled,
+          onToggle: () => void persist({ filesEnabled: !filesEnabled }),
+        },
+        {
+          label: 'Live sessions',
+          description:
+            'Virtual classroom meetings via Jitsi, BigBlueButton, Zoom, or other providers — shows the Live Sessions menu item and scheduling page (plan 6.4).',
+          enabled: liveSessionsEnabled,
+          onToggle: () => void persist({ liveSessionsEnabled: !liveSessionsEnabled }),
+        },
+        {
+          label: 'Misconception detection',
+          description:
+            'When tagged distractors are selected, record events, adjust mastery weighting, and show targeted remediation in quiz results (requires normalized question-bank options).',
+          enabled: misconceptionDetectionEnabled,
+          onToggle: () =>
+            void persist({ misconceptionDetectionEnabled: !misconceptionDetectionEnabled }),
+        },
+        {
+          label: 'Multilingual messaging',
+          description:
+            'Show a Translate button on feed posts, discussion posts, and inbox messages so users can read content in their preferred language (plan 6.10).',
+          enabled: multilingualMessagingEnabled,
+          onToggle: () =>
+            void persist({ multilingualMessagingEnabled: !multilingualMessagingEnabled }),
+        },
+        {
+          label: 'Notebook',
+          description:
+            'Personal notes workspace for this course (stored in the browser for each learner).',
+          enabled: notebookEnabled,
+          onToggle: () => void persist({ notebookEnabled: !notebookEnabled }),
+        },
+        {
+          label: 'Office hours',
+          description:
+            'Let instructors define availability windows and students book 1-on-1 appointment slots — shows the Office Hours menu item (plan 6.7).',
+          enabled: officeHoursEnabled,
+          onToggle: () => void persist({ officeHoursEnabled: !officeHoursEnabled }),
+        },
+        {
+          label: 'Placement diagnostic',
+          description:
+            'Offer a short adaptive placement assessment after enrollment (requires DIAGNOSTIC_ASSESSMENTS_ENABLED on the server and a diagnostic configuration).',
+          enabled: diagnosticAssessmentsEnabled,
+          onToggle: () =>
+            void persist({ diagnosticAssessmentsEnabled: !diagnosticAssessmentsEnabled }),
+        },
+        {
+          label: 'Question bank',
+          description:
+            'Store quiz items in a reusable bank, optional random pools per attempt, and instructor-only bank APIs.',
+          enabled: questionBankEnabled,
+          onToggle: () => void persist({ questionBankEnabled: !questionBankEnabled }),
+        },
+        {
+          label: 'Quiz hints & worked examples',
+          description:
+            'Let learners request progressive hints and unlock worked examples during quizzes (question-bank items with UUID ids).',
+          enabled: hintScaffoldingEnabled,
+          onToggle: () => void persist({ hintScaffoldingEnabled: !hintScaffoldingEnabled }),
+        },
+        {
+          label: 'Quiz lockdown / kiosk',
+          description:
+            'Lets instructors choose one-question-at-a-time or kiosk delivery on quizzes (server-enforced progression and optional focus-loss logging).',
+          enabled: lockdownModeEnabled,
+          onToggle: () => void persist({ lockdownModeEnabled: !lockdownModeEnabled }),
+        },
+        {
+          label: 'Spaced repetition (review)',
+          description:
+            'Let learners use the global review queue for question-bank items you mark as SRS-eligible (requires SRS_PRACTICE_ENABLED on the server).',
+          enabled: srsEnabled,
+          onToggle: () => void persist({ srsEnabled: !srsEnabled }),
+        },
+        {
+          label: 'Standards alignment',
+          description:
+            'Map concepts to Common Core / NGSS codes and view per-standard coverage for this course.',
+          enabled: standardsAlignmentEnabled,
+          onToggle: () => void persist({ standardsAlignmentEnabled: !standardsAlignmentEnabled }),
+        },
+        {
+          label: 'Whiteboard',
+          description:
+            'Interactive canvas for teachers to draw diagrams, annotate concepts, and save named boards for later retrieval.',
+          enabled: whiteboardEnabled,
+          onToggle: () => void persist({ whiteboardEnabled: !whiteboardEnabled }),
+        },
+      ] as const,
+    [
+      adaptivePathsEnabled,
+      aiTutorEnabled,
+      attendanceEnabled,
+      calendarEnabled,
+      collabDocsEnabled,
+      sectionsEnabled,
+      discussionsEnabled,
+      feedEnabled,
+      filesEnabled,
+      liveSessionsEnabled,
+      misconceptionDetectionEnabled,
+      multilingualMessagingEnabled,
+      notebookEnabled,
+      officeHoursEnabled,
+      diagnosticAssessmentsEnabled,
+      questionBankEnabled,
+      hintScaffoldingEnabled,
+      lockdownModeEnabled,
+      srsEnabled,
+      standardsAlignmentEnabled,
+      whiteboardEnabled,
+      persist,
+    ],
+  )
+
+  const visibleFeatures = useMemo(() => {
+    if (!query.trim()) return allFeatures
+    const q = query.toLowerCase()
+    return allFeatures.filter(
+      (f) => f.label.toLowerCase().includes(q) || f.description.toLowerCase().includes(q),
+    )
+  }, [allFeatures, query])
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950">
       <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Course tools</h2>
@@ -175,151 +368,33 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
         menu and cannot be used until you enable them again.
       </p>
 
-      <div className="mt-2 divide-y divide-slate-100 dark:divide-neutral-800">
-        <FeatureToggleRow
-          label="Files"
-          description="Course file space where instructors and students can upload, organize, and share documents, presentations, and other materials."
-          enabled={filesEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ filesEnabled: !filesEnabled })}
+      <div className="mt-3">
+        <input
+          type="search"
+          placeholder="Search tools…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
         />
-        <FeatureToggleRow
-          label="Notebook"
-          description="Personal notes workspace for this course (stored in the browser for each learner)."
-          enabled={notebookEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ notebookEnabled: !notebookEnabled })}
-        />
-        <FeatureToggleRow
-          label="Feed"
-          description="Course-wide channels and messages, including uploads and real-time updates."
-          enabled={feedEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ feedEnabled: !feedEnabled })}
-        />
-        <FeatureToggleRow
-          label="Discussion forums"
-          description="Threaded discussion boards with replies, upvotes, graded threads, and instructor moderation (plan 6.1)."
-          enabled={discussionsEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ discussionsEnabled: !discussionsEnabled })}
-        />
-        <FeatureToggleRow
-          label="Calendar"
-          description="Month, week, and agenda views of assignment and content due dates for this course."
-          enabled={calendarEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ calendarEnabled: !calendarEnabled })}
-        />
-        <FeatureToggleRow
-          label="Question bank"
-          description="Store quiz items in a reusable bank, optional random pools per attempt, and instructor-only bank APIs."
-          enabled={questionBankEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ questionBankEnabled: !questionBankEnabled })}
-        />
-        <FeatureToggleRow
-          label="Quiz lockdown / kiosk"
-          description="Lets instructors choose one-question-at-a-time or kiosk delivery on quizzes (server-enforced progression and optional focus-loss logging)."
-          enabled={lockdownModeEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ lockdownModeEnabled: !lockdownModeEnabled })}
-        />
-        <FeatureToggleRow
-          label="Standards alignment"
-          description="Map concepts to Common Core / NGSS codes and view per-standard coverage for this course."
-          enabled={standardsAlignmentEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ standardsAlignmentEnabled: !standardsAlignmentEnabled })}
-        />
-        <FeatureToggleRow
-          label="Adaptive learning paths"
-          description="Allow mastery-based branching between modules (requires learner model on the server). Instructors configure rules on each module in the course outline."
-          enabled={adaptivePathsEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ adaptivePathsEnabled: !adaptivePathsEnabled })}
-        />
-        <FeatureToggleRow
-          label="Spaced repetition (review)"
-          description="Let learners use the global review queue for question-bank items you mark as SRS-eligible (requires SRS_PRACTICE_ENABLED on the server)."
-          enabled={srsEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ srsEnabled: !srsEnabled })}
-        />
-        <FeatureToggleRow
-          label="Placement diagnostic"
-          description="Offer a short adaptive placement assessment after enrollment (requires DIAGNOSTIC_ASSESSMENTS_ENABLED on the server and a diagnostic configuration)."
-          enabled={diagnosticAssessmentsEnabled}
-          disabled={saving}
-          onToggle={() =>
-            void persist({ diagnosticAssessmentsEnabled: !diagnosticAssessmentsEnabled })
-          }
-        />
-        <FeatureToggleRow
-          label="Quiz hints & worked examples"
-          description="Let learners request progressive hints and unlock worked examples during quizzes (question-bank items with UUID ids)."
-          enabled={hintScaffoldingEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ hintScaffoldingEnabled: !hintScaffoldingEnabled })}
-        />
-        <FeatureToggleRow
-          label="Misconception detection"
-          description="When tagged distractors are selected, record events, adjust mastery weighting, and show targeted remediation in quiz results (requires normalized question-bank options)."
-          enabled={misconceptionDetectionEnabled}
-          disabled={saving}
-          onToggle={() =>
-            void persist({ misconceptionDetectionEnabled: !misconceptionDetectionEnabled })
-          }
-        />
-        <FeatureToggleRow
-          label="Course sections"
-          description="Split one course into multiple sections with separate rosters, section instructors, and optional per-section due dates. Disable to hide section APIs and UI."
-          enabled={sectionsEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ sectionsEnabled: !sectionsEnabled })}
-        />
-        <FeatureToggleRow
-          label="Collaborative documents"
-          description="Real-time co-editing with Y.js CRDT — shared rich-text docs and whiteboards for group work and classroom brainstorming (plan 6.5)."
-          enabled={collabDocsEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ collabDocsEnabled: !collabDocsEnabled })}
-        />
-        <FeatureToggleRow
-          label="Live Sessions"
-          description="Virtual classroom meetings via Jitsi, BigBlueButton, Zoom, or other providers — shows the Live Sessions menu item and scheduling page (plan 6.4)."
-          enabled={liveSessionsEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ liveSessionsEnabled: !liveSessionsEnabled })}
-        />
-        <FeatureToggleRow
-          label="Office Hours"
-          description="Let instructors define availability windows and students book 1-on-1 appointment slots — shows the Office Hours menu item (plan 6.7)."
-          enabled={officeHoursEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ officeHoursEnabled: !officeHoursEnabled })}
-        />
-        <FeatureToggleRow
-          label="Attendance"
-          description="Take roll call or run self-report check-ins; optionally add sessions to the gradebook."
-          enabled={attendanceEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ attendanceEnabled: !attendanceEnabled })}
-        />
-        <FeatureToggleRow
-          label="AI Tutor"
-          description="Conversational AI tutor side-panel available on all course pages — students can ask questions grounded in course context with a per-student monthly token budget (plan 6.9)."
-          enabled={aiTutorEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ aiTutorEnabled: !aiTutorEnabled })}
-        />
-        <FeatureToggleRow
-          label="Multilingual Messaging"
-          description="Show a Translate button on feed posts, discussion posts, and inbox messages so users can read content in their preferred language (plan 6.10)."
-          enabled={multilingualMessagingEnabled}
-          disabled={saving}
-          onToggle={() => void persist({ multilingualMessagingEnabled: !multilingualMessagingEnabled })}
-        />
+      </div>
+
+      <div className="mt-1 divide-y divide-slate-100 dark:divide-neutral-800">
+        {visibleFeatures.length === 0 ? (
+          <p className="py-6 text-center text-sm text-slate-400 dark:text-neutral-500">
+            No tools match &ldquo;{query}&rdquo;
+          </p>
+        ) : (
+          visibleFeatures.map((f) => (
+            <FeatureToggleRow
+              key={f.label}
+              label={f.label}
+              description={f.description}
+              enabled={f.enabled}
+              disabled={saving}
+              onToggle={f.onToggle}
+            />
+          ))
+        )}
       </div>
 
       {message && (

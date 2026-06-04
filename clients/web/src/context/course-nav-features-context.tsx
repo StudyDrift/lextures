@@ -36,6 +36,8 @@ export type CourseNavFeatures = {
   filesEnabled: boolean
   /** Course attendance sessions (roll call / self report). */
   attendanceEnabled: boolean
+  /** Whiteboard canvas tool for teachers (default off). */
+  whiteboardEnabled: boolean
   /** True while loading or re-fetching flags for the active course. */
   loading: boolean
   /** Re-load feature flags from the server (e.g. after saving settings). */
@@ -58,6 +60,7 @@ const defaultFeatures: CourseNavFeatures = {
   sectionsEnabled: false,
   filesEnabled: true,
   attendanceEnabled: false,
+  whiteboardEnabled: false,
   loading: false,
   refresh: async () => {},
 }
@@ -85,6 +88,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [sectionsEnabled, setSectionsEnabled] = useState(false)
   const [filesEnabled, setFilesEnabled] = useState(true)
   const [attendanceEnabled, setAttendanceEnabled] = useState(false)
+  const [whiteboardEnabled, setWhiteboardEnabled] = useState(false)
   const [loading, setLoading] = useState(!!courseCode)
 
   useEffect(() => {
@@ -108,6 +112,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setSectionsEnabled(false)
       setFilesEnabled(true)
       setAttendanceEnabled(false)
+      setWhiteboardEnabled(false)
       setLoading(false)
       return
     }
@@ -129,6 +134,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setSectionsEnabled(c.sectionsEnabled === true)
       setFilesEnabled(c.filesEnabled !== false)
       setAttendanceEnabled(c.attendanceEnabled === true)
+      setWhiteboardEnabled(c.whiteboardEnabled === true)
     } catch {
       setNotebookEnabled(true)
       setFeedEnabled(true)
@@ -145,6 +151,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setSectionsEnabled(false)
       setFilesEnabled(true)
       setAttendanceEnabled(false)
+      setWhiteboardEnabled(false)
     } finally {
       setLoading(false)
     }
@@ -171,6 +178,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       sectionsEnabled,
       filesEnabled,
       attendanceEnabled,
+      whiteboardEnabled,
       loading,
       refresh,
     }),
@@ -190,6 +198,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       sectionsEnabled,
       filesEnabled,
       attendanceEnabled,
+      whiteboardEnabled,
       loading,
       refresh,
     ],

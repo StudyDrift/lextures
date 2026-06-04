@@ -78,6 +78,7 @@ import CourseReportCards from './pages/lms/CourseReportCards'
 import LibraryCatalogPage from './pages/lms/library-catalog-page'
 import ReadingLogPage from './pages/lms/reading-log-page'
 import ReadingDashboardPage from './pages/lms/reading-dashboard-page'
+import CourseWhiteboardPage from './pages/lms/course-whiteboard-page'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -178,6 +179,8 @@ export default function App() {
             <Route path="behavior" element={<CourseBehavior />} />
             <Route path="report-cards" element={<CourseReportCards />} />
             <Route path="reading-dashboard" element={<ReadingDashboardPage />} />
+            <Route path="whiteboard" element={<CourseWhiteboardPage />} />
+            <Route path="whiteboard/:boardId" element={<CourseWhiteboardPage />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />

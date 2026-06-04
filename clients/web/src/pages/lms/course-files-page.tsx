@@ -37,8 +37,10 @@ import {
   type FileItem,
   type FolderContents,
 } from '../../lib/course-files-api'
-import { authorizedFetch } from '../../lib/api'
+import { authorizedFetch, wsUrl } from '../../lib/api'
+import { getAccessToken } from '../../lib/auth'
 import { FilePreview } from '../../components/file-preview'
+import { ConfirmDialog } from '../../components/confirm-dialog'
 import { LmsPage } from './lms-page'
 
 type ContextMenu =
@@ -91,6 +93,12 @@ export default function CourseFilesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<SelectedItemKey>>(new Set())
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<{
+    title: string
+    description: string
+    action: () => Promise<void>
+  } | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -109,6 +117,24 @@ export default function CourseFilesPage() {
   }, [courseCode, folderId])
 
   useEffect(() => { void load() }, [load])
+
+  const loadRef = useRef(load)
+  useEffect(() => { loadRef.current = load }, [load])
+
+  useEffect(() => {
+    if (!courseCode) return
+    const token = getAccessToken()
+    if (!token) return
+    const ws = new WebSocket(wsUrl(`/api/v1/courses/${encodeURIComponent(courseCode)}/files/ws`))
+    ws.onopen = () => { ws.send(JSON.stringify({ authToken: token })) }
+    ws.onmessage = (ev) => {
+      try {
+        const data = JSON.parse(String(ev.data)) as { type?: string }
+        if (data.type === 'files_changed') void loadRef.current()
+      } catch { /* ignore */ }
+    }
+    return () => { ws.close() }
+  }, [courseCode])
 
   useEffect(() => {
     setSelectedItems(new Set())
@@ -199,7 +225,7 @@ export default function CourseFilesPage() {
     }
   }
 
-  async function handleDeleteSelected() {
+  function handleDeleteSelected() {
     if (!contents || selectedItems.size === 0) return
     const foldersToDelete = contents.folders.filter(f =>
       selectedItems.has(selectedItemKey('folder', f.id)),
@@ -208,26 +234,26 @@ export default function CourseFilesPage() {
       selectedItems.has(selectedItemKey('file', f.id)),
     )
     const total = foldersToDelete.length + filesToDelete.length
-    const message =
+    const description =
       total === 1
         ? foldersToDelete.length === 1
           ? `Delete folder "${foldersToDelete[0].name}" and all its contents? This cannot be undone.`
           : `Delete "${filesToDelete[0].displayName}"? This cannot be undone.`
         : `Delete ${total} selected items? Folders and their contents will be removed. This cannot be undone.`
-    if (!confirm(message)) return
-
-    try {
-      for (const folder of foldersToDelete) {
-        await deleteFolder(courseCode, folder.id)
-      }
-      for (const file of filesToDelete) {
-        await deleteFile(courseCode, file.id)
-      }
-      clearSelection()
-      void load()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not delete selected items.')
-    }
+    setPendingDelete({
+      title: total === 1 ? 'Delete item' : `Delete ${total} items`,
+      description,
+      action: async () => {
+        for (const folder of foldersToDelete) {
+          await deleteFolder(courseCode, folder.id)
+        }
+        for (const file of filesToDelete) {
+          await deleteFile(courseCode, file.id)
+        }
+        clearSelection()
+        void load()
+      },
+    })
   }
 
   function handleRenameSelected() {
@@ -294,14 +320,15 @@ export default function CourseFilesPage() {
     }
   }
 
-  async function handleDeleteFolder(folder: FileFolder) {
-    if (!confirm(`Delete folder "${folder.name}" and all its contents? This cannot be undone.`)) return
-    try {
-      await deleteFolder(courseCode, folder.id)
-      void load()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not delete folder.')
-    }
+  function handleDeleteFolder(folder: FileFolder) {
+    setPendingDelete({
+      title: 'Delete folder',
+      description: `Delete folder "${folder.name}" and all its contents? This cannot be undone.`,
+      action: async () => {
+        await deleteFolder(courseCode, folder.id)
+        void load()
+      },
+    })
   }
 
   async function handleRenameFile() {
@@ -317,14 +344,15 @@ export default function CourseFilesPage() {
     }
   }
 
-  async function handleDeleteFile(file: FileItem) {
-    if (!confirm(`Delete "${file.displayName}"? This cannot be undone.`)) return
-    try {
-      await deleteFile(courseCode, file.id)
-      void load()
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Could not delete file.')
-    }
+  function handleDeleteFile(file: FileItem) {
+    setPendingDelete({
+      title: 'Delete file',
+      description: `Delete "${file.displayName}"? This cannot be undone.`,
+      action: async () => {
+        await deleteFile(courseCode, file.id)
+        void load()
+      },
+    })
   }
 
   async function handleMoveItem(kind: 'folder' | 'file', id: string, targetFolderId: string | null) {
@@ -775,6 +803,28 @@ export default function CourseFilesPage() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        title={pendingDelete?.title ?? ''}
+        description={pendingDelete?.description}
+        confirmLabel="Delete"
+        variant="danger"
+        busy={deleting}
+        onConfirm={async () => {
+          if (!pendingDelete) return
+          setDeleting(true)
+          try {
+            await pendingDelete.action()
+          } catch (err) {
+            alert(err instanceof Error ? err.message : 'Could not delete.')
+          } finally {
+            setDeleting(false)
+            setPendingDelete(null)
+          }
+        }}
+        onClose={() => { if (!deleting) setPendingDelete(null) }}
+      />
 
       <FilePreview
         open={previewFile !== null}

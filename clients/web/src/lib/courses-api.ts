@@ -149,6 +149,8 @@ export type CoursePublic = {
   filesEnabled?: boolean
   /** Course attendance sessions — roll call and self report (default off). */
   attendanceEnabled?: boolean
+  /** Whiteboard canvas tool for teachers (default off). */
+  whiteboardEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
   requireCaptions?: boolean
   /** `traditional` or `competency_based` (server default when omitted: traditional). */
@@ -756,6 +758,7 @@ export async function patchCourseFeatures(
     multilingualMessagingEnabled?: boolean
     filesEnabled?: boolean
     attendanceEnabled?: boolean
+    whiteboardEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -783,6 +786,7 @@ export async function patchCourseFeatures(
         ...(body.multilingualMessagingEnabled !== undefined ? { multilingualMessagingEnabled: body.multilingualMessagingEnabled } : {}),
         ...(body.filesEnabled !== undefined ? { filesEnabled: body.filesEnabled } : {}),
         ...(body.attendanceEnabled !== undefined ? { attendanceEnabled: body.attendanceEnabled } : {}),
+        ...(body.whiteboardEnabled !== undefined ? { whiteboardEnabled: body.whiteboardEnabled } : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },
@@ -5679,5 +5683,73 @@ export async function patchCourseAtRiskAlert(
     snoozeUntil: r.snoozeUntil != null ? String(r.snoozeUntil) : undefined,
     notes: r.notes != null ? String(r.notes) : undefined,
     triggeredDate: String(r.triggeredDate ?? ''),
+  }
+}
+
+// --- Whiteboard API ---
+
+export type WhiteboardRow = {
+  id: string
+  courseId: string
+  title: string
+  canvasData: unknown[]
+  createdBy?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export async function listWhiteboards(courseCode: string): Promise<WhiteboardRow[]> {
+  const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}/whiteboards`)
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const payload = raw as { whiteboards: WhiteboardRow[] }
+  return payload.whiteboards ?? []
+}
+
+export async function createWhiteboard(
+  courseCode: string,
+  title: string,
+  canvasData: unknown[],
+): Promise<WhiteboardRow> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/whiteboards`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, canvasData }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as WhiteboardRow
+}
+
+export async function updateWhiteboard(
+  courseCode: string,
+  boardId: string,
+  title: string,
+  canvasData: unknown[],
+): Promise<WhiteboardRow> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/whiteboards/${encodeURIComponent(boardId)}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, canvasData }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as WhiteboardRow
+}
+
+export async function deleteWhiteboard(courseCode: string, boardId: string): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/whiteboards/${encodeURIComponent(boardId)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
   }
 }
