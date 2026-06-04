@@ -129,7 +129,7 @@ test.describe('Grade-Level Scoping API', () => {
     const res = await fetch(`${API_BASE}/api/v1/courses?grade_level=INVALID_GRADE`, {
       headers: { Authorization: `Bearer ${token}` },
     })
-    expect(res.status()).toBe(400)
+    expect(res.status).toBe(400)
     const body = (await res.json()) as { error?: { code?: string } }
     expect(body.error?.code).toBe('INVALID_INPUT')
   })

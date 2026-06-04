@@ -344,7 +344,7 @@ WHERE c.course_code = $1
 func ListForEnrolledUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
-INNER JOIN “user”.users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
+INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
