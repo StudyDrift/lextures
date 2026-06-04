@@ -75,6 +75,9 @@ import BehaviorDashboard from './pages/admin/BehaviorDashboard'
 import CourseAttendance from './pages/lms/CourseAttendance'
 import CourseBehavior from './pages/lms/CourseBehavior'
 import CourseReportCards from './pages/lms/CourseReportCards'
+import LibraryCatalogPage from './pages/lms/library-catalog-page'
+import ReadingLogPage from './pages/lms/reading-log-page'
+import ReadingDashboardPage from './pages/lms/reading-dashboard-page'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -174,12 +177,15 @@ export default function App() {
             <Route path="attendance" element={<CourseAttendance />} />
             <Route path="behavior" element={<CourseBehavior />} />
             <Route path="report-cards" element={<CourseReportCards />} />
+            <Route path="reading-dashboard" element={<ReadingDashboardPage />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
           <Route path="/admin/accommodations/audit" element={<AccommodationAuditPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
+          <Route path="/library/:orgId" element={<LibraryCatalogPage />} />
+          <Route path="/reading-log" element={<ReadingLogPage />} />
           <Route path="/admin/compliance/iso" element={<IsoComplianceAdminPage />} />
           <Route path="/admin/compliance/security-reports" element={<SecurityDisclosureAdminPage />} />
           <Route path="/admin/compliance/backup" element={<BackupOpsAdminPage />} />

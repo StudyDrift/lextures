@@ -250,6 +250,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
+    FF_LIBRARY="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -269,6 +270,7 @@ else
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
+    FF_LIBRARY="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi
