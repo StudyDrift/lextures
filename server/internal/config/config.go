@@ -288,6 +288,8 @@ type Config struct {
 	FFParentPortal bool
 	// FFReportCards enables district-formatted report cards with comment banks and PDF generation (plan 13.4).
 	FFReportCards bool
+	// FFSISIntegration enables SIS vendor connections (PowerSchool, Infinite Campus, Skyward, Aeries) and nightly sync (plan 13.7).
+	FFSISIntegration bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -443,6 +445,7 @@ func Load() Config {
 		BackupModuleEnabled:             boolEnv("BACKUP_MODULE_ENABLED") || boolEnv("FEATURE_BACKUP_MODULE"),
 		RTLEnabled:                      boolEnv("RTL_ENABLED") || boolEnv("FEATURE_RTL_ENABLED"),
 		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
+		FFSISIntegration:                boolEnv("FF_SIS_INTEGRATION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

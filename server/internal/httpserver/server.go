@@ -119,6 +119,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerBehaviorRoutes(r)
 	d.registerReportCardRoutes(r)
 	d.registerSBGReportRoutes(r)
+	d.registerSISRoutes(r)
 	r.Get("/api/v1/help/contextual-articles", d.handleHelpContextualArticles())
 	d.registerTranslationRoutes(r)
 	d.registerReadingLevelRoutes(r)
