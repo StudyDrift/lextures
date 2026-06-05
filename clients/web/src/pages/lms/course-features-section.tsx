@@ -254,7 +254,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
             void persist({ misconceptionDetectionEnabled: !misconceptionDetectionEnabled }),
         },
         {
-          label: 'Multilingual messaging',
+          label: 'Multilingual Messaging',
           description:
             'Show a Translate button on feed posts, discussion posts, and inbox messages so users can read content in their preferred language (plan 6.10).',
           enabled: multilingualMessagingEnabled,
