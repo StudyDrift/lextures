@@ -59,6 +59,16 @@
       } catch {
         /* ignore */
       }
+      try {
+        const uiMode = (localStorage.getItem('lextures.uiMode') || '').trim()
+        if (uiMode === 'k2') {
+          document.documentElement.classList.add('ui-mode-k2')
+        } else if (uiMode === 'elementary') {
+          document.documentElement.classList.add('ui-mode-elementary')
+        }
+      } catch {
+        /* ignore */
+      }
     })()
   </script>
   <title>Lextures</title>

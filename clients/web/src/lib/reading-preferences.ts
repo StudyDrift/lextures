@@ -3,6 +3,7 @@ export type LetterSpacing = 'normal' | 'wide' | 'wider'
 export type WordSpacing = 'normal' | 'wide' | 'wider'
 export type LineHeight = 'normal' | 'tall' | 'taller'
 export type RulerColor = 'yellow' | 'grey'
+export type UIMode = 'k2' | 'elementary' | 'standard'
 
 export interface ReadingPreferences {
   fontFace: FontFace
@@ -13,6 +14,10 @@ export interface ReadingPreferences {
   rulerColor: RulerColor
   highContrastEnabled: boolean
   reducedMotionEnabled: boolean
+  /** Admin-set override; null means derive from grade_level (plan 13.11). */
+  uiModeOverride?: UIMode | null
+  /** Effective UI mode derived server-side (grade_level or override). */
+  effectiveUiMode?: UIMode
   updatedAt?: string
 }
 
@@ -60,9 +65,15 @@ export function applyReadingPreferences(prefs: ReadingPreferences): void {
   root.style.setProperty('--reading-line-height',    lineHeightMap[prefs.lineHeight])
   root.classList.toggle('high-contrast', prefs.highContrastEnabled)
   root.classList.toggle('reduced-motion', prefs.reducedMotionEnabled)
+
+  const mode = prefs.effectiveUiMode ?? 'standard'
+  root.classList.toggle('ui-mode-k2', mode === 'k2')
+  root.classList.toggle('ui-mode-elementary', mode === 'elementary')
+
   try {
     localStorage.setItem('lextures.highContrast', prefs.highContrastEnabled ? '1' : '0')
     localStorage.setItem('lextures.reduceMotion', prefs.reducedMotionEnabled ? '1' : '0')
+    localStorage.setItem('lextures.uiMode', mode === 'standard' ? '' : mode)
   } catch { /* ignore */ }
 }
 

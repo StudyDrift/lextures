@@ -32,7 +32,9 @@ type Row struct {
 	DyslexiaDisplayEnabled bool      `json:"dyslexiaDisplayEnabled"`
 	HighContrastEnabled    bool      `json:"highContrastEnabled"`
 	ReducedMotionEnabled   bool      `json:"reducedMotionEnabled"`
-	UpdatedAt              time.Time `json:"updatedAt"`
+	// UIModeOverride stores the admin-set override; nil means derive from grade_level (plan 13.11).
+	UIModeOverride *string   `json:"uiModeOverride,omitempty"`
+	UpdatedAt      time.Time `json:"updatedAt"`
 }
 
 // AccommodationOverrides marks fields forced by an active accommodation plan.
@@ -69,6 +71,7 @@ SELECT font_face, letter_spacing, word_spacing, line_height, ruler_enabled, rule
        tts_enabled, (tts_speed)::double precision, tts_voice_name,
        stt_enabled, stt_language,
        dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
+       ui_mode_override,
        updated_at
 FROM settings.user_reading_preferences
 WHERE user_id = $1
@@ -78,6 +81,7 @@ WHERE user_id = $1
 		&r.TTSEnabled, &r.TTSSpeed, &voice,
 		&r.STTEnabled, &r.STTLanguage,
 		&r.DyslexiaDisplayEnabled, &r.HighContrastEnabled, &r.ReducedMotionEnabled,
+		&r.UIModeOverride,
 		&r.UpdatedAt,
 	)
 	if err != nil {
@@ -230,6 +234,7 @@ RETURNING font_face, letter_spacing, word_spacing, line_height, ruler_enabled, r
           tts_enabled, (tts_speed)::double precision, tts_voice_name,
           stt_enabled, stt_language,
           dyslexia_display_enabled, high_contrast_enabled, reduced_motion_enabled,
+          ui_mode_override,
           updated_at
 `, userID,
 		current.FontFace, current.LetterSpacing, current.WordSpacing, current.LineHeight,
@@ -243,6 +248,7 @@ RETURNING font_face, letter_spacing, word_spacing, line_height, ruler_enabled, r
 		&out.TTSEnabled, &out.TTSSpeed, &voice,
 		&out.STTEnabled, &out.STTLanguage,
 		&out.DyslexiaDisplayEnabled, &out.HighContrastEnabled, &out.ReducedMotionEnabled,
+		&out.UIModeOverride,
 		&out.UpdatedAt,
 	)
 	if err != nil {
