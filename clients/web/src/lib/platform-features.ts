@@ -31,6 +31,7 @@ export type PlatformFeaturesSnapshot = {
   ffReadingPreferences?: boolean
   ffHighContrastReducedMotion?: boolean
   ffLibrary?: boolean
+  ffClassroomSignals?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -64,6 +65,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffReadingPreferences: false,
   ffHighContrastReducedMotion: false,
   ffLibrary: false,
+  ffClassroomSignals: false,
 }
 
 let loaded = false
