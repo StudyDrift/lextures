@@ -251,6 +251,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
     FF_LIBRARY="true" \
+    FF_BROADCASTS="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -271,6 +272,7 @@ else
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
     FF_LIBRARY="true" \
+    FF_BROADCASTS="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

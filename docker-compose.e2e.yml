@@ -61,6 +61,7 @@ services:
       CLAMAV_STUB: "true"
       STORAGE_QUOTAS_ENABLED: "true"
       FEATURE_ENGAGEMENT_TRACKING: "true"
+      FF_BROADCASTS: "true"
     ports:
       - "8080:8080"
     depends_on:

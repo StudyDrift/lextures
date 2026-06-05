@@ -72,6 +72,7 @@ import CaptionComplianceReportPage from './pages/admin/caption-compliance-report
 import AttendanceDashboard from './pages/admin/AttendanceDashboard'
 import AttendanceExport from './pages/admin/AttendanceExport'
 import BehaviorDashboard from './pages/admin/BehaviorDashboard'
+import BroadcastComposer from './pages/admin/BroadcastComposer'
 import CourseAttendance from './pages/lms/CourseAttendance'
 import CourseBehavior from './pages/lms/CourseBehavior'
 import CourseReportCards from './pages/lms/CourseReportCards'
@@ -196,6 +197,7 @@ export default function App() {
           <Route path="/admin/attendance/dashboard" element={<AttendanceDashboard />} />
           <Route path="/admin/attendance/export" element={<AttendanceExport />} />
           <Route path="/admin/behavior/dashboard" element={<BehaviorDashboard />} />
+          <Route path="/admin/broadcasts/:orgId" element={<BroadcastComposer />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

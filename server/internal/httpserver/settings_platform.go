@@ -106,6 +106,7 @@ type platformSettingsJSON struct {
 	FFParentPortal                  bool `json:"ffParentPortal"`
 	FFReportCards                   bool `json:"ffReportCards"`
 	FFLibrary                       bool `json:"ffLibrary"`
+	FFBroadcasts                    bool `json:"ffBroadcasts"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -243,6 +244,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFParentPortal:                  merged.FFParentPortal,
 				FFReportCards:                   merged.FFReportCards,
 				FFLibrary:                       merged.FFLibrary,
+				FFBroadcasts:                    merged.FFBroadcasts,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -353,6 +355,7 @@ type putPlatformBody struct {
 	FFParentPortal                  *bool `json:"ffParentPortal"`
 	FFReportCards                   *bool `json:"ffReportCards"`
 	FFLibrary                       *bool `json:"ffLibrary"`
+	FFBroadcasts                    *bool `json:"ffBroadcasts"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -624,6 +627,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffparentportal", body.FFParentPortal, func(v bool) { wr.FFParentPortal = &v })
 		setBool("ffreportcards", body.FFReportCards, func(v bool) { wr.FFReportCards = &v })
 		setBool("fflibrary", body.FFLibrary, func(v bool) { wr.FFLibrary = &v })
+		setBool("ffbroadcasts", body.FFBroadcasts, func(v bool) { wr.FFBroadcasts = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -717,6 +721,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFParentPortal:                  merged.FFParentPortal,
 				FFReportCards:                   merged.FFReportCards,
 				FFLibrary:                       merged.FFLibrary,
+				FFBroadcasts:                    merged.FFBroadcasts,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
