@@ -113,6 +113,19 @@ func scanInsertedUserRow(row pgx.Row) (*Row, error) {
 	return &r, nil
 }
 
+// GetGradeLevel returns the user's grade_level or nil if unset (plan 13.11).
+func GetGradeLevel(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*string, error) {
+	var gl sql.NullString
+	err := pool.QueryRow(ctx, `SELECT grade_level FROM "user".users WHERE id = $1`, userID).Scan(&gl)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return strPtr(gl), nil
+}
+
 // FindByEmail returns a user by exact email (already normalized) or nil if missing.
 func FindByEmail(ctx context.Context, pool *pgxpool.Pool, email string) (*Row, error) {
 	const q = `SELECT ` + userRowColumns + `

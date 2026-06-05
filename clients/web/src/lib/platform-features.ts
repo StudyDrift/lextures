@@ -33,6 +33,7 @@ export type PlatformFeaturesSnapshot = {
   ffLibrary?: boolean
   ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
+  ffUiMode?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -68,6 +69,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffLibrary: false,
   ffBroadcasts: false,
   ffClassroomSignals: false,
+  ffUiMode: false,
 }
 
 let loaded = false
@@ -177,6 +179,10 @@ export function broadcastsFeatureEnabled(): boolean {
 
 export function readingPreferencesFeatureEnabled(): boolean {
   return loaded && snapshot.ffReadingPreferences === true
+}
+
+export function uiModeFeatureEnabled(): boolean {
+  return loaded && snapshot.ffUiMode === true
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */

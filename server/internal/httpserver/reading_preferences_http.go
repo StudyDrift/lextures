@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/readingprefs"
+	"github.com/lextures/lextures/server/internal/repos/user"
 	acsvc "github.com/lextures/lextures/server/internal/service/accommodations"
 	ttssvc "github.com/lextures/lextures/server/internal/service/tts"
 )
@@ -34,8 +35,17 @@ type readingPreferencesResponse struct {
 	AccommodationOverrides readingprefs.AccommodationOverrides `json:"accommodationOverrides,omitempty"`
 }
 
+type readingPreferencesWithUIModeResponse struct {
+	readingPreferencesResponse
+	EffectiveUIMode string `json:"effectiveUiMode"`
+}
+
 func (d Deps) speechToTextEnabled() bool {
 	return d.effectiveConfig().SpeechToTextEnabled
+}
+
+func (d Deps) uiModeEnabled() bool {
+	return d.effectiveConfig().FFUiMode
 }
 
 func (d Deps) readingPreferencesEnabled() bool {
@@ -80,13 +90,21 @@ func (d Deps) registerTTSRoutes(r chi.Router) {
 	r.Post("/api/v1/tts/synthesize", d.handlePostTTSSynthesize())
 }
 
-func (d Deps) encodeReadingPreferences(w http.ResponseWriter, row *readingprefs.Row, overrides readingprefs.AccommodationOverrides) {
+func (d Deps) encodeReadingPreferences(w http.ResponseWriter, row *readingprefs.Row, overrides readingprefs.AccommodationOverrides, gradeLevel *string) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	if d.accommodationsEngineFeatureEnabled() {
-		_ = json.NewEncoder(w).Encode(readingPreferencesResponse{
-			Row:                    *row,
-			AccommodationOverrides: overrides,
+	base := readingPreferencesResponse{Row: *row, AccommodationOverrides: overrides}
+	if !d.accommodationsEngineFeatureEnabled() {
+		base.AccommodationOverrides = readingprefs.AccommodationOverrides{}
+	}
+	if d.uiModeEnabled() {
+		_ = json.NewEncoder(w).Encode(readingPreferencesWithUIModeResponse{
+			readingPreferencesResponse: base,
+			EffectiveUIMode:            readingprefs.EffectiveUIMode(gradeLevel, row.UIModeOverride),
 		})
+		return
+	}
+	if d.accommodationsEngineFeatureEnabled() {
+		_ = json.NewEncoder(w).Encode(base)
 		return
 	}
 	_ = json.NewEncoder(w).Encode(row)
@@ -101,17 +119,22 @@ func (d Deps) handleGetMyReadingPreferences() http.HandlerFunc {
 		if !d.requireReadingPreferences(w) {
 			return
 		}
-		row, err := readingprefs.Get(r.Context(), d.Pool, userID)
+		ctx := r.Context()
+		row, err := readingprefs.Get(ctx, d.Pool, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load reading preferences.")
 			return
 		}
 		overrides := readingprefs.AccommodationOverrides{}
 		if d.accommodationsEngineFeatureEnabled() {
-			eff := acsvc.ResolveEffectiveGlobal(r.Context(), d.Pool, userID)
+			eff := acsvc.ResolveEffectiveGlobal(ctx, d.Pool, userID)
 			row, overrides = readingprefs.MergeAccommodationOverrides(row, eff)
 		}
-		d.encodeReadingPreferences(w, row, overrides)
+		var gradeLevel *string
+		if d.uiModeEnabled() {
+			gradeLevel, _ = user.GetGradeLevel(ctx, d.Pool, userID)
+		}
+		d.encodeReadingPreferences(w, row, overrides, gradeLevel)
 	}
 }
 
@@ -195,17 +218,22 @@ func (d Deps) handlePatchMyReadingPreferences() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		row, err := readingprefs.Upsert(r.Context(), d.Pool, userID, p)
+		ctx := r.Context()
+		row, err := readingprefs.Upsert(ctx, d.Pool, userID, p)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save reading preferences.")
 			return
 		}
 		overrides := readingprefs.AccommodationOverrides{}
 		if d.accommodationsEngineFeatureEnabled() {
-			eff := acsvc.ResolveEffectiveGlobal(r.Context(), d.Pool, userID)
+			eff := acsvc.ResolveEffectiveGlobal(ctx, d.Pool, userID)
 			row, overrides = readingprefs.MergeAccommodationOverrides(row, eff)
 		}
-		d.encodeReadingPreferences(w, row, overrides)
+		var gradeLevel *string
+		if d.uiModeEnabled() {
+			gradeLevel, _ = user.GetGradeLevel(ctx, d.Pool, userID)
+		}
+		d.encodeReadingPreferences(w, row, overrides, gradeLevel)
 	}
 }
 

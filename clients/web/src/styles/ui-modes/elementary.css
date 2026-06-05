@@ -1,0 +1,80 @@
+/*
+ * Plan 13.11 — Elementary UI mode (grades 3-5; ages 8-11).
+ *
+ * Activated by html.ui-mode-elementary (set server-side from grade_level or admin override;
+ * persisted to localStorage for before-first-paint application).
+ *
+ * Requirements (FR-4):
+ *   - Minimum font size 18px (1.125rem at 16px base)
+ *   - Minimum touch target 44px (Apple HIG / WCAG 2.5.8)
+ *   - Simplified navigation with icons visible alongside text labels
+ *   - Card-based module list
+ *
+ * Scoped to .lms-scope to avoid affecting third-party embeds.
+ * @layer keeps specificity low so component-level Tailwind utilities win.
+ */
+
+@layer ui-mode-elementary {
+  html.ui-mode-elementary .lms-scope {
+    font-size: 1.125rem;
+    --ui-min-font-size: 1.125rem;
+    --ui-min-touch-target: 2.75rem; /* 44px */
+  }
+
+  /* Enforce minimum font size — reading preferences cannot decrease below mode minimum (FR-6). */
+  html.ui-mode-elementary .lms-scope * {
+    font-size: max(1.125rem, var(--reading-font-size, 1.125rem));
+  }
+
+  /* 44px minimum touch targets (Apple HIG / WCAG 2.5.8, FR-4). */
+  html.ui-mode-elementary .lms-scope button,
+  html.ui-mode-elementary .lms-scope [role='button'],
+  html.ui-mode-elementary .lms-scope input:not([type='hidden']),
+  html.ui-mode-elementary .lms-scope select,
+  html.ui-mode-elementary .lms-scope textarea,
+  html.ui-mode-elementary .lms-scope a[href] {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+  }
+
+  /* Navigation: icons alongside text labels (FR-4). */
+  html.ui-mode-elementary .lms-scope nav a,
+  html.ui-mode-elementary .lms-scope [role='navigation'] a {
+    min-height: 2.75rem;
+    padding-block: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  /* Card-based list layout for module/assignment lists (FR-4). */
+  html.ui-mode-elementary .lms-scope [data-lms-list='modules'],
+  html.ui-mode-elementary .lms-scope [data-lms-list='assignments'] {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: 1.25rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  html.ui-mode-elementary .lms-scope [data-lms-list='modules'] > *,
+  html.ui-mode-elementary .lms-scope [data-lms-list='assignments'] > * {
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    padding: 1.25rem;
+  }
+
+  /* Comfortable line height. */
+  html.ui-mode-elementary .lms-scope p,
+  html.ui-mode-elementary .lms-scope li {
+    line-height: 1.65;
+  }
+
+  /* Icon sizing in nav. */
+  html.ui-mode-elementary .lms-scope nav svg,
+  html.ui-mode-elementary .lms-scope [role='navigation'] svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+  }
+}

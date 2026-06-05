@@ -1,0 +1,80 @@
+/*
+ * Plan 13.11 — K-2 UI mode (grades K, 1, 2; ages 5-8).
+ *
+ * Activated by html.ui-mode-k2 (set server-side from grade_level or admin override;
+ * persisted to localStorage for before-first-paint application).
+ *
+ * Requirements (FR-3):
+ *   - Minimum font size 24px (1.5rem at 16px base)
+ *   - Minimum interactive element height 48px
+ *   - Card-based module/assignment list (not table)
+ *
+ * Scoped to .lms-scope to avoid affecting third-party embeds.
+ * @layer keeps specificity low so component-level Tailwind utilities win.
+ */
+
+@layer ui-mode-k2 {
+  html.ui-mode-k2 .lms-scope {
+    font-size: 1.5rem;
+    --ui-min-font-size: 1.5rem;
+    --ui-min-touch-target: 3rem; /* 48px */
+  }
+
+  /* Enforce minimum font size — reading preferences cannot decrease below mode minimum (FR-6). */
+  html.ui-mode-k2 .lms-scope * {
+    font-size: max(1.5rem, var(--reading-font-size, 1.5rem));
+  }
+
+  /* 48px minimum touch targets for all interactive elements (WCAG 2.5.5, FR-3). */
+  html.ui-mode-k2 .lms-scope button,
+  html.ui-mode-k2 .lms-scope [role='button'],
+  html.ui-mode-k2 .lms-scope input:not([type='hidden']),
+  html.ui-mode-k2 .lms-scope select,
+  html.ui-mode-k2 .lms-scope textarea,
+  html.ui-mode-k2 .lms-scope a[href] {
+    min-height: 3rem;
+    min-width: 3rem;
+  }
+
+  /* Navigation: icon-first with larger hit areas. */
+  html.ui-mode-k2 .lms-scope nav a,
+  html.ui-mode-k2 .lms-scope [role='navigation'] a {
+    min-height: 3rem;
+    padding-block: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Card-based list layout for module/assignment lists (FR-3). */
+  html.ui-mode-k2 .lms-scope [data-lms-list='modules'],
+  html.ui-mode-k2 .lms-scope [data-lms-list='assignments'] {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1.5rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  /* Card items: rounded, elevated, large padding. */
+  html.ui-mode-k2 .lms-scope [data-lms-list='modules'] > *,
+  html.ui-mode-k2 .lms-scope [data-lms-list='assignments'] > * {
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+    padding: 1.5rem;
+  }
+
+  /* Spacing and readability. */
+  html.ui-mode-k2 .lms-scope p,
+  html.ui-mode-k2 .lms-scope li {
+    line-height: 1.75;
+  }
+
+  /* Increase icon size in nav when displayed alongside text. */
+  html.ui-mode-k2 .lms-scope nav svg,
+  html.ui-mode-k2 .lms-scope [role='navigation'] svg {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+  }
+}

@@ -92,6 +92,7 @@ type Row struct {
 	FFSISIntegration                  *bool
 	FFLibrary                         *bool
 	FFBroadcasts                      *bool
+	FFUiMode                          *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -184,6 +185,7 @@ type Write struct {
 	FFSISIntegration                  *bool
 	FFLibrary                         *bool
 	FFBroadcasts                      *bool
+	FFUiMode                          *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
