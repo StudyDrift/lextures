@@ -31,12 +31,13 @@ func (d Deps) handlePatchAdminUserUIMode() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.uiModeEnabled() {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "UI mode is not enabled.")
-			return
-		}
+		// Auth before feature flag: unauthenticated requests always get 401.
 		requesterID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.uiModeEnabled() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "UI mode is not enabled.")
 			return
 		}
 		ctx := r.Context()

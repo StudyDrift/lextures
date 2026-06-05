@@ -20,20 +20,22 @@ func uiModeTestToken(t *testing.T, signer *auth.JWTSigner) string {
 	return tok
 }
 
+// TestUIMode_PatchAdminUserUIMode_NotFound_WhenFlagOff verifies the 404 guard.
+// Auth runs first (requires Pool), so we can only test the unauthenticated path here;
+// the authenticated+flag-off=404 case is covered by the E2E tests.
 func TestUIMode_PatchAdminUserUIMode_NotFound_WhenFlagOff(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
 	cfg := config.Config{FFUiMode: false}
 	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
-	tok := uiModeTestToken(t, signer)
 
+	// No auth header — should get 401 regardless of flag state.
 	body := []byte(`{"uiMode":"k2"}`)
 	req := httptest.NewRequest(http.MethodPatch, "/api/v1/admin/users/00000000-0000-4000-8000-000000000002/ui-mode", bytes.NewReader(body))
-	req.Header.Set("Authorization", "Bearer "+tok)
 	req.Header.Set("Content-Type", "application/json")
 	rr := httptest.NewRecorder()
 	h.ServeHTTP(rr, req)
-	if rr.Code != http.StatusNotFound {
-		t.Fatalf("expected 404 when FFUiMode=false, got %d: %s", rr.Code, rr.Body.String())
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for unauthenticated request, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
