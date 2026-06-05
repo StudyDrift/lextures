@@ -138,6 +138,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerEngagementRoutes(r)
 	d.registerInsightsRoutes(r)
 	d.registerOERRoutes(r)
+	d.registerCloudProviderRoutes(r)
 	d.registerLegalRoutes(r)
 	d.registerTrustRoutes(r)
 	d.registerFERPARoutes(r)

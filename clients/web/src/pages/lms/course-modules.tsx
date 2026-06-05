@@ -2436,6 +2436,7 @@ export default function CourseModules() {
       <VibeActivityCreateModal
         key={`vibe-${vibeActivityModalKey}`}
         open={vibeActivityModalOpen}
+        courseCode={courseCode ?? ''}
         onClose={() => {
           if (!vibeActivitySaving) {
             setVibeActivityModalOpen(false)

@@ -94,6 +94,7 @@ export class GoogleDrivePicker implements CloudPickerProvider {
               viewUrl: doc.url,
               iconUrl: doc.iconUrl,
               mimeType: doc.mimeType,
+              accessToken: token,
             })
           } else if (data.action === window.google!.picker!.Action.CANCEL) {
             resolve(null)

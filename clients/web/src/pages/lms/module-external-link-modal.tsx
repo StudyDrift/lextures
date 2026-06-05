@@ -1,11 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { X } from 'lucide-react'
-import {
-  GoogleDrivePicker,
-  OneDrivePicker,
-  DropboxPicker,
-  type PickedFile,
-} from '../../services/cloud-picker'
+import { CloudPickerButtons } from '../../components/cloud-picker-buttons'
 
 type ModuleExternalLinkModalProps = {
   open: boolean
@@ -34,8 +29,6 @@ function ModuleExternalLinkModalInner({
   const [provider, setProvider] = useState<string | undefined>()
   const [externalId, setExternalId] = useState<string | undefined>()
   const [iconUrl, setIconUrl] = useState<string | undefined>()
-  const [picking, setPicking] = useState<string | null>(null)
-  const [pickError, setPickError] = useState<string | null>(null)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -56,46 +49,19 @@ function ModuleExternalLinkModalInner({
     setIconUrl(undefined)
   }
 
-  async function handleCloudPick(
-    label: string,
-    providerKey: string,
-    doPick: () => Promise<PickedFile | null>,
-  ) {
-    setPickError(null)
-    setPicking(providerKey)
-    try {
-      const file = await doPick()
-      if (file) {
-        if (!title.trim()) setTitle(file.name)
-        setUrl(file.viewUrl)
-        setProvider(file.provider)
-        setExternalId(file.externalId)
-        setIconUrl(file.iconUrl)
-      }
-    } catch (e) {
-      setPickError(e instanceof Error ? e.message : `Could not open ${label}.`)
-    } finally {
-      setPicking(null)
-    }
+  function handleCloudPicked(file: {
+    name: string
+    viewUrl: string
+    provider: string
+    externalId: string
+    iconUrl: string
+  }) {
+    if (!title.trim()) setTitle(file.name)
+    setUrl(file.viewUrl)
+    setProvider(file.provider)
+    setExternalId(file.externalId)
+    setIconUrl(file.iconUrl)
   }
-
-  const cloudButtons = [
-    {
-      label: 'Google Drive',
-      key: 'google_drive',
-      pick: () => new GoogleDrivePicker('', '').pick(),
-    },
-    {
-      label: 'OneDrive',
-      key: 'onedrive',
-      pick: () => new OneDrivePicker('').pick(),
-    },
-    {
-      label: 'Dropbox',
-      key: 'dropbox',
-      pick: () => new DropboxPicker().pick(),
-    },
-  ]
 
   return (
     <div
@@ -167,28 +133,11 @@ function ModuleExternalLinkModalInner({
           </p>
 
           <div className="mt-4 border-t border-slate-100 pt-4 dark:border-neutral-700">
-            <p className="mb-2 text-xs font-medium text-slate-600 dark:text-neutral-300">
-              Or pick from cloud storage
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {cloudButtons.map((btn) => (
-                <button
-                  key={btn.key}
-                  type="button"
-                  disabled={saving || picking !== null}
-                  aria-haspopup="dialog"
-                  onClick={() => void handleCloudPick(btn.label, btn.key, btn.pick)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-                >
-                  {picking === btn.key ? 'Opening…' : btn.label}
-                </button>
-              ))}
-            </div>
-            {pickError && (
-              <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="alert">
-                {pickError}
-              </p>
-            )}
+            <CloudPickerButtons
+              label="Or pick from cloud storage"
+              disabled={saving}
+              onPicked={handleCloudPicked}
+            />
           </div>
 
           {errorMessage && (

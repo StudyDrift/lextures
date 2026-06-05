@@ -34,6 +34,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/oer-import", d.handlePostModuleOERImport())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/lti-links", d.handleCreateModuleLTILink())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/vibe-activities", d.handleCreateModuleVibeActivity())
+	r.Post("/api/v1/courses/{course_code}/vibe-activities/generate", d.handleGenerateVibeActivityHTML())
 	r.Get("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handleGetModuleVibeActivity())
 	r.Patch("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handlePatchModuleVibeActivity())
 	r.Get("/api/v1/courses/{course_code}/external-links/{item_id}", d.handleGetModuleExternalLink())

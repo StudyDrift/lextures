@@ -26,15 +26,21 @@ interface DropboxFile {
   isDir: boolean
 }
 
-function loadScript(src: string): Promise<void> {
+function loadScript(src: string, appKey?: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) {
+    const selector = appKey
+      ? `script[src="${src}"][data-app-key="${appKey}"]`
+      : `script[src="${src}"]`
+    if (document.querySelector(selector)) {
       resolve()
       return
     }
     const s = document.createElement('script')
     s.src = src
     s.async = true
+    if (appKey) {
+      s.setAttribute('data-app-key', appKey)
+    }
     s.onload = () => resolve()
     s.onerror = () => reject(new Error(`Failed to load ${src}`))
     document.head.appendChild(s)
@@ -43,11 +49,19 @@ function loadScript(src: string): Promise<void> {
 
 export class DropboxPicker implements CloudPickerProvider {
   readonly provider = 'dropbox' as const
+  private readonly appKey: string
+  private readonly linkType: 'preview' | 'direct'
+
+  constructor(appKey = '', linkType: 'preview' | 'direct' = 'preview') {
+    this.appKey = appKey
+    this.linkType = linkType
+  }
 
   async pick(): Promise<PickedFile | null> {
-    await loadScript('https://www.dropbox.com/static/api/2/dropins.js')
+    await loadScript('https://www.dropbox.com/static/api/2/dropins.js', this.appKey || undefined)
     if (!window.Dropbox) throw new Error('Dropbox SDK not loaded')
 
+    const linkType = this.linkType
     return new Promise((resolve) => {
       window.Dropbox!.choose({
         success(files) {
@@ -58,11 +72,12 @@ export class DropboxPicker implements CloudPickerProvider {
             externalId: f.id || f.link,
             name: f.name,
             viewUrl: f.link,
+            downloadUrl: f.link,
             iconUrl: f.icon,
           })
         },
         cancel() { resolve(null) },
-        linkType: 'preview',
+        linkType,
         multiselect: false,
         folderselect: false,
       })

@@ -9,12 +9,8 @@ import {
 } from '../../lib/courses-api'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { permCourseItemCreate } from '../../lib/rbac-api'
-import {
-  GoogleDrivePicker,
-  OneDrivePicker,
-  DropboxPicker,
-  type PickedFile,
-} from '../../services/cloud-picker'
+import { CloudPickerButtons } from '../../components/cloud-picker-buttons'
+import type { PickedFile } from '../../services/cloud-picker'
 import { LmsPage } from './lms-page'
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -40,81 +36,6 @@ function ProviderBadge({ provider }: { provider: string }) {
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${color}`}>
       {label}
     </span>
-  )
-}
-
-type CloudButton = {
-  label: string
-  provider: 'google_drive' | 'onedrive' | 'dropbox'
-  pick: () => Promise<PickedFile | null>
-}
-
-function CloudPickerButtons({
-  onPicked,
-  disabled,
-}: {
-  onPicked: (file: PickedFile) => void
-  disabled?: boolean
-}) {
-  const [picking, setPicking] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const buttons: CloudButton[] = [
-    {
-      label: 'Google Drive',
-      provider: 'google_drive',
-      pick: () => new GoogleDrivePicker('', '').pick(),
-    },
-    {
-      label: 'OneDrive',
-      provider: 'onedrive',
-      pick: () => new OneDrivePicker('').pick(),
-    },
-    {
-      label: 'Dropbox',
-      provider: 'dropbox',
-      pick: () => new DropboxPicker().pick(),
-    },
-  ]
-
-  async function handlePick(btn: CloudButton) {
-    setError(null)
-    setPicking(btn.provider)
-    try {
-      const file = await btn.pick()
-      if (file) onPicked(file)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : `Could not open ${btn.label} picker.`)
-    } finally {
-      setPicking(null)
-    }
-  }
-
-  return (
-    <div>
-      <p className="mb-2 text-xs font-medium text-slate-600 dark:text-neutral-300">
-        Or link from cloud storage
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {buttons.map((btn) => (
-          <button
-            key={btn.provider}
-            type="button"
-            disabled={disabled || picking !== null}
-            onClick={() => void handlePick(btn)}
-            aria-haspopup="dialog"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-          >
-            {picking === btn.provider ? 'Opening…' : btn.label}
-          </button>
-        ))}
-      </div>
-      {error && (
-        <p className="mt-2 text-xs text-rose-700 dark:text-rose-300" role="alert">
-          {error}
-        </p>
-      )}
-    </div>
   )
 }
 

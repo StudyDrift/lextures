@@ -2462,6 +2462,27 @@ export async function patchModuleVibeActivity(
   return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
 }
 
+export type VibeGenerateMessage = { role: 'user' | 'assistant'; content: string }
+
+export async function generateVibeActivityHTML(
+  courseCode: string,
+  prompt: string,
+  history: VibeGenerateMessage[] = [],
+): Promise<string> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/vibe-activities/generate`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, history }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const r = raw as Record<string, unknown>
+  return String(r.html ?? '')
+}
+
 export type LtiExternalToolSummary = { id: string; name: string }
 
 export async function fetchCourseLtiExternalTools(courseCode: string): Promise<LtiExternalToolSummary[]> {
@@ -5496,43 +5517,6 @@ export async function downloadSubmissionAnnotatedPdf(
   a.rel = 'noopener'
   a.click()
   URL.revokeObjectURL(url)
-}
-
-// Cloud provider admin API (plan 8.8)
-export type CloudProviderSetting = {
-  provider: string
-  enabled: boolean
-  updatedAt: string
-}
-
-export async function fetchAdminCloudProviders(): Promise<CloudProviderSetting[]> {
-  const res = await authorizedFetch('/api/v1/admin/cloud-providers')
-  const raw = await parseJson(res)
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  if (!Array.isArray(raw)) return []
-  return raw.map((row) => {
-    const r = row as Record<string, unknown>
-    return {
-      provider: String(r.provider ?? ''),
-      enabled: Boolean(r.enabled),
-      updatedAt: String(r.updatedAt ?? ''),
-    }
-  })
-}
-
-export async function putAdminCloudProvider(provider: string, enabled: boolean): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/cloud-providers/${encodeURIComponent(provider)}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled }),
-    },
-  )
-  if (!res.ok) {
-    const raw = await parseJson(res)
-    throw new Error(readApiErrorMessage(raw))
-  }
 }
 
 // At-risk alerts (plan 9.2)

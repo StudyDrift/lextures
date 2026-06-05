@@ -41,6 +41,7 @@ import { authorizedFetch, wsUrl } from '../../lib/api'
 import { getAccessToken } from '../../lib/auth'
 import { FilePreview } from '../../components/file-preview'
 import { ConfirmDialog } from '../../components/confirm-dialog'
+import { CloudImportMenu } from '../../components/cloud-import-menu'
 import { LmsPage } from './lms-page'
 
 type ContextMenu =
@@ -79,6 +80,7 @@ export default function CourseFilesPage() {
 
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string | null>(null)
+  const [cloudImportError, setCloudImportError] = useState<string | null>(null)
 
   const [renamingFolder, setRenamingFolder] = useState<FileFolder | null>(null)
   const [renamingFile, setRenamingFile] = useState<FileItem | null>(null)
@@ -386,25 +388,30 @@ export default function CourseFilesPage() {
     }
   }
 
+  async function uploadSingleFile(file: File) {
+    setUploadProgress(`Uploading ${file.name}…`)
+    const result = await initiateFileUpload(courseCode, file, folderId ?? null)
+    if ('presigned' in result) {
+      await uploadToPresignedUrl(result.presigned.presignedPutUrl!, file)
+      await confirmFileUpload(
+        courseCode,
+        result.presigned.objectKey,
+        file.name,
+        file.type || 'application/octet-stream',
+        file.size,
+        folderId ?? null,
+      )
+    }
+  }
+
   async function handleFilesSelected(files: FileList | null) {
     if (!files || files.length === 0) return
     setUploading(true)
+    setCloudImportError(null)
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      setUploadProgress(`Uploading ${file.name}…`)
       try {
-        const result = await initiateFileUpload(courseCode, file, folderId ?? null)
-        if ('presigned' in result) {
-          await uploadToPresignedUrl(result.presigned.presignedPutUrl!, file)
-          await confirmFileUpload(
-            courseCode,
-            result.presigned.objectKey,
-            file.name,
-            file.type || 'application/octet-stream',
-            file.size,
-            folderId ?? null,
-          )
-        }
+        await uploadSingleFile(file)
       } catch (err) {
         alert(`Failed to upload ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
@@ -412,6 +419,20 @@ export default function CourseFilesPage() {
     setUploading(false)
     setUploadProgress(null)
     void load()
+  }
+
+  async function handleCloudImport(file: File) {
+    setUploading(true)
+    setCloudImportError(null)
+    try {
+      await uploadSingleFile(file)
+      void load()
+    } catch (err) {
+      setCloudImportError(err instanceof Error ? err.message : 'Could not import file from cloud storage.')
+    } finally {
+      setUploading(false)
+      setUploadProgress(null)
+    }
   }
 
   function openContextMenu(e: React.MouseEvent, item: FileFolder | FileItem, kind: 'folder' | 'file') {
@@ -550,6 +571,11 @@ export default function CourseFilesPage() {
                 </>
               )}
             </button>
+            <CloudImportMenu
+              disabled={uploading}
+              onImportFile={handleCloudImport}
+              onError={setCloudImportError}
+            />
             <input
               ref={fileInputRef}
               type="file"
@@ -560,6 +586,12 @@ export default function CourseFilesPage() {
           </div>
         )}
       </div>
+
+      {cloudImportError && (
+        <p className="mb-4 text-sm text-rose-700 dark:text-rose-300" role="alert">
+          {cloudImportError}
+        </p>
+      )}
 
       {/* New folder inline form */}
       {showNewFolder && (

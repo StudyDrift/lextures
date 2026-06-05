@@ -196,6 +196,7 @@ export default function Settings() {
   const [imageModelId, setImageModelId] = useState('')
   const [courseSetupModelId, setCourseSetupModelId] = useState('')
   const [notebookFlashcardsModelId, setNotebookFlashcardsModelId] = useState('')
+  const [vibeActivityModelId, setVibeActivityModelId] = useState('')
   const [aiLoading, setAiLoading] = useState(true)
   const [aiSaving, setAiSaving] = useState(false)
   const [aiMessage, setAiMessage] = useState<string | null>(null)
@@ -325,10 +326,16 @@ export default function Settings() {
         if (!settingsRes.ok) {
           if (!cancelled) setAiError(readApiErrorMessage(settingsRaw))
         } else {
-          const data = settingsRaw as { imageModelId?: string; courseSetupModelId?: string; notebookFlashcardsModelId?: string }
+          const data = settingsRaw as {
+            imageModelId?: string
+            courseSetupModelId?: string
+            notebookFlashcardsModelId?: string
+            vibeActivityModelId?: string
+          }
           if (!cancelled && data.imageModelId) setImageModelId(data.imageModelId)
           if (!cancelled && data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
           if (!cancelled && data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
+          if (!cancelled && data.vibeActivityModelId) setVibeActivityModelId(data.vibeActivityModelId)
         }
         if (!cancelled) await loadModels()
       } catch {
@@ -362,6 +369,7 @@ export default function Settings() {
           imageModelId,
           courseSetupModelId,
           notebookFlashcardsModelId,
+          vibeActivityModelId,
         }),
       })
       const raw: unknown = await res.json().catch(() => ({}))
@@ -369,10 +377,16 @@ export default function Settings() {
         setAiError(readApiErrorMessage(raw))
         return
       }
-      const data = raw as { imageModelId?: string; courseSetupModelId?: string; notebookFlashcardsModelId?: string }
+      const data = raw as {
+        imageModelId?: string
+        courseSetupModelId?: string
+        notebookFlashcardsModelId?: string
+        vibeActivityModelId?: string
+      }
       if (data.imageModelId) setImageModelId(data.imageModelId)
       if (data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
       if (data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
+      if (data.vibeActivityModelId) setVibeActivityModelId(data.vibeActivityModelId)
       setAiMessage('Saved.')
       toastSaveOk('AI defaults saved')
     } catch {
@@ -794,7 +808,8 @@ export default function Settings() {
     }
   }
 
-  const saveDisabled = aiSaving || !imageModelId || !courseSetupModelId || !notebookFlashcardsModelId
+  const saveDisabled =
+    aiSaving || !imageModelId || !courseSetupModelId || !notebookFlashcardsModelId || !vibeActivityModelId
 
   async function onSaveSystemPrompt(e: FormEvent) {
     e.preventDefault()
@@ -981,6 +996,22 @@ export default function Settings() {
                   />
                   <p className="mt-1.5 text-xs text-slate-500">
                     Text-to-text model used when generating AI study flashcards from notebook notes.
+                  </p>
+                </div>
+
+                <div>
+                  <ImageModelPicker
+                    id="vibe-activity-model"
+                    label="Vibe activity model"
+                    models={textModels}
+                    value={vibeActivityModelId}
+                    onChange={setVibeActivityModelId}
+                    disabled={aiSaving}
+                    onRefresh={refreshModels}
+                    refreshing={modelsRefreshing}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Text-to-text model used when generating interactive HTML vibe activities for courses.
                   </p>
                 </div>
 
