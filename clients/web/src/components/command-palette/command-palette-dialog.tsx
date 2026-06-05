@@ -1,34 +1,77 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router-dom'
-import { ArrowDown, ArrowUp, BookOpen, FileText, Navigation, Search, Users, Zap, Stars } from 'lucide-react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import {
+  ArrowDown,
+  ArrowUp,
+  BookOpen,
+  Clock,
+  FileText,
+  Layers,
+  Navigation,
+  Search,
+  Users,
+  Zap,
+  Stars,
+} from 'lucide-react'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
-  buildSearchItems,
+  capSearchResults,
   filterSearchItems,
   SEARCH_GROUP_LABEL,
   sortSearchItems,
+  buildLocalSearchCandidates,
   type SearchGroup,
   type SearchListItem,
 } from '../../lib/build-search-items'
 import { buildCommandPaletteGoToItems } from '../../lib/command-palette-go-to'
-import { fetchSearchIndex, type SearchCourseItem, type SearchPersonItem } from '../../lib/search-api'
+import { buildSearchHubItems } from '../../lib/search-hub'
+import {
+  applyCoursePickerSelection,
+  parseCoursePickerState,
+  parseSearchQuery,
+} from '../../lib/search-query-parse'
+import { listSearchRecents, recordSearchRecent } from '../../lib/search-recents'
+import {
+  fetchSearchIndex,
+  fetchSearchQuery,
+  queryResultsToSearchItems,
+  type SearchCourseItem,
+} from '../../lib/search-api'
+import { mergeCoursesWithNavFeatures } from '../../lib/search-course-features'
 import { LiveRegion } from '../a11y/live-region'
 import { useCommandPalette } from './use-command-palette'
 
 const GROUP_ICONS: Record<SearchGroup, typeof BookOpen> = {
+  recent: Clock,
   goto: Navigation,
   action: Zap,
   course: BookOpen,
   person: Users,
   page: FileText,
-  ai: Stars
+  content: Layers,
+  ai: Stars,
+}
+
+const SEARCH_DEBOUNCE_MS = 200
+
+function currentCourseCodeFromPath(pathname: string): string | null {
+  const m = /^\/courses\/([^/]+)/.exec(pathname)
+  if (!m?.[1]) return null
+  try {
+    return decodeURIComponent(m[1]).trim() || null
+  } catch {
+    return m[1].trim() || null
+  }
 }
 
 export function CommandPaletteDialog() {
   const { close } = useCommandPalette()
   const navigate = useNavigate()
+  const location = useLocation()
   const { allows } = usePermissions()
+  const navFeatures = useCourseNavFeatures()
   const inputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const activeRowRef = useRef<HTMLButtonElement | null>(null)
@@ -36,8 +79,19 @@ export function CommandPaletteDialog() {
   const [query, setQuery] = useState('')
   const [cursor, setCursor] = useState(0)
   const [courses, setCourses] = useState<SearchCourseItem[]>([])
-  const [people, setPeople] = useState<SearchPersonItem[]>([])
   const [loadState, setLoadState] = useState<'loading' | 'error' | 'ready'>('loading')
+  const [serverItems, setServerItems] = useState<SearchListItem[]>([])
+  const [serverLoading, setServerLoading] = useState(false)
+
+  const currentCourseCode = useMemo(
+    () => currentCourseCodeFromPath(location.pathname),
+    [location.pathname],
+  )
+
+  const coursesForSearch = useMemo(
+    () => mergeCoursesWithNavFeatures(courses, currentCourseCode, navFeatures),
+    [courses, currentCourseCode, navFeatures],
+  )
 
   useEffect(() => {
     const prevOverflow = document.body.style.overflow
@@ -51,13 +105,11 @@ export function CommandPaletteDialog() {
     void fetchSearchIndex()
       .then((data) => {
         setCourses(Array.isArray(data.courses) ? data.courses : [])
-        setPeople(Array.isArray(data.people) ? data.people : [])
         setLoadState('ready')
       })
       .catch(() => {
         setLoadState('error')
         setCourses([])
-        setPeople([])
       })
   }, [])
 
@@ -66,7 +118,6 @@ export function CommandPaletteDialog() {
     return () => window.clearTimeout(t)
   }, [])
 
-  // Close on Escape; trap focus within the dialog on Tab/Shift+Tab.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -101,31 +152,105 @@ export function CommandPaletteDialog() {
     return () => window.removeEventListener('keydown', onKey, true)
   }, [close])
 
-  const allItems = useMemo(
-    () => buildSearchItems(courses, people, allows),
-    [courses, people, allows],
-  )
+  const parsed = useMemo(() => parseSearchQuery(query), [query])
+  const coursePicker = useMemo(() => parseCoursePickerState(query), [query])
+  const isHubMode = parsed.raw === '' && !coursePicker.active
+
+  const pickerCourses = useMemo(() => {
+    if (!coursePicker.active) return []
+    const f = coursePicker.filter
+    return coursesForSearch.filter((c) => {
+      if (!f) return true
+      const code = c.courseCode.toLowerCase()
+      const title = c.title.toLowerCase()
+      return code.includes(f) || title.includes(f)
+    })
+  }, [coursePicker, coursesForSearch])
+
+  useEffect(() => {
+    if (parsed.text.length < 2) {
+      setServerItems([])
+      setServerLoading(false)
+      return
+    }
+    let cancelled = false
+    setServerLoading(true)
+    const timer = window.setTimeout(() => {
+      const types = parsed.types
+      const typeParam = types
+        ? [...types].filter((t) => t === 'course' || t === 'person' || t === 'content').join(',')
+        : undefined
+      void fetchSearchQuery({
+        q: parsed.text,
+        scope: parsed.scopeCourseCode,
+        types: typeParam,
+      })
+        .then((data) => {
+          if (cancelled) return
+          setServerItems(queryResultsToSearchItems(data.groups))
+        })
+        .catch(() => {
+          if (cancelled) return
+          setServerItems([])
+        })
+        .finally(() => {
+          if (!cancelled) setServerLoading(false)
+        })
+    }, SEARCH_DEBOUNCE_MS)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timer)
+    }
+  }, [parsed.text, parsed.scopeCourseCode, parsed.types])
+
+  const pinnedCourseCode = isHubMode ? currentCourseCode : parsed.scopeCourseCode
 
   const filtered = useMemo(() => {
-    const base = filterSearchItems(allItems, query)
-    const go = buildCommandPaletteGoToItems(query, courses, allows)
-    if (go.length === 0) return base
+    if (isHubMode) {
+      return capSearchResults(buildSearchHubItems(coursesForSearch, allows, currentCourseCode), {
+        hubMode: true,
+        pinnedCourseCode,
+      })
+    }
+
+    const localCandidates = buildLocalSearchCandidates(coursesForSearch, allows, parsed)
+    const localFiltered = filterSearchItems(localCandidates, query, {
+      currentCourseCode,
+    })
+    const go = buildCommandPaletteGoToItems(query, coursesForSearch, allows)
+
     const seen = new Set<string>()
     const merged: SearchListItem[] = []
-    for (const it of [...go, ...base]) {
+    for (const it of [...go, ...serverItems, ...localFiltered]) {
       if (seen.has(it.id)) continue
       seen.add(it.id)
       merged.push(it)
     }
-    return sortSearchItems(merged)
-  }, [allItems, query, courses, allows])
 
-  const safeIndex =
-    filtered.length === 0 ? 0 : Math.min(cursor, Math.max(0, filtered.length - 1))
+    return capSearchResults(sortSearchItems(merged), { pinnedCourseCode })
+  }, [
+    isHubMode,
+    coursesForSearch,
+    allows,
+    currentCourseCode,
+    parsed,
+    query,
+    serverItems,
+    pinnedCourseCode,
+  ])
+
+  const listLength = coursePicker.active ? pickerCourses.length : filtered.length
+  const safeIndex = listLength === 0 ? 0 : Math.min(cursor, Math.max(0, listLength - 1))
 
   useLayoutEffect(() => {
     activeRowRef.current?.scrollIntoView({ block: 'nearest' })
-  }, [safeIndex, filtered])
+  }, [safeIndex, filtered, pickerCourses, coursePicker.active])
+
+  const selectPickerCourse = (course: SearchCourseItem) => {
+    setQuery(applyCoursePickerSelection(query, coursePicker.atIndex, course.courseCode))
+    setCursor(0)
+    window.setTimeout(() => inputRef.current?.focus(), 0)
+  }
 
   const go = (item: SearchListItem) => {
     if (item.id === 'global:ask-ai') {
@@ -134,10 +259,52 @@ export function CommandPaletteDialog() {
     } else {
       navigate(item.path)
     }
+    if (item.group === 'recent') {
+      const stored = listSearchRecents().find((r) => `recent:${r.id}` === item.id)
+      if (stored) {
+        recordSearchRecent({
+          id: stored.id,
+          group: stored.group,
+          title: stored.title,
+          subtitle: stored.subtitle,
+          path: stored.path,
+          haystack: '',
+        })
+      }
+    } else {
+      recordSearchRecent(item)
+    }
     close()
   }
 
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (coursePicker.active) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        if (pickerCourses.length === 0) return
+        setCursor((c) => {
+          const at = Math.min(c, pickerCourses.length - 1)
+          return (at + 1) % pickerCourses.length
+        })
+        return
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        if (pickerCourses.length === 0) return
+        setCursor((c) => {
+          const at = Math.min(c, pickerCourses.length - 1)
+          return (at - 1 + pickerCourses.length) % pickerCourses.length
+        })
+        return
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        const course = pickerCourses[safeIndex]
+        if (course) selectPickerCourse(course)
+        return
+      }
+    }
+
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       if (filtered.length === 0) return
@@ -165,9 +332,15 @@ export function CommandPaletteDialog() {
 
   const resultsAnnouncement =
     loadState === 'ready'
-      ? filtered.length === 0
-        ? 'No results'
-        : `${filtered.length} ${filtered.length === 1 ? 'result' : 'results'}`
+      ? coursePicker.active
+        ? pickerCourses.length === 0
+          ? 'No matching courses'
+          : `${pickerCourses.length} ${pickerCourses.length === 1 ? 'course' : 'courses'}`
+        : filtered.length === 0
+          ? serverLoading
+            ? 'Searching'
+            : 'No results'
+          : `${filtered.length} ${filtered.length === 1 ? 'result' : 'results'}`
       : ''
 
   const palette = (
@@ -197,15 +370,21 @@ export function CommandPaletteDialog() {
               setCursor(0)
             }}
             onKeyDown={onInputKeyDown}
-            placeholder="Search courses, people, pages, actions…"
+            placeholder="Search courses, content, people… (@course to scope)"
             aria-label="Search"
             className="min-w-0 flex-1 border-0 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-600 dark:text-neutral-100 dark:placeholder:text-neutral-400"
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
-            aria-controls="command-palette-results"
+            aria-controls={coursePicker.active ? 'command-palette-course-picker' : 'command-palette-results'}
             aria-activedescendant={
-              filtered[safeIndex] ? `cmd-result-${filtered[safeIndex].id}` : undefined
+              coursePicker.active
+                ? pickerCourses[safeIndex]
+                  ? `cmd-course-${encodeURIComponent(pickerCourses[safeIndex]!.courseCode)}`
+                  : undefined
+                : filtered[safeIndex]
+                  ? `cmd-result-${filtered[safeIndex].id}`
+                  : undefined
             }
           />
           <kbd className="hidden shrink-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-600 sm:inline dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
@@ -213,13 +392,12 @@ export function CommandPaletteDialog() {
           </kbd>
         </div>
 
-        {/* Polite live region: announces result count to screen readers after each query change. */}
         <LiveRegion>{resultsAnnouncement}</LiveRegion>
 
         <div
-          id="command-palette-results"
+          id={coursePicker.active ? 'command-palette-course-picker' : 'command-palette-results'}
           role="listbox"
-          aria-label="Search results"
+          aria-label={coursePicker.active ? 'Choose a course' : 'Search results'}
           className="max-h-[min(60vh,420px)] overflow-y-auto px-2 py-2"
         >
           {loadState === 'loading' && (
@@ -230,10 +408,66 @@ export function CommandPaletteDialog() {
               Could not load search.
             </p>
           )}
-          {loadState === 'ready' && filtered.length === 0 && (
+          {loadState === 'ready' && coursePicker.active && (
+            <>
+              <div
+                className="px-3 pb-1 pt-2 text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-400"
+                aria-hidden="true"
+              >
+                Scope to course
+              </div>
+              {pickerCourses.length === 0 && (
+                <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">
+                  No matching courses.
+                </p>
+              )}
+              {pickerCourses.map((course, idx) => {
+                const selected = idx === safeIndex
+                return (
+                  <button
+                    key={course.courseCode}
+                    id={`cmd-course-${encodeURIComponent(course.courseCode)}`}
+                    type="button"
+                    role="option"
+                    aria-selected={selected}
+                    ref={selected ? activeRowRef : undefined}
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition ${selected
+                      ? 'bg-indigo-50 text-slate-900 dark:bg-indigo-950/70 dark:text-neutral-100'
+                      : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800/80'
+                      }`}
+                    onMouseEnter={() => setCursor(idx)}
+                    onClick={() => selectPickerCourse(course)}
+                  >
+                    <BookOpen
+                      className={`mt-0.5 h-4 w-4 shrink-0 ${selected
+                        ? 'text-indigo-600 dark:text-indigo-400'
+                        : 'text-slate-400 dark:text-neutral-500'
+                        }`}
+                      aria-hidden
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-medium leading-snug">{course.title}</span>
+                      <span
+                        className={`block text-xs ${selected
+                          ? 'text-slate-600 dark:text-neutral-300'
+                          : 'text-slate-600 dark:text-neutral-400'
+                          }`}
+                      >
+                        {course.courseCode}
+                      </span>
+                    </span>
+                  </button>
+                )
+              })}
+            </>
+          )}
+          {loadState === 'ready' && !coursePicker.active && serverLoading && filtered.length === 0 && !isHubMode && (
+            <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">Searching…</p>
+          )}
+          {loadState === 'ready' && !coursePicker.active && !serverLoading && filtered.length === 0 && (
             <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">No results.</p>
           )}
-          {loadState === 'ready' &&
+          {loadState === 'ready' && !coursePicker.active &&
             filtered.map((item, idx) => {
               const showHeader = idx === 0 || filtered[idx - 1]!.group !== item.group
               const Icon = GROUP_ICONS[item.group]
@@ -271,11 +505,10 @@ export function CommandPaletteDialog() {
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium leading-snug">{item.title}</span>
                       <span
-                        className={`block text-xs ${
-                          selected
-                            ? 'text-slate-600 dark:text-neutral-300'
-                            : 'text-slate-600 dark:text-neutral-400'
-                        }`}
+                        className={`block text-xs ${selected
+                          ? 'text-slate-600 dark:text-neutral-300'
+                          : 'text-slate-600 dark:text-neutral-400'
+                          }`}
                       >
                         {item.subtitle}
                       </span>

@@ -44,6 +44,12 @@ export const handlers = [
       people: [],
     })
   }),
+  http.get('http://localhost:8080/api/v1/search/query', () => {
+    return HttpResponse.json({
+      groups: [],
+      tookMs: 0,
+    })
+  }),
   http.get('http://localhost:8080/api/v1/courses', () => {
     return HttpResponse.json({ courses: [] })
   }),

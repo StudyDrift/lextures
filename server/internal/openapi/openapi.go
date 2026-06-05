@@ -161,6 +161,19 @@ const spec = `{
         "responses": { "200": { "description": "courses, people" }, "401": { "description": "Not signed in" } }
       }
     },
+    "/api/v1/search/query": {
+      "get": {
+        "tags": ["search", "me"],
+        "summary": "Query-driven command palette search (courses, people, module content)",
+        "security": [ { "bearerAuth": [] } ],
+        "parameters": [
+          { "name": "q", "in": "query", "required": true, "schema": { "type": "string", "minLength": 2 } },
+          { "name": "scope", "in": "query", "schema": { "type": "string" }, "description": "Optional course code scope" },
+          { "name": "types", "in": "query", "schema": { "type": "string" }, "description": "Comma-separated: course,person,content" }
+        ],
+        "responses": { "200": { "description": "QueryResponse grouped results" }, "400": { "description": "Query too short" }, "401": { "description": "Not signed in" } }
+      }
+    },
     "/api/v1/reports/learning-activity": {
       "get": {
         "tags": ["reports"],
