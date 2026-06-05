@@ -46,6 +46,7 @@ export type PlatformFeatures = {
   ffHighContrastReducedMotion: boolean
   ffLibrary: boolean
   ffBroadcasts: boolean
+  ffClassroomSignals: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -82,6 +83,7 @@ const defaultFeatures: PlatformFeatures = {
   ffHighContrastReducedMotion: false,
   ffLibrary: false,
   ffBroadcasts: false,
+  ffClassroomSignals: false,
   loading: true,
   refresh: async () => {},
 }
@@ -122,7 +124,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffReadingPreferences: false,
     ffHighContrastReducedMotion: false,
     ffLibrary: false,
-  ffBroadcasts: false,
+    ffBroadcasts: false,
+    ffClassroomSignals: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -165,6 +168,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffHighContrastReducedMotion: data.ffHighContrastReducedMotion === true,
           ffLibrary: data.ffLibrary === true,
           ffBroadcasts: data.ffBroadcasts === true,
+          ffClassroomSignals: data.ffClassroomSignals === true,
         }
         setFeatures({
           ...next,
@@ -174,6 +178,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffHighContrastReducedMotion: next.ffHighContrastReducedMotion === true,
           ffLibrary: next.ffLibrary === true,
           ffBroadcasts: next.ffBroadcasts === true,
+          ffClassroomSignals: next.ffClassroomSignals === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

@@ -252,6 +252,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     FF_SIS_INTEGRATION="true" \
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
+    FF_CLASSROOM_SIGNALS="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -273,6 +274,7 @@ else
     FF_SIS_INTEGRATION="true" \
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
+    FF_CLASSROOM_SIGNALS="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

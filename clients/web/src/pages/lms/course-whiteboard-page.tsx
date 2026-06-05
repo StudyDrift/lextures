@@ -5,11 +5,13 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
+  type ReactNode,
 } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Circle,
   Download,
+  Eraser,
   FolderOpen,
   Minus,
   MousePointer2,
@@ -40,10 +42,11 @@ type LineEl = { type: 'line'; color: string; width: number; x1: number; y1: numb
 
 type DrawEl = StrokeEl | RectEl | CircleEl | TriangleEl | LineEl
 
-type Tool = 'select' | 'pen' | 'line' | 'rect' | 'circle' | 'triangle'
+type Tool = 'select' | 'pen' | 'line' | 'rect' | 'circle' | 'triangle' | 'eraser'
 
 const COLORS = ['#1e293b', '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#ffffff']
 const STROKE_WIDTHS = [2, 4, 8]
+const ERASER_SIZES = [8, 16, 32]
 const GRID_SPACING = 24
 
 // ---------------------------------------------------------------------------
@@ -113,6 +116,138 @@ function drawElement(ctx: CanvasRenderingContext2D, el: DrawEl) {
   ctx.restore()
 }
 
+// ---------------------------------------------------------------------------
+// Eraser hit-testing & partial erase
+// ---------------------------------------------------------------------------
+
+function distToSegment(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+  const dx = bx - ax
+  const dy = by - ay
+  if (dx === 0 && dy === 0) return Math.hypot(px - ax, py - ay)
+  const t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy)))
+  return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
+}
+
+function hitTest(el: DrawEl, px: number, py: number, radius: number): boolean {
+  switch (el.type) {
+    case 'stroke':
+      return el.pts.some(([ex, ey]) => Math.hypot(ex - px, ey - py) <= radius)
+    case 'line':
+      return distToSegment(px, py, el.x1, el.y1, el.x2, el.y2) <= radius
+    case 'rect': {
+      const x1 = Math.min(el.x, el.x + el.w)
+      const x2 = Math.max(el.x, el.x + el.w)
+      const y1 = Math.min(el.y, el.y + el.h)
+      const y2 = Math.max(el.y, el.y + el.h)
+      return (
+        distToSegment(px, py, x1, y1, x2, y1) <= radius ||
+        distToSegment(px, py, x2, y1, x2, y2) <= radius ||
+        distToSegment(px, py, x2, y2, x1, y2) <= radius ||
+        distToSegment(px, py, x1, y2, x1, y1) <= radius
+      )
+    }
+    case 'circle': {
+      const rx = Math.abs(el.rx) || 1
+      const ry = Math.abs(el.ry) || 1
+      const norm = Math.hypot((px - el.cx) / rx, (py - el.cy) / ry)
+      return Math.abs(norm - 1) * Math.min(rx, ry) <= radius
+    }
+    case 'triangle':
+      return (
+        distToSegment(px, py, el.x1, el.y1, el.x2, el.y2) <= radius ||
+        distToSegment(px, py, el.x2, el.y2, el.x3, el.y3) <= radius ||
+        distToSegment(px, py, el.x3, el.y3, el.x1, el.y1) <= radius
+      )
+  }
+}
+
+/** Split a stroke into sub-strokes, cutting out points within `radius` of (px,py). */
+function splitStroke(stroke: StrokeEl, px: number, py: number, radius: number): StrokeEl[] {
+  const segs: StrokeEl[] = []
+  let cur: [number, number][] = []
+  for (const pt of stroke.pts) {
+    if (Math.hypot(pt[0] - px, pt[1] - py) <= radius) {
+      if (cur.length >= 2) segs.push({ ...stroke, pts: cur })
+      cur = []
+    } else {
+      cur.push(pt)
+    }
+  }
+  if (cur.length >= 2) segs.push({ ...stroke, pts: cur })
+  return segs
+}
+
+/** Partial erase: strokes are split; non-stroke elements are removed wholesale if hit. */
+function eraseFromElements(elements: DrawEl[], px: number, py: number, radius: number): DrawEl[] {
+  const out: DrawEl[] = []
+  for (const el of elements) {
+    if (el.type === 'stroke') {
+      out.push(...splitStroke(el, px, py, radius))
+    } else if (!hitTest(el, px, py, radius)) {
+      out.push(el)
+    }
+  }
+  return out
+}
+
+function makeEraserCursor(radius: number): string {
+  const d = radius * 2
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${d}" height="${d}"><circle cx="${radius}" cy="${radius}" r="${radius - 1}" stroke="%23475569" stroke-width="1.5" fill="rgba(255%2C255%2C255%2C0.15)"/></svg>`
+  return `url("data:image/svg+xml,${svg}") ${radius} ${radius}, crosshair`
+}
+
+// ---------------------------------------------------------------------------
+// Select-mode helpers
+// ---------------------------------------------------------------------------
+
+function translateElement(el: DrawEl, dx: number, dy: number): DrawEl {
+  switch (el.type) {
+    case 'stroke': return { ...el, pts: el.pts.map(([x, y]) => [x + dx, y + dy] as [number, number]) }
+    case 'rect':   return { ...el, x: el.x + dx, y: el.y + dy }
+    case 'circle': return { ...el, cx: el.cx + dx, cy: el.cy + dy }
+    case 'line':   return { ...el, x1: el.x1 + dx, y1: el.y1 + dy, x2: el.x2 + dx, y2: el.y2 + dy }
+    case 'triangle': return { ...el, x1: el.x1+dx, y1: el.y1+dy, x2: el.x2+dx, y2: el.y2+dy, x3: el.x3+dx, y3: el.y3+dy }
+  }
+}
+
+/** Returns the index of the topmost element whose outline is within 8px of (px,py), or -1. */
+function pickElement(elements: DrawEl[], px: number, py: number): number {
+  for (let i = elements.length - 1; i >= 0; i--) {
+    if (hitTest(elements[i], px, py, 8)) return i
+  }
+  return -1
+}
+
+function getBoundingBox(el: DrawEl): { x: number; y: number; w: number; h: number } | null {
+  switch (el.type) {
+    case 'stroke': {
+      if (!el.pts.length) return null
+      let [minX, minY, maxX, maxY] = [Infinity, Infinity, -Infinity, -Infinity]
+      for (const [x, y] of el.pts) { minX=Math.min(minX,x); minY=Math.min(minY,y); maxX=Math.max(maxX,x); maxY=Math.max(maxY,y) }
+      return { x: minX, y: minY, w: maxX - minX, h: maxY - minY }
+    }
+    case 'rect': {
+      const x = Math.min(el.x, el.x + el.w), y = Math.min(el.y, el.y + el.h)
+      return { x, y, w: Math.abs(el.w), h: Math.abs(el.h) }
+    }
+    case 'circle':
+      return { x: el.cx - Math.abs(el.rx), y: el.cy - Math.abs(el.ry), w: 2*Math.abs(el.rx), h: 2*Math.abs(el.ry) }
+    case 'line': {
+      const x = Math.min(el.x1, el.x2), y = Math.min(el.y1, el.y2)
+      return { x, y, w: Math.abs(el.x2 - el.x1), h: Math.abs(el.y2 - el.y1) }
+    }
+    case 'triangle': {
+      const xs = [el.x1, el.x2, el.x3], ys = [el.y1, el.y2, el.y3]
+      const x = Math.min(...xs), y = Math.min(...ys)
+      return { x, y, w: Math.max(...xs) - x, h: Math.max(...ys) - y }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Redraw
+// ---------------------------------------------------------------------------
+
 function redraw(
   ctx: CanvasRenderingContext2D,
   w: number,
@@ -120,10 +255,23 @@ function redraw(
   elements: DrawEl[],
   draft: DrawEl | null,
   dark: boolean,
+  selectedIdx?: number | null,
 ) {
   drawGrid(ctx, w, h, dark)
   for (const el of elements) drawElement(ctx, el)
   if (draft) drawElement(ctx, draft)
+  // Selection highlight
+  if (selectedIdx != null && selectedIdx >= 0 && elements[selectedIdx]) {
+    const bb = getBoundingBox(elements[selectedIdx])
+    if (bb) {
+      ctx.save()
+      ctx.strokeStyle = '#6366f1'
+      ctx.lineWidth = 1.5
+      ctx.setLineDash([4, 3])
+      ctx.strokeRect(bb.x - 6, bb.y - 6, bb.w + 12, bb.h + 12)
+      ctx.restore()
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -243,6 +391,38 @@ function LoadPanel({
 }
 
 // ---------------------------------------------------------------------------
+// Popover group — shows trigger; hover/click reveals options panel to the right
+// ---------------------------------------------------------------------------
+
+function PopoverGroup({ trigger, children }: { trigger: ReactNode; children: ReactNode }) {
+  const [open, setOpen] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const show = () => {
+    if (timerRef.current) clearTimeout(timerRef.current)
+    setOpen(true)
+  }
+  const hide = () => {
+    timerRef.current = setTimeout(() => setOpen(false), 80)
+  }
+
+  return (
+    <div className="relative" onMouseEnter={show} onMouseLeave={hide}>
+      <div onClick={() => setOpen((o) => !o)}>{trigger}</div>
+      {open && (
+        <div
+          className="absolute left-full top-0 z-50 ml-2 rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-neutral-800 dark:bg-neutral-950"
+          onMouseEnter={show}
+          onMouseLeave={hide}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
@@ -256,7 +436,14 @@ export default function CourseWhiteboardPage() {
   const [draft, setDraft] = useState<DrawEl | null>(null)
   const [tool, setTool] = useState<Tool>('pen')
   const [color, setColor] = useState(COLORS[0])
-  const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTHS[0])
+  const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTHS[1])
+  const [eraserSize, setEraserSize] = useState(ERASER_SIZES[1])
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
+  const [dragInfo, setDragInfo] = useState<{
+    idx: number
+    startPos: [number, number]
+    origEl: DrawEl
+  } | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [origin, setOrigin] = useState<[number, number]>([0, 0])
 
@@ -277,8 +464,8 @@ export default function CourseWhiteboardPage() {
     canvas.width = width
     canvas.height = height
     const ctx = canvas.getContext('2d')
-    if (ctx) redraw(ctx, width, height, elements, draft, isDark)
-  }, [elements, draft, isDark])
+    if (ctx) redraw(ctx, width, height, elements, draft, isDark, selectedIdx)
+  }, [elements, draft, isDark, selectedIdx])
 
   useEffect(() => {
     resizeCanvas()
@@ -287,14 +474,22 @@ export default function CourseWhiteboardPage() {
     return () => obs.disconnect()
   }, [resizeCanvas])
 
-  // Redraw whenever elements/draft change
+  // Redraw whenever elements/draft/selection change
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    redraw(ctx, canvas.width, canvas.height, elements, draft, isDark)
-  }, [elements, draft, isDark])
+    redraw(ctx, canvas.width, canvas.height, elements, draft, isDark, selectedIdx)
+  }, [elements, draft, isDark, selectedIdx])
+
+  // Reset drawing state when tool changes (prevents eraser/state leaking across tools)
+  useEffect(() => {
+    setIsDrawing(false)
+    setDraft(null)
+    setDragInfo(null)
+    if (tool !== 'select') setSelectedIdx(null)
+  }, [tool])
 
   // Load board list on mount
   useEffect(() => {
@@ -311,20 +506,49 @@ export default function CourseWhiteboardPage() {
   }
 
   function onPointerDown(e: ReactPointerEvent<HTMLCanvasElement>) {
-    if (tool === 'select') return
     const [x, y] = getPos(e)
+    ;(e.target as HTMLCanvasElement).setPointerCapture(e.pointerId)
+
+    if (tool === 'select') {
+      const idx = pickElement(elements, x, y)
+      setSelectedIdx(idx >= 0 ? idx : null)
+      if (idx >= 0) {
+        setDragInfo({ idx, startPos: [x, y], origEl: elements[idx] })
+        setIsDrawing(true)
+      }
+      return
+    }
+
     setOrigin([x, y])
     setIsDrawing(true)
-    ;(e.target as HTMLCanvasElement).setPointerCapture(e.pointerId)
 
     if (tool === 'pen') {
       setDraft({ type: 'stroke', color, width: strokeWidth, pts: [[x, y]] })
+    } else if (tool === 'eraser') {
+      setElements((prev) => eraseFromElements(prev, x, y, eraserSize))
     }
   }
 
   function onPointerMove(e: ReactPointerEvent<HTMLCanvasElement>) {
     if (!isDrawing) return
     const [x, y] = getPos(e)
+
+    if (tool === 'select') {
+      if (dragInfo) {
+        const dx = x - dragInfo.startPos[0]
+        const dy = y - dragInfo.startPos[1]
+        setElements((prev) =>
+          prev.map((el, i) => (i === dragInfo.idx ? translateElement(dragInfo.origEl, dx, dy) : el)),
+        )
+      }
+      return
+    }
+
+    if (tool === 'eraser') {
+      setElements((prev) => eraseFromElements(prev, x, y, eraserSize))
+      return
+    }
+
     const [ox, oy] = origin
 
     if (tool === 'pen') {
@@ -343,23 +567,14 @@ export default function CourseWhiteboardPage() {
       setDraft({ type: 'circle', color, width: strokeWidth, cx: ox, cy: oy, rx: (x - ox) / 2, ry: (y - oy) / 2 })
     } else if (tool === 'triangle') {
       const mx = (ox + x) / 2
-      setDraft({
-        type: 'triangle',
-        color,
-        width: strokeWidth,
-        x1: mx,
-        y1: oy,
-        x2: x,
-        y2: y,
-        x3: ox,
-        y3: y,
-      })
+      setDraft({ type: 'triangle', color, width: strokeWidth, x1: mx, y1: oy, x2: x, y2: y, x3: ox, y3: y })
     }
   }
 
   function onPointerUp() {
     if (!isDrawing) return
     setIsDrawing(false)
+    setDragInfo(null)
     if (draft) {
       setElements((prev) => [...prev, draft])
       setDraft(null)
@@ -434,66 +649,161 @@ export default function CourseWhiteboardPage() {
     { id: 'triangle', icon: <Triangle className="h-5 w-5" />, label: 'Triangle' },
   ]
 
-  const cursor = tool === 'select' ? 'cursor-default' : tool === 'pen' ? 'cursor-crosshair' : 'cursor-crosshair'
+  const cursor =
+    tool === 'select' ? (dragInfo ? 'cursor-grabbing' : 'cursor-grab') :
+    tool === 'eraser' ? '' :
+    'cursor-crosshair'
+  const eraserCursorStyle = tool === 'eraser' ? { cursor: makeEraserCursor(eraserSize) } : undefined
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Left toolbar */}
       <div className="flex w-14 flex-col items-center gap-1 border-r border-slate-200 bg-white py-3 dark:border-neutral-800 dark:bg-neutral-950">
-        {/* Tool buttons */}
-        {tools.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            title={t.label}
-            onClick={() => setTool(t.id)}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-              tool === t.id
-                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
-                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
-            }`}
-          >
-            {t.icon}
-          </button>
-        ))}
+        {/* Tool buttons — collapsed to selected, popover on hover/click */}
+        {(() => {
+          const activeTool = tools.find((t) => t.id === tool) ?? tools[0]
+          return (
+            <PopoverGroup
+              trigger={
+                <button
+                  type="button"
+                  title={activeTool.label}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                >
+                  {activeTool.icon}
+                </button>
+              }
+            >
+              <div className="flex flex-col gap-1">
+                {tools.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    title={t.label}
+                    onClick={() => setTool(t.id)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                      tool === t.id
+                        ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                        : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
+                    }`}
+                  >
+                    {t.icon}
+                  </button>
+                ))}
+              </div>
+            </PopoverGroup>
+          )
+        })()}
+
+        {/* Eraser — collapsed to icon, popover shows 3 sizes */}
+        <PopoverGroup
+          trigger={
+            <button
+              type="button"
+              title="Eraser"
+              onClick={() => setTool('eraser')}
+              className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                tool === 'eraser'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200'
+              }`}
+            >
+              <Eraser className="h-5 w-5" />
+            </button>
+          }
+        >
+          <div className="flex flex-col gap-1">
+            {ERASER_SIZES.map((s) => (
+              <button
+                key={s}
+                type="button"
+                title={`Eraser ${s}px`}
+                onClick={() => { setEraserSize(s); setTool('eraser') }}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                  eraserSize === s && tool === 'eraser'
+                    ? 'bg-indigo-100 dark:bg-indigo-950'
+                    : 'hover:bg-slate-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                <span
+                  className="rounded-full border border-slate-400 bg-white dark:border-neutral-500 dark:bg-neutral-800"
+                  style={{ width: s, height: s }}
+                />
+              </button>
+            ))}
+          </div>
+        </PopoverGroup>
 
         <div className="my-1 h-px w-8 bg-slate-200 dark:bg-neutral-800" />
 
-        {/* Stroke widths */}
-        {STROKE_WIDTHS.map((w) => (
-          <button
-            key={w}
-            type="button"
-            title={`Stroke ${w}px`}
-            onClick={() => setStrokeWidth(w)}
-            className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
-              strokeWidth === w
-                ? 'bg-indigo-100 dark:bg-indigo-950'
-                : 'hover:bg-slate-100 dark:hover:bg-neutral-800'
-            }`}
-          >
-            <span
-              className="rounded-full bg-slate-700 dark:bg-neutral-300"
-              style={{ width: w * 2, height: w * 2 }}
+        {/* Stroke width — collapsed to selected, popover on hover/click */}
+        <PopoverGroup
+          trigger={
+            <button
+              type="button"
+              title={`Stroke ${strokeWidth}px`}
+              className="flex h-9 w-9 items-center justify-center rounded-lg transition-colors bg-indigo-100 dark:bg-indigo-950"
+            >
+              <span
+                className="rounded-full bg-slate-700 dark:bg-neutral-300"
+                style={{ width: strokeWidth * 2, height: strokeWidth * 2 }}
+              />
+            </button>
+          }
+        >
+          <div className="flex flex-col gap-1">
+            {STROKE_WIDTHS.map((w) => (
+              <button
+                key={w}
+                type="button"
+                title={`Stroke ${w}px`}
+                onClick={() => setStrokeWidth(w)}
+                className={`flex h-9 w-9 items-center justify-center rounded-lg transition-colors ${
+                  strokeWidth === w
+                    ? 'bg-indigo-100 dark:bg-indigo-950'
+                    : 'hover:bg-slate-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                <span
+                  className="rounded-full bg-slate-700 dark:bg-neutral-300"
+                  style={{ width: w * 2, height: w * 2 }}
+                />
+              </button>
+            ))}
+          </div>
+        </PopoverGroup>
+
+        <div className="my-1 h-px w-8 bg-slate-200 dark:bg-neutral-800" />
+
+        {/* Color — collapsed to selected, popover on hover/click */}
+        <PopoverGroup
+          trigger={
+            <button
+              type="button"
+              title={color}
+              className="flex h-7 w-7 items-center justify-center rounded-full ring-2 ring-indigo-500 ring-offset-1 scale-110 transition-transform"
+              style={{ backgroundColor: color, border: color === '#ffffff' ? '1px solid #e2e8f0' : undefined }}
             />
-          </button>
-        ))}
-
-        <div className="my-1 h-px w-8 bg-slate-200 dark:bg-neutral-800" />
-
-        {/* Colors */}
-        {COLORS.map((c) => (
-          <button
-            key={c}
-            type="button"
-            title={c}
-            onClick={() => setColor(c)}
-            className={`flex h-7 w-7 items-center justify-center rounded-full transition-transform ${
-              color === c ? 'ring-2 ring-indigo-500 ring-offset-1 scale-110' : 'hover:scale-110'
-            }`}
-            style={{ backgroundColor: c, border: c === '#ffffff' ? '1px solid #e2e8f0' : undefined }}
-          />
-        ))}
+          }
+        >
+          <div
+            className="grid gap-2 p-1"
+            style={{ gridTemplateColumns: 'repeat(3, 1.75rem)' }}
+          >
+            {COLORS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                title={c}
+                onClick={() => setColor(c)}
+                className={`h-7 w-7 rounded-full transition-transform ${
+                  color === c ? 'ring-2 ring-indigo-500 ring-offset-1 scale-110' : 'hover:scale-110'
+                }`}
+                style={{ backgroundColor: c, border: c === '#ffffff' ? '1px solid #e2e8f0' : undefined }}
+              />
+            ))}
+          </div>
+        </PopoverGroup>
 
         <div className="my-1 h-px w-8 bg-slate-200 dark:bg-neutral-800" />
 
@@ -543,6 +853,7 @@ export default function CourseWhiteboardPage() {
         <canvas
           ref={canvasRef}
           className={`touch-none ${cursor}`}
+          style={eraserCursorStyle}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
