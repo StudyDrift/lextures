@@ -31,6 +31,7 @@ export type PlatformFeaturesSnapshot = {
   ffReadingPreferences?: boolean
   ffHighContrastReducedMotion?: boolean
   ffLibrary?: boolean
+  ffBroadcasts?: boolean
   ffClassroomSignals?: boolean
 }
 
@@ -65,6 +66,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffReadingPreferences: false,
   ffHighContrastReducedMotion: false,
   ffLibrary: false,
+  ffBroadcasts: false,
   ffClassroomSignals: false,
 }
 
@@ -167,6 +169,10 @@ export function instructorInsightsFeatureEnabled(): boolean {
 
 export function libraryFeatureEnabled(): boolean {
   return loaded && snapshot.ffLibrary === true
+}
+
+export function broadcastsFeatureEnabled(): boolean {
+  return loaded && snapshot.ffBroadcasts === true
 }
 
 export function readingPreferencesFeatureEnabled(): boolean {

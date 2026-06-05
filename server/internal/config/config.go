@@ -292,6 +292,8 @@ type Config struct {
 	FFSISIntegration bool
 	// FFLibrary enables the school library catalog, student reading log, and reading dashboard (plan 13.8).
 	FFLibrary bool
+	// FFBroadcasts enables district/school broadcast messages and emergency acknowledgement (plan 13.10).
+	FFBroadcasts bool
 	// FFClassroomSignals enables the digital hall pass and anonymous question queue (plan 13.9).
 	FFClassroomSignals bool
 
@@ -451,6 +453,7 @@ func Load() Config {
 		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
 		FFSISIntegration:                boolEnv("FF_SIS_INTEGRATION"),
 		FFLibrary:                       boolEnv("FF_LIBRARY"),
+		FFBroadcasts:                    boolEnv("FF_BROADCASTS"),
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
 
 		AppEnv:              appEnv(),
