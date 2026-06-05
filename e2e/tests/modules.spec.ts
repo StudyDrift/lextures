@@ -88,6 +88,24 @@ test.describe('Course modules', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    const vibeHtml =
+      '<!doctype html><html><body style="padding:1rem;font-family:sans-serif;background:#f8fafc">' +
+      '<h1 data-testid="vibe-title">Hello from Vibe Activity!</h1>' +
+      '<button onclick="document.getElementById(\'out\').textContent=\'Clicked!\'">Click me</button>' +
+      '<div id="out" data-testid="vibe-output"></div>' +
+      '</body></html>'
+
+    await page.route(
+      `**/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/vibe-activities/generate`,
+      async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ html: vibeHtml }),
+        })
+      },
+    )
+
     await page.goto(`/courses/${seededCourse.courseCode}/modules`)
     await expect(page.getByText(seededCourse.moduleTitle)).toBeVisible()
 
@@ -105,40 +123,24 @@ test.describe('Course modules', () => {
     await expect(vibeItem).toBeVisible({ timeout: 3000 })
     await vibeItem.click()
 
-    // The dedicated Vibe modal should open
+    // The Vibe Activity builder opens in prompt-first mode
     const dialog = page.getByRole('dialog')
     await expect(dialog).toBeVisible({ timeout: 5000 })
 
-    // Fill title
-    const titleInput = dialog.getByRole('textbox').first()
+    const promptArea = dialog.locator('textarea').first()
+    await promptArea.fill('A simple interactive demo for E2E')
+    await dialog.getByRole('button', { name: /generate/i }).click()
+
+    const titleInput = dialog.getByPlaceholder(/activity title/i)
+    await expect(titleInput).toBeVisible({ timeout: 8000 })
     await titleInput.fill('E2E Interactive Demo')
 
-    // The modal has a source textarea — fill a minimal self-contained snippet
-    const sourceArea = dialog.locator('textarea').first()
-    if (await sourceArea.count() > 0) {
-      await sourceArea.fill(
-        '<!doctype html><html><body style="padding:1rem;font-family:sans-serif;background:#f8fafc">' +
-          '<h1 data-testid="vibe-title">Hello from Vibe Activity!</h1>' +
-          '<button onclick="document.getElementById(\'out\').textContent=\'Clicked!\'">Click me</button>' +
-          '<div id="out" data-testid="vibe-output"></div>' +
-          '</body></html>'
-      )
-    }
-
-    // Save
-    const saveBtn = dialog.getByRole('button', { name: /save|add to module/i })
-    if (await saveBtn.count() > 0) {
-      await saveBtn.click()
-    } else {
-      // Fallback: any prominent button in the dialog
-      await dialog.getByRole('button').filter({ hasText: /save|create/i }).first().click()
-    }
+    await dialog.getByRole('button', { name: /^save$/i }).click()
 
     // After save the modal closes and the new item should appear in the outline
     await expect(dialog).toBeHidden({ timeout: 8000 })
     await expect(page.getByText('E2E Interactive Demo')).toBeVisible({ timeout: 8000 })
 
-    // It should have the distinctive Vibe styling / icon area (rose / sparkle related)
     const vibeRow = page.locator('li, [role="listitem"]').filter({ hasText: 'E2E Interactive Demo' }).first()
     await expect(vibeRow).toBeVisible()
   })
