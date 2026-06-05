@@ -128,72 +128,210 @@ function distToSegment(px: number, py: number, ax: number, ay: number, bx: numbe
   return Math.hypot(px - (ax + t * dx), py - (ay + t * dy))
 }
 
+function effectiveEraserRadius(radius: number, lineWidth: number): number {
+  return radius + lineWidth / 2
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t
+}
+
+/** Parameter values t ∈ [0,1] where segment (x1,y1)→(x2,y2) meets circle (cx,cy,r). */
+function segmentCircleIntersections(
+  cx: number,
+  cy: number,
+  r: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): number[] {
+  const dx = x2 - x1
+  const dy = y2 - y1
+  const fx = x1 - cx
+  const fy = y1 - cy
+  const a = dx * dx + dy * dy
+  if (a === 0) return Math.hypot(fx, fy) <= r ? [0] : []
+  const b = 2 * (fx * dx + fy * dy)
+  const c = fx * fx + fy * fy - r * r
+  const disc = b * b - 4 * a * c
+  if (disc < 0) return []
+  const sd = Math.sqrt(disc)
+  const t1 = (-b - sd) / (2 * a)
+  const t2 = (-b + sd) / (2 * a)
+  const out: number[] = []
+  if (t1 >= 0 && t1 <= 1) out.push(t1)
+  if (t2 >= 0 && t2 <= 1 && Math.abs(t2 - t1) > 1e-9) out.push(t2)
+  return out.sort((u, v) => u - v)
+}
+
+function hitTestStroke(stroke: StrokeEl, px: number, py: number, radius: number): boolean {
+  const r = effectiveEraserRadius(radius, stroke.width)
+  for (let i = 0; i < stroke.pts.length; i++) {
+    const [ex, ey] = stroke.pts[i]
+    if (Math.hypot(ex - px, ey - py) <= r) return true
+    if (i > 0) {
+      const [ax, ay] = stroke.pts[i - 1]
+      if (distToSegment(px, py, ax, ay, ex, ey) <= r) return true
+    }
+  }
+  return false
+}
+
+/** Convert any drawable element into one or more polylines for partial erasing. */
+function elementToStrokes(el: DrawEl): StrokeEl[] {
+  const { color, width } = el
+  switch (el.type) {
+    case 'stroke':
+      return [el]
+    case 'line':
+      return [{ type: 'stroke', color, width, pts: [[el.x1, el.y1], [el.x2, el.y2]] }]
+    case 'rect': {
+      const x1 = el.x
+      const y1 = el.y
+      const x2 = el.x + el.w
+      const y2 = el.y + el.h
+      const edge = (a: [number, number], b: [number, number]): StrokeEl => ({ type: 'stroke', color, width, pts: [a, b] })
+      return [
+        edge([x1, y1], [x2, y1]),
+        edge([x2, y1], [x2, y2]),
+        edge([x2, y2], [x1, y2]),
+        edge([x1, y2], [x1, y1]),
+      ]
+    }
+    case 'triangle': {
+      const edge = (a: [number, number], b: [number, number]): StrokeEl => ({ type: 'stroke', color, width, pts: [a, b] })
+      return [
+        edge([el.x1, el.y1], [el.x2, el.y2]),
+        edge([el.x2, el.y2], [el.x3, el.y3]),
+        edge([el.x3, el.y3], [el.x1, el.y1]),
+      ]
+    }
+    case 'circle': {
+      const segments = 36
+      const strokes: StrokeEl[] = []
+      let prev: [number, number] | null = null
+      for (let i = 0; i <= segments; i++) {
+        const angle = (2 * Math.PI * i) / segments
+        const pt: [number, number] = [el.cx + el.rx * Math.cos(angle), el.cy + el.ry * Math.sin(angle)]
+        if (prev) strokes.push({ type: 'stroke', color, width, pts: [prev, pt] })
+        prev = pt
+      }
+      return strokes
+    }
+  }
+}
+
 function hitTest(el: DrawEl, px: number, py: number, radius: number): boolean {
   switch (el.type) {
     case 'stroke':
-      return el.pts.some(([ex, ey]) => Math.hypot(ex - px, ey - py) <= radius)
+      return hitTestStroke(el, px, py, radius)
     case 'line':
-      return distToSegment(px, py, el.x1, el.y1, el.x2, el.y2) <= radius
+      return distToSegment(px, py, el.x1, el.y1, el.x2, el.y2) <= effectiveEraserRadius(radius, el.width)
     case 'rect': {
       const x1 = Math.min(el.x, el.x + el.w)
       const x2 = Math.max(el.x, el.x + el.w)
       const y1 = Math.min(el.y, el.y + el.h)
       const y2 = Math.max(el.y, el.y + el.h)
+      const r = effectiveEraserRadius(radius, el.width)
       return (
-        distToSegment(px, py, x1, y1, x2, y1) <= radius ||
-        distToSegment(px, py, x2, y1, x2, y2) <= radius ||
-        distToSegment(px, py, x2, y2, x1, y2) <= radius ||
-        distToSegment(px, py, x1, y2, x1, y1) <= radius
+        distToSegment(px, py, x1, y1, x2, y1) <= r ||
+        distToSegment(px, py, x2, y1, x2, y2) <= r ||
+        distToSegment(px, py, x2, y2, x1, y2) <= r ||
+        distToSegment(px, py, x1, y2, x1, y1) <= r
       )
     }
     case 'circle': {
       const rx = Math.abs(el.rx) || 1
       const ry = Math.abs(el.ry) || 1
       const norm = Math.hypot((px - el.cx) / rx, (py - el.cy) / ry)
-      return Math.abs(norm - 1) * Math.min(rx, ry) <= radius
+      return Math.abs(norm - 1) * Math.min(rx, ry) <= effectiveEraserRadius(radius, el.width)
     }
-    case 'triangle':
+    case 'triangle': {
+      const r = effectiveEraserRadius(radius, el.width)
       return (
-        distToSegment(px, py, el.x1, el.y1, el.x2, el.y2) <= radius ||
-        distToSegment(px, py, el.x2, el.y2, el.x3, el.y3) <= radius ||
-        distToSegment(px, py, el.x3, el.y3, el.x1, el.y1) <= radius
+        distToSegment(px, py, el.x1, el.y1, el.x2, el.y2) <= r ||
+        distToSegment(px, py, el.x2, el.y2, el.x3, el.y3) <= r ||
+        distToSegment(px, py, el.x3, el.y3, el.x1, el.y1) <= r
       )
-  }
-}
-
-/** Split a stroke into sub-strokes, cutting out points within `radius` of (px,py). */
-function splitStroke(stroke: StrokeEl, px: number, py: number, radius: number): StrokeEl[] {
-  const segs: StrokeEl[] = []
-  let cur: [number, number][] = []
-  for (const pt of stroke.pts) {
-    if (Math.hypot(pt[0] - px, pt[1] - py) <= radius) {
-      if (cur.length >= 2) segs.push({ ...stroke, pts: cur })
-      cur = []
-    } else {
-      cur.push(pt)
     }
   }
-  if (cur.length >= 2) segs.push({ ...stroke, pts: cur })
-  return segs
 }
 
-/** Partial erase: strokes are split; non-stroke elements are removed wholesale if hit. */
+function pushUniquePoint(cur: [number, number][], x: number, y: number) {
+  const n = cur.length
+  if (n === 0 || cur[n - 1][0] !== x || cur[n - 1][1] !== y) cur.push([x, y])
+}
+
+/** Split a stroke at the eraser circle, clipping segments rather than dropping dense points. */
+function splitStroke(stroke: StrokeEl, px: number, py: number, radius: number): StrokeEl[] {
+  const pts = stroke.pts
+  if (pts.length < 2) return pts.length === 1 && hitTestStroke(stroke, px, py, radius) ? [] : [stroke]
+
+  const r = effectiveEraserRadius(radius, stroke.width)
+  const inside = (x: number, y: number) => Math.hypot(x - px, y - py) <= r
+  const result: StrokeEl[] = []
+  let cur: [number, number][] = []
+
+  const flush = () => {
+    if (cur.length >= 2) result.push({ ...stroke, pts: cur })
+    cur = []
+  }
+
+  const first = pts[0]
+  if (!inside(first[0], first[1])) cur.push(first)
+
+  for (let i = 1; i < pts.length; i++) {
+    const [x0, y0] = pts[i - 1]
+    const [x1, y1] = pts[i]
+    const aIn = inside(x0, y0)
+    const bIn = inside(x1, y1)
+
+    if (aIn && bIn) {
+      flush()
+      continue
+    }
+
+    const hits = segmentCircleIntersections(px, py, r, x0, y0, x1, y1)
+
+    if (!aIn && !bIn) {
+      if (hits.length >= 2) {
+        pushUniquePoint(cur, lerp(x0, x1, hits[0]), lerp(y0, y1, hits[0]))
+        flush()
+        pushUniquePoint(cur, lerp(x0, x1, hits[1]), lerp(y0, y1, hits[1]))
+      } else {
+        pushUniquePoint(cur, x1, y1)
+      }
+      continue
+    }
+
+    const t = hits[0] ?? (aIn ? 0 : 1)
+    const bx = lerp(x0, x1, t)
+    const by = lerp(y0, y1, t)
+
+    if (!aIn && bIn) {
+      pushUniquePoint(cur, bx, by)
+      flush()
+    } else {
+      flush()
+      pushUniquePoint(cur, bx, by)
+      pushUniquePoint(cur, x1, y1)
+    }
+  }
+
+  flush()
+  return result
+}
+
+/** Partial erase: clip every drawable at the eraser circle boundary. */
 function eraseFromElements(elements: DrawEl[], px: number, py: number, radius: number): DrawEl[] {
   const out: DrawEl[] = []
   for (const el of elements) {
-    if (el.type === 'stroke') {
-      out.push(...splitStroke(el, px, py, radius))
-    } else if (!hitTest(el, px, py, radius)) {
-      out.push(el)
+    for (const stroke of elementToStrokes(el)) {
+      out.push(...splitStroke(stroke, px, py, radius))
     }
   }
   return out
-}
-
-function makeEraserCursor(radius: number): string {
-  const d = radius * 2
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${d}" height="${d}"><circle cx="${radius}" cy="${radius}" r="${radius - 1}" stroke="%23475569" stroke-width="1.5" fill="rgba(255%2C255%2C255%2C0.15)"/></svg>`
-  return `url("data:image/svg+xml,${svg}") ${radius} ${radius}, crosshair`
 }
 
 // ---------------------------------------------------------------------------
@@ -438,6 +576,7 @@ export default function CourseWhiteboardPage() {
   const [color, setColor] = useState(COLORS[0])
   const [strokeWidth, setStrokeWidth] = useState(STROKE_WIDTHS[1])
   const [eraserSize, setEraserSize] = useState(ERASER_SIZES[1])
+  const [eraserCursorPos, setEraserCursorPos] = useState<[number, number] | null>(null)
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null)
   const [dragInfo, setDragInfo] = useState<{
     idx: number
@@ -530,8 +669,13 @@ export default function CourseWhiteboardPage() {
   }
 
   function onPointerMove(e: ReactPointerEvent<HTMLCanvasElement>) {
-    if (!isDrawing) return
     const [x, y] = getPos(e)
+
+    if (tool === 'eraser') {
+      setEraserCursorPos([x, y])
+    }
+
+    if (!isDrawing) return
 
     if (tool === 'select') {
       if (dragInfo) {
@@ -545,7 +689,21 @@ export default function CourseWhiteboardPage() {
     }
 
     if (tool === 'eraser') {
-      setElements((prev) => eraseFromElements(prev, x, y, eraserSize))
+      const canvas = canvasRef.current!
+      const rect = canvas.getBoundingClientRect()
+      // getCoalescedEvents gives all sub-frame pointer positions the browser recorded,
+      // so we erase only where the mouse actually was without artificial interpolation.
+      const coalesced = e.nativeEvent.getCoalescedEvents?.() ?? []
+      const pts: [number, number][] = coalesced.length > 0
+        ? coalesced.map((ce) => [ce.clientX - rect.left, ce.clientY - rect.top])
+        : [[x, y]]
+      setElements((prev) => {
+        let els = prev
+        for (const [px, py] of pts) {
+          els = eraseFromElements(els, px, py, eraserSize)
+        }
+        return els
+      })
       return
     }
 
@@ -651,9 +809,8 @@ export default function CourseWhiteboardPage() {
 
   const cursor =
     tool === 'select' ? (dragInfo ? 'cursor-grabbing' : 'cursor-grab') :
-    tool === 'eraser' ? '' :
+    tool === 'eraser' ? 'cursor-none' :
     'cursor-crosshair'
-  const eraserCursorStyle = tool === 'eraser' ? { cursor: makeEraserCursor(eraserSize) } : undefined
 
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
@@ -853,11 +1010,22 @@ export default function CourseWhiteboardPage() {
         <canvas
           ref={canvasRef}
           className={`touch-none ${cursor}`}
-          style={eraserCursorStyle}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
+          onPointerLeave={() => setEraserCursorPos(null)}
         />
+        {tool === 'eraser' && eraserCursorPos && (
+          <div
+            className="pointer-events-none absolute rounded-full border border-slate-500 bg-white/15 dark:border-slate-400"
+            style={{
+              left: eraserCursorPos[0] - eraserSize,
+              top: eraserCursorPos[1] - eraserSize,
+              width: eraserSize * 2,
+              height: eraserSize * 2,
+            }}
+          />
+        )}
       </div>
 
       {/* Dialogs */}

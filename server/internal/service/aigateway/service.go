@@ -30,6 +30,7 @@ const (
 	FeatureReadingLevelSimplification  = "reading_level_simplification"
 	FeatureContentTranslation          = "content_translation"
 	FeatureAltTextSuggestion           = "alt_text_suggestion"
+	FeatureVibeGeneration              = "vibe_generation"
 )
 
 // BlockReason explains why a call was blocked.

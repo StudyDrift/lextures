@@ -7,6 +7,10 @@ export type PickedFile = {
   viewUrl: string
   iconUrl: string
   mimeType?: string
+  /** OAuth access token for downloading file bytes (Google Drive, OneDrive). */
+  accessToken?: string
+  /** Direct download URL when provided by the picker (OneDrive, Dropbox). */
+  downloadUrl?: string
 }
 
 export interface CloudPickerProvider {

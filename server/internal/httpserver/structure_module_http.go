@@ -14,7 +14,11 @@ import (
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	userai "github.com/lextures/lextures/server/internal/repos/user"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	ltidb "github.com/lextures/lextures/server/internal/repos/lti"
+	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 func parseRFC3339Timestamp(s string) (time.Time, error) {
@@ -845,3 +849,116 @@ func (d Deps) handlePatchModuleVibeActivity() http.HandlerFunc {
 	}
 }
 
+type vibeGenerateMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type vibeGenerateBody struct {
+	Prompt  string                `json:"prompt"`
+	History []vibeGenerateMessage `json:"history"`
+}
+
+const vibeActivitySystemPrompt = `You are an expert web developer helping instructors create self-contained interactive HTML activities for students.
+
+When given a prompt (and optionally prior HTML + revision requests), produce a complete, self-contained HTML document that:
+- Starts with <!doctype html>
+- Uses Tailwind CSS via CDN (https://cdn.tailwindcss.com) for styling
+- Is visually polished, age-appropriate, and interactive where relevant
+- Works entirely offline (no external API calls)
+- Fits within a single HTML file
+
+Output ONLY the raw HTML — no markdown fences, no explanation, no preamble. Start with <!doctype html>.`
+
+// handleGenerateVibeActivityHTML is POST /api/v1/courses/{course_code}/vibe-activities/generate
+func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
+	type resp struct {
+		HTML string `json:"html"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		isStaff, err := enrollment.UserIsCourseStaff(r.Context(), d.Pool, courseCode, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify access.")
+			return
+		}
+		if !isStaff {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Forbidden.")
+			return
+		}
+
+		var body vibeGenerateBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		prompt := strings.TrimSpace(body.Prompt)
+		if prompt == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
+			return
+		}
+
+		or := d.openRouterClient()
+		if or == nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key in Platform Settings.")
+			return
+		}
+
+		model, err := userai.GetVibeActivityModelID(r.Context(), d.Pool, viewer)
+		if err != nil {
+			model = userai.DefaultVibeActivityModelID
+		}
+
+		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureVibeGeneration, model, prompt) {
+			return
+		}
+		gwDec := aigateway.Decision{
+			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, viewer),
+			OptInConfirmed: true,
+		}
+
+		msgs := []openrouter.Message{{Role: "system", Content: vibeActivitySystemPrompt}}
+		for _, h := range body.History {
+			role := h.Role
+			if role != "user" && role != "assistant" {
+				continue
+			}
+			msgs = append(msgs, openrouter.Message{Role: role, Content: h.Content})
+		}
+		msgs = append(msgs, openrouter.Message{Role: "user", Content: prompt})
+
+		generated, err := or.ChatCompletion(model, msgs)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI generation failed: "+err.Error())
+			return
+		}
+		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureVibeGeneration, model, prompt, gwDec)
+
+		html := strings.TrimSpace(generated)
+		// Strip accidental markdown code fences if the model wraps output
+		if strings.HasPrefix(html, "```") {
+			lines := strings.SplitN(html, "\n", 2)
+			if len(lines) == 2 {
+				html = strings.TrimSpace(lines[1])
+			}
+			if idx := strings.LastIndex(html, "```"); idx != -1 {
+				html = strings.TrimSpace(html[:idx])
+			}
+		}
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp{HTML: html})
+	}
+}

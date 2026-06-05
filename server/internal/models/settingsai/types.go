@@ -4,12 +4,14 @@ type AiSettingsUpdateRequest struct {
 	ImageModelID                string `json:"imageModelId"`
 	CourseSetupModelID          string `json:"courseSetupModelId"`
 	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
+	VibeActivityModelID         string `json:"vibeActivityModelId"`
 }
 
 type AiSettingsResponse struct {
 	ImageModelID                string `json:"imageModelId"`
 	CourseSetupModelID          string `json:"courseSetupModelId"`
 	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
+	VibeActivityModelID         string `json:"vibeActivityModelId"`
 }
 
 type AiModelOption struct {

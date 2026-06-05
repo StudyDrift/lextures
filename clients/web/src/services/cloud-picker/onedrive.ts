@@ -23,6 +23,7 @@ interface OneDriveItem {
   id: string
   name: string
   webUrl: string
+  '@microsoft.graph.downloadUrl'?: string
   thumbnails?: Array<{ large?: { url: string } }>
 }
 
@@ -43,9 +44,11 @@ function loadScript(src: string): Promise<void> {
 export class OneDrivePicker implements CloudPickerProvider {
   readonly provider = 'onedrive' as const
   private readonly clientId: string
+  private readonly action: 'share' | 'download'
 
-  constructor(clientId: string) {
+  constructor(clientId: string, action: 'share' | 'download' = 'share') {
     this.clientId = clientId
+    this.action = action
   }
 
   async pick(): Promise<PickedFile | null> {
@@ -55,7 +58,7 @@ export class OneDrivePicker implements CloudPickerProvider {
     return new Promise((resolve, reject) => {
       window.OneDrive!.open({
         clientId: this.clientId,
-        action: 'share',
+        action: this.action,
         multiSelect: false,
         openInNewWindow: true,
         advanced: { redirectUri: window.location.origin },
@@ -67,6 +70,7 @@ export class OneDrivePicker implements CloudPickerProvider {
             externalId: item.id,
             name: item.name,
             viewUrl: item.webUrl,
+            downloadUrl: item['@microsoft.graph.downloadUrl'],
             iconUrl: item.thumbnails?.[0]?.large?.url ?? 'https://res-1.cdn.office.net/files/fabric-cdn-prod_20221209.001/assets/item-types/16/docx.svg',
           })
         },

@@ -80,11 +80,17 @@ func (d Deps) handleGetSettingsAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
 			return
 		}
+		vibe, err := user.GetVibeActivityModelID(r.Context(), d.Pool, uid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
+			return
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"imageModelId":                img,
 			"courseSetupModelId":          course,
 			"notebookFlashcardsModelId":   flashcards,
+			"vibeActivityModelId":         vibe,
 		})
 	}
 }
@@ -93,6 +99,7 @@ type putSettingsAIBody struct {
 	ImageModelID                string `json:"imageModelId"`
 	CourseSetupModelID          string `json:"courseSetupModelId"`
 	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
+	VibeActivityModelID         string `json:"vibeActivityModelId"`
 }
 
 // handlePutSettingsAI is PUT /api/v1/settings/ai
@@ -132,7 +139,11 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 		if flashcards == "" {
 			flashcards = user.DefaultNotebookFlashcardsModelID
 		}
-		imgOut, courseOut, flashcardsOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course, flashcards)
+		vibe := strings.TrimSpace(in.VibeActivityModelID)
+		if vibe == "" {
+			vibe = user.DefaultVibeActivityModelID
+		}
+		imgOut, courseOut, flashcardsOut, vibeOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course, flashcards, vibe)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save AI settings.")
 			return
@@ -142,6 +153,7 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 			"imageModelId":                imgOut,
 			"courseSetupModelId":          courseOut,
 			"notebookFlashcardsModelId":   flashcardsOut,
+			"vibeActivityModelId":         vibeOut,
 		})
 	}
 }

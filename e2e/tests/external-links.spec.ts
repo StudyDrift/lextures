@@ -10,8 +10,53 @@
  *   [x] Cloud picker buttons are visible to instructors in the edit form
  */
 import { test, expect, injectToken } from '../fixtures/test.js'
+import { apiSignup } from '../fixtures/api.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
+const PASSWORD = 'E2eTestPass1!'
+
+async function configureCloudProvidersForE2E(): Promise<boolean> {
+  const adminEmail = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
+  const { access_token: adminToken } = await apiSignup({
+    email: adminEmail,
+    password: PASSWORD,
+    displayName: 'E2E Admin',
+  })
+
+  const providers = [
+    {
+      provider: 'google_drive',
+      body: { enabled: true, clientId: 'e2e.apps.googleusercontent.com', apiKey: 'e2e-google-api-key' },
+    },
+    {
+      provider: 'onedrive',
+      body: { enabled: true, clientId: 'e2e-onedrive-client-id' },
+    },
+    {
+      provider: 'dropbox',
+      body: { enabled: true, appKey: 'e2e-dropbox-app-key' },
+    },
+  ] as const
+
+  for (const entry of providers) {
+    const res = await fetch(`${apiBase}/api/v1/admin/cloud-providers/${entry.provider}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`,
+      },
+      body: JSON.stringify(entry.body),
+    })
+    if (res.status === 403 || res.status === 401) {
+      return false
+    }
+    expect([204, 501]).toContain(res.status)
+    if (res.status !== 204) {
+      return false
+    }
+  }
+  return true
+}
 
 async function apiCreateExternalLink(
   token: string,
@@ -170,6 +215,12 @@ test.describe('External link module items', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    const configured = await configureCloudProvidersForE2E()
+    if (!configured) {
+      test.skip(true, 'Admin could not configure cloud providers in this environment')
+      return
+    }
+
     const item = await apiCreateExternalLink(
       seededCourse.instructorToken,
       seededCourse.courseCode,
@@ -191,6 +242,12 @@ test.describe('External link module items', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    const configured = await configureCloudProvidersForE2E()
+    if (!configured) {
+      test.skip(true, 'Admin could not configure cloud providers in this environment')
+      return
+    }
+
     await page.goto(`/courses/${seededCourse.courseCode}/modules`)
     await expect(page.getByText(seededCourse.moduleTitle)).toBeVisible()
 
