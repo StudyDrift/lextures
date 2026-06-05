@@ -155,6 +155,7 @@ func (d Deps) handlePostCourseFilesFolder() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(folder)
+		broadcastFilesChanged(courseCode)
 	}
 }
 
@@ -210,6 +211,7 @@ func (d Deps) handlePatchCourseFilesFolder() http.HandlerFunc {
 			}
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(folder)
+			broadcastFilesChanged(courseCode)
 			return
 		}
 		if body.ParentID != nil {
@@ -233,6 +235,7 @@ func (d Deps) handlePatchCourseFilesFolder() http.HandlerFunc {
 			}
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(folder)
+			broadcastFilesChanged(courseCode)
 			return
 		}
 		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide name or parentId to update.")
@@ -298,6 +301,7 @@ func (d Deps) handleDeleteCourseFilesFolder() http.HandlerFunc {
 			}
 		}()
 		w.WriteHeader(http.StatusNoContent)
+		broadcastFilesChanged(courseCode)
 	}
 }
 
@@ -407,6 +411,7 @@ func (d Deps) handlePostCourseFileItem() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(item)
+		broadcastFilesChanged(courseCode)
 	}
 }
 
@@ -471,6 +476,7 @@ func (d Deps) handlePostCourseFileItemConfirm() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(item)
+		broadcastFilesChanged(courseCode)
 	}
 }
 
@@ -526,6 +532,7 @@ func (d Deps) handlePatchCourseFileItem() http.HandlerFunc {
 			}
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(item)
+			broadcastFilesChanged(courseCode)
 			return
 		}
 		if body.FolderID != nil {
@@ -549,6 +556,7 @@ func (d Deps) handlePatchCourseFileItem() http.HandlerFunc {
 			}
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			_ = json.NewEncoder(w).Encode(item)
+			broadcastFilesChanged(courseCode)
 			return
 		}
 		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide displayName or folderId to update.")
@@ -606,6 +614,7 @@ func (d Deps) handleDeleteCourseFileItem() http.HandlerFunc {
 			}
 		}()
 		w.WriteHeader(http.StatusNoContent)
+		broadcastFilesChanged(courseCode)
 	}
 }
 

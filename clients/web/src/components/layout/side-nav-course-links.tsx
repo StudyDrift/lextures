@@ -16,6 +16,7 @@ import {
   MessagesSquare,
   NotebookPen,
   PenLine,
+  Pencil,
   Settings,
   Users,
   UsersRound,
@@ -67,6 +68,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     officeHoursEnabled,
     filesEnabled,
     attendanceEnabled,
+    whiteboardEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const courseViewPreview = useCourseViewAs(courseCode)
@@ -141,6 +143,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       {attendanceEnabled && (
         <SideNavLink to={`${base}/attendance`} icon={<ClipboardList className="h-5 w-5" />}>
           Attendance
+        </SideNavLink>
+      )}
+      {whiteboardEnabled && canManageCourse && (
+        <SideNavLink to={`${base}/whiteboard`} icon={<Pencil className="h-5 w-5" />}>
+          Whiteboard
         </SideNavLink>
       )}
       {canManageQuestionBank && questionBankEnabled && (
