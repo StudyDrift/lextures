@@ -64,6 +64,8 @@ import MagicLinkPage from './pages/magic-link'
 import ResetPassword from './pages/reset-password'
 import Signup from './pages/signup'
 import ParentDashboard from './pages/lms/parent/parent-dashboard'
+import ConferenceBooking from './pages/lms/parent/conference-booking'
+import ConferenceAvailabilitySetup from './pages/lms/conference-availability-setup'
 import TrustCenterPage from './pages/trust-center-page'
 import IsoComplianceAdminPage from './pages/iso-compliance-admin-page'
 import SecurityDisclosureAdminPage from './pages/security-disclosure-admin-page'
@@ -73,6 +75,7 @@ import AttendanceDashboard from './pages/admin/AttendanceDashboard'
 import AttendanceExport from './pages/admin/AttendanceExport'
 import BehaviorDashboard from './pages/admin/BehaviorDashboard'
 import BroadcastComposer from './pages/admin/BroadcastComposer'
+import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
 import CourseAttendance from './pages/lms/CourseAttendance'
 import CourseBehavior from './pages/lms/CourseBehavior'
 import CourseReportCards from './pages/lms/CourseReportCards'
@@ -131,6 +134,8 @@ export default function App() {
           <Route path="/privacy-centre" element={<PrivacyCentrePage />} />
           <Route path="/me/study-insights" element={<StudyInsightsPage />} />
           <Route path="/parent" element={<ParentDashboard />} />
+          <Route path="/parent/conferences" element={<ConferenceBooking />} />
+          <Route path="/conferences/availability" element={<ConferenceAvailabilitySetup />} />
           <Route path="/ai" element={<AskAiPage />} />
           <Route path="/review" element={<ReviewSessionPage />} />
           <Route path="/courses" element={<Courses />} />
@@ -198,6 +203,7 @@ export default function App() {
           <Route path="/admin/attendance/export" element={<AttendanceExport />} />
           <Route path="/admin/behavior/dashboard" element={<BehaviorDashboard />} />
           <Route path="/admin/broadcasts/:orgId" element={<BroadcastComposer />} />
+          <Route path="/admin/conferences/schedule" element={<ConferenceScheduleGrid />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

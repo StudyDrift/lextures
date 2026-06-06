@@ -11,6 +11,8 @@ const (
 	PasswordReset          = "password_reset"
 	WelcomeInvite          = "welcome_invite"
 	MeetingReminder        = "meeting_reminder"
+	ConferenceConfirmed      = "conference_confirmed"
+	ConferenceReminder       = "conference_reminder"
 	CoachingTipWeekly      = "coaching_tip_weekly"
 	CanvasCourseImported   = "canvas_course_imported"
 )
@@ -26,6 +28,8 @@ var All = []string{
 	PasswordReset,
 	WelcomeInvite,
 	MeetingReminder,
+	ConferenceConfirmed,
+	ConferenceReminder,
 	CoachingTipWeekly,
 	CanvasCourseImported,
 }

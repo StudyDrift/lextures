@@ -12,6 +12,8 @@ const (
 	EventPasswordReset         = notificationevents.PasswordReset
 	EventWelcomeInvite         = notificationevents.WelcomeInvite
 	EventMeetingReminder       = notificationevents.MeetingReminder
+	EventConferenceConfirmed   = notificationevents.ConferenceConfirmed
+	EventConferenceReminder    = notificationevents.ConferenceReminder
 	EventCoachingTipWeekly     = notificationevents.CoachingTipWeekly
 	EventCanvasCourseImported  = notificationevents.CanvasCourseImported
 )

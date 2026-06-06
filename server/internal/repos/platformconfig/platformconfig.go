@@ -92,6 +92,7 @@ type Row struct {
 	FFSISIntegration                  *bool
 	FFLibrary                         *bool
 	FFBroadcasts                      *bool
+	FFConferenceScheduling            *bool
 	FFUiMode                          *bool
 
 	MFAEnabled     *bool
@@ -185,6 +186,7 @@ type Write struct {
 	FFSISIntegration                  *bool
 	FFLibrary                         *bool
 	FFBroadcasts                      *bool
+	FFConferenceScheduling            *bool
 	FFUiMode                          *bool
 
 	MFAEnabled     *bool
@@ -276,6 +278,7 @@ SELECT
 	ff_sis_integration,
 	ff_library,
 	ff_broadcasts,
+	ff_conference_scheduling,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -361,6 +364,7 @@ WHERE id = 1
 		&r.FFSISIntegration,
 		&r.FFLibrary,
 		&r.FFBroadcasts,
+		&r.FFConferenceScheduling,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -486,6 +490,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_sis_integration,
 	ff_library,
 	ff_broadcasts,
+	ff_conference_scheduling,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -498,7 +503,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -576,6 +581,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_sis_integration = COALESCE(EXCLUDED.ff_sis_integration, settings.platform_app_settings.ff_sis_integration),
 	ff_library = COALESCE(EXCLUDED.ff_library, settings.platform_app_settings.ff_library),
 	ff_broadcasts = COALESCE(EXCLUDED.ff_broadcasts, settings.platform_app_settings.ff_broadcasts),
+	ff_conference_scheduling = COALESCE(EXCLUDED.ff_conference_scheduling, settings.platform_app_settings.ff_conference_scheduling),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -659,6 +665,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFSISIntegration,
 		w.FFLibrary,
 		w.FFBroadcasts,
+		w.FFConferenceScheduling,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

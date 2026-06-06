@@ -85,6 +85,10 @@ func defaultSubject(eventType string) string {
 		return "Reset your password"
 	case EventMeetingReminder:
 		return "Live session starting soon"
+	case EventConferenceConfirmed:
+		return "Parent-teacher conference confirmed"
+	case EventConferenceReminder:
+		return "Parent-teacher conference reminder"
 	case EventCoachingTipWeekly:
 		return "Your weekly study coaching tip"
 	default:
