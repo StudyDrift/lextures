@@ -55,6 +55,7 @@ const GROUP_ICONS: Record<SearchGroup, typeof BookOpen> = {
 }
 
 const SEARCH_DEBOUNCE_MS = 200
+const EMPTY_SERVER_ITEMS: SearchListItem[] = []
 
 function currentCourseCodeFromPath(pathname: string): string | null {
   const m = /^\/courses\/([^/]+)/.exec(pathname)
@@ -155,6 +156,9 @@ export function CommandPaletteDialog() {
   const parsed = useMemo(() => parseSearchQuery(query), [query])
   const coursePicker = useMemo(() => parseCoursePickerState(query), [query])
   const isHubMode = parsed.raw === '' && !coursePicker.active
+  const serverSearchActive = parsed.text.length >= 2
+  const activeServerItems = serverSearchActive ? serverItems : EMPTY_SERVER_ITEMS
+  const activeServerLoading = serverSearchActive && serverLoading
 
   const pickerCourses = useMemo(() => {
     if (!coursePicker.active) return []
@@ -168,14 +172,13 @@ export function CommandPaletteDialog() {
   }, [coursePicker, coursesForSearch])
 
   useEffect(() => {
-    if (parsed.text.length < 2) {
-      setServerItems([])
-      setServerLoading(false)
+    if (!serverSearchActive) {
       return
     }
     let cancelled = false
-    setServerLoading(true)
     const timer = window.setTimeout(() => {
+      if (cancelled) return
+      setServerLoading(true)
       const types = parsed.types
       const typeParam = types
         ? [...types].filter((t) => t === 'course' || t === 'person' || t === 'content').join(',')
@@ -201,7 +204,7 @@ export function CommandPaletteDialog() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [parsed.text, parsed.scopeCourseCode, parsed.types])
+  }, [serverSearchActive, parsed.text, parsed.scopeCourseCode, parsed.types])
 
   const pinnedCourseCode = isHubMode ? currentCourseCode : parsed.scopeCourseCode
 
@@ -221,7 +224,7 @@ export function CommandPaletteDialog() {
 
     const seen = new Set<string>()
     const merged: SearchListItem[] = []
-    for (const it of [...go, ...serverItems, ...localFiltered]) {
+    for (const it of [...go, ...activeServerItems, ...localFiltered]) {
       if (seen.has(it.id)) continue
       seen.add(it.id)
       merged.push(it)
@@ -235,7 +238,7 @@ export function CommandPaletteDialog() {
     currentCourseCode,
     parsed,
     query,
-    serverItems,
+    activeServerItems,
     pinnedCourseCode,
   ])
 
@@ -337,7 +340,7 @@ export function CommandPaletteDialog() {
           ? 'No matching courses'
           : `${pickerCourses.length} ${pickerCourses.length === 1 ? 'course' : 'courses'}`
         : filtered.length === 0
-          ? serverLoading
+          ? activeServerLoading
             ? 'Searching'
             : 'No results'
           : `${filtered.length} ${filtered.length === 1 ? 'result' : 'results'}`
@@ -461,10 +464,10 @@ export function CommandPaletteDialog() {
               })}
             </>
           )}
-          {loadState === 'ready' && !coursePicker.active && serverLoading && filtered.length === 0 && !isHubMode && (
+          {loadState === 'ready' && !coursePicker.active && activeServerLoading && filtered.length === 0 && !isHubMode && (
             <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">Searching…</p>
           )}
-          {loadState === 'ready' && !coursePicker.active && !serverLoading && filtered.length === 0 && (
+          {loadState === 'ready' && !coursePicker.active && !activeServerLoading && filtered.length === 0 && (
             <p className="px-3 py-8 text-center text-sm text-slate-600 dark:text-neutral-400">No results.</p>
           )}
           {loadState === 'ready' && !coursePicker.active &&
