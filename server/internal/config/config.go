@@ -296,6 +296,8 @@ type Config struct {
 	FFBroadcasts bool
 	// FFClassroomSignals enables the digital hall pass and anonymous question queue (plan 13.9).
 	FFClassroomSignals bool
+	// FFConferenceScheduling enables parent-teacher conference scheduling (plan 13.12).
+	FFConferenceScheduling bool
 	// FFUiMode enables age-appropriate UI modes: K-2, elementary, and secondary (plan 13.11).
 	FFUiMode bool
 

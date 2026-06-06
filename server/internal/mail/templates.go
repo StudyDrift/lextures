@@ -46,6 +46,12 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderAtRiskAlert(vars, logo, color)
 	case "coaching_tip":
 		return renderCoachingTip(vars, logo, color)
+	case "conference_confirmed":
+		return renderConferenceConfirmed(vars, logo, color)
+	case "conference_cancelled":
+		return renderConferenceCancelled(vars, logo, color)
+	case "conference_reminder":
+		return renderConferenceReminder(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {
@@ -156,6 +162,84 @@ func renderDailyDigest(vars map[string]string, logo, color string) (RenderedEmai
 	html, err := renderLayout("Daily summary", fmt.Sprintf(
 		`<p>Here is your daily summary:</p><ul style="padding-left:20px;">%s</ul>`,
 		vars["linesHtml"],
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	_ = color
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderConferenceConfirmed(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	when := vars["when"]
+	summary := vars["summary"]
+	location := vars["location"]
+	subject := "Parent-teacher conference confirmed"
+	bodyText := fmt.Sprintf(`Your parent-teacher conference is confirmed.
+
+%s
+When: %s
+Location: %s
+
+A calendar invite is attached to this email.
+`, summary, when, location)
+	html, err := renderLayout("Conference confirmed", fmt.Sprintf(
+		`<p>Your parent-teacher conference is confirmed.</p>
+<p><strong>%s</strong></p>
+<p>When: %s<br/>Location: %s</p>
+<p style="font-size:13px;color:#6b7280;">A calendar invite is attached to this email.</p>`,
+		template.HTMLEscapeString(summary),
+		template.HTMLEscapeString(when),
+		template.HTMLEscapeString(location),
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	_ = color
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderConferenceCancelled(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	when := vars["when"]
+	summary := vars["summary"]
+	subject := "Parent-teacher conference cancelled"
+	bodyText := fmt.Sprintf(`Your parent-teacher conference has been cancelled.
+
+%s
+Was scheduled for: %s
+`, summary, when)
+	html, err := renderLayout("Conference cancelled", fmt.Sprintf(
+		`<p>Your parent-teacher conference has been cancelled.</p>
+<p><strong>%s</strong></p>
+<p>Was scheduled for: %s</p>`,
+		template.HTMLEscapeString(summary),
+		template.HTMLEscapeString(when),
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	_ = color
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderConferenceReminder(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	when := vars["when"]
+	summary := vars["summary"]
+	location := vars["location"]
+	subject := "Reminder: parent-teacher conference tomorrow"
+	bodyText := fmt.Sprintf(`Reminder: you have a parent-teacher conference tomorrow.
+
+%s
+When: %s
+Location: %s
+`, summary, when, location)
+	html, err := renderLayout("Conference reminder", fmt.Sprintf(
+		`<p>Reminder: you have a parent-teacher conference tomorrow.</p>
+<p><strong>%s</strong></p>
+<p>When: %s<br/>Location: %s</p>`,
+		template.HTMLEscapeString(summary),
+		template.HTMLEscapeString(when),
+		template.HTMLEscapeString(location),
 	), logo, vars["unsubscribeUrl"])
 	if err != nil {
 		return RenderedEmail{}, err

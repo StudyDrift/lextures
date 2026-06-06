@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatDateTime } from '../../../lib/format'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Users } from 'lucide-react'
+import { CalendarHeart, Users } from 'lucide-react'
+import { usePlatformFeatures } from '../../../context/platform-features-context'
 import {
   fetchParentChildren,
   fetchParentStudentAssignments,
@@ -18,6 +19,7 @@ function childLabel(c: ParentChildSummary): string {
 }
 
 export default function ParentDashboard() {
+  const { ffConferenceScheduling } = usePlatformFeatures()
   const [params, setParams] = useSearchParams()
   const [children, setChildren] = useState<ParentChildSummary[] | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -103,6 +105,15 @@ export default function ParentDashboard() {
           Review linked students&apos; courses, grades, and upcoming work. This view is read-only; contact the school
           admin if a child is missing.
         </p>
+        {ffConferenceScheduling && (
+          <Link
+            to={`/parent/conferences${selectedId ? `?student=${selectedId}` : ''}`}
+            className="mt-2 inline-flex w-fit items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-800 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-200"
+          >
+            <CalendarHeart className="h-4 w-4" aria-hidden />
+            Book parent-teacher conferences
+          </Link>
+        )}
       </header>
 
       {loadError && (

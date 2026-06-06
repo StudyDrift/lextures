@@ -51,7 +51,15 @@ func deliverEmailJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config,
 	if rendered.Subject != "" {
 		subject = rendered.Subject
 	}
-	if err := mail.SendMultipart(cfg, to, subject, rendered.BodyText, rendered.HTMLBody, mailBranding); err != nil {
+	icsContent := job.TemplateVars["icsContent"]
+	icsFilename := job.TemplateVars["icsFilename"]
+	var sendErr error
+	if strings.TrimSpace(icsContent) != "" {
+		sendErr = mail.SendMultipartWithICS(cfg, to, subject, rendered.BodyText, rendered.HTMLBody, mailBranding, icsContent, icsFilename)
+	} else {
+		sendErr = mail.SendMultipart(cfg, to, subject, rendered.BodyText, rendered.HTMLBody, mailBranding)
+	}
+	if sendErr != nil {
 		attempts := job.Attempts + 1
 		dead := attempts >= len(emailRetryDelays)
 		var next time.Time
@@ -59,7 +67,7 @@ func deliverEmailJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config,
 			next = now.Add(emailRetryDelays[attempts-1])
 		}
 		_ = emailjobs.MarkRetry(ctx, pool, job.ID, attempts, next, dead)
-		return err
+		return sendErr
 	}
 	return emailjobs.MarkSent(ctx, pool, job.ID, now)
 }
