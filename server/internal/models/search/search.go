@@ -19,6 +19,14 @@ type CourseItem struct {
 	HintScaffoldingEnabled        bool   `json:"hintScaffoldingEnabled"`
 	MisconceptionDetectionEnabled bool   `json:"misconceptionDetectionEnabled"`
 	DiscussionsEnabled            bool   `json:"discussionsEnabled"`
+	CollabDocsEnabled             bool   `json:"collabDocsEnabled"`
+	SbgEnabled                    bool   `json:"sbgEnabled"`
+	LiveSessionsEnabled           bool   `json:"liveSessionsEnabled"`
+	GroupSpacesEnabled            bool   `json:"groupSpacesEnabled"`
+	OfficeHoursEnabled            bool   `json:"officeHoursEnabled"`
+	FilesEnabled                  bool   `json:"filesEnabled"`
+	AttendanceEnabled             bool   `json:"attendanceEnabled"`
+	WhiteboardEnabled             bool   `json:"whiteboardEnabled"`
 }
 
 // PersonItem is a roster person visible to the caller (when they have enrollments:read for that course).
@@ -35,4 +43,28 @@ type PersonItem struct {
 type IndexResponse struct {
 	Courses []CourseItem `json:"courses"`
 	People  []PersonItem `json:"people"`
+}
+
+// QueryResultItem is one row in GET /api/v1/search/query grouped results.
+type QueryResultItem struct {
+	ID       string  `json:"id"`
+	Type     string  `json:"type"`
+	Title    string  `json:"title"`
+	Subtitle string  `json:"subtitle"`
+	Path     string  `json:"path"`
+	Score    float64 `json:"score,omitempty"`
+}
+
+// QueryGroup is a capped result bucket (courses, people, content, …).
+type QueryGroup struct {
+	Type  string            `json:"type"`
+	Label string            `json:"label"`
+	Total int               `json:"total"`
+	Items []QueryResultItem `json:"items"`
+}
+
+// QueryResponse is the top-level /api/v1/search/query payload.
+type QueryResponse struct {
+	Groups []QueryGroup `json:"groups"`
+	TookMs int64        `json:"tookMs"`
 }

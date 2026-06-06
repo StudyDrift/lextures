@@ -3,10 +3,23 @@ import {
   courseEnrollmentsReadPermission,
   courseGradebookViewPermission,
   courseItemCreatePermission,
+  courseItemsCreatePermission,
 } from '../courses-api'
-import { buildSearchItems, filterSearchItems, SEARCH_GROUP_LABEL } from '../build-search-items'
+import {
+  buildCourseActionItems,
+  buildCourseListItems,
+  buildCoursePageItems,
+  buildGlobalSearchItems,
+  buildLocalSearchCandidates,
+  buildSearchItems,
+  capSearchResults,
+  filterSearchItems,
+  SEARCH_GROUP_LABEL,
+} from '../build-search-items'
+import { buildSearchHubItems } from '../search-hub'
+import { parseSearchQuery } from '../search-query-parse'
 import { PERM_COURSE_CREATE, PERM_RBAC_MANAGE } from '../rbac-api'
-import type { SearchCourseItem, SearchPersonItem } from '../search-api'
+import type { SearchCourseItem } from '../search-api'
 
 const allowsNone = () => false
 const allowsAll = (perm: string) =>
@@ -17,28 +30,9 @@ describe('buildSearchItems', () => {
     { courseCode: 'CS-101', title: 'Intro' },
     { courseCode: 'a/b', title: 'Encoded' },
   ]
-  const people: SearchPersonItem[] = [
-    {
-      userId: 'u1',
-      email: 'a@x.com',
-      displayName: 'Alice',
-      role: 'student',
-      courseCode: 'CS-101',
-      courseTitle: 'Intro',
-    },
-    {
-      userId: 'u2',
-      email: 'b@x.com',
-      displayName: null,
-      role: 'ta',
-      courseCode: 'CS-101',
-      courseTitle: 'Intro',
-    },
-  ]
 
-  it('includes course and person rows with expected paths and haystack', () => {
-    const allowsRoster = (p: string) => p === courseEnrollmentsReadPermission('CS-101')
-    const items = buildSearchItems(courses, people, allowsRoster)
+  it('includes course rows with expected paths and haystack', () => {
+    const items = buildSearchItems(courses, [], allowsNone)
     const course = items.find((i) => i.id === 'course:CS-101')
     expect(course).toMatchObject({
       group: 'course',
@@ -48,79 +42,6 @@ describe('buildSearchItems', () => {
     })
     expect(course?.haystack).toContain('intro')
     expect(course?.haystack).toContain('cs-101')
-
-    const e = encodeURIComponent
-    const person = items.find(
-      (i) => i.id === `person:${e('u1')}:${e('CS-101')}:${e('student')}`,
-    )
-    expect(person).toMatchObject({
-      group: 'person',
-      path: '/courses/CS-101/enrollments',
-      title: 'Alice',
-    })
-
-    const allowsGrade = (p: string) =>
-      p === courseEnrollmentsReadPermission('CS-101') || p === courseGradebookViewPermission('CS-101')
-    const itemsG = buildSearchItems(courses, people, allowsGrade)
-    const personG = itemsG.find(
-      (i) => i.id === `person:${e('u1')}:${e('CS-101')}:${e('student')}`,
-    )
-    expect(personG?.path).toBe('/courses/CS-101/gradebook?student=u1')
-
-    const emailOnly = items.find(
-      (i) => i.id === `person:${e('u2')}:${e('CS-101')}:${e('ta')}`,
-    )
-    expect(emailOnly?.title).toBe('b@x.com')
-    expect(person?.subtitle).toBe('Intro · CS-101 · student')
-  })
-
-  it('URL-encodes person item ids so colons in user id or course code cannot collide with id delimiters', () => {
-    const people: SearchPersonItem[] = [
-      {
-        userId: 'user:with:colons',
-        email: 'edge@x.com',
-        displayName: 'Edge',
-        role: 'ta',
-        courseCode: 'C/S',
-        courseTitle: 'Slash course',
-      },
-    ]
-    const allows = (p: string) => p === courseEnrollmentsReadPermission('C/S')
-    const items = buildSearchItems([], people, allows)
-    const p = items.find((i) => i.group === 'person' && i.title === 'Edge')
-    expect(p).toBeDefined()
-    const enc = encodeURIComponent
-    expect(p?.id).toBe(
-      `person:${enc('user:with:colons')}:${enc('C/S')}:${enc('ta')}`,
-    )
-  })
-
-  it('uses distinct ids when the same user has multiple roles in one course', () => {
-    const dualRole: SearchPersonItem[] = [
-      {
-        userId: 'same',
-        email: 'x@x.com',
-        displayName: 'Pat',
-        role: 'Student',
-        courseCode: 'C-1',
-        courseTitle: 'Course',
-      },
-      {
-        userId: 'same',
-        email: 'x@x.com',
-        displayName: 'Pat',
-        role: 'Teacher',
-        courseCode: 'C-1',
-        courseTitle: 'Course',
-      },
-    ]
-    const allows = (p: string) => p === courseEnrollmentsReadPermission('C-1')
-    const items = buildSearchItems([], dualRole, allows)
-    const e = encodeURIComponent
-    const ids = items.filter((i) => i.group === 'person').map((i) => i.id)
-    expect(new Set(ids).size).toBe(2)
-    expect(ids).toContain(`person:${e('same')}:${e('C-1')}:${e('Student')}`)
-    expect(ids).toContain(`person:${e('same')}:${e('C-1')}:${e('Teacher')}`)
   })
 
   it('URL-encodes course codes in paths', () => {
@@ -129,7 +50,7 @@ describe('buildSearchItems', () => {
     expect(enc?.path).toBe('/courses/a%2Fb')
   })
 
-  it('includes Ask AI as the first shortcut for every user', () => {
+  it('includes Ask AI as a global shortcut for every user', () => {
     const items = buildSearchItems([], [], allowsNone)
     const ask = items.find((i) => i.id === 'global:ask-ai')
     expect(ask).toMatchObject({
@@ -207,7 +128,7 @@ describe('buildSearchItems', () => {
     expect(items.some((i) => i.id === 'action:/courses/X/enrollments:add')).toBe(false)
   })
 
-  it('adds course settings general page when staff may edit course', () => {
+  it('includes course settings general page when staff may edit course', () => {
     const allowsItemsX = (p: string) => p === courseItemCreatePermission('X')
     const items = buildSearchItems([{ courseCode: 'X', title: 'Y' }], [], allowsItemsX)
     expect(items.some((i) => i.path === '/courses/X/settings/general')).toBe(true)
@@ -215,31 +136,64 @@ describe('buildSearchItems', () => {
     expect(noItems.some((i) => i.path === '/courses/X/settings/general')).toBe(false)
   })
 
-  it('includes grading settings page only when gradebook view is granted', () => {
-    const allowsGradeG = (p: string) => p === courseGradebookViewPermission('G')
-    const items = buildSearchItems([{ courseCode: 'G', title: 'H' }], [], allowsGradeG)
-    expect(items.some((i) => i.path === '/courses/G/settings/grading')).toBe(true)
-    const noGrade = buildSearchItems([{ courseCode: 'G', title: 'H' }], [], allowsNone)
-    expect(noGrade.some((i) => i.path === '/courses/G/settings/grading')).toBe(false)
+  it('includes enabled course apps that match side-nav feature gates', () => {
+    const allowsStaff = (p: string) =>
+      p === courseItemCreatePermission('X') ||
+      p === courseItemsCreatePermission('X') ||
+      p === courseGradebookViewPermission('X')
+    const pages = buildCoursePageItems(
+      [
+        {
+          courseCode: 'X',
+          title: 'Y',
+          discussionsEnabled: true,
+          collabDocsEnabled: true,
+          groupSpacesEnabled: true,
+          liveSessionsEnabled: true,
+          officeHoursEnabled: true,
+          attendanceEnabled: true,
+          whiteboardEnabled: true,
+          questionBankEnabled: true,
+          sbgEnabled: true,
+          standardsAlignmentEnabled: true,
+        },
+      ],
+      allowsStaff,
+    )
+    const paths = pages.map((p) => p.path)
+    expect(paths).toContain('/courses/X/discussions')
+    expect(paths).toContain('/courses/X/collab-docs')
+    expect(paths).toContain('/courses/X/groups')
+    expect(paths).toContain('/courses/X/files')
+    expect(paths).toContain('/courses/X/live')
+    expect(paths).toContain('/courses/X/office-hours')
+    expect(paths).toContain('/courses/X/attendance')
+    expect(paths).toContain('/courses/X/whiteboard')
+    expect(paths).toContain('/courses/X/questions')
+    expect(paths).toContain('/courses/X/standards-gradebook')
+    expect(paths).toContain('/courses/X/standards-coverage')
   })
 
-  it('includes import-export, outcomes, features, blueprint, and archive settings when item:create is granted', () => {
-    const allowsItems = (p: string) => p === courseItemCreatePermission('Z')
-    const items = buildSearchItems([{ courseCode: 'Z', title: 'W' }], [], allowsItems)
-    expect(items.some((i) => i.path === '/courses/Z/settings/outcomes')).toBe(true)
-    expect(items.some((i) => i.path === '/courses/Z/settings/features')).toBe(true)
-    expect(items.some((i) => i.path === '/courses/Z/settings/import-export')).toBe(true)
-    expect(items.some((i) => i.path === '/courses/Z/settings/blueprint')).toBe(true)
-    expect(items.some((i) => i.path === '/courses/Z/settings/archive')).toBe(true)
-  })
-
-  it('omits import-export, outcomes, features, blueprint, and archive settings without item:create', () => {
-    const items = buildSearchItems([{ courseCode: 'Z', title: 'W' }], [], allowsNone)
-    expect(items.some((i) => i.path === '/courses/Z/settings/outcomes')).toBe(false)
-    expect(items.some((i) => i.path === '/courses/Z/settings/features')).toBe(false)
-    expect(items.some((i) => i.path === '/courses/Z/settings/import-export')).toBe(false)
-    expect(items.some((i) => i.path === '/courses/Z/settings/blueprint')).toBe(false)
-    expect(items.some((i) => i.path === '/courses/Z/settings/archive')).toBe(false)
+  it('includes whiteboard when enabled and staff may edit the course', () => {
+    const allowsItems = (p: string) => p === courseItemCreatePermission('X')
+    const items = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', whiteboardEnabled: true }],
+      [],
+      allowsItems,
+    )
+    expect(items.some((i) => i.path === '/courses/X/whiteboard')).toBe(true)
+    const disabled = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', whiteboardEnabled: false }],
+      [],
+      allowsItems,
+    )
+    expect(disabled.some((i) => i.path === '/courses/X/whiteboard')).toBe(false)
+    const noPerm = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', whiteboardEnabled: true }],
+      [],
+      allowsNone,
+    )
+    expect(noPerm.some((i) => i.path === '/courses/X/whiteboard')).toBe(false)
   })
 
   it('omits feed, notebook, and calendar search targets when disabled on the course', () => {
@@ -262,16 +216,35 @@ describe('buildSearchItems', () => {
     expect(items.some((i) => i.path === '/courses/X/calendar')).toBe(false)
     expect(items.some((i) => i.path === '/courses/X/syllabus')).toBe(true)
   })
+})
 
-  it('includes gradebook page only for courses where gradebook view is granted', () => {
-    const courses: SearchCourseItem[] = [
-      { courseCode: 'C-ONE', title: 'First' },
-      { courseCode: 'C-TWO', title: 'Second' },
-    ]
-    const allowsGradebookOne = (p: string) => p === courseGradebookViewPermission('C-ONE')
-    const items = buildSearchItems(courses, [], allowsGradebookOne)
-    expect(items.some((i) => i.path === '/courses/C-ONE/gradebook')).toBe(true)
-    expect(items.some((i) => i.path === '/courses/C-TWO/gradebook')).toBe(false)
+describe('buildLocalSearchCandidates', () => {
+  it('omits per-course pages until there is query text or a scope', () => {
+    const courses = [{ courseCode: 'X', title: 'Y' }]
+    const parsed = parseSearchQuery('')
+    const items = buildLocalSearchCandidates(courses, allowsNone, parsed)
+    expect(items.some((i) => i.path === '/courses/X/syllabus')).toBe(false)
+    expect(items.some((i) => i.id === 'course:X')).toBe(true)
+  })
+
+  it('includes scoped course pages for @scope without extra text', () => {
+    const courses = [{ courseCode: 'X', title: 'Y' }]
+    const parsed = parseSearchQuery('@X')
+    const items = buildLocalSearchCandidates(courses, allowsNone, parsed)
+    expect(items.some((i) => i.path === '/courses/X/syllabus')).toBe(true)
+    expect(items.filter((i) => i.id === 'course:X').length).toBe(1)
+  })
+})
+
+describe('buildSearchHubItems', () => {
+  it('stays small for many courses (no page cartesian product)', () => {
+    const many = Array.from({ length: 20 }, (_, i) => ({
+      courseCode: `C-${i}`,
+      title: `Course ${i}`,
+    }))
+    const hub = buildSearchHubItems(many, allowsNone, null)
+    expect(hub.length).toBeLessThan(30)
+    expect(hub.filter((i) => i.group === 'page' && i.path.includes('/syllabus')).length).toBe(0)
   })
 })
 
@@ -329,9 +302,61 @@ describe('filterSearchItems', () => {
   })
 })
 
+describe('capSearchResults', () => {
+  it('limits total and per-group counts', () => {
+    const items = Array.from({ length: 40 }, (_, i) => ({
+      id: `page:${i}`,
+      group: 'page' as const,
+      title: `Page ${i}`,
+      subtitle: '',
+      path: `/p/${i}`,
+      haystack: `page ${i}`,
+    }))
+    const capped = capSearchResults(items)
+    expect(capped.length).toBeLessThanOrEqual(25)
+    expect(capped.filter((i) => i.group === 'page').length).toBeLessThanOrEqual(5)
+  })
+
+  it('keeps all pinned course pages when scope is set', () => {
+    const pinned = Array.from({ length: 12 }, (_, i) => ({
+      id: `page:c:${i}`,
+      group: 'page' as const,
+      title: `Tool ${i}`,
+      subtitle: '',
+      path: `/courses/X/tool-${i}`,
+      haystack: '',
+    }))
+    const other = Array.from({ length: 10 }, (_, i) => ({
+      id: `page:o:${i}`,
+      group: 'page' as const,
+      title: `Other ${i}`,
+      subtitle: '',
+      path: `/courses/Y/tool-${i}`,
+      haystack: '',
+    }))
+    const capped = capSearchResults([...pinned, ...other], { pinnedCourseCode: 'X' })
+    expect(capped.filter((i) => i.path.startsWith('/courses/X/')).length).toBe(12)
+  })
+})
+
+describe('parseSearchQuery', () => {
+  it('parses @scope and type: filters', () => {
+    expect(parseSearchQuery('@bio gradebook')).toMatchObject({
+      scopeCourseCode: 'bio',
+      text: 'gradebook',
+    })
+    expect(parseSearchQuery('type:person smith')).toMatchObject({
+      text: 'smith',
+    })
+    expect(parseSearchQuery('type:person smith').types).toEqual(new Set(['person']))
+  })
+})
+
 describe('SEARCH_GROUP_LABEL', () => {
   it('has a label for each group', () => {
     expect(SEARCH_GROUP_LABEL.ai).toBe('AI')
+    expect(SEARCH_GROUP_LABEL.recent).toBe('Recent')
+    expect(SEARCH_GROUP_LABEL.content).toBe('Content')
     expect(SEARCH_GROUP_LABEL.action).toBe('Actions')
     expect(SEARCH_GROUP_LABEL.course).toBe('Courses')
     expect(SEARCH_GROUP_LABEL.person).toBe('People')
@@ -339,12 +364,32 @@ describe('SEARCH_GROUP_LABEL', () => {
   })
 })
 
-describe('buildSearchItems with full permissions', () => {
+describe('granular builders', () => {
+  it('buildCourseListItems only returns course rows', () => {
+    const rows = buildCourseListItems([{ courseCode: 'A', title: 'Alpha' }])
+    expect(rows).toHaveLength(1)
+    expect(rows[0]?.group).toBe('course')
+  })
+
+  it('buildCoursePageItems respects permissions', () => {
+    const allowsGrade = (p: string) => p === courseGradebookViewPermission('G')
+    const pages = buildCoursePageItems([{ courseCode: 'G', title: 'H' }], allowsGrade)
+    expect(pages.some((i) => i.path === '/courses/G/gradebook')).toBe(true)
+    expect(buildCoursePageItems([{ courseCode: 'G', title: 'H' }], allowsNone).some(
+      (i) => i.path === '/courses/G/gradebook',
+    )).toBe(false)
+  })
+
+  it('buildCourseActionItems requires roster permission', () => {
+    const allowsRoster = (p: string) => p === courseEnrollmentsReadPermission('Z')
+    expect(buildCourseActionItems([{ courseCode: 'Z', title: 'W' }], allowsRoster).length).toBe(1)
+    expect(buildCourseActionItems([{ courseCode: 'Z', title: 'W' }], allowsNone).length).toBe(0)
+  })
+
   it('includes rbac page and create course when allows returns true', () => {
-    const items = buildSearchItems([], [], allowsAll)
+    const items = buildGlobalSearchItems(allowsAll)
     expect(items.some((i) => i.path === '/settings/roles')).toBe(true)
     expect(items.some((i) => i.path === '/settings/platform')).toBe(true)
-    expect(items.some((i) => i.path === '/settings/ai/models')).toBe(true)
     expect(items.some((i) => i.id === 'action:/courses/create')).toBe(true)
   })
 })

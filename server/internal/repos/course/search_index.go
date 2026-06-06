@@ -25,7 +25,15 @@ SELECT
     c.diagnostic_assessments_enabled,
     c.hint_scaffolding_enabled,
     c.misconception_detection_enabled,
-    c.discussions_enabled
+    c.discussions_enabled,
+    c.collab_docs_enabled,
+    c.sbg_enabled,
+    c.live_sessions_enabled,
+    c.group_spaces_enabled,
+    c.office_hours_enabled,
+    c.files_enabled,
+    c.attendance_enabled,
+    c.whiteboard_enabled
 FROM course.courses c
 LEFT JOIN course.user_course_catalog_order o ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
@@ -54,6 +62,14 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 			&it.HintScaffoldingEnabled,
 			&it.MisconceptionDetectionEnabled,
 			&it.DiscussionsEnabled,
+			&it.CollabDocsEnabled,
+			&it.SbgEnabled,
+			&it.LiveSessionsEnabled,
+			&it.GroupSpacesEnabled,
+			&it.OfficeHoursEnabled,
+			&it.FilesEnabled,
+			&it.AttendanceEnabled,
+			&it.WhiteboardEnabled,
 		); err != nil {
 			return nil, err
 		}
