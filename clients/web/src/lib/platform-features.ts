@@ -35,6 +35,7 @@ export type PlatformFeaturesSnapshot = {
   ffClassroomSignals?: boolean
   ffConferenceScheduling?: boolean
   ffDemographics?: boolean
+  ffContentFilterIntegration?: boolean
   ffUiMode?: boolean
 }
 
@@ -73,6 +74,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffClassroomSignals: false,
   ffConferenceScheduling: false,
   ffDemographics: false,
+  ffContentFilterIntegration: false,
   ffUiMode: false,
 }
 

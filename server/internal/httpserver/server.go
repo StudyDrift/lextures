@@ -126,6 +126,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerClassroomSignalsRoutes(r)
 	d.registerConferenceRoutes(r)
 	d.registerDemographicsRoutes(r)
+	d.registerContentFilterRoutes(r)
 	d.registerUIModeRoutes(r)
 	r.Get("/api/v1/help/contextual-articles", d.handleHelpContextualArticles())
 	d.registerTranslationRoutes(r)

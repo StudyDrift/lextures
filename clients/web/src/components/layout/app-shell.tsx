@@ -6,6 +6,7 @@ import { CourseFeedUnreadProvider } from '../../context/course-feed-unread-provi
 import { InboxNotificationsProvider } from '../../context/inbox-notifications-provider'
 import { InboxUnreadProvider } from '../../context/inbox-unread-provider'
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
+import { ContentFilterProvider } from '../../context/content-filter-context'
 import { PlatformFeaturesProvider } from '../../context/platform-features-context'
 import { ReadingPreferencesProvider } from '../../context/reading-preferences-context'
 import { QuizFocusTopBar } from './quiz-focus-top-bar'
@@ -77,6 +78,7 @@ function AppShellLayout() {
 export function AppShell() {
   return (
     <PlatformFeaturesProvider>
+    <ContentFilterProvider>
     <ReadingPreferencesProvider>
     <InboxUnreadProvider>
       <InboxNotificationsProvider>
@@ -96,6 +98,7 @@ export function AppShell() {
       </InboxNotificationsProvider>
     </InboxUnreadProvider>
     </ReadingPreferencesProvider>
+    </ContentFilterProvider>
     </PlatformFeaturesProvider>
   )
 }

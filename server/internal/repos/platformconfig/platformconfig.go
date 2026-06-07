@@ -94,6 +94,7 @@ type Row struct {
 	FFBroadcasts                      *bool
 	FFConferenceScheduling            *bool
 	FFDemographics                    *bool
+	FFContentFilterIntegration        *bool
 	FFUiMode                          *bool
 
 	MFAEnabled     *bool
@@ -189,6 +190,7 @@ type Write struct {
 	FFBroadcasts                      *bool
 	FFConferenceScheduling            *bool
 	FFDemographics                    *bool
+	FFContentFilterIntegration        *bool
 	FFUiMode                          *bool
 
 	MFAEnabled     *bool
@@ -282,6 +284,7 @@ SELECT
 	ff_broadcasts,
 	ff_conference_scheduling,
 	ff_demographics,
+	ff_content_filter_integration,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -369,6 +372,7 @@ WHERE id = 1
 		&r.FFBroadcasts,
 		&r.FFConferenceScheduling,
 		&r.FFDemographics,
+		&r.FFContentFilterIntegration,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -496,6 +500,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_broadcasts,
 	ff_conference_scheduling,
 	ff_demographics,
+	ff_content_filter_integration,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -588,6 +593,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_broadcasts = COALESCE(EXCLUDED.ff_broadcasts, settings.platform_app_settings.ff_broadcasts),
 	ff_conference_scheduling = COALESCE(EXCLUDED.ff_conference_scheduling, settings.platform_app_settings.ff_conference_scheduling),
 	ff_demographics = COALESCE(EXCLUDED.ff_demographics, settings.platform_app_settings.ff_demographics),
+	ff_content_filter_integration = COALESCE(EXCLUDED.ff_content_filter_integration, settings.platform_app_settings.ff_content_filter_integration),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -673,6 +679,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFBroadcasts,
 		w.FFConferenceScheduling,
 		w.FFDemographics,
+		w.FFContentFilterIntegration,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,
