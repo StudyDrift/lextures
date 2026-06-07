@@ -798,13 +798,13 @@ function SortableChildRow({
     <li ref={setNodeRef} style={style} className="group py-3 first:pt-0">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          {canManageItemRow && (
+          {(!disabled || dragHandlesVisible || isDragging) && (
             <button
               type="button"
-              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
                 gripAlwaysOn
-                  ? 'visible'
-                  : 'invisible group-hover:visible group-focus-within:visible'
+                  ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
               }`}
               aria-label="Drag to reorder item"
               {...listeners}
@@ -1260,7 +1260,8 @@ function SortableModuleCard({
 
   const children = moduleChildrenById.get(item.id) ?? []
   const childIds = children.map((c) => c.id)
-  const gripsPinned = dragHandlesVisible
+  /** Keep grips visible while a modal/overlay has focus (hover/focus-within on rows no longer applies). */
+  const gripsPinned = dragHandlesVisible || anyModalBusy
 
   const childrenList =
     !minified && !collapsed && children.length > 0 ? (
@@ -1317,10 +1318,10 @@ function SortableModuleCard({
           canEditModules ? (
             <button
               type="button"
-              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
                 gripsPinned || isDragging
-                  ? 'visible'
-                  : 'invisible group-hover:visible group-focus-within:visible'
+                  ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
               }`}
               aria-label="Drag to reorder module"
               {...listeners}
