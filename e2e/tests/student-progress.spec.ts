@@ -67,6 +67,30 @@ test.describe('Student progress', () => {
     await expect(page.getByText(noteText)).toBeVisible({ timeout: 8000 })
   })
 
+  test('instructor opens student report from enrollments roster', async ({
+    coursePage: page,
+    seededCourse,
+  }) => {
+    const enrollmentId = await studentEnrollmentId(
+      seededCourse.instructorToken,
+      seededCourse.courseCode,
+    )
+    const apiProgress = `${apiBase}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/enrollments/${encodeURIComponent(enrollmentId)}/progress`
+    await page.goto(`/courses/${seededCourse.courseCode}/enrollments`)
+    const studentRow = page.locator('tr').filter({ hasText: 'E2E Student' })
+    await studentRow.hover()
+    await studentRow.getByRole('link', { name: /view report for e2e student/i }).click()
+
+    await expect(page).toHaveURL(
+      new RegExp(
+        `/courses/${seededCourse.courseCode}/students/${enrollmentId}/progress`,
+      ),
+    )
+    await expect(page.getByText(/assignments submitted|modules viewed/i).first()).toBeVisible({
+      timeout: 15000,
+    })
+  })
+
   test('student views own progress without instructor notes tab', async ({
     page,
     seededCourse,

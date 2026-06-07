@@ -1,4 +1,10 @@
 import type { InboxNotification } from '../context/inbox-notifications-context'
+import {
+  loadNotificationToastedIds,
+  NOTIFICATION_TOASTED_IDS_KEY,
+  pickNotificationsToToast,
+  rememberNotificationToastedIds,
+} from './notification-toast'
 
 /** Returns canvas import notifications that were not in the previous inbox snapshot. */
 export function newCanvasImportNotifications(
@@ -9,30 +15,11 @@ export function newCanvasImportNotifications(
   return incoming.filter((n) => !prevIds.has(n.id) && n.eventType === 'canvas_course_imported')
 }
 
-/** sessionStorage key for notification ids that already triggered a completion toast. */
-export const CANVAS_IMPORT_TOASTED_IDS_KEY = 'lextures:canvas-import-toasted-ids'
+/** @deprecated Use NOTIFICATION_TOASTED_IDS_KEY */
+export const CANVAS_IMPORT_TOASTED_IDS_KEY = NOTIFICATION_TOASTED_IDS_KEY
 
-export function loadCanvasImportToastedIds(): Set<string> {
-  try {
-    const raw = sessionStorage.getItem(CANVAS_IMPORT_TOASTED_IDS_KEY)
-    if (!raw) return new Set()
-    const parsed = JSON.parse(raw) as unknown
-    if (!Array.isArray(parsed)) return new Set()
-    return new Set(parsed.filter((id): id is string => typeof id === 'string'))
-  } catch {
-    return new Set()
-  }
-}
-
-export function rememberCanvasImportToastedIds(existing: Set<string>, ids: string[]): void {
-  for (const id of ids) existing.add(id)
-  const trimmed = [...existing].slice(-100)
-  try {
-    sessionStorage.setItem(CANVAS_IMPORT_TOASTED_IDS_KEY, JSON.stringify(trimmed))
-  } catch {
-    /* quota / private mode */
-  }
-}
+export const loadCanvasImportToastedIds = loadNotificationToastedIds
+export const rememberCanvasImportToastedIds = rememberNotificationToastedIds
 
 export function pickCanvasImportNotificationsToToast(
   prev: readonly InboxNotification[],
@@ -40,6 +27,7 @@ export function pickCanvasImportNotificationsToToast(
   alreadyToasted: ReadonlySet<string>,
   inboxHydrated: boolean,
 ): InboxNotification[] {
-  if (!inboxHydrated) return []
-  return newCanvasImportNotifications(prev, incoming).filter((n) => !alreadyToasted.has(n.id))
+  return pickNotificationsToToast(prev, incoming, alreadyToasted, inboxHydrated).filter(
+    (n) => n.eventType === 'canvas_course_imported',
+  )
 }

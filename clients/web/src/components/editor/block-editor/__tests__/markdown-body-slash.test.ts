@@ -57,6 +57,18 @@ describe('filterSlashCommands', () => {
     const commands = slashCommandsForEditor({ image: false })
     expect(commands.some((c) => c.id === 'image')).toBe(false)
   })
+
+  it('filters drawing by keyword', () => {
+    const commands = slashCommandsForEditor({ equation: true })
+    expect(filterSlashCommands(commands, 'draw').some((c) => c.id === 'drawing')).toBe(true)
+    expect(filterSlashCommands(commands, 'whiteboard').map((c) => c.id)).toEqual(['drawing'])
+  })
+
+  it('filters task by todo keyword', () => {
+    const commands = slashCommandsForEditor({ equation: false })
+    expect(filterSlashCommands(commands, 'todo').map((c) => c.id)).toEqual(['task'])
+    expect(filterSlashCommands(commands, 'task').map((c) => c.id)).toEqual(['task'])
+  })
 })
 
 describe('getBlockSlashRange', () => {

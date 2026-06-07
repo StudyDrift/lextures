@@ -9,13 +9,15 @@ import {
 } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { studentProgressFeatureEnabled } from '../../lib/student-progress'
-import { ClipboardList, Pencil, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
+import { BarChart3, ClipboardList, Mail, Pencil, Send, Shuffle, Trash2, UsersRound, X } from 'lucide-react'
 import { EnrollmentRoleBadge } from './enrollment-role-badge'
 import { EnrollmentGroupsPanel } from './enrollment-groups-panel'
 import { EnrollmentsActionsMenu } from './enrollments-actions-menu'
+import { IconActionTooltip } from '../../components/ui/icon-action-tooltip'
 import { LmsPage } from './lms-page'
 import { usePermission, usePermissions } from '../../context/use-permissions'
 import { authorizedFetch } from '../../lib/api'
+import { getJwtSubject } from '../../lib/auth'
 import {
   courseEnrollmentsReadPermission,
   courseEnrollmentsUpdatePermission,
@@ -28,6 +30,7 @@ import {
   patchEnrollmentSection,
   postEnrollmentGroupsEnable,
   putEnrollmentGroupMembership,
+  sendEnrollmentMessage,
   viewerShouldHideCourseEnrollmentsNav,
   type CourseScopedAppRole,
   type CourseSection,
@@ -37,6 +40,7 @@ import {
 import { notifyCourseViewerEnrollmentChanged, useCourseViewAs } from '../../lib/course-view-as'
 import { readApiErrorMessage } from '../../lib/errors'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
+import { toast } from '../../lib/lms-toast'
 
 export type CourseEnrollment = {
   id: string
@@ -100,7 +104,9 @@ export default function CourseEnrollments() {
   const canViewGradebook = usePermission(
     courseCode ? courseGradebookViewPermission(courseCode) : 'global:app:noop:noop',
   )
-  const showActionsColumn = canUpdateEnrollments || canViewGradebook
+  const canMessageEnrollments = canUpdateEnrollments || canViewGradebook
+  const viewerUserId = useMemo(() => getJwtSubject(), [])
+  const showActionsColumn = canUpdateEnrollments || canViewGradebook || canMessageEnrollments
   const [enrollments, setEnrollments] = useState<CourseEnrollment[] | null>(null)
   /** enrollment id → has active accommodations (non-PII indicator for instructors). */
   const [accommodationActiveByEnrollment, setAccommodationActiveByEnrollment] = useState<
@@ -149,6 +155,12 @@ export default function CourseEnrollments() {
   const [sectionTransferPick, setSectionTransferPick] = useState('')
   const [sectionTransferStatus, setSectionTransferStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [sectionTransferMessage, setSectionTransferMessage] = useState<string | null>(null)
+
+  const [messageTarget, setMessageTarget] = useState<CourseEnrollment | null>(null)
+  const [messageSubject, setMessageSubject] = useState('')
+  const [messageBody, setMessageBody] = useState('')
+  const [messageStatus, setMessageStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [messageError, setMessageError] = useState<string | null>(null)
 
   const viewerIsTeacher = useMemo(
     () => viewerRoles.some((r) => normEnrollmentRole(r) === 'teacher'),
@@ -443,6 +455,22 @@ export default function CourseEnrollments() {
     setGroupAssignMessage(null)
   }, [])
 
+  const closeMessageModal = useCallback(() => {
+    setMessageTarget(null)
+    setMessageSubject('')
+    setMessageBody('')
+    setMessageStatus('idle')
+    setMessageError(null)
+  }, [])
+
+  const openMessageModal = useCallback((enrollment: CourseEnrollment) => {
+    setMessageTarget(enrollment)
+    setMessageSubject('')
+    setMessageBody('')
+    setMessageStatus('idle')
+    setMessageError(null)
+  }, [])
+
   const closeSectionTransferModal = useCallback(() => {
     setSectionTransferTarget(null)
     setSectionTransferPick('')
@@ -483,6 +511,31 @@ export default function CourseEnrollments() {
     }
   }
 
+  async function onSubmitEnrollmentMessage(ev: FormEvent) {
+    ev.preventDefault()
+    if (!courseCode || !messageTarget) return
+    const body = messageBody.trim()
+    if (!body) {
+      setMessageError('Enter a message.')
+      setMessageStatus('error')
+      return
+    }
+    setMessageStatus('loading')
+    setMessageError(null)
+    try {
+      await sendEnrollmentMessage(courseCode, messageTarget.id, {
+        subject: messageSubject.trim(),
+        body,
+      })
+      const name = messageTarget.displayName?.trim() || 'this person'
+      toast.success('Message sent', { description: `Delivered to ${name}'s inbox.` })
+      closeMessageModal()
+    } catch (err) {
+      setMessageStatus('error')
+      setMessageError(err instanceof Error ? err.message : 'Could not send message.')
+    }
+  }
+
   useEffect(() => {
     if (!modalOpen || !courseCode || !viewerIsTeacher) {
       return
@@ -519,7 +572,9 @@ export default function CourseEnrollments() {
   }, [modalOpen, courseCode, viewerIsTeacher])
 
   useEffect(() => {
-    if (!modalOpen && !editTarget && !groupAssignTarget && !sectionTransferTarget) return
+    if (!modalOpen && !editTarget && !groupAssignTarget && !sectionTransferTarget && !messageTarget) {
+      return
+    }
     function onKey(e: KeyboardEvent) {
       if (e.key !== 'Escape') return
       e.preventDefault()
@@ -527,6 +582,7 @@ export default function CourseEnrollments() {
       else if (editTarget) closeEditModal()
       else if (groupAssignTarget) closeGroupAssignModal()
       else if (sectionTransferTarget) closeSectionTransferModal()
+      else if (messageTarget) closeMessageModal()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -535,10 +591,12 @@ export default function CourseEnrollments() {
     editTarget,
     groupAssignTarget,
     sectionTransferTarget,
+    messageTarget,
     closeModal,
     closeEditModal,
     closeGroupAssignModal,
     closeSectionTransferModal,
+    closeMessageModal,
   ])
 
   async function onSubmitAddEnrollments(e: FormEvent) {
@@ -886,6 +944,11 @@ export default function CourseEnrollments() {
                 const showSectionTransfer =
                   sectionsEnabled && canUpdateEnrollments && er === 'student' && sections.length > 1
                 const showGradebook = courseCode != null && er === 'student' && canViewGradebook
+                const showReport = courseCode != null && er === 'student' && canViewGradebook
+                const showMessage =
+                  canMessageEnrollments &&
+                  viewerUserId != null &&
+                  e.userId !== viewerUserId
                 return (
                   <tr
                     key={e.id}
@@ -932,63 +995,102 @@ export default function CourseEnrollments() {
                     </td>
                     {showActionsColumn && (
                       <td className="px-2 py-3 text-end align-middle">
-                        {showEdit || showRemove || showGroupAssign || showSectionTransfer || showGradebook ? (
+                        {showEdit ||
+                        showRemove ||
+                        showGroupAssign ||
+                        showSectionTransfer ||
+                        showGradebook ||
+                        showReport ||
+                        showMessage ? (
                           <div className="inline-flex items-center justify-end gap-0.5">
                             {showSectionTransfer ? (
-                              <button
-                                type="button"
-                                onClick={() => openSectionTransferModal(e)}
-                                className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
-                                aria-label={`Change section for ${e.displayName?.trim() || 'this student'}`}
-                              >
-                                <Shuffle className="h-4 w-4" aria-hidden />
-                              </button>
+                              <IconActionTooltip label="Change section">
+                                <button
+                                  type="button"
+                                  onClick={() => openSectionTransferModal(e)}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  aria-label={`Change section for ${e.displayName?.trim() || 'this student'}`}
+                                >
+                                  <Shuffle className="h-4 w-4" aria-hidden />
+                                </button>
+                              </IconActionTooltip>
                             ) : null}
                             {showGroupAssign ? (
-                              <button
-                                type="button"
-                                onClick={() => openGroupAssignModal(e)}
-                                className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
-                                aria-label={`Assign groups for ${e.displayName?.trim() || 'this person'}`}
-                              >
-                                <UsersRound className="h-4 w-4" aria-hidden />
-                              </button>
+                              <IconActionTooltip label="Assign groups">
+                                <button
+                                  type="button"
+                                  onClick={() => openGroupAssignModal(e)}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  aria-label={`Assign groups for ${e.displayName?.trim() || 'this person'}`}
+                                >
+                                  <UsersRound className="h-4 w-4" aria-hidden />
+                                </button>
+                              </IconActionTooltip>
                             ) : null}
                             {showEdit ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setEditTarget(e)
-                                  setEditBuiltinCourseRole(normEnrollmentRole(e.role))
-                                  setEditSaveStatus('idle')
-                                  setEditMessage(null)
-                                  setDemoteStatus('idle')
-                                }}
-                                className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100"
-                                aria-label={`Edit role for ${e.displayName?.trim() || 'this person'}`}
-                              >
-                                <Pencil className="h-4 w-4" aria-hidden />
-                              </button>
+                              <IconActionTooltip label="Edit role">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditTarget(e)
+                                    setEditBuiltinCourseRole(normEnrollmentRole(e.role))
+                                    setEditSaveStatus('idle')
+                                    setEditMessage(null)
+                                    setDemoteStatus('idle')
+                                  }}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100"
+                                  aria-label={`Edit role for ${e.displayName?.trim() || 'this person'}`}
+                                >
+                                  <Pencil className="h-4 w-4" aria-hidden />
+                                </button>
+                              </IconActionTooltip>
+                            ) : null}
+                            {showMessage ? (
+                              <IconActionTooltip label="Send message">
+                                <button
+                                  type="button"
+                                  onClick={() => openMessageModal(e)}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  aria-label={`Send message to ${e.displayName?.trim() || 'this person'}`}
+                                >
+                                  <Mail className="h-4 w-4" aria-hidden />
+                                </button>
+                              </IconActionTooltip>
                             ) : null}
                             {showGradebook ? (
-                              <Link
-                                to={`/courses/${encodeURIComponent(courseCode)}/gradebook?student=${encodeURIComponent(e.userId)}`}
-                                className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
-                                aria-label={`View gradebook for ${e.displayName?.trim() || 'this student'}`}
-                              >
-                                <ClipboardList className="h-4 w-4" aria-hidden />
-                              </Link>
+                              <IconActionTooltip label="Gradebook">
+                                <Link
+                                  to={`/courses/${encodeURIComponent(courseCode)}/gradebook?student=${encodeURIComponent(e.userId)}`}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  aria-label={`View gradebook for ${e.displayName?.trim() || 'this student'}`}
+                                >
+                                  <ClipboardList className="h-4 w-4" aria-hidden />
+                                </Link>
+                              </IconActionTooltip>
+                            ) : null}
+                            {showReport ? (
+                              <IconActionTooltip label="Student report">
+                                <Link
+                                  to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  aria-label={`View report for ${e.displayName?.trim() || 'this student'}`}
+                                >
+                                  <BarChart3 className="h-4 w-4" aria-hidden />
+                                </Link>
+                              </IconActionTooltip>
                             ) : null}
                             {showRemove ? (
-                              <button
-                                type="button"
-                                onClick={() => void onRemoveEnrollment(e.id)}
-                                disabled={removingId === e.id}
-                                className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
-                                aria-label={`Remove ${e.role} enrollment for ${e.displayName?.trim() || 'this person'}`}
-                              >
-                                <Trash2 className="h-4 w-4" aria-hidden />
-                              </button>
+                              <IconActionTooltip label="Remove enrollment">
+                                <button
+                                  type="button"
+                                  onClick={() => void onRemoveEnrollment(e.id)}
+                                  disabled={removingId === e.id}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                  aria-label={`Remove ${e.role} enrollment for ${e.displayName?.trim() || 'this person'}`}
+                                >
+                                  <Trash2 className="h-4 w-4" aria-hidden />
+                                </button>
+                              </IconActionTooltip>
                             ) : null}
                           </div>
                         ) : null}
@@ -1188,6 +1290,92 @@ export default function CourseEnrollments() {
                   className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
                 >
                   {sectionTransferStatus === 'loading' ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {messageTarget && (
+        <div
+          className={LMS_MODAL_OVERLAY_CLASS}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="enrollment-message-title"
+          onClick={(ev) => {
+            if (ev.target === ev.currentTarget) closeMessageModal()
+          }}
+        >
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+              <h3
+                id="enrollment-message-title"
+                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+              >
+                Send message
+              </h3>
+              <button
+                type="button"
+                onClick={() => closeMessageModal()}
+                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form
+              onSubmit={(ev) => void onSubmitEnrollmentMessage(ev)}
+              className="space-y-3 px-4 py-4 text-sm text-slate-700 dark:text-neutral-300"
+            >
+              <p className="text-slate-600 dark:text-neutral-400">
+                To{' '}
+                <span className="font-medium text-slate-900 dark:text-neutral-100">
+                  {messageTarget.displayName?.trim() || '—'}
+                </span>
+              </p>
+              {messageError ? (
+                <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
+                  {messageError}
+                </p>
+              ) : null}
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Subject</span>
+                <input
+                  value={messageSubject}
+                  onChange={(ev) => setMessageSubject(ev.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  placeholder="Optional subject"
+                  disabled={messageStatus === 'loading'}
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Message</span>
+                <textarea
+                  value={messageBody}
+                  onChange={(ev) => setMessageBody(ev.target.value)}
+                  rows={6}
+                  className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  placeholder="Write your message…"
+                  disabled={messageStatus === 'loading'}
+                  required
+                />
+              </label>
+              <div className="flex justify-end gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+                <button
+                  type="button"
+                  onClick={() => closeMessageModal()}
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={messageStatus === 'loading' || !messageBody.trim()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" aria-hidden />
+                  {messageStatus === 'loading' ? 'Sending…' : 'Send'}
                 </button>
               </div>
             </form>

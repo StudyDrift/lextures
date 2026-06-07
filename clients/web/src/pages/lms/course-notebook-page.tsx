@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- sync localStorage notebook and course title from network */
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Navigate, useParams } from 'react-router-dom'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -18,6 +18,7 @@ import {
   type CourseNotebookPage,
 } from '../../lib/course-notebook-tree'
 import { fetchCourse, uploadCourseFile } from '../../lib/courses-api'
+import { syncNotebookTasksFromMarkdown } from '../../lib/notebook-task-sync'
 import {
   loadCourseNotebook,
   saveCourseNotebookStore,
@@ -31,6 +32,7 @@ const CONTENT_SAVE_MS = 500
 
 export default function CourseNotebookPage() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const [searchParams] = useSearchParams()
   const { notebookEnabled: courseNotebookEnabled, loading: courseFeatureFlagsLoading } =
     useCourseNavFeatures()
   const [data, setData] = useState<CourseNotebookStore | null>(null)
@@ -68,10 +70,18 @@ export default function CourseNotebookPage() {
   useEffect(() => {
     if (!courseCode) return
     const loaded = loadCourseNotebook(courseCode)
-    setData(loaded)
-    const page = loaded.pages.find((p) => p.id === loaded.activePageId)
+    const pageId = searchParams.get('page')
+    const next =
+      pageId && loaded.pages.some((p) => p.id === pageId)
+        ? { ...loaded, activePageId: pageId }
+        : loaded
+    if (next !== loaded) {
+      saveCourseNotebookStore(courseCode, next)
+    }
+    setData(next)
+    const page = next.pages.find((p) => p.id === next.activePageId)
     setHeaderTitleDraft(page?.title ?? '')
-  }, [courseCode])
+  }, [courseCode, searchParams])
 
   useEffect(() => {
     if (!courseCode) return
@@ -113,7 +123,13 @@ export default function CourseNotebookPage() {
     if (contentSaveTimer.current) clearTimeout(contentSaveTimer.current)
     contentSaveTimer.current = setTimeout(() => {
       const d = dataRef.current
-      if (d && courseCode) persistStore(d)
+      if (d && courseCode) {
+        persistStore(d)
+        const page = d.pages.find((p) => p.id === d.activePageId)
+        if (page) {
+          void syncNotebookTasksFromMarkdown(courseCode, page.id, page.contentMd)
+        }
+      }
       contentSaveTimer.current = null
     }, CONTENT_SAVE_MS)
   }, [courseCode, persistStore])
@@ -123,6 +139,11 @@ export default function CourseNotebookPage() {
   useEffect(() => {
     if (activePage) setHeaderTitleDraft(activePage.title)
   }, [activePage])
+
+  useEffect(() => {
+    if (!courseCode || !activePage) return
+    void syncNotebookTasksFromMarkdown(courseCode, activePage.id, activePage.contentMd)
+  }, [courseCode, activePage?.id])
 
   const onSelectPage = useCallback(
     (id: string) => {
@@ -386,6 +407,7 @@ export default function CourseNotebookPage() {
                       value={activePage.contentMd}
                       onChange={onEditorChange}
                       courseCode={courseCode}
+                      notebookTaskContext={{ courseCode, pageId: activePage.id }}
                       uploadCourseImage={(file) =>
                         uploadCourseFile(courseCode, file).then((r) => r.contentPath)
                       }
