@@ -141,6 +141,7 @@ func (d Deps) handleCommMessagesPost() http.HandlerFunc {
 		if u, e := user.FindByEmail(r.Context(), d.Pool, user.NormalizeEmail(to)); e == nil && u != nil {
 			if rid, e2 := uuid.Parse(u.ID); e2 == nil && rid != userID {
 				d.notifyMailbox(rid)
+				d.emitInboxMessageNotification(r.Context(), rid, userID, req.Subject)
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

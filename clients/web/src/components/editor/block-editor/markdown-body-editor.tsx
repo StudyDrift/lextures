@@ -23,6 +23,9 @@ import {
 import { CourseAwareTipTapImage } from './course-aware-tip-tap-image'
 import { MarkdownImageUploadModal } from './markdown-image-upload-modal'
 import { MathBlock, MathInline } from '../extensions/math-tip-tap'
+import { setNotebookTaskContext } from '../../../lib/notebook-task-context'
+import { NotebookTask, type NotebookTaskContext } from '../extensions/notebook-task-tip-tap'
+import { WhiteboardBlock } from '../extensions/whiteboard-tip-tap'
 import { altTextEnforcementFeatureEnabled } from '../../../lib/platform-features'
 
 const editorShellClass = [
@@ -88,6 +91,8 @@ export type MarkdownBodyEditorProps = {
   showImagePickerRow?: boolean
   /** When the user types `/equation`, open the equation editor (caller removes the trigger text). */
   onEquationSlash?: () => void
+  /** When set (student notebooks), notebook tasks sync to the server. */
+  notebookTaskContext?: NotebookTaskContext | null
 }
 
 type MentionUi = {
@@ -133,6 +138,7 @@ export function MarkdownBodyEditor({
   uploadCourseImage,
   showImagePickerRow,
   onEquationSlash,
+  notebookTaskContext = null,
 }: MarkdownBodyEditorProps) {
   const skipEmit = useRef(false)
   const onChangeRef = useRef(onChange)
@@ -398,9 +404,12 @@ export function MarkdownBodyEditor({
       extensions: [
         StarterKit.configure({
           heading: { levels: [1, 2, 3, 4, 5, 6] },
+          link: false,
         }),
         MathBlock,
         MathInline,
+        WhiteboardBlock,
+        NotebookTask.configure({ notebookTaskContext }),
         Markdown.configure({ markedOptions: { gfm: true } }),
         Link.configure({
           openOnClick: false,
@@ -724,6 +733,16 @@ export function MarkdownBodyEditor({
   useEffect(() => {
     if (editor) editor.setEditable(!disabled)
   }, [disabled, editor])
+
+  useEffect(() => {
+    setNotebookTaskContext(notebookTaskContext)
+    if (!editor) return
+    const ext = editor.extensionManager.extensions.find((e) => e.name === 'notebook_task')
+    if (ext) {
+      ext.options.notebookTaskContext = notebookTaskContext
+    }
+    return () => setNotebookTaskContext(null)
+  }, [editor, notebookTaskContext])
 
   useEffect(() => {
     if (!editor) return

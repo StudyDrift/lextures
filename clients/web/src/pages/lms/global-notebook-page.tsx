@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- sync localStorage notebook on load */
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
@@ -17,6 +18,7 @@ import {
   updatePageTitle,
   type CourseNotebookPage,
 } from '../../lib/course-notebook-tree'
+import { syncNotebookTasksFromMarkdown } from '../../lib/notebook-task-sync'
 import {
   GLOBAL_STUDENT_NOTEBOOK_KEY,
   GLOBAL_STUDENT_NOTEBOOK_TITLE,
@@ -31,6 +33,7 @@ import { LmsPage } from './lms-page'
 const CONTENT_SAVE_MS = 500
 
 export default function GlobalNotebookPage() {
+  const [searchParams] = useSearchParams()
   const [data, setData] = useState<CourseNotebookStore | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deletePageId, setDeletePageId] = useState<string | null>(null)
@@ -55,10 +58,18 @@ export default function GlobalNotebookPage() {
 
   useEffect(() => {
     const loaded = loadCourseNotebook(GLOBAL_STUDENT_NOTEBOOK_KEY)
-    setData(loaded)
-    const page = loaded.pages.find((p) => p.id === loaded.activePageId)
+    const pageId = searchParams.get('page')
+    const next =
+      pageId && loaded.pages.some((p) => p.id === pageId)
+        ? { ...loaded, activePageId: pageId }
+        : loaded
+    if (next !== loaded) {
+      saveCourseNotebookStore(GLOBAL_STUDENT_NOTEBOOK_KEY, next)
+    }
+    setData(next)
+    const page = next.pages.find((p) => p.id === next.activePageId)
     setHeaderTitleDraft(page?.title ?? '')
-  }, [])
+  }, [searchParams])
 
   useEffect(() => {
     return () => {
@@ -72,12 +83,31 @@ export default function GlobalNotebookPage() {
     if (contentSaveTimer.current) clearTimeout(contentSaveTimer.current)
     contentSaveTimer.current = setTimeout(() => {
       const d = dataRef.current
-      if (d) persistStore(d)
+      if (d) {
+        persistStore(d)
+        const page = d.pages.find((p) => p.id === d.activePageId)
+        if (page) {
+          void syncNotebookTasksFromMarkdown(
+            GLOBAL_STUDENT_NOTEBOOK_KEY,
+            page.id,
+            page.contentMd,
+          )
+        }
+      }
       contentSaveTimer.current = null
     }, CONTENT_SAVE_MS)
   }, [persistStore])
 
   const activePage = data?.pages.find((p) => p.id === data.activePageId) ?? null
+
+  useEffect(() => {
+    if (!activePage) return
+    void syncNotebookTasksFromMarkdown(
+      GLOBAL_STUDENT_NOTEBOOK_KEY,
+      activePage.id,
+      activePage.contentMd,
+    )
+  }, [activePage?.id])
 
   useEffect(() => {
     if (activePage) setHeaderTitleDraft(activePage.title)
@@ -333,6 +363,10 @@ export default function GlobalNotebookPage() {
                       sectionId={activePage.id}
                       value={activePage.contentMd}
                       onChange={onEditorChange}
+                      notebookTaskContext={{
+                        courseCode: GLOBAL_STUDENT_NOTEBOOK_KEY,
+                        pageId: activePage.id,
+                      }}
                       uploadCourseImage={readFileAsDataUrl}
                       showImagePickerRow
                       placeholder="Start writing… Type / for blocks, or nest pages in the sidebar."

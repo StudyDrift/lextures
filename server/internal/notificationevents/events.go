@@ -15,6 +15,7 @@ const (
 	ConferenceReminder       = "conference_reminder"
 	CoachingTipWeekly      = "coaching_tip_weekly"
 	CanvasCourseImported   = "canvas_course_imported"
+	InboxMessage           = "inbox_message"
 )
 
 // All is the canonical list for defaults and UI.
@@ -32,4 +33,5 @@ var All = []string{
 	ConferenceReminder,
 	CoachingTipWeekly,
 	CanvasCourseImported,
+	InboxMessage,
 }

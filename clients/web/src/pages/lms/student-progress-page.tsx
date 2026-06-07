@@ -4,6 +4,7 @@ import { LmsPage } from './lms-page'
 import { fetchCourse } from '../../lib/courses-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { formatAbsolute } from '../../lib/format-datetime'
+import { formatDate } from '../../lib/format'
 import {
   createStudentProgressNote,
   deleteStudentProgressNote,
@@ -12,6 +13,7 @@ import {
   updateStudentProgressNote,
   type StudentProgressActivityEvent,
   type StudentProgressNote,
+  type StudentProgressQuizRow,
   type StudentProgressResponse,
 } from '../../lib/student-progress-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -31,6 +33,21 @@ function statusBadgeClass(status: string): string {
   }
 }
 
+function formatQuizAxisDate(iso: string): string {
+  return formatDate(iso, { month: 'short', day: 'numeric' })
+}
+
+function formatQuizScorePercent(score: number | null | undefined): string {
+  if (score == null) return '—'
+  return `${Math.round(score * 10) / 10}%`
+}
+
+function sortedQuizAttempts(quizzes: StudentProgressQuizRow[]): StudentProgressQuizRow[] {
+  return [...quizzes].sort(
+    (a, b) => new Date(a.submittedAt).getTime() - new Date(b.submittedAt).getTime(),
+  )
+}
+
 function QuizScoreChart({
   quizzes,
   captionId,
@@ -41,80 +58,147 @@ function QuizScoreChart({
   if (quizzes.length === 0) {
     return <p className="text-sm text-slate-500 dark:text-neutral-400">No quiz attempts yet.</p>
   }
-  const width = 320
-  const height = 120
-  const pad = 16
-  const scores = quizzes.map((q) => q.scorePercent ?? 0)
-  const minY = 0
-  const maxY = 100
-  const innerW = width - pad * 2
-  const innerH = height - pad * 2
-  const points = quizzes.map((_, i) => {
-    const x = pad + (quizzes.length === 1 ? innerW / 2 : (i / (quizzes.length - 1)) * innerW)
-    const y = pad + innerH - ((scores[i] - minY) / (maxY - minY)) * innerH
-    return `${x},${y}`
+
+  const sorted = sortedQuizAttempts(quizzes)
+  const scores = sorted.map((q) => q.scorePercent ?? 0)
+  const minScore = Math.min(...scores)
+  const maxScore = Math.max(...scores)
+  const roundedMin = Math.round(minScore * 10) / 10
+  const roundedMax = Math.round(maxScore * 10) / 10
+
+  if (sorted.length === 1) {
+    const only = sorted[0]
+    return (
+      <p className="text-sm text-slate-600 dark:text-neutral-400">
+        One quiz attempt so far ({formatQuizAxisDate(only.submittedAt)}):{' '}
+        <strong className="text-slate-900 dark:text-neutral-100">
+          {formatQuizScorePercent(only.scorePercent)}
+        </strong>
+        . A trend chart appears after a second attempt.
+      </p>
+    )
+  }
+
+  const width = 520
+  const height = 220
+  const marginLeft = 44
+  const marginRight = 12
+  const marginTop = 12
+  const marginBottom = 52
+  const innerW = width - marginLeft - marginRight
+  const innerH = height - marginTop - marginBottom
+  const yTicks = [0, 25, 50, 75, 100]
+
+  const points = sorted.map((quiz, i) => {
+    const x =
+      marginLeft + (sorted.length === 1 ? innerW / 2 : (i / (sorted.length - 1)) * innerW)
+    const y = marginTop + innerH - (scores[i] / 100) * innerH
+    return { x, y, quiz, score: scores[i] }
   })
+
+  const labelStep = sorted.length <= 6 ? 1 : Math.ceil(sorted.length / 6)
+
   return (
-    <figure className="mt-4">
+    <figure className="mt-2">
+      <figcaption className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        Quiz scores over time
+      </figcaption>
+      <p className="mt-1 text-sm text-slate-600 dark:text-neutral-400">
+        Each dot is one submitted quiz, ordered oldest to newest (left to right). The vertical axis
+        is the score percentage.
+        {roundedMin === roundedMax
+          ? ` Every attempt so far scored ${formatQuizScorePercent(roundedMin)}.`
+          : ` Scores range from ${formatQuizScorePercent(roundedMin)} to ${formatQuizScorePercent(roundedMax)}.`}
+      </p>
       <svg
         role="img"
         aria-labelledby={captionId}
         viewBox={`0 0 ${width} ${height}`}
-        className="max-w-full rounded-lg border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
+        className="mt-4 max-w-full rounded-lg border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900"
       >
-        <title id={captionId}>Quiz score trend over time</title>
-        <polyline
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-indigo-600 dark:text-indigo-400"
-          points={points.join(' ')}
-        />
-        {quizzes.map((q, i) => {
-          const [x, y] = points[i].split(',').map(Number)
+        <title id={captionId}>Quiz scores over time</title>
+        {yTicks.map((tick) => {
+          const y = marginTop + innerH - (tick / 100) * innerH
           return (
-            <circle
-              key={q.attemptId}
-              cx={x}
-              cy={y}
-              r={4}
-              className="fill-indigo-600 dark:fill-indigo-400"
-            />
+            <g key={tick}>
+              <line
+                x1={marginLeft}
+                y1={y}
+                x2={width - marginRight}
+                y2={y}
+                className="stroke-slate-200 dark:stroke-neutral-700"
+                strokeWidth="1"
+              />
+              <text
+                x={marginLeft - 8}
+                y={y + 4}
+                textAnchor="end"
+                className="fill-slate-500 text-[10px] dark:fill-neutral-400"
+              >
+                {tick}%
+              </text>
+            </g>
           )
         })}
+        <line
+          x1={marginLeft}
+          y1={marginTop + innerH}
+          x2={width - marginRight}
+          y2={marginTop + innerH}
+          className="stroke-slate-300 dark:stroke-neutral-600"
+          strokeWidth="1"
+        />
+        <text
+          x={marginLeft + innerW / 2}
+          y={height - 6}
+          textAnchor="middle"
+          className="fill-slate-500 text-[10px] dark:fill-neutral-400"
+        >
+          Submission date (oldest → newest)
+        </text>
+        <polyline
+          fill="none"
+          strokeWidth="2"
+          className="stroke-indigo-600 dark:stroke-indigo-400"
+          points={points.map((p) => `${p.x},${p.y}`).join(' ')}
+        />
+        {points.map((p) => (
+          <g key={p.quiz.attemptId}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={5}
+              className="fill-indigo-600 dark:fill-indigo-400"
+            >
+              <title>
+                {p.quiz.title}: {formatQuizScorePercent(p.score)} on{' '}
+                {formatAbsolute(new Date(p.quiz.submittedAt))}
+              </title>
+            </circle>
+          </g>
+        ))}
+        {points.map((p, i) =>
+          i % labelStep === 0 || i === points.length - 1 ? (
+            <text
+              key={`${p.quiz.attemptId}-label`}
+              x={p.x}
+              y={marginTop + innerH + 16}
+              textAnchor="middle"
+              className="fill-slate-600 text-[9px] dark:fill-neutral-400"
+            >
+              {formatQuizAxisDate(p.quiz.submittedAt)}
+            </text>
+          ) : null,
+        )}
       </svg>
-      <figcaption id={captionId} className="sr-only">
-        Quiz scores by attempt date
-      </figcaption>
-      <table className="mt-3 w-full text-sm">
-        <caption className="text-start text-xs font-medium text-slate-600 dark:text-neutral-400">
-          Quiz score data (text alternative)
-        </caption>
-        <thead>
-          <tr className="border-b border-slate-200 dark:border-neutral-700">
-            <th scope="col" className="py-1 pe-3 text-start font-medium">
-              Quiz
-            </th>
-            <th scope="col" className="py-1 pe-3 text-start font-medium">
-              Date
-            </th>
-            <th scope="col" className="py-1 text-end font-medium">
-              Score %
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {quizzes.map((q) => (
-            <tr key={q.attemptId} className="border-b border-slate-100 dark:border-neutral-800">
-              <td className="py-1 pe-3">{q.title}</td>
-              <td className="py-1 pe-3">{formatAbsolute(new Date(q.submittedAt))}</td>
-              <td className="py-1 text-end tabular-nums">
-                {q.scorePercent != null ? `${Math.round(q.scorePercent * 10) / 10}%` : '—'}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <p id={captionId} className="sr-only">
+        {sorted
+          .map(
+            (q) =>
+              `${q.title}: ${formatQuizScorePercent(q.scorePercent)} on ${formatAbsolute(new Date(q.submittedAt))}`,
+          )
+          .join('; ')}
+      </p>
     </figure>
   )
 }
@@ -475,7 +559,10 @@ export default function StudentProgressPage() {
               {tab === 'quizzes' && (
                 <>
                   <QuizScoreChart quizzes={data.quizzes} captionId={chartCaptionId} />
-                  <div className="mt-6 overflow-x-auto">
+                  <h3 className="mt-8 text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    All quiz attempts
+                  </h3>
+                  <div className="mt-3 overflow-x-auto">
                     <table className="min-w-full text-sm">
                       <thead>
                         <tr className="border-b border-slate-200 text-start dark:border-neutral-700">

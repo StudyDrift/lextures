@@ -51,6 +51,7 @@ import {
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
 import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { LmsPage } from './lms-page'
 
@@ -441,6 +442,14 @@ export default function Dashboard() {
 
   const courseCodes = useMemo(() => (courses ?? []).map((c) => c.courseCode), [courses])
 
+  const courseTitles = useMemo(() => {
+    const out: Record<string, string> = {}
+    for (const c of courses ?? []) {
+      out[c.courseCode] = c.title
+    }
+    return out
+  }, [courses])
+
   /** Read on each render so returning from a module picks up the latest `localStorage` write. */
   const continueTarget =
     courseCodes.length > 0 ? getMostRecentLastVisited(courseCodes) : null
@@ -607,6 +616,8 @@ export default function Dashboard() {
           )}
 
           <StudyStatsCard />
+
+          <NotebookTasksCard courseTitles={courseTitles} />
 
           {reviewStats != null && (
             <section aria-label="Spaced repetition review">

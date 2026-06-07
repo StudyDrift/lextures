@@ -1,5 +1,7 @@
 import type { Editor } from '@tiptap/core'
 import type { EditorState } from '@tiptap/pm/state'
+import { TextSelection } from '@tiptap/pm/state'
+import { newNotebookTaskId } from '../extensions/notebook-task-tip-tap'
 import { getMentionBlockContext } from './markdown-body-mention'
 
 export type SlashCommandId =
@@ -8,6 +10,8 @@ export type SlashCommandId =
   | 'heading3'
   | 'paragraph'
   | 'image'
+  | 'drawing'
+  | 'task'
   | 'bulletList'
   | 'orderedList'
   | 'codeBlock'
@@ -52,6 +56,18 @@ const BASE_SLASH_COMMANDS: SlashCommand[] = [
     label: 'Insert image',
     description: 'Upload and embed an image',
     keywords: ['image', 'photo', 'picture', 'img', 'upload'],
+  },
+  {
+    id: 'drawing',
+    label: 'Drawing',
+    description: 'Insert a whiteboard to draw on',
+    keywords: ['drawing', 'whiteboard', 'sketch', 'draw', 'canvas'],
+  },
+  {
+    id: 'task',
+    label: 'Task',
+    description: 'Checkbox task with optional due date',
+    keywords: ['task', 'todo', 'checkbox', 'checklist'],
   },
   {
     id: 'bulletList',
@@ -162,6 +178,38 @@ export function applySlashCommand(
   if (command.id === 'image') {
     editor.chain().focus().deleteRange({ from: range.from, to: range.to }).run()
     options?.onImage?.()
+    return
+  }
+  if (command.id === 'drawing') {
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from: range.from, to: range.to })
+      .insertContentAt(range.from, { type: 'whiteboard_block', attrs: { elements: '[]' } })
+      .run()
+    return
+  }
+  if (command.id === 'task') {
+    const taskId = newNotebookTaskId()
+    const insertAt = range.from
+    editor
+      .chain()
+      .focus()
+      .deleteRange({ from: range.from, to: range.to })
+      .insertContentAt(insertAt, {
+        type: 'notebook_task',
+        attrs: { taskId, checked: false, dueAt: null },
+      })
+      .command(({ tr, dispatch }) => {
+        const node = tr.doc.nodeAt(insertAt)
+        if (!node || node.type.name !== 'notebook_task') return false
+        if (dispatch) {
+          const inside = insertAt + 1
+          tr.setSelection(TextSelection.near(tr.doc.resolve(inside)))
+        }
+        return true
+      })
+      .run()
     return
   }
 

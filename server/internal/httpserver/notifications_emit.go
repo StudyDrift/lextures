@@ -2,12 +2,16 @@ package httpserver
 
 import (
 	"context"
+	"fmt"
+	"log/slog"
+	"strings"
 
 	"github.com/google/uuid"
 
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/discussions"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
 
@@ -42,6 +46,28 @@ func (d Deps) emitDiscussionReplyNotifications(ctx context.Context, courseID uui
 		orgID = oid
 	}
 	ns.NotifyDiscussionReply(ctx, participants, courseName, threadTitle, courseCode, threadID.String(), orgID)
+}
+
+func (d Deps) emitInboxMessageNotification(ctx context.Context, recipientID, senderID uuid.UUID, subject string) {
+	if recipientID == senderID {
+		return
+	}
+	senderName := "Someone"
+	if sender, err := user.FindByID(ctx, d.Pool, senderID); err == nil && sender != nil {
+		if sender.DisplayName != nil && strings.TrimSpace(*sender.DisplayName) != "" {
+			senderName = strings.TrimSpace(*sender.DisplayName)
+		} else if strings.TrimSpace(sender.Email) != "" {
+			senderName = strings.TrimSpace(sender.Email)
+		}
+	}
+	title := strings.TrimSpace(subject)
+	if title == "" {
+		title = "New message"
+	}
+	body := fmt.Sprintf("From %s", senderName)
+	if err := d.pushNotificationService().Enqueue(ctx, recipientID, notifications.EventInboxMessage, title, body, "/inbox"); err != nil {
+		slog.Warn("inbox_message.notification", "err", err, "recipient_id", recipientID.String())
+	}
 }
 
 func (d Deps) emitAssignmentCreatedNotifications(ctx context.Context, courseCode, assignmentTitle string) {

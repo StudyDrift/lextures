@@ -5,6 +5,7 @@ import {
   type CourseNotebookPage,
   type NotebookPageKind,
 } from './course-notebook-tree'
+import { markTaskCheckedInMarkdown } from './notebook-task-markdown'
 import { decodeJwtSub } from './jwt-payload'
 
 export type { CourseNotebookPage, NotebookPageKind } from './course-notebook-tree'
@@ -27,6 +28,31 @@ export function hrefForStudentNotebook(courseCode: string): string {
   return isGlobalStudentNotebookKey(courseCode)
     ? '/notebooks/global'
     : `/courses/${encodeURIComponent(courseCode)}/notebook`
+}
+
+export function hrefForNotebookPage(courseCode: string, pageId: string): string {
+  const base = hrefForStudentNotebook(courseCode)
+  return `${base}?page=${encodeURIComponent(pageId)}`
+}
+
+/** Activate a notebook page (e.g. from dashboard deep link). */
+export function setActiveNotebookPage(courseCode: string, pageId: string): boolean {
+  const data = loadCourseNotebook(courseCode)
+  if (!data.pages.some((p) => p.id === pageId)) return false
+  saveCourseNotebookStore(courseCode, { ...data, activePageId: pageId })
+  return true
+}
+
+/** Mark a notebook task checked in local markdown (dashboard completion). */
+export function markNotebookTaskComplete(courseCode: string, pageId: string, taskId: string): boolean {
+  const data = loadCourseNotebook(courseCode)
+  const page = data.pages.find((p) => p.id === pageId)
+  if (!page) return false
+  const nextMd = markTaskCheckedInMarkdown(page.contentMd, taskId)
+  if (nextMd === page.contentMd) return false
+  const pages = updatePageContent(data.pages, pageId, nextMd)
+  saveCourseNotebookStore(courseCode, { ...data, pages })
+  return true
 }
 
 /** Legacy v1 row (single body). */

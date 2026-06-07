@@ -121,6 +121,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/enrollments/self-as-student", d.handleCourseEnrollmentsSelfStudent())
 	r.Patch("/api/v1/courses/{course_code}/enrollments/{enrollment_id}", d.handleCourseEnrollmentsPatch())
 	r.Delete("/api/v1/courses/{course_code}/enrollments/{enrollment_id}", d.handleCourseEnrollmentsDelete())
+	r.Post("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/message", d.handleCourseEnrollmentMessagePost())
 	r.Get("/api/v1/courses/{course_code}/enrollments", d.handleCourseEnrollmentsList())
 	r.Get("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/progress", d.handleEnrollmentProgressGet())
 	r.Get("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/progress/activity", d.handleEnrollmentProgressActivity())

@@ -1268,6 +1268,25 @@ export function courseEnrollmentsUpdatePermission(courseCode: string): string {
   return `course:${courseCode}:enrollments:update`
 }
 
+export async function sendEnrollmentMessage(
+  courseCode: string,
+  enrollmentId: string,
+  body: { subject: string; body: string },
+): Promise<string> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments/${encodeURIComponent(enrollmentId)}/message`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw: unknown = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const data = raw as { id?: string }
+  return data.id ?? ''
+}
+
 export type EnrollmentGroupMembership = {
   groupSetId: string
   groupId: string

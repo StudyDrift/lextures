@@ -15,23 +15,51 @@ type ChannelPublic struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-func ensureDefaultChannel(ctx context.Context, pool *pgxpool.Pool, courseID, createdBy uuid.UUID) error {
+func ensureDefaultChannels(ctx context.Context, pool *pgxpool.Pool, courseID, createdBy uuid.UUID) error {
 	_, err := pool.Exec(ctx, `
 		INSERT INTO course.feed_channels (course_id, name, sort_order, created_by_user_id)
-		SELECT $1, $2, 0, $3
-		WHERE NOT EXISTS (SELECT 1 FROM course.feed_channels WHERE course_id = $1)
-	`, courseID, "general", createdBy)
+		SELECT $1, 'general', 0, $2
+		WHERE NOT EXISTS (
+			SELECT 1 FROM course.feed_channels
+			WHERE course_id = $1 AND group_id IS NULL AND lower(name) = 'general'
+		)
+	`, courseID, createdBy)
+	if err != nil {
+		return err
+	}
+
+	tag, err := pool.Exec(ctx, `
+		INSERT INTO course.feed_channels (course_id, name, sort_order, created_by_user_id)
+		SELECT $1, 'announcements', 1, $2
+		WHERE NOT EXISTS (
+			SELECT 1 FROM course.feed_channels
+			WHERE course_id = $1 AND group_id IS NULL AND lower(name) = 'announcements'
+		)
+	`, courseID, createdBy)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return nil
+	}
+	_, err = pool.Exec(ctx, `
+		UPDATE course.feed_channels
+		SET sort_order = sort_order + 1
+		WHERE course_id = $1 AND group_id IS NULL
+		  AND lower(name) NOT IN ('general', 'announcements')
+		  AND sort_order >= 1
+	`, courseID)
 	return err
 }
 
 func ListChannels(ctx context.Context, pool *pgxpool.Pool, courseID, viewerID uuid.UUID) ([]ChannelPublic, error) {
-	if err := ensureDefaultChannel(ctx, pool, courseID, viewerID); err != nil {
+	if err := ensureDefaultChannels(ctx, pool, courseID, viewerID); err != nil {
 		return nil, err
 	}
 	rows, err := pool.Query(ctx, `
 		SELECT id, name, sort_order, created_at
 		FROM course.feed_channels
-		WHERE course_id = $1
+		WHERE course_id = $1 AND group_id IS NULL
 		ORDER BY sort_order ASC, created_at ASC
 	`, courseID)
 	if err != nil {
@@ -50,11 +78,11 @@ func ListChannels(ctx context.Context, pool *pgxpool.Pool, courseID, viewerID uu
 }
 
 func CreateChannel(ctx context.Context, pool *pgxpool.Pool, courseID, viewerID uuid.UUID, name string) (*ChannelPublic, error) {
-	if err := ensureDefaultChannel(ctx, pool, courseID, viewerID); err != nil {
+	if err := ensureDefaultChannels(ctx, pool, courseID, viewerID); err != nil {
 		return nil, err
 	}
 	var next int
-	if err := pool.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), 0) + 1 FROM course.feed_channels WHERE course_id = $1`, courseID).Scan(&next); err != nil {
+	if err := pool.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), 0) + 1 FROM course.feed_channels WHERE course_id = $1 AND group_id IS NULL`, courseID).Scan(&next); err != nil {
 		return nil, err
 	}
 	var c ChannelPublic

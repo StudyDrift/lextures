@@ -13,9 +13,12 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	modelenrollment "github.com/lextures/lextures/server/internal/models/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/communication"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursegrants"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
+	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 )
 
@@ -552,5 +555,103 @@ WHERE ce.id = $1 AND c.course_code = $2 AND ce.active
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (d Deps) handleCourseEnrollmentMessagePost() http.HandlerFunc {
+	type reqBody struct {
+		Subject string `json:"subject"`
+		Body    string `json:"body"`
+	}
+	type respBody struct {
+		ID string `json:"id"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		viewer, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		courseCode, ok := chiCourseCode(w, r)
+		if !ok {
+			return
+		}
+		eid, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "enrollment_id")))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid enrollment id.")
+			return
+		}
+		en, err := enrollment.GetByID(r.Context(), d.Pool, eid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load enrollment.")
+			return
+		}
+		if en == nil || !strings.EqualFold(en.CourseCode, courseCode) {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Enrollment not found.")
+			return
+		}
+		if en.UserID == viewer {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "You cannot message yourself.")
+			return
+		}
+		canRead, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, coursegrants.CourseEnrollmentsReadPermission(courseCode))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !canRead {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to message this enrollment.")
+			return
+		}
+		staff, err := enrollment.UserIsCourseStaff(r.Context(), d.Pool, courseCode, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !staff {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only course staff can message enrollments from the roster.")
+			return
+		}
+		var body reqBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		body.Subject = strings.TrimSpace(body.Subject)
+		body.Body = strings.TrimSpace(body.Body)
+		if body.Body == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Message body is required.")
+			return
+		}
+		if body.Subject == "" {
+			body.Subject = "(no subject)"
+		}
+		recipient, err := user.FindByID(r.Context(), d.Pool, en.UserID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load recipient.")
+			return
+		}
+		if recipient == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Recipient not found.")
+			return
+		}
+		msgID, err := communication.SendMessage(r.Context(), d.Pool, viewer, recipient.Email, body.Subject, body.Body)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not send message.")
+			return
+		}
+		if msgID == nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Recipient is not registered.")
+			return
+		}
+		d.notifyMailbox(viewer)
+		d.notifyMailbox(en.UserID)
+		d.emitInboxMessageNotification(r.Context(), en.UserID, viewer, body.Subject)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(respBody{ID: msgID.String()})
 	}
 }
