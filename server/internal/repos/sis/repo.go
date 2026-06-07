@@ -67,9 +67,11 @@ type SyncSummary struct {
 	EnrollmentsUpdated int `json:"enrollments_updated"`
 	CoursesCreated     int `json:"courses_created"`
 	CoursesUpdated     int `json:"courses_updated"`
-	Deactivated        int `json:"deactivated"`
-	Skipped            int `json:"skipped"`
-	Errored            int `json:"errored"`
+	Deactivated          int `json:"deactivated"`
+	Skipped              int `json:"skipped"`
+	Errored              int `json:"errored"`
+	DemographicsCreated  int `json:"demographics_created"`
+	DemographicsUpdated  int `json:"demographics_updated"`
 }
 
 // ListConnections returns all SIS connections for an org.

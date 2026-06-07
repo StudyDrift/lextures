@@ -298,6 +298,8 @@ type Config struct {
 	FFClassroomSignals bool
 	// FFConferenceScheduling enables parent-teacher conference scheduling (plan 13.12).
 	FFConferenceScheduling bool
+	// FFDemographics enables student demographic flags and Title I reporting (plan 13.13).
+	FFDemographics bool
 	// FFUiMode enables age-appropriate UI modes: K-2, elementary, and secondary (plan 13.11).
 	FFUiMode bool
 
