@@ -108,6 +108,7 @@ type platformSettingsJSON struct {
 	FFLibrary                       bool `json:"ffLibrary"`
 	FFBroadcasts                    bool `json:"ffBroadcasts"`
 	FFConferenceScheduling          bool `json:"ffConferenceScheduling"`
+	FFDemographics                  bool `json:"ffDemographics"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -247,6 +248,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFLibrary:                       merged.FFLibrary,
 				FFBroadcasts:                    merged.FFBroadcasts,
 				FFConferenceScheduling:          merged.FFConferenceScheduling,
+				FFDemographics:                  merged.FFDemographics,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -359,6 +361,7 @@ type putPlatformBody struct {
 	FFLibrary                       *bool `json:"ffLibrary"`
 	FFBroadcasts                    *bool `json:"ffBroadcasts"`
 	FFConferenceScheduling          *bool `json:"ffConferenceScheduling"`
+	FFDemographics                  *bool `json:"ffDemographics"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -632,6 +635,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("fflibrary", body.FFLibrary, func(v bool) { wr.FFLibrary = &v })
 		setBool("ffbroadcasts", body.FFBroadcasts, func(v bool) { wr.FFBroadcasts = &v })
 		setBool("ffconferencescheduling", body.FFConferenceScheduling, func(v bool) { wr.FFConferenceScheduling = &v })
+		setBool("ffdemographics", body.FFDemographics, func(v bool) { wr.FFDemographics = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -727,6 +731,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFLibrary:                       merged.FFLibrary,
 				FFBroadcasts:                    merged.FFBroadcasts,
 				FFConferenceScheduling:          merged.FFConferenceScheduling,
+				FFDemographics:                  merged.FFDemographics,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
