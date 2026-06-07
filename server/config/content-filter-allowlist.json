@@ -1,0 +1,29 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-06-06",
+  "description": "Domains and endpoints required for Lextures to function behind K-12 web-content filters.",
+  "first_party_domains": [
+    "*.lextures.com",
+    "*.lextures.io"
+  ],
+  "cdn_hostnames": [
+    "cdn.lextures.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com"
+  ],
+  "api_endpoints": [
+    "https://api.lextures.com",
+    "https://*.lextures.com/api"
+  ],
+  "classification": {
+    "category": "educational",
+    "subcategory": "learning_management_system"
+  },
+  "securly_app_catalog": {
+    "name": "Lextures",
+    "vendor": "Lextures",
+    "category": "Educational Tool",
+    "description": "Learning management system for K-12 districts.",
+    "pre_approved": true
+  }
+}

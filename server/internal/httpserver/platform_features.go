@@ -44,6 +44,7 @@ type platformFeaturesJSON struct {
 	FFClassroomSignals              bool `json:"ffClassroomSignals"`
 	FFConferenceScheduling          bool `json:"ffConferenceScheduling"`
 	FFDemographics                  bool `json:"ffDemographics"`
+	FFContentFilterIntegration      bool `json:"ffContentFilterIntegration"`
 	FFUiMode                        bool `json:"ffUiMode"`
 }
 
@@ -85,6 +86,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFClassroomSignals:          cfg.FFClassroomSignals,
 		FFConferenceScheduling:        cfg.FFConferenceScheduling,
 		FFDemographics:                cfg.FFDemographics,
+		FFContentFilterIntegration:    cfg.FFContentFilterIntegration,
 		FFUiMode:                    cfg.FFUiMode,
 	}
 }

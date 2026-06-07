@@ -76,6 +76,7 @@ import AttendanceExport from './pages/admin/AttendanceExport'
 import BehaviorDashboard from './pages/admin/BehaviorDashboard'
 import BroadcastComposer from './pages/admin/BroadcastComposer'
 import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
+import ContentFilterSettingsPage from './pages/admin/content-filter-settings'
 import StudentDemographicsPage from './pages/admin/student-demographics'
 import Title1ReportPage from './pages/admin/title1-report'
 import CourseAttendance from './pages/lms/CourseAttendance'
@@ -208,6 +209,7 @@ export default function App() {
           <Route path="/admin/conferences/schedule" element={<ConferenceScheduleGrid />} />
           <Route path="/admin/demographics/student" element={<StudentDemographicsPage />} />
           <Route path="/admin/demographics/title1" element={<Title1ReportPage />} />
+          <Route path="/admin/content-filter" element={<ContentFilterSettingsPage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

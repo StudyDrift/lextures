@@ -300,6 +300,8 @@ type Config struct {
 	FFConferenceScheduling bool
 	// FFDemographics enables student demographic flags and Title I reporting (plan 13.13).
 	FFDemographics bool
+	// FFContentFilterIntegration enables GoGuardian/Securly content-filter hooks and allowlist (plan 13.14).
+	FFContentFilterIntegration bool
 	// FFUiMode enables age-appropriate UI modes: K-2, elementary, and secondary (plan 13.11).
 	FFUiMode bool
 
