@@ -13,7 +13,15 @@ import { fetchCourseStructure, type CourseStructureItem } from '../../../lib/cou
 import { hrefForModuleCourseItem } from '../../../lib/course-item-ref-tokens'
 import { filterTaggable, kindLabel } from '../../course-item-prompt-mention'
 import { getBlockMentionRange } from './markdown-body-mention'
+import {
+  applySlashCommand,
+  filterSlashCommands,
+  getBlockSlashRange,
+  slashCommandsForEditor,
+  type SlashCommand,
+} from './markdown-body-slash'
 import { CourseAwareTipTapImage } from './course-aware-tip-tap-image'
+import { MarkdownImageUploadModal } from './markdown-image-upload-modal'
 import { MathBlock, MathInline } from '../extensions/math-tip-tap'
 import { altTextEnforcementFeatureEnabled } from '../../../lib/platform-features'
 
@@ -90,6 +98,14 @@ type MentionUi = {
   top: number
 }
 
+type SlashUi = {
+  from: number
+  to: number
+  query: string
+  left: number
+  top: number
+}
+
 type LinkPopoverState = {
   href: string
   text: string
@@ -134,17 +150,26 @@ export function MarkdownBodyEditor({
   }, [onEquationSlash])
 
   const listId = useId()
+  const slashListId = useId()
   const [structure, setStructure] = useState<CourseStructureItem[]>([])
   const [structureLoading, setStructureLoading] = useState(false)
   const [structureError, setStructureError] = useState(false)
   const [mentionUi, setMentionUi] = useState<MentionUi | null>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [slashUi, setSlashUi] = useState<SlashUi | null>(null)
+  const [slashActiveIndex, setSlashActiveIndex] = useState(0)
+  const [imageUploadOpen, setImageUploadOpen] = useState(false)
   const [linkPopover, setLinkPopover] = useState<LinkPopoverState | null>(null)
 
   const mentionCtxRef = useRef({
     mentionUi: null as MentionUi | null,
     filtered: [] as CourseStructureItem[],
     activeIndex: 0,
+  })
+  const slashCtxRef = useRef({
+    slashUi: null as SlashUi | null,
+    filtered: [] as SlashCommand[],
+    slashActiveIndex: 0,
   })
 
   useEffect(() => {
@@ -175,7 +200,7 @@ export function MarkdownBodyEditor({
         dragover: (_view: EditorView, e: Event) => {
           const ev = e as DragEvent
           if (disabledRef.current) return false
-          if (!uploadCourseImageRef.current || !courseCodeRef.current) return false
+          if (!uploadCourseImageRef.current) return false
           if (ev.dataTransfer?.types?.includes('Files')) {
             ev.preventDefault()
           }
@@ -185,8 +210,7 @@ export function MarkdownBodyEditor({
       handlePaste(view: EditorView, event: ClipboardEvent) {
         if (disabledRef.current) return false
         const upload = uploadCourseImageRef.current
-        const code = courseCodeRef.current
-        if (!upload || !code) return false
+        if (!upload) return false
         const items = event.clipboardData?.items
         if (!items?.length) return false
         const files: File[] = []
@@ -225,8 +249,7 @@ export function MarkdownBodyEditor({
       handleDrop(view: EditorView, event: DragEvent) {
         if (disabledRef.current) return false
         const upload = uploadCourseImageRef.current
-        const code = courseCodeRef.current
-        if (!upload || !code) return false
+        if (!upload) return false
         const dt = event.dataTransfer
         if (!dt?.files?.length) return false
         const files = [...dt.files].filter((f) => f.type.startsWith('image/'))
@@ -319,6 +342,22 @@ export function MarkdownBodyEditor({
     [structure, mentionUi],
   )
 
+  const imageSlashEnabled = Boolean(uploadCourseImage) || Boolean(showImagePickerRow)
+
+  const slashCommands = useMemo(
+    () =>
+      slashCommandsForEditor({
+        equation: Boolean(onEquationSlash),
+        image: imageSlashEnabled,
+      }),
+    [onEquationSlash, imageSlashEnabled],
+  )
+
+  const filteredSlashCommands = useMemo(
+    () => (slashUi ? filterSlashCommands(slashCommands, slashUi.query) : []),
+    [slashCommands, slashUi],
+  )
+
   useEffect(() => {
     queueMicrotask(() => {
       setActiveIndex(0)
@@ -332,8 +371,25 @@ export function MarkdownBodyEditor({
     })
   }, [filtered.length])
 
+  useEffect(() => {
+    queueMicrotask(() => {
+      setSlashActiveIndex(0)
+    })
+  }, [slashUi?.from, slashUi?.query])
+
+  useEffect(() => {
+    if (filteredSlashCommands.length === 0) return
+    queueMicrotask(() => {
+      setSlashActiveIndex((i) => Math.min(i, filteredSlashCommands.length - 1))
+    })
+  }, [filteredSlashCommands.length])
+
   useLayoutEffect(() => {
     mentionCtxRef.current = { mentionUi, filtered, activeIndex }
+  })
+
+  useLayoutEffect(() => {
+    slashCtxRef.current = { slashUi, filtered: filteredSlashCommands, slashActiveIndex }
   })
 
   const editor = useEditor(
@@ -356,7 +412,7 @@ export function MarkdownBodyEditor({
         }),
         CourseAwareTipTapImage.configure({
           inline: false,
-          allowBase64: false,
+          allowBase64: true,
         }),
         Placeholder.configure({
           placeholder: placeholder ?? 'Start writing…',
@@ -422,6 +478,26 @@ export function MarkdownBodyEditor({
     })
   }, [editor, disabled, courseCode])
 
+  const syncSlash = useCallback(() => {
+    if (!editor || disabled) {
+      setSlashUi(null)
+      return
+    }
+    const r = getBlockSlashRange(editor.state)
+    if (!r) {
+      setSlashUi(null)
+      return
+    }
+    const coords = editor.view.coordsAtPos(editor.state.selection.from)
+    setSlashUi({
+      from: r.from,
+      to: r.to,
+      query: r.query,
+      left: coords.left,
+      top: coords.bottom + 4,
+    })
+  }, [editor, disabled])
+
   useEffect(() => {
     if (!editor) return
     editor.on('selectionUpdate', syncMention)
@@ -434,6 +510,19 @@ export function MarkdownBodyEditor({
       editor.off('update', syncMention)
     }
   }, [editor, syncMention])
+
+  useEffect(() => {
+    if (!editor) return
+    editor.on('selectionUpdate', syncSlash)
+    editor.on('update', syncSlash)
+    queueMicrotask(() => {
+      syncSlash()
+    })
+    return () => {
+      editor.off('selectionUpdate', syncSlash)
+      editor.off('update', syncSlash)
+    }
+  }, [editor, syncSlash])
 
   useEffect(() => {
     if (courseCode) return
@@ -470,6 +559,28 @@ export function MarkdownBodyEditor({
     if (!mu) return
     editor.chain().focus().deleteRange({ from: mu.from, to: mu.to }).run()
     setMentionUi(null)
+  }, [editor])
+
+  const applySlashPick = useCallback(
+    (command: SlashCommand) => {
+      if (!editor) return
+      const su = slashCtxRef.current.slashUi
+      if (!su) return
+      applySlashCommand(editor, command, { from: su.from, to: su.to }, {
+        onEquation: onEquationSlashRef.current,
+        onImage: () => setImageUploadOpen(true),
+      })
+      setSlashUi(null)
+    },
+    [editor],
+  )
+
+  const cancelSlash = useCallback(() => {
+    if (!editor) return
+    const su = slashCtxRef.current.slashUi
+    if (!su) return
+    editor.chain().focus().deleteRange({ from: su.from, to: su.to }).run()
+    setSlashUi(null)
   }, [editor])
 
   const applyLinkEdit = useCallback(() => {
@@ -517,6 +628,48 @@ export function MarkdownBodyEditor({
     if (!editor) return
     const dom = editor.view.dom
     const onKeyDown = (e: KeyboardEvent) => {
+      const {
+        slashUi: su,
+        filtered: slashFiltered,
+        slashActiveIndex: slashAi,
+      } = slashCtxRef.current
+      if (su && !disabled) {
+        if (slashFiltered.length === 0) {
+          if (e.key === 'Escape') {
+            e.preventDefault()
+            e.stopPropagation()
+            cancelSlash()
+          }
+          return
+        }
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault()
+          e.stopPropagation()
+          setSlashActiveIndex((i) => (i + 1) % slashFiltered.length)
+          return
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault()
+          e.stopPropagation()
+          setSlashActiveIndex((i) => (i - 1 + slashFiltered.length) % slashFiltered.length)
+          return
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          e.stopPropagation()
+          const command = slashFiltered[slashAi]
+          if (command) applySlashPick(command)
+          return
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          e.stopPropagation()
+          cancelSlash()
+          return
+        }
+      }
+
       const { mentionUi: mu, filtered: f, activeIndex: ai } = mentionCtxRef.current
       if (!mu || disabled || !courseCode) return
       if (structureLoading) return
@@ -557,7 +710,16 @@ export function MarkdownBodyEditor({
     }
     dom.addEventListener('keydown', onKeyDown, true)
     return () => dom.removeEventListener('keydown', onKeyDown, true)
-  }, [editor, disabled, courseCode, structureLoading, applyPick, cancelMention])
+  }, [
+    editor,
+    disabled,
+    courseCode,
+    structureLoading,
+    applyPick,
+    cancelMention,
+    applySlashPick,
+    cancelSlash,
+  ])
 
   useEffect(() => {
     if (editor) editor.setEditable(!disabled)
@@ -580,7 +742,29 @@ export function MarkdownBodyEditor({
   }, [editor, sectionId])
 
   const listOpen = Boolean(mentionUi && !disabled && courseCode)
-  const canCourseImageUpload = Boolean(courseCode && uploadCourseImage)
+  const slashListOpen = Boolean(slashUi && !disabled)
+  const canCourseImageUpload = Boolean(uploadCourseImage)
+
+  const insertImagesAt = useCallback(
+    async (from: number, files: File[]) => {
+      if (!editor || !uploadCourseImage) return
+      let pos = from
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) continue
+        const path = await uploadCourseImage(file)
+        editor
+          .chain()
+          .focus()
+          .insertContentAt(pos, {
+            type: 'image',
+            attrs: imageInsertAttrs(path, file.name),
+          })
+          .run()
+        pos = editor.state.selection.to
+      }
+    },
+    [editor, uploadCourseImage],
+  )
 
   const onImageInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -588,28 +772,19 @@ export function MarkdownBodyEditor({
       e.target.value = ''
       if (!files?.length || !editor || !uploadCourseImage) return
       const from = editor.state.selection.from
-      void (async () => {
-        let pos = from
-        for (const file of [...files]) {
-          if (!file.type.startsWith('image/')) continue
-          try {
-            const path = await uploadCourseImage(file)
-            editor
-              .chain()
-              .focus()
-              .insertContentAt(pos, {
-                type: 'image',
-                attrs: imageInsertAttrs(path, file.name),
-              })
-              .run()
-            pos = editor.state.selection.to
-          } catch {
-            /* ignore */
-          }
-        }
-      })()
+      void insertImagesAt(from, [...files]).catch(() => {
+        /* ignore failed upload */
+      })
     },
-    [editor, uploadCourseImage],
+    [editor, uploadCourseImage, insertImagesAt],
+  )
+
+  const handleImageModalUpload = useCallback(
+    async (files: File[]) => {
+      if (!editor) throw new Error('Editor is not ready.')
+      await insertImagesAt(editor.state.selection.from, files)
+    },
+    [editor, insertImagesAt],
   )
 
   if (!editor) {
@@ -651,25 +826,9 @@ export function MarkdownBodyEditor({
               const files = [...e.dataTransfer.files].filter((f) => f.type.startsWith('image/'))
               if (!files.length || !editor || !uploadCourseImage) return
               const from = editor.state.selection.from
-              void (async () => {
-                let pos = from
-                for (const file of files) {
-                  try {
-                    const path = await uploadCourseImage(file)
-                    editor
-                      .chain()
-                      .focus()
-                      .insertContentAt(pos, {
-                        type: 'image',
-                        attrs: imageInsertAttrs(path, file.name),
-                      })
-                      .run()
-                    pos = editor.state.selection.to
-                  } catch {
-                    /* ignore */
-                  }
-                }
-              })()
+              void insertImagesAt(from, files).catch(() => {
+                /* ignore failed upload */
+              })
             }}
             className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
@@ -684,6 +843,53 @@ export function MarkdownBodyEditor({
       <div className="w-full [&_.ProseMirror]:min-h-[100px]">
         <EditorContent editor={editor} className="w-full" />
       </div>
+      {slashListOpen && slashUi
+        ? createPortal(
+            <div
+              id={slashListId}
+              role="listbox"
+              aria-label="Insert block"
+              style={{
+                position: 'fixed',
+                left: slashUi.left,
+                top: slashUi.top,
+                zIndex: 60,
+                width: 'min(20rem, calc(100vw - 2rem))',
+              }}
+              className="max-h-56 overflow-auto rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/15 dark:border-neutral-600 dark:bg-neutral-900"
+            >
+              {filteredSlashCommands.length === 0 ? (
+                <p className="px-3 py-2 text-sm text-slate-500 dark:text-neutral-400">
+                  No matching blocks. Keep typing to filter.
+                </p>
+              ) : (
+                filteredSlashCommands.map((command, idx) => (
+                  <button
+                    key={command.id}
+                    type="button"
+                    role="option"
+                    id={`${slashListId}-opt-${idx}`}
+                    aria-selected={idx === slashActiveIndex}
+                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition ${
+                      idx === slashActiveIndex
+                        ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50'
+                        : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'
+                    }`}
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      applySlashPick(command)
+                    }}
+                    onMouseEnter={() => setSlashActiveIndex(idx)}
+                  >
+                    <span className="font-medium">{command.label}</span>
+                    <span className="text-xs text-slate-500 dark:text-neutral-400">{command.description}</span>
+                  </button>
+                ))
+              )}
+            </div>,
+            document.body,
+          )
+        : null}
       {listOpen && mentionUi
         ? createPortal(
             <div
@@ -835,6 +1041,13 @@ export function MarkdownBodyEditor({
             document.body,
           )
         : null}
+      {canCourseImageUpload ? (
+        <MarkdownImageUploadModal
+          open={imageUploadOpen}
+          onClose={() => setImageUploadOpen(false)}
+          onUpload={handleImageModalUpload}
+        />
+      ) : null}
     </>
   )
 }

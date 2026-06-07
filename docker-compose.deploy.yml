@@ -28,11 +28,16 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-studydrift}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-studydrift}
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      # ping alone can pass before the AMQP listener on 5672 accepts connections.
+      test:
+        [
+          "CMD-SHELL",
+          "rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_port_connectivity",
+        ]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
+      timeout: 10s
+      retries: 8
+      start_period: 30s
 
   server:
     image: ${LEXTURES_SERVER_IMAGE:?LEXTURES_SERVER_IMAGE is required}

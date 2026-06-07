@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   DndContext,
@@ -8,6 +17,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragOverEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
 import {
@@ -17,7 +27,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { KeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
-import { CSS } from '@dnd-kit/utilities'
+import { CSS, type Transform } from '@dnd-kit/utilities'
 import {
   AlertCircle,
   Check,
@@ -113,22 +123,92 @@ function findModuleIdForChildItem(
   return undefined
 }
 
+const STRUCTURE_CHILD_KINDS = new Set<CourseStructureItem['kind']>([
+  'heading',
+  'content_page',
+  'assignment',
+  'quiz',
+  'external_link',
+  'survey',
+  'lti_link',
+  'h5p',
+  'vibe_activity',
+])
+
+function buildModuleChildrenMap(items: CourseStructureItem[]): Map<string, CourseStructureItem[]> {
+  const m = new Map<string, CourseStructureItem[]>()
+  for (const i of items) {
+    if (STRUCTURE_CHILD_KINDS.has(i.kind) && i.parentId) {
+      const list = m.get(i.parentId) ?? []
+      list.push(i)
+      m.set(i.parentId, list)
+    }
+  }
+  for (const [, list] of m) {
+    list.sort((a, b) => a.sortOrder - b.sortOrder)
+  }
+  return m
+}
+
+function flattenOrderedStructure(
+  topLevelOrdered: CourseStructureItem[],
+  childrenByModule: Map<string, CourseStructureItem[]>,
+): CourseStructureItem[] {
+  let sortOrder = 0
+  const out: CourseStructureItem[] = []
+  for (const top of topLevelOrdered) {
+    out.push({ ...top, sortOrder: sortOrder++ })
+    if (top.kind === 'module') {
+      for (const child of childrenByModule.get(top.id) ?? []) {
+        out.push({ ...child, sortOrder: sortOrder++ })
+      }
+    }
+  }
+  return out
+}
+
+function reorderModulesInStructure(
+  items: CourseStructureItem[],
+  activeModuleId: string,
+  overModuleId: string,
+): CourseStructureItem[] | null {
+  const childrenByModule = buildModuleChildrenMap(items)
+  const topLevel = items
+    .filter((i) => !i.parentId)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+  const modules = topLevel.filter((i) => i.kind === 'module')
+  const oldIndex = modules.findIndex((m) => m.id === activeModuleId)
+  const newIndex = modules.findIndex((m) => m.id === overModuleId)
+  if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return null
+
+  const nonModules = topLevel.filter((i) => i.kind !== 'module')
+  const nextModules = arrayMove(modules, oldIndex, newIndex)
+  return flattenOrderedStructure([...nonModules, ...nextModules], childrenByModule)
+}
+
+function reorderChildrenInStructure(
+  items: CourseStructureItem[],
+  moduleId: string,
+  activeChildId: string,
+  overChildId: string,
+): CourseStructureItem[] | null {
+  const childrenByModule = buildModuleChildrenMap(items)
+  const children = [...(childrenByModule.get(moduleId) ?? [])]
+  const oldIndex = children.findIndex((c) => c.id === activeChildId)
+  const newIndex = children.findIndex((c) => c.id === overChildId)
+  if (oldIndex < 0 || newIndex < 0 || oldIndex === newIndex) return null
+
+  childrenByModule.set(moduleId, arrayMove(children, oldIndex, newIndex))
+  const topLevel = items
+    .filter((i) => !i.parentId)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+  return flattenOrderedStructure(topLevel, childrenByModule)
+}
+
 function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
   moduleOrder: string[]
   childOrderByModule: Record<string, string[]>
 } {
-  const childItemKinds = new Set<CourseStructureItem['kind']>([
-    'heading',
-    'content_page',
-    'assignment',
-    'quiz',
-    'external_link',
-    'survey',
-    'lti_link',
-    'h5p',
-    'vibe_activity',
-  ])
-
   const modules = items
     .filter((i) => i.kind === 'module' && !i.parentId)
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -136,11 +216,24 @@ function buildReorderPayloadFromItems(items: CourseStructureItem[]): {
   const childOrderByModule: Record<string, string[]> = {}
   for (const m of modules) {
     childOrderByModule[m.id] = items
-      .filter((i) => i.parentId === m.id && childItemKinds.has(i.kind))
+      .filter((i) => i.parentId === m.id && STRUCTURE_CHILD_KINDS.has(i.kind))
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((c) => c.id)
   }
   return { moduleOrder, childOrderByModule }
+}
+
+function sortableDragStyle(
+  transform: Transform | null,
+  transition: string | undefined,
+  isDragging: boolean,
+): CSSProperties {
+  return {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? undefined : transition,
+    opacity: isDragging ? 0 : undefined,
+    pointerEvents: isDragging ? 'none' : undefined,
+  }
 }
 
 const moduleChildMetaLineClasses =
@@ -785,11 +878,7 @@ function SortableChildRow({
     disabled,
     data: { type: 'child' as const, moduleId },
   })
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.45 : undefined,
-  }
+  const style = sortableDragStyle(transform, transition, isDragging)
 
   const showRowChrome = canManageItemRow && !child.archived
   const gripAlwaysOn = dragHandlesVisible || isDragging
@@ -1252,11 +1341,7 @@ function SortableModuleCard({
     disabled: !canEditModules,
     data: { type: 'module' as const },
   })
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.55 : undefined,
-  }
+  const style = sortableDragStyle(transform, transition, isDragging)
 
   const children = moduleChildrenById.get(item.id) ?? []
   const childIds = children.map((c) => c.id)
@@ -1410,7 +1495,6 @@ export default function CourseModules() {
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [reorderError, setReorderError] = useState<string | null>(null)
-  const [reorderSaving, setReorderSaving] = useState(false)
 
   const [moduleModalOpen, setModuleModalOpen] = useState(false)
   const [moduleModalKey, setModuleModalKey] = useState(0)
@@ -1488,8 +1572,8 @@ export default function CourseModules() {
   const [moduleDeleting, setModuleDeleting] = useState(false)
   const [moduleDeleteError, setModuleDeleteError] = useState<string | null>(null)
 
-  const [isDraggingModule, setIsDraggingModule] = useState(false)
   const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const dragReorderCommittedRef = useRef(false)
   const [collapsedModuleIds, setCollapsedModuleIds] = useState<Set<string>>(() => new Set())
   const [dragHandlesVisible, setDragHandlesVisible] = useState(false)
   const [courseMeta, setCourseMeta] = useState<CoursePublic | null>(null)
@@ -1555,7 +1639,7 @@ export default function CourseModules() {
     moduleDeleteTarget !== null ||
     moduleDeleting
 
-  const anyModalBusy = blockingUi || reorderSaving
+  const anyModalBusy = blockingUi
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -2161,77 +2245,100 @@ export default function CourseModules() {
     async (body: { moduleOrder: string[]; childOrderByModule: Record<string, string[]> }) => {
       if (!courseCode) return
       setReorderError(null)
-      setReorderSaving(true)
       try {
         const next = await reorderCourseStructure(courseCode, body)
         setItems(next)
       } catch (e) {
         setReorderError(e instanceof Error ? e.message : 'Could not save order.')
         await load({ silent: true })
-      } finally {
-        setReorderSaving(false)
       }
     },
     [courseCode, load],
   )
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
+    dragReorderCommittedRef.current = false
     setActiveDragId(String(event.active.id))
-    if (event.active.data.current?.type === 'module') {
-      setIsDraggingModule(true)
+  }, [])
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const activeType = active.data.current?.type as string | undefined
+    if (activeType === 'module') {
+      if (over.data.current?.type !== 'module') return
+      setItems((prev) => {
+        const next = reorderModulesInStructure(prev, String(active.id), String(over.id))
+        if (!next) return prev
+        dragReorderCommittedRef.current = true
+        return next
+      })
+      return
+    }
+
+    if (activeType === 'child') {
+      const moduleId = active.data.current?.moduleId as string | undefined
+      if (!moduleId) return
+      setItems((prev) => {
+        const overModuleId =
+          (over.data.current?.moduleId as string | undefined) ??
+          findModuleIdForChildItem(String(over.id), buildModuleChildrenMap(prev))
+        if (!overModuleId || moduleId !== overModuleId) return prev
+        const next = reorderChildrenInStructure(prev, moduleId, String(active.id), String(over.id))
+        if (!next) return prev
+        dragReorderCommittedRef.current = true
+        return next
+      })
     }
   }, [])
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event
-      setIsDraggingModule(false)
       setActiveDragId(null)
-      if (!over || !courseCode || reorderSaving) return
+      if (!over || !courseCode || active.id === over.id) return
 
       const activeType = active.data.current?.type as string | undefined
-      if (activeType === 'module') {
-        if (active.id === over.id) return
-        const oldIndex = moduleIds.indexOf(String(active.id))
-        const newIndex = moduleIds.indexOf(String(over.id))
-        if (oldIndex < 0 || newIndex < 0) return
-        const nextModuleOrder = arrayMove(moduleIds, oldIndex, newIndex)
-        const base = buildReorderPayloadFromItems(items)
-        void persistReorder({
-          moduleOrder: nextModuleOrder,
-          childOrderByModule: base.childOrderByModule,
-        })
-        return
-      }
+      setItems((prev) => {
+        let next = prev
+        if (activeType === 'module') {
+          if (over.data.current?.type !== 'module') return prev
+          const reordered = reorderModulesInStructure(prev, String(active.id), String(over.id))
+          if (reordered) next = reordered
+        } else if (activeType === 'child') {
+          const moduleId = active.data.current?.moduleId as string | undefined
+          if (!moduleId) return prev
+          const overModuleId =
+            (over.data.current?.moduleId as string | undefined) ??
+            findModuleIdForChildItem(String(over.id), buildModuleChildrenMap(prev))
+          if (!overModuleId || moduleId !== overModuleId) return prev
+          const reordered = reorderChildrenInStructure(
+            prev,
+            moduleId,
+            String(active.id),
+            String(over.id),
+          )
+          if (reordered) next = reordered
+        } else {
+          return prev
+        }
 
-      if (activeType === 'child') {
-        const moduleId = active.data.current?.moduleId as string | undefined
-        if (!moduleId) return
-        const overModuleId =
-          (over.data.current?.moduleId as string | undefined) ??
-          findModuleIdForChildItem(String(over.id), moduleChildrenById)
-        if (!overModuleId || moduleId !== overModuleId) return
-        if (active.id === over.id) return
-        const childList = moduleChildrenById.get(moduleId) ?? []
-        const childIds = childList.map((c) => c.id)
-        const oldIndex = childIds.indexOf(String(active.id))
-        const newIndex = childIds.indexOf(String(over.id))
-        if (oldIndex < 0 || newIndex < 0) return
-        const nextChildren = arrayMove(childIds, oldIndex, newIndex)
-        const base = buildReorderPayloadFromItems(items)
-        void persistReorder({
-          moduleOrder: base.moduleOrder,
-          childOrderByModule: { ...base.childOrderByModule, [moduleId]: nextChildren },
-        })
-      }
+        if (next === prev && !dragReorderCommittedRef.current) return prev
+        void persistReorder(buildReorderPayloadFromItems(next))
+        return next
+      })
     },
-    [courseCode, items, moduleChildrenById, moduleIds, persistReorder, reorderSaving],
+    [courseCode, persistReorder],
   )
 
   const handleDragCancel = useCallback(() => {
-    setIsDraggingModule(false)
     setActiveDragId(null)
-  }, [])
+    if (dragReorderCommittedRef.current) {
+      void load({ silent: true })
+    }
+    dragReorderCommittedRef.current = false
+  }, [load])
 
   const activeItem = useMemo(() => {
     if (!activeDragId) return null
@@ -2308,6 +2415,7 @@ export default function CourseModules() {
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
           accessibility={{
@@ -2324,18 +2432,8 @@ export default function CourseModules() {
                 const pos = siblings.findIndex((c) => c.id === String(active.id)) + 1
                 return `Picked up "${item.title}". Position: ${pos} of ${siblings.length}. Press arrow keys to move, Space to drop, Escape to cancel.`
               },
-              onDragOver({ active, over }) {
-                if (!over) return
-                const item = items.find((i) => i.id === String(active.id))
-                if (!item) return
-                if (item.kind === 'module') {
-                  const pos = moduleIds.indexOf(String(over.id)) + 1
-                  return `"${item.title}" is now at position ${pos} of ${moduleIds.length}.`
-                }
-                const moduleId = active.data.current?.moduleId as string | undefined
-                const siblings = moduleId ? (moduleChildrenById.get(moduleId) ?? []) : []
-                const pos = siblings.findIndex((c) => c.id === String(over.id)) + 1
-                return `"${item.title}" is now at position ${pos} of ${siblings.length}.`
+              onDragOver() {
+                return undefined
               },
               onDragEnd({ active, over }) {
                 const item = items.find((i) => i.id === String(active.id))
@@ -2395,7 +2493,7 @@ export default function CourseModules() {
                       setOerPanelOpen(true)
                     }}
                     oerLibraryEnabled={oerEnabled}
-                    minified={isDraggingModule}
+                    minified={false}
                     collapsed={collapsedModuleIds.has(item.id)}
                     onToggleCollapsed={toggleModuleCollapsed}
                     busyModuleId={busyModuleId}
@@ -2415,30 +2513,38 @@ export default function CourseModules() {
                 ))}
             </ul>
           </SortableContext>
-          {/* DragOverlay disables node rect-delta compensation; collapsing modules shifts layout and
-              desyncs the overlay from the cursor. Only use DragOverlay for in-module item drags. */}
-          {activeDragId && activeItem && activeItem.kind !== 'module' ? (
+          {activeDragId && activeItem ? (
             <DragOverlay dropAnimation={null}>
-              <div className="pointer-events-none max-w-lg rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-lg dark:border-neutral-600 dark:bg-neutral-800">
-                <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{activeItem.title}</p>
-                <p className="text-xs text-slate-500 dark:text-neutral-400">
-                  {activeItem.kind === 'content_page'
-                    ? 'Page'
-                    : activeItem.kind === 'assignment'
-                      ? 'Assignment'
-                      : activeItem.kind === 'quiz'
-                        ? activeItem.isAdaptive
-                          ? 'Adaptive quiz'
-                          : 'Quiz'
-                        : activeItem.kind === 'external_link'
-                          ? 'External link'
-                          : activeItem.kind === 'lti_link'
-                          ? 'LTI tool'
-                          : activeItem.kind === 'h5p'
-                            ? 'Interactive H5P'
-                            : 'Heading'}
-                </p>
-              </div>
+              {activeItem.kind === 'module' ? (
+                <div className="pointer-events-none w-full rounded-2xl border border-slate-200/70 bg-slate-50/95 px-4 py-3 shadow-lg dark:border-neutral-600 dark:bg-neutral-800/95">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{activeItem.title}</p>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
+                    {(moduleChildrenById.get(activeItem.id) ?? []).length}{' '}
+                    {(moduleChildrenById.get(activeItem.id) ?? []).length === 1 ? 'item' : 'items'}
+                  </p>
+                </div>
+              ) : (
+                <div className="pointer-events-none max-w-lg rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-lg dark:border-neutral-600 dark:bg-neutral-800">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{activeItem.title}</p>
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">
+                    {activeItem.kind === 'content_page'
+                      ? 'Page'
+                      : activeItem.kind === 'assignment'
+                        ? 'Assignment'
+                        : activeItem.kind === 'quiz'
+                          ? activeItem.isAdaptive
+                            ? 'Adaptive quiz'
+                            : 'Quiz'
+                          : activeItem.kind === 'external_link'
+                            ? 'External link'
+                            : activeItem.kind === 'lti_link'
+                              ? 'LTI tool'
+                              : activeItem.kind === 'h5p'
+                                ? 'Interactive H5P'
+                                : 'Heading'}
+                  </p>
+                </div>
+              )}
             </DragOverlay>
           ) : null}
         </DndContext>

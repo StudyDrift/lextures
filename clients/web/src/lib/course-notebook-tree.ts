@@ -1,12 +1,23 @@
 import { arrayMove } from '@dnd-kit/sortable'
 
+export type NotebookPageKind = 'page' | 'group'
+
 export type CourseNotebookPage = {
   id: string
   title: string
   parentId: string | null
   sortOrder: number
-  /** TipTap / MarkdownBodyEditor markdown */
+  kind: NotebookPageKind
+  /** TipTap / MarkdownBodyEditor markdown (groups may stay empty) */
   contentMd: string
+}
+
+export function isNotebookGroup(page: CourseNotebookPage): boolean {
+  return page.kind === 'group'
+}
+
+export function pageHasChildren(pages: CourseNotebookPage[], pageId: string): boolean {
+  return pages.some((p) => p.parentId === pageId)
 }
 
 export function newNotebookPageId(): string {
@@ -118,6 +129,26 @@ export function addNotebookPage(
     title,
     parentId,
     sortOrder: maxOrder + 1,
+    kind: 'page',
+    contentMd: '',
+  }
+  return { pages: [...pages, row], newId: id }
+}
+
+export function addNotebookGroup(
+  pages: CourseNotebookPage[],
+  parentId: string | null,
+  title = 'Untitled group',
+): { pages: CourseNotebookPage[]; newId: string } {
+  const id = newNotebookPageId()
+  const siblings = sortedChildren(pages, parentId)
+  const maxOrder = siblings.length ? Math.max(...siblings.map((s) => s.sortOrder)) : -1
+  const row: CourseNotebookPage = {
+    id,
+    title,
+    parentId,
+    sortOrder: maxOrder + 1,
+    kind: 'group',
     contentMd: '',
   }
   return { pages: [...pages, row], newId: id }
@@ -141,4 +172,38 @@ export function updatePageTitle(pages: CourseNotebookPage[], pageId: string, tit
 
 export function updatePageContent(pages: CourseNotebookPage[], pageId: string, contentMd: string): CourseNotebookPage[] {
   return pages.map((p) => (p.id === pageId ? { ...p, contentMd } : p))
+}
+
+/** Groups the page can be moved into (excludes self and own descendants). */
+export function notebookGroupMoveTargets(
+  pages: CourseNotebookPage[],
+  pageId: string,
+): CourseNotebookPage[] {
+  return pages
+    .filter((p) => isNotebookGroup(p))
+    .filter((p) => p.id !== pageId)
+    .filter((p) => !isUnderAncestor(pages, pageId, p.id))
+    .sort((a, b) => notebookPagePathLabel(pages, a.id).localeCompare(notebookPagePathLabel(pages, b.id)))
+}
+
+export function notebookPagePathLabel(pages: CourseNotebookPage[], pageId: string): string {
+  const map = byId(pages)
+  const parts: string[] = []
+  let cur: string | null = pageId
+  while (cur) {
+    const row = map.get(cur)
+    if (!row) break
+    parts.unshift(row.title || 'Untitled')
+    cur = row.parentId
+  }
+  return parts.join(' / ')
+}
+
+/** Move a page or group under `newParentId` (null = top level). Returns null on invalid move. */
+export function movePageToParent(
+  pages: CourseNotebookPage[],
+  pageId: string,
+  newParentId: string | null,
+): CourseNotebookPage[] | null {
+  return reparentPage(pages, pageId, newParentId, null)
 }

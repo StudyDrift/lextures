@@ -1,8 +1,13 @@
 import { getAccessToken } from './auth'
-import { newNotebookPageId, updatePageContent, type CourseNotebookPage } from './course-notebook-tree'
+import {
+  newNotebookPageId,
+  updatePageContent,
+  type CourseNotebookPage,
+  type NotebookPageKind,
+} from './course-notebook-tree'
 import { decodeJwtSub } from './jwt-payload'
 
-export type { CourseNotebookPage } from './course-notebook-tree'
+export type { CourseNotebookPage, NotebookPageKind } from './course-notebook-tree'
 
 export const STUDENT_NOTEBOOKS_CHANGED = 'lextures-student-notebooks-changed'
 
@@ -85,6 +90,21 @@ function normalizeActivePage(data: CourseNotebookStore): CourseNotebookStore {
   return { ...data, activePageId: valid }
 }
 
+function normalizePageKind(raw: unknown): NotebookPageKind {
+  return raw === 'group' ? 'group' : 'page'
+}
+
+function parseNotebookPageRow(raw: unknown): CourseNotebookPage {
+  const row = raw as Record<string, unknown>
+  return {
+    id: String(row.id ?? newNotebookPageId()),
+    title: typeof row.title === 'string' ? row.title : 'Untitled',
+    parentId: row.parentId === null || typeof row.parentId === 'string' ? (row.parentId as string | null) : null,
+    sortOrder: typeof row.sortOrder === 'number' ? row.sortOrder : 0,
+    kind: normalizePageKind(row.kind),
+    contentMd: typeof row.contentMd === 'string' ? row.contentMd : '',
+  }
+}
 function migrateLegacyToV2(row: StudentCourseNotebookLegacy): CourseNotebookStore {
   const id = newNotebookPageId()
   const body = typeof row.body === 'string' ? row.body : ''
@@ -92,7 +112,7 @@ function migrateLegacyToV2(row: StudentCourseNotebookLegacy): CourseNotebookStor
     formatVersion: 2,
     updatedAt: row.updatedAt ?? new Date().toISOString(),
     courseTitle: row.courseTitle,
-    pages: [{ id, title: 'Notes', parentId: null, sortOrder: 0, contentMd: body }],
+    pages: [{ id, title: 'Notes', parentId: null, sortOrder: 0, kind: 'page', contentMd: body }],
     activePageId: id,
   })
 }
@@ -102,7 +122,7 @@ function emptyNotebook(): CourseNotebookStore {
   return {
     formatVersion: 2,
     updatedAt: new Date().toISOString(),
-    pages: [{ id, title: 'Untitled', parentId: null, sortOrder: 0, contentMd: '' }],
+    pages: [{ id, title: 'Untitled', parentId: null, sortOrder: 0, kind: 'page', contentMd: '' }],
     activePageId: id,
   }
 }
@@ -111,16 +131,7 @@ function parseStoredNotebookRow(raw: unknown): CourseNotebookStore {
   if (!raw || typeof raw !== 'object') return emptyNotebook()
   const r = raw as Record<string, unknown>
   if (r.formatVersion === 2 && Array.isArray(r.pages) && r.pages.length > 0) {
-    const pages = (r.pages as unknown[]).map((p) => {
-      const row = p as Record<string, unknown>
-      return {
-        id: String(row.id ?? newNotebookPageId()),
-        title: typeof row.title === 'string' ? row.title : 'Untitled',
-        parentId: row.parentId === null || typeof row.parentId === 'string' ? (row.parentId as string | null) : null,
-        sortOrder: typeof row.sortOrder === 'number' ? row.sortOrder : 0,
-        contentMd: typeof row.contentMd === 'string' ? row.contentMd : '',
-      } satisfies CourseNotebookPage
-    })
+    const pages = (r.pages as unknown[]).map((p) => parseNotebookPageRow(p))
     return normalizeActivePage({
       formatVersion: 2,
       updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : new Date().toISOString(),
