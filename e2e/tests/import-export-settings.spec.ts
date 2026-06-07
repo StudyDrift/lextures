@@ -61,6 +61,9 @@ test.describe('Course Settings - Import/Export', () => {
     await expect(page.getByRole('button', { name: /Import from Canvas/i })).toBeVisible()
     // Canvas import button is disabled without credentials filled in
     await expect(page.getByRole('button', { name: /Import from Canvas/i })).toBeDisabled()
+    await expect(
+      page.getByText(/leave this page and refresh later/i),
+    ).toBeVisible()
   })
 
   test('JSON file import button is visible', async ({ coursePage: page, seededCourse }) => {

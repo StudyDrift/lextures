@@ -74,6 +74,16 @@ output "redis_url_secret_arn" {
   value       = aws_secretsmanager_secret.redis_url.arn
 }
 
+output "rabbitmq_primary_endpoint" {
+  description = "Amazon MQ RabbitMQ primary AMQP endpoint."
+  value       = try(aws_mq_broker.rabbitmq.instances[0].endpoints[0], null)
+}
+
+output "rabbitmq_url_secret_arn" {
+  description = "Secrets Manager ARN for RABBITMQ_URL."
+  value       = aws_secretsmanager_secret.rabbitmq_url.arn
+}
+
 output "course_files_bucket_name" {
   description = "S3 bucket for uploaded course files (COURSE_FILES_ROOT)."
   value       = aws_s3_bucket.course_files.id

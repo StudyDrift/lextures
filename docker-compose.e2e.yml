@@ -36,6 +36,18 @@ services:
       retries: 10
       start_period: 180s
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: e2e
+      RABBITMQ_DEFAULT_PASS: e2e
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
   server:
     build:
       context: ./server
@@ -62,10 +74,13 @@ services:
       STORAGE_QUOTAS_ENABLED: "true"
       FEATURE_ENGAGEMENT_TRACKING: "true"
       FF_BROADCASTS: "true"
+      RABBITMQ_URL: amqp://e2e:e2e@rabbitmq:5672/
     ports:
       - "8080:8080"
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     healthcheck:
       # Server image installs curl (not wget); wget would keep the container unhealthy and break `compose up --wait`.

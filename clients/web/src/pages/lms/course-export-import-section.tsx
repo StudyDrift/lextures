@@ -124,7 +124,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
       )
       setFeedback({
         kind: 'ok',
-        text: 'Canvas course imported successfully. Reload the course if modules look stale.',
+        text: 'Canvas import queued. You can leave this page and refresh later — we will notify you when it finishes.',
       })
       if (!rememberCanvasCredentials) {
         setCanvasToken('')
@@ -253,9 +253,10 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
             Use a Canvas personal access token with read-only access. Choose what to pull below (all
             are on by default). We map Canvas into this course; roster members with an email in
             Canvas get a Lextures account when needed and are enrolled when enrollments are included.
-            The token is sent once for the import (HTTPS and
-            WebSocket); Lextures does not store it on the server. You can optionally keep the URL
-            and token in this browser for the next course import.
+            The token is sent once for the import (HTTPS); Lextures does not store it on the server.
+            Imports run in the background — you can leave this page and refresh later; we notify you
+            when the import finishes. You can optionally keep the URL and token in this browser for
+            the next course import.
           </p>
           <fieldset className="mt-4 rounded-xl border border-slate-200 p-4 dark:border-neutral-600">
             <legend className="px-1 text-xs font-medium text-slate-700 dark:text-neutral-300">

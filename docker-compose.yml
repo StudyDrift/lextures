@@ -33,6 +33,21 @@ services:
       retries: 5
       start_period: 120s
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: studydrift
+      RABBITMQ_DEFAULT_PASS: studydrift
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   server:
     build:
       context: ./server
@@ -49,12 +64,15 @@ services:
       OPEN_ROUTER_API_KEY: ${OPEN_ROUTER_API_KEY:-}
       COURSE_FILES_ROOT: /var/course-files
       PORT: "8080"
+      RABBITMQ_URL: amqp://studydrift:studydrift@rabbitmq:5672/
     ports:
       - "8080:8080"
     volumes:
       - ./data/course-files:/var/course-files
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   web:

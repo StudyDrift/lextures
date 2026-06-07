@@ -23,6 +23,7 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       JWT_SECRET: dev-only-change-me-in-production
+      RABBITMQ_URL: amqp://studydrift:studydrift@rabbitmq:5672/
     volumes:
       - ./server:/app
       - ./data/course-files:/var/course-files

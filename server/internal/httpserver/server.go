@@ -10,6 +10,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/auth/hibp"
+	"github.com/lextures/lextures/server/internal/canvasimportevents"
+	"github.com/lextures/lextures/server/internal/canvasimportqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/logging"
@@ -44,6 +46,10 @@ type Deps struct {
 	PasswordChecker hibp.Checker
 	// NotifHub broadcasts SSE signals for real-time in-app notification bell updates (plan 6.3). Optional.
 	NotifHub *notifevents.Hub
+	// CanvasImportHub fans out queued Canvas import progress to WebSocket subscribers.
+	CanvasImportHub *canvasimportevents.Hub
+	// CanvasImportQueue publishes Canvas import jobs to RabbitMQ (or in-memory fallback).
+	CanvasImportQueue *canvasimportqueue.Bus
 	// Storage is the object-storage driver (plan 8.1). When nil, falls back to local disk reads.
 	Storage filestorage.Driver
 	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.
@@ -135,6 +141,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerCourseTranslationRoutes(r)
 	d.registerTusRoutes(r)
 	d.registerTranscodeRoutes(r)
+	d.registerCanvasImportRoutes(r)
 	d.registerCaptionRoutes(r)
 	d.registerStorageQuotaRoutes(r)
 	d.registerAVScanRoutes(r)

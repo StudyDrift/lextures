@@ -61,6 +61,11 @@ output "course_files_irsa_role_arn" {
   value       = try(module.aws[0].course_files_irsa_role_arn, null)
 }
 
+output "rabbitmq_url_secret_arn" {
+  description = "Secrets Manager ARN for RABBITMQ_URL."
+  value       = try(module.aws[0].rabbitmq_url_secret_arn, null)
+}
+
 output "kubectl_config_command" {
   description = "Example command to update kubeconfig for the EKS cluster."
   value = var.cloud_provider == "aws" ? format(

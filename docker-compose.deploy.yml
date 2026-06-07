@@ -21,6 +21,19 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-studydrift}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-studydrift}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
   server:
     image: ${LEXTURES_SERVER_IMAGE:?LEXTURES_SERVER_IMAGE is required}
     restart: unless-stopped
@@ -33,10 +46,13 @@ services:
       PORT: "8080"
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       COURSE_FILES_ROOT: /mnt/lextures-db/course-files
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-studydrift}:${RABBITMQ_PASSWORD:-studydrift}@rabbitmq:5672/
     volumes:
       - /mnt/lextures-db/course-files:/mnt/lextures-db/course-files
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
     healthcheck:
       # Image runs as USER nobody; use absolute path for curl.
