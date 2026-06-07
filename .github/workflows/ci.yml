@@ -141,11 +141,35 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Lint
+      - name: Lint (oxlint)
         run: npm run lint
 
       - name: i18n locale parity
         run: npm run i18n:check
+
+      - name: Build
+        run: npm run build
+
+  www:
+    name: Marketing site (www)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: www
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: www/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (oxlint)
+        run: npm run lint
 
       - name: Build
         run: npm run build

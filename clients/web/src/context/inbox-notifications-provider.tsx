@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { authorizedFetch, apiUrl } from '../lib/api'
 import { getAccessToken } from '../lib/auth'
+import {
+  loadCanvasImportToastedIds,
+  pickCanvasImportNotificationsToToast,
+  rememberCanvasImportToastedIds,
+} from '../lib/canvas-import-toast'
+import { toast } from '../lib/lms-toast'
 import { InboxNotificationsContext, type InboxNotification } from './inbox-notifications-context'
 
 export function InboxNotificationsProvider({ children }: { children: ReactNode }) {
@@ -8,6 +14,8 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
   const sseRef = useRef<EventSource | null>(null)
+  const inboxHydratedRef = useRef(false)
+  const toastedIdsRef = useRef<Set<string>>(loadCanvasImportToastedIds())
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -15,7 +23,26 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
       const res = await authorizedFetch('/api/v1/me/notifications')
       if (!res.ok) return
       const data = (await res.json()) as { notifications: InboxNotification[]; unreadCount: number }
-      setNotifications(data.notifications ?? [])
+      const incoming = data.notifications ?? []
+      setNotifications((prev) => {
+        const toToast = pickCanvasImportNotificationsToToast(
+          prev,
+          incoming,
+          toastedIdsRef.current,
+          inboxHydratedRef.current,
+        )
+        if (toToast.length > 0) {
+          rememberCanvasImportToastedIds(
+            toastedIdsRef.current,
+            toToast.map((n) => n.id),
+          )
+          for (const n of toToast) {
+            toast.success(n.title, { description: n.body })
+          }
+        }
+        return incoming
+      })
+      inboxHydratedRef.current = true
       setUnreadCount(data.unreadCount ?? 0)
     } catch {
       /* ignore */

@@ -17,6 +17,8 @@ import (
 
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/background"
+	"github.com/lextures/lextures/server/internal/canvasimportevents"
+	"github.com/lextures/lextures/server/internal/canvasimportqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
@@ -95,19 +97,29 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		quotaSvc = &storagequota.Service{Pool: pool}
 	}
 
-	deps := httpserver.Deps{
-		Pool:             pool,
-		JWTSigner:        auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
-		Config:           cfg,
-		Platform:         platformstate.New(merged),
-		OIDC:             oidcauth.NewService(merged),
-		Comm:             commevents.New(),
-		Lti:              ltiRT,
-		BrandingResolver: brandingResolver,
-		NotifHub:         notifevents.New(),
-		Storage:          storage,
-		StorageQuota:     quotaSvc,
+	canvasImportHub := canvasimportevents.New()
+	canvasImportQueue, queueErr := canvasimportqueue.NewBus(merged.RabbitMQURL, merged.CanvasImportQueueName)
+	if queueErr != nil {
+		return fmt.Errorf("app: canvas import queue: %w", queueErr)
 	}
+	defer func() { _ = canvasImportQueue.Close() }()
+
+	deps := httpserver.Deps{
+		Pool:              pool,
+		JWTSigner:         auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
+		Config:            cfg,
+		Platform:          platformstate.New(merged),
+		OIDC:              oidcauth.NewService(merged),
+		Comm:              commevents.New(),
+		Lti:               ltiRT,
+		BrandingResolver:  brandingResolver,
+		NotifHub:          notifevents.New(),
+		CanvasImportHub:   canvasImportHub,
+		CanvasImportQueue: canvasImportQueue,
+		Storage:           storage,
+		StorageQuota:      quotaSvc,
+	}
+	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,
 		Handler: httpserver.NewHandler(deps),

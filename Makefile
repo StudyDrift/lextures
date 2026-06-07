@@ -1,4 +1,31 @@
-.PHONY: e2e e2e-run e2e-teardown
+.PHONY: e2e e2e-run e2e-teardown lint lint-server lint-web lint-cli lint-www server web cli www
+
+# Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
+LINT_APPS := server web cli www
+
+lint:
+	@apps="$(filter $(LINT_APPS),$(MAKECMDGOALS))"; \
+	if [ -z "$$apps" ]; then apps="$(LINT_APPS)"; fi; \
+	for app in $$apps; do \
+		echo "==> lint $$app"; \
+		$(MAKE) lint-$$app || exit 1; \
+	done
+
+# Swallow app names when passed as goals alongside `lint` (e.g. `make lint server`).
+server web www:
+	@:
+
+lint-server:
+	$(MAKE) -C server lint
+
+lint-web:
+	cd clients/web && npm run lint
+
+lint-cli:
+	cd clients/cli && golangci-lint run ./...
+
+lint-www:
+	cd www && npm run lint
 
 # Run the full e2e suite — automatically picks a strategy:
 #
@@ -42,4 +69,8 @@ e2e-teardown:
 	docker compose -f docker-compose.e2e.yml down -v
 
 cli:
+ifneq ($(filter lint,$(MAKECMDGOALS)),)
+	@:
+else
 	cd clients/cli && go build -o lextures main.go && mkdir -p ~/.local/bin && mv lextures ~/.local/bin/lextures
+endif

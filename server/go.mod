@@ -23,6 +23,7 @@ require (
 	github.com/minio/minio-go/v7 v7.1.0
 	github.com/pdfcpu/pdfcpu v0.12.1
 	github.com/pquerna/otp v1.5.0
+	github.com/rabbitmq/amqp091-go v1.11.0
 	github.com/russellhaering/goxmldsig v1.6.0
 	github.com/yuin/goldmark v1.7.11
 	golang.org/x/crypto v0.51.0

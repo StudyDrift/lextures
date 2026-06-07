@@ -5023,19 +5023,24 @@ export type PostCourseImportCanvasBody = {
   include?: CanvasImportInclude
 }
 
-function courseCanvasImportWebSocketUrl(courseCode: string): string | null {
+export const CANVAS_IMPORT_CANCELLED_MESSAGE = 'Import cancelled.'
+
+function courseCanvasImportWebSocketUrl(jobId: string): string | null {
   if (!getAccessToken()) return null
   const base = apiBaseUrl()
   const u = new URL(base)
   u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${u.origin}/api/v1/courses/${encodeURIComponent(courseCode)}/import/canvas/ws`
+  return `${u.origin}/api/v1/ws/canvas-import/${encodeURIComponent(jobId)}`
 }
 
-export const CANVAS_IMPORT_CANCELLED_MESSAGE = 'Import cancelled.'
+export type CanvasImportQueuedResponse = {
+  jobId: string
+  message: string
+}
 
 /**
- * Pulls course data from the Canvas REST API (via our server) and applies it like a JSON import.
- * Uses a WebSocket for progress messages (`onProgress`); the Canvas token is sent once and is not stored.
+ * Queues a Canvas import on the server (RabbitMQ) and streams progress over a job WebSocket.
+ * The Canvas token is sent once and is not stored.
  */
 export async function postCourseImportCanvas(
   courseCode: string,
@@ -5043,16 +5048,38 @@ export async function postCourseImportCanvas(
   onProgress?: (message: string) => void,
   options?: { signal?: AbortSignal },
 ): Promise<void> {
-  const url = courseCanvasImportWebSocketUrl(courseCode)
   const authToken = getAccessToken()
-  if (!url) {
-    throw new Error('Sign in to import from Canvas.')
-  }
   if (!authToken) {
     throw new Error('Sign in to import from Canvas.')
   }
 
   const signal = options?.signal
+  const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}/import/canvas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      mode: body.mode,
+      canvasBaseUrl: body.canvasBaseUrl,
+      canvasCourseId: body.canvasCourseId,
+      accessToken: body.accessToken,
+      include: body.include ?? CANVAS_IMPORT_INCLUDE_ALL,
+    }),
+    signal,
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) {
+    throw new Error(readApiErrorMessage(raw))
+  }
+  const queued = raw as CanvasImportQueuedResponse
+  if (!queued.jobId?.trim()) {
+    throw new Error('Server did not return an import job id.')
+  }
+  onProgress?.(queued.message || 'Canvas import queued.')
+
+  const url = courseCanvasImportWebSocketUrl(queued.jobId)
+  if (!url) {
+    throw new Error('Sign in to import from Canvas.')
+  }
 
   await new Promise<void>((resolve, reject) => {
     const ws = new WebSocket(url)
@@ -5080,28 +5107,19 @@ export async function postCourseImportCanvas(
         onAbort()
         return
       }
-      ws.send(
-        JSON.stringify({
-          authToken,
-          mode: body.mode,
-          canvasBaseUrl: body.canvasBaseUrl,
-          canvasCourseId: body.canvasCourseId,
-          accessToken: body.accessToken,
-          include: body.include ?? CANVAS_IMPORT_INCLUDE_ALL,
-        }),
-      )
+      ws.send(JSON.stringify({ authToken }))
     }
 
     ws.onmessage = (ev) => {
-      let raw: unknown
+      let rawMsg: unknown
       try {
-        raw = JSON.parse(String(ev.data))
+        rawMsg = JSON.parse(String(ev.data))
       } catch {
         fail('Unexpected message from server.')
         ws.close()
         return
       }
-      const o = raw as { type?: string; message?: string }
+      const o = rawMsg as { type?: string; message?: string }
       if (o.type === 'progress' && typeof o.message === 'string') {
         onProgress?.(o.message)
         return

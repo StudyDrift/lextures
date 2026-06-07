@@ -25,11 +25,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
+	"github.com/lextures/lextures/server/internal/repos/canvasimportjobs"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/filemanager"
 )
 
 // handleCourseImportCanvasWS is GET /api/v1/courses/{course_code}/import/canvas/ws.
+// Legacy endpoint: accepts the same first message as before, enqueues the import, and returns the job id.
 func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -37,7 +39,7 @@ func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if d.JWTSigner == nil || d.Pool == nil {
+		if d.JWTSigner == nil || d.Pool == nil || d.CanvasImportQueue == nil {
 			http.Error(w, "server misconfiguration", http.StatusServiceUnavailable)
 			return
 		}
@@ -57,13 +59,15 @@ func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 		if err != nil || typ != websocket.MessageText {
 			return
 		}
-		var m struct {
-			AuthToken string `json:"authToken"`
-		}
-		if err := json.Unmarshal(b, &m); err != nil || m.AuthToken == "" {
+		var req canvasImportWSFirstMessage
+		if err := json.Unmarshal(b, &req); err != nil || req.AuthToken == "" {
+			_ = wsWriteJSON(r.Context(), c, map[string]any{
+				"type":    "error",
+				"message": "Invalid JSON in the first message. Send authToken plus the former Canvas import POST body fields.",
+			})
 			return
 		}
-		u, err := d.JWTSigner.Verify(r.Context(), m.AuthToken)
+		u, err := d.JWTSigner.Verify(r.Context(), req.AuthToken)
 		if err != nil {
 			return
 		}
@@ -79,15 +83,6 @@ func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 		if err != nil || !canImport {
 			return
 		}
-
-		var req canvasImportWSFirstMessage
-		if err := json.Unmarshal(b, &req); err != nil {
-			_ = wsWriteJSON(r.Context(), c, map[string]any{
-				"type":    "error",
-				"message": "Invalid JSON in the first message. Send authToken plus the former Canvas import POST body fields.",
-			})
-			return
-		}
 		if req.CanvasBaseURL == "" || req.CanvasCourseID == "" || req.AccessToken == "" {
 			_ = wsWriteJSON(r.Context(), c, map[string]any{
 				"type":    "error",
@@ -96,18 +91,31 @@ func (d Deps) handleCourseImportCanvasWS() http.HandlerFunc {
 			return
 		}
 		include := req.Include.withDefaults()
-		emit := func(msg string) bool {
-			return wsWriteJSON(r.Context(), c, map[string]any{"type": "progress", "message": msg}) == nil
-		}
-		if !emit("Connecting to Canvas...") {
-			return
-		}
-		err = d.runCanvasImport(r.Context(), uid, courseCode, req.Mode, req.CanvasBaseURL, req.CanvasCourseID, req.AccessToken, include, emit)
+
+		jobID, err := canvasimportjobs.Insert(r.Context(), d.Pool, uid, courseCode, req.Mode, req.CanvasBaseURL, req.CanvasCourseID, includeToRepo(include))
 		if err != nil {
-			_ = wsWriteJSON(r.Context(), c, map[string]any{"type": "error", "message": err.Error()})
+			_ = wsWriteJSON(r.Context(), c, map[string]any{"type": "error", "message": "Failed to queue Canvas import."})
 			return
 		}
-		_ = wsWriteJSON(r.Context(), c, map[string]any{"type": "complete"})
+		msg := canvasimportjobs.QueueMessage{
+			JobID:          jobID,
+			UserID:         uid,
+			CourseCode:     courseCode,
+			Mode:           req.Mode,
+			CanvasBaseURL:  req.CanvasBaseURL,
+			CanvasCourseID: req.CanvasCourseID,
+			AccessToken:    req.AccessToken,
+			Include:        includeToRepo(include),
+		}
+		if err := d.CanvasImportQueue.Publish(r.Context(), msg); err != nil {
+			_ = wsWriteJSON(r.Context(), c, map[string]any{"type": "error", "message": "Failed to enqueue Canvas import."})
+			return
+		}
+		_ = wsWriteJSON(r.Context(), c, map[string]any{
+			"type":    "queued",
+			"jobId":   jobID.String(),
+			"message": "Canvas import queued. You can leave this page and refresh later — we will notify you when it finishes.",
+		})
 	}
 }
 

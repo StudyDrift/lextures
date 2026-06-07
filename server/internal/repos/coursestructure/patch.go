@@ -11,7 +11,7 @@ import (
 )
 
 // patchableChildKinds matches Rust `patch_child_structure_item` (child rows only, not top-level modules).
-const patchableChildKindsSQL = `IN ('heading', 'content_page', 'assignment', 'quiz', 'external_link', 'survey', 'lti_link', 'vibe_activity')`
+const patchableChildKindsSQL = `IN ('heading', 'content_page', 'assignment', 'quiz', 'external_link', 'survey', 'lti_link', 'vibe_activity', 'h5p')`
 
 // PatchChildStructureItem updates title, published, and/or archived for a module child item.
 func PatchChildStructureItem(

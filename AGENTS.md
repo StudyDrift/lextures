@@ -13,8 +13,9 @@ Lextures is an LMS (Learning Management System) with two main services:
 ### Starting services
 
 1. **Database**: `docker compose -f docker-compose.yml up -d postgres` (from repo root)
-2. **Go API**: `cd server && go run ./cmd/server` (requires env vars below)
-3. **Web frontend**: `cd clients/web && npm run dev -- --host 0.0.0.0 --port 5173`
+2. **RabbitMQ**: `docker compose -f docker-compose.yml up -d rabbitmq` (Canvas import queue; management UI http://localhost:15672)
+3. **Go API**: `cd server && go run ./cmd/server` (requires env vars below)
+4. **Web frontend**: `cd clients/web && npm run dev -- --host 0.0.0.0 --port 5173`
 
 Required env vars for the Go API (copy from `server/.env.example` to `server/.env`):
 - `DATABASE_URL=postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable`
@@ -24,6 +25,7 @@ Required env vars for the Go API (copy from `server/.env.example` to `server/.en
 - `PORT=8080`
 - `PUBLIC_WEB_ORIGIN=http://localhost:5173`
 - `COURSE_FILES_ROOT=data/course-files`
+- `RABBITMQ_URL=amqp://studydrift:studydrift@localhost:5672/` (optional locally — falls back to in-process queue when unset)
 
 Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run dev`). Feature flags are loaded at runtime from `GET /api/v1/platform/features` (backed by Settings → Global platform), not `VITE_FEATURE_*` build vars.
 
@@ -36,7 +38,8 @@ Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run de
 | Go test (short, no DB) | `go test ./... -count=1 -short -timeout=1m` | `server/` |
 | Go test (full, needs DB) | `make test` (needs `DATABASE_URL`) | `server/` |
 | Go lint | `golangci-lint run ./...` | `server/` |
-| Frontend lint | `npx eslint .` | `clients/web/` |
+| Frontend lint | `npm run lint` (oxlint) | `clients/web/` |
+| Marketing site lint | `npm run lint` (oxlint) | `www/` |
 | Frontend typecheck | `npm run typecheck` | `clients/web/` |
 | Frontend tests | `npm run test` | `clients/web/` |
 | Frontend dev server | `npm run dev` | `clients/web/` |

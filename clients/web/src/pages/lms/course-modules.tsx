@@ -529,6 +529,129 @@ function ChildRowContent({
   )
 }
 
+function ModulePublishMenu({
+  item,
+  disabled,
+  busy,
+  onPublishModuleOnly,
+  onPublishAllItems,
+  onUnpublishModuleOnly,
+  onUnpublishAllItems,
+}: {
+  item: CourseStructureItem
+  disabled: boolean
+  busy: boolean
+  onPublishModuleOnly: () => void
+  onPublishAllItems: () => void
+  onUnpublishModuleOnly: () => void
+  onUnpublishAllItems: () => void
+}) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuId = useId()
+
+  useEffect(() => {
+    if (!menuOpen) return
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setMenuOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [menuOpen])
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        disabled={disabled || busy}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        aria-controls={menuOpen ? menuId : undefined}
+        onClick={() => {
+          if (disabled || busy) return
+          setMenuOpen((o) => !o)
+        }}
+        title={
+          item.published
+            ? 'Published — visible to students when scheduled'
+            : 'Draft — hidden from students'
+        }
+        aria-label={item.published ? 'Published to students' : 'Hidden from students'}
+        aria-pressed={item.published}
+        className={`flex shrink-0 items-center justify-center ${
+          item.published ? iconGhostPublished : iconGhostDraft
+        }`}
+      >
+        {item.published ? (
+          <Eye className="h-4 w-4" strokeWidth={2} aria-hidden />
+        ) : (
+          <EyeOff className="h-4 w-4" strokeWidth={2} aria-hidden />
+        )}
+      </button>
+      {menuOpen && (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label="Module visibility options"
+          className="absolute end-0 z-50 mt-1 min-w-[11rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
+        >
+          {item.published ? (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onUnpublishModuleOnly()
+                  setMenuOpen(false)
+                }}
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              >
+                Unpublish Module Only
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onUnpublishAllItems()
+                  setMenuOpen(false)
+                }}
+                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              >
+                Unpublish All Items
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onPublishModuleOnly()
+                  setMenuOpen(false)
+                }}
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              >
+                Publish Module Only
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  onPublishAllItems()
+                  setMenuOpen(false)
+                }}
+                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              >
+                Publish All Items
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ModuleItemRowActions({
   child,
   disabled,
@@ -757,7 +880,10 @@ type ModuleCardBodyProps = {
   collapsed: boolean
   onToggleCollapsed: () => void
   busyModuleId: string | null
-  onTogglePublished: (item: CourseStructureItem) => void
+  onPublishModuleOnly: (item: CourseStructureItem) => void
+  onPublishAllItems: (item: CourseStructureItem) => void
+  onUnpublishModuleOnly: (item: CourseStructureItem) => void
+  onUnpublishAllItems: (item: CourseStructureItem) => void
   onOpenModuleSettings: (item: CourseStructureItem) => void
   moduleDragHandle: ReactNode
   childrenList: ReactNode | null
@@ -777,7 +903,10 @@ function ModuleCardBody({
   collapsed,
   onToggleCollapsed,
   busyModuleId,
-  onTogglePublished,
+  onPublishModuleOnly,
+  onPublishAllItems,
+  onUnpublishModuleOnly,
+  onUnpublishAllItems,
   onOpenModuleSettings,
   moduleDragHandle,
   childrenList,
@@ -854,27 +983,15 @@ function ModuleCardBody({
         </div>
         {canEditModules && !minified && (
           <div className="flex w-full flex-wrap items-center justify-end gap-1 border-t border-slate-200/60 pt-3 sm:w-auto sm:shrink-0 sm:flex-nowrap sm:border-0 sm:pt-0 dark:border-neutral-600/60">
-            <button
-              type="button"
-              onClick={() => onTogglePublished(item)}
-              disabled={anyModalBusy || busyModuleId === item.id}
-              title={
-                item.published
-                  ? 'Published — visible to students when scheduled'
-                  : 'Draft — hidden from students'
-              }
-              aria-label={item.published ? 'Published to students' : 'Hidden from students'}
-              aria-pressed={item.published}
-              className={`flex shrink-0 items-center justify-center ${
-                item.published ? iconGhostPublished : iconGhostDraft
-              }`}
-            >
-              {item.published ? (
-                <Eye className="h-4 w-4" strokeWidth={2} aria-hidden />
-              ) : (
-                <EyeOff className="h-4 w-4" strokeWidth={2} aria-hidden />
-              )}
-            </button>
+            <ModulePublishMenu
+              item={item}
+              disabled={anyModalBusy}
+              busy={busyModuleId === item.id}
+              onPublishModuleOnly={() => onPublishModuleOnly(item)}
+              onPublishAllItems={() => onPublishAllItems(item)}
+              onUnpublishModuleOnly={() => onUnpublishModuleOnly(item)}
+              onUnpublishAllItems={() => onUnpublishAllItems(item)}
+            />
             <button
               type="button"
               onClick={() => onOpenModuleSettings(item)}
@@ -1091,7 +1208,10 @@ type SortableModuleCardProps = {
   busyModuleId: string | null
   busyChildItemId: string | null
   dragHandlesVisible: boolean
-  onTogglePublished: (item: CourseStructureItem) => void
+  onPublishModuleOnly: (item: CourseStructureItem) => void
+  onPublishAllItems: (item: CourseStructureItem) => void
+  onUnpublishModuleOnly: (item: CourseStructureItem) => void
+  onUnpublishAllItems: (item: CourseStructureItem) => void
   onOpenModuleSettings: (item: CourseStructureItem) => void
   onChildTogglePublished: (child: CourseStructureItem) => void
   onOpenEditChildTitle: (child: CourseStructureItem) => void
@@ -1116,7 +1236,10 @@ function SortableModuleCard({
   busyModuleId,
   busyChildItemId,
   dragHandlesVisible,
-  onTogglePublished,
+  onPublishModuleOnly,
+  onPublishAllItems,
+  onUnpublishModuleOnly,
+  onUnpublishAllItems,
   onOpenModuleSettings,
   onChildTogglePublished,
   onOpenEditChildTitle,
@@ -1186,7 +1309,10 @@ function SortableModuleCard({
         collapsed={collapsed}
         onToggleCollapsed={() => onToggleCollapsed(item.id)}
         busyModuleId={busyModuleId}
-        onTogglePublished={onTogglePublished}
+        onPublishModuleOnly={onPublishModuleOnly}
+        onPublishAllItems={onPublishAllItems}
+        onUnpublishModuleOnly={onUnpublishModuleOnly}
+        onUnpublishAllItems={onUnpublishAllItems}
         onOpenModuleSettings={onOpenModuleSettings}
         moduleDragHandle={
           canEditModules ? (
@@ -1258,7 +1384,10 @@ function StaticModuleCard({
         collapsed={collapsed}
         onToggleCollapsed={() => setCollapsed((c) => !c)}
         busyModuleId={null}
-        onTogglePublished={() => {}}
+        onPublishModuleOnly={() => {}}
+        onPublishAllItems={() => {}}
+        onUnpublishModuleOnly={() => {}}
+        onUnpublishAllItems={() => {}}
         onOpenModuleSettings={() => {}}
         moduleDragHandle={null}
         childrenList={childrenList}
@@ -1751,27 +1880,6 @@ export default function CourseModules() {
     }
   }, [courseCode])
 
-  const handleTogglePublished = useCallback(
-    async (item: CourseStructureItem) => {
-      if (!courseCode) return
-      setModuleActionError(null)
-      setBusyModuleId(item.id)
-      try {
-        await patchCourseModule(courseCode, item.id, {
-          title: item.title,
-          published: !item.published,
-          visibleFrom: item.visibleFrom,
-        })
-        await load({ silent: true })
-      } catch (e) {
-        setModuleActionError(e instanceof Error ? e.message : 'Could not update module.')
-      } finally {
-        setBusyModuleId(null)
-      }
-    },
-    [courseCode, load],
-  )
-
   const handleChildTogglePublished = useCallback(
     async (child: CourseStructureItem) => {
       if (!courseCode) return
@@ -1989,6 +2097,65 @@ export default function CourseModules() {
     }
     return m
   }, [items])
+
+  const setModulePublishedState = useCallback(
+    async (item: CourseStructureItem, published: boolean, includeChildren: boolean) => {
+      if (!courseCode) return
+      setModuleActionError(null)
+      setBusyModuleId(item.id)
+      try {
+        await patchCourseModule(courseCode, item.id, {
+          title: item.title,
+          published,
+          visibleFrom: item.visibleFrom,
+        })
+        if (includeChildren) {
+          const children = (moduleChildrenById.get(item.id) ?? []).filter((child) => !child.archived)
+          await Promise.all(
+            children.map((child) =>
+              patchCourseStructureItem(courseCode, child.id, { published }),
+            ),
+          )
+        }
+        await load({ silent: true })
+      } catch (e) {
+        setModuleActionError(
+          e instanceof Error ? e.message : `Could not ${published ? 'publish' : 'unpublish'} module.`,
+        )
+      } finally {
+        setBusyModuleId(null)
+      }
+    },
+    [courseCode, load, moduleChildrenById],
+  )
+
+  const handlePublishModuleOnly = useCallback(
+    (item: CourseStructureItem) => {
+      void setModulePublishedState(item, true, false)
+    },
+    [setModulePublishedState],
+  )
+
+  const handlePublishAllItems = useCallback(
+    (item: CourseStructureItem) => {
+      void setModulePublishedState(item, true, true)
+    },
+    [setModulePublishedState],
+  )
+
+  const handleUnpublishModuleOnly = useCallback(
+    (item: CourseStructureItem) => {
+      void setModulePublishedState(item, false, false)
+    },
+    [setModulePublishedState],
+  )
+
+  const handleUnpublishAllItems = useCallback(
+    (item: CourseStructureItem) => {
+      void setModulePublishedState(item, false, true)
+    },
+    [setModulePublishedState],
+  )
 
   const persistReorder = useCallback(
     async (body: { moduleOrder: string[]; childOrderByModule: Record<string, string[]> }) => {
@@ -2234,7 +2401,10 @@ export default function CourseModules() {
                     busyModuleId={busyModuleId}
                     busyChildItemId={busyChildItemId}
                     dragHandlesVisible={dragHandlesVisible}
-                    onTogglePublished={handleTogglePublished}
+                    onPublishModuleOnly={handlePublishModuleOnly}
+                    onPublishAllItems={handlePublishAllItems}
+                    onUnpublishModuleOnly={handleUnpublishModuleOnly}
+                    onUnpublishAllItems={handleUnpublishAllItems}
                     onOpenModuleSettings={handleOpenModuleSettings}
                     onChildTogglePublished={handleChildTogglePublished}
                     onOpenEditChildTitle={openEditChildTitle}

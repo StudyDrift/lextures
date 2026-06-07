@@ -311,6 +311,11 @@ type Config struct {
 	DisablePIIRedaction bool
 	// PIIRedactFields adds extra structured log field names to the redaction registry (REDACT_FIELDS).
 	PIIRedactFields []string
+
+	// RabbitMQURL is the AMQP connection URL for background job queues (Canvas import, etc.).
+	RabbitMQURL string
+	// CanvasImportQueueName is the RabbitMQ queue for Canvas LMS imports (default canvas.course.import).
+	CanvasImportQueueName string
 }
 
 // Load reads configuration from the environment.
@@ -468,6 +473,9 @@ func Load() Config {
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
+
+		RabbitMQURL:             firstNonEmptyTrimmed("RABBITMQ_URL"),
+		CanvasImportQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
 	}
 }
 
