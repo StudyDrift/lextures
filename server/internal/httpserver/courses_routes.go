@@ -16,6 +16,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/course-context", d.handlePostCourseContext())
 	r.Get("/api/v1/courses/{course_code}/structure", d.handleCourseStructure())
 	r.Get("/api/v1/courses/{course_code}/structure/archived", d.handleCourseStructureArchived())
+	r.Post("/api/v1/courses/{course_code}/structure/reorder", d.handleReorderCourseStructure())
 	r.Post("/api/v1/courses/{course_code}/structure/modules", d.handleCreateCourseModule())
 	r.Patch("/api/v1/courses/{course_code}/structure/modules/{module_id}", d.handlePatchCourseModule())
 	r.Delete("/api/v1/courses/{course_code}/structure/modules/{module_id}", d.handleDeleteCourseModule())

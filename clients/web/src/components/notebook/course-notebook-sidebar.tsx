@@ -1,12 +1,15 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   DndContext,
   KeyboardSensor,
   PointerSensor,
   closestCenter,
+  useDroppable,
   useSensor,
   useSensors,
+  type DragCancelEvent,
   type DragEndEvent,
+  type DragOverEvent,
 } from '@dnd-kit/core'
 import {
   SortableContext,
@@ -15,9 +18,12 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { FileText, GripVertical, Plus, Trash2 } from 'lucide-react'
+import { ChevronRight, FileText, Folder, GripVertical, Plus, Trash2 } from 'lucide-react'
 import {
   type CourseNotebookPage,
+  isNotebookGroup,
+  isUnderAncestor,
+  pageHasChildren,
   reparentPage,
   reorderAmongSiblings,
   sortedChildren,
@@ -25,15 +31,39 @@ import {
 
 const PARENT_ROOT = '__root__'
 
+function nestDropId(pageId: string): string {
+  return `nest-${pageId}`
+}
+
+function parseNestDropId(id: string): string | null {
+  return id.startsWith('nest-') ? id.slice('nest-'.length) : null
+}
+
 function parentKey(parentId: string | null): string {
   return parentId ?? PARENT_ROOT
+}
+
+function resolveNestTargetId(
+  pages: CourseNotebookPage[],
+  overId: string,
+  shiftHeld: boolean,
+): string | null {
+  const nestId = parseNestDropId(overId)
+  if (nestId) return nestId
+  const overPage = pages.find((p) => p.id === overId)
+  if (overPage && (shiftHeld || isNotebookGroup(overPage))) return overPage.id
+  return null
 }
 
 type NotebookTreeRowProps = {
   page: CourseNotebookPage
   depth: number
   selectedId: string | null
+  collapsed: boolean
+  hasChildren: boolean
+  dropHighlight: boolean
   onSelect: (id: string) => void
+  onToggleCollapse: (id: string) => void
   editingId: string | null
   draftTitle: string
   onDraftTitle: (v: string) => void
@@ -41,6 +71,7 @@ type NotebookTreeRowProps = {
   onStartRename: (id: string, title: string) => void
   onCancelRename: () => void
   onAddChild: (parentId: string) => void
+  onAddChildGroup: (parentId: string) => void
   onDelete: (id: string) => void
   childrenBlock: ReactNode
 }
@@ -49,7 +80,11 @@ function NotebookTreeRow({
   page,
   depth,
   selectedId,
+  collapsed,
+  hasChildren,
+  dropHighlight,
   onSelect,
+  onToggleCollapse,
   editingId,
   draftTitle,
   onDraftTitle,
@@ -57,13 +92,27 @@ function NotebookTreeRow({
   onStartRename,
   onCancelRename,
   onAddChild,
+  onAddChildGroup,
   onDelete,
   childrenBlock,
 }: NotebookTreeRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+  const isGroup = isNotebookGroup(page)
+  const { attributes, listeners, setNodeRef: setSortableRef, transform, transition, isDragging } = useSortable({
     id: page.id,
-    data: { notebookParent: parentKey(page.parentId) },
+    data: { notebookParent: parentKey(page.parentId), notebookKind: page.kind },
   })
+  const { setNodeRef: setNestDropRef, isOver: isNestOver } = useDroppable({
+    id: nestDropId(page.id),
+    disabled: !isGroup,
+    data: { nestTargetId: page.id },
+  })
+  const setNodeRef = useCallback(
+    (node: HTMLElement | null) => {
+      setSortableRef(node)
+      if (isGroup) setNestDropRef(node)
+    },
+    [isGroup, setNestDropRef, setSortableRef],
+  )
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -71,24 +120,46 @@ function NotebookTreeRow({
   }
   const isSelected = selectedId === page.id
   const isEditing = editingId === page.id
+  const showDropHint = isGroup && (dropHighlight || isNestOver)
 
   return (
     <li ref={setNodeRef} style={style} className="list-none">
       <div
-        className={`group flex items-center gap-0.5 rounded-lg pe-1 transition ${
-          isSelected ? 'bg-indigo-50 dark:bg-indigo-950/50' : 'hover:bg-slate-100 dark:hover:bg-neutral-800/80'
+        className={`group flex items-center gap-0 rounded-lg pe-1 transition ${
+          showDropHint
+            ? 'bg-amber-50 ring-2 ring-amber-400/70 dark:bg-amber-950/40 dark:ring-amber-500/60'
+            : isSelected
+              ? 'bg-indigo-50 dark:bg-indigo-950/50'
+              : 'hover:bg-slate-100 dark:hover:bg-neutral-800/80'
         }`}
         style={{ paddingLeft: `${8 + depth * 14}px` }}
       >
         <button
           type="button"
-          className="mt-0.5 flex h-8 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md border-0 bg-transparent p-0 text-slate-400 hover:text-slate-600 active:cursor-grabbing dark:text-neutral-500 dark:hover:text-neutral-300"
+          className="flex h-7 w-5 shrink-0 cursor-grab touch-none items-center justify-center rounded-md border-0 bg-transparent p-0 text-slate-400 hover:text-slate-600 active:cursor-grabbing dark:text-neutral-500 dark:hover:text-neutral-300"
           aria-label={`Drag to reorder ${page.title}`}
           {...listeners}
           {...attributes}
         >
           <GripVertical className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
         </button>
+        {hasChildren || isGroup ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleCollapse(page.id)
+            }}
+            className="me-1 flex h-7 w-4 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-white hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            aria-label={collapsed ? `Expand ${page.title}` : `Collapse ${page.title}`}
+            aria-expanded={!collapsed}
+          >
+            <ChevronRight
+              className={`h-3.5 w-3.5 transition ${collapsed ? '' : 'rotate-90'}`}
+              aria-hidden
+            />
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={() => onSelect(page.id)}
@@ -98,7 +169,11 @@ function NotebookTreeRow({
           }}
           className="flex min-w-0 flex-1 items-center gap-1.5 rounded-md py-1.5 text-start text-sm outline-none ring-indigo-500/30 focus-visible:ring-2"
         >
-          <FileText className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+          {isGroup ? (
+            <Folder className="h-3.5 w-3.5 shrink-0 text-amber-500 dark:text-amber-400" aria-hidden />
+          ) : (
+            <FileText className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden />
+          )}
           {isEditing ? (
             <input
               autoFocus
@@ -128,11 +203,25 @@ function NotebookTreeRow({
             onAddChild(page.id)
           }}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition hover:bg-white hover:text-indigo-600 group-hover:opacity-100 dark:hover:bg-neutral-800 dark:hover:text-indigo-300"
-          aria-label={`Add subpage under ${page.title}`}
-          title="Add subpage"
+          aria-label={`Add page under ${page.title}`}
+          title="Add page"
         >
           <Plus className="h-3.5 w-3.5" aria-hidden />
         </button>
+        {isGroup ? (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onAddChildGroup(page.id)
+            }}
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition hover:bg-white hover:text-amber-600 group-hover:opacity-100 dark:hover:bg-neutral-800 dark:hover:text-amber-300"
+            aria-label={`Add subgroup under ${page.title}`}
+            title="Add subgroup"
+          >
+            <Folder className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={(e) => {
@@ -141,12 +230,12 @@ function NotebookTreeRow({
           }}
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
           aria-label={`Delete ${page.title}`}
-          title="Delete page"
+          title="Delete"
         >
           <Trash2 className="h-3.5 w-3.5" aria-hidden />
         </button>
       </div>
-      {childrenBlock}
+      {!collapsed ? childrenBlock : null}
     </li>
   )
 }
@@ -156,14 +245,18 @@ type NotebookBranchProps = {
   depth: number
   pages: CourseNotebookPage[]
   selectedId: string | null
-  onSelect: (id: string) => void
+  collapsedIds: Set<string>
+  dropHighlightId: string | null
+  onToggleCollapse: (id: string) => void
   editingId: string | null
   draftTitle: string
   onDraftTitle: (v: string) => void
   onCommitTitle: (id: string) => void
   onStartRename: (id: string, title: string) => void
   onCancelRename: () => void
+  onSelect: (id: string) => void
   onAddChild: (parentId: string) => void
+  onAddChildGroup: (parentId: string) => void
   onDelete: (id: string) => void
 }
 
@@ -172,14 +265,18 @@ function NotebookBranch({
   depth,
   pages,
   selectedId,
-  onSelect,
+  collapsedIds,
+  dropHighlightId,
+  onToggleCollapse,
   editingId,
   draftTitle,
   onDraftTitle,
   onCommitTitle,
   onStartRename,
   onCancelRename,
+  onSelect,
   onAddChild,
+  onAddChildGroup,
   onDelete,
 }: NotebookBranchProps) {
   const children = sortedChildren(pages, parentId)
@@ -196,7 +293,11 @@ function NotebookBranch({
             page={page}
             depth={depth}
             selectedId={selectedId}
+            collapsed={collapsedIds.has(page.id)}
+            hasChildren={pageHasChildren(pages, page.id)}
+            dropHighlight={dropHighlightId === page.id}
             onSelect={onSelect}
+            onToggleCollapse={onToggleCollapse}
             editingId={editingId}
             draftTitle={draftTitle}
             onDraftTitle={onDraftTitle}
@@ -204,6 +305,7 @@ function NotebookBranch({
             onStartRename={onStartRename}
             onCancelRename={onCancelRename}
             onAddChild={onAddChild}
+            onAddChildGroup={onAddChildGroup}
             onDelete={onDelete}
             childrenBlock={
               <NotebookBranch
@@ -211,14 +313,18 @@ function NotebookBranch({
                 depth={depth + 1}
                 pages={pages}
                 selectedId={selectedId}
-                onSelect={onSelect}
+                collapsedIds={collapsedIds}
+                dropHighlightId={dropHighlightId}
+                onToggleCollapse={onToggleCollapse}
                 editingId={editingId}
                 draftTitle={draftTitle}
                 onDraftTitle={onDraftTitle}
                 onCommitTitle={onCommitTitle}
                 onStartRename={onStartRename}
                 onCancelRename={onCancelRename}
+                onSelect={onSelect}
                 onAddChild={onAddChild}
+                onAddChildGroup={onAddChildGroup}
                 onDelete={onDelete}
               />
             }
@@ -235,7 +341,9 @@ type CourseNotebookSidebarProps = {
   onSelect: (id: string) => void
   onPagesChange: (next: CourseNotebookPage[]) => void
   onAddRootPage: () => void
+  onAddRootGroup: () => void
   onAddChildPage: (parentId: string) => void
+  onAddChildGroup: (parentId: string) => void
   onRenamePage: (pageId: string, title: string) => void
   onDeletePage: (pageId: string) => void
 }
@@ -246,25 +354,97 @@ export function CourseNotebookSidebar({
   onSelect,
   onPagesChange,
   onAddRootPage,
+  onAddRootGroup,
   onAddChildPage,
+  onAddChildGroup,
   onRenamePage,
   onDeletePage,
 }: CourseNotebookSidebarProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [draftTitle, setDraftTitle] = useState('')
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(() => new Set())
+  const [dropHighlightId, setDropHighlightId] = useState<string | null>(null)
+  const nestOnDropRef = useRef(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Shift') nestOnDropRef.current = true
+    }
+    function onKeyUp(e: KeyboardEvent) {
+      if (e.key === 'Shift') nestOnDropRef.current = false
+    }
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+    }
+  }, [])
+
+  const toggleCollapse = useCallback((id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const clearDragUi = useCallback(() => {
+    setDropHighlightId(null)
+    nestOnDropRef.current = false
+  }, [])
+
+  const onDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const over = event.over
+      if (!over) {
+        setDropHighlightId(null)
+        return
+      }
+      const nestTargetId = resolveNestTargetId(pages, String(over.id), nestOnDropRef.current)
+      const nestPage = nestTargetId ? pages.find((p) => p.id === nestTargetId) : null
+      if (nestPage && isNotebookGroup(nestPage)) {
+        setDropHighlightId(nestTargetId)
+        return
+      }
+      setDropHighlightId(null)
+    },
+    [pages],
+  )
+
   const onDragEnd = useCallback(
     (event: DragEndEvent) => {
+      const shiftHeld = nestOnDropRef.current
+      clearDragUi()
       const { active, over } = event
       if (!over) return
       const activeId = String(active.id)
       const overId = String(over.id)
       if (activeId === overId) return
+
+      const nestTargetId = resolveNestTargetId(pages, overId, shiftHeld)
+      if (
+        nestTargetId &&
+        activeId !== nestTargetId &&
+        !isUnderAncestor(pages, activeId, nestTargetId)
+      ) {
+        const next = reparentPage(pages, activeId, nestTargetId, null)
+        if (next) {
+          onPagesChange(next)
+          setCollapsedIds((prev) => {
+            const nextCollapsed = new Set(prev)
+            nextCollapsed.delete(nestTargetId)
+            return nextCollapsed
+          })
+        }
+        return
+      }
 
       const activeParentRaw = active.data.current?.notebookParent as string | undefined
       const overParentRaw = over.data.current?.notebookParent as string | undefined
@@ -279,14 +459,24 @@ export function CourseNotebookSidebar({
       const next = reparentPage(pages, activeId, overParent, overId)
       if (next) onPagesChange(next)
     },
-    [onPagesChange, pages],
+    [clearDragUi, onPagesChange, pages],
   )
 
-  const startRename = useCallback((id: string, title: string) => {
-    setEditingId(id)
-    setDraftTitle(title)
-    onSelect(id)
-  }, [onSelect])
+  const onDragCancel = useCallback(
+    (_event: DragCancelEvent) => {
+      clearDragUi()
+    },
+    [clearDragUi],
+  )
+
+  const startRename = useCallback(
+    (id: string, title: string) => {
+      setEditingId(id)
+      setDraftTitle(title)
+      onSelect(id)
+    },
+    [onSelect],
+  )
 
   const commitRename = useCallback(
     (id: string) => {
@@ -312,7 +502,16 @@ export function CourseNotebookSidebar({
           Pages
         </span>
       </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+      <p className="border-b border-slate-200 px-3 py-2 text-[11px] leading-snug text-slate-500 dark:border-neutral-800 dark:text-neutral-400">
+        Drag a page onto a group folder to move it inside. Hold Shift while dropping to nest under any page.
+      </p>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragOver={onDragOver}
+        onDragEnd={onDragEnd}
+        onDragCancel={onDragCancel}
+      >
         <nav className="min-h-0 flex-1 overflow-y-auto px-2 py-2" aria-label="Notebook pages">
           {rootHasPages ? (
             <NotebookBranch
@@ -320,14 +519,18 @@ export function CourseNotebookSidebar({
               depth={0}
               pages={pages}
               selectedId={selectedId}
-              onSelect={onSelect}
+              collapsedIds={collapsedIds}
+              dropHighlightId={dropHighlightId}
+              onToggleCollapse={toggleCollapse}
               editingId={editingId}
               draftTitle={draftTitle}
               onDraftTitle={setDraftTitle}
               onCommitTitle={commitRename}
               onStartRename={startRename}
               onCancelRename={cancelRename}
+              onSelect={onSelect}
               onAddChild={onAddChildPage}
+              onAddChildGroup={onAddChildGroup}
               onDelete={onDeletePage}
             />
           ) : (
@@ -335,7 +538,7 @@ export function CourseNotebookSidebar({
           )}
         </nav>
       </DndContext>
-      <div className="border-t border-slate-200 p-2 dark:border-neutral-800">
+      <div className="flex flex-col gap-1 border-t border-slate-200 p-2 dark:border-neutral-800">
         <button
           type="button"
           onClick={onAddRootPage}
@@ -343,6 +546,14 @@ export function CourseNotebookSidebar({
         >
           <Plus className="h-4 w-4 shrink-0" aria-hidden />
           New page
+        </button>
+        <button
+          type="button"
+          onClick={onAddRootGroup}
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium text-slate-600 transition hover:bg-white hover:text-amber-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-amber-200"
+        >
+          <Folder className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" aria-hidden />
+          New group
         </button>
       </div>
     </div>

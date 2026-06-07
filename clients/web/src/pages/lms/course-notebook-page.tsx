@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect -- sync localStorage notebook and course title from network */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Navigate, useParams } from 'react-router-dom'
-import { ChevronDown, Sparkles } from 'lucide-react'
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -10,7 +9,10 @@ import { CourseNotebookSidebar } from '../../components/notebook/course-notebook
 import { FlashcardsModal } from '../../components/notebook/flashcards-modal'
 import {
   addNotebookPage,
+  addNotebookGroup,
   deleteNotebookPage,
+  isNotebookGroup,
+  movePageToParent,
   updatePageContent,
   updatePageTitle,
   type CourseNotebookPage,
@@ -21,6 +23,8 @@ import {
   saveCourseNotebookStore,
   type CourseNotebookStore,
 } from '../../lib/student-notebook-storage'
+import { NotebookGroupPanel } from '../../components/notebook/notebook-group-panel'
+import { NotebookPageActionsMenu } from '../../components/notebook/notebook-page-actions-menu'
 import { LmsPage } from './lms-page'
 
 const CONTENT_SAVE_MS = 500
@@ -167,6 +171,29 @@ export default function CourseNotebookPage() {
     [persistStore],
   )
 
+  const onAddRootGroup = useCallback(() => {
+    setData((d) => {
+      if (!d) return d
+      const { pages, newId } = addNotebookGroup(d.pages, null)
+      const next = { ...d, pages, activePageId: newId }
+      persistStore(next)
+      return next
+    })
+  }, [persistStore])
+
+  const onAddChildGroup = useCallback(
+    (parentId: string) => {
+      setData((d) => {
+        if (!d) return d
+        const { pages, newId } = addNotebookGroup(d.pages, parentId)
+        const next = { ...d, pages, activePageId: newId }
+        persistStore(next)
+        return next
+      })
+    },
+    [persistStore],
+  )
+
   const onRenamePage = useCallback(
     (pageId: string, title: string) => {
       setData((d) => {
@@ -206,6 +233,34 @@ export default function CourseNotebookPage() {
     setDeleteTyped('')
     setDeleteConfirmOpen(true)
   }, [])
+
+  const onMovePageToGroup = useCallback(
+    (pageId: string, groupId: string) => {
+      setData((d) => {
+        if (!d) return d
+        const pages = movePageToParent(d.pages, pageId, groupId)
+        if (!pages) return d
+        const next = { ...d, pages }
+        persistStore(next)
+        return next
+      })
+    },
+    [persistStore],
+  )
+
+  const onMovePageToRoot = useCallback(
+    (pageId: string) => {
+      setData((d) => {
+        if (!d) return d
+        const pages = movePageToParent(d.pages, pageId, null)
+        if (!pages) return d
+        const next = { ...d, pages }
+        persistStore(next)
+        return next
+      })
+    },
+    [persistStore],
+  )
 
   const onEditorChange = useCallback(
     (markdown: string) => {
@@ -276,7 +331,9 @@ export default function CourseNotebookPage() {
             onSelect={onSelectPage}
             onPagesChange={onPagesChange}
             onAddRootPage={onAddRootPage}
+            onAddRootGroup={onAddRootGroup}
             onAddChildPage={onAddChildPage}
+            onAddChildGroup={onAddChildGroup}
             onRenamePage={onRenamePage}
             onDeletePage={onDeletePage}
           />
@@ -301,45 +358,41 @@ export default function CourseNotebookPage() {
                     className="flex-1 min-w-0 border-0 bg-transparent text-lg font-semibold tracking-tight text-slate-900 outline-none ring-indigo-500/25 placeholder:text-slate-400 focus:ring-2 dark:text-neutral-100 dark:placeholder:text-neutral-500"
                     placeholder="Untitled page"
                   />
-                  <div className="relative shrink-0" ref={actionsRef}>
-                    <button
-                      type="button"
-                      onClick={() => setActionsOpen((v) => !v)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                    >
-                      Actions
-                      <ChevronDown className="h-3.5 w-3.5" aria-hidden />
-                    </button>
-                    {actionsOpen && (
-                      <div className="absolute right-0 top-full mt-1 z-20 w-52 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setActionsOpen(false)
-                            setFlashcardsOpen(true)
-                          }}
-                          className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                        >
-                          <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
-                          Create Flash Cards
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <NotebookPageActionsMenu
+                    open={actionsOpen}
+                    onToggle={() => setActionsOpen((v) => !v)}
+                    onClose={() => setActionsOpen(false)}
+                    menuRef={actionsRef}
+                    pages={data.pages}
+                    activePage={activePage}
+                    onMoveToGroup={onMovePageToGroup}
+                    onMoveToRoot={onMovePageToRoot}
+                    onFlashcards={() => setFlashcardsOpen(true)}
+                  />
                 </div>
                 <div className="mx-auto min-h-0 w-full max-w-[72ch] flex-1 overflow-y-auto px-4 py-4 text-[1.0625rem] leading-relaxed md:px-6 md:py-5">
-                  <MarkdownBodyEditor
-                    key={activePage.id}
-                    sectionId={activePage.id}
-                    value={activePage.contentMd}
-                    onChange={onEditorChange}
-                    courseCode={courseCode}
-                    uploadCourseImage={(file) =>
-                      uploadCourseFile(courseCode, file).then((r) => r.contentPath)
-                    }
-                    showImagePickerRow
-                    placeholder="Start writing… Headings, lists, and @ mentions work here."
-                  />
+                  {isNotebookGroup(activePage) ? (
+                    <NotebookGroupPanel
+                      group={activePage}
+                      pages={data.pages}
+                      onSelectPage={onSelectPage}
+                      onAddPage={onAddChildPage}
+                      onAddGroup={onAddChildGroup}
+                    />
+                  ) : (
+                    <MarkdownBodyEditor
+                      key={activePage.id}
+                      sectionId={activePage.id}
+                      value={activePage.contentMd}
+                      onChange={onEditorChange}
+                      courseCode={courseCode}
+                      uploadCourseImage={(file) =>
+                        uploadCourseFile(courseCode, file).then((r) => r.contentPath)
+                      }
+                      showImagePickerRow
+                      placeholder="Start writing… Type / for blocks, or nest pages in the sidebar."
+                    />
+                  )}
                 </div>
               </>
             ) : (

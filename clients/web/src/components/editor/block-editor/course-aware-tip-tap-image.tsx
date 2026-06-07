@@ -155,7 +155,7 @@ function CourseImageNodeView(props: NodeViewProps) {
     enforcementEnabled && !imageHasValidAlt(alt, decorative) && !panelOpen
 
   return (
-    <NodeViewWrapper as="figure" className="group/image-node relative my-3 flex justify-center [&_img]:rounded-lg">
+    <NodeViewWrapper as="figure" className="group/image-node relative my-3 flex justify-start [&_img]:rounded-lg">
       <div className="relative inline-block max-w-full">
         {url ? (
           <img
