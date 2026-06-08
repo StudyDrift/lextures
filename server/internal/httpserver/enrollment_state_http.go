@@ -17,7 +17,7 @@ import (
 
 func (d Deps) requireEnrollmentStateMachine(w http.ResponseWriter) bool {
 	cfg := d.effectiveConfig()
-	if !(cfg.FFEnrollmentStateMachine || d.Config.FFEnrollmentStateMachine) {
+	if !cfg.FFEnrollmentStateMachine && !d.Config.FFEnrollmentStateMachine {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Enrollment state machine is not enabled.")
 		return false
 	}
