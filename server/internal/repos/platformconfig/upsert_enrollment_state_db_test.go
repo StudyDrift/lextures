@@ -24,7 +24,7 @@ func TestUpsert_WithEnrollmentStateMachineColumn(t *testing.T) {
 
 	v := true
 	_, err = platformconfig.Upsert(ctx, pool, &platformconfig.Write{
-		H5PEnabled: &v,
+		FFEnrollmentStateMachine: &v,
 	})
 	if err != nil {
 		t.Fatalf("Upsert: %v", err)
