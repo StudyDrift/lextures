@@ -11,13 +11,39 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// Vendor constants.
+// Vendor constants (K-12 plan 13.7 + HE plan 14.1).
 const (
 	VendorPowerSchool    = "powerschool"
 	VendorInfiniteCampus = "infinite_campus"
 	VendorSkyward        = "skyward"
 	VendorAeries         = "aeries"
+	VendorBanner         = "banner"
+	VendorWorkday        = "workday"
+	VendorColleague      = "colleague"
+	VendorJenzabar       = "jenzabar"
+	VendorPeopleSoft     = "peoplesoft"
 )
+
+// ValidVendor reports whether v is a supported SIS vendor slug.
+func ValidVendor(v string) bool {
+	switch v {
+	case VendorPowerSchool, VendorInfiniteCampus, VendorSkyward, VendorAeries,
+		VendorBanner, VendorWorkday, VendorColleague, VendorJenzabar, VendorPeopleSoft:
+		return true
+	default:
+		return false
+	}
+}
+
+// VendorMarket returns "k12" or "he" for a valid vendor.
+func VendorMarket(v string) string {
+	switch v {
+	case VendorBanner, VendorWorkday, VendorColleague, VendorJenzabar, VendorPeopleSoft:
+		return "he"
+	default:
+		return "k12"
+	}
+}
 
 // SyncStatus values.
 const (

@@ -20,6 +20,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	repoSIS "github.com/lextures/lextures/server/internal/repos/sis"
+	serviceSIS "github.com/lextures/lextures/server/internal/service/sis"
 )
 
 // SyncResult is returned by RunSync.
@@ -100,11 +101,31 @@ func runConnector(ctx context.Context, pool *pgxpool.Pool, conn repoSIS.Connecti
 		return syncSkyward(ctx, pool, conn)
 	case repoSIS.VendorAeries:
 		return syncAeries(ctx, pool, conn)
+	case repoSIS.VendorBanner, repoSIS.VendorWorkday, repoSIS.VendorColleague,
+		repoSIS.VendorJenzabar, repoSIS.VendorPeopleSoft:
+		return syncHE(ctx, conn)
 	default:
 		return repoSIS.SyncSummary{}, []repoSIS.SyncError{{
 			Message: "unknown vendor: " + conn.Vendor,
 		}}
 	}
+}
+
+// syncHE dispatches to the plan 14.1 higher-ed adapter layer.
+func syncHE(ctx context.Context, conn repoSIS.Connection) (repoSIS.SyncSummary, []repoSIS.SyncError) {
+	adapter := serviceSIS.AdapterFor(conn.Vendor)
+	if adapter == nil {
+		return repoSIS.SyncSummary{}, []repoSIS.SyncError{{
+			Message: "no HE adapter for vendor: " + conn.Vendor,
+		}}
+	}
+	summary, errs := adapter.SyncRoster(ctx, serviceSIS.ConnectionConfig{
+		Vendor:          conn.Vendor,
+		BaseURL:         conn.BaseURL,
+		ClientIDRef:     conn.ClientIDRef,
+		ClientSecretRef: conn.ClientSecretRef,
+	})
+	return summary, errs
 }
 
 // syncPowerSchool fetches roster data from PowerSchool (OneRoster 1.2 + PS API v2).

@@ -25,6 +25,11 @@
  *   [x] Grade passback with missing connectionId returns 400
  *   [x] Grade passback with missing gradingPeriod returns 400
  *   [x] Non-admin cannot access SIS endpoints (403)
+ *   [x] HE: Admin can create Banner connection (plan 14.1)
+ *   [x] HE: Admin can create Workday connection
+ *   [x] HE: Admin can create Colleague connection
+ *   [x] HE: Admin can test connection
+ *   [x] HE: Connection includes market=he
  */
 import { test, expect } from '@playwright/test'
 import { apiSignup } from '../fixtures/api.js'
@@ -536,6 +541,69 @@ test('SIS: Grade passback with missing gradingPeriod returns 400', async () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // RBAC: non-admin is forbidden
 // ─────────────────────────────────────────────────────────────────────────────
+
+test('SIS HE: Admin can create a Banner connection', async () => {
+  const token = await getAdminToken()
+  const orgId = await getAdminOrgId(token)
+  if (!orgId) { test.skip(true, 'no org'); return }
+  const adminId = await getAdminUserId(token)
+  if (adminId) await grantOrgAdmin(token, orgId, adminId)
+
+  const { status, body } = await createSISConnection(token, orgId, {
+    vendor: 'banner',
+    baseUrl: 'https://banner.university.example.edu',
+  })
+  expect(status).toBe(201)
+  const conn = (body as { connection: SISConnection & { market?: string } }).connection
+  expect(conn.vendor).toBe('banner')
+  expect(conn.market).toBe('he')
+})
+
+test('SIS HE: Admin can create a Workday connection', async () => {
+  const token = await getAdminToken()
+  const orgId = await getAdminOrgId(token)
+  if (!orgId) { test.skip(true, 'no org'); return }
+  const adminId = await getAdminUserId(token)
+  if (adminId) await grantOrgAdmin(token, orgId, adminId)
+
+  const { status, body } = await createSISConnection(token, orgId, { vendor: 'workday' })
+  expect(status).toBe(201)
+  const conn = (body as { connection: SISConnection }).connection
+  expect(conn.vendor).toBe('workday')
+})
+
+test('SIS HE: Admin can create a Colleague connection', async () => {
+  const token = await getAdminToken()
+  const orgId = await getAdminOrgId(token)
+  if (!orgId) { test.skip(true, 'no org'); return }
+  const adminId = await getAdminUserId(token)
+  if (adminId) await grantOrgAdmin(token, orgId, adminId)
+
+  const { status, body } = await createSISConnection(token, orgId, { vendor: 'colleague' })
+  expect(status).toBe(201)
+  const conn = (body as { connection: SISConnection }).connection
+  expect(conn.vendor).toBe('colleague')
+})
+
+test('SIS HE: Admin can test a connection', async () => {
+  const token = await getAdminToken()
+  const orgId = await getAdminOrgId(token)
+  if (!orgId) { test.skip(true, 'no org'); return }
+  const adminId = await getAdminUserId(token)
+  if (adminId) await grantOrgAdmin(token, orgId, adminId)
+
+  const { body: created } = await createSISConnection(token, orgId, { vendor: 'banner' })
+  const connId = (created as { connection: SISConnection }).connection.id
+
+  const testRes = await fetch(
+    `${API_BASE}/api/v1/admin/orgs/${orgId}/sis/connections/${connId}/test`,
+    { method: 'POST', headers: authHeaders(token) },
+  )
+  expect(testRes.status).toBe(200)
+  const result = (await testRes.json()) as { ok: boolean; message: string; market: string }
+  expect(result.ok).toBe(true)
+  expect(result.market).toBe('he')
+})
 
 test('SIS: Non-admin cannot access SIS endpoints (403)', async () => {
   const adminToken = await getAdminToken()

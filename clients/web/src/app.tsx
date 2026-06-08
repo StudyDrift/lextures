@@ -78,6 +78,7 @@ import BroadcastComposer from './pages/admin/BroadcastComposer'
 import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
 import ContentFilterSettingsPage from './pages/admin/content-filter-settings'
 import StudentDemographicsPage from './pages/admin/student-demographics'
+import SisIntegrationPage from './pages/admin/sis-integration'
 import Title1ReportPage from './pages/admin/title1-report'
 import CourseAttendance from './pages/lms/CourseAttendance'
 import CourseBehavior from './pages/lms/CourseBehavior'
@@ -210,6 +211,7 @@ export default function App() {
           <Route path="/admin/demographics/student" element={<StudentDemographicsPage />} />
           <Route path="/admin/demographics/title1" element={<Title1ReportPage />} />
           <Route path="/admin/content-filter" element={<ContentFilterSettingsPage />} />
+          <Route path="/admin/sis" element={<SisIntegrationPage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

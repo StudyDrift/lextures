@@ -33,6 +33,7 @@ func TestSISRoutes_NotFound404(t *testing.T) {
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections"},
 		{http.MethodPatch, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002"},
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002/sync"},
+		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002/test"},
 		{http.MethodGet, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/sync-logs"},
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/grade-passback"},
 	}
@@ -64,6 +65,7 @@ func TestSISRoutes_Unauthenticated401(t *testing.T) {
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections"},
 		{http.MethodPatch, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002"},
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002/sync"},
+		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002/test"},
 		{http.MethodGet, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/sync-logs"},
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/grade-passback"},
 	}
@@ -95,6 +97,7 @@ func TestSISRoutes_FeatureOff_Returns501(t *testing.T) {
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections"},
 		{http.MethodPatch, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002"},
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002/sync"},
+		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/connections/00000000-0000-0000-0000-000000000002/test"},
 		{http.MethodGet, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/sync-logs"},
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/sis/grade-passback"},
 	}

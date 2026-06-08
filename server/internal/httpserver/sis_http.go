@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	repoSIS "github.com/lextures/lextures/server/internal/repos/sis"
+	serviceSIS "github.com/lextures/lextures/server/internal/service/sis"
 	"github.com/lextures/lextures/server/internal/workers/sissync"
 )
 
@@ -57,13 +58,13 @@ func (d Deps) handleAdminSISConnections() http.HandlerFunc {
 				return
 			}
 			vendor := strings.TrimSpace(body.Vendor)
-			switch vendor {
-			case repoSIS.VendorPowerSchool, repoSIS.VendorInfiniteCampus, repoSIS.VendorSkyward, repoSIS.VendorAeries:
-			case "":
+			if vendor == "" {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "vendor is required.")
 				return
-			default:
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "vendor must be one of: powerschool, infinite_campus, skyward, aeries.")
+			}
+			if !repoSIS.ValidVendor(vendor) {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput,
+					"vendor must be one of: powerschool, infinite_campus, skyward, aeries, banner, workday, colleague, jenzabar, peoplesoft.")
 				return
 			}
 			baseURL := strings.TrimSpace(body.BaseURL)
@@ -345,11 +346,73 @@ func (d Deps) handleAdminSISGradePassback() http.HandlerFunc {
 	}
 }
 
+// handleAdminSISTestConnection is POST /api/v1/admin/orgs/:orgId/sis/connections/:id/test.
+func (d Deps) handleAdminSISTestConnection() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !d.Config.FFSISIntegration {
+			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
+			return
+		}
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid org id.")
+			return
+		}
+		if _, ok := d.orgRoleAccess(w, r, orgID, true); !ok {
+			return
+		}
+		connID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "id")))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid connection id.")
+			return
+		}
+		conn, err := repoSIS.GetConnection(r.Context(), d.Pool, orgID, connID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load SIS connection.")
+			return
+		}
+		if conn == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "SIS connection not found.")
+			return
+		}
+		cfg := serviceSIS.ConnectionConfig{
+			Vendor:          conn.Vendor,
+			BaseURL:         conn.BaseURL,
+			ClientIDRef:     conn.ClientIDRef,
+			ClientSecretRef: conn.ClientSecretRef,
+		}
+		if serviceSIS.IsHEVendor(conn.Vendor) {
+			adapter := serviceSIS.AdapterFor(conn.Vendor)
+			if adapter == nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "HE adapter not available.")
+				return
+			}
+			if err := adapter.TestConnection(r.Context(), cfg); err != nil {
+				apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "Connection test failed: "+err.Error())
+				return
+			}
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"ok":      true,
+			"message": "Connection test succeeded.",
+			"vendor":  conn.Vendor,
+			"market":  repoSIS.VendorMarket(conn.Vendor),
+		})
+	}
+}
+
 func (d Deps) registerSISRoutes(r chi.Router) {
 	r.Method(http.MethodGet, "/api/v1/admin/orgs/{orgId}/sis/connections", d.handleAdminSISConnections())
 	r.Method(http.MethodPost, "/api/v1/admin/orgs/{orgId}/sis/connections", d.handleAdminSISConnections())
 	r.Method(http.MethodPatch, "/api/v1/admin/orgs/{orgId}/sis/connections/{id}", d.handleAdminSISConnection())
 	r.Method(http.MethodPost, "/api/v1/admin/orgs/{orgId}/sis/connections/{id}/sync", d.handleAdminSISSync())
+	r.Method(http.MethodPost, "/api/v1/admin/orgs/{orgId}/sis/connections/{id}/test", d.handleAdminSISTestConnection())
 	r.Method(http.MethodGet, "/api/v1/admin/orgs/{orgId}/sis/sync-logs", d.handleAdminSISSyncLogs())
 	r.Method(http.MethodPost, "/api/v1/admin/orgs/{orgId}/sis/grade-passback", d.handleAdminSISGradePassback())
 }
@@ -364,6 +427,7 @@ func connectionToJSON(c *repoSIS.Connection) map[string]any {
 		"id":              c.ID.String(),
 		"orgId":           c.OrgID.String(),
 		"vendor":          c.Vendor,
+		"market":          repoSIS.VendorMarket(c.Vendor),
 		"baseUrl":         c.BaseURL,
 		"clientIdRef":     c.ClientIDRef,
 		"clientSecretRef": c.ClientSecretRef,
