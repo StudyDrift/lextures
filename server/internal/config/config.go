@@ -314,6 +314,8 @@ type Config struct {
 	FFGradeSubmission bool
 	// FFPlagiarismChecks enables HE plagiarism workflow APIs and async scans (plan 14.8).
 	FFPlagiarismChecks bool
+	// FFCourseEvaluations enables anonymous end-of-term course evaluations (plan 14.7).
+	FFCourseEvaluations bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -486,6 +488,7 @@ func Load() Config {
 		FFPlagiarismChecks:              boolEnv("FF_PLAGIARISM_CHECKS"),
 		OriginalityDetectionEnabled:     boolEnv("ORIGINALITY_DETECTION_ENABLED"),
 		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
+		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

@@ -116,6 +116,7 @@ type platformSettingsJSON struct {
 	FFGradeSubmission               bool `json:"ffGradeSubmission"`
 	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
 	FFIncompleteGradeWorkflow       bool `json:"ffIncompleteGradeWorkflow"`
+	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -263,6 +264,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFGradeSubmission:               merged.FFGradeSubmission,
 				FFPlagiarismChecks:              merged.FFPlagiarismChecks,
 				FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
+				FFCourseEvaluations:             merged.FFCourseEvaluations,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -383,6 +385,7 @@ type putPlatformBody struct {
 	FFGradeSubmission               *bool `json:"ffGradeSubmission"`
 	FFPlagiarismChecks              *bool `json:"ffPlagiarismChecks"`
 	FFIncompleteGradeWorkflow       *bool `json:"ffIncompleteGradeWorkflow"`
+	FFCourseEvaluations             *bool `json:"ffCourseEvaluations"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -664,6 +667,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffgradesubmission", body.FFGradeSubmission, func(v bool) { wr.FFGradeSubmission = &v })
 		setBool("ffplagiarismchecks", body.FFPlagiarismChecks, func(v bool) { wr.FFPlagiarismChecks = &v })
 		setBool("ffincompletegradeworkflow", body.FFIncompleteGradeWorkflow, func(v bool) { wr.FFIncompleteGradeWorkflow = &v })
+		setBool("ffcourseevaluations", body.FFCourseEvaluations, func(v bool) { wr.FFCourseEvaluations = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -767,6 +771,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFGradeSubmission:               merged.FFGradeSubmission,
 				FFPlagiarismChecks:              merged.FFPlagiarismChecks,
 				FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
+				FFCourseEvaluations:             merged.FFCourseEvaluations,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

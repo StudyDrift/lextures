@@ -43,6 +43,7 @@ export type PlatformFeaturesSnapshot = {
   ffUiMode?: boolean
   ffGradeSubmission?: boolean
   ffPlagiarismChecks?: boolean
+  ffCourseEvaluations?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -88,6 +89,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffUiMode: false,
   ffGradeSubmission: false,
   ffPlagiarismChecks: false,
+  ffCourseEvaluations: false,
 }
 
 let loaded = false

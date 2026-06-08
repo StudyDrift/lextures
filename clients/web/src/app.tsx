@@ -91,6 +91,10 @@ import ReadingDashboardPage from './pages/lms/reading-dashboard-page'
 import CourseWhiteboardPage from './pages/lms/course-whiteboard-page'
 import FinalGradeSubmission from './pages/lms/final-grade-submission'
 import GradeSubmissionStatus from './pages/admin/grade-submission-status'
+import CourseEvaluation from './pages/lms/CourseEvaluation'
+import CourseEvaluationResults from './pages/lms/CourseEvaluationResults'
+import EvaluationTemplates from './pages/admin/EvaluationTemplates'
+import EvaluationReport from './pages/admin/EvaluationReport'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -196,6 +200,8 @@ export default function App() {
             <Route path="whiteboard" element={<CourseWhiteboardPage />} />
             <Route path="whiteboard/:boardId" element={<CourseWhiteboardPage />} />
             <Route path="final-grades" element={<FinalGradeSubmission />} />
+            <Route path="evaluation" element={<CourseEvaluation />} />
+            <Route path="evaluation-results" element={<CourseEvaluationResults />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />
@@ -220,6 +226,8 @@ export default function App() {
           <Route path="/admin/sis" element={<SisIntegrationPage />} />
           <Route path="/admin/final-grades/status" element={<GradeSubmissionStatus />} />
           <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
+          <Route path="/admin/evaluations/templates" element={<EvaluationTemplates />} />
+          <Route path="/admin/evaluations/report" element={<EvaluationReport />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
