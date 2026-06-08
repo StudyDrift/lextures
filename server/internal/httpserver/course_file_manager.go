@@ -98,6 +98,13 @@ func (d Deps) handleGetCourseFilesFolder() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list folder contents.")
 			return
 		}
+		breadcrumbs, err := filemanager.ListFolderBreadcrumbs(r.Context(), d.Pool, courseID, folderID)
+		if err != nil {
+			log.Printf("course-files-folder-breadcrumbs: course=%q folder=%s err=%v", courseCode, folderID, err)
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list folder contents.")
+			return
+		}
+		contents.Breadcrumbs = breadcrumbs
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(contents)
 	}

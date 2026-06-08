@@ -25,8 +25,14 @@ export type FileItem = {
   updatedAt: string
 }
 
+export type FolderBreadcrumb = {
+  id: string
+  name: string
+}
+
 export type FolderContents = {
   folderId: string | null
+  breadcrumbs?: FolderBreadcrumb[]
   folders: FileFolder[]
   files: FileItem[]
 }

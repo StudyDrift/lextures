@@ -75,9 +75,6 @@ export default function CourseFilesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // breadcrumbs: list of {id, name} from root to current
-  const [breadcrumbs, setBreadcrumbs] = useState<{ id: string; name: string }[]>([])
-
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState<string | null>(null)
   const [cloudImportError, setCloudImportError] = useState<string | null>(null)
@@ -142,6 +139,11 @@ export default function CourseFilesPage() {
     setSelectedItems(new Set())
     setSearchQuery('')
   }, [folderId])
+
+  const breadcrumbs = useMemo(() => {
+    if (!folderId || contents?.folderId !== folderId) return []
+    return contents.breadcrumbs ?? []
+  }, [folderId, contents?.folderId, contents?.breadcrumbs])
 
   const filteredFolders = useMemo(() => {
     if (!contents) return []
@@ -270,29 +272,11 @@ export default function CourseFilesPage() {
     setRenameValue(selected.file.displayName)
   }
 
-  // Keep breadcrumb trail in sync when folderId changes
-  useEffect(() => {
-    if (!folderId) {
-      setBreadcrumbs([])
-      return
-    }
-    // If we navigated into a subfolder, append; otherwise rebuild from contents
-    if (contents?.folderId === folderId) return
-    // On direct navigation (e.g. back/forward) we may not have parent info — just clear
-    setBreadcrumbs([])
-  }, [folderId, contents?.folderId])
-
-  function navigateToFolder(id: string | null, name?: string) {
+  function navigateToFolder(id: string | null) {
     if (!id) {
       setSearchParams({})
-      setBreadcrumbs([])
     } else {
       setSearchParams({ folder: id })
-      setBreadcrumbs(prev => {
-        const existing = prev.findIndex(b => b.id === id)
-        if (existing >= 0) return prev.slice(0, existing + 1)
-        return [...prev, { id, name: name ?? 'Folder' }]
-      })
     }
   }
 
@@ -451,101 +435,107 @@ export default function CourseFilesPage() {
         />
       )}
 
-      {/* Toolbar */}
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        {/* Breadcrumbs */}
-        <nav className="flex min-w-0 flex-1 items-center gap-1 text-sm">
-          <span
-            onDragOver={(e) => {
-              if (draggingItem && folderId !== undefined) {
-                e.preventDefault()
-                e.dataTransfer.dropEffect = 'move'
-              }
-            }}
-            onDragEnter={() => {
-              if (draggingItem && folderId !== undefined) {
-                setDragOverBreadcrumbId('root')
-              }
-            }}
-            onDragLeave={(e) => {
-              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                setDragOverBreadcrumbId(null)
-              }
-            }}
-            onDrop={() => {
-              if (draggingItem && folderId !== undefined) {
-                void handleMoveItem(draggingItem.kind, draggingItem.id, null)
-              }
+      {/* Breadcrumb trail */}
+      <nav
+        aria-label="Folder path"
+        className="mb-3 flex min-w-0 flex-wrap items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900/60"
+      >
+        <span
+          onDragOver={(e) => {
+            if (draggingItem && folderId !== undefined) {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'move'
+            }
+          }}
+          onDragEnter={() => {
+            if (draggingItem && folderId !== undefined) {
+              setDragOverBreadcrumbId('root')
+            }
+          }}
+          onDragLeave={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
               setDragOverBreadcrumbId(null)
-            }}
-            className={`px-1.5 py-0.5 rounded transition-all duration-150 ${
-              draggingItem && folderId !== undefined
-                ? dragOverBreadcrumbId === 'root'
-                  ? 'bg-indigo-100 dark:bg-indigo-900/60 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300 font-semibold'
-                  : 'bg-indigo-50/50 dark:bg-indigo-950/20 border border-dashed border-indigo-300 dark:border-indigo-700'
-                : ''
-            }`}
+            }
+          }}
+          onDrop={() => {
+            if (draggingItem && folderId !== undefined) {
+              void handleMoveItem(draggingItem.kind, draggingItem.id, null)
+            }
+            setDragOverBreadcrumbId(null)
+          }}
+          className={`rounded px-1.5 py-0.5 transition-all duration-150 ${
+            draggingItem && folderId !== undefined
+              ? dragOverBreadcrumbId === 'root'
+                ? 'bg-indigo-100 font-semibold text-indigo-700 ring-2 ring-indigo-500 dark:bg-indigo-900/60 dark:text-indigo-300'
+                : 'border border-dashed border-indigo-300 bg-indigo-50/50 dark:border-indigo-700 dark:bg-indigo-950/20'
+              : ''
+          }`}
+        >
+          <button
+            type="button"
+            onClick={() => navigateToFolder(null)}
+            className="text-indigo-600 hover:underline dark:text-indigo-400"
+            aria-current={!folderId ? 'page' : undefined}
           >
-            <button
-              onClick={() => navigateToFolder(null)}
-              className="text-indigo-600 hover:underline dark:text-indigo-400"
-            >
-              Files
-            </button>
-          </span>
-          {breadcrumbs.map((b, i) => {
-            const isLast = i === breadcrumbs.length - 1
-            const canDropOnCrumb = draggingItem && folderId !== b.id && draggingItem.id !== b.id
-            return (
-              <span key={b.id} className="flex items-center gap-1">
-                <span className="text-slate-400">/</span>
-                <span
-                  onDragOver={(e) => {
-                    if (canDropOnCrumb) {
-                      e.preventDefault()
-                      e.dataTransfer.dropEffect = 'move'
-                    }
-                  }}
-                  onDragEnter={() => {
-                    if (canDropOnCrumb) {
-                      setDragOverBreadcrumbId(b.id)
-                    }
-                  }}
-                  onDragLeave={(e) => {
-                    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                      setDragOverBreadcrumbId(null)
-                    }
-                  }}
-                  onDrop={() => {
-                    if (canDropOnCrumb) {
-                      void handleMoveItem(draggingItem!.kind, draggingItem!.id, b.id)
-                    }
+            Files
+          </button>
+        </span>
+        {breadcrumbs.map((b, i) => {
+          const isLast = i === breadcrumbs.length - 1
+          const canDropOnCrumb = draggingItem && folderId !== b.id && draggingItem.id !== b.id
+          return (
+            <span key={b.id} className="flex min-w-0 items-center gap-1">
+              <span className="text-slate-400 dark:text-neutral-500" aria-hidden>/</span>
+              <span
+                onDragOver={(e) => {
+                  if (canDropOnCrumb) {
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                  }
+                }}
+                onDragEnter={() => {
+                  if (canDropOnCrumb) {
+                    setDragOverBreadcrumbId(b.id)
+                  }
+                }}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
                     setDragOverBreadcrumbId(null)
-                  }}
-                  className={`px-1.5 py-0.5 rounded transition-all duration-150 ${
-                    canDropOnCrumb
-                      ? dragOverBreadcrumbId === b.id
-                        ? 'bg-indigo-100 dark:bg-indigo-900/60 ring-2 ring-indigo-500 text-indigo-700 dark:text-indigo-300 font-semibold'
-                        : 'bg-indigo-50/50 dark:bg-indigo-950/20 border border-dashed border-indigo-300 dark:border-indigo-700'
-                      : ''
-                  }`}
-                >
-                  {!isLast ? (
-                    <button
-                      onClick={() => navigateToFolder(b.id, b.name)}
-                      className="text-indigo-600 hover:underline dark:text-indigo-400"
-                    >
-                      {b.name}
-                    </button>
-                  ) : (
-                    <span className="truncate font-medium text-slate-800 dark:text-neutral-200">{b.name}</span>
-                  )}
-                </span>
+                  }
+                }}
+                onDrop={() => {
+                  if (canDropOnCrumb) {
+                    void handleMoveItem(draggingItem!.kind, draggingItem!.id, b.id)
+                  }
+                  setDragOverBreadcrumbId(null)
+                }}
+                className={`min-w-0 rounded px-1.5 py-0.5 transition-all duration-150 ${
+                  canDropOnCrumb
+                    ? dragOverBreadcrumbId === b.id
+                      ? 'bg-indigo-100 font-semibold text-indigo-700 ring-2 ring-indigo-500 dark:bg-indigo-900/60 dark:text-indigo-300'
+                      : 'border border-dashed border-indigo-300 bg-indigo-50/50 dark:border-indigo-700 dark:bg-indigo-950/20'
+                    : ''
+                }`}
+              >
+                {!isLast ? (
+                  <button
+                    type="button"
+                    onClick={() => navigateToFolder(b.id)}
+                    className="max-w-[12rem] truncate text-indigo-600 hover:underline dark:text-indigo-400"
+                  >
+                    {b.name}
+                  </button>
+                ) : (
+                  <span className="block max-w-[12rem] truncate font-medium text-slate-800 dark:text-neutral-200" aria-current="page">{b.name}</span>
+                )}
               </span>
-            )
-          })}
-        </nav>
+            </span>
+          )
+        })}
+      </nav>
 
+      {/* Toolbar */}
+      <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
         {canManage && (
           <div className="flex shrink-0 items-center gap-2">
             <button
@@ -719,7 +709,7 @@ export default function CourseFilesPage() {
                   renamingFolder={renamingFolder}
                   renameValue={renameValue}
                   setRenameValue={setRenameValue}
-                  onNavigate={() => navigateToFolder(folder.id, folder.name)}
+                  onNavigate={() => navigateToFolder(folder.id)}
                   onRenameStart={() => { setRenamingFolder(folder); setRenameValue(folder.name) }}
                   onRenameSubmit={() => void handleRenameFolder()}
                   onRenameCancel={() => setRenamingFolder(null)}
@@ -777,7 +767,7 @@ export default function CourseFilesPage() {
             <>
               <button
                 className="flex w-full items-center gap-2 px-4 py-2 text-sm hover:bg-slate-50 dark:hover:bg-neutral-800"
-                onClick={() => { navigateToFolder(contextMenu.item.id, (contextMenu.item as FileFolder).name); setContextMenu(null) }}
+                onClick={() => { navigateToFolder(contextMenu.item.id); setContextMenu(null) }}
               >
                 Open
               </button>

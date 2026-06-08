@@ -2,9 +2,8 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { authorizedFetch, apiUrl } from '../lib/api'
 import { getAccessToken } from '../lib/auth'
 import {
+  applyInboxRefreshForToasts,
   loadNotificationToastedIds,
-  pickNotificationsToToast,
-  rememberNotificationToastedIds,
 } from '../lib/notification-toast'
 import { toast } from '../lib/lms-toast'
 import { InboxNotificationsContext, type InboxNotification } from './inbox-notifications-context'
@@ -24,29 +23,25 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
       if (!res.ok) return
       const data = (await res.json()) as { notifications: InboxNotification[]; unreadCount: number }
       const incoming = data.notifications ?? []
+      let toToast: InboxNotification[] = []
       setNotifications((prev) => {
-        const toToast = pickNotificationsToToast(
+        const result = applyInboxRefreshForToasts(
           prev,
           incoming,
           toastedIdsRef.current,
           inboxHydratedRef.current,
         )
-        if (toToast.length > 0) {
-          rememberNotificationToastedIds(
-            toastedIdsRef.current,
-            toToast.map((n) => n.id),
-          )
-          for (const n of toToast) {
-            if (n.eventType === 'inbox_message') {
-              toast.info(n.title, { description: n.body })
-            } else {
-              toast.success(n.title, { description: n.body })
-            }
-          }
-        }
-        return incoming
+        inboxHydratedRef.current = result.nowHydrated
+        toToast = result.toToast
+        return result.next
       })
-      inboxHydratedRef.current = true
+      for (const n of toToast) {
+        if (n.eventType === 'inbox_message') {
+          toast.info(n.title, { description: n.body })
+        } else {
+          toast.success(n.title, { description: n.body })
+        }
+      }
       setUnreadCount(data.unreadCount ?? 0)
     } catch {
       /* ignore */

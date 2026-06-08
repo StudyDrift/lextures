@@ -105,14 +105,16 @@ type pptxShapeXfrm struct {
 }
 
 func readShapeXfrm(node *pptxXMLNode) pptxShapeXfrm {
-	spPr := node.child("spPr")
-	if spPr == nil {
-		spPr = node.child("grpSpPr")
+	xfrm := node.child("xfrm")
+	if xfrm == nil {
+		spPr := node.child("spPr")
+		if spPr == nil {
+			spPr = node.child("grpSpPr")
+		}
+		if spPr != nil {
+			xfrm = spPr.child("xfrm")
+		}
 	}
-	if spPr == nil {
-		return pptxShapeXfrm{}
-	}
-	xfrm := spPr.child("xfrm")
 	if xfrm == nil {
 		return pptxShapeXfrm{}
 	}
@@ -534,15 +536,81 @@ type pptxParaHTML struct {
 	style string // full CSS for the <p> element (alignment, line-height, spacing, etc.)
 }
 
+// pptxTextStyles holds slide-master default text styles (title/body/other).
+type pptxTextStyles struct {
+	title *pptxXMLNode
+	body  *pptxXMLNode
+	other *pptxXMLNode
+}
+
+func parseMasterTextStyles(masterRoot *pptxXMLNode) pptxTextStyles {
+	var styles pptxTextStyles
+	if masterRoot == nil {
+		return styles
+	}
+	txStyles := masterRoot.findDeep("txStyles")
+	if txStyles == nil {
+		return styles
+	}
+	styles.title = txStyles.child("titleStyle")
+	styles.body = txStyles.child("bodyStyle")
+	styles.other = txStyles.child("otherStyle")
+	return styles
+}
+
+func resolveShapeLstStyle(sp, txBody *pptxXMLNode, phk *phKey, textStyles pptxTextStyles) *pptxXMLNode {
+	if txBody != nil {
+		if lst := txBody.child("lstStyle"); lst != nil {
+			return lst
+		}
+	}
+	if phk != nil {
+		switch phk.typ {
+		case "title", "ctrTitle", "subTitle":
+			if textStyles.title != nil {
+				return textStyles.title
+			}
+		case "body", "obj", "dtm", "tbl", "chart", "clipArt", "media", "pic":
+			if textStyles.body != nil {
+				return textStyles.body
+			}
+		default:
+			if textStyles.other != nil {
+				return textStyles.other
+			}
+		}
+	}
+	if textStyles.body != nil {
+		return textStyles.body
+	}
+	return nil
+}
+
+// shapeStyleFontColor reads default text color from p:style/a:fontRef.
+func shapeStyleFontColor(sp *pptxXMLNode, theme *pptxTheme) string {
+	styleEl := sp.child("style")
+	if styleEl == nil {
+		return ""
+	}
+	fontRef := styleEl.child("fontRef")
+	if fontRef == nil {
+		return ""
+	}
+	if clr := resolveColorNode(fontRef, theme); clr != "" {
+		return clr
+	}
+	return ""
+}
+
 // extractTxBodyHTML returns per-paragraph HTML with inline styles for each run.
-func extractTxBodyHTML(txBody *pptxXMLNode, theme *pptxTheme) []pptxParaHTML {
+func extractTxBodyHTML(txBody *pptxXMLNode, theme *pptxTheme, lstStyle *pptxXMLNode) []pptxParaHTML {
 	var result []pptxParaHTML
 	for i := range txBody.Children {
 		child := &txBody.Children[i]
 		if child.XMLName.Local != "p" {
 			continue
 		}
-		html, style := extractParagraphHTML(child, theme)
+		html, style := extractParagraphHTML(child, theme, lstStyle, paragraphLevel(child))
 		if strings.TrimSpace(html) != "" {
 			result = append(result, pptxParaHTML{html: html, style: style})
 		}
@@ -550,7 +618,18 @@ func extractTxBodyHTML(txBody *pptxXMLNode, theme *pptxTheme) []pptxParaHTML {
 	return result
 }
 
-func extractParagraphHTML(p *pptxXMLNode, theme *pptxTheme) (string, string) {
+func paragraphLevel(p *pptxXMLNode) int {
+	if pPr := p.child("pPr"); pPr != nil {
+		if lvl := pPr.attr("lvl"); lvl != "" {
+			if v := int(parseEMU(lvl)); v >= 0 {
+				return v + 1
+			}
+		}
+	}
+	return 1
+}
+
+func extractParagraphHTML(p *pptxXMLNode, theme *pptxTheme, lstStyle *pptxXMLNode, lvl int) (string, string) {
 	var styleProps []string
 	marL := int64(0)
 
@@ -596,7 +675,7 @@ func extractParagraphHTML(p *pptxXMLNode, theme *pptxTheme) (string, string) {
 		child := &p.Children[i]
 		switch child.XMLName.Local {
 		case "r":
-			buf.WriteString(extractRunHTML(child, theme))
+			buf.WriteString(extractRunHTML(child, theme, defaultRunStyleForLevel(lstStyle, theme, lvl)))
 		case "br":
 			buf.WriteString("<br/>")
 		case "fld":
@@ -638,7 +717,59 @@ func parseSpcPct(node *pptxXMLNode) float64 {
 	return 0
 }
 
-func extractRunHTML(r *pptxXMLNode, theme *pptxTheme) string {
+type pptxDefaultRunStyle struct {
+	fontPt float64
+	color  string
+	bold   bool
+}
+
+func defaultRunStyleForLevel(lstStyle *pptxXMLNode, theme *pptxTheme, lvl int) pptxDefaultRunStyle {
+	if lstStyle == nil {
+		return pptxDefaultRunStyle{}
+	}
+	if lvl < 1 {
+		lvl = 1
+	}
+	lvlName := fmt.Sprintf("lvl%dpPr", lvl)
+	var lvlNode *pptxXMLNode
+	for i := range lstStyle.Children {
+		if lstStyle.Children[i].XMLName.Local == lvlName {
+			lvlNode = &lstStyle.Children[i]
+			break
+		}
+	}
+	if lvlNode == nil {
+		pt, clr, bold := defaultRunStyleFromLstStyle(lstStyle, theme)
+		return pptxDefaultRunStyle{fontPt: pt, color: clr, bold: bold}
+	}
+	defRPr := lvlNode.child("defRPr")
+	if defRPr == nil {
+		return pptxDefaultRunStyle{}
+	}
+	var out pptxDefaultRunStyle
+	if sz := defRPr.attr("sz"); sz != "" {
+		if v := parseEMU(sz); v > 0 {
+			out.fontPt = float64(v) / 100
+		}
+	}
+	out.bold = defRPr.attr("b") == "1" || strings.EqualFold(defRPr.attr("b"), "true")
+	if fill := defRPr.child("solidFill"); fill != nil {
+		out.color = resolveColorNode(fill, theme)
+	}
+	if out.color == "" {
+		if clrNode := defRPr.findDeep("srgbClr"); clrNode != nil {
+			out.color = "#" + strings.ToUpper(clrNode.attr("val"))
+		} else if clrNode := defRPr.findDeep("schemeClr"); clrNode != nil {
+			out.color = resolveColorNodeDirect(clrNode, theme)
+		}
+	}
+	if latin := defRPr.child("latin"); latin != nil {
+		_ = theme.resolveTypeface(latin.attr("typeface"))
+	}
+	return out
+}
+
+func extractRunHTML(r *pptxXMLNode, theme *pptxTheme, defaults pptxDefaultRunStyle) string {
 	tNode := r.child("t")
 	if tNode == nil {
 		return ""
@@ -691,10 +822,21 @@ func extractRunHTML(r *pptxXMLNode, theme *pptxTheme) string {
 			}
 		}
 		if latin := rPr.child("latin"); latin != nil {
-			if tf := safeFontFamily(latin.attr("typeface")); tf != "" {
+			if tf := safeFontFamily(theme.resolveTypeface(latin.attr("typeface"))); tf != "" {
 				styles = append(styles, "font-family:'"+tf+"'")
 			}
 		}
+	}
+	if len(styles) == 0 || !runStyleHas("font-size", styles) {
+		if defaults.fontPt > 0 {
+			styles = append(styles, fmt.Sprintf("font-size:%.2fpx", ptToPx(defaults.fontPt)))
+		}
+	}
+	if !runStyleHas("color", styles) && defaults.color != "" {
+		styles = append(styles, "color:"+defaults.color)
+	}
+	if !runStyleHas("font-weight", styles) && defaults.bold {
+		styles = append(styles, "font-weight:700")
 	}
 
 	escaped := escapeHTMLText(text)
@@ -702,6 +844,16 @@ func extractRunHTML(r *pptxXMLNode, theme *pptxTheme) string {
 		return escaped
 	}
 	return `<span style="` + strings.Join(styles, ";") + `">` + escaped + `</span>`
+}
+
+func runStyleHas(prop string, styles []string) bool {
+	prefix := prop + ":"
+	for _, s := range styles {
+		if strings.HasPrefix(s, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 func contains(slice []string, s string) bool {
@@ -767,10 +919,11 @@ func parseSlideBgCSS(cSld *pptxXMLNode, theme *pptxTheme) string {
 // ----- Theme color resolution -----
 
 type pptxTheme struct {
-	colors        map[string]string // scheme name → RRGGBB hex (no #)
-	clrMap        map[string]string // bg1/tx1/bg2/tx2/etc → dk1/lt1/... per slide master clrMap
-	fillStyles    []*pptxXMLNode    // fmtScheme/fillStyleLst entries (1-indexed by fillRef idx)
-	bgFillStyles  []*pptxXMLNode    // fmtScheme/bgFillStyleLst entries (1001+ idx)
+	colors       map[string]string // scheme name → RRGGBB hex (no #)
+	clrMap       map[string]string // bg1/tx1/bg2/tx2/etc → dk1/lt1/... per slide master clrMap
+	fillStyles   []*pptxXMLNode    // fmtScheme/fillStyleLst entries (1-indexed by fillRef idx)
+	bgFillStyles []*pptxXMLNode    // fmtScheme/bgFillStyleLst entries (1001+ idx)
+	fonts        map[string]string // +mj-lt, +mn-lt, etc. → resolved typeface
 }
 
 // defaultClrMap is the standard mapping used when a master doesn't define its own.
@@ -781,21 +934,60 @@ var defaultClrMap = map[string]string{
 	"tx2": "dk2",
 }
 
-func loadPptxTheme(zr *zip.Reader) *pptxTheme {
-	theme := &pptxTheme{colors: make(map[string]string), clrMap: defaultClrMap}
-	for _, name := range []string{"ppt/theme/theme1.xml", "ppt/theme/theme2.xml", "ppt/theme/theme3.xml"} {
-		data, err := readZipFile(zr, name)
-		if err != nil {
-			continue
+func loadPptxThemeForMaster(zr *zip.Reader, masterPath string, masterRels map[string]packageRel) *pptxTheme {
+	theme := &pptxTheme{
+		colors: make(map[string]string),
+		clrMap: defaultClrMap,
+		fonts:  make(map[string]string),
+	}
+
+	themePath := ""
+	if masterPath != "" && masterRels != nil {
+		themePath = pptxRelatedPartPath(masterRels, masterPath, "theme")
+	}
+	if themePath == "" {
+		for _, name := range []string{"ppt/theme/theme1.xml", "ppt/theme/theme2.xml", "ppt/theme/theme3.xml"} {
+			if _, err := readZipFile(zr, name); err == nil {
+				themePath = name
+				break
+			}
 		}
-		root, err := parsePptxXML(data)
-		if err != nil {
-			continue
+	}
+	if themePath != "" {
+		populateThemeFromFile(zr, themePath, theme)
+	}
+
+	if masterPath != "" {
+		if data, err := readZipFile(zr, masterPath); err == nil {
+			if root, err := parsePptxXML(data); err == nil {
+				if cm := root.findDeep("clrMap"); cm != nil {
+					m := make(map[string]string, len(cm.Attrs))
+					for _, a := range cm.Attrs {
+						if a.Value != "" {
+							m[a.Name.Local] = a.Value
+						}
+					}
+					if len(m) > 0 {
+						theme.clrMap = m
+					}
+				}
+			}
 		}
-		clrScheme := root.findDeep("clrScheme")
-		if clrScheme == nil {
-			continue
-		}
+	}
+	return theme
+}
+
+func populateThemeFromFile(zr *zip.Reader, themePath string, theme *pptxTheme) {
+	data, err := readZipFile(zr, themePath)
+	if err != nil {
+		return
+	}
+	root, err := parsePptxXML(data)
+	if err != nil {
+		return
+	}
+	clrScheme := root.findDeep("clrScheme")
+	if clrScheme != nil {
 		colors := make(map[string]string)
 		for _, child := range clrScheme.Children {
 			schemeName := child.XMLName.Local
@@ -805,41 +997,101 @@ func loadPptxTheme(zr *zip.Reader) *pptxTheme {
 			}
 		}
 		theme.colors = colors
-		// Also cache fillStyleLst / bgFillStyleLst entries for fillRef idx resolution.
-		if fmtScheme := root.findDeep("fmtScheme"); fmtScheme != nil {
-			if fsl := fmtScheme.child("fillStyleLst"); fsl != nil {
-				for i := range fsl.Children {
-					c := &fsl.Children[i]
-					theme.fillStyles = append(theme.fillStyles, c)
-				}
-			}
-			if bfsl := fmtScheme.child("bgFillStyleLst"); bfsl != nil {
-				for i := range bfsl.Children {
-					c := &bfsl.Children[i]
-					theme.bgFillStyles = append(theme.bgFillStyles, c)
-				}
+	}
+	if fmtScheme := root.findDeep("fmtScheme"); fmtScheme != nil {
+		if fsl := fmtScheme.child("fillStyleLst"); fsl != nil {
+			for i := range fsl.Children {
+				c := &fsl.Children[i]
+				theme.fillStyles = append(theme.fillStyles, c)
 			}
 		}
-		break
-	}
-	// Read the first slide master's clrMap, if present. Most decks have one master,
-	// and its clrMap can swap the standard bg/tx mappings (e.g., dark-themed templates).
-	if data, err := readZipFile(zr, "ppt/slideMasters/slideMaster1.xml"); err == nil {
-		if root, err := parsePptxXML(data); err == nil {
-			if cm := root.findDeep("clrMap"); cm != nil {
-				m := make(map[string]string, len(cm.Attrs))
-				for _, a := range cm.Attrs {
-					if a.Value != "" {
-						m[a.Name.Local] = a.Value
-					}
-				}
-				if len(m) > 0 {
-					theme.clrMap = m
-				}
+		if bfsl := fmtScheme.child("bgFillStyleLst"); bfsl != nil {
+			for i := range bfsl.Children {
+				c := &bfsl.Children[i]
+				theme.bgFillStyles = append(theme.bgFillStyles, c)
 			}
 		}
 	}
-	return theme
+	theme.fonts = parseFontScheme(root)
+}
+
+func parseFontScheme(root *pptxXMLNode) map[string]string {
+	fonts := make(map[string]string)
+	fontScheme := root.findDeep("fontScheme")
+	if fontScheme == nil {
+		return fonts
+	}
+	for _, entry := range []struct {
+		node *pptxXMLNode
+		pfx  string
+	}{
+		{fontScheme.child("majorFont"), "+mj"},
+		{fontScheme.child("minorFont"), "+mn"},
+	} {
+		if entry.node == nil {
+			continue
+		}
+		for _, script := range []struct {
+			tag    string
+			suffix string
+		}{
+			{"latin", "-lt"},
+			{"ea", "-ea"},
+			{"cs", "-cs"},
+		} {
+			if node := entry.node.child(script.tag); node != nil {
+				if tf := strings.TrimSpace(node.attr("typeface")); tf != "" && !strings.HasPrefix(tf, "+") {
+					fonts[entry.pfx+script.suffix] = tf
+				}
+			}
+		}
+	}
+	return fonts
+}
+
+func (t *pptxTheme) resolveTypeface(typeface string) string {
+	typeface = strings.TrimSpace(typeface)
+	if typeface == "" {
+		return ""
+	}
+	if strings.HasPrefix(typeface, "+") {
+		if resolved, ok := t.fonts[typeface]; ok {
+			return resolved
+		}
+		return ""
+	}
+	return typeface
+}
+
+func (t *pptxTheme) withSlideClrMapOvr(slideRoot *pptxXMLNode) *pptxTheme {
+	if slideRoot == nil {
+		return t
+	}
+	ovr := slideRoot.child("clrMapOvr")
+	if ovr == nil {
+		return t
+	}
+	if ovr.child("masterClrMapping") != nil {
+		return t
+	}
+	ocm := ovr.child("overrideClrMapping")
+	if ocm == nil {
+		return t
+	}
+	clone := *t
+	merged := make(map[string]string, len(t.clrMap)+len(ocm.Attrs))
+	for k, v := range t.clrMap {
+		merged[k] = v
+	}
+	for _, a := range ocm.Attrs {
+		if a.Value != "" {
+			merged[a.Name.Local] = a.Value
+		}
+	}
+	if len(merged) > 0 {
+		clone.clrMap = merged
+	}
+	return &clone
 }
 
 func extractSingleColorHex(node *pptxXMLNode) string {

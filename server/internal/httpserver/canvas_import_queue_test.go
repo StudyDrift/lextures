@@ -14,6 +14,22 @@ func TestIncludeToRepo(t *testing.T) {
 	}
 }
 
+func TestCanvasImportJobAlreadyTerminal(t *testing.T) {
+	t.Parallel()
+	if canvasImportJobAlreadyTerminal(canvasimportjobs.StatusCompleted) != true {
+		t.Fatal("completed should be terminal")
+	}
+	if canvasImportJobAlreadyTerminal(canvasimportjobs.StatusFailed) != true {
+		t.Fatal("failed should be terminal")
+	}
+	if canvasImportJobAlreadyTerminal(canvasimportjobs.StatusQueued) {
+		t.Fatal("queued should not be terminal")
+	}
+	if canvasImportJobAlreadyTerminal(canvasimportjobs.StatusProcessing) {
+		t.Fatal("processing should not be terminal")
+	}
+}
+
 func TestTerminalWSMessage_Statuses(t *testing.T) {
 	t.Parallel()
 	cases := []struct {

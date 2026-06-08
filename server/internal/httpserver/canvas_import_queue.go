@@ -232,9 +232,33 @@ func (d Deps) HandleCanvasImportQueueMessage(ctx context.Context, msg canvasimpo
 	return d.processCanvasImportQueueMessage(ctx, msg, emit)
 }
 
+func canvasImportJobAlreadyTerminal(status canvasimportjobs.Status) bool {
+	return status == canvasimportjobs.StatusCompleted || status == canvasimportjobs.StatusFailed
+}
+
 func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimportjobs.QueueMessage, progress func(string) bool) error {
 	if d.Pool == nil {
 		return errors.New("server misconfiguration")
+	}
+	job, err := canvasimportjobs.Load(ctx, d.Pool, msg.JobID)
+	if err != nil {
+		return err
+	}
+	if job == nil {
+		return fmt.Errorf("canvas import job %s not found", msg.JobID)
+	}
+	if canvasImportJobAlreadyTerminal(job.Status) {
+		if job.Status == canvasimportjobs.StatusCompleted && d.CanvasImportHub != nil {
+			d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "complete"})
+		}
+		if job.Status == canvasimportjobs.StatusFailed && d.CanvasImportHub != nil {
+			errMsg := "Canvas import failed."
+			if job.ErrorMessage != nil && *job.ErrorMessage != "" {
+				errMsg = *job.ErrorMessage
+			}
+			d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "error", Message: errMsg})
+		}
+		return nil
 	}
 	if err := canvasimportjobs.MarkProcessing(ctx, d.Pool, msg.JobID); err != nil {
 		return err
@@ -249,15 +273,15 @@ func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimp
 		Files:       msg.Include.Files,
 	}.withDefaults()
 
-	err := d.runCanvasImport(ctx, msg.UserID, msg.CourseCode, msg.Mode, msg.CanvasBaseURL, msg.CanvasCourseID, msg.AccessToken, include, progress)
-	if err != nil {
-		if markErr := canvasimportjobs.MarkFailed(ctx, d.Pool, msg.JobID, err.Error(), canvasImportMaxAttempts); markErr != nil {
-			return fmt.Errorf("import failed: %w; mark failed: %v", err, markErr)
+	importErr := d.runCanvasImport(ctx, msg.UserID, msg.CourseCode, msg.Mode, msg.CanvasBaseURL, msg.CanvasCourseID, msg.AccessToken, include, progress)
+	if importErr != nil {
+		if markErr := canvasimportjobs.MarkFailed(ctx, d.Pool, msg.JobID, importErr.Error(), canvasImportMaxAttempts); markErr != nil {
+			return fmt.Errorf("import failed: %w; mark failed: %v", importErr, markErr)
 		}
 		if d.CanvasImportHub != nil {
-			d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "error", Message: err.Error()})
+			d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "error", Message: importErr.Error()})
 		}
-		return err
+		return importErr
 	}
 
 	var courseTitle string
@@ -265,6 +289,7 @@ func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimp
 	if markErr := canvasimportjobs.MarkCompleted(ctx, d.Pool, msg.JobID, courseTitle); markErr != nil {
 		return markErr
 	}
+	d.pushNotificationService().EnqueueCanvasCourseImported(ctx, msg.UserID, courseTitle, msg.CourseCode)
 	if d.CanvasImportHub != nil {
 		d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "complete"})
 	}
