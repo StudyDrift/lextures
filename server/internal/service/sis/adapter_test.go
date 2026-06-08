@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/uuid"
+
 	repoSIS "github.com/lextures/lextures/server/internal/repos/sis"
 )
 
@@ -32,6 +34,16 @@ func TestAdapterFor_HEVendors(t *testing.T) {
 		}
 		if err := a.TestConnection(context.Background(), ConnectionConfig{}); err != nil {
 			t.Fatalf("test connection: %v", err)
+		}
+		sections, errs, err := SyncCatalog(context.Background(), a, ConnectionConfig{Vendor: v, BaseURL: "https://sis.example.edu"}, uuid.Nil, "Spring 2027")
+		if err != nil {
+			t.Fatalf("catalog sync: %v", err)
+		}
+		if len(errs) != 0 {
+			t.Fatalf("catalog sync errors: %v", errs)
+		}
+		if len(sections) == 0 {
+			t.Fatal("expected stub catalog sections")
 		}
 	}
 }

@@ -54,6 +54,8 @@ import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skelet
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { LmsPage } from './lms-page'
+import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 function startOfWeekMonday(now = new Date()): Date {
   const d = new Date(now)
@@ -207,8 +209,10 @@ export default function Dashboard() {
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
+  const { ffCatalogIntegration } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
+  const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [detailError, setDetailError] = useState<string | null>(null)
@@ -312,6 +316,24 @@ export default function Dashboard() {
       cancelled = true
     }
   }, [coursesRevision])
+
+  useEffect(() => {
+    if (!ffCatalogIntegration) {
+      setSchedule([])
+      return
+    }
+    let cancelled = false
+    void fetchCatalogSchedule()
+      .then((entries) => {
+        if (!cancelled) setSchedule(entries)
+      })
+      .catch(() => {
+        if (!cancelled) setSchedule([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [ffCatalogIntegration, coursesRevision])
 
   useEffect(() => {
     if (catalog === null || permLoading) return
@@ -644,6 +666,70 @@ export default function Dashboard() {
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
+            </section>
+          )}
+
+          {ffCatalogIntegration && schedule.length > 0 && (
+            <section aria-label="My schedule">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                  My schedule
+                </h2>
+                <Link
+                  to="/catalog"
+                  className="text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
+                >
+                  Browse catalog
+                </Link>
+              </div>
+              <ul className="mt-4 space-y-3">
+                {schedule.map((entry) => {
+                  const sec = entry.section
+                  const mp = sec.meetingPattern
+                  const meeting =
+                    mp?.days && mp.startTime
+                      ? `${mp.days} ${mp.startTime}${mp.endTime ? `–${mp.endTime}` : ''}`
+                      : '—'
+                  const href = entry.courseCode
+                    ? `/courses/${encodeURIComponent(entry.courseCode)}`
+                    : '/catalog'
+                  const regLabel =
+                    entry.registrationStatus === 'registered'
+                      ? 'Registered'
+                      : entry.registrationStatus === 'waitlisted'
+                        ? 'Waitlisted'
+                        : entry.registrationStatus === 'auditing'
+                          ? 'Auditing'
+                          : entry.registrationStatus
+                  return (
+                    <li key={sec.id}>
+                      <Link
+                        to={href}
+                        className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 sm:flex-row sm:items-center sm:justify-between"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
+                            {sec.subject} {sec.courseNumber}
+                            {sec.sectionNumber ? ` · ${sec.sectionNumber}` : ''}
+                            {sec.crn ? ` · CRN ${sec.crn}` : ''}
+                          </p>
+                          <p className="truncate font-semibold text-slate-900 dark:text-neutral-100">
+                            {entry.courseTitle ?? sec.title}
+                          </p>
+                          <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-neutral-400">
+                            <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                            {meeting}
+                            {sec.room ? ` · ${sec.room}` : ''}
+                          </p>
+                        </div>
+                        <span className="inline-flex shrink-0 items-center rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-200">
+                          {regLabel}
+                        </span>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
             </section>
           )}
 

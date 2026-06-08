@@ -111,6 +111,7 @@ type platformSettingsJSON struct {
 	FFDemographics                  bool `json:"ffDemographics"`
 	FFContentFilterIntegration      bool `json:"ffContentFilterIntegration"`
 	FFSISIntegration                bool `json:"ffSisIntegration"`
+	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -253,6 +254,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFDemographics:                  merged.FFDemographics,
 				FFContentFilterIntegration:      merged.FFContentFilterIntegration,
 				FFSISIntegration:                merged.FFSISIntegration,
+				FFCatalogIntegration:            merged.FFCatalogIntegration,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -368,6 +370,7 @@ type putPlatformBody struct {
 	FFDemographics                  *bool `json:"ffDemographics"`
 	FFContentFilterIntegration      *bool `json:"ffContentFilterIntegration"`
 	FFSISIntegration                *bool `json:"ffSisIntegration"`
+	FFCatalogIntegration            *bool `json:"ffCatalogIntegration"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -644,6 +647,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffdemographics", body.FFDemographics, func(v bool) { wr.FFDemographics = &v })
 		setBool("ffcontentfilterintegration", body.FFContentFilterIntegration, func(v bool) { wr.FFContentFilterIntegration = &v })
 		setBool("ffsisintegration", body.FFSISIntegration, func(v bool) { wr.FFSISIntegration = &v })
+		setBool("ffcatalogintegration", body.FFCatalogIntegration, func(v bool) { wr.FFCatalogIntegration = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -742,6 +746,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFDemographics:                  merged.FFDemographics,
 				FFContentFilterIntegration:      merged.FFContentFilterIntegration,
 				FFSISIntegration:                merged.FFSISIntegration,
+				FFCatalogIntegration:            merged.FFCatalogIntegration,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

@@ -127,6 +127,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerReportCardRoutes(r)
 	d.registerSBGReportRoutes(r)
 	d.registerSISRoutes(r)
+	d.registerCatalogRoutes(r)
 	d.registerLibraryRoutes(r)
 	d.registerBroadcastRoutes(r)
 	d.registerClassroomSignalsRoutes(r)

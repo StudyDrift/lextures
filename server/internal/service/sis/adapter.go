@@ -10,6 +10,8 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/google/uuid"
+
 	repoSIS "github.com/lextures/lextures/server/internal/repos/sis"
 )
 
@@ -64,6 +66,11 @@ func (a bannerAdapter) TestConnection(_ context.Context, _ ConnectionConfig) err
 	return nil
 }
 
+func (a bannerAdapter) SyncCatalog(_ context.Context, cfg ConnectionConfig, termID uuid.UUID, termName string) ([]CatalogSection, []repoSIS.SyncError, error) {
+	slog.Info("sis banner catalog sync: stub sections", "base_url", cfg.BaseURL, "term", termName)
+	return stubCatalogSections(termID, termName), nil, nil
+}
+
 type workdayAdapter struct{}
 
 func (workdayAdapter) Vendor() string { return repoSIS.VendorWorkday }
@@ -75,6 +82,11 @@ func (w workdayAdapter) SyncRoster(_ context.Context, cfg ConnectionConfig) (rep
 
 func (w workdayAdapter) TestConnection(_ context.Context, _ ConnectionConfig) error {
 	return nil
+}
+
+func (w workdayAdapter) SyncCatalog(_ context.Context, cfg ConnectionConfig, termID uuid.UUID, termName string) ([]CatalogSection, []repoSIS.SyncError, error) {
+	slog.Info("sis workday catalog sync: stub sections", "base_url", cfg.BaseURL)
+	return stubCatalogSections(termID, termName), nil, nil
 }
 
 type colleagueAdapter struct{}
@@ -90,6 +102,11 @@ func (c colleagueAdapter) TestConnection(_ context.Context, _ ConnectionConfig) 
 	return nil
 }
 
+func (c colleagueAdapter) SyncCatalog(_ context.Context, cfg ConnectionConfig, termID uuid.UUID, termName string) ([]CatalogSection, []repoSIS.SyncError, error) {
+	slog.Info("sis colleague catalog sync: stub sections", "base_url", cfg.BaseURL)
+	return stubCatalogSections(termID, termName), nil, nil
+}
+
 type jenzabarAdapter struct{}
 
 func (jenzabarAdapter) Vendor() string { return repoSIS.VendorJenzabar }
@@ -103,6 +120,11 @@ func (j jenzabarAdapter) TestConnection(_ context.Context, _ ConnectionConfig) e
 	return nil
 }
 
+func (j jenzabarAdapter) SyncCatalog(_ context.Context, cfg ConnectionConfig, termID uuid.UUID, termName string) ([]CatalogSection, []repoSIS.SyncError, error) {
+	slog.Info("sis jenzabar catalog sync: stub sections", "base_url", cfg.BaseURL)
+	return stubCatalogSections(termID, termName), nil, nil
+}
+
 type peoplesoftAdapter struct{}
 
 func (peoplesoftAdapter) Vendor() string { return repoSIS.VendorPeopleSoft }
@@ -114,4 +136,9 @@ func (p peoplesoftAdapter) SyncRoster(_ context.Context, cfg ConnectionConfig) (
 
 func (p peoplesoftAdapter) TestConnection(_ context.Context, _ ConnectionConfig) error {
 	return nil
+}
+
+func (p peoplesoftAdapter) SyncCatalog(_ context.Context, cfg ConnectionConfig, termID uuid.UUID, termName string) ([]CatalogSection, []repoSIS.SyncError, error) {
+	slog.Info("sis peoplesoft catalog sync: stub sections", "base_url", cfg.BaseURL)
+	return stubCatalogSections(termID, termName), nil, nil
 }

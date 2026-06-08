@@ -58,6 +58,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFParentPortal = mergeBool(db.FFParentPortal, false)
 	out.FFReportCards = mergeBool(db.FFReportCards, false)
 	out.FFSISIntegration = mergeBool(db.FFSISIntegration, false)
+	out.FFCatalogIntegration = mergeBool(db.FFCatalogIntegration, false)
 	out.FFLibrary = mergeBool(db.FFLibrary, false)
 	out.FFBroadcasts = mergeBool(db.FFBroadcasts, false)
 	out.FFConferenceScheduling = mergeBool(db.FFConferenceScheduling, false)

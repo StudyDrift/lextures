@@ -41,6 +41,8 @@ import { getCourseViewAs } from '../../lib/course-view-as'
 import { permCourseItemsCreate } from '../../lib/rbac-api'
 import { CourseCalendar, type CourseCalendarAssignment } from './course-calendar'
 import { formatDueShort } from '../../lib/course-calendar-utils'
+import { fetchCourseCatalogInfo, type CatalogSection } from '../../lib/catalog-api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 function formatIsoDurationHuman(iso: string | null | undefined): string {
   if (!iso?.trim()) return '—'
@@ -192,8 +194,10 @@ export default function CourseDetail() {
   const { calendarEnabled: courseCalendarEnabled, loading: courseFeatureFlagsLoading } =
     useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
+  const { ffCatalogIntegration } = usePlatformFeatures()
 
   const [course, setCourse] = useState<CoursePublic | null>(null)
+  const [catalogInfo, setCatalogInfo] = useState<CatalogSection | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [diagnosticPending, setDiagnosticPending] = useState(false)
@@ -204,6 +208,24 @@ export default function CourseDetail() {
   const [myGrades, setMyGrades] = useState<CourseMyGradesResponse | null>(null)
   const [announcement, setAnnouncement] = useState<AnnouncementPreview | null>(null)
   const [gradebookEmptyCells, setGradebookEmptyCells] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (!courseCode || !ffCatalogIntegration) {
+      setCatalogInfo(null)
+      return
+    }
+    let cancelled = false
+    void fetchCourseCatalogInfo(courseCode)
+      .then((info) => {
+        if (!cancelled) setCatalogInfo(info)
+      })
+      .catch(() => {
+        if (!cancelled) setCatalogInfo(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode, ffCatalogIntegration])
 
   useEffect(() => {
     if (!courseCode) return
@@ -475,6 +497,79 @@ export default function CourseDetail() {
               </Link>
             </section>
           ) : null}
+
+          {catalogInfo && (
+            <aside
+              aria-label="Catalog metadata"
+              className="mt-6 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 text-sm dark:border-neutral-700 dark:bg-neutral-900/60"
+            >
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                Official catalog
+              </p>
+              <dl className="mt-3 grid gap-2 sm:grid-cols-2">
+                {catalogInfo.crn && (
+                  <div>
+                    <dt className="text-xs text-slate-500 dark:text-neutral-400">CRN</dt>
+                    <dd className="font-medium text-slate-900 dark:text-neutral-100">{catalogInfo.crn}</dd>
+                  </div>
+                )}
+                {catalogInfo.credits != null && (
+                  <div>
+                    <dt className="text-xs text-slate-500 dark:text-neutral-400">Credits</dt>
+                    <dd className="font-medium text-slate-900 dark:text-neutral-100">{catalogInfo.credits}</dd>
+                  </div>
+                )}
+                {catalogInfo.meetingPattern && (
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs text-slate-500 dark:text-neutral-400">Meeting</dt>
+                    <dd className="font-medium text-slate-900 dark:text-neutral-100">
+                      {catalogInfo.meetingPattern.days ?? '—'}
+                      {catalogInfo.meetingPattern.startTime
+                        ? ` ${catalogInfo.meetingPattern.startTime}${catalogInfo.meetingPattern.endTime ? `–${catalogInfo.meetingPattern.endTime}` : ''}`
+                        : ''}
+                      {catalogInfo.room ? ` · ${catalogInfo.room}` : ''}
+                    </dd>
+                  </div>
+                )}
+              </dl>
+              {catalogInfo.prerequisites && catalogInfo.prerequisites.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-xs text-slate-500 dark:text-neutral-400">Prerequisites</p>
+                  <ul className="mt-1 space-y-1">
+                    {catalogInfo.prerequisites.map((p) => {
+                      const st = catalogInfo.prerequisiteStatus?.find((s) => s.code === p.code)
+                      return (
+                        <li key={p.code} className="flex items-center justify-between gap-2">
+                          <span>
+                            {p.code}
+                            {p.title ? ` — ${p.title}` : ''}
+                          </span>
+                          {st && (
+                            <span
+                              className={
+                                st.status === 'met'
+                                  ? 'text-emerald-600'
+                                  : st.status === 'waived'
+                                    ? 'text-amber-600'
+                                    : 'text-rose-600'
+                              }
+                            >
+                              {st.status === 'met' ? 'Met' : st.status === 'waived' ? 'Waived' : 'Not met'}
+                            </span>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+              {catalogInfo.status === 'cancelled' && (
+                <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/30 dark:text-rose-200">
+                  This section has been cancelled by the registrar.
+                </p>
+              )}
+            </aside>
+          )}
 
           {landing === 'calendar' ? (
             <div className="mt-8 space-y-4">

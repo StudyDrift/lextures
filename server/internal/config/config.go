@@ -290,6 +290,8 @@ type Config struct {
 	FFReportCards bool
 	// FFSISIntegration enables SIS vendor connections (PowerSchool, Infinite Campus, Skyward, Aeries) and nightly sync (plan 13.7).
 	FFSISIntegration bool
+	// FFCatalogIntegration enables HE course catalog browse, registration status, and SIS catalog sync (plan 14.2).
+	FFCatalogIntegration bool
 	// FFLibrary enables the school library catalog, student reading log, and reading dashboard (plan 13.8).
 	FFLibrary bool
 	// FFBroadcasts enables district/school broadcast messages and emergency acknowledgement (plan 13.10).
@@ -465,6 +467,7 @@ func Load() Config {
 		RTLEnabled:                      boolEnv("RTL_ENABLED") || boolEnv("FEATURE_RTL_ENABLED"),
 		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
 		FFSISIntegration:                boolEnv("FF_SIS_INTEGRATION"),
+		FFCatalogIntegration:            boolEnv("FF_CATALOG_INTEGRATION"),
 		FFLibrary:                       boolEnv("FF_LIBRARY"),
 		FFBroadcasts:                    boolEnv("FF_BROADCASTS"),
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
