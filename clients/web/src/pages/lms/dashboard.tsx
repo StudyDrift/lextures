@@ -58,6 +58,7 @@ import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { LmsPage } from './lms-page'
 import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { fetchCalendarEvents, type AcademicCalendarEvent } from '../../lib/courses-api'
 
 function startOfWeekMonday(now = new Date()): Date {
   const d = new Date(now)
@@ -211,7 +212,7 @@ export default function Dashboard() {
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
-  const { ffCatalogIntegration, ffEnrollmentStateMachine } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffEnrollmentStateMachine, ffAcademicCalendar } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
@@ -241,6 +242,8 @@ export default function Dashboard() {
     chips: RecommendationItem[]
     degraded: boolean
   } | null>(null)
+
+  const [upcomingCalendarEvents, setUpcomingCalendarEvents] = useState<AcademicCalendarEvent[]>([])
 
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(() => {
     try {
@@ -460,6 +463,27 @@ export default function Dashboard() {
     }
   }, [studentRows])
 
+  useEffect(() => {
+    if (!ffAcademicCalendar || !courses?.length) return
+    let cancelled = false
+    void (async () => {
+      const today = new Date().toISOString().slice(0, 10)
+      const pairs = new Map<string, string | undefined>()
+      for (const c of courses) {
+        if (c.orgId) pairs.set(c.orgId, c.termId ?? undefined)
+      }
+      const fetches = Array.from(pairs.entries()).map(([orgId, termId]) =>
+        fetchCalendarEvents(orgId, termId).catch(() => [] as AcademicCalendarEvent[]),
+      )
+      const results = await Promise.all(fetches)
+      if (cancelled) return
+      const all = results.flat().filter((e) => e.startDate >= today)
+      all.sort((a, b) => a.startDate.localeCompare(b.startDate))
+      setUpcomingCalendarEvents(all.slice(0, 5))
+    })()
+    return () => { cancelled = true }
+  }, [ffAcademicCalendar, courses])
+
   const weekStart = useMemo(() => startOfWeekMonday(), [])
   const weekEnd = useMemo(() => endOfWeekSunday(weekStart), [weekStart])
   const weekFrac = useMemo(() => weekProgressFraction(), [])
@@ -668,6 +692,30 @@ export default function Dashboard() {
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
+            </section>
+          )}
+
+          {ffAcademicCalendar && upcomingCalendarEvents.length > 0 && (
+            <section aria-label="Upcoming dates">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                Upcoming dates
+              </h2>
+              <ul className="mt-4 space-y-2">
+                {upcomingCalendarEvents.map((ev) => (
+                  <li
+                    key={ev.id}
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+                  >
+                    <span className="font-medium text-slate-900 dark:text-neutral-100">{ev.eventName}</span>
+                    <span className="text-slate-500 dark:text-neutral-400">
+                      <time dateTime={ev.startDate}>{ev.startDate}</time>
+                      {ev.endDate && ev.endDate !== ev.startDate && (
+                        <> – <time dateTime={ev.endDate}>{ev.endDate}</time></>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </section>
           )}
 

@@ -56,6 +56,7 @@ export type PlatformFeatures = {
   ffGradeSubmission: boolean
   ffPlagiarismChecks: boolean
   ffIncompleteGradeWorkflow: boolean
+  ffAcademicCalendar: boolean
   ffCourseEvaluations: boolean
   loading: boolean
   refresh: () => Promise<void>
@@ -103,6 +104,7 @@ const defaultFeatures: PlatformFeatures = {
   ffGradeSubmission: false,
   ffPlagiarismChecks: false,
   ffIncompleteGradeWorkflow: false,
+  ffAcademicCalendar: false,
   ffCourseEvaluations: false,
   loading: true,
   refresh: async () => {},
@@ -155,6 +157,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffGradeSubmission: false,
     ffPlagiarismChecks: false,
     ffIncompleteGradeWorkflow: false,
+    ffAcademicCalendar: false,
     ffCourseEvaluations: false,
   })
   const [loading, setLoading] = useState(true)
@@ -208,6 +211,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffGradeSubmission: data.ffGradeSubmission === true,
           ffPlagiarismChecks: data.ffPlagiarismChecks === true,
           ffIncompleteGradeWorkflow: data.ffIncompleteGradeWorkflow === true,
+          ffAcademicCalendar: data.ffAcademicCalendar === true,
           ffCourseEvaluations: data.ffCourseEvaluations === true,
         }
         setFeatures({
@@ -228,6 +232,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffGradeSubmission: next.ffGradeSubmission === true,
           ffPlagiarismChecks: next.ffPlagiarismChecks === true,
           ffIncompleteGradeWorkflow: next.ffIncompleteGradeWorkflow === true,
+          ffAcademicCalendar: next.ffAcademicCalendar === true,
           ffCourseEvaluations: next.ffCourseEvaluations === true,
         })
         setPlatformFeaturesSnapshot(next)

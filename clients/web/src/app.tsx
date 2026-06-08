@@ -91,6 +91,7 @@ import ReadingDashboardPage from './pages/lms/reading-dashboard-page'
 import CourseWhiteboardPage from './pages/lms/course-whiteboard-page'
 import FinalGradeSubmission from './pages/lms/final-grade-submission'
 import GradeSubmissionStatus from './pages/admin/grade-submission-status'
+import AcademicCalendarAdminPage from './pages/admin/academic-calendar'
 import CourseEvaluation from './pages/lms/CourseEvaluation'
 import CourseEvaluationResults from './pages/lms/CourseEvaluationResults'
 import EvaluationTemplates from './pages/admin/EvaluationTemplates'
@@ -226,6 +227,7 @@ export default function App() {
           <Route path="/admin/sis" element={<SisIntegrationPage />} />
           <Route path="/admin/final-grades/status" element={<GradeSubmissionStatus />} />
           <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
+          <Route path="/admin/academic-calendar" element={<AcademicCalendarAdminPage />} />
           <Route path="/admin/evaluations/templates" element={<EvaluationTemplates />} />
           <Route path="/admin/evaluations/report" element={<EvaluationReport />} />
           <Route path="/reports" element={<Reports />} />

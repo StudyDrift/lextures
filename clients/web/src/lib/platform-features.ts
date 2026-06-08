@@ -42,6 +42,7 @@ export type PlatformFeaturesSnapshot = {
   ffIncompleteGradeWorkflow?: boolean
   ffUiMode?: boolean
   ffGradeSubmission?: boolean
+  ffAcademicCalendar?: boolean
   ffPlagiarismChecks?: boolean
   ffCourseEvaluations?: boolean
 }
@@ -88,6 +89,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffIncompleteGradeWorkflow: false,
   ffUiMode: false,
   ffGradeSubmission: false,
+  ffAcademicCalendar: false,
   ffPlagiarismChecks: false,
   ffCourseEvaluations: false,
 }
@@ -215,6 +217,10 @@ export function enrollmentStateMachineFeatureEnabled(): boolean {
 
 export function finalGradeSubmissionFeatureEnabled(): boolean {
   return loaded && snapshot.ffGradeSubmission === true
+}
+
+export function academicCalendarFeatureEnabled(): boolean {
+  return loaded && snapshot.ffAcademicCalendar === true
 }
 
 export function plagiarismChecksFeatureEnabled(): boolean {
