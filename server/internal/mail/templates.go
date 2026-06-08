@@ -52,6 +52,10 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderConferenceCancelled(vars, logo, color)
 	case "conference_reminder":
 		return renderConferenceReminder(vars, logo, color)
+	case "incomplete_granted":
+		return renderIncompleteGranted(vars, logo, color)
+	case "incomplete_reminder":
+		return renderIncompleteReminder(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {
@@ -245,6 +249,66 @@ Location: %s
 		return RenderedEmail{}, err
 	}
 	_ = color
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderIncompleteGranted(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	course := vars["courseName"]
+	deadline := vars["extensionDeadline"]
+	link := vars["link"]
+	subject := fmt.Sprintf("Incomplete grade granted — %s", course)
+	bodyText := fmt.Sprintf(`You have been granted an Incomplete grade for %s.
+
+Extension deadline: %s
+
+Open your course: %s
+`, course, deadline, link)
+	html, err := renderLayout("Incomplete grade granted", fmt.Sprintf(
+		`<p>You have been granted an <strong>Incomplete</strong> grade for <strong>%s</strong>.</p>
+<p>Extension deadline: <strong>%s</strong></p>
+<p><a href="%s" style="color:%s;font-weight:600;">Open your course</a></p>`,
+		template.HTMLEscapeString(course),
+		template.HTMLEscapeString(deadline),
+		template.HTMLEscapeString(link),
+		color,
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderIncompleteReminder(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	course := vars["courseName"]
+	student := vars["studentName"]
+	deadline := vars["extensionDeadline"]
+	days := vars["daysRemaining"]
+	link := vars["link"]
+	subject := fmt.Sprintf("Incomplete deadline in %s days — %s", days, course)
+	bodyText := fmt.Sprintf(`Reminder: the Incomplete grade deadline is approaching.
+
+Course: %s
+Student: %s
+Deadline: %s (%s days remaining)
+
+View gradebook: %s
+`, course, student, deadline, days, link)
+	html, err := renderLayout("Incomplete deadline reminder", fmt.Sprintf(
+		`<p>Reminder: the <strong>Incomplete</strong> grade deadline is approaching.</p>
+<p>Course: <strong>%s</strong><br/>
+Student: <strong>%s</strong><br/>
+Deadline: <strong>%s</strong> (%s days remaining)</p>
+<p><a href="%s" style="color:%s;font-weight:600;">View gradebook</a></p>`,
+		template.HTMLEscapeString(course),
+		template.HTMLEscapeString(student),
+		template.HTMLEscapeString(deadline),
+		template.HTMLEscapeString(days),
+		template.HTMLEscapeString(link),
+		color,
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
 	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
 }
 

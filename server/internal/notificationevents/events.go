@@ -16,6 +16,8 @@ const (
 	CoachingTipWeekly      = "coaching_tip_weekly"
 	CanvasCourseImported   = "canvas_course_imported"
 	InboxMessage           = "inbox_message"
+	IncompleteGranted      = "incomplete_granted"
+	IncompleteReminder     = "incomplete_reminder"
 )
 
 // All is the canonical list for defaults and UI.
@@ -34,4 +36,6 @@ var All = []string{
 	CoachingTipWeekly,
 	CanvasCourseImported,
 	InboxMessage,
+	IncompleteGranted,
+	IncompleteReminder,
 }

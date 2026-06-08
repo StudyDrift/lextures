@@ -35,6 +35,8 @@ const (
 	EventUserImpersonation   = "user_impersonation"
 	EventPasswordResetAdmin  = "password_reset_admin"
 	EventContentDelete       = "content_delete"
+	EventIncompleteGranted   = "incomplete_granted"
+	EventIncompleteResolved  = "incomplete_resolved"
 )
 
 var ErrNotFound = errors.New("adminaudit: event not found")

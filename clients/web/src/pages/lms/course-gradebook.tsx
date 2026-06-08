@@ -35,6 +35,9 @@ import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-t
 import { GradeHistoryPanel } from '../../components/grading/grade-history-panel'
 import { GradebookImportModal } from '../../components/grading/gradebook-import-modal'
 import { LmsPage } from './lms-page'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { IncompleteGradeModal } from './gradebook/IncompleteGradeModal'
+import type { IncompleteGradeRecord } from '../../lib/incomplete-grades-api'
 
 function buildEmptyGrades(students: GradebookStudent[], columns: GradebookColumn[]): Record<string, Record<string, string>> {
   const out: Record<string, Record<string, string>> = {}
@@ -347,6 +350,12 @@ export default function CourseGradebook() {
   const [sections, setSections] = useState<CourseSection[]>([])
   const [gradebookSectionId, setGradebookSectionId] = useState<string>('')
   const [crossListMerge, setCrossListMerge] = useState(true)
+  const { ffIncompleteGradeWorkflow } = usePlatformFeatures()
+  const [incompleteModal, setIncompleteModal] = useState<{
+    enrollmentId: string
+    studentName: string
+    record?: IncompleteGradeRecord | null
+  } | null>(null)
 
   useEffect(() => {
     if (!courseCode) return
@@ -392,6 +401,7 @@ export default function CourseGradebook() {
         name: s.displayName,
         enrollmentId: s.enrollmentId ?? enrollmentIdByUserId[s.userId],
         state: s.state,
+        incompleteRecord: s.incompleteRecord ?? null,
       })),
     [students, enrollmentIdByUserId],
   )
@@ -908,6 +918,29 @@ export default function CourseGradebook() {
             onToggleExcused={canEditGrades ? handleToggleExcused : undefined}
             onPostAssignmentGrades={canEditGrades ? handlePostAssignmentGrades : undefined}
             postGradesPending={postGradesPending}
+            onIncompleteAction={
+              ffIncompleteGradeWorkflow && canEditGrades
+                ? (student) => {
+                    if (!student.enrollmentId) return
+                    setIncompleteModal({
+                      enrollmentId: student.enrollmentId,
+                      studentName: student.name,
+                      record:
+                        student.incompleteRecord?.status === 'open'
+                          ? ({
+                              id: '',
+                              enrollmentId: student.enrollmentId,
+                              grantedBy: '',
+                              extensionDeadline: student.incompleteRecord.extensionDeadline,
+                              outstandingItemIds: student.incompleteRecord.outstandingItemIds ?? [],
+                              status: 'open',
+                              createdAt: '',
+                            } satisfies IncompleteGradeRecord)
+                          : null,
+                    })
+                  }
+                : undefined
+            }
             footerNote={
               gridStudents.length > 0 && gridColumns.length > 0
                 ? canEditGrades
@@ -924,6 +957,21 @@ export default function CourseGradebook() {
             onClose={() => setRubricModal(null)}
             onSave={handleRubricModalSave}
           />
+          {courseCode && incompleteModal ? (
+            <IncompleteGradeModal
+              open
+              courseCode={courseCode}
+              enrollmentId={incompleteModal.enrollmentId}
+              studentName={incompleteModal.studentName}
+              assignmentColumns={gridColumns}
+              existingRecord={incompleteModal.record}
+              onClose={() => setIncompleteModal(null)}
+              onSaved={() => {
+                setIncompleteModal(null)
+                void loadGrid()
+              }}
+            />
+          ) : null}
           {gradeHistoryOpen ? (
             <div
               className="fixed inset-0 z-[90] flex items-end justify-center bg-black/40 p-4 sm:items-center"

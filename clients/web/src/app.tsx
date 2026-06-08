@@ -79,6 +79,7 @@ import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
 import ContentFilterSettingsPage from './pages/admin/content-filter-settings'
 import StudentDemographicsPage from './pages/admin/student-demographics'
 import SisIntegrationPage from './pages/admin/sis-integration'
+import IncompletesAdminPage from './pages/admin/incompletes'
 import CourseCatalogPage from './pages/lms/course-catalog'
 import Title1ReportPage from './pages/admin/title1-report'
 import CourseAttendance from './pages/lms/CourseAttendance'
@@ -214,6 +215,7 @@ export default function App() {
           <Route path="/admin/demographics/title1" element={<Title1ReportPage />} />
           <Route path="/admin/content-filter" element={<ContentFilterSettingsPage />} />
           <Route path="/admin/sis" element={<SisIntegrationPage />} />
+          <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />
           <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
