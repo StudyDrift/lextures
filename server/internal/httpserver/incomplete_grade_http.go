@@ -201,8 +201,8 @@ func (d Deps) handleIncompleteGradePost() http.HandlerFunc {
 		})
 		if err != nil {
 			msg := err.Error()
-			switch {
-			case err == svc.ErrAlreadyExists, err == svc.ErrInvalidDeadline, err == svc.ErrOutstandingEmpty:
+			switch err {
+			case svc.ErrAlreadyExists, svc.ErrInvalidDeadline, svc.ErrOutstandingEmpty:
 				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput, msg)
 			default:
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to grant incomplete grade.")
@@ -279,10 +279,10 @@ func (d Deps) handleIncompleteGradePatch() http.HandlerFunc {
 		}
 		if err != nil {
 			msg := err.Error()
-			switch {
-			case err == svc.ErrNotOpen, err == svc.ErrInvalidDeadline, err == svc.ErrInvalidGrade:
+			switch err {
+			case svc.ErrNotOpen, svc.ErrInvalidDeadline, svc.ErrInvalidGrade:
 				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput, msg)
-			case err == svc.ErrNotFound:
+			case svc.ErrNotFound:
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, msg)
 			default:
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update incomplete grade.")
