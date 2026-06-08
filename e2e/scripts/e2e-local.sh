@@ -250,6 +250,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
+    FF_CATALOG_INTEGRATION="true" \
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
     FF_CLASSROOM_SIGNALS="true" \
@@ -272,6 +273,7 @@ else
     STORAGE_QUOTAS_ENABLED="true" \
     FEATURE_ENGAGEMENT_TRACKING="true" \
     FF_SIS_INTEGRATION="true" \
+    FF_CATALOG_INTEGRATION="true" \
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
     FF_CLASSROOM_SIGNALS="true" \

@@ -79,6 +79,7 @@ import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
 import ContentFilterSettingsPage from './pages/admin/content-filter-settings'
 import StudentDemographicsPage from './pages/admin/student-demographics'
 import SisIntegrationPage from './pages/admin/sis-integration'
+import CourseCatalogPage from './pages/lms/course-catalog'
 import Title1ReportPage from './pages/admin/title1-report'
 import CourseAttendance from './pages/lms/CourseAttendance'
 import CourseBehavior from './pages/lms/CourseBehavior'
@@ -197,6 +198,7 @@ export default function App() {
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
           <Route path="/admin/accommodations/audit" element={<AccommodationAuditPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
+          <Route path="/catalog" element={<CourseCatalogPage />} />
           <Route path="/library/:orgId" element={<LibraryCatalogPage />} />
           <Route path="/reading-log" element={<ReadingLogPage />} />
           <Route path="/admin/compliance/iso" element={<IsoComplianceAdminPage />} />

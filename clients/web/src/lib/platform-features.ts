@@ -37,6 +37,7 @@ export type PlatformFeaturesSnapshot = {
   ffDemographics?: boolean
   ffContentFilterIntegration?: boolean
   ffSisIntegration?: boolean
+  ffCatalogIntegration?: boolean
   ffUiMode?: boolean
 }
 
@@ -77,6 +78,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffDemographics: false,
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
+  ffCatalogIntegration: false,
   ffUiMode: false,
 }
 
@@ -191,6 +193,10 @@ export function readingPreferencesFeatureEnabled(): boolean {
 
 export function uiModeFeatureEnabled(): boolean {
   return loaded && snapshot.ffUiMode === true
+}
+
+export function catalogFeatureEnabled(): boolean {
+  return loaded && snapshot.ffCatalogIntegration === true
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */
