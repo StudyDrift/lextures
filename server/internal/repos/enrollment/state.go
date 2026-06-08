@@ -221,9 +221,9 @@ type GradebookStudentRow struct {
 
 // ListGradebookStudents returns active and optionally former students for the gradebook.
 func ListGradebookStudents(ctx context.Context, pool *pgxpool.Pool, courseCode string, sectionIDs []uuid.UUID, includeFormer bool) ([]GradebookStudentRow, error) {
-	stateFilter := `ce.state = 'active' AND ce.active`
+	stateFilter := `(ce.state = 'active' AND ce.active) OR ce.state = 'incomplete'`
 	if includeFormer {
-		stateFilter = `(ce.state = 'active' AND ce.active) OR ce.state IN ('dropped', 'withdrawn', 'no_credit')`
+		stateFilter = `(ce.state = 'active' AND ce.active) OR ce.state IN ('dropped', 'withdrawn', 'no_credit', 'incomplete')`
 	}
 	var rows pgx.Rows
 	var err error

@@ -17,9 +17,16 @@ export type GradebookColumn = {
   replaceWithFinal?: boolean
 }
 
+export type GradebookIncompleteRecord = {
+  extensionDeadline: string
+  status: string
+  outstandingItemIds?: string[]
+}
+
 export type GradebookStudent = {
   id: string
   name: string
   enrollmentId?: string
   state?: string
+  incompleteRecord?: GradebookIncompleteRecord | null
 }

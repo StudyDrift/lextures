@@ -39,6 +39,7 @@ export type PlatformFeaturesSnapshot = {
   ffSisIntegration?: boolean
   ffCatalogIntegration?: boolean
   ffEnrollmentStateMachine?: boolean
+  ffIncompleteGradeWorkflow?: boolean
   ffUiMode?: boolean
   ffGradeSubmission?: boolean
 }
@@ -82,6 +83,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffSisIntegration: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
+  ffIncompleteGradeWorkflow: false,
   ffUiMode: false,
   ffGradeSubmission: false,
 }
@@ -209,6 +211,10 @@ export function enrollmentStateMachineFeatureEnabled(): boolean {
 
 export function finalGradeSubmissionFeatureEnabled(): boolean {
   return loaded && snapshot.ffGradeSubmission === true
+}
+
+export function incompleteGradeWorkflowFeatureEnabled(): boolean {
+  return loaded && snapshot.ffIncompleteGradeWorkflow === true
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */

@@ -92,6 +92,7 @@ type Row struct {
 	FFSISIntegration                  *bool
 	FFCatalogIntegration              *bool
 	FFEnrollmentStateMachine          *bool
+	FFIncompleteGradeWorkflow         *bool
 	FFLibrary                         *bool
 	FFBroadcasts                      *bool
 	FFConferenceScheduling            *bool
@@ -191,6 +192,7 @@ type Write struct {
 	FFSISIntegration                  *bool
 	FFCatalogIntegration              *bool
 	FFEnrollmentStateMachine          *bool
+	FFIncompleteGradeWorkflow         *bool
 	FFLibrary                         *bool
 	FFBroadcasts                      *bool
 	FFConferenceScheduling            *bool
@@ -288,6 +290,7 @@ SELECT
 	ff_sis_integration,
 	ff_catalog_integration,
 	ff_enrollment_state_machine,
+	ff_incomplete_grade_workflow,
 	ff_library,
 	ff_broadcasts,
 	ff_conference_scheduling,
@@ -379,6 +382,7 @@ WHERE id = 1
 		&r.FFSISIntegration,
 		&r.FFCatalogIntegration,
 		&r.FFEnrollmentStateMachine,
+		&r.FFIncompleteGradeWorkflow,
 		&r.FFLibrary,
 		&r.FFBroadcasts,
 		&r.FFConferenceScheduling,
@@ -510,6 +514,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_sis_integration,
 	ff_catalog_integration,
 	ff_enrollment_state_machine,
+	ff_incomplete_grade_workflow,
 	ff_library,
 	ff_broadcasts,
 	ff_conference_scheduling,
@@ -606,6 +611,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_sis_integration = COALESCE(EXCLUDED.ff_sis_integration, settings.platform_app_settings.ff_sis_integration),
 	ff_catalog_integration = COALESCE(EXCLUDED.ff_catalog_integration, settings.platform_app_settings.ff_catalog_integration),
 	ff_enrollment_state_machine = COALESCE(EXCLUDED.ff_enrollment_state_machine, settings.platform_app_settings.ff_enrollment_state_machine),
+	ff_incomplete_grade_workflow = COALESCE(EXCLUDED.ff_incomplete_grade_workflow, settings.platform_app_settings.ff_incomplete_grade_workflow),
 	ff_library = COALESCE(EXCLUDED.ff_library, settings.platform_app_settings.ff_library),
 	ff_broadcasts = COALESCE(EXCLUDED.ff_broadcasts, settings.platform_app_settings.ff_broadcasts),
 	ff_conference_scheduling = COALESCE(EXCLUDED.ff_conference_scheduling, settings.platform_app_settings.ff_conference_scheduling),
@@ -695,6 +701,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFSISIntegration,
 		w.FFCatalogIntegration,
 		w.FFEnrollmentStateMachine,
+		w.FFIncompleteGradeWorkflow,
 		w.FFLibrary,
 		w.FFBroadcasts,
 		w.FFConferenceScheduling,

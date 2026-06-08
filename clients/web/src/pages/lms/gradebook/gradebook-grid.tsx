@@ -76,6 +76,8 @@ type GradebookGridProps = {
   /** When set, show “Post grades” in column header for manual assignment columns. */
   onPostAssignmentGrades?: (itemId: string) => void
   postGradesPending?: string | null
+  /** Plan 14.4 — open grant/resolve incomplete modal for a student row. */
+  onIncompleteAction?: (student: GradebookStudent) => void
 }
 
 function gradingSelectOptions(
@@ -249,6 +251,7 @@ export function GradebookGrid({
   onToggleExcused,
   onPostAssignmentGrades,
   postGradesPending = null,
+  onIncompleteAction,
 }: GradebookGridProps) {
   const density = useUiDensity()
   const pad = gradebookCellPad(density)
@@ -1529,18 +1532,39 @@ export function GradebookGrid({
                     title={student.name}
                     className={`sticky start-0 z-10 ${stickyNameWidth} ${pad} truncate border-e border-slate-200 bg-slate-100 text-start font-medium text-slate-950 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100`}
                   >
-                    {studentProgressFeatureEnabled() &&
-                    courseCode &&
-                    student.enrollmentId ? (
-                      <Link
-                        to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(student.enrollmentId)}/progress`}
-                        className="text-indigo-700 hover:underline dark:text-indigo-300"
-                      >
-                        {student.name}
-                      </Link>
-                    ) : (
-                      student.name
-                    )}
+                    <div className="flex flex-col gap-0.5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {studentProgressFeatureEnabled() &&
+                        courseCode &&
+                        student.enrollmentId ? (
+                          <Link
+                            to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(student.enrollmentId)}/progress`}
+                            className="text-indigo-700 hover:underline dark:text-indigo-300"
+                          >
+                            {student.name}
+                          </Link>
+                        ) : (
+                          <span>{student.name}</span>
+                        )}
+                        {student.state === 'incomplete' || student.incompleteRecord?.status === 'open' ? (
+                          <EnrollmentStateBadge state="incomplete" />
+                        ) : null}
+                        {onIncompleteAction && student.enrollmentId ? (
+                          <button
+                            type="button"
+                            onClick={() => onIncompleteAction(student)}
+                            className="rounded px-1.5 py-0.5 text-[11px] font-medium text-violet-700 hover:bg-violet-50 dark:text-violet-300 dark:hover:bg-violet-950/40"
+                          >
+                            {student.incompleteRecord?.status === 'open' ? 'Resolve I' : 'Grant I'}
+                          </button>
+                        ) : null}
+                      </div>
+                      {student.incompleteRecord?.status === 'open' ? (
+                        <span className="text-[11px] font-normal text-violet-700 dark:text-violet-300">
+                          Due {student.incompleteRecord.extensionDeadline}
+                        </span>
+                      ) : null}
+                    </div>
                   </th>
                   <td
                     role="gridcell"

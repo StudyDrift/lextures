@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -91,6 +92,10 @@ func defaultSubject(eventType string) string {
 		return "Parent-teacher conference reminder"
 	case EventCoachingTipWeekly:
 		return "Your weekly study coaching tip"
+	case EventIncompleteGranted:
+		return "Incomplete grade granted"
+	case EventIncompleteReminder:
+		return "Incomplete grade deadline reminder"
 	default:
 		return "Notification from StudyDrift"
 	}
@@ -192,6 +197,56 @@ func (s *Service) EnqueuePasswordReset(ctx context.Context, userID uuid.UUID, em
 	}
 	_, err = emailjobs.Enqueue(ctx, s.Pool, userID, EventPasswordReset, vars["subject"], "password_reset", vars)
 	return err
+}
+
+// NotifyIncompleteGranted emails a student when an Incomplete is granted.
+func (s *Service) NotifyIncompleteGranted(ctx context.Context, studentUserID, courseID uuid.UUID, extensionDeadline time.Time) {
+	if !s.enabled() || s.Pool == nil {
+		return
+	}
+	var courseCode, courseTitle string
+	if err := s.Pool.QueryRow(ctx, `
+SELECT course_code, COALESCE(title, course_code) FROM course.courses WHERE id = $1
+`, courseID).Scan(&courseCode, &courseTitle); err != nil {
+		slog.Warn("notifications.incomplete_granted.course", "err", err)
+		return
+	}
+	deadline := extensionDeadline.Format("January 2, 2006")
+	link := fmt.Sprintf("%s/courses/%s", s.publicWebOrigin(), courseCode)
+	vars := map[string]string{
+		"courseName":        courseTitle,
+		"extensionDeadline": deadline,
+		"link":              link,
+		"digestLine":        fmt.Sprintf("Incomplete grade granted for %s — due %s", courseTitle, deadline),
+	}
+	if err := s.EnqueueEmail(ctx, studentUserID, EventIncompleteGranted, "incomplete_granted", vars, nil); err != nil {
+		slog.Warn("notifications.incomplete_granted", "err", err, "user_id", studentUserID)
+	}
+}
+
+// NotifyIncompleteReminder emails student and instructors about an approaching deadline.
+func (s *Service) NotifyIncompleteReminder(ctx context.Context, studentID uuid.UUID, instructorIDs []uuid.UUID, courseName, courseCode, studentName string, daysRemaining int, deadline time.Time) {
+	if !s.enabled() {
+		return
+	}
+	deadlineStr := deadline.Format("January 2, 2006")
+	link := fmt.Sprintf("%s/courses/%s/gradebook", s.publicWebOrigin(), courseCode)
+	vars := map[string]string{
+		"courseName":        courseName,
+		"studentName":       studentName,
+		"extensionDeadline": deadlineStr,
+		"daysRemaining":     fmt.Sprintf("%d", daysRemaining),
+		"link":              link,
+		"digestLine":        fmt.Sprintf("Incomplete deadline in %d days for %s in %s", daysRemaining, studentName, courseName),
+	}
+	if err := s.EnqueueEmail(ctx, studentID, EventIncompleteReminder, "incomplete_reminder", vars, nil); err != nil {
+		slog.Warn("notifications.incomplete_reminder.student", "err", err, "user_id", studentID)
+	}
+	for _, iid := range instructorIDs {
+		if err := s.EnqueueEmail(ctx, iid, EventIncompleteReminder, "incomplete_reminder", vars, nil); err != nil {
+			slog.Warn("notifications.incomplete_reminder.instructor", "err", err, "user_id", iid)
+		}
+	}
 }
 
 // RecipientEmail loads a user's email for delivery.

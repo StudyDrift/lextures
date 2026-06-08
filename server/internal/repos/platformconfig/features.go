@@ -60,6 +60,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFSISIntegration = mergeBool(db.FFSISIntegration, false)
 	out.FFCatalogIntegration = mergeBool(db.FFCatalogIntegration, false)
 	out.FFEnrollmentStateMachine = mergeBool(db.FFEnrollmentStateMachine, out.FFEnrollmentStateMachine)
+	out.FFIncompleteGradeWorkflow = mergeBool(db.FFIncompleteGradeWorkflow, out.FFIncompleteGradeWorkflow)
 	out.FFLibrary = mergeBool(db.FFLibrary, false)
 	out.FFBroadcasts = mergeBool(db.FFBroadcasts, false)
 	out.FFConferenceScheduling = mergeBool(db.FFConferenceScheduling, false)

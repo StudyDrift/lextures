@@ -149,6 +149,12 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		sweepAtRiskScores(context.Background(), pool, cfg, time.Now().UTC())
 	})
 
+	go runEvery(ctx, 24*time.Hour, func() {
+		now := time.Now().UTC()
+		sweepIncompleteReminders(context.Background(), pool, cfg, now)
+		sweepIncompleteLapse(context.Background(), pool, cfg, now)
+	})
+
 	if cfg.FFSISIntegration {
 		go runEvery(ctx, time.Hour, func() {
 			sissync.SweepScheduled(context.Background(), pool)
