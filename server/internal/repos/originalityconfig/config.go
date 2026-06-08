@@ -3,6 +3,7 @@ package originalityconfig
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -50,6 +51,45 @@ ON CONFLICT (id) DO UPDATE SET
 // Row is a read of the singleton config row.
 type Row struct {
 	WebhookHMACSecret *string
+}
+
+// GetFull returns the singleton originality platform config row.
+type FullConfig struct {
+	DpaAcceptedAt          *time.Time
+	ActiveExternalProvider string
+	SimilarityAmberMinPct  float64
+	SimilarityRedMinPct    float64
+	AIAmberMinPct          float64
+	AIRedMinPct            float64
+	WebhookHMACSecret      *string
+}
+
+func GetFull(ctx context.Context, pool *pgxpool.Pool) (*FullConfig, error) {
+	var r FullConfig
+	var dpa sql.NullTime
+	var webhook sql.NullString
+	err := pool.QueryRow(ctx, `
+SELECT dpa_accepted_at, active_external_provider,
+	similarity_amber_min_pct::float8, similarity_red_min_pct::float8,
+	ai_amber_min_pct::float8, ai_red_min_pct::float8, webhook_hmac_secret
+FROM settings.originality_platform_config
+WHERE id = 1
+`).Scan(&dpa, &r.ActiveExternalProvider, &r.SimilarityAmberMinPct, &r.SimilarityRedMinPct, &r.AIAmberMinPct, &r.AIRedMinPct, &webhook)
+	if err == pgx.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if dpa.Valid {
+		t := dpa.Time
+		r.DpaAcceptedAt = &t
+	}
+	if webhook.Valid {
+		v := webhook.String
+		r.WebhookHMACSecret = &v
+	}
+	return &r, nil
 }
 
 // GetSingleton returns the row id=1, or (nil, nil) if the row is missing.

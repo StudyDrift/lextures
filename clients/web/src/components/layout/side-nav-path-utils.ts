@@ -48,6 +48,7 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
 export type CourseSettingsSection =
   | 'general'
   | 'grading'
+  | 'plagiarism'
   | 'outcomes'
   | 'features'
   | 'accessibility'
@@ -73,6 +74,7 @@ export function courseSettingsSectionFromPathname(pathname: string): CourseSetti
     return 'general'
   }
   if (seg === 'grading') return 'grading'
+  if (seg === 'plagiarism') return 'plagiarism'
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'features' || seg === 'features-tools') return 'features'
   if (seg === 'accessibility') return 'accessibility'

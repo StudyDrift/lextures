@@ -43,6 +43,8 @@ export type PlatformFeaturesSnapshot = {
   ffUiMode?: boolean
   ffGradeSubmission?: boolean
   ffAcademicCalendar?: boolean
+  ffPlagiarismChecks?: boolean
+  ffCourseEvaluations?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -88,6 +90,8 @@ const defaults: PlatformFeaturesSnapshot = {
   ffUiMode: false,
   ffGradeSubmission: false,
   ffAcademicCalendar: false,
+  ffPlagiarismChecks: false,
+  ffCourseEvaluations: false,
 }
 
 let loaded = false
@@ -217,6 +221,10 @@ export function finalGradeSubmissionFeatureEnabled(): boolean {
 
 export function academicCalendarFeatureEnabled(): boolean {
   return loaded && snapshot.ffAcademicCalendar === true
+}
+
+export function plagiarismChecksFeatureEnabled(): boolean {
+  return loaded && snapshot.ffPlagiarismChecks === true
 }
 
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {

@@ -314,6 +314,10 @@ type Config struct {
 	FFGradeSubmission bool
 	// FFAcademicCalendar enables institutional academic calendar events, dashboard upcoming-dates panel, and iCal feed (plan 14.6).
 	FFAcademicCalendar bool
+	// FFPlagiarismChecks enables HE plagiarism workflow APIs and async scans (plan 14.8).
+	FFPlagiarismChecks bool
+	// FFCourseEvaluations enables anonymous end-of-term course evaluations (plan 14.7).
+	FFCourseEvaluations bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -484,6 +488,10 @@ func Load() Config {
 		FFUiMode:                        boolEnv("FF_UI_MODE"),
 		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
 		FFAcademicCalendar:              boolEnv("FF_ACADEMIC_CALENDAR"),
+		FFPlagiarismChecks:              boolEnv("FF_PLAGIARISM_CHECKS"),
+		OriginalityDetectionEnabled:     boolEnv("ORIGINALITY_DETECTION_ENABLED"),
+		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
+		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

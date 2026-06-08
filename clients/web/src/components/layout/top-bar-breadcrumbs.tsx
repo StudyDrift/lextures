@@ -21,6 +21,7 @@ type Crumb = { key: string; label: string; to?: string }
 const COURSE_SETTINGS_LABEL: Record<CourseSettingsSection, string> = {
   general: 'General',
   grading: 'Grading',
+  plagiarism: 'Plagiarism',
   outcomes: 'Outcomes',
   features: 'Features',
   accessibility: 'Accessibility',

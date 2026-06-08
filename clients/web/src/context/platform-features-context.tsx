@@ -54,8 +54,10 @@ export type PlatformFeatures = {
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
   ffGradeSubmission: boolean
+  ffPlagiarismChecks: boolean
   ffIncompleteGradeWorkflow: boolean
   ffAcademicCalendar: boolean
+  ffCourseEvaluations: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -100,8 +102,10 @@ const defaultFeatures: PlatformFeatures = {
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
   ffGradeSubmission: false,
+  ffPlagiarismChecks: false,
   ffIncompleteGradeWorkflow: false,
   ffAcademicCalendar: false,
+  ffCourseEvaluations: false,
   loading: true,
   refresh: async () => {},
 }
@@ -151,8 +155,10 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
     ffGradeSubmission: false,
+    ffPlagiarismChecks: false,
     ffIncompleteGradeWorkflow: false,
     ffAcademicCalendar: false,
+    ffCourseEvaluations: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -203,8 +209,10 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
           ffGradeSubmission: data.ffGradeSubmission === true,
+          ffPlagiarismChecks: data.ffPlagiarismChecks === true,
           ffIncompleteGradeWorkflow: data.ffIncompleteGradeWorkflow === true,
           ffAcademicCalendar: data.ffAcademicCalendar === true,
+          ffCourseEvaluations: data.ffCourseEvaluations === true,
         }
         setFeatures({
           ...next,
@@ -222,8 +230,10 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,
           ffGradeSubmission: next.ffGradeSubmission === true,
+          ffPlagiarismChecks: next.ffPlagiarismChecks === true,
           ffIncompleteGradeWorkflow: next.ffIncompleteGradeWorkflow === true,
           ffAcademicCalendar: next.ffAcademicCalendar === true,
+          ffCourseEvaluations: next.ffCourseEvaluations === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

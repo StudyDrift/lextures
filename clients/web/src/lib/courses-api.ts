@@ -4118,6 +4118,69 @@ export async function fetchSubmissionOriginalitySummary(
   return parseOriginalityReportSummary((raw as { summary?: unknown }).summary)
 }
 
+/** Plan 14.8 — instructor retry for failed originality scans. */
+export async function retrySubmissionOriginality(
+  courseCode: string,
+  itemId: string,
+  submissionId: string,
+): Promise<number> {
+  const url = `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/${encodeURIComponent(submissionId)}/originality/retry`
+  const res = await authorizedFetch(url, { method: 'POST' })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const n = (raw as { retried?: unknown }).retried
+  return typeof n === 'number' && Number.isFinite(n) ? n : 0
+}
+
+/** Plan 14.8 — course-level plagiarism workflow settings. */
+export type CoursePlagiarismSettings = {
+  plagiarismChecksEnabled: boolean
+  plagiarismProvider: string | null
+  plagiarismAlertThresholdPct: number
+}
+
+export async function fetchCoursePlagiarismSettings(
+  courseCode: string,
+): Promise<CoursePlagiarismSettings | null> {
+  const url = `/api/v1/courses/${encodeURIComponent(courseCode)}/plagiarism-settings`
+  const res = await authorizedFetch(url)
+  const raw = await parseJson(res)
+  if (res.status === 404 || res.status === 501) return null
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as Record<string, unknown>
+  return {
+    plagiarismChecksEnabled: o.plagiarismChecksEnabled === true,
+    plagiarismProvider: typeof o.plagiarismProvider === 'string' ? o.plagiarismProvider : null,
+    plagiarismAlertThresholdPct:
+      typeof o.plagiarismAlertThresholdPct === 'number' && Number.isFinite(o.plagiarismAlertThresholdPct)
+        ? o.plagiarismAlertThresholdPct
+        : 40,
+  }
+}
+
+export async function patchCoursePlagiarismSettings(
+  courseCode: string,
+  body: Partial<CoursePlagiarismSettings>,
+): Promise<CoursePlagiarismSettings> {
+  const url = `/api/v1/courses/${encodeURIComponent(courseCode)}/plagiarism-settings`
+  const res = await authorizedFetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as Record<string, unknown>
+  return {
+    plagiarismChecksEnabled: o.plagiarismChecksEnabled === true,
+    plagiarismProvider: typeof o.plagiarismProvider === 'string' ? o.plagiarismProvider : null,
+    plagiarismAlertThresholdPct:
+      typeof o.plagiarismAlertThresholdPct === 'number' && Number.isFinite(o.plagiarismAlertThresholdPct)
+        ? o.plagiarismAlertThresholdPct
+        : 40,
+  }
+}
+
 /** Plan 3.4 — roster for moderator / grader pickers (course staff only). */
 export type CourseEnrollmentRosterRow = {
   id: string

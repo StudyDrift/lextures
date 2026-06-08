@@ -52,6 +52,8 @@ type platformFeaturesJSON struct {
 	FFUiMode                        bool `json:"ffUiMode"`
 	FFGradeSubmission               bool `json:"ffGradeSubmission"`
 	FFAcademicCalendar              bool `json:"ffAcademicCalendar"`
+	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
+	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -100,6 +102,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFUiMode:                    cfg.FFUiMode,
 		FFGradeSubmission:           cfg.FFGradeSubmission,
 		FFAcademicCalendar:          cfg.FFAcademicCalendar,
+		FFPlagiarismChecks:          cfg.FFPlagiarismChecks,
+		FFCourseEvaluations:         cfg.FFCourseEvaluations,
 	}
 }
 

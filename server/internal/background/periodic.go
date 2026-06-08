@@ -197,6 +197,13 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		})
 		slog.Info("av scanning worker started", "clamav_addr", cfg.ClamAVAddr, "stub", cfg.ClamAVStub)
 	}
+
+	if cfg.FFPlagiarismChecks && cfg.OriginalityDetectionEnabled {
+		go runEvery(ctx, 30*time.Second, func() {
+			sweepOriginalityScans(context.Background(), pool, cfg)
+		})
+		slog.Info("originality scan worker started")
+	}
 }
 
 func runEvery(ctx context.Context, d time.Duration, fn func()) {

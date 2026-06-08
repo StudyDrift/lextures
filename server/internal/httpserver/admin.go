@@ -545,4 +545,12 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Post("/api/v1/admin/lrs-config/{id}/test", d.handlePostAdminLRSTest())
 	r.Get("/api/v1/admin/lrs-dead-letter", d.handleGetAdminLRSDeadLetter())
 	r.Post("/api/v1/admin/lrs-dead-letter/{id}/retry", d.handlePostAdminLRSDeadLetterRetry())
+	// Course evaluations — admin template management and reporting (plan 14.7)
+	r.Get("/api/v1/admin/evaluation-templates", d.handleAdminListEvaluationTemplates())
+	r.Post("/api/v1/admin/evaluation-templates", d.handleAdminCreateEvaluationTemplate())
+	r.Get("/api/v1/admin/evaluation-templates/{template_id}", d.handleAdminEvaluationTemplateItem())
+	r.Patch("/api/v1/admin/evaluation-templates/{template_id}", d.handleAdminEvaluationTemplateItem())
+	r.Delete("/api/v1/admin/evaluation-templates/{template_id}", d.handleAdminEvaluationTemplateItem())
+	r.Post("/api/v1/admin/courses/{course_code}/evaluation-windows", d.handleAdminPostEvaluationWindow())
+	r.Get("/api/v1/admin/evaluations/report", d.handleAdminEvaluationReport())
 }
