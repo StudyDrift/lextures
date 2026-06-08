@@ -123,22 +123,20 @@ SELECT
     instr.user_id,
     COALESCE(u.display_name, u.email, '') AS instructor_name,
     MAX(fgs.submitted_at)                  AS last_submitted_at,
-    COUNT(DISTINCT ce.id)                  AS total_students,
+    COUNT(DISTINCT ce.id) FILTER (WHERE ce_er.role_key IS NOT NULL) AS total_students,
     COUNT(DISTINCT fgs.enrollment_id)      AS submitted_count
 FROM course.courses c
 LEFT JOIN course.course_enrollments instr
     ON instr.course_id = c.id
-    AND instr.role IN (
-        SELECT role FROM course.enrollment_roles WHERE is_instructor_equivalent = TRUE
-    )
     AND instr.active = TRUE
-LEFT JOIN "user".users u ON u.id = instr.user_id
+LEFT JOIN course.enrollment_roles instr_er
+    ON instr_er.role_key = instr.role AND instr_er.is_staff = TRUE
+LEFT JOIN "user".users u ON u.id = instr.user_id AND instr_er.role_key IS NOT NULL
 LEFT JOIN course.course_enrollments ce
     ON ce.course_id = c.id
-    AND ce.role IN (
-        SELECT role FROM course.enrollment_roles WHERE is_student_equivalent = TRUE
-    )
     AND ce.active = TRUE
+LEFT JOIN course.enrollment_roles ce_er
+    ON ce_er.role_key = ce.role AND ce_er.is_student_equivalent = TRUE
 LEFT JOIN course.final_grade_submissions fgs ON fgs.course_id = c.id
 WHERE c.term_id = $1
 GROUP BY c.id, c.course_code, c.title, instr.user_id, u.display_name, u.email
