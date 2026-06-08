@@ -48,10 +48,10 @@ func (d Deps) handleCalendarEventsGet() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireAcademicCalendar(w) {
+		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
-		if _, ok := d.meUserID(w, r); !ok {
+		if !d.requireAcademicCalendar(w) {
 			return
 		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))
@@ -171,11 +171,11 @@ func (d Deps) handleAdminCalendarEventPost() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireAcademicCalendar(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireAcademicCalendar(w) {
 			return
 		}
 		isAdmin, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, permGlobalRBACManage)
@@ -295,11 +295,11 @@ func (d Deps) handleAdminCalendarEventPatch() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireAcademicCalendar(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireAcademicCalendar(w) {
 			return
 		}
 		isAdmin, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, permGlobalRBACManage)
@@ -446,11 +446,11 @@ func (d Deps) handleAdminCalendarEventDelete() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireAcademicCalendar(w) {
-			return
-		}
 		viewer, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireAcademicCalendar(w) {
 			return
 		}
 		isAdmin, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, permGlobalRBACManage)
@@ -495,10 +495,10 @@ func (d Deps) handleCalendarTermICAL() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.requireAcademicCalendar(w) {
+		if _, ok := d.meUserID(w, r); !ok {
 			return
 		}
-		if _, ok := d.meUserID(w, r); !ok {
+		if !d.requireAcademicCalendar(w) {
 			return
 		}
 		orgID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "orgId")))

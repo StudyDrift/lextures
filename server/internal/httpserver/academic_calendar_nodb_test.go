@@ -2,121 +2,107 @@ package httpserver
 
 import (
 	"bytes"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/config"
 )
 
-func academicCalendarTestToken(t *testing.T, signer *auth.JWTSigner) string {
-	t.Helper()
-	tok, err := signer.Sign(t.Context(), "00000000-0000-0000-0000-000000000001", "u@test.invalid", "", "", nil)
-	if err != nil {
-		t.Fatalf("sign: %v", err)
-	}
-	return tok
-}
+// Auth runs first (requires Pool), so these no-db tests verify the unauthenticated path.
+// The authenticated + feature-disabled (501) cases are covered by e2e tests.
 
-func TestCalendarEventsGet_FeatureDisabled(t *testing.T) {
+func TestCalendarEventsGet_Unauthenticated(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
-	cfg := config.Config{FFAcademicCalendar: false}
-	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
-	tok := academicCalendarTestToken(t, signer)
-
-	r := chi.NewRouter()
-	r.Get("/api/v1/orgs/{orgId}/calendar/events", d.handleCalendarEventsGet())
+	cfg := config.Config{FFAcademicCalendar: true}
+	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/orgs/"+uuid.New().String()+"/calendar/events", nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d, want 501", w.Code)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
-func TestAdminCalendarEventPost_FeatureDisabled(t *testing.T) {
+func TestAdminCalendarEventPost_Unauthenticated(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
-	cfg := config.Config{FFAcademicCalendar: false}
-	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
-	tok := academicCalendarTestToken(t, signer)
+	cfg := config.Config{FFAcademicCalendar: true}
+	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
 
-	r := chi.NewRouter()
-	r.Post("/api/v1/admin/orgs/{orgId}/calendar/events", d.handleAdminCalendarEventPost())
-
-	body, _ := json.Marshal(map[string]string{
-		"eventType": "holiday",
-		"eventName": "Test Holiday",
-		"startDate": "2027-01-01",
-	})
+	body := []byte(`{"eventType":"holiday","eventName":"Test","startDate":"2027-01-01"}`)
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/orgs/"+uuid.New().String()+"/calendar/events", bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+tok)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d, want 501", w.Code)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
-func TestAdminCalendarEventPatch_FeatureDisabled(t *testing.T) {
+func TestAdminCalendarEventPatch_Unauthenticated(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
-	cfg := config.Config{FFAcademicCalendar: false}
-	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
-	tok := academicCalendarTestToken(t, signer)
+	cfg := config.Config{FFAcademicCalendar: true}
+	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
 
-	r := chi.NewRouter()
-	r.Patch("/api/v1/admin/orgs/{orgId}/calendar/events/{eventId}", d.handleAdminCalendarEventPatch())
-
-	body, _ := json.Marshal(map[string]string{"eventName": "Updated"})
+	body := []byte(`{"eventName":"Updated"}`)
 	req := httptest.NewRequest(http.MethodPatch, "/api/v1/admin/orgs/"+uuid.New().String()+"/calendar/events/"+uuid.New().String(), bytes.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+tok)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d, want 501", w.Code)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
-func TestAdminCalendarEventDelete_FeatureDisabled(t *testing.T) {
+func TestAdminCalendarEventDelete_Unauthenticated(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
-	cfg := config.Config{FFAcademicCalendar: false}
-	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
-	tok := academicCalendarTestToken(t, signer)
-
-	r := chi.NewRouter()
-	r.Delete("/api/v1/admin/orgs/{orgId}/calendar/events/{eventId}", d.handleAdminCalendarEventDelete())
+	cfg := config.Config{FFAcademicCalendar: true}
+	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
 
 	req := httptest.NewRequest(http.MethodDelete, "/api/v1/admin/orgs/"+uuid.New().String()+"/calendar/events/"+uuid.New().String(), nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d, want 501", w.Code)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
 	}
 }
 
-func TestCalendarTermICAL_FeatureDisabled(t *testing.T) {
+func TestCalendarTermICAL_Unauthenticated(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
-	cfg := config.Config{FFAcademicCalendar: false}
-	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
-	tok := academicCalendarTestToken(t, signer)
-
-	r := chi.NewRouter()
-	r.Get("/api/v1/orgs/{orgId}/calendar/terms/{termId}/ical", d.handleCalendarTermICAL())
+	cfg := config.Config{FFAcademicCalendar: true}
+	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/orgs/"+uuid.New().String()+"/calendar/terms/"+uuid.New().String()+"/ical", nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	if w.Code != http.StatusNotImplemented {
-		t.Fatalf("status = %d, want 501", w.Code)
+	rr := httptest.NewRecorder()
+	h.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d: %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestCalendarRoutes_Registered(t *testing.T) {
+	signer := auth.NewJWTSigner("01234567890123456789012345678901")
+	cfg := config.Config{FFAcademicCalendar: true}
+	h := NewHandler(Deps{Pool: nil, JWTSigner: signer, Config: cfg})
+
+	routes := []struct {
+		method string
+		path   string
+	}{
+		{http.MethodGet, "/api/v1/orgs/" + uuid.New().String() + "/calendar/events"},
+		{http.MethodPost, "/api/v1/admin/orgs/" + uuid.New().String() + "/calendar/events"},
+		{http.MethodGet, "/api/v1/orgs/" + uuid.New().String() + "/calendar/terms/" + uuid.New().String() + "/ical"},
+	}
+	for _, rt := range routes {
+		req := httptest.NewRequest(rt.method, rt.path, nil)
+		rr := httptest.NewRecorder()
+		h.ServeHTTP(rr, req)
+		if rr.Code == http.StatusNotFound || rr.Code == http.StatusMethodNotAllowed {
+			t.Errorf("%s %s: route not registered (got %d)", rt.method, rt.path, rr.Code)
+		}
 	}
 }
 

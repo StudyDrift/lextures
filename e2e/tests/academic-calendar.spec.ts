@@ -77,8 +77,6 @@ async function setAcademicCalendarFeature(token: string, enabled: boolean): Prom
 
 test('AC: GET events unauthenticated returns 401', async () => {
   const adminToken = await getAdminToken()
-  await setAcademicCalendarFeature(adminToken, true)
-
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
 
@@ -88,8 +86,6 @@ test('AC: GET events unauthenticated returns 401', async () => {
 
 test('AC: POST admin events unauthenticated returns 401', async () => {
   const adminToken = await getAdminToken()
-  await setAcademicCalendarFeature(adminToken, true)
-
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
 
