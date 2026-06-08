@@ -65,12 +65,19 @@ async function getAdminOrgId(token: string): Promise<string | null> {
   return data.organizations?.[0]?.id ?? null
 }
 
-async function enableGradeSubmission(token: string, orgId: string, enabled: boolean): Promise<void> {
-  await fetch(`${API_BASE}/api/v1/admin/orgs/${orgId}/platform-settings`, {
+async function enableGradeSubmission(token: string, enabled: boolean): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
     method: 'PUT',
     headers: authHeaders(token),
-    body: JSON.stringify({ ffGradeSubmission: enabled }),
+    body: JSON.stringify({
+      ffGradeSubmission: enabled,
+      updateMask: ['ffGradeSubmission'],
+    }),
   })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`enableGradeSubmission failed (${res.status}): ${body}`)
+  }
 }
 
 async function createCourse(token: string, orgId: string): Promise<string> {
@@ -90,15 +97,22 @@ async function createCourse(token: string, orgId: string): Promise<string> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Auth guard (no token → 401)
+// Auth guard (no token → 401; feature must be enabled or handlers return 501 first)
 // ─────────────────────────────────────────────────────────────────────────────
 
+async function enableGradeSubmissionForAuthTests(): Promise<void> {
+  const adminToken = await getAdminToken()
+  await enableGradeSubmission(adminToken, true)
+}
+
 test('FGS: GET preview unauthenticated returns 401', async () => {
+  await enableGradeSubmissionForAuthTests()
   const res = await fetch(`${API_BASE}/api/v1/courses/CS101/final-grades/preview`)
   expect(res.status).toBe(401)
 })
 
 test('FGS: POST submit unauthenticated returns 401', async () => {
+  await enableGradeSubmissionForAuthTests()
   const res = await fetch(`${API_BASE}/api/v1/courses/CS101/final-grades/submit`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -108,11 +122,13 @@ test('FGS: POST submit unauthenticated returns 401', async () => {
 })
 
 test('FGS: GET export CSV unauthenticated returns 401', async () => {
+  await enableGradeSubmissionForAuthTests()
   const res = await fetch(`${API_BASE}/api/v1/courses/CS101/final-grades/export.csv`)
   expect(res.status).toBe(401)
 })
 
 test('FGS: GET admin status unauthenticated returns 401', async () => {
+  await enableGradeSubmissionForAuthTests()
   const res = await fetch(
     `${API_BASE}/api/v1/admin/final-grades/status?term_id=00000000-0000-0000-0000-000000000001`,
   )
@@ -127,7 +143,7 @@ test('FGS: Preview returns 501 when feature disabled', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, false)
+  await enableGradeSubmission(adminToken, false)
 
   const user = await apiSignup({ email: uniqueEmail('u'), password: PASSWORD })
   const res = await fetch(`${API_BASE}/api/v1/courses/CS101/final-grades/preview`, {
@@ -140,7 +156,7 @@ test('FGS: Submit returns 501 when feature disabled', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, false)
+  await enableGradeSubmission(adminToken, false)
 
   const user = await apiSignup({ email: uniqueEmail('u2'), password: PASSWORD })
   const res = await fetch(`${API_BASE}/api/v1/courses/CS101/final-grades/submit`, {
@@ -155,7 +171,7 @@ test('FGS: Export CSV returns 501 when feature disabled', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, false)
+  await enableGradeSubmission(adminToken, false)
 
   const user = await apiSignup({ email: uniqueEmail('u3'), password: PASSWORD })
   const res = await fetch(`${API_BASE}/api/v1/courses/CS101/final-grades/export.csv`, {
@@ -168,7 +184,7 @@ test('FGS: Admin status returns 501 when feature disabled', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, false)
+  await enableGradeSubmission(adminToken, false)
 
   const res = await fetch(
     `${API_BASE}/api/v1/admin/final-grades/status?term_id=00000000-0000-0000-0000-000000000001`,
@@ -185,7 +201,7 @@ test('FGS: Preview returns grade list when feature enabled', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const courseCode = await createCourse(adminToken, orgId)
 
@@ -205,7 +221,7 @@ test('FGS: Submit saves audit rows and returns downloadUrl', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const courseCode = await createCourse(adminToken, orgId)
 
@@ -229,7 +245,7 @@ test('FGS: Export CSV returns text/csv content-type', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const courseCode = await createCourse(adminToken, orgId)
 
@@ -250,7 +266,7 @@ test('FGS: Admin status returns courses array', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const termRes = await fetch(`${API_BASE}/api/v1/orgs/${orgId}/terms`, {
     headers: authHeaders(adminToken),
@@ -279,7 +295,7 @@ test('FGS: Submit with invalid method returns 400', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const courseCode = await createCourse(adminToken, orgId)
 
@@ -298,7 +314,7 @@ test('FGS: Admin status without term_id returns 400', async () => {
   const adminToken = await getAdminToken()
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const res = await fetch(`${API_BASE}/api/v1/admin/final-grades/status`, {
     headers: authHeaders(adminToken),
@@ -315,7 +331,7 @@ test('FGS: Platform settings PUT ffGradeSubmission=true reflects in features end
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
 
-  await enableGradeSubmission(adminToken, orgId, true)
+  await enableGradeSubmission(adminToken, true)
 
   const featRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(adminToken),
@@ -330,7 +346,7 @@ test('FGS: Platform settings PUT ffGradeSubmission=false reflects in features en
   const orgId = await getAdminOrgId(adminToken)
   if (!orgId) { test.skip(true, 'no org'); return }
 
-  await enableGradeSubmission(adminToken, orgId, false)
+  await enableGradeSubmission(adminToken, false)
 
   const featRes = await fetch(`${API_BASE}/api/v1/platform/features`, {
     headers: authHeaders(adminToken),
