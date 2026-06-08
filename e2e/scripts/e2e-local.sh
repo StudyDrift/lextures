@@ -252,6 +252,7 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     FF_SIS_INTEGRATION="true" \
     FF_CATALOG_INTEGRATION="true" \
     FF_ENROLLMENT_STATE_MACHINE="true" \
+    FF_INCOMPLETE_GRADE_WORKFLOW="true" \
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
     FF_CLASSROOM_SIGNALS="true" \
@@ -276,6 +277,7 @@ else
     FF_SIS_INTEGRATION="true" \
     FF_CATALOG_INTEGRATION="true" \
     FF_ENROLLMENT_STATE_MACHINE="true" \
+    FF_INCOMPLETE_GRADE_WORKFLOW="true" \
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
     FF_CLASSROOM_SIGNALS="true" \

@@ -476,6 +476,7 @@ func (d Deps) handleAdminOIDCProviderPut() http.HandlerFunc {
 }
 
 func (d Deps) registerAdminRoutes(r chi.Router) {
+	r.Get("/api/v1/admin/incompletes", d.handleAdminIncompletes())
 	r.Post("/api/v1/admin/jobs/irt-calibrate", d.handleAdminIRTCalibrate())
 	r.Get("/api/v1/admin/orgs", d.handleAdminOrgsCollection())
 	r.Post("/api/v1/admin/orgs", d.handleAdminOrgsCollection())

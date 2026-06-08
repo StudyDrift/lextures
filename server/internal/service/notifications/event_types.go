@@ -17,6 +17,8 @@ const (
 	EventCoachingTipWeekly     = notificationevents.CoachingTipWeekly
 	EventCanvasCourseImported  = notificationevents.CanvasCourseImported
 	EventInboxMessage          = notificationevents.InboxMessage
+	EventIncompleteGranted     = notificationevents.IncompleteGranted
+	EventIncompleteReminder    = notificationevents.IncompleteReminder
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

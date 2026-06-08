@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/h5pcompletions"
 	"github.com/lextures/lextures/server/internal/repos/crosslisting"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/incompletegrades"
 	"github.com/lextures/lextures/server/internal/repos/gradingschemes"
 	"github.com/lextures/lextures/server/internal/courseroles"
 )
@@ -45,11 +46,17 @@ type gradebookGridColumn struct {
 
 // handleGradebookGrid is GET /api/v1/courses/{course_code}/gradebook/grid (Rust `gradebook_grid_get_handler`).
 func (d Deps) handleGradebookGrid() http.HandlerFunc {
+	type incompleteOut struct {
+		ExtensionDeadline  string   `json:"extensionDeadline"`
+		Status             string   `json:"status"`
+		OutstandingItemIDs []string `json:"outstandingItemIds,omitempty"`
+	}
 	type studentOut struct {
-		UserID       string  `json:"userId"`
-		EnrollmentID string  `json:"enrollmentId,omitempty"`
-		DisplayName  string  `json:"displayName"`
-		State        *string `json:"state,omitempty"`
+		UserID            string         `json:"userId"`
+		EnrollmentID      string         `json:"enrollmentId,omitempty"`
+		DisplayName       string         `json:"displayName"`
+		State             *string        `json:"state,omitempty"`
+		IncompleteRecord  *incompleteOut `json:"incompleteRecord,omitempty"`
 	}
 	type schemeSum struct {
 		Type      string          `json:"type"`
@@ -182,6 +189,21 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load students.")
 			return
 		}
+		incompleteWorkflow := cfg.FFIncompleteGradeWorkflow || d.Config.FFIncompleteGradeWorkflow
+		var incompleteByEnrollment map[uuid.UUID]incompletegrades.Record
+		if incompleteWorkflow {
+			enrollIDs := make([]uuid.UUID, 0, len(gradebookStudents))
+			for _, s := range gradebookStudents {
+				if s.EnrollmentID != uuid.Nil {
+					enrollIDs = append(enrollIDs, s.EnrollmentID)
+				}
+			}
+			incompleteByEnrollment, err = incompletegrades.GetOpenByEnrollmentIDs(r.Context(), d.Pool, enrollIDs)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load incomplete grades.")
+				return
+			}
+		}
 		students := make([]studentOut, 0, len(gradebookStudents))
 		for _, s := range gradebookStudents {
 			out := studentOut{UserID: s.UserID.String(), DisplayName: s.DisplayName}
@@ -191,6 +213,17 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			if enrollmentLifecycle {
 				st := string(s.State)
 				out.State = &st
+			}
+			if rec, ok := incompleteByEnrollment[s.EnrollmentID]; ok {
+				itemIDs := make([]string, 0, len(rec.OutstandingItemIDs))
+				for _, id := range rec.OutstandingItemIDs {
+					itemIDs = append(itemIDs, id.String())
+				}
+				out.IncompleteRecord = &incompleteOut{
+					ExtensionDeadline:  rec.ExtensionDeadline.Format("2006-01-02"),
+					Status:             string(rec.Status),
+					OutstandingItemIDs: itemIDs,
+				}
 			}
 			students = append(students, out)
 		}

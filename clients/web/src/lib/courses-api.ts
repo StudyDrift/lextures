@@ -1580,11 +1580,18 @@ export async function fetchCourseStructure(courseCode: string): Promise<CourseSt
 }
 
 /** GET `/gradebook/grid` — enrolled students and gradable module items (assignments and quizzes). */
+export type CourseGradebookGridIncompleteRecord = {
+  extensionDeadline: string
+  status: string
+  outstandingItemIds?: string[]
+}
+
 export type CourseGradebookGridStudent = {
   userId: string
   displayName: string
   enrollmentId?: string
   state?: string
+  incompleteRecord?: CourseGradebookGridIncompleteRecord | null
 }
 
 /** Assignment rubric: criteria with point-band levels (matches server `RubricDefinition`). */
