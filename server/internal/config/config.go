@@ -312,6 +312,8 @@ type Config struct {
 	FFUiMode bool
 	// FFGradeSubmission enables the final grade roll-up, review-and-confirm step, and SIS export (plan 14.5).
 	FFGradeSubmission bool
+	// FFPlagiarismChecks enables HE plagiarism workflow APIs and async scans (plan 14.8).
+	FFPlagiarismChecks bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -481,6 +483,7 @@ func Load() Config {
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
 		FFUiMode:                        boolEnv("FF_UI_MODE"),
 		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
+		FFPlagiarismChecks:              boolEnv("FF_PLAGIARISM_CHECKS"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

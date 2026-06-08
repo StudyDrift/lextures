@@ -37,6 +37,7 @@ import { CourseCrossListingSection } from './course-cross-listing-settings'
 import { CourseSectionsSettingsSection } from './course-sections-settings'
 import CourseTranslationsSettings from './course-translations-settings'
 import { CourseAccessibilitySettingsSection } from './course-accessibility-settings'
+import { CoursePlagiarismSettingsSection } from './course-plagiarism-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
@@ -109,6 +110,7 @@ type SavePayload = {
 type SettingsSection =
   | 'general'
   | 'grading'
+  | 'plagiarism'
   | 'outcomes'
   | 'features'
   | 'accessibility'
@@ -148,6 +150,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   const seg = parts[0]
   if (seg === 'general') return 'general'
   if (seg === 'grading') return 'grading'
+  if (seg === 'plagiarism') return 'plagiarism'
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'features') return 'features'
   if (seg === 'accessibility') return 'accessibility'
@@ -162,7 +165,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
 export default function CourseSettings() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const { allows, loading: permLoading } = usePermissions()
-  const { altTextEnforcementEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const { altTextEnforcementEnabled, ffPlagiarismChecks, loading: featuresLoading } = usePlatformFeatures()
   const location = useLocation()
   const [course, setCourse] = useState<CoursePublic | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -712,7 +715,8 @@ export default function CourseSettings() {
   if (
     section === 'invalid' ||
     (section === 'translations' && !isTranslationMemoryEnabled()) ||
-    (section === 'accessibility' && !featuresLoading && !altTextEnforcementEnabled)
+    (section === 'accessibility' && !featuresLoading && !altTextEnforcementEnabled) ||
+    (section === 'plagiarism' && !featuresLoading && !ffPlagiarismChecks)
   ) {
     return <Navigate to={`${settingsBase}/general`} replace />
   }
@@ -726,6 +730,10 @@ export default function CourseSettings() {
         ? course?.title
           ? `${course.title} — grading`
           : 'Grading'
+        : section === 'plagiarism'
+          ? course?.title
+            ? `${course.title} — plagiarism`
+            : 'Plagiarism'
         : section === 'outcomes'
           ? course?.title
             ? `${course.title} — outcomes`
@@ -767,6 +775,8 @@ export default function CourseSettings() {
       ? 'Basics, course home, schedule, visibility, hero image, and reading theme for this course.'
       : section === 'grading'
         ? 'Grading scale, weighted assignment groups, and how items map to each group.'
+        : section === 'plagiarism'
+          ? 'Course-wide plagiarism and AI-authorship check settings, provider, and alert thresholds.'
         : section === 'outcomes'
           ? 'Define learning outcomes, map assignments and quizzes (including individual questions) with measurement and intensity levels, and review class progress from grades and attempts.'
           : section === 'features'
@@ -1308,6 +1318,13 @@ export default function CourseSettings() {
           )}
 
           {section === 'grading' && <CourseGradingSettingsSection courseCode={courseCode} />}
+          {section === 'plagiarism' && (featuresLoading || ffPlagiarismChecks) ? (
+            featuresLoading ? (
+              <p className="text-sm text-slate-600 dark:text-neutral-300">Loading plagiarism settings…</p>
+            ) : (
+              <CoursePlagiarismSettingsSection courseCode={courseCode} />
+            )
+          ) : null}
           {section === 'outcomes' && <CourseOutcomesSection courseCode={courseCode} />}
           {section === 'features' && (
             <>

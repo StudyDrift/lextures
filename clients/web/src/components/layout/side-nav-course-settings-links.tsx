@@ -11,6 +11,7 @@ import {
   SlidersHorizontal,
   Target,
   Eye,
+  Shield,
 } from 'lucide-react'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -27,7 +28,7 @@ type SideNavCourseSettingsLinksProps = {
 export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettingsLinksProps) {
   const location = useLocation()
   const { sideNavCollapsed } = useShellNav()
-  const { altTextEnforcementEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const { altTextEnforcementEnabled, ffPlagiarismChecks, loading: featuresLoading } = usePlatformFeatures()
   const { sectionsEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
@@ -59,6 +60,15 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Grading
       </SideNavLink>
+      {!featuresLoading && ffPlagiarismChecks ? (
+        <SideNavLink
+          to={`${base}/plagiarism`}
+          className={() => (section === 'plagiarism' ? sideNavActiveClass : '')}
+          icon={<Shield className="h-5 w-5" />}
+        >
+          Plagiarism
+        </SideNavLink>
+      ) : null}
       <SideNavLink
         to={`${base}/outcomes`}
         className={() => (section === 'outcomes' ? sideNavActiveClass : '')}
