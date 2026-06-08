@@ -78,6 +78,19 @@ function normEnrollmentRole(role: string): string {
   return role.trim().toLowerCase()
 }
 
+const ENROLLMENT_ROLE_SELECT_CLASS =
+  'w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+
+const ASSIGNABLE_ENROLLMENT_ROLES: { value: string; label: string }[] = [
+  { value: 'student', label: 'Student' },
+  { value: 'instructor', label: 'Instructor' },
+  { value: 'ta', label: 'Teaching assistant' },
+  { value: 'designer', label: 'Designer' },
+  { value: 'observer', label: 'Observer' },
+  { value: 'auditor', label: 'Auditor' },
+  { value: 'librarian', label: 'Librarian' },
+]
+
 function enrollmentRoleRank(role: string): number {
   switch (normEnrollmentRole(role)) {
     case 'owner':
@@ -147,7 +160,7 @@ export default function CourseEnrollments() {
   const [stateChangeStatus, setStateChangeStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [stateChangeMessage, setStateChangeMessage] = useState<string | null>(null)
   /** When set, POST /enrollments uses `courseRole` instead of a course-scoped app role. */
-  const [addCourseRole, setAddCourseRole] = useState('')
+  const [addCourseRole, setAddCourseRole] = useState('student')
   const [editBuiltinCourseRole, setEditBuiltinCourseRole] = useState('')
   const [editSaveStatus, setEditSaveStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [editMessage, setEditMessage] = useState<string | null>(null)
@@ -463,7 +476,7 @@ export default function CourseEnrollments() {
     setModalOpen(false)
     setEmailListText('')
     setSelectedAppRoleId('')
-    setAddCourseRole('')
+    setAddCourseRole('student')
     setAddStatus('idle')
     setAddMessage(null)
     setRolesError(null)
@@ -669,7 +682,12 @@ export default function CourseEnrollments() {
     }
 
     const builtinAdd = addCourseRole.trim()
-    if (viewerIsTeacher && !builtinAdd) {
+    if (canUpdateEnrollments && !builtinAdd) {
+      setAddMessage('Select an enrollment role.')
+      setAddStatus('error')
+      return
+    }
+    if (isCourseCreator && !builtinAdd) {
       if (rolesLoading) {
         setAddMessage('Loading roles…')
         setAddStatus('error')
@@ -682,7 +700,7 @@ export default function CourseEnrollments() {
       }
       if (!selectedAppRoleId) {
         setAddMessage(
-          'Pick a built-in course role, or create a course-scoped app role under Settings → Roles & Permissions.',
+          'Pick an enrollment role, or choose Custom app role and select a course-scoped app role under Settings → Roles & Permissions.',
         )
         setAddStatus('error')
         return
@@ -694,9 +712,9 @@ export default function CourseEnrollments() {
     try {
       const body = builtinAdd
         ? { emails: emailListText, courseRole: normEnrollmentRole(builtinAdd) }
-        : viewerIsTeacher
+        : isCourseCreator
           ? { emails: emailListText, appRoleId: selectedAppRoleId }
-          : { emails: emailListText }
+          : { emails: emailListText, courseRole: 'student' }
 
       const res = await authorizedFetch(
         `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
@@ -870,7 +888,8 @@ export default function CourseEnrollments() {
   const submitDisabled =
     addStatus === 'loading' ||
     !emailListText.trim() ||
-    (viewerIsTeacher &&
+    (canUpdateEnrollments && !addCourseRole.trim()) ||
+    (isCourseCreator &&
       !usingBuiltinAdd &&
       (rolesLoading || !selectedAppRoleId || !!rolesError))
 
@@ -906,7 +925,7 @@ export default function CourseEnrollments() {
               enrollAsStudentBusy={selfStudentStatus === 'loading'}
               onAddEnrollment={() => {
                 setModalOpen(true)
-                setAddCourseRole('')
+                setAddCourseRole('student')
                 setAddMessage(null)
                 setAddStatus('idle')
               }}
@@ -1526,16 +1545,14 @@ export default function CourseEnrollments() {
                     id="edit-builtin-course-role"
                     value={editBuiltinCourseRole}
                     onChange={(e) => setEditBuiltinCourseRole(e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
+                    className={`mt-2 ${ENROLLMENT_ROLE_SELECT_CLASS}`}
                     disabled={editSaveStatus === 'loading' || demoteStatus === 'loading'}
                   >
-                    <option value="student">Student</option>
-                    <option value="instructor">Instructor</option>
-                    <option value="ta">Teaching assistant</option>
-                    <option value="designer">Designer</option>
-                    <option value="observer">Observer</option>
-                    <option value="auditor">Auditor</option>
-                    <option value="librarian">Librarian</option>
+                    {ASSIGNABLE_ENROLLMENT_ROLES.map((role) => (
+                      <option key={role.value} value={role.value}>
+                        {role.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               )}
@@ -1635,40 +1652,34 @@ export default function CourseEnrollments() {
                 Only people who already have an account can be enrolled.
               </p>
 
-              {viewerIsTeacher && (
-                <div className="mt-4">
-                  <label htmlFor="enrollment-builtin-role" className="text-xs font-medium text-slate-600">
-                    Built-in enrollment role (optional)
-                  </label>
-                  <p className="mt-1 text-xs text-slate-500">
-                    Pick a Lextures role (TA, designer, …) or leave blank and choose a course-scoped
-                    app role instead.
-                  </p>
-                  <select
-                    id="enrollment-builtin-role"
-                    value={addCourseRole}
-                    onChange={(e) => setAddCourseRole(e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100"
-                    disabled={addStatus === 'loading'}
-                  >
-                    <option value="">— Use app role below —</option>
-                    <option value="student">Student</option>
-                    <option value="instructor">Instructor</option>
-                    <option value="ta">Teaching assistant</option>
-                    <option value="designer">Designer</option>
-                    <option value="observer">Observer</option>
-                    <option value="auditor">Auditor</option>
-                    <option value="librarian">Librarian</option>
-                  </select>
-                </div>
-              )}
+              <div className="mt-4">
+                <label htmlFor="enrollment-role" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
+                  Role
+                </label>
+                <select
+                  id="enrollment-role"
+                  value={addCourseRole}
+                  onChange={(e) => setAddCourseRole(e.target.value)}
+                  className={`mt-1 ${ENROLLMENT_ROLE_SELECT_CLASS}`}
+                  disabled={addStatus === 'loading'}
+                >
+                  {ASSIGNABLE_ENROLLMENT_ROLES.map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                  {isCourseCreator ? (
+                    <option value="">Custom app role…</option>
+                  ) : null}
+                </select>
+              </div>
 
               {isCourseCreator && !addCourseRole.trim() && (
                 <div className="mt-4">
-                  <label htmlFor="enrollment-app-role" className="text-xs font-medium text-slate-600">
+                  <label htmlFor="enrollment-app-role" className="text-xs font-medium text-slate-600 dark:text-neutral-400">
                     Course-scoped app role
                   </label>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
                     App roles with scope <span className="font-mono">course</span> (configure under
                     Settings → Roles & Permissions). Permissions are applied for this course only.
                   </p>
@@ -1677,16 +1688,16 @@ export default function CourseEnrollments() {
                   ) : rolesError ? (
                     <p className="mt-2 text-sm text-rose-700">{rolesError}</p>
                   ) : courseScopedRoles.length === 0 ? (
-                    <p className="mt-2 text-sm text-amber-800">
+                    <p className="mt-2 text-sm text-amber-800 dark:text-amber-200">
                       No course-scoped roles yet. Create one in Settings → Roles & Permissions (set
-                      scope to Course), then add permissions — or use a built-in role above.
+                      scope to Course), then add permissions — or pick a built-in role above.
                     </p>
                   ) : (
                     <select
                       id="enrollment-app-role"
                       value={selectedAppRoleId}
                       onChange={(e) => setSelectedAppRoleId(e.target.value)}
-                      className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+                      className={`mt-1 ${ENROLLMENT_ROLE_SELECT_CLASS}`}
                       disabled={addStatus === 'loading'}
                     >
                       {courseScopedRoles.map((r) => (
@@ -1698,14 +1709,6 @@ export default function CourseEnrollments() {
                     </select>
                   )}
                 </div>
-              )}
-
-              {!isCourseCreator && (
-                <p className="mt-4 text-xs text-slate-500">
-                  As someone who did not create this course, you can add people as{' '}
-                  <span className="font-medium">students</span> only. The course creator assigns
-                  course-scoped roles when enrolling.
-                </p>
               )}
 
               {addMessage && (

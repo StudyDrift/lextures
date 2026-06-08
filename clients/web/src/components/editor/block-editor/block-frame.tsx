@@ -5,6 +5,8 @@ export type BlockFrameProps = {
   blockId: string
   /** Toolbar shown above the block on hover, focus, or selection. */
   toolbar?: ReactNode
+  /** When false, toolbar is rendered elsewhere (e.g. caret-anchored portal). */
+  inlineToolbar?: boolean
   children: ReactNode
   className?: string
 }
@@ -12,7 +14,13 @@ export type BlockFrameProps = {
 /**
  * Wraps a single block: Gutenberg-style left accent, floating toolbar above, hover/focus affordances.
  */
-export function BlockFrame({ blockId, toolbar, children, className }: BlockFrameProps) {
+export function BlockFrame({
+  blockId,
+  toolbar,
+  inlineToolbar = true,
+  children,
+  className,
+}: BlockFrameProps) {
   const { selectedId, setSelectedId, disabled } = useBlockEditor()
   const selected = selectedId === blockId
 
@@ -39,7 +47,7 @@ export function BlockFrame({ blockId, toolbar, children, className }: BlockFrame
           disabled ? 'opacity-60' : '',
         ].join(' ')}
       >
-        {toolbar && (
+        {toolbar && inlineToolbar && (
           <div
             className={[
               'sticky top-0 z-20 w-full overflow-hidden transition-all duration-150',

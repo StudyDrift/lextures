@@ -963,6 +963,7 @@ type ModuleCardBodyProps = {
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
   h5pEnabled?: boolean
+  ltiToolsAvailable?: boolean
   onFindOpenResources?: (moduleId: string) => void
   oerLibraryEnabled?: boolean
   minified: boolean
@@ -986,6 +987,7 @@ function ModuleCardBody({
   anyModalBusy,
   onModuleItemAdd,
   h5pEnabled,
+  ltiToolsAvailable,
   onFindOpenResources,
   oerLibraryEnabled: oerEnabled,
   minified,
@@ -1099,6 +1101,7 @@ function ModuleCardBody({
               oerLibraryEnabled={oerEnabled}
               disabled={anyModalBusy}
               h5pEnabled={h5pEnabled}
+              ltiToolsAvailable={ltiToolsAvailable}
             />
           </div>
         )}
@@ -1289,6 +1292,7 @@ type SortableModuleCardProps = {
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
   h5pEnabled?: boolean
+  ltiToolsAvailable?: boolean
   onFindOpenResources?: (moduleId: string) => void
   oerLibraryEnabled?: boolean
   minified: boolean
@@ -1317,6 +1321,7 @@ function SortableModuleCard({
   anyModalBusy,
   onModuleItemAdd,
   h5pEnabled,
+  ltiToolsAvailable,
   onFindOpenResources,
   oerLibraryEnabled: oerEnabled,
   minified,
@@ -1388,6 +1393,7 @@ function SortableModuleCard({
         anyModalBusy={anyModalBusy}
         onModuleItemAdd={onModuleItemAdd}
         h5pEnabled={h5pEnabled}
+        ltiToolsAvailable={ltiToolsAvailable}
         onFindOpenResources={onFindOpenResources}
         oerLibraryEnabled={oerEnabled}
         minified={minified}
@@ -1547,8 +1553,8 @@ export default function CourseModules() {
   const [ltiLinkModuleId, setLtiLinkModuleId] = useState<string | null>(null)
   const [ltiLinkSaving, setLtiLinkSaving] = useState(false)
   const [ltiLinkSaveError, setLtiLinkSaveError] = useState<string | null>(null)
-  const [ltiLinkTools, setLtiLinkTools] = useState<{ id: string; name: string }[]>([])
-  const [ltiLinkToolsLoading, setLtiLinkToolsLoading] = useState(false)
+  const [ltiExternalTools, setLtiExternalTools] = useState<{ id: string; name: string }[]>([])
+  const [ltiExternalToolsLoading, setLtiExternalToolsLoading] = useState(false)
   const [busyModuleId, setBusyModuleId] = useState<string | null>(null)
   const [busyChildItemId, setBusyChildItemId] = useState<string | null>(null)
   const [moduleActionError, setModuleActionError] = useState<string | null>(null)
@@ -1693,6 +1699,29 @@ export default function CourseModules() {
       cancelled = true
     }
   }, [courseCode])
+
+  useEffect(() => {
+    if (!courseCode || !canEditModules) {
+      setLtiExternalTools([])
+      setLtiExternalToolsLoading(false)
+      return
+    }
+    let cancelled = false
+    setLtiExternalToolsLoading(true)
+    void fetchCourseLtiExternalTools(courseCode)
+      .then((tools) => {
+        if (!cancelled) setLtiExternalTools(tools)
+      })
+      .catch(() => {
+        if (!cancelled) setLtiExternalTools([])
+      })
+      .finally(() => {
+        if (!cancelled) setLtiExternalToolsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode, canEditModules])
 
   useEffect(() => {
     if (!archiveConfirmItem) return
@@ -1950,19 +1979,14 @@ export default function CourseModules() {
       return
     }
     if (kind === 'lti_link') {
-      if (!courseCode) return
+      if (!courseCode || ltiExternalTools.length === 0) return
       setLtiLinkSaveError(null)
       setLtiLinkModuleId(moduleId)
       setLtiLinkModalKey((k) => k + 1)
-      setLtiLinkTools([])
-      setLtiLinkToolsLoading(true)
       setLtiLinkModalOpen(true)
-      void fetchCourseLtiExternalTools(courseCode)
-        .then((tools) => setLtiLinkTools(tools))
-        .catch(() => setLtiLinkTools([]))
-        .finally(() => setLtiLinkToolsLoading(false))
+      return
     }
-  }, [courseCode])
+  }, [courseCode, ltiExternalTools.length])
 
   const handleChildTogglePublished = useCallback(
     async (child: CourseStructureItem) => {
@@ -2488,6 +2512,7 @@ export default function CourseModules() {
                     anyModalBusy={anyModalBusy}
                     onModuleItemAdd={onModuleItemAdd}
                     h5pEnabled={h5pFeatureEnabled()}
+                    ltiToolsAvailable={!ltiExternalToolsLoading && ltiExternalTools.length > 0}
                     onFindOpenResources={(moduleId) => {
                       setOerModuleId(moduleId)
                       setOerPanelOpen(true)
@@ -2703,8 +2728,8 @@ export default function CourseModules() {
           }
         }}
         onSave={(input) => void saveLtiLink(input)}
-        tools={ltiLinkTools}
-        toolsLoading={ltiLinkToolsLoading}
+        tools={ltiExternalTools}
+        toolsLoading={ltiExternalToolsLoading}
         saving={ltiLinkSaving}
         errorMessage={ltiLinkSaveError}
       />
