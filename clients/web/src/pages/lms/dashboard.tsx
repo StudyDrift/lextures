@@ -52,6 +52,8 @@ import {
 } from './gradebook/compute-course-final-percent'
 import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
+import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
+import type { EnrollmentState } from '../../lib/enrollment-state-api'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { LmsPage } from './lms-page'
 import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
@@ -209,7 +211,7 @@ export default function Dashboard() {
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
-  const { ffCatalogIntegration } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffEnrollmentStateMachine } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
@@ -905,12 +907,22 @@ export default function Dashboard() {
                           key={row.course.courseCode}
                           className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
                         >
-                          <Link
-                            to={base}
-                            className="text-base font-semibold text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-300"
-                          >
-                            {row.course.title}
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                              to={base}
+                              className="text-base font-semibold text-slate-900 hover:text-indigo-600 dark:text-neutral-100 dark:hover:text-indigo-300"
+                            >
+                              {row.course.title}
+                            </Link>
+                            {ffEnrollmentStateMachine &&
+                            row.course.viewerEnrollmentState &&
+                            row.course.viewerEnrollmentState !== 'active' ? (
+                              <EnrollmentStateBadge
+                                state={row.course.viewerEnrollmentState as EnrollmentState}
+                                changedAt={row.course.viewerEnrollmentStateChangedAt}
+                              />
+                            ) : null}
+                          </div>
                           {courseSectionSubtitle(row.course) ? (
                             <p className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
                               {courseSectionSubtitle(row.course)}

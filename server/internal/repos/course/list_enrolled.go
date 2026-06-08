@@ -76,6 +76,8 @@ type CoursePublic struct {
 	CourseHomeContentItemID       *string          `json:"courseHomeContentItemId,omitempty"`
 	CourseTimezone                *string          `json:"courseTimezone,omitempty"`
 	GradeLevel                    *string          `json:"gradeLevel,omitempty"`
+	ViewerEnrollmentState         *string          `json:"viewerEnrollmentState,omitempty"`
+	ViewerEnrollmentStateChangedAt *time.Time      `json:"viewerEnrollmentStateChangedAt,omitempty"`
 }
 
 // coursePublicSelect is columns for `course.courses` joined to `tenant.terms` (alias `tr`) for public APIs.
@@ -350,7 +352,11 @@ SELECT`+coursePublicSelect+coursePublicFrom+`
 INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
-WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
+WHERE c.id IN (
+  SELECT e.course_id FROM course.course_enrollments e
+  WHERE e.user_id = $1
+    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+)
   AND c.archived = false
   AND ($2::text IS NULL OR c.grade_level = $2::text)
 ORDER BY o.sort_order NULLS LAST, c.title ASC
@@ -382,7 +388,11 @@ SELECT`+coursePublicSelect+coursePublicFrom+`
 INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
-WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
+WHERE c.id IN (
+  SELECT e.course_id FROM course.course_enrollments e
+  WHERE e.user_id = $1
+    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+)
   AND c.archived = false
   AND c.org_unit_id IS NOT NULL
   AND c.org_unit_id = ANY($2::uuid[])
@@ -413,7 +423,11 @@ SELECT`+coursePublicSelect+coursePublicFrom+`
 INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
-WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
+WHERE c.id IN (
+  SELECT e.course_id FROM course.course_enrollments e
+  WHERE e.user_id = $1
+    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+)
   AND c.archived = false
   AND c.term_id = $2
   AND ($3::text IS NULL OR c.grade_level = $3::text)
@@ -445,7 +459,11 @@ SELECT`+coursePublicSelect+coursePublicFrom+`
 INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
-WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
+WHERE c.id IN (
+  SELECT e.course_id FROM course.course_enrollments e
+  WHERE e.user_id = $1
+    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+)
   AND c.archived = false
   AND c.org_unit_id IS NOT NULL
   AND c.org_unit_id = ANY($2::uuid[])

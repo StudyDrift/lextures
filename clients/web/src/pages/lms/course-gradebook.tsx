@@ -390,7 +390,8 @@ export default function CourseGradebook() {
       students.map((s) => ({
         id: s.userId,
         name: s.displayName,
-        enrollmentId: enrollmentIdByUserId[s.userId],
+        enrollmentId: s.enrollmentId ?? enrollmentIdByUserId[s.userId],
+        state: s.state,
       })),
     [students, enrollmentIdByUserId],
   )

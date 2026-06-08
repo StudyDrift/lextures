@@ -120,6 +120,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/enrollments", d.handleCourseEnrollmentsPost())
 	r.Post("/api/v1/courses/{course_code}/enrollments/self-as-student", d.handleCourseEnrollmentsSelfStudent())
 	r.Patch("/api/v1/courses/{course_code}/enrollments/{enrollment_id}", d.handleCourseEnrollmentsPatch())
+	r.Patch("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/state", d.handleEnrollmentStatePatch())
+	r.Get("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/state/history", d.handleEnrollmentStateHistory())
 	r.Delete("/api/v1/courses/{course_code}/enrollments/{enrollment_id}", d.handleCourseEnrollmentsDelete())
 	r.Post("/api/v1/courses/{course_code}/enrollments/{enrollment_id}/message", d.handleCourseEnrollmentMessagePost())
 	r.Get("/api/v1/courses/{course_code}/enrollments", d.handleCourseEnrollmentsList())

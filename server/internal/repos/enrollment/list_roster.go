@@ -4,6 +4,7 @@ package enrollment
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,14 +12,17 @@ import (
 
 // RosterRow is one row for GET /api/v1/courses/{course}/enrollments.
 type RosterRow struct {
-	ID             uuid.UUID
-	UserID         uuid.UUID
-	DisplayName    *string
-	Role           string
-	RoleDisplay    *string
-	SectionID      *uuid.UUID
-	SectionCode    *string
-	SectionName    *string
+	ID               uuid.UUID
+	UserID           uuid.UUID
+	DisplayName      *string
+	Role             string
+	RoleDisplay      *string
+	SectionID        *uuid.UUID
+	SectionCode      *string
+	SectionName      *string
+	State            string
+	StateChangedAt   *time.Time
+	StateReason      *string
 }
 
 // ListRosterForCourse returns enrollments for a course code, ordered for UI.
@@ -32,13 +36,17 @@ SELECT
 	er.display_name,
 	ce.section_id,
 	cs.section_code,
-	cs.name
+	cs.name,
+	COALESCE(ce.state::text, 'active'),
+	ce.state_changed_at,
+	ce.state_reason
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
 LEFT JOIN course.enrollment_roles er ON er.role_key = ce.role
 LEFT JOIN course.course_sections cs ON cs.id = ce.section_id
-WHERE c.course_code = $1 AND ce.active
+WHERE c.course_code = $1
+  AND (ce.active OR ce.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 ORDER BY
 	CASE ce.role
 		WHEN 'owner' THEN 0
@@ -65,7 +73,10 @@ ORDER BY
 		var secID sql.NullString
 		var secCode, secName sql.NullString
 		var roleDisplay sql.NullString
-		if err := rows.Scan(&r.ID, &r.UserID, &display, &r.Role, &roleDisplay, &secID, &secCode, &secName); err != nil {
+		var stateStr string
+		var stateChanged sql.NullTime
+		var stateReason sql.NullString
+		if err := rows.Scan(&r.ID, &r.UserID, &display, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason); err != nil {
 			return nil, err
 		}
 		if display.Valid {
@@ -91,6 +102,15 @@ ORDER BY
 		if secName.Valid && secName.String != "" {
 			s := secName.String
 			r.SectionName = &s
+		}
+		r.State = stateStr
+		if stateChanged.Valid {
+			t := stateChanged.Time
+			r.StateChangedAt = &t
+		}
+		if stateReason.Valid && stateReason.String != "" {
+			s := stateReason.String
+			r.StateReason = &s
 		}
 		out = append(out, r)
 	}

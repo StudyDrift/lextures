@@ -344,6 +344,8 @@ export const courseGradebookGridResponseSchema = z.object({
     z.object({
       userId: z.string(),
       displayName: z.string(),
+      enrollmentId: z.string().optional(),
+      state: z.string().optional(),
     }),
   ),
   columns: z.array(courseGradebookGridColumnSchema),
