@@ -484,6 +484,8 @@ func Load() Config {
 		FFUiMode:                        boolEnv("FF_UI_MODE"),
 		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
 		FFPlagiarismChecks:              boolEnv("FF_PLAGIARISM_CHECKS"),
+		OriginalityDetectionEnabled:     boolEnv("ORIGINALITY_DETECTION_ENABLED"),
+		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
