@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/orgunit"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
@@ -109,6 +110,20 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 		}
 		if courses == nil {
 			courses = []course.CoursePublic{}
+		}
+		if d.Config.FFEnrollmentStateMachine {
+			for i := range courses {
+				st, changedAt, err := enrollment.ViewerStudentState(ctx, d.Pool, courses[i].CourseCode, userID)
+				if err != nil {
+					continue
+				}
+				s := string(st)
+				courses[i].ViewerEnrollmentState = &s
+				if changedAt != nil {
+					t := changedAt.UTC()
+					courses[i].ViewerEnrollmentStateChangedAt = &t
+				}
+			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(coursesListResponse{Courses: courses})

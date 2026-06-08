@@ -38,6 +38,7 @@ export type PlatformFeaturesSnapshot = {
   ffContentFilterIntegration?: boolean
   ffSisIntegration?: boolean
   ffCatalogIntegration?: boolean
+  ffEnrollmentStateMachine?: boolean
   ffUiMode?: boolean
 }
 
@@ -79,6 +80,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
   ffCatalogIntegration: false,
+  ffEnrollmentStateMachine: false,
   ffUiMode: false,
 }
 
@@ -197,6 +199,10 @@ export function uiModeFeatureEnabled(): boolean {
 
 export function catalogFeatureEnabled(): boolean {
   return loaded && snapshot.ffCatalogIntegration === true
+}
+
+export function enrollmentStateMachineFeatureEnabled(): boolean {
+  return loaded && snapshot.ffEnrollmentStateMachine === true
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */

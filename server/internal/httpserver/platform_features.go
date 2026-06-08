@@ -47,6 +47,7 @@ type platformFeaturesJSON struct {
 	FFContentFilterIntegration      bool `json:"ffContentFilterIntegration"`
 	FFSISIntegration                bool `json:"ffSisIntegration"`
 	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
+	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
 	FFUiMode                        bool `json:"ffUiMode"`
 }
 
@@ -91,6 +92,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFContentFilterIntegration:    cfg.FFContentFilterIntegration,
 		FFSISIntegration:              cfg.FFSISIntegration,
 		FFCatalogIntegration:          cfg.FFCatalogIntegration,
+		FFEnrollmentStateMachine:      cfg.FFEnrollmentStateMachine,
 		FFUiMode:                    cfg.FFUiMode,
 	}
 }

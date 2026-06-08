@@ -36,6 +36,8 @@ import {
 } from './compute-course-final-percent'
 import { GradebookTransposedTable } from './gradebook-grid-transposed'
 import type { AssignmentGroup } from '../../../lib/courses-api'
+import { EnrollmentStateBadge } from '../../../components/enrollment/enrollment-state-badge'
+import { isFormerEnrollmentState, type EnrollmentState } from '../../../lib/enrollment-state-api'
 import type { GradebookColumn, GradebookStudent } from './gradebook-grid-types'
 
 export type { GradebookColumn, GradebookStudent } from './gradebook-grid-types'
@@ -300,12 +302,22 @@ export function GradebookGrid({
   const [colorScaleEnabled, setColorScaleEnabled] = useState(false)
   const [transposed, setTransposed] = useState(false)
 
-  const baseRowCount = students.length
+  const rosterStudents = useMemo(
+    () => students.filter((s) => !isFormerEnrollmentState(s.state)),
+    [students],
+  )
+  const formerStudents = useMemo(
+    () => students.filter((s) => isFormerEnrollmentState(s.state)),
+    [students],
+  )
+  const [formerCollapsed, setFormerCollapsed] = useState(true)
+
+  const baseRowCount = rosterStudents.length
   const baseColCount = columns.length
 
   const sortedStudents = useMemo(() => {
-    if (!activeSort) return students
-    const copy = [...students]
+    if (!activeSort) return rosterStudents
+    const copy = [...rosterStudents]
     if (activeSort.kind === 'student') {
       copy.sort((a, b) => compareStudentsForSort(a, b, activeSort.mode) || a.id.localeCompare(b.id))
       return copy
@@ -316,7 +328,7 @@ export function GradebookGrid({
         a.id.localeCompare(b.id),
     )
     return copy
-  }, [students, activeSort, grades])
+  }, [rosterStudents, activeSort, grades])
 
   const studentFilterNorm = normalizeFilter(studentFilter)
   const assignmentFilterNorm = normalizeFilter(assignmentFilter)
@@ -1081,7 +1093,81 @@ export function GradebookGrid({
       ? `/courses/${encodeURIComponent(courseCode)}/enrollments`
       : undefined
 
-  if (baseRowCount === 0 && baseColCount === 0) {
+  const formerStudentsPanel =
+    formerStudents.length > 0 ? (
+      <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-start text-sm font-semibold text-slate-800 dark:text-neutral-100"
+          aria-expanded={!formerCollapsed}
+          onClick={() => setFormerCollapsed((v) => !v)}
+        >
+          <span className="inline-flex items-center gap-2">
+            <Users className="h-4 w-4 text-slate-500 dark:text-neutral-400" aria-hidden />
+            Former students ({formerStudents.length})
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 transition ${formerCollapsed ? '' : 'rotate-180'}`}
+            aria-hidden
+          />
+        </button>
+        {!formerCollapsed && (
+          <div className="overflow-auto border-t border-slate-200 dark:border-neutral-700">
+            <table className="w-full min-w-max border-collapse text-start text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800">
+                  <th scope="col" className="px-4 py-2 text-start font-medium text-slate-600 dark:text-neutral-300">
+                    Student
+                  </th>
+                  <th scope="col" className="px-4 py-2 text-start font-medium text-slate-600 dark:text-neutral-300">
+                    Status
+                  </th>
+                  {visibleColumns.slice(0, 4).map((col) => (
+                    <th
+                      key={col.id}
+                      scope="col"
+                      className="px-3 py-2 text-start font-medium text-slate-600 dark:text-neutral-300"
+                    >
+                      {col.title}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {formerStudents.map((student) => (
+                  <tr
+                    key={student.id}
+                    className="border-b border-slate-100 dark:border-neutral-800"
+                  >
+                    <td className="px-4 py-2 font-medium text-slate-900 dark:text-neutral-100">{student.name}</td>
+                    <td className="px-4 py-2">
+                      <EnrollmentStateBadge state={(student.state ?? 'withdrawn') as EnrollmentState} />
+                    </td>
+                    {visibleColumns.slice(0, 4).map((col) => {
+                      const raw = grades[student.id]?.[col.id] ?? ''
+                      return (
+                        <td
+                          key={col.id}
+                          className="px-3 py-2 text-slate-700 dark:text-neutral-300"
+                          aria-label={`${student.name} ${col.title} grade`}
+                        >
+                          {raw || '—'}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="px-4 py-2 text-xs text-slate-500 dark:text-neutral-400">
+              Former students are read-only; grades are retained for transcript history.
+            </p>
+          </div>
+        )}
+      </div>
+    ) : null
+
+  if (baseRowCount === 0 && baseColCount === 0 && formerStudents.length === 0) {
     return (
       <div className="mt-6">
         <EmptyState
@@ -1095,7 +1181,7 @@ export function GradebookGrid({
     )
   }
 
-  if (baseRowCount === 0) {
+  if (baseRowCount === 0 && formerStudents.length === 0) {
     return (
       <div className="mt-6">
         <EmptyState
@@ -1121,7 +1207,7 @@ export function GradebookGrid({
     )
   }
 
-  if (baseColCount === 0) {
+  if (baseColCount === 0 && baseRowCount > 0) {
     return (
       <div className="mt-6">
         <EmptyState
@@ -1132,6 +1218,10 @@ export function GradebookGrid({
         />
       </div>
     )
+  }
+
+  if (baseRowCount === 0 && formerStudents.length > 0) {
+    return <div className="mt-6 space-y-3">{formerStudentsPanel}</div>
   }
 
   return (
@@ -1741,6 +1831,8 @@ export function GradebookGrid({
           </table>
         </div>
       )}
+
+      {formerStudentsPanel}
 
       {headerMenu?.kind === 'student' && (
         <HeaderSortMenuPortal menu={headerMenu} onClose={closeHeaderMenu}>

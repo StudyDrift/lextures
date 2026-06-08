@@ -112,6 +112,7 @@ type platformSettingsJSON struct {
 	FFContentFilterIntegration      bool `json:"ffContentFilterIntegration"`
 	FFSISIntegration                bool `json:"ffSisIntegration"`
 	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
+	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -255,6 +256,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFContentFilterIntegration:      merged.FFContentFilterIntegration,
 				FFSISIntegration:                merged.FFSISIntegration,
 				FFCatalogIntegration:            merged.FFCatalogIntegration,
+				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -371,6 +373,7 @@ type putPlatformBody struct {
 	FFContentFilterIntegration      *bool `json:"ffContentFilterIntegration"`
 	FFSISIntegration                *bool `json:"ffSisIntegration"`
 	FFCatalogIntegration            *bool `json:"ffCatalogIntegration"`
+	FFEnrollmentStateMachine        *bool `json:"ffEnrollmentStateMachine"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -648,6 +651,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcontentfilterintegration", body.FFContentFilterIntegration, func(v bool) { wr.FFContentFilterIntegration = &v })
 		setBool("ffsisintegration", body.FFSISIntegration, func(v bool) { wr.FFSISIntegration = &v })
 		setBool("ffcatalogintegration", body.FFCatalogIntegration, func(v bool) { wr.FFCatalogIntegration = &v })
+		setBool("ffenrollmentstatemachine", body.FFEnrollmentStateMachine, func(v bool) { wr.FFEnrollmentStateMachine = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -747,6 +751,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFContentFilterIntegration:      merged.FFContentFilterIntegration,
 				FFSISIntegration:                merged.FFSISIntegration,
 				FFCatalogIntegration:            merged.FFCatalogIntegration,
+				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

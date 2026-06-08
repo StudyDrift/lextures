@@ -46,8 +46,10 @@ type gradebookGridColumn struct {
 // handleGradebookGrid is GET /api/v1/courses/{course_code}/gradebook/grid (Rust `gradebook_grid_get_handler`).
 func (d Deps) handleGradebookGrid() http.HandlerFunc {
 	type studentOut struct {
-		UserID      string `json:"userId"`
-		DisplayName string `json:"displayName"`
+		UserID       string  `json:"userId"`
+		EnrollmentID string  `json:"enrollmentId,omitempty"`
+		DisplayName  string  `json:"displayName"`
+		State        *string `json:"state,omitempty"`
 	}
 	type schemeSum struct {
 		Type      string          `json:"type"`
@@ -147,22 +149,50 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			crossListGroupID = &s
 			slog.Info("gradebook.cross_list", "cross_list_group_id", clGroup.ID.String(), "course_code", courseCode)
 		}
-		var stuRows []struct {
-			UserID      uuid.UUID
-			DisplayName string
+		cfg := d.effectiveConfig()
+		enrollmentLifecycle := cfg.FFEnrollmentStateMachine || d.Config.FFEnrollmentStateMachine
+		includeFormer := enrollmentLifecycle
+		if includeFormer {
+			q := strings.TrimSpace(strings.ToLower(r.URL.Query().Get("include_withdrawn")))
+			if q == "0" || q == "false" || q == "no" {
+				includeFormer = false
+			}
 		}
-		if len(sectionFilter) > 0 {
-			stuRows, err = enrollment.ListStudentUsersForCourseCode(r.Context(), d.Pool, courseCode, sectionFilter)
+		var gradebookStudents []enrollment.GradebookStudentRow
+		if enrollmentLifecycle {
+			gradebookStudents, err = enrollment.ListGradebookStudents(r.Context(), d.Pool, courseCode, sectionFilter, includeFormer)
+		} else if len(sectionFilter) > 0 {
+			legacy, lerr := enrollment.ListStudentUsersForCourseCode(r.Context(), d.Pool, courseCode, sectionFilter)
+			err = lerr
+			for _, s := range legacy {
+				gradebookStudents = append(gradebookStudents, enrollment.GradebookStudentRow{
+					UserID: s.UserID, DisplayName: s.DisplayName, State: "active",
+				})
+			}
 		} else {
-			stuRows, err = enrollment.ListStudentUsersForCourseCode(r.Context(), d.Pool, courseCode, nil)
+			legacy, lerr := enrollment.ListStudentUsersForCourseCode(r.Context(), d.Pool, courseCode, nil)
+			err = lerr
+			for _, s := range legacy {
+				gradebookStudents = append(gradebookStudents, enrollment.GradebookStudentRow{
+					UserID: s.UserID, DisplayName: s.DisplayName, State: "active",
+				})
+			}
 		}
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load students.")
 			return
 		}
-		students := make([]studentOut, 0, len(stuRows))
-		for _, s := range stuRows {
-			students = append(students, studentOut{UserID: s.UserID.String(), DisplayName: s.DisplayName})
+		students := make([]studentOut, 0, len(gradebookStudents))
+		for _, s := range gradebookStudents {
+			out := studentOut{UserID: s.UserID.String(), DisplayName: s.DisplayName}
+			if s.EnrollmentID != uuid.Nil {
+				out.EnrollmentID = s.EnrollmentID.String()
+			}
+			if enrollmentLifecycle {
+				st := string(s.State)
+				out.State = &st
+			}
+			students = append(students, out)
 		}
 
 		items, err := coursestructure.ListForCourseWithEnrichment(r.Context(), d.Pool, courseID, true)

@@ -670,14 +670,17 @@ func (d Deps) handleFeedMessagePost() http.HandlerFunc {
 
 func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 	type row struct {
-		ID           string  `json:"id"`
-		UserID       string  `json:"userId"`
-		DisplayName  *string `json:"displayName"`
-		Role         string  `json:"role"`
-		RoleDisplay  *string `json:"roleDisplay,omitempty"`
-		SectionID    *string `json:"sectionId,omitempty"`
-		SectionCode  *string `json:"sectionCode,omitempty"`
-		SectionName  *string `json:"sectionName,omitempty"`
+		ID             string  `json:"id"`
+		UserID         string  `json:"userId"`
+		DisplayName    *string `json:"displayName"`
+		Role           string  `json:"role"`
+		RoleDisplay    *string `json:"roleDisplay,omitempty"`
+		SectionID      *string `json:"sectionId,omitempty"`
+		SectionCode    *string `json:"sectionCode,omitempty"`
+		SectionName    *string `json:"sectionName,omitempty"`
+		State          *string `json:"state,omitempty"`
+		StateChangedAt *string `json:"stateChangedAt,omitempty"`
+		StateReason    *string `json:"stateReason,omitempty"`
 	}
 	type resp struct {
 		Enrollments []row `json:"enrollments"`
@@ -728,6 +731,15 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			}
 			if e.SectionName != nil {
 				r.SectionName = e.SectionName
+			}
+			if d.Config.FFEnrollmentStateMachine && e.State != "" {
+				s := e.State
+				r.State = &s
+				if e.StateChangedAt != nil {
+					ts := e.StateChangedAt.UTC().Format("2006-01-02T15:04:05Z07:00")
+					r.StateChangedAt = &ts
+				}
+				r.StateReason = e.StateReason
 			}
 			out = append(out, r)
 		}

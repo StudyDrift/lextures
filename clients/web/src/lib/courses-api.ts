@@ -181,6 +181,9 @@ export type CoursePublic = {
   orgId?: string
   /** Embedded term metadata when `termId` is set. */
   term?: TermSummary | null
+  /** HE enrollment lifecycle state for the viewer's student enrollment (plan 14.3). */
+  viewerEnrollmentState?: string | null
+  viewerEnrollmentStateChangedAt?: string | null
   /** What the course root shows: `data` overview, `calendar`, or `content_page`. */
   courseHomeLanding?: string
   /** When `courseHomeLanding` is `content_page`, the module item id. */
@@ -1580,6 +1583,8 @@ export async function fetchCourseStructure(courseCode: string): Promise<CourseSt
 export type CourseGradebookGridStudent = {
   userId: string
   displayName: string
+  enrollmentId?: string
+  state?: string
 }
 
 /** Assignment rubric: criteria with point-band levels (matches server `RubricDefinition`). */

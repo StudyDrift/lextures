@@ -52,6 +52,7 @@ export type PlatformFeatures = {
   ffContentFilterIntegration: boolean
   ffSisIntegration: boolean
   ffCatalogIntegration: boolean
+  ffEnrollmentStateMachine: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -94,6 +95,7 @@ const defaultFeatures: PlatformFeatures = {
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
   ffCatalogIntegration: false,
+  ffEnrollmentStateMachine: false,
   loading: true,
   refresh: async () => {},
 }
@@ -141,6 +143,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffContentFilterIntegration: false,
     ffSisIntegration: false,
     ffCatalogIntegration: false,
+    ffEnrollmentStateMachine: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -189,6 +192,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffContentFilterIntegration: data.ffContentFilterIntegration === true,
           ffSisIntegration: data.ffSisIntegration === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
+          ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
         }
         setFeatures({
           ...next,
@@ -204,6 +208,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffContentFilterIntegration: next.ffContentFilterIntegration === true,
           ffSisIntegration: next.ffSisIntegration === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
+          ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

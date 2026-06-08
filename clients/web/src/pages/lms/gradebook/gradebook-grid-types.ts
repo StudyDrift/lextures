@@ -21,4 +21,5 @@ export type GradebookStudent = {
   id: string
   name: string
   enrollmentId?: string
+  state?: string
 }

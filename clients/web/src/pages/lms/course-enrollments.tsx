@@ -40,7 +40,13 @@ import {
 import { notifyCourseViewerEnrollmentChanged, useCourseViewAs } from '../../lib/course-view-as'
 import { readApiErrorMessage } from '../../lib/errors'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
-import { toast } from '../../lib/lms-toast'
+import { toast, toastSaveOk } from '../../lib/lms-toast'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
+import {
+  patchEnrollmentState,
+  type EnrollmentState,
+} from '../../lib/enrollment-state-api'
 
 export type CourseEnrollment = {
   id: string
@@ -53,6 +59,9 @@ export type CourseEnrollment = {
   sectionId?: string | null
   sectionCode?: string | null
   sectionName?: string | null
+  state?: EnrollmentState | null
+  stateChangedAt?: string | null
+  stateReason?: string | null
 }
 
 /** Blurred dim backdrop for roster modals (Escape closes in the keydown effect below). */
@@ -96,6 +105,7 @@ function enrollmentRoleRank(role: string): number {
 
 export default function CourseEnrollments() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const { ffEnrollmentStateMachine } = usePlatformFeatures()
   const courseViewPreview = useCourseViewAs(courseCode)
   const { allows, loading: permLoading, refresh: refreshPermissions } = usePermissions()
   const canUpdateEnrollments = usePermission(
@@ -131,6 +141,11 @@ export default function CourseEnrollments() {
   const [selfStudentMessage, setSelfStudentMessage] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<string | null>(null)
   const [editTarget, setEditTarget] = useState<CourseEnrollment | null>(null)
+  const [stateChangeTarget, setStateChangeTarget] = useState<CourseEnrollment | null>(null)
+  const [stateChangeValue, setStateChangeValue] = useState<EnrollmentState>('active')
+  const [stateChangeReason, setStateChangeReason] = useState('')
+  const [stateChangeStatus, setStateChangeStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [stateChangeMessage, setStateChangeMessage] = useState<string | null>(null)
   /** When set, POST /enrollments uses `courseRole` instead of a course-scoped app role. */
   const [addCourseRole, setAddCourseRole] = useState('')
   const [editBuiltinCourseRole, setEditBuiltinCourseRole] = useState('')
@@ -330,6 +345,29 @@ export default function CourseEnrollments() {
             if (groupSetId && groupId) groupMemberships.push({ groupSetId, groupId })
           }
         }
+        const stateRaw = typeof o.state === 'string' ? o.state : null
+        const state =
+          stateRaw === 'active' ||
+          stateRaw === 'waitlist' ||
+          stateRaw === 'dropped' ||
+          stateRaw === 'withdrawn' ||
+          stateRaw === 'audit' ||
+          stateRaw === 'no_credit' ||
+          stateRaw === 'incomplete'
+            ? stateRaw
+            : null
+        const stateChangedAt =
+          typeof o.stateChangedAt === 'string'
+            ? o.stateChangedAt
+            : typeof o.state_changed_at === 'string'
+              ? o.state_changed_at
+              : null
+        const stateReason =
+          typeof o.stateReason === 'string'
+            ? o.stateReason
+            : typeof o.state_reason === 'string'
+              ? o.state_reason
+              : null
         return {
           id,
           userId,
@@ -340,6 +378,9 @@ export default function CourseEnrollments() {
           sectionId,
           sectionCode,
           sectionName,
+          state,
+          stateChangedAt,
+          stateReason,
           ...(groupMemberships?.length ? { groupMemberships } : {}),
         }
       })
@@ -351,6 +392,26 @@ export default function CourseEnrollments() {
       setError('Could not load enrollments.')
     }
   }, [courseCode])
+
+  const submitStateChange = useCallback(async () => {
+    if (!courseCode || !stateChangeTarget) return
+    setStateChangeStatus('loading')
+    setStateChangeMessage(null)
+    try {
+      await patchEnrollmentState(courseCode, stateChangeTarget.id, {
+        state: stateChangeValue,
+        reason: stateChangeReason.trim() || undefined,
+      })
+      setStateChangeTarget(null)
+      setStateChangeReason('')
+      setStateChangeStatus('idle')
+      await loadEnrollments()
+      toastSaveOk('Enrollment status updated.')
+    } catch (err) {
+      setStateChangeStatus('error')
+      setStateChangeMessage(err instanceof Error ? err.message : 'Could not update status.')
+    }
+  }, [courseCode, stateChangeTarget, stateChangeValue, stateChangeReason, loadEnrollments])
 
   useEffect(() => {
     if (!courseCode || permLoading) return
@@ -922,6 +983,7 @@ export default function CourseEnrollments() {
               <tr className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3">Name</th>
                 <th className="px-4 py-3">Role</th>
+                {ffEnrollmentStateMachine ? <th className="px-4 py-3">Status</th> : null}
                 {sectionsEnabled ? <th className="px-4 py-3">Section</th> : null}
                 <th className="px-4 py-3">Last access</th>
                 {showActionsColumn && (
@@ -949,6 +1011,8 @@ export default function CourseEnrollments() {
                   canMessageEnrollments &&
                   viewerUserId != null &&
                   e.userId !== viewerUserId
+                const showStateChange =
+                  ffEnrollmentStateMachine && canUpdateEnrollments && er === 'student'
                 return (
                   <tr
                     key={e.id}
@@ -981,6 +1045,14 @@ export default function CourseEnrollments() {
                     <td className="px-4 py-3 text-slate-700">
                       <EnrollmentRoleBadge courseRoleKey={e.role} roleDisplay={e.roleDisplay} />
                     </td>
+                    {ffEnrollmentStateMachine ? (
+                      <td className="px-4 py-3 text-slate-700">
+                        <EnrollmentStateBadge
+                          state={e.state ?? 'active'}
+                          changedAt={e.stateChangedAt}
+                        />
+                      </td>
+                    ) : null}
                     {sectionsEnabled ? (
                       <td className="px-4 py-3 text-slate-600">
                         {e.sectionCode?.trim()
@@ -1001,7 +1073,8 @@ export default function CourseEnrollments() {
                         showSectionTransfer ||
                         showGradebook ||
                         showReport ||
-                        showMessage ? (
+                        showMessage ||
+                        showStateChange ? (
                           <div className="inline-flex items-center justify-end gap-0.5">
                             {showSectionTransfer ? (
                               <IconActionTooltip label="Change section">
@@ -1054,6 +1127,24 @@ export default function CourseEnrollments() {
                                   aria-label={`Send message to ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Mail className="h-4 w-4" aria-hidden />
+                                </button>
+                              </IconActionTooltip>
+                            ) : null}
+                            {showStateChange ? (
+                              <IconActionTooltip label="Change enrollment status">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setStateChangeTarget(e)
+                                    setStateChangeValue(e.state ?? 'active')
+                                    setStateChangeReason('')
+                                    setStateChangeStatus('idle')
+                                    setStateChangeMessage(null)
+                                  }}
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  aria-label={`Change enrollment status for ${e.displayName?.trim() || 'this student'}`}
+                                >
+                                  <ClipboardList className="h-4 w-4" aria-hidden />
                                 </button>
                               </IconActionTooltip>
                             ) : null}
@@ -1646,6 +1737,84 @@ export default function CourseEnrollments() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {stateChangeTarget && (
+        <div className={LMS_MODAL_OVERLAY_CLASS} role="presentation" onClick={() => setStateChangeTarget(null)}>
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="enrollment-state-dialog-title"
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-neutral-700 dark:bg-neutral-900"
+            onClick={(ev) => ev.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <h2 id="enrollment-state-dialog-title" className="text-lg font-semibold text-slate-900 dark:text-neutral-100">
+                Change enrollment status
+              </h2>
+              <button
+                type="button"
+                className="rounded-lg p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-neutral-800"
+                aria-label="Close"
+                onClick={() => setStateChangeTarget(null)}
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+              {stateChangeTarget.displayName?.trim() || 'Student'}
+            </p>
+            <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="enrollment-state-select">
+              Status
+            </label>
+            <select
+              id="enrollment-state-select"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              value={stateChangeValue}
+              onChange={(ev) => setStateChangeValue(ev.target.value as EnrollmentState)}
+            >
+              <option value="active">Active</option>
+              <option value="waitlist">Waitlisted</option>
+              <option value="dropped">Dropped</option>
+              <option value="withdrawn">Withdrawn</option>
+              <option value="audit">Audit</option>
+              <option value="no_credit">No Credit</option>
+              <option value="incomplete">Incomplete</option>
+            </select>
+            <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-300" htmlFor="enrollment-state-reason">
+              Reason (optional)
+            </label>
+            <textarea
+              id="enrollment-state-reason"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-800"
+              rows={3}
+              value={stateChangeReason}
+              onChange={(ev) => setStateChangeReason(ev.target.value)}
+            />
+            {stateChangeMessage ? (
+              <p className="mt-3 text-sm text-rose-700" role="alert">
+                {stateChangeMessage}
+              </p>
+            ) : null}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+                onClick={() => setStateChangeTarget(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                disabled={stateChangeStatus === 'loading'}
+                onClick={() => void submitStateChange()}
+              >
+                {stateChangeStatus === 'loading' ? 'Saving…' : 'Save status'}
+              </button>
+            </div>
           </div>
         </div>
       )}

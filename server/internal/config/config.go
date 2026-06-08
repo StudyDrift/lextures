@@ -292,6 +292,8 @@ type Config struct {
 	FFSISIntegration bool
 	// FFCatalogIntegration enables HE course catalog browse, registration status, and SIS catalog sync (plan 14.2).
 	FFCatalogIntegration bool
+	// FFEnrollmentStateMachine enables HE enrollment lifecycle states (W/AU/I/NC) and state history (plan 14.3).
+	FFEnrollmentStateMachine bool
 	// FFLibrary enables the school library catalog, student reading log, and reading dashboard (plan 13.8).
 	FFLibrary bool
 	// FFBroadcasts enables district/school broadcast messages and emergency acknowledgement (plan 13.10).
@@ -468,6 +470,7 @@ func Load() Config {
 		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
 		FFSISIntegration:                boolEnv("FF_SIS_INTEGRATION"),
 		FFCatalogIntegration:            boolEnv("FF_CATALOG_INTEGRATION"),
+		FFEnrollmentStateMachine:        boolEnv("FF_ENROLLMENT_STATE_MACHINE"),
 		FFLibrary:                       boolEnv("FF_LIBRARY"),
 		FFBroadcasts:                    boolEnv("FF_BROADCASTS"),
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),

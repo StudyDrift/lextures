@@ -108,6 +108,22 @@ describe('GradebookGrid — accessibility', () => {
     expect(cells.length).toBeGreaterThanOrEqual(students.length * (1 + columns.length))
   })
 
+  it('shows former students panel when all roster students are withdrawn', () => {
+    render(
+      <MemoryRouter>
+        <UiDensityProvider>
+          <GradebookGrid
+            columns={columns}
+            students={[{ id: 's1', name: 'Alice Smith', state: 'withdrawn' }]}
+            initialGrades={{ s1: { a1: '90', a2: '45' } }}
+          />
+        </UiDensityProvider>
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole('button', { name: /former students \(1\)/i })).toBeInTheDocument()
+    expect(screen.queryByText(/no students in this course yet/i)).not.toBeInTheDocument()
+  })
+
   it('toggles transposed layout when Transpose is clicked', async () => {
     const user = userEvent.setup()
     renderGrid()
