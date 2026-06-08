@@ -5779,3 +5779,84 @@ export async function deleteWhiteboard(courseCode: string, boardId: string): Pro
     throw new Error(readApiErrorMessage(raw))
   }
 }
+
+// ── Final Grade Submission (plan 14.5) ──────────────────────────────────────
+
+export type FinalGradeStudentRow = {
+  userId: string
+  enrollmentId: string
+  displayName: string
+  externalSisId: string
+  state: string
+  computedGrade: string
+  finalGrade: string
+  alreadySubmitted: boolean
+}
+
+export type FinalGradesPreviewResponse = {
+  grades: FinalGradeStudentRow[]
+  exportUrl: string
+}
+
+export type FinalGradeOverride = {
+  enrollmentId: string
+  finalGrade: string
+  overrideReason?: string
+}
+
+export type FinalGradeSubmitRequest = {
+  method: 'csv' | 'ags'
+  overrides: FinalGradeOverride[]
+}
+
+export type FinalGradeSubmitResponse = {
+  downloadUrl: string
+  count: number
+}
+
+export type CourseGradeSubmissionStatus = {
+  courseId: string
+  courseCode: string
+  courseTitle: string
+  submittedAt: string | null
+  submittedBy: string | null
+  count: number
+}
+
+export async function fetchFinalGradesPreview(courseCode: string): Promise<FinalGradesPreviewResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/final-grades/preview`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as FinalGradesPreviewResponse
+}
+
+export async function submitFinalGrades(
+  courseCode: string,
+  body: FinalGradeSubmitRequest,
+): Promise<FinalGradeSubmitResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/final-grades/submit`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as FinalGradeSubmitResponse
+}
+
+export async function fetchAdminGradeSubmissionStatus(
+  termId: string,
+): Promise<CourseGradeSubmissionStatus[]> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/final-grades/status?term_id=${encodeURIComponent(termId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const payload = raw as { courses: CourseGradeSubmissionStatus[] }
+  return payload.courses ?? []
+}

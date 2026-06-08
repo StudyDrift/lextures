@@ -113,6 +113,7 @@ type platformSettingsJSON struct {
 	FFSISIntegration                bool `json:"ffSisIntegration"`
 	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
+	FFGradeSubmission               bool `json:"ffGradeSubmission"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -257,6 +258,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFSISIntegration:                merged.FFSISIntegration,
 				FFCatalogIntegration:            merged.FFCatalogIntegration,
 				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
+				FFGradeSubmission:               merged.FFGradeSubmission,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -374,6 +376,7 @@ type putPlatformBody struct {
 	FFSISIntegration                *bool `json:"ffSisIntegration"`
 	FFCatalogIntegration            *bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        *bool `json:"ffEnrollmentStateMachine"`
+	FFGradeSubmission               *bool `json:"ffGradeSubmission"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -652,6 +655,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffsisintegration", body.FFSISIntegration, func(v bool) { wr.FFSISIntegration = &v })
 		setBool("ffcatalogintegration", body.FFCatalogIntegration, func(v bool) { wr.FFCatalogIntegration = &v })
 		setBool("ffenrollmentstatemachine", body.FFEnrollmentStateMachine, func(v bool) { wr.FFEnrollmentStateMachine = &v })
+		setBool("ffgradesubmission", body.FFGradeSubmission, func(v bool) { wr.FFGradeSubmission = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -752,6 +756,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFSISIntegration:                merged.FFSISIntegration,
 				FFCatalogIntegration:            merged.FFCatalogIntegration,
 				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
+				FFGradeSubmission:               merged.FFGradeSubmission,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

@@ -49,6 +49,7 @@ type platformFeaturesJSON struct {
 	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
 	FFUiMode                        bool `json:"ffUiMode"`
+	FFGradeSubmission               bool `json:"ffGradeSubmission"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -94,6 +95,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFCatalogIntegration:          cfg.FFCatalogIntegration,
 		FFEnrollmentStateMachine:      cfg.FFEnrollmentStateMachine,
 		FFUiMode:                    cfg.FFUiMode,
+		FFGradeSubmission:           cfg.FFGradeSubmission,
 	}
 }
 

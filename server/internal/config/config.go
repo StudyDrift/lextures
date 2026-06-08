@@ -308,6 +308,8 @@ type Config struct {
 	FFContentFilterIntegration bool
 	// FFUiMode enables age-appropriate UI modes: K-2, elementary, and secondary (plan 13.11).
 	FFUiMode bool
+	// FFGradeSubmission enables the final grade roll-up, review-and-confirm step, and SIS export (plan 14.5).
+	FFGradeSubmission bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -475,6 +477,7 @@ func Load() Config {
 		FFBroadcasts:                    boolEnv("FF_BROADCASTS"),
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
 		FFUiMode:                        boolEnv("FF_UI_MODE"),
+		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
