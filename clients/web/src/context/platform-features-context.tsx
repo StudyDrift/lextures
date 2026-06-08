@@ -50,6 +50,7 @@ export type PlatformFeatures = {
   ffConferenceScheduling: boolean
   ffDemographics: boolean
   ffContentFilterIntegration: boolean
+  ffSisIntegration: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -90,6 +91,7 @@ const defaultFeatures: PlatformFeatures = {
   ffConferenceScheduling: false,
   ffDemographics: false,
   ffContentFilterIntegration: false,
+  ffSisIntegration: false,
   loading: true,
   refresh: async () => {},
 }
@@ -135,6 +137,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffConferenceScheduling: false,
     ffDemographics: false,
     ffContentFilterIntegration: false,
+    ffSisIntegration: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -181,6 +184,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffConferenceScheduling: data.ffConferenceScheduling === true,
           ffDemographics: data.ffDemographics === true,
           ffContentFilterIntegration: data.ffContentFilterIntegration === true,
+          ffSisIntegration: data.ffSisIntegration === true,
         }
         setFeatures({
           ...next,
@@ -194,6 +198,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffConferenceScheduling: next.ffConferenceScheduling === true,
           ffDemographics: next.ffDemographics === true,
           ffContentFilterIntegration: next.ffContentFilterIntegration === true,
+          ffSisIntegration: next.ffSisIntegration === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

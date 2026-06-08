@@ -45,6 +45,7 @@ type platformFeaturesJSON struct {
 	FFConferenceScheduling          bool `json:"ffConferenceScheduling"`
 	FFDemographics                  bool `json:"ffDemographics"`
 	FFContentFilterIntegration      bool `json:"ffContentFilterIntegration"`
+	FFSISIntegration                bool `json:"ffSisIntegration"`
 	FFUiMode                        bool `json:"ffUiMode"`
 }
 
@@ -87,6 +88,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFConferenceScheduling:        cfg.FFConferenceScheduling,
 		FFDemographics:                cfg.FFDemographics,
 		FFContentFilterIntegration:    cfg.FFContentFilterIntegration,
+		FFSISIntegration:              cfg.FFSISIntegration,
 		FFUiMode:                    cfg.FFUiMode,
 	}
 }
