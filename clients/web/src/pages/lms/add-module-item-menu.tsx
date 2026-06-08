@@ -29,6 +29,8 @@ type AddModuleItemMenuProps = {
   oerLibraryEnabled?: boolean
   disabled?: boolean
   h5pEnabled?: boolean
+  /** When false, LTI tool is shown disabled (no registered external tools). */
+  ltiToolsAvailable?: boolean
 }
 
 export function AddModuleItemMenu({
@@ -37,6 +39,7 @@ export function AddModuleItemMenu({
   oerLibraryEnabled = false,
   disabled,
   h5pEnabled,
+  ltiToolsAvailable = true,
 }: AddModuleItemMenuProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -218,8 +221,12 @@ export function AddModuleItemMenu({
           <button
             type="button"
             role="menuitem"
-            onClick={() => pick('lti_link')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            disabled={!ltiToolsAvailable}
+            onClick={() => {
+              if (!ltiToolsAvailable) return
+              pick('lti_link')
+            }}
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-200/90 bg-purple-50 text-purple-800 dark:border-purple-500/40 dark:bg-purple-950 dark:text-purple-200">
               <Plug className="h-4 w-4" aria-hidden />
@@ -227,7 +234,9 @@ export function AddModuleItemMenu({
             <span className="min-w-0 flex flex-col gap-0.5">
               <span className="font-semibold text-slate-950 dark:text-neutral-100">LTI tool</span>
               <span className="text-xs text-slate-500 dark:text-neutral-400">
-                Embedded publisher or external LTI 1.3 tool
+                {ltiToolsAvailable
+                  ? 'Embedded publisher or external LTI 1.3 tool'
+                  : 'No LTI tools registered — add under Settings → LTI tools'}
               </span>
             </span>
           </button>

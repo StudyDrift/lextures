@@ -19,6 +19,17 @@ export { BlockFloatingToolbar } from './block-floating-toolbar'
 export type { BlockFloatingToolbarProps } from './block-floating-toolbar'
 export { BlockFrame } from './block-frame'
 export type { BlockFrameProps } from './block-frame'
+export { CaretAnchoredToolbarPortal } from './caret-anchored-toolbar-portal'
+export type { CaretAnchoredToolbarPortalProps } from './caret-anchored-toolbar-portal'
+export {
+  clampCenteredToolbarLeft,
+  resolveCaretAnchoredPosition,
+  useCaretAnchoredPosition,
+  CARET_TOOLBAR_GAP,
+  CARET_TOOLBAR_HEIGHT,
+  CARET_VIEWPORT_INSET,
+} from './use-caret-anchored-position'
+export type { CaretAnchoredPosition } from './use-caret-anchored-position'
 export { EditorSidebar } from './editor-sidebar'
 export type { EditorSidebarProps, EditorSidebarTab } from './editor-sidebar'
 export { SidebarSection } from './sidebar-section'

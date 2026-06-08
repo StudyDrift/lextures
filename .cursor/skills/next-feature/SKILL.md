@@ -1,6 +1,7 @@
 ---
 name: Next Feature 
 description: Use this when the next feature needs to be implemented.
+disable-model-invocation: true
 ---
 
 You are to complete the following steps in order:
@@ -10,5 +11,6 @@ You are to complete the following steps in order:
  4. Make sure it's linted and all lintes pass locally.
  5. Make sure there are e2e tests to prove that this works. Make sure the tests pass locally.
  6. Move it to docs/completed once completed. Once the folder is empty, delete the folder.
- 7. Submit a pull request and be sure to include a screen capture of the feature working.
- 8. Run the /fix-ci to ensure the CI pipeline succeeds.
+ 7. Verify and fix any merge conflicts with /fix-merge-conflicts skill
+ 8. Submit a pull request and be sure to include a screen capture of the feature working.
+ 9. Run the /fix-ci to ensure the CI pipeline succeeds.

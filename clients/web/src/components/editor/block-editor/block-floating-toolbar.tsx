@@ -13,6 +13,8 @@ export type BlockFloatingToolbarProps = {
   onRemove?: () => void
   removeLabel?: string
   disabled?: boolean
+  /** When true, omits outer chrome for use inside a parent card (e.g. generate panel stack). */
+  embedded?: boolean
   /** Extra controls (e.g. formatting) before remove. */
   children?: ReactNode
 }
@@ -30,12 +32,18 @@ export function BlockFloatingToolbar({
   onRemove,
   removeLabel = 'Remove block',
   disabled,
+  embedded = false,
   children,
 }: BlockFloatingToolbarProps) {
   return (
     <div
       data-toolbar-anchor
-      className="pointer-events-auto flex h-9 max-w-[min(100vw-2rem,520px)] flex-wrap items-center gap-0.5 rounded-md border border-slate-200 bg-white px-1 py-0.5 shadow-md shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40 sm:max-w-none sm:flex-nowrap"
+      className={[
+        'pointer-events-auto flex h-9 w-max max-w-[calc(100vw-2rem)] items-center gap-0.5 px-1 py-0.5',
+        embedded
+          ? 'w-full rounded-none border-0 bg-transparent shadow-none'
+          : 'rounded-md border border-slate-200 bg-white shadow-md shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40',
+      ].join(' ')}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
       role="toolbar"

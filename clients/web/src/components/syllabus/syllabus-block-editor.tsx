@@ -16,6 +16,7 @@ import {
   BlockEditorShell,
   BlockFloatingToolbar,
   BlockFrame,
+  CaretAnchoredToolbarPortal,
   EditorSidebar,
   MarkdownBodyEditor,
   MarkdownFormatToolbar,
@@ -447,8 +448,10 @@ function SyllabusBlockEditorInner({
     [altTextOn],
   )
 
+  const [editorVersion, setEditorVersion] = useState(0)
   const handleEditorChange = useCallback((sectionId: string, editor: Editor | null) => {
     editorRefs.current[sectionId] = editor
+    setEditorVersion((v) => v + 1)
   }, [])
 
   const insertImagesIntoSection = useCallback(
@@ -603,13 +606,122 @@ function SyllabusBlockEditorInner({
     }
   }
 
-  function renderToolbar(section: SyllabusSection, index: number) {
+  const caretAnchoredSectionIndex = useMemo(() => {
+    if (!showMarkdownToolbar || !selectedId) return -1
+    return sections.findIndex((s) => s.id === selectedId)
+  }, [showMarkdownToolbar, selectedId, sections])
+
+  const caretAnchoredEditor = useMemo(() => {
+    if (caretAnchoredSectionIndex < 0 || !selectedId) return null
+    void editorVersion
+    return editorRefs.current[selectedId] ?? null
+  }, [caretAnchoredSectionIndex, selectedId, editorVersion])
+
+  function renderGeneratePanel(
+    section: SyllabusSection,
+    index: number,
+    placement: 'inline' | 'anchored' = 'inline',
+  ) {
+    if (!courseCode) return null
+
+    const inputClassName = [
+      'w-full py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none disabled:opacity-60 dark:text-neutral-100 dark:placeholder:text-neutral-500',
+      placement === 'anchored'
+        ? 'border-0 bg-transparent px-2 focus:ring-0'
+        : 'rounded-md border border-slate-200 bg-white px-2.5 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 dark:border-neutral-600 dark:bg-neutral-950 dark:focus:border-indigo-500 dark:focus:ring-indigo-500',
+      generateSubmittingId === section.id ? (placement === 'anchored' ? 'ps-2 pe-14' : 'ps-2.5 pe-14') : placement === 'anchored' ? 'px-2' : 'px-2.5',
+    ].join(' ')
+
+    const panel = (
+      <>
+        <label htmlFor={`section-generate-input-${section.id}`} className="sr-only">
+          Instructions for generated section content
+        </label>
+        <div className="relative">
+          <input
+            ref={generateInputRef}
+            id={`section-generate-input-${section.id}`}
+            type="text"
+            value={generateInstructions}
+            maxLength={MAX_SECTION_GENERATE_INSTRUCTIONS}
+            disabled={disabled || generateSubmittingId === section.id}
+            onChange={(e) => setGenerateInstructions(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                void submitGenerate(section, index)
+              }
+              if (e.key === 'Escape') {
+                e.stopPropagation()
+                setGenerateSectionId(null)
+                setGenerateInstructions('')
+                setGenerateError(null)
+              }
+            }}
+            placeholder={
+              generateSubmittingId === section.id
+                ? 'Generating…'
+                : 'Describe what this section should say… (Enter to generate)'
+            }
+            className={inputClassName}
+            aria-busy={generateSubmittingId === section.id ? true : undefined}
+          />
+          {generateSubmittingId === section.id ? (
+            <div
+              className="pointer-events-none absolute inset-y-0 end-1.5 flex items-center justify-end pe-[5px]"
+              role="status"
+              aria-live="polite"
+              aria-label="Generating section"
+            >
+              <div className="translate-y-[10px]">
+                <div className="inline-flex shrink-0 origin-center scale-[0.32]">
+                  <BookLoader />
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </div>
+        {generateError ? (
+          <p className={`text-xs text-rose-600 dark:text-rose-400 ${placement === 'anchored' ? 'px-2 pb-1.5 pt-0.5' : 'mt-1.5'}`}>
+            {generateError}
+          </p>
+        ) : null}
+      </>
+    )
+
+    if (placement === 'anchored') {
+      return (
+        <div
+          id={`section-generate-${section.id}`}
+          data-generate-anchor
+          className="border-t border-slate-200 py-1 dark:border-neutral-600"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {panel}
+        </div>
+      )
+    }
+
+    return (
+      <div
+        id={`section-generate-${section.id}`}
+        data-generate-anchor
+        className="mb-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900/40"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {panel}
+      </div>
+    )
+  }
+
+  function renderToolbar(section: SyllabusSection, index: number, embedded = false) {
     const showMarkdownTools = showMarkdownToolbar && selectedId === section.id
     const label = showMarkdownTools ? 'Markdown' : 'Section'
     const genBusy = generateSubmittingId === section.id
 
     return (
       <BlockFloatingToolbar
+        embedded={embedded}
         icon={<FileText className="h-4 w-4" />}
         label={label}
         onMoveUp={() => move(index, -1)}
@@ -755,71 +867,35 @@ function SyllabusBlockEditorInner({
         {altTextOn ? (
           <AltTextWarningBanner coverage={altCoverage} hardBlock={altTextHardBlock} />
         ) : null}
-        {sections.map((section, index) => (
-          <BlockFrame key={section.id} blockId={section.id} toolbar={renderToolbar(section, index)}>
+        {caretAnchoredSectionIndex >= 0 ? (
+          <CaretAnchoredToolbarPortal editor={caretAnchoredEditor} enabled>
+            {generateSectionId === selectedId ? (
+              <div className="flex w-max max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40">
+                {renderToolbar(sections[caretAnchoredSectionIndex]!, caretAnchoredSectionIndex, true)}
+                {renderGeneratePanel(
+                  sections[caretAnchoredSectionIndex]!,
+                  caretAnchoredSectionIndex,
+                  'anchored',
+                )}
+              </div>
+            ) : (
+              renderToolbar(sections[caretAnchoredSectionIndex]!, caretAnchoredSectionIndex)
+            )}
+          </CaretAnchoredToolbarPortal>
+        ) : null}
+        {sections.map((section, index) => {
+          const caretAnchored = caretAnchoredSectionIndex === index
+          return (
+          <BlockFrame
+            key={section.id}
+            blockId={section.id}
+            toolbar={caretAnchored ? undefined : renderToolbar(section, index)}
+            inlineToolbar={!caretAnchored}
+          >
             <div className="pb-8 pt-0.5">
-              {generateSectionId === section.id && courseCode ? (
-                <div
-                  id={`section-generate-${section.id}`}
-                  className="mb-3 rounded-lg border border-slate-200 bg-slate-50/80 px-3 py-2 dark:border-neutral-600 dark:bg-neutral-900/40"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <label htmlFor={`section-generate-input-${section.id}`} className="sr-only">
-                    Instructions for generated section content
-                  </label>
-                  <div className="relative">
-                    <input
-                      ref={generateInputRef}
-                      id={`section-generate-input-${section.id}`}
-                      type="text"
-                      value={generateInstructions}
-                      maxLength={MAX_SECTION_GENERATE_INSTRUCTIONS}
-                      disabled={disabled || generateSubmittingId === section.id}
-                      onChange={(e) => setGenerateInstructions(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault()
-                          void submitGenerate(section, index)
-                        }
-                        if (e.key === 'Escape') {
-                          e.stopPropagation()
-                          setGenerateSectionId(null)
-                          setGenerateInstructions('')
-                          setGenerateError(null)
-                        }
-                      }}
-                      placeholder={
-                        generateSubmittingId === section.id
-                          ? 'Generating…'
-                          : 'Describe what this section should say… (Enter to generate)'
-                      }
-                      className={[
-                        'w-full rounded-md border border-slate-200 bg-white py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500 dark:focus:ring-indigo-500',
-                        generateSubmittingId === section.id ? 'ps-2.5 pe-14' : 'px-2.5',
-                      ].join(' ')}
-                      aria-busy={generateSubmittingId === section.id ? true : undefined}
-                    />
-                    {generateSubmittingId === section.id ? (
-                      <div
-                        className="pointer-events-none absolute inset-y-0 end-1.5 flex items-center justify-end pe-[5px]"
-                        role="status"
-                        aria-live="polite"
-                        aria-label="Generating section"
-                      >
-                        {/* Loader paint extends above its layout box; nudge down for optical vertical center in the input */}
-                        <div className="translate-y-[10px]">
-                          <div className="inline-flex shrink-0 origin-center scale-[0.32]">
-                            <BookLoader />
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                  {generateError ? (
-                    <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{generateError}</p>
-                  ) : null}
-                </div>
-              ) : null}
+              {generateSectionId === section.id && courseCode && !caretAnchored
+                ? renderGeneratePanel(section, index)
+                : null}
               <label className="sr-only" htmlFor={`canvas-heading-${section.id}`}>
                 Section heading (optional)
               </label>
@@ -855,6 +931,7 @@ function SyllabusBlockEditorInner({
                   onBlur={(e) => {
                     const next = e.relatedTarget as HTMLElement | null
                     if (next?.closest('[data-toolbar-anchor]')) return
+                    if (next?.closest('[data-generate-anchor]')) return
                     requestAnimationFrame(() => {
                       setActiveField((prev) =>
                         prev?.blockId === section.id && prev.field === 'markdown' ? null : prev,
@@ -882,7 +959,8 @@ function SyllabusBlockEditorInner({
               </div>
             </div>
           </BlockFrame>
-        ))}
+          )
+        })}
 
         <BlockInsertionRow onAdd={addSection} disabled={disabled} />
       </BlockCanvas>
