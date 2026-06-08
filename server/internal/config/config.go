@@ -312,6 +312,8 @@ type Config struct {
 	FFUiMode bool
 	// FFGradeSubmission enables the final grade roll-up, review-and-confirm step, and SIS export (plan 14.5).
 	FFGradeSubmission bool
+	// FFCourseEvaluations enables anonymous end-of-term course evaluations (plan 14.7).
+	FFCourseEvaluations bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -481,6 +483,7 @@ func Load() Config {
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
 		FFUiMode:                        boolEnv("FF_UI_MODE"),
 		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
+		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
