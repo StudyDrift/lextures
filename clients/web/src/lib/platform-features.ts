@@ -41,6 +41,7 @@ export type PlatformFeaturesSnapshot = {
   ffEnrollmentStateMachine?: boolean
   ffIncompleteGradeWorkflow?: boolean
   ffUiMode?: boolean
+  ffGradeSubmission?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -84,6 +85,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffEnrollmentStateMachine: false,
   ffIncompleteGradeWorkflow: false,
   ffUiMode: false,
+  ffGradeSubmission: false,
 }
 
 let loaded = false
@@ -205,6 +207,10 @@ export function catalogFeatureEnabled(): boolean {
 
 export function enrollmentStateMachineFeatureEnabled(): boolean {
   return loaded && snapshot.ffEnrollmentStateMachine === true
+}
+
+export function finalGradeSubmissionFeatureEnabled(): boolean {
+  return loaded && snapshot.ffGradeSubmission === true
 }
 
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {

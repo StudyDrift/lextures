@@ -89,6 +89,8 @@ import LibraryCatalogPage from './pages/lms/library-catalog-page'
 import ReadingLogPage from './pages/lms/reading-log-page'
 import ReadingDashboardPage from './pages/lms/reading-dashboard-page'
 import CourseWhiteboardPage from './pages/lms/course-whiteboard-page'
+import FinalGradeSubmission from './pages/lms/final-grade-submission'
+import GradeSubmissionStatus from './pages/admin/grade-submission-status'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
@@ -193,6 +195,7 @@ export default function App() {
             <Route path="reading-dashboard" element={<ReadingDashboardPage />} />
             <Route path="whiteboard" element={<CourseWhiteboardPage />} />
             <Route path="whiteboard/:boardId" element={<CourseWhiteboardPage />} />
+            <Route path="final-grades" element={<FinalGradeSubmission />} />
             <Route index element={<CourseDetail />} />
           </Route>
           <Route path="/calendar" element={<Calendar />} />
@@ -215,6 +218,7 @@ export default function App() {
           <Route path="/admin/demographics/title1" element={<Title1ReportPage />} />
           <Route path="/admin/content-filter" element={<ContentFilterSettingsPage />} />
           <Route path="/admin/sis" element={<SisIntegrationPage />} />
+          <Route path="/admin/final-grades/status" element={<GradeSubmissionStatus />} />
           <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/inbox" element={<Inbox />} />

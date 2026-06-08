@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { authorizedFetch } from '../../lib/api'
 import { studentProgressFeatureEnabled } from '../../lib/student-progress'
 import { usePermissions } from '../../context/use-permissions'
@@ -35,7 +36,6 @@ import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-t
 import { GradeHistoryPanel } from '../../components/grading/grade-history-panel'
 import { GradebookImportModal } from '../../components/grading/gradebook-import-modal'
 import { LmsPage } from './lms-page'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import { IncompleteGradeModal } from './gradebook/IncompleteGradeModal'
 import type { IncompleteGradeRecord } from '../../lib/incomplete-grades-api'
 
@@ -311,6 +311,7 @@ export default function CourseGradebook() {
   const [searchParams] = useSearchParams()
   const highlightStudentId = searchParams.get('student')?.trim() || null
   const { allows, loading } = usePermissions()
+  const { ffGradeSubmission, ffIncompleteGradeWorkflow } = usePlatformFeatures()
   const [students, setStudents] = useState<CourseGradebookGridStudent[]>([])
   const [enrollmentIdByUserId, setEnrollmentIdByUserId] = useState<Record<string, string>>({})
   const [columns, setColumns] = useState<CourseGradebookGridColumn[]>([])
@@ -350,7 +351,6 @@ export default function CourseGradebook() {
   const [sections, setSections] = useState<CourseSection[]>([])
   const [gradebookSectionId, setGradebookSectionId] = useState<string>('')
   const [crossListMerge, setCrossListMerge] = useState(true)
-  const { ffIncompleteGradeWorkflow } = usePlatformFeatures()
   const [incompleteModal, setIncompleteModal] = useState<{
     enrollmentId: string
     studentName: string
@@ -765,6 +765,14 @@ export default function CourseGradebook() {
             </>
           ) : null}
           <FeatureHelpTrigger topic="gradebook" />
+          {ffGradeSubmission && courseCode && canEditGrades ? (
+            <Link
+              to={`/courses/${encodeURIComponent(courseCode)}/final-grades`}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            >
+              Submit Final Grades
+            </Link>
+          ) : null}
         </div>
       }
     >
