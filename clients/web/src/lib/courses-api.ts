@@ -5256,6 +5256,7 @@ export type ModuleAssignmentSubmissionApi = {
   updatedAt: string
   attachmentContentPath?: string | null
   attachmentMimeType?: string | null
+  attachmentFilename?: string | null
   /** Plan 3.13 */
   resubmissionRequested?: boolean
   revisionDueAt?: string | null
@@ -5270,6 +5271,7 @@ export type SubmissionVersionApi = {
   attachmentFileId: string | null
   attachmentContentPath?: string | null
   attachmentMimeType?: string | null
+  attachmentFilename?: string | null
 }
 
 export type SubmissionAnnotationApi = {
@@ -5345,6 +5347,54 @@ export async function fetchModuleAssignmentSubmissions(
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   const o = raw as { submissions?: ModuleAssignmentSubmissionApi[] }
   return Array.isArray(o.submissions) ? o.submissions : []
+}
+
+/** Grade for one submission (`GET/PUT .../submissions/:id/grade`). */
+export type SubmissionGradeApi = {
+  submissionId: string
+  pointsEarned?: number
+  maxPoints?: number | null
+  rubricScores?: Record<string, number>
+  instructorComment?: string | null
+  posted?: boolean
+  excused?: boolean
+}
+
+export async function fetchSubmissionGrade(
+  courseCode: string,
+  itemId: string,
+  submissionId: string,
+): Promise<SubmissionGradeApi> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/${encodeURIComponent(submissionId)}/grade`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as SubmissionGradeApi
+}
+
+export async function putSubmissionGrade(
+  courseCode: string,
+  itemId: string,
+  submissionId: string,
+  body: {
+    pointsEarned?: number
+    rubricScores?: Record<string, number>
+    instructorComment?: string | null
+    clearGrade?: boolean
+  },
+): Promise<SubmissionGradeApi> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/${encodeURIComponent(submissionId)}/grade`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as SubmissionGradeApi
 }
 
 export async function uploadModuleAssignmentSubmissionFile(

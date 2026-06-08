@@ -42,6 +42,8 @@ import typescript from 'react-syntax-highlighter/dist/esm/languages/prism/typesc
 import yaml from 'react-syntax-highlighter/dist/esm/languages/prism/yaml'
 import { authorizedFetch } from '../lib/api'
 import { useLmsDarkMode } from '../hooks/use-lms-dark-mode'
+import { downloadAuthorizedFile } from '../lib/download-file'
+import { FilePreviewFallback } from './file-preview-fallback'
 
 SyntaxHighlighter.registerLanguage('bash', bash)
 SyntaxHighlighter.registerLanguage('c', c)
@@ -156,9 +158,10 @@ function detectLanguage(filename: string): string {
 type CodeFilePreviewProps = {
   filePath: string
   filename: string
+  errorVariant?: 'standalone' | 'message-only'
 }
 
-export function CodeFilePreview({ filePath, filename }: CodeFilePreviewProps) {
+export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone' }: CodeFilePreviewProps) {
   const isDark = useLmsDarkMode()
   const [content, setContent] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -215,17 +218,7 @@ export function CodeFilePreview({ filePath, filename }: CodeFilePreviewProps) {
 
   const handleDownload = async () => {
     try {
-      const res = await authorizedFetch(filePath)
-      if (!res.ok) throw new Error()
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      await downloadAuthorizedFile(filePath, filename)
     } catch { /* noop */ }
   }
 
@@ -239,17 +232,13 @@ export function CodeFilePreview({ filePath, filename }: CodeFilePreviewProps) {
 
   if (error) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
-        <p className="text-center text-sm text-slate-600 dark:text-neutral-400" role="alert">{error}</p>
-        <button
-          type="button"
-          onClick={() => void handleDownload()}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          Download to view
-        </button>
-      </div>
+      <FilePreviewFallback
+        filePath={filePath}
+        filename={filename}
+        message={error}
+        downloadLabel="Download to view"
+        variant={errorVariant}
+      />
     )
   }
 

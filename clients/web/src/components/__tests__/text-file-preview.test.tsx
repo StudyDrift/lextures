@@ -37,23 +37,26 @@ describe('TextFilePreview', () => {
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Hello' })).toBeInTheDocument()
     })
-    await user.click(screen.getByRole('tab', { name: 'Source' }))
+    await user.click(screen.getByRole('tab', { name: 'Code' }))
     expect(screen.getByLabelText(/text preview of readme\.md/i)).toHaveTextContent('# Hello')
   })
 
-  it('shows plain text only for .txt files (no tabs)', async () => {
+  it('shows preview and code tabs for .txt files', async () => {
     server.use(
       http.get('http://localhost:8080' + FILE_PATH, () =>
-        new HttpResponse('plain line', {
+        new HttpResponse('# Title\n\nplain line', {
           headers: { 'Content-Type': 'text/plain; charset=utf-8' },
         }),
       ),
     )
+    const user = userEvent.setup()
     render(<TextFilePreview filePath={FILE_PATH} filename="notes.txt" />)
     await waitFor(() => {
-      expect(screen.getByLabelText(/text preview of notes\.txt/i)).toHaveTextContent('plain line')
+      expect(screen.getByRole('heading', { level: 1, name: 'Title' })).toBeInTheDocument()
     })
-    expect(screen.queryByRole('tablist')).toBeNull()
+    expect(screen.getByRole('tablist')).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: 'Code' }))
+    expect(screen.getByLabelText(/text preview of notes\.txt/i)).toHaveTextContent('# Title')
   })
 
   it('shows error when fetch fails', async () => {
@@ -66,5 +69,8 @@ describe('TextFilePreview', () => {
     await waitFor(() => {
       expect(screen.getByRole('alert')).toHaveTextContent(/could not load/i)
     })
+    expect(screen.getByText('notes')).toBeInTheDocument()
+    expect(screen.getByText('.txt')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /download to view/i })).toBeInTheDocument()
   })
 })

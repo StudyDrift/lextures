@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -67,16 +66,10 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 				http.Redirect(w, r, presignURL, http.StatusFound)
 				return
 			}
-			// local driver falls through to disk read below
+			// local driver falls through to GetObject / disk below
 		}
 
-		// Local driver: serve bytes directly from disk
-		root := strings.TrimSpace(cfg.CourseFilesRoot)
-		if root == "" {
-			root = "data/course-files"
-		}
-		p := coursefiles.BlobDiskPath(root, courseCode, row.StorageKey)
-		b, err := os.ReadFile(p)
+		b, err := d.readCourseFileRowBytes(r.Context(), courseCode, row)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return

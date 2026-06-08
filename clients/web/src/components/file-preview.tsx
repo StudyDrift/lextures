@@ -4,6 +4,7 @@ import { detectPreviewType } from '../lib/file-type'
 import { authorizedFetch } from '../lib/api'
 import { apiUrl } from '../lib/api'
 import { CodeFilePreview } from './code-file-preview'
+import { FilePreviewFallback } from './file-preview-fallback'
 import { OfficeHtmlPreview } from './office-html-preview'
 import { PdfViewer } from './pdf-viewer'
 import { TextFilePreview } from './text-file-preview'
@@ -198,47 +199,13 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
 // ── Unsupported file fallback ────────────────────────────────────────────────
 
 function UnsupportedFileView({ filePath, filename }: { filePath: string; filename: string }) {
-  const handleDownload = async () => {
-    try {
-      const res = await authorizedFetch(filePath)
-      if (!res.ok) throw new Error()
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
-    } catch {
-      /* noop */
-    }
-  }
-
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
-      <div className="rounded-2xl bg-slate-100 p-6 dark:bg-neutral-800">
-        <svg className="h-12 w-12 text-slate-400 dark:text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-medium text-slate-700 dark:text-neutral-300">{filename}</p>
-        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-500">
-          This file type cannot be previewed in the browser.
-        </p>
-      </div>
-      <button
-        type="button"
-        onClick={() => void handleDownload()}
-        className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-        aria-label="Download to view"
-      >
-        <Download className="h-4 w-4" />
-        Download to view
-      </button>
-    </div>
+    <FilePreviewFallback
+      filePath={filePath}
+      filename={filename}
+      message="This file type cannot be previewed in the browser."
+      downloadLabel="Download to view"
+    />
   )
 }
 
@@ -357,12 +324,66 @@ function AudioViewer({ filePath, filename }: { filePath: string; filename: strin
   )
 }
 
+// ── Shared preview body (course files + submission attachments) ───────────────
+
+export type FilePreviewBodyProps = {
+  filePath: string
+  filename: string
+  mimeType: string | null | undefined
+  /** When `message-only`, load errors omit sidebar download UI (e.g. submission modal). */
+  errorVariant?: 'standalone' | 'message-only'
+  className?: string
+}
+
+export function FilePreviewBody({
+  filePath,
+  filename,
+  mimeType,
+  errorVariant = 'standalone',
+  className,
+}: FilePreviewBodyProps) {
+  const previewType = detectPreviewType(mimeType, filename)
+
+  return (
+    <div className={className ?? 'h-full min-h-0'}>
+      {previewType === 'pdf' && (
+        <PdfViewer filePath={filePath} filename={filename} />
+      )}
+      {previewType === 'image' && (
+        <ImageViewer filePath={filePath} filename={filename} />
+      )}
+      {previewType === 'video' && (
+        <VideoFileViewer filePath={filePath} filename={filename} />
+      )}
+      {previewType === 'audio' && (
+        <AudioViewer filePath={filePath} filename={filename} />
+      )}
+      {previewType === 'office' && (
+        <OfficeHtmlPreview filePath={filePath} filename={filename} />
+      )}
+      {previewType === 'text' && (
+        <TextFilePreview
+          filePath={filePath}
+          filename={filename}
+          mimeType={mimeType}
+          errorVariant={errorVariant}
+        />
+      )}
+      {previewType === 'code' && (
+        <CodeFilePreview filePath={filePath} filename={filename} errorVariant={errorVariant} />
+      )}
+      {previewType === 'none' && (
+        <UnsupportedFileView filePath={filePath} filename={filename} />
+      )}
+    </div>
+  )
+}
+
 // ── FilePreview modal ────────────────────────────────────────────────────────
 
 export function FilePreview({ open, filePath, filename, mimeType, onClose }: FilePreviewProps) {
   const titleId = useId()
   const closeRef = useRef<HTMLButtonElement>(null)
-  const previewType = detectPreviewType(mimeType, filename)
 
   // Focus close button on open
   useEffect(() => {
@@ -432,30 +453,7 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
 
         {/* Content */}
         <div className="min-h-0 flex-1">
-          {previewType === 'pdf' && (
-            <PdfViewer filePath={filePath} filename={filename} />
-          )}
-          {previewType === 'image' && (
-            <ImageViewer filePath={filePath} filename={filename} />
-          )}
-          {previewType === 'video' && (
-            <VideoFileViewer filePath={filePath} filename={filename} />
-          )}
-          {previewType === 'audio' && (
-            <AudioViewer filePath={filePath} filename={filename} />
-          )}
-          {previewType === 'office' && (
-            <OfficeHtmlPreview filePath={filePath} filename={filename} />
-          )}
-          {previewType === 'text' && (
-            <TextFilePreview filePath={filePath} filename={filename} mimeType={mimeType} />
-          )}
-          {previewType === 'code' && (
-            <CodeFilePreview filePath={filePath} filename={filename} />
-          )}
-          {previewType === 'none' && (
-            <UnsupportedFileView filePath={filePath} filename={filename} />
-          )}
+          <FilePreviewBody filePath={filePath} filename={filename} mimeType={mimeType} />
         </div>
       </div>
     </div>

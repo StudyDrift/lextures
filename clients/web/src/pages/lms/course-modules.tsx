@@ -62,6 +62,7 @@ import { ModuleLtiLinkModal } from './module-lti-link-modal'
 import { ModuleNameModal } from './module-name-modal'
 import { VibeActivityCreateModal } from './vibe-activity-create-modal'
 import { ModuleSettingsModal } from './module-settings-modal'
+import { useCourseLiveStructureRevision } from '../../context/course-live-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   createCourseModule,
@@ -1680,9 +1681,16 @@ export default function CourseModules() {
     }
   }, [courseCode, canLoadStudentGrades])
 
+  const structureRevision = useCourseLiveStructureRevision()
+
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (structureRevision === 0) return
+    void load({ silent: true })
+  }, [structureRevision, load])
 
   useEffect(() => {
     if (!courseCode) return

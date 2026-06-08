@@ -37,8 +37,6 @@ const TEXT_MIME_TYPES = new Set([
 ])
 
 const TEXT_EXTS = new Set(['.txt', '.md', '.markdown'])
-const MARKDOWN_EXTS = new Set(['.md', '.markdown'])
-const MARKDOWN_MIME_TYPES = new Set(['text/markdown', 'text/x-markdown'])
 
 const CODE_EXTS = new Set([
   '.js', '.mjs', '.cjs', '.jsx',
@@ -64,6 +62,30 @@ function fileExt(filename: string): string {
   return i >= 0 ? filename.slice(i).toLowerCase() : ''
 }
 
+/** Split a filename into display name and extension (without dot). */
+export function formatDisplayFilename(filename: string): string {
+  const trimmed = filename.trim() || 'file'
+  try {
+    return decodeURIComponent(trimmed.replace(/\+/g, ' '))
+  } catch {
+    return trimmed.replace(/\+/g, ' ')
+  }
+}
+
+/** Split a filename into display name and extension (without dot). */
+export function splitFilename(filename: string): { name: string; extension: string | null } {
+  const display = formatDisplayFilename(filename)
+  const dot = display.lastIndexOf('.')
+  if (dot <= 0 || dot === display.length - 1) {
+    return { name: display, extension: null }
+  }
+  const ext = display.slice(dot + 1).trim().toLowerCase()
+  return {
+    name: display.slice(0, dot),
+    extension: ext || null,
+  }
+}
+
 /**
  * Determine preview type from MIME type and/or filename extension.
  * MIME type is primary; extension is fallback for unknown or missing MIME types.
@@ -84,12 +106,12 @@ export function detectPreviewType(
   return 'none'
 }
 
-/** True when the file should offer a rendered markdown preview tab. */
+/** True when the file should offer rendered preview and source tabs (.txt, .md, .markdown). */
 export function isMarkdownFilename(
   filename: string,
   mimeType?: string | null,
 ): boolean {
   const mt = (mimeType ?? '').toLowerCase().trim()
-  if (MARKDOWN_MIME_TYPES.has(mt)) return true
-  return MARKDOWN_EXTS.has(fileExt(filename))
+  if (TEXT_MIME_TYPES.has(mt)) return true
+  return TEXT_EXTS.has(fileExt(formatDisplayFilename(filename)))
 }

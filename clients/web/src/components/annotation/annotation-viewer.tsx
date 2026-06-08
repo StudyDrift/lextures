@@ -5,6 +5,7 @@ import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { apiUrl, authorizedFetch } from '../../lib/api'
 import { getAccessToken } from '../../lib/auth'
 import type { SubmissionAnnotationApi } from '../../lib/courses-api'
+import { FilePreviewFallback } from '../file-preview-fallback'
 import type { AnnotationTool } from './annotation-toolbar'
 
 GlobalWorkerOptions.workerSrc = workerSrc
@@ -15,7 +16,9 @@ type NormRect = { x1: number; y1: number; x2: number; y2: number }
 export type AnnotationViewerProps = {
   filePath: string | null
   mimeType: string | null
+  filename?: string | null
   readOnly: boolean
+  fallbackVariant?: 'standalone' | 'message-only'
   tool: AnnotationTool
   colour: string
   annotations: SubmissionAnnotationApi[]
@@ -300,7 +303,9 @@ const PDF_SCALE = 1.2
 export function AnnotationViewer({
   filePath,
   mimeType,
+  filename,
   readOnly,
+  fallbackVariant = 'standalone',
   tool,
   colour,
   annotations,
@@ -413,6 +418,17 @@ export function AnnotationViewer({
   }
 
   if (error) {
+    if (filePath && filename) {
+      return (
+        <FilePreviewFallback
+          filePath={filePath}
+          filename={filename}
+          message={error}
+          downloadLabel="Download submission"
+          variant={fallbackVariant}
+        />
+      )
+    }
     return (
       <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-6 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
         {error}

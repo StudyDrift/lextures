@@ -49,3 +49,20 @@ func Create(ctx context.Context, pool *pgxpool.Pool, courseID, uploadedBy uuid.U
 	`, courseID, storageKey, originalFilename, mimeType, byteSize, uploadedBy).Scan(&id)
 	return id, err
 }
+
+// CreateInTransaction is like Create but participates in an open import transaction.
+func CreateInTransaction(
+	ctx context.Context,
+	tx pgx.Tx,
+	courseID, uploadedBy uuid.UUID,
+	storageKey, originalFilename, mimeType string,
+	byteSize int64,
+) (uuid.UUID, error) {
+	var id uuid.UUID
+	err := tx.QueryRow(ctx, `
+		INSERT INTO course.course_files (course_id, storage_key, original_filename, mime_type, byte_size, uploaded_by)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING id
+	`, courseID, storageKey, originalFilename, mimeType, byteSize, uploadedBy).Scan(&id)
+	return id, err
+}

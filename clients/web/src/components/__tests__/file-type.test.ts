@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { detectPreviewType, isMarkdownFilename } from '../../lib/file-type'
+import { detectPreviewType, isMarkdownFilename, splitFilename } from '../../lib/file-type'
 
 describe('detectPreviewType', () => {
   // PDF detection
@@ -121,6 +121,16 @@ describe('detectPreviewType', () => {
   })
 })
 
+describe('splitFilename', () => {
+  it('splits name and extension', () => {
+    expect(splitFilename('homework.pdf')).toEqual({ name: 'homework', extension: 'pdf' })
+  })
+
+  it('returns null extension when missing', () => {
+    expect(splitFilename('submission')).toEqual({ name: 'submission', extension: null })
+  })
+})
+
 describe('isMarkdownFilename', () => {
   it('returns true for .md extension', () => {
     expect(isMarkdownFilename('readme.md', null)).toBe(true)
@@ -130,7 +140,12 @@ describe('isMarkdownFilename', () => {
     expect(isMarkdownFilename('notes.txt', 'text/markdown')).toBe(true)
   })
 
-  it('returns false for plain .txt', () => {
-    expect(isMarkdownFilename('notes.txt', 'text/plain')).toBe(false)
+  it('returns true for plain .txt', () => {
+    expect(isMarkdownFilename('notes.txt', 'text/plain')).toBe(true)
+    expect(isMarkdownFilename('notes.txt', null)).toBe(true)
+  })
+
+  it('returns true for .markdown extension', () => {
+    expect(isMarkdownFilename('guide.markdown', null)).toBe(true)
   })
 })

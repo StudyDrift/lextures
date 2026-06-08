@@ -1,5 +1,4 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
-import { Download } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { createThemedMarkdownComponents } from './markdown/markdown-themed-components'
@@ -7,6 +6,7 @@ import { authorizedFetch } from '../lib/api'
 import { isMarkdownFilename } from '../lib/file-type'
 import { resolveMarkdownTheme } from '../lib/markdown-theme'
 import { useLmsDarkMode } from '../hooks/use-lms-dark-mode'
+import { FilePreviewFallback } from './file-preview-fallback'
 
 /** Max bytes to load into the preview (avoids huge files in memory). */
 const MAX_TEXT_PREVIEW_BYTES = 2 * 1024 * 1024
@@ -17,9 +17,10 @@ type TextFilePreviewProps = {
   filePath: string
   filename: string
   mimeType?: string | null
+  errorVariant?: 'standalone' | 'message-only'
 }
 
-export function TextFilePreview({ filePath, filename, mimeType }: TextFilePreviewProps) {
+export function TextFilePreview({ filePath, filename, mimeType, errorVariant = 'standalone' }: TextFilePreviewProps) {
   const markdownFile = isMarkdownFilename(filename, mimeType)
   const lmsUiDark = useLmsDarkMode()
   const mdTheme = useMemo(
@@ -79,24 +80,6 @@ export function TextFilePreview({ filePath, filename, mimeType }: TextFilePrevie
     return () => { cancelled = true }
   }, [filePath])
 
-  const handleDownload = async () => {
-    try {
-      const res = await authorizedFetch(filePath)
-      if (!res.ok) throw new Error()
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
-    } catch {
-      /* noop */
-    }
-  }
-
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center" role="status" aria-label="Loading text preview">
@@ -107,17 +90,13 @@ export function TextFilePreview({ filePath, filename, mimeType }: TextFilePrevie
 
   if (error) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
-        <p className="text-center text-sm text-slate-600 dark:text-neutral-400" role="alert">{error}</p>
-        <button
-          type="button"
-          onClick={() => void handleDownload()}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-        >
-          <Download className="h-4 w-4" aria-hidden="true" />
-          Download to view
-        </button>
-      </div>
+      <FilePreviewFallback
+        filePath={filePath}
+        filename={filename}
+        message={error}
+        downloadLabel="Download to view"
+        variant={errorVariant}
+      />
     )
   }
 
@@ -127,7 +106,7 @@ export function TextFilePreview({ filePath, filename, mimeType }: TextFilePrevie
         <div
           id={tablistId}
           role="tablist"
-          aria-label="Markdown preview mode"
+          aria-label="Text preview mode"
           className="flex shrink-0 gap-1 border-b border-slate-200 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
         >
           <TabButton
@@ -142,7 +121,7 @@ export function TextFilePreview({ filePath, filename, mimeType }: TextFilePrevie
             controls="markdown-source-panel"
             onClick={() => setTab('source')}
           >
-            Source
+            Code
           </TabButton>
         </div>
       )}
