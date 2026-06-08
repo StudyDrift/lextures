@@ -115,6 +115,7 @@ type platformSettingsJSON struct {
 	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
 	FFGradeSubmission               bool `json:"ffGradeSubmission"`
 	FFIncompleteGradeWorkflow       bool `json:"ffIncompleteGradeWorkflow"`
+	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -261,6 +262,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 				FFGradeSubmission:               merged.FFGradeSubmission,
 				FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
+				FFCourseEvaluations:             merged.FFCourseEvaluations,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -380,6 +382,7 @@ type putPlatformBody struct {
 	FFEnrollmentStateMachine        *bool `json:"ffEnrollmentStateMachine"`
 	FFGradeSubmission               *bool `json:"ffGradeSubmission"`
 	FFIncompleteGradeWorkflow       *bool `json:"ffIncompleteGradeWorkflow"`
+	FFCourseEvaluations             *bool `json:"ffCourseEvaluations"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -660,6 +663,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffenrollmentstatemachine", body.FFEnrollmentStateMachine, func(v bool) { wr.FFEnrollmentStateMachine = &v })
 		setBool("ffgradesubmission", body.FFGradeSubmission, func(v bool) { wr.FFGradeSubmission = &v })
 		setBool("ffincompletegradeworkflow", body.FFIncompleteGradeWorkflow, func(v bool) { wr.FFIncompleteGradeWorkflow = &v })
+		setBool("ffcourseevaluations", body.FFCourseEvaluations, func(v bool) { wr.FFCourseEvaluations = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -762,6 +766,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 				FFGradeSubmission:               merged.FFGradeSubmission,
 				FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
+				FFCourseEvaluations:             merged.FFCourseEvaluations,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

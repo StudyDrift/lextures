@@ -42,6 +42,7 @@ export type PlatformFeaturesSnapshot = {
   ffIncompleteGradeWorkflow?: boolean
   ffUiMode?: boolean
   ffGradeSubmission?: boolean
+  ffCourseEvaluations?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -86,6 +87,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffIncompleteGradeWorkflow: false,
   ffUiMode: false,
   ffGradeSubmission: false,
+  ffCourseEvaluations: false,
 }
 
 let loaded = false

@@ -55,6 +55,7 @@ export type PlatformFeatures = {
   ffEnrollmentStateMachine: boolean
   ffGradeSubmission: boolean
   ffIncompleteGradeWorkflow: boolean
+  ffCourseEvaluations: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -100,6 +101,7 @@ const defaultFeatures: PlatformFeatures = {
   ffEnrollmentStateMachine: false,
   ffGradeSubmission: false,
   ffIncompleteGradeWorkflow: false,
+  ffCourseEvaluations: false,
   loading: true,
   refresh: async () => {},
 }
@@ -150,6 +152,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffEnrollmentStateMachine: false,
     ffGradeSubmission: false,
     ffIncompleteGradeWorkflow: false,
+    ffCourseEvaluations: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -201,6 +204,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
           ffGradeSubmission: data.ffGradeSubmission === true,
           ffIncompleteGradeWorkflow: data.ffIncompleteGradeWorkflow === true,
+          ffCourseEvaluations: data.ffCourseEvaluations === true,
         }
         setFeatures({
           ...next,
@@ -219,6 +223,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,
           ffGradeSubmission: next.ffGradeSubmission === true,
           ffIncompleteGradeWorkflow: next.ffIncompleteGradeWorkflow === true,
+          ffCourseEvaluations: next.ffCourseEvaluations === true,
         })
         setPlatformFeaturesSnapshot(next)
       }
