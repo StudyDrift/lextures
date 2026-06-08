@@ -168,6 +168,9 @@ func (d Deps) handleGetSubmissionOriginality() http.HandlerFunc {
 			return
 		}
 		viewer, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
 		courseCode, ok := chiCourseCode(w, r)
 		if !ok {
 			return
@@ -218,6 +221,9 @@ func (d Deps) handleGetSubmissionOriginalityEmbed() http.HandlerFunc {
 			return
 		}
 		viewer, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
 		courseCode, ok := chiCourseCode(w, r)
 		if !ok {
 			return
@@ -278,6 +284,9 @@ func (d Deps) handleGetSubmissionOriginalitySummary() http.HandlerFunc {
 			return
 		}
 		viewer, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
 		courseCode, ok := chiCourseCode(w, r)
 		if !ok {
 			return
@@ -324,6 +333,9 @@ func (d Deps) handlePostSubmissionOriginalityRetry() http.HandlerFunc {
 			return
 		}
 		viewer, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
 		courseCode, ok := chiCourseCode(w, r)
 		if !ok {
 			return
