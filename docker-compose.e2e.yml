@@ -74,6 +74,9 @@ services:
       STORAGE_QUOTAS_ENABLED: "true"
       FEATURE_ENGAGEMENT_TRACKING: "true"
       FF_BROADCASTS: "true"
+      FF_PLAGIARISM_CHECKS: "true"
+      ORIGINALITY_DETECTION_ENABLED: "true"
+      ORIGINALITY_STUB_EXTERNAL: "true"
       RABBITMQ_URL: amqp://e2e:e2e@rabbitmq:5672/
     ports:
       - "8080:8080"

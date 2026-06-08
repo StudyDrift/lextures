@@ -93,16 +93,14 @@ func (d Deps) handlePatchCoursePlagiarismSettings() http.HandlerFunc {
 		}
 		if body.PlagiarismProvider != nil {
 			p := strings.ToLower(strings.TrimSpace(*body.PlagiarismProvider))
-			if p != "" && p != "none" && p != "turnitin" && p != "copyleaks" && p != "gptzero" {
+			switch p {
+			case "":
+				body.PlagiarismProvider = nil
+			case "none", "turnitin", "copyleaks", "gptzero":
+				body.PlagiarismProvider = &p
+			default:
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid plagiarismProvider.")
 				return
-			}
-			if p == "" {
-				body.PlagiarismProvider = nil
-			} else if p == "none" {
-				body.PlagiarismProvider = &p
-			} else {
-				body.PlagiarismProvider = &p
 			}
 		}
 		settings, err := course.PatchPlagiarismSettings(r.Context(), d.Pool, courseCode, course.PlagiarismSettingsPatch{
