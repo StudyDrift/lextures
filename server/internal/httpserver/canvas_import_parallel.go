@@ -25,21 +25,3 @@ func canvasImportParallelGroup(ctx context.Context, taskCount int) (*errgroup.Gr
 	return g, gctx
 }
 
-func canvasImportParallelEach[T any](
-	ctx context.Context,
-	items []T,
-	fn func(context.Context, T) error,
-) error {
-	if len(items) == 0 {
-		return nil
-	}
-	g, gctx := canvasImportParallelGroup(ctx, len(items))
-	for _, item := range items {
-		item := item
-		g.Go(func() error {
-			return fn(gctx, item)
-		})
-	}
-	return g.Wait()
-}
-
