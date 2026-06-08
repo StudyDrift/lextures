@@ -277,6 +277,8 @@ func canvasImportAssignmentGrades(
 	courseID uuid.UUID,
 	canvasAssignToItem map[int64]uuid.UUID,
 	canvasUserToLocal map[int64]uuid.UUID,
+	submissionDeps *canvasAssignmentSubmissionImportDeps,
+	importGrades bool,
 ) error {
 	// #region agent log
 	assignCanvasIDs := int64(len(canvasAssignToItem))
@@ -285,19 +287,20 @@ func canvasImportAssignmentGrades(
 	var skipNoLocalUser int64
 	var skipNoScore int64
 	var upserts int64
+	var submissionRowsUpserted int64
+	var submissionContentStored int64
 	// #endregion agent log
 
-	assignmentSubsQuery := url.Values{}
-	assignmentSubsQuery.Add("include[]", "submission_history")
+	subsByAssignment, err := canvasFetchAssignmentSubmissionsParallel(ctx, client, canvasBase, accessToken, canvasCourseID, canvasAssignToItem)
+	if err != nil {
+		return err
+	}
 	for canvasAID, itemID := range canvasAssignToItem {
-		subs, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
-			fmt.Sprintf("courses/%d/assignments/%d/submissions", canvasCourseID, canvasAID), assignmentSubsQuery)
-		if err != nil {
-			return fmt.Errorf("Canvas assignment %d submissions: %w", canvasAID, err)
-		}
+		subs := subsByAssignment[canvasAID]
 		// #region agent log
 		totalSubs += int64(len(subs))
 		// #endregion agent log
+		prefetchedAttachments := canvasPrefetchSubmissionAttachmentsParallel(ctx, client, accessToken, subs)
 		for _, raw := range subs {
 			canvasUserID := int64At(raw, "user_id")
 			if canvasUserID <= 0 {
@@ -313,34 +316,57 @@ func canvasImportAssignmentGrades(
 				// #endregion agent log
 				continue
 			}
-			exc, score, hasScore := submissionScoreAndExcused(raw)
-			if !exc && !hasScore {
-				// #region agent log
-				skipNoScore++
-				// #endregion agent log
-				continue
+			if importGrades {
+				exc, score, hasScore := submissionScoreAndExcused(raw)
+				if exc || hasScore {
+					pts := 0.0
+					if hasScore {
+						pts = score
+					}
+					if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, exc); err != nil {
+						return fmt.Errorf("save grade for assignment canvas id %d: %w", canvasAID, err)
+					}
+					// #region agent log
+					upserts++
+					// #endregion agent log
+				} else {
+					// #region agent log
+					skipNoScore++
+					// #endregion agent log
+				}
 			}
-			pts := 0.0
-			if hasScore {
-				pts = score
+			if submissionDeps != nil {
+				hadContent := canvasSubmissionHasContent(raw)
+				var prefetched *canvasPrefetchedSubmissionAttachment
+				if blob, ok := prefetchedAttachments[canvasUserID]; ok {
+					blobCopy := blob
+					prefetched = &blobCopy
+				}
+				if err := canvasImportOneAssignmentSubmission(
+					ctx, tx, client, accessToken, *submissionDeps, courseID, itemID, studentID, raw, prefetched,
+				); err != nil {
+					return fmt.Errorf("import submission for assignment canvas id %d: %w", canvasAID, err)
+				}
+				if canvasAssignmentSubmissionImportable(raw) {
+					submissionRowsUpserted++
+					if hadContent {
+						submissionContentStored++
+					}
+				}
 			}
-			if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, exc); err != nil {
-				return fmt.Errorf("save grade for assignment canvas id %d: %w", canvasAID, err)
-			}
-			// #region agent log
-			upserts++
-			// #endregion agent log
 		}
 	}
 
 	// #region agent log
 	canvasAgentDebugLog("canvas-import", "H2-H4", "canvas_grade_import.go:canvasImportAssignmentGrades", "assignment submission import counters", map[string]any{
-		"assignmentCanvasIDs": assignCanvasIDs,
-		"totalSubmissionRows": totalSubs,
-		"skipBadCanvasUserID": skipBadCanvasUID,
-		"skipNoMappedUser":    skipNoLocalUser,
-		"skipNoScore":         skipNoScore,
-		"gradesUpserted":      upserts,
+		"assignmentCanvasIDs":       assignCanvasIDs,
+		"totalSubmissionRows":     totalSubs,
+		"skipBadCanvasUserID":     skipBadCanvasUID,
+		"skipNoMappedUser":        skipNoLocalUser,
+		"skipNoScore":             skipNoScore,
+		"gradesUpserted":          upserts,
+		"submissionRowsUpserted":  submissionRowsUpserted,
+		"submissionContentStored": submissionContentStored,
 	})
 	// #endregion agent log
 	return nil
@@ -439,6 +465,7 @@ func canvasImportQuizGrades(
 	courseID uuid.UUID,
 	canvasQuizToItem map[int64]uuid.UUID,
 	canvasUserToLocal map[int64]uuid.UUID,
+	quizSubsByQuiz map[int64][]map[string]any,
 ) error {
 	// #region agent log
 	quizCanvasIDs := int64(len(canvasQuizToItem))
@@ -450,10 +477,7 @@ func canvasImportQuizGrades(
 	// #endregion agent log
 
 	for canvasQID, itemID := range canvasQuizToItem {
-		subs, err := canvasGetQuizSubmissionsPaginated(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID, nil)
-		if err != nil {
-			return fmt.Errorf("Canvas quiz %d submissions: %w", canvasQID, err)
-		}
+		subs := quizSubsByQuiz[canvasQID]
 		// #region agent log
 		totalQuizSubs += int64(len(subs))
 		// #endregion agent log
@@ -546,6 +570,7 @@ func canvasImportAllCanvasGrades(
 	canvasQuizToItem map[int64]uuid.UUID,
 	canvasQuizToQuestions map[int64][]coursemodulequiz.QuizQuestion,
 	canvasUserToLocal map[int64]uuid.UUID,
+	submissionDeps *canvasAssignmentSubmissionImportDeps,
 ) error {
 	// #region agent log
 	canvasAgentDebugLog("canvas-import", "H2,H5", "canvas_grade_import.go:canvasImportAllCanvasGrades", "entering aggregated grade import", map[string]any{
@@ -560,13 +585,17 @@ func canvasImportAllCanvasGrades(
 		// #endregion agent log
 		return nil
 	}
-	if err := canvasImportAssignmentGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasUserToLocal); err != nil {
+	quizSubsByQuiz, err := canvasFetchQuizSubmissionsParallel(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizIDsFromMap(canvasQuizToItem))
+	if err != nil {
 		return err
 	}
-	if err := canvasImportQuizGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasUserToLocal); err != nil {
+	if err := canvasImportAssignmentGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasUserToLocal, submissionDeps, true); err != nil {
 		return err
 	}
-	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal); err != nil {
+	if err := canvasImportQuizGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasUserToLocal, quizSubsByQuiz); err != nil {
+		return err
+	}
+	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal, quizSubsByQuiz); err != nil {
 		return err
 	}
 	return nil

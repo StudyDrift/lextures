@@ -290,6 +290,8 @@ func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimp
 		return markErr
 	}
 	d.pushNotificationService().EnqueueCanvasCourseImported(ctx, msg.UserID, courseTitle, msg.CourseCode)
+	d.notifyCourses(msg.UserID)
+	broadcastStructureChanged(msg.CourseCode)
 	if d.CanvasImportHub != nil {
 		d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "complete"})
 	}

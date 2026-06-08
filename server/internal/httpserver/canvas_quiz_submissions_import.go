@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -689,6 +690,114 @@ INSERT INTO course.quiz_responses (
 	return nil
 }
 
+type canvasQuizAnswerMetadata struct {
+	choiceMaps       map[int64]map[int64]int
+	correctAnswerIDs map[int64]map[int64]struct{}
+}
+
+type canvasQuizAttemptPayload struct {
+	raw          map[string]any
+	detail       map[string]any
+	questionRows []map[string]any
+}
+
+func canvasFetchQuizAnswerMetadataParallel(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID int64,
+	quizIDs []int64,
+) (map[int64]canvasQuizAnswerMetadata, error) {
+	out := make(map[int64]canvasQuizAnswerMetadata, len(quizIDs))
+	if len(quizIDs) == 0 {
+		return out, nil
+	}
+	var mu sync.Mutex
+	var firstErr error
+	var errOnce sync.Once
+
+	g, gctx := canvasImportParallelGroup(ctx, len(quizIDs))
+	for _, quizID := range quizIDs {
+		quizID := quizID
+		g.Go(func() error {
+			choiceMaps, correctAnswerIDs, err := canvasLoadQuizAnswerMetadata(gctx, client, canvasBase, accessToken, canvasCourseID, quizID)
+			if err != nil {
+				errOnce.Do(func() { firstErr = fmt.Errorf("Canvas quiz %d answer map: %w", quizID, err) })
+				return err
+			}
+			mu.Lock()
+			out[quizID] = canvasQuizAnswerMetadata{choiceMaps: choiceMaps, correctAnswerIDs: correctAnswerIDs}
+			mu.Unlock()
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		if firstErr != nil {
+			return nil, firstErr
+		}
+		return nil, err
+	}
+	return out, nil
+}
+
+func canvasFetchQuizAttemptPayloadsParallel(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID, canvasQuizID int64,
+	subs []map[string]any,
+	canvasUserToLocal map[int64]uuid.UUID,
+) ([]canvasQuizAttemptPayload, error) {
+	candidates := make([]map[string]any, 0, len(subs))
+	for _, raw := range subs {
+		if !canvasQuizSubmissionImportable(raw) {
+			continue
+		}
+		canvasUserID := int64At(raw, "user_id")
+		if _, ok := canvasUserToLocal[canvasUserID]; !ok {
+			continue
+		}
+		if int64At(raw, "id") <= 0 {
+			continue
+		}
+		candidates = append(candidates, raw)
+	}
+	if len(candidates) == 0 {
+		return nil, nil
+	}
+
+	out := make([]canvasQuizAttemptPayload, len(candidates))
+	var firstErr error
+	var errOnce sync.Once
+
+	g, gctx := canvasImportParallelGroup(ctx, len(candidates))
+	for i, raw := range candidates {
+		i, raw := i, raw
+		g.Go(func() error {
+			submissionID := int64At(raw, "id")
+			detail, err := canvasGetQuizSubmissionDetail(gctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizID, submissionID)
+			if err != nil {
+				errOnce.Do(func() { firstErr = fmt.Errorf("Canvas quiz submission %d detail: %w", submissionID, err) })
+				return err
+			}
+			questionRows, err := canvasGetQuizSubmissionQuestions(gctx, client, canvasBase, accessToken, submissionID)
+			if err != nil {
+				errOnce.Do(func() { firstErr = fmt.Errorf("Canvas quiz submission %d questions: %w", submissionID, err) })
+				return err
+			}
+			out[i] = canvasQuizAttemptPayload{raw: raw, detail: detail, questionRows: questionRows}
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		if firstErr != nil {
+			return nil, firstErr
+		}
+		return nil, err
+	}
+	return out, nil
+}
+
 func canvasImportQuizAttempts(
 	ctx context.Context,
 	tx pgx.Tx,
@@ -699,25 +808,31 @@ func canvasImportQuizAttempts(
 	canvasQuizToItem map[int64]uuid.UUID,
 	canvasQuizToQuestions map[int64][]coursemodulequiz.QuizQuestion,
 	canvasUserToLocal map[int64]uuid.UUID,
+	quizSubsByQuiz map[int64][]map[string]any,
 ) error {
+	quizIDs := canvasQuizIDsFromMap(canvasQuizToItem)
+	answerMetaByQuiz, err := canvasFetchQuizAnswerMetadataParallel(ctx, client, canvasBase, accessToken, canvasCourseID, quizIDs)
+	if err != nil {
+		return err
+	}
+
 	for canvasQID, itemID := range canvasQuizToItem {
 		questions := canvasQuizToQuestions[canvasQID]
 		if len(questions) == 0 {
 			continue
 		}
-		choiceMaps, correctAnswerIDs, err := canvasLoadQuizAnswerMetadata(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID)
-		if err != nil {
-			return fmt.Errorf("Canvas quiz %d answer map: %w", canvasQID, err)
-		}
-		subs, err := canvasGetQuizSubmissionsPaginated(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID, nil)
-		if err != nil {
-			return fmt.Errorf("Canvas quiz %d submissions for attempts: %w", canvasQID, err)
-		}
+		meta := answerMetaByQuiz[canvasQID]
+		choiceMaps := meta.choiceMaps
+		correctAnswerIDs := meta.correctAnswerIDs
+		subs := quizSubsByQuiz[canvasQID]
 		pointsPossibleQuiz := canvasQuizPointsPossible(questions, nil)
-		for _, raw := range subs {
-			if !canvasQuizSubmissionImportable(raw) {
-				continue
-			}
+
+		payloads, err := canvasFetchQuizAttemptPayloadsParallel(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID, subs, canvasUserToLocal)
+		if err != nil {
+			return err
+		}
+		for _, payload := range payloads {
+			raw := payload.raw
 			canvasUserID := int64At(raw, "user_id")
 			studentID, ok := canvasUserToLocal[canvasUserID]
 			if !ok {
@@ -732,15 +847,7 @@ func canvasImportQuizAttempts(
 				attemptNum = 1
 			}
 
-			detail, err := canvasGetQuizSubmissionDetail(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID, submissionID)
-			if err != nil {
-				return fmt.Errorf("Canvas quiz submission %d detail: %w", submissionID, err)
-			}
-			questionRows, err := canvasGetQuizSubmissionQuestions(ctx, client, canvasBase, accessToken, submissionID)
-			if err != nil {
-				return fmt.Errorf("Canvas quiz submission %d questions: %w", submissionID, err)
-			}
-			answers := canvasMergeSubmissionAnswers(detail, raw, questionRows)
+			answers := canvasMergeSubmissionAnswers(payload.detail, raw, payload.questionRows)
 			score, hasScore := canvasQuizSubmissionScore(raw)
 			if len(answers) == 0 && !hasScore {
 				continue

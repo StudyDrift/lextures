@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
-import { Link, useParams } from 'react-router-dom'
-import { Pencil } from 'lucide-react'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Eye, Pencil } from 'lucide-react'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
 import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
@@ -11,7 +11,9 @@ import {
   fetchCourseEnrollmentsList,
   fetchCourseGradingSettings,
   fetchModuleAssignment,
+  fetchModuleAssignmentSubmissions,
   fetchReaderMarkups,
+  viewerIsCourseStaffEnrollment,
   patchCourseStructureItemAssignmentGroup,
   patchModuleAssignment,
   type ContentPageMarkup,
@@ -87,6 +89,15 @@ function formatSubmissionTypes(text: boolean, file: boolean, url: boolean): stri
   return parts.join(', ')
 }
 
+function countEnrolledStudents(enrollments: CourseEnrollmentRosterRow[]): number {
+  const seen = new Set<string>()
+  for (const row of enrollments) {
+    if (row.role.trim().toLowerCase() !== 'student') continue
+    seen.add(row.userId)
+  }
+  return seen.size
+}
+
 function submissionTypesAreSet(text: boolean, file: boolean, url: boolean): boolean {
   return text || file || url
 }
@@ -120,8 +131,28 @@ function newLocalId(): string {
   return `local-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
 }
 
+function scrollToSubmissionPreview() {
+  const el = document.getElementById('submission-preview')
+  if (!el) return
+  const main = document.getElementById('main-content')
+  if (main) {
+    const mainRect = main.getBoundingClientRect()
+    const elRect = el.getBoundingClientRect()
+    const fullyVisible = elRect.top >= mainRect.top && elRect.bottom <= mainRect.bottom
+    if (!fullyVisible) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+    }
+  } else {
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })
+  }
+  window.requestAnimationFrame(() => {
+    el.focus({ preventScroll: true })
+  })
+}
+
 export default function CourseModuleAssignmentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
+  const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
 
   const [title, setTitle] = useState('')
@@ -196,6 +227,9 @@ export default function CourseModuleAssignmentPage() {
   const [blindGrading, setBlindGrading] = useState(false)
   const [identitiesRevealedAt, setIdentitiesRevealedAt] = useState<string | null>(null)
   const [viewerCanRevealIdentities, setViewerCanRevealIdentities] = useState(false)
+  const [previewModalOpen, setPreviewModalOpen] = useState(false)
+  const [submissionCount, setSubmissionCount] = useState<number | null>(null)
+  const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<SyllabusSection[]>([])
@@ -364,6 +398,85 @@ export default function CourseModuleAssignmentPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const viewerIsCourseStaff = viewerIsCourseStaffEnrollment(viewerEnrollmentRoles)
+
+  const assignmentAcceptsSubmissions = submissionTypesAreSet(
+    submissionAllowText,
+    submissionAllowFileUpload,
+    submissionAllowUrl,
+  )
+
+  const viewerCanPreviewSubmissions = canEdit || viewerIsCourseStaff
+
+  const annotationsActive = Boolean(annotationsEnabled && submissionAllowFileUpload)
+  const staffPreviewInModal = Boolean(viewerCanPreviewSubmissions && !annotationsActive)
+
+  const showSubmissionWorkbench = Boolean(
+    itemId && (assignmentAcceptsSubmissions || feedbackMediaEnabled),
+  )
+
+  const showPreviewSubmissionsAction = Boolean(
+    !loading &&
+      !loadError &&
+      !editing &&
+      viewerCanPreviewSubmissions &&
+      assignmentAcceptsSubmissions,
+  )
+
+  const gradeSubmissionsLabel =
+    submissionCount != null && enrolledStudentCount != null
+      ? `Grade submissions ${submissionCount}/${enrolledStudentCount}`
+      : 'Grade submissions'
+
+  useEffect(() => {
+    if (!showPreviewSubmissionsAction || !courseCode || !itemId) {
+      setSubmissionCount(null)
+      setEnrolledStudentCount(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const [submissions, enrollments] = await Promise.all([
+          fetchModuleAssignmentSubmissions(courseCode, itemId),
+          fetchCourseEnrollmentsList(courseCode),
+        ])
+        if (!cancelled) {
+          setSubmissionCount(submissions.length)
+          setEnrolledStudentCount(countEnrolledStudents(enrollments))
+        }
+      } catch {
+        if (!cancelled) {
+          setSubmissionCount(null)
+          setEnrolledStudentCount(null)
+        }
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode, itemId, showPreviewSubmissionsAction])
+
+  useEffect(() => {
+    if (!showPreviewSubmissionsAction) return
+    const preview = searchParams.get('preview')
+    if (preview !== 'submissions' && preview !== '1') return
+    if (staffPreviewInModal) {
+      setPreviewModalOpen(true)
+      return
+    }
+    const t = window.setTimeout(() => scrollToSubmissionPreview(), 150)
+    return () => window.clearTimeout(t)
+  }, [showPreviewSubmissionsAction, searchParams, loading, loadError, editing, staffPreviewInModal])
+
+  function openSubmissionPreview() {
+    if (staffPreviewInModal) {
+      setPreviewModalOpen(true)
+      return
+    }
+    scrollToSubmissionPreview()
+  }
 
   function syncDraftsFromSaved() {
     setDraftDueLocal(isoToDatetimeLocalValue(dueAt))
@@ -547,10 +660,6 @@ export default function CourseModuleAssignmentPage() {
 
   const backTo = `/courses/${encodeURIComponent(courseCode)}/modules`
 
-  const viewerIsCourseStaff = viewerEnrollmentRoles.some(
-    (r) => r === 'teacher' || r === 'instructor',
-  )
-
   return (
     <LmsPage
       title={loading ? 'Assignment' : title || 'Assignment'}
@@ -577,6 +686,16 @@ export default function CourseModuleAssignmentPage() {
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
+            {showPreviewSubmissionsAction ? (
+              <button
+                type="button"
+                onClick={openSubmissionPreview}
+                className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-900 shadow-sm transition hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-100 dark:hover:bg-indigo-950"
+              >
+                <Eye className="h-4 w-4" aria-hidden />
+                {gradeSubmissionsLabel}
+              </button>
+            ) : null}
             {canEdit ? (
               <button
                 type="button"
@@ -732,8 +851,7 @@ export default function CourseModuleAssignmentPage() {
               contentTitle={title || 'Assignment'}
               emptyMessage="No instructions yet. Select Edit to add Markdown."
             />
-            {itemId &&
-            (feedbackMediaEnabled || (annotationsEnabled && submissionAllowFileUpload)) ? (
+            {showSubmissionWorkbench ? (
               <>
                 {!viewerIsCourseStaff && originalityDetection !== 'disabled' ? (
                   <AcademicIntegrityNotice className="mt-6" />
@@ -742,9 +860,11 @@ export default function CourseModuleAssignmentPage() {
                 courseCode={courseCode}
                 itemId={itemId}
                 assignmentTitle={title}
-                mode={viewerIsCourseStaff ? 'staff' : 'student'}
+                mode={viewerCanPreviewSubmissions ? 'staff' : 'student'}
                 submissionAllowsFile={submissionAllowFileUpload}
-                annotationsActive={Boolean(annotationsEnabled && submissionAllowFileUpload)}
+                submissionAllowsText={submissionAllowText}
+                submissionAllowsUrl={submissionAllowUrl}
+                annotationsActive={annotationsActive}
                 feedbackMediaEnabled={Boolean(feedbackMediaEnabled)}
                 resubmissionWorkflowEnabled={resubmissionWorkflowEnabled}
                 blindGradingActive={
@@ -754,8 +874,12 @@ export default function CourseModuleAssignmentPage() {
                 onAfterRevealIdentities={() => void load()}
                 moderatedGradingActive={Boolean(moderatedGrading && viewerIsCourseStaff)}
                 assignmentPointsWorth={pointsWorth}
+                assignmentRubric={rubric}
                 provisionalGraderUserIds={provisionalGraderUserIds}
                 originalityDetection={originalityDetection}
+                presentation={staffPreviewInModal ? 'modal' : 'inline'}
+                modalOpen={previewModalOpen}
+                onModalClose={() => setPreviewModalOpen(false)}
               />
               </>
             ) : null}

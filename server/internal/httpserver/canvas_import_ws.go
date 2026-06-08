@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"log"
@@ -180,73 +181,96 @@ func (d Deps) runCanvasImport(
 	}
 	client := canvasHTTPClient()
 
-	course, err := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d", canvasCourseID), url.Values{"include[]": []string{"syllabus_body"}})
-	if err != nil {
-		return err
-	}
-	if !progress("Loaded course details from Canvas.") {
-		return context.Canceled
-	}
+	var course map[string]any
 	modules := []map[string]any{}
-	if include.Modules {
-		if !progress("Loading modules from Canvas...") {
-			return context.Canceled
-		}
-		modules, err = canvasGetArrayPaginated(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/modules", canvasCourseID), url.Values{"include[]": []string{"items"}})
-		if err != nil {
-			return err
-		}
-	}
 	enrollmentRows := []map[string]any{}
 	rosterEmailByCanvasUID := make(map[int64]string)
-	needEnrollmentRows := include.Enrollments || include.Grades
+	needEnrollmentRows := include.Enrollments || include.Grades || include.Assignments
+
+	if !progress("Loading course data from Canvas...") {
+		return context.Canceled
+	}
+	prefetchTasks := 1
+	if include.Modules {
+		prefetchTasks++
+	}
 	if needEnrollmentRows {
-		if !progress("Loading Canvas enrollments...") {
+		prefetchTasks += 2
+	}
+	prefetchGroup, prefetchCtx := canvasImportParallelGroup(ctx, prefetchTasks)
+	prefetchGroup.Go(func() error {
+		var loadErr error
+		course, loadErr = canvasGetObject(prefetchCtx, client, canvasBase, accessToken,
+			fmt.Sprintf("courses/%d", canvasCourseID), url.Values{"include[]": []string{"syllabus_body"}})
+		return loadErr
+	})
+	if include.Modules {
+		prefetchGroup.Go(func() error {
+			var loadErr error
+			modules, loadErr = canvasGetArrayPaginated(prefetchCtx, client, canvasBase, accessToken,
+				fmt.Sprintf("courses/%d/modules", canvasCourseID), url.Values{"include[]": []string{"items"}})
+			return loadErr
+		})
+	}
+	if needEnrollmentRows {
+		prefetchGroup.Go(func() error {
+			var loadErr error
+			enrollmentRows, loadErr = canvasGetArrayPaginated(prefetchCtx, client, canvasBase, accessToken,
+				fmt.Sprintf("courses/%d/enrollments", canvasCourseID), canvasEnrollmentListQuery())
+			return loadErr
+		})
+		prefetchGroup.Go(func() error {
+			var loadErr error
+			rosterEmailByCanvasUID, loadErr = canvasRosterEmailsByCanvasUserID(prefetchCtx, client, canvasBase, accessToken, canvasCourseID)
+			return loadErr
+		})
+	}
+	if err := prefetchGroup.Wait(); err != nil {
+		return err
+	}
+	if !progress("Loaded course data from Canvas.") {
+		return context.Canceled
+	}
+
+	var moduleItemCache *canvasModuleItemCache
+	if include.Modules && len(modules) > 0 {
+		if !progress("Prefetching module content from Canvas...") {
 			return context.Canceled
 		}
-		enrollmentRows, err = canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
-			fmt.Sprintf("courses/%d/enrollments", canvasCourseID), canvasEnrollmentListQuery())
-		if err != nil {
-			return err
-		}
-		rosterEmailByCanvasUID, err = canvasRosterEmailsByCanvasUserID(ctx, client, canvasBase, accessToken, canvasCourseID)
+		moduleItemCache, err = canvasPrefetchModuleItemData(ctx, client, canvasBase, accessToken, canvasCourseID, modules, include)
 		if err != nil {
 			return err
 		}
 	}
 
 	var canvasUserToLocal map[int64]uuid.UUID
-	if include.Grades {
+	if include.Grades || include.Assignments {
 		canvasUserToLocal = buildCanvasUserIDToLexturesUserID(ctx, d.Pool, client, canvasBase, accessToken, canvasCourseID, enrollmentRows, rosterEmailByCanvasUID)
 	}
 
-	tx, err := d.Pool.Begin(ctx)
-	if err != nil {
-		return errors.New("Failed to start import transaction.")
-	}
-	defer func() { _ = tx.Rollback(ctx) }()
-
 	var courseID uuid.UUID
-	err = tx.QueryRow(ctx, `SELECT id FROM course.courses WHERE course_code = $1`, courseCode).Scan(&courseID)
+	var orgID uuid.UUID
+	err = d.Pool.QueryRow(ctx, `SELECT id, org_id FROM course.courses WHERE course_code = $1`, courseCode).Scan(&courseID, &orgID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return errors.New("Course not found or you do not have access.")
 	}
 	if err != nil {
 		return errors.New("Failed to load course.")
 	}
-	var orgID uuid.UUID
-	if err = tx.QueryRow(ctx, `SELECT org_id FROM course.courses WHERE id = $1`, courseID).Scan(&orgID); err != nil {
-		return errors.New("Failed to load course organization.")
-	}
 
 	if include.Settings {
+		settingsTx, settingsErr := d.Pool.Begin(ctx)
+		if settingsErr != nil {
+			return errors.New("Failed to start import transaction.")
+		}
 		title := strAt(course, "name", "Imported Canvas course")
 		// Avoid stuffing the syllabus (or HTML public description) into the short course
 		// blurb—the syllabus still lands on the dedicated syllabus record below.
 		desc := title
 		published := strAt(course, "workflow_state", "available") == "available"
-		_, err = tx.Exec(ctx, `UPDATE course.courses SET title = $1, description = $2, published = $3, updated_at = NOW() WHERE id = $4`, title, desc, published, courseID)
-		if err != nil {
+		_, settingsErr = settingsTx.Exec(ctx, `UPDATE course.courses SET title = $1, description = $2, published = $3, updated_at = NOW() WHERE id = $4`, title, desc, published, courseID)
+		if settingsErr != nil {
+			_ = settingsTx.Rollback(ctx)
 			return errors.New("Failed to update course settings.")
 		}
 		syllabusHTML := strAt(course, "syllabus_body", "")
@@ -256,28 +280,43 @@ func (d Deps) runCanvasImport(
 				"heading":  "Syllabus",
 				"markdown": markdownFromHTML(syllabusHTML),
 			}})
-			_, err = tx.Exec(ctx, `
+			_, settingsErr = settingsTx.Exec(ctx, `
 				INSERT INTO course.course_syllabus (course_id, sections, require_syllabus_acceptance, updated_at)
 				VALUES ($1, $2, false, NOW())
 				ON CONFLICT (course_id) DO UPDATE SET sections = EXCLUDED.sections, updated_at = NOW()
 			`, courseID, sections)
-			if err != nil {
+			if settingsErr != nil {
+				_ = settingsTx.Rollback(ctx)
 				return errors.New("Failed to update syllabus.")
 			}
 		}
+		if settingsErr = settingsTx.Commit(ctx); settingsErr != nil {
+			return errors.New("Something went wrong while saving the import.")
+		}
+		broadcastStructureChanged(courseCode)
+		d.notifyCourses(importerUserID)
 	}
 
 	if include.Modules && (mode == "erase" || mode == "overwrite") {
 		if !progress("Clearing existing course modules...") {
 			return context.Canceled
 		}
-		if _, err = tx.Exec(ctx, `DELETE FROM course.course_structure_items WHERE course_id = $1`, courseID); err != nil {
+		wipeTx, wipeErr := d.Pool.Begin(ctx)
+		if wipeErr != nil {
+			return errors.New("Failed to start import transaction.")
+		}
+		if _, wipeErr = wipeTx.Exec(ctx, `DELETE FROM course.course_structure_items WHERE course_id = $1`, courseID); wipeErr != nil {
+			_ = wipeTx.Rollback(ctx)
 			return errors.New("Failed to clear existing module structure.")
 		}
+		if wipeErr = wipeTx.Commit(ctx); wipeErr != nil {
+			return errors.New("Something went wrong while saving the import.")
+		}
+		broadcastStructureChanged(courseCode)
 	}
 
 	nextSort := 0
-	_ = tx.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), -1) + 1 FROM course.course_structure_items WHERE course_id = $1`, courseID).Scan(&nextSort)
+	_ = d.Pool.QueryRow(ctx, `SELECT COALESCE(MAX(sort_order), -1) + 1 FROM course.course_structure_items WHERE course_id = $1`, courseID).Scan(&nextSort)
 	canvasAssignToItem := make(map[int64]uuid.UUID)
 	canvasQuizToItem := make(map[int64]uuid.UUID)
 	canvasQuizToQuestions := make(map[int64][]coursemodulequiz.QuizQuestion)
@@ -287,14 +326,22 @@ func (d Deps) runCanvasImport(
 			return context.Canceled
 		}
 		for _, m := range modules {
+			moduleTx, moduleErr := d.Pool.Begin(ctx)
+			if moduleErr != nil {
+				return errors.New("Failed to start import transaction.")
+			}
+			moduleFailed := func(msg string) error {
+				_ = moduleTx.Rollback(ctx)
+				return errors.New(msg)
+			}
 			moduleID := uuid.New()
 			title := strAt(m, "name", "Module")
 			published := boolAt(m, "published", true)
-			if _, err = tx.Exec(ctx, `
+			if _, moduleErr = moduleTx.Exec(ctx, `
 				INSERT INTO course.course_structure_items (id, course_id, sort_order, kind, title, parent_id, published, archived)
 				VALUES ($1, $2, $3, 'module', $4, NULL, $5, false)
-			`, moduleID, courseID, nextSort, title, published); err != nil {
-				return errors.New("Failed to insert module item.")
+			`, moduleID, courseID, nextSort, title, published); moduleErr != nil {
+				return moduleFailed("Failed to insert module item.")
 			}
 			nextSort++
 			items := arrAt(m, "items")
@@ -312,11 +359,11 @@ func (d Deps) runCanvasImport(
 				itemID := uuid.New()
 				itemTitle := strAt(it, "title", "Item")
 				itemPublished := boolAt(it, "published", published)
-				if _, err = tx.Exec(ctx, `
+				if _, moduleErr = moduleTx.Exec(ctx, `
 					INSERT INTO course.course_structure_items (id, course_id, sort_order, kind, title, parent_id, published, archived)
 					VALUES ($1, $2, $3, $4, $5, $6, $7, false)
-				`, itemID, courseID, nextSort, kind, itemTitle, moduleID, itemPublished); err != nil {
-					return errors.New("Failed to insert module child item.")
+				`, itemID, courseID, nextSort, kind, itemTitle, moduleID, itemPublished); moduleErr != nil {
+					return moduleFailed("Failed to insert module child item.")
 				}
 				nextSort++
 				switch bodyTable {
@@ -325,10 +372,12 @@ func (d Deps) runCanvasImport(
 					if kind == "content_page" {
 						pageURL := strAt(it, "page_url", "")
 						if pageURL != "" {
-							canvasPageSlugToItem[strings.ToLower(strings.TrimSpace(pageURL))] = itemID
-							page, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/pages/%s", canvasCourseID, url.PathEscape(pageURL)), nil)
-							if e == nil {
-								md = markdownFromHTML(strAt(page, "body", ""))
+							slug := strings.ToLower(strings.TrimSpace(pageURL))
+							canvasPageSlugToItem[slug] = itemID
+							if moduleItemCache != nil {
+								if page := moduleItemCache.pages[slug]; page != nil {
+									md = markdownFromHTML(strAt(page, "body", ""))
+								}
 							}
 						}
 					} else {
@@ -337,30 +386,37 @@ func (d Deps) runCanvasImport(
 							md = fmt.Sprintf("**%s**\n\n[Open in Canvas](%s)", itemTitle, link)
 						}
 					}
-					if _, err = tx.Exec(ctx, `INSERT INTO course.module_content_pages (structure_item_id, markdown) VALUES ($1, $2)`, itemID, md); err != nil {
-						return errors.New("Failed to save imported page content.")
+					if _, moduleErr = moduleTx.Exec(ctx, `INSERT INTO course.module_content_pages (structure_item_id, markdown) VALUES ($1, $2)`, itemID, md); moduleErr != nil {
+						return moduleFailed("Failed to save imported page content.")
 					}
 				case "assignment":
 					markdown := ""
 					var pointsWorth *int
 					var dueAt, availFrom, availUntil *time.Time
+					var rubricJSON []byte
 					if cid := int64At(it, "content_id"); cid > 0 {
 						canvasAssignToItem[cid] = itemID
-						obj, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/assignments/%d", canvasCourseID, cid), nil)
-						if e == nil && obj != nil {
+						var obj map[string]any
+						if moduleItemCache != nil {
+							obj = moduleItemCache.assignments[cid]
+						}
+						if obj != nil {
 							markdown = markdownFromHTML(strAt(obj, "description", ""))
 							pointsWorth = optionalPointsWorthFromCanvas(obj, "points_possible")
 							dueAt = canvasTimeAt(obj, "due_at")
 							availFrom = canvasTimeAt(obj, "unlock_at")
 							availUntil = canvasTimeAt(obj, "lock_at")
+							if raw, rubErr := canvasOptionalRubricJSONFromAssignment(obj); rubErr == nil && len(raw) > 0 {
+								rubricJSON = raw
+							}
 						}
 					}
-					if _, err = tx.Exec(ctx, `INSERT INTO course.module_assignments (structure_item_id, markdown, points_worth, available_from, available_until) VALUES ($1, $2, $3, $4, $5)`, itemID, markdown, pointsWorth, availFrom, availUntil); err != nil {
-						return errors.New("Failed to save imported assignment.")
+					if _, moduleErr = moduleTx.Exec(ctx, `INSERT INTO course.module_assignments (structure_item_id, markdown, points_worth, available_from, available_until, rubric_json) VALUES ($1, $2, $3, $4, $5, $6)`, itemID, markdown, pointsWorth, availFrom, availUntil, nullableJSONBytes(rubricJSON)); moduleErr != nil {
+						return moduleFailed("Failed to save imported assignment.")
 					}
 					if dueAt != nil {
-						if _, err = tx.Exec(ctx, `UPDATE course.course_structure_items SET due_at = $1 WHERE id = $2`, dueAt, itemID); err != nil {
-							return errors.New("Failed to save imported assignment due date.")
+						if _, moduleErr = moduleTx.Exec(ctx, `UPDATE course.course_structure_items SET due_at = $1 WHERE id = $2`, dueAt, itemID); moduleErr != nil {
+							return moduleFailed("Failed to save imported assignment due date.")
 						}
 					}
 				case "quiz":
@@ -370,31 +426,28 @@ func (d Deps) runCanvasImport(
 					var dueAt, availFrom, availUntil *time.Time
 					if cid := int64At(it, "content_id"); cid > 0 {
 						canvasQuizToItem[cid] = itemID
-						obj, e := canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("courses/%d/quizzes/%d", canvasCourseID, cid), nil)
-						if e == nil && obj != nil {
-							markdown = markdownFromHTML(strAt(obj, "description", ""))
-							pointsWorth = optionalPointsWorthFromCanvas(obj, "points_possible")
-							dueAt = canvasTimeAt(obj, "due_at")
-							availFrom = canvasTimeAt(obj, "unlock_at")
-							availUntil = canvasTimeAt(obj, "lock_at")
+						if moduleItemCache != nil {
+							if obj := moduleItemCache.quizzes[cid]; obj != nil {
+								markdown = markdownFromHTML(strAt(obj, "description", ""))
+								pointsWorth = optionalPointsWorthFromCanvas(obj, "points_possible")
+								dueAt = canvasTimeAt(obj, "due_at")
+								availFrom = canvasTimeAt(obj, "unlock_at")
+								availUntil = canvasTimeAt(obj, "lock_at")
+							}
+							questions = moduleItemCache.quizQuestions[cid]
+							canvasQuizToQuestions[cid] = questions
 						}
-						qq, qe := canvasImportQuizQuestions(ctx, client, canvasBase, accessToken, canvasCourseID, cid)
-						if qe != nil {
-							return fmt.Errorf("Failed to load quiz questions from Canvas (quiz id %d): %w", cid, qe)
-						}
-						questions = qq
-						canvasQuizToQuestions[cid] = questions
 					}
 					qJSON, mj := json.Marshal(questions)
 					if mj != nil {
-						return errors.New("Failed to encode imported quiz questions.")
+						return moduleFailed("Failed to encode imported quiz questions.")
 					}
-					if _, err = tx.Exec(ctx, `INSERT INTO course.module_quizzes (structure_item_id, markdown, questions_json, points_worth, available_from, available_until) VALUES ($1, $2, $3, $4, $5, $6)`, itemID, markdown, qJSON, pointsWorth, availFrom, availUntil); err != nil {
-						return errors.New("Failed to save imported quiz.")
+					if _, moduleErr = moduleTx.Exec(ctx, `INSERT INTO course.module_quizzes (structure_item_id, markdown, questions_json, points_worth, available_from, available_until) VALUES ($1, $2, $3, $4, $5, $6)`, itemID, markdown, qJSON, pointsWorth, availFrom, availUntil); moduleErr != nil {
+						return moduleFailed("Failed to save imported quiz.")
 					}
 					if dueAt != nil {
-						if _, err = tx.Exec(ctx, `UPDATE course.course_structure_items SET due_at = $1 WHERE id = $2`, dueAt, itemID); err != nil {
-							return errors.New("Failed to save imported quiz due date.")
+						if _, moduleErr = moduleTx.Exec(ctx, `UPDATE course.course_structure_items SET due_at = $1 WHERE id = $2`, dueAt, itemID); moduleErr != nil {
+							return moduleFailed("Failed to save imported quiz due date.")
 						}
 					}
 				case "external":
@@ -402,12 +455,26 @@ func (d Deps) runCanvasImport(
 					if raw == "" {
 						raw = strAt(it, "html_url", "")
 					}
-					if _, err = tx.Exec(ctx, `INSERT INTO course.module_external_links (structure_item_id, url) VALUES ($1, $2)`, itemID, raw); err != nil {
-						return errors.New("Failed to save imported external link.")
+					if _, moduleErr = moduleTx.Exec(ctx, `INSERT INTO course.module_external_links (structure_item_id, url) VALUES ($1, $2)`, itemID, raw); moduleErr != nil {
+						return moduleFailed("Failed to save imported external link.")
 					}
 				}
 			}
+			if moduleErr = moduleTx.Commit(ctx); moduleErr != nil {
+				return errors.New("Something went wrong while saving the import.")
+			}
+			broadcastStructureChanged(courseCode)
 		}
+	}
+
+	needFinalizeTx := include.Enrollments || include.Grades || (include.Assignments && len(canvasAssignToItem) > 0)
+	var tx pgx.Tx
+	if needFinalizeTx {
+		tx, err = d.Pool.Begin(ctx)
+		if err != nil {
+			return errors.New("Failed to start import transaction.")
+		}
+		defer func() { _ = tx.Rollback(ctx) }()
 	}
 
 	if include.Enrollments {
@@ -430,7 +497,10 @@ func (d Deps) runCanvasImport(
 				continue
 			}
 			role := canvasEnrollmentTypeToRole(strAt(e, "type", ""))
-			if include.Grades && canvasUID > 0 {
+			if (include.Grades || include.Assignments) && canvasUID > 0 {
+				if canvasUserToLocal == nil {
+					canvasUserToLocal = make(map[int64]uuid.UUID)
+				}
 				canvasUserToLocal[canvasUID] = userID
 			}
 			if err := canvasApplyEnrollment(ctx, tx, courseID, courseCode, userID, role, &enrollStats); err != nil {
@@ -449,6 +519,13 @@ func (d Deps) runCanvasImport(
 		}
 	}
 
+	cfg := d.effectiveConfig()
+	submissionDeps := &canvasAssignmentSubmissionImportDeps{
+		CourseCode:     courseCode,
+		ImporterUserID: importerUserID,
+		FilesRoot:      cfg.CourseFilesRoot,
+		Storage:        d.Storage,
+	}
 	if include.Grades {
 		if canvasUserToLocal == nil {
 			canvasUserToLocal = make(map[int64]uuid.UUID)
@@ -462,7 +539,7 @@ func (d Deps) runCanvasImport(
 				return context.Canceled
 			}
 		}
-		if !progress("Importing assignment and quiz grades from Canvas...") {
+		if !progress("Importing assignment grades and student submissions from Canvas...") {
 			return context.Canceled
 		}
 		if !progress("Importing quiz attempt responses from Canvas...") {
@@ -478,16 +555,28 @@ func (d Deps) runCanvasImport(
 			"userMapLen":         len(canvasUserToLocal),
 		})
 		// #endregion agent log
-		if err := canvasImportAllCanvasGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal); err != nil {
+		if err := canvasImportAllCanvasGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal, submissionDeps); err != nil {
+			return err
+		}
+	} else if include.Assignments && len(canvasAssignToItem) > 0 {
+		if canvasUserToLocal == nil {
+			canvasUserToLocal = make(map[int64]uuid.UUID)
+		}
+		if !progress("Importing student assignment submissions from Canvas...") {
+			return context.Canceled
+		}
+		if err := canvasImportAssignmentGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasUserToLocal, submissionDeps, false); err != nil {
 			return err
 		}
 	}
 
-	if !progress("Saving imported content into your course...") {
-		return context.Canceled
-	}
-	if err = tx.Commit(ctx); err != nil {
-		return errors.New("Something went wrong while saving the import.")
+	if needFinalizeTx {
+		if !progress("Saving imported content into your course...") {
+			return context.Canceled
+		}
+		if err = tx.Commit(ctx); err != nil {
+			return errors.New("Something went wrong while saving the import.")
+		}
 	}
 
 	var canvasFileIDs map[int64]uuid.UUID
@@ -889,64 +978,78 @@ func enrichCanvasLinkMaps(
 		return ids[0], true
 	}
 
-	assignRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
-		fmt.Sprintf("courses/%d/assignments", canvasCourseID), nil)
-	if err != nil {
-		log.Printf("canvas-link-rewrite: list assignments: %v", err)
-	} else {
-		for _, a := range assignRows {
-			cid := int64At(a, "id")
-			if cid <= 0 {
-				continue
-			}
-			if _, ok := assignments[cid]; ok {
-				continue
-			}
-			if id, ok := uniqueByKindTitle("assignment", strAt(a, "name", "")); ok {
-				assignments[cid] = id
-			}
+	var assignRows, quizRows, pageRows []map[string]any
+	linkGroup, linkCtx := canvasImportParallelGroup(ctx, 3)
+	linkGroup.Go(func() error {
+		rows, listErr := canvasGetArrayPaginated(linkCtx, client, canvasBase, accessToken,
+			fmt.Sprintf("courses/%d/assignments", canvasCourseID), nil)
+		if listErr != nil {
+			log.Printf("canvas-link-rewrite: list assignments: %v", listErr)
+			return nil
+		}
+		assignRows = rows
+		return nil
+	})
+	linkGroup.Go(func() error {
+		rows, listErr := canvasGetArrayPaginated(linkCtx, client, canvasBase, accessToken,
+			fmt.Sprintf("courses/%d/quizzes", canvasCourseID), nil)
+		if listErr != nil {
+			log.Printf("canvas-link-rewrite: list quizzes: %v", listErr)
+			return nil
+		}
+		quizRows = rows
+		return nil
+	})
+	linkGroup.Go(func() error {
+		rows, listErr := canvasGetArrayPaginated(linkCtx, client, canvasBase, accessToken,
+			fmt.Sprintf("courses/%d/pages", canvasCourseID), nil)
+		if listErr != nil {
+			log.Printf("canvas-link-rewrite: list pages: %v", listErr)
+			return nil
+		}
+		pageRows = rows
+		return nil
+	})
+	_ = linkGroup.Wait()
+
+	for _, a := range assignRows {
+		cid := int64At(a, "id")
+		if cid <= 0 {
+			continue
+		}
+		if _, ok := assignments[cid]; ok {
+			continue
+		}
+		if id, ok := uniqueByKindTitle("assignment", strAt(a, "name", "")); ok {
+			assignments[cid] = id
 		}
 	}
-
-	quizRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
-		fmt.Sprintf("courses/%d/quizzes", canvasCourseID), nil)
-	if err != nil {
-		log.Printf("canvas-link-rewrite: list quizzes: %v", err)
-	} else {
-		for _, q := range quizRows {
-			cid := int64At(q, "id")
-			if cid <= 0 {
-				continue
-			}
-			if _, ok := quizzes[cid]; ok {
-				continue
-			}
-			if id, ok := uniqueByKindTitle("quiz", strAt(q, "title", "")); ok {
-				quizzes[cid] = id
-			}
+	for _, q := range quizRows {
+		cid := int64At(q, "id")
+		if cid <= 0 {
+			continue
+		}
+		if _, ok := quizzes[cid]; ok {
+			continue
+		}
+		if id, ok := uniqueByKindTitle("quiz", strAt(q, "title", "")); ok {
+			quizzes[cid] = id
 		}
 	}
-
-	pageRows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
-		fmt.Sprintf("courses/%d/pages", canvasCourseID), nil)
-	if err != nil {
-		log.Printf("canvas-link-rewrite: list pages: %v", err)
-	} else {
-		for _, p := range pageRows {
-			slug := strings.ToLower(strings.TrimSpace(strAt(p, "url", "")))
-			if slug == "" {
-				continue
-			}
-			if _, ok := pageSlugs[slug]; ok {
-				continue
-			}
-			if id, ok := uniqueByKindTitle("content_page", strAt(p, "title", "")); ok {
-				pageSlugs[slug] = id
-				continue
-			}
-			if id, ok := uniqueByKindTitle("content_page", slug); ok {
-				pageSlugs[slug] = id
-			}
+	for _, p := range pageRows {
+		slug := strings.ToLower(strings.TrimSpace(strAt(p, "url", "")))
+		if slug == "" {
+			continue
+		}
+		if _, ok := pageSlugs[slug]; ok {
+			continue
+		}
+		if id, ok := uniqueByKindTitle("content_page", strAt(p, "title", "")); ok {
+			pageSlugs[slug] = id
+			continue
+		}
+		if id, ok := uniqueByKindTitle("content_page", slug); ok {
+			pageSlugs[slug] = id
 		}
 	}
 }
@@ -1261,80 +1364,103 @@ func (d Deps) importCanvasFiles(
 	imported := 0
 	canvasFileIDs := make(map[int64]uuid.UUID)
 	canvasFileNames := make(map[int64]string)
+	var fileMapsMu sync.Mutex
+	var importedMu sync.Mutex
+
+	fileGroup, fileCtx := canvasImportParallelGroup(ctx, len(fileRows))
 	for _, f := range fileRows {
-		canvasFileID := int64At(f, "id")
-		if canvasFileID == 0 {
-			continue
-		}
-		displayName := strAt(f, "display_name", strAt(f, "filename", "file"))
-		filename := strAt(f, "filename", displayName)
-		mimeType := strAt(f, "content-type", "application/octet-stream")
-		fileSize := int64At(f, "size")
-		downloadURL := strAt(f, "url", "")
-		if downloadURL == "" {
-			continue
-		}
-		canvasFolderID := int64At(f, "folder_id")
-		var localFolderID *uuid.UUID
-		if canvasFolderID != 0 {
-			if fid, ok := canvasFolderToLocal[canvasFolderID]; ok && fid != uuid.Nil {
-				localFolderID = &fid
+		f := f
+		fileGroup.Go(func() error {
+			canvasFileID := int64At(f, "id")
+			if canvasFileID == 0 {
+				return nil
 			}
-		}
-		ext := filepath.Ext(filename)
-		objectKey := fmt.Sprintf("managed-files/%s/%s%s", courseCode, uuid.New().String(), ext)
+			displayName := strAt(f, "display_name", strAt(f, "filename", "file"))
+			filename := strAt(f, "filename", displayName)
+			mimeType := strAt(f, "content-type", "application/octet-stream")
+			fileSize := int64At(f, "size")
+			downloadURL := strAt(f, "url", "")
+			if downloadURL == "" {
+				return nil
+			}
+			canvasFolderID := int64At(f, "folder_id")
+			var localFolderID *uuid.UUID
+			if canvasFolderID != 0 {
+				if fid, ok := canvasFolderToLocal[canvasFolderID]; ok && fid != uuid.Nil {
+					localFolderID = &fid
+				}
+			}
+			ext := filepath.Ext(filename)
+			objectKey := fmt.Sprintf("managed-files/%s/%s%s", courseCode, uuid.New().String(), ext)
 
-		// Download from Canvas
-		req, reqErr := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
-		if reqErr != nil {
-			log.Printf("canvas-import-files: build request file=%d err=%v", canvasFileID, reqErr)
-			continue
-		}
-		req.Header.Set("Authorization", "Bearer "+accessToken)
-		resp, dlErr := client.Do(req)
-		if dlErr != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {
-			if resp != nil {
+			req, reqErr := http.NewRequestWithContext(fileCtx, http.MethodGet, downloadURL, nil)
+			if reqErr != nil {
+				log.Printf("canvas-import-files: build request file=%d err=%v", canvasFileID, reqErr)
+				return nil
+			}
+			req.Header.Set("Authorization", "Bearer "+accessToken)
+			resp, dlErr := client.Do(req)
+			if dlErr != nil || resp.StatusCode < 200 || resp.StatusCode > 299 {
+				if resp != nil {
+					_ = resp.Body.Close()
+				}
+				log.Printf("canvas-import-files: download file=%d status=%v err=%v", canvasFileID, resp, dlErr)
+				return nil
+			}
+
+			if d.Storage != nil {
+				storeErr := d.Storage.PutObject(fileCtx, objectKey, resp.Body, fileSize, mimeType)
+				_ = resp.Body.Close()
+				if storeErr != nil {
+					log.Printf("canvas-import-files: store file=%d key=%q err=%v", canvasFileID, objectKey, storeErr)
+					return nil
+				}
+			} else {
+				root := strings.TrimSpace(cfg.CourseFilesRoot)
+				if root == "" {
+					root = "data/course-files"
+				}
+				p := root + "/" + courseCode + "/" + objectKey
+				if writeErr := writeLocalFile(p, resp.Body); writeErr != nil {
+					_ = resp.Body.Close()
+					log.Printf("canvas-import-files: write file=%d path=%q err=%v", canvasFileID, p, writeErr)
+					return nil
+				}
 				_ = resp.Body.Close()
 			}
-			log.Printf("canvas-import-files: download file=%d status=%v err=%v", canvasFileID, resp, dlErr)
-			continue
-		}
 
-		// Store blob
-		if d.Storage != nil {
-			storeErr := d.Storage.PutObject(ctx, objectKey, resp.Body, fileSize, mimeType)
-			_ = resp.Body.Close()
-			if storeErr != nil {
-				log.Printf("canvas-import-files: store file=%d key=%q err=%v", canvasFileID, objectKey, storeErr)
-				continue
+			fi, dbErr := filemanager.CreateFileItemWithCanvas(
+				fileCtx, d.Pool, courseID, localFolderID,
+				objectKey, filename, displayName, mimeType, fileSize, importerUserID, canvasFileID,
+			)
+			if dbErr != nil {
+				log.Printf("canvas-import-files: db insert file=%d err=%v", canvasFileID, dbErr)
+				return nil
 			}
-		} else {
-			root := strings.TrimSpace(cfg.CourseFilesRoot)
-			if root == "" {
-				root = "data/course-files"
-			}
-			p := root + "/" + courseCode + "/" + objectKey
-			if writeErr := writeLocalFile(p, resp.Body); writeErr != nil {
-				_ = resp.Body.Close()
-				log.Printf("canvas-import-files: write file=%d path=%q err=%v", canvasFileID, p, writeErr)
-				continue
-			}
-			_ = resp.Body.Close()
-		}
 
-		// Register metadata
-		fi, dbErr := filemanager.CreateFileItemWithCanvas(
-			ctx, d.Pool, courseID, localFolderID,
-			objectKey, filename, displayName, mimeType, fileSize, importerUserID, canvasFileID,
-		)
-		if dbErr != nil {
-			log.Printf("canvas-import-files: db insert file=%d err=%v", canvasFileID, dbErr)
-			continue
-		}
-		canvasFileIDs[canvasFileID] = fi.ID
-		canvasFileNames[canvasFileID] = displayName
-		imported++
+			fileMapsMu.Lock()
+			canvasFileIDs[canvasFileID] = fi.ID
+			canvasFileNames[canvasFileID] = displayName
+			fileMapsMu.Unlock()
+			broadcastFilesChanged(courseCode)
 
+			n := 0
+			importedMu.Lock()
+			imported++
+			n = imported
+			importedMu.Unlock()
+			if n%5 == 0 {
+				if !progress(fmt.Sprintf("Importing files… (%d so far)", n)) {
+					return context.Canceled
+				}
+			}
+			return nil
+		})
+	}
+	if err := fileGroup.Wait(); err != nil {
+		return imported, canvasFileIDs, canvasFileNames, err
+	}
+	if imported > 0 {
 		if !progress(fmt.Sprintf("Importing files… (%d so far)", imported)) {
 			return imported, canvasFileIDs, canvasFileNames, context.Canceled
 		}

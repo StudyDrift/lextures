@@ -35,6 +35,7 @@ import { heroImageObjectStyle } from '../../lib/hero-image-position'
 import { getJwtSubject } from '../../lib/auth'
 import { hrefForRecommendationItem, surfaceLabel } from '../../lib/recommendation-nav'
 import { CourseVisibilityPill } from '../../components/ui/status-vocabulary'
+import { useCourseLiveStructureRevision } from '../../context/course-live-context'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { getCourseViewAs } from '../../lib/course-view-as'
@@ -227,11 +228,15 @@ export default function CourseDetail() {
     }
   }, [courseCode, ffCatalogIntegration])
 
+  const structureRevision = useCourseLiveStructureRevision()
+
   useEffect(() => {
     if (!courseCode) return
     let cancelled = false
     ;(async () => {
-      setLoading(true)
+      if (structureRevision === 0) {
+        setLoading(true)
+      }
       setError(null)
       try {
         const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}`)
@@ -271,7 +276,7 @@ export default function CourseDetail() {
     return () => {
       cancelled = true
     }
-  }, [courseCode])
+  }, [courseCode, structureRevision])
 
   const landing = useMemo((): 'data' | 'calendar' | 'content_page' => {
     if (!course) return 'data'
@@ -299,7 +304,7 @@ export default function CourseDetail() {
     return () => {
       cancelled = true
     }
-  }, [courseCode, course, landing])
+  }, [courseCode, course, landing, structureRevision])
 
   useEffect(() => {
     if (!courseCode || !course || landing !== 'data') return

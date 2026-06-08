@@ -143,6 +143,29 @@ RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, submi
 `, courseID, moduleItemID, submittedBy, attachmentFileID))
 }
 
+// UpsertImportedInTransaction records or updates a Canvas-imported submission row inside an import tx.
+func UpsertImportedInTransaction(
+	ctx context.Context,
+	tx pgx.Tx,
+	courseID, moduleItemID, submittedBy uuid.UUID,
+	attachmentFileID *uuid.UUID,
+	submittedAt time.Time,
+) error {
+	_, err := tx.Exec(ctx, `
+INSERT INTO course.module_assignment_submissions (
+	course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at
+) VALUES ($1, $2, $3, $4, $5, $5)
+ON CONFLICT (module_item_id, submitted_by) DO UPDATE SET
+	attachment_file_id = COALESCE(EXCLUDED.attachment_file_id, course.module_assignment_submissions.attachment_file_id),
+	submitted_at = CASE
+		WHEN EXCLUDED.submitted_at > course.module_assignment_submissions.submitted_at THEN EXCLUDED.submitted_at
+		ELSE course.module_assignment_submissions.submitted_at
+	END,
+	updated_at = GREATEST(course.module_assignment_submissions.updated_at, EXCLUDED.updated_at)
+`, courseID, moduleItemID, submittedBy, attachmentFileID, submittedAt)
+	return err
+}
+
 func ResubmitVersionedInTransaction(ctx context.Context, tx pgx.Tx, now time.Time, courseID, submissionID, newAttachmentFileID uuid.UUID) (*SubmissionRow, error) {
 	if tx == nil {
 		return nil, errors.New("db tx is nil")

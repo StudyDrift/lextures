@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { X } from 'lucide-react'
 import { formatDateTime } from '../../lib/format'
 import {
   deleteSubmissionAnnotation,
@@ -33,7 +34,16 @@ import { AnnotationToolbar, type AnnotationTool } from './annotation-toolbar'
 import { AnnotationViewer } from './annotation-viewer'
 import { FeedbackMediaPlayerList } from './feedback-media-player'
 import { FeedbackMediaRecorder } from './feedback-media-recorder'
+import { FilePreviewBody } from '../file-preview'
+import { detectPreviewType } from '../../lib/file-type'
 import { SubmissionNavigator, type GradedFilter } from './submission-navigator'
+import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
+import type { RubricDefinition } from '../../lib/courses-api'
+
+function submissionContentPath(contentPath?: string | null): string | null {
+  const trimmed = contentPath?.trim()
+  return trimmed || null
+}
 
 export type AssignmentAnnotationWorkbenchProps = {
   courseCode: string
@@ -43,6 +53,8 @@ export type AssignmentAnnotationWorkbenchProps = {
   /** `staff` uses roster navigation; `student` loads only the viewer’s submission. */
   mode: 'staff' | 'student'
   submissionAllowsFile: boolean
+  submissionAllowsText?: boolean
+  submissionAllowsUrl?: boolean
   /**
    * When true, show document annotation (requires file upload allowed). Default: same as
    * `submissionAllowsFile` for backwards compatibility.
@@ -59,11 +71,16 @@ export type AssignmentAnnotationWorkbenchProps = {
   /** Plan 3.4 — show provisional score entry for listed graders. */
   moderatedGradingActive?: boolean
   assignmentPointsWorth?: number | null
+  assignmentRubric?: RubricDefinition | null
   provisionalGraderUserIds?: string[]
   /** Plan 3.5 — from assignment settings; when not `disabled`, originality API is polled. */
   originalityDetection?: 'disabled' | 'plagiarism' | 'ai' | 'both'
   /** Plan 3.13 — server `RESUBMISSION_WORKFLOW_ENABLED`. */
   resubmissionWorkflowEnabled?: boolean
+  /** Staff preview-only mode opens in a near-full-screen modal instead of inline. */
+  presentation?: 'inline' | 'modal'
+  modalOpen?: boolean
+  onModalClose?: () => void
 }
 
 export function AssignmentAnnotationWorkbench({
@@ -71,6 +88,8 @@ export function AssignmentAnnotationWorkbench({
   itemId,
   mode,
   submissionAllowsFile,
+  submissionAllowsText = false,
+  submissionAllowsUrl = false,
   annotationsActive: annotationsActiveProp,
   feedbackMediaEnabled = false,
   blindGradingActive = false,
@@ -78,10 +97,14 @@ export function AssignmentAnnotationWorkbench({
   onAfterRevealIdentities,
   moderatedGradingActive = false,
   assignmentPointsWorth = null,
+  assignmentRubric = null,
   provisionalGraderUserIds = [],
   originalityDetection = 'disabled',
   assignmentTitle = 'Assignment',
   resubmissionWorkflowEnabled = false,
+  presentation = 'inline',
+  modalOpen = false,
+  onModalClose,
 }: AssignmentAnnotationWorkbenchProps) {
   const annotationsActive = annotationsActiveProp ?? submissionAllowsFile
   const [panel, setPanel] = useState<'document' | 'media'>('document')
@@ -176,8 +199,16 @@ export function AssignmentAnnotationWorkbench({
       ? true
       : versionForView.versionNumber === (current?.versionNumber ?? 0)
 
-  const displayFilePath = versionForView ? versionForView.attachmentContentPath : current?.attachmentContentPath
+  const displayAttachmentFileId = versionForView?.attachmentFileId ?? current?.attachmentFileId ?? null
+  const displayFilePath = submissionContentPath(
+    versionForView ? versionForView.attachmentContentPath : current?.attachmentContentPath,
+  )
   const displayMimeType = versionForView ? versionForView.attachmentMimeType : current?.attachmentMimeType
+  const displayFilename =
+    versionForView?.attachmentFilename ?? current?.attachmentFilename ?? 'submission'
+  const displayPreviewType = displayFilePath
+    ? detectPreviewType(displayMimeType, displayFilename)
+    : 'none'
   const readOnlyDocument =
     readOnly || (mode === 'staff' && resubmissionWorkflowEnabled && !viewIsLatest)
 
@@ -215,9 +246,10 @@ export function AssignmentAnnotationWorkbench({
   }, [courseCode, itemId, mode])
 
   useEffect(() => {
+    if (presentation === 'modal' && !modalOpen) return
     if (mode === 'staff') void reloadStaffList()
     else void reloadMine()
-  }, [mode, reloadMine, reloadStaffList])
+  }, [mode, reloadMine, reloadStaffList, presentation, modalOpen])
 
   const myUid = getJwtSubject()
   const isListedGrader = Boolean(
@@ -527,23 +559,242 @@ export function AssignmentAnnotationWorkbench({
     }
   }
 
-  const showDocPanel = annotationsActive
+  const submissionReviewActive =
+    mode === 'staff' && (submissionAllowsFile || submissionAllowsText || submissionAllowsUrl)
+  const filePreviewActive = submissionAllowsFile || submissionAllowsText || submissionAllowsUrl
+  const showDocPanel = annotationsActive || submissionReviewActive || (mode === 'student' && filePreviewActive)
   const showMediaPanel = feedbackMediaEnabled
   const both = showDocPanel && showMediaPanel
+  const staffPreviewOnly = mode === 'staff' && filePreviewActive && !annotationsActive
+  const previewErrorVariant = presentation === 'modal' ? 'message-only' : 'standalone'
+  const modalTitleId = useId()
+  const modalCloseRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (presentation !== 'modal' || !modalOpen) return
+    const t = window.setTimeout(() => modalCloseRef.current?.focus(), 0)
+    return () => window.clearTimeout(t)
+  }, [presentation, modalOpen])
+
+  useEffect(() => {
+    if (presentation !== 'modal' || !modalOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        onModalClose?.()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [presentation, modalOpen, onModalClose])
 
   if (!showDocPanel && !showMediaPanel) {
     return null
   }
 
+  if (presentation === 'modal' && !modalOpen) {
+    return null
+  }
+
+  const sectionAriaLabel =
+    mode === 'staff'
+      ? annotationsActive
+        ? 'Submission annotations'
+        : 'Submission preview'
+      : 'Your submission'
+
+  const sectionTitle =
+    mode === 'staff'
+      ? annotationsActive
+        ? 'SpeedGrader'
+        : 'Grade submissions'
+      : 'Your submission'
+
+  const documentPreviewContent =
+    displayFilePath ? (
+      annotationsActive && (displayPreviewType === 'pdf' || displayPreviewType === 'image') ? (
+        <AnnotationViewer
+          filePath={displayFilePath}
+          mimeType={displayMimeType ?? null}
+          filename={displayFilename}
+          readOnly={readOnlyDocument || staffPreviewOnly}
+          fallbackVariant={previewErrorVariant}
+          tool={tool}
+          colour={colour}
+          annotations={annotations}
+          onHighlightComplete={
+            annotationsActive && !readOnlyDocument ? onHighlightComplete : undefined
+          }
+          onDrawComplete={
+            annotationsActive && !readOnlyDocument ? onDrawComplete : undefined
+          }
+          onPinComplete={
+            annotationsActive && !readOnlyDocument ? onPinComplete : undefined
+          }
+          onTextBoxComplete={
+            annotationsActive && !readOnlyDocument ? onTextBoxComplete : undefined
+          }
+        />
+      ) : (
+        <FilePreviewBody
+          filePath={displayFilePath}
+          filename={displayFilename}
+          mimeType={displayMimeType}
+          errorVariant={previewErrorVariant}
+          className="h-full min-h-[40vh]"
+        />
+      )
+    ) : displayAttachmentFileId ? (
+      <div className="flex h-full min-h-48 items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50 px-4 py-6 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+        <p>This submission references a file that could not be loaded. Try downloading from the panel on the right, or re-import submissions from Canvas.</p>
+      </div>
+    ) : (
+      <div className="flex h-full min-h-48 items-center justify-center rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-900/60 dark:text-neutral-300">
+        {mode === 'staff' ? (
+          current?.submittedAt ? (
+            <p>
+              This student submitted on{' '}
+              {formatDateTime(current.submittedAt, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+              , but no submission content is on file yet.
+            </p>
+          ) : (
+            <p>No submission from this student yet.</p>
+          )
+        ) : submissionAllowsFile ? (
+          <p>Upload a file to submit this assignment.</p>
+        ) : (
+          <p>No submission on file yet.</p>
+        )}
+      </div>
+    )
+
+  if (presentation === 'modal') {
+    return (
+      <div
+        className="fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6"
+        role="presentation"
+      >
+        <button
+          type="button"
+          aria-label="Close submission preview backdrop"
+          className="absolute inset-0 cursor-default border-0 bg-slate-950/55 p-0 backdrop-blur-[2px] dark:bg-black/80"
+          onClick={onModalClose}
+          tabIndex={-1}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={modalTitleId}
+          className="relative z-10 flex w-full max-w-[min(96vw,1600px)] flex-col overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-[0_24px_80px_-12px_rgba(15,23,42,0.55)] ring-1 ring-slate-900/10 dark:border-neutral-500 dark:bg-neutral-900 dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.85)] dark:ring-white/10"
+          style={{ height: 'min(92vh, 1080px)', maxHeight: 'calc(100dvh - 1.5rem)' }}
+        >
+          <div className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 dark:border-neutral-600 dark:bg-neutral-800">
+            <h2
+              id={modalTitleId}
+              className="text-base font-semibold text-slate-900 dark:text-neutral-50"
+            >
+              {sectionTitle}
+            </h2>
+            {mode === 'staff' ? (
+              <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
+                {canRevealIdentities ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void onRevealIdentities()}
+                    className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-950 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-900/60"
+                  >
+                    Reveal identities
+                  </button>
+                ) : null}
+                <SubmissionNavigator
+                  submissions={submissions}
+                  index={idx}
+                  onIndexChange={setIdx}
+                  gradedFilter={gradedFilter}
+                  onGradedFilterChange={(f) => {
+                    setGradedFilter(f)
+                    setIdx(0)
+                  }}
+                  disabled={busy}
+                  currentSubmissionDisplayLabel={
+                    current?.blindLabel ??
+                    (submissions.length > 0 ? `Submission ${idx + 1}` : undefined)
+                  }
+                  anonymisedAriaLabel={
+                    current?.blindLabel
+                      ? `Anonymised student, label ${current.blindLabel}`
+                      : undefined
+                  }
+                />
+              </div>
+            ) : null}
+            <button
+              ref={modalCloseRef}
+              type="button"
+              onClick={onModalClose}
+              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+              aria-label="Close submission preview"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          {loadError ? (
+            <p className="shrink-0 border-b border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+              {loadError}
+            </p>
+          ) : null}
+
+          {mode === 'staff' && blindGradingActive ? (
+            <p
+              role="status"
+              className="shrink-0 border-b border-indigo-200 bg-indigo-50/90 px-4 py-2 text-sm text-indigo-950 dark:border-indigo-900/60 dark:bg-indigo-950/40 dark:text-indigo-100"
+            >
+              Blind grading is active — student identities are hidden.
+            </p>
+          ) : null}
+
+          <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+            <div className="min-h-[40vh] flex-1 overflow-auto border-b border-slate-200 bg-white dark:border-neutral-600 dark:bg-neutral-800 lg:min-h-0 lg:border-b-0 lg:border-r">
+              <div className="h-full min-h-[40vh] bg-slate-50 dark:bg-neutral-800/60">
+                {documentPreviewContent}
+              </div>
+            </div>
+            <SubmissionPreviewSidebar
+              mode={mode}
+              courseCode={courseCode}
+              itemId={itemId}
+              submissionId={current?.id ?? null}
+              rubric={assignmentRubric}
+              maxPoints={assignmentPointsWorth}
+              gradingDisabled={busy}
+              filename={displayFilename}
+              filePath={displayFilePath ?? null}
+              submittedAt={current?.submittedAt}
+              blindLabel={current?.blindLabel}
+              mimeType={displayMimeType}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <section
-      aria-label="Submission annotations"
-      className="mt-8 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-950"
+      id="submission-preview"
+      tabIndex={-1}
+      aria-label={sectionAriaLabel}
+      className="scroll-mt-20 mt-8 space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-950"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0 space-y-2">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
-            {mode === 'staff' ? 'SpeedGrader' : 'Your submission'}
+            {sectionTitle}
           </h2>
           {originalityActive && originalityReports && originalityReports.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2">
@@ -879,7 +1130,11 @@ export function AssignmentAnnotationWorkbench({
         </div>
       ) : null}
 
-      {showDocPanel && panel === 'document' && displayMimeType === 'application/pdf' && current?.id ? (
+      {showDocPanel &&
+      annotationsActive &&
+      panel === 'document' &&
+      displayMimeType === 'application/pdf' &&
+      current?.id ? (
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -894,37 +1149,28 @@ export function AssignmentAnnotationWorkbench({
 
       {showDocPanel && panel === 'document' ? (
         <>
-          <AnnotationToolbar
-            tool={tool}
-            onToolChange={setTool}
-            colour={colour}
-            onColourChange={setColour}
-            disabled={busy || !(current?.attachmentFileId || displayFilePath)}
-            readOnly={readOnlyDocument}
-          />
+          {annotationsActive ? (
+            <AnnotationToolbar
+              tool={tool}
+              onToolChange={setTool}
+              colour={colour}
+              onColourChange={setColour}
+              disabled={busy || !(current?.attachmentFileId || displayFilePath)}
+              readOnly={readOnlyDocument}
+            />
+          ) : null}
 
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-            <div className="min-w-0 flex-1">
-              <AnnotationViewer
-                filePath={displayFilePath ?? null}
-                mimeType={displayMimeType ?? null}
-                readOnly={readOnlyDocument}
-                tool={tool}
-                colour={colour}
+            <div className="min-w-0 flex-1">{documentPreviewContent}</div>
+            {annotationsActive ? (
+              <AnnotationCommentPanel
                 annotations={annotations}
-                onHighlightComplete={readOnlyDocument ? undefined : onHighlightComplete}
-                onDrawComplete={readOnlyDocument ? undefined : onDrawComplete}
-                onPinComplete={readOnlyDocument ? undefined : onPinComplete}
-                onTextBoxComplete={readOnlyDocument ? undefined : onTextBoxComplete}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                readOnly={readOnlyDocument}
+                onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
               />
-            </div>
-            <AnnotationCommentPanel
-              annotations={annotations}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              readOnly={readOnlyDocument}
-              onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
-            />
+            ) : null}
           </div>
         </>
       ) : null}
