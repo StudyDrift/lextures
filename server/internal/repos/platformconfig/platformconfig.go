@@ -100,6 +100,7 @@ type Row struct {
 	FFContentFilterIntegration        *bool
 	FFUiMode                          *bool
 	FFGradeSubmission                 *bool
+	FFPlagiarismChecks                *bool
 	FFCourseEvaluations               *bool
 
 	MFAEnabled     *bool
@@ -201,6 +202,7 @@ type Write struct {
 	FFContentFilterIntegration        *bool
 	FFUiMode                          *bool
 	FFGradeSubmission                 *bool
+	FFPlagiarismChecks                *bool
 	FFCourseEvaluations               *bool
 
 	MFAEnabled     *bool
@@ -299,6 +301,7 @@ SELECT
 	ff_demographics,
 	ff_content_filter_integration,
 	ff_grade_submission,
+	ff_plagiarism_checks,
 	ff_course_evaluations,
 	mfa_enabled,
 	mfa_enforcement,
@@ -392,6 +395,7 @@ WHERE id = 1
 		&r.FFDemographics,
 		&r.FFContentFilterIntegration,
 		&r.FFGradeSubmission,
+		&r.FFPlagiarismChecks,
 		&r.FFCourseEvaluations,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
@@ -525,6 +529,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_demographics,
 	ff_content_filter_integration,
 	ff_grade_submission,
+	ff_plagiarism_checks,
 	ff_course_evaluations,
 	mfa_enabled,
 	mfa_enforcement,
@@ -538,7 +543,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -623,6 +628,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_demographics = COALESCE(EXCLUDED.ff_demographics, settings.platform_app_settings.ff_demographics),
 	ff_content_filter_integration = COALESCE(EXCLUDED.ff_content_filter_integration, settings.platform_app_settings.ff_content_filter_integration),
 	ff_grade_submission = COALESCE(EXCLUDED.ff_grade_submission, settings.platform_app_settings.ff_grade_submission),
+	ff_plagiarism_checks = COALESCE(EXCLUDED.ff_plagiarism_checks, settings.platform_app_settings.ff_plagiarism_checks),
 	ff_course_evaluations = COALESCE(EXCLUDED.ff_course_evaluations, settings.platform_app_settings.ff_course_evaluations),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
@@ -714,6 +720,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFDemographics,
 		w.FFContentFilterIntegration,
 		w.FFGradeSubmission,
+		w.FFPlagiarismChecks,
 		w.FFCourseEvaluations,
 		w.MFAEnabled,
 		w.MFAEnforcement,

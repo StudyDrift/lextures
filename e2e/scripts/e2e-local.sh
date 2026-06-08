@@ -256,6 +256,9 @@ if [[ -n "${E2E_SERVER_BIN:-}" ]]; then
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
     FF_CLASSROOM_SIGNALS="true" \
+    FF_PLAGIARISM_CHECKS="true" \
+    ORIGINALITY_DETECTION_ENABLED="true" \
+    ORIGINALITY_STUB_EXTERNAL="true" \
     PORT="${E2E_API_PORT}" \
     "${E2E_SERVER_BIN}" &
 else
@@ -281,6 +284,9 @@ else
     FF_LIBRARY="true" \
     FF_BROADCASTS="true" \
     FF_CLASSROOM_SIGNALS="true" \
+    FF_PLAGIARISM_CHECKS="true" \
+    ORIGINALITY_DETECTION_ENABLED="true" \
+    ORIGINALITY_STUB_EXTERNAL="true" \
     PORT="${E2E_API_PORT}" \
     go run ./cmd/server &
 fi

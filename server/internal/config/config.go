@@ -312,6 +312,8 @@ type Config struct {
 	FFUiMode bool
 	// FFGradeSubmission enables the final grade roll-up, review-and-confirm step, and SIS export (plan 14.5).
 	FFGradeSubmission bool
+	// FFPlagiarismChecks enables HE plagiarism workflow APIs and async scans (plan 14.8).
+	FFPlagiarismChecks bool
 	// FFCourseEvaluations enables anonymous end-of-term course evaluations (plan 14.7).
 	FFCourseEvaluations bool
 
@@ -483,6 +485,9 @@ func Load() Config {
 		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
 		FFUiMode:                        boolEnv("FF_UI_MODE"),
 		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
+		FFPlagiarismChecks:              boolEnv("FF_PLAGIARISM_CHECKS"),
+		OriginalityDetectionEnabled:     boolEnv("ORIGINALITY_DETECTION_ENABLED"),
+		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
 		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 
 		AppEnv:              appEnv(),

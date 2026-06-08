@@ -10,6 +10,7 @@ import {
   fetchSubmissionFeedbackMedia,
   fetchSubmissionOriginality,
   fetchSubmissionOriginalityEmbed,
+  retrySubmissionOriginality,
   fetchSubmissionVersions,
   postProvisionalGrade,
   postRequestAssignmentRevision,
@@ -115,6 +116,23 @@ export function AssignmentAnnotationWorkbench({
   const current: ModuleAssignmentSubmissionApi | null =
     mode === 'staff' ? (submissions[idx] ?? null) : mine
   const readOnly = mode === 'student'
+  const failedOriginality = originalityReports?.some((r) => r.status === 'failed') ?? false
+
+  async function onRetryOriginality() {
+    if (!current?.id) return
+    setBusy(true)
+    try {
+      const n = await retrySubmissionOriginality(courseCode, itemId, current.id)
+      if (n === 0) {
+        window.alert('No failed scans to retry.')
+      }
+      await reloadOriginality()
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Retry failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   useEffect(() => {
     setViewVersionNumber(null)
@@ -538,6 +556,16 @@ export function AssignmentAnnotationWorkbench({
                   className="rounded-md border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-indigo-300 dark:hover:bg-neutral-900"
                 >
                   View report
+                </button>
+              ) : null}
+              {mode === 'staff' && failedOriginality ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void onRetryOriginality()}
+                  className="rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-900 hover:bg-rose-100 disabled:opacity-50 dark:border-rose-900 dark:bg-rose-950/50 dark:text-rose-100"
+                >
+                  Retry scan
                 </button>
               ) : null}
             </div>

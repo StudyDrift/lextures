@@ -32,6 +32,7 @@ import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { getJwtSubject } from '../../lib/auth'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { AssignmentPageSettingsPanel } from '../../components/assignment/assignment-page-settings-panel'
+import { AcademicIntegrityNotice } from '../../components/assignment/academic-integrity-notice'
 import { AssignmentAnnotationWorkbench } from '../../components/annotation/assignment-annotation-workbench'
 import { LmsPage } from './lms-page'
 
@@ -733,7 +734,11 @@ export default function CourseModuleAssignmentPage() {
             />
             {itemId &&
             (feedbackMediaEnabled || (annotationsEnabled && submissionAllowFileUpload)) ? (
-              <AssignmentAnnotationWorkbench
+              <>
+                {!viewerIsCourseStaff && originalityDetection !== 'disabled' ? (
+                  <AcademicIntegrityNotice className="mt-6" />
+                ) : null}
+                <AssignmentAnnotationWorkbench
                 courseCode={courseCode}
                 itemId={itemId}
                 assignmentTitle={title}
@@ -752,6 +757,7 @@ export default function CourseModuleAssignmentPage() {
                 provisionalGraderUserIds={provisionalGraderUserIds}
                 originalityDetection={originalityDetection}
               />
+              </>
             ) : null}
           </div>
         )}

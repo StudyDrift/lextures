@@ -114,6 +114,7 @@ type platformSettingsJSON struct {
 	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
 	FFGradeSubmission               bool `json:"ffGradeSubmission"`
+	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
 	FFIncompleteGradeWorkflow       bool `json:"ffIncompleteGradeWorkflow"`
 	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 
@@ -261,6 +262,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFCatalogIntegration:            merged.FFCatalogIntegration,
 				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 				FFGradeSubmission:               merged.FFGradeSubmission,
+				FFPlagiarismChecks:              merged.FFPlagiarismChecks,
 				FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
 				FFCourseEvaluations:             merged.FFCourseEvaluations,
 			MFAEnabled:                      merged.MFAEnabled,
@@ -381,6 +383,7 @@ type putPlatformBody struct {
 	FFCatalogIntegration            *bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        *bool `json:"ffEnrollmentStateMachine"`
 	FFGradeSubmission               *bool `json:"ffGradeSubmission"`
+	FFPlagiarismChecks              *bool `json:"ffPlagiarismChecks"`
 	FFIncompleteGradeWorkflow       *bool `json:"ffIncompleteGradeWorkflow"`
 	FFCourseEvaluations             *bool `json:"ffCourseEvaluations"`
 
@@ -662,6 +665,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcatalogintegration", body.FFCatalogIntegration, func(v bool) { wr.FFCatalogIntegration = &v })
 		setBool("ffenrollmentstatemachine", body.FFEnrollmentStateMachine, func(v bool) { wr.FFEnrollmentStateMachine = &v })
 		setBool("ffgradesubmission", body.FFGradeSubmission, func(v bool) { wr.FFGradeSubmission = &v })
+		setBool("ffplagiarismchecks", body.FFPlagiarismChecks, func(v bool) { wr.FFPlagiarismChecks = &v })
 		setBool("ffincompletegradeworkflow", body.FFIncompleteGradeWorkflow, func(v bool) { wr.FFIncompleteGradeWorkflow = &v })
 		setBool("ffcourseevaluations", body.FFCourseEvaluations, func(v bool) { wr.FFCourseEvaluations = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
@@ -765,6 +769,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFCatalogIntegration:            merged.FFCatalogIntegration,
 				FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 				FFGradeSubmission:               merged.FFGradeSubmission,
+				FFPlagiarismChecks:              merged.FFPlagiarismChecks,
 				FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
 				FFCourseEvaluations:             merged.FFCourseEvaluations,
 			MFAEnabled:                      merged.MFAEnabled,
