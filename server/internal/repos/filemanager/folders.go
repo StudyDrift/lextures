@@ -96,6 +96,38 @@ func listFiles(ctx context.Context, db *pgxpool.Pool, courseID uuid.UUID, folder
 	return out, rows.Err()
 }
 
+// ListFolderBreadcrumbs returns ancestors from the course-files root through the given folder (inclusive).
+func ListFolderBreadcrumbs(ctx context.Context, db *pgxpool.Pool, courseID, folderID uuid.UUID) ([]FolderBreadcrumb, error) {
+	rows, err := db.Query(ctx, `
+		WITH RECURSIVE ancestors AS (
+			SELECT id, parent_id, name, 0 AS depth
+			FROM course.file_folders
+			WHERE id = $1 AND course_id = $2
+			UNION ALL
+			SELECT f.id, f.parent_id, f.name, a.depth + 1
+			FROM course.file_folders f
+			JOIN ancestors a ON f.id = a.parent_id
+		)
+		SELECT id, name FROM ancestors ORDER BY depth DESC
+	`, folderID, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []FolderBreadcrumb
+	for rows.Next() {
+		var crumb FolderBreadcrumb
+		if scanErr := rows.Scan(&crumb.ID, &crumb.Name); scanErr != nil {
+			return nil, scanErr
+		}
+		out = append(out, crumb)
+	}
+	if out == nil {
+		out = []FolderBreadcrumb{}
+	}
+	return out, rows.Err()
+}
+
 func GetFolder(ctx context.Context, db *pgxpool.Pool, courseID, folderID uuid.UUID) (*Folder, error) {
 	row := db.QueryRow(ctx, `
 		SELECT id, course_id, parent_id, name, created_by, created_at, updated_at

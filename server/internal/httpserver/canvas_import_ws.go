@@ -534,15 +534,6 @@ func (d Deps) runCanvasImport(
 		}
 	}
 
-	courseTitle := strAt(course, "name", "")
-	if courseTitle == "" {
-		_ = d.Pool.QueryRow(ctx, `SELECT title FROM course.courses WHERE id = $1`, courseID).Scan(&courseTitle)
-	}
-	if courseTitle == "" {
-		courseTitle = courseCode
-	}
-	d.pushNotificationService().EnqueueCanvasCourseImported(ctx, importerUserID, courseTitle, courseCode)
-
 	return nil
 }
 

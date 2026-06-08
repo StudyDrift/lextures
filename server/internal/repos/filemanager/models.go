@@ -31,9 +31,16 @@ type FileItem struct {
 	UpdatedAt        time.Time  `json:"updatedAt"`
 }
 
+// FolderBreadcrumb is one segment of the path from the course-files root to the current folder.
+type FolderBreadcrumb struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
 // FolderContents is the response for listing a folder (or the root).
 type FolderContents struct {
-	FolderID *uuid.UUID `json:"folderId"`
-	Folders  []Folder   `json:"folders"`
-	Files    []FileItem `json:"files"`
+	FolderID    *uuid.UUID         `json:"folderId"`
+	Breadcrumbs []FolderBreadcrumb `json:"breadcrumbs,omitempty"`
+	Folders     []Folder           `json:"folders"`
+	Files       []FileItem         `json:"files"`
 }
