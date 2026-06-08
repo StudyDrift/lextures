@@ -100,6 +100,7 @@ type Row struct {
 	FFContentFilterIntegration        *bool
 	FFUiMode                          *bool
 	FFGradeSubmission                 *bool
+	FFAcademicCalendar                *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -200,6 +201,7 @@ type Write struct {
 	FFContentFilterIntegration        *bool
 	FFUiMode                          *bool
 	FFGradeSubmission                 *bool
+	FFAcademicCalendar                *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -297,6 +299,7 @@ SELECT
 	ff_demographics,
 	ff_content_filter_integration,
 	ff_grade_submission,
+	ff_academic_calendar,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -389,6 +392,7 @@ WHERE id = 1
 		&r.FFDemographics,
 		&r.FFContentFilterIntegration,
 		&r.FFGradeSubmission,
+		&r.FFAcademicCalendar,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -521,6 +525,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_demographics,
 	ff_content_filter_integration,
 	ff_grade_submission,
+	ff_academic_calendar,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -533,7 +538,7 @@ INSERT INTO settings.platform_app_settings (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
-	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88,
+	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -618,6 +623,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_demographics = COALESCE(EXCLUDED.ff_demographics, settings.platform_app_settings.ff_demographics),
 	ff_content_filter_integration = COALESCE(EXCLUDED.ff_content_filter_integration, settings.platform_app_settings.ff_content_filter_integration),
 	ff_grade_submission = COALESCE(EXCLUDED.ff_grade_submission, settings.platform_app_settings.ff_grade_submission),
+	ff_academic_calendar = COALESCE(EXCLUDED.ff_academic_calendar, settings.platform_app_settings.ff_academic_calendar),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -708,6 +714,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFDemographics,
 		w.FFContentFilterIntegration,
 		w.FFGradeSubmission,
+		w.FFAcademicCalendar,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

@@ -5867,3 +5867,103 @@ export async function fetchAdminGradeSubmissionStatus(
   const payload = raw as { courses: CourseGradeSubmissionStatus[] }
   return payload.courses ?? []
 }
+
+// Academic Calendar (plan 14.6)
+
+export type CalendarEventType =
+  | 'term_start'
+  | 'term_end'
+  | 'add_drop_deadline'
+  | 'withdrawal_deadline'
+  | 'finals_start'
+  | 'finals_end'
+  | 'no_class_day'
+  | 'holiday'
+  | 'custom'
+
+export type AcademicCalendarEvent = {
+  id: string
+  orgId: string
+  termId?: string
+  eventType: CalendarEventType
+  eventName: string
+  startDate: string
+  endDate?: string
+  allDay: boolean
+  notes?: string
+  sisId?: string
+  createdBy?: string
+  createdAt: string
+}
+
+export async function fetchCalendarEvents(
+  orgId: string,
+  termId?: string,
+): Promise<AcademicCalendarEvent[]> {
+  let url = `/api/v1/orgs/${encodeURIComponent(orgId)}/calendar/events`
+  if (termId) url += `?term_id=${encodeURIComponent(termId)}`
+  const res = await authorizedFetch(url)
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const payload = raw as { events: AcademicCalendarEvent[] }
+  return payload.events ?? []
+}
+
+export async function createCalendarEvent(
+  orgId: string,
+  body: {
+    termId?: string
+    eventType: CalendarEventType
+    eventName: string
+    startDate: string
+    endDate?: string
+    allDay?: boolean
+    notes?: string
+    sisId?: string
+  },
+): Promise<AcademicCalendarEvent> {
+  const res = await authorizedFetch(`/api/v1/admin/orgs/${encodeURIComponent(orgId)}/calendar/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return (raw as { event: AcademicCalendarEvent }).event
+}
+
+export async function patchCalendarEvent(
+  orgId: string,
+  eventId: string,
+  body: {
+    eventType?: CalendarEventType
+    eventName?: string
+    startDate?: string
+    endDate?: string | null
+    allDay?: boolean
+    notes?: string | null
+  },
+): Promise<AcademicCalendarEvent> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/calendar/events/${encodeURIComponent(eventId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return (raw as { event: AcademicCalendarEvent }).event
+}
+
+export async function deleteCalendarEvent(orgId: string, eventId: string): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/calendar/events/${encodeURIComponent(eventId)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+}
