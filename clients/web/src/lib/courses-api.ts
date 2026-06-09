@@ -1543,6 +1543,7 @@ export type CourseStructureItem = {
     | 'lti_link'
     | 'h5p'
     | 'vibe_activity'
+    | 'library_resource'
   title: string
   /** Set when this row is nested under a module. */
   parentId: string | null
@@ -6181,3 +6182,97 @@ export async function fetchQuizProctoringSession(
   }
   return (await parseJson(res)) as ProctoringSession
 }
+
+// ─── HE Library / E-Reserves (plan 14.10) ────────────────────────────────────
+
+export type LibraryResourceMeta = {
+  title?: string
+  author?: string
+  issn?: string
+  isbn?: string
+  source?: string
+  almaMmsId?: string
+  legantoListId?: string
+}
+
+export async function createModuleLibraryResource(
+  courseCode: string,
+  moduleId: string,
+  body: {
+    title: string
+    resourceType?: 'catalog_item' | 'leganto_list'
+    externalToolId?: string
+    metadata?: LibraryResourceMeta
+    sourceUrl?: string
+  },
+): Promise<CourseStructureItem> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/library-resources`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: body.title,
+        resourceType: body.resourceType ?? 'catalog_item',
+        externalToolId: body.externalToolId,
+        metadata: body.metadata ?? {},
+        sourceUrl: body.sourceUrl ?? '',
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
+}
+
+export type LibraryResourcePayload = {
+  itemId: string
+  resourceType: string
+  metadata: LibraryResourceMeta
+  ezproxyUrl: string | null
+  updatedAt: string
+}
+
+export async function fetchModuleLibraryResource(
+  courseCode: string,
+  itemId: string,
+): Promise<LibraryResourcePayload | null> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/library-resources/${encodeURIComponent(itemId)}`,
+  )
+  if (res.status === 404) return null
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  return (await parseJson(res)) as LibraryResourcePayload
+}
+
+export async function patchModuleLibraryResource(
+  courseCode: string,
+  itemId: string,
+  body: { metadata?: LibraryResourceMeta; ezproxyUrl?: string | null },
+): Promise<LibraryResourcePayload> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/library-resources/${encodeURIComponent(itemId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as LibraryResourcePayload
+}
+
+export async function recordLibraryResourceAccess(
+  courseCode: string,
+  itemId: string,
+): Promise<void> {
+  await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/library-resources/${encodeURIComponent(itemId)}/access`,
+    { method: 'POST' },
+  )
+}
+

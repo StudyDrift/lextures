@@ -131,6 +131,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerFinalGradeRoutes(r)
 	d.registerCatalogRoutes(r)
 	d.registerLibraryRoutes(r)
+	d.registerHELibraryRoutes(r)
 	d.registerBroadcastRoutes(r)
 	d.registerClassroomSignalsRoutes(r)
 	d.registerConferenceRoutes(r)
