@@ -140,7 +140,7 @@ test.describe('Collaborative documents', () => {
 
     // Editor page should show the doc title and a connection status indicator.
     await expect(
-      page.getByText(/live|connecting/i).first(),
+      page.getByText('Connecting…').or(page.getByText('Live', { exact: true })),
     ).toBeVisible({ timeout: 10000 })
   })
 
@@ -158,7 +158,10 @@ test.describe('Collaborative documents', () => {
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs/${doc.id}`)
     // Should show the connection status bar (Live / Connecting… / Offline).
     await expect(
-      page.getByText(/live|connecting|offline/i).first(),
+      page
+        .getByText('Connecting…')
+        .or(page.getByText('Live', { exact: true }))
+        .or(page.getByText(/^Offline/)),
     ).toBeVisible({ timeout: 10000 })
   })
 
