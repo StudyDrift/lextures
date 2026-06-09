@@ -102,11 +102,11 @@ export async function fetchCollabDocSnapshots(
   return body.snapshots ?? []
 }
 
-/** Build the WebSocket URL for a collaborative document. */
+/** Base WebSocket server URL; y-websocket appends `/{roomname}` (use roomname `ws`). */
 export function collabDocWsUrl(courseCode: string, docId: string): string {
   const base = (import.meta.env.VITE_API_URL ?? window.location.origin)
     .replace(/^https?:\/\//, '')
     .replace(/^http:\/\//, '')
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
-  return `${proto}://${base}/api/v1/courses/${encodeURIComponent(courseCode)}/collab-docs/${encodeURIComponent(docId)}/ws`
+  return `${proto}://${base}/api/v1/courses/${encodeURIComponent(courseCode)}/collab-docs/${encodeURIComponent(docId)}`
 }

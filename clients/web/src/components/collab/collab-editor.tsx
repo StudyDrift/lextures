@@ -74,7 +74,7 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
   useEffect(() => {
     const ydoc = new Y.Doc()
     const token = getAccessToken() ?? ''
-    const provider = new WebsocketProvider(wsUrl, docId, ydoc, {
+    const provider = new WebsocketProvider(wsUrl, 'ws', ydoc, {
       connect: true,
       params: { token },
       WebSocketPolyfill: buildAuthWebSocket(token),

@@ -146,9 +146,10 @@ test.describe('Collaborative documents', () => {
     )
 
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
-    await expect(page.getByRole('link', { name: doc.title })).toBeVisible({ timeout: 8000 })
-    await page.getByRole('link', { name: doc.title }).click()
-    await page.waitForURL(new RegExp(`/collab-docs/${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))
+    const docLink = page.getByRole('link', { name: doc.title })
+    await expect(docLink).toBeVisible({ timeout: 8000 })
+    const docUrl = new RegExp(`/collab-docs/${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
+    await Promise.all([page.waitForURL(docUrl), docLink.click()])
 
     // Editor page should show a connection status indicator.
     await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })

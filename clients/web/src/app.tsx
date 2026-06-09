@@ -159,8 +159,7 @@ export default function App() {
             <Route path="settings/*" element={<CourseSettings />} />
             <Route path="feed" element={<CourseFeedPage />} />
             <Route path="discussions" element={<CourseDiscussionsPage />} />
-            <Route path="collab-docs" element={<CourseCollabDocsPage />} />
-            <Route path="collab-docs/:docId" element={<CourseCollabDocsPage />} />
+            <Route path="collab-docs/:docId?" element={<CourseCollabDocsPage />} />
             <Route path="files" element={<CourseFilesPage />} />
             <Route path="groups" element={<CourseGroupsPage />} />
             <Route path="syllabus" element={<CourseSyllabus />} />
