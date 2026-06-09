@@ -6,7 +6,7 @@ import { useEffect, useReducer, useState, type ReactNode } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { getAccessToken } from '../../lib/auth'
@@ -108,7 +108,7 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
     ? [
         collabStarterKit,
         Collaboration.configure({ document: session.ydoc }),
-        CollaborationCursor.configure({
+        CollaborationCaret.configure({
           provider: session.provider,
           user: { name: userName, color: colorForUser(userName) },
         }),
