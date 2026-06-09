@@ -61,6 +61,9 @@ import {
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
+import { ProctoringPreExamChecklist } from '../../components/quiz/proctoring-pre-exam-checklist'
+import { fetchQuizProctoringConfig, type ProctoringConfig } from '../../lib/courses-api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 function QuestionTypeDropdown({
   value,
@@ -332,6 +335,9 @@ export default function CourseModuleQuizPage() {
   const [studentQuizPayload, setStudentQuizPayload] = useState<ModuleQuizPayload | null>(null)
   const [studentTakeOpen, setStudentTakeOpen] = useState(false)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
+  const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
+  const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
+  const { ffProctoringIntegration } = usePlatformFeatures()
   const [mdTheme, setMdTheme] = useState<ResolvedMarkdownTheme>(() =>
     resolveMarkdownTheme('classic', null),
   )
@@ -969,9 +975,26 @@ export default function CourseModuleQuizPage() {
     }
   }
 
-  function handleStudentStartQuiz() {
+  async function handleStudentStartQuiz() {
     if (!courseCode || !itemId) return
     setStudentQuizBanner(null)
+    if (ffProctoringIntegration) {
+      // Load proctoring config if not already fetched.
+      let cfg = proctoringConfig
+      if (cfg === undefined) {
+        try {
+          cfg = await fetchQuizProctoringConfig(courseCode, itemId)
+          setProctoringConfig(cfg)
+        } catch {
+          cfg = null
+          setProctoringConfig(null)
+        }
+      }
+      if (cfg) {
+        setProctoringChecklistOpen(true)
+        return
+      }
+    }
     setStudentTakeOpen(true)
   }
 
@@ -1584,6 +1607,19 @@ export default function CourseModuleQuizPage() {
         advanced={quizAdvanced}
         oneQuestionAtATime={oneQuestionAtATime}
       />
+
+      {proctoringConfig && proctoringChecklistOpen && (
+        <ProctoringPreExamChecklist
+          open={proctoringChecklistOpen}
+          vendor={proctoringConfig.vendor}
+          required={proctoringConfig.required}
+          onProceed={() => {
+            setProctoringChecklistOpen(false)
+            setStudentTakeOpen(true)
+          }}
+          onClose={() => setProctoringChecklistOpen(false)}
+        />
+      )}
 
       {studentQuizPayload && courseCode && itemId ? (
         <QuizStudentTakePanel

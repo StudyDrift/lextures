@@ -45,6 +45,7 @@ export type PlatformFeaturesSnapshot = {
   ffAcademicCalendar?: boolean
   ffPlagiarismChecks?: boolean
   ffCourseEvaluations?: boolean
+  ffProctoringIntegration?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -92,6 +93,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffAcademicCalendar: false,
   ffPlagiarismChecks: false,
   ffCourseEvaluations: false,
+  ffProctoringIntegration: false,
 }
 
 let loaded = false

@@ -318,6 +318,8 @@ type Config struct {
 	FFPlagiarismChecks bool
 	// FFCourseEvaluations enables anonymous end-of-term course evaluations (plan 14.7).
 	FFCourseEvaluations bool
+	// FFProctoringIntegration enables LTI 1.3 proctoring vendor integrations (plan 14.9).
+	FFProctoringIntegration bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -492,6 +494,7 @@ func Load() Config {
 		OriginalityDetectionEnabled:     boolEnv("ORIGINALITY_DETECTION_ENABLED"),
 		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
 		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
+		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

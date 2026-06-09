@@ -54,6 +54,7 @@ type platformFeaturesJSON struct {
 	FFAcademicCalendar              bool `json:"ffAcademicCalendar"`
 	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
 	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
+	FFProctoringIntegration         bool `json:"ffProctoringIntegration"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -104,6 +105,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFAcademicCalendar:          cfg.FFAcademicCalendar,
 		FFPlagiarismChecks:          cfg.FFPlagiarismChecks,
 		FFCourseEvaluations:         cfg.FFCourseEvaluations,
+		FFProctoringIntegration:     cfg.FFProctoringIntegration,
 	}
 }
 

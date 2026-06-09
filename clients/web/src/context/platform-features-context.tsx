@@ -58,6 +58,7 @@ export type PlatformFeatures = {
   ffIncompleteGradeWorkflow: boolean
   ffAcademicCalendar: boolean
   ffCourseEvaluations: boolean
+  ffProctoringIntegration: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -106,6 +107,7 @@ const defaultFeatures: PlatformFeatures = {
   ffIncompleteGradeWorkflow: false,
   ffAcademicCalendar: false,
   ffCourseEvaluations: false,
+  ffProctoringIntegration: false,
   loading: true,
   refresh: async () => {},
 }
@@ -159,6 +161,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffIncompleteGradeWorkflow: false,
     ffAcademicCalendar: false,
     ffCourseEvaluations: false,
+    ffProctoringIntegration: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -213,6 +216,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffIncompleteGradeWorkflow: data.ffIncompleteGradeWorkflow === true,
           ffAcademicCalendar: data.ffAcademicCalendar === true,
           ffCourseEvaluations: data.ffCourseEvaluations === true,
+          ffProctoringIntegration: data.ffProctoringIntegration === true,
         }
         setFeatures({
           ...next,
@@ -234,6 +238,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffIncompleteGradeWorkflow: next.ffIncompleteGradeWorkflow === true,
           ffAcademicCalendar: next.ffAcademicCalendar === true,
           ffCourseEvaluations: next.ffCourseEvaluations === true,
+          ffProctoringIntegration: next.ffProctoringIntegration === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

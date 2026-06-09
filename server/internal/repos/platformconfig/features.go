@@ -71,6 +71,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFAcademicCalendar = mergeBool(db.FFAcademicCalendar, false)
 	out.FFPlagiarismChecks = mergeBool(db.FFPlagiarismChecks, false)
 	out.FFCourseEvaluations = mergeBool(db.FFCourseEvaluations, false)
+	out.FFProctoringIntegration = mergeBool(db.FFProctoringIntegration, false)
 	out.SpeechToTextEnabled = mergeBool(db.SpeechToTextEnabled, false)
 	out.AccommodationsEngineEnabled = mergeBool(db.AccommodationsEngineEnabled, false)
 	out.FFAccommodationsEngine = mergeBool(db.FFAccommodationsEngine, false)
