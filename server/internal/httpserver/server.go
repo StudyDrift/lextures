@@ -99,6 +99,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerReportExportRoutes(r)
 	r.Post("/api/v1/recommendations/event", d.handleRecommendationEvent())
 	r.Post("/api/v1/webhooks/originality/{provider}", d.handleOriginalityWebhook())
+	r.Post("/api/v1/webhooks/proctoring-callback/{vendor}", d.handleProctoringCallback())
 	r.Get("/oneroster/v1p2/*", d.handleOneRosterV1P2())
 	d.registerSAMLBrowserRoutes(r)
 	d.registerLTIHTTPRoutes(r)

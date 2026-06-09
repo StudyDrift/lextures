@@ -6087,3 +6087,97 @@ export async function deleteCalendarEvent(orgId: string, eventId: string): Promi
     throw new Error(readApiErrorMessage(raw))
   }
 }
+
+// ── Proctoring Integration (plan 14.9) ────────────────────────────────────────
+
+export type ProctoringVendor = 'honorlock' | 'respondus' | 'proctu' | 'examity'
+
+export type ProctoringConfig = {
+  id: string
+  quizItemId: string
+  externalToolId: string
+  vendor: ProctoringVendor
+  required: boolean
+  settings: Record<string, unknown>
+  createdAt: string
+}
+
+export type ProctoringSession = {
+  id: string
+  attemptId: string
+  vendor: ProctoringVendor
+  vendorSessionId: string | null
+  status: 'pending' | 'active' | 'complete' | 'flagged'
+  flagCount: number
+  reviewUrl: string | null
+  startedAt: string | null
+  completedAt: string | null
+}
+
+export async function fetchQuizProctoringConfig(
+  courseCode: string,
+  itemId: string,
+): Promise<ProctoringConfig | null> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/proctoring-config`,
+  )
+  if (res.status === 204) return null
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  return (await parseJson(res)) as ProctoringConfig
+}
+
+export async function saveQuizProctoringConfig(
+  courseCode: string,
+  itemId: string,
+  body: {
+    externalToolId: string
+    vendor: ProctoringVendor
+    required: boolean
+    settings?: Record<string, unknown>
+  },
+): Promise<ProctoringConfig> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/proctoring-config`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as ProctoringConfig
+}
+
+export async function deleteQuizProctoringConfig(
+  courseCode: string,
+  itemId: string,
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/proctoring-config`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+}
+
+export async function fetchQuizProctoringSession(
+  courseCode: string,
+  itemId: string,
+  attemptId: string,
+): Promise<ProctoringSession | null> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/attempts/${encodeURIComponent(attemptId)}/proctoring-session`,
+  )
+  if (res.status === 404) return null
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  return (await parseJson(res)) as ProctoringSession
+}
