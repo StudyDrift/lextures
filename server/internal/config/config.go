@@ -320,6 +320,8 @@ type Config struct {
 	FFCourseEvaluations bool
 	// FFProctoringIntegration enables LTI 1.3 proctoring vendor integrations (plan 14.9).
 	FFProctoringIntegration bool
+	// FFLibraryIntegration enables HE library / e-reserves integration: Leganto LTI, Alma search, EZproxy rewriting (plan 14.10).
+	FFLibraryIntegration bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -495,6 +497,7 @@ func Load() Config {
 		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
 		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
+		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

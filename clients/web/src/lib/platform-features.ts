@@ -46,6 +46,7 @@ export type PlatformFeaturesSnapshot = {
   ffPlagiarismChecks?: boolean
   ffCourseEvaluations?: boolean
   ffProctoringIntegration?: boolean
+  ffLibraryIntegration?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -94,6 +95,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffPlagiarismChecks: false,
   ffCourseEvaluations: false,
   ffProctoringIntegration: false,
+  ffLibraryIntegration: false,
 }
 
 let loaded = false
@@ -227,6 +229,10 @@ export function academicCalendarFeatureEnabled(): boolean {
 
 export function plagiarismChecksFeatureEnabled(): boolean {
   return loaded && snapshot.ffPlagiarismChecks === true
+}
+
+export function heLibraryIntegrationEnabled(): boolean {
+  return loaded && snapshot.ffLibraryIntegration === true
 }
 
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {

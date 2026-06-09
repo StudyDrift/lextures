@@ -30,6 +30,7 @@ import { KeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyb
 import { CSS, type Transform } from '@dnd-kit/utilities'
 import {
   AlertCircle,
+  BookMarked,
   Check,
   ChevronDown,
   ChevronRight,
@@ -76,6 +77,7 @@ import {
   patchModuleExternalLink,
   createModuleLtiLink,
   createModuleVibeActivity,
+  createModuleLibraryResource,
   deleteCourseModule,
   fetchCourseLtiExternalTools,
   fetchCourseModuleDeletePreview,
@@ -103,6 +105,7 @@ import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
 import { h5pFeatureEnabled } from '../../lib/h5p-i18n'
+import { heLibraryIntegrationEnabled } from '../../lib/platform-features'
 
 const MODULE_SORT_ID = 'sortable-modules'
 
@@ -134,6 +137,7 @@ const STRUCTURE_CHILD_KINDS = new Set<CourseStructureItem['kind']>([
   'lti_link',
   'h5p',
   'vibe_activity',
+  'library_resource',
 ])
 
 function buildModuleChildrenMap(items: CourseStructureItem[]): Map<string, CourseStructureItem[]> {
@@ -607,6 +611,28 @@ function ChildRowContent({
             {studentFooter}
           </div>
         </div>
+      ) : (child.kind as CourseStructureItem['kind']) === 'library_resource' ? (
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-cyan-200/90 bg-cyan-50 text-cyan-700 dark:border-cyan-500/40 dark:bg-cyan-950/55 dark:text-cyan-200"
+            aria-hidden
+          >
+            <BookMarked className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link
+                to={`/courses/${encodeURIComponent(courseCode)}/modules/library-resource/${encodeURIComponent(child.id)}`}
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                {child.title}
+              </Link>
+              <BlueprintLockIcon locked={child.blueprintLocked} />
+            </div>
+            {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
+            {studentFooter}
+          </div>
+        </div>
       ) : (
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
@@ -965,6 +991,7 @@ type ModuleCardBodyProps = {
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
   h5pEnabled?: boolean
   ltiToolsAvailable?: boolean
+  heLibraryEnabled?: boolean
   onFindOpenResources?: (moduleId: string) => void
   oerLibraryEnabled?: boolean
   minified: boolean
@@ -989,6 +1016,7 @@ function ModuleCardBody({
   onModuleItemAdd,
   h5pEnabled,
   ltiToolsAvailable,
+  heLibraryEnabled,
   onFindOpenResources,
   oerLibraryEnabled: oerEnabled,
   minified,
@@ -1103,6 +1131,7 @@ function ModuleCardBody({
               disabled={anyModalBusy}
               h5pEnabled={h5pEnabled}
               ltiToolsAvailable={ltiToolsAvailable}
+              heLibraryEnabled={heLibraryEnabled}
             />
           </div>
         )}
@@ -1294,6 +1323,7 @@ type SortableModuleCardProps = {
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
   h5pEnabled?: boolean
   ltiToolsAvailable?: boolean
+  heLibraryEnabled?: boolean
   onFindOpenResources?: (moduleId: string) => void
   oerLibraryEnabled?: boolean
   minified: boolean
@@ -1323,6 +1353,7 @@ function SortableModuleCard({
   onModuleItemAdd,
   h5pEnabled,
   ltiToolsAvailable,
+  heLibraryEnabled,
   onFindOpenResources,
   oerLibraryEnabled: oerEnabled,
   minified,
@@ -1395,6 +1426,7 @@ function SortableModuleCard({
         onModuleItemAdd={onModuleItemAdd}
         h5pEnabled={h5pEnabled}
         ltiToolsAvailable={ltiToolsAvailable}
+        heLibraryEnabled={heLibraryEnabled}
         onFindOpenResources={onFindOpenResources}
         oerLibraryEnabled={oerEnabled}
         minified={minified}
@@ -1994,6 +2026,22 @@ export default function CourseModules() {
       setLtiLinkModalOpen(true)
       return
     }
+    if (kind === 'library_resource') {
+      if (!courseCode) return
+      void (async () => {
+        try {
+          await createModuleLibraryResource(courseCode, moduleId, {
+            title: 'Library Resource',
+            resourceType: 'catalog_item',
+            metadata: {},
+          })
+          toast('Library resource added — click to configure.')
+        } catch {
+          toast('Failed to create library resource.')
+        }
+      })()
+      return
+    }
   }, [courseCode, ltiExternalTools.length])
 
   const handleChildTogglePublished = useCallback(
@@ -2521,6 +2569,7 @@ export default function CourseModules() {
                     onModuleItemAdd={onModuleItemAdd}
                     h5pEnabled={h5pFeatureEnabled()}
                     ltiToolsAvailable={!ltiExternalToolsLoading && ltiExternalTools.length > 0}
+                    heLibraryEnabled={heLibraryIntegrationEnabled()}
                     onFindOpenResources={(moduleId) => {
                       setOerModuleId(moduleId)
                       setOerPanelOpen(true)
