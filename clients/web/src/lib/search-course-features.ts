@@ -18,7 +18,7 @@ export function normalizeSearchCourseItem(c: SearchCourseItem): SearchCourseItem
     feedEnabled: featureDefaultOn(c.feedEnabled),
     calendarEnabled: featureDefaultOn(c.calendarEnabled),
     filesEnabled: featureDefaultOn(c.filesEnabled),
-    liveSessionsEnabled: featureDefaultOn(c.liveSessionsEnabled),
+    liveSessionsEnabled: c.liveSessionsEnabled === true,
   }
 }
 

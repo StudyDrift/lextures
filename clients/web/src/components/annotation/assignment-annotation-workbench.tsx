@@ -36,7 +36,9 @@ import { FeedbackMediaPlayerList } from './feedback-media-player'
 import { FeedbackMediaRecorder } from './feedback-media-recorder'
 import { FilePreviewBody } from '../file-preview'
 import { detectPreviewType } from '../../lib/file-type'
-import { SubmissionNavigator, type GradedFilter } from './submission-navigator'
+import { SubmissionNavigator } from './submission-navigator'
+import { sortSubmissionsByStudentLabel, type GradedFilter } from './submission-navigator-utils'
+import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
 import type { RubricDefinition } from '../../lib/courses-api'
 
@@ -81,6 +83,8 @@ export type AssignmentAnnotationWorkbenchProps = {
   presentation?: 'inline' | 'modal'
   modalOpen?: boolean
   onModalClose?: () => void
+  /** When set, staff navigation opens on this student's submission after load. */
+  initialStudentUserId?: string | null
 }
 
 export function AssignmentAnnotationWorkbench({
@@ -105,6 +109,7 @@ export function AssignmentAnnotationWorkbench({
   presentation = 'inline',
   modalOpen = false,
   onModalClose,
+  initialStudentUserId = null,
 }: AssignmentAnnotationWorkbenchProps) {
   const annotationsActive = annotationsActiveProp ?? submissionAllowsFile
   const [panel, setPanel] = useState<'document' | 'media'>('document')
@@ -112,6 +117,8 @@ export function AssignmentAnnotationWorkbench({
   const [gradedFilter, setGradedFilter] = useState<GradedFilter>('all')
   const [submissions, setSubmissions] = useState<ModuleAssignmentSubmissionApi[]>([])
   const [idx, setIdx] = useState(0)
+  const staffNavRef = useRef({ submissions, idx })
+  staffNavRef.current = { submissions, idx }
   const [mine, setMine] = useState<ModuleAssignmentSubmissionApi | null>(null)
   const [annotations, setAnnotations] = useState<SubmissionAnnotationApi[]>([])
   const [tool, setTool] = useState<AnnotationTool>('highlight')
@@ -225,13 +232,25 @@ export function AssignmentAnnotationWorkbench({
     setLoadError(null)
     try {
       const list = await fetchModuleAssignmentSubmissions(courseCode, itemId, { graded: gradedFilter })
-      setSubmissions(list)
-      setIdx((i) => (list.length === 0 ? 0 : Math.min(i, list.length - 1)))
+      const sorted = sortSubmissionsByStudentLabel(list)
+      const preserveId = staffNavRef.current.submissions[staffNavRef.current.idx]?.id
+      setSubmissions(sorted)
+      setIdx(() => {
+        if (initialStudentUserId) {
+          const targetIdx = sorted.findIndex((s) => s.submittedBy === initialStudentUserId)
+          if (targetIdx >= 0) return targetIdx
+        }
+        if (preserveId) {
+          const nextIdx = sorted.findIndex((s) => s.id === preserveId)
+          if (nextIdx >= 0) return nextIdx
+        }
+        return 0
+      })
     } catch (e) {
       setSubmissions([])
       setLoadError(e instanceof Error ? e.message : 'Could not load submissions.')
     }
-  }, [courseCode, itemId, gradedFilter, mode])
+  }, [courseCode, initialStudentUserId, itemId, gradedFilter, mode])
 
   const reloadMine = useCallback(async () => {
     if (mode !== 'student') return
@@ -720,10 +739,6 @@ export function AssignmentAnnotationWorkbench({
                     setIdx(0)
                   }}
                   disabled={busy}
-                  currentSubmissionDisplayLabel={
-                    current?.blindLabel ??
-                    (submissions.length > 0 ? `Submission ${idx + 1}` : undefined)
-                  }
                   anonymisedAriaLabel={
                     current?.blindLabel
                       ? `Anonymised student, label ${current.blindLabel}`
@@ -758,27 +773,30 @@ export function AssignmentAnnotationWorkbench({
             </p>
           ) : null}
 
-          <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-            <div className="min-h-[40vh] flex-1 overflow-auto border-b border-slate-200 bg-white dark:border-neutral-600 dark:bg-neutral-800 lg:min-h-0 lg:border-b-0 lg:border-r">
+          <ResizableSplitPane
+            storageKey="lextures:submission-grade-sidebar-width"
+            primary={
               <div className="h-full min-h-[40vh] bg-slate-50 dark:bg-neutral-800/60">
                 {documentPreviewContent}
               </div>
-            </div>
-            <SubmissionPreviewSidebar
-              mode={mode}
-              courseCode={courseCode}
-              itemId={itemId}
-              submissionId={current?.id ?? null}
-              rubric={assignmentRubric}
-              maxPoints={assignmentPointsWorth}
-              gradingDisabled={busy}
-              filename={displayFilename}
-              filePath={displayFilePath ?? null}
-              submittedAt={current?.submittedAt}
-              blindLabel={current?.blindLabel}
-              mimeType={displayMimeType}
-            />
-          </div>
+            }
+            secondary={
+              <SubmissionPreviewSidebar
+                mode={mode}
+                courseCode={courseCode}
+                itemId={itemId}
+                submissionId={current?.id ?? null}
+                rubric={assignmentRubric}
+                maxPoints={assignmentPointsWorth}
+                gradingDisabled={busy}
+                filename={displayFilename}
+                filePath={displayFilePath ?? null}
+                submittedAt={current?.submittedAt}
+                blindLabel={current?.blindLabel}
+                mimeType={displayMimeType}
+              />
+            }
+          />
         </div>
       </div>
     )
@@ -859,10 +877,6 @@ export function AssignmentAnnotationWorkbench({
                 setIdx(0)
               }}
               disabled={busy}
-              currentSubmissionDisplayLabel={
-                current?.blindLabel ??
-                (submissions.length > 0 ? `Submission ${idx + 1}` : undefined)
-              }
               anonymisedAriaLabel={
                 current?.blindLabel
                   ? `Anonymised student, label ${current.blindLabel}`

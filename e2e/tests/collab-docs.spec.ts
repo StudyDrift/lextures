@@ -10,12 +10,17 @@
  *   [x] Delete a doc via UI (instructor only)
  */
 import { test, expect } from '../fixtures/test.js'
+import type { Page } from '@playwright/test'
 import {
   apiCreateCollabDoc,
   apiDeleteCollabDoc,
   apiEnableCollabDocs,
   apiListCollabDocs,
 } from '../fixtures/api.js'
+
+function expectCollabConnectionStatus(page: Page) {
+  return expect(page.getByTestId('collab-connection-status'))
+}
 
 test.describe('Collaborative documents', () => {
   // -----------------------------------------------------------------------
@@ -135,13 +140,24 @@ test.describe('Collaborative documents', () => {
       'Editor Test Doc',
     )
 
+    const docPath = `/courses/${seededCourse.courseCode}/collab-docs/${doc.id}`
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
-    await page.getByText(doc.title).click()
+    const docLink = page.locator(`a[href="${docPath}"]`)
+    await expect(docLink).toBeVisible({ timeout: 8000 })
 
-    // Editor page should show the doc title and a connection status indicator.
-    await expect(
-      page.getByText(/live|connecting/i).first(),
-    ).toBeVisible({ timeout: 10000 })
+    const docApiPath = `/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/collab-docs/${doc.id}`
+    await Promise.all([
+      page.waitForURL(new RegExp(`${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)),
+      page.waitForResponse(
+        (response) =>
+          response.url().includes(docApiPath)
+          && response.request().method() === 'GET'
+          && response.ok(),
+      ),
+      docLink.click(),
+    ])
+    await expect(page.getByTestId('collab-doc-back-link')).toBeVisible({ timeout: 15000 })
+    await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })
   })
 
   test('direct URL to doc shows editor with status indicator', async ({
@@ -157,9 +173,7 @@ test.describe('Collaborative documents', () => {
 
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs/${doc.id}`)
     // Should show the connection status bar (Live / Connecting… / Offline).
-    await expect(
-      page.getByText(/live|connecting|offline/i).first(),
-    ).toBeVisible({ timeout: 10000 })
+    await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })
   })
 
   // -----------------------------------------------------------------------

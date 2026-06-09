@@ -2,11 +2,11 @@
  * CollabEditor — real-time collaborative rich-text editor using TipTap + Y.js.
  * Connects to the Go WebSocket relay at /api/v1/courses/{code}/collab-docs/{id}/ws.
  */
-import { useEffect, useReducer, useState } from 'react'
+import { useEffect, useReducer, useState, type ReactNode } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Collaboration from '@tiptap/extension-collaboration'
-import CollaborationCursor from '@tiptap/extension-collaboration-cursor'
+import CollaborationCaret from '@tiptap/extension-collaboration-caret'
 import * as Y from 'yjs'
 import { WebsocketProvider } from 'y-websocket'
 import { getAccessToken } from '../../lib/auth'
@@ -39,6 +39,38 @@ function sessionReducer(_state: Session | null, action: SessionAction): Session 
   return null
 }
 
+/** Undo/redo must be off when Yjs Collaboration drives the document. */
+const collabStarterKit = StarterKit.configure({ undoRedo: false })
+
+function ConnectionStatusBar({
+  connState,
+  trailing,
+}: {
+  connState: ConnState
+  trailing?: ReactNode
+}) {
+  return (
+    <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-neutral-700">
+      <span
+        data-testid="collab-connection-status"
+        className="text-sm text-slate-500 dark:text-neutral-400"
+      >
+        {connState === 'connected' ? (
+          <span className="flex items-center gap-1">
+            <span className="inline-block h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
+            Live
+          </span>
+        ) : connState === 'connecting' ? (
+          'Connecting…'
+        ) : (
+          <span className="text-red-500">Offline — changes will sync when reconnected</span>
+        )}
+      </span>
+      {trailing}
+    </div>
+  )
+}
+
 export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOnly = false }: Props) {
   const [session, dispatchSession] = useReducer(sessionReducer, null)
   const [connState, setConnState] = useState<ConnState>('connecting')
@@ -48,7 +80,7 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
   useEffect(() => {
     const ydoc = new Y.Doc()
     const token = getAccessToken() ?? ''
-    const provider = new WebsocketProvider(wsUrl, docId, ydoc, {
+    const provider = new WebsocketProvider(wsUrl, 'ws', ydoc, {
       connect: true,
       params: { token },
       WebSocketPolyfill: buildAuthWebSocket(token),
@@ -74,14 +106,14 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
 
   const extensions = session
     ? [
-        StarterKit,
+        collabStarterKit,
         Collaboration.configure({ document: session.ydoc }),
-        CollaborationCursor.configure({
+        CollaborationCaret.configure({
           provider: session.provider,
           user: { name: userName, color: colorForUser(userName) },
         }),
       ]
-    : [StarterKit]
+    : [collabStarterKit]
 
   const editor = useEditor(
     {
@@ -98,33 +130,20 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
     [session],
   )
 
-  if (!editor) return null
+  const presence =
+    session?.provider.awareness ? (
+      <PresenceBar
+        awareness={session.provider.awareness}
+        selfName={userName}
+        selfColor={colorForUser(userName)}
+      />
+    ) : null
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-neutral-700">
-        <span className="text-sm text-slate-500 dark:text-neutral-400">
-          {connState === 'connected' ? (
-            <span className="flex items-center gap-1">
-              <span className="inline-block h-2 w-2 rounded-full bg-green-500" aria-hidden="true" />
-              Live
-            </span>
-          ) : connState === 'connecting' ? (
-            'Connecting…'
-          ) : (
-            <span className="text-red-500">Offline — changes will sync when reconnected</span>
-          )}
-        </span>
-        {session?.provider.awareness && (
-          <PresenceBar
-            awareness={session.provider.awareness}
-            selfName={userName}
-            selfColor={colorForUser(userName)}
-          />
-        )}
-      </div>
+      <ConnectionStatusBar connState={connState} trailing={presence} />
       <div className="flex-1 overflow-y-auto">
-        <EditorContent editor={editor} className="w-full" />
+        {editor ? <EditorContent editor={editor} className="w-full" /> : null}
       </div>
     </div>
   )

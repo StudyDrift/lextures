@@ -4,6 +4,12 @@ import "github.com/go-chi/chi/v5"
 
 func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses", d.handleListCourses())
+	r.Get("/api/v1/courses/catalog-settings", d.handleGetCourseCatalogSettings())
+	r.Put("/api/v1/courses/catalog-settings", d.handlePutCourseCatalogSettings())
+	r.Post("/api/v1/courses/catalog-settings/migrate-local", d.handleMigrateCourseCatalogLocalStorage())
+	r.Put("/api/v1/courses/catalog-nickname", d.handlePutCourseCatalogNickname())
+	r.Put("/api/v1/courses/catalog-order", d.handlePutCourseCatalogOrder())
+	r.Put("/api/v1/courses/kanban-board", d.handlePutCourseKanbanBoard())
 	r.Post("/api/v1/courses", d.handleCreateCourse())
 	r.Post("/api/v1/integrations/canvas/courses", d.handleCanvasListCourses())
 	// iCalendar feed must register before the /api/v1/courses/{course_code} subtree.

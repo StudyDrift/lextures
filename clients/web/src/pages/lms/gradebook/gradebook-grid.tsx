@@ -35,6 +35,17 @@ import {
   type AssignmentGroupWeight,
 } from './compute-course-final-percent'
 import { GradebookTransposedTable } from './gradebook-grid-transposed'
+import {
+  getGradebookCellMenuItems,
+  openGradebookCellMenuFromButton,
+  openGradebookCellMenuFromEvent,
+  type GradebookCellMenuState,
+} from './gradebook-cell-menu-utils'
+import {
+  GradebookCellMenuItems,
+  GradebookCellMenuPortal,
+  GradebookCellMenuTrigger,
+} from './gradebook-cell-menu'
 import type { AssignmentGroup } from '../../../lib/courses-api'
 import { EnrollmentStateBadge } from '../../../components/enrollment/enrollment-state-badge'
 import { isFormerEnrollmentState, type EnrollmentState } from '../../../lib/enrollment-state-api'
@@ -55,6 +66,8 @@ type GradebookGridProps = {
   onGradesChange?: (grades: Record<string, Record<string, string>>) => void
   /** Open rubric scoring for a student/column (assignment columns with a rubric). */
   onRubricClick?: (studentId: string, columnId: string) => void
+  /** Open submission grading modal for an assignment cell. */
+  onGradeSubmission?: (studentId: string, columnId: string) => void
   /** Open grade change history (3.10) for this cell. */
   onOpenGradeHistory?: (studentId: string, columnId: string) => void
   /** Used for empty-state links back to modules or enrollments. */
@@ -241,6 +254,7 @@ export function GradebookGrid({
   readOnly = false,
   onGradesChange,
   onRubricClick,
+  onGradeSubmission,
   onOpenGradeHistory,
   courseCode,
   highlightStudentId = null,
@@ -263,6 +277,7 @@ export function GradebookGrid({
   )
   const [activeSort, setActiveSort] = useState<GradebookActiveSort | null>(null)
   const [headerMenu, setHeaderMenu] = useState<HeaderMenuState>(null)
+  const [cellMenu, setCellMenu] = useState<GradebookCellMenuState>(null)
   const [studentFilter, setStudentFilter] = useState(() => {
     if (highlightStudentId && (students?.length ?? 0) > 0) {
       const hi = students.find((s) => s.id === highlightStudentId)
@@ -301,6 +316,7 @@ export function GradebookGrid({
   const skipNextCellClickRef = useRef(false)
 
   const headerRowRef = useRef<HTMLTableRowElement>(null)
+  const gridScrollRef = useRef<HTMLDivElement>(null)
   const [headerStickyPx, setHeaderStickyPx] = useState(0)
   const [colorScaleEnabled, setColorScaleEnabled] = useState(false)
   const [transposed, setTransposed] = useState(false)
@@ -562,8 +578,10 @@ export function GradebookGrid({
   }, [filteredStudents, visibleColumns])
 
   useLayoutEffect(() => {
+    if (transposed) return
     const el = headerRowRef.current
     if (!el) return
+    if (gridScrollRef.current) gridScrollRef.current.scrollTop = 0
     const measure = () => {
       setHeaderStickyPx(el.getBoundingClientRect().height)
     }
@@ -571,7 +589,7 @@ export function GradebookGrid({
     const ro = new ResizeObserver(measure)
     ro.observe(el)
     return () => ro.disconnect()
-  }, [visibleColumns, studentFilter, assignmentFilter, activeSort])
+  }, [transposed, visibleColumns, studentFilter, assignmentFilter, activeSort])
 
   const setCellRef = useCallback(
     (row: number, col: number, el: HTMLTableCellElement | null) => {
@@ -1048,6 +1066,34 @@ export function GradebookGrid({
   }, [editing, selectionRect, focusRow, focusCol, colCount, rowCount])
 
   const closeHeaderMenu = useCallback(() => setHeaderMenu(null), [])
+  const closeCellMenu = useCallback(() => setCellMenu(null), [])
+
+  const handleCellMenuSelect = useCallback(
+    (item: ReturnType<typeof getGradebookCellMenuItems>[number]) => {
+      if (!cellMenu) return
+      const { studentId, columnId } = cellMenu
+      setCellMenu(null)
+      switch (item.kind) {
+        case 'gradeSubmission':
+          onGradeSubmission?.(studentId, columnId)
+          break
+        case 'rubric':
+          onRubricClick?.(studentId, columnId)
+          break
+        case 'history':
+          onOpenGradeHistory?.(studentId, columnId)
+          break
+        case 'excuse':
+          void onToggleExcused?.(studentId, columnId, item.label === 'Excuse')
+          break
+        default: {
+          const _exhaustive: never = item
+          return _exhaustive
+        }
+      }
+    },
+    [cellMenu, onGradeSubmission, onOpenGradeHistory, onRubricClick, onToggleExcused],
+  )
 
   const pickStudentSort = useCallback((mode: StudentSortMode) => {
     setActiveSort({ kind: 'student', mode })
@@ -1281,6 +1327,7 @@ export function GradebookGrid({
             onClick={() => {
               setTransposed((v) => !v)
               setHeaderMenu(null)
+              setCellMenu(null)
               setEditing(null)
               setSelectionAnchor(null)
               setFillDrag(null)
@@ -1344,6 +1391,7 @@ export function GradebookGrid({
           courseCode={courseCode}
           highlightStudentId={highlightStudentId}
           onRubricClick={onRubricClick}
+          onGradeSubmission={onGradeSubmission}
           onOpenGradeHistory={onOpenGradeHistory}
           onToggleExcused={onToggleExcused}
           onPostAssignmentGrades={onPostAssignmentGrades}
@@ -1355,7 +1403,10 @@ export function GradebookGrid({
       )}
 
       {rowCount > 0 && baseColCount > 0 && !transposed && (
-        <div className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+        <div
+          ref={gridScrollRef}
+          className="overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+        >
           <table
             role="grid"
             aria-label="Grades by student and assignment"
@@ -1596,6 +1647,16 @@ export function GradebookGrid({
                     const selectOpts =
                       showEditor && singleCellEdit ? gradingSelectOptions(col, gradingScheme) : []
                     const showSelectEditor = showEditor && selectOpts.length > 0
+                    const cellMenuItems = getGradebookCellMenuItems({
+                      col,
+                      readOnly,
+                      isExcused,
+                      onGradeSubmission,
+                      onRubricClick,
+                      onOpenGradeHistory,
+                      onToggleExcused,
+                    })
+                    const hasCellMenu = cellMenuItems.length > 0
 
                     const ringActive =
                       'relative z-[1] bg-indigo-50 ring-2 ring-inset ring-indigo-500 dark:bg-indigo-950/50 dark:ring-indigo-400'
@@ -1717,6 +1778,12 @@ export function GradebookGrid({
                           dragSelectStartRef.current = null
                         }}
                         onDoubleClick={() => beginEdit(row, colIndex, { range: 'single' })}
+                        onContextMenu={
+                          hasCellMenu
+                            ? (e) =>
+                                openGradebookCellMenuFromEvent(e, student.id, col.id, setCellMenu)
+                            : undefined
+                        }
                       >
                         {showEditor ? (
                           showSelectEditor ? (
@@ -1759,7 +1826,16 @@ export function GradebookGrid({
                             />
                           )
                         ) : (
-                          <div className="flex flex-col items-end gap-0.5">
+                          <div className="relative flex min-h-[1.25rem] flex-col items-end gap-0.5">
+                            {hasCellMenu ? (
+                              <GradebookCellMenuTrigger
+                                studentName={student.name}
+                                columnTitle={col.title}
+                                onOpen={(e) =>
+                                  openGradebookCellMenuFromButton(e, student.id, col.id, setCellMenu)
+                                }
+                              />
+                            ) : null}
                             <span className="inline-flex max-w-full items-center justify-end gap-1">
                               {cellHeld ? (
                                 <Lock
@@ -1785,55 +1861,6 @@ export function GradebookGrid({
                               >
                                 {val || '—'}
                               </span>
-                            </span>
-                            <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5">
-                              {!readOnly && col.rubric && onRubricClick ? (
-                                <button
-                                  type="button"
-                                  className="text-[11px] font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    onRubricClick(student.id, col.id)
-                                  }}
-                                >
-                                  Rubric
-                                </button>
-                              ) : null}
-                              {onOpenGradeHistory &&
-                                (col.kind === 'assignment' || col.kind === 'quiz' || col.kind === 'quiz_comprehensive') ? (
-                                <button
-                                  type="button"
-                                  tabIndex={isActive ? 0 : -1}
-                                  aria-hidden={!isActive}
-                                  className={`text-[11px] font-medium text-slate-600 hover:underline dark:text-neutral-400 ${!isActive ? 'invisible pointer-events-none' : ''
-                                    }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    onOpenGradeHistory(student.id, col.id)
-                                  }}
-                                >
-                                  History
-                                </button>
-                              ) : null}
-                              {!readOnly &&
-                                onToggleExcused &&
-                                (col.kind === 'assignment' ||
-                                  col.kind === 'quiz' ||
-                                  col.kind === 'quiz_comprehensive') ? (
-                                <button
-                                  type="button"
-                                  tabIndex={isActive ? 0 : -1}
-                                  aria-hidden={!isActive}
-                                  className={`text-[11px] font-medium text-slate-600 hover:underline dark:text-neutral-400 ${!isActive ? 'invisible pointer-events-none' : ''
-                                    }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    void onToggleExcused(student.id, col.id, !isExcused)
-                                  }}
-                                >
-                                  {isExcused ? 'Unexcuse' : 'Excuse'}
-                                </button>
-                              ) : null}
                             </span>
                           </div>
                         )}
@@ -1933,6 +1960,27 @@ export function GradebookGrid({
           </button>
         </HeaderSortMenuPortal>
       )}
+
+      {cellMenu ? (() => {
+        const menuCol = visibleColumns.find((c) => c.id === cellMenu.columnId)
+        if (!menuCol) return null
+        return (
+          <GradebookCellMenuPortal menu={cellMenu} onClose={closeCellMenu}>
+            <GradebookCellMenuItems
+              items={getGradebookCellMenuItems({
+                col: menuCol,
+                readOnly,
+                isExcused: Boolean(gradeExcused?.[cellMenu.studentId]?.[cellMenu.columnId]),
+                onGradeSubmission,
+                onRubricClick,
+                onOpenGradeHistory,
+                onToggleExcused,
+              })}
+              onSelect={handleCellMenuSelect}
+            />
+          </GradebookCellMenuPortal>
+        )
+      })() : null}
     </div>
   )
 }

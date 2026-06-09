@@ -37,6 +37,10 @@ import { GradeHistoryPanel } from '../../components/grading/grade-history-panel'
 import { GradebookImportModal } from '../../components/grading/gradebook-import-modal'
 import { LmsPage } from './lms-page'
 import { IncompleteGradeModal } from './gradebook/IncompleteGradeModal'
+import {
+  GradebookSubmissionGradingModal,
+  type GradebookSubmissionGradingModalState,
+} from './gradebook/gradebook-submission-grading-modal'
 import type { IncompleteGradeRecord } from '../../lib/incomplete-grades-api'
 
 function buildEmptyGrades(students: GradebookStudent[], columns: GradebookColumn[]): Record<string, Record<string, string>> {
@@ -356,6 +360,8 @@ export default function CourseGradebook() {
     studentName: string
     record?: IncompleteGradeRecord | null
   } | null>(null)
+  const [submissionGradingModal, setSubmissionGradingModal] =
+    useState<GradebookSubmissionGradingModalState>(null)
 
   useEffect(() => {
     if (!courseCode) return
@@ -656,6 +662,24 @@ export default function CourseGradebook() {
     [courseCode, columns, students],
   )
 
+  const openGradeSubmission = useCallback(
+    (studentId: string, columnId: string) => {
+      const col = columns.find((c) => c.id === columnId)
+      if (!col || col.kind !== 'assignment') return
+      setSubmissionGradingModal({
+        itemId: columnId,
+        studentUserId: studentId,
+        columnTitle: col.title,
+      })
+    },
+    [columns],
+  )
+
+  const closeSubmissionGradingModal = useCallback(() => {
+    setSubmissionGradingModal(null)
+    void loadGrid()
+  }, [loadGrid])
+
   useEffect(() => {
     if (!gradeHistoryOpen || !courseCode) return
     let cancelled = false
@@ -727,7 +751,7 @@ export default function CourseGradebook() {
     return (
       <LmsPage
         title="Gradebook"
-        description="Spreadsheet-style grades for enrolled students and each course assignment or quiz. Use the arrows, Tab, Enter, and double-click to edit cells; assignment rubrics open from the Rubric link. Save writes your changes to the server."
+        description="Spreadsheet-style grades for enrolled students and each course assignment or quiz. Use the arrows, Tab, Enter, and double-click to edit cells; open the cell menu for rubric scoring, submission grading, history, and excused status. Save writes your changes to the server."
       >
         <GradebookLoadingSkeleton />
       </LmsPage>
@@ -741,7 +765,7 @@ export default function CourseGradebook() {
   return (
     <LmsPage
       title="Gradebook"
-      description="Spreadsheet-style grades for enrolled students and each course assignment or quiz. Use the arrows, Tab, Enter, and double-click to edit cells; assignment rubrics open from the Rubric link. Save writes your changes to the server."
+      description="Spreadsheet-style grades for enrolled students and each course assignment or quiz. Use the arrows, Tab, Enter, and double-click to edit cells; open the cell menu for rubric scoring, submission grading, history, and excused status. Save writes your changes to the server."
       actions={
         <div className="flex flex-wrap items-center gap-2">
           {loadState === 'ok' && gradebookCsvEnabled ? (
@@ -917,6 +941,7 @@ export default function CourseGradebook() {
             readOnly={!canEditGrades}
             onGradesChange={handleGradesChange}
             onRubricClick={canEditGrades ? openRubricModal : undefined}
+            onGradeSubmission={canEditGrades ? openGradeSubmission : undefined}
             onOpenGradeHistory={openGradeHistory}
             highlightStudentId={highlightStudentId}
             gradingScheme={gradingScheme}
@@ -978,6 +1003,13 @@ export default function CourseGradebook() {
                 setIncompleteModal(null)
                 void loadGrid()
               }}
+            />
+          ) : null}
+          {courseCode ? (
+            <GradebookSubmissionGradingModal
+              open={submissionGradingModal}
+              courseCode={courseCode}
+              onClose={closeSubmissionGradingModal}
             />
           ) : null}
           {gradeHistoryOpen ? (

@@ -272,7 +272,7 @@ test.describe('AI Tutor UI', () => {
     await expect(page.getByText('AI Tutor', { exact: true })).toBeVisible()
   })
 
-  test('enabling AI Tutor shows the floating button on course pages', async ({ page }) => {
+  test('enabling AI Tutor shows the top bar button on course pages', async ({ page }) => {
     const instrEmail = uniqueEmail('btn-instr')
     const studEmail = uniqueEmail('btn-stud')
     const { access_token: instrToken } = await apiSignup({

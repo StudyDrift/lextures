@@ -4,6 +4,17 @@ import { Lock } from 'lucide-react'
 import { studentProgressFeatureEnabled } from '../../../lib/student-progress'
 import { formatFinalPercent } from './compute-course-final-percent'
 import type { GradebookColumn, GradebookStudent } from './gradebook-grid-types'
+import {
+  getGradebookCellMenuItems,
+  openGradebookCellMenuFromButton,
+  openGradebookCellMenuFromEvent,
+  type GradebookCellMenuState,
+} from './gradebook-cell-menu-utils'
+import {
+  GradebookCellMenuItems,
+  GradebookCellMenuPortal,
+  GradebookCellMenuTrigger,
+} from './gradebook-cell-menu'
 
 function parseGradeNumber(raw: string): number | null {
   const s = raw.trim().replace(/,/g, '')
@@ -100,6 +111,7 @@ export type GradebookTransposedTableProps = {
   courseCode?: string
   highlightStudentId?: string | null
   onRubricClick?: (studentId: string, columnId: string) => void
+  onGradeSubmission?: (studentId: string, columnId: string) => void
   onOpenGradeHistory?: (studentId: string, columnId: string) => void
   onToggleExcused?: (studentId: string, columnId: string, excused: boolean) => void | Promise<void>
   onPostAssignmentGrades?: (itemId: string) => void
@@ -137,6 +149,7 @@ export function GradebookTransposedTable({
   courseCode,
   highlightStudentId,
   onRubricClick,
+  onGradeSubmission,
   onOpenGradeHistory,
   onToggleExcused,
   onPostAssignmentGrades,
@@ -147,6 +160,7 @@ export function GradebookTransposedTable({
 }: GradebookTransposedTableProps) {
   const [editing, setEditing] = useState<EditingCell | null>(null)
   const [draft, setDraft] = useState('')
+  const [cellMenu, setCellMenu] = useState<GradebookCellMenuState>(null)
   const [assignmentColWidthPx, setAssignmentColWidthPx] = useState(() =>
     readStoredAssignmentColWidth(defaultAssignmentColWidthPx),
   )
@@ -243,7 +257,37 @@ export function GradebookTransposedTable({
     setDraft('')
   }, [])
 
+  const closeCellMenu = useCallback(() => setCellMenu(null), [])
+
+  const handleCellMenuSelect = useCallback(
+    (item: ReturnType<typeof getGradebookCellMenuItems>[number]) => {
+      if (!cellMenu) return
+      const { studentId, columnId } = cellMenu
+      setCellMenu(null)
+      switch (item.kind) {
+        case 'gradeSubmission':
+          onGradeSubmission?.(studentId, columnId)
+          break
+        case 'rubric':
+          onRubricClick?.(studentId, columnId)
+          break
+        case 'history':
+          onOpenGradeHistory?.(studentId, columnId)
+          break
+        case 'excuse':
+          void onToggleExcused?.(studentId, columnId, item.label === 'Excuse')
+          break
+        default: {
+          const _exhaustive: never = item
+          return _exhaustive
+        }
+      }
+    },
+    [cellMenu, onGradeSubmission, onOpenGradeHistory, onRubricClick, onToggleExcused],
+  )
+
   return (
+    <>
     <div
       className={`overflow-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900 ${resizing ? 'cursor-col-resize select-none' : ''}`}
     >
@@ -383,6 +427,16 @@ export function GradebookTransposedTable({
                   const cellHeld = Boolean(gradeHeld?.[student.id]?.[col.id])
                   const cellDropped = Boolean(droppedGrades?.[student.id]?.[col.id])
                   const selectOpts = isEditing ? gradingSelectOptions(col, gradingScheme) : []
+                  const cellMenuItems = getGradebookCellMenuItems({
+                    col,
+                    readOnly,
+                    isExcused,
+                    onGradeSubmission,
+                    onRubricClick,
+                    onOpenGradeHistory,
+                    onToggleExcused,
+                  })
+                  const hasCellMenu = cellMenuItems.length > 0
                   const heatT =
                     colorScaleEnabled && !isExcused
                       ? heatPercentForCell(col, val === 'EX' ? '' : val)
@@ -398,6 +452,11 @@ export function GradebookTransposedTable({
                         cellDropped ? 'opacity-65 dark:opacity-70' : ''
                       }`}
                       onDoubleClick={() => beginEdit(student.id, col.id)}
+                      onContextMenu={
+                        hasCellMenu
+                          ? (e) => openGradebookCellMenuFromEvent(e, student.id, col.id, setCellMenu)
+                          : undefined
+                      }
                     >
                       {isEditing ? (
                         selectOpts.length > 0 ? (
@@ -438,7 +497,16 @@ export function GradebookTransposedTable({
                           />
                         )
                       ) : (
-                        <div className="flex flex-col items-end gap-0.5">
+                        <div className="relative flex min-h-[1.25rem] flex-col items-end gap-0.5">
+                          {hasCellMenu ? (
+                            <GradebookCellMenuTrigger
+                              studentName={student.name}
+                              columnTitle={col.title}
+                              onOpen={(e) =>
+                                openGradebookCellMenuFromButton(e, student.id, col.id, setCellMenu)
+                              }
+                            />
+                          ) : null}
                           <span className="inline-flex max-w-full items-center justify-end gap-1">
                             {cellHeld ? (
                               <Lock
@@ -458,42 +526,6 @@ export function GradebookTransposedTable({
                               {val || '—'}
                             </span>
                           </span>
-                          <span className="inline-flex flex-wrap items-center justify-end gap-x-2 gap-y-0.5">
-                            {!readOnly && col.rubric && onRubricClick ? (
-                              <button
-                                type="button"
-                                className="text-[11px] font-medium text-indigo-600 hover:underline dark:text-indigo-400"
-                                onClick={() => onRubricClick(student.id, col.id)}
-                              >
-                                Rubric
-                              </button>
-                            ) : null}
-                            {onOpenGradeHistory &&
-                            (col.kind === 'assignment' ||
-                              col.kind === 'quiz' ||
-                              col.kind === 'quiz_comprehensive') ? (
-                              <button
-                                type="button"
-                                className="text-[11px] font-medium text-slate-600 hover:underline dark:text-neutral-400"
-                                onClick={() => onOpenGradeHistory(student.id, col.id)}
-                              >
-                                History
-                              </button>
-                            ) : null}
-                            {!readOnly &&
-                            onToggleExcused &&
-                            (col.kind === 'assignment' ||
-                              col.kind === 'quiz' ||
-                              col.kind === 'quiz_comprehensive') ? (
-                              <button
-                                type="button"
-                                className="text-[11px] font-medium text-slate-600 hover:underline dark:text-neutral-400"
-                                onClick={() => void onToggleExcused(student.id, col.id, !isExcused)}
-                              >
-                                {isExcused ? 'Unexcuse' : 'Excuse'}
-                              </button>
-                            ) : null}
-                          </span>
                         </div>
                       )}
                     </td>
@@ -505,5 +537,26 @@ export function GradebookTransposedTable({
         </tbody>
       </table>
     </div>
+    {cellMenu ? (() => {
+      const menuCol = columns.find((c) => c.id === cellMenu.columnId)
+      if (!menuCol) return null
+      return (
+        <GradebookCellMenuPortal menu={cellMenu} onClose={closeCellMenu}>
+          <GradebookCellMenuItems
+            items={getGradebookCellMenuItems({
+              col: menuCol,
+              readOnly,
+              isExcused: Boolean(gradeExcused?.[cellMenu.studentId]?.[cellMenu.columnId]),
+              onGradeSubmission,
+              onRubricClick,
+              onOpenGradeHistory,
+              onToggleExcused,
+            })}
+            onSelect={handleCellMenuSelect}
+          />
+        </GradebookCellMenuPortal>
+      )
+    })() : null}
+    </>
   )
 }

@@ -18,8 +18,27 @@ interface ConversationState {
   periodMonth: string
 }
 
-interface TutorPanelProps {
+interface AiTutorMenuProps {
   courseCode: string
+}
+
+function AiTutorTrigger({ open, onToggle }: { open: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="Open AI Tutor"
+      aria-expanded={open}
+      aria-haspopup="dialog"
+      onClick={onToggle}
+      className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
+        open
+          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
+          : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
+      }`}
+    >
+      <Bot className="h-5 w-5" aria-hidden />
+    </button>
+  )
 }
 
 async function fetchConversation(courseCode: string): Promise<ConversationState> {
@@ -38,7 +57,7 @@ async function resetConversation(courseCode: string): Promise<void> {
   if (!res.ok) throw new Error(`Failed to reset conversation: ${res.status}`)
 }
 
-export function TutorPanel({ courseCode }: TutorPanelProps) {
+export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
   const [open, setOpen] = useState(false)
   const [conv, setConv] = useState<ConversationState | null>(null)
   const [loading, setLoading] = useState(false)
@@ -180,17 +199,8 @@ export function TutorPanel({ courseCode }: TutorPanelProps) {
 
   return (
     <>
-      {/* Floating button */}
-      <button
-        type="button"
-        aria-label="Open AI Tutor"
-        onClick={() => setOpen(true)}
-        className="fixed bottom-6 end-24 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
-      >
-        <Bot className="h-7 w-7" />
-      </button>
+      <AiTutorTrigger open={open} onToggle={() => setOpen((o) => !o)} />
 
-      {/* Slide-out side panel */}
       {open && (
         <div
           role="dialog"

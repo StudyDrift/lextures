@@ -30,6 +30,18 @@ function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 }
 
+async function enableLiveSessions(token: string, courseCode: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/api/v1/courses/${courseCode}/features`, {
+    method: 'PATCH',
+    headers: authHeaders(token),
+    body: JSON.stringify({ liveSessionsEnabled: true }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Failed to enable live sessions: ${res.status} ${body}`)
+  }
+}
+
 // ---------------------------------------------------------------------------
 // API tests — pure HTTP, no browser
 // ---------------------------------------------------------------------------
@@ -218,6 +230,7 @@ test.describe('Live Sessions UI', () => {
     const { access_token: token } = await apiSignup({ email, password: PASSWORD })
     const course = await apiCreateCourse(token, { title: 'UI VM Course' })
     const cc = course.courseCode
+    await enableLiveSessions(token, cc)
 
     await injectToken(page, token)
     await page.goto(`/courses/${cc}/live`)
@@ -229,6 +242,7 @@ test.describe('Live Sessions UI', () => {
     const { access_token: token } = await apiSignup({ email, password: PASSWORD })
     const course = await apiCreateCourse(token, { title: 'Instr UI VM' })
     const cc = course.courseCode
+    await enableLiveSessions(token, cc)
 
     await injectToken(page, token)
     await page.goto(`/courses/${cc}/live`)
@@ -243,6 +257,7 @@ test.describe('Live Sessions UI', () => {
     const course = await apiCreateCourse(instrToken, { title: 'Stu UI VM' })
     const cc = course.courseCode
     await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await enableLiveSessions(instrToken, cc)
 
     await injectToken(page, stuToken)
     await page.goto(`/courses/${cc}/live`)
@@ -256,6 +271,7 @@ test.describe('Live Sessions UI', () => {
     const { access_token: token } = await apiSignup({ email, password: PASSWORD })
     const course = await apiCreateCourse(token, { title: 'Create UI VM' })
     const cc = course.courseCode
+    await enableLiveSessions(token, cc)
 
     await injectToken(page, token)
     await page.goto(`/courses/${cc}/live`)
@@ -281,6 +297,7 @@ test.describe('Live Sessions UI', () => {
     const { access_token: token } = await apiSignup({ email, password: PASSWORD })
     const course = await apiCreateCourse(token, { title: 'Nav VM' })
     const cc = course.courseCode
+    await enableLiveSessions(token, cc)
 
     await injectToken(page, token)
     await page.goto(`/courses/${cc}`)

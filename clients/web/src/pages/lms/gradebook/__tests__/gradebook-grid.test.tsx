@@ -135,5 +135,11 @@ describe('GradebookGrid — accessibility', () => {
     expect(screen.queryByRole('grid', { name: /grades by student and assignment/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^transpose$/i })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: /resize assignment column/i })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: /^transpose$/i }))
+
+    expect(screen.getByRole('grid', { name: /grades by student and assignment/i })).toBeInTheDocument()
+    expect(screen.queryByRole('grid', { name: /grades by assignment and student/i })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^transpose$/i })).toHaveAttribute('aria-pressed', 'false')
   })
 })

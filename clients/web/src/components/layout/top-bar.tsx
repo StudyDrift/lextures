@@ -2,6 +2,8 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { ChevronDown, LogOut, Menu, User } from 'lucide-react'
 import { Link, matchPath, useLocation, useNavigate } from 'react-router-dom'
+import { AiTutorMenu } from '../tutor-panel'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { setCourseViewAs, useCourseViewAs } from '../../lib/course-view-as'
 import { apiUrl, authorizedFetch } from '../../lib/api'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
@@ -261,10 +263,17 @@ function CourseEnrollmentViewDropdown() {
 }
 
 export function TopBar() {
+  const location = useLocation()
   const { mobileNavOpen, setMobileNavOpen } = useShellNav()
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [readingPanelOpen, setReadingPanelOpen] = useState(false)
   const { ffReadingPreferences } = usePlatformFeatures()
+  const { aiTutorEnabled } = useCourseNavFeatures()
+  const courseCode = useMemo(() => {
+    const m = matchPath({ path: '/courses/:courseCode', end: false }, location.pathname)
+    const code = m?.params.courseCode
+    return code && code !== 'create' ? code : null
+  }, [location.pathname])
 
   return (
     <header className="lms-chrome flex h-14 shrink-0 items-center gap-1.5 border-b border-slate-200 bg-white px-2 shadow-sm shadow-slate-900/5 print:hidden sm:gap-3 sm:px-4 md:gap-4 md:px-6 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-black/20">
@@ -300,6 +309,7 @@ export function TopBar() {
             Aa
           </button>
         )}
+        {courseCode && aiTutorEnabled ? <AiTutorMenu courseCode={courseCode} /> : null}
         <HelpWidgetMenu />
         <NotificationsDrawerTrigger open={notificationsOpen} onOpen={() => setNotificationsOpen(true)} />
         <CourseEnrollmentViewDropdown />

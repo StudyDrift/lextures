@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 func submissionAttachmentContentPath(courseCode string, fileID uuid.UUID) string {
@@ -59,6 +60,7 @@ func (d Deps) submissionToJSON(
 	s moduleassignmentsubmissions.SubmissionRow,
 	redactPII bool,
 	blindRank int,
+	submitterDisplayName string,
 ) map[string]any {
 	out := map[string]any{
 		"id":               s.ID.String(),
@@ -90,6 +92,9 @@ func (d Deps) submissionToJSON(
 		out["blindLabel"] = gradingredaction.BlindStudentLabel(blindRank)
 	} else {
 		out["submittedBy"] = s.SubmittedBy.String()
+		if strings.TrimSpace(submitterDisplayName) != "" {
+			out["submittedByDisplayName"] = strings.TrimSpace(submitterDisplayName)
+		}
 	}
 	return out
 }
@@ -157,10 +162,23 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 			newestFirst[len(rows)-1-i] = rows[i].ID
 		}
 		rankByID := gradingredaction.SubmissionRankByID(newestFirst)
+		displayNames := map[uuid.UUID]string{}
+		if !redact {
+			userIDs := make([]uuid.UUID, 0, len(rows))
+			for _, s := range rows {
+				userIDs = append(userIDs, s.SubmittedBy)
+			}
+			var err error
+			displayNames, err = user.DisplayLabelsByIDs(r.Context(), d.Pool, userIDs)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submitter names.")
+				return
+			}
+		}
 		items := make([]map[string]any, 0, len(rows))
 		for _, s := range rows {
 			rank := rankByID[s.ID]
-			items = append(items, d.submissionToJSON(r.Context(), courseCode, s, redact, rank))
+			items = append(items, d.submissionToJSON(r.Context(), courseCode, s, redact, rank, displayNames[s.SubmittedBy]))
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"submissions": items})
@@ -202,7 +220,11 @@ func (d Deps) handleGetMyAssignmentSubmission() http.HandlerFunc {
 			_ = json.NewEncoder(w).Encode(map[string]any{"submission": nil})
 			return
 		}
-		payload := d.submissionToJSON(r.Context(), courseCode, *row, false, 0)
+		displayName := ""
+		if u, err := user.FindByID(r.Context(), d.Pool, viewer); err == nil && u != nil {
+			displayName = user.DisplayLabel(u.DisplayName, u.Email)
+		}
+		payload := d.submissionToJSON(r.Context(), courseCode, *row, false, 0, displayName)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"submission": payload})
 	}

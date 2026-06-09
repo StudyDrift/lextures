@@ -70,7 +70,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const sectionsEnabled = course.sectionsEnabled === true
   const discussionsEnabled = course.discussionsEnabled === true
   const collabDocsEnabled = course.collabDocsEnabled === true
-  const liveSessionsEnabled = course.liveSessionsEnabled !== false
+  const liveSessionsEnabled = course.liveSessionsEnabled === true
   const officeHoursEnabled = course.officeHoursEnabled === true
   const aiTutorEnabled = course.aiTutorEnabled === true
   const multilingualMessagingEnabled = course.multilingualMessagingEnabled === true

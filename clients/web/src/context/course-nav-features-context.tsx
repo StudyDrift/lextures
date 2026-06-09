@@ -22,7 +22,7 @@ export type CourseNavFeatures = {
   collabDocsEnabled: boolean
   /** Plan 3.7 — standards-based grading enabled for the course. */
   sbgEnabled: boolean
-  /** Plan 6.4 — virtual classroom / live sessions (default true). */
+  /** Plan 6.4 — virtual classroom / live sessions (default off). */
   liveSessionsEnabled: boolean
   /** Plan 6.6 — private group spaces (feed per enrollment group). */
   groupSpacesEnabled: boolean
@@ -53,7 +53,7 @@ const defaultFeatures: CourseNavFeatures = {
   discussionsEnabled: false,
   collabDocsEnabled: false,
   sbgEnabled: false,
-  liveSessionsEnabled: true,
+  liveSessionsEnabled: false,
   groupSpacesEnabled: false,
   officeHoursEnabled: false,
   aiTutorEnabled: false,
@@ -81,7 +81,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
   const [discussionsEnabled, setDiscussionsEnabled] = useState(false)
   const [collabDocsEnabled, setCollabDocsEnabled] = useState(false)
   const [sbgEnabled, setSbgEnabled] = useState(false)
-  const [liveSessionsEnabled, setLiveSessionsEnabled] = useState(true)
+  const [liveSessionsEnabled, setLiveSessionsEnabled] = useState(false)
   const [groupSpacesEnabled, setGroupSpacesEnabled] = useState(false)
   const [officeHoursEnabled, setOfficeHoursEnabled] = useState(false)
   const [aiTutorEnabled, setAiTutorEnabled] = useState(false)
@@ -105,7 +105,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setDiscussionsEnabled(false)
       setCollabDocsEnabled(false)
       setSbgEnabled(false)
-      setLiveSessionsEnabled(true)
+      setLiveSessionsEnabled(false)
       setGroupSpacesEnabled(false)
       setOfficeHoursEnabled(false)
       setAiTutorEnabled(false)
@@ -127,7 +127,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setDiscussionsEnabled(c.discussionsEnabled === true)
       setCollabDocsEnabled(c.collabDocsEnabled === true)
       setSbgEnabled(c.sbgEnabled === true)
-      setLiveSessionsEnabled(c.liveSessionsEnabled !== false)
+      setLiveSessionsEnabled(c.liveSessionsEnabled === true)
       setGroupSpacesEnabled(c.groupSpacesEnabled === true)
       setOfficeHoursEnabled(c.officeHoursEnabled === true)
       setAiTutorEnabled(c.aiTutorEnabled === true)
@@ -144,7 +144,7 @@ export function CourseNavFeaturesProvider({ children }: { children: ReactNode })
       setDiscussionsEnabled(false)
       setCollabDocsEnabled(false)
       setSbgEnabled(false)
-      setLiveSessionsEnabled(true)
+      setLiveSessionsEnabled(false)
       setGroupSpacesEnabled(false)
       setOfficeHoursEnabled(false)
       setAiTutorEnabled(false)

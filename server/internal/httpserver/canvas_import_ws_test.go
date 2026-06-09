@@ -5,8 +5,16 @@ import (
 	"testing"
 )
 
-func TestCanvasEnrollmentTypeToRole_TeacherAndTA(t *testing.T) {
-	for _, typ := range []string{"TeacherEnrollment", "TaEnrollment", "teacher", "ta", "head_ta"} {
+func TestCanvasEnrollmentTypeToRole_Teacher(t *testing.T) {
+	for _, typ := range []string{"TeacherEnrollment", "teacher"} {
+		if got := canvasEnrollmentTypeToRole(typ); got != "teacher" {
+			t.Errorf("canvasEnrollmentTypeToRole(%q) = %q, want teacher", typ, got)
+		}
+	}
+}
+
+func TestCanvasEnrollmentTypeToRole_TA(t *testing.T) {
+	for _, typ := range []string{"TaEnrollment", "ta", "head_ta"} {
 		if got := canvasEnrollmentTypeToRole(typ); got != "instructor" {
 			t.Errorf("canvasEnrollmentTypeToRole(%q) = %q, want instructor", typ, got)
 		}

@@ -1,12 +1,13 @@
 /* eslint-disable react-hooks/set-state-in-effect -- sync breadcrumb async labels and cache when the route or course changes */
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
-import { Link, matchPath, useLocation } from 'react-router-dom'
+import { Link, matchPath, useLocation, useSearchParams } from 'react-router-dom'
 import {
   fetchCourse,
   fetchCourseStructure,
   type CourseStructureItem,
 } from '../../lib/courses-api'
+import { listCourseFiles, type FolderBreadcrumb } from '../../lib/course-files-api'
 import {
   courseSettingsSectionFromPathname,
   settingsViewFromPathname,
@@ -15,6 +16,7 @@ import {
 
 const courseTitleCache = new Map<string, string>()
 const structureCache = new Map<string, CourseStructureItem[]>()
+const fileFolderCache = new Map<string, FolderBreadcrumb[]>()
 
 type Crumb = { key: string; label: string; to?: string }
 
@@ -235,6 +237,26 @@ function mergeModuleItem(
   }).filter((c) => c.label.trim().length > 0)
 }
 
+function mergeFileFolderCrumbs(
+  crumbs: Crumb[],
+  courseCode: string,
+  breadcrumbs: FolderBreadcrumb[],
+): Crumb[] {
+  if (!breadcrumbs.length) return crumbs
+  const filesBase = `/courses/${encodeURIComponent(courseCode)}/files`
+  return [
+    ...crumbs.map((c) => (c.key === 'files' ? { ...c, to: filesBase } : c)),
+    ...breadcrumbs.map((b, i) => ({
+      key: `ff-${b.id}`,
+      label: b.name,
+      to:
+        i < breadcrumbs.length - 1
+          ? `${filesBase}?folder=${encodeURIComponent(b.id)}`
+          : undefined,
+    })),
+  ]
+}
+
 const MODULE_ITEM_PATTERNS = [
   '/courses/:courseCode/modules/content/:itemId',
   '/courses/:courseCode/modules/assignment/:itemId',
@@ -257,6 +279,8 @@ function matchModuleItemRoute(pathname: string): { code: string; id: string } | 
 
 export function TopBarBreadcrumbs() {
   const { pathname } = useLocation()
+  const [searchParams] = useSearchParams()
+  const folderId = searchParams.get('folder')
   const courseCode = useMemo(() => {
     const m = matchPath({ path: '/courses/:courseCode/*', end: false }, pathname)
     const code = m?.params.courseCode
@@ -270,6 +294,8 @@ export function TopBarBreadcrumbs() {
   const [itemTrail, setItemTrail] = useState<{ moduleTitle: string | null; itemTitle: string } | null>(
     null,
   )
+
+  const [fileFolderTrail, setFileFolderTrail] = useState<FolderBreadcrumb[] | null>(null)
 
   useEffect(() => {
     if (!courseCode) {
@@ -325,6 +351,43 @@ export function TopBarBreadcrumbs() {
     }
   }, [pathname])
 
+  useEffect(() => {
+    if (!courseCode) {
+      setFileFolderTrail(null)
+      return
+    }
+    const filesBase = `/courses/${encodeURIComponent(courseCode)}/files`
+    if (!pathname.startsWith(`${filesBase}`)) {
+      setFileFolderTrail(null)
+      return
+    }
+    if (!folderId) {
+      setFileFolderTrail([])
+      return
+    }
+    const cacheKey = `${courseCode}:${folderId}`
+    const cached = fileFolderCache.get(cacheKey)
+    if (cached) {
+      setFileFolderTrail(cached)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const contents = await listCourseFiles(courseCode, folderId)
+        if (cancelled) return
+        const trail = contents.breadcrumbs ?? []
+        fileFolderCache.set(cacheKey, trail)
+        setFileFolderTrail(trail)
+      } catch {
+        if (!cancelled) setFileFolderTrail([])
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [pathname, courseCode, folderId])
+
   const crumbs = useMemo(() => {
     let base = staticCrumbsFromPathname(pathname, courseCode)
     if (courseCode && base.some((c) => c.key === 'course')) {
@@ -333,8 +396,19 @@ export function TopBarBreadcrumbs() {
     if (itemTrail && base.some((c) => c.key === 'item')) {
       base = mergeModuleItem(base, itemTrail.moduleTitle, itemTrail.itemTitle)
     }
+    if (base.some((c) => c.key === 'files') && folderId) {
+      if (fileFolderTrail === null) {
+        const filesBase = `/courses/${encodeURIComponent(courseCode!)}/files`
+        base = [
+          ...base.map((c) => (c.key === 'files' ? { ...c, to: filesBase } : c)),
+          { key: 'ff-loading', label: '…' },
+        ]
+      } else if (fileFolderTrail.length > 0) {
+        base = mergeFileFolderCrumbs(base, courseCode!, fileFolderTrail)
+      }
+    }
     return base
-  }, [pathname, courseCode, courseTitle, itemTrail])
+  }, [pathname, courseCode, courseTitle, itemTrail, folderId, fileFolderTrail])
 
   if (!crumbs.length) return null
 

@@ -125,6 +125,10 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 				}
 			}
 		}
+		if err := course.AttachUserCatalogMeta(ctx, d.Pool, userID, courses); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
+			return
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(coursesListResponse{Courses: courses})
 	}
