@@ -145,6 +145,7 @@ test.describe('Collaborative documents', () => {
     await expect(docLink).toBeVisible({ timeout: 8000 })
     const docUrl = new RegExp(`/collab-docs/${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
     await Promise.all([page.waitForURL(docUrl), docLink.click()])
+    await expect(page.getByRole('link', { name: 'Back to documents' })).toBeVisible({ timeout: 15000 })
 
     // Editor page should show a connection status indicator.
     await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })
