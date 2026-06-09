@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useMatch, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { CollabEditor } from '../../components/collab/collab-editor'
 import { CollabDocsList } from '../../components/collab/collab-docs-list'
@@ -9,9 +9,10 @@ import { usePermissions } from '../../context/use-permissions'
 import { LmsPage } from './lms-page'
 
 export default function CourseCollabDocsPage() {
-  const { courseCode: rawCode, docId: rawDocId } = useParams<{ courseCode: string; docId?: string }>()
+  const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
-  const docId = rawDocId ? decodeURIComponent(rawDocId) : undefined
+  const docMatch = useMatch('/courses/:courseCode/collab-docs/:docId')
+  const docId = docMatch?.params.docId ? decodeURIComponent(docMatch.params.docId) : undefined
   const { allows, loading: permLoading } = usePermissions()
   const canManage = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
 

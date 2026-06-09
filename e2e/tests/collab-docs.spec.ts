@@ -19,12 +19,7 @@ import {
 } from '../fixtures/api.js'
 
 function expectCollabConnectionStatus(page: Page) {
-  return expect(
-    page
-      .getByText('Connecting…')
-      .or(page.getByText('Live', { exact: true }))
-      .or(page.getByText(/^Offline/)),
-  )
+  return expect(page.getByTestId('collab-connection-status'))
 }
 
 test.describe('Collaborative documents', () => {
