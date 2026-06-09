@@ -39,6 +39,9 @@ function sessionReducer(_state: Session | null, action: SessionAction): Session 
   return null
 }
 
+/** Undo/redo must be off when Yjs Collaboration drives the document. */
+const collabStarterKit = StarterKit.configure({ undoRedo: false })
+
 function ConnectionStatusBar({
   connState,
   trailing,
@@ -103,14 +106,14 @@ export function CollabEditor({ courseCode, docId, userName = 'Anonymous', readOn
 
   const extensions = session
     ? [
-        StarterKit,
+        collabStarterKit,
         Collaboration.configure({ document: session.ydoc }),
         CollaborationCursor.configure({
           provider: session.provider,
           user: { name: userName, color: colorForUser(userName) },
         }),
       ]
-    : [StarterKit]
+    : [collabStarterKit]
 
   const editor = useEditor(
     {
