@@ -140,14 +140,23 @@ test.describe('Collaborative documents', () => {
       'Editor Test Doc',
     )
 
+    const docPath = `/courses/${seededCourse.courseCode}/collab-docs/${doc.id}`
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
-    const docLink = page.getByRole('link', { name: doc.title })
+    const docLink = page.locator(`a[href="${docPath}"]`)
     await expect(docLink).toBeVisible({ timeout: 8000 })
-    const docUrl = new RegExp(`/collab-docs/${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)
-    await Promise.all([page.waitForURL(docUrl), docLink.click()])
-    await expect(page.getByRole('link', { name: 'Back to documents' })).toBeVisible({ timeout: 15000 })
 
-    // Editor page should show a connection status indicator.
+    const docApiPath = `/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/collab-docs/${doc.id}`
+    await Promise.all([
+      page.waitForURL(new RegExp(`${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`)),
+      page.waitForResponse(
+        (response) =>
+          response.url().includes(docApiPath)
+          && response.request().method() === 'GET'
+          && response.ok(),
+      ),
+      docLink.click(),
+    ])
+    await expect(page.getByTestId('collab-doc-back-link')).toBeVisible({ timeout: 15000 })
     await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })
   })
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, matchPath, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { CollabEditor } from '../../components/collab/collab-editor'
 import { CollabDocsList } from '../../components/collab/collab-docs-list'
@@ -13,12 +13,11 @@ export default function CourseCollabDocsPage() {
   const { courseCode: rawCode } = useParams<{ courseCode: string }>()
   const courseCode = rawCode ? decodeURIComponent(rawCode) : ''
   const docId = useMemo(() => {
-    const match = matchPath(
-      { path: '/courses/:courseCode/collab-docs/:docId', end: true },
-      pathname,
-    )
-    const id = match?.params.docId
-    return id ? decodeURIComponent(id) : undefined
+    const marker = '/collab-docs/'
+    const idx = pathname.indexOf(marker)
+    if (idx === -1) return undefined
+    const rest = pathname.slice(idx + marker.length).split('/')[0]
+    return rest ? decodeURIComponent(rest) : undefined
   }, [pathname])
   const { allows, loading: permLoading } = usePermissions()
   const canManage = !permLoading && !!courseCode && allows(courseItemCreatePermission(courseCode))
@@ -109,6 +108,7 @@ export default function CourseCollabDocsPage() {
           <div className="flex min-h-48 flex-1 flex-col gap-2">
             <Link
               to={listBase}
+              data-testid="collab-doc-back-link"
               className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
             >
               <ArrowLeft className="size-4" aria-hidden />
