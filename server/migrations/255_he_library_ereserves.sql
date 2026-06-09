@@ -4,12 +4,12 @@
 ALTER TABLE course.course_structure_items DROP CONSTRAINT IF EXISTS course_structure_items_kind_check;
 ALTER TABLE course.course_structure_items
     ADD CONSTRAINT course_structure_items_kind_check
-    CHECK (kind IN ('module', 'heading', 'content_page', 'assignment', 'quiz', 'external_link', 'h5p', 'survey', 'lti_link', 'vibe_activity', 'library_resource'));
+    CHECK (kind IN ('module', 'heading', 'content_page', 'assignment', 'quiz', 'external_link', 'h5p', 'survey', 'lti_link', 'vibe_activity', 'attendance', 'library_resource'));
 
 ALTER TABLE course.course_structure_items DROP CONSTRAINT IF EXISTS course_structure_items_parent_child_kind_check;
 ALTER TABLE course.course_structure_items
     ADD CONSTRAINT course_structure_items_parent_child_kind_check
-    CHECK (parent_id IS NULL OR kind IN ('heading', 'content_page', 'assignment', 'quiz', 'external_link', 'h5p', 'survey', 'lti_link', 'vibe_activity', 'library_resource'));
+    CHECK (parent_id IS NULL OR kind IN ('heading', 'content_page', 'assignment', 'quiz', 'external_link', 'h5p', 'survey', 'lti_link', 'vibe_activity', 'attendance', 'library_resource'));
 
 -- Per-item metadata for library resources (Alma catalog items or Leganto reading lists).
 CREATE TABLE course.module_library_resources (
