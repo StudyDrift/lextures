@@ -17,7 +17,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
-	"github.com/lextures/lextures/server/internal/repos/course"
 )
 
 // requireProctoringEnabled returns false and writes a 501 if the proctoring feature flag is off.
@@ -448,19 +447,3 @@ func proctoringWebhookSecret(vendor string) string {
 	return strings.TrimSpace(os.Getenv("PROCTORING_HMAC_" + strings.ToUpper(vendor)))
 }
 
-// --- Route lookup helpers (used by getProctoringConfig for course validation) ---
-
-// verifyQuizInCourse checks the structure item belongs to the given course.
-func verifyQuizInCourse(ctx context.Context, pool *pgxpool.Pool, courseCode string, itemID uuid.UUID) (bool, error) {
-	cid, err := course.GetIDByCourseCode(ctx, pool, courseCode)
-	if err != nil || cid == nil {
-		return false, err
-	}
-	var count int
-	err = pool.QueryRow(ctx, `
-SELECT COUNT(*)
-FROM course.course_structure_items csi
-WHERE csi.id = $1 AND csi.course_id = $2 AND csi.kind = 'quiz'
-`, itemID, *cid).Scan(&count)
-	return count > 0, err
-}
