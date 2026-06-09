@@ -239,7 +239,7 @@ const coursePageDefs: CoursePageDef[] = [
     suffix: '/live',
     title: 'Live Sessions',
     hint: 'live live sessions virtual classroom video meeting jitsi zoom bbb bigbluebutton',
-    whenCourse: (c) => featureDefaultOn(c.liveSessionsEnabled),
+    whenCourse: (c) => c.liveSessionsEnabled === true,
   },
   {
     suffix: '/office-hours',

@@ -88,7 +88,6 @@ export default function CourseFilesPage() {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
   const [draggingItem, setDraggingItem] = useState<{ kind: 'folder' | 'file'; id: string } | null>(null)
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null)
-  const [dragOverBreadcrumbId, setDragOverBreadcrumbId] = useState<string | 'root' | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<SelectedItemKey>>(new Set())
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null)
@@ -435,105 +434,6 @@ export default function CourseFilesPage() {
         />
       )}
 
-      {/* Breadcrumb trail */}
-      <nav
-        aria-label="Folder path"
-        className="mb-3 flex min-w-0 flex-wrap items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900/60"
-      >
-        <span
-          onDragOver={(e) => {
-            if (draggingItem && folderId !== undefined) {
-              e.preventDefault()
-              e.dataTransfer.dropEffect = 'move'
-            }
-          }}
-          onDragEnter={() => {
-            if (draggingItem && folderId !== undefined) {
-              setDragOverBreadcrumbId('root')
-            }
-          }}
-          onDragLeave={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-              setDragOverBreadcrumbId(null)
-            }
-          }}
-          onDrop={() => {
-            if (draggingItem && folderId !== undefined) {
-              void handleMoveItem(draggingItem.kind, draggingItem.id, null)
-            }
-            setDragOverBreadcrumbId(null)
-          }}
-          className={`rounded px-1.5 py-0.5 transition-all duration-150 ${
-            draggingItem && folderId !== undefined
-              ? dragOverBreadcrumbId === 'root'
-                ? 'bg-indigo-100 font-semibold text-indigo-700 ring-2 ring-indigo-500 dark:bg-indigo-900/60 dark:text-indigo-300'
-                : 'border border-dashed border-indigo-300 bg-indigo-50/50 dark:border-indigo-700 dark:bg-indigo-950/20'
-              : ''
-          }`}
-        >
-          <button
-            type="button"
-            onClick={() => navigateToFolder(null)}
-            className="text-indigo-600 hover:underline dark:text-indigo-400"
-            aria-current={!folderId ? 'page' : undefined}
-          >
-            Files
-          </button>
-        </span>
-        {breadcrumbs.map((b, i) => {
-          const isLast = i === breadcrumbs.length - 1
-          const canDropOnCrumb = draggingItem && folderId !== b.id && draggingItem.id !== b.id
-          return (
-            <span key={b.id} className="flex min-w-0 items-center gap-1">
-              <span className="text-slate-400 dark:text-neutral-500" aria-hidden>/</span>
-              <span
-                onDragOver={(e) => {
-                  if (canDropOnCrumb) {
-                    e.preventDefault()
-                    e.dataTransfer.dropEffect = 'move'
-                  }
-                }}
-                onDragEnter={() => {
-                  if (canDropOnCrumb) {
-                    setDragOverBreadcrumbId(b.id)
-                  }
-                }}
-                onDragLeave={(e) => {
-                  if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-                    setDragOverBreadcrumbId(null)
-                  }
-                }}
-                onDrop={() => {
-                  if (canDropOnCrumb) {
-                    void handleMoveItem(draggingItem!.kind, draggingItem!.id, b.id)
-                  }
-                  setDragOverBreadcrumbId(null)
-                }}
-                className={`min-w-0 rounded px-1.5 py-0.5 transition-all duration-150 ${
-                  canDropOnCrumb
-                    ? dragOverBreadcrumbId === b.id
-                      ? 'bg-indigo-100 font-semibold text-indigo-700 ring-2 ring-indigo-500 dark:bg-indigo-900/60 dark:text-indigo-300'
-                      : 'border border-dashed border-indigo-300 bg-indigo-50/50 dark:border-indigo-700 dark:bg-indigo-950/20'
-                    : ''
-                }`}
-              >
-                {!isLast ? (
-                  <button
-                    type="button"
-                    onClick={() => navigateToFolder(b.id)}
-                    className="max-w-[12rem] truncate text-indigo-600 hover:underline dark:text-indigo-400"
-                  >
-                    {b.name}
-                  </button>
-                ) : (
-                  <span className="block max-w-[12rem] truncate font-medium text-slate-800 dark:text-neutral-200" aria-current="page">{b.name}</span>
-                )}
-              </span>
-            </span>
-          )
-        })}
-      </nav>
-
       {/* Toolbar */}
       <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
         {canManage && (
@@ -718,7 +618,7 @@ export default function CourseFilesPage() {
                   draggingItem={draggingItem}
                   dragOverFolderId={dragOverFolderId}
                   onDragStart={(kind, id) => setDraggingItem({ kind, id })}
-                  onDragEnd={() => { setDraggingItem(null); setDragOverFolderId(null); setDragOverBreadcrumbId(null); }}
+                  onDragEnd={() => { setDraggingItem(null); setDragOverFolderId(null); }}
                   onDragEnter={(id) => setDragOverFolderId(id)}
                   onDragLeave={() => setDragOverFolderId(null)}
                   onDrop={(kind, dragId, targetId) => void handleMoveItem(kind, dragId, targetId)}
@@ -742,7 +642,7 @@ export default function CourseFilesPage() {
                   onContextMenu={e => openContextMenu(e, file, 'file')}
                   draggingItem={draggingItem}
                   onDragStart={(kind, id) => setDraggingItem({ kind, id })}
-                  onDragEnd={() => { setDraggingItem(null); setDragOverFolderId(null); setDragOverBreadcrumbId(null); }}
+                  onDragEnd={() => { setDraggingItem(null); setDragOverFolderId(null); }}
                 />
               ))}
             </tbody>

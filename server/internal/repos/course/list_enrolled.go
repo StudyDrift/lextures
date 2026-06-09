@@ -78,6 +78,9 @@ type CoursePublic struct {
 	GradeLevel                    *string          `json:"gradeLevel,omitempty"`
 	ViewerEnrollmentState         *string          `json:"viewerEnrollmentState,omitempty"`
 	ViewerEnrollmentStateChangedAt *time.Time      `json:"viewerEnrollmentStateChangedAt,omitempty"`
+	CatalogNickname               *string          `json:"catalogNickname,omitempty"`
+	KanbanColumnID                *string          `json:"kanbanColumnId,omitempty"`
+	KanbanSortOrder               *int             `json:"kanbanSortOrder,omitempty"`
 }
 
 // coursePublicSelect is columns for `course.courses` joined to `tenant.terms` (alias `tr`) for public APIs.

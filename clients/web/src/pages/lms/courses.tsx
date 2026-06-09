@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import {
   closestCorners,
   DndContext,
-  KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
@@ -13,13 +12,30 @@ import {
   arrayMove,
   rectSortingStrategy,
   SortableContext,
-  sortableKeyboardCoordinates,
   useSortable,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { BookOpen, Plus } from 'lucide-react'
+import { KeyboardSensor as SharedKeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
 import { CanvasImportCoursesModal } from './canvas-import-courses-modal'
 import { CourseCatalogImportMenu } from './course-catalog-import-menu'
+import {
+  CourseCatalogViewMenu,
+} from './course-catalog-view-menu'
+import { CourseCatalogKanbanBoard } from './course-catalog-kanban'
+import { courseCatalogStatusLabel } from './course-catalog-status'
+import { courseCatalogDescriptionBlurb, courseCatalogDisplayTitle } from './course-catalog-display'
+import { CourseCatalogNicknameEditor } from './course-catalog-nickname-editor'
+import {
+  DEFAULT_KANBAN_COLUMN_LABELS,
+  fetchCourseCatalogSettings,
+  migrateLegacyCourseCatalogLocalStorage,
+  putCourseCatalogSettings,
+  putCourseKanbanBoard,
+  type KanbanColumnLabels,
+} from '../../lib/course-catalog-settings-api'
+import type { CourseCatalogView, KanbanColumnId } from '../../lib/course-catalog-types'
 import { EmptyState } from '../../components/ui/empty-state'
 import { CoursesCatalogSkeleton } from '../../components/ui/lms-content-skeletons'
 import { LmsPage } from './lms-page'
@@ -38,6 +54,8 @@ import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
 
 export type { CoursePublic } from '../../lib/courses-api'
+
+type CatalogNicknameChangeHandler = (courseId: string, nickname: string | null) => void
 
 function CreateCourseIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
@@ -71,32 +89,40 @@ function CreateCourseIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
 
 const COURSE_GRID_SORT_ID = 'course-catalog-grid'
 
+type CatalogSection = {
+  key: string
+  title: string
+  items: CoursePublic[]
+}
+
+type SortableCourseProps = {
+  listeners: Record<string, unknown>
+  setNodeRef: (node: HTMLElement | null) => void
+  style: CSSProperties
+  isDragging: boolean
+}
+
 function formatEditedAgo(iso: string): string {
   return `Edited ${formatRelativeCompact(iso)}`
 }
 
-/** Catalog pill: draft vs published schedule window (uses real `published`, `startsAt`, `endsAt`). */
-function courseStatusBadgeLabel(c: CoursePublic): string {
-  if (!c.published) return 'Draft'
-  const now = Date.now()
-  if (c.endsAt) {
-    const end = new Date(c.endsAt).getTime()
-    if (!Number.isNaN(end) && end < now) return 'Ended'
-  }
-  if (c.startsAt) {
-    const start = new Date(c.startsAt).getTime()
-    if (!Number.isNaN(start) && start > now) return 'Upcoming'
-  }
-  return 'Active'
+function formatCourseTermLabel(course: CoursePublic): string {
+  return course.term?.name?.trim() || '—'
+}
+
+function catalogViewUsesGrid(view: CourseCatalogView): boolean {
+  return view === 'cards' || view === 'gallery'
 }
 
 function CourseCard({
   course,
   sortable,
   suppressNavigateAfterDragRef,
+  onNicknameChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
   sortable?: {
     listeners: Record<string, unknown>
     setNodeRef: (node: HTMLElement | null) => void
@@ -105,15 +131,16 @@ function CourseCard({
   }
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
-  const badgeLabel = courseStatusBadgeLabel(course)
-  const descriptionBlurb = course.description.trim() || 'No description yet.'
+  const badgeLabel = courseCatalogStatusLabel(course)
+  const descriptionBlurb = courseCatalogDescriptionBlurb(course)
+  const displayTitle = courseCatalogDisplayTitle(course)
 
   return (
     <article
       ref={sortable?.setNodeRef}
       style={sortable?.style}
       className={[
-        'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow',
+        'flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
         sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
         sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
       ]
@@ -124,7 +151,7 @@ function CourseCard({
       <Link
         to={courseHref}
         className="relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
-        aria-label={`Open ${course.title}`}
+        aria-label={`Open ${displayTitle}`}
         onClick={(e) => {
           if (!suppressNavigateAfterDragRef?.current) return
           e.preventDefault()
@@ -151,14 +178,23 @@ function CourseCard({
         </span>
         <div className="absolute inset-x-0 bottom-0 p-4 pt-10">
           <h2 className="text-lg font-semibold leading-snug tracking-tight text-white drop-shadow-sm line-clamp-2">
-            {course.title}
+            {displayTitle}
           </h2>
         </div>
       </Link>
 
       <div className="flex flex-1 flex-col justify-end px-5 pb-4 pt-3">
-        <p className="text-start text-sm leading-snug text-slate-600 line-clamp-4">{descriptionBlurb}</p>
-        <p className="mt-3 text-start text-xs text-slate-400">{formatEditedAgo(course.updatedAt)}</p>
+        <CourseCatalogNicknameEditor
+          course={course}
+          compact
+          onNicknameChange={onNicknameChange}
+        />
+        {descriptionBlurb ? (
+          <p className="mt-3 text-start text-sm leading-snug text-slate-600 line-clamp-4 dark:text-neutral-400">
+            {descriptionBlurb}
+          </p>
+        ) : null}
+        <p className="mt-3 text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
       </div>
     </article>
   )
@@ -167,9 +203,11 @@ function CourseCard({
 function SortableCourseCard({
   course,
   suppressNavigateAfterDragRef,
+  onNicknameChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -186,6 +224,7 @@ function SortableCourseCard({
       <CourseCard
         course={course}
         suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+        onNicknameChange={onNicknameChange}
         sortable={{
           listeners: listeners as Record<string, unknown>,
           setNodeRef,
@@ -194,6 +233,332 @@ function SortableCourseCard({
         }}
       />
     </div>
+  )
+}
+
+function CourseListRow({
+  course,
+  sortable,
+  suppressNavigateAfterDragRef,
+  onNicknameChange,
+}: {
+  course: CoursePublic
+  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
+  sortable?: SortableCourseProps
+}) {
+  const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
+  const badgeLabel = courseCatalogStatusLabel(course)
+  const descriptionBlurb = courseCatalogDescriptionBlurb(course)
+  const displayTitle = courseCatalogDisplayTitle(course)
+
+  return (
+    <article
+      ref={sortable?.setNodeRef}
+      style={sortable?.style}
+      className={[
+        'flex overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
+        sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      {...(sortable ? sortable.listeners : {})}
+    >
+      <div className="flex min-w-0 flex-1 items-stretch gap-4 p-3 sm:p-4">
+        <Link
+          to={courseHref}
+          className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 sm:h-20 sm:w-28"
+          aria-label={`Open ${displayTitle}`}
+          onClick={(e) => {
+            if (!suppressNavigateAfterDragRef?.current) return
+            e.preventDefault()
+            e.stopPropagation()
+            suppressNavigateAfterDragRef.current = false
+          }}
+        >
+          <img
+            data-lex-hero
+            src={course.heroImageUrl ?? '/course-card-hero.png'}
+            alt=""
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+            style={heroImageObjectStyle(course.heroImageObjectPosition)}
+          />
+        </Link>
+        <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <CourseCatalogNicknameEditor
+              course={course}
+              titleClassName="text-base font-semibold leading-snug text-slate-900 line-clamp-1 dark:text-neutral-100"
+              onNicknameChange={onNicknameChange}
+            />
+            <CourseCatalogStatusPill label={badgeLabel} />
+          </div>
+          {descriptionBlurb ? (
+            <Link
+              to={courseHref}
+              className="text-start text-sm leading-snug text-slate-600 line-clamp-2 hover:text-indigo-600 dark:text-neutral-400 dark:hover:text-indigo-300"
+              onClick={(e) => {
+                if (!suppressNavigateAfterDragRef?.current) return
+                e.preventDefault()
+                e.stopPropagation()
+                suppressNavigateAfterDragRef.current = false
+              }}
+            >
+              {descriptionBlurb}
+            </Link>
+          ) : null}
+          <p className="text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function SortableCourseListRow({
+  course,
+  suppressNavigateAfterDragRef,
+  onNicknameChange,
+}: {
+  course: CoursePublic
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
+}) {
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: course.id,
+  })
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.92 : undefined,
+    zIndex: isDragging ? 20 : undefined,
+  }
+
+  return (
+    <CourseListRow
+      course={course}
+      suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+      onNicknameChange={onNicknameChange}
+      sortable={{
+        listeners: listeners as Record<string, unknown>,
+        setNodeRef,
+        style,
+        isDragging,
+      }}
+    />
+  )
+}
+
+function CourseGalleryTile({
+  course,
+  sortable,
+  suppressNavigateAfterDragRef,
+  onNicknameChange,
+}: {
+  course: CoursePublic
+  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
+  sortable?: SortableCourseProps
+}) {
+  const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
+  const badgeLabel = courseCatalogStatusLabel(course)
+  const displayTitle = courseCatalogDisplayTitle(course)
+
+  return (
+    <article
+      ref={sortable?.setNodeRef}
+      style={sortable?.style}
+      className={[
+        'overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 transition-shadow dark:border-neutral-700 dark:bg-neutral-900',
+        sortable ? 'touch-none cursor-grab active:cursor-grabbing' : '',
+        sortable?.isDragging ? 'shadow-md shadow-slate-900/10 ring-2 ring-indigo-400/40' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      {...(sortable ? sortable.listeners : {})}
+    >
+      <Link
+        to={courseHref}
+        className="relative block aspect-[4/3] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+        aria-label={`Open ${displayTitle}`}
+        onClick={(e) => {
+          if (!suppressNavigateAfterDragRef?.current) return
+          e.preventDefault()
+          e.stopPropagation()
+          suppressNavigateAfterDragRef.current = false
+        }}
+      >
+        <img
+          data-lex-hero
+          src={course.heroImageUrl ?? '/course-card-hero.png'}
+          alt=""
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+          style={heroImageObjectStyle(course.heroImageObjectPosition)}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
+          aria-hidden
+        />
+        <span className="absolute start-2 top-2">
+          <CourseCatalogStatusPill label={badgeLabel} />
+        </span>
+        <h2 className="absolute inset-x-0 bottom-0 p-3 text-sm font-semibold leading-snug text-white drop-shadow-sm line-clamp-2">
+          {displayTitle}
+        </h2>
+      </Link>
+      <div className="border-t border-slate-100 px-3 py-2 dark:border-neutral-800">
+        <CourseCatalogNicknameEditor course={course} compact onNicknameChange={onNicknameChange} />
+      </div>
+    </article>
+  )
+}
+
+function SortableCourseGalleryTile({
+  course,
+  suppressNavigateAfterDragRef,
+  onNicknameChange,
+}: {
+  course: CoursePublic
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
+}) {
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: course.id,
+  })
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.92 : undefined,
+    zIndex: isDragging ? 20 : undefined,
+  }
+
+  return (
+    <CourseGalleryTile
+      course={course}
+      suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+      onNicknameChange={onNicknameChange}
+      sortable={{
+        listeners: listeners as Record<string, unknown>,
+        setNodeRef,
+        style,
+        isDragging,
+      }}
+    />
+  )
+}
+
+function CourseCatalogTableHeader() {
+  return (
+    <div
+      className="grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-slate-200 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:text-neutral-400"
+      aria-hidden
+    >
+      <span>Title</span>
+      <span>Status</span>
+      <span>Term</span>
+      <span>Edited</span>
+      <span>Code</span>
+    </div>
+  )
+}
+
+function CourseTableRow({
+  course,
+  sortable,
+  suppressNavigateAfterDragRef,
+  onNicknameChange,
+}: {
+  course: CoursePublic
+  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
+  sortable?: SortableCourseProps
+}) {
+  const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
+  const badgeLabel = courseCatalogStatusLabel(course)
+
+  return (
+    <article
+      ref={sortable?.setNodeRef}
+      style={sortable?.style}
+      className={[
+        'grid grid-cols-[minmax(0,2.2fr)_minmax(5.5rem,auto)_minmax(0,1.1fr)_minmax(5.5rem,auto)_minmax(4.5rem,auto)] gap-3 border-b border-slate-100 px-4 py-3 text-sm last:border-b-0 dark:border-neutral-800',
+        sortable ? 'touch-none cursor-grab bg-white active:cursor-grabbing dark:bg-neutral-900' : 'bg-white dark:bg-neutral-900',
+        sortable?.isDragging ? 'relative z-20 shadow-md ring-2 ring-indigo-400/40' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      {...(sortable ? sortable.listeners : {})}
+    >
+      <div className="min-w-0">
+        <CourseCatalogNicknameEditor
+          course={course}
+          titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
+          onNicknameChange={onNicknameChange}
+        />
+        <Link
+          to={courseHref}
+          className="mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
+          onClick={(e) => {
+            if (!suppressNavigateAfterDragRef?.current) return
+            e.preventDefault()
+            e.stopPropagation()
+            suppressNavigateAfterDragRef.current = false
+          }}
+        >
+          Open course
+        </Link>
+      </div>
+      <div className="self-center">
+        <CourseCatalogStatusPill label={badgeLabel} />
+      </div>
+      <span className="self-center truncate text-slate-600 dark:text-neutral-400">{formatCourseTermLabel(course)}</span>
+      <span className="self-center whitespace-nowrap text-xs text-slate-500 dark:text-neutral-400">
+        {formatRelativeCompact(course.updatedAt)}
+      </span>
+      <span className="self-center truncate font-mono text-xs text-slate-500 dark:text-neutral-400">
+        {course.courseCode}
+      </span>
+    </article>
+  )
+}
+
+function SortableCourseTableRow({
+  course,
+  suppressNavigateAfterDragRef,
+  onNicknameChange,
+}: {
+  course: CoursePublic
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+  onNicknameChange: CatalogNicknameChangeHandler
+}) {
+  const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: course.id,
+  })
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.92 : undefined,
+    zIndex: isDragging ? 20 : undefined,
+  }
+
+  return (
+    <CourseTableRow
+      course={course}
+      suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+      onNicknameChange={onNicknameChange}
+      sortable={{
+        listeners: listeners as Record<string, unknown>,
+        setNodeRef,
+        style,
+        isDragging,
+      }}
+    />
   )
 }
 
@@ -206,6 +571,9 @@ export default function Courses() {
   const [termFilter, setTermFilter] = useState<string>('')
   const [termList, setTermList] = useState<OrgTerm[]>([])
   const [gradeLevelFilter, setGradeLevelFilter] = useState<string>('')
+  const [catalogView, setCatalogView] = useState<CourseCatalogView>('cards')
+  const [kanbanColumnLabels, setKanbanColumnLabels] = useState<KanbanColumnLabels>(DEFAULT_KANBAN_COLUMN_LABELS)
+  const [hiddenColumnExpanded, setHiddenColumnExpanded] = useState(false)
   const [orgType, setOrgType] = useState<OrgType>('higher-ed')
   void orgType
   const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
@@ -245,6 +613,76 @@ export default function Courses() {
 
   useEffect(() => {
     let cancelled = false
+    void (async () => {
+      try {
+        await migrateLegacyCourseCatalogLocalStorage()
+        const settings = await fetchCourseCatalogSettings()
+        if (cancelled) return
+        setCatalogView(settings.view)
+        setKanbanColumnLabels(settings.kanbanColumnLabels)
+        setHiddenColumnExpanded(settings.hiddenColumnExpanded)
+      } catch {
+        /* keep defaults */
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleCatalogViewChange = useCallback((next: CourseCatalogView) => {
+    setCatalogView(next)
+    void putCourseCatalogSettings({ view: next }).catch(() => {
+      setError('Could not save catalog view preference.')
+    })
+  }, [])
+
+  const handleNicknameChange = useCallback((courseId: string, nickname: string | null) => {
+    setCourses((prev) =>
+      prev?.map((course) => (course.id === courseId ? { ...course, catalogNickname: nickname } : course)) ?? prev,
+    )
+  }, [])
+
+  const handleKanbanColumnLabelsChange = useCallback((labels: KanbanColumnLabels) => {
+    setKanbanColumnLabels(labels)
+    void putCourseCatalogSettings({ kanbanColumnLabels: labels }).catch(() => {
+      setError('Could not save kanban column names.')
+    })
+  }, [])
+
+  const handleHiddenColumnExpandedChange = useCallback((expanded: boolean) => {
+    setHiddenColumnExpanded(expanded)
+    void putCourseCatalogSettings({ hiddenColumnExpanded: expanded }).catch(() => {
+      setError('Could not save kanban column preference.')
+    })
+  }, [])
+
+  const handleKanbanBoardChange = useCallback(async (columns: Record<KanbanColumnId, string[]>) => {
+    await putCourseKanbanBoard(columns)
+    setCourses((prev) => {
+      if (!prev) return prev
+      const placementById = new Map<string, { columnId: KanbanColumnId; sortOrder: number }>()
+      for (const columnId of Object.keys(columns) as KanbanColumnId[]) {
+        columns[columnId].forEach((courseId, sortOrder) => {
+          placementById.set(courseId, { columnId, sortOrder })
+        })
+      }
+      return prev.map((course) => {
+        const placement = placementById.get(course.id)
+        if (!placement) {
+          return { ...course, kanbanColumnId: null, kanbanSortOrder: null }
+        }
+        return {
+          ...course,
+          kanbanColumnId: placement.columnId,
+          kanbanSortOrder: placement.sortOrder,
+        }
+      })
+    })
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
     ;(async () => {
       setError(null)
       try {
@@ -275,17 +713,17 @@ export default function Courses() {
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(SharedKeyboardSensor, defaultKeyboardSensorOptions),
   )
 
   const courseIds = useMemo(() => (courses ?? []).map((c) => c.id), [courses])
 
-  const catalogSections = useMemo(() => {
-    if (!courses?.length || termFilter !== '') return null
+  const catalogSections = useMemo((): CatalogSection[] | null => {
+    if (!courses?.length || termFilter !== '' || catalogView === 'status') return null
     if (!courses.some((c) => c.termId)) return null
     const ongoing = courses.filter((c) => !c.termId)
     const termOrder = [...termList].sort((a, b) => (a.startDate < b.startDate ? 1 : -1))
-    const sections: { key: string; title: string; items: CoursePublic[] }[] = []
+    const sections: CatalogSection[] = []
     if (ongoing.length > 0) {
       sections.push({ key: 'ongoing', title: 'Ongoing / Self-paced', items: ongoing })
     }
@@ -309,7 +747,7 @@ export default function Courses() {
       }
     }
     return sections
-  }, [courses, termFilter, termList])
+  }, [courses, termFilter, termList, catalogView])
 
   const clearSuppressNavigateAfterDragSoon = useCallback(() => {
     window.setTimeout(() => {
@@ -345,14 +783,110 @@ export default function Courses() {
     clearSuppressNavigateAfterDragSoon()
   }, [clearSuppressNavigateAfterDragSoon])
 
+  const sortStrategy = catalogViewUsesGrid(catalogView) ? rectSortingStrategy : verticalListSortingStrategy
+
+  const renderSortableCourse = useCallback(
+    (course: CoursePublic) => {
+      switch (catalogView) {
+        case 'cards':
+          return (
+            <SortableCourseCard
+              key={course.id}
+              course={course}
+              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+              onNicknameChange={handleNicknameChange}
+            />
+          )
+        case 'gallery':
+          return (
+            <SortableCourseGalleryTile
+              key={course.id}
+              course={course}
+              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+              onNicknameChange={handleNicknameChange}
+            />
+          )
+        case 'table':
+          return (
+            <SortableCourseTableRow
+              key={course.id}
+              course={course}
+              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+              onNicknameChange={handleNicknameChange}
+            />
+          )
+        case 'list':
+          return (
+            <SortableCourseListRow
+              key={course.id}
+              course={course}
+              suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
+              onNicknameChange={handleNicknameChange}
+            />
+          )
+        case 'status':
+          return null
+        default: {
+          const _exhaustive: never = catalogView
+          return _exhaustive
+        }
+      }
+    },
+    [catalogView, handleNicknameChange],
+  )
+
+  const renderCourseItems = useCallback(
+    (items: CoursePublic[], marginClass = 'mt-4') => {
+      switch (catalogView) {
+        case 'cards':
+          return (
+            <div className={`${marginClass} grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`}>
+              {items.map((c) => renderSortableCourse(c))}
+            </div>
+          )
+        case 'gallery':
+          return (
+            <div
+              className={`${marginClass} grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6`}
+            >
+              {items.map((c) => renderSortableCourse(c))}
+            </div>
+          )
+        case 'table':
+          return (
+            <div
+              className={`${marginClass} overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900`}
+            >
+              <div className="min-w-[42rem]">
+                <CourseCatalogTableHeader />
+                {items.map((c) => renderSortableCourse(c))}
+              </div>
+            </div>
+          )
+        case 'list':
+          return <div className={`${marginClass} flex flex-col gap-2`}>{items.map((c) => renderSortableCourse(c))}</div>
+        case 'status':
+          return null
+        default: {
+          const _exhaustive: never = catalogView
+          return _exhaustive
+        }
+      }
+    },
+    [catalogView, renderSortableCourse],
+  )
+
   return (
     <LmsPage
       title="Courses"
-      description="Browse and open your enrolled courses. Drag a card to reorder your catalog."
+      description="Browse and open your enrolled courses. Drag to reorder your catalog."
       actions={
-        <RequirePermission permission={PERM_COURSE_CREATE} fallback={null}>
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <RequirePermission permission={PERM_COURSE_CREATE} fallback={null}>
             <CourseCatalogImportMenu onImportCanvas={() => setCanvasImportOpen(true)} />
+          </RequirePermission>
+          <CourseCatalogViewMenu value={catalogView} onChange={handleCatalogViewChange} />
+          <RequirePermission permission={PERM_COURSE_CREATE} fallback={null}>
             <Link
               to="/courses/create"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
@@ -360,8 +894,8 @@ export default function Courses() {
               <Plus className="h-4 w-4" aria-hidden />
               New course
             </Link>
-          </div>
-        </RequirePermission>
+          </RequirePermission>
+        </div>
       }
     >
       {error && (
@@ -449,7 +983,19 @@ export default function Courses() {
         </div>
       )}
 
-      {courses && courses.length > 0 && catalogSections && (
+      {courses && courses.length > 0 && catalogView === 'status' && (
+        <CourseCatalogKanbanBoard
+          courses={courses}
+          columnLabels={kanbanColumnLabels}
+          hiddenColumnExpanded={hiddenColumnExpanded}
+          onHiddenColumnExpandedChange={handleHiddenColumnExpandedChange}
+          onColumnLabelsChange={handleKanbanColumnLabelsChange}
+          onNicknameChange={handleNicknameChange}
+          onBoardChange={handleKanbanBoardChange}
+        />
+      )}
+
+      {courses && courses.length > 0 && catalogView !== 'status' && catalogSections && (
         <DndContext
           id={COURSE_GRID_SORT_ID}
           sensors={sensors}
@@ -458,7 +1004,7 @@ export default function Courses() {
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
-          <SortableContext items={courseIds} strategy={rectSortingStrategy}>
+          <SortableContext items={courseIds} strategy={sortStrategy}>
             <div className="mt-8 space-y-10">
               {catalogSections.map((sec) => (
                 <section key={sec.key} aria-labelledby={`cat-${sec.key}`}>
@@ -468,15 +1014,7 @@ export default function Courses() {
                   >
                     {sec.title}
                   </h2>
-                  <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {sec.items.map((c) => (
-                      <SortableCourseCard
-                        key={c.id}
-                        course={c}
-                        suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
-                      />
-                    ))}
-                  </div>
+                  {renderCourseItems(sec.items)}
                 </section>
               ))}
             </div>
@@ -484,7 +1022,7 @@ export default function Courses() {
         </DndContext>
       )}
 
-      {courses && courses.length > 0 && !catalogSections && (
+      {courses && courses.length > 0 && catalogView !== 'status' && !catalogSections && (
         <DndContext
           id={COURSE_GRID_SORT_ID}
           sensors={sensors}
@@ -493,16 +1031,8 @@ export default function Courses() {
           onDragEnd={handleDragEnd}
           onDragCancel={handleDragCancel}
         >
-          <SortableContext items={courseIds} strategy={rectSortingStrategy}>
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {courses.map((c) => (
-                <SortableCourseCard
-                  key={c.id}
-                  course={c}
-                  suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
-                />
-              ))}
-            </div>
+          <SortableContext items={courseIds} strategy={sortStrategy}>
+            {renderCourseItems(courses, 'mt-8')}
           </SortableContext>
         </DndContext>
       )}

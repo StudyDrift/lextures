@@ -135,7 +135,7 @@ export type CoursePublic = {
   discussionsEnabled?: boolean
   /** Plan 6.5 — real-time collaborative documents (default off when omitted). */
   collabDocsEnabled?: boolean
-  /** Plan 6.4 — virtual classroom / live sessions menu (default true when omitted). */
+  /** Plan 6.4 — virtual classroom / live sessions menu (default off when omitted). */
   liveSessionsEnabled?: boolean
   /** Plan 6.6 — private group spaces (feed + files + assignments per enrollment group). */
   groupSpacesEnabled?: boolean
@@ -192,6 +192,11 @@ export type CoursePublic = {
   courseTimezone?: string | null
   /** K-12 grade level (plan 13.6). Values: K, 1-12, K-2, 3-5, 6-8, 9-12, K-12. Null for non-K12. */
   gradeLevel?: string | null
+  /** Per-user catalog nickname from GET /api/v1/courses. */
+  catalogNickname?: string | null
+  /** Manual kanban column override for the signed-in user. */
+  kanbanColumnId?: 'todo' | 'in-progress' | 'done' | 'hidden' | null
+  kanbanSortOrder?: number | null
 }
 
 export type OrgTerm = {
@@ -5249,6 +5254,8 @@ export type ModuleAssignmentSubmissionApi = {
   id: string
   /** Omitted when blind grading hides student identity (plan 3.3). */
   submittedBy?: string
+  /** Human-readable submitter name when identities are visible. */
+  submittedByDisplayName?: string
   /** Set when blind grading is active (plan 3.3). */
   blindLabel?: string
   attachmentFileId: string | null

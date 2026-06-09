@@ -79,6 +79,9 @@ export const courseSchema = z
     feedbackMediaEnabled: z.boolean().optional(),
     termId: z.string().nullable().optional(),
     gradeLevel: z.string().nullable().optional(),
+    catalogNickname: z.string().nullable().optional(),
+    kanbanColumnId: z.enum(['todo', 'in-progress', 'done', 'hidden']).nullable().optional(),
+    kanbanSortOrder: z.number().int().nullable().optional(),
     term: z
       .object({
         id: z.string(),

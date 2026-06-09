@@ -1269,7 +1269,10 @@ func rewriteSyllabusMarkdown(ctx context.Context, pool *pgxpool.Pool, courseID u
 // "TeacherEnrollment", "TaEnrollment") to the Lextures course role it maps to.
 func canvasEnrollmentTypeToRole(canvasType string) string {
 	t := strings.ToLower(canvasType)
-	if strings.Contains(t, "teacher") || strings.Contains(t, "ta") {
+	if strings.Contains(t, "teacher") {
+		return "teacher"
+	}
+	if strings.Contains(t, "ta") {
 		return "instructor"
 	}
 	return "student"

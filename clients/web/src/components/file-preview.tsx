@@ -59,8 +59,11 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault()
+    let deltaY = e.deltaY
+    if (e.deltaMode === 1) deltaY *= 16
+    else if (e.deltaMode === 2) deltaY *= 400
     setZoom((z) => {
-      const delta = e.deltaY < 0 ? 0.15 : -0.15
+      const delta = -deltaY * 0.00035
       return Math.max(0.1, Math.min(5, z + delta))
     })
   }, [])

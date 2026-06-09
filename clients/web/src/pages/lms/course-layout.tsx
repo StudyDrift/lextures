@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, Outlet, useParams } from 'react-router-dom'
-import { TutorPanel } from '../../components/tutor-panel'
 import { CourseLiveContext } from '../../context/course-live-context'
-import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { useCourseStructureRevision } from '../../hooks/use-course-structure-ws'
 import { fetchEvaluationStatus } from '../../lib/course-evaluations-api'
@@ -50,7 +48,6 @@ function EvaluationReminderBanner({ courseCode }: { courseCode: string }) {
  */
 export default function CourseLayout() {
   const { courseCode } = useParams<{ courseCode: string }>()
-  const { aiTutorEnabled } = useCourseNavFeatures()
   const { ffCourseEvaluations } = usePlatformFeatures()
   const structureRevision = useCourseStructureRevision(courseCode)
   const liveValue = useMemo(
@@ -65,7 +62,6 @@ export default function CourseLayout() {
         <EvaluationReminderBanner courseCode={courseCode} />
       ) : null}
       <Outlet />
-      {courseCode && aiTutorEnabled ? <TutorPanel courseCode={courseCode} /> : null}
     </CourseLiveContext.Provider>
   )
 }

@@ -14,9 +14,9 @@ describe('featureDefaultOn', () => {
 })
 
 describe('normalizeSearchCourseItem', () => {
-  it('defaults live sessions on when the search index omits the flag', () => {
+  it('defaults live sessions off when the search index omits the flag', () => {
     expect(normalizeSearchCourseItem({ courseCode: 'X', title: 'Y' }).liveSessionsEnabled).toBe(
-      true,
+      false,
     )
   })
 })
@@ -57,7 +57,7 @@ describe('mergeCoursesWithNavFeatures', () => {
       discussionsEnabled: false,
       collabDocsEnabled: false,
       sbgEnabled: false,
-      liveSessionsEnabled: true,
+      liveSessionsEnabled: false,
       groupSpacesEnabled: false,
       officeHoursEnabled: false,
       filesEnabled: true,
@@ -66,6 +66,6 @@ describe('mergeCoursesWithNavFeatures', () => {
     })
     expect(merged).toHaveLength(1)
     expect(merged[0]?.courseCode).toBe('NEW')
-    expect(merged[0]?.liveSessionsEnabled).toBe(true)
+    expect(merged[0]?.liveSessionsEnabled).toBe(false)
   })
 })

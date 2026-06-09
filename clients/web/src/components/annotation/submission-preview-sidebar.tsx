@@ -41,7 +41,7 @@ export function SubmissionPreviewSidebar({
   if (mode !== 'staff') {
     return (
       <aside
-        className="flex w-full shrink-0 flex-col overflow-y-auto border-t border-slate-200 bg-slate-100 dark:border-neutral-600 dark:bg-neutral-800 lg:w-96 lg:border-t-0 lg:border-l xl:w-[26rem]"
+        className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-slate-100 dark:bg-neutral-800"
         aria-label="Submission file details"
       >
         <SubmissionFileDetailsPanel
@@ -57,7 +57,7 @@ export function SubmissionPreviewSidebar({
 
   return (
     <aside
-      className="flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 bg-slate-100 dark:border-neutral-600 dark:bg-neutral-800 lg:w-96 lg:border-t-0 lg:border-l xl:w-[28rem]"
+      className="flex h-full min-h-0 w-full flex-col bg-slate-100 dark:bg-neutral-800"
       aria-label="Submission grading and details"
     >
       <div

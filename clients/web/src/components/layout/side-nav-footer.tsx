@@ -8,16 +8,9 @@ import {
   FileText,
   Globe,
 } from 'lucide-react'
-import { RELEASE_VERSION } from '../../lib/release-version'
 import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
 import { MARKETING_SITE_URLS } from '../../lib/marketing-site'
-
-function versionLabel(version: string) {
-  const trimmed = version.trim()
-  if (!trimmed) return 'v0'
-  return trimmed.startsWith('v') ? trimmed : `v${trimmed}`
-}
 
 export function SideNavFooter() {
   const { sideNavCollapsed, toggleSideNav } = useShellNav()
@@ -76,17 +69,7 @@ export function SideNavFooter() {
 
       {!sideNavCollapsed && (
         <div className="relative flex flex-col gap-1.5 pt-0.5 motion-safe:animate-in motion-safe:fade-in duration-200">
-          <div className="flex items-center justify-between text-slate-600 dark:text-neutral-400">
-            <span>© {year} Lextures</span>
-            <span
-              className="tabular-nums text-[10px]"
-              title="App version"
-            >
-              {versionLabel(RELEASE_VERSION)}
-            </span>
-          </div>
-
-          <div ref={dropdownRef} className="relative mt-1">
+          <div ref={dropdownRef} className="relative">
             <button
               id={buttonId}
               type="button"
@@ -166,6 +149,10 @@ export function SideNavFooter() {
                     Do Not Sell or Share My Info
                   </span>
                 </a>
+                <div className="h-[1px] bg-slate-100 dark:bg-neutral-800/80 mx-1 my-1" />
+                <div className="px-2.5 py-1.5 text-[10px] text-slate-500 dark:text-neutral-500">
+                  © {year} Lextures
+                </div>
               </div>
             )}
           </div>
