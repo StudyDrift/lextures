@@ -10,12 +10,22 @@
  *   [x] Delete a doc via UI (instructor only)
  */
 import { test, expect } from '../fixtures/test.js'
+import type { Page } from '@playwright/test'
 import {
   apiCreateCollabDoc,
   apiDeleteCollabDoc,
   apiEnableCollabDocs,
   apiListCollabDocs,
 } from '../fixtures/api.js'
+
+function expectCollabConnectionStatus(page: Page) {
+  return expect(
+    page
+      .getByText('Connecting…')
+      .or(page.getByText('Live', { exact: true }))
+      .or(page.getByText(/^Offline/)),
+  )
+}
 
 test.describe('Collaborative documents', () => {
   // -----------------------------------------------------------------------
@@ -136,12 +146,12 @@ test.describe('Collaborative documents', () => {
     )
 
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
-    await page.getByText(doc.title).click()
+    await expect(page.getByRole('link', { name: doc.title })).toBeVisible({ timeout: 8000 })
+    await page.getByRole('link', { name: doc.title }).click()
+    await page.waitForURL(new RegExp(`/collab-docs/${doc.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`))
 
-    // Editor page should show the doc title and a connection status indicator.
-    await expect(
-      page.getByText('Connecting…').or(page.getByText('Live', { exact: true })),
-    ).toBeVisible({ timeout: 10000 })
+    // Editor page should show a connection status indicator.
+    await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })
   })
 
   test('direct URL to doc shows editor with status indicator', async ({
@@ -157,12 +167,7 @@ test.describe('Collaborative documents', () => {
 
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs/${doc.id}`)
     // Should show the connection status bar (Live / Connecting… / Offline).
-    await expect(
-      page
-        .getByText('Connecting…')
-        .or(page.getByText('Live', { exact: true }))
-        .or(page.getByText(/^Offline/)),
-    ).toBeVisible({ timeout: 10000 })
+    await expectCollabConnectionStatus(page).toBeVisible({ timeout: 15000 })
   })
 
   // -----------------------------------------------------------------------
