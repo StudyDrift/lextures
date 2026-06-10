@@ -49,6 +49,7 @@ export type PlatformFeaturesSnapshot = {
   ffCoCurricularTranscript?: boolean
   ffLibraryIntegration?: boolean
   ffEportfolio?: boolean
+  ffBookstoreIntegration?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -100,6 +101,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffCoCurricularTranscript: false,
   ffLibraryIntegration: false,
   ffEportfolio: false,
+  ffBookstoreIntegration: false,
 }
 
 let loaded = false
@@ -237,6 +239,10 @@ export function plagiarismChecksFeatureEnabled(): boolean {
 
 export function heLibraryIntegrationEnabled(): boolean {
   return loaded && snapshot.ffLibraryIntegration === true
+}
+
+export function bookstoreIntegrationEnabled(): boolean {
+  return loaded && snapshot.ffBookstoreIntegration === true
 }
 
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {

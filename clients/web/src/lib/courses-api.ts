@@ -1562,6 +1562,7 @@ export type CourseStructureItem = {
     | 'h5p'
     | 'vibe_activity'
     | 'library_resource'
+    | 'textbook_resource'
   title: string
   /** Set when this row is nested under a module. */
   parentId: string | null
@@ -6314,5 +6315,139 @@ export async function recordLibraryResourceAccess(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/library-resources/${encodeURIComponent(itemId)}/access`,
     { method: 'POST' },
   )
+}
+
+// ─── Bookstore / Textbook linking (plan 14.11) ──────────────────────────────────
+
+export type BookstoreProvider = 'vitalsource' | 'redshelf'
+
+export type TextbookResourceMeta = {
+  isbn?: string
+  title?: string
+  edition?: string
+  publisher?: string
+  chapter?: string
+  pageRange?: string
+}
+
+export async function createModuleTextbookResource(
+  courseCode: string,
+  moduleId: string,
+  body: {
+    title: string
+    provider?: BookstoreProvider
+    externalToolId?: string
+    metadata?: TextbookResourceMeta
+  },
+): Promise<CourseStructureItem> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/textbook-resources`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: body.title,
+        provider: body.provider ?? 'vitalsource',
+        externalToolId: body.externalToolId,
+        metadata: body.metadata ?? {},
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
+}
+
+export type TextbookResourcePayload = {
+  itemId: string
+  provider: BookstoreProvider
+  metadata: TextbookResourceMeta
+  updatedAt: string
+}
+
+export async function fetchModuleTextbookResource(
+  courseCode: string,
+  itemId: string,
+): Promise<TextbookResourcePayload | null> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/textbook-resources/${encodeURIComponent(itemId)}`,
+  )
+  if (res.status === 404) return null
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  return (await parseJson(res)) as TextbookResourcePayload
+}
+
+export async function patchModuleTextbookResource(
+  courseCode: string,
+  itemId: string,
+  body: { metadata?: TextbookResourceMeta },
+): Promise<TextbookResourcePayload> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/textbook-resources/${encodeURIComponent(itemId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as TextbookResourcePayload
+}
+
+export async function recordTextbookResourceAccess(
+  courseCode: string,
+  itemId: string,
+): Promise<void> {
+  await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/textbook-resources/${encodeURIComponent(itemId)}/access`,
+    { method: 'POST' },
+  )
+}
+
+export type InclusiveAccessStatus = {
+  enabled: boolean
+  isbn?: string
+  title?: string
+  optOutUrl?: string
+  provider?: BookstoreProvider
+  updatedAt?: string
+}
+
+export async function fetchInclusiveAccess(courseCode: string): Promise<InclusiveAccessStatus> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/inclusive-access`,
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  return (await parseJson(res)) as InclusiveAccessStatus
+}
+
+export async function configureInclusiveAccess(
+  courseCode: string,
+  body: {
+    isbn: string
+    title: string
+    optOutUrl: string
+    provider?: BookstoreProvider
+    enabled?: boolean
+  },
+): Promise<InclusiveAccessStatus> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/inclusive-access`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as InclusiveAccessStatus
 }
 

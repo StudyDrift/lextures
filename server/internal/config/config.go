@@ -324,6 +324,8 @@ type Config struct {
 	FFCoCurricularTranscript bool
 	// FFLibraryIntegration enables HE library / e-reserves integration: Leganto LTI, Alma search, EZproxy rewriting (plan 14.10).
 	FFLibraryIntegration bool
+	// FFBookstoreIntegration enables bookstore / textbook integration: VitalSource & RedShelf Inclusive Access LTI deep links (plan 14.11).
+	FFBookstoreIntegration bool
 	// FFEportfolio enables the ePortfolio / capstone artifact collection module (plan 14.12).
 	FFEportfolio bool
 
@@ -331,8 +333,6 @@ type Config struct {
 	CCRSigningSeedB64 string
 	// CCRInstitutionName is the issuer name on generated CLRs (plan 14.13).
 	CCRInstitutionName string
-	// FFBookstoreIntegration enables bookstore / textbook integration: VitalSource & RedShelf Inclusive Access LTI deep links (plan 14.11).
-	FFBookstoreIntegration bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -510,11 +510,11 @@ func Load() Config {
 		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
 		FFCoCurricularTranscript:        boolEnv("FF_CO_CURRICULAR_TRANSCRIPT"),
 		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
+		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
 		FFEportfolio:                    boolEnv("FF_EPORTFOLIO"),
 
 		CCRSigningSeedB64:  strings.TrimSpace(os.Getenv("CCR_SIGNING_SEED_B64")),
 		CCRInstitutionName: strings.TrimSpace(os.Getenv("CCR_INSTITUTION_NAME")),
-		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
