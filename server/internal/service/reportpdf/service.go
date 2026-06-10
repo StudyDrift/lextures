@@ -310,3 +310,61 @@ func BuildReportCardPDF(in ReportCardInput) ([]byte, error) {
 
 	return renderPDF(pdf)
 }
+
+// ── CCR PDF (plan 14.13) ──────────────────────────────────────────────────────
+
+// CCRAchievementRow is one achievement line in a co-curricular transcript PDF.
+type CCRAchievementRow struct {
+	Type    string
+	Title   string
+	Issued  string
+	Details string
+}
+
+// CCRInput describes a comprehensive learner record PDF export.
+type CCRInput struct {
+	InstitutionName string
+	StudentName     string
+	GeneratedAt     time.Time
+	Achievements    []CCRAchievementRow
+	VerificationURL string
+	QRCodePNG       []byte
+}
+
+// BuildCCRPDF renders a student co-curricular transcript with optional verification QR code.
+func BuildCCRPDF(in CCRInput) ([]byte, error) {
+	pdf := newPDF()
+	subtitle := in.StudentName
+	addHeaderPage(pdf, in.InstitutionName, "Comprehensive Learner Record", subtitle, in.GeneratedAt, true)
+
+	if len(in.QRCodePNG) > 0 && strings.TrimSpace(in.VerificationURL) != "" {
+		opt := gofpdf.ImageOptions{ImageType: "PNG"}
+		name := "ccr-qr.png"
+		pdf.RegisterImageOptionsReader(name, opt, bytes.NewReader(in.QRCodePNG))
+		pdf.ImageOptions(name, pageW-marginR-35, 18, 30, 30, false, opt, 0, "")
+		pdf.SetFont("Helvetica", "", 7)
+		pdf.SetXY(pageW-marginR-35, 50)
+		pdf.MultiCell(35, 3, "Scan to verify", "", "C", false)
+	}
+
+	pdf.SetFont("Helvetica", "B", 9)
+	colW := []float64{35, 70, 25, 40}
+	drawRow(pdf, colW, []string{"Type", "Achievement", "Date", "Details"}, true)
+	pdf.SetFont("Helvetica", "", 9)
+	for _, a := range in.Achievements {
+		drawRow(pdf, colW, []string{
+			truncate(a.Type, 16),
+			truncate(a.Title, 42),
+			a.Issued,
+			truncate(a.Details, 24),
+		}, false)
+	}
+
+	if strings.TrimSpace(in.VerificationURL) != "" {
+		pdf.Ln(8)
+		pdf.SetFont("Helvetica", "", 8)
+		pdf.MultiCell(contentW, 4, "Verification URL: "+in.VerificationURL, "", "L", false)
+	}
+
+	return renderPDF(pdf)
+}

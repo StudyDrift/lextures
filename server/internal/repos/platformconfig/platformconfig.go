@@ -104,6 +104,7 @@ type Row struct {
 	FFPlagiarismChecks                *bool
 	FFCourseEvaluations               *bool
 	FFProctoringIntegration           *bool
+	FFCoCurricularTranscript          *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -208,6 +209,7 @@ type Write struct {
 	FFPlagiarismChecks                *bool
 	FFCourseEvaluations               *bool
 	FFProctoringIntegration           *bool
+	FFCoCurricularTranscript          *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -309,6 +311,7 @@ SELECT
 	ff_plagiarism_checks,
 	ff_course_evaluations,
 	ff_proctoring_integration,
+	ff_co_curricular_transcript,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -405,6 +408,7 @@ WHERE id = 1
 		&r.FFPlagiarismChecks,
 		&r.FFCourseEvaluations,
 		&r.FFProctoringIntegration,
+		&r.FFCoCurricularTranscript,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -541,6 +545,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_plagiarism_checks,
 	ff_course_evaluations,
 	ff_proctoring_integration,
+	ff_co_curricular_transcript,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -642,6 +647,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_plagiarism_checks = COALESCE(EXCLUDED.ff_plagiarism_checks, settings.platform_app_settings.ff_plagiarism_checks),
 	ff_course_evaluations = COALESCE(EXCLUDED.ff_course_evaluations, settings.platform_app_settings.ff_course_evaluations),
 	ff_proctoring_integration = COALESCE(EXCLUDED.ff_proctoring_integration, settings.platform_app_settings.ff_proctoring_integration),
+	ff_co_curricular_transcript = COALESCE(EXCLUDED.ff_co_curricular_transcript, settings.platform_app_settings.ff_co_curricular_transcript),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -736,6 +742,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFPlagiarismChecks,
 		w.FFCourseEvaluations,
 		w.FFProctoringIntegration,
+		w.FFCoCurricularTranscript,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

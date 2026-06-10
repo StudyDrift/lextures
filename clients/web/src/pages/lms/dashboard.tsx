@@ -10,6 +10,7 @@ import {
   Megaphone,
   MessageCircle,
   Sparkles,
+  Award,
   Flame,
   ChevronDown,
   ChevronUp,
@@ -212,7 +213,7 @@ export default function Dashboard() {
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
-  const { ffCatalogIntegration, ffEnrollmentStateMachine, ffAcademicCalendar } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffEnrollmentStateMachine, ffAcademicCalendar, ffCoCurricularTranscript } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
@@ -666,6 +667,26 @@ export default function Dashboard() {
           <StudyStatsCard />
 
           <NotebookTasksCard courseTitles={courseTitles} />
+
+          {ffCoCurricularTranscript ? (
+            <section aria-label="My Achievements">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-violet-50/70 px-5 py-4 dark:border-violet-900/40 dark:bg-violet-950/20">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">My Achievements</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                    Build and share your comprehensive learner record with employers and graduate programs.
+                  </p>
+                </div>
+                <Link
+                  to="/my-ccr"
+                  className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
+                >
+                  <Award className="h-4 w-4" aria-hidden="true" />
+                  Open CCR
+                </Link>
+              </div>
+            </section>
+          ) : null}
 
           {reviewStats != null && (
             <section aria-label="Spaced repetition review">

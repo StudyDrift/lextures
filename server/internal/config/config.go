@@ -322,6 +322,8 @@ type Config struct {
 	FFProctoringIntegration bool
 	// FFLibraryIntegration enables HE library / e-reserves integration: Leganto LTI, Alma search, EZproxy rewriting (plan 14.10).
 	FFLibraryIntegration bool
+	// FFCoCurricularTranscript enables comprehensive learner record generation and verification (plan 14.13).
+	FFCoCurricularTranscript bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -498,6 +500,7 @@ func Load() Config {
 		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
 		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
+		FFCoCurricularTranscript:        boolEnv("FF_CO_CURRICULAR_TRANSCRIPT"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

@@ -170,6 +170,8 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAIDisclosureRoutes(r)
 	d.registerBackupOpsRoutes(r)
 	d.registerPIIRedactionRoutes(r)
+	d.registerCCRRoutes(r)
+	r.Get("/.well-known/did.json", d.handlePublicDIDDocument())
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
 	return r
