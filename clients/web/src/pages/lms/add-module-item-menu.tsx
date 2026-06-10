@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import {
   BookOpen,
   BookMarked,
+  BookCopy,
   ChevronDown,
   CircleHelp,
   ClipboardList,
@@ -24,6 +25,7 @@ export type ModuleItemKind =
   | 'h5p'
   | 'vibe_activity'
   | 'library_resource'
+  | 'textbook_resource'
 
 type AddModuleItemMenuProps = {
   onAdd: (kind: ModuleItemKind) => void
@@ -35,6 +37,8 @@ type AddModuleItemMenuProps = {
   ltiToolsAvailable?: boolean
   /** When true, shows the Library Resource option (HE e-reserves). */
   heLibraryEnabled?: boolean
+  /** When true, shows the Textbook Resource option (bookstore / Inclusive Access). */
+  bookstoreEnabled?: boolean
 }
 
 export function AddModuleItemMenu({
@@ -45,6 +49,7 @@ export function AddModuleItemMenu({
   h5pEnabled,
   ltiToolsAvailable = true,
   heLibraryEnabled = false,
+  bookstoreEnabled = false,
 }: AddModuleItemMenuProps) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -237,6 +242,24 @@ export function AddModuleItemMenu({
                 <span className="font-semibold text-slate-950 dark:text-neutral-100">Library Resource</span>
                 <span className="text-xs text-slate-500 dark:text-neutral-400">
                   Alma catalog item or Leganto reading list
+                </span>
+              </span>
+            </button>
+          )}
+          {bookstoreEnabled && (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => pick('textbook_resource')}
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            >
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-200/90 bg-orange-50 text-orange-700 dark:border-orange-500/40 dark:bg-orange-950 dark:text-orange-200">
+                <BookCopy className="h-4 w-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex flex-col gap-0.5">
+                <span className="font-semibold text-slate-950 dark:text-neutral-100">Textbook Resource</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400">
+                  VitalSource or RedShelf Inclusive Access deep link
                 </span>
               </span>
             </button>

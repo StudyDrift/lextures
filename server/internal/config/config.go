@@ -322,6 +322,8 @@ type Config struct {
 	FFProctoringIntegration bool
 	// FFLibraryIntegration enables HE library / e-reserves integration: Leganto LTI, Alma search, EZproxy rewriting (plan 14.10).
 	FFLibraryIntegration bool
+	// FFBookstoreIntegration enables bookstore / textbook integration: VitalSource & RedShelf Inclusive Access LTI deep links (plan 14.11).
+	FFBookstoreIntegration bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -498,6 +500,7 @@ func Load() Config {
 		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
 		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
 		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
+		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

@@ -31,6 +31,7 @@ import { CSS, type Transform } from '@dnd-kit/utilities'
 import {
   AlertCircle,
   BookMarked,
+  BookCopy,
   Check,
   ChevronDown,
   ChevronRight,
@@ -78,6 +79,7 @@ import {
   createModuleLtiLink,
   createModuleVibeActivity,
   createModuleLibraryResource,
+  createModuleTextbookResource,
   deleteCourseModule,
   fetchCourseLtiExternalTools,
   fetchCourseModuleDeletePreview,
@@ -105,7 +107,7 @@ import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
 import { h5pFeatureEnabled } from '../../lib/h5p-i18n'
-import { heLibraryIntegrationEnabled } from '../../lib/platform-features'
+import { heLibraryIntegrationEnabled, bookstoreIntegrationEnabled } from '../../lib/platform-features'
 
 const MODULE_SORT_ID = 'sortable-modules'
 
@@ -138,6 +140,7 @@ const STRUCTURE_CHILD_KINDS = new Set<CourseStructureItem['kind']>([
   'h5p',
   'vibe_activity',
   'library_resource',
+  'textbook_resource',
 ])
 
 function buildModuleChildrenMap(items: CourseStructureItem[]): Map<string, CourseStructureItem[]> {
@@ -633,6 +636,28 @@ function ChildRowContent({
             {studentFooter}
           </div>
         </div>
+      ) : (child.kind as CourseStructureItem['kind']) === 'textbook_resource' ? (
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-orange-200/90 bg-orange-50 text-orange-700 dark:border-orange-500/40 dark:bg-orange-950/55 dark:text-orange-200"
+            aria-hidden
+          >
+            <BookCopy className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link
+                to={`/courses/${encodeURIComponent(courseCode)}/modules/textbook-resource/${encodeURIComponent(child.id)}`}
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                {child.title}
+              </Link>
+              <BlueprintLockIcon locked={child.blueprintLocked} />
+            </div>
+            {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
+            {studentFooter}
+          </div>
+        </div>
       ) : (
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-2">
@@ -992,6 +1017,7 @@ type ModuleCardBodyProps = {
   h5pEnabled?: boolean
   ltiToolsAvailable?: boolean
   heLibraryEnabled?: boolean
+  bookstoreEnabled?: boolean
   onFindOpenResources?: (moduleId: string) => void
   oerLibraryEnabled?: boolean
   minified: boolean
@@ -1017,6 +1043,7 @@ function ModuleCardBody({
   h5pEnabled,
   ltiToolsAvailable,
   heLibraryEnabled,
+  bookstoreEnabled,
   onFindOpenResources,
   oerLibraryEnabled: oerEnabled,
   minified,
@@ -1132,6 +1159,7 @@ function ModuleCardBody({
               h5pEnabled={h5pEnabled}
               ltiToolsAvailable={ltiToolsAvailable}
               heLibraryEnabled={heLibraryEnabled}
+              bookstoreEnabled={bookstoreEnabled}
             />
           </div>
         )}
@@ -1324,6 +1352,7 @@ type SortableModuleCardProps = {
   h5pEnabled?: boolean
   ltiToolsAvailable?: boolean
   heLibraryEnabled?: boolean
+  bookstoreEnabled?: boolean
   onFindOpenResources?: (moduleId: string) => void
   oerLibraryEnabled?: boolean
   minified: boolean
@@ -1354,6 +1383,7 @@ function SortableModuleCard({
   h5pEnabled,
   ltiToolsAvailable,
   heLibraryEnabled,
+  bookstoreEnabled,
   onFindOpenResources,
   oerLibraryEnabled: oerEnabled,
   minified,
@@ -1427,6 +1457,7 @@ function SortableModuleCard({
         h5pEnabled={h5pEnabled}
         ltiToolsAvailable={ltiToolsAvailable}
         heLibraryEnabled={heLibraryEnabled}
+        bookstoreEnabled={bookstoreEnabled}
         onFindOpenResources={onFindOpenResources}
         oerLibraryEnabled={oerEnabled}
         minified={minified}
@@ -2042,6 +2073,22 @@ export default function CourseModules() {
       })()
       return
     }
+    if (kind === 'textbook_resource') {
+      if (!courseCode) return
+      void (async () => {
+        try {
+          await createModuleTextbookResource(courseCode, moduleId, {
+            title: 'Textbook Resource',
+            provider: 'vitalsource',
+            metadata: {},
+          })
+          toast('Textbook resource added — click to configure.')
+        } catch {
+          toast('Failed to create textbook resource.')
+        }
+      })()
+      return
+    }
   }, [courseCode, ltiExternalTools.length])
 
   const handleChildTogglePublished = useCallback(
@@ -2570,6 +2617,7 @@ export default function CourseModules() {
                     h5pEnabled={h5pFeatureEnabled()}
                     ltiToolsAvailable={!ltiExternalToolsLoading && ltiExternalTools.length > 0}
                     heLibraryEnabled={heLibraryIntegrationEnabled()}
+                    bookstoreEnabled={bookstoreIntegrationEnabled()}
                     onFindOpenResources={(moduleId) => {
                       setOerModuleId(moduleId)
                       setOerPanelOpen(true)

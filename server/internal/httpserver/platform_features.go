@@ -56,6 +56,7 @@ type platformFeaturesJSON struct {
 	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 	FFProctoringIntegration         bool `json:"ffProctoringIntegration"`
 	FFLibraryIntegration            bool `json:"ffLibraryIntegration"`
+	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -108,6 +109,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFCourseEvaluations:         cfg.FFCourseEvaluations,
 		FFProctoringIntegration:     cfg.FFProctoringIntegration,
 		FFLibraryIntegration:        cfg.FFLibraryIntegration,
+		FFBookstoreIntegration:      cfg.FFBookstoreIntegration,
 	}
 }
 
