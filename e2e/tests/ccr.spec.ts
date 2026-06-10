@@ -43,6 +43,17 @@ test.describe('CCR — authenticated API', () => {
 
 test.describe('CCR — UI', () => {
   test('My CCR page loads for student when feature enabled', async ({ page, seededCourse }) => {
+    const featRes = await fetch(`${apiBase}/api/v1/platform/features`, {
+      headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
+    })
+    if (!featRes.ok) {
+      test.skip(true, 'platform features unavailable')
+    }
+    const feats = (await featRes.json()) as { ffCoCurricularTranscript?: boolean }
+    if (!feats.ffCoCurricularTranscript) {
+      test.skip(true, 'ff_co_curricular_transcript not enabled in this environment')
+    }
+
     await injectToken(page, seededCourse.studentToken)
     await page.goto('/me/ccr')
     await expect(page.getByRole('heading', { name: /comprehensive learner record/i })).toBeVisible({

@@ -38,11 +38,11 @@ func (d Deps) registerCCRRoutes(r chi.Router) {
 
 func (d Deps) handleListMyCCR() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ccrFeatureOff(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ccrFeatureOff(w) {
 			return
 		}
 		achievements, err := ccrsvc.AggregateAchievements(r.Context(), d.Pool, userID)
@@ -68,11 +68,11 @@ func (d Deps) handleGenerateMyCCR() http.HandlerFunc {
 		SharePublicly bool `json:"sharePublicly"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ccrFeatureOff(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ccrFeatureOff(w) {
 			return
 		}
 		var req body
@@ -110,11 +110,11 @@ func (d Deps) handleGenerateMyCCR() http.HandlerFunc {
 
 func (d Deps) handleDownloadMyCCR() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ccrFeatureOff(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ccrFeatureOff(w) {
 			return
 		}
 		docID, err := uuid.Parse(strings.TrimSpace(chi.URLParam(r, "id")))
@@ -259,11 +259,11 @@ func (d Deps) handleAdminAddCCRAchievement() http.HandlerFunc {
 		OutcomeTags []string `json:"outcomeTags"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ccrFeatureOff(w) {
-			return
-		}
 		actorID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ccrFeatureOff(w) {
 			return
 		}
 		if !d.userHasAccommodationsManage(w, r, actorID) {
