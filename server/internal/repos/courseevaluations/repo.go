@@ -281,7 +281,7 @@ func SubmitResponse(ctx context.Context, pool *pgxpool.Pool, in SubmitInput, now
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx) //nolint:errcheck
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Lock and validate the window.
 	var opensAt, closesAt time.Time

@@ -211,6 +211,17 @@ export type OrgTerm = {
   updatedAt: string
 }
 
+export type OrgType = 'higher-ed' | 'k-12'
+
+export async function fetchOrgType(orgId: string): Promise<OrgType> {
+  const res = await authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/settings/org-type`)
+  const raw: unknown = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const data = raw as { orgType?: string }
+  if (data.orgType === 'k-12' || data.orgType === 'higher-ed') return data.orgType
+  return 'higher-ed'
+}
+
 export async function fetchOrgTerms(orgId: string): Promise<OrgTerm[]> {
   const res = await authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/terms`)
   const raw: unknown = await res.json().catch(() => ({}))
@@ -335,6 +346,13 @@ export function learnerCourseItemHref(courseCode: string, item: { kind: string; 
     default:
       return `/courses/${cc}/modules`
   }
+}
+
+/** Full-page student quiz attempt route (begin + take). */
+export function courseModuleQuizAttemptHref(courseCode: string, itemId: string): string {
+  const cc = encodeURIComponent(courseCode)
+  const id = encodeURIComponent(itemId)
+  return `/courses/${cc}/modules/quiz/${id}/attempt`
 }
 
 /** Server `course::GRADING_SCALES` — keep in sync for labels and validation. */
@@ -2840,6 +2858,28 @@ export function quizAdvancedSettingsFromPayload(data: ModuleQuizPayload): QuizAd
 }
 
 /** Backward-compatible defaults when older API responses omit new fields. */
+export function normalizeQuizQuestion(raw: unknown): QuizQuestion {
+  const q = raw as Partial<QuizQuestion> & Record<string, unknown>
+  return {
+    id: String(q.id ?? ''),
+    prompt: String(q.prompt ?? ''),
+    questionType: (q.questionType as QuizQuestion['questionType']) ?? 'multiple_choice',
+    choices: Array.isArray(q.choices) ? q.choices.map((c) => String(c)) : [],
+    choiceIds: Array.isArray(q.choiceIds) ? q.choiceIds.map(String) : undefined,
+    typeConfig:
+      q.typeConfig && typeof q.typeConfig === 'object' && !Array.isArray(q.typeConfig)
+        ? (q.typeConfig as Record<string, unknown>)
+        : undefined,
+    correctChoiceIndex: typeof q.correctChoiceIndex === 'number' ? q.correctChoiceIndex : null,
+    multipleAnswer: Boolean(q.multipleAnswer),
+    answerWithImage: Boolean(q.answerWithImage),
+    required: q.required !== false,
+    points: typeof q.points === 'number' ? q.points : 0,
+    estimatedMinutes: typeof q.estimatedMinutes === 'number' ? q.estimatedMinutes : 0,
+  }
+}
+
+/** Backward-compatible defaults when older API responses omit new fields. */
 export function normalizeModuleQuizPayload(raw: unknown): ModuleQuizPayload {
   const r = raw as Partial<ModuleQuizPayload> & Record<string, unknown>
   return {
@@ -2881,7 +2921,7 @@ export function normalizeModuleQuizPayload(raw: unknown): ModuleQuizPayload {
     adaptiveStopRule: (r.adaptiveStopRule as AdaptiveStopRule) ?? 'fixed_count',
     randomQuestionPoolCount:
       typeof r.randomQuestionPoolCount === 'number' ? r.randomQuestionPoolCount : null,
-    questions: Array.isArray(r.questions) ? (r.questions as QuizQuestion[]) : [],
+    questions: Array.isArray(r.questions) ? r.questions.map(normalizeQuizQuestion) : [],
     usesServerQuestionSampling: Boolean(r.usesServerQuestionSampling),
     updatedAt: String(r.updatedAt ?? ''),
     isAdaptive: Boolean(r.isAdaptive),

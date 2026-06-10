@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { useOfflineContent } from '../../hooks/use-offline-content'
@@ -14,12 +14,14 @@ import {
   fetchCourseQuestions,
   defaultQuizAdvancedSettings,
   fetchCourse,
+  courseGradebookViewPermission,
   fetchCourseGradingSettings,
   fetchCourseStructure,
   fetchModuleQuiz,
   fetchQuizFocusLossEvents,
   fetchReaderMarkups,
   generateModuleQuizQuestions,
+  courseModuleQuizAttemptHref,
   patchCourseStructureItemAssignmentGroup,
   patchModuleQuiz,
   quizAdvancedSettingsFromPayload,
@@ -27,7 +29,6 @@ import {
   type CourseStructureItem,
   type BankQuestionRow,
   type LockdownMode,
-  type ModuleQuizPayload,
   type QuizAdvancedSettings,
   type QuizQuestion,
   type SyllabusSection,
@@ -38,7 +39,6 @@ import { CourseItemPromptEditor } from '../../components/course-item-prompt-edit
 import { expandQuizPromptWithRefs } from '../../lib/course-item-ref-tokens'
 import { QuizPageSettingsPanel } from '../../components/quiz/quiz-page-settings-panel'
 import { QuizStudentPreviewModal } from '../../components/quiz/quiz-student-preview-modal'
-import { QuizStudentTakePanel } from '../../components/quiz/quiz-student-take-panel'
 import { AuthoringSaveFootprint } from '../../components/authoring-save-footprint'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import {
@@ -244,6 +244,7 @@ function QuizEditorMoreMenu({
 
 export default function CourseModuleQuizPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
+  const navigate = useNavigate()
   const { allows, loading: permLoading } = usePermissions()
   const canEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
   const canEditQuizItems = Boolean(
@@ -332,8 +333,6 @@ export default function CourseModuleQuizPage() {
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
-  const [studentQuizPayload, setStudentQuizPayload] = useState<ModuleQuizPayload | null>(null)
-  const [studentTakeOpen, setStudentTakeOpen] = useState(false)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
   const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
@@ -371,12 +370,16 @@ export default function CourseModuleQuizPage() {
       setDraftNeverDrop(nd)
       setDraftReplaceWithFinal(rwf)
       setAssignmentGroupPatchError(null)
-      try {
-        const grading = await fetchCourseGradingSettings(courseCode)
-        setGradingGroups(
-          grading.assignmentGroups.filter((g) => g.id.trim()).map((g) => ({ id: g.id, name: g.name })),
-        )
-      } catch {
+      if (!permLoading && allows(courseGradebookViewPermission(courseCode))) {
+        try {
+          const grading = await fetchCourseGradingSettings(courseCode)
+          setGradingGroups(
+            grading.assignmentGroups.filter((g) => g.id.trim()).map((g) => ({ id: g.id, name: g.name })),
+          )
+        } catch {
+          setGradingGroups([])
+        }
+      } else if (!permLoading) {
         setGradingGroups([])
       }
       setTitle(data.title)
@@ -400,7 +403,6 @@ export default function CourseModuleQuizPage() {
         typeof data.adaptiveQuestionCount === 'number' ? data.adaptiveQuestionCount : 5,
       )
       setAdaptiveDeliveryMode(data.adaptiveDeliveryMode === 'cat' ? 'cat' : 'ai')
-      setStudentQuizPayload(data)
       setCourseQuestionBankEnabled(courseRow.questionBankEnabled === true)
       setCourseLockdownEnabled(courseRow.lockdownModeEnabled === true)
       setLockdownMode(data.lockdownMode)
@@ -442,7 +444,6 @@ export default function CourseModuleQuizPage() {
       setDraftNeverDrop(false)
       setDraftReplaceWithFinal(false)
       setMarkups([])
-      setStudentQuizPayload(null)
       setCourseLockdownEnabled(false)
       setLockdownMode('standard')
       setDraftLockdownMode('standard')
@@ -451,7 +452,7 @@ export default function CourseModuleQuizPage() {
     } finally {
       setLoading(false)
     }
-  }, [courseCode, itemId, loadMarkups])
+  }, [allows, courseCode, itemId, loadMarkups, permLoading])
 
   useEffect(() => {
     void load()
@@ -530,81 +531,8 @@ export default function CourseModuleQuizPage() {
   }, [importQuestionsOpen])
 
   const quizActionsRef = useRef<HTMLDivElement>(null)
-  const quizSummaryAsideRef = useRef<HTMLElement>(null)
   const importDropdownRef = useRef<HTMLDivElement>(null)
   const importButtonRef = useRef<HTMLButtonElement>(null)
-
-  useLayoutEffect(() => {
-    if (editingContent || loading || loadError) return
-
-    const asideEl = quizSummaryAsideRef.current
-    const mq = window.matchMedia('(min-width: 1024px)')
-    let deferredRaf = 0
-    let mountRaf = 0
-
-    function alignSummaryAside() {
-      const aside = quizSummaryAsideRef.current
-      const actions = quizActionsRef.current
-      if (!aside || !actions) {
-        if (aside) aside.style.marginTop = ''
-        return
-      }
-      if (!mq.matches) {
-        aside.style.marginTop = ''
-        return
-      }
-      const delta =
-        actions.getBoundingClientRect().top - aside.getBoundingClientRect().top
-      aside.style.marginTop = `${Math.round(delta)}px`
-    }
-
-    /** Header + flex row reflow after viewport changes is not always done in the same frame as `resize`. */
-    function scheduleAlignAfterLayout() {
-      cancelAnimationFrame(deferredRaf)
-      deferredRaf = requestAnimationFrame(() => {
-        deferredRaf = requestAnimationFrame(() => {
-          deferredRaf = 0
-          alignSummaryAside()
-        })
-      })
-    }
-
-    alignSummaryAside()
-    mountRaf = requestAnimationFrame(() => alignSummaryAside())
-
-    mq.addEventListener('change', scheduleAlignAfterLayout)
-    window.addEventListener('resize', scheduleAlignAfterLayout)
-    const vv = window.visualViewport
-    vv?.addEventListener('resize', scheduleAlignAfterLayout)
-    return () => {
-      cancelAnimationFrame(mountRaf)
-      cancelAnimationFrame(deferredRaf)
-      mq.removeEventListener('change', scheduleAlignAfterLayout)
-      window.removeEventListener('resize', scheduleAlignAfterLayout)
-      vv?.removeEventListener('resize', scheduleAlignAfterLayout)
-      if (asideEl) asideEl.style.marginTop = ''
-    }
-  }, [
-    editingContent,
-    loading,
-    loadError,
-    title,
-    markdown,
-    questions.length,
-    isAdaptive,
-    dueAt,
-    availableFromAt,
-    availableUntilAt,
-    unlimitedAttempts,
-    oneQuestionAtATime,
-    lockdownMode,
-    focusLossThreshold,
-    courseLockdownEnabled,
-    pointsWorth,
-    assignmentGroupId,
-    gradingGroups,
-    updatedAt,
-  ])
 
   function beginEditContent() {
     setSaveError(null)
@@ -868,7 +796,6 @@ export default function CourseModuleQuizPage() {
         const thAdaptive = data.focusLossThreshold
         setFocusLossThreshold(typeof thAdaptive === 'number' ? thAdaptive : null)
         setDraftFocusLossThreshold(typeof thAdaptive === 'number' ? thAdaptive : null)
-        setStudentQuizPayload(data)
         setPointsWorth(data.pointsWorth ?? null)
         setDraftPointsWorth(data.pointsWorth ?? null)
         setAssignmentGroupId(data.assignmentGroupId ?? null)
@@ -908,7 +835,6 @@ export default function CourseModuleQuizPage() {
         const thStatic = data.focusLossThreshold
         setFocusLossThreshold(typeof thStatic === 'number' ? thStatic : null)
         setDraftFocusLossThreshold(typeof thStatic === 'number' ? thStatic : null)
-        setStudentQuizPayload(data)
         setPointsWorth(data.pointsWorth ?? null)
         setDraftPointsWorth(data.pointsWorth ?? null)
         setAssignmentGroupId(data.assignmentGroupId ?? null)
@@ -975,6 +901,11 @@ export default function CourseModuleQuizPage() {
     }
   }
 
+  function goToQuizAttempt() {
+    if (!courseCode || !itemId) return
+    navigate(courseModuleQuizAttemptHref(courseCode, itemId))
+  }
+
   async function handleStudentStartQuiz() {
     if (!courseCode || !itemId) return
     setStudentQuizBanner(null)
@@ -995,7 +926,7 @@ export default function CourseModuleQuizPage() {
         return
       }
     }
-    setStudentTakeOpen(true)
+    goToQuizAttempt()
   }
 
   async function handleSaveQuizForOffline() {
@@ -1077,65 +1008,30 @@ export default function CourseModuleQuizPage() {
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
-        ) : (
+        ) : canEdit ? (
           <div className="flex flex-wrap items-center justify-end gap-2">
-            {canEdit ? (
-              canEditQuizItems ? (
-                <>
-                  <FeatureHelpTrigger topic="quiz-authoring" />
-                  <QuizEditorMoreMenu
-                    disabled={loading}
-                    onPreview={() => setPreviewOpen(true)}
-                    onEditIntro={beginEditContent}
-                    onGenerate={openGenerateModal}
-                    onAnalytics={() => setAnalyticsOpen(true)}
-                  />
-                  <button
-                    type="button"
-                    onClick={openQuestionsEditor}
-                    disabled={loading}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Edit questions
-                  </button>
-                </>
-              ) : null
-            ) : (
-              <div className="flex items-center gap-2">
-                <ReadAloudControls />
-                {isOnline && (
-                  <button
-                    type="button"
-                    onClick={() => void handleSaveQuizForOffline()}
-                    disabled={offlineStatus === 'saving'}
-                    aria-label={offlineStatus === 'cached' ? 'Quiz saved for offline' : 'Save quiz for offline'}
-                    title={offlineStatus === 'cached' ? 'Quiz saved for offline access' : 'Save quiz intro for offline access'}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {offlineStatus === 'saving' ? (
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    ) : offlineStatus === 'cached' ? (
-                      <CheckCircle className="h-4 w-4 text-emerald-600" aria-hidden />
-                    ) : (
-                      <Download className="h-4 w-4" aria-hidden />
-                    )}
-                  </button>
-                )}
+            {canEditQuizItems ? (
+              <>
+                <FeatureHelpTrigger topic="quiz-authoring" />
+                <QuizEditorMoreMenu
+                  disabled={loading}
+                  onPreview={() => setPreviewOpen(true)}
+                  onEditIntro={beginEditContent}
+                  onGenerate={openGenerateModal}
+                  onAnalytics={() => setAnalyticsOpen(true)}
+                />
                 <button
                   type="button"
-                  onClick={() => handleStudentStartQuiz()}
-                  disabled={loading || !isOnline}
-                  aria-disabled={!isOnline}
-                  title={!isOnline ? 'Available when online' : undefined}
+                  onClick={openQuestionsEditor}
+                  disabled={loading}
                   className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {!isOnline && <WifiOff className="h-4 w-4" aria-hidden />}
-                  Start Quiz
+                  Edit questions
                 </button>
-              </div>
-            )}
+              </>
+            ) : null}
           </div>
-        )
+        ) : undefined
       }
     >
       <p className="mt-2 text-start text-sm">
@@ -1206,10 +1102,47 @@ export default function CourseModuleQuizPage() {
               />
             </div>
             <aside
-              ref={quizSummaryAsideRef}
-              className="shrink-0 lg:sticky lg:top-6 lg:w-72 lg:max-w-[min(100%,18rem)] xl:w-80 xl:max-w-[min(100%,20rem)]"
+              className="order-first shrink-0 lg:sticky lg:top-6 lg:order-none lg:w-72 lg:max-w-[min(100%,18rem)] lg:self-start xl:w-80 xl:max-w-[min(100%,20rem)]"
               aria-label="Quiz summary"
             >
+              {!canEdit ? (
+                <div className="mb-4 flex flex-wrap items-center justify-end gap-2">
+                  <ReadAloudControls />
+                  {isOnline ? (
+                    <button
+                      type="button"
+                      onClick={() => void handleSaveQuizForOffline()}
+                      disabled={offlineStatus === 'saving'}
+                      aria-label={offlineStatus === 'cached' ? 'Quiz saved for offline' : 'Save quiz for offline'}
+                      title={
+                        offlineStatus === 'cached'
+                          ? 'Quiz saved for offline access'
+                          : 'Save quiz intro for offline access'
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    >
+                      {offlineStatus === 'saving' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      ) : offlineStatus === 'cached' ? (
+                        <CheckCircle className="h-4 w-4 text-emerald-600" aria-hidden />
+                      ) : (
+                        <Download className="h-4 w-4" aria-hidden />
+                      )}
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => handleStudentStartQuiz()}
+                    disabled={loading || !isOnline}
+                    aria-disabled={!isOnline}
+                    title={!isOnline ? 'Available when online' : undefined}
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {!isOnline && <WifiOff className="h-4 w-4" aria-hidden />}
+                    Start Quiz
+                  </button>
+                </div>
+              ) : null}
               <div className="rounded-2xl border border-slate-200/90 bg-slate-50/70 p-4 dark:border-neutral-600 dark:bg-neutral-900/90">
                 <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
                   {isAdaptive
@@ -1615,24 +1548,11 @@ export default function CourseModuleQuizPage() {
           required={proctoringConfig.required}
           onProceed={() => {
             setProctoringChecklistOpen(false)
-            setStudentTakeOpen(true)
+            goToQuizAttempt()
           }}
           onClose={() => setProctoringChecklistOpen(false)}
         />
       )}
-
-      {studentQuizPayload && courseCode && itemId ? (
-        <QuizStudentTakePanel
-          open={studentTakeOpen}
-          onClose={() => setStudentTakeOpen(false)}
-          courseCode={courseCode}
-          itemId={itemId}
-          quiz={studentQuizPayload}
-          advanced={quizAdvanced}
-          oneQuestionAtATime={oneQuestionAtATime}
-          allowBackNavigation={quizAdvanced.allowBackNavigation}
-        />
-      ) : null}
 
       {questionsOpen && (
         <div

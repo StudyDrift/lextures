@@ -7,6 +7,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Clock, X } from 'lucide-react'
 import { useOptionalQuizShellFocus } from '../layout/quiz-shell-focus-context'
 import type { QuizShellFocusMode, QuizShellLockdownAccent } from '../layout/quiz-shell-focus-context'
@@ -76,6 +77,8 @@ export type QuizStudentTakePanelProps = {
   advanced: QuizAdvancedSettings
   oneQuestionAtATime: boolean
   allowBackNavigation: boolean
+  /** Full-page route (`/attempt`) vs modal overlay on the quiz module page. */
+  layout?: 'overlay' | 'page'
 }
 
 type QuizAnswerState = {
@@ -103,7 +106,10 @@ export function QuizStudentTakePanel({
   advanced,
   oneQuestionAtATime,
   allowBackNavigation,
+  layout = 'overlay',
 }: QuizStudentTakePanelProps) {
+  const pageLayout = layout === 'page'
+  const isActive = pageLayout || open
   const [accessCode, setAccessCode] = useState('')
   const [uiPhase, setUiPhase] = useState<UiPhase>({ kind: 'idle' })
   const [postSubmitResults, setPostSubmitResults] = useState<QuizResultsPayload | null>(null)
@@ -114,6 +120,10 @@ export function QuizStudentTakePanel({
   const [serverLockdown, setServerLockdown] = useState(false)
   const [fullscreenWarning, setFullscreenWarning] = useState<string | null>(null)
   const [focusLossBanner, setFocusLossBanner] = useState<string | null>(null)
+  const [leaveConfirmOpen, setLeaveConfirmOpen] = useState(false)
+  const [leavingBusy, setLeavingBusy] = useState(false)
+  const pendingNavRef = useRef<string | null>(null)
+  const navigate = useNavigate()
   const [srvQuestion, setSrvQuestion] = useState<QuizQuestion | null>(null)
   const [srvIdx, setSrvIdx] = useState(0)
   const [srvTotal, setSrvTotal] = useState(0)
@@ -207,36 +217,117 @@ export function QuizStudentTakePanel({
     setFlaggedQuestionIds(new Set())
     setPostSubmitResults(null)
     setUnderstandingCheckDismissed(false)
+    setLeaveConfirmOpen(false)
+    setLeavingBusy(false)
     timeoutSubmitStartedRef.current = false
     tenMinuteWarningRef.current = false
     oneMinuteWarningRef.current = false
   }, [])
 
-  useEffect(() => {
-    if (!open) reset()
-  }, [open, reset])
+  const takeInProgress =
+    uiPhase.kind === 'starting' || (uiPhase.kind === 'static' && attemptId != null)
+
+  const requestClose = useCallback(() => {
+    if (takeInProgress) {
+      setLeaveConfirmOpen(true)
+      return
+    }
+    onClose()
+  }, [takeInProgress, onClose])
+
+  const confirmLeave = useCallback(async () => {
+    setLeaveConfirmOpen(false)
+    if (takeInProgress && attemptId) {
+      setLeavingBusy(true)
+      try {
+        if (quiz.isAdaptive) {
+          await postQuizSubmit(courseCode, itemId, { attemptId, adaptiveHistory: adHistory })
+        } else {
+          await submitStaticRef.current()
+        }
+      } catch {
+        /* close even if auto-submit fails */
+      } finally {
+        setLeavingBusy(false)
+      }
+    }
+    const pending = pendingNavRef.current
+    pendingNavRef.current = null
+    onClose()
+    if (pending) navigate(pending)
+  }, [takeInProgress, attemptId, onClose, quiz.isAdaptive, courseCode, itemId, adHistory, navigate])
+
+  const cancelLeave = useCallback(() => {
+    setLeaveConfirmOpen(false)
+    pendingNavRef.current = null
+  }, [])
 
   useEffect(() => {
-    if (!open) return
+    if (!takeInProgress || leaveConfirmOpen) return
+    const onClick = (e: MouseEvent) => {
+      const anchor = (e.target as Element).closest('a[href]') as HTMLAnchorElement | null
+      if (!anchor) return
+      if (anchor.target === '_blank' || anchor.hasAttribute('download')) return
+      const href = anchor.getAttribute('href')
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return
+      let url: URL
+      try {
+        url = new URL(href, window.location.origin)
+      } catch {
+        return
+      }
+      if (url.origin !== window.location.origin) return
+      const dest = url.pathname + url.search + url.hash
+      const here = window.location.pathname + window.location.search + window.location.hash
+      if (dest === here) return
+      e.preventDefault()
+      e.stopPropagation()
+      pendingNavRef.current = dest
+      setLeaveConfirmOpen(true)
+    }
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [takeInProgress, leaveConfirmOpen])
+
+  useEffect(() => {
+    if (!takeInProgress) return
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [takeInProgress])
+
+  useEffect(() => {
+    if (!pageLayout && !open) reset()
+    return () => {
+      if (pageLayout) reset()
+    }
+  }, [open, reset, pageLayout])
+
+  useEffect(() => {
+    if (!isActive) return
     function onKey(e: KeyboardEvent) {
       if (e.key !== 'Escape') return
+      if (takeInProgress) return
       e.preventDefault()
-      onClose()
+      requestClose()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
+  }, [isActive, takeInProgress, requestClose])
 
   useEffect(() => {
-    if (!open) return
+    if (!isActive) return
     requestAnimationFrame(() => {
       const el = panelRef.current?.querySelector<HTMLElement>('button:not([disabled])')
       el?.focus()
     })
-  }, [open])
+  }, [isActive])
 
   useEffect(() => {
-    if (!open || !startMeta?.deadlineAt || uiPhase.kind !== 'static') {
+    if (!isActive || !startMeta?.deadlineAt || uiPhase.kind !== 'static') {
       setTimeLeftSec(null)
       return
     }
@@ -254,7 +345,7 @@ export function QuizStudentTakePanel({
   }, [open, startMeta?.deadlineAt, uiPhase.kind])
 
   useEffect(() => {
-    if (!open || !serverLockdown || startMeta?.lockdownMode !== 'kiosk' || !attemptId) return
+    if (!open || !attemptId || uiPhase.kind !== 'static') return
     const aid = attemptId
     kioskVisSkipRef.current = true
     function onVis() {
@@ -283,7 +374,7 @@ export function QuizStudentTakePanel({
       document.removeEventListener('visibilitychange', onVis)
       window.removeEventListener('blur', onBlur)
     }
-  }, [open, serverLockdown, startMeta?.lockdownMode, attemptId, courseCode, itemId])
+  }, [open, attemptId, uiPhase.kind, courseCode, itemId])
 
   async function beginAttempt() {
     setError(null)
@@ -661,9 +752,8 @@ export function QuizStudentTakePanel({
   }
 
   const optionalShell = useOptionalQuizShellFocus()
-  const timedConfigured = (advanced.timeLimitMinutes ?? 0) > 0
-  const shellFocusSession =
-    open && (timedConfigured || needsLockdownWarning) && uiPhase.kind !== 'done'
+  const setQuizShellFocus = optionalShell?.setQuizShellFocus
+  const shellFocusSession = isActive && takeInProgress
 
   const currentAdaptiveHeadless = open ? (adPending[0] ?? null) : null
 
@@ -757,9 +847,9 @@ export function QuizStudentTakePanel({
   }, [lockdownModalOpen, uiPhase.kind, quiz.isAdaptive, serverLockdown, advanceBusy, srvCompleted])
 
   useEffect(() => {
-    if (!optionalShell) return
+    if (!setQuizShellFocus) return
     if (!shellFocusSession) {
-      optionalShell.setQuizShellFocus(null)
+      setQuizShellFocus(null)
       return
     }
     const model: QuizShellFocusMode = {
@@ -772,12 +862,12 @@ export function QuizStudentTakePanel({
       flaggedForCurrent,
       onToggleFlagForReview: currentFlagQuestionId ? toggleFlagForReview : null,
     }
-    optionalShell.setQuizShellFocus(model)
+    setQuizShellFocus(model)
     return () => {
-      optionalShell.setQuizShellFocus(null)
+      setQuizShellFocus(null)
     }
   }, [
-    optionalShell,
+    setQuizShellFocus,
     shellFocusSession,
     quiz.title,
     timeLabelForShell,
@@ -790,11 +880,12 @@ export function QuizStudentTakePanel({
     toggleFlagForReview,
   ])
 
-  if (!open) return null
+  if (!pageLayout && !open) return null
 
   const currentAdaptive = adPending[0] ?? null
   const reducedTake = Boolean(startMeta?.reducedDistractionMode)
-  const immersiveChrome = shellFocusSession
+  const immersiveChrome = pageLayout || open
+  const showPanelHeader = !pageLayout || !shellFocusSession
 
   const timeLabel =
     timeLeftSec != null
@@ -806,68 +897,87 @@ export function QuizStudentTakePanel({
   return (
     <div
       ref={panelRef}
-      className={`fixed inset-0 z-[70] flex justify-center bg-slate-900/40 p-4 sm:items-center ${
-        immersiveChrome ? 'items-stretch bg-slate-950 p-0 sm:items-stretch' : 'items-end'
-      }`}
-      role="dialog"
-      aria-modal="true"
+      className={
+        pageLayout
+          ? `flex min-h-0 flex-1 flex-col ${reducedTake ? 'lex-quiz-reduced-distract' : ''}`
+          : `fixed inset-0 z-[70] flex justify-center bg-slate-900/40 p-4 sm:items-center ${
+              immersiveChrome ? 'relative items-stretch bg-slate-950 p-0 sm:items-stretch' : 'items-end'
+            }`
+      }
+      role={pageLayout ? undefined : 'dialog'}
+      aria-modal={pageLayout ? undefined : true}
       aria-labelledby="quiz-take-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose()
-      }}
+      onClick={
+        pageLayout
+          ? undefined
+          : (e) => {
+              if (e.target === e.currentTarget && !takeInProgress) requestClose()
+            }
+      }
     >
       <div
         className={`flex w-full flex-col overflow-hidden border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-900 ${
-          immersiveChrome
-            ? `h-dvh max-h-dvh max-w-none rounded-none border-0 shadow-none sm:max-h-dvh ${
-                reducedTake ? 'lex-quiz-reduced-distract' : ''
-              }`
-            : `h-[90vh] rounded-2xl ${reducedTake ? 'lex-quiz-reduced-distract max-w-2xl' : 'max-w-3xl'}`
+          pageLayout
+            ? `min-h-0 flex-1 border-0 shadow-none ${reducedTake ? 'lex-quiz-reduced-distract' : ''}`
+            : immersiveChrome
+              ? `h-dvh max-h-dvh max-w-none rounded-none border-0 shadow-none sm:max-h-dvh ${
+                  reducedTake ? 'lex-quiz-reduced-distract' : ''
+                }`
+              : `h-[90vh] rounded-2xl ${reducedTake ? 'lex-quiz-reduced-distract max-w-2xl' : 'max-w-3xl'}`
         } ${highContrastQuiz && reducedTake ? 'ring-2 ring-slate-900 dark:ring-neutral-100' : ''}`}
       >
-        <div
-          className={`flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600 ${
-            immersiveChrome ? 'py-2' : ''
-          }`}
-        >
-          <div className="min-w-0">
-            {immersiveChrome ? (
-              <h2 id="quiz-take-title" className="sr-only">
-                {reducedTake ? 'Quiz' : 'Take quiz'} — {quiz.title || 'Quiz'}
-              </h2>
-            ) : (
-              <>
-                <h2 id="quiz-take-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
-                  {reducedTake ? 'Quiz' : 'Take quiz'}
+        {showPanelHeader ? (
+          <div
+            className={`flex shrink-0 items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600 ${
+              immersiveChrome ? 'py-2' : ''
+            }`}
+          >
+            <div className="min-w-0">
+              {immersiveChrome && !pageLayout ? (
+                <h2 id="quiz-take-title" className="sr-only">
+                  {reducedTake ? 'Quiz' : 'Take quiz'} — {quiz.title || 'Quiz'}
                 </h2>
-                {!reducedTake ? (
-                  <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-400" title={quiz.title}>
-                    {quiz.title || 'Quiz'}
-                  </p>
-                ) : null}
-              </>
-            )}
+              ) : (
+                <>
+                  <h2 id="quiz-take-title" className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                    {reducedTake ? 'Quiz' : pageLayout && uiPhase.kind === 'idle' ? 'Begin quiz' : 'Take quiz'}
+                  </h2>
+                  {!reducedTake ? (
+                    <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-400" title={quiz.title}>
+                      {quiz.title || 'Quiz'}
+                    </p>
+                  ) : null}
+                </>
+              )}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {reducedTake ? (
+                <button
+                  type="button"
+                  onClick={() => setHighContrastQuiz((v) => !v)}
+                  className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  {highContrastQuiz ? 'Contrast: on' : 'Contrast: off'}
+                </button>
+              ) : null}
+              {!pageLayout ? (
+                <button
+                  type="button"
+                  onClick={requestClose}
+                  disabled={leavingBusy}
+                  className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:hover:bg-neutral-800"
+                  aria-label={takeInProgress ? 'Leave quiz' : 'Close'}
+                >
+                  <X className="h-5 w-5" aria-hidden />
+                </button>
+              ) : null}
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {reducedTake ? (
-              <button
-                type="button"
-                onClick={() => setHighContrastQuiz((v) => !v)}
-                className="rounded-lg border border-slate-200 px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
-              >
-                {highContrastQuiz ? 'Contrast: on' : 'Contrast: off'}
-              </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={onClose}
-              className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5" aria-hidden />
-            </button>
-          </div>
-        </div>
+        ) : (
+          <h2 id="quiz-take-title" className="sr-only">
+            {quiz.title || 'Quiz'}
+          </h2>
+        )}
 
         <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50/60 p-4 dark:bg-neutral-950/80">
           {lockdownModalOpen && (
@@ -1002,6 +1112,10 @@ export function QuizStudentTakePanel({
                 {quiz.isAdaptive
                   ? 'You will answer up to the configured number of AI-generated questions. Your attempt is saved when you finish.'
                   : 'Answer each question, then submit. Your score is recorded for this course.'}
+              </p>
+              <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+                Leaving this tab or switching apps during the quiz is logged for your instructor. If you
+                navigate away, your attempt will be submitted automatically.
               </p>
               {advanced.requiresQuizAccessCode ? (
                 <div>
@@ -1239,15 +1353,51 @@ export function QuizStudentTakePanel({
               )}
               <button
                 type="button"
-                onClick={onClose}
+                onClick={requestClose}
                 className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-800 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200"
               >
-                Close
+                {pageLayout ? 'Return to quiz' : 'Close'}
               </button>
             </div>
           )}
         </div>
       </div>
+
+      {leaveConfirmOpen ? (
+        <div
+          className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quiz-leave-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-xl dark:border-neutral-600 dark:bg-neutral-900">
+            <h3 id="quiz-leave-title" className="text-base font-semibold text-slate-900 dark:text-neutral-100">
+              Leave this quiz?
+            </h3>
+            <p className="mt-2 text-sm text-slate-600 dark:text-neutral-300">
+              Your attempt is in progress. Leaving now will submit whatever you have answered so far.
+            </p>
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                onClick={cancelLeave}
+                disabled={leavingBusy}
+                className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 dark:border-neutral-600 dark:text-neutral-200"
+              >
+                Stay on quiz
+              </button>
+              <button
+                type="button"
+                onClick={() => void confirmLeave()}
+                disabled={leavingBusy}
+                className="rounded-lg bg-rose-600 px-3 py-2 text-sm font-semibold text-white hover:bg-rose-500 disabled:opacity-50"
+              >
+                {leavingBusy ? 'Submitting…' : 'Leave and submit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

@@ -58,6 +58,13 @@ function matchesSearchQuery(name: string, query: string): boolean {
   return name.toLowerCase().includes(query.trim().toLowerCase())
 }
 
+function isExternalFileDragEvent(
+  e: React.DragEvent | DragEvent,
+  draggingItem: { kind: 'folder' | 'file'; id: string } | null,
+): boolean {
+  return draggingItem === null && (e.dataTransfer?.types.includes('Files') ?? false)
+}
+
 const CHECKBOX_COLUMN_CLASS = 'w-11 px-4 py-2.5 align-middle text-left'
 const CHECKBOX_INPUT_CLASS =
   'block h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900'
@@ -88,6 +95,8 @@ export default function CourseFilesPage() {
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
   const [draggingItem, setDraggingItem] = useState<{ kind: 'folder' | 'file'; id: string } | null>(null)
   const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null)
+  const [externalFileDragActive, setExternalFileDragActive] = useState(false)
+  const externalDragDepthRef = useRef(0)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItems, setSelectedItems] = useState<Set<SelectedItemKey>>(new Set())
   const [previewFile, setPreviewFile] = useState<FileItem | null>(null)
@@ -138,6 +147,41 @@ export default function CourseFilesPage() {
     setSelectedItems(new Set())
     setSearchQuery('')
   }, [folderId])
+
+  useEffect(() => {
+    if (!canManage) return
+
+    function resetExternalDrag() {
+      externalDragDepthRef.current = 0
+      setExternalFileDragActive(false)
+      setDragOverFolderId(null)
+    }
+
+    function onDragEnter(e: DragEvent) {
+      if (!isExternalFileDragEvent(e, draggingItem)) return
+      externalDragDepthRef.current++
+      setExternalFileDragActive(true)
+    }
+
+    function onDragLeave(e: DragEvent) {
+      if (!isExternalFileDragEvent(e, draggingItem)) return
+      externalDragDepthRef.current--
+      if (externalDragDepthRef.current <= 0) {
+        resetExternalDrag()
+      }
+    }
+
+    window.addEventListener('dragenter', onDragEnter)
+    window.addEventListener('dragleave', onDragLeave)
+    window.addEventListener('drop', resetExternalDrag)
+    window.addEventListener('dragend', resetExternalDrag)
+    return () => {
+      window.removeEventListener('dragenter', onDragEnter)
+      window.removeEventListener('dragleave', onDragLeave)
+      window.removeEventListener('drop', resetExternalDrag)
+      window.removeEventListener('dragend', resetExternalDrag)
+    }
+  }, [canManage, draggingItem])
 
   const breadcrumbs = useMemo(() => {
     if (!folderId || contents?.folderId !== folderId) return []
@@ -371,9 +415,9 @@ export default function CourseFilesPage() {
     }
   }
 
-  async function uploadSingleFile(file: File) {
+  async function uploadSingleFile(file: File, targetFolderId: string | null) {
     setUploadProgress(`Uploading ${file.name}…`)
-    const result = await initiateFileUpload(courseCode, file, folderId ?? null)
+    const result = await initiateFileUpload(courseCode, file, targetFolderId)
     if ('presigned' in result) {
       await uploadToPresignedUrl(result.presigned.presignedPutUrl!, file)
       await confirmFileUpload(
@@ -382,19 +426,20 @@ export default function CourseFilesPage() {
         file.name,
         file.type || 'application/octet-stream',
         file.size,
-        folderId ?? null,
+        targetFolderId,
       )
     }
   }
 
-  async function handleFilesSelected(files: FileList | null) {
+  async function handleFilesSelected(files: FileList | null, targetFolderId?: string | null) {
     if (!files || files.length === 0) return
+    const destinationFolderId = targetFolderId ?? folderId ?? null
     setUploading(true)
     setCloudImportError(null)
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
       try {
-        await uploadSingleFile(file)
+        await uploadSingleFile(file, destinationFolderId)
       } catch (err) {
         alert(`Failed to upload ${file.name}: ${err instanceof Error ? err.message : 'Unknown error'}`)
       }
@@ -404,11 +449,23 @@ export default function CourseFilesPage() {
     void load()
   }
 
+  async function handleExternalFileDrop(e: React.DragEvent, targetFolderId: string | null) {
+    if (!canManage) return
+    e.preventDefault()
+    e.stopPropagation()
+    externalDragDepthRef.current = 0
+    setExternalFileDragActive(false)
+    setDragOverFolderId(null)
+    const files = e.dataTransfer.files
+    if (files.length === 0) return
+    await handleFilesSelected(files, targetFolderId)
+  }
+
   async function handleCloudImport(file: File) {
     setUploading(true)
     setCloudImportError(null)
     try {
-      await uploadSingleFile(file)
+      await uploadSingleFile(file, folderId ?? null)
       void load()
     } catch (err) {
       setCloudImportError(err instanceof Error ? err.message : 'Could not import file from cloud storage.')
@@ -560,7 +617,12 @@ export default function CourseFilesPage() {
           {error}
         </div>
       ) : !contents || (contents.folders.length === 0 && contents.files.length === 0) ? (
-        <EmptyState canManage={canManage} onUpload={() => fileInputRef.current?.click()} />
+        <EmptyState
+          canManage={canManage}
+          externalFileDragActive={externalFileDragActive}
+          onUpload={() => fileInputRef.current?.click()}
+          onExternalFileDrop={e => void handleExternalFileDrop(e, folderId ?? null)}
+        />
       ) : filteredFolders.length === 0 && filteredFiles.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-16 text-center dark:border-neutral-800 dark:bg-neutral-950">
           <Search className="mb-3 h-10 w-10 text-slate-300 dark:text-neutral-600" aria-hidden />
@@ -570,7 +632,25 @@ export default function CourseFilesPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-950">
+        <div
+          className={`overflow-hidden rounded-xl border bg-white dark:bg-neutral-950 ${
+            externalFileDragActive && dragOverFolderId === null
+              ? 'border-indigo-400 ring-2 ring-indigo-500/20 dark:border-indigo-600'
+              : 'border-slate-200 dark:border-neutral-800'
+          }`}
+          onDragOver={e => {
+            if (canManage && isExternalFileDragEvent(e, draggingItem)) {
+              e.preventDefault()
+              e.dataTransfer.dropEffect = 'copy'
+              setDragOverFolderId(null)
+            }
+          }}
+          onDrop={e => {
+            if (canManage && isExternalFileDragEvent(e, draggingItem)) {
+              void handleExternalFileDrop(e, folderId ?? null)
+            }
+          }}
+        >
           <table className="min-w-full table-fixed divide-y divide-slate-100 text-sm dark:divide-neutral-800">
             {canManage && (
               <colgroup>
@@ -616,12 +696,14 @@ export default function CourseFilesPage() {
                   onDelete={() => void handleDeleteFolder(folder)}
                   onContextMenu={e => openContextMenu(e, folder, 'folder')}
                   draggingItem={draggingItem}
+                  externalFileDragActive={externalFileDragActive}
                   dragOverFolderId={dragOverFolderId}
                   onDragStart={(kind, id) => setDraggingItem({ kind, id })}
                   onDragEnd={() => { setDraggingItem(null); setDragOverFolderId(null); }}
                   onDragEnter={(id) => setDragOverFolderId(id)}
                   onDragLeave={() => setDragOverFolderId(null)}
                   onDrop={(kind, dragId, targetId) => void handleMoveItem(kind, dragId, targetId)}
+                  onExternalFileDrop={e => void handleExternalFileDrop(e, folder.id)}
                 />
               ))}
               {filteredFiles.map(file => (
@@ -900,13 +982,38 @@ function SelectionActionsMenu({
   )
 }
 
-function EmptyState({ canManage, onUpload }: { canManage: boolean; onUpload: () => void }) {
+function EmptyState({
+  canManage,
+  externalFileDragActive,
+  onUpload,
+  onExternalFileDrop,
+}: {
+  canManage: boolean
+  externalFileDragActive: boolean
+  onUpload: () => void
+  onExternalFileDrop: (e: React.DragEvent) => void
+}) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-neutral-700">
+    <div
+      className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed py-16 text-center ${
+        externalFileDragActive
+          ? 'border-indigo-400 bg-indigo-50/50 dark:border-indigo-600 dark:bg-indigo-950/30'
+          : 'border-slate-200 dark:border-neutral-700'
+      }`}
+      onDragOver={e => {
+        if (canManage) {
+          e.preventDefault()
+          e.dataTransfer.dropEffect = 'copy'
+        }
+      }}
+      onDrop={e => {
+        if (canManage) onExternalFileDrop(e)
+      }}
+    >
       <FolderOpen className="mb-3 h-12 w-12 text-slate-300 dark:text-neutral-600" aria-hidden />
       <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">No files yet</p>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-        {canManage ? 'Upload files or create folders to organize course materials.' : 'No files have been uploaded to this course yet.'}
+        {canManage ? 'Upload files, drag and drop them here, or create folders to organize course materials.' : 'No files have been uploaded to this course yet.'}
       </p>
       {canManage && (
         <button
@@ -936,26 +1043,30 @@ type FolderRowProps = {
   onDelete: () => void
   onContextMenu: (e: React.MouseEvent) => void
   draggingItem: { kind: 'folder' | 'file'; id: string } | null
+  externalFileDragActive: boolean
   dragOverFolderId: string | null
   onDragStart: (kind: 'folder' | 'file', id: string) => void
   onDragEnd: () => void
   onDragEnter: (id: string) => void
   onDragLeave: () => void
   onDrop: (kind: 'folder' | 'file', dragId: string, targetId: string) => void
+  onExternalFileDrop: (e: React.DragEvent) => void
 }
 
 function FolderRow({
   folder, canManage, selected, onToggleSelect, renamingFolder, renameValue, setRenameValue,
   onNavigate, onRenameStart, onRenameSubmit, onRenameCancel, onDelete, onContextMenu,
-  draggingItem, dragOverFolderId, onDragStart, onDragEnd, onDragEnter, onDragLeave, onDrop,
+  draggingItem, externalFileDragActive, dragOverFolderId, onDragStart, onDragEnd, onDragEnter, onDragLeave, onDrop,
+  onExternalFileDrop,
 }: FolderRowProps) {
   const isRenaming = renamingFolder?.id === folder.id
-  const isDraggingActive = draggingItem !== null
+  const isInternalDragActive = draggingItem !== null
+  const isDropTargetMode = isInternalDragActive || externalFileDragActive
   const isSelf = draggingItem?.id === folder.id && draggingItem?.kind === 'folder'
   const isDragOver = dragOverFolderId === folder.id
 
   let dragClass = 'group cursor-pointer hover:bg-slate-50 dark:hover:bg-neutral-900/50 transition-colors'
-  if (isDraggingActive) {
+  if (isDropTargetMode) {
     if (isSelf) {
       dragClass = 'opacity-40 select-none pointer-events-none'
     } else {
@@ -981,13 +1092,24 @@ function FolderRow({
       }}
       onDragEnd={onDragEnd}
       onDragOver={(e) => {
-        if (isDraggingActive && !isSelf) {
+        if (canManage && isExternalFileDragEvent(e, draggingItem) && !isSelf) {
+          e.preventDefault()
+          e.stopPropagation()
+          e.dataTransfer.dropEffect = 'copy'
+          return
+        }
+        if (isInternalDragActive && !isSelf) {
           e.preventDefault()
           e.dataTransfer.dropEffect = 'move'
         }
       }}
-      onDragEnter={() => {
-        if (isDraggingActive && !isSelf) {
+      onDragEnter={(e) => {
+        if (canManage && isExternalFileDragEvent(e, draggingItem) && !isSelf) {
+          e.stopPropagation()
+          onDragEnter(folder.id)
+          return
+        }
+        if (isInternalDragActive && !isSelf) {
           onDragEnter(folder.id)
         }
       }}
@@ -998,7 +1120,11 @@ function FolderRow({
         }
       }}
       onDrop={(e) => {
-        if (isDraggingActive && !isSelf) {
+        if (canManage && isExternalFileDragEvent(e, draggingItem) && !isSelf) {
+          onExternalFileDrop(e)
+          return
+        }
+        if (isInternalDragActive && !isSelf) {
           e.preventDefault()
           onDrop(draggingItem.kind, draggingItem.id, folder.id)
         }

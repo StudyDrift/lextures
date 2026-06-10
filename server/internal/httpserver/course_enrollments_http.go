@@ -127,6 +127,7 @@ func (d Deps) handleCourseEnrollmentsPost() http.HandlerFunc {
 		}
 		ctx := r.Context()
 		var added, already, notFound []string
+		var addedUserIDs []uuid.UUID
 		tx, err := d.Pool.BeginTx(ctx, pgx.TxOptions{})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start transaction.")
@@ -190,6 +191,7 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 					already = append(already, em)
 				} else {
 					added = append(added, em)
+					addedUserIDs = append(addedUserIDs, uid)
 				}
 				if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
@@ -240,6 +242,7 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 					already = append(already, em)
 				} else {
 					added = append(added, em)
+					addedUserIDs = append(addedUserIDs, uid)
 				}
 				if _, err := tx.Exec(ctx, `
 INSERT INTO "user".user_app_roles (user_id, role_id)
@@ -284,6 +287,7 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 					already = append(already, em)
 				} else {
 					added = append(added, em)
+					addedUserIDs = append(addedUserIDs, uid)
 				}
 				if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
@@ -295,6 +299,7 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollments.")
 			return
 		}
+		d.notifyCoursesForUsers(addedUserIDs...)
 		learningevents.EmitEnrollmentAsync(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, added)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(modelenrollment.AddEnrollmentsResponse{
@@ -361,6 +366,9 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 		if err := tx.Commit(ctx); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollment.")
 			return
+		}
+		if tag.RowsAffected() > 0 {
+			d.notifyCourses(viewer)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(modelenrollment.EnrollSelfAsStudentResponse{Created: tag.RowsAffected() > 0})
@@ -554,6 +562,7 @@ WHERE ce.id = $1 AND c.course_code = $2 AND ce.active
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save.")
 			return
 		}
+		d.notifyCourses(uid)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

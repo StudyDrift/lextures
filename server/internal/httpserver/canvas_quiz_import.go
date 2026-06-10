@@ -312,7 +312,7 @@ func canvasQuestionToQuizQuestion(q map[string]any) (coursemodulequiz.QuizQuesti
 		}, true
 
 	case "matching_question":
-		pairs := canvasMatchingPairsJSON(answers)
+		pairs := canvasMatchingPairsJSON(q, answers)
 		return coursemodulequiz.QuizQuestion{
 			ID:                 fmt.Sprintf("canvas-%d", id),
 			Prompt:             prompt,
@@ -402,25 +402,88 @@ func trueFalseCorrectChoiceIndex(answers []map[string]any) *uint {
 	return nil
 }
 
-func canvasMatchingPairsJSON(answers []map[string]any) json.RawMessage {
+func canvasMatchTextByID(q map[string]any) map[int64]string {
+	out := make(map[int64]string)
+	for _, m := range canvasMatchMaps(q) {
+		id := int64At(m, "match_id")
+		if id <= 0 {
+			id = int64At(m, "id")
+		}
+		text := strings.TrimSpace(strAt(m, "text", ""))
+		if text == "" {
+			text = strings.TrimSpace(canvasAnswerText(m))
+		}
+		if id > 0 && text != "" {
+			out[id] = text
+		}
+	}
+	return out
+}
+
+func canvasMatchMaps(q map[string]any) []map[string]any {
+	raw, ok := q["matches"]
+	if !ok || raw == nil {
+		return nil
+	}
+	arr, ok := raw.([]any)
+	if !ok {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(arr))
+	for _, v := range arr {
+		if m, ok := v.(map[string]any); ok {
+			out = append(out, m)
+		}
+	}
+	return out
+}
+
+func canvasMatchingLeftText(a map[string]any) string {
+	for _, k := range []string{"answer_match_left", "left", "text"} {
+		if s := strings.TrimSpace(strAt(a, k, "")); s != "" {
+			return markdownFromHTML(s)
+		}
+	}
+	if s := strings.TrimSpace(strAt(a, "left_html", "")); s != "" {
+		return markdownFromHTML(s)
+	}
+	return strings.TrimSpace(canvasAnswerText(a))
+}
+
+func canvasMatchingRightText(a map[string]any, matchByID map[int64]string) string {
+	for _, k := range []string{"answer_match_right", "right"} {
+		if s := strings.TrimSpace(strAt(a, k, "")); s != "" {
+			return markdownFromHTML(s)
+		}
+	}
+	if matchID := int64At(a, "match_id"); matchID > 0 {
+		if s := strings.TrimSpace(matchByID[matchID]); s != "" {
+			return markdownFromHTML(s)
+		}
+	}
+	return ""
+}
+
+func canvasMatchingPairsJSON(q map[string]any, answers []map[string]any) json.RawMessage {
 	type pair struct {
 		LeftID  string `json:"leftId"`
 		RightID string `json:"rightId"`
 		Left    string `json:"left"`
 		Right   string `json:"right"`
 	}
+	matchByID := canvasMatchTextByID(q)
 	ps := make([]pair, 0, len(answers))
 	for i, a := range answers {
-		left := strings.TrimSpace(strAt(a, "answer_match_left", ""))
-		right := strings.TrimSpace(strAt(a, "answer_match_right", ""))
+		left := canvasMatchingLeftText(a)
+		right := canvasMatchingRightText(a, matchByID)
 		if left == "" && right == "" {
 			continue
 		}
 		ps = append(ps, pair{
 			LeftID:  fmt.Sprintf("l%d", i),
 			RightID: fmt.Sprintf("r%d", i),
-			Left:    markdownFromHTML(left),
-			Right:   markdownFromHTML(right),
+			Left:    left,
+			Right:   right,
 		})
 	}
 	if len(ps) == 0 {

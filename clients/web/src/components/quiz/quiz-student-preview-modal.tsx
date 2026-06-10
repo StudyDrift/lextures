@@ -34,7 +34,8 @@ export type QuizStudentPreviewModalProps = {
 }
 
 function visibleChoices(q: QuizQuestion): string[] {
-  return q.choices.map((c) => c.trim()).filter((c) => c.length > 0)
+  const choices = Array.isArray(q.choices) ? q.choices : []
+  return choices.map((c) => String(c).trim()).filter((c) => c.length > 0)
 }
 
 /** Apply shuffle choices to a copy of the question. */
@@ -598,7 +599,9 @@ function StaticQuizPreview({
       qs = shuffleArray(qs).slice(0, pool)
     }
     if (advanced.shuffleChoices) {
-      qs = qs.map((q) => withShuffledChoices({ ...q, choices: [...q.choices] }))
+      qs = qs.map((q) =>
+        withShuffledChoices({ ...q, choices: [...(Array.isArray(q.choices) ? q.choices : [])] }),
+      )
     }
     return qs
   }, [questions, advanced.shuffleQuestions, advanced.shuffleChoices, advanced.randomQuestionPoolCount])

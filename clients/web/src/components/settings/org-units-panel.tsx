@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { ChevronRight, FolderTree, Plus, RefreshCw } from 'lucide-react'
 import { authorizedFetch } from '../../lib/api'
+import { fetchOrgType, type OrgType } from '../../lib/courses-api'
 import { getAccessToken } from '../../lib/auth'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
 import { PERM_RBAC_MANAGE, PERM_TENANT_ORG_UNITS_ADMIN } from '../../lib/rbac-api'
@@ -8,7 +9,7 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { usePermissions } from '../../context/use-permissions'
 
-export type OrgType = 'higher-ed' | 'k-12'
+export type { OrgType } from '../../lib/courses-api'
 
 type OrgRow = {
   id: string
@@ -162,14 +163,11 @@ export function OrgUnitsPanel() {
   }, [orgId, canUnits, loadTree])
 
   useEffect(() => {
-    if (!orgId) return
-    void authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/settings/org-type`)
-      .then((r) => r.json())
-      .then((data: { orgType?: OrgType }) => {
-        if (data.orgType === 'k-12' || data.orgType === 'higher-ed') setOrgType(data.orgType)
-      })
+    if (!orgId || (!canUnits && !canRbac)) return
+    void fetchOrgType(orgId)
+      .then((t) => setOrgType(t))
       .catch(() => {})
-  }, [orgId])
+  }, [orgId, canUnits, canRbac])
 
   async function createRoot(e: FormEvent) {
     e.preventDefault()

@@ -1,6 +1,8 @@
+import { type ComponentProps } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
+import { BrowserRouter } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import {
   defaultQuizAdvancedSettings,
@@ -69,21 +71,44 @@ function minimalQuiz(overrides: Partial<ModuleQuizPayload> = {}): ModuleQuizPayl
 }
 
 describe('QuizStudentTakePanel', () => {
+  function renderPanel(props: ComponentProps<typeof QuizStudentTakePanel>) {
+    return render(
+      <BrowserRouter>
+        <QuizStudentTakePanel {...props} />
+      </BrowserRouter>,
+    )
+  }
+
   it('renders nothing when closed', () => {
     const onClose = () => {}
-    const { container } = render(
-      <QuizStudentTakePanel
-        open={false}
-        onClose={onClose}
-        courseCode="C-TEST"
-        itemId="item-1"
-        quiz={minimalQuiz()}
-        advanced={defaultQuizAdvancedSettings()}
-        oneQuestionAtATime={false}
-        allowBackNavigation
-      />,
-    )
+    const { container } = renderPanel({
+      open: false,
+      onClose,
+      courseCode: 'C-TEST',
+      itemId: 'item-1',
+      quiz: minimalQuiz(),
+      advanced: defaultQuizAdvancedSettings(),
+      oneQuestionAtATime: false,
+      allowBackNavigation: true,
+    })
     expect(container.firstChild).toBeNull()
+  })
+
+  it('renders page layout when mounted on the attempt route', () => {
+    const onClose = () => {}
+    renderPanel({
+      layout: 'page',
+      open: true,
+      onClose,
+      courseCode: 'C-TEST',
+      itemId: 'item-1',
+      quiz: minimalQuiz(),
+      advanced: defaultQuizAdvancedSettings(),
+      oneQuestionAtATime: false,
+      allowBackNavigation: true,
+    })
+    expect(screen.getByRole('heading', { name: /begin quiz/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Begin' })).toBeInTheDocument()
   })
 
   it('starts a standard attempt and shows the first question', async () => {
@@ -170,18 +195,16 @@ describe('QuizStudentTakePanel', () => {
     )
 
     const onClose = () => {}
-    render(
-      <QuizStudentTakePanel
-        open
-        onClose={onClose}
-        courseCode="C-TEST"
-        itemId="item-1"
-        quiz={minimalQuiz()}
-        advanced={defaultQuizAdvancedSettings()}
-        oneQuestionAtATime={false}
-        allowBackNavigation
-      />,
-    )
+    renderPanel({
+      open: true,
+      onClose,
+      courseCode: 'C-TEST',
+      itemId: 'item-1',
+      quiz: minimalQuiz(),
+      advanced: defaultQuizAdvancedSettings(),
+      oneQuestionAtATime: false,
+      allowBackNavigation: true,
+    })
 
     await user.click(screen.getByRole('button', { name: /^Begin$/i }))
 

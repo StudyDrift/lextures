@@ -115,10 +115,89 @@ WHERE course_id = $1 AND structure_item_id = $2 AND student_user_id = $3 AND sta
 	return n, err
 }
 
+type FocusLossEventRow struct {
+	ID         uuid.UUID
+	EventType  string
+	DurationMS *int32
+	CreatedAt  time.Time
+}
+
+type AttemptFocusSummary struct {
+	AttemptID             uuid.UUID
+	AttemptNumber         int32
+	EventCount            int64
+	AcademicIntegrityFlag bool
+}
+
 func InsertFocusLossEvent(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID, eventType string, durationMS *int32) error {
 	_, err := pool.Exec(ctx, `
-INSERT INTO course.quiz_focus_loss_events (attempt_id, event_type, duration_ms)
+INSERT INTO course.attempt_focus_loss_events (attempt_id, event_type, duration_ms)
 VALUES ($1, $2, $3)
 `, attemptID, eventType, durationMS)
 	return err
+}
+
+func CountFocusLossEvents(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID) (int64, error) {
+	var n int64
+	err := pool.QueryRow(ctx, `
+SELECT COUNT(*)::bigint FROM course.attempt_focus_loss_events WHERE attempt_id = $1
+`, attemptID).Scan(&n)
+	return n, err
+}
+
+func ListFocusLossEvents(ctx context.Context, pool *pgxpool.Pool, attemptID uuid.UUID, limit int) ([]FocusLossEventRow, int64, error) {
+	if limit <= 0 || limit > 500 {
+		limit = 500
+	}
+	var total int64
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*)::bigint FROM course.attempt_focus_loss_events WHERE attempt_id = $1
+`, attemptID).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	rows, err := pool.Query(ctx, `
+SELECT id, event_type, duration_ms, created_at
+FROM course.attempt_focus_loss_events
+WHERE attempt_id = $1
+ORDER BY created_at ASC
+LIMIT $2
+`, attemptID, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var out []FocusLossEventRow
+	for rows.Next() {
+		var r FocusLossEventRow
+		if err := rows.Scan(&r.ID, &r.EventType, &r.DurationMS, &r.CreatedAt); err != nil {
+			return nil, 0, err
+		}
+		out = append(out, r)
+	}
+	return out, total, rows.Err()
+}
+
+func ListAttemptFocusSummariesForItem(ctx context.Context, pool *pgxpool.Pool, structureItemID uuid.UUID) ([]AttemptFocusSummary, error) {
+	rows, err := pool.Query(ctx, `
+SELECT qa.id, qa.attempt_number, qa.academic_integrity_flag, COUNT(afle.id)::bigint
+FROM course.quiz_attempts qa
+LEFT JOIN course.attempt_focus_loss_events afle ON afle.attempt_id = qa.id
+WHERE qa.structure_item_id = $1 AND qa.status = 'submitted'
+GROUP BY qa.id, qa.attempt_number, qa.academic_integrity_flag
+HAVING COUNT(afle.id) > 0 OR qa.academic_integrity_flag
+ORDER BY qa.submitted_at DESC NULLS LAST, qa.started_at DESC
+`, structureItemID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []AttemptFocusSummary
+	for rows.Next() {
+		var s AttemptFocusSummary
+		if err := rows.Scan(&s.AttemptID, &s.AttemptNumber, &s.AcademicIntegrityFlag, &s.EventCount); err != nil {
+			return nil, err
+		}
+		out = append(out, s)
+	}
+	return out, rows.Err()
 }

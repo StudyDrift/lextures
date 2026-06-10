@@ -43,8 +43,7 @@ import { RequirePermission } from '../../components/require-permission'
 import { usePermissions } from '../../context/use-permissions'
 import { useCoursesRevision } from '../../context/use-inbox-unread'
 import { authorizedFetch } from '../../lib/api'
-import { putCourseCatalogOrder, type CoursePublic, fetchOrgTerms, type OrgTerm } from '../../lib/courses-api'
-import { type OrgType } from '../../components/settings/org-units-panel'
+import { putCourseCatalogOrder, type CoursePublic, fetchOrgTerms, fetchOrgType, type OrgTerm, type OrgType } from '../../lib/courses-api'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
 import { getAccessToken } from '../../lib/auth'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -575,7 +574,6 @@ export default function Courses() {
   const [kanbanColumnLabels, setKanbanColumnLabels] = useState<KanbanColumnLabels>(DEFAULT_KANBAN_COLUMN_LABELS)
   const [hiddenColumnExpanded, setHiddenColumnExpanded] = useState(false)
   const [orgType, setOrgType] = useState<OrgType>('higher-ed')
-  void orgType
   const orgId = decodeJwtPayload(getAccessToken())?.org_id ?? ''
 
   useEffect(() => {
@@ -596,12 +594,9 @@ export default function Courses() {
   useEffect(() => {
     if (!orgId) return
     let cancelled = false
-    void authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/settings/org-type`)
-      .then((r) => r.json())
-      .then((data: { orgType?: OrgType }) => {
-        if (!cancelled && (data.orgType === 'k-12' || data.orgType === 'higher-ed')) {
-          setOrgType(data.orgType)
-        }
+    void fetchOrgType(orgId)
+      .then((t) => {
+        if (!cancelled) setOrgType(t)
       })
       .catch(() => {})
     return () => {

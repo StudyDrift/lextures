@@ -20,13 +20,13 @@ func (d Deps) handleOrgTypeItem() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid organization id.")
 			return
 		}
-		if _, _, ok := d.adminOrgOrUnitAccess(w, r, orgID); !ok {
-			return
-		}
 		ctx := r.Context()
 
 		switch r.Method {
 		case http.MethodGet:
+			if _, ok := d.orgReadAccess(w, r, orgID); !ok {
+				return
+			}
 			var orgType string
 			err := d.Pool.QueryRow(ctx, `SELECT org_type FROM tenant.organizations WHERE id = $1 AND status <> 'deleted'`, orgID).Scan(&orgType)
 			if err != nil {
@@ -36,6 +36,9 @@ func (d Deps) handleOrgTypeItem() http.HandlerFunc {
 			_ = json.NewEncoder(w).Encode(map[string]any{"orgId": orgID.String(), "orgType": orgType})
 
 		case http.MethodPut:
+			if _, _, ok := d.adminOrgOrUnitAccess(w, r, orgID); !ok {
+				return
+			}
 			var body struct {
 				OrgType string `json:"orgType"`
 			}

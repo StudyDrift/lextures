@@ -44,7 +44,9 @@ func ConvertToHTML(data []byte, filename string, mimeType string) (string, error
 	switch format {
 	case FormatPPTX:
 		return convertPptxToHTML(data, filename, mimeType)
-	case FormatDOCX, FormatXLSX:
+	case FormatDOCX:
+		return convertDocxToHTML(data, filename, mimeType)
+	case FormatXLSX:
 		return convertMarkdownOfficeToHTML(data, filename, mimeType, format)
 	default:
 		return "", fmt.Errorf("officepreview: unsupported format")

@@ -3,6 +3,7 @@ import { RefreshCw, X } from 'lucide-react'
 import {
   fetchQuizAnalytics,
   type QuizAnalyticsReport,
+  type QuizFocusAttemptStat,
   type QuizQuestionStat,
   type QuizScoreBucket,
 } from '../../lib/quiz-analytics-api'
@@ -106,6 +107,7 @@ export function QuizAnalyticsModal({ open, onClose, courseCode, itemId, quizTitl
             <div className="space-y-8">
               <AnalyticsSummary report={report} />
               <ScoreDistributionChart buckets={report.scoreBuckets} nAttempts={report.nAttempts} />
+              <FocusLossSection attempts={report.focusAttempts} />
               <QuestionPerformanceSection questions={report.questionStats} />
               <QuizItemAnalysisPanel courseCode={courseCode} itemId={itemId} />
             </div>
@@ -240,6 +242,59 @@ function ScoreDistributionChart({
             <tr key={bucket.label} className="border-b border-slate-100 dark:border-neutral-800">
               <td className="py-1 pe-3">{bucket.label}</td>
               <td className="py-1 text-end tabular-nums">{bucket.count}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
+function FocusLossSection({ attempts }: { attempts: QuizFocusAttemptStat[] }) {
+  const headingId = useId()
+
+  if (attempts.length === 0) {
+    return (
+      <section aria-labelledby={headingId}>
+        <h3 id={headingId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+          Focus-loss events
+        </h3>
+        <p className="mt-3 text-sm text-slate-500 dark:text-neutral-400">
+          No focus-loss events recorded on submitted attempts.
+        </p>
+      </section>
+    )
+  }
+
+  return (
+    <section aria-labelledby={headingId}>
+      <h3 id={headingId} className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+        Focus-loss events
+      </h3>
+      <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+        Tab switches and window blur events logged while learners had a quiz in progress.
+      </p>
+      <table className="mt-4 w-full text-sm">
+        <caption className="sr-only">Focus-loss events by attempt</caption>
+        <thead>
+          <tr className="border-b border-slate-200 dark:border-neutral-700">
+            <th scope="col" className="py-1 pe-3 text-start font-medium">
+              Attempt
+            </th>
+            <th scope="col" className="py-1 pe-3 text-end font-medium">
+              Events
+            </th>
+            <th scope="col" className="py-1 text-end font-medium">
+              Flagged
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {attempts.map((a) => (
+            <tr key={a.attemptId} className="border-b border-slate-100 dark:border-neutral-800">
+              <td className="py-1.5 pe-3 tabular-nums">#{a.attemptNumber}</td>
+              <td className="py-1.5 pe-3 text-end tabular-nums">{a.eventCount}</td>
+              <td className="py-1.5 text-end">{a.academicIntegrityFlag ? 'Yes' : '—'}</td>
             </tr>
           ))}
         </tbody>

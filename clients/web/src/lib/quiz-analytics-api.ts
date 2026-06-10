@@ -21,6 +21,14 @@ export type QuizAnalyticsReport = {
   meanScore: number | null
   scoreBuckets: QuizScoreBucket[]
   questionStats: QuizQuestionStat[]
+  focusAttempts: QuizFocusAttemptStat[]
+}
+
+export type QuizFocusAttemptStat = {
+  attemptId: string
+  attemptNumber: number
+  eventCount: number
+  academicIntegrityFlag: boolean
 }
 
 /** GET `/api/v1/courses/:code/quizzes/:id/analytics` — instructor only. */
@@ -40,5 +48,6 @@ export async function fetchQuizAnalytics(
     meanScore: (raw.meanScore as number | null | undefined) ?? null,
     scoreBuckets: (raw.scoreBuckets as QuizScoreBucket[]) ?? [],
     questionStats: (raw.questionStats as QuizQuestionStat[]) ?? [],
+    focusAttempts: (raw.focusAttempts as QuizFocusAttemptStat[]) ?? [],
   }
 }
