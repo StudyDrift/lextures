@@ -1,7 +1,6 @@
 package logging
 
 import (
-	"sync"
 	"sync/atomic"
 )
 
@@ -9,7 +8,6 @@ import (
 type CCRMetrics struct {
 	generated     atomic.Uint64
 	verifications atomic.Uint64
-	mu            sync.RWMutex
 }
 
 // GlobalCCRMetrics is incremented by CCR HTTP handlers.
