@@ -17,6 +17,8 @@ import {
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
 import { GradeHistoryPanel } from '../../components/grading/grade-history-panel'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { FolderOpen } from 'lucide-react'
 import { LmsPage } from './lms-page'
 
 function parseEarned(raw: string | undefined): number {
@@ -33,6 +35,7 @@ function formatRowPercent(earned: number, max: number | null): string {
 
 export default function CourseMyGrades() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const { ffEportfolio } = usePlatformFeatures()
   const viewerEnrollmentRoles = useViewerEnrollmentRoles(courseCode)
   const courseViewPreview = useCourseViewAs(courseCode)
   const [loadState, setLoadState] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
@@ -184,6 +187,17 @@ export default function CourseMyGrades() {
     <LmsPage
       title="My grades"
       description="Your earned points and course average from the gradebook. Contact your instructor if something looks wrong."
+      actions={
+        ffEportfolio ? (
+          <Link
+            to="/portfolios"
+            className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium hover:bg-accent"
+          >
+            <FolderOpen className="h-4 w-4" aria-hidden />
+            Add to Portfolio
+          </Link>
+        ) : undefined
+      }
     >
       {loadState === 'loading' && (
         <p className="mt-6 text-sm text-slate-600 dark:text-neutral-400">Loading grades…</p>

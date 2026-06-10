@@ -326,6 +326,8 @@ type Config struct {
 	FFLibraryIntegration bool
 	// FFBookstoreIntegration enables bookstore / textbook integration: VitalSource & RedShelf Inclusive Access LTI deep links (plan 14.11).
 	FFBookstoreIntegration bool
+	// FFEportfolio enables the ePortfolio / capstone artifact collection module (plan 14.12).
+	FFEportfolio bool
 
 	// CCRSigningSeedB64 is a base64-encoded 32-byte Ed25519 seed for CLR signing (plan 14.13).
 	CCRSigningSeedB64 string
@@ -509,6 +511,7 @@ func Load() Config {
 		FFCoCurricularTranscript:        boolEnv("FF_CO_CURRICULAR_TRANSCRIPT"),
 		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
 		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
+		FFEportfolio:                    boolEnv("FF_EPORTFOLIO"),
 
 		CCRSigningSeedB64:  strings.TrimSpace(os.Getenv("CCR_SIGNING_SEED_B64")),
 		CCRInstitutionName: strings.TrimSpace(os.Getenv("CCR_INSTITUTION_NAME")),

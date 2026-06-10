@@ -13,6 +13,7 @@ import {
   Flame,
   ChevronDown,
   ChevronUp,
+  FolderOpen,
 } from 'lucide-react'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -212,7 +213,13 @@ export default function Dashboard() {
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
-  const { ffCatalogIntegration, ffEnrollmentStateMachine, ffAcademicCalendar, ffCoCurricularTranscript } = usePlatformFeatures()
+  const {
+    ffCatalogIntegration,
+    ffEnrollmentStateMachine,
+    ffAcademicCalendar,
+    ffEportfolio,
+    ffCoCurricularTranscript,
+  } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
@@ -572,6 +579,15 @@ export default function Dashboard() {
                 <BookOpen className="h-4 w-4 text-indigo-500" aria-hidden />
                 All courses
               </Link>
+              {ffEportfolio ? (
+                <Link
+                  to="/portfolios"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                >
+                  <FolderOpen className="h-4 w-4 text-indigo-500" aria-hidden />
+                  My Portfolio
+                </Link>
+              ) : null}
               {totalFeedUnread > 0 ? (
                 <span className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-900 dark:border-teal-900/50 dark:bg-teal-950/40 dark:text-teal-50">
                   <MessageCircle className="h-4 w-4" aria-hidden />

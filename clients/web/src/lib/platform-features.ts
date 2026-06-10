@@ -48,6 +48,7 @@ export type PlatformFeaturesSnapshot = {
   ffProctoringIntegration?: boolean
   ffCoCurricularTranscript?: boolean
   ffLibraryIntegration?: boolean
+  ffEportfolio?: boolean
   ffBookstoreIntegration?: boolean
 }
 
@@ -99,6 +100,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffProctoringIntegration: false,
   ffCoCurricularTranscript: false,
   ffLibraryIntegration: false,
+  ffEportfolio: false,
   ffBookstoreIntegration: false,
 }
 

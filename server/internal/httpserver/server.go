@@ -133,6 +133,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerLibraryRoutes(r)
 	d.registerHELibraryRoutes(r)
 	d.registerBookstoreRoutes(r)
+	d.registerEportfolioRoutes(r)
 	d.registerBroadcastRoutes(r)
 	d.registerClassroomSignalsRoutes(r)
 	d.registerConferenceRoutes(r)
