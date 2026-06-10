@@ -1,0 +1,77 @@
+export type FieldSource = 'environment' | 'database' | 'default'
+
+export type PlatformSettingsPayload = {
+  openRouterApiKey: string
+  samlSsoEnabled: boolean
+  samlPublicBaseUrl: string
+  samlSpEntityId: string
+  samlSpX509Pem: string
+  samlSpPrivateKeyPem: string
+  annotationEnabled: boolean
+  feedbackMediaEnabled: boolean
+  blindGradingEnabled: boolean
+  moderatedGradingEnabled: boolean
+  originalityDetectionEnabled: boolean
+  originalityStubExternal: boolean
+  gradePostingPoliciesEnabled: boolean
+  gradebookCsvEnabled: boolean
+  resubmissionWorkflowEnabled: boolean
+  ltiEnabled: boolean
+  oneRosterEnabled: boolean
+  scimEnabled: boolean
+  studentProgressEnabled: boolean
+  selfReflectionEnabled: boolean
+  outcomesReportEnabled: boolean
+  atRiskAlertsEnabled: boolean
+  h5pEnabled: boolean
+  oerLibraryEnabled: boolean
+  oerStub: boolean
+  itemAnalysisEnabled: boolean
+  xapiEmissionEnabled: boolean
+  equationEditorEnabled: boolean
+  readingLevelEnabled: boolean
+  speechToTextEnabled: boolean
+  accommodationsEngineEnabled: boolean
+  ffAccommodationsEngine: boolean
+  ffBookstoreIntegration: boolean
+  ffEportfolio: boolean
+  translationMemoryEnabled: boolean
+  storageQuotasEnabled: boolean
+  avScanningEnabled: boolean
+  virtualClassroomEnabled: boolean
+  sessionManagementUiEnabled: boolean
+  mfaEnabled: boolean
+  mfaEnforcement: 'none' | 'all' | 'staff'
+  smtpHost: string
+  smtpPort: number
+  smtpFrom: string
+  smtpUser: string
+  smtpPassword: string
+  sources: {
+    openRouterApiKey: FieldSource
+    samlSsoEnabled: FieldSource
+    samlPublicBaseUrl: FieldSource
+    samlSpEntityId: FieldSource
+    samlSpX509Pem: FieldSource
+    samlSpPrivateKeyPem: FieldSource
+    annotationEnabled: FieldSource
+    feedbackMediaEnabled: FieldSource
+    blindGradingEnabled: FieldSource
+    moderatedGradingEnabled: FieldSource
+    originalityDetectionEnabled: FieldSource
+    originalityStubExternal: FieldSource
+    gradePostingPoliciesEnabled: FieldSource
+    gradebookCsvEnabled: FieldSource
+    resubmissionWorkflowEnabled: FieldSource
+    ltiEnabled: FieldSource
+    oneRosterEnabled: FieldSource
+    scimEnabled: FieldSource
+    mfaEnabled: FieldSource
+    mfaEnforcement: FieldSource
+    smtpHost: FieldSource
+    smtpPort: FieldSource
+    smtpFrom: FieldSource
+    smtpUser: FieldSource
+    smtpPassword: FieldSource
+  }
+}

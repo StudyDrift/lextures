@@ -1,84 +1,14 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { authorizedFetch } from '../../lib/api'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { readApiErrorMessage } from '../../lib/errors'
 import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { FeatureToggleRow } from './feature-toggle-row'
+import { PLATFORM_FEATURE_DEFINITIONS, type PlatformFeatureDefinition } from './platform-feature-definitions'
+import type { FieldSource, PlatformSettingsPayload } from './platform-settings-types'
 
-type FieldSource = 'environment' | 'database' | 'default'
-
-export type PlatformSettingsPayload = {
-  openRouterApiKey: string
-  samlSsoEnabled: boolean
-  samlPublicBaseUrl: string
-  samlSpEntityId: string
-  samlSpX509Pem: string
-  samlSpPrivateKeyPem: string
-  annotationEnabled: boolean
-  feedbackMediaEnabled: boolean
-  blindGradingEnabled: boolean
-  moderatedGradingEnabled: boolean
-  originalityDetectionEnabled: boolean
-  originalityStubExternal: boolean
-  gradePostingPoliciesEnabled: boolean
-  gradebookCsvEnabled: boolean
-  resubmissionWorkflowEnabled: boolean
-  ltiEnabled: boolean
-  oneRosterEnabled: boolean
-  scimEnabled: boolean
-  studentProgressEnabled: boolean
-  selfReflectionEnabled: boolean
-  outcomesReportEnabled: boolean
-  atRiskAlertsEnabled: boolean
-  h5pEnabled: boolean
-  oerLibraryEnabled: boolean
-  oerStub: boolean
-  itemAnalysisEnabled: boolean
-  xapiEmissionEnabled: boolean
-  equationEditorEnabled: boolean
-  readingLevelEnabled: boolean
-  speechToTextEnabled: boolean
-  accommodationsEngineEnabled: boolean
-  ffAccommodationsEngine: boolean
-  translationMemoryEnabled: boolean
-  storageQuotasEnabled: boolean
-  avScanningEnabled: boolean
-  virtualClassroomEnabled: boolean
-  sessionManagementUiEnabled: boolean
-  mfaEnabled: boolean
-  mfaEnforcement: 'none' | 'all' | 'staff'
-  smtpHost: string
-  smtpPort: number
-  smtpFrom: string
-  smtpUser: string
-  smtpPassword: string
-  sources: {
-    openRouterApiKey: FieldSource
-    samlSsoEnabled: FieldSource
-    samlPublicBaseUrl: FieldSource
-    samlSpEntityId: FieldSource
-    samlSpX509Pem: FieldSource
-    samlSpPrivateKeyPem: FieldSource
-    annotationEnabled: FieldSource
-    feedbackMediaEnabled: FieldSource
-    blindGradingEnabled: FieldSource
-    moderatedGradingEnabled: FieldSource
-    originalityDetectionEnabled: FieldSource
-    originalityStubExternal: FieldSource
-    gradePostingPoliciesEnabled: FieldSource
-    gradebookCsvEnabled: FieldSource
-    resubmissionWorkflowEnabled: FieldSource
-    ltiEnabled: FieldSource
-    oneRosterEnabled: FieldSource
-    scimEnabled: FieldSource
-    mfaEnabled: FieldSource
-    mfaEnforcement: FieldSource
-    smtpHost: FieldSource
-    smtpPort: FieldSource
-    smtpFrom: FieldSource
-    smtpUser: FieldSource
-    smtpPassword: FieldSource
-  }
-}
+export type { PlatformSettingsPayload } from './platform-settings-types'
 
 function normalizePlatformPayload(data: PlatformSettingsPayload) {
   if (typeof data.smtpPort !== 'number' || Number.isNaN(data.smtpPort)) {
@@ -125,6 +55,8 @@ function emptyForm(): PlatformSettingsPayload {
     speechToTextEnabled: false,
     accommodationsEngineEnabled: false,
     ffAccommodationsEngine: false,
+    ffBookstoreIntegration: false,
+    ffEportfolio: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
@@ -190,11 +122,24 @@ function sourceBadge(src: FieldSource) {
 }
 
 export function PlatformSettingsPanel() {
+  const { refresh: refreshPlatformFeatures } = usePlatformFeatures()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [featureSaving, setFeatureSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [featureMessage, setFeatureMessage] = useState<string | null>(null)
+  const [featureError, setFeatureError] = useState<string | null>(null)
+  const [featureQuery, setFeatureQuery] = useState('')
   const [form, setForm] = useState<PlatformSettingsPayload>(() => emptyForm())
   const [baseline, setBaseline] = useState<PlatformSettingsPayload>(() => emptyForm())
+
+  const visiblePlatformFeatures = useMemo(() => {
+    const q = featureQuery.trim().toLowerCase()
+    if (!q) return PLATFORM_FEATURE_DEFINITIONS
+    return PLATFORM_FEATURE_DEFINITIONS.filter(
+      (f) => f.label.toLowerCase().includes(q) || f.description.toLowerCase().includes(q),
+    )
+  }, [featureQuery])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -223,6 +168,84 @@ export function PlatformSettingsPanel() {
   function update<K extends keyof PlatformSettingsPayload>(key: K, value: PlatformSettingsPayload[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
+
+  const putPlatformSettings = useCallback(
+    async (body: Record<string, unknown>) => {
+      const res = await authorizedFetch('/api/v1/settings/platform', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+      const raw: unknown = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        throw new Error(readApiErrorMessage(raw))
+      }
+      const data = raw as PlatformSettingsPayload
+      normalizePlatformPayload(data)
+      setForm(data)
+      setBaseline(data)
+      await refreshPlatformFeatures()
+      return data
+    },
+    [refreshPlatformFeatures],
+  )
+
+  const persistPlatformFeature = useCallback(
+    async (key: PlatformFeatureDefinition['key'], value: boolean) => {
+      if (featureSaving) return
+      let previous = false
+      setFeatureSaving(true)
+      setFeatureMessage(null)
+      setFeatureError(null)
+      setForm((prev) => {
+        previous = prev[key]
+        return { ...prev, [key]: value }
+      })
+      try {
+        const data = await putPlatformSettings({ [key]: value, updateMask: [key] })
+        if (data[key] !== value) {
+          throw new Error('The server did not persist this feature change. Reload the page and try again.')
+        }
+        setFeatureMessage('Saved.')
+        toastSaveOk('Platform feature updated')
+      } catch (e) {
+        setForm((prev) => ({ ...prev, [key]: previous }))
+        const msg = e instanceof Error ? e.message : 'Could not save feature.'
+        setFeatureError(msg)
+        toastMutationError(msg)
+      } finally {
+        setFeatureSaving(false)
+      }
+    },
+    [featureSaving, putPlatformSettings],
+  )
+
+  const persistMfaEnforcement = useCallback(
+    async (value: PlatformSettingsPayload['mfaEnforcement']) => {
+      if (featureSaving) return
+      let previous: PlatformSettingsPayload['mfaEnforcement'] = 'none'
+      setFeatureSaving(true)
+      setFeatureMessage(null)
+      setFeatureError(null)
+      setForm((prev) => {
+        previous = prev.mfaEnforcement
+        return { ...prev, mfaEnforcement: value }
+      })
+      try {
+        await putPlatformSettings({ mfaEnforcement: value, updateMask: ['mfaEnforcement'] })
+        setFeatureMessage('Saved.')
+        toastSaveOk('MFA requirement updated')
+      } catch (e) {
+        setForm((prev) => ({ ...prev, mfaEnforcement: previous }))
+        const msg = e instanceof Error ? e.message : 'Could not save MFA requirement.'
+        setFeatureError(msg)
+        toastMutationError(msg)
+      } finally {
+        setFeatureSaving(false)
+      }
+    },
+    [featureSaving, putPlatformSettings],
+  )
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -282,136 +305,6 @@ export function PlatformSettingsPanel() {
         }
       })
 
-      maybe('annotationEnabled', baseline.annotationEnabled, form.annotationEnabled, () => {
-        body.annotationEnabled = form.annotationEnabled
-      })
-      maybe('feedbackMediaEnabled', baseline.feedbackMediaEnabled, form.feedbackMediaEnabled, () => {
-        body.feedbackMediaEnabled = form.feedbackMediaEnabled
-      })
-      maybe('blindGradingEnabled', baseline.blindGradingEnabled, form.blindGradingEnabled, () => {
-        body.blindGradingEnabled = form.blindGradingEnabled
-      })
-      maybe('moderatedGradingEnabled', baseline.moderatedGradingEnabled, form.moderatedGradingEnabled, () => {
-        body.moderatedGradingEnabled = form.moderatedGradingEnabled
-      })
-      maybe(
-        'originalityDetectionEnabled',
-        baseline.originalityDetectionEnabled,
-        form.originalityDetectionEnabled,
-        () => {
-          body.originalityDetectionEnabled = form.originalityDetectionEnabled
-        },
-      )
-      maybe('originalityStubExternal', baseline.originalityStubExternal, form.originalityStubExternal, () => {
-        body.originalityStubExternal = form.originalityStubExternal
-      })
-      maybe(
-        'gradePostingPoliciesEnabled',
-        baseline.gradePostingPoliciesEnabled,
-        form.gradePostingPoliciesEnabled,
-        () => {
-          body.gradePostingPoliciesEnabled = form.gradePostingPoliciesEnabled
-        },
-      )
-      maybe('gradebookCsvEnabled', baseline.gradebookCsvEnabled, form.gradebookCsvEnabled, () => {
-        body.gradebookCsvEnabled = form.gradebookCsvEnabled
-      })
-      maybe(
-        'resubmissionWorkflowEnabled',
-        baseline.resubmissionWorkflowEnabled,
-        form.resubmissionWorkflowEnabled,
-        () => {
-          body.resubmissionWorkflowEnabled = form.resubmissionWorkflowEnabled
-        },
-      )
-      maybe('ltiEnabled', baseline.ltiEnabled, form.ltiEnabled, () => {
-        body.ltiEnabled = form.ltiEnabled
-      })
-      maybe('oneRosterEnabled', baseline.oneRosterEnabled, form.oneRosterEnabled, () => {
-        body.oneRosterEnabled = form.oneRosterEnabled
-      })
-      maybe('scimEnabled', baseline.scimEnabled, form.scimEnabled, () => {
-        body.scimEnabled = form.scimEnabled
-      })
-      maybe('studentProgressEnabled', baseline.studentProgressEnabled, form.studentProgressEnabled, () => {
-        body.studentProgressEnabled = form.studentProgressEnabled
-      })
-      maybe('selfReflectionEnabled', baseline.selfReflectionEnabled, form.selfReflectionEnabled, () => {
-        body.selfReflectionEnabled = form.selfReflectionEnabled
-      })
-      maybe('outcomesReportEnabled', baseline.outcomesReportEnabled, form.outcomesReportEnabled, () => {
-        body.outcomesReportEnabled = form.outcomesReportEnabled
-      })
-      maybe('atRiskAlertsEnabled', baseline.atRiskAlertsEnabled, form.atRiskAlertsEnabled, () => {
-        body.atRiskAlertsEnabled = form.atRiskAlertsEnabled
-      })
-      maybe('h5pEnabled', baseline.h5pEnabled, form.h5pEnabled, () => {
-        body.h5pEnabled = form.h5pEnabled
-      })
-      maybe('oerLibraryEnabled', baseline.oerLibraryEnabled, form.oerLibraryEnabled, () => {
-        body.oerLibraryEnabled = form.oerLibraryEnabled
-      })
-      maybe('oerStub', baseline.oerStub, form.oerStub, () => {
-        body.oerStub = form.oerStub
-      })
-      maybe('itemAnalysisEnabled', baseline.itemAnalysisEnabled, form.itemAnalysisEnabled, () => {
-        body.itemAnalysisEnabled = form.itemAnalysisEnabled
-      })
-      maybe('xapiEmissionEnabled', baseline.xapiEmissionEnabled, form.xapiEmissionEnabled, () => {
-        body.xapiEmissionEnabled = form.xapiEmissionEnabled
-      })
-      maybe('equationEditorEnabled', baseline.equationEditorEnabled, form.equationEditorEnabled, () => {
-        body.equationEditorEnabled = form.equationEditorEnabled
-      })
-      maybe('readingLevelEnabled', baseline.readingLevelEnabled, form.readingLevelEnabled, () => {
-        body.readingLevelEnabled = form.readingLevelEnabled
-      })
-      maybe('speechToTextEnabled', baseline.speechToTextEnabled, form.speechToTextEnabled, () => {
-        body.speechToTextEnabled = form.speechToTextEnabled
-      })
-      maybe(
-        'accommodationsEngineEnabled',
-        baseline.accommodationsEngineEnabled,
-        form.accommodationsEngineEnabled,
-        () => {
-          body.accommodationsEngineEnabled = form.accommodationsEngineEnabled
-        },
-      )
-      maybe('ffAccommodationsEngine', baseline.ffAccommodationsEngine, form.ffAccommodationsEngine, () => {
-        body.ffAccommodationsEngine = form.ffAccommodationsEngine
-      })
-      maybe(
-        'translationMemoryEnabled',
-        baseline.translationMemoryEnabled,
-        form.translationMemoryEnabled,
-        () => {
-          body.translationMemoryEnabled = form.translationMemoryEnabled
-        },
-      )
-      maybe('storageQuotasEnabled', baseline.storageQuotasEnabled, form.storageQuotasEnabled, () => {
-        body.storageQuotasEnabled = form.storageQuotasEnabled
-      })
-      maybe('avScanningEnabled', baseline.avScanningEnabled, form.avScanningEnabled, () => {
-        body.avScanningEnabled = form.avScanningEnabled
-      })
-      maybe('virtualClassroomEnabled', baseline.virtualClassroomEnabled, form.virtualClassroomEnabled, () => {
-        body.virtualClassroomEnabled = form.virtualClassroomEnabled
-      })
-      maybe(
-        'sessionManagementUiEnabled',
-        baseline.sessionManagementUiEnabled,
-        form.sessionManagementUiEnabled,
-        () => {
-          body.sessionManagementUiEnabled = form.sessionManagementUiEnabled
-        },
-      )
-      maybe('mfaEnabled', baseline.mfaEnabled, form.mfaEnabled, () => {
-        body.mfaEnabled = form.mfaEnabled
-      })
-      maybe('mfaEnforcement', baseline.mfaEnforcement, form.mfaEnforcement, () => {
-        body.mfaEnforcement = form.mfaEnforcement
-      })
-
       maybe('smtpHost', baseline.smtpHost, form.smtpHost, () => {
         body.smtpHost = form.smtpHost.trim()
       })
@@ -447,20 +340,7 @@ export function PlatformSettingsPanel() {
 
       body.updateMask = mask
 
-      const res = await authorizedFetch('/api/v1/settings/platform', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      const raw: unknown = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        toastMutationError(readApiErrorMessage(raw))
-        return
-      }
-      const data = raw as PlatformSettingsPayload
-      normalizePlatformPayload(data)
-      setForm(data)
-      setBaseline(data)
+      await putPlatformSettings(body)
       toastSaveOk('Platform settings saved.')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Save failed.')
@@ -653,223 +533,83 @@ export function PlatformSettingsPanel() {
           </div>
         </section>
 
-        <section>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Platform feature flags</h3>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <FlagRow
-              label="Annotations"
-              src={form.sources.annotationEnabled}
-              checked={form.annotationEnabled}
-              onChange={(v) => update('annotationEnabled', v)}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-950">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Platform features</h3>
+          <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+            Turn platform-wide capabilities on or off. Changes save immediately. Database values override environment
+            defaults.
+          </p>
+
+          <div className="mt-3">
+            <input
+              type="search"
+              placeholder="Search features…"
+              value={featureQuery}
+              onChange={(e) => setFeatureQuery(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
             />
-            <FlagRow
-              label="Feedback media"
-              src={form.sources.feedbackMediaEnabled}
-              checked={form.feedbackMediaEnabled}
-              onChange={(v) => update('feedbackMediaEnabled', v)}
-            />
-            <FlagRow
-              label="Blind grading"
-              src={form.sources.blindGradingEnabled}
-              checked={form.blindGradingEnabled}
-              onChange={(v) => update('blindGradingEnabled', v)}
-            />
-            <FlagRow
-              label="Moderated grading"
-              src={form.sources.moderatedGradingEnabled}
-              checked={form.moderatedGradingEnabled}
-              onChange={(v) => update('moderatedGradingEnabled', v)}
-            />
-            <FlagRow
-              label="Originality detection"
-              src={form.sources.originalityDetectionEnabled}
-              checked={form.originalityDetectionEnabled}
-              onChange={(v) => update('originalityDetectionEnabled', v)}
-            />
-            <FlagRow
-              label="Originality stub external"
-              src={form.sources.originalityStubExternal}
-              checked={form.originalityStubExternal}
-              onChange={(v) => update('originalityStubExternal', v)}
-            />
-            <FlagRow
-              label="Grade posting policies"
-              src={form.sources.gradePostingPoliciesEnabled}
-              checked={form.gradePostingPoliciesEnabled}
-              onChange={(v) => update('gradePostingPoliciesEnabled', v)}
-            />
-            <FlagRow
-              label="Gradebook CSV export"
-              src={form.sources.gradebookCsvEnabled}
-              checked={form.gradebookCsvEnabled}
-              onChange={(v) => update('gradebookCsvEnabled', v)}
-            />
-            <FlagRow
-              label="Resubmission workflow"
-              src={form.sources.resubmissionWorkflowEnabled}
-              checked={form.resubmissionWorkflowEnabled}
-              onChange={(v) => update('resubmissionWorkflowEnabled', v)}
-            />
-            <FlagRow
-              label="LTI"
-              src={form.sources.ltiEnabled}
-              checked={form.ltiEnabled}
-              onChange={(v) => update('ltiEnabled', v)}
-            />
-            <FlagRow
-              label="OneRoster API"
-              src={form.sources.oneRosterEnabled}
-              checked={form.oneRosterEnabled}
-              onChange={(v) => update('oneRosterEnabled', v)}
-            />
-            <FlagRow
-              label="SCIM 2.0 provisioning"
-              src={form.sources.scimEnabled}
-              checked={form.scimEnabled}
-              onChange={(v) => update('scimEnabled', v)}
-            />
-            <FlagRow
-              label="Per-student progress dashboards"
-              src="default"
-              checked={form.studentProgressEnabled}
-              onChange={(v) => update('studentProgressEnabled', v)}
-            />
-            <FlagRow
-              label="Learner self-reflection & coaching"
-              src="default"
-              checked={form.selfReflectionEnabled}
-              onChange={(v) => update('selfReflectionEnabled', v)}
-            />
-            <FlagRow
-              label="Course outcomes report"
-              src="default"
-              checked={form.outcomesReportEnabled}
-              onChange={(v) => update('outcomesReportEnabled', v)}
-            />
-            <FlagRow
-              label="At-risk early-warning alerts"
-              src="default"
-              checked={form.atRiskAlertsEnabled}
-              onChange={(v) => update('atRiskAlertsEnabled', v)}
-            />
-            <FlagRow
-              label="Interactive H5P content"
-              src="default"
-              checked={form.h5pEnabled}
-              onChange={(v) => update('h5pEnabled', v)}
-            />
-            <FlagRow
-              label="OER library search"
-              src="default"
-              checked={form.oerLibraryEnabled}
-              onChange={(v) => update('oerLibraryEnabled', v)}
-            />
-            <FlagRow
-              label="OER stub catalog (dev/e2e)"
-              src="default"
-              checked={form.oerStub}
-              onChange={(v) => update('oerStub', v)}
-            />
-            <FlagRow
-              label="Quiz item analysis"
-              src="default"
-              checked={form.itemAnalysisEnabled}
-              onChange={(v) => update('itemAnalysisEnabled', v)}
-            />
-            <FlagRow
-              label="xAPI / Caliper emission"
-              src="default"
-              checked={form.xapiEmissionEnabled}
-              onChange={(v) => update('xapiEmissionEnabled', v)}
-            />
-            <FlagRow
-              label="Equation editor"
-              src="default"
-              checked={form.equationEditorEnabled}
-              onChange={(v) => update('equationEditorEnabled', v)}
-            />
-            <FlagRow
-              label="Reading level adaptation"
-              src="default"
-              checked={form.readingLevelEnabled}
-              onChange={(v) => update('readingLevelEnabled', v)}
-            />
-            <FlagRow
-              label="Speech-to-text dictation"
-              src="default"
-              checked={form.speechToTextEnabled}
-              onChange={(v) => update('speechToTextEnabled', v)}
-            />
-            <FlagRow
-              label="Accommodations engine (IEP/504)"
-              src="default"
-              checked={form.accommodationsEngineEnabled}
-              onChange={(v) => update('accommodationsEngineEnabled', v)}
-            />
-            <FlagRow
-              label="Accommodations audit log (engine)"
-              src="default"
-              checked={form.ffAccommodationsEngine}
-              onChange={(v) => update('ffAccommodationsEngine', v)}
-            />
-            <FlagRow
-              label="Translation memory (course content)"
-              src="default"
-              checked={form.translationMemoryEnabled}
-              onChange={(v) => update('translationMemoryEnabled', v)}
-            />
-            <FlagRow
-              label="Storage quotas"
-              src="default"
-              checked={form.storageQuotasEnabled}
-              onChange={(v) => update('storageQuotasEnabled', v)}
-            />
-            <FlagRow
-              label="Antivirus scanning (ClamAV)"
-              src="default"
-              checked={form.avScanningEnabled}
-              onChange={(v) => update('avScanningEnabled', v)}
-            />
-            <FlagRow
-              label="Virtual classroom / live sessions"
-              src="default"
-              checked={form.virtualClassroomEnabled}
-              onChange={(v) => update('virtualClassroomEnabled', v)}
-            />
-            <FlagRow
-              label="Active sessions UI"
-              src="default"
-              checked={form.sessionManagementUiEnabled}
-              onChange={(v) => update('sessionManagementUiEnabled', v)}
-            />
-            <FlagRow
-              label="Two-factor authentication (TOTP and passkeys)"
-              src={form.sources.mfaEnabled}
-              checked={form.mfaEnabled}
-              onChange={(v) => update('mfaEnabled', v)}
-            />
-            <div className="flex flex-col gap-1 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 dark:border-neutral-700 dark:bg-neutral-800/40">
-              <label className="text-sm font-medium text-slate-800 dark:text-neutral-100">
-                MFA requirement {sourceBadge(form.sources.mfaEnforcement)}
-              </label>
-              <select
-                value={form.mfaEnforcement}
-                onChange={(e) =>
-                  update('mfaEnforcement', e.target.value as PlatformSettingsPayload['mfaEnforcement'])
-                }
-                className="mt-1 w-full max-w-xs rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-              >
-                <option value="none">Optional (users choose)</option>
-                <option value="staff">Required for teachers, TAs, and global admins</option>
-                <option value="all">Required for everyone</option>
-              </select>
-              <p className="text-xs text-slate-500 dark:text-neutral-400">
-                When required, users without a factor complete setup after password sign-in. Set{' '}
-                <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">PUBLIC_WEB_ORIGIN</code> for
-                passkeys.
-              </p>
-            </div>
           </div>
+
+          <div className="mt-1 divide-y divide-slate-100 dark:divide-neutral-800">
+            {visiblePlatformFeatures.length === 0 ? (
+              <p className="py-6 text-center text-sm text-slate-400 dark:text-neutral-500">
+                No features match &ldquo;{featureQuery}&rdquo;
+              </p>
+            ) : (
+              visiblePlatformFeatures.map((feature) => {
+                const enabled = form[feature.key]
+                const source = feature.sourceKey ? form.sources[feature.sourceKey] : 'default'
+                return (
+                  <FeatureToggleRow
+                    key={feature.key}
+                    label={feature.label}
+                    description={feature.description}
+                    enabled={enabled}
+                    disabled={featureSaving}
+                    meta={sourceBadge(source)}
+                    onToggle={() => void persistPlatformFeature(feature.key, !enabled)}
+                  />
+                )
+              })
+            )}
+          </div>
+
+          <div className="mt-4 border-t border-slate-100 pt-4 dark:border-neutral-800">
+            <label className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+              MFA requirement {sourceBadge(form.sources.mfaEnforcement)}
+            </label>
+            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              Require two-factor authentication for some or all users after password sign-in.
+            </p>
+            <select
+              value={form.mfaEnforcement}
+              disabled={featureSaving}
+              onChange={(e) =>
+                void persistMfaEnforcement(e.target.value as PlatformSettingsPayload['mfaEnforcement'])
+              }
+              className="mt-3 w-full max-w-md rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:focus:border-indigo-500"
+            >
+              <option value="none">Optional (users choose)</option>
+              <option value="staff">Required for teachers, TAs, and global admins</option>
+              <option value="all">Required for everyone</option>
+            </select>
+            <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+              Set{' '}
+              <code className="rounded bg-slate-100 px-1 font-mono dark:bg-neutral-900">PUBLIC_WEB_ORIGIN</code> on the
+              API for passkey registration.
+            </p>
+          </div>
+
+          {featureMessage ? (
+            <p className="mt-4 text-sm text-emerald-700 dark:text-emerald-400" role="status">
+              {featureMessage}
+            </p>
+          ) : null}
+          {featureError ? (
+            <p className="mt-4 text-sm text-rose-700 dark:text-rose-400" role="alert">
+              {featureError}
+            </p>
+          ) : null}
         </section>
 
         <div className="flex flex-wrap gap-3">
@@ -891,24 +631,5 @@ export function PlatformSettingsPanel() {
         </div>
       </form>
     </div>
-  )
-}
-
-function FlagRow(props: {
-  label: string
-  src: FieldSource
-  checked: boolean
-  onChange: (v: boolean) => void
-}) {
-  const chk =
-    'rounded border border-slate-200 bg-white text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-800'
-  return (
-    <label className="flex items-start gap-2 rounded-xl border border-slate-100 bg-slate-50/80 px-3 py-2.5 dark:border-neutral-700 dark:bg-neutral-800/40">
-      <input type="checkbox" checked={props.checked} onChange={(e) => props.onChange(e.target.checked)} className={chk} />
-      <span className="text-sm text-slate-800 dark:text-neutral-100">
-        {props.label}
-        {sourceBadge(props.src)}
-      </span>
-    </label>
   )
 }

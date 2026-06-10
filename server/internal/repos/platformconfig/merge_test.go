@@ -68,4 +68,19 @@ func TestMerge_H5PDefaultOff(t *testing.T) {
 	}
 }
 
+func TestMerge_BookstoreIntegrationEnvWhenDBUnset(t *testing.T) {
+	got := Merge(config.Config{FFBookstoreIntegration: true}, nil)
+	if !got.FFBookstoreIntegration {
+		t.Fatal("expected bookstore integration from env when DB unset")
+	}
+}
+
+func TestMerge_BookstoreIntegrationDBOverridesEnv(t *testing.T) {
+	off := false
+	got := Merge(config.Config{FFBookstoreIntegration: true}, &Row{FFBookstoreIntegration: &off})
+	if got.FFBookstoreIntegration {
+		t.Fatal("expected DB false to override env true")
+	}
+}
+
 func ptr(s string) *string { return &s }

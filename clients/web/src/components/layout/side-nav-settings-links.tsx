@@ -15,8 +15,10 @@ import {
   Plug,
   Settings2,
   Shield,
+  Store,
   User,
 } from 'lucide-react'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
 import { oerLibraryEnabled } from '../../lib/oer-api'
@@ -43,6 +45,7 @@ export function SideNavSettingsLinks() {
   const canOrgRoles =
     !permLoading && (allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW))
   const { scimEnabled: platformScimEnabled } = usePlatformScimEnabled(canManageRbac)
+  const { ffBookstoreIntegration } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
   const aiSectionActive = view === 'ai-models' || view === 'ai-prompts'
@@ -164,6 +167,17 @@ export function SideNavSettingsLinks() {
                   icon={<BookOpen className="h-5 w-5" />}
                 >
                   OER library
+                </SideNavLink>
+              )}
+              {ffBookstoreIntegration && (
+                <SideNavLink
+                  to="/admin/bookstore"
+                  className={() =>
+                    location.pathname === '/admin/bookstore' ? sideNavActiveClass : ''
+                  }
+                  icon={<Store className="h-5 w-5" />}
+                >
+                  Bookstore
                 </SideNavLink>
               )}
               <SideNavLink

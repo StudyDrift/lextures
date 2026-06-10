@@ -7,6 +7,7 @@ import {
 } from './courses-api'
 import {
   atRiskFeatureEnabled,
+  bookstoreIntegrationEnabled,
   outcomesReportFeatureEnabled,
   xapiEmissionFeatureEnabled,
 } from './platform-features'
@@ -147,6 +148,17 @@ export function buildGlobalSearchItems(allows: (perm: string) => boolean): Searc
       path: '/settings/roles',
       haystack: 'roles permissions rbac security admin page'.toLowerCase(),
     })
+    if (bookstoreIntegrationEnabled()) {
+      items.push({
+        id: 'page:/admin/bookstore',
+        group: 'page',
+        title: 'Bookstore integration',
+        subtitle: 'System settings',
+        path: '/admin/bookstore',
+        haystack:
+          'bookstore textbook vitalsource redshelf inclusive access lti admin page'.toLowerCase(),
+      })
+    }
   }
 
   if (allows(PERM_REPORTS_VIEW)) {

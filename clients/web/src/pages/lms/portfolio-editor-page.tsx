@@ -117,7 +117,10 @@ export default function PortfolioEditorPage() {
   if (!ffEportfolio) {
     return (
       <LmsPage title="Portfolio">
-        <p className="text-muted-foreground">The ePortfolio feature is not enabled.</p>
+        <p className="text-muted-foreground">
+          The ePortfolio feature is not enabled. A global administrator can turn it on in Settings → Global
+          platform.
+        </p>
       </LmsPage>
     )
   }
