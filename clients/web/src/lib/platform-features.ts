@@ -46,6 +46,7 @@ export type PlatformFeaturesSnapshot = {
   ffPlagiarismChecks?: boolean
   ffCourseEvaluations?: boolean
   ffProctoringIntegration?: boolean
+  ffCoCurricularTranscript?: boolean
   ffLibraryIntegration?: boolean
 }
 
@@ -95,6 +96,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffPlagiarismChecks: false,
   ffCourseEvaluations: false,
   ffProctoringIntegration: false,
+  ffCoCurricularTranscript: false,
   ffLibraryIntegration: false,
 }
 

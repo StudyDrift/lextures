@@ -55,7 +55,9 @@ type platformFeaturesJSON struct {
 	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
 	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 	FFProctoringIntegration         bool `json:"ffProctoringIntegration"`
+	FFCoCurricularTranscript        bool `json:"ffCoCurricularTranscript"`
 	FFLibraryIntegration            bool `json:"ffLibraryIntegration"`
+	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -107,7 +109,9 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFPlagiarismChecks:          cfg.FFPlagiarismChecks,
 		FFCourseEvaluations:         cfg.FFCourseEvaluations,
 		FFProctoringIntegration:     cfg.FFProctoringIntegration,
+		FFCoCurricularTranscript:    cfg.FFCoCurricularTranscript,
 		FFLibraryIntegration:        cfg.FFLibraryIntegration,
+		FFBookstoreIntegration:      cfg.FFBookstoreIntegration,
 	}
 }
 

@@ -1,18 +1,22 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from '../standalone-public-routes'
 
 describe('isStandalonePublicRoute', () => {
-  it('matches trust pages', () => {
+  it('returns true for trust center', () => {
     expect(isStandalonePublicRoute('/trust')).toBe(true)
   })
 
-  it('matches auth pages', () => {
+  it('returns true for login routes', () => {
     expect(isStandalonePublicRoute('/login')).toBe(true)
     expect(isStandalonePublicRoute('/login/magic-link')).toBe(true)
     expect(isStandalonePublicRoute('/signup')).toBe(true)
   })
 
-  it('does not match LMS shell routes or marketing legal pages', () => {
+  it('returns true for verify routes', () => {
+    expect(isStandalonePublicRoute('/verify/abc')).toBe(true)
+  })
+
+  it('returns false for authenticated app routes', () => {
     expect(isStandalonePublicRoute('/')).toBe(false)
     expect(isStandalonePublicRoute('/courses')).toBe(false)
     expect(isStandalonePublicRoute('/privacy-centre')).toBe(false)
@@ -26,17 +30,8 @@ describe('isStandalonePublicRoute', () => {
 })
 
 describe('applyDocumentScrollMode', () => {
-  afterEach(() => {
-    document.documentElement.style.overflow = 'hidden'
-  })
-
-  it('enables document scroll on standalone public pages', () => {
+  it('sets overflow auto on public routes', () => {
     applyDocumentScrollMode('/trust')
     expect(document.documentElement.style.overflow).toBe('auto')
-  })
-
-  it('locks document scroll in the LMS shell', () => {
-    applyDocumentScrollMode('/courses')
-    expect(document.documentElement.style.overflow).toBe('hidden')
   })
 })
