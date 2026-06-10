@@ -10,13 +10,11 @@ import {
 import { Navigate, useLocation } from 'react-router-dom'
 import { ImageIcon, Monitor, Save, Upload, X } from 'lucide-react'
 import { settingsViewFromPathname } from '../../components/layout/side-nav-path-utils'
-import { useOrgRoleCapabilities } from '../../hooks/use-org-role-capabilities'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
 import { ImageModelPicker } from '../../components/image-model-picker'
 import { RequirePermission } from '../../components/require-permission'
 import { LtiToolsSettingsPanel } from '../../components/settings/lti-tools-settings-panel'
 import { OrganizationsPanel } from '../../components/settings/organizations-panel'
-import { OrgRolesPanel } from '../../components/settings/org-roles-panel'
 import { OrgUnitsPanel } from '../../components/settings/org-units-panel'
 import { TermsSettingsPanel } from '../../components/settings/terms-settings-panel'
 import { PlatformSettingsPanel } from '../../components/settings/platform-settings-panel'
@@ -30,8 +28,6 @@ import { RolesPermissionsPanel } from '../../components/settings/roles-permissio
 import { usePermissions } from '../../context/use-permissions'
 import {
   PERM_RBAC_MANAGE,
-  PERM_TENANT_ORG_ROLES_MANAGE,
-  PERM_TENANT_ORG_ROLES_VIEW,
   PERM_TENANT_ORG_UNITS_ADMIN,
 } from '../../lib/rbac-api'
 import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-accounts-panel'
@@ -58,7 +54,6 @@ function isSystemSettingsPath(pathname: string): boolean {
   if (pathname.startsWith('/settings/ai/')) return true
   return (
     pathname === '/settings/roles' ||
-    pathname === '/settings/org-roles' ||
     pathname === '/settings/lti-tools' ||
     pathname === '/settings/platform' ||
     pathname === '/settings/organizations' ||
@@ -176,7 +171,6 @@ export default function Settings() {
   const { density, setDensity } = useUiDensityControls()
   const activeView = settingsViewFromPathname(location.pathname)
   const canManageRbac = !permLoading && allows(PERM_RBAC_MANAGE)
-  const orgRoleCaps = useOrgRoleCapabilities()
   const { scimEnabled: platformScimEnabled, loading: platformScimFlagLoading } = usePlatformScimEnabled(
     canManageRbac && activeView === 'scim-provisioning',
   )
@@ -855,6 +849,10 @@ export default function Settings() {
     if (row) setSystemPromptDraft(row.content)
   }
 
+  if (location.pathname === '/settings/org-roles') {
+    return <Navigate to="/settings/roles" replace />
+  }
+
   if (permLoading && isSystemSettingsPath(location.pathname)) {
     return (
       <LmsPage title="Settings" description="Account and learning preferences.">
@@ -864,19 +862,11 @@ export default function Settings() {
   }
   if (!permLoading && isSystemSettingsPath(location.pathname)) {
     const onOrgUnits = location.pathname === '/settings/org-units'
-    const onOrgRoles = location.pathname === '/settings/org-roles'
     const onTerms = location.pathname === '/settings/terms'
     const onOrgBranding = location.pathname === '/settings/org-branding'
     const hasRbac = allows(PERM_RBAC_MANAGE)
     const hasUnitAdmin = allows(PERM_TENANT_ORG_UNITS_ADMIN)
-    const orgRolesOk =
-      onOrgRoles &&
-      (orgRoleCaps.loading ||
-        allows(PERM_TENANT_ORG_ROLES_VIEW) ||
-        allows(PERM_TENANT_ORG_ROLES_MANAGE) ||
-        orgRoleCaps.canManageOrgRoleGrants ||
-        hasRbac)
-    if (!hasRbac && !((onOrgUnits || onTerms || onOrgBranding) && hasUnitAdmin) && !orgRolesOk) {
+    if (!hasRbac && !((onOrgUnits || onTerms || onOrgBranding) && hasUnitAdmin)) {
       return <Navigate to="/settings/account" replace />
     }
   }
@@ -897,7 +887,6 @@ export default function Settings() {
       <div
         className={`mt-8 ${
           activeView === 'roles' ||
-          activeView === 'org-roles' ||
           activeView === 'lti-tools' ||
           activeView === 'platform' ||
           activeView === 'organizations' ||
@@ -1726,16 +1715,6 @@ export default function Settings() {
               Schools, colleges, and departments within your organization.
             </p>
             <OrgUnitsPanel />
-          </div>
-        )}
-
-        {activeView === 'org-roles' && (
-          <div>
-            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Roles &amp; permissions</h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-              Assign org-level roles (org admin, org unit admin, org viewer) for your organization.
-            </p>
-            <OrgRolesPanel />
           </div>
         )}
 

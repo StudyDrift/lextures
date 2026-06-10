@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { ExternalLink, FileText } from 'lucide-react'
+import { ExternalLink, FileText, FolderOpen } from 'lucide-react'
 import { getPublicPortfolio, type PublicPortfolio } from '../../lib/eportfolio-api'
+import { EmptyState } from '../../components/ui/empty-state'
+
 
 export default function PublicPortfolioPage() {
   const { slug = '' } = useParams<{ slug: string }>()
@@ -57,65 +59,73 @@ export default function PublicPortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 dark:bg-neutral-950 dark:text-neutral-100">
       <a
         href="#portfolio-artifacts"
         className="sr-only focus:not-sr-only focus:absolute focus:start-2 focus:top-2 focus:z-10 focus:rounded focus:bg-primary focus:px-3 focus:py-1.5 focus:text-sm focus:text-primary-foreground"
       >
         Skip to artifacts
       </a>
-      <header className="border-b bg-card">
-        <div className="mx-auto max-w-3xl px-4 py-10">
-          <h1 className="text-3xl font-bold tracking-tight">{portfolio.title}</h1>
+      <header className="border-b border-slate-100 bg-white dark:border-neutral-800 dark:bg-neutral-900/50">
+        <div className="mx-auto max-w-3xl px-4 py-12">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-neutral-50">{portfolio.title}</h1>
           {portfolio.ownerName && (
-            <p className="mt-1 text-sm text-muted-foreground">{portfolio.ownerName}</p>
+            <p className="mt-2 text-sm font-semibold text-indigo-650 dark:text-indigo-400">{portfolio.ownerName}</p>
           )}
           {portfolio.introText && (
-            <p className="mt-4 max-w-2xl leading-relaxed text-muted-foreground">{portfolio.introText}</p>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 dark:text-neutral-350">{portfolio.introText}</p>
           )}
         </div>
       </header>
 
-      <main id="portfolio-artifacts" className="mx-auto max-w-3xl px-4 py-8">
+      <main id="portfolio-artifacts" className="mx-auto max-w-3xl px-4 py-10">
         {portfolio.artifacts.length === 0 ? (
-          <p className="text-center text-muted-foreground">No public artifacts in this portfolio yet.</p>
+          <EmptyState
+            icon={FolderOpen}
+            title="No public artifacts"
+            body="There are no public artifacts in this portfolio yet."
+          />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             {portfolio.artifacts.map((a) => (
               <article
                 key={a.id}
                 role="article"
-                className="flex flex-col rounded-lg border bg-card p-4"
+                className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
               >
-                <h2 className="flex items-center gap-1.5 font-semibold">
-                  <FileText className="h-4 w-4 text-muted-foreground" aria-hidden />
+                <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-neutral-100">
+                  <FileText className="h-4 w-4 text-indigo-500" aria-hidden />
                   {a.title}
                 </h2>
                 {a.description && (
-                  <p className="mt-1 text-sm text-muted-foreground">{a.description}</p>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{a.description}</p>
                 )}
                 {a.artifactType === 'text_page' && a.textContent && (
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">{a.textContent}</p>
+                  <p className="mt-3 flex-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-neutral-300">{a.textContent}</p>
                 )}
                 {a.artifactType === 'url' && a.externalUrl && (
-                  <a
-                    href={a.externalUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" aria-hidden /> View resource
-                  </a>
+                  <div className="mt-4 flex-1">
+                    <a
+                      href={a.externalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-505 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden /> View resource
+                    </a>
+                  </div>
                 )}
                 {a.fileName && (
-                  <p className="mt-2 text-xs text-muted-foreground">Attachment: {a.fileName}</p>
+                  <div className="mt-3 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs text-slate-500 dark:bg-neutral-950 dark:text-neutral-400">
+                    Attachment: <span className="font-medium">{a.fileName}</span>
+                  </div>
                 )}
                 {a.outcomeIds.length > 0 && (
-                  <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Aligned outcomes">
+                  <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="Aligned outcomes">
                     {a.outcomeIds.map((oid) => (
                       <li
                         key={oid}
-                        className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+                        className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-neutral-800 dark:text-neutral-400"
                       >
                         Outcome
                       </li>
@@ -128,10 +138,12 @@ export default function PublicPortfolioPage() {
         )}
       </main>
 
-      <footer className="border-t">
-        <div className="mx-auto max-w-3xl px-4 py-6 text-xs text-muted-foreground">
-          <p>This page conforms to WCAG 2.1 AA accessibility standards.</p>
-          <p className="mt-1">{portfolio.viewCount} view{portfolio.viewCount === 1 ? '' : 's'}</p>
+      <footer className="border-t border-slate-150 bg-slate-50/50 dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="mx-auto max-w-3xl px-4 py-8 text-xs text-slate-500 dark:text-neutral-500">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+            <p>Conforms to WCAG 2.1 AA accessibility standards.</p>
+            <p className="font-semibold">{portfolio.viewCount} view{portfolio.viewCount === 1 ? '' : 's'}</p>
+          </div>
         </div>
       </footer>
     </div>

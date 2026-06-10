@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useOrgRoleCapabilities } from '../../hooks/use-org-role-capabilities'
 import {
   ArrowLeft,
   Bell,
@@ -38,9 +37,6 @@ export function SideNavSettingsLinks() {
   const { allows, loading: permLoading } = usePermissions()
   const { sideNavCollapsed } = useShellNav()
   const canManageRbac = !permLoading && allows(PERM_RBAC_MANAGE)
-  const orgRoleCaps = useOrgRoleCapabilities()
-  const canOrgRolesNav =
-    canManageRbac || (!orgRoleCaps.loading && orgRoleCaps.canManageOrgRoleGrants)
   const canOrgUnits = !permLoading && (canManageRbac || allows(PERM_TENANT_ORG_UNITS_ADMIN))
   const canOrgRoles =
     !permLoading && (allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW))
@@ -81,14 +77,14 @@ export function SideNavSettingsLinks() {
       >
         Notifications
       </SideNavLink>
-      {(canOrgUnits || canOrgRoles || canManageRbac || canOrgRolesNav) && (
+      {(canOrgUnits || canOrgRoles || canManageRbac) && (
         <>
           {!sideNavCollapsed && (
             <p className="px-3 pb-1 pt-4 text-sm font-bold tracking-tight text-slate-900 dark:text-neutral-100">
               System Settings
             </p>
           )}
-          {(canOrgUnits || canOrgRoles || canOrgRolesNav) && (
+          {(canOrgUnits || canOrgRoles) && (
             <>
               {canOrgUnits && (
                 <SideNavLink
@@ -97,15 +93,6 @@ export function SideNavSettingsLinks() {
                   icon={<FolderTree className="h-5 w-5" />}
                 >
                   Org structure
-                </SideNavLink>
-              )}
-              {(canOrgRoles || canOrgRolesNav) && (
-                <SideNavLink
-                  to="/settings/org-roles"
-                  className={() => (view === 'org-roles' ? sideNavActiveClass : '')}
-                  icon={<Shield className="h-5 w-5" />}
-                >
-                  Roles &amp; permissions
                 </SideNavLink>
               )}
               {(canOrgUnits || canOrgRoles) && (
