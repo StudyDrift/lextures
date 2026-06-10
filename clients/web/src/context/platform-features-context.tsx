@@ -59,6 +59,7 @@ export type PlatformFeatures = {
   ffAcademicCalendar: boolean
   ffCourseEvaluations: boolean
   ffProctoringIntegration: boolean
+  ffCoCurricularTranscript: boolean
   ffLibraryIntegration: boolean
   ffBookstoreIntegration: boolean
   loading: boolean
@@ -110,6 +111,7 @@ const defaultFeatures: PlatformFeatures = {
   ffAcademicCalendar: false,
   ffCourseEvaluations: false,
   ffProctoringIntegration: false,
+  ffCoCurricularTranscript: false,
   ffLibraryIntegration: false,
   ffBookstoreIntegration: false,
   loading: true,
@@ -166,6 +168,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffAcademicCalendar: false,
     ffCourseEvaluations: false,
     ffProctoringIntegration: false,
+    ffCoCurricularTranscript: false,
     ffLibraryIntegration: false,
     ffBookstoreIntegration: false,
   })
@@ -223,6 +226,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffAcademicCalendar: data.ffAcademicCalendar === true,
           ffCourseEvaluations: data.ffCourseEvaluations === true,
           ffProctoringIntegration: data.ffProctoringIntegration === true,
+          ffCoCurricularTranscript: data.ffCoCurricularTranscript === true,
           ffLibraryIntegration: data.ffLibraryIntegration === true,
           ffBookstoreIntegration: data.ffBookstoreIntegration === true,
         }
@@ -247,6 +251,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffAcademicCalendar: next.ffAcademicCalendar === true,
           ffCourseEvaluations: next.ffCourseEvaluations === true,
           ffProctoringIntegration: next.ffProctoringIntegration === true,
+          ffCoCurricularTranscript: next.ffCoCurricularTranscript === true,
           ffLibraryIntegration: next.ffLibraryIntegration === true,
           ffBookstoreIntegration: next.ffBookstoreIntegration === true,
         })

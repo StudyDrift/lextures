@@ -212,7 +212,7 @@ export default function Dashboard() {
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
-  const { ffCatalogIntegration, ffEnrollmentStateMachine, ffAcademicCalendar } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffEnrollmentStateMachine, ffAcademicCalendar, ffCoCurricularTranscript } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
@@ -664,6 +664,26 @@ export default function Dashboard() {
           )}
 
           <StudyStatsCard />
+
+          {ffCoCurricularTranscript ? (
+            <section aria-label="My achievements">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-violet-100 bg-violet-50/80 px-5 py-4 dark:border-violet-900/40 dark:bg-violet-950/30">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">My achievements</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                    Build and share your comprehensive learner record.
+                  </p>
+                </div>
+                <Link
+                  to="/me/ccr"
+                  className="inline-flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700"
+                >
+                  Open CCR
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </div>
+            </section>
+          ) : null}
 
           <NotebookTasksCard courseTitles={courseTitles} />
 
