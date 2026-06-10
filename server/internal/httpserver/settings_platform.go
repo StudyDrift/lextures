@@ -119,6 +119,7 @@ type platformSettingsJSON struct {
 	FFAcademicCalendar              bool `json:"ffAcademicCalendar"`
 	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 	FFProctoringIntegration         bool `json:"ffProctoringIntegration"`
+	FFCoCurricularTranscript        bool `json:"ffCoCurricularTranscript"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -269,6 +270,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFAcademicCalendar:              merged.FFAcademicCalendar,
 				FFCourseEvaluations:             merged.FFCourseEvaluations,
 				FFProctoringIntegration:         merged.FFProctoringIntegration,
+				FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -392,6 +394,7 @@ type putPlatformBody struct {
 	FFAcademicCalendar              *bool `json:"ffAcademicCalendar"`
 	FFCourseEvaluations             *bool `json:"ffCourseEvaluations"`
 	FFProctoringIntegration         *bool `json:"ffProctoringIntegration"`
+	FFCoCurricularTranscript        *bool `json:"ffCoCurricularTranscript"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -676,6 +679,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffacademiccalendar", body.FFAcademicCalendar, func(v bool) { wr.FFAcademicCalendar = &v })
 		setBool("ffcourseevaluations", body.FFCourseEvaluations, func(v bool) { wr.FFCourseEvaluations = &v })
 		setBool("ffproctoringintegration", body.FFProctoringIntegration, func(v bool) { wr.FFProctoringIntegration = &v })
+		setBool("ffcocurriculartranscript", body.FFCoCurricularTranscript, func(v bool) { wr.FFCoCurricularTranscript = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -782,6 +786,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFAcademicCalendar:              merged.FFAcademicCalendar,
 				FFCourseEvaluations:             merged.FFCourseEvaluations,
 				FFProctoringIntegration:         merged.FFProctoringIntegration,
+				FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

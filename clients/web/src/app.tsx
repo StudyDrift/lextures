@@ -43,6 +43,8 @@ import CourseStandardsGradebook from './pages/lms/course-standards-gradebook'
 import CourseSyllabus from './pages/lms/course-syllabus'
 import Courses from './pages/lms/courses'
 import Dashboard from './pages/lms/dashboard'
+import MyCCR from './pages/lms/MyCCR'
+import CcrVerifyPage from './pages/verify/CcrVerify'
 import StudyInsightsPage from './pages/lms/study-insights-page'
 import AskAiPage from './pages/lms/ask-ai-page'
 import ReviewSessionPage from './pages/lms/review-session-page'
@@ -135,6 +137,7 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/ai-disclosure" element={<AiDisclosurePage />} />
       <Route path="/trust" element={<TrustCenterPage />} />
+      <Route path="/verify/:token" element={<CcrVerifyPage />} />
       <Route element={<RequireAuth />}>
         <Route path="/cli-auth" element={<CliAuthPage />} />
         <Route
@@ -147,6 +150,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/privacy-centre" element={<PrivacyCentrePage />} />
           <Route path="/me/study-insights" element={<StudyInsightsPage />} />
+          <Route path="/me/ccr" element={<MyCCR />} />
           <Route path="/parent" element={<ParentDashboard />} />
           <Route path="/parent/conferences" element={<ConferenceBooking />} />
           <Route path="/conferences/availability" element={<ConferenceAvailabilitySetup />} />
