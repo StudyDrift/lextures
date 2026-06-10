@@ -1,4 +1,3 @@
-e2e/tests/ccr.spec.ts
 /**
  * Co-Curricular Transcript (plan 14.13).
  */
