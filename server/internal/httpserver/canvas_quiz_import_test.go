@@ -61,23 +61,94 @@ func TestCanvasQuestionToQuizQuestion_TrueFalseSecondAnswerCorrect(t *testing.T)
 }
 
 func TestCanvasMatchingPairsJSON(t *testing.T) {
-	answers := []map[string]any{
-		{"answer_match_left": "A", "answer_match_right": "1", "weight": float64(100)},
+	t.Run("create API fields", func(t *testing.T) {
+		answers := []map[string]any{
+			{"answer_match_left": "A", "answer_match_right": "1", "weight": float64(100)},
+		}
+		raw := canvasMatchingPairsJSON(nil, answers)
+		var wrap struct {
+			Pairs []struct {
+				LeftID  string `json:"leftId"`
+				RightID string `json:"rightId"`
+				Left    string `json:"left"`
+				Right   string `json:"right"`
+			} `json:"pairs"`
+		}
+		if err := json.Unmarshal(raw, &wrap); err != nil {
+			t.Fatal(err)
+		}
+		if len(wrap.Pairs) != 1 || wrap.Pairs[0].LeftID != "l0" || wrap.Pairs[0].RightID != "r0" {
+			t.Fatalf("%+v", wrap)
+		}
+		if wrap.Pairs[0].Left != "A" || wrap.Pairs[0].Right != "1" {
+			t.Fatalf("unexpected pair text: %+v", wrap.Pairs[0])
+		}
+	})
+
+	t.Run("stored Canvas question_data fields", func(t *testing.T) {
+		q := map[string]any{
+			"matches": []any{
+				map[string]any{"match_id": float64(10), "text": "Utah"},
+				map[string]any{"match_id": float64(11), "text": "Nevada"},
+			},
+		}
+		answers := []map[string]any{
+			{"id": float64(1), "left": "Salt Lake City", "right": "Utah", "match_id": float64(10)},
+			{"id": float64(2), "text": "Las Vegas", "match_id": float64(11)},
+		}
+		raw := canvasMatchingPairsJSON(q, answers)
+		var wrap struct {
+			Pairs []struct {
+				Left  string `json:"left"`
+				Right string `json:"right"`
+			} `json:"pairs"`
+		}
+		if err := json.Unmarshal(raw, &wrap); err != nil {
+			t.Fatal(err)
+		}
+		if len(wrap.Pairs) != 2 {
+			t.Fatalf("expected 2 pairs, got %+v", wrap)
+		}
+		if wrap.Pairs[0].Left != "Salt Lake City" || wrap.Pairs[0].Right != "Utah" {
+			t.Fatalf("pair 0: %+v", wrap.Pairs[0])
+		}
+		if wrap.Pairs[1].Left != "Las Vegas" || wrap.Pairs[1].Right != "Nevada" {
+			t.Fatalf("pair 1: %+v", wrap.Pairs[1])
+		}
+	})
+}
+
+func TestCanvasQuestionToQuizQuestion_Matching(t *testing.T) {
+	q := map[string]any{
+		"id":            float64(99),
+		"question_type": "matching_question",
+		"question_text": "<p>Match cities to states</p>",
+		"points_possible": float64(2),
+		"matches": []any{
+			map[string]any{"match_id": float64(10), "text": "Utah"},
+		},
+		"answers": []any{
+			map[string]any{"id": float64(1), "left": "Salt Lake City", "right": "Utah", "match_id": float64(10)},
+		},
 	}
-	raw := canvasMatchingPairsJSON(answers)
-	var wrap struct {
+	qq, ok := canvasQuestionToQuizQuestion(q)
+	if !ok {
+		t.Fatal("expected ok")
+	}
+	if qq.QuestionType != "matching" {
+		t.Fatalf("unexpected type: %s", qq.QuestionType)
+	}
+	var cfg struct {
 		Pairs []struct {
-			LeftID  string `json:"leftId"`
-			RightID string `json:"rightId"`
-			Left    string `json:"left"`
-			Right   string `json:"right"`
+			Left  string `json:"left"`
+			Right string `json:"right"`
 		} `json:"pairs"`
 	}
-	if err := json.Unmarshal(raw, &wrap); err != nil {
+	if err := json.Unmarshal(qq.TypeConfig, &cfg); err != nil {
 		t.Fatal(err)
 	}
-	if len(wrap.Pairs) != 1 || wrap.Pairs[0].LeftID != "l0" || wrap.Pairs[0].RightID != "r0" {
-		t.Fatalf("%+v", wrap)
+	if len(cfg.Pairs) != 1 || cfg.Pairs[0].Left != "Salt Lake City" || cfg.Pairs[0].Right != "Utah" {
+		t.Fatalf("unexpected typeConfig: %+v", cfg)
 	}
 }
 

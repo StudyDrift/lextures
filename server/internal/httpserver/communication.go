@@ -51,6 +51,20 @@ func (d Deps) notifyCourses(userID uuid.UUID) {
 	d.Comm.Broadcast(userID, coursesUpdateJSON)
 }
 
+func (d Deps) notifyCoursesForUsers(userIDs ...uuid.UUID) {
+	if d.Comm == nil || len(userIDs) == 0 {
+		return
+	}
+	seen := make(map[uuid.UUID]struct{}, len(userIDs))
+	for _, uid := range userIDs {
+		if _, ok := seen[uid]; ok {
+			continue
+		}
+		seen[uid] = struct{}{}
+		d.notifyCourses(uid)
+	}
+}
+
 // handleCommMessagesList is GET /api/v1/communication/messages?folder&...
 func (d Deps) handleCommMessagesList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

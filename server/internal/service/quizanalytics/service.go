@@ -28,13 +28,22 @@ type QuestionStat struct {
 	PctCorrect    float64 `json:"pctCorrect"`
 }
 
+// AttemptFocusStat summarizes focus-loss events for one submitted attempt.
+type AttemptFocusStat struct {
+	AttemptID             string `json:"attemptId"`
+	AttemptNumber         int32  `json:"attemptNumber"`
+	EventCount            int64  `json:"eventCount"`
+	AcademicIntegrityFlag bool   `json:"academicIntegrityFlag"`
+}
+
 // Report is the analytics payload for a quiz.
 type Report struct {
-	QuizID        uuid.UUID      `json:"quizId"`
-	NAttempts     int            `json:"nAttempts"`
-	MeanScore     *float64       `json:"meanScore"`
-	ScoreBuckets  []ScoreBucket  `json:"scoreBuckets"`
-	QuestionStats []QuestionStat `json:"questionStats"`
+	QuizID        uuid.UUID          `json:"quizId"`
+	NAttempts     int                `json:"nAttempts"`
+	MeanScore     *float64           `json:"meanScore"`
+	ScoreBuckets  []ScoreBucket      `json:"scoreBuckets"`
+	QuestionStats []QuestionStat     `json:"questionStats"`
+	FocusAttempts []AttemptFocusStat `json:"focusAttempts"`
 }
 
 // BuildReport aggregates submitted attempt data into score and question distributions.

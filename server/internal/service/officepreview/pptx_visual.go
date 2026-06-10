@@ -169,6 +169,7 @@ func renderPptxVisualSlide(zr *zip.Reader, slidePath string, slideNum int, size 
 
 	// Build placeholder geometry + default style map from layout and master.
 	phMap := buildPhMap(masterRoot, layoutRoot, theme)
+	showMasterShapes := layoutShowsMasterShapes(layoutRoot)
 
 	// Collect background (image or solid color).
 	bgURI := ""
@@ -200,18 +201,15 @@ func renderPptxVisualSlide(zr *zip.Reader, slidePath string, slideNum int, size 
 	var layers []pptxVisualLayer
 	z := 0
 
-	// 1. Background (non-placeholder) shapes from master.
-	if masterRoot != nil {
+	// 1–2. Master decorative shapes and placeholders (unless the layout hides them).
+	if masterRoot != nil && showMasterShapes {
 		bgLayers := extractBackgroundLayers(masterRoot, zr, masterPath, masterRels, theme)
 		for i := range bgLayers {
 			bgLayers[i].zIndex = z
 			z++
 		}
 		layers = append(layers, bgLayers...)
-	}
 
-	// 2. Master placeholder content not overridden by the slide or layout.
-	if masterRoot != nil {
 		covered := clonePhKeySet(slidePhKeys)
 		if layoutRoot != nil {
 			for k := range collectSlidePhKeys(layoutRoot) {
@@ -337,7 +335,7 @@ func collectSlidePhKeys(root *pptxXMLNode) map[phKey]bool {
 	}
 	out := make(map[phKey]bool)
 	walkPptxShapes(root, identityTransform, func(local string, n *pptxXMLNode, _ pptxGroupTransform) {
-		if local != "sp" {
+		if !shapeMayHavePlaceholder(local) {
 			return
 		}
 		if ph := n.findDeep("ph"); ph != nil {
@@ -345,6 +343,15 @@ func collectSlidePhKeys(root *pptxXMLNode) map[phKey]bool {
 		}
 	})
 	return out
+}
+
+func shapeMayHavePlaceholder(local string) bool {
+	switch local {
+	case "sp", "pic", "graphicFrame", "cxnSp":
+		return true
+	default:
+		return false
+	}
 }
 
 func clonePhKeySet(src map[phKey]bool) map[phKey]bool {
@@ -368,13 +375,14 @@ func extractInheritedPlaceholderLayers(root *pptxXMLNode, zr *zip.Reader, partPa
 			return
 		}
 		key := phKey{typ: ph.attr("type"), idx: ph.attr("idx")}
-		if covered[key] {
+		if phKeyIsCovered(covered, key) {
 			return
 		}
 		layer, ok := extractSpLayer(n, gt, zr, partPath, rels, theme, phMap, textStyles)
-		if ok {
-			layers = append(layers, layer)
+		if !ok || layerHasOnlyPlaceholderPromptText(layer) {
+			return
 		}
+		layers = append(layers, layer)
 	})
 	return layers
 }
@@ -547,7 +555,7 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 		phk = &k
 	}
 	if (cx <= 0 || cy <= 0) && phk != nil && phMap != nil {
-		if info, ok := phMap[*phk]; ok {
+		if info, ok := lookupPhInfo(phMap, *phk); ok {
 			left, top, cx, cy = info.left, info.top, info.cx, info.cy
 		}
 	}
@@ -614,7 +622,7 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 		}
 	}
 	if phk != nil && phMap != nil {
-		if info, ok := phMap[*phk]; ok {
+		if info, ok := lookupPhInfo(phMap, *phk); ok {
 			if fontPt == 0 && info.defaultFontPt > 0 {
 				fontPt = info.defaultFontPt
 			}
@@ -667,7 +675,7 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 		}
 	}
 
-	return pptxVisualLayer{
+	layer := pptxVisualLayer{
 		left: left, top: top, cx: cx, cy: cy,
 		rotDeg: xfrm.rotDeg, flipH: xfrm.flipH,
 		kind: "text", paraHTML: paraHTML,
@@ -676,7 +684,14 @@ func extractSpLayer(n *pptxXMLNode, gt pptxGroupTransform, zr *zip.Reader, partP
 		vert: vert, noWrap: noWrap,
 		borderRadiusPx: readShapeBorderRadiusPx(n, cx, cy),
 		spID: shapeSpID(n),
-	}, true
+	}
+	if phk != nil && layerHasOnlyPlaceholderPromptText(layer) {
+		if bg == "" && border == "" {
+			return pptxVisualLayer{}, false
+		}
+		layer.paraHTML = nil
+	}
+	return layer, true
 }
 
 // resolveShapeFill returns the background CSS for a shape, checking both

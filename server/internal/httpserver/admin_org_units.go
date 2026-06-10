@@ -58,6 +58,33 @@ func (d Deps) adminOrgOrUnitAccess(w http.ResponseWriter, r *http.Request, orgID
 	return actorID, false, true
 }
 
+// orgReadAccess allows global RBAC admin or any member of orgID to read org-scoped data.
+func (d Deps) orgReadAccess(w http.ResponseWriter, r *http.Request, orgID uuid.UUID) (actorID uuid.UUID, ok bool) {
+	actorID, ok = d.meUserID(w, r)
+	if !ok {
+		return uuid.UUID{}, false
+	}
+	ctx := r.Context()
+	ga, err := rbac.UserHasPermission(ctx, d.Pool, actorID, permGlobalRBACManage)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return uuid.UUID{}, false
+	}
+	if ga {
+		return actorID, true
+	}
+	uOrg, err := organization.OrgIDForUser(ctx, d.Pool, actorID)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify organization.")
+		return uuid.UUID{}, false
+	}
+	if uOrg != orgID {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have access to this organization.")
+		return uuid.UUID{}, false
+	}
+	return actorID, true
+}
+
 func (d Deps) unitAdminAllowedSubtree(ctx context.Context, userID, orgID uuid.UUID) ([]uuid.UUID, error) {
 	return orgunit.ListSubtreeIDsForUserOrgUnitAdmin(ctx, d.Pool, userID, orgID)
 }

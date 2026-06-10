@@ -467,6 +467,11 @@ export const courseGradingSchemeEnvelopeSchema = z.object({
     .optional(),
 })
 
+const quizQuestionChoicesSchema = z.preprocess(
+  (v) => (Array.isArray(v) ? v : []),
+  z.array(z.string()),
+)
+
 export const quizQuestionSchema = z.object({
   id: z.string(),
   prompt: z.string(),
@@ -486,7 +491,7 @@ export const quizQuestionSchema = z.object({
     'audio_response',
     'video_response',
   ]),
-  choices: z.array(z.string()),
+  choices: quizQuestionChoicesSchema,
   typeConfig: z.record(z.string(), z.unknown()).optional(),
   correctChoiceIndex: z.number().nullable(),
   multipleAnswer: z.boolean(),
@@ -504,7 +509,7 @@ const adaptiveQuizGeneratedQuestionSchema = z.object({
   questionId: z.string().uuid().optional(),
   prompt: z.string(),
   questionType: z.string(),
-  choices: z.array(z.string()),
+  choices: quizQuestionChoicesSchema,
   choiceWeights: z.array(z.number()),
   multipleAnswer: z.boolean(),
   answerWithImage: z.boolean(),

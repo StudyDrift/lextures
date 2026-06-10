@@ -16,12 +16,16 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 	acsvc "github.com/lextures/lextures/server/internal/service/accommodations"
 )
 
 func (d Deps) registerQuizDeliveryRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/start", d.handleQuizStart())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/current-question", d.handleQuizCurrentQuestion())
+	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/focus-loss", d.handleQuizFocusLossPost())
+	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/focus-loss-events", d.handleQuizFocusLossEventsGet())
+	d.registerQuizSubmitRoutes(r)
 }
 
 func (d Deps) ffAccommodationsAuditEnabled() bool {
@@ -289,5 +293,147 @@ func (d Deps) handleQuizCurrentQuestion() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
+	}
+}
+
+func (d Deps) parseQuizAttemptForViewer(
+	w http.ResponseWriter,
+	r *http.Request,
+	courseCode string,
+	viewer uuid.UUID,
+) (itemID uuid.UUID, attemptID uuid.UUID, attempt *quizattempts.QuizAttemptRow, ok bool) {
+	var err error
+	itemID, err = uuid.Parse(chi.URLParam(r, "item_id"))
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+		return itemID, attemptID, nil, false
+	}
+	attemptID, err = uuid.Parse(chi.URLParam(r, "attempt_id"))
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid attempt id.")
+		return itemID, attemptID, nil, false
+	}
+	ctx := r.Context()
+	attempt, err = quizattempts.GetAttempt(ctx, d.Pool, attemptID)
+	if err != nil || attempt == nil {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
+		return itemID, attemptID, nil, false
+	}
+	if attempt.StudentUserID != viewer || attempt.StructureItemID != itemID {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
+		return itemID, attemptID, nil, false
+	}
+	cid, err := course.GetIDByCourseCode(ctx, d.Pool, courseCode)
+	if err != nil || cid == nil || attempt.CourseID != *cid {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
+		return itemID, attemptID, nil, false
+	}
+	return itemID, attemptID, attempt, true
+}
+
+// handleQuizFocusLossPost is POST .../attempts/{attempt_id}/focus-loss — learner reports tab blur / visibility change.
+func (d Deps) handleQuizFocusLossPost() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.Header().Set("Allow", http.MethodPost)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		_, attemptID, attempt, ok := d.parseQuizAttemptForViewer(w, r, courseCode, viewer)
+		if !ok {
+			return
+		}
+		if attempt.Status != "in_progress" {
+			apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Attempt is not in progress.")
+			return
+		}
+		var body coursemodulequiz.QuizFocusLossRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		eventType := strings.TrimSpace(body.EventType)
+		if eventType == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "eventType is required.")
+			return
+		}
+		if len(eventType) > 64 {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "eventType is too long.")
+			return
+		}
+		if err := quizattempts.InsertFocusLossEvent(r.Context(), d.Pool, attemptID, eventType, body.DurationMS); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to record focus event.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// handleQuizFocusLossEventsGet is GET .../attempts/{attempt_id}/focus-loss-events — instructor review.
+func (d Deps) handleQuizFocusLossEventsGet() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+			return
+		}
+		attemptID, err := uuid.Parse(chi.URLParam(r, "attempt_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid attempt id.")
+			return
+		}
+		perm := "course:" + courseCode + ":item:create"
+		can, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, perm)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !can {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view focus-loss events.")
+			return
+		}
+		ctx := r.Context()
+		attempt, err := quizattempts.GetAttempt(ctx, d.Pool, attemptID)
+		if err != nil || attempt == nil || attempt.StructureItemID != itemID {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(ctx, d.Pool, courseCode)
+		if err != nil || cid == nil || attempt.CourseID != *cid {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
+			return
+		}
+		events, total, err := quizattempts.ListFocusLossEvents(ctx, d.Pool, attemptID, 500)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load focus-loss events.")
+			return
+		}
+		outEvents := make([]coursemodulequiz.QuizFocusLossEventAPI, 0, len(events))
+		for _, ev := range events {
+			outEvents = append(outEvents, coursemodulequiz.QuizFocusLossEventAPI{
+				ID:         ev.ID,
+				EventType:  ev.EventType,
+				DurationMS: ev.DurationMS,
+				CreatedAt:  ev.CreatedAt,
+			})
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(coursemodulequiz.QuizFocusLossEventsResponse{
+			Events: outEvents,
+			Total:  total,
+		})
 	}
 }

@@ -8,6 +8,7 @@ import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../component
 import { usePermissions } from '../../context/use-permissions'
 import {
   fetchCourse,
+  courseGradebookViewPermission,
   fetchCourseEnrollmentsList,
   fetchCourseGradingSettings,
   fetchModuleAssignment,
@@ -317,12 +318,16 @@ export default function CourseModuleAssignmentPage() {
       setDraftNeverDrop(nd)
       setDraftReplaceWithFinal(rwf)
       setAssignmentGroupPatchError(null)
-      try {
-        const grading = await fetchCourseGradingSettings(courseCode)
-        setGradingGroups(
-          grading.assignmentGroups.filter((g) => g.id.trim()).map((g) => ({ id: g.id, name: g.name })),
-        )
-      } catch {
+      if (!permLoading && allows(courseGradebookViewPermission(courseCode))) {
+        try {
+          const grading = await fetchCourseGradingSettings(courseCode)
+          setGradingGroups(
+            grading.assignmentGroups.filter((g) => g.id.trim()).map((g) => ({ id: g.id, name: g.name })),
+          )
+        } catch {
+          setGradingGroups([])
+        }
+      } else if (!permLoading) {
         setGradingGroups([])
       }
       if (allows(permCourseItemCreate(courseCode))) {
@@ -393,7 +398,7 @@ export default function CourseModuleAssignmentPage() {
     } finally {
       setLoading(false)
     }
-  }, [allows, courseCode, itemId, loadMarkups])
+  }, [allows, courseCode, itemId, loadMarkups, permLoading])
 
   useEffect(() => {
     void load()

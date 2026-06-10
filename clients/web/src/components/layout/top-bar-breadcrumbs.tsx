@@ -268,8 +268,9 @@ const MODULE_ITEM_PATTERNS = [
 ] as const
 
 function matchModuleItemRoute(pathname: string): { code: string; id: string } | null {
+  const normalized = pathname.replace(/\/attempt\/?$/, '')
   for (const p of MODULE_ITEM_PATTERNS) {
-    const m = matchPath({ path: p, end: true }, pathname)
+    const m = matchPath({ path: p, end: true }, normalized)
     if (m?.params.itemId && m.params.courseCode) {
       return { code: m.params.courseCode, id: m.params.itemId }
     }

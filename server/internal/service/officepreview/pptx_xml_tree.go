@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"encoding/xml"
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -227,12 +228,71 @@ type phKey struct {
 	idx string
 }
 
+// phKeyIsCovered reports whether a slide already defines the placeholder slot.
+// PowerPoint often omits type on p:ph and only sets idx, while the slide master
+// uses an explicit type (e.g. type="body" idx="1"); idx is the canonical slot id.
+func phKeyIsCovered(covered map[phKey]bool, key phKey) bool {
+	if covered[key] {
+		return true
+	}
+	if key.idx != "" {
+		for k := range covered {
+			if k.idx == key.idx {
+				return true
+			}
+		}
+	}
+	if key.typ != "" && key.idx == "" {
+		for k := range covered {
+			if k.typ == key.typ && k.idx == "" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// lookupPhInfo finds placeholder geometry/styles using the same slot matching rules.
+func lookupPhInfo(phMap map[phKey]phInfo, key phKey) (phInfo, bool) {
+	if info, ok := phMap[key]; ok {
+		return info, true
+	}
+	if key.idx != "" {
+		for k, info := range phMap {
+			if k.idx == key.idx {
+				return info, true
+			}
+		}
+	}
+	if key.typ != "" && key.idx == "" {
+		for k, info := range phMap {
+			if k.typ == key.typ && k.idx == "" {
+				return info, true
+			}
+		}
+	}
+	return phInfo{}, false
+}
+
 // phInfo holds the resolved position and default text style for a placeholder.
 type phInfo struct {
 	left, top, cx, cy int64
 	defaultFontPt     float64
 	defaultColor      string
 	defaultBold       bool
+}
+
+// layoutShowsMasterShapes reports whether a slide layout inherits decorative
+// shapes from its slide master (p:sldLayout/@showMasterSp, default true).
+func layoutShowsMasterShapes(layoutRoot *pptxXMLNode) bool {
+	if layoutRoot == nil {
+		return true
+	}
+	val := layoutRoot.attr("showMasterSp")
+	if val == "" {
+		return true
+	}
+	return val != "0" && !strings.EqualFold(val, "false")
 }
 
 // buildPhMap collects placeholder geometry and default text styles from layout
@@ -248,9 +308,45 @@ func buildPhMap(masterRoot, layoutRoot *pptxXMLNode, theme *pptxTheme) map[phKey
 	return m
 }
 
+// pptxPlaceholderPrompts are default editing hints PowerPoint puts in
+// layout/master placeholders; they should not appear in rendered previews.
+var pptxPlaceholderPrompts = map[string]struct{}{
+	"Click to edit Master title style":    {},
+	"Click to edit Master subtitle style": {},
+	"Click to edit Master text styles":    {},
+	"Click to add title":                  {},
+	"Click to add text":                   {},
+	"Click to add subtitle":               {},
+	"Click to add notes":                  {},
+	"Second level":                        {},
+	"Third level":                         {},
+	"Fourth level":                        {},
+	"Fifth level":                         {},
+}
+
+var htmlTagStripper = regexp.MustCompile(`<[^>]*>`)
+
+func layerHasOnlyPlaceholderPromptText(layer pptxVisualLayer) bool {
+	if len(layer.paraHTML) == 0 {
+		return false
+	}
+	found := false
+	for _, para := range layer.paraHTML {
+		text := strings.TrimSpace(htmlTagStripper.ReplaceAllString(para.html, ""))
+		if text == "" {
+			continue
+		}
+		found = true
+		if _, ok := pptxPlaceholderPrompts[text]; !ok {
+			return false
+		}
+	}
+	return found
+}
+
 func collectPhInfo(root *pptxXMLNode, theme *pptxTheme, out map[phKey]phInfo) {
 	walkPptxShapes(root, identityTransform, func(local string, n *pptxXMLNode, gt pptxGroupTransform) {
-		if local != "sp" {
+		if !shapeMayHavePlaceholder(local) {
 			return
 		}
 		ph := n.findDeep("ph")
