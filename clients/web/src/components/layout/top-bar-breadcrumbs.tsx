@@ -61,8 +61,6 @@ function settingsSubLabel(view: ReturnType<typeof settingsViewFromPathname>): st
       return 'Notifications'
     case 'roles':
       return 'Roles and Permissions'
-    case 'org-roles':
-      return 'Roles & permissions'
     case 'ai-models':
       return 'Models'
     case 'ai-prompts':

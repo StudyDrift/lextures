@@ -1,13 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FolderOpen, Globe, Lock, Plus } from 'lucide-react'
+import { ChevronRight, Eye, EyeOff, FolderOpen, Plus } from 'lucide-react'
 import {
   createPortfolio,
   listMyPortfolios,
+  patchPortfolio,
   type Portfolio,
 } from '../../lib/eportfolio-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
+import { EmptyState } from '../../components/ui/empty-state'
+
+const iconGhost =
+  'rounded-md p-2 text-slate-500 transition hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
+const iconGhostPublished =
+  'rounded-md p-2 text-indigo-600 transition hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+const iconGhostDraft =
+  'rounded-md p-2 text-slate-400 transition hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
 
 export default function MyPortfoliosPage() {
   const { ffEportfolio } = usePlatformFeatures()
@@ -58,6 +67,15 @@ export default function MyPortfoliosPage() {
     }
   }
 
+  const togglePublic = async (p: Portfolio) => {
+    try {
+      const updated = await patchPortfolio(p.id, { isPublic: !p.isPublic })
+      setPortfolios((prev) => prev.map((x) => (x.id === p.id ? updated : x)))
+    } catch {
+      setError('Failed to update portfolio visibility.')
+    }
+  }
+
   if (!ffEportfolio) {
     return (
       <LmsPage title="My Portfolios">
@@ -76,7 +94,7 @@ export default function MyPortfoliosPage() {
       actions={
         <button
           onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition"
         >
           <Plus className="h-4 w-4" aria-hidden />
           New Portfolio
@@ -85,11 +103,14 @@ export default function MyPortfoliosPage() {
     >
       <div className="space-y-4">
         {showAdd && (
-          <form onSubmit={(e) => void handleCreate(e)} className="space-y-3 rounded-lg border bg-card p-4">
-            <h2 className="font-medium">Create a Portfolio</h2>
+          <form
+            onSubmit={(e) => void handleCreate(e)}
+            className="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+          >
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Create a Portfolio</h2>
             {formError && <p className="text-sm text-destructive">{formError}</p>}
             <div>
-              <label htmlFor="pf-title" className="mb-1 block text-sm font-medium">
+              <label htmlFor="pf-title" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
                 Title *
               </label>
               <input
@@ -97,13 +118,13 @@ export default function MyPortfoliosPage() {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full rounded-md border bg-background px-3 py-1.5 text-sm"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                 placeholder="e.g. Teaching Capstone Portfolio"
                 required
               />
             </div>
             <div>
-              <label htmlFor="pf-intro" className="mb-1 block text-sm font-medium">
+              <label htmlFor="pf-intro" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-neutral-300">
                 Introduction <span className="text-xs text-muted-foreground">(optional)</span>
               </label>
               <textarea
@@ -111,15 +132,15 @@ export default function MyPortfoliosPage() {
                 rows={3}
                 value={intro}
                 onChange={(e) => setIntro(e.target.value)}
-                className="w-full rounded-md border bg-background px-3 py-1.5 text-sm"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                 placeholder="A short introduction shown at the top of your portfolio."
               />
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition disabled:opacity-50"
               >
                 {saving ? 'Creating…' : 'Create'}
               </button>
@@ -129,7 +150,7 @@ export default function MyPortfoliosPage() {
                   setShowAdd(false)
                   setFormError(null)
                 }}
-                className="rounded-md border px-3 py-1.5 text-sm"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
               >
                 Cancel
               </button>
@@ -141,54 +162,64 @@ export default function MyPortfoliosPage() {
         {loading ? (
           <div className="space-y-2" aria-hidden>
             {[0, 1, 2].map((i) => (
-              <div key={i} className="h-16 motion-safe:animate-pulse rounded-lg border bg-card" />
+              <div key={i} className="h-16 motion-safe:animate-pulse rounded-2xl border bg-card" />
             ))}
           </div>
         ) : portfolios.length === 0 ? (
-          <div className="rounded-lg border border-dashed bg-card p-8 text-center">
-            <FolderOpen className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden />
-            <p className="mt-2 font-medium">Start your portfolio</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Collect your best assignments, projects, and reflections to share with employers and graduate
-              programs.
-            </p>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="mt-4 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              <Plus className="h-4 w-4" aria-hidden />
-              New Portfolio
-            </button>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            title="Start your portfolio"
+            body="Collect your best assignments, projects, and reflections to share with employers and graduate programs."
+            primaryAction={{
+              label: 'New Portfolio',
+              onClick: () => setShowAdd(true),
+            }}
+          />
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {portfolios.map((p) => (
-              <li key={p.id}>
-                <Link
-                  to={`/portfolios/${p.id}`}
-                  className="flex items-center justify-between rounded-lg border bg-card p-4 hover:border-primary/50"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{p.title}</p>
-                    {p.introText && (
-                      <p className="truncate text-sm text-muted-foreground">{p.introText}</p>
-                    )}
+              <li key={p.id} className="group">
+                <div className="w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm dark:border-neutral-700/80 dark:bg-neutral-800/85">
+                  <div className="flex items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{p.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-neutral-400">
+                        {p.introText
+                          ? p.introText
+                          : p.isPublic
+                            ? 'Published · visible to anyone with the link'
+                            : 'Draft · private'}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-0.5">
+                      <button
+                        type="button"
+                        onClick={() => void togglePublic(p)}
+                        title={
+                          p.isPublic
+                            ? 'Published — visible to anyone with the link'
+                            : 'Draft — private; click to publish'
+                        }
+                        aria-label={p.isPublic ? 'Published' : 'Draft'}
+                        aria-pressed={p.isPublic}
+                        className={p.isPublic ? iconGhostPublished : iconGhostDraft}
+                      >
+                        {p.isPublic ? (
+                          <Eye className="h-4 w-4" aria-hidden />
+                        ) : (
+                          <EyeOff className="h-4 w-4" aria-hidden />
+                        )}
+                      </button>
+                      <Link
+                        to={`/portfolios/${p.id}`}
+                        aria-label={`Open ${p.title}`}
+                        className={iconGhost}
+                      >
+                        <ChevronRight className="h-4 w-4" aria-hidden />
+                      </Link>
+                    </div>
                   </div>
-                  <span
-                    className="ms-3 inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground"
-                    title={p.isPublic ? 'Public' : 'Private'}
-                  >
-                    {p.isPublic ? (
-                      <>
-                        <Globe className="h-3.5 w-3.5" aria-hidden /> Public
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="h-3.5 w-3.5" aria-hidden /> Private
-                      </>
-                    )}
-                  </span>
-                </Link>
+                </div>
               </li>
             ))}
           </ul>

@@ -6,12 +6,10 @@ export type SettingsNavView =
   | 'account'
   | 'notifications'
   | 'roles'
-  | 'org-roles'
   | 'lti-tools'
   | 'platform'
   | 'organizations'
   | 'org-units'
-  | 'org-roles'
   | 'terms'
   | 'org-branding'
   | 'scim-provisioning'
@@ -28,12 +26,10 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'account' ||
     raw === 'notifications' ||
     raw === 'roles' ||
-    raw === 'org-roles' ||
     raw === 'lti-tools' ||
     raw === 'platform' ||
     raw === 'organizations' ||
     raw === 'org-units' ||
-    raw === 'org-roles' ||
     raw === 'terms' ||
     raw === 'org-branding' ||
     raw === 'scim-provisioning' ||
