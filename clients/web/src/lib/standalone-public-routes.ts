@@ -8,6 +8,7 @@ const STANDALONE_PUBLIC_ROUTE_PREFIXES = [
   '/ai-disclosure',
   '/trust',
   '/p',
+  '/verify',
 ] as const
 
 export function isStandalonePublicRoute(pathname: string): boolean {
