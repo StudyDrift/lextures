@@ -22,8 +22,7 @@ import (
 
 // requireEportfolioEnabled returns false and writes 501 when the feature flag is off.
 func (d Deps) requireEportfolioEnabled(w http.ResponseWriter) bool {
-	cfg := d.effectiveConfig()
-	if !cfg.FFEportfolio && !d.Config.FFEportfolio {
+	if !d.effectiveConfig().FFEportfolio {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "ePortfolio is not enabled.")
 		return false
 	}

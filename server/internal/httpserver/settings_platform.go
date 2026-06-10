@@ -120,6 +120,8 @@ type platformSettingsJSON struct {
 	FFCourseEvaluations             bool `json:"ffCourseEvaluations"`
 	FFProctoringIntegration         bool `json:"ffProctoringIntegration"`
 	FFCoCurricularTranscript        bool `json:"ffCoCurricularTranscript"`
+	FFEportfolio                    bool `json:"ffEportfolio"`
+	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -271,6 +273,8 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFCourseEvaluations:             merged.FFCourseEvaluations,
 				FFProctoringIntegration:         merged.FFProctoringIntegration,
 				FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
+				FFEportfolio:                    merged.FFEportfolio,
+				FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -395,6 +399,8 @@ type putPlatformBody struct {
 	FFCourseEvaluations             *bool `json:"ffCourseEvaluations"`
 	FFProctoringIntegration         *bool `json:"ffProctoringIntegration"`
 	FFCoCurricularTranscript        *bool `json:"ffCoCurricularTranscript"`
+	FFEportfolio                    *bool `json:"ffEportfolio"`
+	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -680,6 +686,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcourseevaluations", body.FFCourseEvaluations, func(v bool) { wr.FFCourseEvaluations = &v })
 		setBool("ffproctoringintegration", body.FFProctoringIntegration, func(v bool) { wr.FFProctoringIntegration = &v })
 		setBool("ffcocurriculartranscript", body.FFCoCurricularTranscript, func(v bool) { wr.FFCoCurricularTranscript = &v })
+		setBool("ffeportfolio", body.FFEportfolio, func(v bool) { wr.FFEportfolio = &v })
+		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -787,6 +795,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFCourseEvaluations:             merged.FFCourseEvaluations,
 				FFProctoringIntegration:         merged.FFProctoringIntegration,
 				FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
+				FFEportfolio:                    merged.FFEportfolio,
+				FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

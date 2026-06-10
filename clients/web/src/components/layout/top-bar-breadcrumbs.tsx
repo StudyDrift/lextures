@@ -122,6 +122,13 @@ function staticCrumbsFromPathname(pathname: string, courseCode: string | null): 
     ]
   }
 
+  if (pathname === '/admin/bookstore') {
+    return [
+      { key: 'admin', label: 'Admin' },
+      { key: 'bookstore', label: 'Bookstore integration' },
+    ]
+  }
+
   if (pathname.startsWith('/settings')) {
     const view = settingsViewFromPathname(pathname)
     return [

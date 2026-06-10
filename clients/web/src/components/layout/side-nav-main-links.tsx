@@ -4,6 +4,7 @@ import {
   BookMarked,
   BookOpen,
   Calendar,
+  FolderOpen,
   Inbox,
   LayoutDashboard,
   Settings,
@@ -22,7 +23,7 @@ import { SideNavLink } from './side-nav-link'
 export function SideNavMainLinks() {
   const unreadInboxCount = useInboxUnreadCount()
   const { allows, loading: permLoading } = usePermissions()
-  const { accommodationsEngineEnabled } = usePlatformFeatures()
+  const { accommodationsEngineEnabled, ffEportfolio } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
@@ -53,6 +54,11 @@ export function SideNavMainLinks() {
       <SideNavLink to="/notebooks" icon={<BookMarked className="h-5 w-5" />}>
         My Notebooks
       </SideNavLink>
+      {ffEportfolio ? (
+        <SideNavLink to="/portfolios" icon={<FolderOpen className="h-5 w-5" />}>
+          My Portfolio
+        </SideNavLink>
+      ) : null}
       <SideNavLink to="/calendar" icon={<Calendar className="h-5 w-5" />}>
         Calendar
       </SideNavLink>
