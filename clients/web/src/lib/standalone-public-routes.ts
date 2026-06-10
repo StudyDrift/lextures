@@ -7,6 +7,7 @@ const STANDALONE_PUBLIC_ROUTE_PREFIXES = [
   '/sso-error',
   '/ai-disclosure',
   '/trust',
+  '/p',
 ] as const
 
 export function isStandalonePublicRoute(pathname: string): boolean {

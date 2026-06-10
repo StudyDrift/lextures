@@ -47,6 +47,7 @@ export type PlatformFeaturesSnapshot = {
   ffCourseEvaluations?: boolean
   ffProctoringIntegration?: boolean
   ffLibraryIntegration?: boolean
+  ffEportfolio?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -96,6 +97,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffCourseEvaluations: false,
   ffProctoringIntegration: false,
   ffLibraryIntegration: false,
+  ffEportfolio: false,
 }
 
 let loaded = false

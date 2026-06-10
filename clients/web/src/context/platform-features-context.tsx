@@ -60,6 +60,7 @@ export type PlatformFeatures = {
   ffCourseEvaluations: boolean
   ffProctoringIntegration: boolean
   ffLibraryIntegration: boolean
+  ffEportfolio: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -110,6 +111,7 @@ const defaultFeatures: PlatformFeatures = {
   ffCourseEvaluations: false,
   ffProctoringIntegration: false,
   ffLibraryIntegration: false,
+  ffEportfolio: false,
   loading: true,
   refresh: async () => {},
 }
@@ -165,6 +167,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffCourseEvaluations: false,
     ffProctoringIntegration: false,
     ffLibraryIntegration: false,
+    ffEportfolio: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -221,6 +224,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCourseEvaluations: data.ffCourseEvaluations === true,
           ffProctoringIntegration: data.ffProctoringIntegration === true,
           ffLibraryIntegration: data.ffLibraryIntegration === true,
+          ffEportfolio: data.ffEportfolio === true,
         }
         setFeatures({
           ...next,
@@ -244,6 +248,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCourseEvaluations: next.ffCourseEvaluations === true,
           ffProctoringIntegration: next.ffProctoringIntegration === true,
           ffLibraryIntegration: next.ffLibraryIntegration === true,
+          ffEportfolio: next.ffEportfolio === true,
         })
         setPlatformFeaturesSnapshot(next)
       }
