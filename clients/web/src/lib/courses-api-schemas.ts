@@ -253,6 +253,7 @@ export const courseStructureItemSchema = z
       'h5p',
       'vibe_activity',
       'library_resource',
+      'textbook_resource',
     ]),
     title: z.string(),
     parentId: z.string().nullable(),

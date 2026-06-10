@@ -28,6 +28,7 @@ import CourseModuleExternalLinkPage from './pages/lms/course-module-external-lin
 import CourseModuleH5PPage from './pages/lms/course-module-h5p-page'
 import CourseModuleLtiPage from './pages/lms/course-module-lti-page'
 import CourseModuleVibeActivityPage from './pages/lms/course-module-vibe-activity-page'
+import CourseModuleTextbookResourcePage from './pages/lms/course-module-textbook-resource-page'
 import CourseModuleQuizPage from './pages/lms/course-module-quiz-page'
 import CourseModuleQuizAttemptPage from './pages/lms/course-module-quiz-attempt-page'
 import CourseDiagnosticPage from './pages/lms/course-diagnostic-page'
@@ -82,6 +83,7 @@ import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
 import ContentFilterSettingsPage from './pages/admin/content-filter-settings'
 import StudentDemographicsPage from './pages/admin/student-demographics'
 import SisIntegrationPage from './pages/admin/sis-integration'
+import BookstoreIntegrationPage from './pages/admin/BookstoreIntegration'
 import IncompletesAdminPage from './pages/admin/incompletes'
 import CourseCatalogPage from './pages/lms/course-catalog'
 import Title1ReportPage from './pages/admin/title1-report'
@@ -181,6 +183,7 @@ export default function App() {
             <Route path="modules/h5p/:itemId" element={<CourseModuleH5PPage />} />
             <Route path="modules/lti/:itemId" element={<CourseModuleLtiPage />} />
             <Route path="modules/vibe-activity/:itemId" element={<CourseModuleVibeActivityPage />} />
+            <Route path="modules/textbook-resource/:itemId" element={<CourseModuleTextbookResourcePage />} />
             <Route path="questions" element={<CourseQuestionBankPage />} />
             <Route path="misconception-report" element={<CourseMisconceptionReportPage />} />
             <Route path="modules" element={<CourseModules />} />
@@ -230,6 +233,7 @@ export default function App() {
           <Route path="/admin/demographics/title1" element={<Title1ReportPage />} />
           <Route path="/admin/content-filter" element={<ContentFilterSettingsPage />} />
           <Route path="/admin/sis" element={<SisIntegrationPage />} />
+          <Route path="/admin/bookstore" element={<BookstoreIntegrationPage />} />
           <Route path="/admin/final-grades/status" element={<GradeSubmissionStatus />} />
           <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
           <Route path="/admin/academic-calendar" element={<AcademicCalendarAdminPage />} />

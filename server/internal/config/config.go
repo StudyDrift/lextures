@@ -90,10 +90,10 @@ type Config struct {
 	CleverClientSecret string
 	CleverDistrictID   string // optional; skips Clever school picker when set
 
-	ClassLinkSSOEnabled         bool
-	ClassLinkOIDCIssuer         string // e.g. https://launchpad.classlink.com/v2_0/sis/{tenant}
-	ClassLinkOIDCClientID       string
-	ClassLinkOIDCClientSecret   string
+	ClassLinkSSOEnabled       bool
+	ClassLinkOIDCIssuer       string // e.g. https://launchpad.classlink.com/v2_0/sis/{tenant}
+	ClassLinkOIDCClientID     string
+	ClassLinkOIDCClientSecret string
 
 	OneRosterEnabled             bool
 	OneRosterBearerFallbackToken string
@@ -324,13 +324,13 @@ type Config struct {
 	FFCoCurricularTranscript bool
 	// FFLibraryIntegration enables HE library / e-reserves integration: Leganto LTI, Alma search, EZproxy rewriting (plan 14.10).
 	FFLibraryIntegration bool
+	// FFBookstoreIntegration enables bookstore / textbook integration: VitalSource & RedShelf Inclusive Access LTI deep links (plan 14.11).
+	FFBookstoreIntegration bool
 
 	// CCRSigningSeedB64 is a base64-encoded 32-byte Ed25519 seed for CLR signing (plan 14.13).
 	CCRSigningSeedB64 string
 	// CCRInstitutionName is the issuer name on generated CLRs (plan 14.13).
 	CCRInstitutionName string
-	// FFBookstoreIntegration enables bookstore / textbook integration: VitalSource & RedShelf Inclusive Access LTI deep links (plan 14.11).
-	FFBookstoreIntegration bool
 
 	// AppEnv is the deployment environment (local, staging, production). Used for PII redaction guards (plan 10.14).
 	AppEnv string
@@ -384,8 +384,8 @@ func Load() Config {
 		OpenRouterAPIKey: firstNonEmptyTrimmed("OPENROUTER_API_KEY", "OPEN_ROUTER_API_KEY"),
 		CourseFilesRoot:  stringDefault(firstNonEmptyTrimmed("COURSE_FILES_ROOT"), "data/course-files"),
 
-		CanvasAllowedHostSuffixes: canvasAllowedHostSuffixes(),
-		PublicWebOrigin:           trimTrailingSlash(stringDefault(firstNonEmptyTrimmed("PUBLIC_WEB_ORIGIN"), "http://localhost:5173")),
+		CanvasAllowedHostSuffixes:     canvasAllowedHostSuffixes(),
+		PublicWebOrigin:               trimTrailingSlash(stringDefault(firstNonEmptyTrimmed("PUBLIC_WEB_ORIGIN"), "http://localhost:5173")),
 		BrandingMultitenantHostSuffix: strings.TrimSpace(strings.ToLower(firstNonEmptyTrimmed("BRANDING_MULTITENANT_HOST_SUFFIX"))),
 
 		PlatformSecretsKey: platformSecretsKeyFromEnv(),
@@ -400,13 +400,13 @@ func Load() Config {
 		LTIRSAPrivateKeyPEM: firstNonEmptyTrimmed("LTI_RSA_PRIVATE_KEY_PEM"),
 		LTIRSAKeyID:         stringDefault(firstNonEmptyTrimmed("LTI_RSA_KEY_ID"), "lti-key-1"),
 
-		SAMLSSOEnabled: false,
+		SAMLSSOEnabled:      false,
 		SAMLPublicBaseURL:   samlBaseURL,
 		SAMLSPEntityID:      stringDefault(firstNonEmptyTrimmed("SAML_SP_ENTITY_ID"), samlBaseURL+"/auth/saml/metadata"),
 		SAMLSPX509PEM:       firstNonEmptyTrimmedOrFile("SAML_SP_X509_PEM", "SAML_SP_X509_PATH"),
 		SAMLSPPrivateKeyPEM: firstNonEmptyTrimmedOrFile("SAML_SP_PRIVATE_KEY_PEM", "SAML_SP_PRIVATE_KEY_PATH"),
 
-		OIDCSSOEnabled: false,
+		OIDCSSOEnabled:            false,
 		OIDCPublicBaseURL:         oidcBaseURL,
 		OIDCGoogleClientID:        firstNonEmptyTrimmed("OIDC_GOOGLE_CLIENT_ID"),
 		OIDCGoogleClientSecret:    firstNonEmptyTrimmed("OIDC_GOOGLE_CLIENT_SECRET"),
@@ -419,17 +419,17 @@ func Load() Config {
 		OIDCAppleKeyID:            firstNonEmptyTrimmed("OIDC_APPLE_KEY_ID"),
 		OIDCApplePrivateKeyPEM:    firstNonEmptyTrimmedOrFile("OIDC_APPLE_PRIVATE_KEY_PEM", "OIDC_APPLE_PRIVATE_KEY_PATH"),
 
-		CleverSSOEnabled: false,
+		CleverSSOEnabled:   false,
 		CleverClientID:     firstNonEmptyTrimmed("CLEVER_CLIENT_ID", "CLEVER_OIDC_CLIENT_ID"),
 		CleverClientSecret: firstNonEmptyTrimmed("CLEVER_CLIENT_SECRET", "CLEVER_OIDC_CLIENT_SECRET"),
 		CleverDistrictID:   firstNonEmptyTrimmed("CLEVER_DISTRICT_ID"),
 
-		ClassLinkSSOEnabled: false,
+		ClassLinkSSOEnabled:       false,
 		ClassLinkOIDCIssuer:       strings.TrimRight(firstNonEmptyTrimmed("CLASSLINK_OIDC_ISSUER"), "/"),
 		ClassLinkOIDCClientID:     firstNonEmptyTrimmed("CLASSLINK_OIDC_CLIENT_ID"),
 		ClassLinkOIDCClientSecret: firstNonEmptyTrimmed("CLASSLINK_OIDC_CLIENT_SECRET"),
 
-		OneRosterEnabled: false,
+		OneRosterEnabled:             false,
 		OneRosterBearerFallbackToken: firstNonEmptyTrimmed("ONEROSTER_BEARER_FALLBACK_TOKEN"),
 		OneRosterBearerFallbackInst:  strings.TrimSpace(os.Getenv("ONEROSTER_BEARER_FALLBACK_INSTITUTION_ID")),
 
@@ -476,15 +476,15 @@ func Load() Config {
 		XAPIEmissionEnabled: boolEnv("XAPI_EMISSION_ENABLED") || boolEnv("FEATURE_XAPI_EMISSION"),
 		LRSAnonymizeActors:  boolEnv("LRS_ANONYMIZE_ACTORS"),
 
-		FERPAWorkflowEnabled: boolEnv("FERPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_FERPA_WORKFLOW"),
-		CoppaWorkflowEnabled: boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
-		GDPRModuleEnabled:    boolEnv("GDPR_MODULE_ENABLED") || boolEnv("FEATURE_GDPR_MODULE"),
-		CCPAModuleEnabled:    boolEnv("CCPA_MODULE_ENABLED") || boolEnv("FEATURE_CCPA_MODULE"),
-		DPAPortalEnabled:     boolEnv("DPA_PORTAL_ENABLED") || boolEnv("FEATURE_DPA_PORTAL"),
-		StatePrivacyEnabled:  boolEnv("STATE_PRIVACY_ENABLED") || boolEnv("FEATURE_STATE_PRIVACY"),
-		SOC2ModuleEnabled:    boolEnv("SOC2_MODULE_ENABLED") || boolEnv("FEATURE_SOC2_MODULE"),
-		IsoIsmsEnabled:       boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
-		AdminAuditLogEnabled: true, // plan 10.11 default on; disable via platform settings
+		FERPAWorkflowEnabled:            boolEnv("FERPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_FERPA_WORKFLOW"),
+		CoppaWorkflowEnabled:            boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
+		GDPRModuleEnabled:               boolEnv("GDPR_MODULE_ENABLED") || boolEnv("FEATURE_GDPR_MODULE"),
+		CCPAModuleEnabled:               boolEnv("CCPA_MODULE_ENABLED") || boolEnv("FEATURE_CCPA_MODULE"),
+		DPAPortalEnabled:                boolEnv("DPA_PORTAL_ENABLED") || boolEnv("FEATURE_DPA_PORTAL"),
+		StatePrivacyEnabled:             boolEnv("STATE_PRIVACY_ENABLED") || boolEnv("FEATURE_STATE_PRIVACY"),
+		SOC2ModuleEnabled:               boolEnv("SOC2_MODULE_ENABLED") || boolEnv("FEATURE_SOC2_MODULE"),
+		IsoIsmsEnabled:                  boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
+		AdminAuditLogEnabled:            true, // plan 10.11 default on; disable via platform settings
 		DataResidencyEnabled:            boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
 		AiDisclosureEnabled:             !boolEnv("AI_DISCLOSURE_DISABLED"),
 		SecurityDisclosureModuleEnabled: boolEnv("SECURITY_DISCLOSURE_MODULE_ENABLED") || boolEnv("FEATURE_SECURITY_DISCLOSURE"),
@@ -508,17 +508,17 @@ func Load() Config {
 		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
 		FFCoCurricularTranscript:        boolEnv("FF_CO_CURRICULAR_TRANSCRIPT"),
 		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
+		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
 
 		CCRSigningSeedB64:  strings.TrimSpace(os.Getenv("CCR_SIGNING_SEED_B64")),
 		CCRInstitutionName: strings.TrimSpace(os.Getenv("CCR_INSTITUTION_NAME")),
-		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
-		RabbitMQURL:             firstNonEmptyTrimmed("RABBITMQ_URL"),
-		CanvasImportQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
+		RabbitMQURL:           firstNonEmptyTrimmed("RABBITMQ_URL"),
+		CanvasImportQueueName: stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
 	}
 }
 

@@ -61,6 +61,7 @@ export type PlatformFeatures = {
   ffProctoringIntegration: boolean
   ffCoCurricularTranscript: boolean
   ffLibraryIntegration: boolean
+  ffBookstoreIntegration: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -112,6 +113,7 @@ const defaultFeatures: PlatformFeatures = {
   ffProctoringIntegration: false,
   ffCoCurricularTranscript: false,
   ffLibraryIntegration: false,
+  ffBookstoreIntegration: false,
   loading: true,
   refresh: async () => {},
 }
@@ -168,6 +170,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffProctoringIntegration: false,
     ffCoCurricularTranscript: false,
     ffLibraryIntegration: false,
+    ffBookstoreIntegration: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -225,6 +228,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffProctoringIntegration: data.ffProctoringIntegration === true,
           ffCoCurricularTranscript: data.ffCoCurricularTranscript === true,
           ffLibraryIntegration: data.ffLibraryIntegration === true,
+          ffBookstoreIntegration: data.ffBookstoreIntegration === true,
         }
         setFeatures({
           ...next,
@@ -249,6 +253,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffProctoringIntegration: next.ffProctoringIntegration === true,
           ffCoCurricularTranscript: next.ffCoCurricularTranscript === true,
           ffLibraryIntegration: next.ffLibraryIntegration === true,
+          ffBookstoreIntegration: next.ffBookstoreIntegration === true,
         })
         setPlatformFeaturesSnapshot(next)
       }
