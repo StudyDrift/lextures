@@ -82,14 +82,8 @@ struct NotebooksListView: View {
 
     private func notebookCard(title: String, subtitle: String, notebook: CourseNotebook?) -> some View {
         LMSCard {
-            HStack(alignment: .top, spacing: 12) {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(LexturesTheme.primary.opacity(0.12))
-                    .frame(width: 44, height: 44)
-                    .overlay(
-                        Image(systemName: "note.text")
-                            .foregroundStyle(LexturesTheme.primary)
-                    )
+            HStack(alignment: .top, spacing: 14) {
+                LMSCoverTile(key: subtitle, systemImage: "square.and.pencil", size: 48)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)

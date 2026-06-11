@@ -104,7 +104,9 @@ import EvaluationReport from './pages/admin/EvaluationReport'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import MyPortfoliosPage from './pages/lms/my-portfolios-page'
 import PortfolioEditorPage from './pages/lms/portfolio-editor-page'
+import PortfolioArtifactContentPage from './pages/lms/portfolio-artifact-content-page'
 import PublicPortfolioPage from './pages/portfolio/public-portfolio-page'
+import PublicPortfolioContentPage from './pages/portfolio/public-portfolio-content-page'
 import CliAuthPage from './pages/cli-auth'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
 
@@ -142,6 +144,7 @@ export default function App() {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/ai-disclosure" element={<AiDisclosurePage />} />
       <Route path="/trust" element={<TrustCenterPage />} />
+      <Route path="/p/:slug/content/:aid" element={<PublicPortfolioContentPage />} />
       <Route path="/p/:slug" element={<PublicPortfolioPage />} />
       <Route path="/verify/:token" element={<CcrVerifyPage />} />
       <Route element={<RequireAuth />}>
@@ -223,6 +226,7 @@ export default function App() {
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/catalog" element={<CourseCatalogPage />} />
           <Route path="/portfolios" element={<MyPortfoliosPage />} />
+          <Route path="/portfolios/:pid/content/:aid" element={<PortfolioArtifactContentPage />} />
           <Route path="/portfolios/:pid" element={<PortfolioEditorPage />} />
           <Route path="/library/:orgId" element={<LibraryCatalogPage />} />
           <Route path="/reading-log" element={<ReadingLogPage />} />

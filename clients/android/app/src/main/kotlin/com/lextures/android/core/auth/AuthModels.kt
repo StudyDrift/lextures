@@ -32,6 +32,11 @@ data class LoginRequest(
 )
 
 @Serializable
+data class RefreshRequest(
+    @SerialName("refresh_token") val refreshToken: String,
+)
+
+@Serializable
 data class SignupRequest(
     val email: String,
     val password: String,

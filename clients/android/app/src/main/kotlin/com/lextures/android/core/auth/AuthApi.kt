@@ -16,6 +16,17 @@ object AuthApi {
         }
     }
 
+    /** Exchanges a refresh token for a new access token (+ rotated refresh token). */
+    suspend fun refresh(refreshToken: String): AuthTokenResponse {
+        val body = client.encodeBody(RefreshRequest(refreshToken), RefreshRequest.serializer())
+        val (response, _) = client.request(
+            path = "/api/v1/auth/refresh",
+            method = "POST",
+            body = body,
+        )
+        return json.decodeFromString(response)
+    }
+
     suspend fun login(email: String, password: String): AuthTokenResponse {
         val body = client.encodeBody(LoginRequest(email = email, password = password), LoginRequest.serializer())
         val (response, _) = client.request(

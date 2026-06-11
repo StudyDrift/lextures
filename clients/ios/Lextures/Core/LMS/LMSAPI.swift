@@ -42,6 +42,29 @@ enum LMSAPI {
         return try decode(CourseStructureResponse.self, from: data).items
     }
 
+    /// Per-kind detail GET for a structure item; nil when the kind has no detail endpoint.
+    static func fetchItemDetail(
+        courseCode: String,
+        item: CourseStructureItem,
+        accessToken: String
+    ) async throws -> ModuleItemDetail? {
+        let resource: String?
+        switch item.kind {
+        case "content_page": resource = "content-pages"
+        case "assignment": resource = "assignments"
+        case "quiz": resource = "quizzes"
+        case "external_link": resource = "external-links"
+        default: resource = nil
+        }
+        guard let resource else { return nil }
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/\(resource)/\(encodePath(item.id))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ModuleItemDetail.self, from: data)
+    }
+
     // MARK: - Inbox (communication)
 
     static func fetchMailboxMessages(

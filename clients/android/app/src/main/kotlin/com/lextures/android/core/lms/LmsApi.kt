@@ -45,6 +45,26 @@ object LmsApi {
             decode<CourseStructureResponse>(body).items
         }
 
+    /** Per-kind detail GET for a structure item; null when the kind has no detail endpoint. */
+    suspend fun fetchItemDetail(
+        courseCode: String,
+        item: CourseStructureItem,
+        accessToken: String,
+    ): ModuleItemDetail? = withContext(Dispatchers.IO) {
+        val resource = when (item.kind) {
+            "content_page" -> "content-pages"
+            "assignment" -> "assignments"
+            "quiz" -> "quizzes"
+            "external_link" -> "external-links"
+            else -> return@withContext null
+        }
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/$resource/${encodePath(item.id)}",
+            accessToken = accessToken,
+        )
+        decode<ModuleItemDetail>(body)
+    }
+
     // Inbox (communication)
 
     suspend fun fetchMailboxMessages(

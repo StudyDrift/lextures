@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.design.coverBrush
 import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
@@ -235,15 +236,15 @@ private fun MessageRowCard(message: MailboxMessage, onClick: () -> Unit) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Box(
                 modifier = Modifier
-                    .size(38.dp)
-                    .background(LexturesColors.Primary.copy(alpha = 0.14f), CircleShape),
+                    .size(40.dp)
+                    .background(coverBrush(message.from.email), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = initials(message.from.name.ifBlank { message.from.email }),
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = LexturesColors.Primary,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
                 )
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {

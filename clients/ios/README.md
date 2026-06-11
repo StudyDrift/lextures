@@ -62,13 +62,14 @@ Prefer adding files through Xcode when possible so the project stays in sync.
 | `Lextures/Core/Design/` | Theme aligned with web auth UI |
 | `Lextures/Resources/` | Assets, Info.plist |
 | `Logo` (imageset) | Vector `logo-trimmed.svg` for in-app UI (login, splash) |
-| `LaunchLogo` (imageset) | Raster PNG for the system launch screen only |
+
+The system launch screen is a plain `LaunchBackground` color (brand paper / dark teal) so it blends
+seamlessly into the animated in-app splash — no logo flashes before SwiftUI loads.
 
 When `clients/web/public/logo-trimmed.svg` changes, refresh iOS image assets:
 
 ```bash
 cp clients/web/public/logo-trimmed.svg clients/ios/Lextures/Resources/Assets.xcassets/Logo.imageset/logo-trimmed.svg
-bash clients/ios/scripts/export-launch-logo.sh
 bash clients/ios/scripts/export-app-icon.sh
 ```
 

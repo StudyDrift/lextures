@@ -12,7 +12,7 @@ export type Portfolio = {
   updatedAt: string
 }
 
-export type ArtifactType = 'submission' | 'upload' | 'text_page' | 'url'
+export type ArtifactType = 'submission' | 'upload' | 'text_page' | 'url' | 'heading'
 
 export type Artifact = {
   id: string
@@ -31,6 +31,29 @@ export type Artifact = {
   sortOrder: number
   createdAt: string
   updatedAt: string
+}
+
+export function isPortfolioHeading(
+  a: Pick<Artifact, 'artifactType'>,
+): boolean {
+  return a.artifactType === 'heading'
+}
+
+export function isPortfolioContentPage(
+  a: Pick<Artifact, 'artifactType'>,
+): boolean {
+  return a.artifactType === 'text_page'
+}
+
+export function portfolioContentPageHref(portfolioId: string, artifactId: string): string {
+  return `/portfolios/${encodeURIComponent(portfolioId)}/content/${encodeURIComponent(artifactId)}`
+}
+
+export async function getMyPortfolioArtifact(pid: string, aid: string): Promise<Artifact> {
+  const detail = await getMyPortfolio(pid)
+  const artifact = detail.artifacts.find((a) => a.id === aid)
+  if (!artifact) throw new Error('Artifact not found.')
+  return artifact
 }
 
 export type Evaluation = {
@@ -201,4 +224,20 @@ export async function getPublicPortfolio(slug: string): Promise<PublicPortfolio 
   if (res.status === 404) return null
   if (!res.ok) throw new Error(`Failed to load portfolio (${res.status})`)
   return (await res.json()) as PublicPortfolio
+}
+
+export function publicPortfolioContentPageHref(slug: string, artifactId: string): string {
+  return `/p/${encodeURIComponent(slug)}/content/${encodeURIComponent(artifactId)}`
+}
+
+/** Public content page within a shared portfolio; null when not found or not a public content page. */
+export async function getPublicPortfolioContentPage(
+  slug: string,
+  aid: string,
+): Promise<{ portfolio: PublicPortfolio; artifact: Artifact } | null> {
+  const portfolio = await getPublicPortfolio(slug)
+  if (!portfolio) return null
+  const artifact = portfolio.artifacts.find((a) => a.id === aid)
+  if (!artifact || !isPortfolioContentPage(artifact)) return null
+  return { portfolio, artifact }
 }

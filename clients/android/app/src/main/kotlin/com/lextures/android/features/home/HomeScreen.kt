@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -28,7 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.design.accentColor
+import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.sceneBackground
+import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.features.courses.CoursesTab
 import com.lextures.android.features.dashboard.DashboardTab
@@ -36,9 +39,9 @@ import com.lextures.android.features.inbox.InboxTab
 import com.lextures.android.features.notebooks.NotebooksTab
 
 private enum class HomeTab(val label: String, val icon: ImageVector) {
-    Dashboard("Dashboard", Icons.Default.Dashboard),
+    Dashboard("Home", Icons.Default.Home),
     Courses("Courses", Icons.AutoMirrored.Filled.MenuBook),
-    Notebooks("Notebooks", Icons.Default.Description),
+    Notebooks("Notebooks", Icons.Default.EditNote),
     Inbox("Inbox", Icons.Default.Inbox),
 }
 
@@ -58,19 +61,25 @@ fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
         modifier = modifier,
         containerColor = sceneBackground(),
         bottomBar = {
-            NavigationBar {
+            NavigationBar(containerColor = cardBackground()) {
                 HomeTab.entries.forEach { tab ->
                     NavigationBarItem(
                         selected = selectedTab == tab.name,
                         onClick = { selectedTab = tab.name },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = LexturesColors.Primary,
-                            selectedTextColor = LexturesColors.Primary,
-                            indicatorColor = LexturesColors.Primary.copy(alpha = 0.14f),
+                            selectedIconColor = accentColor(),
+                            selectedTextColor = accentColor(),
+                            unselectedIconColor = textSecondary(),
+                            unselectedTextColor = textSecondary(),
+                            indicatorColor = LexturesColors.BrandTeal.copy(alpha = 0.18f),
                         ),
                         icon = {
                             if (tab == HomeTab.Inbox && unreadInbox > 0) {
-                                BadgedBox(badge = { Badge { Text("$unreadInbox") } }) {
+                                BadgedBox(
+                                    badge = {
+                                        Badge(containerColor = LexturesColors.Coral) { Text("$unreadInbox") }
+                                    },
+                                ) {
                                     Icon(tab.icon, contentDescription = tab.label)
                                 }
                             } else {

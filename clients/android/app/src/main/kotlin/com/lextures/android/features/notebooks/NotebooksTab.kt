@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,7 +36,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
-import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.CourseSummary
@@ -44,6 +45,7 @@ import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.notebook.CourseNotebook
 import com.lextures.android.core.notebook.NotebookStore
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsSectionHeader
 
@@ -104,8 +106,7 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = "Notebooks",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = LexturesType.display(24),
             color = textPrimary(),
             modifier = Modifier.padding(start = 16.dp, top = 12.dp),
         )
@@ -158,21 +159,8 @@ private fun NotebookCard(
     onClick: () -> Unit,
 ) {
     LmsCard(onClick = onClick) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(LexturesColors.Primary.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.Default.Description,
-                    contentDescription = null,
-                    tint = LexturesColors.Primary,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            LmsCoverTile(key = subtitle, icon = Icons.Default.EditNote, size = 48)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = title,

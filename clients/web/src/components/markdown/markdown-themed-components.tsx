@@ -33,6 +33,21 @@ export function createThemedMarkdownComponents(
         {children}
       </h3>
     ),
+    h4: ({ children }) => (
+      <h4 className={c.h3} style={o.h3}>
+        {children}
+      </h4>
+    ),
+    h5: ({ children }) => (
+      <h5 className={c.h3} style={o.h3}>
+        {children}
+      </h5>
+    ),
+    h6: ({ children }) => (
+      <h6 className={c.h3} style={o.h3}>
+        {children}
+      </h6>
+    ),
     p: ({ children }) => (
       <p className={c.p} style={o.p}>
         {children}

@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,8 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -57,8 +54,8 @@ import coil.request.ImageRequest
 @Composable
 fun PublicAuthBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     val dark = isDarkTheme()
-    val tealGlow = LexturesColors.Primary.copy(alpha = if (dark) 0.07f else 0.055f)
-    val grayGlow = Color.Gray.copy(alpha = if (dark) 0.04f else 0.05f)
+    val tealGlow = LexturesColors.BrandTeal.copy(alpha = if (dark) 0.12f else 0.18f)
+    val coralGlow = LexturesColors.BrandCoral.copy(alpha = if (dark) 0.07f else 0.10f)
 
     Box(
         modifier = modifier
@@ -71,7 +68,7 @@ fun PublicAuthBackground(modifier: Modifier = Modifier, content: @Composable () 
                 .background(
                     Brush.radialGradient(
                         colors = listOf(tealGlow, Color.Transparent),
-                        radius = 900f,
+                        radius = 950f,
                     ),
                 ),
         )
@@ -80,8 +77,8 @@ fun PublicAuthBackground(modifier: Modifier = Modifier, content: @Composable () 
                 .fillMaxSize()
                 .background(
                     Brush.radialGradient(
-                        colors = listOf(grayGlow, Color.Transparent),
-                        radius = 800f,
+                        colors = listOf(coralGlow, Color.Transparent),
+                        radius = 850f,
                     ),
                 ),
         )
@@ -119,18 +116,20 @@ fun AuthCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val shape = RoundedCornerShape(12.dp)
+    val shape = RoundedCornerShape(22.dp)
     Column(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = if (isDarkTheme()) 0.dp else 2.dp,
+                elevation = if (isDarkTheme()) 0.dp else 6.dp,
                 shape = shape,
                 clip = false,
+                ambientColor = Color(0xFF3A2E18).copy(alpha = 0.3f),
+                spotColor = Color(0xFF3A2E18).copy(alpha = 0.3f),
             )
             .clip(shape)
             .background(cardBackground())
-            .border(1.dp, fieldBorder().copy(alpha = 0.9f), shape)
+            .border(1.dp, fieldBorder().copy(alpha = if (isDarkTheme()) 0.9f else 0.5f), shape)
             .padding(28.dp),
     ) {
         content()
@@ -169,9 +168,9 @@ fun AuthTextField(
     capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
 ) {
     var focused by remember { mutableStateOf(false) }
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(12.dp)
     val borderColor = if (focused) LexturesColors.Primary else fieldBorder()
-    val fieldBackground = if (isDarkTheme()) Color(0xFF0D0D0D) else Color.White
+    val fieldBackground = if (isDarkTheme()) Color(0xFF141F1D) else LexturesColors.SceneBackground.copy(alpha = 0.6f)
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -234,20 +233,27 @@ fun AuthPrimaryButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    Button(
-        onClick = onClick,
-        enabled = enabled,
+    val shape = RoundedCornerShape(14.dp)
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(44.dp),
-        shape = RoundedCornerShape(8.dp),
-        contentPadding = PaddingValues(vertical = 11.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = LexturesColors.Primary,
-            contentColor = Color.White,
-            disabledContainerColor = LexturesColors.Primary.copy(alpha = 0.55f),
-            disabledContentColor = Color.White.copy(alpha = 0.92f),
-        ),
+            .height(50.dp)
+            .shadow(
+                elevation = if (enabled) 8.dp else 0.dp,
+                shape = shape,
+                clip = false,
+                ambientColor = LexturesColors.Primary.copy(alpha = 0.5f),
+                spotColor = LexturesColors.Primary.copy(alpha = 0.5f),
+            )
+            .clip(shape)
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(LexturesColors.Primary, Color(0xFF17897B)),
+                ),
+                alpha = if (enabled) 1f else 0.55f,
+            )
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,

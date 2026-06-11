@@ -388,7 +388,7 @@ func (d Deps) handleCreateArtifact() http.HandlerFunc {
 			return
 		}
 		switch body.ArtifactType {
-		case "submission", "upload", "text_page", "url":
+		case "submission", "upload", "text_page", "url", "heading":
 		default:
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid artifactType.")
 			return

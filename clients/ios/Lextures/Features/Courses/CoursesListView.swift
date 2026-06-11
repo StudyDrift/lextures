@@ -88,22 +88,17 @@ struct CourseRowCard: View {
 
     var body: some View {
         LMSCard {
-            HStack(alignment: .top, spacing: 12) {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .fill(LexturesTheme.primary.opacity(0.12))
-                    .frame(width: 44, height: 44)
-                    .overlay(
-                        Image(systemName: "book")
-                            .foregroundStyle(LexturesTheme.primary)
-                    )
+            HStack(alignment: .top, spacing: 14) {
+                LMSCoverTile(key: course.courseCode, systemImage: "book.fill", size: 52)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(course.displayTitle)
-                        .font(.subheadline.weight(.semibold))
+                        .font(LexturesTheme.displayFont(16))
                         .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    Text(course.courseCode)
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    Text(course.courseCode.uppercased())
+                        .font(.caption2.weight(.semibold))
+                        .tracking(0.8)
+                        .foregroundStyle(LexturesTheme.accent(for: colorScheme))
                     if !course.description.isEmpty {
                         Text(course.description)
                             .font(.caption)
@@ -115,9 +110,9 @@ struct CourseRowCard: View {
                 Spacer(minLength: 0)
 
                 Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    .padding(.top, 14)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
+                    .padding(.top, 18)
             }
         }
     }

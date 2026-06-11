@@ -1,5 +1,8 @@
 import { registerServiceWorker } from './lib/push-notifications'
 import './i18n'
+import { applyUiTheme, readStoredUiTheme } from './lib/ui-theme'
+
+applyUiTheme(readStoredUiTheme())
 
 void registerServiceWorker()
 

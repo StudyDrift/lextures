@@ -196,12 +196,12 @@ struct MessageRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Circle()
-                .fill(LexturesTheme.primary.opacity(0.14))
-                .frame(width: 38, height: 38)
+                .fill(LexturesTheme.coverGradient(for: message.from.email))
+                .frame(width: 40, height: 40)
                 .overlay(
                     Text(initials(message.from.name.isEmpty ? message.from.email : message.from.name))
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.primary)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
                 )
 
             VStack(alignment: .leading, spacing: 3) {

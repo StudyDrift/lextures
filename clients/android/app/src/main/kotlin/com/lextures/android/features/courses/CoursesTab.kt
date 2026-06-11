@@ -37,11 +37,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.design.LexturesType
+import com.lextures.android.core.design.accentColor
+import com.lextures.android.core.design.cardBackground
+import com.lextures.android.core.design.fieldBorder
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 
@@ -94,8 +99,7 @@ fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = "Courses",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.SemiBold,
+            style = LexturesType.display(24),
             color = textPrimary(),
             modifier = Modifier.padding(start = 16.dp, top = 12.dp),
         )
@@ -109,9 +113,12 @@ fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
             placeholder = { Text("Search courses", color = textSecondary()) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = textSecondary()) },
             singleLine = true,
-            shape = RoundedCornerShape(10.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = LexturesColors.Primary,
+                unfocusedBorderColor = fieldBorder(),
+                focusedContainerColor = cardBackground(),
+                unfocusedContainerColor = cardBackground(),
             ),
         )
 
@@ -155,29 +162,21 @@ fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
 @Composable
 fun CourseRowCard(course: CourseSummary, onClick: () -> Unit, modifier: Modifier = Modifier) {
     LmsCard(modifier = modifier, onClick = onClick) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(LexturesColors.Primary.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.MenuBook,
-                    contentDescription = null,
-                    tint = LexturesColors.Primary,
-                    modifier = Modifier.size(22.dp),
-                )
-            }
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            LmsCoverTile(key = course.courseCode, icon = Icons.AutoMirrored.Filled.MenuBook, size = 52)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     text = course.displayTitle,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
+                    style = LexturesType.display(16),
                     color = textPrimary(),
                 )
-                Text(text = course.courseCode, fontSize = 12.sp, color = textSecondary())
+                Text(
+                    text = course.courseCode.uppercase(),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.8.sp,
+                    color = accentColor(),
+                )
                 if (course.description.isNotEmpty()) {
                     Text(
                         text = course.description,

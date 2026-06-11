@@ -57,6 +57,47 @@ struct CourseStructureResponse: Decodable {
     var items: [CourseStructureItem]
 }
 
+/// Tolerant union of the per-kind item GET responses
+/// (`/content-pages/{id}`, `/assignments/{id}`, `/quizzes/{id}`, `/external-links/{id}`).
+struct ModuleItemDetail: Decodable {
+    var title: String?
+    var markdown: String?
+    var dueAt: String?
+    var availableFrom: String?
+    var availableUntil: String?
+    var updatedAt: String?
+    var pointsWorth: Int?
+
+    // Quiz settings (the web "preview box")
+    var unlimitedAttempts: Bool?
+    var maxAttempts: Int?
+    var gradeAttemptPolicy: String?
+    var oneQuestionAtATime: Bool?
+    var shuffleQuestions: Bool?
+    var lockdownMode: String?
+    var adaptiveDeliveryMode: String?
+    var timeLimitMinutes: Int?
+    var passingScorePercent: Int?
+    var questions: [QuestionStub]?
+
+    // Assignment submission settings
+    var submissionAllowText: Bool?
+    var submissionAllowFileUpload: Bool?
+    var submissionAllowUrl: Bool?
+    var lateSubmissionPolicy: String?
+    var latePenaltyPercent: Int?
+
+    // External link
+    var url: String?
+    var provider: String?
+
+    struct QuestionStub: Decodable {
+        var id: String?
+    }
+
+    var questionCount: Int { questions?.count ?? 0 }
+}
+
 /// Mirrors web `MailboxMessage` (snake_case JSON from the communication API).
 struct MailboxParty: Decodable, Hashable {
     var name: String
