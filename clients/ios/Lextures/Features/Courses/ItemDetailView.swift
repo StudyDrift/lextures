@@ -84,8 +84,8 @@ struct ItemDetailView: View {
     }
 
     private var pointsValue: Int? {
-        if let p = detail?.pointsWorth { return p }
-        if let p = item.pointsWorth { return Int(p) }
+        if let pts = detail?.pointsWorth { return pts }
+        if let pts = item.pointsWorth { return Int(pts) }
         return nil
     }
 
