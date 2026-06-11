@@ -75,6 +75,18 @@ class NotebookStore(context: Context, accessToken: String?) {
         writeAll(all)
     }
 
+    fun exists(courseCode: String): Boolean = readAll().containsKey(courseCode)
+
+    /** Every stored course code, including the global key. */
+    fun allCourseCodes(): List<String> = readAll().keys.toList()
+
+    /** Write a server copy verbatim — keeps the server `updatedAt` so last-write-wins stays stable. */
+    fun saveFromServer(courseCode: String, notebook: CourseNotebook) {
+        val all = readAll().toMutableMap()
+        all[courseCode] = notebook
+        writeAll(all)
+    }
+
     /** Course-scoped notebooks with content (excludes the global key). */
     fun listCourseNotebooks(): Map<String, CourseNotebook> =
         readAll().filter { (key, notebook) -> key != GLOBAL_KEY && notebook.previewText.isNotEmpty() }

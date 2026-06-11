@@ -42,6 +42,7 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { toast, toastSaveOk } from '../../lib/lms-toast'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { EnrollmentAvatar } from '../../components/enrollment/enrollment-avatar'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import {
   patchEnrollmentState,
@@ -52,6 +53,7 @@ export type CourseEnrollment = {
   id: string
   userId: string
   displayName: string | null
+  avatarUrl?: string | null
   role: string
   roleDisplay?: string | null
   lastCourseAccessAt?: string | null
@@ -305,6 +307,12 @@ export default function CourseEnrollments() {
             : typeof o.display_name === 'string'
               ? o.display_name
               : null
+        const avatarUrl =
+          typeof o.avatarUrl === 'string'
+            ? o.avatarUrl
+            : typeof o.avatar_url === 'string'
+              ? o.avatar_url
+              : null
         const role = typeof o.role === 'string' ? o.role : 'student'
         const roleDisplay =
           typeof o.roleDisplay === 'string'
@@ -385,6 +393,7 @@ export default function CourseEnrollments() {
           id,
           userId,
           displayName,
+          avatarUrl,
           role,
           roleDisplay,
           lastCourseAccessAt,
@@ -1039,6 +1048,11 @@ export default function CourseEnrollments() {
                   >
                     <td className="px-4 py-3 font-medium text-slate-900">
                       <div className="flex flex-wrap items-center gap-2">
+                        <EnrollmentAvatar
+                          userId={e.userId}
+                          name={e.displayName?.trim() || '—'}
+                          avatarUrl={e.avatarUrl}
+                        />
                         {studentProgressFeatureEnabled() &&
                         courseCode &&
                         (er === 'student' || er === 'learner') ? (

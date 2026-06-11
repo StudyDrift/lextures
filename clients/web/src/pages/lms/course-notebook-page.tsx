@@ -19,6 +19,7 @@ import {
 } from '../../lib/course-notebook-tree'
 import { fetchCourse, uploadCourseFile } from '../../lib/courses-api'
 import { syncNotebookTasksFromMarkdown } from '../../lib/notebook-task-sync'
+import { pullStudentNotebooks } from '../../lib/student-notebook-sync'
 import {
   loadCourseNotebook,
   saveCourseNotebookStore,
@@ -82,6 +83,24 @@ export default function CourseNotebookPage() {
     const page = next.pages.find((p) => p.id === next.activePageId)
     setHeaderTitleDraft(page?.title ?? '')
   }, [courseCode, searchParams])
+
+  useEffect(() => {
+    if (!courseCode) return
+    let cancelled = false
+    const before = loadCourseNotebook(courseCode).updatedAt
+    void pullStudentNotebooks().then(() => {
+      if (cancelled) return
+      const pulled = loadCourseNotebook(courseCode)
+      if (pulled.updatedAt !== before) {
+        setData(pulled)
+        const page = pulled.pages.find((p) => p.id === pulled.activePageId)
+        setHeaderTitleDraft(page?.title ?? '')
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
 
   useEffect(() => {
     if (!courseCode) return

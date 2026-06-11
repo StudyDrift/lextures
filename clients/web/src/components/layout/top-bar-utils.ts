@@ -6,6 +6,28 @@ export type TopBarAccountProfile = {
   avatarUrl?: string | null
 }
 
+function readOptionalString(value: unknown): string | null {
+  return typeof value === 'string' ? value : null
+}
+
+/** Normalizes GET/PATCH /api/v1/settings/account JSON for the top bar. */
+export function parseAccountProfile(raw: unknown): TopBarAccountProfile | null {
+  if (!raw || typeof raw !== 'object') return null
+  const o = raw as Record<string, unknown>
+  const email = readOptionalString(o.email)?.trim() ?? ''
+  if (!email) return null
+  const avatarCandidate =
+    readOptionalString(o.avatarUrl) ?? readOptionalString(o.avatar_url) ?? ''
+  const avatarUrl = avatarCandidate.trim() || null
+  return {
+    email,
+    displayName: readOptionalString(o.displayName) ?? readOptionalString(o.display_name),
+    firstName: readOptionalString(o.firstName) ?? readOptionalString(o.first_name),
+    lastName: readOptionalString(o.lastName) ?? readOptionalString(o.last_name),
+    avatarUrl,
+  }
+}
+
 export function profileName(profile: TopBarAccountProfile | null): string {
   if (!profile) return 'Profile'
   const first = profile.firstName?.trim() ?? ''

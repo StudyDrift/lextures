@@ -92,8 +92,8 @@ struct NotebooksListView: View {
                     Text(subtitle)
                         .font(.caption)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    if let notebook, !notebook.previewText.isEmpty {
-                        Text(notebook.previewText)
+                    if let notebook, case let preview = NotebookMarkdown.previewText(notebook.previewText), !preview.isEmpty {
+                        Text(preview)
                             .font(.caption)
                             .lineLimit(2)
                             .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
@@ -125,6 +125,10 @@ struct NotebooksListView: View {
         guard let token = session.accessToken else { return }
         if loadedOnce && !force { return }
         loadedOnce = true
+        // Pull server notebooks first so web-created ones appear in the list.
+        if await NotebookSync.pull(store: store, accessToken: token) {
+            savedNotebooks = store.listCourseNotebooks()
+        }
         courses = (try? await LMSAPI.fetchCourses(accessToken: token)) ?? courses
     }
 }

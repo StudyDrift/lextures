@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { initialsFromName, profileName, shortcutHint } from '../top-bar-utils'
+import { initialsFromName, parseAccountProfile, profileName, shortcutHint } from '../top-bar-utils'
 
 describe('profileName', () => {
   it('returns Profile when profile is null', () => {
@@ -24,6 +24,34 @@ describe('profileName', () => {
       }),
     ).toBe('Display')
     expect(profileName({ email: 'e@mail.test' })).toBe('e@mail.test')
+  })
+})
+
+describe('parseAccountProfile', () => {
+  it('reads avatarUrl and snake_case avatar_url', () => {
+    expect(
+      parseAccountProfile({
+        email: 'a@b.com',
+        firstName: 'Ada',
+        avatarUrl: 'https://example.com/a.png',
+      }),
+    ).toEqual({
+      email: 'a@b.com',
+      displayName: null,
+      firstName: 'Ada',
+      lastName: null,
+      avatarUrl: 'https://example.com/a.png',
+    })
+    expect(
+      parseAccountProfile({
+        email: 'a@b.com',
+        avatar_url: ' data:image/png;base64,abc ',
+      })?.avatarUrl,
+    ).toBe('data:image/png;base64,abc')
+  })
+
+  it('returns null for missing email', () => {
+    expect(parseAccountProfile({ avatarUrl: 'https://x.test/a.png' })).toBeNull()
   })
 })
 

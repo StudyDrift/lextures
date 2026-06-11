@@ -25,6 +25,7 @@ import {
   courseGradebookViewPermission,
   fetchCourse,
   fetchCourseGradebookGrid,
+  fetchCourseGradingBacklog,
   fetchCourseMyGrades,
   fetchCourseStructure,
   fetchLearnerRecommendations,
@@ -52,6 +53,10 @@ import {
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
 import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import {
+  GradingBacklogList,
+  type GradingBacklogItem,
+} from '../../components/dashboard/grading-backlog-list'
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import type { EnrollmentState } from '../../lib/enrollment-state-api'
@@ -239,6 +244,7 @@ export default function Dashboard() {
     {
       course: CoursePublic
       emptyGradeCells: number | null
+      gradingBacklog: GradingBacklogItem[]
     }[]
   >([])
 
@@ -406,6 +412,7 @@ export default function Dashboard() {
         const tRows = await mapPool(staffCourses, 3, async (course) => {
           const code = course.courseCode
           let emptyGradeCells: number | null = null
+          let gradingBacklog: GradingBacklogItem[] = []
           if (allows(courseGradebookViewPermission(code))) {
             try {
               const grid = await fetchCourseGradebookGrid(code)
@@ -413,8 +420,20 @@ export default function Dashboard() {
             } catch {
               emptyGradeCells = null
             }
+            try {
+              const backlog = await fetchCourseGradingBacklog(code)
+              gradingBacklog = backlog.map((item) => ({
+                assignmentId: item.assignmentId,
+                assignmentTitle: item.assignmentTitle,
+                ungradedCount: item.ungradedCount,
+                courseCode: code,
+                courseTitle: course.title,
+              }))
+            } catch {
+              gradingBacklog = []
+            }
           }
-          return { course, emptyGradeCells }
+          return { course, emptyGradeCells, gradingBacklog }
         })
 
         if (detailGenRef.current !== gen) return
@@ -517,6 +536,14 @@ export default function Dashboard() {
 
   const anyStudentExperience = studentRows.length > 0
   const anyStaffExperience = staffRows.length > 0
+
+  const allGradingBacklog = useMemo(
+    () =>
+      staffRows
+        .flatMap((row) => row.gradingBacklog)
+        .sort((a, b) => b.ungradedCount - a.ungradedCount),
+    [staffRows],
+  )
 
   const showLoading = catalog === null || courses === null
 
@@ -1109,7 +1136,21 @@ export default function Dashboard() {
               </div>
 
               {!collapsedSections['teaching-overview'] && (
-                <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <>
+                  {allGradingBacklog.length > 0 ? (
+                    <div className="mt-4 rounded-2xl border border-amber-100 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
+                      <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+                        Needs grading
+                      </h3>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                        Open SpeedGrader or grade submissions for assignments with ungraded work.
+                      </p>
+                      <div className="mt-3">
+                        <GradingBacklogList items={allGradingBacklog} showCourse />
+                      </div>
+                    </div>
+                  ) : null}
+                  <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {staffRows.map((row) => {
                     const base = `/courses/${encodeURIComponent(row.course.courseCode)}`
                     return (
@@ -1128,6 +1169,20 @@ export default function Dashboard() {
                             {courseSectionSubtitle(row.course)}
                           </p>
                         ) : null}
+                        {row.gradingBacklog.length > 0 ? (
+                          <div className="mt-4">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                              Ungraded submissions
+                            </p>
+                            <div className="mt-2">
+                              <GradingBacklogList items={row.gradingBacklog} />
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
+                            No ungraded assignment submissions right now.
+                          </p>
+                        )}
                         <dl className="mt-4 space-y-3 text-sm">
                           <div className="flex justify-between gap-3">
                             <dt className="text-slate-500 dark:text-neutral-400">Gradebook gaps</dt>
@@ -1140,13 +1195,6 @@ export default function Dashboard() {
                                   <span className="font-normal text-slate-500 dark:text-neutral-400">empty cells</span>
                                 </>
                               )}
-                            </dd>
-                          </div>
-                          <div className="flex justify-between gap-3">
-                            <dt className="text-slate-500 dark:text-neutral-400">Quizzes in progress</dt>
-                            <dd className="text-end text-xs text-slate-500 dark:text-neutral-400">
-                              Live attempts appear in the gradebook after students submit or auto-submit. Open the quiz
-                              or gradebook to review.
                             </dd>
                           </div>
                         </dl>
@@ -1168,6 +1216,7 @@ export default function Dashboard() {
                     )
                   })}
                 </div>
+                </>
               )}
             </section>
           )}

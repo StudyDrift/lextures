@@ -67,6 +67,37 @@ test.describe('Student progress', () => {
     await expect(page.getByText(noteText)).toBeVisible({ timeout: 8000 })
   })
 
+  test('instructor opens student report from course reports page', async ({
+    coursePage: page,
+    seededCourse,
+  }) => {
+    const enrollmentId = await studentEnrollmentId(
+      seededCourse.instructorToken,
+      seededCourse.courseCode,
+    )
+    const apiProgress = `${apiBase}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/enrollments/${encodeURIComponent(enrollmentId)}/progress`
+    const probe = await page.request.get(apiProgress, {
+      headers: { Authorization: `Bearer ${seededCourse.instructorToken}` },
+    })
+    if (probe.status() === 404) {
+      test.skip(true, 'FEATURE_STUDENT_PROGRESS is disabled on the API')
+    }
+    expect(probe.ok()).toBeTruthy()
+
+    await page.goto(`/courses/${seededCourse.courseCode}/reports`)
+    await expect(page.getByRole('heading', { name: /^reports$/i })).toBeVisible()
+    await page.getByRole('link', { name: /e2e student/i }).first().click()
+
+    await expect(page).toHaveURL(
+      new RegExp(
+        `/courses/${seededCourse.courseCode}/students/${enrollmentId}/progress`,
+      ),
+    )
+    await expect(page.getByText(/assignments submitted|modules viewed/i).first()).toBeVisible({
+      timeout: 15000,
+    })
+  })
+
   test('instructor opens student report from enrollments roster', async ({
     coursePage: page,
     seededCourse,

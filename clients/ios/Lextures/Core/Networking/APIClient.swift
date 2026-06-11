@@ -3,8 +3,8 @@ import Foundation
 struct APIClient {
     let session: URLSession
 
-    init(session: URLSession = .shared) {
-        self.session = session
+    init(session: URLSession? = nil) {
+        self.session = session ?? NetworkBootstrap.makeSession()
     }
 
     func request(

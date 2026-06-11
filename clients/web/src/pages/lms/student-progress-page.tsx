@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { EnrollmentAvatar } from '../../components/enrollment/enrollment-avatar'
 import { LmsPage } from './lms-page'
 import { fetchCourse } from '../../lib/courses-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
@@ -289,6 +290,7 @@ export default function StudentProgressPage() {
   }
 
   const title = isSelf ? studentProgressI18n.myProgressTitle : studentProgressI18n.progressTitle
+  const pageTitle = data?.summary.studentDisplayName ?? title
 
   if (featuresLoading) {
     return (
@@ -336,7 +338,22 @@ export default function StudentProgressPage() {
 
   return (
     <LmsPage
-      title={data?.summary.studentDisplayName ?? title}
+      title={pageTitle}
+      titleContent={
+        data ? (
+          <div className="flex items-center gap-3">
+            <EnrollmentAvatar
+              userId={data.summary.studentUserId}
+              name={data.summary.studentDisplayName}
+              avatarUrl={data.summary.studentAvatarUrl}
+              size="md"
+            />
+            <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
+              {pageTitle}
+            </h1>
+          </div>
+        ) : undefined
+      }
       description={
         isSelf
           ? 'Track your assignment completion, quiz performance, and recent activity in this course.'

@@ -2,6 +2,7 @@ import { useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
   Award,
+  BarChart3,
   BookMarked,
   Calendar,
   ClipboardList,
@@ -28,6 +29,7 @@ import {
 import { atRiskFeatureEnabled, atRiskI18n } from '../../lib/at-risk-i18n'
 import {
   outcomesReportFeatureEnabled,
+  studentProgressFeatureEnabled,
   xapiEmissionFeatureEnabled,
 } from '../../lib/platform-features'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
@@ -178,6 +180,11 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
       {canViewGradebook && (
         <SideNavLink to={`${base}/gradebook`} icon={<ClipboardList className="h-5 w-5" />}>
           Gradebook
+        </SideNavLink>
+      )}
+      {canViewGradebook && studentProgressFeatureEnabled() && (
+        <SideNavLink to={`${base}/reports`} icon={<BarChart3 className="h-5 w-5" />}>
+          Reports
         </SideNavLink>
       )}
       {canViewGradebook && atRiskFeatureEnabled() && (

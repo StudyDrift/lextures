@@ -6,13 +6,14 @@ import { AiTutorMenu } from '../tutor-panel'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { setCourseViewAs, useCourseViewAs } from '../../lib/course-view-as'
 import { apiUrl, authorizedFetch } from '../../lib/api'
+import { getJwtSubject } from '../../lib/auth'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
-
+import { EnrollmentAvatar } from '../enrollment/enrollment-avatar'
 
 import { clearSessionTokens, getRefreshToken } from '../../lib/session-tokens'
 import { applyUiTheme } from '../../lib/ui-theme'
 import {
-  initialsFromName,
+  parseAccountProfile,
   profileName,
   type TopBarAccountProfile,
 } from './top-bar-utils'
@@ -38,8 +39,7 @@ function UserMenu() {
         const res = await authorizedFetch('/api/v1/settings/account')
         const raw: unknown = await res.json().catch(() => ({}))
         if (!res.ok || cancelled) return
-        const data = raw as TopBarAccountProfile
-        setProfile(data)
+        setProfile(parseAccountProfile(raw))
       } catch {
         if (!cancelled) setProfile(null)
       }
@@ -91,7 +91,7 @@ function UserMenu() {
   }
 
   const name = profileName(profile)
-  const initials = initialsFromName(name)
+  const viewerId = getJwtSubject() ?? profile?.email ?? 'viewer'
 
   return (
     <div ref={rootRef} className="relative">
@@ -104,17 +104,12 @@ function UserMenu() {
         onClick={() => setOpen((o) => !o)}
         className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white py-1.5 ps-1.5 pe-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 focus:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-700"
       >
-        {profile?.avatarUrl ? (
-          <img
-            src={profile.avatarUrl}
-            alt=""
-            className="h-8 w-8 rounded-full border border-slate-200 object-cover dark:border-neutral-600"
-          />
-        ) : (
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700 dark:bg-neutral-700 dark:text-neutral-100">
-            {initials}
-          </span>
-        )}
+        <EnrollmentAvatar
+          userId={viewerId}
+          name={name}
+          avatarUrl={profile?.avatarUrl}
+          showPreview={false}
+        />
         <span className="hidden max-w-[10rem] truncate sm:inline">{name}</span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-slate-500 transition dark:text-neutral-400 ${open ? 'rotate-180' : ''}`}
