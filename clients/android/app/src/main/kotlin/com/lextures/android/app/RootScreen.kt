@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import com.lextures.android.core.auth.AuthPhase
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.features.auth.AuthFlowScreen
-import com.lextures.android.features.auth.PlaceholderHomeScreen
+import com.lextures.android.features.home.HomeScreen
 import com.lextures.android.features.splash.SplashScreen
 
 @Composable
@@ -31,7 +31,7 @@ fun RootScreen(session: AuthSession, modifier: Modifier = Modifier) {
         when (current) {
             AuthPhase.Splash -> SplashScreen()
             AuthPhase.Unauthenticated -> AuthFlowScreen(session = session)
-            AuthPhase.Authenticated -> PlaceholderHomeScreen(session = session)
+            AuthPhase.Authenticated -> HomeScreen(session = session)
         }
     }
 }

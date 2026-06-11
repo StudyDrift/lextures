@@ -18,7 +18,7 @@ struct RootView: View {
                 AuthFlowView()
                     .transition(.opacity)
             case .authenticated:
-                PlaceholderHomeView()
+                MainTabView()
                     .transition(.opacity)
             }
         }

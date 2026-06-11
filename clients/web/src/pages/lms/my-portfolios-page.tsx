@@ -11,8 +11,6 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 import { EmptyState } from '../../components/ui/empty-state'
 
-const iconGhost =
-  'rounded-md p-2 text-slate-500 transition hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
 const iconGhostPublished =
   'rounded-md p-2 text-indigo-600 transition hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
@@ -179,7 +177,10 @@ export default function MyPortfoliosPage() {
           <ul className="space-y-3">
             {portfolios.map((p) => (
               <li key={p.id} className="group">
-                <div className="w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm dark:border-neutral-700/80 dark:bg-neutral-800/85">
+                <Link
+                  to={`/portfolios/${p.id}`}
+                  className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm transition hover:border-slate-300/80 hover:bg-slate-100/60 dark:border-neutral-700/80 dark:bg-neutral-800/85 dark:hover:border-neutral-600/80 dark:hover:bg-neutral-800"
+                >
                   <div className="flex items-center gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">{p.title}</p>
@@ -194,7 +195,7 @@ export default function MyPortfoliosPage() {
                     <div className="flex shrink-0 items-center gap-0.5">
                       <button
                         type="button"
-                        onClick={() => void togglePublic(p)}
+                        onClick={(e) => { e.preventDefault(); void togglePublic(p) }}
                         title={
                           p.isPublic
                             ? 'Published — visible to anyone with the link'
@@ -210,16 +211,10 @@ export default function MyPortfoliosPage() {
                           <EyeOff className="h-4 w-4" aria-hidden />
                         )}
                       </button>
-                      <Link
-                        to={`/portfolios/${p.id}`}
-                        aria-label={`Open ${p.title}`}
-                        className={iconGhost}
-                      >
-                        <ChevronRight className="h-4 w-4" aria-hidden />
-                      </Link>
+                      <ChevronRight className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden />
                     </div>
                   </div>
-                </div>
+                </Link>
               </li>
             ))}
           </ul>
