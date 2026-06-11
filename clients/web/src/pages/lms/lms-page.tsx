@@ -49,7 +49,7 @@ export function LmsPage({
               </h1>
             )}
             {description && (
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
+              <p className="mt-2 mb-4 max-w-2xl text-sm leading-relaxed text-stone-600 dark:text-neutral-400">
                 {description}
               </p>
             )}

@@ -1,6 +1,6 @@
 # Lextures Android
 
-Native Android app for Lextures (Kotlin + Jetpack Compose). Feature development mirrors the web app incrementally; the first shipped flows are splash, sign-in, and sign-up (parity with `clients/ios`).
+Native Android app for Lextures (Kotlin + Jetpack Compose). Feature development mirrors the web app incrementally; shipped flows are splash, sign-in, sign-up, and the post-auth tabs: dashboard, courses, notebooks, and inbox (parity with `clients/ios`).
 
 ## Requirements
 
@@ -45,7 +45,14 @@ Cleartext HTTP to localhost is allowed for development (`res/xml/network_securit
 | `app/src/main/kotlin/.../app/` | Activity, root navigation |
 | `app/src/main/kotlin/.../features/splash/` | Branded splash screen |
 | `app/src/main/kotlin/.../features/auth/` | Login, signup, auth shell |
+| `app/src/main/kotlin/.../features/home/` | Post-auth tab shell + shared LMS UI |
+| `app/src/main/kotlin/.../features/dashboard/` | Greeting, stats, due-this-week, course shortcuts |
+| `app/src/main/kotlin/.../features/courses/` | Course list, search, course structure detail |
+| `app/src/main/kotlin/.../features/notebooks/` | Device-local markdown notebooks (global + per course) |
+| `app/src/main/kotlin/.../features/inbox/` | Mailbox folders, message detail, compose |
 | `app/src/main/kotlin/.../core/auth/` | API + encrypted token store |
+| `app/src/main/kotlin/.../core/lms/` | Courses + communication API models/client |
+| `app/src/main/kotlin/.../core/notebook/` | Device-local notebook store (parity with web localStorage) |
 | `app/src/main/kotlin/.../core/design/` | Theme aligned with web auth UI |
 | `app/src/main/assets/logo-trimmed.svg` | In-app logo (login, splash) |
 | `app/src/main/res/drawable/launch_logo.png` | System splash icon only |
@@ -66,6 +73,15 @@ bash clients/android/scripts/export-app-icon.sh
 
 Access and refresh tokens are stored in EncryptedSharedPreferences. MFA-required accounts show a message until a dedicated MFA screen is implemented.
 
+## LMS API (parity with web / iOS)
+
+- `GET /api/v1/courses` — course catalog for the dashboard and Courses tab
+- `GET /api/v1/courses/{code}` — viewer enrollment roles
+- `GET /api/v1/courses/{code}/structure` — modules and due dates
+- `GET/POST/PATCH /api/v1/communication/messages` + `GET /api/v1/communication/unread-count` — inbox
+
+Notebooks are device-local (same model as the web app's localStorage notebooks, format v2), keyed per signed-in user.
+
 ## CI
 
 The `.github/workflows/ci-android.yml` workflow runs on every PR that touches `clients/android/`. It performs three steps in order:
@@ -78,6 +94,6 @@ No secrets or signing config are required for the debug build.
 
 ## Next features (planned)
 
-- Dashboard and course navigation
+- Assignment / quiz detail and submissions
 - OIDC / SAML sign-in
 - Forgot password and magic link

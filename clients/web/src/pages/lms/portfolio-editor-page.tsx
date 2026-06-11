@@ -534,12 +534,12 @@ export default function PortfolioEditorPage() {
       title={portfolio.title}
       titleContent={
         <div>
-          <Link to="/portfolios" className="mb-1 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+          <Link to="/portfolios" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Portfolios
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">{portfolio.title}</h1>
+          <h1 className="mt-2 mb-2 text-3xl font-bold tracking-tight">{portfolio.title}</h1>
           {portfolio.introText && (
-            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{portfolio.introText}</p>
+            <p className="max-w-2xl text-sm text-muted-foreground">{portfolio.introText}</p>
           )}
         </div>
       }
@@ -547,7 +547,7 @@ export default function PortfolioEditorPage() {
         <PortfolioPublishButton portfolio={portfolio} onToggle={() => void toggleVisibility()} />
       }
     >
-      <div className="space-y-5">
+      <div className="mt-5 space-y-5 sm:mt-6">
         {error && <p className="text-sm text-destructive">{error}</p>}
 
         {portfolio.isPublic && (
