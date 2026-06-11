@@ -88,26 +88,26 @@ struct InboxView: View {
     private var folderPicker: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(MailboxFolder.allCases) { f in
+                ForEach(MailboxFolder.allCases) { mailboxFolder in
                     Button {
-                        folder = f
+                        folder = mailboxFolder
                     } label: {
-                        Label(f.label, systemImage: f.systemImage)
-                            .font(.caption.weight(folder == f ? .semibold : .regular))
+                        Label(mailboxFolder.label, systemImage: mailboxFolder.systemImage)
+                            .font(.caption.weight(folder == mailboxFolder ? .semibold : .regular))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 7)
                             .background(
-                                folder == f
+                                folder == mailboxFolder
                                     ? LexturesTheme.primary.opacity(0.14)
                                     : LexturesTheme.cardBackground(for: colorScheme)
                             )
                             .foregroundStyle(
-                                folder == f ? LexturesTheme.primary : LexturesTheme.textSecondary(for: colorScheme)
+                                folder == mailboxFolder ? LexturesTheme.primary : LexturesTheme.textSecondary(for: colorScheme)
                             )
                             .clipShape(Capsule())
                             .overlay(
                                 Capsule().stroke(
-                                    folder == f
+                                    folder == mailboxFolder
                                         ? LexturesTheme.primary.opacity(0.4)
                                         : LexturesTheme.fieldBorder(for: colorScheme),
                                     lineWidth: 1
@@ -242,8 +242,8 @@ struct MessageRow: View {
 
     private func initials(_ name: String) -> String {
         let parts = name.split(separator: " ")
-        if parts.count >= 2, let a = parts.first?.first, let b = parts.last?.first {
-            return String([a, b]).uppercased()
+        if parts.count >= 2, let firstChar = parts.first?.first, let lastChar = parts.last?.first {
+            return String([firstChar, lastChar]).uppercased()
         }
         return String(name.prefix(2)).uppercased()
     }

@@ -85,20 +85,20 @@ struct MailboxMessage: Decodable, Identifiable, Hashable {
     }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        id = try c.decode(String.self, forKey: .id)
-        from = try c.decode(MailboxParty.self, forKey: .from)
-        to = try c.decodeIfPresent(String.self, forKey: .to) ?? ""
-        subject = try c.decodeIfPresent(String.self, forKey: .subject) ?? ""
-        snippet = try c.decodeIfPresent(String.self, forKey: .snippet) ?? ""
-        body = try c.decodeIfPresent(String.self, forKey: .body) ?? ""
-        read = try c.decodeIfPresent(Bool.self, forKey: .read) ?? false
-        starred = try c.decodeIfPresent(Bool.self, forKey: .starred) ?? false
-        folder = try c.decodeIfPresent(String.self, forKey: .folder) ?? "inbox"
-        sentAt = try c.decodeIfPresent(String.self, forKey: .sentAtSnake)
-            ?? c.decodeIfPresent(String.self, forKey: .sentAtCamel) ?? ""
-        hasAttachment = try c.decodeIfPresent(Bool.self, forKey: .hasAttachmentSnake)
-            ?? c.decodeIfPresent(Bool.self, forKey: .hasAttachmentCamel) ?? false
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        from = try container.decode(MailboxParty.self, forKey: .from)
+        to = try container.decodeIfPresent(String.self, forKey: .to) ?? ""
+        subject = try container.decodeIfPresent(String.self, forKey: .subject) ?? ""
+        snippet = try container.decodeIfPresent(String.self, forKey: .snippet) ?? ""
+        body = try container.decodeIfPresent(String.self, forKey: .body) ?? ""
+        read = try container.decodeIfPresent(Bool.self, forKey: .read) ?? false
+        starred = try container.decodeIfPresent(Bool.self, forKey: .starred) ?? false
+        folder = try container.decodeIfPresent(String.self, forKey: .folder) ?? "inbox"
+        sentAt = try container.decodeIfPresent(String.self, forKey: .sentAtSnake)
+            ?? container.decodeIfPresent(String.self, forKey: .sentAtCamel) ?? ""
+        hasAttachment = try container.decodeIfPresent(Bool.self, forKey: .hasAttachmentSnake)
+            ?? container.decodeIfPresent(Bool.self, forKey: .hasAttachmentCamel) ?? false
     }
 }
 
@@ -134,15 +134,15 @@ enum MailboxFolder: String, CaseIterable, Identifiable {
 
 enum LMSDates {
     private static let isoFractional: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
     }()
 
     private static let iso: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
     }()
 
     static func parse(_ raw: String?) -> Date? {

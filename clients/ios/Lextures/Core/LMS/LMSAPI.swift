@@ -76,9 +76,9 @@ enum LMSAPI {
                 case camel = "unreadInbox"
             }
             init(from decoder: Decoder) throws {
-                let c = try decoder.container(keyedBy: CodingKeys.self)
-                unreadInbox = try c.decodeIfPresent(Int.self, forKey: .snake)
-                    ?? c.decodeIfPresent(Int.self, forKey: .camel)
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                unreadInbox = try container.decodeIfPresent(Int.self, forKey: .snake)
+                    ?? container.decodeIfPresent(Int.self, forKey: .camel)
             }
         }
         return try decode(UnreadResponse.self, from: data).unreadInbox ?? 0

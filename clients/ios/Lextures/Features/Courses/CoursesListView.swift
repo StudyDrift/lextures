@@ -10,12 +10,12 @@ struct CoursesListView: View {
     @State private var searchText = ""
 
     private var filteredCourses: [CourseSummary] {
-        let q = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return courses }
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !query.isEmpty else { return courses }
         return courses.filter {
-            $0.displayTitle.lowercased().contains(q)
-                || $0.courseCode.lowercased().contains(q)
-                || $0.description.lowercased().contains(q)
+            $0.displayTitle.lowercased().contains(query)
+                || $0.courseCode.lowercased().contains(query)
+                || $0.description.lowercased().contains(query)
         }
     }
 
