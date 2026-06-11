@@ -353,61 +353,119 @@ body {
 }
 
 /*
- * Course markdown: slate utilities follow global .lms-scope remapping (light text on dark surfaces).
- * Presets using stone/violet/amber/emerald/black need explicit dark-readable colors on the dark panel.
+ * Markdown reading surfaces (syllabus, modules, portfolios, file preview): remap light-theme
+ * utility classes so presets stay readable on dark UI shells and public portfolio pages.
  */
-.dark .lms-scope .syllabus-md .text-stone-900 {
+.dark .syllabus-md {
+  @apply text-neutral-300;
+}
+.dark .syllabus-md .text-slate-900 {
+  @apply text-neutral-100;
+}
+.dark .syllabus-md .text-slate-800 {
+  @apply text-neutral-200;
+}
+.dark .syllabus-md .text-slate-700 {
+  @apply text-neutral-300;
+}
+.dark .syllabus-md .text-slate-600 {
+  @apply text-neutral-400;
+}
+.dark .syllabus-md .text-slate-500 {
+  @apply text-neutral-400;
+}
+.dark .syllabus-md .text-stone-900 {
   @apply text-stone-100;
 }
-.dark .lms-scope .syllabus-md .text-stone-800 {
+.dark .syllabus-md .text-stone-800 {
   @apply text-stone-200;
 }
-.dark .lms-scope .syllabus-md .text-stone-700 {
+.dark .syllabus-md .text-stone-700 {
   @apply text-stone-300;
 }
-.dark .lms-scope .syllabus-md .text-stone-600 {
+.dark .syllabus-md .text-stone-600 {
   @apply text-stone-400;
 }
-.dark .lms-scope .syllabus-md .text-stone-500 {
+.dark .syllabus-md .text-stone-500 {
   @apply text-stone-400;
 }
-.dark .lms-scope .syllabus-md .text-stone-400 {
+.dark .syllabus-md .text-stone-400 {
   @apply text-stone-400;
 }
-
-.dark .lms-scope .syllabus-md .text-violet-950 {
+.dark .syllabus-md .text-violet-950 {
   @apply text-violet-200;
 }
-.dark .lms-scope .syllabus-md .text-violet-900 {
+.dark .syllabus-md .text-violet-900 {
   @apply text-violet-300;
 }
-
-.dark .lms-scope .syllabus-md .text-emerald-950 {
+.dark .syllabus-md .text-emerald-950 {
   @apply text-emerald-200;
 }
-.dark .lms-scope .syllabus-md .text-emerald-700 {
+.dark .syllabus-md .text-emerald-700 {
   @apply text-emerald-300;
 }
-
-.dark .lms-scope .syllabus-md .text-amber-950 {
+.dark .syllabus-md .text-amber-950 {
   @apply text-amber-200;
 }
-.dark .lms-scope .syllabus-md .text-amber-900 {
+.dark .syllabus-md .text-amber-900 {
   @apply text-amber-200;
 }
-.dark .lms-scope .syllabus-md .text-amber-800 {
+.dark .syllabus-md .text-amber-800 {
   @apply text-amber-300;
 }
-
-.dark .lms-scope .syllabus-md .text-indigo-600 {
+.dark .syllabus-md .text-indigo-600 {
   @apply text-indigo-400;
 }
-.dark .lms-scope .syllabus-md .text-indigo-800 {
+.dark .syllabus-md .text-indigo-800 {
   @apply text-indigo-300;
 }
-
-.dark .lms-scope .syllabus-md .text-black {
+.dark .syllabus-md .text-black {
   @apply text-neutral-100;
+}
+.dark .syllabus-md .bg-slate-50 {
+  @apply bg-neutral-900;
+}
+.dark .syllabus-md .bg-slate-100 {
+  @apply bg-neutral-800;
+}
+.dark .syllabus-md .bg-stone-50 {
+  @apply bg-neutral-900;
+}
+.dark .syllabus-md .bg-stone-100 {
+  @apply bg-neutral-800;
+}
+.dark .syllabus-md .bg-white {
+  @apply bg-neutral-900;
+}
+.dark .syllabus-md .bg-amber-50\/50 {
+  @apply bg-neutral-800/80;
+}
+.dark .syllabus-md .bg-violet-50\/80 {
+  @apply bg-neutral-800/80;
+}
+.dark .syllabus-md .bg-violet-50\/50 {
+  @apply bg-neutral-800/80;
+}
+.dark .syllabus-md .bg-emerald-50 {
+  @apply bg-neutral-800;
+}
+.dark .syllabus-md .border-slate-200 {
+  @apply border-neutral-700;
+}
+.dark .syllabus-md .border-slate-100 {
+  @apply border-neutral-800;
+}
+.dark .syllabus-md .border-stone-200 {
+  @apply border-neutral-700;
+}
+.dark .syllabus-md .border-stone-300 {
+  @apply border-neutral-700;
+}
+.dark .syllabus-md .border-violet-200 {
+  @apply border-neutral-700;
+}
+.dark .syllabus-md .katex {
+  color: rgb(229 229 229);
 }
 
 /* Course markdown (syllabus, modules): bounded width is set per theme; min-w-0 avoids flex overflow. */
@@ -415,7 +473,7 @@ body {
   @apply min-w-0;
 }
 
-/* File preview modal: dark-mode readability for classic markdown theme */
+/* File preview modal: same dark markdown rules via .syllabus-md + .markdown-file-preview */
 .dark .markdown-file-preview .text-slate-900 {
   @apply text-neutral-100;
 }

@@ -1,5 +1,6 @@
 package com.lextures.android.features.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,10 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
@@ -32,12 +36,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.design.HeroBrush
 import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.design.LexturesType
+import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.CourseStructureItem
@@ -46,6 +55,7 @@ import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.features.courses.CourseDetailScreen
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSectionHeader
@@ -138,17 +148,12 @@ fun DashboardTab(
                 .padding(start = 16.dp, end = 4.dp, top = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = greetingText(),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textPrimary(),
-                )
-                userEmail?.let {
-                    Text(text = it, fontSize = 13.sp, color = textSecondary())
-                }
-            }
+            Text(
+                text = "Lextures",
+                style = LexturesType.display(21),
+                color = textPrimary(),
+                modifier = Modifier.weight(1f),
+            )
             Box {
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Account", tint = textSecondary())
@@ -177,15 +182,24 @@ fun DashboardTab(
             contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            item {
+                HeroPanel(
+                    greeting = greetingText(),
+                    email = userEmail,
+                    dueCount = dueThisWeek.size,
+                    loading = loading,
+                )
+            }
+
             errorMessage?.let { message ->
                 item { LmsErrorBanner(message) }
             }
 
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatCard("${courses.size}", "Courses", Icons.AutoMirrored.Filled.MenuBook)
-                    StatCard("${dueThisWeek.size}", "Due this week", Icons.Default.AssignmentTurnedIn)
-                    StatCard("$unreadInbox", "Unread", Icons.Default.Inbox)
+                    StatCard("${courses.size}", "Courses", Icons.AutoMirrored.Filled.MenuBook, accentColor())
+                    StatCard("${dueThisWeek.size}", "Due this week", Icons.Default.AssignmentTurnedIn, LexturesColors.Coral)
+                    StatCard("$unreadInbox", "Unread", Icons.Default.Inbox, LexturesColors.Amber)
                 }
             }
 
@@ -202,14 +216,17 @@ fun DashboardTab(
                 }
             } else {
                 items(dueThisWeek, key = { "${it.courseCode}/${it.item.id}" }) { due ->
-                    LmsCard {
+                    LmsCard(accent = LexturesColors.Coral) {
                         Text(
                             text = due.item.title,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = textPrimary(),
                         )
-                        Row(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Text(
                                 text = due.courseTitle,
                                 fontSize = 12.sp,
@@ -219,7 +236,12 @@ fun DashboardTab(
                             Text(
                                 text = LmsDates.shortDateTime(due.item.dueAt),
                                 fontSize = 12.sp,
-                                color = textSecondary(),
+                                fontWeight = FontWeight.SemiBold,
+                                color = LexturesColors.Coral,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(LexturesColors.Coral.copy(alpha = 0.12f))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp),
                             )
                         }
                     }
@@ -238,13 +260,21 @@ fun DashboardTab(
             } else {
                 items(courses.take(5), key = { it.id }) { course ->
                     LmsCard(onClick = { openCourse = course }) {
-                        Text(
-                            text = course.displayTitle,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = textPrimary(),
-                        )
-                        Text(text = course.courseCode, fontSize = 12.sp, color = textSecondary())
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            LmsCoverTile(key = course.courseCode, icon = Icons.AutoMirrored.Filled.MenuBook, size = 44)
+                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                Text(
+                                    text = course.displayTitle,
+                                    fontSize = 15.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textPrimary(),
+                                )
+                                Text(text = course.courseCode, fontSize = 12.sp, color = textSecondary())
+                            }
+                        }
                     }
                 }
             }
@@ -252,11 +282,87 @@ fun DashboardTab(
     }
 }
 
+/** Deep-teal gradient greeting panel — the brand statement at the top of the app. */
 @Composable
-private fun RowScope.StatCard(value: String, label: String, icon: ImageVector) {
+private fun HeroPanel(greeting: String, email: String?, dueCount: Int, loading: Boolean) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(HeroBrush),
+    ) {
+        // Decorative drifting circles, echoing the rocket's arc in the logo.
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .offset(x = 250.dp, y = (-60).dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.07f)),
+        )
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .offset(x = 200.dp, y = 70.dp)
+                .clip(CircleShape)
+                .background(LexturesColors.BrandCoral.copy(alpha = 0.35f)),
+        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = greeting,
+                style = LexturesType.display(26),
+                color = Color.White,
+            )
+            email?.let {
+                Text(text = it, fontSize = 12.sp, color = Color.White.copy(alpha = 0.75f))
+            }
+            if (dueCount > 0) {
+                Text(
+                    text = "$dueCount assignment${if (dueCount == 1) "" else "s"} due this week",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = LexturesColors.PrimaryDeep,
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(LexturesColors.BrandCream)
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                )
+            } else if (!loading) {
+                Text(
+                    text = "You're all caught up",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White.copy(alpha = 0.9f),
+                    modifier = Modifier
+                        .padding(top = 8.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.16f))
+                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RowScope.StatCard(value: String, label: String, icon: ImageVector, tint: Color) {
     LmsCard(modifier = Modifier.weight(1f)) {
-        Icon(icon, contentDescription = null, tint = LexturesColors.Primary, modifier = Modifier.size(18.dp))
-        Text(text = value, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = textPrimary())
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(RoundedCornerShape(9.dp))
+                .background(tint.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+        }
+        Text(text = value, style = LexturesType.display(24, FontWeight.Bold), color = textPrimary())
         Text(text = label, fontSize = 11.sp, color = textSecondary())
     }
 }

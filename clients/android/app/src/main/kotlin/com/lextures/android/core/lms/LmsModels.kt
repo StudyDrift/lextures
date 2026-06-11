@@ -58,6 +58,49 @@ data class CourseStructureResponse(
     val items: List<CourseStructureItem> = emptyList(),
 )
 
+/**
+ * Tolerant union of the per-kind item GET responses
+ * (`/content-pages/{id}`, `/assignments/{id}`, `/quizzes/{id}`, `/external-links/{id}`).
+ */
+@Serializable
+data class ModuleItemDetail(
+    val title: String? = null,
+    val markdown: String? = null,
+    val dueAt: String? = null,
+    val availableFrom: String? = null,
+    val availableUntil: String? = null,
+    val updatedAt: String? = null,
+    val pointsWorth: Int? = null,
+
+    // Quiz settings (the web "preview box")
+    val unlimitedAttempts: Boolean? = null,
+    val maxAttempts: Int? = null,
+    val gradeAttemptPolicy: String? = null,
+    val oneQuestionAtATime: Boolean? = null,
+    val shuffleQuestions: Boolean? = null,
+    val lockdownMode: String? = null,
+    val adaptiveDeliveryMode: String? = null,
+    val timeLimitMinutes: Int? = null,
+    val passingScorePercent: Int? = null,
+    val questions: List<QuestionStub>? = null,
+
+    // Assignment submission settings
+    val submissionAllowText: Boolean? = null,
+    val submissionAllowFileUpload: Boolean? = null,
+    val submissionAllowUrl: Boolean? = null,
+    val lateSubmissionPolicy: String? = null,
+    val latePenaltyPercent: Int? = null,
+
+    // External link
+    val url: String? = null,
+    val provider: String? = null,
+) {
+    @Serializable
+    data class QuestionStub(val id: String? = null)
+
+    val questionCount: Int get() = questions?.size ?: 0
+}
+
 /** Mirrors web `MailboxMessage` (snake_case JSON from the communication API). */
 @Serializable
 data class MailboxParty(

@@ -194,7 +194,7 @@ export const MarkdownArticleView = forwardRef<HTMLDivElement, MarkdownArticleVie
     if (!src) {
       return (
         <div ref={ref} className={`syllabus-md ${theme.classes.article}`}>
-          <p className="text-sm leading-relaxed text-slate-500">{emptyMessage}</p>
+          <p className="text-sm leading-relaxed text-slate-500 dark:text-neutral-400">{emptyMessage}</p>
         </div>
       )
     }

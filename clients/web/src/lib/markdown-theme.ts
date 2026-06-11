@@ -314,6 +314,38 @@ function articleSurfaceForLmsDark(
   return ''
 }
 
+/** Light presets keep slate utility classes; override with readable colors on the dark LMS shell. */
+function presetUsesLmsDarkTypography(effective: MarkdownThemePresetId | 'custom'): boolean {
+  return (
+    effective === 'classic' ||
+    effective === 'reader' ||
+    effective === 'serif' ||
+    effective === 'accent'
+  )
+}
+
+function lmsDarkTypographyOverrides(): ElementStyleOverrides {
+  const c = CUSTOM_INLINE_COLORS_DARK_LMS
+  return {
+    h1: { color: c.headingColor },
+    h2: { color: c.headingColor },
+    h3: { color: c.headingColor },
+    p: { color: c.bodyColor },
+    ul: { color: c.bodyColor },
+    ol: { color: c.bodyColor },
+    li: { color: c.bodyColor },
+    a: { color: '#38bdf8' },
+    blockquote: { color: '#a3a3a3', borderLeftColor: c.blockquoteBorder },
+    codeInline: { backgroundColor: c.codeBackground, color: c.headingColor },
+    pre: { backgroundColor: '#0a0a0a', color: '#e5e5e5', borderColor: c.blockquoteBorder },
+    table: { color: c.bodyColor },
+    thead: { color: c.headingColor },
+    th: { color: c.headingColor, borderColor: c.blockquoteBorder },
+    td: { color: c.bodyColor, borderColor: c.blockquoteBorder },
+    hr: { borderColor: c.blockquoteBorder },
+  }
+}
+
 export type ResolveMarkdownThemeOptions = {
   /** When true, adjust article chrome so course branding stays readable on the dark LMS shell. */
   lmsUiDark?: boolean
@@ -341,16 +373,29 @@ export function resolveMarkdownTheme(
   }
 
   const effective = effectiveMarkdownPresetId(preset)
-  const extra = articleSurfaceForLmsDark(effective, resolved.classes.article, lmsUiDark)
-  if (!extra) return resolved
 
-  return {
-    ...resolved,
-    classes: {
-      ...resolved.classes,
-      article: `${resolved.classes.article} ${extra}`.trim(),
-    },
+  if (lmsUiDark && presetUsesLmsDarkTypography(effective)) {
+    resolved = {
+      ...resolved,
+      styleOverrides: {
+        ...resolved.styleOverrides,
+        ...lmsDarkTypographyOverrides(),
+      },
+    }
   }
+
+  const extra = articleSurfaceForLmsDark(effective, resolved.classes.article, lmsUiDark)
+  if (extra) {
+    resolved = {
+      ...resolved,
+      classes: {
+        ...resolved.classes,
+        article: `${resolved.classes.article} ${extra}`.trim(),
+      },
+    }
+  }
+
+  return resolved
 }
 
 export const MARKDOWN_THEME_PRESET_META: {

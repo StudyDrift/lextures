@@ -41,6 +41,15 @@ describe('resolveMarkdownTheme', () => {
     expect(r.classes.article).toContain('!bg-neutral-950')
   })
 
+  it('applies dark typography overrides for classic preset when lmsUiDark', () => {
+    const light = resolveMarkdownTheme('classic', null, { lmsUiDark: false })
+    const dark = resolveMarkdownTheme('classic', null, { lmsUiDark: true })
+    expect(light.styleOverrides.p?.color).toBeUndefined()
+    expect(dark.styleOverrides.p?.color).toBe('#d4d4d4')
+    expect(dark.styleOverrides.a?.color).toBe('#38bdf8')
+    expect(dark.classes.article).toContain('!bg-neutral-950')
+  })
+
   it('returns preset night without custom style overrides', () => {
     const r = resolveMarkdownTheme('night', null)
     expect(r.styleOverrides).toEqual({})

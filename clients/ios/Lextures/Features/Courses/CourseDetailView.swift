@@ -58,8 +58,8 @@ struct CourseDetailView: View {
                             message: "Modules and assignments will appear here once published."
                         )
                     } else {
-                        ForEach(moduleGroups) { group in
-                            moduleCard(group)
+                        ForEach(Array(moduleGroups.enumerated()), id: \.element.id) { index, group in
+                            moduleCard(group, number: index + 1)
                         }
                     }
                 }
@@ -69,83 +69,137 @@ struct CourseDetailView: View {
         }
         .navigationTitle(course.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationDestination(for: CourseStructureItem.self) { item in
+            ItemDetailView(courseCode: course.courseCode, item: item)
+        }
         .task { await load() }
     }
 
+    /// Gradient cover banner — matches the course's tile color across the app.
     private var header: some View {
-        LMSCard {
-            Text(course.title)
-                .font(.headline)
-                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            Text(course.courseCode)
-                .font(.caption)
-                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            if !course.description.isEmpty {
-                Text(course.description)
-                    .font(.subheadline)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+        ZStack(alignment: .topTrailing) {
+            Circle()
+                .fill(.white.opacity(0.08))
+                .frame(width: 140, height: 140)
+                .offset(x: 44, y: -52)
+
+            VStack(alignment: .leading, spacing: 7) {
+                Text(course.courseCode.uppercased())
+                    .font(.caption2.weight(.semibold))
+                    .tracking(1.2)
+                    .foregroundStyle(.white.opacity(0.8))
+                Text(course.title)
+                    .font(LexturesTheme.displayFont(22))
+                    .foregroundStyle(.white)
+                if !course.description.isEmpty {
+                    Text(course.description)
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .lineLimit(3)
+                }
+                if let starts = LMSDates.parse(course.startsAt) {
+                    Label(starts.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 9)
+                        .padding(.vertical, 4)
+                        .background(.white.opacity(0.16))
+                        .clipShape(Capsule())
+                        .padding(.top, 4)
+                }
             }
-            if let starts = LMSDates.parse(course.startsAt) {
-                Label(starts.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
-                    .font(.caption)
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(20)
         }
+        .background(LexturesTheme.coverGradient(for: course.courseCode))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 14, y: 7)
     }
 
-    private func moduleCard(_ group: ModuleGroup) -> some View {
+    private func moduleCard(_ group: ModuleGroup, number: Int) -> some View {
         LMSCard {
-            Text(group.title)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            HStack(spacing: 10) {
+                Text("\(number)")
+                    .font(LexturesTheme.displayFont(14, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 26, height: 26)
+                    .background(LexturesTheme.coverGradient(for: course.courseCode))
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Text(group.title)
+                    .font(LexturesTheme.displayFont(17))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            }
 
             if group.items.isEmpty {
-                Text("Empty module")
+                Text("Nothing in this module yet")
                     .font(.caption)
+                    .italic()
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             } else {
-                ForEach(group.items) { item in
-                    HStack(spacing: 10) {
-                        Image(systemName: icon(for: item.kind))
-                            .font(.subheadline)
-                            .frame(width: 22)
-                            .foregroundStyle(LexturesTheme.primary)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(item.title)
-                                .font(.subheadline)
-                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                            if let due = LMSDates.parse(item.dueAt) {
-                                Text("Due \(due.formatted(date: .abbreviated, time: .shortened))")
-                                    .font(.caption)
-                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                            }
-                        }
-                        Spacer(minLength: 0)
-                        if let points = item.pointsWorth ?? item.pointsPossible {
-                            Text("\(points.formatted()) pts")
-                                .font(.caption)
-                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        }
+                ForEach(Array(group.items.enumerated()), id: \.element.id) { index, item in
+                    if index > 0 {
+                        Divider()
                     }
-                    .padding(.vertical, 2)
+                    if ItemKind.isOpenable(item.kind) {
+                        NavigationLink(value: item) {
+                            itemRow(item, openable: true)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        itemRow(item, openable: false)
+                    }
                 }
             }
         }
     }
 
-    private func icon(for kind: String) -> String {
-        switch kind {
-        case "assignment": return "doc.text"
-        case "quiz": return "checkmark.circle"
-        case "content_page": return "doc.richtext"
-        case "external_link": return "link"
-        case "survey": return "list.clipboard"
-        case "lti_link": return "puzzlepiece.extension"
-        case "h5p": return "play.rectangle"
-        case "vibe_activity": return "sparkles"
-        case "library_resource", "textbook_resource": return "books.vertical"
-        default: return "square.stack.3d.up"
+    private func itemRow(_ item: CourseStructureItem, openable: Bool) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: ItemKind.icon(for: item.kind))
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                .frame(width: 32, height: 32)
+                .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.16 : 0.13))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(item.title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                HStack(spacing: 6) {
+                    Text(ItemKind.label(for: item.kind))
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    if let due = LMSDates.parse(item.dueAt) {
+                        Text("·")
+                            .font(.caption2)
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        Text("Due \(due.formatted(date: .abbreviated, time: .shortened))")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(LexturesTheme.coral)
+                    }
+                }
+            }
+
+            Spacer(minLength: 0)
+
+            if let points = item.pointsWorth ?? item.pointsPossible {
+                Text("\(points.formatted()) pts")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.amber)
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 3)
+                    .background(LexturesTheme.amber.opacity(0.13))
+                    .clipShape(Capsule())
+            }
+            if openable {
+                Image(systemName: "chevron.right")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
+            }
         }
+        .padding(.vertical, 4)
+        .contentShape(Rectangle())
     }
 
     private func load() async {

@@ -101,8 +101,26 @@ struct AuthTokenResponse: Decodable {
     }
 }
 
+struct RefreshRequest: Encodable {
+    var refreshToken: String
+
+    enum CodingKeys: String, CodingKey {
+        case refreshToken = "refresh_token"
+    }
+}
+
 enum AuthAPI {
     private static let client = APIClient()
+
+    /// Exchanges a refresh token for a new access token (+ rotated refresh token).
+    static func refresh(refreshToken: String) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/refresh",
+            method: "POST",
+            body: RefreshRequest(refreshToken: refreshToken)
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
 
     static func fetchPasswordPolicy() async -> PasswordPolicy {
         do {

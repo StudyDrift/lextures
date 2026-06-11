@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { ExternalLink, FileText, FolderOpen } from 'lucide-react'
-import { getPublicPortfolio, type PublicPortfolio } from '../../lib/eportfolio-api'
+import {
+  getPublicPortfolio,
+  isPortfolioContentPage,
+  isPortfolioHeading,
+  publicPortfolioContentPageHref,
+  type PublicPortfolio,
+} from '../../lib/eportfolio-api'
 import { EmptyState } from '../../components/ui/empty-state'
 
 
@@ -86,8 +92,42 @@ export default function PublicPortfolioPage() {
             body="There are no public artifacts in this portfolio yet."
           />
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2">
-            {portfolio.artifacts.map((a) => (
+          <div className="space-y-6">
+            {portfolio.artifacts.map((a) =>
+              isPortfolioHeading(a) ? (
+                <h2
+                  key={a.id}
+                  className="border-t border-slate-200/80 pt-6 text-xl font-bold tracking-tight text-slate-950 first:border-t-0 first:pt-0 dark:border-neutral-800 dark:text-neutral-100"
+                >
+                  {a.title}
+                </h2>
+              ) : isPortfolioContentPage(a) ? (
+              <article
+                key={a.id}
+                role="article"
+                className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950/60 dark:text-indigo-300"
+                    aria-hidden
+                  >
+                    <FileText className="h-4 w-4" strokeWidth={2} />
+                  </span>
+                  <h2 className="min-w-0 flex-1 text-base font-semibold leading-snug">
+                    <Link
+                      to={publicPortfolioContentPageHref(slug, a.id)}
+                      className="text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                    >
+                      {a.title}
+                    </Link>
+                  </h2>
+                </div>
+                {a.description ? (
+                  <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{a.description}</p>
+                ) : null}
+              </article>
+              ) : (
               <article
                 key={a.id}
                 role="article"
@@ -99,9 +139,6 @@ export default function PublicPortfolioPage() {
                 </h2>
                 {a.description && (
                   <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">{a.description}</p>
-                )}
-                {a.artifactType === 'text_page' && a.textContent && (
-                  <p className="mt-3 flex-1 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-neutral-300">{a.textContent}</p>
                 )}
                 {a.artifactType === 'url' && a.externalUrl && (
                   <div className="mt-4 flex-1">
@@ -133,7 +170,8 @@ export default function PublicPortfolioPage() {
                   </ul>
                 )}
               </article>
-            ))}
+              ),
+            )}
           </div>
         )}
       </main>

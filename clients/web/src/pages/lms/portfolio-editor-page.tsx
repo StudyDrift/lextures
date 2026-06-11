@@ -1,10 +1,26 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { KeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
+import { CSS, type Transform } from '@dnd-kit/utilities'
 import {
   AlertTriangle,
-  ArrowDown,
   ArrowLeft,
-  ArrowUp,
   Check,
   ChevronDown,
   Copy,
@@ -12,11 +28,13 @@ import {
   Eye,
   EyeOff,
   FileText,
+  GripVertical,
   Heading,
   Link2,
   MoreVertical,
   Plus,
   Trash2,
+  X,
 } from 'lucide-react'
 import {
   createArtifact,
@@ -26,14 +44,49 @@ import {
   patchPortfolio,
   type Artifact,
   type ArtifactType,
+  isPortfolioContentPage,
+  isPortfolioHeading,
+  portfolioContentPageHref,
   type Evaluation,
   type Portfolio,
 } from '../../lib/eportfolio-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
+import { ModuleNameModal } from './module-name-modal'
 import { EmptyState } from '../../components/ui/empty-state'
 
 type PortfolioArtifactKind = 'heading' | 'content_page' | 'url'
+
+const PORTFOLIO_ARTIFACTS_SORT_ID = 'sortable-portfolio-artifacts'
+
+function sortableDragStyle(
+  transform: Transform | null,
+  transition: string | undefined,
+  isDragging: boolean,
+): CSSProperties {
+  return {
+    transform: CSS.Transform.toString(transform),
+    transition: isDragging ? undefined : transition,
+    opacity: isDragging ? 0 : undefined,
+    pointerEvents: isDragging ? 'none' : undefined,
+  }
+}
+
+function artifactTypeLabel(a: Artifact): string {
+  if (isPortfolioHeading(a)) return 'Heading'
+  switch (a.artifactType) {
+    case 'text_page':
+      return 'Content page'
+    case 'url':
+      return 'External link'
+    case 'submission':
+      return 'Submission'
+    case 'upload':
+      return 'Upload'
+    default:
+      return a.artifactType.replace('_', ' ')
+  }
+}
 
 const iconGhostPublished =
   'rounded-md p-2 text-indigo-600 transition hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
@@ -65,19 +118,13 @@ function ArtifactTypeIcon({ type }: { type: ArtifactType }) {
 
 function ArtifactItemActions({
   artifact,
-  index,
-  total,
   onTogglePublished,
-  onMoveUp,
-  onMoveDown,
+  onEditTitle,
   onDelete,
 }: {
   artifact: Artifact
-  index: number
-  total: number
   onTogglePublished: () => void
-  onMoveUp: () => void
-  onMoveDown: () => void
+  onEditTitle?: () => void
   onDelete: () => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -132,24 +179,16 @@ function ArtifactItemActions({
             aria-label="Artifact actions"
             className="absolute end-0 z-50 mt-1 min-w-[10rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
           >
-            <button
-              type="button"
-              role="menuitem"
-              disabled={index === 0}
-              onClick={() => { onMoveUp(); setMenuOpen(false) }}
-              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:opacity-40 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
-            >
-              <ArrowUp className="h-4 w-4" aria-hidden /> Move up
-            </button>
-            <button
-              type="button"
-              role="menuitem"
-              disabled={index === total - 1}
-              onClick={() => { onMoveDown(); setMenuOpen(false) }}
-              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:opacity-40 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
-            >
-              <ArrowDown className="h-4 w-4" aria-hidden /> Move down
-            </button>
+            {onEditTitle ? (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { onEditTitle(); setMenuOpen(false) }}
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              >
+                Edit title
+              </button>
+            ) : null}
             <button
               type="button"
               role="menuitem"
@@ -165,7 +204,19 @@ function ArtifactItemActions({
   )
 }
 
-function AddArtifactMenu({ onSelect }: { onSelect: (kind: PortfolioArtifactKind) => void }) {
+function AddArtifactMenu({
+  onSelect,
+  disabled,
+  dragHandlesVisible,
+  onToggleDragHandles,
+  artifactListActionsEnabled,
+}: {
+  onSelect: (kind: PortfolioArtifactKind) => void
+  disabled?: boolean
+  dragHandlesVisible: boolean
+  onToggleDragHandles: () => void
+  artifactListActionsEnabled: boolean
+}) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -188,11 +239,15 @@ function AddArtifactMenu({ onSelect }: { onSelect: (kind: PortfolioArtifactKind)
     <div ref={rootRef} className="relative inline-block shrink-0 text-start">
       <button
         type="button"
+        disabled={disabled}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition hover:border-slate-300/80 hover:bg-slate-50/90 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
+        onClick={() => {
+          if (disabled) return
+          setOpen((o) => !o)
+        }}
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span className="truncate">Add artifact</span>
@@ -251,9 +306,191 @@ function AddArtifactMenu({ onSelect }: { onSelect: (kind: PortfolioArtifactKind)
               <span className="text-xs text-slate-500 dark:text-neutral-400">Opens a URL in a new tab</span>
             </span>
           </button>
+          {artifactListActionsEnabled ? (
+            <>
+              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" role="separator" />
+              <button
+                type="button"
+                role="menuitemcheckbox"
+                aria-checked={dragHandlesVisible}
+                onClick={onToggleDragHandles}
+                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+              >
+                <span
+                  className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                    dragHandlesVisible
+                      ? 'border-indigo-600 bg-indigo-600 text-white dark:border-indigo-500 dark:bg-indigo-500'
+                      : 'border-slate-300 bg-white dark:border-neutral-500 dark:bg-neutral-800'
+                  }`}
+                  aria-hidden
+                >
+                  {dragHandlesVisible ? <Check className="h-3 w-3" strokeWidth={3} /> : null}
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                  <span className="font-semibold text-slate-950 dark:text-neutral-100">Drag and drop</span>
+                  <span className="text-xs text-slate-500 dark:text-neutral-400">Show reorder handles for artifacts</span>
+                </span>
+              </button>
+            </>
+          ) : null}
         </div>
       )}
     </div>
+  )
+}
+
+function ArtifactRowContent({
+  artifact,
+  pid,
+  evaluations,
+}: {
+  artifact: Artifact
+  pid: string
+  evaluations: Evaluation[]
+}) {
+  const heading = isPortfolioHeading(artifact)
+  const contentPage = isPortfolioContentPage(artifact)
+  const evals = evaluations.filter((e) => e.artifactId === artifact.id)
+
+  if (heading) {
+    return (
+      <p className="text-lg font-bold leading-snug tracking-tight text-slate-950 sm:text-xl dark:text-neutral-100">
+        {artifact.title}
+      </p>
+    )
+  }
+
+  if (contentPage) {
+    return (
+      <div className="flex min-w-0 items-center gap-3">
+        <ArtifactTypeIcon type="text_page" />
+        <div className="min-w-0 flex-1">
+          <Link
+            to={portfolioContentPageHref(pid, artifact.id)}
+            className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+          >
+            {artifact.title}
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <ArtifactTypeIcon type={artifact.artifactType} />
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <p className="text-base font-semibold leading-snug tracking-tight text-slate-900 dark:text-neutral-100">
+            {artifact.title}
+          </p>
+          <p className="inline-flex shrink-0 items-center rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:bg-neutral-750 dark:text-neutral-400">
+            {artifactTypeLabel(artifact)}
+            {artifact.fileName ? ` · ${artifact.fileName}` : ''}
+          </p>
+        </div>
+        {artifact.description && (
+          <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">{artifact.description}</p>
+        )}
+        {artifact.externalUrl && (
+          <div className="mt-1">
+            <a
+              href={artifact.externalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+            >
+              <ExternalLink className="h-3 w-3" aria-hidden /> {artifact.externalUrl}
+            </a>
+          </div>
+        )}
+        {artifact.outcomeIds.length > 0 && (
+          <p className="mt-1 text-xs font-medium text-slate-500 dark:text-neutral-400">
+            {artifact.outcomeIds.length} outcome{artifact.outcomeIds.length === 1 ? '' : 's'} tagged
+          </p>
+        )}
+        {evals.map((ev) => (
+          <div
+            key={ev.id}
+            className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-xs dark:border-emerald-900 dark:bg-emerald-950/20"
+          >
+            <span className="font-semibold text-emerald-800 dark:text-emerald-300">Reviewer feedback</span>
+            {ev.totalScore != null && (
+              <span className="font-semibold text-emerald-800 dark:text-emerald-300"> · Score: {ev.totalScore}</span>
+            )}
+            {ev.feedback && (
+              <p className="mt-1 leading-relaxed text-emerald-900 dark:text-emerald-450">{ev.feedback}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+type SortableArtifactRowProps = {
+  artifact: Artifact
+  pid: string
+  evaluations: Evaluation[]
+  disabled: boolean
+  dragHandlesVisible: boolean
+  onTogglePublished: () => void
+  onEditTitle?: () => void
+  onDelete: () => void
+}
+
+function SortableArtifactRow({
+  artifact,
+  pid,
+  evaluations,
+  disabled,
+  dragHandlesVisible,
+  onTogglePublished,
+  onEditTitle,
+  onDelete,
+}: SortableArtifactRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: artifact.id,
+    disabled,
+  })
+  const style = sortableDragStyle(transform, transition, isDragging)
+  const gripAlwaysOn = dragHandlesVisible || isDragging
+
+  return (
+    <li ref={setNodeRef} style={style} className="group py-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {(!disabled || dragHandlesVisible || isDragging) && (
+            <button
+              type="button"
+              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+                gripAlwaysOn
+                  ? 'opacity-100'
+                  : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
+              }`}
+              aria-label="Drag to reorder item"
+              {...listeners}
+              {...attributes}
+            >
+              <GripVertical className="h-4 w-4" strokeWidth={2} aria-hidden />
+            </button>
+          )}
+          <div className="min-w-0 flex-1">
+            <ArtifactRowContent artifact={artifact} pid={pid} evaluations={evaluations} />
+          </div>
+        </div>
+        <div
+          className={`flex shrink-0 justify-end sm:items-center sm:self-center sm:ps-0 ${!disabled ? 'ps-[3.25rem]' : 'ps-0'}`}
+        >
+          <ArtifactItemActions
+            artifact={artifact}
+            onTogglePublished={onTogglePublished}
+            onEditTitle={onEditTitle}
+            onDelete={onDelete}
+          />
+        </div>
+      </div>
+    </li>
   )
 }
 
@@ -284,7 +521,8 @@ function AddArtifactForm({
     setSaving(true)
     setErr(null)
     try {
-      const artifactType: ArtifactType = kind === 'url' ? 'url' : 'text_page'
+      const artifactType: ArtifactType =
+        kind === 'url' ? 'url' : kind === 'heading' ? 'heading' : 'text_page'
       const created = await createArtifact(pid, {
         artifactType,
         title: title.trim(),
@@ -407,6 +645,7 @@ function PortfolioPublishButton({
 
 export default function PortfolioEditorPage() {
   const { pid = '' } = useParams<{ pid: string }>()
+  const navigate = useNavigate()
   const { ffEportfolio } = usePlatformFeatures()
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
@@ -415,6 +654,41 @@ export default function PortfolioEditorPage() {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const [addKind, setAddKind] = useState<PortfolioArtifactKind | null>(null)
+  const [headingModalOpen, setHeadingModalOpen] = useState(false)
+  const [headingModalKey, setHeadingModalKey] = useState(0)
+  const [headingSaving, setHeadingSaving] = useState(false)
+  const [headingSaveError, setHeadingSaveError] = useState<string | null>(null)
+  const [contentPageModalOpen, setContentPageModalOpen] = useState(false)
+  const [contentPageModalKey, setContentPageModalKey] = useState(0)
+  const [contentPageSaving, setContentPageSaving] = useState(false)
+  const [contentPageSaveError, setContentPageSaveError] = useState<string | null>(null)
+  const [editTitleTarget, setEditTitleTarget] = useState<Artifact | null>(null)
+  const [editTitleModalKey, setEditTitleModalKey] = useState(0)
+  const [editTitleSaving, setEditTitleSaving] = useState(false)
+  const [editTitleError, setEditTitleError] = useState<string | null>(null)
+  const [deleteConfirmArtifact, setDeleteConfirmArtifact] = useState<Artifact | null>(null)
+  const [deletingArtifactId, setDeletingArtifactId] = useState<string | null>(null)
+  const deleteDialogTitleId = useId()
+  const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const [dragHandlesVisible, setDragHandlesVisible] = useState(false)
+
+  const anyModalBusy =
+    headingModalOpen ||
+    headingSaving ||
+    contentPageModalOpen ||
+    contentPageSaving ||
+    editTitleTarget !== null ||
+    editTitleSaving ||
+    deleteConfirmArtifact !== null ||
+    Boolean(deletingArtifactId) ||
+    addKind !== null
+
+  const artifactIds = useMemo(() => artifacts.map((a) => a.id), [artifacts])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, defaultKeyboardSensorOptions),
+  )
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -436,7 +710,18 @@ export default function PortfolioEditorPage() {
     void load()
   }, [ffEportfolio, load])
 
-  const evalsByArtifact = (aid: string) => evaluations.filter((e) => e.artifactId === aid)
+  useEffect(() => {
+    if (!deleteConfirmArtifact) return
+    const artifactId = deleteConfirmArtifact.id
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      if (deletingArtifactId === artifactId) return
+      e.preventDefault()
+      setDeleteConfirmArtifact(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [deleteConfirmArtifact, deletingArtifactId])
 
   const toggleVisibility = async () => {
     if (!portfolio) return
@@ -448,20 +733,48 @@ export default function PortfolioEditorPage() {
     }
   }
 
-  const move = async (index: number, dir: -1 | 1) => {
-    const next = index + dir
-    if (next < 0 || next >= artifacts.length) return
-    const reordered = [...artifacts]
-    const [item] = reordered.splice(index, 1)
-    reordered.splice(next, 0, item)
-    setArtifacts(reordered)
-    try {
-      await patchPortfolio(pid, { order: reordered.map((a) => a.id) })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to reorder.')
-      void load()
-    }
-  }
+  const persistArtifactOrder = useCallback(
+    async (order: string[]) => {
+      try {
+        await patchPortfolio(pid, { order })
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to reorder.')
+        void load()
+      }
+    },
+    [pid, load],
+  )
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id))
+  }, [])
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      setActiveDragId(null)
+      if (!over || active.id === over.id) return
+
+      setArtifacts((prev) => {
+        const oldIndex = prev.findIndex((a) => a.id === active.id)
+        const newIndex = prev.findIndex((a) => a.id === over.id)
+        if (oldIndex < 0 || newIndex < 0) return prev
+        const reordered = arrayMove(prev, oldIndex, newIndex)
+        void persistArtifactOrder(reordered.map((a) => a.id))
+        return reordered
+      })
+    },
+    [persistArtifactOrder],
+  )
+
+  const handleDragCancel = useCallback(() => {
+    setActiveDragId(null)
+  }, [])
+
+  const activeDragArtifact = useMemo(() => {
+    if (!activeDragId) return null
+    return artifacts.find((a) => a.id === activeDragId) ?? null
+  }, [activeDragId, artifacts])
 
   const toggleArtifactPublic = async (a: Artifact) => {
     try {
@@ -472,19 +785,102 @@ export default function PortfolioEditorPage() {
     }
   }
 
-  const removeArtifact = async (a: Artifact) => {
-    if (!window.confirm(`Remove "${a.title}" from this portfolio?`)) return
+  const requestDeleteArtifact = (a: Artifact) => {
+    setDeleteConfirmArtifact(a)
+  }
+
+  const confirmDeleteArtifact = async () => {
+    if (!deleteConfirmArtifact) return
+    const artifact = deleteConfirmArtifact
+    setDeletingArtifactId(artifact.id)
     try {
-      await apiDeleteArtifact(pid, a.id)
-      setArtifacts((prev) => prev.filter((x) => x.id !== a.id))
+      await apiDeleteArtifact(pid, artifact.id)
+      setArtifacts((prev) => prev.filter((x) => x.id !== artifact.id))
+      setDeleteConfirmArtifact(null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove artifact.')
+    } finally {
+      setDeletingArtifactId(null)
     }
   }
 
   const onArtifactAdded = (a: Artifact) => {
     setArtifacts((prev) => [...prev, a])
     setAddKind(null)
+  }
+
+  const openAddHeading = () => {
+    setHeadingSaveError(null)
+    setHeadingModalKey((k) => k + 1)
+    setHeadingModalOpen(true)
+  }
+
+  const saveNewHeading = async (title: string) => {
+    setHeadingSaveError(null)
+    setHeadingSaving(true)
+    try {
+      const created = await createArtifact(pid, { artifactType: 'heading', title })
+      setArtifacts((prev) => [...prev, created])
+      setHeadingModalOpen(false)
+    } catch (err) {
+      setHeadingSaveError(err instanceof Error ? err.message : 'Could not save heading.')
+    } finally {
+      setHeadingSaving(false)
+    }
+  }
+
+  const openAddContentPage = () => {
+    setContentPageSaveError(null)
+    setContentPageModalKey((k) => k + 1)
+    setContentPageModalOpen(true)
+  }
+
+  const saveNewContentPage = async (title: string) => {
+    setContentPageSaveError(null)
+    setContentPageSaving(true)
+    try {
+      const created = await createArtifact(pid, { artifactType: 'text_page', title })
+      setArtifacts((prev) => [...prev, created])
+      setContentPageModalOpen(false)
+      navigate(portfolioContentPageHref(pid, created.id))
+    } catch (err) {
+      setContentPageSaveError(err instanceof Error ? err.message : 'Could not save page.')
+    } finally {
+      setContentPageSaving(false)
+    }
+  }
+
+  const openEditTitle = (a: Artifact) => {
+    setEditTitleError(null)
+    setEditTitleTarget(a)
+    setEditTitleModalKey((k) => k + 1)
+  }
+
+  const saveEditTitle = async (title: string) => {
+    if (!editTitleTarget) return
+    setEditTitleError(null)
+    setEditTitleSaving(true)
+    try {
+      const updated = await patchArtifact(pid, editTitleTarget.id, { title })
+      setArtifacts((prev) => prev.map((x) => (x.id === editTitleTarget.id ? updated : x)))
+      setEditTitleTarget(null)
+    } catch (err) {
+      setEditTitleError(err instanceof Error ? err.message : 'Could not save title.')
+    } finally {
+      setEditTitleSaving(false)
+    }
+  }
+
+  const onAddArtifactKind = (kind: PortfolioArtifactKind) => {
+    if (kind === 'heading') {
+      openAddHeading()
+      return
+    }
+    if (kind === 'content_page') {
+      openAddContentPage()
+      return
+    }
+    setAddKind(kind)
   }
 
   const publicUrl =
@@ -592,75 +988,93 @@ export default function PortfolioEditorPage() {
                   : `${artifacts.length} ${artifacts.length === 1 ? 'item' : 'items'}`}
               </p>
             </div>
-            <AddArtifactMenu onSelect={(kind) => setAddKind(kind)} />
+            <AddArtifactMenu
+              onSelect={onAddArtifactKind}
+              disabled={anyModalBusy}
+              dragHandlesVisible={dragHandlesVisible}
+              onToggleDragHandles={() => setDragHandlesVisible((v) => !v)}
+              artifactListActionsEnabled={artifacts.length > 0}
+            />
           </div>
 
           {artifacts.length > 0 && (
-            <ul className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 dark:divide-neutral-700/80 dark:border-neutral-700/80">
-              {artifacts.map((a, i) => (
-                <li key={a.id} className="py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex min-w-0 flex-1 items-center gap-3">
-                      <ArtifactTypeIcon type={a.artifactType} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                          <p className="text-base font-semibold leading-snug tracking-tight text-slate-900 dark:text-neutral-100">
-                            {a.title}
-                          </p>
-                          <p className="inline-flex shrink-0 items-center rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-slate-600 dark:bg-neutral-750 dark:text-neutral-400">
-                            {a.artifactType.replace('_', ' ')}
-                            {a.fileName ? ` · ${a.fileName}` : ''}
-                          </p>
-                        </div>
-                        {a.description && (
-                          <p className="mt-0.5 text-sm text-slate-500 dark:text-neutral-400">{a.description}</p>
-                        )}
-                        {a.externalUrl && (
-                          <div className="mt-1">
-                            <a
-                              href={a.externalUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-                            >
-                              <ExternalLink className="h-3 w-3" aria-hidden /> {a.externalUrl}
-                            </a>
-                          </div>
-                        )}
-                        {a.outcomeIds.length > 0 && (
-                          <p className="mt-1 text-xs font-medium text-slate-500 dark:text-neutral-400">
-                            {a.outcomeIds.length} outcome{a.outcomeIds.length === 1 ? '' : 's'} tagged
-                          </p>
-                        )}
-                        {evalsByArtifact(a.id).map((ev) => (
-                          <div
-                            key={ev.id}
-                            className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-xs dark:border-emerald-900 dark:bg-emerald-950/20"
-                          >
-                            <span className="font-semibold text-emerald-800 dark:text-emerald-300">Reviewer feedback</span>
-                            {ev.totalScore != null && (
-                              <span className="font-semibold text-emerald-800 dark:text-emerald-300"> · Score: {ev.totalScore}</span>
-                            )}
-                            {ev.feedback && (
-                              <p className="mt-1 leading-relaxed text-emerald-900 dark:text-emerald-450">{ev.feedback}</p>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <ArtifactItemActions
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+              accessibility={{
+                announcements: {
+                  onDragStart({ active }) {
+                    const item = artifacts.find((a) => a.id === String(active.id))
+                    if (!item) return
+                    const pos = artifacts.findIndex((a) => a.id === String(active.id)) + 1
+                    return `Picked up "${item.title}". Current position: ${pos} of ${artifacts.length}. Press arrow keys to move, Space to drop, Escape to cancel.`
+                  },
+                  onDragOver() {
+                    return undefined
+                  },
+                  onDragEnd({ active, over }) {
+                    const item = artifacts.find((a) => a.id === String(active.id))
+                    if (!item) return
+                    if (!over || active.id === over.id) {
+                      return `Dragging cancelled. "${item.title}" returned to its original position.`
+                    }
+                    const pos = artifacts.findIndex((a) => a.id === String(over.id)) + 1
+                    return `"${item.title}" dropped at position ${pos} of ${artifacts.length}.`
+                  },
+                  onDragCancel({ active }) {
+                    const item = artifacts.find((a) => a.id === String(active.id))
+                    return `Dragging cancelled. "${item?.title ?? 'Item'}" returned to its original position.`
+                  },
+                },
+              }}
+            >
+              <SortableContext
+                id={PORTFOLIO_ARTIFACTS_SORT_ID}
+                items={artifactIds}
+                strategy={verticalListSortingStrategy}
+              >
+                <ul className="mt-4 divide-y divide-slate-200/55 border-t border-slate-200/55 dark:divide-neutral-700/80 dark:border-neutral-700/80">
+                  {artifacts.map((a) => (
+                    <SortableArtifactRow
+                      key={a.id}
                       artifact={a}
-                      index={i}
-                      total={artifacts.length}
+                      pid={pid}
+                      evaluations={evaluations}
+                      disabled={anyModalBusy}
+                      dragHandlesVisible={dragHandlesVisible || anyModalBusy}
                       onTogglePublished={() => void toggleArtifactPublic(a)}
-                      onMoveUp={() => void move(i, -1)}
-                      onMoveDown={() => void move(i, 1)}
-                      onDelete={() => void removeArtifact(a)}
+                      onEditTitle={
+                        isPortfolioHeading(a) || isPortfolioContentPage(a)
+                          ? () => openEditTitle(a)
+                          : undefined
+                      }
+                      onDelete={() => requestDeleteArtifact(a)}
                     />
+                  ))}
+                </ul>
+              </SortableContext>
+              {activeDragId && activeDragArtifact ? (
+                <DragOverlay dropAnimation={null}>
+                  <div className="pointer-events-none max-w-lg rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-lg dark:border-neutral-600 dark:bg-neutral-800">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-neutral-100">
+                      {activeDragArtifact.title}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-neutral-400">
+                      {isPortfolioHeading(activeDragArtifact)
+                        ? 'Heading'
+                        : isPortfolioContentPage(activeDragArtifact)
+                          ? 'Content page'
+                          : activeDragArtifact.artifactType === 'url'
+                            ? 'External link'
+                            : artifactTypeLabel(activeDragArtifact)}
+                    </p>
                   </div>
-                </li>
-              ))}
-            </ul>
+                </DragOverlay>
+              ) : null}
+            </DndContext>
           )}
 
           {artifacts.length === 0 && !addKind && (
@@ -683,6 +1097,116 @@ export default function PortfolioEditorPage() {
           )}
         </div>
       </div>
+
+      <ModuleNameModal
+        key={`portfolio-heading-${headingModalKey}`}
+        open={headingModalOpen}
+        onClose={() => {
+          if (!headingSaving) setHeadingModalOpen(false)
+        }}
+        onSave={(title) => void saveNewHeading(title)}
+        saving={headingSaving}
+        errorMessage={headingSaveError}
+        mode="heading"
+      />
+
+      <ModuleNameModal
+        key={`portfolio-content-page-${contentPageModalKey}`}
+        open={contentPageModalOpen}
+        onClose={() => {
+          if (!contentPageSaving) setContentPageModalOpen(false)
+        }}
+        onSave={(title) => void saveNewContentPage(title)}
+        saving={contentPageSaving}
+        errorMessage={contentPageSaveError}
+        mode="content_page"
+      />
+
+      {deleteConfirmArtifact ? (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={deleteDialogTitleId}
+          onClick={(e) => {
+            if (
+              e.target === e.currentTarget &&
+              deletingArtifactId !== deleteConfirmArtifact.id
+            ) {
+              setDeleteConfirmArtifact(null)
+            }
+          }}
+        >
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-600 dark:bg-neutral-800">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-600">
+              <h3
+                id={deleteDialogTitleId}
+                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+              >
+                Delete item
+              </h3>
+              <button
+                type="button"
+                onClick={() => {
+                  if (deletingArtifactId !== deleteConfirmArtifact.id) setDeleteConfirmArtifact(null)
+                }}
+                disabled={deletingArtifactId === deleteConfirmArtifact.id}
+                className="shrink-0 rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-200"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" aria-hidden />
+              </button>
+            </div>
+            <div className="p-4">
+              <p className="text-sm leading-relaxed text-slate-600 dark:text-neutral-300">
+                Remove this artifact from your portfolio? This cannot be undone.
+              </p>
+              {deleteConfirmArtifact.title ? (
+                <p className="mt-2 text-sm font-medium text-slate-900 dark:text-neutral-100">
+                  {deleteConfirmArtifact.title}
+                </p>
+              ) : null}
+              <div className="mt-5 flex flex-wrap justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmArtifact(null)}
+                  disabled={deletingArtifactId === deleteConfirmArtifact.id}
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void confirmDeleteArtifact()}
+                  disabled={deletingArtifactId === deleteConfirmArtifact.id}
+                  className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                >
+                  {deletingArtifactId === deleteConfirmArtifact.id ? 'Deleting…' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <ModuleNameModal
+        key={`portfolio-edit-title-${editTitleModalKey}`}
+        open={editTitleTarget !== null}
+        onClose={() => {
+          if (!editTitleSaving) setEditTitleTarget(null)
+        }}
+        onSave={(title) => void saveEditTitle(title)}
+        saving={editTitleSaving}
+        errorMessage={editTitleError}
+        mode={
+          editTitleTarget && isPortfolioHeading(editTitleTarget)
+            ? 'heading'
+            : 'content_page'
+        }
+        initialTitle={editTitleTarget?.title ?? ''}
+        dialogTitleOverride="Edit title"
+        submitLabelOverride="Save title"
+      />
     </LmsPage>
   )
 }
