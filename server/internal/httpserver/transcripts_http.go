@@ -281,7 +281,7 @@ func (d Deps) deliverTranscriptWebhook(ctx context.Context, requestID uuid.UUID,
 		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, requestID, msg, nil)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	_, _ = io.Copy(io.Discard, resp.Body)
 	code := resp.StatusCode
 	if code >= 200 && code < 300 {
