@@ -17,6 +17,15 @@ export type CourseCatalogSettings = {
   nicknames: Record<string, string>
 }
 
+export type PinnedCourseSummary = {
+  id: string
+  courseCode: string
+  title: string
+  heroImageUrl: string | null
+  heroImageObjectPosition: string | null
+  catalogNickname?: string | null
+}
+
 const LEGACY_VIEW_KEY = 'lextures.courseCatalogView'
 const LEGACY_HIDDEN_KEY = 'lextures.courseKanbanHiddenExpanded'
 
@@ -74,6 +83,25 @@ export async function putCourseCatalogNickname(courseId: string, nickname: strin
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ courseId, nickname }),
+  })
+  if (res.ok) return
+  const raw: unknown = await res.json().catch(() => ({}))
+  throw new Error(readApiErrorMessage(raw))
+}
+
+export async function fetchPinnedCourses(): Promise<PinnedCourseSummary[]> {
+  const res = await authorizedFetch('/api/v1/courses/catalog-pins')
+  const raw: unknown = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const data = raw as { courses?: PinnedCourseSummary[] }
+  return data.courses ?? []
+}
+
+export async function putCourseCatalogPin(courseId: string, pinned: boolean): Promise<void> {
+  const res = await authorizedFetch('/api/v1/courses/catalog-pin', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ courseId, pinned }),
   })
   if (res.ok) return
   const raw: unknown = await res.json().catch(() => ({}))

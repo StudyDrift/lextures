@@ -27,6 +27,7 @@ import { CourseCatalogKanbanBoard } from './course-catalog-kanban'
 import { courseCatalogStatusLabel } from './course-catalog-status'
 import { courseCatalogDescriptionBlurb, courseCatalogDisplayTitle } from './course-catalog-display'
 import { CourseCatalogNicknameEditor } from './course-catalog-nickname-editor'
+import { CourseCatalogPinButton } from './course-catalog-pin-button'
 import {
   DEFAULT_KANBAN_COLUMN_LABELS,
   fetchCourseCatalogSettings,
@@ -55,6 +56,7 @@ import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
 export type { CoursePublic } from '../../lib/courses-api'
 
 type CatalogNicknameChangeHandler = (courseId: string, nickname: string | null) => void
+type CatalogPinnedChangeHandler = (courseId: string, pinned: boolean) => void
 
 function CreateCourseIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
@@ -118,10 +120,12 @@ function CourseCard({
   sortable,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
   sortable?: {
     listeners: Record<string, unknown>
     setNodeRef: (node: HTMLElement | null) => void
@@ -175,6 +179,9 @@ function CourseCard({
         <span className="absolute start-3 top-3">
           <CourseCatalogStatusPill label={badgeLabel} />
         </span>
+        <span className="absolute end-3 top-3 z-10">
+          <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
+        </span>
         <div className="absolute inset-x-0 bottom-0 p-4 pt-10">
           <h2 className="text-lg font-semibold leading-snug tracking-tight text-white drop-shadow-sm line-clamp-2">
             {displayTitle}
@@ -203,10 +210,12 @@ function SortableCourseCard({
   course,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -224,6 +233,7 @@ function SortableCourseCard({
         course={course}
         suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
         onNicknameChange={onNicknameChange}
+        onPinnedChange={onPinnedChange}
         sortable={{
           listeners: listeners as Record<string, unknown>,
           setNodeRef,
@@ -240,10 +250,12 @@ function CourseListRow({
   sortable,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
   sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
@@ -312,6 +324,9 @@ function CourseListRow({
           ) : null}
           <p className="text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
         </div>
+        <div className="flex shrink-0 items-start pt-1">
+          <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+        </div>
       </div>
     </article>
   )
@@ -321,10 +336,12 @@ function SortableCourseListRow({
   course,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -341,6 +358,7 @@ function SortableCourseListRow({
       course={course}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
+      onPinnedChange={onPinnedChange}
       sortable={{
         listeners: listeners as Record<string, unknown>,
         setNodeRef,
@@ -356,10 +374,12 @@ function CourseGalleryTile({
   sortable,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
   sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
@@ -407,6 +427,9 @@ function CourseGalleryTile({
         <span className="absolute start-2 top-2">
           <CourseCatalogStatusPill label={badgeLabel} />
         </span>
+        <span className="absolute end-2 top-2 z-10">
+          <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
+        </span>
         <h2 className="absolute inset-x-0 bottom-0 p-3 text-sm font-semibold leading-snug text-white drop-shadow-sm line-clamp-2">
           {displayTitle}
         </h2>
@@ -422,10 +445,12 @@ function SortableCourseGalleryTile({
   course,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -442,6 +467,7 @@ function SortableCourseGalleryTile({
       course={course}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
+      onPinnedChange={onPinnedChange}
       sortable={{
         listeners: listeners as Record<string, unknown>,
         setNodeRef,
@@ -472,10 +498,12 @@ function CourseTableRow({
   sortable,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
   sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
@@ -494,24 +522,27 @@ function CourseTableRow({
         .join(' ')}
       {...(sortable ? sortable.listeners : {})}
     >
-      <div className="min-w-0">
-        <CourseCatalogNicknameEditor
-          course={course}
-          titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
-          onNicknameChange={onNicknameChange}
-        />
-        <Link
-          to={courseHref}
-          className="mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
-          onClick={(e) => {
-            if (!suppressNavigateAfterDragRef?.current) return
-            e.preventDefault()
-            e.stopPropagation()
-            suppressNavigateAfterDragRef.current = false
-          }}
-        >
-          Open course
-        </Link>
+      <div className="flex min-w-0 items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <CourseCatalogNicknameEditor
+            course={course}
+            titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
+            onNicknameChange={onNicknameChange}
+          />
+          <Link
+            to={courseHref}
+            className="mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
+            onClick={(e) => {
+              if (!suppressNavigateAfterDragRef?.current) return
+              e.preventDefault()
+              e.stopPropagation()
+              suppressNavigateAfterDragRef.current = false
+            }}
+          >
+            Open course
+          </Link>
+        </div>
+        <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
       </div>
       <div className="self-center">
         <CourseCatalogStatusPill label={badgeLabel} />
@@ -531,10 +562,12 @@ function SortableCourseTableRow({
   course,
   suppressNavigateAfterDragRef,
   onNicknameChange,
+  onPinnedChange,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
+  onPinnedChange: CatalogPinnedChangeHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -551,6 +584,7 @@ function SortableCourseTableRow({
       course={course}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
+      onPinnedChange={onPinnedChange}
       sortable={{
         listeners: listeners as Record<string, unknown>,
         setNodeRef,
@@ -635,6 +669,13 @@ export default function Courses() {
   const handleNicknameChange = useCallback((courseId: string, nickname: string | null) => {
     setCourses((prev) =>
       prev?.map((course) => (course.id === courseId ? { ...course, catalogNickname: nickname } : course)) ?? prev,
+    )
+  }, [])
+
+  const handlePinnedChange = useCallback((courseId: string, pinned: boolean) => {
+    setCourses(
+      (prev) =>
+        prev?.map((course) => (course.id === courseId ? { ...course, catalogPinned: pinned } : course)) ?? prev,
     )
   }, [])
 
@@ -790,6 +831,7 @@ export default function Courses() {
               course={course}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
+              onPinnedChange={handlePinnedChange}
             />
           )
         case 'gallery':
@@ -799,6 +841,7 @@ export default function Courses() {
               course={course}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
+              onPinnedChange={handlePinnedChange}
             />
           )
         case 'table':
@@ -808,6 +851,7 @@ export default function Courses() {
               course={course}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
+              onPinnedChange={handlePinnedChange}
             />
           )
         case 'list':
@@ -817,6 +861,7 @@ export default function Courses() {
               course={course}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
+              onPinnedChange={handlePinnedChange}
             />
           )
         case 'status':
@@ -827,7 +872,7 @@ export default function Courses() {
         }
       }
     },
-    [catalogView, handleNicknameChange],
+    [catalogView, handleNicknameChange, handlePinnedChange],
   )
 
   const renderCourseItems = useCallback(
@@ -986,6 +1031,7 @@ export default function Courses() {
           onHiddenColumnExpandedChange={handleHiddenColumnExpandedChange}
           onColumnLabelsChange={handleKanbanColumnLabelsChange}
           onNicknameChange={handleNicknameChange}
+          onPinnedChange={handlePinnedChange}
           onBoardChange={handleKanbanBoardChange}
         />
       )}

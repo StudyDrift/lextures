@@ -194,6 +194,8 @@ export type CoursePublic = {
   gradeLevel?: string | null
   /** Per-user catalog nickname from GET /api/v1/courses. */
   catalogNickname?: string | null
+  /** Pinned for quick access from the sidebar. */
+  catalogPinned?: boolean
   /** Manual kanban column override for the signed-in user. */
   kanbanColumnId?: 'todo' | 'in-progress' | 'done' | 'hidden' | null
   kanbanSortOrder?: number | null

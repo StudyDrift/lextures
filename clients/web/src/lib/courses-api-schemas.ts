@@ -80,6 +80,7 @@ export const courseSchema = z
     termId: z.string().nullable().optional(),
     gradeLevel: z.string().nullable().optional(),
     catalogNickname: z.string().nullable().optional(),
+    catalogPinned: z.boolean().optional(),
     kanbanColumnId: z.enum(['todo', 'in-progress', 'done', 'hidden']).nullable().optional(),
     kanbanSortOrder: z.number().int().nullable().optional(),
     term: z

@@ -79,6 +79,7 @@ type CoursePublic struct {
 	ViewerEnrollmentState         *string          `json:"viewerEnrollmentState,omitempty"`
 	ViewerEnrollmentStateChangedAt *time.Time      `json:"viewerEnrollmentStateChangedAt,omitempty"`
 	CatalogNickname               *string          `json:"catalogNickname,omitempty"`
+	CatalogPinned                 bool             `json:"catalogPinned,omitempty"`
 	KanbanColumnID                *string          `json:"kanbanColumnId,omitempty"`
 	KanbanSortOrder               *int             `json:"kanbanSortOrder,omitempty"`
 }

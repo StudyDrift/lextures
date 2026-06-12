@@ -44,6 +44,17 @@ type UserKanbanPlacement struct {
 	SortOrder int
 }
 
+type PinnedCourseSummary struct {
+	ID                      uuid.UUID `json:"id"`
+	CourseCode              string    `json:"courseCode"`
+	Title                   string    `json:"title"`
+	HeroImageURL            *string   `json:"heroImageUrl"`
+	HeroImageObjectPosition *string   `json:"heroImageObjectPosition"`
+	CatalogNickname         *string   `json:"catalogNickname,omitempty"`
+}
+
+const maxCatalogPins = 20
+
 func defaultCatalogPrefs() UserCatalogPrefs {
 	labels := make(map[string]string, len(DefaultKanbanColumnLabels))
 	for k, v := range DefaultKanbanColumnLabels {
@@ -329,7 +340,134 @@ VALUES ($1, $2, $3)
 	return tx.Commit(ctx)
 }
 
-// AttachUserCatalogMeta merges nicknames and kanban placement onto listed courses.
+// ListUserCatalogPinIDs returns pinned course ids in display order.
+func ListUserCatalogPinIDs(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]uuid.UUID, error) {
+	rows, err := pool.Query(ctx, `
+SELECT course_id
+FROM course.user_course_catalog_pins
+WHERE user_id = $1
+ORDER BY sort_order ASC, updated_at ASC
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []uuid.UUID
+	for rows.Next() {
+		var courseID uuid.UUID
+		if err := rows.Scan(&courseID); err != nil {
+			return nil, err
+		}
+		out = append(out, courseID)
+	}
+	return out, rows.Err()
+}
+
+func userIsEnrolledInCatalog(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) (bool, error) {
+	var enrolled bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1 FROM course.course_enrollments e
+  WHERE e.user_id = $1 AND e.course_id = $2
+    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+)
+`, userID, courseID).Scan(&enrolled)
+	return enrolled, err
+}
+
+// SetUserCatalogPin pins or unpins one enrolled course for the user.
+func SetUserCatalogPin(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID, pinned bool) error {
+	if !pinned {
+		_, err := pool.Exec(ctx, `
+DELETE FROM course.user_course_catalog_pins
+WHERE user_id = $1 AND course_id = $2
+`, userID, courseID)
+		return err
+	}
+	enrolled, err := userIsEnrolledInCatalog(ctx, pool, userID, courseID)
+	if err != nil {
+		return err
+	}
+	if !enrolled {
+		return fmt.Errorf("course is not in your catalog")
+	}
+	var count int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*) FROM course.user_course_catalog_pins WHERE user_id = $1
+`, userID).Scan(&count); err != nil {
+		return err
+	}
+	if count >= maxCatalogPins {
+		return fmt.Errorf("pin limit reached")
+	}
+	var already bool
+	if err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1 FROM course.user_course_catalog_pins WHERE user_id = $1 AND course_id = $2
+)
+`, userID, courseID).Scan(&already); err != nil {
+		return err
+	}
+	if already {
+		return nil
+	}
+	var nextSort int
+	if err := pool.QueryRow(ctx, `
+SELECT COALESCE(MAX(sort_order), -1) + 1
+FROM course.user_course_catalog_pins
+WHERE user_id = $1
+`, userID).Scan(&nextSort); err != nil {
+		return err
+	}
+	_, err = pool.Exec(ctx, `
+INSERT INTO course.user_course_catalog_pins (user_id, course_id, sort_order, updated_at)
+VALUES ($1, $2, $3, now())
+`, userID, courseID, nextSort)
+	return err
+}
+
+// ListUserPinnedCourseSummaries returns pinned enrolled courses for sidebar shortcuts.
+func ListUserPinnedCourseSummaries(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]PinnedCourseSummary, error) {
+	rows, err := pool.Query(ctx, `
+SELECT
+    c.id,
+    c.course_code,
+    c.title,
+    c.hero_image_url,
+    c.hero_image_object_position,
+    n.nickname
+FROM course.user_course_catalog_pins p
+JOIN course.courses c ON c.id = p.course_id
+JOIN course.course_enrollments e ON e.course_id = c.id AND e.user_id = p.user_id
+LEFT JOIN course.user_course_catalog_nicknames n ON n.user_id = p.user_id AND n.course_id = c.id
+WHERE p.user_id = $1
+  AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+  AND NOT c.archived
+ORDER BY p.sort_order ASC, p.updated_at ASC
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []PinnedCourseSummary
+	for rows.Next() {
+		var item PinnedCourseSummary
+		if err := rows.Scan(
+			&item.ID,
+			&item.CourseCode,
+			&item.Title,
+			&item.HeroImageURL,
+			&item.HeroImageObjectPosition,
+			&item.CatalogNickname,
+		); err != nil {
+			return nil, err
+		}
+		out = append(out, item)
+	}
+	return out, rows.Err()
+}
+
+// AttachUserCatalogMeta merges nicknames, kanban placement, and pin state onto listed courses.
 func AttachUserCatalogMeta(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courses []CoursePublic) error {
 	if len(courses) == 0 {
 		return nil
@@ -342,9 +480,17 @@ func AttachUserCatalogMeta(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 	if err != nil {
 		return err
 	}
+	pinIDs, err := ListUserCatalogPinIDs(ctx, pool, userID)
+	if err != nil {
+		return err
+	}
 	placementByCourse := map[string]UserKanbanPlacement{}
 	for _, p := range placements {
 		placementByCourse[p.CourseID.String()] = p
+	}
+	pinned := map[string]struct{}{}
+	for _, id := range pinIDs {
+		pinned[id.String()] = struct{}{}
 	}
 	for i := range courses {
 		if nick, ok := nicknames[courses[i].ID]; ok {
@@ -356,6 +502,9 @@ func AttachUserCatalogMeta(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 			sortOrder := p.SortOrder
 			courses[i].KanbanColumnID = &col
 			courses[i].KanbanSortOrder = &sortOrder
+		}
+		if _, ok := pinned[courses[i].ID]; ok {
+			courses[i].CatalogPinned = true
 		}
 	}
 	return nil
