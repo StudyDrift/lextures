@@ -17,6 +17,7 @@ import StudentProgressPage from './pages/lms/student-progress-page'
 import CourseStudentReportsPage from './pages/lms/course-student-reports-page'
 import CourseMyGrades from './pages/lms/course-my-grades'
 import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
+import AdminCCRAchievementsPage from './pages/lms/admin-ccr-achievements-page'
 import AccommodationAuditPage from './pages/lms/accommodation-audit-page'
 import AdminQuarantinePage from './pages/lms/admin-quarantine-page'
 import CourseCreate from './pages/lms/course-create'
@@ -225,6 +226,7 @@ export default function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
           <Route path="/admin/accommodations/audit" element={<AccommodationAuditPage />} />
+          <Route path="/admin/ccr/achievements" element={<AdminCCRAchievementsPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/catalog" element={<CourseCatalogPage />} />
           <Route path="/portfolios" element={<MyPortfoliosPage />} />

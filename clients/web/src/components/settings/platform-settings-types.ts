@@ -34,6 +34,7 @@ export type PlatformSettingsPayload = {
   accommodationsEngineEnabled: boolean
   ffAccommodationsEngine: boolean
   ffBookstoreIntegration: boolean
+  ffCoCurricularTranscript: boolean
   ffEportfolio: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean

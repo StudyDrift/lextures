@@ -75,3 +75,27 @@ export async function verifyCCRShareToken(token: string): Promise<CCRVerifyRespo
   }
   return (await res.json()) as CCRVerifyResponse
 }
+
+export type CreateCCRAchievementBody = {
+  title: string
+  description?: string
+  issuedAt?: string
+  evidenceUrl?: string
+  outcomeTags?: string[]
+}
+
+export async function createAdminCCRAchievement(
+  studentUserId: string,
+  body: CreateCCRAchievementBody,
+): Promise<CCRAchievement> {
+  const res = await authorizedFetch(`/api/v1/admin/students/${encodeURIComponent(studentUserId)}/ccr/achievements`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    const msg = await res.text()
+    throw new Error(msg || 'Failed to add achievement.')
+  }
+  return (await res.json()) as CCRAchievement
+}

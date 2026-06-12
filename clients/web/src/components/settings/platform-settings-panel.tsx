@@ -56,6 +56,7 @@ function emptyForm(): PlatformSettingsPayload {
     accommodationsEngineEnabled: false,
     ffAccommodationsEngine: false,
     ffBookstoreIntegration: false,
+    ffCoCurricularTranscript: false,
     ffEportfolio: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,

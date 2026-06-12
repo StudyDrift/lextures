@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { fetchMyCCR, generateMyCCR, verifyCCRShareToken } from '../ccr-api'
+import { fetchMyCCR, generateMyCCR, verifyCCRShareToken, createAdminCCRAchievement } from '../ccr-api'
 
 vi.mock('../api', () => ({
   authorizedFetch: vi.fn(),
@@ -47,6 +47,32 @@ describe('generateMyCCR', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sharePublicly: true }),
+    })
+  })
+})
+
+describe('createAdminCCRAchievement', () => {
+  beforeEach(() => {
+    mockFetch.mockReset()
+  })
+
+  it('posts achievement to admin endpoint', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: 'ach-1',
+        type: 'extracurricular',
+        title: 'Peer mentor',
+        description: '',
+        issuedAt: '2026-01-01T00:00:00Z',
+      }),
+    })
+    const res = await createAdminCCRAchievement('user-123', { title: 'Peer mentor' })
+    expect(res.title).toBe('Peer mentor')
+    expect(mockFetch).toHaveBeenCalledWith('/api/v1/admin/students/user-123/ccr/achievements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Peer mentor' }),
     })
   })
 })

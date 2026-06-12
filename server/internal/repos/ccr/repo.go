@@ -58,6 +58,17 @@ type CourseCompletion struct {
 	IssuedAt    time.Time
 }
 
+// PortfolioMilestone is a derived portfolio artifact eligible for the CLR (plan 14.12 → 14.13).
+type PortfolioMilestone struct {
+	ArtifactID   uuid.UUID
+	Title        string
+	Description  string
+	IssuedAt     time.Time
+	PublicSlug   *string
+	IsPublic     bool
+	OutcomeNames []string
+}
+
 // ListAchievements returns stored achievements for a user ordered by issued_at desc.
 func ListAchievements(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]Achievement, error) {
 	rows, err := pool.Query(ctx, `
@@ -93,6 +104,56 @@ RETURNING id, user_id, achievement_type, source_id, title, description, issued_a
 		return nil, err
 	}
 	return &out, nil
+}
+
+// ListPortfolioMilestones returns portfolio artifacts with outcome tags or capstone evaluations.
+func ListPortfolioMilestones(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]PortfolioMilestone, error) {
+	rows, err := pool.Query(ctx, `
+SELECT
+    a.id,
+    a.title,
+    a.description,
+    COALESCE(MAX(e.updated_at), a.updated_at) AS issued_at,
+    p.public_slug,
+    a.is_public,
+    COALESCE(
+        array_agg(DISTINCT lo.title) FILTER (WHERE lo.title IS NOT NULL),
+        '{}'
+    ) AS outcome_names
+FROM portfolio.portfolio_artifacts a
+JOIN portfolio.portfolios p ON p.id = a.portfolio_id
+LEFT JOIN portfolio.portfolio_artifact_evaluations e ON e.artifact_id = a.id
+LEFT JOIN LATERAL unnest(a.outcome_ids) AS oid(outcome_id) ON TRUE
+LEFT JOIN course.course_learning_outcomes lo ON lo.id = oid.outcome_id
+WHERE p.owner_id = $1
+  AND a.artifact_type <> 'heading'
+  AND (
+      cardinality(a.outcome_ids) > 0
+      OR EXISTS (
+          SELECT 1
+          FROM portfolio.portfolio_artifact_evaluations ev
+          WHERE ev.artifact_id = a.id
+      )
+  )
+GROUP BY a.id, a.title, a.description, a.updated_at, p.public_slug, a.is_public
+ORDER BY issued_at DESC
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []PortfolioMilestone
+	for rows.Next() {
+		var row PortfolioMilestone
+		if err := rows.Scan(
+			&row.ArtifactID, &row.Title, &row.Description, &row.IssuedAt,
+			&row.PublicSlug, &row.IsPublic, &row.OutcomeNames,
+		); err != nil {
+			return nil, err
+		}
+		out = append(out, row)
+	}
+	return out, rows.Err()
 }
 
 // ListCourseCompletions returns latest final grade per enrollment for a student.
