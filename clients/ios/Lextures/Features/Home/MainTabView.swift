@@ -1,34 +1,161 @@
 import SwiftUI
 
-/// Post-auth shell: Dashboard, Courses, Notebooks, Inbox tabs.
-struct MainTabView: View {
-    @Environment(AuthSession.self) private var session
-    @State private var unreadInbox = 0
+// MARK: - Shell state
 
-    var body: some View {
-        TabView {
-            DashboardView(unreadInbox: $unreadInbox)
-                .tabItem { Label("Home", systemImage: "house.fill") }
+enum AppTab: String, CaseIterable, Identifiable {
+    case home, courses, notebooks, inbox, profile
 
-            CoursesListView()
-                .tabItem { Label("Courses", systemImage: "books.vertical.fill") }
+    var id: String { rawValue }
 
-            NotebooksListView()
-                .tabItem { Label("Notebooks", systemImage: "square.and.pencil") }
-
-            InboxView(unreadInbox: $unreadInbox)
-                .tabItem { Label("Inbox", systemImage: "tray.fill") }
-                .badge(unreadInbox)
-        }
-        .tint(LexturesTheme.primary)
-        .task {
-            await refreshUnread()
+    var label: String {
+        switch self {
+        case .home: return "Home"
+        case .courses: return "Courses"
+        case .notebooks: return "Notebooks"
+        case .inbox: return "Inbox"
+        case .profile: return "Profile"
         }
     }
 
-    private func refreshUnread() async {
-        guard let token = session.accessToken else { return }
-        unreadInbox = (try? await LMSAPI.fetchUnreadInboxCount(accessToken: token)) ?? unreadInbox
+    var systemImage: String {
+        switch self {
+        case .home: return "house.fill"
+        case .courses: return "books.vertical.fill"
+        case .notebooks: return "square.and.pencil"
+        case .inbox: return "tray.fill"
+        case .profile: return "person.fill"
+        }
+    }
+}
+
+/// Cross-tab state: selected tab, viewer profile, and unread counters.
+/// Single source for the tab badge, Home stat card, and notification bell dot.
+@MainActor
+@Observable
+final class AppShellModel {
+    var selectedTab: AppTab = .home
+    var profile: MeProfile?
+    var unreadInbox = 0
+    var unreadNotifications = 0
+
+    func refresh(accessToken: String?) async {
+        guard let token = accessToken else { return }
+        async let me = try? LMSAPI.fetchMe(accessToken: token)
+        async let inbox = try? LMSAPI.fetchUnreadInboxCount(accessToken: token)
+        async let notifications = try? LMSAPI.fetchNotifications(accessToken: token)
+        if let me = await me { profile = me }
+        if let inbox = await inbox { unreadInbox = inbox }
+        if let page = await notifications { unreadNotifications = page.unreadCount }
+    }
+}
+
+/// Post-auth shell: Home, Courses, Notebooks, Inbox, Profile behind a floating pill tab bar.
+struct MainTabView: View {
+    @Environment(AuthSession.self) private var session
+    @State private var shell = AppShellModel()
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            tabContent
+            LexturesTabBar(shell: shell)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 4)
+        }
+        .environment(shell)
+        .task {
+            await shell.refresh(accessToken: session.accessToken)
+        }
+    }
+
+    /// Keeps every tab's view (and its NavigationStack) alive so switching
+    /// tabs never loses scroll position or navigation state.
+    private var tabContent: some View {
+        ZStack {
+            pane(.home) { DashboardView() }
+            pane(.courses) { CoursesListView() }
+            pane(.notebooks) { NotebooksListView() }
+            pane(.inbox) { InboxView() }
+            pane(.profile) { ProfileView() }
+        }
+    }
+
+    private func pane<Content: View>(_ tab: AppTab, @ViewBuilder content: () -> Content) -> some View {
+        content()
+            .safeAreaInset(edge: .bottom) {
+                Color.clear.frame(height: 70)
+            }
+            .opacity(shell.selectedTab == tab ? 1 : 0)
+            .allowsHitTesting(shell.selectedTab == tab)
+            .accessibilityHidden(shell.selectedTab != tab)
+    }
+}
+
+// MARK: - Floating pill tab bar
+
+/// Deep-teal floating capsule: selected tab gets a cream circular "puck".
+struct LexturesTabBar: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Bindable var shell: AppShellModel
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(AppTab.allCases) { tab in
+                Button {
+                    withAnimation(.spring(duration: 0.3)) {
+                        shell.selectedTab = tab
+                    }
+                } label: {
+                    tabIcon(tab)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tab.label)
+                .accessibilityAddTraits(shell.selectedTab == tab ? [.isSelected] : [])
+            }
+        }
+        .padding(.vertical, 9)
+        .padding(.horizontal, 10)
+        .background(
+            Capsule(style: .continuous)
+                .fill(colorScheme == .dark ? LexturesTheme.cardBackgroundDark : LexturesTheme.primaryDeep)
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(
+                    colorScheme == .dark ? LexturesTheme.fieldBorderDark : .white.opacity(0.08),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: LexturesTheme.primaryDeep.opacity(colorScheme == .dark ? 0 : 0.35), radius: 16, y: 8)
+    }
+
+    @ViewBuilder
+    private func tabIcon(_ tab: AppTab) -> some View {
+        let selected = shell.selectedTab == tab
+        ZStack(alignment: .topTrailing) {
+            Image(systemName: tab.systemImage)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(
+                    selected
+                        ? LexturesTheme.primaryDeep
+                        : (colorScheme == .dark ? LexturesTheme.textSecondaryDark : .white.opacity(0.72))
+                )
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle().fill(selected ? AnyShapeStyle(LexturesTheme.brandCream) : AnyShapeStyle(.clear))
+                )
+
+            if tab == .inbox && shell.unreadInbox > 0 {
+                Text(shell.unreadInbox > 99 ? "99+" : "\(shell.unreadInbox)")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(LexturesTheme.coral)
+                    .clipShape(Capsule())
+                    .offset(x: 4, y: -2)
+            }
+        }
     }
 }
 
@@ -153,5 +280,140 @@ struct LMSCoverTile: View {
                     .font(.system(size: size * 0.4, weight: .medium))
                     .foregroundStyle(.white)
             )
+    }
+}
+
+/// Horizontally scrolling pill selector — solid deep teal when selected,
+/// white card with hairline border otherwise (inspiration: segmented chips).
+struct LMSSegmentedChips<Option: Hashable>: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let options: [Option]
+    @Binding var selection: Option
+    let label: (Option) -> String
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(options, id: \.self) { option in
+                    let selected = option == selection
+                    Button {
+                        withAnimation(.easeOut(duration: 0.15)) { selection = option }
+                    } label: {
+                        Text(label(option))
+                            .font(.subheadline.weight(selected ? .semibold : .regular))
+                            .padding(.horizontal, 15)
+                            .padding(.vertical, 8)
+                            .background(
+                                selected
+                                    ? AnyShapeStyle(LexturesTheme.accent(for: colorScheme))
+                                    : AnyShapeStyle(LexturesTheme.cardBackground(for: colorScheme))
+                            )
+                            .foregroundStyle(
+                                selected
+                                    ? (colorScheme == .dark ? LexturesTheme.primaryDeep : .white)
+                                    : LexturesTheme.textSecondary(for: colorScheme)
+                            )
+                            .clipShape(Capsule())
+                            .overlay(
+                                Capsule().stroke(
+                                    selected ? .clear : LexturesTheme.fieldBorder(for: colorScheme),
+                                    lineWidth: 1
+                                )
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.vertical, 2)
+        }
+    }
+}
+
+/// Initials avatar chip; tapping jumps to the Profile tab.
+struct LMSAvatarButton: View {
+    @Environment(AppShellModel.self) private var shell
+    var size: CGFloat = 34
+
+    var body: some View {
+        Button {
+            shell.selectedTab = .profile
+        } label: {
+            Circle()
+                .fill(LexturesTheme.heroGradient)
+                .frame(width: size, height: size)
+                .overlay(
+                    Text(shell.profile?.initials ?? "··")
+                        .font(.system(size: size * 0.36, weight: .bold))
+                        .foregroundStyle(.white)
+                )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Profile")
+    }
+}
+
+/// Card-shaped redacted placeholder shown while a list loads.
+struct LMSSkeletonCard: View {
+    @Environment(\.colorScheme) private var colorScheme
+    var lines: Int = 2
+
+    var body: some View {
+        LMSCard {
+            HStack(spacing: 12) {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(LexturesTheme.fieldBorder(for: colorScheme).opacity(0.6))
+                    .frame(width: 44, height: 44)
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(0 ..< lines, id: \.self) { index in
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(LexturesTheme.fieldBorder(for: colorScheme).opacity(index == 0 ? 0.7 : 0.45))
+                            .frame(width: index == 0 ? 180 : 120, height: 11)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .redacted(reason: .placeholder)
+        .accessibilityHidden(true)
+    }
+}
+
+/// Stack of skeleton cards for list screens.
+struct LMSSkeletonList: View {
+    var count: Int = 4
+
+    var body: some View {
+        VStack(spacing: 12) {
+            ForEach(0 ..< count, id: \.self) { _ in
+                LMSSkeletonCard()
+            }
+        }
+    }
+}
+
+/// Small circular progress ring (course completion) — echoes the health-app ring.
+struct LMSProgressRing: View {
+    @Environment(\.colorScheme) private var colorScheme
+    let progress: Double // 0...1
+    var size: CGFloat = 38
+    var tint: Color?
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(0.8), lineWidth: 4)
+            Circle()
+                .trim(from: 0, to: max(0.02, min(1, progress)))
+                .stroke(
+                    tint ?? LexturesTheme.accent(for: colorScheme),
+                    style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+            Text("\(Int((progress * 100).rounded()))")
+                .font(.system(size: size * 0.3, weight: .bold, design: .rounded))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+        }
+        .frame(width: size, height: size)
+        .accessibilityLabel("\(Int((progress * 100).rounded())) percent complete")
     }
 }

@@ -225,3 +225,165 @@ fun LmsChipRow(
         }
     }
 }
+
+/**
+ * Segmented chip row — solid deep teal when selected, white card with hairline
+ * border otherwise. Same look as iOS `LMSSegmentedChips`.
+ */
+@Composable
+fun LmsSegmentedChips(
+    options: List<Pair<String, String>>, // id to label
+    selectedId: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dark = isDarkTheme()
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        options.forEach { (id, label) ->
+            val selected = id == selectedId
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = when {
+                    selected && dark -> LexturesColors.PrimaryDeep
+                    selected -> Color.White
+                    else -> textSecondary()
+                },
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(if (selected) accentColor() else cardBackground())
+                    .border(
+                        1.dp,
+                        if (selected) Color.Transparent else fieldBorder(),
+                        RoundedCornerShape(50),
+                    )
+                    .clickable { onSelect(id) }
+                    .padding(horizontal = 15.dp, vertical = 8.dp),
+            )
+        }
+    }
+}
+
+/** Card-shaped placeholder shown while a list loads. */
+@Composable
+fun LmsSkeletonCard(modifier: Modifier = Modifier) {
+    LmsCard(modifier = modifier) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(fieldBorder().copy(alpha = 0.6f)),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                Box(
+                    modifier = Modifier
+                        .width(180.dp)
+                        .height(11.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(fieldBorder().copy(alpha = 0.7f)),
+                )
+                Box(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(11.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(fieldBorder().copy(alpha = 0.45f)),
+                )
+            }
+        }
+    }
+}
+
+/** Stack of skeleton cards for list screens. */
+@Composable
+fun LmsSkeletonList(count: Int = 4, modifier: Modifier = Modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        repeat(count) { LmsSkeletonCard() }
+    }
+}
+
+/** Small circular progress ring (e.g. overall grade) — echoes the health-app ring. */
+@Composable
+fun LmsProgressRing(
+    progress: Float, // 0f..1f
+    modifier: Modifier = Modifier,
+    size: Int = 38,
+    tint: Color? = null,
+) {
+    val ringColor = tint ?: accentColor()
+    val track = fieldBorder().copy(alpha = 0.8f)
+    Box(modifier = modifier.size(size.dp), contentAlignment = Alignment.Center) {
+        androidx.compose.foundation.Canvas(modifier = Modifier.size(size.dp)) {
+            val stroke = androidx.compose.ui.graphics.drawscope.Stroke(
+                width = 4.dp.toPx(),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round,
+            )
+            val inset = 2.dp.toPx()
+            val arcSize = androidx.compose.ui.geometry.Size(
+                this.size.width - inset * 2,
+                this.size.height - inset * 2,
+            )
+            drawArc(
+                color = track,
+                startAngle = 0f,
+                sweepAngle = 360f,
+                useCenter = false,
+                topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+                size = arcSize,
+                style = stroke,
+            )
+            drawArc(
+                color = ringColor,
+                startAngle = -90f,
+                sweepAngle = 360f * progress.coerceIn(0.02f, 1f),
+                useCenter = false,
+                topLeft = androidx.compose.ui.geometry.Offset(inset, inset),
+                size = arcSize,
+                style = stroke,
+            )
+        }
+        Text(
+            text = "${(progress * 100).toInt()}",
+            fontSize = (size * 0.3).sp,
+            fontWeight = FontWeight.Bold,
+            color = textPrimary(),
+        )
+    }
+}
+
+/** Initials avatar chip on the hero gradient; tapping jumps to the Profile tab. */
+@Composable
+fun LmsAvatarChip(
+    initials: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Int = 34,
+) {
+    Box(
+        modifier = modifier
+            .size(size.dp)
+            .clip(CircleShape)
+            .background(com.lextures.android.core.design.HeroBrush)
+            .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = initials,
+            fontSize = (size * 0.36).sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+        )
+    }
+}

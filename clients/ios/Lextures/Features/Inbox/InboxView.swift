@@ -3,8 +3,8 @@ import SwiftUI
 /// Mailbox folders, search, message list, and compose (parity with web inbox).
 struct InboxView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
-    @Binding var unreadInbox: Int
 
     @State private var folder: MailboxFolder = .inbox
     @State private var messages: [MailboxMessage] = []
@@ -86,40 +86,13 @@ struct InboxView: View {
     }
 
     private var folderPicker: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(MailboxFolder.allCases) { mailboxFolder in
-                    Button {
-                        folder = mailboxFolder
-                    } label: {
-                        Label(mailboxFolder.label, systemImage: mailboxFolder.systemImage)
-                            .font(.caption.weight(folder == mailboxFolder ? .semibold : .regular))
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 7)
-                            .background(
-                                folder == mailboxFolder
-                                    ? LexturesTheme.primary.opacity(0.14)
-                                    : LexturesTheme.cardBackground(for: colorScheme)
-                            )
-                            .foregroundStyle(
-                                folder == mailboxFolder ? LexturesTheme.primary : LexturesTheme.textSecondary(for: colorScheme)
-                            )
-                            .clipShape(Capsule())
-                            .overlay(
-                                Capsule().stroke(
-                                    folder == mailboxFolder
-                                        ? LexturesTheme.primary.opacity(0.4)
-                                        : LexturesTheme.fieldBorder(for: colorScheme),
-                                    lineWidth: 1
-                                )
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-        }
+        LMSSegmentedChips(
+            options: MailboxFolder.allCases,
+            selection: $folder,
+            label: \.label
+        )
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
     }
 
     private var messageList: some View {
@@ -185,7 +158,7 @@ struct InboxView: View {
 
     private func refreshUnread() async {
         guard let token = session.accessToken else { return }
-        unreadInbox = (try? await LMSAPI.fetchUnreadInboxCount(accessToken: token)) ?? unreadInbox
+        shell.unreadInbox = (try? await LMSAPI.fetchUnreadInboxCount(accessToken: token)) ?? shell.unreadInbox
     }
 }
 

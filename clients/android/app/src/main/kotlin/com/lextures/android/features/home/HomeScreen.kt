@@ -1,19 +1,26 @@
 package com.lextures.android.features.home
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,90 +31,174 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
-import com.lextures.android.core.design.accentColor
-import com.lextures.android.core.design.cardBackground
+import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.sceneBackground
-import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.MeProfile
 import com.lextures.android.features.courses.CoursesTab
 import com.lextures.android.features.dashboard.DashboardTab
 import com.lextures.android.features.inbox.InboxTab
 import com.lextures.android.features.notebooks.NotebooksTab
+import com.lextures.android.features.profile.ProfileTab
 
-private enum class HomeTab(val label: String, val icon: ImageVector) {
+enum class HomeTab(val label: String, val icon: ImageVector) {
     Dashboard("Home", Icons.Default.Home),
     Courses("Courses", Icons.AutoMirrored.Filled.MenuBook),
     Notebooks("Notebooks", Icons.Default.EditNote),
     Inbox("Inbox", Icons.Default.Inbox),
+    Profile("Profile", Icons.Default.Person),
 }
 
-/** Post-auth shell: Dashboard, Courses, Notebooks, Inbox tabs. */
+/**
+ * Cross-tab state: viewer profile and unread counters. Single source for the
+ * tab badge, Home stat card, and notification bell dot.
+ */
+class HomeShellState {
+    var profile by mutableStateOf<MeProfile?>(null)
+    var unreadInbox by mutableIntStateOf(0)
+    var unreadNotifications by mutableIntStateOf(0)
+
+    suspend fun refresh(accessToken: String?) {
+        val token = accessToken ?: return
+        runCatching { LmsApi.fetchMe(token) }.getOrNull()?.let { profile = it }
+        runCatching { LmsApi.fetchUnreadInboxCount(token) }.getOrNull()?.let { unreadInbox = it }
+        runCatching { LmsApi.fetchNotifications(token) }.getOrNull()?.let {
+            unreadNotifications = it.unreadCount
+        }
+    }
+}
+
+/** Post-auth shell: Home, Courses, Notebooks, Inbox, Profile behind a floating pill tab bar. */
 @Composable
 fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
     var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Dashboard.name) }
-    var unreadInbox by remember { mutableIntStateOf(0) }
+    val shell = remember { HomeShellState() }
     val accessToken by session.accessToken.collectAsState()
 
     LaunchedEffect(accessToken) {
-        val token = accessToken ?: return@LaunchedEffect
-        unreadInbox = runCatching { LmsApi.fetchUnreadInboxCount(token) }.getOrDefault(unreadInbox)
+        shell.refresh(accessToken)
     }
 
-    Scaffold(
-        modifier = modifier,
-        containerColor = sceneBackground(),
-        bottomBar = {
-            NavigationBar(containerColor = cardBackground()) {
-                HomeTab.entries.forEach { tab ->
-                    NavigationBarItem(
-                        selected = selectedTab == tab.name,
-                        onClick = { selectedTab = tab.name },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = accentColor(),
-                            selectedTextColor = accentColor(),
-                            unselectedIconColor = textSecondary(),
-                            unselectedTextColor = textSecondary(),
-                            indicatorColor = LexturesColors.BrandTeal.copy(alpha = 0.18f),
-                        ),
-                        icon = {
-                            if (tab == HomeTab.Inbox && unreadInbox > 0) {
-                                BadgedBox(
-                                    badge = {
-                                        Badge(containerColor = LexturesColors.Coral) { Text("$unreadInbox") }
-                                    },
-                                ) {
-                                    Icon(tab.icon, contentDescription = tab.label)
-                                }
-                            } else {
-                                Icon(tab.icon, contentDescription = tab.label)
-                            }
-                        },
-                        label = { Text(tab.label) },
-                    )
-                }
-            }
-        },
-    ) { padding ->
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(sceneBackground()),
+    ) {
+        // Content leaves room for the floating bar so list ends stay reachable.
         val contentModifier = Modifier
             .fillMaxSize()
-            .padding(padding)
+            .padding(bottom = 84.dp)
         when (selectedTab) {
             HomeTab.Dashboard.name -> DashboardTab(
                 session = session,
-                unreadInbox = unreadInbox,
+                shell = shell,
+                onOpenProfile = { selectedTab = HomeTab.Profile.name },
                 modifier = contentModifier,
             )
             HomeTab.Courses.name -> CoursesTab(session = session, modifier = contentModifier)
             HomeTab.Notebooks.name -> NotebooksTab(session = session, modifier = contentModifier)
             HomeTab.Inbox.name -> InboxTab(
                 session = session,
-                onUnreadChanged = { unreadInbox = it },
+                onUnreadChanged = { shell.unreadInbox = it },
                 modifier = contentModifier,
             )
+            HomeTab.Profile.name -> ProfileTab(
+                session = session,
+                shell = shell,
+                modifier = contentModifier,
+            )
+        }
+
+        LexturesTabBar(
+            selected = selectedTab,
+            unreadInbox = shell.unreadInbox,
+            onSelect = { selectedTab = it },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(start = 24.dp, end = 24.dp, bottom = 10.dp),
+        )
+    }
+}
+
+/** Deep-teal floating capsule: selected tab gets a cream circular "puck". */
+@Composable
+fun LexturesTabBar(
+    selected: String,
+    unreadInbox: Int,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val dark = isDarkTheme()
+    val shape = RoundedCornerShape(50)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (dark) 0.dp else 12.dp,
+                shape = shape,
+                clip = false,
+                ambientColor = LexturesColors.PrimaryDeep.copy(alpha = 0.6f),
+                spotColor = LexturesColors.PrimaryDeep.copy(alpha = 0.6f),
+            )
+            .clip(shape)
+            .background(if (dark) LexturesColors.CardBackgroundDark else LexturesColors.PrimaryDeep)
+            .border(
+                1.dp,
+                if (dark) LexturesColors.FieldBorderDark else Color.White.copy(alpha = 0.08f),
+                shape,
+            )
+            .padding(horizontal = 10.dp, vertical = 9.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HomeTab.entries.forEach { tab ->
+            val isSelected = selected == tab.name
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(if (isSelected) LexturesColors.BrandCream else Color.Transparent)
+                    .clickable { onSelect(tab.name) }
+                    .semantics { contentDescription = tab.label },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    tab.icon,
+                    contentDescription = null,
+                    tint = when {
+                        isSelected -> LexturesColors.PrimaryDeep
+                        dark -> LexturesColors.TextSecondaryDark
+                        else -> Color.White.copy(alpha = 0.72f)
+                    },
+                    modifier = Modifier.size(21.dp),
+                )
+                if (tab == HomeTab.Inbox && unreadInbox > 0) {
+                    Text(
+                        text = if (unreadInbox > 99) "99+" else "$unreadInbox",
+                        fontSize = 9.sp,
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 2.dp, y = (-2).dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(LexturesColors.Coral)
+                            .padding(horizontal = 4.dp, vertical = 1.dp),
+                    )
+                }
+            }
         }
     }
 }

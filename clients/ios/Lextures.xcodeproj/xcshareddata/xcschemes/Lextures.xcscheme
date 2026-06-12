@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A599432A8B3F4BC3BC4DBDBC"
+               BlueprintIdentifier = "40934B6DD44F4A9CB8AFA195"
                BuildableName = "Lextures.app"
                BlueprintName = "Lextures"
                ReferencedContainer = "container:Lextures.xcodeproj">
@@ -22,13 +22,6 @@
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
-   <TestAction
-      buildConfiguration = "Debug"
-      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
-      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      shouldAutocreateTestPlan = "YES">
-   </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -43,25 +36,11 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A599432A8B3F4BC3BC4DBDBC"
+            BlueprintIdentifier = "40934B6DD44F4A9CB8AFA195"
             BuildableName = "Lextures.app"
             BlueprintName = "Lextures"
             ReferencedContainer = "container:Lextures.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
-   <ProfileAction
-      buildConfiguration = "Release"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      savedToolIdentifier = ""
-      useCustomWorkingDirectory = "NO"
-      debugDocumentVersioning = "YES">
-   </ProfileAction>
-   <AnalyzeAction
-      buildConfiguration = "Debug">
-   </AnalyzeAction>
-   <ArchiveAction
-      buildConfiguration = "Release"
-      revealArchiveInOrganizer = "YES">
-   </ArchiveAction>
 </Scheme>

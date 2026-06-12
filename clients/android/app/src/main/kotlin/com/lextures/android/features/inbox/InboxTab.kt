@@ -54,7 +54,7 @@ import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.lms.MailboxFolder
 import com.lextures.android.core.lms.MailboxMessage
 import com.lextures.android.features.home.LmsCard
-import com.lextures.android.features.home.LmsChipRow
+import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import kotlinx.coroutines.delay
@@ -166,10 +166,11 @@ fun InboxTab(
                 ),
             )
 
-            LmsChipRow(
+            LmsSegmentedChips(
                 options = MailboxFolder.entries.map { it.name to it.label },
                 selectedId = folder.name,
                 onSelect = { id -> folder = MailboxFolder.valueOf(id) },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
             )
 
             errorMessage?.let {

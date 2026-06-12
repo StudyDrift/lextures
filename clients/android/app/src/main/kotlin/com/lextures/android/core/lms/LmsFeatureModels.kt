@@ -1,0 +1,310 @@
+package com.lextures.android.core.lms
+
+import kotlinx.serialization.Serializable
+
+// Shapes documented in `docs/MOBILE_PLAN.md` §2.
+
+// region Profile
+
+/** GET `/api/v1/me`. */
+@Serializable
+data class MeProfile(
+    val id: String,
+    val email: String,
+    val displayName: String? = null,
+) {
+    /** First name for greetings; falls back to the email local part. */
+    val firstName: String
+        get() {
+            val name = displayName?.trim().orEmpty()
+            if (name.isNotEmpty()) return name.split(" ").first()
+            return email.substringBefore("@").ifEmpty { "there" }
+        }
+
+    /** Two-letter initials for the avatar chip. */
+    val initials: String
+        get() {
+            val name = displayName?.trim().orEmpty()
+            val source = name.ifEmpty { email.substringBefore("@") }
+            val parts = source.split(" ").filter { it.isNotEmpty() }
+            return if (parts.size >= 2) {
+                "${parts.first().first()}${parts.last().first()}".uppercase()
+            } else {
+                source.take(2).uppercase()
+            }
+        }
+}
+
+// endregion
+
+// region Notifications
+
+/** Row from GET `/api/v1/me/notifications`. */
+@Serializable
+data class AppNotification(
+    val id: String,
+    val eventType: String = "",
+    val title: String = "",
+    val body: String = "",
+    val actionUrl: String? = null,
+    val isRead: Boolean = false,
+    val createdAt: String = "",
+)
+
+@Serializable
+data class NotificationsPage(
+    val notifications: List<AppNotification> = emptyList(),
+    val unreadCount: Int = 0,
+)
+
+// endregion
+
+// region Announcements (org broadcasts)
+
+/** Row from GET `/api/v1/me/broadcasts`. */
+@Serializable
+data class Broadcast(
+    val id: String,
+    val type: String = "announcement", // "announcement" | "emergency"
+    val subject: String = "",
+    val body: String = "",
+    val sentAt: String? = null,
+    val createdAt: String = "",
+) {
+    val isEmergency: Boolean get() = type == "emergency"
+}
+
+@Serializable
+data class BroadcastsResponse(
+    val broadcasts: List<Broadcast> = emptyList(),
+)
+
+// endregion
+
+// region My grades
+
+/** Column from `/my-grades` (subset used on mobile). */
+@Serializable
+data class GradeColumn(
+    val id: String,
+    val kind: String = "",
+    val title: String = "",
+    val maxPoints: Double? = null,
+    val dueAt: String? = null,
+    val assignmentGroupId: String? = null,
+)
+
+@Serializable
+data class AssignmentGroup(
+    val id: String,
+    val name: String = "",
+    val weightPercent: Double = 0.0,
+)
+
+/** GET `/courses/{code}/my-grades` (student only). */
+@Serializable
+data class MyGradesResponse(
+    val columns: List<GradeColumn> = emptyList(),
+    val grades: Map<String, String> = emptyMap(),
+    val displayGrades: Map<String, String> = emptyMap(),
+    val assignmentGroups: List<AssignmentGroup> = emptyList(),
+    val heldGradeItemIds: List<String> = emptyList(),
+    val droppedGrades: Map<String, Boolean> = emptyMap(),
+    val gradeStatuses: Map<String, String> = emptyMap(),
+)
+
+/**
+ * Weighted-total math for `/my-grades` (simplified port of the web logic:
+ * per-group earned/possible, weights renormalized over groups that have grades).
+ */
+object GradeMath {
+    fun overallPercent(response: MyGradesResponse): Double? {
+        var flatEarned = 0.0
+        var flatPossible = 0.0
+        val groupEarned = mutableMapOf<String, Double>()
+        val groupPossible = mutableMapOf<String, Double>()
+
+        for (column in response.columns) {
+            val max = column.maxPoints ?: continue
+            if (max <= 0) continue
+            if (response.droppedGrades[column.id] == true) continue
+            if (response.gradeStatuses[column.id] == "excused") continue
+            val earned = response.grades[column.id]?.toDoubleOrNull() ?: continue
+
+            flatEarned += earned
+            flatPossible += max
+            val key = column.assignmentGroupId ?: ""
+            groupEarned[key] = (groupEarned[key] ?: 0.0) + earned
+            groupPossible[key] = (groupPossible[key] ?: 0.0) + max
+        }
+
+        if (flatPossible <= 0) return null
+
+        val weighted = response.assignmentGroups.filter { it.weightPercent > 0 }
+        if (weighted.isEmpty()) return flatEarned / flatPossible * 100
+
+        var weightTotal = 0.0
+        var weightedSum = 0.0
+        for (group in weighted) {
+            val possible = groupPossible[group.id] ?: continue
+            if (possible <= 0) continue
+            weightTotal += group.weightPercent
+            weightedSum += (groupEarned[group.id] ?: 0.0) / possible * group.weightPercent
+        }
+        if (weightTotal <= 0) return flatEarned / flatPossible * 100
+        return weightedSum / weightTotal * 100
+    }
+}
+
+// endregion
+
+// region Syllabus
+
+@Serializable
+data class SyllabusSection(
+    val id: String,
+    val heading: String = "",
+    val markdown: String = "",
+)
+
+/** GET `/courses/{code}/syllabus`. */
+@Serializable
+data class SyllabusPayload(
+    val sections: List<SyllabusSection> = emptyList(),
+    val updatedAt: String? = null,
+    val requireSyllabusAcceptance: Boolean? = null,
+    val syllabusAcceptancePending: Boolean? = null,
+) {
+    val hasContent: Boolean get() = sections.any { it.markdown.isNotBlank() }
+}
+
+// endregion
+
+// region Assignment submissions
+
+/** Row from `/assignments/{item}/submissions` and `/submissions/mine`. */
+@Serializable
+data class AssignmentSubmission(
+    val id: String,
+    val submittedBy: String? = null,
+    val submittedByDisplayName: String? = null,
+    val blindLabel: String? = null,
+    val attachmentFilename: String? = null,
+    val submittedAt: String = "",
+    val updatedAt: String? = null,
+    val versionNumber: Int? = null,
+    val resubmissionRequested: Boolean? = null,
+    val revisionDueAt: String? = null,
+    val revisionFeedback: String? = null,
+) {
+    /** Name shown in staff lists; respects blind grading. */
+    val displayName: String
+        get() = blindLabel?.takeIf { it.isNotEmpty() }
+            ?: submittedByDisplayName?.takeIf { it.isNotEmpty() }
+            ?: "Student"
+}
+
+@Serializable
+data class MySubmissionResponse(
+    val submission: AssignmentSubmission? = null,
+)
+
+@Serializable
+data class SubmissionsListResponse(
+    val submissions: List<AssignmentSubmission> = emptyList(),
+)
+
+/** GET/PUT `.../submissions/{id}/grade`. */
+@Serializable
+data class SubmissionGrade(
+    val submissionId: String? = null,
+    val pointsEarned: Double? = null,
+    val maxPoints: Double? = null,
+    val instructorComment: String? = null,
+    val posted: Boolean? = null,
+    val excused: Boolean? = null,
+)
+
+@Serializable
+data class SubmissionGradePut(
+    val pointsEarned: Double? = null,
+    val instructorComment: String? = null,
+    val clearGrade: Boolean? = null,
+)
+
+// endregion
+
+// region Grading backlog (staff)
+
+/** Row from GET `/courses/{code}/grading-backlog`. */
+@Serializable
+data class GradingBacklogItem(
+    val assignmentId: String,
+    val assignmentTitle: String = "",
+    val ungradedCount: Int = 0,
+)
+
+@Serializable
+data class GradingBacklogResponse(
+    val items: List<GradingBacklogItem> = emptyList(),
+)
+
+// endregion
+
+// region Attendance
+
+/** Session from GET `/courses/{code}/attendance/sessions`. */
+@Serializable
+data class AttendanceSession(
+    val id: String,
+    val title: String? = null,
+    val collectionMethod: String = "roll_call", // "roll_call" | "self_report"
+    val sessionDate: String? = null,
+    val status: String = "open", // "open" | "closed"
+) {
+    val isOpen: Boolean get() = status == "open"
+    val isSelfReport: Boolean get() = collectionMethod == "self_report"
+    val displayTitle: String get() = title?.takeIf { it.isNotEmpty() } ?: "Attendance"
+}
+
+@Serializable
+data class AttendanceRecord(
+    val studentUserId: String = "",
+    val displayName: String? = null,
+    val status: String = "not_recorded",
+    val recordedAt: String? = null,
+)
+
+/** GET `.../attendance/sessions/{id}` — session plus viewer-specific fields. */
+@Serializable
+data class AttendanceSessionDetail(
+    val id: String,
+    val title: String? = null,
+    val collectionMethod: String = "roll_call",
+    val sessionDate: String? = null,
+    val status: String = "open",
+    val records: List<AttendanceRecord>? = null,
+    val myRecord: AttendanceRecord? = null,
+    val canSelfReport: Boolean? = null,
+)
+
+@Serializable
+data class AttendanceSessionsResponse(
+    val sessions: List<AttendanceSession> = emptyList(),
+)
+
+@Serializable
+data class SelfReportBody(val status: String)
+
+object AttendanceStatusInfo {
+    fun label(status: String): String = when (status) {
+        "present" -> "Present"
+        "absent" -> "Absent"
+        "tardy" -> "Tardy"
+        "excused" -> "Excused"
+        "not_recorded" -> "Not recorded"
+        else -> status.replace('_', ' ').replaceFirstChar { it.uppercase() }
+    }
+}
+
+// endregion

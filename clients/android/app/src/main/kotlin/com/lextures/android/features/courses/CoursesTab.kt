@@ -49,6 +49,7 @@ import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
+import com.lextures.android.features.home.LmsSkeletonList
 
 @Composable
 fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
@@ -123,12 +124,10 @@ fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
         )
 
         when {
-            loading && courses.isEmpty() -> Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator(color = LexturesColors.Primary)
-            }
+            loading && courses.isEmpty() -> LmsSkeletonList(
+                count = 5,
+                modifier = Modifier.padding(16.dp),
+            )
 
             filtered.isEmpty() -> Column {
                 errorMessage?.let { LmsErrorBanner(it, Modifier.padding(horizontal = 16.dp)) }

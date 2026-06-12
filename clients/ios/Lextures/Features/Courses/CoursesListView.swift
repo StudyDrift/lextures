@@ -31,9 +31,7 @@ struct CoursesListView: View {
                         }
 
                         if loading && courses.isEmpty {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 40)
+                            LMSSkeletonList(count: 5)
                         } else if filteredCourses.isEmpty {
                             LMSEmptyState(
                                 systemImage: "book",

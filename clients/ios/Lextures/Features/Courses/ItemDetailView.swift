@@ -6,10 +6,15 @@ struct ItemDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
 
-    let courseCode: String
+    let course: CourseSummary
     let item: CourseStructureItem
 
+    private var courseCode: String { course.courseCode }
+
     @State private var detail: ModuleItemDetail?
+    @State private var mySubmission: AssignmentSubmission?
+    @State private var myGrade: SubmissionGrade?
+    @State private var submissionLoaded = false
     @State private var errorMessage: String?
     @State private var loading = true
 
@@ -36,6 +41,7 @@ struct ItemDetailView: View {
                         if let markdown = detail?.markdown, !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             contentCard(markdown)
                         }
+                        submissionCard
                         detailsCard
                     }
                 }
@@ -58,6 +64,126 @@ struct ItemDetailView: View {
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load this activity."
         }
+        await loadMySubmission(token: token)
+    }
+
+    /// Student view of their own submission + released grade (assignments only).
+    private func loadMySubmission(token: String) async {
+        guard item.kind == "assignment", course.viewerIsStudent else { return }
+        submissionLoaded = false
+        mySubmission = try? await LMSAPI.fetchMySubmission(
+            courseCode: courseCode,
+            itemId: item.id,
+            accessToken: token
+        )
+        if let submission = mySubmission {
+            myGrade = try? await LMSAPI.fetchSubmissionGrade(
+                courseCode: courseCode,
+                itemId: item.id,
+                submissionId: submission.id,
+                accessToken: token
+            )
+        }
+        submissionLoaded = true
+    }
+
+    // MARK: My submission (students)
+
+    @ViewBuilder
+    private var submissionCard: some View {
+        if item.kind == "assignment" && course.viewerIsStudent && submissionLoaded {
+            if let submission = mySubmission {
+                LMSCard(accent: submission.resubmissionRequested == true ? LexturesTheme.coral : LexturesTheme.brandTeal) {
+                    Text("Your submission")
+                        .font(LexturesTheme.displayFont(18))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+
+                    HStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(LexturesTheme.primary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Submitted \(LMSDates.shortDateTime(submission.submittedAt))")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                            if let version = submission.versionNumber, version > 1 {
+                                Text("Version \(version)")
+                                    .font(.caption)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            }
+                        }
+                    }
+
+                    if let filename = submission.attachmentFilename, !filename.isEmpty {
+                        Label(filename, systemImage: "paperclip")
+                            .font(.caption)
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    }
+
+                    if submission.resubmissionRequested == true {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label("Revision requested", systemImage: "arrow.uturn.backward.circle.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.coral)
+                            if let feedback = submission.revisionFeedback, !feedback.isEmpty {
+                                Text(feedback)
+                                    .font(.caption)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            }
+                            if let revisionDue = LMSDates.parse(submission.revisionDueAt) {
+                                Text("Revise by \(revisionDue.formatted(date: .abbreviated, time: .shortened))")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(LexturesTheme.coral)
+                            }
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(LexturesTheme.coral.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+
+                    if let grade = myGrade, grade.posted == true, let earned = grade.pointsEarned {
+                        Divider()
+                        HStack(alignment: .firstTextBaseline) {
+                            Text("Grade")
+                                .font(.subheadline)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            Spacer()
+                            Text(gradeText(earned: earned, max: grade.maxPoints))
+                                .font(LexturesTheme.displayFont(18, weight: .bold))
+                                .foregroundStyle(LexturesTheme.primary)
+                        }
+                        if let comment = grade.instructorComment, !comment.isEmpty {
+                            Text("“\(comment)”")
+                                .font(.subheadline)
+                                .italic()
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        }
+                    }
+                }
+            } else {
+                LMSCard {
+                    HStack(spacing: 10) {
+                        Image(systemName: "tray")
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Not submitted yet")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                            Text("Submit this assignment from the web app.")
+                                .font(.caption)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func gradeText(earned: Double, max: Double?) -> String {
+        if let max {
+            return "\(earned.formatted()) / \(max.formatted())"
+        }
+        return earned.formatted()
     }
 
     // MARK: Header
@@ -181,105 +307,7 @@ struct ItemDetailView: View {
     }
 
     private var detailRows: [(String, String)] {
-        var rows: [(String, String)] = []
-        let due = LMSDates.parse(detail?.dueAt ?? item.dueAt)
-        if let due {
-            rows.append(("Due date", due.formatted(date: .abbreviated, time: .shortened)))
-        }
-
-        switch item.kind {
-        case "quiz":
-            if let detail {
-                rows.append(("Unlimited attempts", yesNo(detail.unlimitedAttempts ?? false)))
-                rows.append(("One question at a time", yesNo(detail.oneQuestionAtATime ?? false)))
-                rows.append(("Course lockdown feature", lockdownLabel(detail.lockdownMode)))
-                rows.append(("Delivery mode", titlecase(detail.adaptiveDeliveryMode ?? "standard")))
-                if detail.unlimitedAttempts != true {
-                    rows.append(("Max attempts", "\(detail.maxAttempts ?? 1)"))
-                }
-                rows.append(("Grade uses", gradePolicyLabel(detail.gradeAttemptPolicy)))
-                if let limit = detail.timeLimitMinutes {
-                    rows.append(("Time limit", "\(limit) min"))
-                }
-                if let passing = detail.passingScorePercent {
-                    rows.append(("Passing score", "\(passing)%"))
-                }
-                if let points = pointsValue {
-                    rows.append(("Points", "\(points)"))
-                }
-                rows.append(("Shuffle questions", yesNo(detail.shuffleQuestions ?? false)))
-            }
-        case "assignment":
-            if let points = pointsValue {
-                rows.append(("Points", "\(points)"))
-            }
-            if let detail {
-                let types = [
-                    (detail.submissionAllowText ?? false) ? "Text" : nil,
-                    (detail.submissionAllowFileUpload ?? false) ? "File upload" : nil,
-                    (detail.submissionAllowUrl ?? false) ? "URL" : nil,
-                ].compactMap(\.self)
-                if !types.isEmpty {
-                    rows.append(("Submission types", types.joined(separator: ", ")))
-                }
-                if let policy = detail.lateSubmissionPolicy {
-                    rows.append(("Late submissions", lateLabel(policy, penalty: detail.latePenaltyPercent)))
-                }
-                if let from = LMSDates.parse(detail.availableFrom) {
-                    rows.append(("Available from", from.formatted(date: .abbreviated, time: .shortened)))
-                }
-                if let until = LMSDates.parse(detail.availableUntil) {
-                    rows.append(("Available until", until.formatted(date: .abbreviated, time: .shortened)))
-                }
-            }
-        case "external_link":
-            if let provider = detail?.provider, !provider.isEmpty {
-                rows.append(("Provider", titlecase(provider)))
-            }
-        default:
-            if let points = pointsValue {
-                rows.append(("Points", "\(points)"))
-            }
-        }
-
-        if let updated = LMSDates.parse(detail?.updatedAt) {
-            rows.append(("Updated", updated.formatted(date: .abbreviated, time: .omitted)))
-        }
-        return rows
-    }
-
-    private func yesNo(_ value: Bool) -> String { value ? "Yes" : "No" }
-
-    private func lockdownLabel(_ mode: String?) -> String {
-        guard let mode, !mode.isEmpty, mode != "off", mode != "none" else { return "Off" }
-        return titlecase(mode)
-    }
-
-    private func gradePolicyLabel(_ policy: String?) -> String {
-        switch policy {
-        case "highest": return "Highest attempt"
-        case "latest": return "Latest attempt"
-        case "first": return "First attempt"
-        case "average": return "Average of attempts"
-        default: return titlecase(policy ?? "Latest attempt")
-        }
-    }
-
-    private func lateLabel(_ policy: String, penalty: Int?) -> String {
-        switch policy {
-        case "allow": return "Allowed"
-        case "block", "reject": return "Not allowed"
-        case "penalty":
-            if let penalty { return "Allowed, −\(penalty)%" }
-            return "Allowed with penalty"
-        default: return titlecase(policy)
-        }
-    }
-
-    private func titlecase(_ raw: String) -> String {
-        let cleaned = raw.replacingOccurrences(of: "_", with: " ")
-        guard let first = cleaned.first else { return cleaned }
-        return first.uppercased() + cleaned.dropFirst()
+        ItemDetailRows.rows(for: item, detail: detail, pointsValue: pointsValue)
     }
 }
 

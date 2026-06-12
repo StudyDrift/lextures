@@ -27,6 +27,11 @@ data class CourseSummary(
 
     val viewerIsStudent: Boolean
         get() = viewerEnrollmentRoles?.any { it.equals("student", ignoreCase = true) } == true
+
+    val viewerIsStaff: Boolean
+        get() = viewerEnrollmentRoles?.any {
+            it.lowercase() in setOf("teacher", "ta", "designer", "grader")
+        } == true
 }
 
 @Serializable
