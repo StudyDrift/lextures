@@ -1,14 +1,33 @@
 import SwiftUI
 
-/// Course structure (modules and items) for one course.
+/// Course home: gradient hero + segmented sections
+/// (Overview · Modules · Grades · Attendance · Grading by role).
 struct CourseDetailView: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
 
+    enum Section: String, CaseIterable {
+        case overview = "Overview"
+        case modules = "Modules"
+        case grades = "Grades"
+        case attendance = "Attendance"
+        case grading = "Grading"
+    }
+
+    @State private var section: Section = .modules
     @State private var items: [CourseStructureItem] = []
+    @State private var hasAttendanceSessions = false
     @State private var errorMessage: String?
     @State private var loading = false
+
+    private var sections: [Section] {
+        var out: [Section] = [.overview, .modules]
+        if course.viewerIsStudent { out.append(.grades) }
+        if course.viewerIsStaff || hasAttendanceSessions { out.append(.attendance) }
+        if course.viewerIsStaff { out.append(.grading) }
+        return out
+    }
 
     private struct ModuleGroup: Identifiable {
         let id: String
@@ -43,24 +62,27 @@ struct CourseDetailView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     header
 
+                    LMSSegmentedChips(
+                        options: sections,
+                        selection: $section,
+                        label: \.rawValue
+                    )
+
                     if let errorMessage {
                         LMSErrorBanner(message: errorMessage)
                     }
 
-                    if loading && items.isEmpty {
-                        ProgressView()
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
-                    } else if moduleGroups.isEmpty {
-                        LMSEmptyState(
-                            systemImage: "square.stack.3d.up",
-                            title: "No content yet",
-                            message: "Modules and assignments will appear here once published."
-                        )
-                    } else {
-                        ForEach(Array(moduleGroups.enumerated()), id: \.element.id) { index, group in
-                            moduleCard(group, number: index + 1)
-                        }
+                    switch section {
+                    case .overview:
+                        CourseSyllabusSection(course: course)
+                    case .modules:
+                        modulesSection
+                    case .grades:
+                        CourseGradesSection(course: course)
+                    case .attendance:
+                        CourseAttendanceSection(course: course)
+                    case .grading:
+                        GradingBacklogSection(course: course)
                     }
                 }
                 .padding(16)
@@ -70,7 +92,13 @@ struct CourseDetailView: View {
         .navigationTitle(course.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: CourseStructureItem.self) { item in
-            ItemDetailView(courseCode: course.courseCode, item: item)
+            ItemDetailView(course: course, item: item)
+        }
+        .navigationDestination(for: AttendanceSession.self) { attendanceSession in
+            AttendanceSessionDetailView(course: course, attendanceSession: attendanceSession)
+        }
+        .navigationDestination(for: GradingBacklogItem.self) { backlogItem in
+            SubmissionsListView(course: course, backlogItem: backlogItem)
         }
         .task { await load() }
     }
@@ -97,16 +125,15 @@ struct CourseDetailView: View {
                         .foregroundStyle(.white.opacity(0.85))
                         .lineLimit(3)
                 }
-                if let starts = LMSDates.parse(course.startsAt) {
-                    Label(starts.formatted(date: .abbreviated, time: .omitted), systemImage: "calendar")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 4)
-                        .background(.white.opacity(0.16))
-                        .clipShape(Capsule())
-                        .padding(.top, 4)
+                HStack(spacing: 6) {
+                    if let starts = LMSDates.parse(course.startsAt) {
+                        heroChip(starts.formatted(date: .abbreviated, time: .omitted), icon: "calendar")
+                    }
+                    ForEach(roleBadges, id: \.self) { role in
+                        heroChip(role, icon: "person.fill")
+                    }
                 }
+                .padding(.top, 4)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(20)
@@ -114,6 +141,41 @@ struct CourseDetailView: View {
         .background(LexturesTheme.coverGradient(for: course.courseCode))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 14, y: 7)
+    }
+
+    private var roleBadges: [String] {
+        (course.viewerEnrollmentRoles ?? []).map { role in
+            role.count <= 2 ? role.uppercased() : role.capitalized
+        }
+    }
+
+    private func heroChip(_ text: String, icon: String) -> some View {
+        Label(text, systemImage: icon)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(.white)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 4)
+            .background(.white.opacity(0.16))
+            .clipShape(Capsule())
+    }
+
+    // MARK: Modules
+
+    @ViewBuilder
+    private var modulesSection: some View {
+        if loading && items.isEmpty {
+            LMSSkeletonList(count: 3)
+        } else if moduleGroups.isEmpty {
+            LMSEmptyState(
+                systemImage: "square.stack.3d.up",
+                title: "No content yet",
+                message: "Modules and assignments will appear here once published."
+            )
+        } else {
+            ForEach(Array(moduleGroups.enumerated()), id: \.element.id) { index, group in
+                moduleCard(group, number: index + 1)
+            }
+        }
     }
 
     private func moduleCard(_ group: ModuleGroup, number: Int) -> some View {
@@ -208,7 +270,12 @@ struct CourseDetailView: View {
         errorMessage = nil
         defer { loading = false }
         do {
+            async let sessionsTask = (try? LMSAPI.fetchAttendanceSessions(
+                courseCode: course.courseCode,
+                accessToken: token
+            )) ?? []
             items = try await LMSAPI.fetchCourseStructure(courseCode: course.courseCode, accessToken: token)
+            hasAttendanceSessions = await !sessionsTask.isEmpty
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load course content."
         }

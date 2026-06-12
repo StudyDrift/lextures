@@ -1,31 +1,35 @@
 package com.lextures.android.features.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AssignmentTurnedIn
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Inbox
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +44,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
@@ -47,56 +53,87 @@ import com.lextures.android.core.design.HeroBrush
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
+import com.lextures.android.core.design.cardBackground
+import com.lextures.android.core.design.coverBrush
+import com.lextures.android.core.design.fieldBorder
+import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.lms.Broadcast
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.lms.GradingBacklogItem
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.features.courses.CourseDetailScreen
+import com.lextures.android.features.courses.ItemDetailScreen
+import com.lextures.android.features.courses.ItemKind
+import com.lextures.android.features.grading.GradingBacklogScreen
+import com.lextures.android.features.home.HomeShellState
+import com.lextures.android.features.home.LmsAvatarChip
 import com.lextures.android.features.home.LmsCard
-import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSectionHeader
+import com.lextures.android.features.home.LmsSkeletonList
+import com.lextures.android.features.profile.AnnouncementsScreen
+import com.lextures.android.features.profile.NotificationsScreen
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.Calendar
 
 data class DueItem(
-    val courseCode: String,
-    val courseTitle: String,
+    val course: CourseSummary,
     val item: CourseStructureItem,
     val dueAt: Instant,
 )
 
+data class StaffBacklog(
+    val course: CourseSummary,
+    val items: List<GradingBacklogItem>,
+) {
+    val total: Int get() = items.sumOf { it.ungradedCount }
+}
+
 @Composable
 fun DashboardTab(
     session: AuthSession,
-    unreadInbox: Int,
+    shell: HomeShellState,
+    onOpenProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
-    val userEmail by session.userEmail.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var courses by remember { mutableStateOf<List<CourseSummary>>(emptyList()) }
+    var courseCounts by remember { mutableStateOf<Map<String, Pair<Int, Int>>>(emptyMap()) }
     var dueThisWeek by remember { mutableStateOf<List<DueItem>>(emptyList()) }
+    var staffBacklogs by remember { mutableStateOf<List<StaffBacklog>>(emptyList()) }
+    var announcements by remember { mutableStateOf<List<Broadcast>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
-    var menuOpen by remember { mutableStateOf(false) }
+
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
+    var openDueItem by remember { mutableStateOf<DueItem?>(null) }
+    var openBacklog by remember { mutableStateOf<StaffBacklog?>(null) }
+    var showNotifications by remember { mutableStateOf(false) }
+    var showAnnouncements by remember { mutableStateOf(false) }
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null
         try {
+            announcements = runCatching { LmsApi.fetchMyBroadcasts(token) }.getOrDefault(emptyList())
             val list = LmsApi.fetchCourses(token)
             // The list GET omits viewer roles; enrich from the single-course GET.
             val enriched = coroutineScope {
@@ -105,30 +142,65 @@ fun DashboardTab(
                 }.awaitAll()
             }
             courses = enriched
+
             val zone = ZoneId.systemDefault()
             val weekStart = LocalDate.now(zone)
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                 .atStartOfDay(zone).toInstant()
             val weekEnd = weekStart.plusSeconds(7 * 86_400 - 1)
-            val studentCourses = enriched.filter { it.viewerIsStudent }
-            dueThisWeek = coroutineScope {
-                studentCourses.map { course ->
+
+            // One structure fetch per course feeds both the due rail and the card counts.
+            val structures = coroutineScope {
+                enriched.map { course ->
                     async {
-                        val items = runCatching { LmsApi.fetchCourseStructure(course.courseCode, token) }
+                        course to runCatching { LmsApi.fetchCourseStructure(course.courseCode, token) }
                             .getOrDefault(emptyList())
-                        items.mapNotNull { item ->
-                            val due = LmsDates.parse(item.dueAt) ?: return@mapNotNull null
-                            if (!item.isGradable || due < weekStart || due > weekEnd) return@mapNotNull null
-                            DueItem(course.courseCode, course.displayTitle, item, due)
-                        }
                     }
-                }.awaitAll().flatten().sortedBy { it.dueAt }
+                }.awaitAll()
             }
+            courseCounts = structures.associate { (course, items) ->
+                course.courseCode to Pair(
+                    items.count { it.isModule },
+                    items.count { !it.isModule && it.kind != "heading" },
+                )
+            }
+            dueThisWeek = structures
+                .filter { (course, _) -> course.viewerIsStudent }
+                .flatMap { (course, items) ->
+                    items.mapNotNull { item ->
+                        val due = LmsDates.parse(item.dueAt) ?: return@mapNotNull null
+                        if (!item.isGradable || due < weekStart || due > weekEnd) return@mapNotNull null
+                        DueItem(course, item, due)
+                    }
+                }
+                .sortedBy { it.dueAt }
+
+            val staffCourses = enriched.filter { it.viewerIsStaff }
+            staffBacklogs = coroutineScope {
+                staffCourses.map { course ->
+                    async {
+                        runCatching { LmsApi.fetchGradingBacklog(course.courseCode, token) }
+                            .getOrNull()
+                            ?.let { StaffBacklog(course, it) }
+                    }
+                }.awaitAll()
+            }.filterNotNull().filter { it.total > 0 }.sortedByDescending { it.total }
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
             loading = false
         }
+    }
+
+    openDueItem?.let { due ->
+        ItemDetailScreen(
+            session = session,
+            course = due.course,
+            item = due.item,
+            onBack = { openDueItem = null },
+            modifier = modifier,
+        )
+        return
     }
 
     openCourse?.let { course ->
@@ -141,140 +213,214 @@ fun DashboardTab(
         return
     }
 
-    Column(modifier = modifier) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 4.dp, top = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = "Lextures",
-                style = LexturesType.display(21),
-                color = textPrimary(),
-                modifier = Modifier.weight(1f),
+    openBacklog?.let { backlog ->
+        GradingBacklogScreen(
+            session = session,
+            course = backlog.course,
+            onBack = { openBacklog = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showNotifications) {
+        NotificationsScreen(
+            session = session,
+            shell = shell,
+            onBack = { showNotifications = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showAnnouncements) {
+        AnnouncementsScreen(
+            session = session,
+            onBack = { showAnnouncements = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        item {
+            HeroPanel(
+                greeting = greetingText(),
+                name = shell.profile?.firstName ?: "",
+                dueCount = dueThisWeek.size,
+                loading = loading,
+                unreadNotifications = shell.unreadNotifications,
+                avatarInitials = shell.profile?.initials ?: "··",
+                onOpenNotifications = { showNotifications = true },
+                onOpenProfile = onOpenProfile,
             )
-            Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Account", tint = textSecondary())
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text("Sign out") },
-                        onClick = {
-                            menuOpen = false
-                            session.signOut()
-                        },
-                    )
-                }
-            }
+        }
+
+        errorMessage?.let { message ->
+            item { LmsErrorBanner(message) }
         }
 
         if (loading && courses.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = LexturesColors.Primary)
-            }
-            return
+            item { LmsSkeletonList(count = 4) }
+            return@LazyColumn
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-        ) {
+        announcements.firstOrNull()?.let { broadcast ->
             item {
-                HeroPanel(
-                    greeting = greetingText(),
-                    email = userEmail,
-                    dueCount = dueThisWeek.size,
-                    loading = loading,
+                AnnouncementCard(
+                    broadcast = broadcast,
+                    showSeeAll = announcements.size > 1,
+                    onAcknowledge = {
+                        val token = accessToken ?: return@AnnouncementCard
+                        scope.launch {
+                            // Best-effort: dismiss locally even if the POST fails.
+                            runCatching { LmsApi.acknowledgeBroadcast(broadcast.id, token) }
+                            announcements = announcements.filterNot { it.id == broadcast.id }
+                        }
+                    },
+                    onSeeAll = { showAnnouncements = true },
                 )
             }
+        }
 
-            errorMessage?.let { message ->
-                item { LmsErrorBanner(message) }
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                StatCard("${courses.size}", "Courses", Icons.AutoMirrored.Filled.MenuBook, accentColor())
+                StatCard("${dueThisWeek.size}", "Due this week", Icons.Default.AssignmentTurnedIn, LexturesColors.Coral)
+                StatCard("${shell.unreadInbox}", "Unread", Icons.Default.Inbox, LexturesColors.Amber)
             }
+        }
 
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    StatCard("${courses.size}", "Courses", Icons.AutoMirrored.Filled.MenuBook, accentColor())
-                    StatCard("${dueThisWeek.size}", "Due this week", Icons.Default.AssignmentTurnedIn, LexturesColors.Coral)
-                    StatCard("$unreadInbox", "Unread", Icons.Default.Inbox, LexturesColors.Amber)
-                }
-            }
-
-            item { LmsSectionHeader("Due this week", Icons.Default.CalendarMonth) }
-            if (dueThisWeek.isEmpty()) {
-                item {
-                    LmsCard {
-                        Text(
-                            text = "Nothing due this week. Enjoy the breathing room!",
-                            fontSize = 14.sp,
-                            color = textSecondary(),
-                        )
-                    }
-                }
-            } else {
-                items(dueThisWeek, key = { "${it.courseCode}/${it.item.id}" }) { due ->
-                    LmsCard(accent = LexturesColors.Coral) {
-                        Text(
-                            text = due.item.title,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = textPrimary(),
-                        )
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
+        if (staffBacklogs.isNotEmpty()) {
+            item { LmsSectionHeader("Needs grading", Icons.Default.FactCheck) }
+            items(staffBacklogs, key = { "backlog-${it.course.id}" }) { backlog ->
+                LmsCard(accent = LexturesColors.Amber, onClick = { openBacklog = backlog }) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                             Text(
-                                text = due.courseTitle,
+                                text = backlog.course.displayTitle,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textPrimary(),
+                            )
+                            Text(
+                                text = "${backlog.total} submission${if (backlog.total == 1) "" else "s"} waiting",
                                 fontSize = 12.sp,
                                 color = textSecondary(),
-                                modifier = Modifier.weight(1f),
+                            )
+                        }
+                        Text(
+                            text = "${backlog.total}",
+                            style = LexturesType.display(18, FontWeight.Bold),
+                            color = LexturesColors.Amber,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .background(LexturesColors.Amber.copy(alpha = 0.14f))
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
+                        )
+                    }
+                }
+            }
+        }
+
+        item { LmsSectionHeader("Due this week", Icons.Default.CalendarMonth) }
+        if (dueThisWeek.isEmpty()) {
+            item {
+                LmsCard {
+                    Text(
+                        text = "Nothing due this week. Enjoy the breathing room!",
+                        fontSize = 14.sp,
+                        color = textSecondary(),
+                    )
+                }
+            }
+        } else {
+            items(dueThisWeek, key = { "${it.course.courseCode}/${it.item.id}" }) { due ->
+                LmsCard(accent = LexturesColors.Coral, onClick = { openDueItem = due }) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(LexturesColors.Coral.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                ItemKind.icon(due.item.kind),
+                                contentDescription = null,
+                                tint = LexturesColors.Coral,
+                                modifier = Modifier.size(17.dp),
+                            )
+                        }
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = due.item.title,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textPrimary(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                text = LmsDates.shortDateTime(due.item.dueAt),
+                                text = due.course.displayTitle,
                                 fontSize = 12.sp,
+                                color = textSecondary(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                text = weekdayLabel(due.dueAt),
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold,
+                                color = textSecondary(),
+                            )
+                            Text(
+                                text = timeLabel(due.dueAt),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
                                 color = LexturesColors.Coral,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(LexturesColors.Coral.copy(alpha = 0.12f))
-                                    .padding(horizontal = 8.dp, vertical = 3.dp),
                             )
                         }
                     }
                 }
             }
+        }
 
-            item { LmsSectionHeader("Your courses", Icons.AutoMirrored.Filled.MenuBook) }
-            if (courses.isEmpty()) {
-                item {
-                    LmsEmptyState(
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        title = "No courses yet",
-                        message = "Courses you enroll in will show up here.",
-                    )
-                }
-            } else {
-                items(courses.take(5), key = { it.id }) { course ->
-                    LmsCard(onClick = { openCourse = course }) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            LmsCoverTile(key = course.courseCode, icon = Icons.AutoMirrored.Filled.MenuBook, size = 44)
-                            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                Text(
-                                    text = course.displayTitle,
-                                    fontSize = 15.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = textPrimary(),
-                                )
-                                Text(text = course.courseCode, fontSize = 12.sp, color = textSecondary())
-                            }
-                        }
+        item { LmsSectionHeader("Your courses", Icons.AutoMirrored.Filled.MenuBook) }
+        if (courses.isEmpty()) {
+            item {
+                LmsEmptyState(
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    title = "No courses yet",
+                    message = "Courses you enroll in will show up here.",
+                )
+            }
+        } else {
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    courses.forEach { course ->
+                        CourseCarouselCard(
+                            course = course,
+                            counts = courseCounts[course.courseCode],
+                            onClick = { openCourse = course },
+                        )
                     }
                 }
             }
@@ -282,9 +428,18 @@ fun DashboardTab(
     }
 }
 
-/** Deep-teal gradient greeting panel — the brand statement at the top of the app. */
+/** Deep-teal gradient greeting panel with bell + avatar — the brand statement. */
 @Composable
-private fun HeroPanel(greeting: String, email: String?, dueCount: Int, loading: Boolean) {
+private fun HeroPanel(
+    greeting: String,
+    name: String,
+    dueCount: Int,
+    loading: Boolean,
+    unreadNotifications: Int,
+    avatarInitials: String,
+    onOpenNotifications: () -> Unit,
+    onOpenProfile: () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -313,14 +468,53 @@ private fun HeroPanel(greeting: String, email: String?, dueCount: Int, loading: 
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            Text(
-                text = greeting,
-                style = LexturesType.display(26),
-                color = Color.White,
-            )
-            email?.let {
-                Text(text = it, fontSize = 12.sp, color = Color.White.copy(alpha = 0.75f))
+            Row(verticalAlignment = Alignment.Top) {
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "$greeting,",
+                        style = LexturesType.display(26),
+                        color = Color.White,
+                    )
+                    if (name.isNotEmpty()) {
+                        Text(
+                            text = name,
+                            style = LexturesType.display(26),
+                            color = LexturesColors.BrandCream,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.16f))
+                            .clickable(onClick = onOpenNotifications),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Default.Notifications,
+                            contentDescription = "Notifications",
+                            tint = Color.White,
+                            modifier = Modifier.size(17.dp),
+                        )
+                        if (unreadNotifications > 0) {
+                            Box(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = (-3).dp, y = 3.dp)
+                                    .size(9.dp)
+                                    .clip(CircleShape)
+                                    .background(LexturesColors.Coral),
+                            )
+                        }
+                    }
+                    LmsAvatarChip(initials = avatarInitials, onClick = onOpenProfile)
+                }
             }
+
             if (dueCount > 0) {
                 Text(
                     text = "$dueCount assignment${if (dueCount == 1) "" else "s"} due this week",
@@ -350,6 +544,124 @@ private fun HeroPanel(greeting: String, email: String?, dueCount: Int, loading: 
     }
 }
 
+/** Dashboard banner for the newest org announcement; coral treatment for emergencies. */
+@Composable
+fun AnnouncementCard(
+    broadcast: Broadcast,
+    showSeeAll: Boolean,
+    onAcknowledge: () -> Unit,
+    onSeeAll: () -> Unit,
+) {
+    val tint = if (broadcast.isEmergency) LexturesColors.Coral else LexturesColors.Amber
+    LmsCard(accent = tint) {
+        Row(verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = broadcast.subject,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textPrimary(),
+                )
+                Text(
+                    text = broadcast.body,
+                    fontSize = 12.sp,
+                    color = textSecondary(),
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Text(
+                text = LmsDates.relative(broadcast.sentAt ?: broadcast.createdAt),
+                fontSize = 11.sp,
+                color = textSecondary(),
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Got it",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = tint,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(tint.copy(alpha = 0.12f))
+                    .clickable(onClick = onAcknowledge)
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            )
+            Box(modifier = Modifier.weight(1f))
+            if (showSeeAll) {
+                Text(
+                    text = "See all",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = accentColor(),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable(onClick = onSeeAll)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CourseCarouselCard(
+    course: CourseSummary,
+    counts: Pair<Int, Int>?,
+    onClick: () -> Unit,
+) {
+    val dark = isDarkTheme()
+    Column(
+        modifier = Modifier
+            .width(190.dp)
+            .clip(RoundedCornerShape(18.dp))
+            .background(cardBackground())
+            .clickable(onClick = onClick),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(84.dp)
+                .background(coverBrush(course.courseCode)),
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.MenuBook,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .size(22.dp),
+            )
+        }
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = course.displayTitle,
+                style = LexturesType.display(15),
+                color = textPrimary(),
+                maxLines = 2,
+                minLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                text = counts?.takeIf { it.second > 0 }?.let { (modules, items) ->
+                    "$modules module${if (modules == 1) "" else "s"} · $items item${if (items == 1) "" else "s"}"
+                } ?: course.courseCode.uppercase(),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                color = textSecondary(),
+            )
+        }
+    }
+}
+
 @Composable
 private fun RowScope.StatCard(value: String, label: String, icon: ImageVector, tint: Color) {
     LmsCard(modifier = Modifier.weight(1f)) {
@@ -374,3 +686,9 @@ private fun greetingText(): String {
         else -> "Good evening"
     }
 }
+
+private fun weekdayLabel(instant: Instant): String =
+    DateTimeFormatter.ofPattern("EEE").withZone(ZoneId.systemDefault()).format(instant)
+
+private fun timeLabel(instant: Instant): String =
+    DateTimeFormatter.ofPattern("h:mm a").withZone(ZoneId.systemDefault()).format(instant)

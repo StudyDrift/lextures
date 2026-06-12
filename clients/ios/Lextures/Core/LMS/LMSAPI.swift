@@ -2,9 +2,9 @@ import Foundation
 
 /// LMS endpoints used by the post-auth tabs (parity with web `courses-api` / `communication-api`).
 enum LMSAPI {
-    private static let client = APIClient()
+    static let client = APIClient()
 
-    private static func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
+    static func decode<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
         do {
             return try JSONDecoder().decode(type, from: data)
         } catch {
@@ -224,7 +224,7 @@ enum LMSAPI {
         )
     }
 
-    private static func encodePath(_ component: String) -> String {
+    static func encodePath(_ component: String) -> String {
         component.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? component
     }
 }

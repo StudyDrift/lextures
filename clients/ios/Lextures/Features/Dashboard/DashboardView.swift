@@ -1,11 +1,19 @@
 import SwiftUI
 
 struct DueItem: Identifiable, Hashable {
-    var id: String { "\(courseCode)/\(item.id)" }
-    let courseCode: String
-    let courseTitle: String
+    var id: String { "\(course.courseCode)/\(item.id)" }
+    let course: CourseSummary
     let item: CourseStructureItem
     let dueDate: Date
+}
+
+/// Per-staff-course ungraded totals for the teacher snapshot card.
+struct StaffBacklog: Identifiable, Hashable {
+    let course: CourseSummary
+    let items: [GradingBacklogItem]
+
+    var id: String { course.id }
+    var total: Int { items.reduce(0) { $0 + $1.ungradedCount } }
 }
 
 @MainActor
@@ -13,9 +21,15 @@ struct DueItem: Identifiable, Hashable {
 final class DashboardModel {
     var courses: [CourseSummary] = []
     var dueThisWeek: [DueItem] = []
+    var courseItemCounts: [String: (modules: Int, items: Int)] = [:]
+    var staffBacklogs: [StaffBacklog] = []
+    var announcements: [Broadcast] = []
     var errorMessage: String?
     var loading = false
     private var loadedOnce = false
+
+    var staffCourses: [CourseSummary] { courses.filter(\.viewerIsStaff) }
+    var ungradedTotal: Int { staffBacklogs.reduce(0) { $0 + $1.total } }
 
     func load(accessToken: String?, force: Bool = false) async {
         guard let accessToken else { return }
@@ -28,6 +42,8 @@ final class DashboardModel {
         }
 
         do {
+            async let broadcastsTask = (try? LMSAPI.fetchMyBroadcasts(accessToken: accessToken)) ?? []
+
             let list = try await LMSAPI.fetchCourses(accessToken: accessToken)
             // The list GET omits viewer roles; enrich from the single-course GET.
             let enriched = await withTaskGroup(of: CourseSummary.self) { group in
@@ -44,38 +60,70 @@ final class DashboardModel {
             let order = Dictionary(uniqueKeysWithValues: list.enumerated().map { ($1.id, $0) })
             courses = enriched.sorted { (order[$0.id] ?? 0) < (order[$1.id] ?? 0) }
 
-            let studentCourses = courses.filter(\.viewerIsStudent)
-            dueThisWeek = await loadDueThisWeek(for: studentCourses, accessToken: accessToken)
+            await loadStructures(accessToken: accessToken)
+            announcements = await broadcastsTask
+            await loadStaffBacklogs(accessToken: accessToken)
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load your dashboard."
         }
     }
 
-    private func loadDueThisWeek(for studentCourses: [CourseSummary], accessToken: String) async -> [DueItem] {
+    /// One structure fetch per course feeds both the due-this-week rail and the course card counts.
+    private func loadStructures(accessToken: String) async {
         let (weekStart, weekEnd) = DashboardModel.currentWeek()
-        var out: [DueItem] = []
-        await withTaskGroup(of: [DueItem].self) { group in
-            for course in studentCourses {
+        var due: [DueItem] = []
+        var counts: [String: (Int, Int)] = [:]
+        await withTaskGroup(of: (CourseSummary, [CourseStructureItem]).self) { group in
+            for course in courses {
                 group.addTask {
                     let items = (try? await LMSAPI.fetchCourseStructure(
                         courseCode: course.courseCode,
                         accessToken: accessToken
                     )) ?? []
-                    return items.compactMap { item in
-                        guard item.isGradable, let due = LMSDates.parse(item.dueAt) else { return nil }
-                        guard due >= weekStart, due <= weekEnd else { return nil }
-                        return DueItem(
-                            courseCode: course.courseCode,
-                            courseTitle: course.displayTitle,
-                            item: item,
-                            dueDate: due
-                        )
-                    }
+                    return (course, items)
                 }
             }
-            for await items in group { out.append(contentsOf: items) }
+            for await (course, items) in group {
+                counts[course.courseCode] = (
+                    items.filter(\.isModule).count,
+                    items.filter { !$0.isModule && $0.kind != "heading" }.count
+                )
+                guard course.viewerIsStudent else { continue }
+                due.append(contentsOf: items.compactMap { item in
+                    guard item.isGradable, let dueAt = LMSDates.parse(item.dueAt) else { return nil }
+                    guard dueAt >= weekStart, dueAt <= weekEnd else { return nil }
+                    return DueItem(course: course, item: item, dueDate: dueAt)
+                })
+            }
         }
-        return out.sorted { $0.dueDate < $1.dueDate }
+        courseItemCounts = counts
+        dueThisWeek = due.sorted { $0.dueDate < $1.dueDate }
+    }
+
+    private func loadStaffBacklogs(accessToken: String) async {
+        let staff = staffCourses
+        guard !staff.isEmpty else {
+            staffBacklogs = []
+            return
+        }
+        var out: [StaffBacklog] = []
+        await withTaskGroup(of: StaffBacklog?.self) { group in
+            for course in staff {
+                group.addTask {
+                    guard let items = try? await LMSAPI.fetchGradingBacklog(
+                        courseCode: course.courseCode,
+                        accessToken: accessToken
+                    ) else { return nil }
+                    return StaffBacklog(course: course, items: items)
+                }
+            }
+            for await backlog in group {
+                if let backlog { out.append(backlog) }
+            }
+        }
+        staffBacklogs = out
+            .filter { $0.total > 0 }
+            .sorted { $0.total > $1.total }
     }
 
     /// Monday 00:00 through Sunday 23:59 of the current week (parity with web dashboard).
@@ -90,9 +138,9 @@ final class DashboardModel {
 
 struct DashboardView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @State private var model = DashboardModel()
-    @Binding var unreadInbox: Int
 
     var body: some View {
         NavigationStack {
@@ -108,44 +156,37 @@ struct DashboardView: View {
                         }
 
                         if model.loading && model.courses.isEmpty {
-                            ProgressView()
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 40)
+                            LMSSkeletonList(count: 4)
                         } else {
+                            announcementCard
                             statsRow
-                            dueThisWeekSection
-                            coursesSection
+                            teacherSnapshot
+                            dueSoonSection
+                            coursesCarousel
                         }
                     }
                     .padding(16)
                 }
                 .refreshable {
                     await model.load(accessToken: session.accessToken, force: true)
+                    await shell.refresh(accessToken: session.accessToken)
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("Lextures")
-                        .font(LexturesTheme.displayFont(21))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Menu {
-                        if let email = session.userEmail {
-                            Text(email)
-                        }
-                        Button("Sign out", role: .destructive) {
-                            session.signOut()
-                        }
-                    } label: {
-                        Image(systemName: "person.crop.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(for: CourseSummary.self) { course in
                 CourseDetailView(course: course)
+            }
+            .navigationDestination(for: DueItem.self) { due in
+                ItemDetailView(course: due.course, item: due.item)
+            }
+            .navigationDestination(for: StaffBacklog.self) { backlog in
+                GradingBacklogView(course: backlog.course)
+            }
+            .navigationDestination(for: BroadcastsListRoute.self) { _ in
+                AnnouncementsListView()
+            }
+            .navigationDestination(for: NotificationsRoute.self) { _ in
+                NotificationsView()
             }
             .task {
                 await model.load(accessToken: session.accessToken)
@@ -153,7 +194,9 @@ struct DashboardView: View {
         }
     }
 
-    /// Deep-teal gradient greeting panel — the brand statement at the top of the app.
+    // MARK: Hero
+
+    /// Deep-teal gradient greeting panel with bell + avatar — the brand statement.
     private var heroPanel: some View {
         ZStack(alignment: .topTrailing) {
             // Decorative drifting circles, echoing the rocket's arc in the logo.
@@ -167,14 +210,23 @@ struct DashboardView: View {
                 .offset(x: -28, y: 26)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(greetingText)
-                    .font(LexturesTheme.displayFont(26))
-                    .foregroundStyle(.white)
-                if let email = session.userEmail {
-                    Text(email)
-                        .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.75))
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(greetingText + ",")
+                            .font(LexturesTheme.displayFont(26))
+                            .foregroundStyle(.white)
+                        Text(shell.profile?.firstName ?? session.userEmail ?? "")
+                            .font(LexturesTheme.displayFont(26))
+                            .foregroundStyle(LexturesTheme.brandCream)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 8)
+                    HStack(spacing: 10) {
+                        bellButton
+                        LMSAvatarButton()
+                    }
                 }
+
                 if !model.dueThisWeek.isEmpty {
                     Text("\(model.dueThisWeek.count) assignment\(model.dueThisWeek.count == 1 ? "" : "s") due this week")
                         .font(.caption.weight(.semibold))
@@ -203,6 +255,27 @@ struct DashboardView: View {
         .shadow(color: LexturesTheme.primaryDeep.opacity(0.25), radius: 14, y: 7)
     }
 
+    private var bellButton: some View {
+        NavigationLink(value: NotificationsRoute()) {
+            ZStack(alignment: .topTrailing) {
+                Image(systemName: "bell.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                    .frame(width: 34, height: 34)
+                    .background(.white.opacity(0.16))
+                    .clipShape(Circle())
+                if shell.unreadNotifications > 0 {
+                    Circle()
+                        .fill(LexturesTheme.coral)
+                        .frame(width: 9, height: 9)
+                        .offset(x: -2, y: 2)
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Notifications")
+    }
+
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
@@ -212,11 +285,24 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: Announcements
+
+    @ViewBuilder
+    private var announcementCard: some View {
+        if let broadcast = model.announcements.first {
+            AnnouncementCard(broadcast: broadcast, showSeeAll: model.announcements.count > 1) {
+                model.announcements.removeAll { $0.id == broadcast.id }
+            }
+        }
+    }
+
+    // MARK: Stats
+
     private var statsRow: some View {
         HStack(spacing: 12) {
             statCard(value: "\(model.courses.count)", label: "Courses", systemImage: "books.vertical.fill", tint: LexturesTheme.accent(for: colorScheme))
             statCard(value: "\(model.dueThisWeek.count)", label: "Due this week", systemImage: "clock.fill", tint: LexturesTheme.coral)
-            statCard(value: "\(unreadInbox)", label: "Unread", systemImage: "tray.fill", tint: LexturesTheme.amber)
+            statCard(value: "\(shell.unreadInbox)", label: "Unread", systemImage: "tray.fill", tint: LexturesTheme.amber)
         }
     }
 
@@ -237,8 +323,45 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: Teacher snapshot
+
     @ViewBuilder
-    private var dueThisWeekSection: some View {
+    private var teacherSnapshot: some View {
+        if !model.staffBacklogs.isEmpty {
+            LMSSectionHeader(title: "Needs grading", systemImage: "checkmark.rectangle.stack")
+            ForEach(model.staffBacklogs) { backlog in
+                NavigationLink(value: backlog) {
+                    LMSCard(accent: LexturesTheme.amber) {
+                        HStack(spacing: 12) {
+                            LMSCoverTile(key: backlog.course.courseCode, systemImage: "checkmark.rectangle.stack", size: 44)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(backlog.course.displayTitle)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                                Text("\(backlog.total) submission\(backlog.total == 1 ? "" : "s") waiting")
+                                    .font(.caption)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            }
+                            Spacer(minLength: 0)
+                            Text("\(backlog.total)")
+                                .font(LexturesTheme.displayFont(18, weight: .bold))
+                                .foregroundStyle(LexturesTheme.amber)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 4)
+                                .background(LexturesTheme.amber.opacity(0.14))
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    // MARK: Due soon
+
+    @ViewBuilder
+    private var dueSoonSection: some View {
         LMSSectionHeader(title: "Due this week", systemImage: "calendar")
         if model.dueThisWeek.isEmpty {
             LMSCard {
@@ -253,55 +376,34 @@ struct DashboardView: View {
             }
         } else {
             ForEach(model.dueThisWeek) { due in
-                LMSCard(accent: LexturesTheme.coral) {
-                    Text(due.item.title)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    HStack {
-                        Text(due.courseTitle)
-                            .font(.caption)
-                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        Spacer()
-                        Text(due.dueDate.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(LexturesTheme.coral)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(LexturesTheme.coral.opacity(0.12))
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var coursesSection: some View {
-        LMSSectionHeader(title: "Your courses", systemImage: "book.fill")
-        if model.courses.isEmpty {
-            LMSEmptyState(
-                systemImage: "book",
-                title: "No courses yet",
-                message: "Courses you enroll in will show up here."
-            )
-        } else {
-            ForEach(model.courses.prefix(5)) { course in
-                NavigationLink(value: course) {
-                    LMSCard {
+                NavigationLink(value: due) {
+                    LMSCard(accent: LexturesTheme.coral) {
                         HStack(spacing: 12) {
-                            LMSCoverTile(key: course.courseCode, systemImage: "book.fill", size: 44)
+                            Image(systemName: ItemKind.icon(for: due.item.kind))
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.coral)
+                                .frame(width: 34, height: 34)
+                                .background(LexturesTheme.coral.opacity(0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             VStack(alignment: .leading, spacing: 3) {
-                                Text(course.displayTitle)
+                                Text(due.item.title)
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                                Text(course.courseCode)
+                                    .lineLimit(1)
+                                Text(due.course.displayTitle)
                                     .font(.caption)
                                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                    .lineLimit(1)
                             }
                             Spacer(minLength: 0)
-                            Image(systemName: "chevron.right")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(due.dueDate.formatted(.dateTime.weekday(.abbreviated)))
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                                Text(due.dueDate.formatted(date: .omitted, time: .shortened))
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(LexturesTheme.coral)
+                            }
                         }
                     }
                 }
@@ -309,9 +411,82 @@ struct DashboardView: View {
             }
         }
     }
+
+    // MARK: Courses carousel
+
+    @ViewBuilder
+    private var coursesCarousel: some View {
+        LMSSectionHeader(title: "Your courses", systemImage: "book.fill")
+        if model.courses.isEmpty && !model.loading {
+            LMSEmptyState(
+                systemImage: "book",
+                title: "No courses yet",
+                message: "Courses you enroll in will show up here."
+            )
+        } else {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
+                    ForEach(model.courses) { course in
+                        NavigationLink(value: course) {
+                            courseCarouselCard(course)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 2)
+                .padding(.horizontal, 2)
+            }
+            .scrollClipDisabled()
+        }
+    }
+
+    private func courseCarouselCard(_ course: CourseSummary) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            ZStack(alignment: .topTrailing) {
+                RoundedRectangle(cornerRadius: 0)
+                    .fill(LexturesTheme.coverGradient(for: course.courseCode))
+                    .frame(height: 84)
+                Image(systemName: "book.fill")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.5))
+                    .padding(12)
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(course.displayTitle)
+                    .font(LexturesTheme.displayFont(15))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    .lineLimit(2, reservesSpace: true)
+                    .multilineTextAlignment(.leading)
+                Text(courseSubtitle(course))
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            }
+            .padding(12)
+        }
+        .frame(width: 190, alignment: .leading)
+        .background(LexturesTheme.cardBackground(for: colorScheme))
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(colorScheme == .dark ? 0.9 : 0.45), lineWidth: 1)
+        )
+        .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 12, y: 5)
+    }
+
+    private func courseSubtitle(_ course: CourseSummary) -> String {
+        if let counts = model.courseItemCounts[course.courseCode], counts.items > 0 {
+            return "\(counts.modules) module\(counts.modules == 1 ? "" : "s") · \(counts.items) item\(counts.items == 1 ? "" : "s")"
+        }
+        return course.courseCode.uppercased()
+    }
 }
 
+/// Value-type routes for dashboard navigation destinations.
+struct NotificationsRoute: Hashable {}
+struct BroadcastsListRoute: Hashable {}
+
 #Preview {
-    DashboardView(unreadInbox: .constant(2))
+    DashboardView()
         .environment(AuthSession())
+        .environment(AppShellModel())
 }

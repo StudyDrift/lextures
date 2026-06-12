@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Schedule
@@ -61,10 +62,13 @@ import com.lextures.android.core.design.AuthPrimaryButton
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.lms.AssignmentSubmission
 import com.lextures.android.core.lms.CourseStructureItem
+import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.lms.ModuleItemDetail
+import com.lextures.android.core.lms.SubmissionGrade
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsErrorBanner
@@ -103,15 +107,19 @@ object ItemKind {
 @Composable
 fun ItemDetailScreen(
     session: AuthSession,
-    courseCode: String,
+    course: CourseSummary,
     item: CourseStructureItem,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
+    val courseCode = course.courseCode
 
     var detail by remember { mutableStateOf<ModuleItemDetail?>(null) }
+    var mySubmission by remember { mutableStateOf<AssignmentSubmission?>(null) }
+    var myGrade by remember { mutableStateOf<SubmissionGrade?>(null) }
+    var submissionLoaded by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
@@ -127,6 +135,15 @@ fun ItemDetailScreen(
             errorMessage = session.mapError(e)
         } finally {
             loading = false
+        }
+        // Student view of their own submission + released grade (assignments only).
+        if (item.kind == "assignment" && course.viewerIsStudent) {
+            submissionLoaded = false
+            mySubmission = runCatching { LmsApi.fetchMySubmission(courseCode, item.id, token) }.getOrNull()
+            myGrade = mySubmission?.let { submission ->
+                runCatching { LmsApi.fetchSubmissionGrade(courseCode, item.id, submission.id, token) }.getOrNull()
+            }
+            submissionLoaded = true
         }
     }
 
@@ -228,6 +245,12 @@ fun ItemDetailScreen(
                     LmsCard {
                         MarkdownText(markdown)
                     }
+                }
+            }
+
+            if (item.kind == "assignment" && course.viewerIsStudent && submissionLoaded) {
+                item {
+                    MySubmissionCard(submission = mySubmission, grade = myGrade)
                 }
             }
 
@@ -464,3 +487,134 @@ private fun parseMarkdownBlocks(markdown: String): List<MdBlock> {
     flush()
     return out
 }
+
+/** Student view of their own submission status and released grade. */
+@Composable
+private fun MySubmissionCard(
+    submission: AssignmentSubmission?,
+    grade: SubmissionGrade?,
+) {
+    if (submission == null) {
+        LmsCard {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.Default.Inbox,
+                    contentDescription = null,
+                    tint = textSecondary(),
+                    modifier = Modifier.size(18.dp),
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "Not submitted yet",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = textPrimary(),
+                    )
+                    Text(
+                        text = "Submit this assignment from the web app.",
+                        fontSize = 12.sp,
+                        color = textSecondary(),
+                    )
+                }
+            }
+        }
+        return
+    }
+
+    val revisionRequested = submission.resubmissionRequested == true
+    LmsCard(accent = if (revisionRequested) LexturesColors.Coral else LexturesColors.BrandTeal) {
+        Text(text = "Your submission", style = LexturesType.display(18), color = textPrimary())
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = LexturesColors.Primary,
+                modifier = Modifier.size(18.dp),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = "Submitted ${LmsDates.shortDateTime(submission.submittedAt)}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = textPrimary(),
+                )
+                submission.versionNumber?.takeIf { it > 1 }?.let {
+                    Text(text = "Version $it", fontSize = 12.sp, color = textSecondary())
+                }
+            }
+        }
+
+        submission.attachmentFilename?.takeIf { it.isNotEmpty() }?.let { filename ->
+            Text(text = filename, fontSize = 12.sp, color = textSecondary())
+        }
+
+        if (revisionRequested) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(LexturesColors.Coral.copy(alpha = 0.08f))
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = "Revision requested",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = LexturesColors.Coral,
+                )
+                submission.revisionFeedback?.takeIf { it.isNotEmpty() }?.let {
+                    Text(text = it, fontSize = 12.sp, color = textSecondary())
+                }
+                LmsDates.parse(submission.revisionDueAt)?.let {
+                    Text(
+                        text = "Revise by ${LmsDates.shortDateTime(submission.revisionDueAt)}",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = LexturesColors.Coral,
+                    )
+                }
+            }
+        }
+
+        if (grade?.posted == true && grade.pointsEarned != null) {
+            HorizontalDivider()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = "Grade",
+                    fontSize = 14.sp,
+                    color = textSecondary(),
+                    modifier = Modifier.weight(1f),
+                )
+                val earned = grade.pointsEarned
+                val max = grade.maxPoints
+                Text(
+                    text = if (max != null) "${fmtPts(earned)} / ${fmtPts(max)}" else fmtPts(earned),
+                    style = LexturesType.display(18, FontWeight.Bold),
+                    color = LexturesColors.Primary,
+                )
+            }
+            grade.instructorComment?.takeIf { it.isNotEmpty() }?.let {
+                Text(
+                    text = "“$it”",
+                    fontSize = 13.sp,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    color = textSecondary(),
+                )
+            }
+        }
+    }
+}
+
+private fun fmtPts(points: Double): String =
+    if (points % 1.0 == 0.0) points.toLong().toString() else points.toString()

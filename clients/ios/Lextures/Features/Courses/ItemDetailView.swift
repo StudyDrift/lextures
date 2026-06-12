@@ -6,10 +6,15 @@ struct ItemDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.openURL) private var openURL
 
-    let courseCode: String
+    let course: CourseSummary
     let item: CourseStructureItem
 
+    private var courseCode: String { course.courseCode }
+
     @State private var detail: ModuleItemDetail?
+    @State private var mySubmission: AssignmentSubmission?
+    @State private var myGrade: SubmissionGrade?
+    @State private var submissionLoaded = false
     @State private var errorMessage: String?
     @State private var loading = true
 
@@ -36,6 +41,7 @@ struct ItemDetailView: View {
                         if let markdown = detail?.markdown, !markdown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             contentCard(markdown)
                         }
+                        submissionCard
                         detailsCard
                     }
                 }
@@ -58,6 +64,126 @@ struct ItemDetailView: View {
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load this activity."
         }
+        await loadMySubmission(token: token)
+    }
+
+    /// Student view of their own submission + released grade (assignments only).
+    private func loadMySubmission(token: String) async {
+        guard item.kind == "assignment", course.viewerIsStudent else { return }
+        submissionLoaded = false
+        mySubmission = try? await LMSAPI.fetchMySubmission(
+            courseCode: courseCode,
+            itemId: item.id,
+            accessToken: token
+        )
+        if let submission = mySubmission {
+            myGrade = try? await LMSAPI.fetchSubmissionGrade(
+                courseCode: courseCode,
+                itemId: item.id,
+                submissionId: submission.id,
+                accessToken: token
+            )
+        }
+        submissionLoaded = true
+    }
+
+    // MARK: My submission (students)
+
+    @ViewBuilder
+    private var submissionCard: some View {
+        if item.kind == "assignment" && course.viewerIsStudent && submissionLoaded {
+            if let submission = mySubmission {
+                LMSCard(accent: submission.resubmissionRequested == true ? LexturesTheme.coral : LexturesTheme.brandTeal) {
+                    Text("Your submission")
+                        .font(LexturesTheme.displayFont(18))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+
+                    HStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(LexturesTheme.primary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Submitted \(LMSDates.shortDateTime(submission.submittedAt))")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                            if let version = submission.versionNumber, version > 1 {
+                                Text("Version \(version)")
+                                    .font(.caption)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            }
+                        }
+                    }
+
+                    if let filename = submission.attachmentFilename, !filename.isEmpty {
+                        Label(filename, systemImage: "paperclip")
+                            .font(.caption)
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    }
+
+                    if submission.resubmissionRequested == true {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Label("Revision requested", systemImage: "arrow.uturn.backward.circle.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.coral)
+                            if let feedback = submission.revisionFeedback, !feedback.isEmpty {
+                                Text(feedback)
+                                    .font(.caption)
+                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            }
+                            if let revisionDue = LMSDates.parse(submission.revisionDueAt) {
+                                Text("Revise by \(revisionDue.formatted(date: .abbreviated, time: .shortened))")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(LexturesTheme.coral)
+                            }
+                        }
+                        .padding(10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(LexturesTheme.coral.opacity(0.08))
+                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+
+                    if let grade = myGrade, grade.posted == true, let earned = grade.pointsEarned {
+                        Divider()
+                        HStack(alignment: .firstTextBaseline) {
+                            Text("Grade")
+                                .font(.subheadline)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            Spacer()
+                            Text(gradeText(earned: earned, max: grade.maxPoints))
+                                .font(LexturesTheme.displayFont(18, weight: .bold))
+                                .foregroundStyle(LexturesTheme.primary)
+                        }
+                        if let comment = grade.instructorComment, !comment.isEmpty {
+                            Text("“\(comment)”")
+                                .font(.subheadline)
+                                .italic()
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        }
+                    }
+                }
+            } else {
+                LMSCard {
+                    HStack(spacing: 10) {
+                        Image(systemName: "tray")
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Not submitted yet")
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                            Text("Submit this assignment from the web app.")
+                                .font(.caption)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func gradeText(earned: Double, max: Double?) -> String {
+        if let max {
+            return "\(earned.formatted()) / \(max.formatted())"
+        }
+        return earned.formatted()
     }
 
     // MARK: Header
