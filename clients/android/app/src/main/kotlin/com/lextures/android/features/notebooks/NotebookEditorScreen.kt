@@ -5,56 +5,42 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.font.FontStyle
-import com.lextures.android.core.design.isDarkTheme
-import com.lextures.android.core.design.sceneBackground
-import com.lextures.android.core.lms.LmsDates
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddTask
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.CreateNewFolder
-import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Draw
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.HorizontalRule
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.UnfoldMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -63,7 +49,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -78,13 +63,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -93,13 +81,15 @@ import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.fieldBorder
+import com.lextures.android.core.design.isDarkTheme
+import com.lextures.android.core.design.sceneBackground
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.lms.NotebookTaskUpsert
 import com.lextures.android.core.lms.NotebookTasksApi
 import com.lextures.android.core.notebook.NotebookEditBlock
 import com.lextures.android.core.notebook.NotebookMarkdown
-import com.lextures.android.core.notebook.NotebookPage
 import com.lextures.android.core.notebook.NotebookSlashCommand
 import com.lextures.android.core.notebook.NotebookStore
 import com.lextures.android.core.notebook.NotebookSync
@@ -112,87 +102,53 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 /**
- * Notebook page editor with a page tree, a rendered reading view (interactive tasks),
- * and a markdown edit mode with `/` commands + insert toolbar (parity with web).
+ * Notion-style page editor: a large editable title plus an always-editable block list
+ * (text, tasks, drawings, …). There is no separate read/edit mode — tap any block to
+ * edit it, toggle tasks in place, tap drawings to open the whiteboard. The `/` command
+ * menu and insert toolbar ride above the keyboard while a block is focused.
  */
 @Composable
 fun NotebookEditorScreen(
     store: NotebookStore,
     courseCode: String,
-    title: String,
+    notebookTitle: String,
+    pageId: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     accessToken: String? = null,
 ) {
-    var notebook by remember {
-        val loaded = store.load(courseCode)
-        mutableStateOf(
-            if (courseCode == NotebookStore.GLOBAL_KEY) loaded else loaded.copy(courseTitle = title),
-        )
-    }
-    val activePage = notebook.pages.firstOrNull { it.id == notebook.activePageId }
-        ?: notebook.pages.firstOrNull { !NotebookTree.isGroup(it) }
-    val activeIsGroup = activePage != null && NotebookTree.isGroup(activePage)
+    var notebook by remember { mutableStateOf(store.load(courseCode)) }
+    val page = notebook.pages.firstOrNull { it.id == pageId }
 
-    // WYSIWYG edit mode: the page is a list of rendered blocks (web block-editor parity);
-    // markdown is only the storage format.
-    var blocks by remember { mutableStateOf(NotebookMarkdown.editBlocks(activePage?.contentMd.orEmpty())) }
+    var blocks by remember { mutableStateOf(NotebookMarkdown.editBlocks(page?.contentMd.orEmpty())) }
+    var titleText by remember { mutableStateOf(page?.title?.takeIf { it != "Untitled" }.orEmpty()) }
     var focusedBlockId by remember { mutableStateOf<String?>(null) }
+    var titleFocused by remember { mutableStateOf(false) }
     var pendingFocusId by remember { mutableStateOf<String?>(null) }
     var editingDrawing by remember { mutableStateOf<EditingDrawingTarget?>(null) }
-    var editing by remember { mutableStateOf(activePage != null && !activeIsGroup && activePage.contentMd.isBlank()) }
-    var showPages by remember { mutableStateOf(false) }
-    var menuOpen by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf(false) }
-    var renameText by remember { mutableStateOf("") }
     var dueTask by remember { mutableStateOf<ParsedNotebookTask?>(null) }
+    var menuOpen by remember { mutableStateOf(false) }
+    var confirmingDelete by remember { mutableStateOf(false) }
     var pushRevision by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+    val titleFocusRequester = remember { FocusRequester() }
 
     fun persist() {
-        store.save(courseCode, notebook)
+        val data = if (courseCode == NotebookStore.GLOBAL_KEY) notebook else notebook.copy(courseTitle = notebookTitle)
+        store.save(courseCode, data)
         pushRevision++
     }
 
-    // Rendered edit blocks from canonical markdown (fences never shown to the user).
-    fun loadBlocks(contentMd: String) {
-        blocks = NotebookMarkdown.editBlocks(contentMd)
-    }
-
-    // Canonical markdown rebuilt from the edit blocks.
-    fun draftMarkdown(): String = NotebookMarkdown.markdownFromBlocks(blocks)
-
-    // Merge any newer server copy (e.g. written on web) once on open.
-    LaunchedEffect(courseCode) {
-        if (NotebookSync.pull(store, accessToken)) {
-            val loaded = store.load(courseCode)
-            notebook = if (courseCode == NotebookStore.GLOBAL_KEY) loaded else loaded.copy(courseTitle = title)
-            val page = loaded.pages.firstOrNull { it.id == loaded.activePageId }
-                ?: loaded.pages.firstOrNull { !NotebookTree.isGroup(it) }
-            loadBlocks(page?.contentMd.orEmpty())
-            editing = page != null && !NotebookTree.isGroup(page) && page.contentMd.isBlank()
-        }
-    }
-
-    // Debounced server push so typing doesn't fire a request per keystroke; each persist
-    // restarts the effect, which cancels the pending delay.
-    LaunchedEffect(pushRevision) {
-        if (pushRevision == 0) return@LaunchedEffect
-        delay(1_500)
-        NotebookSync.push(store, courseCode, accessToken)
-    }
-
     fun saveDraft() {
-        val active = activePage ?: return
-        if (editing && !NotebookTree.isGroup(active)) {
-            notebook = notebook.copy(pages = NotebookTree.updateContent(notebook.pages, active.id, draftMarkdown()))
-        }
+        notebook = notebook.copy(
+            pages = NotebookTree.updateContent(notebook.pages, pageId, NotebookMarkdown.markdownFromBlocks(blocks)),
+        )
         persist()
     }
 
     fun syncTask(task: ParsedNotebookTask) {
         val token = accessToken ?: return
-        val pageId = activePage?.id ?: return
         scope.launch {
             runCatching {
                 NotebookTasksApi.upsert(
@@ -210,99 +166,86 @@ fun NotebookEditorScreen(
         }
     }
 
-    fun updateActiveContent(contentMd: String) {
-        val active = activePage ?: return
-        notebook = notebook.copy(pages = NotebookTree.updateContent(notebook.pages, active.id, contentMd))
-        loadBlocks(contentMd)
-        persist()
+    fun syncAllTasks() {
+        NotebookMarkdown.parseTasks(NotebookMarkdown.markdownFromBlocks(blocks)).forEach { syncTask(it) }
     }
 
-    fun selectPage(pageId: String) {
+    fun leave() {
         saveDraft()
-        editing = false
-        val page = notebook.pages.firstOrNull { it.id == pageId }
-        notebook = notebook.copy(activePageId = pageId)
-        loadBlocks(page?.contentMd.orEmpty())
-        if (page != null && !NotebookTree.isGroup(page) && page.contentMd.isBlank()) {
-            editing = true
-        }
-        persist()
+        syncAllTasks()
+        onBack()
     }
 
-    fun createPage(parentId: String?) {
-        saveDraft()
-        val (pages, newId) = NotebookTree.addPage(notebook.pages, parentId)
-        notebook = notebook.copy(pages = pages, activePageId = newId)
-        loadBlocks("")
-        pendingFocusId = blocks.firstOrNull()?.id
-        editing = true
-        persist()
-    }
-
-    fun createGroup() {
-        saveDraft()
-        val (pages, _) = NotebookTree.addGroup(notebook.pages, parentId = null, title = "New group")
-        notebook = notebook.copy(pages = pages)
-        persist()
-    }
-
-    fun deletePage(pageId: String) {
+    fun deletePage() {
         var pages = NotebookTree.delete(notebook.pages, pageId)
         var activeId = notebook.activePageId
+        // Keep at least one real page in the notebook.
         if (pages.none { !NotebookTree.isGroup(it) }) {
             val (withPage, newId) = NotebookTree.addPage(pages, parentId = null)
             pages = withPage
             activeId = newId
-        }
-        if (pages.none { it.id == activeId }) {
-            activeId = pages.firstOrNull { !NotebookTree.isGroup(it) }?.id ?: pages.firstOrNull()?.id
+        } else if (pages.none { it.id == activeId }) {
+            activeId = pages.firstOrNull { !NotebookTree.isGroup(it) }?.id
         }
         notebook = notebook.copy(pages = pages, activePageId = activeId)
-        loadBlocks(pages.firstOrNull { it.id == activeId }?.contentMd.orEmpty())
-        editing = false
         persist()
+        onBack()
     }
 
-    fun finishEditing() {
-        saveDraft()
-        editing = false
-        activePage?.let { page ->
-            NotebookMarkdown.parseTasks(page.contentMd).forEach { syncTask(it) }
+    // Opening a page makes it the notebook's active page (web sidebar parity); fresh
+    // pages drop straight into the title so writing is one tap away.
+    LaunchedEffect(pageId) {
+        notebook = notebook.copy(activePageId = pageId)
+        persist()
+        if (page != null && page.contentMd.isBlank()) {
+            delay(350)
+            if (titleText.isEmpty()) {
+                runCatching { titleFocusRequester.requestFocus() }
+            } else {
+                pendingFocusId = blocks.firstOrNull { it.isTextual }?.id
+            }
         }
+    }
+
+    // Debounced server push so typing doesn't fire a request per keystroke; each persist
+    // restarts the effect, which cancels the pending delay.
+    LaunchedEffect(pushRevision) {
+        if (pushRevision == 0) return@LaunchedEffect
+        delay(1_500)
+        NotebookSync.push(store, courseCode, accessToken)
     }
 
     BackHandler {
-        if (editing) {
-            finishEditing()
+        if (focusedBlockId != null || titleFocused) {
+            focusManager.clearFocus()
         } else {
-            saveDraft()
-            onBack()
+            leave()
         }
     }
 
     Column(modifier = modifier.imePadding()) {
         // Top bar
         Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = {
-                saveDraft()
-                onBack()
-            }) {
+            IconButton(onClick = { leave() }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = textPrimary(),
+                text = notebookTitle,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = textSecondary(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
-            if (editing) {
-                TextButton(onClick = { finishEditing() }) {
+            if (focusedBlockId != null || titleFocused) {
+                TextButton(onClick = {
+                    saveDraft()
+                    focusManager.clearFocus()
+                }) {
                     Text("Done", fontWeight = FontWeight.SemiBold, color = accentColor())
                 }
             } else {
@@ -312,29 +255,11 @@ fun NotebookEditorScreen(
                     }
                     DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                         DropdownMenuItem(
-                            text = { Text("Rename page") },
-                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                            text = { Text("Delete page", color = LexturesColors.Error) },
+                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null, tint = LexturesColors.Error) },
                             onClick = {
                                 menuOpen = false
-                                renameText = activePage?.title.orEmpty()
-                                renaming = true
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("New page") },
-                            leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
-                            onClick = {
-                                menuOpen = false
-                                createPage(null)
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = { Text("New group") },
-                            leadingIcon = { Icon(Icons.Default.CreateNewFolder, contentDescription = null) },
-                            onClick = {
-                                menuOpen = false
-                                createGroup()
-                                showPages = true
+                                confirmingDelete = true
                             },
                         )
                     }
@@ -342,150 +267,52 @@ fun NotebookEditorScreen(
             }
         }
 
-        // Page header: current page (opens the page tree) + Edit
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(cardBackground())
-                    .border(1.dp, fieldBorder(), RoundedCornerShape(50))
-                    .clickable {
-                        saveDraft()
-                        showPages = true
-                    }
-                    .padding(horizontal = 14.dp, vertical = 9.dp)
-                    .weight(1f, fill = false),
-            ) {
-                Icon(
-                    imageVector = if (activeIsGroup) Icons.Default.Folder else Icons.Default.Description,
-                    contentDescription = null,
-                    tint = if (activeIsGroup) LexturesColors.BrandAmber else accentColor(),
-                    modifier = Modifier.size(14.dp),
-                )
-                Text(
-                    text = activePage?.let { NotebookTree.pathLabel(notebook.pages, it.id) }?.ifBlank { "Untitled" } ?: "Untitled",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = textPrimary(),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Icon(Icons.Default.UnfoldMore, contentDescription = "Show pages", tint = textSecondary(), modifier = Modifier.size(14.dp))
-            }
-
-            Spacer(Modifier.weight(1f))
-
-            if (!editing && !activeIsGroup) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(50))
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(LexturesColors.Primary, Color(0xFF17897B)),
-                            ),
-                        )
-                        .clickable {
-                            loadBlocks(activePage?.contentMd.orEmpty())
-                            editing = true
-                            pendingFocusId = blocks.lastOrNull { it.isTextual }?.id
-                        }
-                        .padding(horizontal = 16.dp, vertical = 9.dp),
-                ) {
-                    Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                    Text("Edit", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
-                }
-            }
-        }
-
-        when {
-            activeIsGroup -> GroupPanel(
-                notebookPages = notebook.pages,
-                group = activePage,
-                onSelect = { selectPage(it) },
-                onCreatePage = { createPage(activePage?.id) },
-            )
-
-            editing -> BlockEditorPane(
-                blocks = blocks,
-                pendingFocusId = pendingFocusId,
-                onPendingFocusConsumed = { pendingFocusId = null },
-                onFocusedChange = { focusedBlockId = it },
-                onBlocksChange = { next, focusId ->
-                    blocks = next
-                    if (focusId != null) pendingFocusId = focusId
-                    val active = activePage
-                    if (active != null) {
-                        notebook = notebook.copy(pages = NotebookTree.updateContent(notebook.pages, active.id, draftMarkdown()))
-                        persist()
-                    }
-                },
-                onToggleTask = { blockId ->
-                    val idx = blocks.indexOfFirst { it.id == blockId }
-                    val kind = blocks.getOrNull(idx)?.kind as? NotebookEditBlock.Kind.Task ?: return@BlockEditorPane
-                    blocks = blocks.toMutableList().also {
-                        it[idx] = it[idx].copy(kind = kind.copy(checked = !kind.checked))
-                    }
-                    saveDraft()
-                    syncTask(ParsedNotebookTask(kind.taskId, blocks[idx].text, !kind.checked, kind.dueAt))
-                },
-                onEditTaskDue = { blockId ->
-                    val block = blocks.firstOrNull { it.id == blockId } ?: return@BlockEditorPane
-                    val kind = block.kind as? NotebookEditBlock.Kind.Task ?: return@BlockEditorPane
-                    dueTask = ParsedNotebookTask(kind.taskId, block.text, kind.checked, kind.dueAt)
-                },
-                onEditDrawing = { blockId, elementsJson ->
-                    editingDrawing = EditingDrawingTarget(elementsJson, readIndex = null, blockId = blockId)
-                },
-                accessToken = accessToken,
-            )
-
-            else -> ReadingPane(
-                contentMd = activePage?.contentMd.orEmpty(),
-                onStartEditing = {
-                    loadBlocks(activePage?.contentMd.orEmpty())
-                    editing = true
-                    pendingFocusId = blocks.lastOrNull { it.isTextual }?.id
-                },
-                onToggleTask = { task ->
-                    val active = activePage ?: return@ReadingPane
-                    updateActiveContent(NotebookMarkdown.setTaskChecked(active.contentMd, task.id, !task.checked))
-                    syncTask(task.copy(checked = !task.checked))
-                },
-                onEditTaskDue = { dueTask = it },
-                accessToken = accessToken,
-                onEditDrawing = { index, elementsJson ->
-                    editingDrawing = EditingDrawingTarget(elementsJson, readIndex = index, blockId = null)
-                },
-            )
-        }
-    }
-
-    if (showPages) {
-        NotebookPagesSheet(
-            pages = notebook.pages,
-            activePageId = activePage?.id,
-            onDismiss = { showPages = false },
-            onSelect = { selectPage(it) },
-            onCreatePage = { createPage(it) },
-            onCreateGroup = { createGroup() },
-            onRename = { pageId, name ->
+        BlockEditorPane(
+            blocks = blocks,
+            titleText = titleText,
+            onTitleChange = { value ->
+                // The title is a single line — a return moves into the page body.
+                val flat = value.replace("\n", "")
+                val returned = flat != value
+                titleText = flat
+                val name = flat.trim().ifEmpty { "Untitled" }
                 notebook = notebook.copy(pages = NotebookTree.rename(notebook.pages, pageId, name))
                 persist()
-            },
-            onMove = { pageId, newParentId ->
-                NotebookTree.moveToParent(notebook.pages, pageId, newParentId)?.let {
-                    notebook = notebook.copy(pages = it)
-                    persist()
+                if (returned) {
+                    pendingFocusId = blocks.firstOrNull { it.isTextual }?.id
                 }
             },
-            onDelete = { deletePage(it) },
+            titleFocusRequester = titleFocusRequester,
+            onTitleFocusChanged = { titleFocused = it },
+            pendingFocusId = pendingFocusId,
+            onPendingFocusConsumed = { pendingFocusId = null },
+            onFocusedChange = { focusedBlockId = it },
+            onBlocksChange = { next, focusId ->
+                blocks = next
+                if (focusId != null) pendingFocusId = focusId
+                notebook = notebook.copy(
+                    pages = NotebookTree.updateContent(notebook.pages, pageId, NotebookMarkdown.markdownFromBlocks(next)),
+                )
+                persist()
+            },
+            onToggleTask = { blockId ->
+                val idx = blocks.indexOfFirst { it.id == blockId }
+                val kind = blocks.getOrNull(idx)?.kind as? NotebookEditBlock.Kind.Task ?: return@BlockEditorPane
+                blocks = blocks.toMutableList().also {
+                    it[idx] = it[idx].copy(kind = kind.copy(checked = !kind.checked))
+                }
+                saveDraft()
+                syncTask(ParsedNotebookTask(kind.taskId, blocks[idx].text, !kind.checked, kind.dueAt))
+            },
+            onEditTaskDue = { blockId ->
+                val block = blocks.firstOrNull { it.id == blockId } ?: return@BlockEditorPane
+                val kind = block.kind as? NotebookEditBlock.Kind.Task ?: return@BlockEditorPane
+                dueTask = ParsedNotebookTask(kind.taskId, block.text, kind.checked, kind.dueAt)
+            },
+            onEditDrawing = { blockId, elementsJson ->
+                editingDrawing = EditingDrawingTarget(elementsJson, blockId)
+            },
+            accessToken = accessToken,
         )
     }
 
@@ -494,12 +321,14 @@ fun NotebookEditorScreen(
             task = task,
             onDismiss = { dueTask = null },
             onSave = { dueAt ->
-                saveDraft()
-                val active = activePage
-                if (active != null) {
-                    val next = NotebookMarkdown.setTaskDueAt(active.contentMd, task.id, dueAt)
-                    updateActiveContent(next)
-                    NotebookMarkdown.parseTasks(next).firstOrNull { it.id == task.id }?.let { syncTask(it) }
+                val idx = blocks.indexOfFirst { (it.kind as? NotebookEditBlock.Kind.Task)?.taskId == task.id }
+                val kind = blocks.getOrNull(idx)?.kind as? NotebookEditBlock.Kind.Task
+                if (kind != null) {
+                    blocks = blocks.toMutableList().also {
+                        it[idx] = it[idx].copy(kind = kind.copy(dueAt = dueAt))
+                    }
+                    saveDraft()
+                    syncTask(ParsedNotebookTask(task.id, blocks[idx].text, kind.checked, dueAt))
                 }
                 dueTask = null
             },
@@ -511,181 +340,51 @@ fun NotebookEditorScreen(
             initialElementsJson = target.elementsJson,
             onDismiss = { editingDrawing = null },
             onSave = { newJson ->
-                val blockId = target.blockId
-                if (blockId != null) {
-                    val idx = blocks.indexOfFirst { it.id == blockId }
-                    if (idx >= 0) {
-                        blocks = blocks.toMutableList().also {
-                            it[idx] = it[idx].copy(kind = NotebookEditBlock.Kind.Drawing(newJson))
-                        }
-                        saveDraft()
+                val idx = blocks.indexOfFirst { it.id == target.blockId }
+                if (idx >= 0) {
+                    blocks = blocks.toMutableList().also {
+                        it[idx] = it[idx].copy(kind = NotebookEditBlock.Kind.Drawing(newJson))
                     }
-                } else if (target.readIndex != null) {
-                    activePage?.let { active ->
-                        updateActiveContent(NotebookMarkdown.replaceDrawing(active.contentMd, target.readIndex, newJson))
-                    }
+                    saveDraft()
                 }
                 editingDrawing = null
             },
         )
     }
 
-    if (renaming) {
+    if (confirmingDelete) {
         AlertDialog(
-            onDismissRequest = { renaming = false },
-            title = { Text("Rename page") },
-            text = {
-                OutlinedTextField(value = renameText, onValueChange = { renameText = it }, singleLine = true)
-            },
+            onDismissRequest = { confirmingDelete = false },
+            title = { Text("Delete this page?") },
+            text = { Text("The page and its notes will be deleted.") },
             confirmButton = {
                 TextButton(onClick = {
-                    val name = renameText.trim()
-                    val active = activePage
-                    if (name.isNotEmpty() && active != null) {
-                        notebook = notebook.copy(pages = NotebookTree.rename(notebook.pages, active.id, name))
-                        persist()
-                    }
-                    renaming = false
-                }) { Text("Save") }
+                    confirmingDelete = false
+                    deletePage()
+                }) { Text("Delete", color = LexturesColors.Error) }
             },
             dismissButton = {
-                TextButton(onClick = { renaming = false }) { Text("Cancel") }
+                TextButton(onClick = { confirmingDelete = false }) { Text("Cancel") }
             },
         )
-    }
-}
-
-// MARK: Reading
-
-@Composable
-private fun ReadingPane(
-    contentMd: String,
-    onStartEditing: () -> Unit,
-    onToggleTask: (ParsedNotebookTask) -> Unit,
-    onEditTaskDue: (ParsedNotebookTask) -> Unit,
-    accessToken: String? = null,
-    onEditDrawing: ((Int, String) -> Unit)? = null,
-) {
-    if (contentMd.isBlank()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp, vertical = 70.dp),
-        ) {
-            Icon(Icons.Default.Edit, contentDescription = null, tint = accentColor().copy(alpha = 0.7f), modifier = Modifier.size(34.dp))
-            Text("This page is empty", style = LexturesType.display(19), color = textPrimary())
-            Text(
-                text = "Tap Edit to start writing. Type / while editing for headings, tasks, lists, and more.",
-                fontSize = 13.sp,
-                color = textSecondary(),
-                textAlign = TextAlign.Center,
-            )
-            TextButton(onClick = onStartEditing) {
-                Text("Start writing", fontWeight = FontWeight.SemiBold, color = accentColor())
-            }
-        }
-        return
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp),
-    ) {
-        NotebookContentView(
-            markdown = contentMd,
-            onToggleTask = onToggleTask,
-            onEditTaskDue = onEditTaskDue,
-            accessToken = accessToken,
-            onEditDrawing = onEditDrawing,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(cardBackground())
-                .border(1.dp, fieldBorder().copy(alpha = 0.9f), RoundedCornerShape(16.dp))
-                .padding(16.dp),
-        )
-    }
-}
-
-// MARK: Group panel
-
-@Composable
-private fun GroupPanel(
-    notebookPages: List<NotebookPage>,
-    group: NotebookPage?,
-    onSelect: (String) -> Unit,
-    onCreatePage: () -> Unit,
-) {
-    val children = NotebookTree.sortedChildren(notebookPages, group?.id)
-    Column(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-    ) {
-        if (children.isEmpty()) {
-            Text(
-                text = "No pages in this group yet.",
-                fontSize = 13.sp,
-                color = textSecondary(),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
-            )
-        }
-        children.forEach { child ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(cardBackground())
-                    .border(1.dp, fieldBorder(), RoundedCornerShape(12.dp))
-                    .clickable { onSelect(child.id) }
-                    .padding(14.dp),
-            ) {
-                Icon(
-                    imageVector = if (NotebookTree.isGroup(child)) Icons.Default.Folder else Icons.Default.Description,
-                    contentDescription = null,
-                    tint = if (NotebookTree.isGroup(child)) LexturesColors.BrandAmber else accentColor(),
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    text = child.title.ifBlank { "Untitled" },
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = textPrimary(),
-                    modifier = Modifier.weight(1f),
-                )
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary(), modifier = Modifier.size(18.dp))
-            }
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable(onClick = onCreatePage).padding(vertical = 8.dp),
-        ) {
-            Icon(Icons.Default.Add, contentDescription = null, tint = accentColor(), modifier = Modifier.size(18.dp))
-            Text("New page in group", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = accentColor())
-        }
     }
 }
 
 // MARK: Block editor (WYSIWYG, web parity)
 
-/** Drawing being edited — from the reading view (by document index) or the block editor (by block id). */
+/** Drawing being edited, identified by its block id. */
 private data class EditingDrawingTarget(
     val elementsJson: String,
-    val readIndex: Int?,
-    val blockId: String?,
+    val blockId: String,
 )
 
 @Composable
 private fun ColumnScope.BlockEditorPane(
     blocks: List<NotebookEditBlock>,
+    titleText: String,
+    onTitleChange: (String) -> Unit,
+    titleFocusRequester: FocusRequester,
+    onTitleFocusChanged: (Boolean) -> Unit,
     pendingFocusId: String?,
     onPendingFocusConsumed: () -> Unit,
     onFocusedChange: (String?) -> Unit,
@@ -766,9 +465,20 @@ private fun ColumnScope.BlockEditorPane(
         onBlocksChange(next, next[(idx - 1).coerceIn(0, next.size - 1)].id)
     }
 
+    /** Focus the trailing textual block (appending a paragraph if the page ends in a drawing). */
+    fun focusTail() {
+        val last = blocks.lastOrNull()
+        if (last != null && last.isTextual) {
+            runCatching { requesterFor(last.id).requestFocus() }
+        } else {
+            val paragraph = NotebookEditBlock(kind = NotebookEditBlock.Kind.Paragraph)
+            onBlocksChange(blocks + paragraph, paragraph.id)
+        }
+    }
+
     /** Convert the focused block (text kinds) or insert after it (divider / drawing). */
     fun applyCommand(command: NotebookSlashCommand) {
-        var next = blocks.toMutableList()
+        val next = blocks.toMutableList()
         var idx = next.indexOfFirst { it.id == focusedId }
         if (idx < 0) {
             next.add(NotebookEditBlock(kind = NotebookEditBlock.Kind.Paragraph))
@@ -812,14 +522,34 @@ private fun ColumnScope.BlockEditorPane(
         modifier = Modifier
             .weight(1f)
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(cardBackground())
-            .border(1.dp, fieldBorder().copy(alpha = 0.9f), RoundedCornerShape(16.dp))
             .verticalScroll(rememberScrollState())
-            .padding(14.dp),
+            .padding(horizontal = 20.dp, vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
+        // Page title — Notion-style, edited in place.
+        BasicTextField(
+            value = titleText,
+            onValueChange = onTitleChange,
+            textStyle = LexturesType.display(26, FontWeight.Bold).copy(color = textPrimary()),
+            cursorBrush = SolidColor(accentColor()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(titleFocusRequester)
+                .onFocusChanged { onTitleFocusChanged(it.isFocused) },
+            decorationBox = { inner ->
+                Box {
+                    if (titleText.isEmpty()) {
+                        Text(
+                            text = "Untitled",
+                            style = LexturesType.display(26, FontWeight.Bold),
+                            color = textSecondary().copy(alpha = 0.45f),
+                        )
+                    }
+                    inner()
+                }
+            },
+        )
+
         blocks.forEachIndexed { index, block ->
             // Ordered numbering: position within the current run of ordered blocks.
             var orderedNumber = 1
@@ -853,6 +583,17 @@ private fun ColumnScope.BlockEditorPane(
                 accessToken = accessToken,
             )
         }
+
+        // Tap the empty space below the page to keep writing.
+        Spacer(
+            Modifier
+                .fillMaxWidth()
+                .height(220.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                ) { focusTail() },
+        )
     }
 
     // `/` command menu (anchored above the insert toolbar, parity with the web slash menu).
@@ -891,35 +632,37 @@ private fun ColumnScope.BlockEditorPane(
         }
     }
 
-    // Insert toolbar — converts the focused block, or inserts divider/drawing after it.
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(cardBackground())
-            .border(1.dp, fieldBorder())
-            .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-    ) {
-        fun insert(commandId: String) {
-            applyCommand(NotebookMarkdown.slashCommands.first { it.id == commandId })
-        }
-        ToolbarTextButton("H1") { insert("heading1") }
-        ToolbarTextButton("H2") { insert("heading2") }
-        ToolbarTextButton("H3") { insert("heading3") }
-        ToolbarDividerLine()
-        ToolbarIconButton(Icons.Default.AddTask, "Task") { insert("task") }
-        ToolbarIconButton(Icons.Default.Draw, "Drawing") { insert("drawing") }
-        ToolbarIconButton(Icons.AutoMirrored.Filled.FormatListBulleted, "Bullet list") { insert("bulletList") }
-        ToolbarIconButton(Icons.Default.FormatListNumbered, "Numbered list") { insert("orderedList") }
-        ToolbarDividerLine()
-        ToolbarIconButton(Icons.Default.FormatQuote, "Quote") { insert("blockquote") }
-        ToolbarIconButton(Icons.Default.Code, "Code") { insert("codeBlock") }
-        ToolbarIconButton(Icons.Default.HorizontalRule, "Divider") { insert("horizontalRule") }
-        ToolbarDividerLine()
-        ToolbarIconButton(Icons.Default.Delete, "Delete block") {
-            focusedId?.let { deleteBlock(it) }
+    // Insert toolbar — rides above the keyboard while a block is focused.
+    if (focusedId != null) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(cardBackground())
+                .border(1.dp, fieldBorder())
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp, vertical = 6.dp),
+        ) {
+            fun insert(commandId: String) {
+                applyCommand(NotebookMarkdown.slashCommands.first { it.id == commandId })
+            }
+            ToolbarIconButton(Icons.Default.AddTask, "Task") { insert("task") }
+            ToolbarIconButton(Icons.Default.Draw, "Drawing") { insert("drawing") }
+            ToolbarDividerLine()
+            ToolbarTextButton("H1") { insert("heading1") }
+            ToolbarTextButton("H2") { insert("heading2") }
+            ToolbarTextButton("H3") { insert("heading3") }
+            ToolbarDividerLine()
+            ToolbarIconButton(Icons.AutoMirrored.Filled.FormatListBulleted, "Bullet list") { insert("bulletList") }
+            ToolbarIconButton(Icons.Default.FormatListNumbered, "Numbered list") { insert("orderedList") }
+            ToolbarIconButton(Icons.Default.FormatQuote, "Quote") { insert("blockquote") }
+            ToolbarIconButton(Icons.Default.Code, "Code") { insert("codeBlock") }
+            ToolbarIconButton(Icons.Default.HorizontalRule, "Divider") { insert("horizontalRule") }
+            ToolbarDividerLine()
+            ToolbarIconButton(Icons.Default.Delete, "Delete block") {
+                focusedId?.let { deleteBlock(it) }
+            }
         }
     }
 }

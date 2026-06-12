@@ -1,50 +1,46 @@
 import SwiftUI
 
-/// Notebook page editor with a page tree, a rendered reading view (interactive tasks),
-/// and a WYSIWYG block edit mode with `/` commands + insert toolbar (parity with the web
-/// block editor — blocks stay rendered while editing, markdown is only the storage format).
+/// Notion-style page editor: a large editable title plus an always-editable block list
+/// (text, tasks, drawings, …). There is no separate read/edit mode — tap any block to
+/// edit it, toggle tasks in place, tap drawings to open the whiteboard. The `/` command
+/// menu and insert toolbar ride above the keyboard while a block is focused.
 struct NotebookEditorView: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+
     let courseCode: String
-    let title: String
+    let notebookTitle: String
+    let pageId: String
 
     @State private var notebook: CourseNotebook = .empty()
     @State private var blocks: [NotebookEditBlock] = []
-    @State private var editing = false
-    @State private var showPages = false
-    @State private var renamingPage = false
-    @State private var renameText = ""
+    @State private var pageTitle = ""
     @State private var dueTask: ParsedNotebookTask?
+    @State private var confirmingDelete = false
     @State private var loaded = false
     @State private var pushTask: Task<Void, Never>?
     @State private var editingDrawing: EditingDrawing?
     @FocusState private var focusedBlock: UUID?
+    @FocusState private var titleFocused: Bool
 
-    /// Drawing being edited — from the reading view (by document index) or the
-    /// block editor (by block id).
     private struct EditingDrawing: Identifiable {
         let id = UUID()
         let elementsJson: String
-        var readIndex: Int?
-        var blockId: UUID?
+        let blockId: UUID
     }
 
     private var store: NotebookStore {
         NotebookStore(accessToken: session.accessToken)
     }
 
-    private var activePage: NotebookPage? {
-        notebook.pages.first { $0.id == notebook.activePageId } ?? notebook.pages.first { $0.kind != "group" }
-    }
-
-    private var activeIsGroup: Bool {
-        activePage.map { NotebookTree.isGroup($0) } == true
+    private var page: NotebookPage? {
+        notebook.pages.first { $0.id == pageId }
     }
 
     /// `/query` typed at the start of the focused block opens the command menu (web parity).
     private var slashQuery: String? {
-        guard editing, let focused = focusedBlock,
+        guard let focused = focusedBlock,
               let block = blocks.first(where: { $0.id == focused }), block.isTextual,
               block.text.hasPrefix("/")
         else { return nil }
@@ -61,26 +57,14 @@ struct NotebookEditorView: View {
     var body: some View {
         ZStack {
             LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                pageHeader
-
-                if activeIsGroup {
-                    groupPanel
-                } else if editing {
-                    blockEditor
-                } else {
-                    readingView
-                }
-            }
+            editorScroll
         }
-        .navigationTitle(title)
+        .navigationTitle(notebookTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
-        .sheet(isPresented: $showPages) { pagesSheet }
         .sheet(item: $editingDrawing) { drawing in
             NotebookDrawingEditorView(initialElementsJson: drawing.elementsJson) { json in
-                saveDrawing(drawing, elementsJson: json)
+                saveDrawing(blockId: drawing.blockId, elementsJson: json)
             }
         }
         .sheet(item: $dueTask) { task in
@@ -90,193 +74,37 @@ struct NotebookEditorView: View {
             )
             .presentationDetents([.medium])
         }
-        .alert("Rename page", isPresented: $renamingPage) {
-            TextField("Page title", text: $renameText)
-            Button("Save") { renameActivePage() }
+        .alert("Delete this page?", isPresented: $confirmingDelete) {
+            Button("Delete", role: .destructive) { deletePage() }
             Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The page and its notes will be deleted.")
         }
         .onAppear(perform: loadOnce)
         .onChange(of: blocks) {
-            if editing { saveDraft() }
+            guard loaded else { return }
+            saveDraft()
+        }
+        .onChange(of: pageTitle) {
+            guard loaded else { return }
+            commitTitle()
         }
         .onDisappear {
             saveDraft()
-            if editing { syncAllTasks() }
+            syncAllTasks()
             // Leave the screen with the server current — skip the debounce.
             pushTask?.cancel()
             NotebookSync.push(store: store, courseCode: courseCode, accessToken: session.accessToken)
         }
     }
 
-    // MARK: - Header (current page → pages sheet)
+    // MARK: - Editor body
 
-    private var pageHeader: some View {
-        HStack(spacing: 10) {
-            Button {
-                saveDraft()
-                showPages = true
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: activeIsGroup ? "folder.fill" : "doc.text")
-                        .font(.caption)
-                        .foregroundStyle(activeIsGroup ? LexturesTheme.brandAmber : LexturesTheme.accent(for: colorScheme))
-                    Text(headerTitle)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                        .lineLimit(1)
-                    Image(systemName: "chevron.up.chevron.down")
-                        .font(.caption2.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 9)
-                .background(LexturesTheme.cardBackground(for: colorScheme))
-                .clipShape(Capsule())
-                .overlay(Capsule().stroke(LexturesTheme.fieldBorder(for: colorScheme), lineWidth: 1))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Show pages")
-
-            Spacer()
-
-            if !editing, !activeIsGroup {
-                Button {
-                    startEditing()
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "pencil")
-                        Text("Edit")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 9)
-                    .background(
-                        LinearGradient(
-                            colors: [LexturesTheme.primary, Color(hex: 0x17897B)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .clipShape(Capsule())
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-    }
-
-    private var headerTitle: String {
-        guard let page = activePage else { return "Untitled" }
-        let path = NotebookTree.pathLabel(notebook.pages, pageId: page.id)
-        return path.isEmpty ? "Untitled" : path
-    }
-
-    // MARK: - Reading view
-
-    private var readingView: some View {
-        ScrollView {
-            if (activePage?.contentMd ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                emptyPageState
-            } else {
-                NotebookContentView(
-                    markdown: activePage?.contentMd ?? "",
-                    onToggleTask: { task in toggleTask(task) },
-                    onEditTaskDue: { task in dueTask = task },
-                    onEditDrawing: { index, elementsJson in
-                        editingDrawing = EditingDrawing(elementsJson: elementsJson, readIndex: index, blockId: nil)
-                    }
-                )
-                .padding(16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(LexturesTheme.cardBackground(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(0.9), lineWidth: 1)
-                )
-                .padding(.horizontal, 16)
-                .padding(.bottom, 24)
-            }
-        }
-    }
-
-    private var emptyPageState: some View {
-        VStack(spacing: 14) {
-            Image(systemName: "square.and.pencil")
-                .font(.system(size: 34))
-                .foregroundStyle(LexturesTheme.accent(for: colorScheme).opacity(0.7))
-            Text("This page is empty")
-                .font(LexturesTheme.displayFont(19))
-                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            Text("Tap Edit to start writing. Type / on a new line for headings, tasks, drawings, and more.")
-                .font(.footnote)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-        }
-        .padding(.horizontal, 40)
-        .padding(.top, 80)
-        .frame(maxWidth: .infinity)
-    }
-
-    // MARK: - Group panel (active "page" is a group)
-
-    private var groupPanel: some View {
+    private var editorScroll: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                let children = NotebookTree.sortedChildren(notebook.pages, parentId: activePage?.id)
-                if children.isEmpty {
-                    Text("No pages in this group yet.")
-                        .font(.footnote)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        .padding(.top, 20)
-                        .frame(maxWidth: .infinity)
-                }
-                ForEach(children) { child in
-                    Button {
-                        selectPage(child.id)
-                    } label: {
-                        HStack(spacing: 10) {
-                            Image(systemName: NotebookTree.isGroup(child) ? "folder.fill" : "doc.text")
-                                .foregroundStyle(NotebookTree.isGroup(child) ? LexturesTheme.brandAmber : LexturesTheme.accent(for: colorScheme))
-                            Text(child.title.isEmpty ? "Untitled" : child.title)
-                                .font(.subheadline.weight(.medium))
-                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        }
-                        .padding(14)
-                        .background(LexturesTheme.cardBackground(for: colorScheme))
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(LexturesTheme.fieldBorder(for: colorScheme), lineWidth: 1)
-                        )
-                    }
-                    .buttonStyle(.plain)
-                }
+                titleField
 
-                Button {
-                    createPage(parentId: activePage?.id)
-                } label: {
-                    Label("New page in group", systemImage: "plus")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                }
-                .padding(.top, 4)
-            }
-            .padding(16)
-        }
-    }
-
-    // MARK: - Block editor
-
-    private var blockEditor: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
                 ForEach($blocks) { $block in
                     NotebookEditBlockRow(
                         block: $block,
@@ -287,41 +115,66 @@ struct NotebookEditorView: View {
                         onEditTaskDue: { editTaskDue(block.id) },
                         onEditDrawing: {
                             if case .drawing(let json) = block.kind {
-                                editingDrawing = EditingDrawing(elementsJson: json, readIndex: nil, blockId: block.id)
+                                editingDrawing = EditingDrawing(elementsJson: json, blockId: block.id)
                             }
                         },
                         onDelete: { deleteBlock(block.id) }
                     )
                 }
+
+                // Tap the empty space below the page to keep writing.
+                Color.clear
+                    .frame(height: 220)
+                    .frame(maxWidth: .infinity)
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusTail() }
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(LexturesTheme.cardBackground(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(0.9), lineWidth: 1)
-            )
-            .padding(.horizontal, 16)
-            .padding(.bottom, 24)
-            .onTapGesture {
-                // Tap below the last block: focus it (or add a trailing paragraph).
-                if let last = blocks.last, last.isTextual {
-                    focusedBlock = last.id
-                } else {
-                    let block = NotebookEditBlock(kind: .paragraph)
-                    blocks.append(block)
-                    focusedBlock = block.id
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            if focusedBlock != nil {
+                VStack(spacing: 0) {
+                    if !slashCommands.isEmpty {
+                        slashMenu
+                    }
+                    insertToolbar
                 }
             }
         }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(spacing: 0) {
-                if !slashCommands.isEmpty {
-                    slashMenu
-                }
-                insertToolbar
-            }
+    }
+
+    private var titleField: some View {
+        TextField("Untitled", text: $pageTitle)
+            .font(LexturesTheme.displayFont(28, weight: .bold))
+            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            .focused($titleFocused)
+            .submitLabel(.next)
+            .onSubmit { focusHead() }
+            .padding(.bottom, 2)
+    }
+
+    /// Focus the first textual block (creating one if needed) — after finishing the title.
+    private func focusHead() {
+        if let first = blocks.first(where: { $0.isTextual }) {
+            focusedBlock = first.id
+        } else {
+            let block = NotebookEditBlock(kind: .paragraph)
+            blocks.append(block)
+            focusedBlock = block.id
+        }
+    }
+
+    /// Focus the trailing textual block (appending a paragraph if the page ends in a
+    /// drawing/divider) — the tap-below-the-page affordance.
+    private func focusTail() {
+        if let last = blocks.last, last.isTextual {
+            focusedBlock = last.id
+        } else {
+            let block = NotebookEditBlock(kind: .paragraph)
+            blocks.append(block)
+            focusedBlock = block.id
         }
     }
 
@@ -337,12 +190,14 @@ struct NotebookEditorView: View {
         return number
     }
 
+    // MARK: - Slash menu + insert toolbar
+
     private var slashMenu: some View {
         ScrollView {
             VStack(spacing: 0) {
                 ForEach(slashCommands) { command in
                     Button {
-                        applySlashCommand(command)
+                        applyCommand(command, clearSlash: true)
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: command.icon)
@@ -382,15 +237,15 @@ struct NotebookEditorView: View {
     private var insertToolbar: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 4) {
+                toolbarButton("task")
+                toolbarButton("drawing")
+                toolbarDividerLine
                 toolbarButton("heading1", label: "H1")
                 toolbarButton("heading2", label: "H2")
                 toolbarButton("heading3", label: "H3")
                 toolbarDividerLine
-                toolbarButton("task")
-                toolbarButton("drawing")
                 toolbarButton("bulletList")
                 toolbarButton("orderedList")
-                toolbarDividerLine
                 toolbarButton("blockquote")
                 toolbarButton("codeBlock")
                 toolbarButton("horizontalRule")
@@ -400,16 +255,11 @@ struct NotebookEditorView: View {
                 } label: {
                     Image(systemName: "trash")
                         .font(.subheadline)
-                        .foregroundStyle(
-                            focusedBlock == nil
-                                ? LexturesTheme.textSecondary(for: colorScheme).opacity(0.5)
-                                : LexturesTheme.coral
-                        )
+                        .foregroundStyle(LexturesTheme.coral)
                         .frame(width: 38, height: 34)
                         .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .disabled(focusedBlock == nil)
                 .accessibilityLabel("Delete block")
             }
             .padding(.horizontal, 12)
@@ -454,32 +304,21 @@ struct NotebookEditorView: View {
         }
     }
 
-    // MARK: - Toolbar (navigation bar)
+    // MARK: - Navigation bar
 
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            if editing {
-                Button("Done") { finishEditing() }
+            if focusedBlock != nil || titleFocused {
+                Button("Done") { dismissKeyboard() }
                     .fontWeight(.semibold)
                     .tint(LexturesTheme.accent(for: colorScheme))
             } else {
                 Menu {
-                    Button {
-                        renameText = activePage?.title ?? ""
-                        renamingPage = true
+                    Button(role: .destructive) {
+                        confirmingDelete = true
                     } label: {
-                        Label("Rename page", systemImage: "pencil")
-                    }
-                    Button {
-                        createPage(parentId: nil)
-                    } label: {
-                        Label("New page", systemImage: "plus")
-                    }
-                    Button {
-                        createGroup()
-                    } label: {
-                        Label("New group", systemImage: "folder.badge.plus")
+                        Label("Delete page", systemImage: "trash")
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -488,134 +327,43 @@ struct NotebookEditorView: View {
         }
     }
 
-    // MARK: - Pages sheet wiring
-
-    private var pagesSheet: some View {
-        NotebookPagesSheet(
-            pages: notebook.pages,
-            activePageId: activePage?.id,
-            onSelect: { selectPage($0) },
-            onCreatePage: { parentId in createPage(parentId: parentId) },
-            onCreateGroup: { createGroup() },
-            onRename: { pageId, title in
-                notebook.pages = NotebookTree.rename(notebook.pages, pageId: pageId, title: title)
-                persist()
-            },
-            onMove: { pageId, newParentId in
-                if let moved = NotebookTree.moveToParent(notebook.pages, pageId: pageId, newParentId: newParentId) {
-                    notebook.pages = moved
-                    persist()
-                }
-            },
-            onDelete: { pageId in deletePage(pageId) }
-        )
-        .presentationDetents([.medium, .large])
+    private func dismissKeyboard() {
+        saveDraft()
+        focusedBlock = nil
+        titleFocused = false
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
-    // MARK: - Page operations
+    // MARK: - Loading
 
     private func loadOnce() {
         guard !loaded else { return }
+        var data = store.load(courseCode: courseCode)
+        if courseCode != NotebookStore.globalKey {
+            data.courseTitle = notebookTitle
+        }
+        // Opening a page makes it the notebook's active page (web sidebar parity).
+        data.activePageId = pageId
+        notebook = data
+        let current = page
+        pageTitle = (current?.title == "Untitled") ? "" : (current?.title ?? "")
+        blocks = NotebookMarkdown.editBlocks(from: current?.contentMd ?? "")
         loaded = true
-        loadFromStore()
-        // Merge any newer server copy (e.g. written on web), then refresh once.
-        Task {
-            if await NotebookSync.pull(store: store, accessToken: session.accessToken) {
-                loadFromStore()
+        persist()
+
+        // Fresh page: drop straight into the title so writing is one tap away.
+        if (current?.contentMd ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                if pageTitle.isEmpty {
+                    titleFocused = true
+                } else {
+                    focusHead()
+                }
             }
         }
     }
 
-    private func loadFromStore() {
-        var data = store.load(courseCode: courseCode)
-        if courseCode != NotebookStore.globalKey {
-            data.courseTitle = title
-        }
-        notebook = data
-        loadBlocks()
-        // Empty page → straight into edit mode so writing is one tap away.
-        if !activeIsGroup, pageIsEmpty {
-            editing = true
-        }
-    }
-
-    private var pageIsEmpty: Bool {
-        (activePage?.contentMd ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private func loadBlocks() {
-        blocks = NotebookMarkdown.editBlocks(from: activePage?.contentMd ?? "")
-    }
-
-    private func selectPage(_ pageId: String) {
-        saveDraft()
-        editing = false
-        notebook.activePageId = pageId
-        loadBlocks()
-        if !activeIsGroup, pageIsEmpty {
-            editing = true
-        }
-        persist()
-    }
-
-    private func createPage(parentId: String?) {
-        saveDraft()
-        let (pages, newId) = NotebookTree.addPage(notebook.pages, parentId: parentId)
-        notebook.pages = pages
-        notebook.activePageId = newId
-        loadBlocks()
-        editing = true
-        focusedBlock = blocks.first?.id
-        persist()
-    }
-
-    private func createGroup() {
-        saveDraft()
-        let (pages, _) = NotebookTree.addGroup(notebook.pages, parentId: nil, title: "New group")
-        notebook.pages = pages
-        persist()
-        showPages = true
-    }
-
-    private func deletePage(_ pageId: String) {
-        var pages = NotebookTree.delete(notebook.pages, pageId: pageId)
-        if !pages.contains(where: { !NotebookTree.isGroup($0) }) {
-            let (withPage, newId) = NotebookTree.addPage(pages, parentId: nil)
-            pages = withPage
-            notebook.activePageId = newId
-        }
-        notebook.pages = pages
-        if !notebook.pages.contains(where: { $0.id == notebook.activePageId }) {
-            notebook.activePageId = pages.first { !NotebookTree.isGroup($0) }?.id ?? pages.first?.id
-        }
-        loadBlocks()
-        editing = false
-        persist()
-    }
-
-    private func renameActivePage() {
-        guard let active = activePage else { return }
-        let name = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty else { return }
-        notebook.pages = NotebookTree.rename(notebook.pages, pageId: active.id, title: name)
-        persist()
-    }
-
-    // MARK: - Editing & block operations
-
-    private func startEditing() {
-        loadBlocks()
-        editing = true
-        focusedBlock = blocks.last(where: { $0.isTextual })?.id
-    }
-
-    private func finishEditing() {
-        saveDraft()
-        editing = false
-        syncAllTasks()
-        focusedBlock = nil
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
+    // MARK: - Block operations
 
     /// Newlines never live inside a text block (except code): a return splits the block,
     /// continuing the list/task kind like the web editor does.
@@ -653,10 +401,6 @@ struct NotebookEditorView: View {
     private func isParagraphKind(_ kind: NotebookEditBlock.Kind) -> Bool {
         if case .paragraph = kind { return true }
         return false
-    }
-
-    private func applySlashCommand(_ command: NotebookSlashCommand) {
-        applyCommand(command, clearSlash: true)
     }
 
     /// Convert the focused block (text kinds) or insert after it (divider / drawing).
@@ -725,24 +469,14 @@ struct NotebookEditorView: View {
         dueTask = ParsedNotebookTask(id: taskId, text: block.text, checked: checked, dueAt: dueAt)
     }
 
-    // MARK: - Tasks (reading view + due sheet)
-
-    private func toggleTask(_ task: ParsedNotebookTask) {
-        guard let active = activePage else { return }
-        let next = NotebookMarkdown.setTaskChecked(in: active.contentMd, taskId: task.id, checked: !task.checked)
-        updateActiveContent(next)
-        syncTask(ParsedNotebookTask(id: task.id, text: task.text, checked: !task.checked, dueAt: task.dueAt))
-    }
-
     private func setDueDate(taskId: String, date: Date?) {
-        saveDraft()
-        guard let active = activePage else { return }
+        guard let idx = blocks.firstIndex(where: {
+            if case .task(let id, _, _) = $0.kind { return id == taskId }
+            return false
+        }), case .task(_, let checked, _) = blocks[idx].kind else { return }
         let dueAt = date.map { endOfDayISO($0) }
-        let next = NotebookMarkdown.setTaskDueAt(in: active.contentMd, taskId: taskId, dueAt: dueAt)
-        updateActiveContent(next)
-        if let task = NotebookMarkdown.parseTasks(in: next).first(where: { $0.id == taskId }) {
-            syncTask(task)
-        }
+        blocks[idx].kind = .task(taskId: taskId, checked: checked, dueAt: dueAt)
+        syncTask(ParsedNotebookTask(id: taskId, text: blocks[idx].text, checked: checked, dueAt: dueAt))
     }
 
     private func endOfDayISO(_ date: Date) -> String {
@@ -751,31 +485,42 @@ struct NotebookEditorView: View {
         return ISO8601DateFormatter().string(from: end)
     }
 
-    private func updateActiveContent(_ contentMd: String) {
-        guard let active = activePage else { return }
-        notebook.pages = NotebookTree.updateContent(notebook.pages, pageId: active.id, contentMd: contentMd)
-        loadBlocks()
+    // MARK: - Drawings
+
+    private func saveDrawing(blockId: UUID, elementsJson: String) {
+        guard let idx = blocks.firstIndex(where: { $0.id == blockId }) else { return }
+        blocks[idx].kind = .drawing(elementsJson: elementsJson)
+    }
+
+    // MARK: - Page operations
+
+    private func commitTitle() {
+        let name = pageTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        notebook.pages = NotebookTree.rename(notebook.pages, pageId: pageId, title: name.isEmpty ? "Untitled" : name)
         persist()
     }
 
-    // MARK: - Drawings
-
-    private func saveDrawing(_ drawing: EditingDrawing, elementsJson: String) {
-        if let blockId = drawing.blockId,
-           let idx = blocks.firstIndex(where: { $0.id == blockId }) {
-            blocks[idx].kind = .drawing(elementsJson: elementsJson)
-            saveDraft()
-            return
+    private func deletePage() {
+        var pages = NotebookTree.delete(notebook.pages, pageId: pageId)
+        // Keep at least one real page in the notebook.
+        if !pages.contains(where: { !NotebookTree.isGroup($0) }) {
+            let (withPage, newId) = NotebookTree.addPage(pages, parentId: nil)
+            pages = withPage
+            notebook.activePageId = newId
+        } else if !pages.contains(where: { $0.id == notebook.activePageId }) {
+            notebook.activePageId = pages.first { !NotebookTree.isGroup($0) }?.id
         }
-        if let index = drawing.readIndex, let active = activePage {
-            let next = NotebookMarkdown.replaceDrawing(in: active.contentMd, index: index, elementsJson: elementsJson)
-            updateActiveContent(next)
-        }
+        notebook.pages = pages
+        loaded = false
+        store.save(courseCode: courseCode, notebook: notebook)
+        NotebookSync.push(store: store, courseCode: courseCode, accessToken: session.accessToken)
+        dismiss()
     }
 
-    /// Fire-and-forget dashboard sync (web parity: tasks also live server-side).
+    // MARK: - Task sync (dashboard parity: tasks also live server-side)
+
     private func syncTask(_ task: ParsedNotebookTask) {
-        guard let token = session.accessToken, let pageId = activePage?.id else { return }
+        guard let token = session.accessToken else { return }
         let body = LMSAPI.NotebookTaskUpsert(
             id: task.id,
             courseCode: courseCode,
@@ -788,8 +533,8 @@ struct NotebookEditorView: View {
     }
 
     private func syncAllTasks() {
-        guard let active = activePage else { return }
-        for task in NotebookMarkdown.parseTasks(in: active.contentMd) {
+        guard loaded else { return }
+        for task in NotebookMarkdown.parseTasks(in: NotebookMarkdown.markdown(from: blocks)) {
             syncTask(task)
         }
     }
@@ -797,13 +542,10 @@ struct NotebookEditorView: View {
     // MARK: - Persistence
 
     private func saveDraft() {
-        guard editing, let active = activePage, !NotebookTree.isGroup(active) else {
-            persist()
-            return
-        }
+        guard loaded else { return }
         notebook.pages = NotebookTree.updateContent(
             notebook.pages,
-            pageId: active.id,
+            pageId: pageId,
             contentMd: NotebookMarkdown.markdown(from: blocks)
         )
         persist()

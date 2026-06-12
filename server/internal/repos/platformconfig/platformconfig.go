@@ -107,6 +107,7 @@ type Row struct {
 	FFCoCurricularTranscript          *bool
 	FFEportfolio                      *bool
 	FFBookstoreIntegration            *bool
+	FFTranscripts                     *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -214,6 +215,7 @@ type Write struct {
 	FFCoCurricularTranscript          *bool
 	FFEportfolio                      *bool
 	FFBookstoreIntegration            *bool
+	FFTranscripts                     *bool
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -318,6 +320,7 @@ SELECT
 	ff_co_curricular_transcript,
 	ff_eportfolio,
 	ff_bookstore_integration,
+	ff_transcripts,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -417,6 +420,7 @@ WHERE id = 1
 		&r.FFCoCurricularTranscript,
 		&r.FFEportfolio,
 		&r.FFBookstoreIntegration,
+		&r.FFTranscripts,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -567,6 +571,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_co_curricular_transcript,
 	ff_eportfolio,
 	ff_bookstore_integration,
+	ff_transcripts,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -671,6 +676,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_co_curricular_transcript = COALESCE(EXCLUDED.ff_co_curricular_transcript, settings.platform_app_settings.ff_co_curricular_transcript),
 	ff_eportfolio = COALESCE(EXCLUDED.ff_eportfolio, settings.platform_app_settings.ff_eportfolio),
 	ff_bookstore_integration = COALESCE(EXCLUDED.ff_bookstore_integration, settings.platform_app_settings.ff_bookstore_integration),
+	ff_transcripts = COALESCE(EXCLUDED.ff_transcripts, settings.platform_app_settings.ff_transcripts),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -768,6 +774,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFCoCurricularTranscript,
 		w.FFEportfolio,
 		w.FFBookstoreIntegration,
+		w.FFTranscripts,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

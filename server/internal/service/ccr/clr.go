@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,9 +33,14 @@ func AggregateAchievements(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 	if err != nil {
 		return nil, err
 	}
+	portfolios, err := ccrrepo.ListPortfolioMilestones(ctx, pool, userID)
+	if err != nil {
+		return nil, err
+	}
 
-	out := make([]AggregatedAchievement, 0, len(stored)+len(completions))
+	out := make([]AggregatedAchievement, 0, len(stored)+len(completions)+len(portfolios))
 	seenCourse := make(map[uuid.UUID]struct{}, len(completions))
+	seenPortfolio := make(map[uuid.UUID]struct{}, len(portfolios))
 
 	for _, c := range completions {
 		seenCourse[c.CourseID] = struct{}{}
@@ -48,9 +54,28 @@ func AggregateAchievements(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 		})
 	}
 
+	for _, m := range portfolios {
+		seenPortfolio[m.ArtifactID] = struct{}{}
+		evidence := portfolioEvidenceURL(m.PublicSlug, m.IsPublic)
+		out = append(out, AggregatedAchievement{
+			ID:          "portfolio:" + m.ArtifactID.String(),
+			Type:        ccrrepo.TypePortfolio,
+			Title:       m.Title,
+			Description: m.Description,
+			IssuedAt:    m.IssuedAt,
+			EvidenceURL: evidence,
+			OutcomeTags: append([]string(nil), m.OutcomeNames...),
+		})
+	}
+
 	for _, a := range stored {
 		if a.AchievementType == ccrrepo.TypeCourseCompletion && a.SourceID != nil {
 			if _, ok := seenCourse[*a.SourceID]; ok {
+				continue
+			}
+		}
+		if a.AchievementType == ccrrepo.TypePortfolio && a.SourceID != nil {
+			if _, ok := seenPortfolio[*a.SourceID]; ok {
 				continue
 			}
 		}
@@ -73,6 +98,17 @@ func AggregateAchievements(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 		})
 	}
 	return out, nil
+}
+
+func portfolioEvidenceURL(publicSlug *string, isPublic bool) string {
+	if !isPublic || publicSlug == nil {
+		return ""
+	}
+	slug := strings.TrimSpace(*publicSlug)
+	if slug == "" {
+		return ""
+	}
+	return "/portfolios/" + slug
 }
 
 // BuildCLRSubject constructs an IMS CLR v2.0 credentialSubject payload.

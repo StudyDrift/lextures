@@ -61,6 +61,18 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Aggregate mastery and coverage reports across course learning outcomes.',
   },
   {
+    key: 'ffTranscripts',
+    label: 'Transcripts',
+    description:
+      'Let students request official transcripts from their institution via a configurable webhook.',
+  },
+  {
+    key: 'ffCoCurricularTranscript',
+    label: 'Co-curricular transcript (CLR)',
+    description:
+      'Let students generate IMS CLR v2.0 comprehensive learner records with W3C verifiable credentials and public verification links.',
+  },
+  {
     key: 'ffEportfolio',
     label: 'ePortfolio / capstone artifacts',
     description:

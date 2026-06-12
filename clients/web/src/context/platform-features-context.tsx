@@ -63,6 +63,7 @@ export type PlatformFeatures = {
   ffLibraryIntegration: boolean
   ffEportfolio: boolean
   ffBookstoreIntegration: boolean
+  ffTranscripts: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -116,6 +117,7 @@ const defaultFeatures: PlatformFeatures = {
   ffLibraryIntegration: false,
   ffEportfolio: false,
   ffBookstoreIntegration: false,
+  ffTranscripts: false,
   loading: true,
   refresh: async () => {},
 }
@@ -174,6 +176,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffLibraryIntegration: false,
     ffEportfolio: false,
     ffBookstoreIntegration: false,
+    ffTranscripts: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -233,6 +236,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffLibraryIntegration: data.ffLibraryIntegration === true,
           ffEportfolio: data.ffEportfolio === true,
           ffBookstoreIntegration: data.ffBookstoreIntegration === true,
+          ffTranscripts: data.ffTranscripts === true,
         }
         setFeatures({
           ...next,
@@ -259,6 +263,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffLibraryIntegration: next.ffLibraryIntegration === true,
           ffEportfolio: next.ffEportfolio === true,
           ffBookstoreIntegration: next.ffBookstoreIntegration === true,
+          ffTranscripts: next.ffTranscripts === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

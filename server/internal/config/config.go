@@ -329,6 +329,9 @@ type Config struct {
 	// FFEportfolio enables the ePortfolio / capstone artifact collection module (plan 14.12).
 	// Managed in Settings → Global platform (not process env).
 	FFEportfolio bool
+	// FFTranscripts enables student transcript requests and institution webhook configuration.
+	// Managed in Settings → Global platform (not process env).
+	FFTranscripts bool
 
 	// CCRSigningSeedB64 is a base64-encoded 32-byte Ed25519 seed for CLR signing (plan 14.13).
 	CCRSigningSeedB64 string

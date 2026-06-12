@@ -134,6 +134,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_co_curricular_transcript", w.FFCoCurricularTranscript)
 	addBool("ff_eportfolio", w.FFEportfolio)
 	addBool("ff_bookstore_integration", w.FFBookstoreIntegration)
+	addBool("ff_transcripts", w.FFTranscripts)
 	addBool("mfa_enabled", w.MFAEnabled)
 	addString("mfa_enforcement", w.MFAEnforcement)
 	addString("smtp_host", w.SMTPHost)

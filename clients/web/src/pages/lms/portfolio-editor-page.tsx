@@ -32,6 +32,7 @@ import {
   Heading,
   Link2,
   MoreVertical,
+  Pencil,
   Plus,
   Trash2,
   X,
@@ -666,6 +667,10 @@ export default function PortfolioEditorPage() {
   const [editTitleModalKey, setEditTitleModalKey] = useState(0)
   const [editTitleSaving, setEditTitleSaving] = useState(false)
   const [editTitleError, setEditTitleError] = useState<string | null>(null)
+  const [portfolioTitleModalOpen, setPortfolioTitleModalOpen] = useState(false)
+  const [portfolioTitleModalKey, setPortfolioTitleModalKey] = useState(0)
+  const [portfolioTitleSaving, setPortfolioTitleSaving] = useState(false)
+  const [portfolioTitleError, setPortfolioTitleError] = useState<string | null>(null)
   const [deleteConfirmArtifact, setDeleteConfirmArtifact] = useState<Artifact | null>(null)
   const [deletingArtifactId, setDeletingArtifactId] = useState<string | null>(null)
   const deleteDialogTitleId = useId()
@@ -679,6 +684,8 @@ export default function PortfolioEditorPage() {
     contentPageSaving ||
     editTitleTarget !== null ||
     editTitleSaving ||
+    portfolioTitleModalOpen ||
+    portfolioTitleSaving ||
     deleteConfirmArtifact !== null ||
     Boolean(deletingArtifactId) ||
     addKind !== null
@@ -871,6 +878,26 @@ export default function PortfolioEditorPage() {
     }
   }
 
+  const openPortfolioTitleEdit = () => {
+    setPortfolioTitleError(null)
+    setPortfolioTitleModalOpen(true)
+    setPortfolioTitleModalKey((k) => k + 1)
+  }
+
+  const savePortfolioTitle = async (title: string) => {
+    setPortfolioTitleError(null)
+    setPortfolioTitleSaving(true)
+    try {
+      const updated = await patchPortfolio(pid, { title })
+      setPortfolio(updated)
+      setPortfolioTitleModalOpen(false)
+    } catch (err) {
+      setPortfolioTitleError(err instanceof Error ? err.message : 'Could not save title.')
+    } finally {
+      setPortfolioTitleSaving(false)
+    }
+  }
+
   const onAddArtifactKind = (kind: PortfolioArtifactKind) => {
     if (kind === 'heading') {
       openAddHeading()
@@ -933,7 +960,19 @@ export default function PortfolioEditorPage() {
           <Link to="/portfolios" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> Portfolios
           </Link>
-          <h1 className="mt-2 mb-2 text-3xl font-bold tracking-tight">{portfolio.title}</h1>
+          <div className="mt-2 mb-2 flex items-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">{portfolio.title}</h1>
+            <button
+              type="button"
+              onClick={openPortfolioTitleEdit}
+              disabled={anyModalBusy}
+              title="Rename portfolio"
+              aria-label="Rename portfolio"
+              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
+            >
+              <Pencil className="h-4 w-4" aria-hidden />
+            </button>
+          </div>
           {portfolio.introText && (
             <p className="max-w-2xl text-sm text-muted-foreground">{portfolio.introText}</p>
           )}
@@ -1206,6 +1245,19 @@ export default function PortfolioEditorPage() {
         initialTitle={editTitleTarget?.title ?? ''}
         dialogTitleOverride="Edit title"
         submitLabelOverride="Save title"
+      />
+
+      <ModuleNameModal
+        key={`portfolio-rename-${portfolioTitleModalKey}`}
+        open={portfolioTitleModalOpen}
+        onClose={() => {
+          if (!portfolioTitleSaving) setPortfolioTitleModalOpen(false)
+        }}
+        onSave={(title) => void savePortfolioTitle(title)}
+        saving={portfolioTitleSaving}
+        errorMessage={portfolioTitleError}
+        mode="portfolio"
+        initialTitle={portfolio.title}
       />
     </LmsPage>
   )

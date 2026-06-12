@@ -17,6 +17,7 @@ import StudentProgressPage from './pages/lms/student-progress-page'
 import CourseStudentReportsPage from './pages/lms/course-student-reports-page'
 import CourseMyGrades from './pages/lms/course-my-grades'
 import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
+import AdminCCRAchievementsPage from './pages/lms/admin-ccr-achievements-page'
 import AccommodationAuditPage from './pages/lms/accommodation-audit-page'
 import AdminQuarantinePage from './pages/lms/admin-quarantine-page'
 import CourseCreate from './pages/lms/course-create'
@@ -104,6 +105,7 @@ import EvaluationTemplates from './pages/admin/EvaluationTemplates'
 import EvaluationReport from './pages/admin/EvaluationReport'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import MyPortfoliosPage from './pages/lms/my-portfolios-page'
+import TranscriptsPage from './pages/lms/transcripts-page'
 import PortfolioEditorPage from './pages/lms/portfolio-editor-page'
 import PortfolioArtifactContentPage from './pages/lms/portfolio-artifact-content-page'
 import PublicPortfolioPage from './pages/portfolio/public-portfolio-page'
@@ -161,6 +163,7 @@ export default function App() {
           <Route path="/privacy-centre" element={<PrivacyCentrePage />} />
           <Route path="/me/study-insights" element={<StudyInsightsPage />} />
           <Route path="/me/ccr" element={<MyCCR />} />
+          <Route path="/transcripts" element={<TranscriptsPage />} />
           <Route path="/parent" element={<ParentDashboard />} />
           <Route path="/parent/conferences" element={<ConferenceBooking />} />
           <Route path="/conferences/availability" element={<ConferenceAvailabilitySetup />} />
@@ -225,6 +228,7 @@ export default function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
           <Route path="/admin/accommodations/audit" element={<AccommodationAuditPage />} />
+          <Route path="/admin/ccr/achievements" element={<AdminCCRAchievementsPage />} />
           <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
           <Route path="/catalog" element={<CourseCatalogPage />} />
           <Route path="/portfolios" element={<MyPortfoliosPage />} />

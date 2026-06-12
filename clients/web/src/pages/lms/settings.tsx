@@ -22,8 +22,10 @@ import { ScimSettingsPanel } from '../../components/settings/scim-settings-panel
 import { CloudProvidersPanel } from '../../components/settings/cloud-providers-panel'
 import { LRSSettingsPanel } from '../../components/settings/lrs-settings-panel'
 import { OERProvidersPanel } from '../../components/settings/oer-providers-panel'
+import { TranscriptsSettingsPanel } from '../../components/settings/transcripts-settings-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { xapiEmissionFeatureEnabled } from '../../lib/platform-features'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { RolesPermissionsPanel } from '../../components/settings/roles-permissions-panel'
 import { usePermissions } from '../../context/use-permissions'
 import {
@@ -63,7 +65,8 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/scim-provisioning' ||
     pathname === '/settings/cloud-providers' ||
     pathname === '/settings/lrs-integrations' ||
-    pathname === '/settings/oer-providers'
+    pathname === '/settings/oer-providers' ||
+    pathname === '/settings/transcripts'
   )
 }
 
@@ -174,6 +177,7 @@ export default function Settings() {
   const { scimEnabled: platformScimEnabled, loading: platformScimFlagLoading } = usePlatformScimEnabled(
     canManageRbac && activeView === 'scim-provisioning',
   )
+  const { ffTranscripts, loading: featuresLoading } = usePlatformFeatures()
   const accountFormId = useId()
   const { setProfile: setLocaleProfile } = useLocaleFormatContext()
   const [displayLocale, setDisplayLocale] = useState(detectBrowserLocale())
@@ -881,6 +885,9 @@ export default function Settings() {
   if (activeView === 'scim-provisioning' && canManageRbac && !platformScimEnabled) {
     return <Navigate to="/settings/platform" replace />
   }
+  if (activeView === 'transcripts' && canManageRbac && !featuresLoading && !ffTranscripts) {
+    return <Navigate to="/settings/platform" replace />
+  }
 
   return (
     <LmsPage title="Settings" description="Account and learning preferences.">
@@ -896,7 +903,8 @@ export default function Settings() {
           activeView === 'scim-provisioning' ||
           activeView === 'cloud-providers' ||
           activeView === 'lrs-integrations' ||
-          activeView === 'oer-providers'
+          activeView === 'oer-providers' ||
+          activeView === 'transcripts'
             ? 'max-w-4xl'
             : activeView === 'ai-prompts'
               ? 'max-w-3xl'
@@ -1687,6 +1695,22 @@ export default function Settings() {
               }
             >
               <OERProvidersPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'transcripts' && ffTranscripts && (
+          <div>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  You need permission to manage transcript settings (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <TranscriptsSettingsPanel />
             </RequirePermission>
           </div>
         )}

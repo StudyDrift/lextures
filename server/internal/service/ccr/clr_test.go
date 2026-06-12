@@ -5,6 +5,19 @@ import (
 	"time"
 )
 
+func TestPortfolioEvidenceURL(t *testing.T) {
+	slug := "my-portfolio"
+	if got := portfolioEvidenceURL(&slug, true); got != "/portfolios/my-portfolio" {
+		t.Fatalf("public slug: got %q", got)
+	}
+	if got := portfolioEvidenceURL(&slug, false); got != "" {
+		t.Fatalf("private artifact: got %q", got)
+	}
+	if got := portfolioEvidenceURL(nil, true); got != "" {
+		t.Fatalf("nil slug: got %q", got)
+	}
+}
+
 func TestBuildCLRSubjectAssertions(t *testing.T) {
 	issued := time.Date(2026, 1, 15, 12, 0, 0, 0, time.UTC)
 	achievements := []AggregatedAchievement{
