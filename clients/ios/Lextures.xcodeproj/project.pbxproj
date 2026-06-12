@@ -12,6 +12,8 @@
 		21794DCE0F7F4E2291E13329 /* AuthFieldRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 574334E883A949A1B00BEA7E /* AuthFieldRepresentable.swift */; };
 		39084479F6C04C9ABBCA91AA /* NotebookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F94B6FA6AB244FC840F2082 /* NotebookStore.swift */; };
 		6B2E11D1BB124F37C20E42B1 /* NotebookMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1F00C1AA014E26B10D31A1 /* NotebookMarkdown.swift */; };
+		6B2E11D6BB124F37C20E42B6 /* NotebookSlashCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1F00C6AA014E26B10D31A6 /* NotebookSlashCommands.swift */; };
+		6B2E11D7BB124F37C20E42B7 /* NotebookEditorSupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1F00C7AA014E26B10D31A7 /* NotebookEditorSupportViews.swift */; };
 		6B2E11D2BB124F37C20E42B2 /* NotebookTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1F00C2AA014E26B10D31A2 /* NotebookTree.swift */; };
 		6B2E11EABB124F37C20E42EA /* NotebookDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1F00EAAA014E26B10D31EA /* NotebookDrawing.swift */; };
 		6B2E11E9BB124F37C20E42E9 /* NotebookSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A1F00E9AA014E26B10D31E9 /* NotebookSync.swift */; };
@@ -63,6 +65,8 @@
 		4F94B6FA6AB244FC840F2082 /* NotebookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStore.swift; sourceTree = "<group>"; };
 		55556549CC7648629ED206D3 /* LMSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSModels.swift; sourceTree = "<group>"; };
 		5A1F00C1AA014E26B10D31A1 /* NotebookMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookMarkdown.swift; sourceTree = "<group>"; };
+		5A1F00C6AA014E26B10D31A6 /* NotebookSlashCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSlashCommands.swift; sourceTree = "<group>"; };
+		5A1F00C7AA014E26B10D31A7 /* NotebookEditorSupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookEditorSupportViews.swift; sourceTree = "<group>"; };
 		5A1F00C2AA014E26B10D31A2 /* NotebookTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTree.swift; sourceTree = "<group>"; };
 		5A1F00EAAA014E26B10D31EA /* NotebookDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawing.swift; sourceTree = "<group>"; };
 		5A1F00E9AA014E26B10D31E9 /* NotebookSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSync.swift; sourceTree = "<group>"; };
@@ -223,6 +227,7 @@
 				5A1F00EBAA014E26B10D31EB /* NotebookDrawingViews.swift */,
 				5A1F00C4AA014E26B10D31A4 /* NotebookContentView.swift */,
 				64F60254486B40848E7855DD /* NotebookEditorView.swift */,
+				5A1F00C7AA014E26B10D31A7 /* NotebookEditorSupportViews.swift */,
 				5A1F00C5AA014E26B10D31A5 /* NotebookPagesSheet.swift */,
 				45F7D43BE028418E80C1FCD3 /* NotebooksListView.swift */,
 			);
@@ -233,6 +238,7 @@
 			isa = PBXGroup;
 			children = (
 				5A1F00C1AA014E26B10D31A1 /* NotebookMarkdown.swift */,
+				5A1F00C6AA014E26B10D31A6 /* NotebookSlashCommands.swift */,
 				4F94B6FA6AB244FC840F2082 /* NotebookStore.swift */,
 				5A1F00C2AA014E26B10D31A2 /* NotebookTree.swift */,
 				5A1F00EAAA014E26B10D31EA /* NotebookDrawing.swift */,
@@ -395,6 +401,7 @@
 				526718352EC24C6C92BB7AF2 /* NetworkBootstrap.swift in Sources */,
 				39084479F6C04C9ABBCA91AA /* NotebookStore.swift in Sources */,
 				6B2E11D1BB124F37C20E42B1 /* NotebookMarkdown.swift in Sources */,
+				6B2E11D6BB124F37C20E42B6 /* NotebookSlashCommands.swift in Sources */,
 				6B2E11D2BB124F37C20E42B2 /* NotebookTree.swift in Sources */,
 				6B2E11EABB124F37C20E42EA /* NotebookDrawing.swift in Sources */,
 				6B2E11E9BB124F37C20E42E9 /* NotebookSync.swift in Sources */,
@@ -413,6 +420,7 @@
 				A108965FD77349D8A3448CDA /* InboxView.swift in Sources */,
 				F7CA8C3DF6C94432975ACEAC /* MessageDetailView.swift in Sources */,
 				D649B2C460344F0182EE662A /* NotebookEditorView.swift in Sources */,
+				6B2E11D7BB124F37C20E42B7 /* NotebookEditorSupportViews.swift in Sources */,
 				4CBBAE4108D04616A02D1967 /* NotebooksListView.swift in Sources */,
 				FA9B4A2B7C3C4CABB220C97B /* SplashView.swift in Sources */,
 			);

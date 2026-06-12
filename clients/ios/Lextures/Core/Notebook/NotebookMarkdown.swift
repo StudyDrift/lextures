@@ -88,7 +88,14 @@ struct NotebookEditBlock: Identifiable, Equatable {
 enum NotebookMarkdown {
     // MARK: - Task blocks (```task + JSON meta line)
 
-    private static let taskBlockRegex = try! NSRegularExpression(pattern: "```task[ \\t]*\\n([\\s\\S]*?)```")
+    private static let taskBlockRegex = makeRegex("```task[ \\t]*\\n([\\s\\S]*?)```")
+
+    private static func makeRegex(_ pattern: String) -> NSRegularExpression {
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            preconditionFailure("Invalid regex: \(pattern)")
+        }
+        return regex
+    }
 
     static func newTaskId() -> String {
         UUID().uuidString.lowercased()
@@ -192,49 +199,49 @@ enum NotebookMarkdown {
         }
 
         let lines = contentMd.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
-        var i = 0
+        var lineIndex = 0
         var drawingIndex = 0
-        while i < lines.count {
-            let line = lines[i]
+        while lineIndex < lines.count {
+            let line = lines[lineIndex]
             let trimmed = line.trimmingCharacters(in: .whitespaces)
 
             if trimmed.hasPrefix("```drawing") {
                 flushAll()
                 var inner: [String] = []
-                i += 1
-                while i < lines.count, lines[i].trimmingCharacters(in: .whitespaces) != "```" {
-                    inner.append(lines[i])
-                    i += 1
+                lineIndex += 1
+                while lineIndex < lines.count, lines[lineIndex].trimmingCharacters(in: .whitespaces) != "```" {
+                    inner.append(lines[lineIndex])
+                    lineIndex += 1
                 }
                 kinds.append(.drawing(index: drawingIndex, elementsJson: inner.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)))
                 drawingIndex += 1
-                i += 1
+                lineIndex += 1
                 continue
             }
             if trimmed == "```task" || trimmed.hasPrefix("```task") {
                 flushAll()
                 var inner: [String] = []
-                i += 1
-                while i < lines.count, lines[i].trimmingCharacters(in: .whitespaces) != "```" {
-                    inner.append(lines[i])
-                    i += 1
+                lineIndex += 1
+                while lineIndex < lines.count, lines[lineIndex].trimmingCharacters(in: .whitespaces) != "```" {
+                    inner.append(lines[lineIndex])
+                    lineIndex += 1
                 }
                 if let task = parseTaskInner(inner.joined(separator: "\n")) {
                     kinds.append(.task(task))
                 }
-                i += 1
+                lineIndex += 1
                 continue
             }
             if trimmed.hasPrefix("```") {
                 flushAll()
                 var inner: [String] = []
-                i += 1
-                while i < lines.count, !lines[i].trimmingCharacters(in: .whitespaces).hasPrefix("```") {
-                    inner.append(lines[i])
-                    i += 1
+                lineIndex += 1
+                while lineIndex < lines.count, !lines[lineIndex].trimmingCharacters(in: .whitespaces).hasPrefix("```") {
+                    inner.append(lines[lineIndex])
+                    lineIndex += 1
                 }
                 kinds.append(.code(inner.joined(separator: "\n")))
-                i += 1
+                lineIndex += 1
                 continue
             }
             if let heading = parseHeading(trimmed) {
@@ -261,7 +268,7 @@ enum NotebookMarkdown {
                 flushQuote()
                 paragraph.append(trimmed)
             }
-            i += 1
+            lineIndex += 1
         }
         flushAll()
         return kinds.enumerated().map { NotebookBlock(id: $0.offset, kind: $0.element) }
@@ -276,7 +283,7 @@ enum NotebookMarkdown {
         return .heading(level: hashes.count, text: rest.trimmingCharacters(in: .whitespaces))
     }
 
-    private static let orderedItemRegex = try! NSRegularExpression(pattern: "^(\\d+)[.)] (.*)$")
+    private static let orderedItemRegex = makeRegex("^(\\d+)[.)] (.*)$")
 
     private static func parseOrderedItem(_ line: String) -> NotebookBlockKind? {
         let ns = line as NSString
@@ -286,7 +293,7 @@ enum NotebookMarkdown {
         return .orderedItem(number: ns.substring(with: match.range(at: 1)), text: ns.substring(with: match.range(at: 2)))
     }
 
-    private static let imageRegex = try! NSRegularExpression(pattern: "^!\\[([^\\]]*)\\]\\(([^)]+)\\)$")
+    private static let imageRegex = makeRegex("^!\\[([^\\]]*)\\]\\(([^)]+)\\)$")
 
     private static func parseImage(_ line: String) -> NotebookBlockKind? {
         let ns = line as NSString
@@ -385,89 +392,28 @@ enum NotebookMarkdown {
         var out: [String] = []
         var current = -1
         let lines = contentMd.replacingOccurrences(of: "\r\n", with: "\n").components(separatedBy: "\n")
-        var i = 0
-        while i < lines.count {
-            let trimmed = lines[i].trimmingCharacters(in: .whitespaces)
+        var lineIndex = 0
+        while lineIndex < lines.count {
+            let trimmed = lines[lineIndex].trimmingCharacters(in: .whitespaces)
             if trimmed.hasPrefix("```drawing") {
                 current += 1
                 var inner: [String] = []
-                i += 1
-                while i < lines.count, lines[i].trimmingCharacters(in: .whitespaces) != "```" {
-                    inner.append(lines[i])
-                    i += 1
+                lineIndex += 1
+                while lineIndex < lines.count, lines[lineIndex].trimmingCharacters(in: .whitespaces) != "```" {
+                    inner.append(lines[lineIndex])
+                    lineIndex += 1
                 }
-                i += 1
+                lineIndex += 1
                 let body = current == index
                     ? elementsJson
                     : inner.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
                 out.append("```drawing\n\(body)\n```")
                 continue
             }
-            out.append(lines[i])
-            i += 1
+            out.append(lines[lineIndex])
+            lineIndex += 1
         }
         return out.joined(separator: "\n")
-    }
-
-    // MARK: - Slash commands
-
-    static let slashCommands: [NotebookSlashCommand] = [
-        NotebookSlashCommand(
-            id: "heading1", label: "Heading 1", detail: "Large section heading",
-            icon: "textformat.size.larger", keywords: ["h1", "title", "heading"]
-        ),
-        NotebookSlashCommand(
-            id: "heading2", label: "Heading 2", detail: "Medium section heading",
-            icon: "textformat.size", keywords: ["h2", "heading"]
-        ),
-        NotebookSlashCommand(
-            id: "heading3", label: "Heading 3", detail: "Small section heading",
-            icon: "textformat.size.smaller", keywords: ["h3", "heading"]
-        ),
-        NotebookSlashCommand(
-            id: "task", label: "Task", detail: "Checkbox task with optional due date",
-            icon: "checkmark.square", keywords: ["task", "todo", "checkbox", "checklist"]
-        ),
-        NotebookSlashCommand(
-            id: "drawing", label: "Drawing", detail: "Insert a whiteboard to draw on",
-            icon: "scribble.variable", keywords: ["drawing", "whiteboard", "sketch", "draw", "canvas"]
-        ),
-        NotebookSlashCommand(
-            id: "bulletList", label: "Bullet list", detail: "Unordered list",
-            icon: "list.bullet", keywords: ["ul", "list", "bullets"]
-        ),
-        NotebookSlashCommand(
-            id: "orderedList", label: "Numbered list", detail: "Ordered list",
-            icon: "list.number", keywords: ["ol", "list", "numbers"]
-        ),
-        NotebookSlashCommand(
-            id: "blockquote", label: "Quote", detail: "Indented quotation",
-            icon: "text.quote", keywords: ["quote", "blockquote"]
-        ),
-        NotebookSlashCommand(
-            id: "codeBlock", label: "Code", detail: "Code block",
-            icon: "curlybraces", keywords: ["code", "pre", "snippet"]
-        ),
-        NotebookSlashCommand(
-            id: "horizontalRule", label: "Divider", detail: "Horizontal line",
-            icon: "minus", keywords: ["hr", "divider", "line", "rule"]
-        ),
-    ]
-
-    static func filterCommands(query: String) -> [NotebookSlashCommand] {
-        let q = query.trimmingCharacters(in: .whitespaces).lowercased()
-        guard !q.isEmpty else { return slashCommands }
-        return slashCommands.filter { cmd in
-            if cmd.id.lowercased() == q || cmd.id.lowercased().hasPrefix(q) || q.hasPrefix(cmd.id.lowercased()) {
-                return true
-            }
-            if cmd.label.lowercased().contains(q) || cmd.detail.lowercased().contains(q) { return true }
-            return cmd.keywords.contains { kw in
-                if kw == q { return true }
-                guard kw.count >= 2, q.count >= 2 else { return false }
-                return kw.hasPrefix(q) || q.hasPrefix(kw)
-            }
-        }
     }
 
     // MARK: - Preview text (notebook cards)

@@ -192,11 +192,11 @@ enum LMSAPI {
         enum CodingKeys: String, CodingKey { case courseCode, updatedAt, data }
 
         init(from decoder: Decoder) throws {
-            let c = try decoder.container(keyedBy: CodingKeys.self)
-            courseCode = try c.decode(String.self, forKey: .courseCode)
-            updatedAt = try c.decode(String.self, forKey: .updatedAt)
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            courseCode = try container.decode(String.self, forKey: .courseCode)
+            updatedAt = try container.decode(String.self, forKey: .updatedAt)
             // Lenient: one malformed document must not break the whole list.
-            data = try? c.decode(CourseNotebook.self, forKey: .data)
+            data = try? container.decode(CourseNotebook.self, forKey: .data)
         }
     }
 

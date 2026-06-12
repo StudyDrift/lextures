@@ -148,9 +148,9 @@ struct NotebookDrawingEditorView: View {
         if dragStart == nil { dragStart = point }
         switch tool {
         case .pen:
-            if case .stroke(let c, let w, var pts) = draftElement {
+            if case .stroke(let strokeColor, let strokeWidth, var pts) = draftElement {
                 pts.append(point)
-                draftElement = .stroke(color: c, width: w, pts: pts)
+                draftElement = .stroke(color: strokeColor, width: strokeWidth, pts: pts)
             } else {
                 draftElement = .stroke(color: color, width: lineWidth, pts: [point])
             }
@@ -159,8 +159,8 @@ struct NotebookDrawingEditorView: View {
         case .rect:
             draftElement = .rect(
                 color: color, width: lineWidth,
-                x: min(start.x, point.x), y: min(start.y, point.y),
-                w: abs(point.x - start.x), h: abs(point.y - start.y)
+                rectX: min(start.x, point.x), rectY: min(start.y, point.y),
+                rectWidth: abs(point.x - start.x), rectHeight: abs(point.y - start.y)
             )
         case .circle:
             draftElement = .circle(
@@ -241,24 +241,24 @@ struct NotebookDrawingEditorView: View {
                     .accessibilityLabel("Color \(hex)")
                 }
                 Spacer()
-                ForEach(NotebookDrawing.strokeWidths, id: \.self) { w in
+                ForEach(NotebookDrawing.strokeWidths, id: \.self) { strokeWidth in
                     Button {
-                        lineWidth = w
+                        lineWidth = strokeWidth
                     } label: {
                         Circle()
                             .fill(LexturesTheme.textPrimary(for: colorScheme))
-                            .frame(width: 6 + w * 1.5, height: 6 + w * 1.5)
+                            .frame(width: 6 + strokeWidth * 1.5, height: 6 + strokeWidth * 1.5)
                             .frame(width: 28, height: 28)
                             .background(
                                 Circle().fill(
-                                    lineWidth == w
+                                    lineWidth == strokeWidth
                                         ? LexturesTheme.accent(for: colorScheme).opacity(0.18)
                                         : .clear
                                 )
                             )
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Stroke width \(Int(w))")
+                    .accessibilityLabel("Stroke width \(Int(strokeWidth))")
                 }
             }
         }
