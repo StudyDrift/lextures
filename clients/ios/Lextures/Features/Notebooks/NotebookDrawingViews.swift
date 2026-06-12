@@ -155,25 +155,28 @@ struct NotebookDrawingEditorView: View {
                 draftElement = .stroke(color: color, width: lineWidth, pts: [point])
             }
         case .line:
-            draftElement = .line(color: color, width: lineWidth, x1: start.x, y1: start.y, x2: point.x, y2: point.y)
+            draftElement = .line(
+                color: color, width: lineWidth,
+                x1: Double(start.x), y1: Double(start.y), x2: Double(point.x), y2: Double(point.y)
+            )
         case .rect:
             draftElement = .rect(
                 color: color, width: lineWidth,
-                rectX: min(start.x, point.x), rectY: min(start.y, point.y),
-                rectWidth: abs(point.x - start.x), rectHeight: abs(point.y - start.y)
+                rectX: Double(min(start.x, point.x)), rectY: Double(min(start.y, point.y)),
+                rectWidth: Double(abs(point.x - start.x)), rectHeight: Double(abs(point.y - start.y))
             )
         case .circle:
             draftElement = .circle(
                 color: color, width: lineWidth,
-                cx: (start.x + point.x) / 2, cy: (start.y + point.y) / 2,
-                rx: abs(point.x - start.x) / 2, ry: abs(point.y - start.y) / 2
+                cx: Double(start.x + point.x) / 2.0, cy: Double(start.y + point.y) / 2.0,
+                rx: Double(abs(point.x - start.x)) / 2.0, ry: Double(abs(point.y - start.y)) / 2.0
             )
         case .triangle:
             draftElement = .triangle(
                 color: color, width: lineWidth,
-                x1: (start.x + point.x) / 2, y1: min(start.y, point.y),
-                x2: start.x, y2: max(start.y, point.y),
-                x3: point.x, y3: max(start.y, point.y)
+                x1: Double(start.x + point.x) / 2.0, y1: Double(min(start.y, point.y)),
+                x2: Double(start.x), y2: Double(max(start.y, point.y)),
+                x3: Double(point.x), y3: Double(max(start.y, point.y))
             )
         case .eraser:
             break
