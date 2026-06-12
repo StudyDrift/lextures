@@ -22,8 +22,10 @@ struct MeProfile: Decodable {
         let name = displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let source = name.isEmpty ? String(email.split(separator: "@").first ?? "?") : name
         let parts = source.split(separator: " ")
-        if parts.count >= 2, let a = parts.first?.first, let b = parts.last?.first {
-            return String([a, b]).uppercased()
+        if parts.count >= 2,
+           let firstInitial = parts.first?.first,
+           let lastInitial = parts.last?.first {
+            return String([firstInitial, lastInitial]).uppercased()
         }
         return String(source.prefix(2)).uppercased()
     }
