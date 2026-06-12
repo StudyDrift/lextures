@@ -1,0 +1,4 @@
+# Notebook editor views are intentionally large single-file SwiftUI screens.
+type_body_length:
+  warning: 350
+  error: 750

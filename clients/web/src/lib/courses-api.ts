@@ -5382,6 +5382,22 @@ export async function revealModuleAssignmentIdentities(
   }
 }
 
+export type GradingBacklogItemApi = {
+  assignmentId: string
+  assignmentTitle: string
+  ungradedCount: number
+}
+
+export async function fetchCourseGradingBacklog(courseCode: string): Promise<GradingBacklogItemApi[]> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grading-backlog`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { items?: GradingBacklogItemApi[] }
+  return Array.isArray(o.items) ? o.items : []
+}
+
 export async function fetchModuleAssignmentSubmissions(
   courseCode: string,
   itemId: string,

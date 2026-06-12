@@ -109,6 +109,30 @@ function emitChanged(): void {
   window.dispatchEvent(new Event(STUDENT_NOTEBOOKS_CHANGED))
 }
 
+/** Called after a local save so the sync layer can push to the server (set once at module init). */
+let notebookSavedListener: ((courseCode: string) => void) | null = null
+
+export function setNotebookSavedListener(fn: (courseCode: string) => void): void {
+  notebookSavedListener = fn
+}
+
+/** Course codes with a stored notebook on this device (includes the global key). */
+export function localNotebookCourseCodes(): string[] {
+  return Object.keys(readFile().notebooks)
+}
+
+/**
+ * Write a server copy verbatim (keeps the server `updatedAt`, does not trigger a push).
+ * Used by the sync layer when the server copy wins the last-write-wins merge.
+ */
+export function saveCourseNotebookFromServer(courseCode: string, raw: unknown): void {
+  const data = parseStoredNotebookRow(raw)
+  const file = readFile()
+  file.notebooks[courseCode] = data
+  writeFile(file)
+  emitChanged()
+}
+
 function normalizeActivePage(data: CourseNotebookStore): CourseNotebookStore {
   const first = data.pages[0]?.id ?? null
   const valid =
@@ -184,6 +208,7 @@ export function saveCourseNotebookStore(courseCode: string, data: CourseNotebook
   file.notebooks[courseCode] = next
   writeFile(file)
   emitChanged()
+  notebookSavedListener?.(courseCode)
 }
 
 /** Preview for My Notebooks: any non-empty markdown across pages. */

@@ -84,6 +84,42 @@ WHERE course_id = $1 AND id = $2
 	return s, err
 }
 
+// UngradedAssignmentCount is one assignment with at least one ungraded submission.
+type UngradedAssignmentCount struct {
+	ModuleItemID  uuid.UUID
+	Title         string
+	UngradedCount int64
+}
+
+// ListUngradedCountsForCourse returns assignments in a course that have ungraded submissions.
+func ListUngradedCountsForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]UngradedAssignmentCount, error) {
+	rows, err := pool.Query(ctx, `
+SELECT si.id, si.title, COUNT(s.id)::bigint
+FROM course.course_structure_items si
+INNER JOIN course.module_assignment_submissions s
+	ON s.module_item_id = si.id AND s.course_id = $1
+LEFT JOIN course.course_grades g
+	ON g.module_item_id = s.module_item_id AND g.student_user_id = s.submitted_by
+WHERE si.course_id = $1 AND si.kind = 'assignment' AND g.student_user_id IS NULL
+GROUP BY si.id, si.title
+HAVING COUNT(s.id) > 0
+ORDER BY MIN(s.submitted_at) ASC, si.title ASC
+`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]UngradedAssignmentCount, 0)
+	for rows.Next() {
+		var row UngradedAssignmentCount
+		if err := rows.Scan(&row.ModuleItemID, &row.Title, &row.UngradedCount); err != nil {
+			return nil, err
+		}
+		out = append(out, row)
+	}
+	return out, rows.Err()
+}
+
 func CountUngradedForAssignment(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID uuid.UUID) (int64, error) {
 	var n *int64
 	err := pool.QueryRow(ctx, `

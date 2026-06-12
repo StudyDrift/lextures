@@ -15,6 +15,7 @@ type RosterRow struct {
 	ID               uuid.UUID
 	UserID           uuid.UUID
 	DisplayName      *string
+	AvatarURL        *string
 	Role             string
 	RoleDisplay      *string
 	SectionID        *uuid.UUID
@@ -32,6 +33,7 @@ SELECT
 	ce.id,
 	ce.user_id,
 	u.display_name,
+	u.avatar_url,
 	ce.role,
 	er.display_name,
 	ce.section_id,
@@ -70,19 +72,26 @@ ORDER BY
 	for rows.Next() {
 		var r RosterRow
 		var display sql.NullString
+		var avatar sql.NullString
 		var secID sql.NullString
 		var secCode, secName sql.NullString
 		var roleDisplay sql.NullString
 		var stateStr string
 		var stateChanged sql.NullTime
 		var stateReason sql.NullString
-		if err := rows.Scan(&r.ID, &r.UserID, &display, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason); err != nil {
+		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason); err != nil {
 			return nil, err
 		}
 		if display.Valid {
 			s := display.String
 			if s != "" {
 				r.DisplayName = &s
+			}
+		}
+		if avatar.Valid {
+			s := avatar.String
+			if s != "" {
+				r.AvatarURL = &s
 			}
 		}
 		if roleDisplay.Valid && roleDisplay.String != "" {

@@ -496,6 +496,9 @@ func (d Deps) runCanvasImport(
 			if userID == uuid.Nil {
 				continue
 			}
+			if err := canvasImportEnrollmentUserAvatar(ctx, tx, client, accessToken, userID, e, u, &enrollStats); err != nil {
+				return err
+			}
 			role := canvasEnrollmentTypeToRole(strAt(e, "type", ""))
 			if (include.Grades || include.Assignments) && canvasUID > 0 {
 				if canvasUserToLocal == nil {
@@ -510,6 +513,9 @@ func (d Deps) runCanvasImport(
 		msg := fmt.Sprintf("Applied %d enrollment(s) from Canvas.", enrollStats.Enrolled)
 		if enrollStats.AccountsCreated > 0 {
 			msg += fmt.Sprintf(" Created %d new Lextures account(s) from Canvas emails.", enrollStats.AccountsCreated)
+		}
+		if enrollStats.AvatarsImported > 0 {
+			msg += fmt.Sprintf(" Imported %d profile picture(s).", enrollStats.AvatarsImported)
 		}
 		if enrollStats.SkippedNoEmail > 0 {
 			msg += fmt.Sprintf(" Skipped %d without an email in Canvas.", enrollStats.SkippedNoEmail)
@@ -531,7 +537,7 @@ func (d Deps) runCanvasImport(
 			canvasUserToLocal = make(map[int64]uuid.UUID)
 		}
 		var gradeUserStats canvasEnrollmentImportStats
-		if err := canvasFillGradeUserMap(ctx, d.Pool, tx, orgID, enrollmentRows, rosterEmailByCanvasUID, canvasUserToLocal, &gradeUserStats); err != nil {
+		if err := canvasFillGradeUserMap(ctx, d.Pool, tx, orgID, client, accessToken, enrollmentRows, rosterEmailByCanvasUID, canvasUserToLocal, &gradeUserStats); err != nil {
 			return err
 		}
 		if !include.Enrollments && gradeUserStats.AccountsCreated > 0 {

@@ -17,6 +17,7 @@ import {
   listStudentCourseNotebooks,
   subscribeStudentNotebooks,
 } from '../../lib/student-notebook-storage'
+import { pullStudentNotebooks } from '../../lib/student-notebook-sync'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { AiDisclosureBanner } from '../../components/ai-disclosure-banner'
 import { LmsPage } from './lms-page'
@@ -63,6 +64,11 @@ export default function MyNotebooksPage() {
   useEffect(() => {
     return subscribeStudentNotebooks(refreshNotebooks)
   }, [refreshNotebooks])
+
+  // Server pull writes through storage, which notifies the subscription above.
+  useEffect(() => {
+    void pullStudentNotebooks()
+  }, [])
 
   useEffect(() => {
     let cancelled = false

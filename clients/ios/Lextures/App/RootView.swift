@@ -10,11 +10,10 @@ struct RootView: View {
             case .splash:
                 SplashView()
                     .task {
-                        // Refresh in parallel with the splash animation so a stale
-                        // 15-minute access token is replaced before the app shows.
-                        async let minimumSplash: Void? = try? await Task.sleep(for: .milliseconds(900))
+                        // Show splash first, then refresh. Avoids overlapping Swift concurrency +
+                        // URLSession work at process start (problematic on iOS 26/27 betas).
+                        try? await Task.sleep(for: .milliseconds(900))
                         await session.refreshIfNeeded()
-                        _ = await minimumSplash
                         withAnimation(.easeInOut(duration: 0.35)) {
                             session.finishSplash()
                         }

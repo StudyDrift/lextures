@@ -174,8 +174,14 @@ func (d Deps) handleEnrollmentProgressGet() http.HandlerFunc {
 		}
 
 		displayName := "Student"
-		if u, _ := user.FindByID(ctx, d.Pool, en.UserID); u != nil && u.DisplayName != nil && strings.TrimSpace(*u.DisplayName) != "" {
-			displayName = strings.TrimSpace(*u.DisplayName)
+		var avatarURL *string
+		if u, _ := user.FindByID(ctx, d.Pool, en.UserID); u != nil {
+			if u.DisplayName != nil && strings.TrimSpace(*u.DisplayName) != "" {
+				displayName = strings.TrimSpace(*u.DisplayName)
+			}
+			if u.AvatarURL != nil && strings.TrimSpace(*u.AvatarURL) != "" {
+				avatarURL = u.AvatarURL
+			}
 		}
 
 		avgGrade, _ := stprog.AvgGradePercent(ctx, d.Pool, en.CourseID, en.UserID)
@@ -202,6 +208,7 @@ func (d Deps) handleEnrollmentProgressGet() http.HandlerFunc {
 			CourseID:                en.CourseID.String(),
 			StudentUserID:           en.UserID.String(),
 			StudentDisplayName:      displayName,
+			StudentAvatarURL:        avatarURL,
 			AssignmentsSubmittedPct: stprog.Pct(snap.AssignmentsSubmitted, snap.AssignmentsTotal),
 			ModulesViewedPct:        stprog.Pct(snap.ModuleViewsCount, snap.ModulesTotal),
 			AvgQuizScore:            avgQuiz,

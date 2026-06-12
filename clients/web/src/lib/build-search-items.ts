@@ -9,6 +9,7 @@ import {
   atRiskFeatureEnabled,
   bookstoreIntegrationEnabled,
   outcomesReportFeatureEnabled,
+  studentProgressFeatureEnabled,
   xapiEmissionFeatureEnabled,
 } from './platform-features'
 import type { SearchCourseItem } from './search-api'
@@ -307,6 +308,13 @@ const coursePageDefs: CoursePageDef[] = [
     suffix: '/gradebook',
     title: 'Gradebook',
     hint: 'gradebook grades scores',
+    requiredPermission: courseGradebookViewPermission,
+  },
+  {
+    suffix: '/reports',
+    title: 'Reports',
+    hint: 'student reports progress dashboard',
+    whenPlatform: studentProgressFeatureEnabled,
     requiredPermission: courseGradebookViewPermission,
   },
   {

@@ -4,8 +4,26 @@ Native iPhone app for Lextures (SwiftUI). Feature development mirrors the web ap
 
 ## Requirements
 
-- Xcode 16+ (iOS 17 deployment target)
+- Xcode 16+ (iOS 17 deployment target; Xcode 26 recommended for iOS 26/27 device betas)
 - Running Lextures API (see repo root [AGENTS.md](../../AGENTS.md))
+
+## iOS 26/27 device crash at launch (`OS_dispatch_mach_msg _setContext`)
+
+On physical devices running iOS 26 or 27 betas with Xcode 26 on macOS Tahoe, Xcode’s debugger (LLDB) can abort the app at launch with:
+
+```
+-[OS_dispatch_mach_msg _setContext:]: unrecognized selector sent to instance
+```
+
+This is a known toolchain/OS beta issue, not a bug in app logic. Try in order:
+
+1. **Run without the debugger** — select the **Lextures-Device** scheme (Debug executable is off) and Run on your iPhone. Breakpoints are disabled, but the app should launch.
+2. **Or** Edit Scheme → Run → Info → uncheck **Debug executable** on the normal **Lextures** scheme.
+3. **Or** build & run once, then launch Lextures from the home screen (tap the icon instead of using Xcode Run).
+4. **Refresh device symbols** — delete `~/Library/Developer/Xcode/iOS DeviceSupport/`, unplug/replug the iPhone, wait for “Preparing debugger support…”, then rebuild.
+5. **Update Xcode** to the latest Tahoe beta; Apple fixed related URLSession/Network launch crashes in later iOS 26 betas.
+
+The app warms up Network.framework in `AppDelegate` before any API calls to avoid a separate URLSession init crash on these OS versions.
 
 ## Open the project
 

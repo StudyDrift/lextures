@@ -26,6 +26,7 @@ import {
   saveCourseNotebookStore,
   type CourseNotebookStore,
 } from '../../lib/student-notebook-storage'
+import { pullStudentNotebooks } from '../../lib/student-notebook-sync'
 import { NotebookGroupPanel } from '../../components/notebook/notebook-group-panel'
 import { NotebookPageActionsMenu } from '../../components/notebook/notebook-page-actions-menu'
 import { LmsPage } from './lms-page'
@@ -70,6 +71,23 @@ export default function GlobalNotebookPage() {
     const page = next.pages.find((p) => p.id === next.activePageId)
     setHeaderTitleDraft(page?.title ?? '')
   }, [searchParams])
+
+  useEffect(() => {
+    let cancelled = false
+    const before = loadCourseNotebook(GLOBAL_STUDENT_NOTEBOOK_KEY).updatedAt
+    void pullStudentNotebooks().then(() => {
+      if (cancelled) return
+      const pulled = loadCourseNotebook(GLOBAL_STUDENT_NOTEBOOK_KEY)
+      if (pulled.updatedAt !== before) {
+        setData(pulled)
+        const page = pulled.pages.find((p) => p.id === pulled.activePageId)
+        setHeaderTitleDraft(page?.title ?? '')
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     return () => {

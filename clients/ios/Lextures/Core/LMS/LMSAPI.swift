@@ -145,6 +145,85 @@ enum LMSAPI {
         )
     }
 
+    // MARK: - Notebook tasks (dashboard sync, parity with web `notebook-tasks-api`)
+
+    struct NotebookTaskUpsert: Encodable {
+        var id: String
+        var courseCode: String
+        var notebookPageId: String
+        var taskText: String
+        var completed: Bool
+        var dueAt: String?
+
+        enum CodingKeys: String, CodingKey {
+            case id, courseCode, notebookPageId, taskText, completed, dueAt
+        }
+
+        // Explicit `dueAt: null` (web parity) — synthesized encoding would omit the key,
+        // which leaves a stale due date on the server.
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(id, forKey: .id)
+            try container.encode(courseCode, forKey: .courseCode)
+            try container.encode(notebookPageId, forKey: .notebookPageId)
+            try container.encode(taskText, forKey: .taskText)
+            try container.encode(completed, forKey: .completed)
+            try container.encode(dueAt, forKey: .dueAt)
+        }
+    }
+
+    static func upsertNotebookTask(_ task: NotebookTaskUpsert, accessToken: String) async throws {
+        _ = try await client.request(
+            path: "/api/v1/me/notebook-tasks",
+            method: "POST",
+            body: task,
+            authorized: true,
+            accessToken: accessToken
+        )
+    }
+
+    // MARK: - Notebooks (server sync, parity with web `student-notebook-sync`)
+
+    struct NotebookEntry: Decodable {
+        var courseCode: String
+        var updatedAt: String
+        var data: CourseNotebook?
+
+        enum CodingKeys: String, CodingKey { case courseCode, updatedAt, data }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            courseCode = try container.decode(String.self, forKey: .courseCode)
+            updatedAt = try container.decode(String.self, forKey: .updatedAt)
+            // Lenient: one malformed document must not break the whole list.
+            data = try? container.decode(CourseNotebook.self, forKey: .data)
+        }
+    }
+
+    private struct NotebooksResponse: Decodable {
+        var notebooks: [NotebookEntry]
+    }
+
+    static func fetchNotebooks(accessToken: String) async throws -> [NotebookEntry] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/notebooks",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(NotebooksResponse.self, from: data).notebooks
+    }
+
+    static func putNotebook(courseCode: String, notebook: CourseNotebook, accessToken: String) async throws {
+        let code = courseCode.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? courseCode
+        _ = try await client.request(
+            path: "/api/v1/me/notebooks?courseCode=\(code)",
+            method: "PUT",
+            body: notebook,
+            authorized: true,
+            accessToken: accessToken
+        )
+    }
+
     private static func encodePath(_ component: String) -> String {
         component.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? component
     }

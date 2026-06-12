@@ -9,6 +9,7 @@ type Summary struct {
 	CourseID                string     `json:"courseId"`
 	StudentUserID           string     `json:"studentUserId"`
 	StudentDisplayName      string     `json:"studentDisplayName"`
+	StudentAvatarURL        *string    `json:"studentAvatarUrl,omitempty"`
 	AssignmentsSubmittedPct float64    `json:"assignmentsSubmittedPct"`
 	ModulesViewedPct        float64    `json:"modulesViewedPct"`
 	AvgQuizScore            *float64   `json:"avgQuizScore,omitempty"`

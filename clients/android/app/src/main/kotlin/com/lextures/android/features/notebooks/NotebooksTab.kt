@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,11 +44,14 @@ import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.notebook.CourseNotebook
+import com.lextures.android.core.notebook.NotebookMarkdown
 import com.lextures.android.core.notebook.NotebookStore
+import com.lextures.android.core.notebook.NotebookSync
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsSectionHeader
+import kotlinx.coroutines.launch
 
 private data class NotebookRow(
     val courseCode: String,
@@ -62,6 +66,7 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
     val accessToken by session.accessToken.collectAsState()
     val store = remember(accessToken) { NotebookStore(context, accessToken) }
 
+    val scope = rememberCoroutineScope()
     var courses by remember { mutableStateOf<List<CourseSummary>>(emptyList()) }
     var openNotebook by remember { mutableStateOf<NotebookRow?>(null) }
     // Bumped after the editor closes so previews re-read from the store.
@@ -69,6 +74,8 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
+        // Pull server notebooks first so web-created ones appear in the list.
+        if (NotebookSync.pull(store, token)) revision++
         courses = runCatching { LmsApi.fetchCourses(token) }.getOrDefault(emptyList())
     }
 
@@ -80,8 +87,11 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
             onBack = {
                 openNotebook = null
                 revision++
+                // The editor's debounced push dies with its composition — flush from here.
+                scope.launch { NotebookSync.push(store, row.courseCode, accessToken) }
             },
             modifier = modifier,
+            accessToken = accessToken,
         )
         return
     }
@@ -169,7 +179,7 @@ private fun NotebookCard(
                     color = textPrimary(),
                 )
                 Text(text = subtitle, fontSize = 12.sp, color = textSecondary())
-                val preview = notebook?.previewText.orEmpty()
+                val preview = NotebookMarkdown.previewText(notebook?.previewText.orEmpty())
                 if (preview.isNotEmpty()) {
                     Text(
                         text = preview,

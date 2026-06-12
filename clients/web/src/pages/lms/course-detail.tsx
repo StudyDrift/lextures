@@ -13,6 +13,7 @@ import { authorizedFetch } from '../../lib/api'
 import {
   courseGradebookViewPermission,
   fetchCourseGradebookGrid,
+  fetchCourseGradingBacklog,
   fetchCourseMyGrades,
   fetchCourseStructure,
   fetchEnrollmentDiagnostic,
@@ -44,6 +45,10 @@ import { CourseCalendar, type CourseCalendarAssignment } from './course-calendar
 import { formatDueShort } from '../../lib/course-calendar-utils'
 import { fetchCourseCatalogInfo, type CatalogSection } from '../../lib/catalog-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import {
+  GradingBacklogList,
+  type GradingBacklogItem,
+} from '../../components/dashboard/grading-backlog-list'
 
 function formatIsoDurationHuman(iso: string | null | undefined): string {
   if (!iso?.trim()) return '—'
@@ -209,6 +214,7 @@ export default function CourseDetail() {
   const [myGrades, setMyGrades] = useState<CourseMyGradesResponse | null>(null)
   const [announcement, setAnnouncement] = useState<AnnouncementPreview | null>(null)
   const [gradebookEmptyCells, setGradebookEmptyCells] = useState<number | null>(null)
+  const [gradingBacklog, setGradingBacklog] = useState<GradingBacklogItem[]>([])
 
   useEffect(() => {
     if (!courseCode || !ffCatalogIntegration) {
@@ -344,8 +350,27 @@ export default function CourseDetail() {
               if (!cancelled) setGradebookEmptyCells(null)
             }),
         )
+        tasks.push(
+          fetchCourseGradingBacklog(courseCode)
+            .then((items) => {
+              if (!cancelled) {
+                setGradingBacklog(
+                  items.map((item) => ({
+                    assignmentId: item.assignmentId,
+                    assignmentTitle: item.assignmentTitle,
+                    ungradedCount: item.ungradedCount,
+                    courseCode,
+                  })),
+                )
+              }
+            })
+            .catch(() => {
+              if (!cancelled) setGradingBacklog([])
+            }),
+        )
       } else if (!cancelled) {
         setGradebookEmptyCells(null)
+        setGradingBacklog([])
       }
 
       await Promise.all(tasks)
@@ -796,11 +821,23 @@ export default function CourseDetail() {
                         <LayoutDashboard className="h-5 w-5 shrink-0" aria-hidden />
                         <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Teaching</span>
                       </div>
-                      <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
-                        {gradebookEmptyCells != null
-                          ? `${gradebookEmptyCells} empty grade cell${gradebookEmptyCells === 1 ? '' : 's'} in the gradebook.`
-                          : 'Open the gradebook to review submissions and scores.'}
-                      </p>
+                      {gradingBacklog.length > 0 ? (
+                        <div className="mt-3">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+                            Needs grading
+                          </p>
+                          <div className="mt-2">
+                            <GradingBacklogList items={gradingBacklog} />
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
+                          No ungraded assignment submissions right now.
+                          {gradebookEmptyCells != null && gradebookEmptyCells > 0
+                            ? ` ${gradebookEmptyCells} empty grade cell${gradebookEmptyCells === 1 ? '' : 's'} remain in the gradebook.`
+                            : ''}
+                        </p>
+                      )}
                       <div className="mt-4 flex flex-wrap gap-2">
                         <Link
                           to={`/courses/${encodeURIComponent(courseCode)}/gradebook`}

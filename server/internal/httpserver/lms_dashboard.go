@@ -673,6 +673,7 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 		ID             string  `json:"id"`
 		UserID         string  `json:"userId"`
 		DisplayName    *string `json:"displayName"`
+		AvatarURL      *string `json:"avatarUrl,omitempty"`
 		Role           string  `json:"role"`
 		RoleDisplay    *string `json:"roleDisplay,omitempty"`
 		SectionID      *string `json:"sectionId,omitempty"`
@@ -719,6 +720,7 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 				ID:          e.ID.String(),
 				UserID:      e.UserID.String(),
 				DisplayName: e.DisplayName,
+				AvatarURL:   e.AvatarURL,
 				Role:        e.Role,
 				RoleDisplay: e.RoleDisplay,
 			}

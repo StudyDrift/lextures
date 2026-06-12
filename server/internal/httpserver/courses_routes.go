@@ -87,6 +87,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/markups", d.handleCreateQuizMarkup())
 	r.Delete("/api/v1/courses/{course_code}/quizzes/{item_id}/markups/{markup_id}", d.handleDeleteQuizMarkup())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/markups", d.handleListAssignmentMarkups())
+	r.Get("/api/v1/courses/{course_code}/grading-backlog", d.handleCourseGradingBacklog())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/submissions", d.handleListAssignmentSubmissions())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/submissions/mine", d.handleGetMyAssignmentSubmission())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/submissions/{submission_id}/originality", d.handleGetSubmissionOriginality())

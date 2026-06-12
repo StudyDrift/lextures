@@ -6,6 +6,7 @@ export type StudentProgressSummary = {
   courseId: string
   studentUserId: string
   studentDisplayName: string
+  studentAvatarUrl?: string | null
   assignmentsSubmittedPct: number
   modulesViewedPct: number
   avgQuizScore?: number | null

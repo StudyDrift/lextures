@@ -84,6 +84,22 @@ final class NotebookStore {
         writeAll(all)
     }
 
+    func exists(courseCode: String) -> Bool {
+        readAll()[courseCode] != nil
+    }
+
+    /// Every stored course code, including the global key.
+    func allCourseCodes() -> [String] {
+        Array(readAll().keys)
+    }
+
+    /// Write a server copy verbatim — keeps the server `updatedAt` so last-write-wins stays stable.
+    func saveFromServer(courseCode: String, notebook: CourseNotebook) {
+        var all = readAll()
+        all[courseCode] = notebook
+        writeAll(all)
+    }
+
     /// Course-scoped notebooks with content (excludes the global key).
     func listCourseNotebooks() -> [String: CourseNotebook] {
         readAll().filter { key, notebook in

@@ -2,8 +2,10 @@ package httpserver
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -18,10 +20,13 @@ import (
 	"github.com/lextures/lextures/server/internal/service/authservice"
 )
 
+const canvasAvatarMaxBytes = 512 << 10
+
 type canvasEnrollmentImportStats struct {
-	Enrolled       int
+	Enrolled        int
 	AccountsCreated int
-	SkippedNoEmail int
+	SkippedNoEmail  int
+	AvatarsImported int
 }
 
 func canvasUserDisplayName(u map[string]any, email string) string {
@@ -46,6 +51,7 @@ func canvasEnrollmentListQuery() url.Values {
 	q.Add("state[]", "invited")
 	q.Add("state[]", "creation_pending")
 	q.Add("include[]", "user")
+	q.Add("include[]", "avatar_url")
 	return q
 }
 
@@ -57,7 +63,7 @@ func canvasRosterEmailsByCanvasUserID(
 ) (map[int64]string, error) {
 	rows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
 		fmt.Sprintf("courses/%d/users", canvasCourseID),
-		url.Values{"include[]": []string{"email"}})
+		url.Values{"include[]": []string{"email", "avatar_url"}})
 	if err != nil {
 		return nil, err
 	}
@@ -72,6 +78,116 @@ func canvasRosterEmailsByCanvasUserID(
 		}
 	}
 	return out, nil
+}
+
+func canvasAvatarURLFromMaps(enrollment, canvasUser map[string]any) string {
+	for _, m := range []map[string]any{canvasUser, enrollment} {
+		if m == nil {
+			continue
+		}
+		if u := strings.TrimSpace(strAt(m, "avatar_url", "")); u != "" {
+			return u
+		}
+	}
+	return ""
+}
+
+func canvasImageBytesToDataURL(data []byte, contentType string) (string, error) {
+	ct := strings.TrimSpace(contentType)
+	if i := strings.Index(ct, ";"); i >= 0 {
+		ct = ct[:i]
+	}
+	ct = strings.ToLower(ct)
+	if !strings.HasPrefix(ct, "image/") {
+		return "", fmt.Errorf("avatar is not an image")
+	}
+	out := "data:" + ct + ";base64," + base64.StdEncoding.EncodeToString(data)
+	if len(out) > 2_000_000 {
+		return "", fmt.Errorf("avatar data url too large")
+	}
+	return out, nil
+}
+
+func canvasDownloadAvatarImage(
+	ctx context.Context,
+	client *http.Client,
+	downloadURL, accessToken string,
+) ([]byte, string, error) {
+	if client == nil || strings.TrimSpace(downloadURL) == "" {
+		return nil, "", fmt.Errorf("missing download client or url")
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+	if err != nil {
+		return nil, "", err
+	}
+	if strings.TrimSpace(accessToken) != "" {
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, "", err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, "", fmt.Errorf("download status %d", resp.StatusCode)
+	}
+	data, err := io.ReadAll(io.LimitReader(resp.Body, canvasAvatarMaxBytes+1))
+	if err != nil {
+		return nil, "", err
+	}
+	if len(data) > canvasAvatarMaxBytes {
+		return nil, "", fmt.Errorf("avatar too large")
+	}
+	ct := strings.TrimSpace(resp.Header.Get("Content-Type"))
+	if ct == "" {
+		ct = "image/jpeg"
+	}
+	return data, ct, nil
+}
+
+func canvasImportEnrollmentUserAvatar(
+	ctx context.Context,
+	tx pgx.Tx,
+	client *http.Client,
+	accessToken string,
+	userID uuid.UUID,
+	enrollment, canvasUser map[string]any,
+	stats *canvasEnrollmentImportStats,
+) error {
+	if tx == nil || userID == uuid.Nil {
+		return nil
+	}
+	var hasAvatar bool
+	if err := tx.QueryRow(ctx, `
+SELECT avatar_url IS NOT NULL AND TRIM(avatar_url) <> ''
+FROM "user".users
+WHERE id = $1
+`, userID).Scan(&hasAvatar); err != nil {
+		return err
+	}
+	if hasAvatar {
+		return nil
+	}
+	avatarURL := canvasAvatarURLFromMaps(enrollment, canvasUser)
+	if avatarURL == "" {
+		return nil
+	}
+	data, contentType, err := canvasDownloadAvatarImage(ctx, client, avatarURL, accessToken)
+	if err != nil || len(data) == 0 {
+		return nil
+	}
+	dataURL, err := canvasImageBytesToDataURL(data, contentType)
+	if err != nil {
+		return nil
+	}
+	updated, err := user.SetAvatarURLIfEmptyTx(ctx, tx, userID, dataURL)
+	if err != nil {
+		return err
+	}
+	if updated && stats != nil {
+		stats.AvatarsImported++
+	}
+	return nil
 }
 
 // canvasResolveLexturesUserForEnrollment finds or creates a Lextures user for a Canvas roster member.
@@ -131,6 +247,8 @@ func canvasFillGradeUserMap(
 	pool *pgxpool.Pool,
 	tx pgx.Tx,
 	orgID uuid.UUID,
+	client *http.Client,
+	accessToken string,
 	enrollmentRows []map[string]any,
 	rosterEmailByCanvasUID map[int64]string,
 	out map[int64]uuid.UUID,
@@ -158,6 +276,9 @@ func canvasFillGradeUserMap(
 		}
 		if userID != uuid.Nil {
 			out[canvasUID] = userID
+			if err := canvasImportEnrollmentUserAvatar(ctx, tx, client, accessToken, userID, e, u, stats); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
