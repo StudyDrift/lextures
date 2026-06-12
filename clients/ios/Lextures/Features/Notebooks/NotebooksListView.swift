@@ -73,7 +73,7 @@ struct NotebooksListView: View {
             .navigationTitle("Notebooks")
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: NotebookRoute.self) { route in
-                NotebookEditorView(courseCode: route.courseCode, title: route.title)
+                NotebookPagesView(courseCode: route.courseCode, title: route.title)
             }
             .task { await load() }
             .onAppear { savedNotebooks = store.listCourseNotebooks() }

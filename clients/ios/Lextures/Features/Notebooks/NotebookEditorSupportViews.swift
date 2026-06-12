@@ -151,6 +151,69 @@ struct NotebookEditBlockRow: View {
     }
 }
 
+/// Notebook image loader. Web stores relative course-file paths (`/api/v1/...`) that need the
+/// bearer token (parity with web's authorized blob fetch), so `AsyncImage` can't be used.
+struct AuthorizedNotebookImage: View {
+    @Environment(AuthSession.self) private var session
+    @Environment(\.colorScheme) private var colorScheme
+    let urlString: String
+    let alt: String
+
+    @State private var image: UIImage?
+
+    private static let cache = NSCache<NSString, UIImage>()
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .accessibilityLabel(alt.isEmpty ? "Image" : alt)
+            } else {
+                HStack(spacing: 6) {
+                    Image(systemName: "photo")
+                    Text(alt.isEmpty ? "Image" : alt)
+                }
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                .padding(12)
+            }
+        }
+        .task(id: urlString) { await load() }
+    }
+
+    private var resolvedURL: URL? {
+        if urlString.hasPrefix("/") {
+            return AppConfiguration.apiURL(path: urlString)
+        }
+        if let parsed = URL(string: urlString), parsed.scheme == "https" || parsed.scheme == "http" {
+            return parsed
+        }
+        return nil
+    }
+
+    private func load() async {
+        if let cached = Self.cache.object(forKey: urlString as NSString) {
+            image = cached
+            return
+        }
+        guard let url = resolvedURL else { return }
+        var request = URLRequest(url: url)
+        if let token = session.accessToken {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        guard
+            let (data, response) = try? await URLSession.shared.data(for: request),
+            (response as? HTTPURLResponse).map({ (200 ... 299).contains($0.statusCode) }) != false,
+            let loaded = UIImage(data: data)
+        else { return }
+        Self.cache.setObject(loaded, forKey: urlString as NSString)
+        image = loaded
+    }
+}
+
 /// Due-date picker for a notebook task (set / change / remove).
 struct NotebookDueDateSheet: View {
     @Environment(\.dismiss) private var dismiss

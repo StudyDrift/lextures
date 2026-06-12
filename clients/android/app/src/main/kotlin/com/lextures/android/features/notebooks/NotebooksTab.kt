@@ -59,6 +59,13 @@ private data class NotebookRow(
     val notebook: CourseNotebook?,
 )
 
+/** Notebook screens: home list → pages of one notebook → page editor. */
+private sealed interface NotebooksNav {
+    data object Home : NotebooksNav
+    data class Pages(val courseCode: String, val title: String) : NotebooksNav
+    data class Editor(val courseCode: String, val title: String, val pageId: String) : NotebooksNav
+}
+
 /** My Notebooks: the global notebook plus one notebook per enrolled course (device-local). */
 @Composable
 fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
@@ -68,8 +75,8 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
 
     val scope = rememberCoroutineScope()
     var courses by remember { mutableStateOf<List<CourseSummary>>(emptyList()) }
-    var openNotebook by remember { mutableStateOf<NotebookRow?>(null) }
-    // Bumped after the editor closes so previews re-read from the store.
+    var nav by remember { mutableStateOf<NotebooksNav>(NotebooksNav.Home) }
+    // Bumped after pages/editor close so previews re-read from the store.
     var revision by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(accessToken) {
@@ -79,21 +86,43 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
         courses = runCatching { LmsApi.fetchCourses(token) }.getOrDefault(emptyList())
     }
 
-    openNotebook?.let { row ->
-        NotebookEditorScreen(
-            store = store,
-            courseCode = row.courseCode,
-            title = row.title,
-            onBack = {
-                openNotebook = null
-                revision++
-                // The editor's debounced push dies with its composition — flush from here.
-                scope.launch { NotebookSync.push(store, row.courseCode, accessToken) }
-            },
-            modifier = modifier,
-            accessToken = accessToken,
-        )
-        return
+    when (val screen = nav) {
+        is NotebooksNav.Pages -> {
+            NotebookPagesScreen(
+                store = store,
+                courseCode = screen.courseCode,
+                title = screen.title,
+                accessToken = accessToken,
+                onBack = {
+                    nav = NotebooksNav.Home
+                    revision++
+                },
+                onOpenPage = { pageId ->
+                    nav = NotebooksNav.Editor(screen.courseCode, screen.title, pageId)
+                },
+                modifier = modifier,
+            )
+            return
+        }
+
+        is NotebooksNav.Editor -> {
+            NotebookEditorScreen(
+                store = store,
+                courseCode = screen.courseCode,
+                notebookTitle = screen.title,
+                pageId = screen.pageId,
+                onBack = {
+                    nav = NotebooksNav.Pages(screen.courseCode, screen.title)
+                    // The editor's debounced push dies with its composition — flush from here.
+                    scope.launch { NotebookSync.push(store, screen.courseCode, accessToken) }
+                },
+                modifier = modifier,
+                accessToken = accessToken,
+            )
+            return
+        }
+
+        NotebooksNav.Home -> Unit
     }
 
     val saved = remember(revision, store) { store.listCourseNotebooks() }
@@ -133,7 +162,7 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
                     subtitle = "Notes that follow you across courses",
                     notebook = globalNotebook,
                     onClick = {
-                        openNotebook = NotebookRow(NotebookStore.GLOBAL_KEY, NotebookStore.GLOBAL_TITLE, globalNotebook)
+                        nav = NotebooksNav.Pages(NotebookStore.GLOBAL_KEY, NotebookStore.GLOBAL_TITLE)
                     },
                 )
             }
@@ -153,7 +182,7 @@ fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
                         title = row.title,
                         subtitle = row.courseCode,
                         notebook = row.notebook,
-                        onClick = { openNotebook = row },
+                        onClick = { nav = NotebooksNav.Pages(row.courseCode, row.title) },
                     )
                 }
             }

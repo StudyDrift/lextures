@@ -96,10 +96,11 @@ fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
             .fillMaxSize()
             .background(sceneBackground()),
     ) {
-        // Content leaves room for the floating bar so list ends stay reachable.
+        // Content leaves room for the floating bar so lists and FABs stay reachable.
         val contentModifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 84.dp)
+            .navigationBarsPadding()
+            .padding(bottom = 96.dp)
         when (selectedTab) {
             HomeTab.Dashboard.name -> DashboardTab(
                 session = session,

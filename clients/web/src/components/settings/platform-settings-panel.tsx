@@ -58,6 +58,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffBookstoreIntegration: false,
     ffCoCurricularTranscript: false,
     ffEportfolio: false,
+    ffTranscripts: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,

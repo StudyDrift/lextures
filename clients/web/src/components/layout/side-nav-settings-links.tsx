@@ -8,6 +8,7 @@ import {
   Building2,
   CalendarRange,
   ChevronDown,
+  FileText,
   FolderTree,
   Link2,
   Palette,
@@ -41,7 +42,7 @@ export function SideNavSettingsLinks() {
   const canOrgRoles =
     !permLoading && (allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW))
   const { scimEnabled: platformScimEnabled } = usePlatformScimEnabled(canManageRbac)
-  const { ffBookstoreIntegration } = usePlatformFeatures()
+  const { ffBookstoreIntegration, ffTranscripts } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
   const aiSectionActive = view === 'ai-models' || view === 'ai-prompts'
@@ -154,6 +155,15 @@ export function SideNavSettingsLinks() {
                   icon={<BookOpen className="h-5 w-5" />}
                 >
                   OER library
+                </SideNavLink>
+              )}
+              {ffTranscripts && (
+                <SideNavLink
+                  to="/settings/transcripts"
+                  className={() => (view === 'transcripts' ? sideNavActiveClass : '')}
+                  icon={<FileText className="h-5 w-5" />}
+                >
+                  Transcripts
                 </SideNavLink>
               )}
               {ffBookstoreIntegration && (

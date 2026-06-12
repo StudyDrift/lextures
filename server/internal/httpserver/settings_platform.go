@@ -122,6 +122,7 @@ type platformSettingsJSON struct {
 	FFCoCurricularTranscript        bool `json:"ffCoCurricularTranscript"`
 	FFEportfolio                    bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
+	FFTranscripts                   bool `json:"ffTranscripts"`
 
 	MFAEnabled     bool   `json:"mfaEnabled"`
 	MFAEnforcement string `json:"mfaEnforcement"`
@@ -275,6 +276,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 				FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
 				FFEportfolio:                    merged.FFEportfolio,
 				FFBookstoreIntegration:          merged.FFBookstoreIntegration,
+				FFTranscripts:                   merged.FFTranscripts,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,
@@ -401,6 +403,7 @@ type putPlatformBody struct {
 	FFCoCurricularTranscript        *bool `json:"ffCoCurricularTranscript"`
 	FFEportfolio                    *bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
+	FFTranscripts                   *bool `json:"ffTranscripts"`
 
 	MFAEnabled     *bool   `json:"mfaEnabled"`
 	MFAEnforcement *string `json:"mfaEnforcement"`
@@ -688,6 +691,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcocurriculartranscript", body.FFCoCurricularTranscript, func(v bool) { wr.FFCoCurricularTranscript = &v })
 		setBool("ffeportfolio", body.FFEportfolio, func(v bool) { wr.FFEportfolio = &v })
 		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
+		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
 		set("mfaenabled", body.MFAEnabled != nil, func() {
 			v := *body.MFAEnabled
 			wr.MFAEnabled = &v
@@ -797,6 +801,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				FFCoCurricularTranscript:        merged.FFCoCurricularTranscript,
 				FFEportfolio:                    merged.FFEportfolio,
 				FFBookstoreIntegration:          merged.FFBookstoreIntegration,
+				FFTranscripts:                   merged.FFTranscripts,
 			MFAEnabled:                      merged.MFAEnabled,
 			MFAEnforcement:                  merged.MFAEnforcement,
 			SMTPHost:                        merged.SMTPHost,

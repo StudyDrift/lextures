@@ -16,6 +16,7 @@ type ModuleNameModalProps = {
     | 'quiz'
     | 'external_link'
     | 'lti_link'
+    | 'portfolio'
   /** Prefill the input (e.g. edit title). */
   initialTitle?: string
   /** Overrides the dialog heading (e.g. "Edit title"). */
@@ -56,7 +57,9 @@ function ModuleNameModalInner({
               ? mode === 'lti_link'
                 ? 'LTI tool link'
                 : 'External link'
-          : 'New module'
+              : mode === 'portfolio'
+                ? 'Rename portfolio'
+                : 'New module'
   const fieldLabel =
     mode === 'heading'
       ? 'Heading title'
@@ -68,7 +71,9 @@ function ModuleNameModalInner({
             ? 'Quiz name'
             : mode === 'external_link' || mode === 'lti_link'
               ? 'Link title'
-          : 'Module name'
+              : mode === 'portfolio'
+                ? 'Portfolio title'
+                : 'Module name'
   const placeholder =
     mode === 'heading'
       ? 'e.g. Readings and discussion'
@@ -80,7 +85,9 @@ function ModuleNameModalInner({
             ? 'e.g. Week 1 check-in'
             : mode === 'external_link' || mode === 'lti_link'
               ? 'e.g. Textbook website'
-          : 'e.g. Week 1 — Introduction'
+              : mode === 'portfolio'
+                ? 'e.g. Teaching Capstone Portfolio'
+                : 'e.g. Week 1 — Introduction'
   const submitLabel =
     mode === 'heading'
       ? 'Save heading'
@@ -92,7 +99,9 @@ function ModuleNameModalInner({
             ? 'Save quiz'
             : mode === 'external_link' || mode === 'lti_link'
               ? 'Save title'
-          : 'Save module'
+              : mode === 'portfolio'
+                ? 'Save title'
+                : 'Save module'
 
   const headingText = dialogTitleOverride ?? dialogTitle
   const primarySubmitLabel = submitLabelOverride ?? submitLabel
