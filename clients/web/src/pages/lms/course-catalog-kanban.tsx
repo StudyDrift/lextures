@@ -19,6 +19,7 @@ import type { KanbanColumnLabels } from '../../lib/course-catalog-settings-api'
 import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 import { CourseCatalogNicknameEditor } from './course-catalog-nickname-editor'
+import { CourseCatalogPinButton } from './course-catalog-pin-button'
 import {
   buildKanbanBoardState,
   courseCatalogStatusLabel,
@@ -89,10 +90,12 @@ function formatCourseTermLabel(course: CoursePublic): string {
 function KanbanDraggableCard({
   course,
   onNicknameChange,
+  onPinnedChange,
   overlay = false,
 }: {
   course: CoursePublic
   onNicknameChange: (courseId: string, nickname: string | null) => void
+  onPinnedChange: (courseId: string, pinned: boolean) => void
   overlay?: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -126,11 +129,21 @@ function KanbanDraggableCard({
           <GripVertical className="h-4 w-4" aria-hidden />
         </button>
         <div className="min-w-0 flex-1">
-          <CourseCatalogNicknameEditor
-            course={course}
-            titleClassName="text-sm font-semibold leading-snug text-slate-900 dark:text-neutral-100"
-            onNicknameChange={onNicknameChange}
-          />
+          <div className="flex items-start gap-1">
+            <div className="min-w-0 flex-1">
+              <CourseCatalogNicknameEditor
+                course={course}
+                titleClassName="text-sm font-semibold leading-snug text-slate-900 dark:text-neutral-100"
+                onNicknameChange={onNicknameChange}
+              />
+            </div>
+            <CourseCatalogPinButton
+              course={course}
+              variant="inline"
+              className="h-7 w-7"
+              onPinnedChange={onPinnedChange}
+            />
+          </div>
           <Link
             to={courseHref}
             className="mt-2 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
@@ -190,6 +203,7 @@ type KanbanColumnProps = {
   onToggleCollapsed?: () => void
   onTitleChange: (columnId: KanbanColumnId, title: string) => void
   onNicknameChange: (courseId: string, nickname: string | null) => void
+  onPinnedChange: (courseId: string, pinned: boolean) => void
 }
 
 function KanbanColumn({
@@ -201,6 +215,7 @@ function KanbanColumn({
   onToggleCollapsed,
   onTitleChange,
   onNicknameChange,
+  onPinnedChange,
 }: KanbanColumnProps) {
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState(title)
@@ -301,7 +316,12 @@ function KanbanColumn({
             </p>
           ) : (
             courses.map((course) => (
-              <KanbanDraggableCard key={course.id} course={course} onNicknameChange={onNicknameChange} />
+              <KanbanDraggableCard
+                key={course.id}
+                course={course}
+                onNicknameChange={onNicknameChange}
+                onPinnedChange={onPinnedChange}
+              />
             ))
           )}
         </KanbanColumnDropZone>
@@ -317,6 +337,7 @@ type Props = {
   onHiddenColumnExpandedChange: (expanded: boolean) => void
   onColumnLabelsChange: (labels: KanbanColumnLabels) => void
   onNicknameChange: (courseId: string, nickname: string | null) => void
+  onPinnedChange: (courseId: string, pinned: boolean) => void
   onBoardChange: (columns: Record<KanbanColumnId, string[]>) => Promise<void>
 }
 
@@ -327,6 +348,7 @@ export function CourseCatalogKanbanBoard({
   onHiddenColumnExpandedChange,
   onColumnLabelsChange,
   onNicknameChange,
+  onPinnedChange,
   onBoardChange,
 }: Props) {
   const courseById = useMemo(() => new Map(courses.map((c) => [c.id, c])), [courses])
@@ -427,13 +449,19 @@ export function CourseCatalogKanbanBoard({
                   onColumnLabelsChange({ ...columnLabels, [id]: nextTitle })
                 }}
                 onNicknameChange={onNicknameChange}
+                onPinnedChange={onPinnedChange}
               />
             ))}
           </div>
         </div>
         <DragOverlay dropAnimation={null}>
           {activeCourse ? (
-            <KanbanDraggableCard course={activeCourse} onNicknameChange={onNicknameChange} overlay />
+            <KanbanDraggableCard
+              course={activeCourse}
+              onNicknameChange={onNicknameChange}
+              onPinnedChange={onPinnedChange}
+              overlay
+            />
           ) : null}
         </DragOverlay>
       </DndContext>

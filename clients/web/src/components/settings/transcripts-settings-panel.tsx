@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
+  fetchAdminTranscriptRequests,
   fetchAdminTranscriptsConfig,
   saveAdminTranscriptsConfig,
+  type TranscriptRequest,
   type TranscriptsConfig,
 } from '../../lib/transcripts-api'
 
@@ -12,13 +14,16 @@ export function TranscriptsSettingsPanel() {
   const { ffTranscripts, loading: featuresLoading } = usePlatformFeatures()
   const urlId = useId()
   const secretId = useId()
+  const pickupId = useId()
   const [config, setConfig] = useState<TranscriptsConfig | null>(null)
   const [webhookUrl, setWebhookUrl] = useState('')
   const [webhookSecret, setWebhookSecret] = useState('')
+  const [pickupInstructions, setPickupInstructions] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [failures, setFailures] = useState<TranscriptRequest[]>([])
 
   const load = useCallback(async () => {
     if (!ffTranscripts) {
@@ -29,10 +34,15 @@ export function TranscriptsSettingsPanel() {
     setLoading(true)
     setError(null)
     try {
-      const cfg = await fetchAdminTranscriptsConfig()
+      const [cfg, failed] = await Promise.all([
+        fetchAdminTranscriptsConfig(),
+        fetchAdminTranscriptRequests(),
+      ])
       setConfig(cfg)
       setWebhookUrl(cfg.webhookUrl)
       setWebhookSecret(cfg.hasWebhookSecret ? SECRET_PLACEHOLDER : '')
+      setPickupInstructions(cfg.pickupInstructions ?? '')
+      setFailures(failed)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not load transcripts settings.')
     } finally {
@@ -51,8 +61,9 @@ export function TranscriptsSettingsPanel() {
     setError(null)
     setSaved(false)
     try {
-      const payload: { webhookUrl: string; webhookSecret?: string } = {
+      const payload: { webhookUrl: string; webhookSecret?: string; pickupInstructions?: string } = {
         webhookUrl: webhookUrl.trim(),
+        pickupInstructions: pickupInstructions.trim(),
       }
       if (webhookSecret.trim() && webhookSecret !== SECRET_PLACEHOLDER) {
         payload.webhookSecret = webhookSecret.trim()
@@ -60,6 +71,7 @@ export function TranscriptsSettingsPanel() {
       const cfg = await saveAdminTranscriptsConfig(payload)
       setConfig(cfg)
       setWebhookSecret(cfg.hasWebhookSecret ? SECRET_PLACEHOLDER : '')
+      setPickupInstructions(cfg.pickupInstructions ?? '')
       setSaved(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save settings.')
@@ -126,7 +138,23 @@ export function TranscriptsSettingsPanel() {
               className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
             />
             <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
-              POST-only endpoint. Receives JSON with requestId, requestedAt, and student profile fields.
+              POST-only endpoint. Receives JSON with requestId, requestedAt, delivery preferences, and student profile fields.
+            </p>
+          </div>
+          <div>
+            <label htmlFor={pickupId} className="block text-sm font-medium text-slate-700 dark:text-neutral-300">
+              Pickup instructions
+            </label>
+            <textarea
+              id={pickupId}
+              rows={4}
+              value={pickupInstructions}
+              onChange={(e) => setPickupInstructions(e.target.value)}
+              placeholder={'Registrar office, Room 101\nMonday–Friday, 9:00 AM–4:00 PM\nBring a photo ID'}
+              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+            />
+            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+              Shown to students who choose in-person pickup. Leave blank to hide the pickup option.
             </p>
           </div>
           <div>
@@ -155,6 +183,49 @@ export function TranscriptsSettingsPanel() {
             {saving ? 'Saving…' : 'Save configuration'}
           </button>
         </form>
+      )}
+
+      {!loading && failures.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">
+            Delivery failures
+          </h3>
+          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+            These requests failed to deliver to your webhook endpoint.
+          </p>
+          <div className="mt-3 overflow-x-auto rounded-md border border-slate-200 dark:border-neutral-700">
+            <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-neutral-700">
+              <thead className="bg-slate-50 dark:bg-neutral-800">
+                <tr>
+                  <th className="px-3 py-2 text-start text-xs font-medium text-slate-500 dark:text-neutral-400">
+                    Requested
+                  </th>
+                  <th className="px-3 py-2 text-start text-xs font-medium text-slate-500 dark:text-neutral-400">
+                    Error
+                  </th>
+                  <th className="px-3 py-2 text-start text-xs font-medium text-slate-500 dark:text-neutral-400">
+                    HTTP status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white dark:divide-neutral-800 dark:bg-neutral-900">
+                {failures.map((f) => (
+                  <tr key={f.id}>
+                    <td className="whitespace-nowrap px-3 py-2 text-slate-700 dark:text-neutral-300">
+                      {new Date(f.requestedAt).toLocaleString()}
+                    </td>
+                    <td className="px-3 py-2 text-red-600 dark:text-red-400">
+                      {f.errorMessage ?? '—'}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-2 text-slate-700 dark:text-neutral-300">
+                      {f.webhookResponseCode ?? '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
     </section>
   )

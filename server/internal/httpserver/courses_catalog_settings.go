@@ -32,6 +32,15 @@ type putKanbanBoardBody struct {
 	Columns map[string][]string `json:"columns"`
 }
 
+type putCatalogPinBody struct {
+	CourseID string `json:"courseId"`
+	Pinned   bool   `json:"pinned"`
+}
+
+type pinnedCoursesResponse struct {
+	Courses []course.PinnedCourseSummary `json:"courses"`
+}
+
 func (d Deps) handleGetCourseCatalogSettings() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -222,6 +231,67 @@ func (d Deps) handlePutCourseKanbanBoard() http.HandlerFunc {
 				return
 			}
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save kanban board.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func (d Deps) handleGetCourseCatalogPins() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		courses, err := course.ListUserPinnedCourseSummaries(r.Context(), d.Pool, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load pinned courses.")
+			return
+		}
+		if courses == nil {
+			courses = []course.PinnedCourseSummary{}
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(pinnedCoursesResponse{Courses: courses})
+	}
+}
+
+func (d Deps) handlePutCourseCatalogPin() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			w.Header().Set("Allow", http.MethodPut)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		var body putCatalogPinBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		courseID, err := uuid.Parse(strings.TrimSpace(body.CourseID))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid courseId.")
+			return
+		}
+		if err := course.SetUserCatalogPin(r.Context(), d.Pool, userID, courseID, body.Pinned); err != nil {
+			if strings.Contains(err.Error(), "not in your catalog") {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+				return
+			}
+			if strings.Contains(err.Error(), "pin limit") {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "You can pin at most 20 courses.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save pin.")
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)

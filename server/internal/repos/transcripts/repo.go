@@ -21,12 +21,35 @@ const (
 	StatusFailed    RequestStatus = "failed"
 )
 
+// DeliveryType is how a student wants their transcript delivered.
+type DeliveryType string
+
+const (
+	DeliveryEmail  DeliveryType = "email"
+	DeliveryMail   DeliveryType = "mail"
+	DeliveryPickup DeliveryType = "pickup"
+)
+
+// UrgencyUnit distinguishes calendar days from business days.
+type UrgencyUnit string
+
+const (
+	UrgencyDays         UrgencyUnit = "days"
+	UrgencyBusinessDays UrgencyUnit = "business_days"
+)
+
 // Request is a student transcript request row.
 type Request struct {
 	ID                  uuid.UUID
 	UserID              uuid.UUID
 	OrgID               *uuid.UUID
 	Status              RequestStatus
+	DeliveryType        DeliveryType
+	DeliveryEmail       *string
+	DeliveryAddress     *string
+	UrgencyDays         int
+	UrgencyDaysMin      *int
+	UrgencyUnit         UrgencyUnit
 	ErrorMessage        *string
 	WebhookResponseCode *int
 	RequestedAt         time.Time
@@ -34,22 +57,33 @@ type Request struct {
 	CreatedAt           time.Time
 }
 
+// InsertRequestInput captures delivery preferences for a new transcript request.
+type InsertRequestInput struct {
+	DeliveryType    DeliveryType
+	DeliveryEmail   *string
+	DeliveryAddress *string
+	UrgencyDays     int
+	UrgencyDaysMin  *int
+	UrgencyUnit     UrgencyUnit
+}
+
 // Config holds the institution webhook settings.
 type Config struct {
-	WebhookURL    *string
-	WebhookSecret *string
-	UpdatedAt     time.Time
+	WebhookURL          *string
+	WebhookSecret       *string
+	PickupInstructions  *string
+	UpdatedAt           time.Time
 }
 
 // GetConfig returns the singleton transcripts config row.
 func GetConfig(ctx context.Context, pool *pgxpool.Pool) (*Config, error) {
 	var c Config
-	var url, secret *string
+	var url, secret, pickup *string
 	err := pool.QueryRow(ctx, `
-SELECT webhook_url, webhook_secret, updated_at
+SELECT webhook_url, webhook_secret, pickup_instructions, updated_at
 FROM settings.transcripts_config
 WHERE id = 1
-`).Scan(&url, &secret, &c.UpdatedAt)
+`).Scan(&url, &secret, &pickup, &c.UpdatedAt)
 	if err == pgx.ErrNoRows {
 		return &Config{}, nil
 	}
@@ -58,13 +92,20 @@ WHERE id = 1
 	}
 	c.WebhookURL = url
 	c.WebhookSecret = secret
+	c.PickupInstructions = pickup
 	return &c, nil
 }
 
-// UpsertConfig saves webhook URL and optional secret (empty secret leaves unchanged).
-func UpsertConfig(ctx context.Context, pool *pgxpool.Pool, webhookURL string, webhookSecret *string) (*Config, error) {
+// UpsertConfig saves webhook URL, optional secret (empty secret leaves unchanged), and pickup instructions.
+func UpsertConfig(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	webhookURL string,
+	webhookSecret *string,
+	pickupInstructions *string,
+) (*Config, error) {
 	var c Config
-	var url, secret *string
+	var url, secret, pickup *string
 	err := pool.QueryRow(ctx, `
 UPDATE settings.transcripts_config
 SET
@@ -73,43 +114,75 @@ SET
         WHEN $2::text IS NOT NULL AND TRIM($2) <> '' THEN TRIM($2)
         ELSE webhook_secret
     END,
+    pickup_instructions = CASE
+        WHEN $3::text IS NOT NULL THEN NULLIF(TRIM($3), '')
+        ELSE pickup_instructions
+    END,
     updated_at = NOW()
 WHERE id = 1
-RETURNING webhook_url, webhook_secret, updated_at
-`, webhookURL, webhookSecret).Scan(&url, &secret, &c.UpdatedAt)
+RETURNING webhook_url, webhook_secret, pickup_instructions, updated_at
+`, webhookURL, webhookSecret, pickupInstructions).Scan(&url, &secret, &pickup, &c.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
 	c.WebhookURL = url
 	c.WebhookSecret = secret
+	c.PickupInstructions = pickup
 	return &c, nil
 }
 
-// InsertRequest creates a new queued transcript request.
-func InsertRequest(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, orgID *uuid.UUID) (*Request, error) {
-	var r Request
+// requestSelectColumns is the shared SELECT list for transcript request queries.
+const requestSelectColumns = `
+id, user_id, org_id, status, delivery_type, delivery_email, delivery_address,
+urgency_days, urgency_days_min, urgency_unit, error_message, webhook_response_code,
+requested_at, submitted_at, created_at`
+
+func scanRequestRow(row pgx.Row, r *Request) error {
 	var orgIDScan *uuid.UUID
-	err := pool.QueryRow(ctx, `
-INSERT INTO transcripts.transcript_requests (user_id, org_id)
-VALUES ($1, $2)
-RETURNING id, user_id, org_id, status, error_message, webhook_response_code,
-          requested_at, submitted_at, created_at
-`, userID, orgID).Scan(
-		&r.ID, &r.UserID, &orgIDScan, &r.Status, &r.ErrorMessage,
+	var deliveryType string
+	var urgencyUnit string
+	err := row.Scan(
+		&r.ID, &r.UserID, &orgIDScan, &r.Status, &deliveryType, &r.DeliveryEmail, &r.DeliveryAddress,
+		&r.UrgencyDays, &r.UrgencyDaysMin, &urgencyUnit, &r.ErrorMessage,
 		&r.WebhookResponseCode, &r.RequestedAt, &r.SubmittedAt, &r.CreatedAt,
 	)
 	if err != nil {
+		return err
+	}
+	r.DeliveryType = DeliveryType(deliveryType)
+	r.UrgencyUnit = UrgencyUnit(urgencyUnit)
+	r.OrgID = orgIDScan
+	return nil
+}
+
+// InsertRequest creates a new queued transcript request.
+func InsertRequest(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	userID uuid.UUID,
+	orgID *uuid.UUID,
+	input InsertRequestInput,
+) (*Request, error) {
+	var r Request
+	row := pool.QueryRow(ctx, `
+INSERT INTO transcripts.transcript_requests (
+    user_id, org_id, delivery_type, delivery_email, delivery_address,
+    urgency_days, urgency_days_min, urgency_unit
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+RETURNING `+requestSelectColumns+`
+`, userID, orgID, input.DeliveryType, input.DeliveryEmail, input.DeliveryAddress,
+		input.UrgencyDays, input.UrgencyDaysMin, input.UrgencyUnit)
+	if err := scanRequestRow(row, &r); err != nil {
 		return nil, err
 	}
-	r.OrgID = orgIDScan
 	return &r, nil
 }
 
 // ListByUser returns transcript requests for a user, newest first.
 func ListByUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]Request, error) {
 	rows, err := pool.Query(ctx, `
-SELECT id, user_id, org_id, status, error_message, webhook_response_code,
-       requested_at, submitted_at, created_at
+SELECT `+requestSelectColumns+`
 FROM transcripts.transcript_requests
 WHERE user_id = $1
 ORDER BY requested_at DESC
@@ -122,14 +195,33 @@ LIMIT 50
 	var out []Request
 	for rows.Next() {
 		var r Request
-		var orgIDScan *uuid.UUID
-		if err := rows.Scan(
-			&r.ID, &r.UserID, &orgIDScan, &r.Status, &r.ErrorMessage,
-			&r.WebhookResponseCode, &r.RequestedAt, &r.SubmittedAt, &r.CreatedAt,
-		); err != nil {
+		if err := scanRequestRow(rows, &r); err != nil {
 			return nil, err
 		}
-		r.OrgID = orgIDScan
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// ListFailed returns failed transcript requests for an org, newest first.
+func ListFailed(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) ([]Request, error) {
+	rows, err := pool.Query(ctx, `
+SELECT `+requestSelectColumns+`
+FROM transcripts.transcript_requests
+WHERE org_id = $1 AND status = 'failed'
+ORDER BY requested_at DESC
+LIMIT 100
+`, orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []Request
+	for rows.Next() {
+		var r Request
+		if err := scanRequestRow(rows, &r); err != nil {
+			return nil, err
+		}
 		out = append(out, r)
 	}
 	return out, rows.Err()

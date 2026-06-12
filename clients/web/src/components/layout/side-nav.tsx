@@ -9,6 +9,7 @@ import { SideNavMainLinks } from './side-nav-main-links'
 import { SideNavFooter } from './side-nav-footer'
 import { SideNavSettingsLinks } from './side-nav-settings-links'
 import { SideNavCommandPaletteTrigger } from './side-nav-command-palette'
+import { SideNavPinnedCourses } from './side-nav-pinned-courses'
 import { SideNavTooltip } from './side-nav-tooltip'
 
 export function SideNav() {
@@ -107,6 +108,7 @@ export function SideNav() {
           </SideNavTooltip>
         </div>
         <SideNavCommandPaletteTrigger />
+        <SideNavPinnedCourses />
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <nav
             className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-all duration-300 ease-out ${

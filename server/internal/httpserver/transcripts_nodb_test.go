@@ -29,6 +29,7 @@ func TestTranscripts_Unauthenticated(t *testing.T) {
 		method string
 		path   string
 	}{
+		{http.MethodGet, "/api/v1/transcripts/config"},
 		{http.MethodGet, "/api/v1/transcripts/requests"},
 		{http.MethodPost, "/api/v1/transcripts/requests"},
 		{http.MethodGet, "/api/v1/admin/transcripts/config"},

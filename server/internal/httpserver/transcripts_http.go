@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -37,15 +38,31 @@ type transcriptStudentJSON struct {
 	StudentID   *string `json:"studentId,omitempty"`
 }
 
+type transcriptDeliveryJSON struct {
+	Type            string  `json:"type"`
+	Email           *string `json:"email,omitempty"`
+	Address         *string `json:"address,omitempty"`
+	UrgencyDays     int     `json:"urgencyDays,omitempty"`
+	UrgencyDaysMin  *int    `json:"urgencyDaysMin,omitempty"`
+	UrgencyUnit     string  `json:"urgencyUnit,omitempty"`
+}
+
 type transcriptWebhookPayload struct {
-	RequestID   string                `json:"requestId"`
-	RequestedAt string                `json:"requestedAt"`
-	Student     transcriptStudentJSON `json:"student"`
+	RequestID   string                 `json:"requestId"`
+	RequestedAt string                 `json:"requestedAt"`
+	Delivery    transcriptDeliveryJSON `json:"delivery"`
+	Student     transcriptStudentJSON  `json:"student"`
 }
 
 type transcriptRequestJSON struct {
 	ID                  string  `json:"id"`
 	Status              string  `json:"status"`
+	DeliveryType        string  `json:"deliveryType"`
+	DeliveryEmail       *string `json:"deliveryEmail,omitempty"`
+	DeliveryAddress     *string `json:"deliveryAddress,omitempty"`
+	UrgencyDays         int     `json:"urgencyDays,omitempty"`
+	UrgencyDaysMin      *int    `json:"urgencyDaysMin,omitempty"`
+	UrgencyUnit         string  `json:"urgencyUnit,omitempty"`
 	RequestedAt         string  `json:"requestedAt"`
 	SubmittedAt         *string `json:"submittedAt,omitempty"`
 	ErrorMessage        *string `json:"errorMessage,omitempty"`
@@ -56,9 +73,17 @@ func requestToJSON(r transcriptsrepo.Request) transcriptRequestJSON {
 	out := transcriptRequestJSON{
 		ID:                  r.ID.String(),
 		Status:              string(r.Status),
+		DeliveryType:        string(r.DeliveryType),
+		DeliveryEmail:       r.DeliveryEmail,
+		DeliveryAddress:     r.DeliveryAddress,
 		RequestedAt:         r.RequestedAt.UTC().Format(time.RFC3339),
 		ErrorMessage:        r.ErrorMessage,
 		WebhookResponseCode: r.WebhookResponseCode,
+	}
+	if r.DeliveryType != transcriptsrepo.DeliveryEmail {
+		out.UrgencyDays = r.UrgencyDays
+		out.UrgencyDaysMin = r.UrgencyDaysMin
+		out.UrgencyUnit = string(r.UrgencyUnit)
 	}
 	if r.SubmittedAt != nil {
 		s := r.SubmittedAt.UTC().Format(time.RFC3339)
@@ -68,9 +93,10 @@ func requestToJSON(r transcriptsrepo.Request) transcriptRequestJSON {
 }
 
 type transcriptsConfigJSON struct {
-	WebhookURL        string `json:"webhookUrl"`
-	WebhookSecret     string `json:"webhookSecret"`
-	HasWebhookSecret  bool   `json:"hasWebhookSecret"`
+	WebhookURL         string  `json:"webhookUrl"`
+	WebhookSecret      string  `json:"webhookSecret"`
+	HasWebhookSecret   bool    `json:"hasWebhookSecret"`
+	PickupInstructions *string `json:"pickupInstructions,omitempty"`
 }
 
 func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
@@ -82,12 +108,33 @@ func configToJSON(c *transcriptsrepo.Config) transcriptsConfigJSON {
 		out.HasWebhookSecret = true
 		out.WebhookSecret = placeholderSecretResponse
 	}
+	if c.PickupInstructions != nil && strings.TrimSpace(*c.PickupInstructions) != "" {
+		s := strings.TrimSpace(*c.PickupInstructions)
+		out.PickupInstructions = &s
+	}
+	return out
+}
+
+type transcriptsStudentConfigJSON struct {
+	PickupInstructions *string `json:"pickupInstructions,omitempty"`
+	PickupAvailable    bool    `json:"pickupAvailable"`
+}
+
+func studentConfigToJSON(c *transcriptsrepo.Config) transcriptsStudentConfigJSON {
+	out := transcriptsStudentConfigJSON{}
+	if c.PickupInstructions != nil && strings.TrimSpace(*c.PickupInstructions) != "" {
+		s := strings.TrimSpace(*c.PickupInstructions)
+		out.PickupInstructions = &s
+		out.PickupAvailable = true
+	}
 	return out
 }
 
 func (d Deps) registerTranscriptsRoutes(r chi.Router) {
 	r.Get("/api/v1/admin/transcripts/config", d.handleGetAdminTranscriptsConfig())
 	r.Put("/api/v1/admin/transcripts/config", d.handlePutAdminTranscriptsConfig())
+	r.Get("/api/v1/admin/transcripts/requests", d.handleGetAdminTranscriptRequests())
+	r.Get("/api/v1/transcripts/config", d.handleGetTranscriptsConfig())
 	r.Post("/api/v1/transcripts/requests", d.handlePostTranscriptRequest())
 	r.Get("/api/v1/transcripts/requests", d.handleGetTranscriptRequests())
 }
@@ -116,8 +163,9 @@ func (d Deps) handleGetAdminTranscriptsConfig() http.HandlerFunc {
 }
 
 type putTranscriptsConfigBody struct {
-	WebhookURL    string  `json:"webhookUrl"`
-	WebhookSecret *string `json:"webhookSecret"`
+	WebhookURL         string  `json:"webhookUrl"`
+	WebhookSecret      *string `json:"webhookSecret"`
+	PickupInstructions *string `json:"pickupInstructions"`
 }
 
 // PUT /api/v1/admin/transcripts/config
@@ -156,7 +204,7 @@ func (d Deps) handlePutAdminTranscriptsConfig() http.HandlerFunc {
 				secret = &s
 			}
 		}
-		cfg, err := transcriptsrepo.UpsertConfig(r.Context(), d.Pool, url, secret)
+		cfg, err := transcriptsrepo.UpsertConfig(r.Context(), d.Pool, url, secret, body.PickupInstructions)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save transcripts config.")
 			return
@@ -164,6 +212,136 @@ func (d Deps) handlePutAdminTranscriptsConfig() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(configToJSON(cfg))
 	}
+}
+
+// GET /api/v1/admin/transcripts/requests
+func (d Deps) handleGetAdminTranscriptRequests() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if d.transcriptsFeatureOff(w) {
+			return
+		}
+		userID, ok := d.adminRbacUser(w, r)
+		if !ok {
+			return
+		}
+		if d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
+			return
+		}
+		orgID, err := organization.OrgIDForUser(r.Context(), d.Pool, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load organization.")
+			return
+		}
+		list, err := transcriptsrepo.ListFailed(r.Context(), d.Pool, orgID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load transcript requests.")
+			return
+		}
+		out := make([]transcriptRequestJSON, 0, len(list))
+		for _, item := range list {
+			out = append(out, requestToJSON(item))
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"requests": out})
+	}
+}
+
+// GET /api/v1/transcripts/config
+func (d Deps) handleGetTranscriptsConfig() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if d.transcriptsFeatureOff(w) {
+			return
+		}
+		if _, ok := d.meUserID(w, r); !ok {
+			return
+		}
+		if d.Pool == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
+			return
+		}
+		cfg, err := transcriptsrepo.GetConfig(r.Context(), d.Pool)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load transcripts config.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(studentConfigToJSON(cfg))
+	}
+}
+
+type postTranscriptRequestBody struct {
+	DeliveryType    string `json:"deliveryType"`
+	DeliveryEmail   string `json:"deliveryEmail"`
+	DeliveryAddress string `json:"deliveryAddress"`
+	MailUrgency     string `json:"mailUrgency"`
+	UrgencyDays     int    `json:"urgencyDays"`
+}
+
+func parseTranscriptRequestBody(body postTranscriptRequestBody, cfg *transcriptsrepo.Config) (transcriptsrepo.InsertRequestInput, string) {
+	deliveryType := strings.TrimSpace(strings.ToLower(body.DeliveryType))
+	switch transcriptsrepo.DeliveryType(deliveryType) {
+	case transcriptsrepo.DeliveryEmail, transcriptsrepo.DeliveryMail, transcriptsrepo.DeliveryPickup:
+	default:
+		return transcriptsrepo.InsertRequestInput{}, "deliveryType must be email, mail, or pickup."
+	}
+
+	input := transcriptsrepo.InsertRequestInput{
+		DeliveryType: transcriptsrepo.DeliveryType(deliveryType),
+	}
+
+	switch transcriptsrepo.DeliveryType(deliveryType) {
+	case transcriptsrepo.DeliveryEmail:
+		input.UrgencyDays = 1
+		input.UrgencyUnit = transcriptsrepo.UrgencyDays
+	case transcriptsrepo.DeliveryMail:
+		input.UrgencyUnit = transcriptsrepo.UrgencyBusinessDays
+		mailUrgency := strings.TrimSpace(strings.ToLower(body.MailUrgency))
+		if mailUrgency == "" {
+			mailUrgency = "standard"
+		}
+		switch mailUrgency {
+		case "standard":
+			min := 3
+			input.UrgencyDaysMin = &min
+			input.UrgencyDays = 5
+		case "rush":
+			min := 1
+			input.UrgencyDaysMin = &min
+			input.UrgencyDays = 2
+		default:
+			return transcriptsrepo.InsertRequestInput{}, "mailUrgency must be standard or rush."
+		}
+	case transcriptsrepo.DeliveryPickup:
+		input.UrgencyUnit = transcriptsrepo.UrgencyBusinessDays
+		if body.UrgencyDays != 1 && body.UrgencyDays != 2 && body.UrgencyDays != 3 {
+			return transcriptsrepo.InsertRequestInput{}, "urgencyDays must be 1, 2, or 3 business days for pickup."
+		}
+		input.UrgencyDays = body.UrgencyDays
+		if cfg.PickupInstructions == nil || strings.TrimSpace(*cfg.PickupInstructions) == "" {
+			return transcriptsrepo.InsertRequestInput{}, "Pickup is not available. Choose another delivery method."
+		}
+	}
+
+	switch transcriptsrepo.DeliveryType(deliveryType) {
+	case transcriptsrepo.DeliveryEmail:
+		email := strings.TrimSpace(body.DeliveryEmail)
+		if email == "" {
+			return transcriptsrepo.InsertRequestInput{}, "deliveryEmail is required for email delivery."
+		}
+		if _, err := mail.ParseAddress(email); err != nil {
+			return transcriptsrepo.InsertRequestInput{}, "deliveryEmail must be a valid email address."
+		}
+		input.DeliveryEmail = &email
+	case transcriptsrepo.DeliveryMail:
+		address := strings.TrimSpace(body.DeliveryAddress)
+		if len(address) < 10 {
+			return transcriptsrepo.InsertRequestInput{}, "deliveryAddress must be a complete mailing address."
+		}
+		input.DeliveryAddress = &address
+	}
+
+	return input, ""
 }
 
 // POST /api/v1/transcripts/requests
@@ -180,6 +358,13 @@ func (d Deps) handlePostTranscriptRequest() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 			return
 		}
+		b, _ := io.ReadAll(r.Body)
+		_ = r.Body.Close()
+		var body postTranscriptRequestBody
+		if err := json.Unmarshal(b, &body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
 		cfg, err := transcriptsrepo.GetConfig(r.Context(), d.Pool)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load transcripts config.")
@@ -189,17 +374,22 @@ func (d Deps) handlePostTranscriptRequest() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Transcript requests are not configured yet. Contact your institution.")
 			return
 		}
+		input, msg := parseTranscriptRequestBody(body, cfg)
+		if msg != "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, msg)
+			return
+		}
 		orgID, err := organization.OrgIDForUser(r.Context(), d.Pool, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load organization.")
 			return
 		}
-		req, err := transcriptsrepo.InsertRequest(r.Context(), d.Pool, userID, &orgID)
+		req, err := transcriptsrepo.InsertRequest(r.Context(), d.Pool, userID, &orgID, input)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not create transcript request.")
 			return
 		}
-		go d.deliverTranscriptWebhook(context.Background(), req.ID, userID, cfg)
+		go d.deliverTranscriptWebhook(context.Background(), *req, userID, cfg)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusAccepted)
@@ -235,18 +425,29 @@ func (d Deps) handleGetTranscriptRequests() http.HandlerFunc {
 	}
 }
 
-func (d Deps) deliverTranscriptWebhook(ctx context.Context, requestID uuid.UUID, userID uuid.UUID, cfg *transcriptsrepo.Config) {
+func (d Deps) deliverTranscriptWebhook(ctx context.Context, req transcriptsrepo.Request, userID uuid.UUID, cfg *transcriptsrepo.Config) {
 	if d.Pool == nil || cfg.WebhookURL == nil {
 		return
 	}
 	u, err := user.FindByID(ctx, d.Pool, userID)
 	if err != nil || u == nil {
-		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, requestID, "Could not load student profile.", nil)
+		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, req.ID, "Could not load student profile.", nil)
 		return
 	}
+	delivery := transcriptDeliveryJSON{
+		Type:    string(req.DeliveryType),
+		Email:   req.DeliveryEmail,
+		Address: req.DeliveryAddress,
+	}
+	if req.DeliveryType != transcriptsrepo.DeliveryEmail {
+		delivery.UrgencyDays = req.UrgencyDays
+		delivery.UrgencyDaysMin = req.UrgencyDaysMin
+		delivery.UrgencyUnit = string(req.UrgencyUnit)
+	}
 	payload := transcriptWebhookPayload{
-		RequestID:   requestID.String(),
-		RequestedAt: time.Now().UTC().Format(time.RFC3339),
+		RequestID:   req.ID.String(),
+		RequestedAt: req.RequestedAt.UTC().Format(time.RFC3339),
+		Delivery:    delivery,
 		Student: transcriptStudentJSON{
 			UserID:      u.ID,
 			Email:       u.Email,
@@ -258,36 +459,36 @@ func (d Deps) deliverTranscriptWebhook(ctx context.Context, requestID uuid.UUID,
 	}
 	body, err := json.Marshal(payload)
 	if err != nil {
-		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, requestID, "Failed to encode webhook payload.", nil)
+		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, req.ID, "Failed to encode webhook payload.", nil)
 		return
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimSpace(*cfg.WebhookURL), bytes.NewReader(body))
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimSpace(*cfg.WebhookURL), bytes.NewReader(body))
 	if err != nil {
-		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, requestID, "Invalid webhook URL.", nil)
+		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, req.ID, "Invalid webhook URL.", nil)
 		return
 	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "Lextures-Transcripts/1.0")
+	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("User-Agent", "Lextures-Transcripts/1.0")
 	if cfg.WebhookSecret != nil && strings.TrimSpace(*cfg.WebhookSecret) != "" {
 		mac := hmac.New(sha256.New, []byte(strings.TrimSpace(*cfg.WebhookSecret)))
 		_, _ = mac.Write(body)
 		sig := hex.EncodeToString(mac.Sum(nil))
-		req.Header.Set("X-Lextures-Signature", "sha256="+sig)
+		httpReq.Header.Set("X-Lextures-Signature", "sha256="+sig)
 	}
 	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
+	resp, err := client.Do(httpReq)
 	if err != nil {
 		msg := "Webhook delivery failed: " + err.Error()
-		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, requestID, msg, nil)
+		_ = transcriptsrepo.MarkFailed(ctx, d.Pool, req.ID, msg, nil)
 		return
 	}
 	defer func() { _ = resp.Body.Close() }()
 	_, _ = io.Copy(io.Discard, resp.Body)
 	code := resp.StatusCode
 	if code >= 200 && code < 300 {
-		_ = transcriptsrepo.MarkSubmitted(ctx, d.Pool, requestID, code)
+		_ = transcriptsrepo.MarkSubmitted(ctx, d.Pool, req.ID, code)
 		return
 	}
 	msg := "Institution webhook returned an error."
-	_ = transcriptsrepo.MarkFailed(ctx, d.Pool, requestID, msg, &code)
+	_ = transcriptsrepo.MarkFailed(ctx, d.Pool, req.ID, msg, &code)
 }
