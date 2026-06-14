@@ -411,7 +411,7 @@ func (d Deps) handleLearnerReviewSubmit() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		out, err := srssvc.SubmitReview(r.Context(), d.Pool, viewer, target, body)
+		out, err := srssvc.SubmitReview(r.Context(), d.Pool, d.effectiveConfig().SRSPracticeEnabled, viewer, target, body)
 		if err != nil {
 			var se *srssvc.ErrSubmitReview
 			if errors.As(err, &se) {

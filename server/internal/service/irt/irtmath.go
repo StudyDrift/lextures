@@ -19,12 +19,6 @@ func isFinite64(f float64) bool {
 	return !math.IsNaN(f) && !math.IsInf(f, 0)
 }
 
-// CatModeEnabled mirrors IRT_CAT_MODE_ENABLED (default false).
-func CatModeEnabled() bool {
-	// Defer to env in a single place; avoid importing os in multiple tests.
-	return catModeEnabled()
-}
-
 // Prob2pl is 2PL probability of a correct response at latent ability theta.
 func Prob2pl(theta, a, b float64) float64 {
 	x := a * (theta - b)

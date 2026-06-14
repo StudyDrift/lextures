@@ -157,7 +157,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			slog.Info("gradebook.cross_list", "cross_list_group_id", clGroup.ID.String(), "course_code", courseCode)
 		}
 		cfg := d.effectiveConfig()
-		enrollmentLifecycle := cfg.FFEnrollmentStateMachine || d.Config.FFEnrollmentStateMachine
+		enrollmentLifecycle := cfg.FFEnrollmentStateMachine || d.effectiveConfig().FFEnrollmentStateMachine
 		includeFormer := enrollmentLifecycle
 		if includeFormer {
 			q := strings.TrimSpace(strings.ToLower(r.URL.Query().Get("include_withdrawn")))
@@ -189,7 +189,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load students.")
 			return
 		}
-		incompleteWorkflow := cfg.FFIncompleteGradeWorkflow || d.Config.FFIncompleteGradeWorkflow
+		incompleteWorkflow := cfg.FFIncompleteGradeWorkflow || d.effectiveConfig().FFIncompleteGradeWorkflow
 		var incompleteByEnrollment map[uuid.UUID]incompletegrades.Record
 		if incompleteWorkflow {
 			enrollIDs := make([]uuid.UUID, 0, len(gradebookStudents))

@@ -20,7 +20,7 @@ const (
 
 func (d Deps) handleOrgBroadcasts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFBroadcasts {
+		if !d.effectiveConfig().FFBroadcasts {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
 			return
 		}
@@ -142,7 +142,7 @@ func (d Deps) handleOrgBroadcasts() http.HandlerFunc {
 
 func (d Deps) handleOrgBroadcastDeliveryReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFBroadcasts {
+		if !d.effectiveConfig().FFBroadcasts {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
 			return
 		}
@@ -200,7 +200,7 @@ func (d Deps) handleOrgBroadcastDeliveryReport() http.HandlerFunc {
 
 func (d Deps) handleBroadcastAcknowledge() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFBroadcasts {
+		if !d.effectiveConfig().FFBroadcasts {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
 			return
 		}
@@ -228,7 +228,7 @@ func (d Deps) handleBroadcastAcknowledge() http.HandlerFunc {
 
 func (d Deps) handleMeBroadcasts() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFBroadcasts {
+		if !d.effectiveConfig().FFBroadcasts {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Broadcasts feature is not enabled.")
 			return
 		}

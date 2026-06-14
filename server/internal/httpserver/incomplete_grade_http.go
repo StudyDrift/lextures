@@ -20,11 +20,11 @@ import (
 
 func (d Deps) requireIncompleteGradeWorkflow(w http.ResponseWriter) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.FFIncompleteGradeWorkflow && !d.Config.FFIncompleteGradeWorkflow {
+	if !cfg.FFIncompleteGradeWorkflow && !d.effectiveConfig().FFIncompleteGradeWorkflow {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Incomplete grade workflow is not enabled.")
 		return false
 	}
-	if !cfg.FFEnrollmentStateMachine && !d.Config.FFEnrollmentStateMachine {
+	if !cfg.FFEnrollmentStateMachine && !d.effectiveConfig().FFEnrollmentStateMachine {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Enrollment state machine is required for incomplete grades.")
 		return false
 	}

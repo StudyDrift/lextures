@@ -21,7 +21,7 @@ const maxQuestionLen = 500
 // classroomSignalsEnabled writes 501 if the feature flag is off and returns
 // false; on returns true.
 func (d Deps) classroomSignalsEnabled(w http.ResponseWriter) bool {
-	if !d.Config.FFClassroomSignals {
+	if !d.effectiveConfig().FFClassroomSignals {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented,
 			"Classroom signals feature is not enabled.")
 		return false

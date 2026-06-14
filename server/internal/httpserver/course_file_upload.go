@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 )
@@ -24,6 +26,13 @@ type postCourseFileResponse struct {
 	ObjectKey       string `json:"object_key"`
 	PresignedPutURL string `json:"presigned_put_url,omitempty"`
 	ExpiresAt       string `json:"expires_at,omitempty"`
+}
+
+type postCourseFileMultipartResponse struct {
+	ID          string `json:"id"`
+	ContentPath string `json:"content_path"`
+	MimeType    string `json:"mime_type"`
+	ByteSize    int64  `json:"byte_size"`
 }
 
 // handlePostCourseFile is POST /api/v1/courses/{course_code}/course-files
@@ -52,6 +61,12 @@ func (d Deps) handlePostCourseFile() http.HandlerFunc {
 		}
 		if !canEdit {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to upload files.")
+			return
+		}
+
+		ctHeader := strings.TrimSpace(r.Header.Get("Content-Type"))
+		if strings.HasPrefix(ctHeader, "multipart/form-data") {
+			d.handlePostCourseFileMultipart(w, r, courseCode, viewer)
 			return
 		}
 
@@ -118,6 +133,84 @@ func (d Deps) handlePostCourseFile() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(postCourseFileResponse{ObjectKey: objectKey})
 	}
+}
+
+func (d Deps) handlePostCourseFileMultipart(w http.ResponseWriter, r *http.Request, courseCode string, viewer uuid.UUID) {
+	const maxImageSize = 10 * 1024 * 1024 // 10 MiB
+	cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+	if err != nil || cid == nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+		return
+	}
+	if err := r.ParseMultipartForm(12 << 20); err != nil {
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid form or file too large.")
+		return
+	}
+	f, header, err := r.FormFile("file")
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing 'file' part.")
+		return
+	}
+	defer func() { _ = f.Close() }()
+
+	ct := strings.TrimSpace(header.Header.Get("Content-Type"))
+	if ct == "" {
+		ct = mime.TypeByExtension(filepath.Ext(header.Filename))
+	}
+	if ct == "" {
+		ct = "application/octet-stream"
+	}
+	if !strings.HasPrefix(ct, "image/") {
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Only image/* uploads are allowed.")
+		return
+	}
+	if header.Size > maxImageSize || header.Size <= 0 {
+		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Image exceeds 10MB limit.")
+		return
+	}
+
+	ext := filepath.Ext(header.Filename)
+	if ext == "" {
+		ext = ".jpg"
+	}
+	fileUUID := uuid.New().String()
+	storageKey := fmt.Sprintf("files/%s/%s%s", courseCode, fileUUID, ext)
+
+	cfg := d.effectiveConfig()
+	if d.Storage != nil {
+		if perr := d.Storage.PutObject(r.Context(), storageKey, f, header.Size, ct); perr != nil {
+			log.Printf("course-file-post: PutObject key=%s err=%v", storageKey, perr)
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to store image.")
+			return
+		}
+	} else {
+		root := strings.TrimSpace(cfg.CourseFilesRoot)
+		if root == "" {
+			root = "data/course-files"
+		}
+		p := coursefiles.BlobDiskPath(root, courseCode, storageKey)
+		if werr := writeLocalFile(p, f); werr != nil {
+			log.Printf("course-file-post: local write key=%s err=%v", storageKey, werr)
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to store image.")
+			return
+		}
+	}
+
+	fileID, err := coursefiles.Create(r.Context(), d.Pool, *cid, viewer, storageKey, header.Filename, ct, header.Size)
+	if err != nil {
+		log.Printf("course-file-post: db insert err=%v", err)
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to record upload.")
+		return
+	}
+
+	contentPath := fmt.Sprintf("/api/v1/courses/%s/course-files/%s/content", courseCode, fileID.String())
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	_ = json.NewEncoder(w).Encode(postCourseFileMultipartResponse{
+		ID:          fileID.String(),
+		ContentPath: contentPath,
+		MimeType:    ct,
+		ByteSize:    header.Size,
+	})
 }
 
 // handleDeleteCourseFile is DELETE /api/v1/courses/{course_code}/course-files/{file_id}

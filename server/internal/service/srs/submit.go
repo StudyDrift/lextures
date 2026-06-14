@@ -2,7 +2,6 @@ package srs
 
 import (
 	"context"
-	"os"
 	"strings"
 	"time"
 
@@ -11,11 +10,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	srsrepo "github.com/lextures/lextures/server/internal/repos/srs"
 )
-
-func srsPracticeGloballyEnabled() bool {
-	v := strings.ToLower(strings.TrimSpace(os.Getenv("SRS_PRACTICE_ENABLED")))
-	return v == "1" || v == "true" || v == "yes" || v == "on"
-}
 
 func srsActiveForCourse(globalOn, courseFlag bool) bool {
 	return globalOn && courseFlag
@@ -43,7 +37,7 @@ type ErrSubmitReview struct {
 func (e *ErrSubmitReview) Error() string { return e.Msg }
 
 // SubmitReview applies one SRS grade (self-only; parity with server submit_review).
-func SubmitReview(ctx context.Context, pool *pgxpool.Pool, actorUserID, targetUserID uuid.UUID, body SubmitReviewBody) (*SubmitReviewResponse, error) {
+func SubmitReview(ctx context.Context, pool *pgxpool.Pool, globalEnabled bool, actorUserID, targetUserID uuid.UUID, body SubmitReviewBody) (*SubmitReviewResponse, error) {
 	if actorUserID != targetUserID {
 		return nil, &ErrSubmitReview{Code: 403, APICode: "FORBIDDEN", Msg: "Forbidden."}
 	}
@@ -57,7 +51,7 @@ func SubmitReview(ctx context.Context, pool *pgxpool.Pool, actorUserID, targetUs
 	if !meta.SRSEligible {
 		return nil, &ErrSubmitReview{Code: 400, APICode: "INVALID_INPUT", Msg: "This question is not enabled for spaced repetition."}
 	}
-	if !srsActiveForCourse(srsPracticeGloballyEnabled(), meta.SRSEnabled) {
+	if !srsActiveForCourse(globalEnabled, meta.SRSEnabled) {
 		return nil, &ErrSubmitReview{Code: 400, APICode: "INVALID_INPUT", Msg: "Spaced repetition is not enabled for this course."}
 	}
 	ok, err := enrollment.UserHasAccess(ctx, pool, meta.CourseCode, targetUserID)

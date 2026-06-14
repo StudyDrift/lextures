@@ -177,6 +177,7 @@ func pickNextQuestionID(
 	used map[uuid.UUID]struct{},
 	history [][3]float64,
 	counts map[uuid.UUID]int,
+	catModeEnabled bool,
 ) (*uuid.UUID, error) {
 	poolIDs, err := questionbank.ListActiveDiagnosticQuestionIDs(ctx, pool, courseID, diagnostic.ConceptIDs)
 	if err != nil {
@@ -225,7 +226,7 @@ func pickNextQuestionID(
 			break
 		}
 	}
-	catOn := irt.CatModeEnabled() && calibratedAny
+	catOn := catModeEnabled && calibratedAny
 	if catOn {
 		thetaHat, _ := irt.EapTheta2pl(history)
 		cands := make([]struct {
@@ -480,7 +481,7 @@ type RespondResult struct {
 }
 
 // RespondDiagnosticAttempt records an answer and either completes or returns the next item.
-func RespondDiagnosticAttempt(ctx context.Context, pool *pgxpool.Pool, courseID, userID, attemptID uuid.UUID, body RespondBody) (*RespondResult, error) {
+func RespondDiagnosticAttempt(ctx context.Context, pool *pgxpool.Pool, courseID, userID, attemptID uuid.UUID, body RespondBody, catModeEnabled bool) (*RespondResult, error) {
 	attempt, err := diagrepo.GetAttemptByID(ctx, pool, attemptID)
 	if err != nil {
 		return nil, err
@@ -622,7 +623,7 @@ func RespondDiagnosticAttempt(ctx context.Context, pool *pgxpool.Pool, courseID,
 		}
 	}
 	answered := len(respList)
-	nextID, err := pickNextQuestionID(ctx, pool, courseID, diagnostic, used, history, counts)
+	nextID, err := pickNextQuestionID(ctx, pool, courseID, diagnostic, used, history, counts, catModeEnabled)
 	if err != nil {
 		return nil, err
 	}
@@ -668,7 +669,7 @@ func RespondDiagnosticAttempt(ctx context.Context, pool *pgxpool.Pool, courseID,
 }
 
 // StartOrResumeDiagnostic returns attempt id and first (or resumed) question.
-func StartOrResumeDiagnostic(ctx context.Context, pool *pgxpool.Pool, courseID, enrollmentID, userID uuid.UUID) (uuid.UUID, coursemodulequiz.AdaptiveQuizGeneratedQuestion, error) {
+func StartOrResumeDiagnostic(ctx context.Context, pool *pgxpool.Pool, courseID, enrollmentID, userID uuid.UUID, catModeEnabled bool) (uuid.UUID, coursemodulequiz.AdaptiveQuizGeneratedQuestion, error) {
 	diagnostic, err := diagrepo.GetDiagnosticForCourse(ctx, pool, courseID)
 	if err != nil {
 		return uuid.Nil, coursemodulequiz.AdaptiveQuizGeneratedQuestion{}, err
@@ -727,7 +728,7 @@ func StartOrResumeDiagnostic(ctx context.Context, pool *pgxpool.Pool, courseID, 
 	used := make(map[uuid.UUID]struct{})
 	var history [][3]float64
 	counts := make(map[uuid.UUID]int)
-	firstID, err := pickNextQuestionID(ctx, pool, courseID, diagnostic, used, history, counts)
+	firstID, err := pickNextQuestionID(ctx, pool, courseID, diagnostic, used, history, counts, catModeEnabled)
 	if err != nil {
 		return uuid.Nil, coursemodulequiz.AdaptiveQuizGeneratedQuestion{}, err
 	}

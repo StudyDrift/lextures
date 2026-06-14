@@ -79,7 +79,7 @@ func (d Deps) handleEnrollmentDiagnosticGet() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load diagnostic.")
 			return
 		}
-		global := diagsvc.GloballyEnabled()
+		global := d.effectiveConfig().DiagnosticAssessmentsEnabled
 		active := diagsvc.ActiveForCourse(global, crow.DiagnosticAssessmentsEnabled, diag != nil)
 		if !active {
 			writeJSON(w, http.StatusOK, respBody{Status: "off"})
@@ -181,13 +181,13 @@ func (d Deps) handleEnrollmentDiagnosticStart() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load diagnostic.")
 			return
 		}
-		global := diagsvc.GloballyEnabled()
+		global := d.effectiveConfig().DiagnosticAssessmentsEnabled
 		active := diagsvc.ActiveForCourse(global, crow.DiagnosticAssessmentsEnabled, diag != nil)
 		if !active {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Diagnostic assessments are not available for this course.")
 			return
 		}
-		aid, q, err := diagsvc.StartOrResumeDiagnostic(r.Context(), d.Pool, cid, eid, userID)
+		aid, q, err := diagsvc.StartOrResumeDiagnostic(r.Context(), d.Pool, cid, eid, userID, d.effectiveConfig().IRTCatModeEnabled)
 		if err != nil {
 			writeDiagnosticErr(w, err)
 			return
@@ -292,7 +292,7 @@ func (d Deps) handleDiagnosticAttemptRespond() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Invalid course id.")
 			return
 		}
-		out, err := diagsvc.RespondDiagnosticAttempt(r.Context(), d.Pool, cid, userID, aid, body)
+		out, err := diagsvc.RespondDiagnosticAttempt(r.Context(), d.Pool, cid, userID, aid, body, d.effectiveConfig().IRTCatModeEnabled)
 		if err != nil {
 			writeDiagnosticErr(w, err)
 			return

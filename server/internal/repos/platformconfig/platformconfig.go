@@ -36,78 +36,92 @@ type Row struct {
 	OneRosterEnabled            *bool
 	ScimEnabled                 *bool
 
-	OIDCSSOEnabled             *bool
-	CleverSSOEnabled           *bool
-	ClassLinkSSOEnabled        *bool
-	MagicLinkEnabled           *bool
-	MagicLinkEnrolledOnly      *bool
-	SessionManagementUIEnabled *bool
-	EmailNotificationsEnabled  *bool
-	PushNotificationsEnabled   *bool
-	VirtualClassroomEnabled    *bool
-	DRMEnabled                 *bool
-	VideoTranscodingEnabled    *bool
-	AutoCaptioningEnabled      *bool
-	VideoCaptionsEnabled       *bool
-	StorageQuotasEnabled       *bool
-	AtRiskAlertsEnabled        *bool
-	AvScanningEnabled          *bool
-	ClamAVStub                 *bool
-	H5PEnabled                 *bool
-	OERLibraryEnabled          *bool
-	OERStub                    *bool
-	ItemAnalysisEnabled        *bool
-	StudentProgressEnabled     *bool
-	EngagementTrackingEnabled  *bool
-	SelfReflectionEnabled      *bool
-	OutcomesReportEnabled      *bool
-	EquationEditorEnabled      *bool
-	ReadingLevelEnabled        *bool
-	AltTextEnforcementEnabled  *bool
-	FFAltTextEnforcement       *bool
-	SpeechToTextEnabled        *bool
-	AccommodationsEngineEnabled *bool
-	FFAccommodationsEngine      *bool
-	ReadAloudEnabled           *bool
-	FFReadAloud                *bool
-	TranslationMemoryEnabled   *bool
-	ReportExportEnabled        *bool
-	XAPIEmissionEnabled        *bool
-	InstructorInsightsEnabled  *bool
-	CoppaWorkflowEnabled       *bool
-	GDPRModuleEnabled          *bool
-	CCPAModuleEnabled          *bool
-	StatePrivacyEnabled               *bool
-	IsoIsmsEnabled                    *bool
-	AdminAuditLogEnabled              *bool
-	DataResidencyEnabled              *bool
-	AiDisclosureEnabled               *bool
-	RTLEnabled                        *bool
-	SecurityDisclosureModuleEnabled   *bool
-	BackupModuleEnabled               *bool
-	FFHighContrastReducedMotion       *bool
-	FFParentPortal                    *bool
-	FFReportCards                     *bool
-	FFSBGReportCards                  *bool
-	FFSISIntegration                  *bool
-	FFCatalogIntegration              *bool
-	FFEnrollmentStateMachine          *bool
-	FFIncompleteGradeWorkflow         *bool
-	FFLibrary                         *bool
-	FFBroadcasts                      *bool
-	FFConferenceScheduling            *bool
-	FFDemographics                    *bool
-	FFContentFilterIntegration        *bool
-	FFUiMode                          *bool
-	FFGradeSubmission                 *bool
-	FFAcademicCalendar                *bool
-	FFPlagiarismChecks                *bool
-	FFCourseEvaluations               *bool
-	FFProctoringIntegration           *bool
-	FFCoCurricularTranscript          *bool
-	FFEportfolio                      *bool
-	FFBookstoreIntegration            *bool
-	FFTranscripts                     *bool
+	OIDCSSOEnabled                  *bool
+	CleverSSOEnabled                *bool
+	ClassLinkSSOEnabled             *bool
+	MagicLinkEnabled                *bool
+	MagicLinkEnrolledOnly           *bool
+	SessionManagementUIEnabled      *bool
+	EmailNotificationsEnabled       *bool
+	PushNotificationsEnabled        *bool
+	VirtualClassroomEnabled         *bool
+	DRMEnabled                      *bool
+	VideoTranscodingEnabled         *bool
+	AutoCaptioningEnabled           *bool
+	VideoCaptionsEnabled            *bool
+	StorageQuotasEnabled            *bool
+	AtRiskAlertsEnabled             *bool
+	AvScanningEnabled               *bool
+	ClamAVStub                      *bool
+	H5PEnabled                      *bool
+	OERLibraryEnabled               *bool
+	OERStub                         *bool
+	ItemAnalysisEnabled             *bool
+	StudentProgressEnabled          *bool
+	EngagementTrackingEnabled       *bool
+	SelfReflectionEnabled           *bool
+	OutcomesReportEnabled           *bool
+	EquationEditorEnabled           *bool
+	ReadingLevelEnabled             *bool
+	AltTextEnforcementEnabled       *bool
+	FFAltTextEnforcement            *bool
+	SpeechToTextEnabled             *bool
+	AccommodationsEngineEnabled     *bool
+	FFAccommodationsEngine          *bool
+	ReadAloudEnabled                *bool
+	FFReadAloud                     *bool
+	TranslationMemoryEnabled        *bool
+	ReportExportEnabled             *bool
+	XAPIEmissionEnabled             *bool
+	InstructorInsightsEnabled       *bool
+	CoppaWorkflowEnabled            *bool
+	GDPRModuleEnabled               *bool
+	CCPAModuleEnabled               *bool
+	StatePrivacyEnabled             *bool
+	IsoIsmsEnabled                  *bool
+	AdminAuditLogEnabled            *bool
+	DataResidencyEnabled            *bool
+	AiDisclosureEnabled             *bool
+	RTLEnabled                      *bool
+	SecurityDisclosureModuleEnabled *bool
+	BackupModuleEnabled             *bool
+	FFHighContrastReducedMotion     *bool
+	FFParentPortal                  *bool
+	FFReportCards                   *bool
+	FFSBGReportCards                *bool
+	FFSISIntegration                *bool
+	FFCatalogIntegration            *bool
+	FFEnrollmentStateMachine        *bool
+	FFIncompleteGradeWorkflow       *bool
+	FFLibrary                       *bool
+	FFBroadcasts                    *bool
+	FFConferenceScheduling          *bool
+	FFDemographics                  *bool
+	FFContentFilterIntegration      *bool
+	FFUiMode                        *bool
+	FFGradeSubmission               *bool
+	FFAcademicCalendar              *bool
+	FFPlagiarismChecks              *bool
+	FFCourseEvaluations             *bool
+	FFProctoringIntegration         *bool
+	FFCoCurricularTranscript        *bool
+	FFEportfolio                    *bool
+	FFBookstoreIntegration          *bool
+	FFTranscripts                   *bool
+
+	// Previously env-only flags (categories B and C), now platform-managed.
+	LRSAnonymizeActors           *bool
+	FERPAWorkflowEnabled         *bool
+	DPAPortalEnabled             *bool
+	SOC2ModuleEnabled            *bool
+	FFReadingPreferences         *bool
+	FFClassroomSignals           *bool
+	FFLibraryIntegration         *bool
+	DiagnosticAssessmentsEnabled *bool
+	SRSPracticeEnabled           *bool
+	IRTCatModeEnabled            *bool
+	AdaptiveLearnerModelEnabled  *bool
+	LearnerModelEMAAlpha         *float64
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -144,78 +158,92 @@ type Write struct {
 	OneRosterEnabled            *bool
 	ScimEnabled                 *bool
 
-	OIDCSSOEnabled             *bool
-	CleverSSOEnabled           *bool
-	ClassLinkSSOEnabled        *bool
-	MagicLinkEnabled           *bool
-	MagicLinkEnrolledOnly      *bool
-	SessionManagementUIEnabled *bool
-	EmailNotificationsEnabled  *bool
-	PushNotificationsEnabled   *bool
-	VirtualClassroomEnabled    *bool
-	DRMEnabled                 *bool
-	VideoTranscodingEnabled    *bool
-	AutoCaptioningEnabled      *bool
-	VideoCaptionsEnabled       *bool
-	StorageQuotasEnabled       *bool
-	AtRiskAlertsEnabled        *bool
-	AvScanningEnabled          *bool
-	ClamAVStub                 *bool
-	H5PEnabled                 *bool
-	OERLibraryEnabled          *bool
-	OERStub                    *bool
-	ItemAnalysisEnabled        *bool
-	StudentProgressEnabled     *bool
-	EngagementTrackingEnabled  *bool
-	SelfReflectionEnabled      *bool
-	OutcomesReportEnabled      *bool
-	EquationEditorEnabled      *bool
-	ReadingLevelEnabled        *bool
-	AltTextEnforcementEnabled  *bool
-	FFAltTextEnforcement       *bool
-	SpeechToTextEnabled        *bool
-	AccommodationsEngineEnabled *bool
-	FFAccommodationsEngine      *bool
-	ReadAloudEnabled           *bool
-	FFReadAloud                *bool
-	TranslationMemoryEnabled   *bool
-	ReportExportEnabled        *bool
-	XAPIEmissionEnabled        *bool
-	InstructorInsightsEnabled  *bool
-	CoppaWorkflowEnabled       *bool
-	GDPRModuleEnabled          *bool
-	CCPAModuleEnabled          *bool
-	StatePrivacyEnabled               *bool
-	IsoIsmsEnabled                    *bool
-	AdminAuditLogEnabled              *bool
-	DataResidencyEnabled              *bool
-	AiDisclosureEnabled               *bool
-	RTLEnabled                        *bool
-	SecurityDisclosureModuleEnabled   *bool
-	BackupModuleEnabled               *bool
-	FFHighContrastReducedMotion       *bool
-	FFParentPortal                    *bool
-	FFReportCards                     *bool
-	FFSBGReportCards                  *bool
-	FFSISIntegration                  *bool
-	FFCatalogIntegration              *bool
-	FFEnrollmentStateMachine          *bool
-	FFIncompleteGradeWorkflow         *bool
-	FFLibrary                         *bool
-	FFBroadcasts                      *bool
-	FFConferenceScheduling            *bool
-	FFDemographics                    *bool
-	FFContentFilterIntegration        *bool
-	FFUiMode                          *bool
-	FFGradeSubmission                 *bool
-	FFAcademicCalendar                *bool
-	FFPlagiarismChecks                *bool
-	FFCourseEvaluations               *bool
-	FFProctoringIntegration           *bool
-	FFCoCurricularTranscript          *bool
-	FFEportfolio                      *bool
-	FFBookstoreIntegration            *bool
-	FFTranscripts                     *bool
+	OIDCSSOEnabled                  *bool
+	CleverSSOEnabled                *bool
+	ClassLinkSSOEnabled             *bool
+	MagicLinkEnabled                *bool
+	MagicLinkEnrolledOnly           *bool
+	SessionManagementUIEnabled      *bool
+	EmailNotificationsEnabled       *bool
+	PushNotificationsEnabled        *bool
+	VirtualClassroomEnabled         *bool
+	DRMEnabled                      *bool
+	VideoTranscodingEnabled         *bool
+	AutoCaptioningEnabled           *bool
+	VideoCaptionsEnabled            *bool
+	StorageQuotasEnabled            *bool
+	AtRiskAlertsEnabled             *bool
+	AvScanningEnabled               *bool
+	ClamAVStub                      *bool
+	H5PEnabled                      *bool
+	OERLibraryEnabled               *bool
+	OERStub                         *bool
+	ItemAnalysisEnabled             *bool
+	StudentProgressEnabled          *bool
+	EngagementTrackingEnabled       *bool
+	SelfReflectionEnabled           *bool
+	OutcomesReportEnabled           *bool
+	EquationEditorEnabled           *bool
+	ReadingLevelEnabled             *bool
+	AltTextEnforcementEnabled       *bool
+	FFAltTextEnforcement            *bool
+	SpeechToTextEnabled             *bool
+	AccommodationsEngineEnabled     *bool
+	FFAccommodationsEngine          *bool
+	ReadAloudEnabled                *bool
+	FFReadAloud                     *bool
+	TranslationMemoryEnabled        *bool
+	ReportExportEnabled             *bool
+	XAPIEmissionEnabled             *bool
+	InstructorInsightsEnabled       *bool
+	CoppaWorkflowEnabled            *bool
+	GDPRModuleEnabled               *bool
+	CCPAModuleEnabled               *bool
+	StatePrivacyEnabled             *bool
+	IsoIsmsEnabled                  *bool
+	AdminAuditLogEnabled            *bool
+	DataResidencyEnabled            *bool
+	AiDisclosureEnabled             *bool
+	RTLEnabled                      *bool
+	SecurityDisclosureModuleEnabled *bool
+	BackupModuleEnabled             *bool
+	FFHighContrastReducedMotion     *bool
+	FFParentPortal                  *bool
+	FFReportCards                   *bool
+	FFSBGReportCards                *bool
+	FFSISIntegration                *bool
+	FFCatalogIntegration            *bool
+	FFEnrollmentStateMachine        *bool
+	FFIncompleteGradeWorkflow       *bool
+	FFLibrary                       *bool
+	FFBroadcasts                    *bool
+	FFConferenceScheduling          *bool
+	FFDemographics                  *bool
+	FFContentFilterIntegration      *bool
+	FFUiMode                        *bool
+	FFGradeSubmission               *bool
+	FFAcademicCalendar              *bool
+	FFPlagiarismChecks              *bool
+	FFCourseEvaluations             *bool
+	FFProctoringIntegration         *bool
+	FFCoCurricularTranscript        *bool
+	FFEportfolio                    *bool
+	FFBookstoreIntegration          *bool
+	FFTranscripts                   *bool
+
+	// Previously env-only flags (categories B and C), now platform-managed.
+	LRSAnonymizeActors           *bool
+	FERPAWorkflowEnabled         *bool
+	DPAPortalEnabled             *bool
+	SOC2ModuleEnabled            *bool
+	FFReadingPreferences         *bool
+	FFClassroomSignals           *bool
+	FFLibraryIntegration         *bool
+	DiagnosticAssessmentsEnabled *bool
+	SRSPracticeEnabled           *bool
+	IRTCatModeEnabled            *bool
+	AdaptiveLearnerModelEnabled  *bool
+	LearnerModelEMAAlpha         *float64
 
 	MFAEnabled     *bool
 	MFAEnforcement *string
@@ -321,6 +349,19 @@ SELECT
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	lrs_anonymize_actors,
+	ferpa_workflow_enabled,
+	dpa_portal_enabled,
+	soc2_module_enabled,
+	ff_reading_preferences,
+	ff_classroom_signals,
+	ff_library_integration,
+	diagnostic_assessments_enabled,
+	srs_practice_enabled,
+	irt_cat_mode_enabled,
+	adaptive_learner_model_enabled,
+	learner_model_ema_alpha,
+	ff_ui_mode,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -421,6 +462,19 @@ WHERE id = 1
 		&r.FFEportfolio,
 		&r.FFBookstoreIntegration,
 		&r.FFTranscripts,
+		&r.LRSAnonymizeActors,
+		&r.FERPAWorkflowEnabled,
+		&r.DPAPortalEnabled,
+		&r.SOC2ModuleEnabled,
+		&r.FFReadingPreferences,
+		&r.FFClassroomSignals,
+		&r.FFLibraryIntegration,
+		&r.DiagnosticAssessmentsEnabled,
+		&r.SRSPracticeEnabled,
+		&r.IRTCatModeEnabled,
+		&r.AdaptiveLearnerModelEnabled,
+		&r.LearnerModelEMAAlpha,
+		&r.FFUiMode,
 		&r.MFAEnabled,
 		&r.MFAEnforcement,
 		&r.SMTPHost,
@@ -579,12 +633,26 @@ INSERT INTO settings.platform_app_settings (
 	smtp_from,
 	smtp_user,
 	smtp_password_ciphertext,
+	lrs_anonymize_actors,
+	ferpa_workflow_enabled,
+	dpa_portal_enabled,
+	soc2_module_enabled,
+	ff_reading_preferences,
+	ff_classroom_signals,
+	ff_library_integration,
+	diagnostic_assessments_enabled,
+	srs_practice_enabled,
+	irt_cat_mode_enabled,
+	adaptive_learner_model_enabled,
+	learner_model_ema_alpha,
+	ff_ui_mode,
 	updated_at
 ) VALUES (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -677,6 +745,19 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_eportfolio = COALESCE(EXCLUDED.ff_eportfolio, settings.platform_app_settings.ff_eportfolio),
 	ff_bookstore_integration = COALESCE(EXCLUDED.ff_bookstore_integration, settings.platform_app_settings.ff_bookstore_integration),
 	ff_transcripts = COALESCE(EXCLUDED.ff_transcripts, settings.platform_app_settings.ff_transcripts),
+	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
+	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
+	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
+	soc2_module_enabled = COALESCE(EXCLUDED.soc2_module_enabled, settings.platform_app_settings.soc2_module_enabled),
+	ff_reading_preferences = COALESCE(EXCLUDED.ff_reading_preferences, settings.platform_app_settings.ff_reading_preferences),
+	ff_classroom_signals = COALESCE(EXCLUDED.ff_classroom_signals, settings.platform_app_settings.ff_classroom_signals),
+	ff_library_integration = COALESCE(EXCLUDED.ff_library_integration, settings.platform_app_settings.ff_library_integration),
+	diagnostic_assessments_enabled = COALESCE(EXCLUDED.diagnostic_assessments_enabled, settings.platform_app_settings.diagnostic_assessments_enabled),
+	srs_practice_enabled = COALESCE(EXCLUDED.srs_practice_enabled, settings.platform_app_settings.srs_practice_enabled),
+	irt_cat_mode_enabled = COALESCE(EXCLUDED.irt_cat_mode_enabled, settings.platform_app_settings.irt_cat_mode_enabled),
+	adaptive_learner_model_enabled = COALESCE(EXCLUDED.adaptive_learner_model_enabled, settings.platform_app_settings.adaptive_learner_model_enabled),
+	learner_model_ema_alpha = COALESCE(EXCLUDED.learner_model_ema_alpha, settings.platform_app_settings.learner_model_ema_alpha),
+	ff_ui_mode = COALESCE(EXCLUDED.ff_ui_mode, settings.platform_app_settings.ff_ui_mode),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -782,6 +863,19 @@ ON CONFLICT (id) DO UPDATE SET
 		w.SMTPFrom,
 		w.SMTPUser,
 		smtpCipher,
+		w.LRSAnonymizeActors,
+		w.FERPAWorkflowEnabled,
+		w.DPAPortalEnabled,
+		w.SOC2ModuleEnabled,
+		w.FFReadingPreferences,
+		w.FFClassroomSignals,
+		w.FFLibraryIntegration,
+		w.DiagnosticAssessmentsEnabled,
+		w.SRSPracticeEnabled,
+		w.IRTCatModeEnabled,
+		w.AdaptiveLearnerModelEnabled,
+		w.LearnerModelEMAAlpha,
+		w.FFUiMode,
 	)
 	if err != nil {
 		return nil, err

@@ -17,7 +17,7 @@ import (
 // handleAdminSISConnections is GET/POST /api/v1/admin/orgs/:orgId/sis/connections.
 func (d Deps) handleAdminSISConnections() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFSISIntegration {
+		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
@@ -116,7 +116,7 @@ func (d Deps) handleAdminSISConnections() http.HandlerFunc {
 // handleAdminSISConnection is PATCH /api/v1/admin/orgs/:orgId/sis/connections/:id.
 func (d Deps) handleAdminSISConnection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFSISIntegration {
+		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
@@ -183,7 +183,7 @@ func (d Deps) handleAdminSISConnection() http.HandlerFunc {
 // handleAdminSISSync is POST /api/v1/admin/orgs/:orgId/sis/connections/:id/sync.
 func (d Deps) handleAdminSISSync() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFSISIntegration {
+		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
@@ -232,7 +232,7 @@ func (d Deps) handleAdminSISSync() http.HandlerFunc {
 // handleAdminSISSyncLogs is GET /api/v1/admin/orgs/:orgId/sis/sync-logs.
 func (d Deps) handleAdminSISSyncLogs() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFSISIntegration {
+		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
@@ -278,7 +278,7 @@ func (d Deps) handleAdminSISSyncLogs() http.HandlerFunc {
 // handleAdminSISGradePassback is POST /api/v1/admin/orgs/:orgId/sis/grade-passback.
 func (d Deps) handleAdminSISGradePassback() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFSISIntegration {
+		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}
@@ -349,7 +349,7 @@ func (d Deps) handleAdminSISGradePassback() http.HandlerFunc {
 // handleAdminSISTestConnection is POST /api/v1/admin/orgs/:orgId/sis/connections/:id/test.
 func (d Deps) handleAdminSISTestConnection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFSISIntegration {
+		if !d.effectiveConfig().FFSISIntegration {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "SIS integration is not enabled.")
 			return
 		}

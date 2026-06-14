@@ -111,7 +111,7 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 		if courses == nil {
 			courses = []course.CoursePublic{}
 		}
-		if d.Config.FFEnrollmentStateMachine {
+		if d.effectiveConfig().FFEnrollmentStateMachine {
 			for i := range courses {
 				st, changedAt, err := enrollment.ViewerStudentState(ctx, d.Pool, courses[i].CourseCode, userID)
 				if err != nil {

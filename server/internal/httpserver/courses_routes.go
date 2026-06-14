@@ -21,6 +21,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 		cr.Put("/", d.handlePutCourse())
 		cr.Patch("/markdown-theme", d.handlePatchCourseMarkdownTheme())
 	})
+	r.Put("/api/v1/courses/{course_code}/hero-image", d.handlePutCourseHeroImage())
 	r.Post("/api/v1/courses/{course_code}/course-context", d.handlePostCourseContext())
 	r.Get("/api/v1/courses/{course_code}/structure", d.handleCourseStructure())
 	r.Get("/api/v1/courses/{course_code}/structure/ws", d.handleCourseStructureWS())

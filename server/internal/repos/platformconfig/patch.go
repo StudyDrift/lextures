@@ -36,6 +36,13 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 		args = append(args, *v)
 		sets = append(sets, fmt.Sprintf("%s = $%d", col, len(args)))
 	}
+	addFloat64 := func(col string, v *float64) {
+		if v == nil {
+			return
+		}
+		args = append(args, *v)
+		sets = append(sets, fmt.Sprintf("%s = $%d", col, len(args)))
+	}
 	addBytes := func(col string, v *[]byte) {
 		if v == nil {
 			return
@@ -135,6 +142,19 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_eportfolio", w.FFEportfolio)
 	addBool("ff_bookstore_integration", w.FFBookstoreIntegration)
 	addBool("ff_transcripts", w.FFTranscripts)
+	addBool("lrs_anonymize_actors", w.LRSAnonymizeActors)
+	addBool("ferpa_workflow_enabled", w.FERPAWorkflowEnabled)
+	addBool("dpa_portal_enabled", w.DPAPortalEnabled)
+	addBool("soc2_module_enabled", w.SOC2ModuleEnabled)
+	addBool("ff_reading_preferences", w.FFReadingPreferences)
+	addBool("ff_classroom_signals", w.FFClassroomSignals)
+	addBool("ff_library_integration", w.FFLibraryIntegration)
+	addBool("diagnostic_assessments_enabled", w.DiagnosticAssessmentsEnabled)
+	addBool("srs_practice_enabled", w.SRSPracticeEnabled)
+	addBool("irt_cat_mode_enabled", w.IRTCatModeEnabled)
+	addBool("adaptive_learner_model_enabled", w.AdaptiveLearnerModelEnabled)
+	addFloat64("learner_model_ema_alpha", w.LearnerModelEMAAlpha)
+	addBool("ff_ui_mode", w.FFUiMode)
 	addBool("mfa_enabled", w.MFAEnabled)
 	addString("mfa_enforcement", w.MFAEnforcement)
 	addString("smtp_host", w.SMTPHost)

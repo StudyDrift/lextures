@@ -7,25 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestCatModeEnabled(t *testing.T) {
-	t.Setenv("IRT_CAT_MODE_ENABLED", "")
-	if CatModeEnabled() {
-		t.Fatal("empty -> false")
-	}
-	t.Setenv("IRT_CAT_MODE_ENABLED", "yes")
-	if !CatModeEnabled() {
-		t.Fatal("yes -> true")
-	}
-	t.Setenv("IRT_CAT_MODE_ENABLED", "true")
-	if !CatModeEnabled() {
-		t.Fatal("true")
-	}
-	t.Setenv("IRT_CAT_MODE_ENABLED", "no")
-	if CatModeEnabled() {
-		t.Fatal("no -> false")
-	}
-}
-
 func TestService_Health(t *testing.T) {
 	s := New()
 	if s.Name != "irt" {

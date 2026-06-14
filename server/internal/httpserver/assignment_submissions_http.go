@@ -175,10 +175,32 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 				return
 			}
 		}
+		gradedMap := make(map[uuid.UUID]bool)
+		gradeRows, err := d.Pool.Query(r.Context(), `
+			SELECT student_user_id 
+			FROM course.course_grades 
+			WHERE course_id = $1 AND module_item_id = $2
+		`, *cid, itemID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grades.")
+			return
+		}
+		defer gradeRows.Close()
+		for gradeRows.Next() {
+			var sID uuid.UUID
+			if err := gradeRows.Scan(&sID); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to scan grades.")
+				return
+			}
+			gradedMap[sID] = true
+		}
+
 		items := make([]map[string]any, 0, len(rows))
 		for _, s := range rows {
 			rank := rankByID[s.ID]
-			items = append(items, d.submissionToJSON(r.Context(), courseCode, s, redact, rank, displayNames[s.SubmittedBy]))
+			item := d.submissionToJSON(r.Context(), courseCode, s, redact, rank, displayNames[s.SubmittedBy])
+			item["isGraded"] = gradedMap[s.SubmittedBy]
+			items = append(items, item)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"submissions": items})
@@ -225,6 +247,19 @@ func (d Deps) handleGetMyAssignmentSubmission() http.HandlerFunc {
 			displayName = user.DisplayLabel(u.DisplayName, u.Email)
 		}
 		payload := d.submissionToJSON(r.Context(), courseCode, *row, false, 0, displayName)
+		var exists bool
+		err = d.Pool.QueryRow(r.Context(), `
+			SELECT EXISTS(
+				SELECT 1 FROM course.course_grades 
+				WHERE course_id = $1 AND student_user_id = $2 AND module_item_id = $3
+			)
+		`, *cid, viewer, itemID).Scan(&exists)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to check grading status.")
+			return
+		}
+		payload["isGraded"] = exists
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"submission": payload})
 	}

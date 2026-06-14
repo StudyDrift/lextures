@@ -3,12 +3,10 @@ package platformconfig
 import "github.com/lextures/lextures/server/internal/config"
 
 func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
+	// Feature flags are DB-managed (no env seed); a missing settings row means "all columns
+	// unset", so every flag falls back to its documented default below.
 	if db == nil {
-		out.BlindGradingEnabled = def.BlindGradingEnabled
-		out.GradePostingPoliciesEnabled = def.GradePostingPoliciesEnabled
-		out.MagicLinkEnabled = def.MagicLinkEnabled
-		out.VirtualClassroomEnabled = def.VirtualClassroomEnabled
-		return
+		db = &Row{}
 	}
 	out.SAMLSSOEnabled = mergeBool(db.SAMLSSOEnabled, false)
 	out.AnnotationEnabled = mergeBool(db.AnnotationEnabled, false)
@@ -59,8 +57,8 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFReportCards = mergeBool(db.FFReportCards, false)
 	out.FFSISIntegration = mergeBool(db.FFSISIntegration, false)
 	out.FFCatalogIntegration = mergeBool(db.FFCatalogIntegration, false)
-	out.FFEnrollmentStateMachine = mergeBool(db.FFEnrollmentStateMachine, out.FFEnrollmentStateMachine)
-	out.FFIncompleteGradeWorkflow = mergeBool(db.FFIncompleteGradeWorkflow, out.FFIncompleteGradeWorkflow)
+	out.FFEnrollmentStateMachine = mergeBool(db.FFEnrollmentStateMachine, false)
+	out.FFIncompleteGradeWorkflow = mergeBool(db.FFIncompleteGradeWorkflow, false)
 	out.FFLibrary = mergeBool(db.FFLibrary, false)
 	out.FFBroadcasts = mergeBool(db.FFBroadcasts, false)
 	out.FFConferenceScheduling = mergeBool(db.FFConferenceScheduling, false)
@@ -74,7 +72,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFProctoringIntegration = mergeBool(db.FFProctoringIntegration, false)
 	out.FFCoCurricularTranscript = mergeBool(db.FFCoCurricularTranscript, false)
 	out.FFEportfolio = mergeBool(db.FFEportfolio, false)
-	out.FFBookstoreIntegration = mergeBool(db.FFBookstoreIntegration, out.FFBookstoreIntegration)
+	out.FFBookstoreIntegration = mergeBool(db.FFBookstoreIntegration, false)
 	out.FFTranscripts = mergeBool(db.FFTranscripts, false)
 	out.SpeechToTextEnabled = mergeBool(db.SpeechToTextEnabled, false)
 	out.AccommodationsEngineEnabled = mergeBool(db.AccommodationsEngineEnabled, false)
@@ -83,16 +81,30 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFReadAloud = mergeBool(db.FFReadAloud, false)
 	out.TranslationMemoryEnabled = mergeBool(db.TranslationMemoryEnabled, false)
 	out.ReportExportEnabled = mergeBool(db.ReportExportEnabled, false)
-	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, out.XAPIEmissionEnabled)
-	out.CoppaWorkflowEnabled = mergeBool(db.CoppaWorkflowEnabled, out.CoppaWorkflowEnabled)
-	out.GDPRModuleEnabled = mergeBool(db.GDPRModuleEnabled, out.GDPRModuleEnabled)
-	out.CCPAModuleEnabled = mergeBool(db.CCPAModuleEnabled, out.CCPAModuleEnabled)
-	out.StatePrivacyEnabled = mergeBool(db.StatePrivacyEnabled, out.StatePrivacyEnabled)
-	out.IsoIsmsEnabled = mergeBool(db.IsoIsmsEnabled, out.IsoIsmsEnabled)
-	out.AdminAuditLogEnabled = mergeBool(db.AdminAuditLogEnabled, out.AdminAuditLogEnabled)
-	out.DataResidencyEnabled = mergeBool(db.DataResidencyEnabled, out.DataResidencyEnabled)
-	out.AiDisclosureEnabled = mergeBool(db.AiDisclosureEnabled, out.AiDisclosureEnabled)
-	out.RTLEnabled = mergeBool(db.RTLEnabled, out.RTLEnabled)
-	out.SecurityDisclosureModuleEnabled = mergeBool(db.SecurityDisclosureModuleEnabled, out.SecurityDisclosureModuleEnabled)
-	out.BackupModuleEnabled = mergeBool(db.BackupModuleEnabled, out.BackupModuleEnabled)
+	out.XAPIEmissionEnabled = mergeBool(db.XAPIEmissionEnabled, false)
+	out.LRSAnonymizeActors = mergeBool(db.LRSAnonymizeActors, false)
+	out.FERPAWorkflowEnabled = mergeBool(db.FERPAWorkflowEnabled, false)
+	out.CoppaWorkflowEnabled = mergeBool(db.CoppaWorkflowEnabled, false)
+	out.GDPRModuleEnabled = mergeBool(db.GDPRModuleEnabled, false)
+	out.CCPAModuleEnabled = mergeBool(db.CCPAModuleEnabled, false)
+	out.DPAPortalEnabled = mergeBool(db.DPAPortalEnabled, false)
+	out.StatePrivacyEnabled = mergeBool(db.StatePrivacyEnabled, false)
+	out.SOC2ModuleEnabled = mergeBool(db.SOC2ModuleEnabled, false)
+	out.IsoIsmsEnabled = mergeBool(db.IsoIsmsEnabled, false)
+	out.AdminAuditLogEnabled = mergeBool(db.AdminAuditLogEnabled, def.AdminAuditLogEnabled)
+	out.DataResidencyEnabled = mergeBool(db.DataResidencyEnabled, false)
+	out.AiDisclosureEnabled = mergeBool(db.AiDisclosureEnabled, def.AiDisclosureEnabled)
+	out.RTLEnabled = mergeBool(db.RTLEnabled, false)
+	out.SecurityDisclosureModuleEnabled = mergeBool(db.SecurityDisclosureModuleEnabled, false)
+	out.BackupModuleEnabled = mergeBool(db.BackupModuleEnabled, false)
+	out.FFReadingPreferences = mergeBool(db.FFReadingPreferences, false)
+	out.FFClassroomSignals = mergeBool(db.FFClassroomSignals, false)
+	out.FFLibraryIntegration = mergeBool(db.FFLibraryIntegration, false)
+
+	// Adaptive-learning platform gates (previously env-only service flags).
+	out.DiagnosticAssessmentsEnabled = mergeBool(db.DiagnosticAssessmentsEnabled, false)
+	out.SRSPracticeEnabled = mergeBool(db.SRSPracticeEnabled, false)
+	out.IRTCatModeEnabled = mergeBool(db.IRTCatModeEnabled, false)
+	out.AdaptiveLearnerModelEnabled = mergeBool(db.AdaptiveLearnerModelEnabled, false)
+	out.LearnerModelEMAAlpha = mergeFloat64(db.LearnerModelEMAAlpha, def.LearnerModelEMAAlpha)
 }

@@ -17,11 +17,11 @@ import (
 
 func (d Deps) requirePlagiarismWorkflow(w http.ResponseWriter) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.FFPlagiarismChecks && !d.Config.FFPlagiarismChecks {
+	if !cfg.FFPlagiarismChecks && !d.effectiveConfig().FFPlagiarismChecks {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Plagiarism workflow is not enabled.")
 		return false
 	}
-	if !cfg.OriginalityDetectionEnabled && !d.Config.OriginalityDetectionEnabled {
+	if !cfg.OriginalityDetectionEnabled && !d.effectiveConfig().OriginalityDetectionEnabled {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Originality detection is not enabled.")
 		return false
 	}

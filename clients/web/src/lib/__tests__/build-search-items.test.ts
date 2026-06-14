@@ -18,7 +18,12 @@ import {
 } from '../build-search-items'
 import { buildSearchHubItems } from '../search-hub'
 import { parseSearchQuery } from '../search-query-parse'
-import { PERM_COURSE_CREATE, PERM_RBAC_MANAGE } from '../rbac-api'
+import { resetPlatformFeaturesSnapshot, setPlatformFeaturesSnapshot } from '../platform-features'
+import {
+  PERM_COURSE_CREATE,
+  PERM_RBAC_MANAGE,
+  PERM_TENANT_ORG_UNITS_ADMIN,
+} from '../rbac-api'
 import type { SearchCourseItem } from '../search-api'
 
 const allowsNone = () => false
@@ -76,8 +81,42 @@ describe('buildSearchItems', () => {
     const items = buildSearchItems([], [], allowed)
     expect(items.some((i) => i.path === '/settings/roles')).toBe(true)
     expect(items.some((i) => i.path === '/settings/platform')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/lti-tools')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/cloud-providers')).toBe(true)
     expect(items.some((i) => i.path === '/settings/ai/models')).toBe(true)
     expect(items.some((i) => i.path === '/settings/ai/system-prompts')).toBe(true)
+  })
+
+  it('matches system settings by title (e.g. Global platform)', () => {
+    const allowed = (p: string) => p === PERM_RBAC_MANAGE
+    const items = buildGlobalSearchItems(allowed)
+    const hits = filterSearchItems(items, 'global platform')
+    expect(hits.some((i) => i.path === '/settings/platform')).toBe(true)
+  })
+
+  it('matches cloud file pickers and lti tools by title', () => {
+    const allowed = (p: string) => p === PERM_RBAC_MANAGE
+    const items = buildGlobalSearchItems(allowed)
+    expect(filterSearchItems(items, 'cloud file pickers').some((i) => i.path === '/settings/cloud-providers')).toBe(
+      true,
+    )
+    expect(filterSearchItems(items, 'lti tools').some((i) => i.path === '/settings/lti-tools')).toBe(true)
+  })
+
+  it('adds org settings for org unit admins without global rbac', () => {
+    const allowed = (p: string) => p === PERM_TENANT_ORG_UNITS_ADMIN
+    const items = buildGlobalSearchItems(allowed)
+    expect(items.some((i) => i.path === '/settings/org-units')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/terms')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/platform')).toBe(false)
+  })
+
+  it('includes SCIM provisioning when enabled for rbac admins', () => {
+    const allowed = (p: string) => p === PERM_RBAC_MANAGE
+    const without = buildGlobalSearchItems(allowed)
+    const withScim = buildGlobalSearchItems(allowed, { scimEnabled: true })
+    expect(without.some((i) => i.path === '/settings/scim-provisioning')).toBe(false)
+    expect(withScim.some((i) => i.path === '/settings/scim-provisioning')).toBe(true)
   })
 
   it('omits system settings pages without rbac permission', () => {
@@ -317,6 +356,28 @@ describe('capSearchResults', () => {
     expect(capped.filter((i) => i.group === 'page').length).toBeLessThanOrEqual(5)
   })
 
+  it('keeps exempt admin pages when page group is capped', () => {
+    const adminPages = Array.from({ length: 8 }, (_, i) => ({
+      id: `admin:${i}`,
+      group: 'page' as const,
+      title: `Admin ${i}`,
+      subtitle: 'System settings',
+      path: `/settings/admin-${i}`,
+      haystack: `admin ${i}`,
+      exemptFromCap: true,
+    }))
+    const filler = Array.from({ length: 20 }, (_, i) => ({
+      id: `page:${i}`,
+      group: 'page' as const,
+      title: `Page ${i}`,
+      subtitle: '',
+      path: `/p/${i}`,
+      haystack: `page ${i}`,
+    }))
+    const capped = capSearchResults([...adminPages, ...filler], { hubMode: true })
+    expect(capped.filter((i) => i.id.startsWith('admin:')).length).toBe(8)
+  })
+
   it('keeps all pinned course pages when scope is set', () => {
     const pinned = Array.from({ length: 12 }, (_, i) => ({
       id: `page:c:${i}`,
@@ -390,6 +451,53 @@ describe('granular builders', () => {
     const items = buildGlobalSearchItems(allowsAll)
     expect(items.some((i) => i.path === '/settings/roles')).toBe(true)
     expect(items.some((i) => i.path === '/settings/platform')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/lti-tools')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/cloud-providers')).toBe(true)
     expect(items.some((i) => i.id === 'action:/courses/create')).toBe(true)
+  })
+
+  it('marks rbac system settings as exempt from result caps', () => {
+    const items = buildGlobalSearchItems((p) => p === PERM_RBAC_MANAGE)
+    const platform = items.find((i) => i.path === '/settings/platform')
+    const lti = items.find((i) => i.path === '/settings/lti-tools')
+    expect(platform?.exemptFromCap).toBe(true)
+    expect(lti?.exemptFromCap).toBe(true)
+  })
+})
+
+describe('feature-gated global pages', () => {
+  it('includes transcript settings when the platform flag is on', () => {
+    setPlatformFeaturesSnapshot({
+      studentProgressEnabled: false,
+      atRiskAlertsEnabled: false,
+      h5pEnabled: false,
+      oerLibraryEnabled: false,
+      itemAnalysisEnabled: false,
+      engagementTrackingEnabled: false,
+      selfReflectionEnabled: false,
+      outcomesReportEnabled: false,
+      xapiEmissionEnabled: false,
+      equationEditorEnabled: false,
+      readingLevelEnabled: false,
+      altTextEnforcementEnabled: false,
+      ffAltTextEnforcement: false,
+      speechToTextEnabled: false,
+      accommodationsEngineEnabled: false,
+      ffAccommodationsEngine: false,
+      readAloudEnabled: false,
+      ffReadAloud: false,
+      translationMemoryEnabled: false,
+      storageQuotasEnabled: false,
+      avScanningEnabled: false,
+      virtualClassroomEnabled: true,
+      sessionManagementUiEnabled: false,
+      instructorInsightsEnabled: false,
+      rtlEnabled: false,
+      ffTranscripts: true,
+    })
+    const items = buildGlobalSearchItems((p) => p === PERM_RBAC_MANAGE)
+    expect(items.some((i) => i.path === '/settings/transcripts')).toBe(true)
+    expect(items.some((i) => i.path === '/transcripts')).toBe(true)
+    resetPlatformFeaturesSnapshot()
   })
 })

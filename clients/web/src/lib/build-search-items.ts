@@ -6,15 +6,28 @@ import {
   courseItemsCreatePermission,
 } from './courses-api'
 import {
+  accommodationsEngineFeatureEnabled,
   atRiskFeatureEnabled,
   bookstoreIntegrationEnabled,
+  eportfolioFeatureEnabled,
+  oerLibraryEnabled,
   outcomesReportFeatureEnabled,
   studentProgressFeatureEnabled,
+  transcriptsFeatureEnabled,
   xapiEmissionFeatureEnabled,
 } from './platform-features'
 import type { SearchCourseItem } from './search-api'
 import { featureDefaultOn } from './search-course-features'
-import { PERM_COURSE_CREATE, PERM_RBAC_MANAGE, PERM_REPORTS_VIEW } from './rbac-api'
+import {
+  PERM_ACCOMMODATIONS_MANAGE,
+  PERM_COURSE_CREATE,
+  PERM_PARENT_DASHBOARD,
+  PERM_RBAC_MANAGE,
+  PERM_REPORTS_VIEW,
+  PERM_TENANT_ORG_ROLES_MANAGE,
+  PERM_TENANT_ORG_ROLES_VIEW,
+  PERM_TENANT_ORG_UNITS_ADMIN,
+} from './rbac-api'
 import {
   courseMatchesScope,
   parseSearchQuery,
@@ -42,6 +55,34 @@ export type SearchListItem = {
   haystack: string
   /** Optional relevance boost from server or ranking */
   score?: number
+  /** Permission-gated admin pages bypass per-group result caps. */
+  exemptFromCap?: boolean
+}
+
+export type GlobalSearchBuildOptions = {
+  /** Effective platform SCIM flag (Settings → Global platform). */
+  scimEnabled?: boolean
+}
+
+type SearchPageDef = { title: string; subtitle: string; path: string; hint: string }
+
+const ADMIN_PAGE_OPTS = { score: 1, exemptFromCap: true } as const
+
+function pushSearchPage(
+  items: SearchListItem[],
+  def: SearchPageDef,
+  opts?: { score?: number; exemptFromCap?: boolean },
+): void {
+  items.push({
+    id: `page:${def.path}`,
+    group: 'page',
+    title: def.title,
+    subtitle: def.subtitle,
+    path: def.path,
+    haystack: `${def.title} ${def.subtitle} ${def.hint} page`.toLowerCase(),
+    score: opts?.score,
+    exemptFromCap: opts?.exemptFromCap,
+  })
 }
 
 function enc(s: string): string {
@@ -54,7 +95,10 @@ function courseSearchBreadcrumb(c: SearchCourseItem): string {
   return t ? `${t} · ${c.courseCode}` : c.courseCode
 }
 
-export function buildGlobalSearchItems(allows: (perm: string) => boolean): SearchListItem[] {
+export function buildGlobalSearchItems(
+  allows: (perm: string) => boolean,
+  options: GlobalSearchBuildOptions = {},
+): SearchListItem[] {
   const items: SearchListItem[] = [
     {
       id: 'global:ask-ai',
@@ -66,7 +110,7 @@ export function buildGlobalSearchItems(allows: (perm: string) => boolean): Searc
     },
   ]
 
-  const globalPages: { title: string; subtitle: string; path: string; hint: string }[] = [
+  const globalPages: SearchPageDef[] = [
     { title: 'Dashboard', subtitle: 'Home', path: '/', hint: 'dashboard home' },
     { title: 'Courses', subtitle: 'All your courses', path: '/courses', hint: 'courses catalog' },
     {
@@ -98,79 +142,215 @@ export function buildGlobalSearchItems(allows: (perm: string) => boolean): Searc
   ]
 
   for (const g of globalPages) {
-    items.push({
-      id: `page:${g.path}`,
-      group: 'page',
-      title: g.title,
-      subtitle: g.subtitle,
-      path: g.path,
-      haystack: `${g.title} ${g.subtitle} ${g.hint} page`.toLowerCase(),
+    pushSearchPage(items, g)
+  }
+
+  if (allows(PERM_PARENT_DASHBOARD)) {
+    pushSearchPage(items, {
+      title: 'Family',
+      subtitle: 'Parent dashboard',
+      path: '/parent',
+      hint: 'family parent guardian children dependents dashboard',
     })
   }
 
-  if (allows(PERM_RBAC_MANAGE)) {
-    items.push({
-      id: 'page:/settings/platform',
-      group: 'page',
-      title: 'Global platform',
-      subtitle: 'System settings',
-      path: '/settings/platform',
-      haystack: 'openrouter saml feature flags lti oneroster platform environment database admin page'.toLowerCase(),
+  if (eportfolioFeatureEnabled()) {
+    pushSearchPage(items, {
+      title: 'My Portfolio',
+      subtitle: 'ePortfolio artifacts',
+      path: '/portfolios',
+      hint: 'portfolio eportfolio capstone artifacts collection',
     })
-    items.push({
-      id: 'page:/settings/organizations',
-      group: 'page',
-      title: 'Organizations',
-      subtitle: 'System settings',
-      path: '/settings/organizations',
-      haystack: 'organizations tenants multi-tenant org slug suspend admin page'.toLowerCase(),
+  }
+
+  if (transcriptsFeatureEnabled()) {
+    pushSearchPage(items, {
+      title: 'Transcripts',
+      subtitle: 'Request academic transcripts',
+      path: '/transcripts',
+      hint: 'transcripts academic records requests',
     })
-    items.push({
-      id: 'page:/settings/ai/models',
-      group: 'page',
-      title: 'AI models',
-      subtitle: 'System settings',
-      path: '/settings/ai/models',
-      haystack: 'ai intelligence openrouter models system settings page'.toLowerCase(),
-    })
-    items.push({
-      id: 'page:/settings/ai/system-prompts',
-      group: 'page',
-      title: 'System prompts',
-      subtitle: 'System settings',
-      path: '/settings/ai/system-prompts',
-      haystack: 'system prompts ai configuration admin page'.toLowerCase(),
-    })
-    items.push({
-      id: 'page:/settings/roles',
-      group: 'page',
-      title: 'Roles and Permissions',
-      subtitle: 'System settings',
-      path: '/settings/roles',
-      haystack: 'roles permissions rbac security admin page'.toLowerCase(),
-    })
-    if (bookstoreIntegrationEnabled()) {
-      items.push({
-        id: 'page:/admin/bookstore',
-        group: 'page',
-        title: 'Bookstore integration',
+  }
+
+  const canManageRbac = allows(PERM_RBAC_MANAGE)
+  const canOrgUnits = canManageRbac || allows(PERM_TENANT_ORG_UNITS_ADMIN)
+  const canOrgRoles = allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW)
+
+  if (canOrgUnits) {
+    pushSearchPage(
+      items,
+      {
+        title: 'Org structure',
+        subtitle: 'Organization settings',
+        path: '/settings/org-units',
+        hint: 'org units schools departments hierarchy structure organization',
+      },
+      ADMIN_PAGE_OPTS,
+    )
+  }
+
+  if (canOrgUnits || canOrgRoles) {
+    pushSearchPage(
+      items,
+      {
+        title: 'Academic terms',
+        subtitle: 'Organization settings',
+        path: '/settings/terms',
+        hint: 'academic terms semesters quarters school year calendar',
+      },
+      ADMIN_PAGE_OPTS,
+    )
+    pushSearchPage(
+      items,
+      {
+        title: 'Branding',
+        subtitle: 'Organization settings',
+        path: '/settings/org-branding',
+        hint: 'branding logo colors theme organization identity',
+      },
+      ADMIN_PAGE_OPTS,
+    )
+  }
+
+  if (canManageRbac) {
+    const systemPages: SearchPageDef[] = [
+      {
+        title: 'Roles and Permissions',
         subtitle: 'System settings',
-        path: '/admin/bookstore',
-        haystack:
-          'bookstore textbook vitalsource redshelf inclusive access lti admin page'.toLowerCase(),
-      })
+        path: '/settings/roles',
+        hint: 'roles permissions rbac security admin',
+      },
+      {
+        title: 'LTI tools',
+        subtitle: 'System settings',
+        path: '/settings/lti-tools',
+        hint: 'lti learning tools interoperability external apps launch',
+      },
+      {
+        title: 'Cloud file pickers',
+        subtitle: 'System settings',
+        path: '/settings/cloud-providers',
+        hint: 'cloud file pickers google drive onedrive dropbox box storage integration',
+      },
+      {
+        title: 'Global platform',
+        subtitle: 'System settings',
+        path: '/settings/platform',
+        hint: 'openrouter saml feature flags lti oneroster platform environment database admin',
+      },
+      {
+        title: 'Organizations',
+        subtitle: 'System settings',
+        path: '/settings/organizations',
+        hint: 'organizations tenants multi-tenant org slug suspend admin',
+      },
+      {
+        title: 'AI models',
+        subtitle: 'System settings',
+        path: '/settings/ai/models',
+        hint: 'ai intelligence openrouter models',
+      },
+      {
+        title: 'System prompts',
+        subtitle: 'System settings',
+        path: '/settings/ai/system-prompts',
+        hint: 'system prompts ai configuration admin intelligence',
+      },
+    ]
+    for (const g of systemPages) {
+      pushSearchPage(items, g, ADMIN_PAGE_OPTS)
+    }
+
+    if (xapiEmissionFeatureEnabled()) {
+      pushSearchPage(
+        items,
+        {
+          title: 'Learning Record Stores',
+          subtitle: 'System settings',
+          path: '/settings/lrs-integrations',
+          hint: 'learning record stores lrs xapi caliper integrations',
+        },
+        ADMIN_PAGE_OPTS,
+      )
+    }
+
+    if (oerLibraryEnabled()) {
+      pushSearchPage(
+        items,
+        {
+          title: 'OER library',
+          subtitle: 'System settings',
+          path: '/settings/oer-providers',
+          hint: 'oer open educational resources library providers commons merlot openstax',
+        },
+        ADMIN_PAGE_OPTS,
+      )
+    }
+
+    if (transcriptsFeatureEnabled()) {
+      pushSearchPage(
+        items,
+        {
+          title: 'Transcript settings',
+          subtitle: 'System settings',
+          path: '/settings/transcripts',
+          hint: 'transcripts webhook institution configuration admin',
+        },
+        ADMIN_PAGE_OPTS,
+      )
+    }
+
+    if (bookstoreIntegrationEnabled()) {
+      pushSearchPage(
+        items,
+        {
+          title: 'Bookstore',
+          subtitle: 'System settings',
+          path: '/admin/bookstore',
+          hint: 'bookstore textbook vitalsource redshelf inclusive access lti integration',
+        },
+        ADMIN_PAGE_OPTS,
+      )
+    }
+
+    if (options.scimEnabled) {
+      pushSearchPage(
+        items,
+        {
+          title: 'SCIM provisioning',
+          subtitle: 'System settings',
+          path: '/settings/scim-provisioning',
+          hint: 'scim provisioning identity sync users groups sso',
+        },
+        ADMIN_PAGE_OPTS,
+      )
     }
   }
 
   if (allows(PERM_REPORTS_VIEW)) {
-    items.push({
-      id: 'page:/reports',
-      group: 'page',
+    pushSearchPage(items, {
       title: 'Reports',
       subtitle: 'Learning activity',
       path: '/reports',
-      haystack: 'reports analytics audit activity learning page'.toLowerCase(),
+      hint: 'reports analytics audit activity learning',
     })
+  }
+
+  if (allows(PERM_ACCOMMODATIONS_MANAGE)) {
+    pushSearchPage(items, {
+      title: 'Accommodations',
+      subtitle: 'Student accessibility',
+      path: '/admin/accommodations',
+      hint: 'accommodations accessibility students iep 504 support',
+    })
+    if (accommodationsEngineFeatureEnabled()) {
+      pushSearchPage(items, {
+        title: 'Accommodation audit',
+        subtitle: 'Student accessibility',
+        path: '/admin/accommodations/audit',
+        hint: 'accommodation audit accessibility records history compliance',
+      })
+    }
   }
 
   if (allows(PERM_COURSE_CREATE)) {
@@ -493,9 +673,10 @@ export function buildSearchItems(
   courses: SearchCourseItem[],
   _people: unknown[],
   allows: (perm: string) => boolean,
+  options: GlobalSearchBuildOptions = {},
 ): SearchListItem[] {
   return [
-    ...buildGlobalSearchItems(allows),
+    ...buildGlobalSearchItems(allows, options),
     ...buildCourseListItems(courses),
     ...buildCoursePageItems(courses, allows),
     ...buildCourseActionItems(courses, allows),
@@ -615,12 +796,13 @@ export function buildLocalSearchCandidates(
   courses: SearchCourseItem[],
   allows: (perm: string) => boolean,
   parsed: ParsedSearchQuery,
+  options: GlobalSearchBuildOptions = {},
 ): SearchListItem[] {
   const scopedCourses = parsed.scopeCourseCode
     ? courses.filter((c) => courseMatchesScope(c.courseCode, parsed.scopeCourseCode))
     : courses
 
-  const items: SearchListItem[] = [...buildGlobalSearchItems(allows)]
+  const items: SearchListItem[] = [...buildGlobalSearchItems(allows, options)]
 
   const includeCourses = !parsed.types || parsed.types.has('course')
   const includePages = !parsed.types || parsed.types.has('page')
@@ -671,26 +853,34 @@ function capSearchResultsDefault(items: SearchListItem[], totalCap: number): Sea
   return out
 }
 
-export function capSearchResults(items: SearchListItem[], options: CapSearchOptions = {}): SearchListItem[] {
-  const pinned = options.pinnedCourseCode?.trim()
-  if (!pinned) {
-    return capSearchResultsDefault(items, options.hubMode ? SEARCH_HUB_RESULT_CAP : SEARCH_RESULT_CAP)
-  }
-
-  const pinnedPages = sortSearchItems(items.filter((it) => isPageForCourse(it, pinned)))
-  const pinnedIds = new Set(pinnedPages.map((it) => it.id))
-  const rest = items.filter((it) => !pinnedIds.has(it.id))
-  const cappedRest = capSearchResultsDefault(
-    rest,
-    options.hubMode ? SEARCH_HUB_RESULT_CAP : SEARCH_RESULT_CAP,
-  )
-
+function mergeCappedSearchResults(
+  prioritized: SearchListItem[],
+  capped: SearchListItem[],
+): SearchListItem[] {
   const seen = new Set<string>()
   const out: SearchListItem[] = []
-  for (const it of [...pinnedPages, ...cappedRest]) {
+  for (const it of [...prioritized, ...capped]) {
     if (seen.has(it.id)) continue
     seen.add(it.id)
     out.push(it)
   }
   return out
+}
+
+export function capSearchResults(items: SearchListItem[], options: CapSearchOptions = {}): SearchListItem[] {
+  const exempt = sortSearchItems(items.filter((it) => it.exemptFromCap))
+  const cappedPool = items.filter((it) => !it.exemptFromCap)
+  const totalCap = options.hubMode ? SEARCH_HUB_RESULT_CAP : SEARCH_RESULT_CAP
+
+  const pinned = options.pinnedCourseCode?.trim()
+  if (!pinned) {
+    return mergeCappedSearchResults(exempt, capSearchResultsDefault(cappedPool, totalCap))
+  }
+
+  const pinnedPages = sortSearchItems(cappedPool.filter((it) => isPageForCourse(it, pinned)))
+  const pinnedIds = new Set(pinnedPages.map((it) => it.id))
+  const rest = cappedPool.filter((it) => !pinnedIds.has(it.id))
+  const cappedRest = capSearchResultsDefault(rest, totalCap)
+
+  return mergeCappedSearchResults(exempt, [...pinnedPages, ...cappedRest])
 }

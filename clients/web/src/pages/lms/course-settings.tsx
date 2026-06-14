@@ -1,6 +1,6 @@
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
-import { Check, ImageIcon, Loader2, Move, Save, X } from 'lucide-react'
+import { Check, ImageIcon, Loader2, Move, Save, Upload, X } from 'lucide-react'
 import { LmsPage } from './lms-page'
 import { usePermissions } from '../../context/use-permissions'
 import { authorizedFetch } from '../../lib/api'
@@ -14,6 +14,7 @@ import {
   patchCourseMarkdownTheme,
   type CoursePublic,
   type CourseStructureItem,
+  uploadCourseFile,
 } from '../../lib/courses-api'
 import {
   MARKDOWN_THEME_PRESET_META,
@@ -201,6 +202,8 @@ export default function CourseSettings() {
   const [genStatus, setGenStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [genMessage, setGenMessage] = useState<string | null>(null)
   const [saveHeroStatus, setSaveHeroStatus] = useState<'idle' | 'saving' | 'error'>('idle')
+  const [heroUploadStatus, setHeroUploadStatus] = useState<'idle' | 'uploading' | 'error'>('idle')
+  const [heroImageMessage, setHeroImageMessage] = useState<string | null>(null)
 
   const [positionModalOpen, setPositionModalOpen] = useState(false)
   const [positionDraft, setPositionDraft] = useState({ x: 50, y: 50 })
@@ -607,34 +610,73 @@ export default function CourseSettings() {
     setImageModalOpen(true)
   }
 
+  async function persistHeroImageUrl(imageUrl: string, successMessage: string) {
+    if (!courseCode || !imageUrl.trim()) return false
+    const res = await authorizedFetch(
+      `/api/v1/courses/${encodeURIComponent(courseCode)}/hero-image`,
+      {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl }),
+      },
+    )
+    const raw: unknown = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      const msg = readApiErrorMessage(raw)
+      setHeroImageMessage(msg)
+      setHeroUploadStatus('error')
+      setSaveHeroStatus('error')
+      setGenMessage(msg)
+      return false
+    }
+    const updated = raw as CoursePublic
+    setCourse(updated)
+    setPreviewUrl(updated.heroImageUrl ?? imageUrl)
+    setPendingHeroUrl(null)
+    setSaveHeroStatus('idle')
+    setHeroUploadStatus('idle')
+    setHeroImageMessage(successMessage)
+    setGenMessage(successMessage)
+    return true
+  }
+
   async function onSaveHeroImage() {
     if (!courseCode || !pendingHeroUrl?.trim()) return
     setSaveHeroStatus('saving')
     setGenMessage(null)
+    setHeroImageMessage(null)
     try {
-      const res = await authorizedFetch(
-        `/api/v1/courses/${encodeURIComponent(courseCode)}/hero-image`,
-        {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrl: pendingHeroUrl }),
-        },
-      )
-      const raw: unknown = await res.json().catch(() => ({}))
-      if (!res.ok) {
-        setSaveHeroStatus('error')
-        setGenMessage(readApiErrorMessage(raw))
-        return
-      }
-      const updated = raw as CoursePublic
-      setCourse(updated)
-      setPreviewUrl(updated.heroImageUrl ?? pendingHeroUrl)
-      setPendingHeroUrl(null)
-      setSaveHeroStatus('idle')
-      setGenMessage('Hero image saved to this course.')
+      const ok = await persistHeroImageUrl(pendingHeroUrl, 'Hero image saved to this course.')
+      if (ok) closeImageModal()
     } catch {
       setSaveHeroStatus('error')
       setGenMessage('Could not reach the server.')
+      setHeroImageMessage('Could not reach the server.')
+    }
+  }
+
+  async function onHeroImageUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !courseCode) return
+    if (!file.type.startsWith('image/')) {
+      setHeroUploadStatus('error')
+      setHeroImageMessage('Choose an image file.')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setHeroUploadStatus('error')
+      setHeroImageMessage('Image must be 10MB or smaller.')
+      return
+    }
+    setHeroUploadStatus('uploading')
+    setHeroImageMessage(null)
+    try {
+      const uploaded = await uploadCourseFile(courseCode, file)
+      await persistHeroImageUrl(uploaded.contentPath, 'Hero image uploaded and saved.')
+    } catch (err) {
+      setHeroUploadStatus('error')
+      setHeroImageMessage(err instanceof Error ? err.message : 'Could not upload image.')
     }
   }
 
@@ -1125,7 +1167,7 @@ export default function CourseSettings() {
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
                 <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Hero image</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
-                  Generate a cover image with AI (model is configured under Settings → AI).
+                  Generate a cover image with AI or upload your own (PNG, JPEG, GIF, or WebP up to 10MB).
                 </p>
                 {course.heroImageUrl && (
                   <img
@@ -1144,6 +1186,17 @@ export default function CourseSettings() {
                     <ImageIcon className="h-4 w-4" aria-hidden />
                     Generate image
                   </button>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100">
+                    <Upload className="h-4 w-4" aria-hidden />
+                    {heroUploadStatus === 'uploading' ? 'Uploading…' : 'Upload image'}
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                      className="hidden"
+                      disabled={heroUploadStatus === 'uploading'}
+                      onChange={(e) => void onHeroImageUpload(e)}
+                    />
+                  </label>
                   <button
                     type="button"
                     onClick={openPositionModal}
@@ -1155,6 +1208,18 @@ export default function CourseSettings() {
                     Position image
                   </button>
                 </div>
+                {heroImageMessage && (
+                  <p
+                    className={
+                      heroUploadStatus === 'error'
+                        ? 'mt-3 text-sm text-rose-700 dark:text-rose-400'
+                        : 'mt-3 text-sm text-emerald-700 dark:text-emerald-400'
+                    }
+                    role="status"
+                  >
+                    {heroImageMessage}
+                  </p>
+                )}
               </section>
 
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/5 dark:border-neutral-800 dark:bg-neutral-900">
