@@ -23,7 +23,7 @@ import (
 // requireLibraryIntegrationEnabled returns false and writes 501 when the feature flag is off.
 func (d Deps) requireLibraryIntegrationEnabled(w http.ResponseWriter) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.FFLibraryIntegration && !d.Config.FFLibraryIntegration {
+	if !cfg.FFLibraryIntegration && !d.effectiveConfig().FFLibraryIntegration {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Library integration is not enabled.")
 		return false
 	}

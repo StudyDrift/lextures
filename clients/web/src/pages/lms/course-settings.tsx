@@ -646,7 +646,8 @@ export default function CourseSettings() {
     setGenMessage(null)
     setHeroImageMessage(null)
     try {
-      await persistHeroImageUrl(pendingHeroUrl, 'Hero image saved to this course.')
+      const ok = await persistHeroImageUrl(pendingHeroUrl, 'Hero image saved to this course.')
+      if (ok) closeImageModal()
     } catch {
       setSaveHeroStatus('error')
       setGenMessage('Could not reach the server.')

@@ -17,7 +17,7 @@ import (
 // handleOrgLibraryCollection is GET+POST /api/v1/orgs/{orgId}/library.
 func (d Deps) handleOrgLibraryCollection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFLibrary {
+		if !d.effectiveConfig().FFLibrary {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Library feature is not enabled.")
 			return
 		}
@@ -112,7 +112,7 @@ func (d Deps) handleOrgLibraryCollection() http.HandlerFunc {
 // handleOrgLibraryItem is GET+DELETE /api/v1/orgs/{orgId}/library/{bookId}.
 func (d Deps) handleOrgLibraryItem() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFLibrary {
+		if !d.effectiveConfig().FFLibrary {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Library feature is not enabled.")
 			return
 		}
@@ -164,7 +164,7 @@ func (d Deps) handleOrgLibraryItem() http.HandlerFunc {
 // handleMeReadingLog is GET+POST /api/v1/me/reading-log.
 func (d Deps) handleMeReadingLog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFLibrary {
+		if !d.effectiveConfig().FFLibrary {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Library feature is not enabled.")
 			return
 		}
@@ -251,7 +251,7 @@ func (d Deps) handleMeReadingLog() http.HandlerFunc {
 // handleCourseReadingDashboard is GET /api/v1/courses/{courseCode}/reading-dashboard.
 func (d Deps) handleCourseReadingDashboard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.Config.FFLibrary {
+		if !d.effectiveConfig().FFLibrary {
 			apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Library feature is not enabled.")
 			return
 		}

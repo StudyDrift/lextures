@@ -734,7 +734,7 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			if e.SectionName != nil {
 				r.SectionName = e.SectionName
 			}
-			if d.Config.FFEnrollmentStateMachine && e.State != "" {
+			if d.effectiveConfig().FFEnrollmentStateMachine && e.State != "" {
 				s := e.State
 				r.State = &s
 				if e.StateChangedAt != nil {

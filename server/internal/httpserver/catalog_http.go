@@ -39,7 +39,7 @@ func (d Deps) registerCatalogRoutes(r chi.Router) {
 }
 
 func (d Deps) catalogFeatureOff(w http.ResponseWriter) bool {
-	if !d.Config.FFCatalogIntegration {
+	if !d.effectiveConfig().FFCatalogIntegration {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Course catalog integration is not enabled.")
 		return true
 	}

@@ -20,7 +20,7 @@ import (
 // requireBookstoreEnabled returns false and writes a 501 when the bookstore feature flag is off.
 func (d Deps) requireBookstoreEnabled(w http.ResponseWriter) bool {
 	cfg := d.effectiveConfig()
-	if !cfg.FFBookstoreIntegration && !d.Config.FFBookstoreIntegration {
+	if !cfg.FFBookstoreIntegration && !d.effectiveConfig().FFBookstoreIntegration {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Bookstore integration is not enabled.")
 		return false
 	}
