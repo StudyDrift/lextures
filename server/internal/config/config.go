@@ -333,6 +333,19 @@ type Config struct {
 	// Managed in Settings → Global platform (not process env).
 	FFTranscripts bool
 
+	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
+	// the per-course flag at the callsite). Previously env-only service flags.
+	// DiagnosticAssessmentsEnabled is the platform gate for adaptive diagnostic assessments.
+	DiagnosticAssessmentsEnabled bool
+	// SRSPracticeEnabled is the platform gate for spaced-repetition practice.
+	SRSPracticeEnabled bool
+	// IRTCatModeEnabled enables IRT computerized adaptive testing (CAT) item selection.
+	IRTCatModeEnabled bool
+	// AdaptiveLearnerModelEnabled enables the adaptive learner (θ) model updates.
+	AdaptiveLearnerModelEnabled bool
+	// LearnerModelEMAAlpha is the EMA smoothing factor for the learner model, in (0,1]. Default 0.3.
+	LearnerModelEMAAlpha float64
+
 	// CCRSigningSeedB64 is a base64-encoded 32-byte Ed25519 seed for CLR signing (plan 14.13).
 	CCRSigningSeedB64 string
 	// CCRInstitutionName is the issuer name on generated CLRs (plan 14.13).
@@ -479,42 +492,11 @@ func Load() Config {
 
 		ClamAVAddr: stringDefault(firstNonEmptyTrimmed("CLAMAV_ADDR"), "localhost:3310"),
 
-		XAPIEmissionEnabled: boolEnv("XAPI_EMISSION_ENABLED") || boolEnv("FEATURE_XAPI_EMISSION"),
-		LRSAnonymizeActors:  boolEnv("LRS_ANONYMIZE_ACTORS"),
-
-		FERPAWorkflowEnabled:            boolEnv("FERPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_FERPA_WORKFLOW"),
-		CoppaWorkflowEnabled:            boolEnv("COPPA_WORKFLOW_ENABLED") || boolEnv("FEATURE_COPPA_WORKFLOW"),
-		GDPRModuleEnabled:               boolEnv("GDPR_MODULE_ENABLED") || boolEnv("FEATURE_GDPR_MODULE"),
-		CCPAModuleEnabled:               boolEnv("CCPA_MODULE_ENABLED") || boolEnv("FEATURE_CCPA_MODULE"),
-		DPAPortalEnabled:                boolEnv("DPA_PORTAL_ENABLED") || boolEnv("FEATURE_DPA_PORTAL"),
-		StatePrivacyEnabled:             boolEnv("STATE_PRIVACY_ENABLED") || boolEnv("FEATURE_STATE_PRIVACY"),
-		SOC2ModuleEnabled:               boolEnv("SOC2_MODULE_ENABLED") || boolEnv("FEATURE_SOC2_MODULE"),
-		IsoIsmsEnabled:                  boolEnv("ISO_ISMS_ENABLED") || boolEnv("FEATURE_ISO_ISMS"),
-		AdminAuditLogEnabled:            true, // plan 10.11 default on; disable via platform settings
-		DataResidencyEnabled:            boolEnv("DATA_RESIDENCY_ENABLED") || boolEnv("FEATURE_DATA_RESIDENCY"),
-		AiDisclosureEnabled:             !boolEnv("AI_DISCLOSURE_DISABLED"),
-		SecurityDisclosureModuleEnabled: boolEnv("SECURITY_DISCLOSURE_MODULE_ENABLED") || boolEnv("FEATURE_SECURITY_DISCLOSURE"),
-		BackupModuleEnabled:             boolEnv("BACKUP_MODULE_ENABLED") || boolEnv("FEATURE_BACKUP_MODULE"),
-		RTLEnabled:                      boolEnv("RTL_ENABLED") || boolEnv("FEATURE_RTL_ENABLED"),
-		FFReadingPreferences:            boolEnv("FF_READING_PREFERENCES"),
-		FFSISIntegration:                boolEnv("FF_SIS_INTEGRATION"),
-		FFCatalogIntegration:            boolEnv("FF_CATALOG_INTEGRATION"),
-		FFEnrollmentStateMachine:        boolEnv("FF_ENROLLMENT_STATE_MACHINE"),
-		FFIncompleteGradeWorkflow:       boolEnv("FF_INCOMPLETE_GRADE_WORKFLOW"),
-		FFLibrary:                       boolEnv("FF_LIBRARY"),
-		FFBroadcasts:                    boolEnv("FF_BROADCASTS"),
-		FFClassroomSignals:              boolEnv("FF_CLASSROOM_SIGNALS"),
-		FFUiMode:                        boolEnv("FF_UI_MODE"),
-		FFGradeSubmission:               boolEnv("FF_GRADE_SUBMISSION"),
-		FFAcademicCalendar:              boolEnv("FF_ACADEMIC_CALENDAR"),
-		FFPlagiarismChecks:              boolEnv("FF_PLAGIARISM_CHECKS"),
-		OriginalityDetectionEnabled:     boolEnv("ORIGINALITY_DETECTION_ENABLED"),
-		OriginalityStubExternal:         boolEnv("ORIGINALITY_STUB_EXTERNAL"),
-		FFCourseEvaluations:             boolEnv("FF_COURSE_EVALUATIONS"),
-		FFProctoringIntegration:         boolEnv("FF_PROCTORING_INTEGRATION"),
-		FFCoCurricularTranscript:        boolEnv("FF_CO_CURRICULAR_TRANSCRIPT"),
-		FFLibraryIntegration:            boolEnv("FF_LIBRARY_INTEGRATION"),
-		FFBookstoreIntegration:          boolEnv("FF_BOOKSTORE_INTEGRATION"),
+		// Feature flags below are managed in Settings → Global platform (DB-backed) and
+		// resolved by platformconfig.Merge / applyPlatformBools. They are intentionally NOT
+		// seeded from the process environment — see server/internal/repos/platformconfig.
+		// Operational/security controls (DISABLE_PII_REDACTION, ALLOW_INSECURE_JWT, etc.)
+		// remain environment-driven below.
 
 		CCRSigningSeedB64:  strings.TrimSpace(os.Getenv("CCR_SIGNING_SEED_B64")),
 		CCRInstitutionName: strings.TrimSpace(os.Getenv("CCR_INSTITUTION_NAME")),

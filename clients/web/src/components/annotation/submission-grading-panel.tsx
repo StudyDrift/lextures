@@ -18,6 +18,8 @@ type SubmissionGradingPanelProps = {
   rubric: RubricDefinition | null
   maxPoints: number | null
   disabled?: boolean
+  onGradeSaved?: () => void
+  onGradeCleared?: () => void
 }
 
 function initialGradeMode(grade: SubmissionGradeApi, hasRubric: boolean): GradeMode {
@@ -34,6 +36,8 @@ export function SubmissionGradingPanel({
   rubric: rubricProp,
   maxPoints,
   disabled = false,
+  onGradeSaved,
+  onGradeCleared,
 }: SubmissionGradingPanelProps) {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -46,6 +50,8 @@ export function SubmissionGradingPanel({
   const [posted, setPosted] = useState(false)
   const [gradeMode, setGradeMode] = useState<GradeMode>('points')
   const [fetchedRubric, setFetchedRubric] = useState<RubricDefinition | null>(null)
+  const [hasGrade, setHasGrade] = useState(false)
+  const [flashMsg, setFlashMsg] = useState('')
 
   const rubric = rubricProp ?? fetchedRubric
   const hasRubric = Boolean(rubric && rubric.criteria.length > 0)
@@ -71,6 +77,9 @@ export function SubmissionGradingPanel({
       setComment(grade.instructorComment ?? '')
       setPosted(Boolean(grade.posted))
       setGradeMode(initialGradeMode(grade, hasRubric))
+      const hasPoints = grade.pointsEarned != null && Number.isFinite(grade.pointsEarned)
+      const hasRubricScores = Boolean(grade.rubricScores && Object.keys(grade.rubricScores).length > 0)
+      setHasGrade(hasPoints || hasRubricScores)
       if (grade.rubricScores && Object.keys(grade.rubricScores).length > 0) {
         setRubricScores(grade.rubricScores)
         setPointsInput('')
@@ -91,6 +100,7 @@ export function SubmissionGradingPanel({
       setPointsInput('')
       setRubricScores({})
       setPosted(false)
+      setHasGrade(false)
       setGradeMode(hasRubric ? 'rubric' : 'points')
       setLoadError(null)
       return
@@ -108,6 +118,7 @@ export function SubmissionGradingPanel({
           setPointsInput('')
           setRubricScores({})
           setPosted(false)
+          setHasGrade(false)
           setGradeMode(hasRubric ? 'rubric' : 'points')
           setLoadError(e instanceof Error ? e.message : 'Could not load grade.')
         }
@@ -180,11 +191,39 @@ export function SubmissionGradingPanel({
           instructorComment: comment.trim() || null,
         })
       }
+      setFlashMsg('Grade saved' + (posted ? '' : ' (held until posted)'))
       setSavedFlash(true)
       setPosted(true)
+      setHasGrade(true)
+      onGradeSaved?.()
       window.setTimeout(() => setSavedFlash(false), 2500)
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Could not save grade.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleClearGrade() {
+    if (!submissionId) return
+    setSaving(true)
+    setSaveError(null)
+    setSavedFlash(false)
+    try {
+      await putSubmissionGrade(courseCode, itemId, submissionId, {
+        clearGrade: true,
+      })
+      setPointsInput('')
+      setRubricScores({})
+      setComment('')
+      setPosted(false)
+      setHasGrade(false)
+      setFlashMsg('Grade cleared.')
+      setSavedFlash(true)
+      onGradeCleared?.()
+      window.setTimeout(() => setSavedFlash(false), 2500)
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : 'Could not clear grade.')
     } finally {
       setSaving(false)
     }
@@ -348,17 +387,29 @@ export function SubmissionGradingPanel({
         ) : null}
         {savedFlash ? (
           <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300" role="status">
-            Grade saved{posted ? '' : ' (held until posted)'}.
+            {flashMsg}
           </p>
         ) : null}
-        <button
-          type="button"
-          disabled={formDisabled}
-          onClick={() => void handleSave()}
-          className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {saving ? 'Saving…' : 'Save grade'}
-        </button>
+        <div className="flex gap-2">
+          {hasGrade && (
+            <button
+              type="button"
+              disabled={formDisabled}
+              onClick={() => void handleClearGrade()}
+              className="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:border-neutral-700 dark:bg-neutral-950 dark:text-rose-400 dark:hover:bg-rose-950/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Mark ungraded
+            </button>
+          )}
+          <button
+            type="button"
+            disabled={formDisabled}
+            onClick={() => void handleSave()}
+            className={`${hasGrade ? 'flex-1' : 'w-full'} rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50`}
+          >
+            {saving ? 'Saving…' : 'Save grade'}
+          </button>
+        </div>
       </div>
     </section>
   )

@@ -68,10 +68,12 @@ func TestMerge_H5PDefaultOff(t *testing.T) {
 	}
 }
 
-func TestMerge_BookstoreIntegrationEnvWhenDBUnset(t *testing.T) {
+func TestMerge_BookstoreIntegrationDefaultsOffWhenDBUnset(t *testing.T) {
+	// Feature flags are DB-managed; a process-env/config value must not leak through when the
+	// settings row is unset — the documented default (off) wins.
 	got := Merge(config.Config{FFBookstoreIntegration: true}, nil)
-	if !got.FFBookstoreIntegration {
-		t.Fatal("expected bookstore integration from env when DB unset")
+	if got.FFBookstoreIntegration {
+		t.Fatal("expected bookstore integration off (default) when DB unset, ignoring config/env")
 	}
 }
 

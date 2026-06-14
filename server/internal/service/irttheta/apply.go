@@ -13,19 +13,20 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/learnermodel"
 	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/service/irt"
-	"github.com/lextures/lextures/server/internal/service/learnerstate"
 	"github.com/lextures/lextures/server/internal/service/quizattemptgrading"
 )
 
 // ApplyCATQuizThetaUpdates updates learner_concept_states.theta and appends theta events
-// for each concept tied to calibrated bank items in the CAT history.
+// for each concept tied to calibrated bank items in the CAT history. The learnerModelEnabled
+// gate is the platform AdaptiveLearnerModelEnabled flag, supplied by the caller.
 func ApplyCATQuizThetaUpdates(
 	ctx context.Context,
 	pool *pgxpool.Pool,
 	courseID, userID, attemptID uuid.UUID,
 	hist []coursemodulequiz.AdaptiveQuizHistoryTurn,
+	learnerModelEnabled bool,
 ) error {
-	if !learnerstate.LearnerModelEnabled() {
+	if !learnerModelEnabled {
 		return nil
 	}
 	byConcept := make(map[uuid.UUID][][3]float64)

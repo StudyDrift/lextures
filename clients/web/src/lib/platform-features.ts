@@ -247,6 +247,14 @@ export function bookstoreIntegrationEnabled(): boolean {
   return loaded && snapshot.ffBookstoreIntegration === true
 }
 
+export function transcriptsFeatureEnabled(): boolean {
+  return loaded && snapshot.ffTranscripts === true
+}
+
+export function eportfolioFeatureEnabled(): boolean {
+  return loaded && snapshot.ffEportfolio === true
+}
+
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {
   return loaded && snapshot.ffIncompleteGradeWorkflow === true
 }

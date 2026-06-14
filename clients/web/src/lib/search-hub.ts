@@ -2,6 +2,7 @@ import {
   buildCourseListItems,
   buildCoursePageItems,
   buildGlobalSearchItems,
+  type GlobalSearchBuildOptions,
   type SearchListItem,
 } from './build-search-items'
 import { recentsToSearchItems, listSearchRecents } from './search-recents'
@@ -16,6 +17,7 @@ export function buildSearchHubItems(
   courses: SearchCourseItem[],
   allows: (perm: string) => boolean,
   currentCourseCode: string | null,
+  options: GlobalSearchBuildOptions = {},
 ): SearchListItem[] {
   const items: SearchListItem[] = []
   const seen = new Set<string>()
@@ -47,7 +49,7 @@ export function buildSearchHubItems(
     }
   }
 
-  for (const g of buildGlobalSearchItems(allows)) {
+  for (const g of buildGlobalSearchItems(allows, options)) {
     push(g)
   }
 
@@ -56,7 +58,7 @@ export function buildSearchHubItems(
   }
 
   if (allows(PERM_COURSE_CREATE)) {
-    const create = buildGlobalSearchItems(allows).find((i) => i.id === 'action:/courses/create')
+    const create = buildGlobalSearchItems(allows, options).find((i) => i.id === 'action:/courses/create')
     if (create) push(create)
   }
 

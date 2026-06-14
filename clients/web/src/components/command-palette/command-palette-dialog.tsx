@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
+import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
+import { PERM_RBAC_MANAGE } from '../../lib/rbac-api'
 import {
   capSearchResults,
   filterSearchItems,
@@ -72,6 +74,12 @@ export function CommandPaletteDialog() {
   const navigate = useNavigate()
   const location = useLocation()
   const { allows } = usePermissions()
+  const canManageRbac = allows(PERM_RBAC_MANAGE)
+  const { scimEnabled } = usePlatformScimEnabled(canManageRbac)
+  const globalSearchOptions = useMemo(
+    () => ({ scimEnabled: canManageRbac && scimEnabled }),
+    [canManageRbac, scimEnabled],
+  )
   const navFeatures = useCourseNavFeatures()
   const inputRef = useRef<HTMLInputElement>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
@@ -210,13 +218,21 @@ export function CommandPaletteDialog() {
 
   const filtered = useMemo(() => {
     if (isHubMode) {
-      return capSearchResults(buildSearchHubItems(coursesForSearch, allows, currentCourseCode), {
-        hubMode: true,
-        pinnedCourseCode,
-      })
+      return capSearchResults(
+        buildSearchHubItems(coursesForSearch, allows, currentCourseCode, globalSearchOptions),
+        {
+          hubMode: true,
+          pinnedCourseCode,
+        },
+      )
     }
 
-    const localCandidates = buildLocalSearchCandidates(coursesForSearch, allows, parsed)
+    const localCandidates = buildLocalSearchCandidates(
+      coursesForSearch,
+      allows,
+      parsed,
+      globalSearchOptions,
+    )
     const localFiltered = filterSearchItems(localCandidates, query, {
       currentCourseCode,
     })
@@ -240,6 +256,7 @@ export function CommandPaletteDialog() {
     query,
     activeServerItems,
     pinnedCourseCode,
+    globalSearchOptions,
   ])
 
   const listLength = coursePicker.active ? pickerCourses.length : filtered.length

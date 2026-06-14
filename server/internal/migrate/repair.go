@@ -37,6 +37,10 @@ var demoChecksumRepairMigrations = []struct {
 	{172, "172_platform_feature_flags.sql"},
 	// Idempotent (CREATE ... IF NOT EXISTS + ADD COLUMN IF NOT EXISTS); file drifted on persistent dev/demo DBs.
 	{220, "220_behavior_pbis.sql"},
+	// Idempotent ADD COLUMN IF NOT EXISTS; feature-flag columns may evolve as flags migrate off env.
+	{267, "267_feature_flags_env_to_db.sql"},
+	// Idempotent ADD COLUMN IF NOT EXISTS; backfills the ff_ui_mode column the repo expected.
+	{268, "268_ff_ui_mode_column.sql"},
 }
 
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored

@@ -135,13 +135,14 @@ test.describe('Course Settings - General - Fixed Schedule & Visibility', () => {
 })
 
 test.describe('Course Settings - General - Hero Image', () => {
-  test('hero image section shows generate control; position is disabled without an image', async ({
+  test('hero image section shows generate and upload controls; position is disabled without an image', async ({
     coursePage: page,
     seededCourse,
   }) => {
     await page.goto(`/courses/${seededCourse.courseCode}/settings/general`)
     await expect(page.getByRole('heading', { name: /^hero image$/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /^generate image$/i })).toBeVisible()
+    await expect(page.getByText(/^upload image$/i)).toBeVisible()
     await expect(page.getByRole('button', { name: /^position image$/i })).toBeDisabled()
   })
 

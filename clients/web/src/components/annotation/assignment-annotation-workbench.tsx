@@ -270,6 +270,24 @@ export function AssignmentAnnotationWorkbench({
     else void reloadMine()
   }, [mode, reloadMine, reloadStaffList, presentation, modalOpen])
 
+  const handleGradeSaved = useCallback(() => {
+    if (!current?.id) return
+    setSubmissions((prev) =>
+      prev.map((sub) =>
+        sub.id === current.id ? { ...sub, isGraded: true } : sub
+      )
+    )
+  }, [current?.id])
+
+  const handleGradeCleared = useCallback(() => {
+    if (!current?.id) return
+    setSubmissions((prev) =>
+      prev.map((sub) =>
+        sub.id === current.id ? { ...sub, isGraded: false } : sub
+      )
+    )
+  }, [current?.id])
+
   const myUid = getJwtSubject()
   const isListedGrader = Boolean(
     mode === 'staff' &&
@@ -626,7 +644,7 @@ export function AssignmentAnnotationWorkbench({
     mode === 'staff'
       ? annotationsActive
         ? 'SpeedGrader'
-        : 'Grade submissions'
+        : assignmentTitle
       : 'Your submission'
 
   const documentPreviewContent =
@@ -794,6 +812,8 @@ export function AssignmentAnnotationWorkbench({
                 submittedAt={current?.submittedAt}
                 blindLabel={current?.blindLabel}
                 mimeType={displayMimeType}
+                onGradeSaved={handleGradeSaved}
+                onGradeCleared={handleGradeCleared}
               />
             }
           />

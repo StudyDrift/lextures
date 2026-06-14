@@ -19,6 +19,8 @@ type SubmissionPreviewSidebarProps = {
   submittedAt?: string | null
   blindLabel?: string | null
   mimeType?: string | null
+  onGradeSaved?: () => void
+  onGradeCleared?: () => void
 }
 
 export function SubmissionPreviewSidebar({
@@ -34,6 +36,8 @@ export function SubmissionPreviewSidebar({
   submittedAt,
   blindLabel,
   mimeType,
+  onGradeSaved,
+  onGradeCleared,
 }: SubmissionPreviewSidebarProps) {
   const [tab, setTab] = useState<SidebarTab>('grade')
   const hasRubric = Boolean(rubric && rubric.criteria.length > 0)
@@ -107,6 +111,8 @@ export function SubmissionPreviewSidebar({
           rubric={rubric}
           maxPoints={maxPoints}
           disabled={gradingDisabled}
+          onGradeSaved={onGradeSaved}
+          onGradeCleared={onGradeCleared}
         />
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">

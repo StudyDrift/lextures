@@ -60,6 +60,16 @@ type platformFeaturesJSON struct {
 	FFBookstoreIntegration      bool `json:"ffBookstoreIntegration"`
 	FFEportfolio                bool `json:"ffEportfolio"`
 	FFTranscripts               bool `json:"ffTranscripts"`
+
+	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
+	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
+	DPAPortalEnabled             bool    `json:"dpaPortalEnabled"`
+	SOC2ModuleEnabled            bool    `json:"soc2ModuleEnabled"`
+	DiagnosticAssessmentsEnabled bool    `json:"diagnosticAssessmentsEnabled"`
+	SRSPracticeEnabled           bool    `json:"srsPracticeEnabled"`
+	IRTCatModeEnabled            bool    `json:"irtCatModeEnabled"`
+	AdaptiveLearnerModelEnabled  bool    `json:"adaptiveLearnerModelEnabled"`
+	LearnerModelEMAAlpha         float64 `json:"learnerModelEmaAlpha"`
 }
 
 func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
@@ -116,6 +126,16 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBookstoreIntegration:      cfg.FFBookstoreIntegration,
 		FFEportfolio:                cfg.FFEportfolio,
 		FFTranscripts:               cfg.FFTranscripts,
+
+		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
+		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,
+		DPAPortalEnabled:             cfg.DPAPortalEnabled,
+		SOC2ModuleEnabled:            cfg.SOC2ModuleEnabled,
+		DiagnosticAssessmentsEnabled: cfg.DiagnosticAssessmentsEnabled,
+		SRSPracticeEnabled:           cfg.SRSPracticeEnabled,
+		IRTCatModeEnabled:            cfg.IRTCatModeEnabled,
+		AdaptiveLearnerModelEnabled:  cfg.AdaptiveLearnerModelEnabled,
+		LearnerModelEMAAlpha:         cfg.LearnerModelEMAAlpha,
 	}
 }
 

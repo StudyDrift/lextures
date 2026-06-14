@@ -1,4 +1,4 @@
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, CheckSquare } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { ModuleAssignmentSubmissionApi } from '../../lib/courses-api'
 import {
@@ -82,6 +82,15 @@ function SubmissionStudentPicker({
         className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-start text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
       >
         <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
+        {current && (
+          current.isGraded ? (
+            <span title="Graded" className="inline-flex shrink-0">
+              <CheckSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+            </span>
+          ) : (
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" title="Ungraded" />
+          )
+        )}
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
             open ? 'rotate-180' : ''
@@ -147,6 +156,13 @@ function SubmissionStudentPicker({
                       {i + 1}.
                     </span>
                     <span className="min-w-0 flex-1 truncate">{label}</span>
+                    {submission.isGraded ? (
+                      <span title="Graded" className="inline-flex shrink-0">
+                        <CheckSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                      </span>
+                    ) : (
+                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" title="Ungraded" />
+                    )}
                   </button>
                 )
               })

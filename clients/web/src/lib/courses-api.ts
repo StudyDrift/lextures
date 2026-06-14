@@ -5313,6 +5313,7 @@ export type ModuleAssignmentSubmissionApi = {
   revisionDueAt?: string | null
   revisionFeedback?: string | null
   versionNumber?: number
+  isGraded?: boolean
 }
 
 /** One version from `/submissions/:id/versions` (plan 3.13). */
