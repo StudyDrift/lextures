@@ -64,6 +64,9 @@ async function enableAdvisingFeature(adminToken: string) {
 }
 
 test('Advising: unauthenticated endpoints return 401', async () => {
+  const adminToken = await getAdminToken()
+  await enableAdvisingFeature(adminToken)
+
   const paths = [
     '/api/v1/me/degree-progress',
     '/api/v1/me/advising-notes',
