@@ -12,6 +12,11 @@ import { chromium, type BrowserContext, type Page } from '@playwright/test'
 import lighthouse, { type Result } from 'lighthouse'
 
 import {
+  assertAccessibilityScore,
+  resolveMinAccessibilityScore,
+  type AccessibilityReportSummary,
+} from './lighthouse-a11y.js'
+import {
   apiCreateCourse,
   apiCreateModule,
   apiEnroll,
@@ -38,6 +43,7 @@ export interface LighthouseHarnessResult {
   outputPath: string
   performanceScore: number
   accessibilityScore: number
+  accessibilitySummary: AccessibilityReportSummary
   requestedUrl: string
 }
 
@@ -155,6 +161,7 @@ export async function seedLighthouseDashboardUser(theme: UiTheme = 'dark'): Prom
   for (const title of ['LH Dashboard Course A', 'LH Dashboard Course B']) {
     const course = await apiCreateCourse(token, { title })
     await apiEnroll(token, course.courseCode, email, 'teacher')
+    await apiEnroll(token, course.courseCode, email, 'student')
     await apiCreateModule(token, course.courseCode, 'Unit 1')
   }
 
@@ -233,10 +240,14 @@ function validateReport(report: Result, outputPath: string): LighthouseHarnessRe
 
   writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8')
 
+  const minA11yScore = resolveMinAccessibilityScore()
+  const accessibilitySummary = assertAccessibilityScore(report, minA11yScore)
+
   return {
     outputPath,
     performanceScore,
     accessibilityScore,
+    accessibilitySummary,
     requestedUrl: report.requestedUrl,
   }
 }

@@ -17,11 +17,12 @@ async function main() {
 
   const perfPct = Math.round(result.performanceScore * 100)
   const a11yPct = Math.round(result.accessibilityScore * 100)
+  const { failureCount } = result.accessibilitySummary
 
   console.log(`Lighthouse report written to ${result.outputPath}`)
   console.log(`  requestedUrl: ${result.requestedUrl}`)
   console.log(`  performance: ${perfPct}`)
-  console.log(`  accessibility: ${a11yPct}`)
+  console.log(`  accessibility: ${a11yPct} (${failureCount} weighted audit failure(s))`)
 }
 
 main().catch((err: unknown) => {
