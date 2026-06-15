@@ -25,6 +25,7 @@ describe('Signup', () => {
       </MemoryRouter>,
     )
 
+    await screen.findByLabelText(/^email$/i)
     await user.type(screen.getByLabelText(/^email$/i), 'new@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'password12')
     await user.click(screen.getByRole('button', { name: /create account/i }))
@@ -44,6 +45,7 @@ describe('Signup', () => {
       </MemoryRouter>,
     )
 
+    await screen.findByLabelText(/^email$/i)
     await user.type(screen.getByLabelText(/display name/i), 'Alex')
     await user.type(screen.getByLabelText(/^email$/i), 'alex@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'password12')

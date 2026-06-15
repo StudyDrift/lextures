@@ -52,6 +52,7 @@ import { heroImageObjectStyle } from '../../lib/hero-image-position'
 import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
+import { CourseHeroImage } from '../../components/course-hero-image'
 
 export type { CoursePublic } from '../../lib/courses-api'
 
@@ -162,7 +163,7 @@ function CourseCard({
           suppressNavigateAfterDragRef.current = false
         }}
       >
-        <img
+        <CourseHeroImage
           data-lex-hero
           src={course.heroImageUrl ?? '/course-card-hero.png'}
           alt=""
@@ -288,7 +289,7 @@ function CourseListRow({
             suppressNavigateAfterDragRef.current = false
           }}
         >
-          <img
+          <CourseHeroImage
             data-lex-hero
             src={course.heroImageUrl ?? '/course-card-hero.png'}
             alt=""
@@ -410,7 +411,7 @@ function CourseGalleryTile({
           suppressNavigateAfterDragRef.current = false
         }}
       >
-        <img
+        <CourseHeroImage
           data-lex-hero
           src={course.heroImageUrl ?? '/course-card-hero.png'}
           alt=""

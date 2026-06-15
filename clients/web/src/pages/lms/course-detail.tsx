@@ -49,6 +49,7 @@ import {
   GradingBacklogList,
   type GradingBacklogItem,
 } from '../../components/dashboard/grading-backlog-list'
+import { CourseHeroImage } from '../../components/course-hero-image'
 
 function formatIsoDurationHuman(iso: string | null | undefined): string {
   if (!iso?.trim()) return '—'
@@ -642,6 +643,23 @@ export default function CourseDetail() {
 
           {landing === 'data' ? (
             <>
+              {course.heroImageUrl && (
+                <div className="relative mt-6 h-44 w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm sm:h-56 dark:border-neutral-700">
+                  <CourseHeroImage
+                    src={course.heroImageUrl}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    style={heroImageObjectStyle(course.heroImageObjectPosition)}
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5">
+                    <h2 className="text-lg font-semibold tracking-tight text-white drop-shadow-sm sm:text-xl">
+                      {course.title}
+                    </h2>
+                    <p className="mt-0.5 text-xs font-medium text-white/80">{course.courseCode}</p>
+                  </div>
+                </div>
+              )}
               {viewerIsStudent && courseRecs.length > 0 && courseCode ? (
                 <section aria-label="Suggestions for this course" className="mt-8">
                   <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
@@ -864,14 +882,6 @@ export default function CourseDetail() {
                 </div>
               </section>
 
-              {course.heroImageUrl && (
-                <img
-                  src={course.heroImageUrl}
-                  alt=""
-                  className="mt-8 max-h-64 w-full max-w-xl rounded-2xl border border-slate-200 object-cover"
-                  style={heroImageObjectStyle(course.heroImageObjectPosition)}
-                />
-              )}
               <details className="group mt-8 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
                 <summary className="cursor-pointer list-none text-sm font-semibold text-slate-800 marker:hidden dark:text-neutral-100 [&::-webkit-details-marker]:hidden">
                   <span className="inline-flex items-center gap-2">

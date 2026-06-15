@@ -26,6 +26,7 @@ describe('Login', () => {
       </MemoryRouter>,
     )
 
+    await screen.findByLabelText(/^email$/i)
     await user.type(screen.getByLabelText(/^email$/i), 'learner@example.com')
     await user.type(screen.getByLabelText(/^password$/i), 'hunter2correct')
     await user.click(screen.getByRole('button', { name: /^sign in$/i }))

@@ -13,6 +13,28 @@ function LiveRegion({ children }: { children: string }) {
   return <span className="sr-only">{children}</span>
 }
 
+export function DashboardCourseSectionSkeleton() {
+  return (
+    <div className="space-y-6" aria-busy="true">
+      <LiveRegion>Loading course details.</LiveRegion>
+      <div>
+        <Shimmer className="h-3 w-20" />
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+          <Shimmer className="h-5 w-40" />
+          <ul className="mt-4 space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <li key={i} className="rounded-xl border border-slate-100 px-3 py-3 dark:border-neutral-800">
+                <Shimmer className="h-3 w-28" />
+                <Shimmer className="mt-2 h-4 w-full max-w-sm" />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function DashboardLoadingSkeleton() {
   return (
     <div className="mt-8 space-y-10" aria-busy="true">

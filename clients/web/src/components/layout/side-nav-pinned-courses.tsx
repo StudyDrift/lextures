@@ -4,9 +4,17 @@ import { heroImageObjectStyle } from '../../lib/hero-image-position'
 import type { PinnedCourseSummary } from '../../lib/course-catalog-settings-api'
 import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
+import { CourseHeroImage } from '../course-hero-image'
 
 function pinnedCourseTitle(course: PinnedCourseSummary): string {
   return course.catalogNickname?.trim() || course.title
+}
+
+const gridColsMap: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-3',
+  4: 'grid-cols-4',
 }
 
 export function SideNavPinnedCourses() {
@@ -16,9 +24,12 @@ export function SideNavPinnedCourses() {
 
   if (loading || pinnedCourses.length === 0) return null
 
+  const cols = Math.min(pinnedCourses.length, 4)
+  const gridColsClass = gridColsMap[cols] ?? 'grid-cols-4'
+
   return (
     <div
-      className={`shrink-0 px-3 pb-2 ${sideNavCollapsed ? 'flex flex-col items-center gap-1.5' : 'flex flex-wrap gap-1.5'}`}
+      className={`shrink-0 px-3 py-3 ${sideNavCollapsed ? 'flex flex-col items-center gap-1.5' : `grid ${gridColsClass} gap-1.5`}`}
       aria-label="Pinned courses"
     >
       {pinnedCourses.map((course) => {
@@ -40,13 +51,13 @@ export function SideNavPinnedCourses() {
               aria-current={active ? 'page' : undefined}
               className={[
                 'group relative block overflow-hidden rounded-xl ring-1 ring-black/[0.06] transition hover:ring-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:ring-white/10 dark:hover:ring-indigo-400/40',
-                sideNavCollapsed ? 'h-9 w-9' : 'h-10 w-10',
+                sideNavCollapsed ? 'h-9 w-9' : 'h-10 w-full',
                 active ? 'ring-2 ring-indigo-500 dark:ring-indigo-400' : '',
               ]
                 .filter(Boolean)
                 .join(' ')}
             >
-              <img
+              <CourseHeroImage
                 src={course.heroImageUrl ?? '/course-card-hero.png'}
                 alt=""
                 draggable={false}
