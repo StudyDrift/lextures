@@ -139,6 +139,12 @@ export function buildGlobalSearchItems(
       path: '/settings/notifications',
       hint: 'notifications alerts email preferences',
     },
+    {
+      title: 'Integrations',
+      subtitle: 'User settings',
+      path: '/settings/integrations',
+      hint: 'integrations access keys api tokens mcp ai agents tools',
+    },
   ]
 
   for (const g of globalPages) {

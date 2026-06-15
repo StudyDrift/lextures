@@ -13,7 +13,9 @@ import (
 )
 
 // handleFeedWS is GET /api/v1/courses/{course_code}/feed/ws — first text: {"authToken":"…"}.
-// Full feed broadcast is not ported yet; the connection stays open so the SPA does not log handshake failures.
+// After auth it subscribes to the feed hub for this course and forwards change
+// events to the client, so channels/messages updated from any source (web or CLI)
+// refresh the SPA in real time.
 func (d Deps) handleFeedWS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -67,10 +69,34 @@ func (d Deps) handleFeedWS() http.HandlerFunc {
 		}
 		runCtx, stop := context.WithCancel(r.Context())
 		defer stop()
+
+		// Drain client reads (e.g. close frames) so the connection state stays current.
+		go func() {
+			for {
+				if _, _, err := c.Read(runCtx); err != nil {
+					stop()
+					return
+				}
+			}
+		}()
+
+		events, unsubscribe := d.FeedHub.Subscribe(courseCode)
+		defer unsubscribe()
 		for {
-			_, _, err := c.Read(runCtx)
-			if err != nil {
+			select {
+			case <-runCtx.Done():
 				return
+			case ev := <-events:
+				payload, err := json.Marshal(ev)
+				if err != nil {
+					continue
+				}
+				writeCtx, cancel := context.WithTimeout(runCtx, 10*time.Second)
+				err = c.Write(writeCtx, websocket.MessageText, payload)
+				cancel()
+				if err != nil {
+					return
+				}
 			}
 		}
 	}

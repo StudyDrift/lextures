@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/orgunit"
@@ -110,6 +111,19 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 		}
 		if courses == nil {
 			courses = []course.CoursePublic{}
+		}
+		if tok, ok := auth.APITokenFromContext(ctx); ok && len(tok.CourseIDs) > 0 {
+			allowed := make(map[string]struct{}, len(tok.CourseIDs))
+			for _, id := range tok.CourseIDs {
+				allowed[id.String()] = struct{}{}
+			}
+			filtered := make([]course.CoursePublic, 0, len(courses))
+			for _, c := range courses {
+				if _, ok := allowed[c.ID]; ok {
+					filtered = append(filtered, c)
+				}
+			}
+			courses = filtered
 		}
 		if d.effectiveConfig().FFEnrollmentStateMachine {
 			for i := range courses {

@@ -7,6 +7,7 @@ import {
   Pencil,
   Hash,
   Plus,
+  Trash2,
   X,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -20,6 +21,7 @@ import {
   bodyHasEveryoneTag,
   collectMentionUserIdsFromBody,
   createFeedChannel,
+  deleteFeedMessage,
   fetchFeedChannels,
   fetchFeedMessages,
   fetchFeedRoster,
@@ -37,7 +39,7 @@ import { fetchCourse, type CoursePublic } from '../../lib/courses-api'
 import { getAccessToken, getJwtSubject } from '../../lib/auth'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
-import { formatAbsolute, formatRelative, formatRelativeCompact } from '../../lib/format-datetime'
+import { formatAbsolute, formatRelativeCompact } from '../../lib/format-datetime'
 import { TabPresenceHint } from '../../components/presence/tab-presence-hint'
 import { LmsPage } from './lms-page'
 
@@ -81,10 +83,12 @@ function displayInitials(label: string): string {
 function FeedAvatar({
   userId,
   name,
+  avatarUrl,
   size = 'md',
 }: {
   userId: string
   name: string
+  avatarUrl?: string | null
   size?: 'xs' | 'sm' | 'md'
 }) {
   const h = hueFromString(userId.toLowerCase())
@@ -95,6 +99,24 @@ function FeedAvatar({
       : size === 'sm'
         ? 'h-7 w-7 text-[0.65rem]'
         : 'h-8 w-8 text-xs'
+  const resolved = avatarUrl?.trim() ?? ''
+  const [imageError, setImageError] = useState(false)
+
+  useEffect(() => {
+    setImageError(false)
+  }, [resolved])
+
+  if (resolved && !imageError) {
+    return (
+      <img
+        src={resolved}
+        alt=""
+        className={`shrink-0 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-neutral-950 ${dim}`}
+        onError={() => setImageError(true)}
+      />
+    )
+  }
+
   return (
     <div
       className={`flex shrink-0 select-none items-center justify-center rounded-full font-semibold text-white shadow-sm ring-2 ring-white dark:ring-neutral-950 ${dim}`}
@@ -571,6 +593,19 @@ export default function CourseFeedPage() {
     }
   }
 
+  const deleteMessage = async (messageId: string) => {
+    if (!courseCode) return
+    if (!globalThis.confirm('Delete this message? This cannot be undone.')) return
+    try {
+      await deleteFeedMessage(courseCode, messageId)
+      if (replyTo?.id === messageId) setReplyTo(null)
+      if (editingId === messageId) setEditingId(null)
+      await reloadMessages()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not delete message.')
+    }
+  }
+
   if (!courseCode) {
     return (
       <LmsPage title="Feed" description="">
@@ -896,13 +931,7 @@ export default function CourseFeedPage() {
                 className="min-h-0 flex-1 overflow-y-auto px-3 py-1 sm:px-4"
               >
                 {/* Message spooling + rendering */}
-                {messages.map((m, index) => {
-                  const prev = index > 0 ? messages[index - 1] : null
-                  const sameAuthor = prev && prev.authorUserId === m.authorUserId
-                  const timeDiff = prev ? (new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime()) : Infinity
-                  const withinWindow = timeDiff < 5 * 60 * 1000 // 5 minutes (practical spooling window)
-                  const showAuthorForThis = !(sameAuthor && withinWindow)
-
+                {messages.map((m) => {
                   return (
                     <article
                       key={m.id}
@@ -930,8 +959,8 @@ export default function CourseFeedPage() {
                         }}
                         onToggleLike={() => void toggleLike(m.id, m.viewerHasLiked)}
                         onTogglePin={() => void togglePin(m.id, !m.pinnedAt)}
+                        onDelete={() => void deleteMessage(m.id)}
                         showTranslate={course?.multilingualMessagingEnabled === true}
-                        showAuthor={showAuthorForThis}
                       />
 
                     {m.replies.length > 0 && (
@@ -983,6 +1012,7 @@ export default function CourseFeedPage() {
                                       }}
                                       onToggleLike={() => void toggleLike(r.id, r.viewerHasLiked)}
                                       onTogglePin={() => {}}
+                                      onDelete={() => void deleteMessage(r.id)}
                                       showTranslate={course?.multilingualMessagingEnabled === true}
                                     />
                                   </div>
@@ -1058,8 +1088,8 @@ type MessageBlockProps = {
   onReply: () => void
   onToggleLike: () => void
   onTogglePin: () => void
+  onDelete: () => void
   showTranslate?: boolean
-  showAuthor?: boolean   // for message spooling (same author within time window)
 }
 
 function MessageBlock({
@@ -1078,32 +1108,30 @@ function MessageBlock({
   onReply,
   onToggleLike,
   onTogglePin,
+  onDelete,
   showTranslate,
-  showAuthor = true,
 }: MessageBlockProps) {
   const mine =
     viewerId !== null && m.authorUserId.toLowerCase() === viewerId.toLowerCase()
   const editing = editingId === m.id
   const showActionsMenu = !editing && (depth === 0 || mine)
   const author = authorLabel(m)
+  const authorAvatarUrl = peopleById.get(m.authorUserId)?.avatarUrl
   const isReply = depth > 0
   const avatarSize: 'xs' | 'sm' | 'md' = depth === 0 ? 'md' : 'xs'
-  const isRootWithoutAuthor = depth === 0 && !showAuthor
 
   return (
     <div
       className={
         isReply
           ? 'group/msg flex gap-2 rounded px-1 py-0.5 transition-colors group-hover/replyrow:bg-neutral-800/60 dark:group-hover/replyrow:bg-neutral-700/50'
-          : isRootWithoutAuthor
-            ? 'group/msg flex gap-2 px-1 py-0.5'
-            : 'group/msg rounded-xl px-1 py-0.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-900'
+          : 'group/msg rounded-xl px-1 py-0.5 transition-colors hover:bg-slate-50/70 dark:hover:bg-neutral-900'
       }
     >
       {isReply ? (
         // Discord-style compact reply row
         <>
-          <FeedAvatar userId={m.authorUserId} name={author} size={avatarSize} />
+          <FeedAvatar userId={m.authorUserId} name={author} avatarUrl={authorAvatarUrl} size={avatarSize} />
           <div className="min-w-0 flex-1 pt-0.5">
             {/* Header: username + tiny timestamp + badges + reaction pill */}
             <div className="flex items-baseline gap-x-1.5 leading-none">
@@ -1163,6 +1191,19 @@ function MessageBlock({
                         Edit
                       </button>
                     )}
+                    {mine && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-3 py-1 text-start text-rose-300 hover:bg-neutral-800"
+                        onClick={(e) => {
+                          closeParentDetails(e.currentTarget)
+                          onDelete()
+                        }}
+                      >
+                        <Trash2 className="h-3 w-3" aria-hidden />
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </details>
               )}
@@ -1177,13 +1218,7 @@ function MessageBlock({
       ) : (
         // Original root post layout (unchanged)
         <div className="flex gap-3">
-          {isRootWithoutAuthor ? (
-            <div className="w-8 shrink-0 pt-0.5 text-right text-[10px] font-medium text-neutral-400 dark:text-neutral-500 tabular-nums">
-              {formatRelative(m.createdAt)}
-            </div>
-          ) : (
-            <FeedAvatar userId={m.authorUserId} name={author} size={avatarSize} />
-          )}
+          <FeedAvatar userId={m.authorUserId} name={author} avatarUrl={authorAvatarUrl} size={avatarSize} />
           <div className="min-w-0 flex-1 pt-0.5">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
@@ -1255,6 +1290,19 @@ function MessageBlock({
                       >
                         <Pencil className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                         Edit
+                      </button>
+                    )}
+                    {mine && (
+                      <button
+                        type="button"
+                        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-start text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
+                        onClick={(e) => {
+                          closeParentDetails(e.currentTarget)
+                          onDelete()
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
+                        Delete
                       </button>
                     )}
                     {staff && depth === 0 && (

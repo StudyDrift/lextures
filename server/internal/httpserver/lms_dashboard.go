@@ -13,6 +13,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefeed"
@@ -306,6 +307,15 @@ func (d Deps) requireCourseAccess(w http.ResponseWriter, r *http.Request) (strin
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 		return "", uuid.UUID{}, false
 	}
+	cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+	if err != nil || cid == nil {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+		return "", uuid.UUID{}, false
+	}
+	if !auth.AccessKeyAllowsCourse(r.Context(), *cid) {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+		return "", uuid.UUID{}, false
+	}
 	return courseCode, viewer, true
 }
 
@@ -474,6 +484,7 @@ func (d Deps) handleCreateFeedChannel() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create feed channel.")
 			return
 		}
+		d.FeedHub.ChannelsChanged(courseCode)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp{
 			ID:        ch.ID.String(),
@@ -484,12 +495,144 @@ func (d Deps) handleCreateFeedChannel() http.HandlerFunc {
 	}
 }
 
+// handleUpdateFeedChannel is PATCH /api/v1/courses/{course_code}/feed/channels/{channel_id} — rename a channel.
+func (d Deps) handleUpdateFeedChannel() http.HandlerFunc {
+	type req struct {
+		Name string `json:"name"`
+	}
+	type resp struct {
+		ID        string `json:"id"`
+		Name      string `json:"name"`
+		SortOrder int    `json:"sortOrder"`
+		CreatedAt string `json:"createdAt"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodPatch {
+			w.Header().Set("Allow", http.MethodPatch+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		canEdit, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !canEdit {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+			return
+		}
+		channelID, err := uuid.Parse(chi.URLParam(r, "channel_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid channel id.")
+			return
+		}
+		var body req
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		name := strings.TrimSpace(body.Name)
+		if name == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Channel name is required.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		ch, err := coursefeed.UpdateChannel(r.Context(), d.Pool, *cid, channelID, name)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update feed channel.")
+			return
+		}
+		if ch == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Channel not found.")
+			return
+		}
+		d.FeedHub.ChannelsChanged(courseCode)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp{
+			ID:        ch.ID.String(),
+			Name:      ch.Name,
+			SortOrder: ch.SortOrder,
+			CreatedAt: ch.CreatedAt.UTC().Format(time.RFC3339),
+		})
+	}
+}
+
+// handleDeleteFeedChannel is DELETE /api/v1/courses/{course_code}/feed/channels/{channel_id}.
+func (d Deps) handleDeleteFeedChannel() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodDelete {
+			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		canEdit, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !canEdit {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission for this action.")
+			return
+		}
+		channelID, err := uuid.Parse(chi.URLParam(r, "channel_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid channel id.")
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		deleted, err := coursefeed.DeleteChannel(r.Context(), d.Pool, *cid, channelID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete feed channel.")
+			return
+		}
+		if !deleted {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Channel not found.")
+			return
+		}
+		d.FeedHub.ChannelsChanged(courseCode)
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
 // handleFeedRoster is GET /api/v1/courses/{course_code}/feed/roster — people for @mentions.
 func (d Deps) handleFeedRoster() http.HandlerFunc {
 	type person struct {
 		UserID      string  `json:"userId"`
 		Email       string  `json:"email"`
 		DisplayName *string `json:"displayName"`
+		AvatarURL   *string `json:"avatarUrl,omitempty"`
 	}
 	type resp struct {
 		People []person `json:"people"`
@@ -519,6 +662,7 @@ func (d Deps) handleFeedRoster() http.HandlerFunc {
 				UserID:      p.UserID.String(),
 				Email:       p.Email,
 				DisplayName: p.DisplayName,
+				AvatarURL:   p.AvatarURL,
 			})
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -567,7 +711,19 @@ func (d Deps) handleFeedMessagesList() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
-		msgs, err := coursefeed.ListMessagesThreaded(r.Context(), d.Pool, channelID, viewer, 200)
+		limitRoots := int64(200)
+		if raw := strings.TrimSpace(r.URL.Query().Get("limit")); raw != "" {
+			n, err := strconv.Atoi(raw)
+			if err != nil || n <= 0 {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid limit.")
+				return
+			}
+			if n > 200 {
+				n = 200
+			}
+			limitRoots = int64(n)
+		}
+		msgs, err := coursefeed.ListMessagesThreaded(r.Context(), d.Pool, channelID, viewer, limitRoots)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load messages.")
 			return
@@ -663,6 +819,7 @@ func (d Deps) handleFeedMessagePost() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create message.")
 			return
 		}
+		d.FeedHub.MessagesChanged(courseCode, channelID.String())
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"id": id.String()})
 	}
@@ -817,6 +974,63 @@ func (d Deps) handlePatchFeedMessage() http.HandlerFunc {
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
+	}
+}
+
+// handleDeleteFeedMessage is DELETE /api/v1/courses/{course_code}/feed/messages/{message_id}
+func (d Deps) handleDeleteFeedMessage() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		if r.Method != http.MethodDelete {
+			w.Header().Set("Allow", http.MethodDelete+","+http.MethodOptions)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		messageID, err := uuid.Parse(chi.URLParam(r, "message_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid message id.")
+			return
+		}
+		belongs, err := coursefeed.MessageBelongsToCourse(r.Context(), d.Pool, *cid, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to validate message.")
+			return
+		}
+		if !belongs {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		author, _, err := coursefeed.GetMessageAuthorAndIsRoot(r.Context(), d.Pool, messageID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load message.")
+			return
+		}
+		if author != viewer {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only the author can delete this message.")
+			return
+		}
+		deleted, err := coursefeed.DeleteMessage(r.Context(), d.Pool, messageID, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete message.")
+			return
+		}
+		if !deleted {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

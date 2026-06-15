@@ -2,9 +2,11 @@ package coursefeed
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -94,6 +96,39 @@ func CreateChannel(ctx context.Context, pool *pgxpool.Pool, courseID, viewerID u
 		return nil, err
 	}
 	return &c, nil
+}
+
+// UpdateChannel renames a course-level (non-group) channel. It returns the
+// updated channel, or (nil, nil) if no matching channel exists for the course.
+func UpdateChannel(ctx context.Context, pool *pgxpool.Pool, courseID, channelID uuid.UUID, name string) (*ChannelPublic, error) {
+	var c ChannelPublic
+	err := pool.QueryRow(ctx, `
+		UPDATE course.feed_channels
+		SET name = $3
+		WHERE id = $1 AND course_id = $2 AND group_id IS NULL
+		RETURNING id, name, sort_order, created_at
+	`, channelID, courseID, name).Scan(&c.ID, &c.Name, &c.SortOrder, &c.CreatedAt)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &c, nil
+}
+
+// DeleteChannel removes a course-level (non-group) channel and (via ON DELETE
+// CASCADE) its messages, likes, and mentions. It returns false if no matching
+// channel existed for the course.
+func DeleteChannel(ctx context.Context, pool *pgxpool.Pool, courseID, channelID uuid.UUID) (bool, error) {
+	tag, err := pool.Exec(ctx, `
+		DELETE FROM course.feed_channels
+		WHERE id = $1 AND course_id = $2 AND group_id IS NULL
+	`, channelID, courseID)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
 }
 
 // EnsureGroupDefaultChannel creates a "general" channel for the group if none exists.

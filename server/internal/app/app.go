@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
+	"github.com/lextures/lextures/server/internal/feedevents"
 	"github.com/lextures/lextures/server/internal/httpserver"
 	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
@@ -114,6 +115,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		Lti:               ltiRT,
 		BrandingResolver:  brandingResolver,
 		NotifHub:          notifevents.New(),
+		FeedHub:           feedevents.New(),
 		CanvasImportHub:   canvasImportHub,
 		CanvasImportQueue: canvasImportQueue,
 		Storage:           storage,
