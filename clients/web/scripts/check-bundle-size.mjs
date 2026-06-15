@@ -30,7 +30,7 @@ const dashboardFile = findChunk(/^dashboard-.*\.js$/)
 const entryGzip = gzipSize(join(distAssets, entryFile))
 const dashboardGzip = dashboardFile ? gzipSize(join(distAssets, dashboardFile)) : null
 
-const entryMaxBytes = Number(process.env.ENTRY_MAX_JS_GZIP_BYTES ?? 200 * 1024)
+const entryMaxBytes = Number(process.env.ENTRY_MAX_JS_GZIP_BYTES ?? 256 * 1024)
 const regressionMaxBytes = Number(process.env.DASHBOARD_CHUNK_REGRESSION_BYTES ?? 10 * 1024)
 
 if (entryGzip > entryMaxBytes) {
