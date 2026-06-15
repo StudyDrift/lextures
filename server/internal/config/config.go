@@ -335,6 +335,9 @@ type Config struct {
 	// FFAdvisingIntegration enables advising appointment links, degree progress, and advisor notes (plan 14.14).
 	// Managed in Settings → Global platform (not process env).
 	FFAdvisingIntegration bool
+	// FFResearchConsent enables research / IRB consent studies, consent prompts, and gated data export (plan 14.15).
+	// Managed in Settings → Global platform (not process env).
+	FFResearchConsent bool
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.

@@ -73,6 +73,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Degree progress widget, advising appointment links, and advisor notes on the student dashboard.',
   },
   {
+    key: 'ffResearchConsent',
+    label: 'Research / IRB consent',
+    description:
+      'IRB consent studies: present consent forms to students, record decisions, and gate research data export to consenting participants.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:
