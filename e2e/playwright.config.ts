@@ -23,6 +23,7 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'on-first-retry',
+    ...(process.env.LH_BROWSER_CHANNEL ? { channel: process.env.LH_BROWSER_CHANNEL } : {}),
   },
   projects: [
     {

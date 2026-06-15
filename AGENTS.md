@@ -43,6 +43,19 @@ Frontend env: `VITE_API_URL=http://localhost:8080` (set when running `npm run de
 | Frontend typecheck | `npm run typecheck` | `clients/web/` |
 | Frontend tests | `npm run test` | `clients/web/` |
 | Frontend dev server | `npm run dev` | `clients/web/` |
+| Lighthouse (dashboard, dark) | `npm run lighthouse:dashboard:dark` | `clients/web/` or `e2e/` (stack must be running) |
+| E2E suite | `make e2e` | repo root |
+| E2E (stack already up) | `make e2e-run` | repo root |
+
+### Lighthouse harness (LH.1)
+
+Reproducible Lighthouse audits for the signed-in global dashboard:
+
+1. Start the stack (`make dev` or e2e-local).
+2. Run `npm run lighthouse:dashboard:dark` from `clients/web/` or `e2e/`.
+3. Inspect `docs/lighthouse/global-dashboard-darkmode.json`.
+
+If the report shows `NO_FCP`, verify the auth token (`LH_TOKEN`), API availability, and that the browser is not backgrounded. Use `LH_REQUIRE_AUTH=1` without `LH_TOKEN` to confirm the harness fails fast instead of producing an invalid report.
 
 ### Gotchas
 

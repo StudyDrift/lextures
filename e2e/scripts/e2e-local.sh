@@ -29,6 +29,7 @@
 #   E2E_SERVER_BIN       — path to a pre-built API binary (faster than go run)
 #   E2E_WEB_MODE=preview — serve clients/web/dist via vite preview (requires npm run build)
 #   E2E_SKIP_DEPS=1      — skip npm ci and playwright install (deps installed in a prior step)
+#   E2E_LIGHTHOUSE=1     — run Lighthouse dashboard harness instead of Playwright tests
 #   E2E_API_PORT         — API listen port (default: random free port locally, 8080 in CI)
 #   E2E_HEALTH_POLL_SECS / E2E_HEALTH_MAX_ATTEMPTS — readiness polling tuning
 #
@@ -315,6 +316,19 @@ PIDS+=($!)
 cd "${REPO_ROOT}"
 
 wait_for_http "http://localhost:5173" "web client" || exit 1
+
+if [[ "${E2E_LIGHTHOUSE:-}" == "1" ]]; then
+  echo "==> Running Lighthouse dashboard harness..."
+  cd "${REPO_ROOT}/e2e"
+  if [[ "${E2E_SKIP_DEPS:-}" != "1" ]]; then
+    npm ci --prefer-offline --quiet
+    npx playwright install --with-deps chromium
+  fi
+  E2E_BASE_URL="http://localhost:5173" \
+    E2E_API_URL="http://localhost:${E2E_API_PORT}" \
+    npm run lighthouse:dashboard:dark
+  exit $?
+fi
 
 # Run Playwright. Optional args are forwarded to `playwright test` (paths relative to
 # e2e/ after cd). Paths given as e2e/tests/... from repo root are normalized.
