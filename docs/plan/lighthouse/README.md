@@ -20,10 +20,10 @@ Implementation plans derived from Lighthouse reports stored in [`docs/lighthouse
 
 | Report | Page | Theme | Status | Plans |
 |---|---|---|---|---|
-| [`global-dashboard-darkmode.json`](../../lighthouse/global-dashboard-darkmode.json) | Global dashboard (`/`) | Dark (`.dark`) | **Valid** — Performance re-baselined after LH.2 (see [LH.2](../../completed/lighthouse/LH.2-global-dashboard-darkmode-performance.md)) | [LH.3](LH.3-global-dashboard-darkmode-accessibility.md) |
+| [`global-dashboard-darkmode.json`](../../lighthouse/global-dashboard-darkmode.json) | Global dashboard (`/`) | Dark (`.dark`) | **Valid** — Accessibility **100** after LH.3 (see [LH.3](../../completed/lighthouse/LH.3-global-dashboard-darkmode-accessibility.md)); Performance re-baselined after LH.2 | — |
 
 ## Plans
 
 - [LH.1 — Global dashboard dark mode: reproducible Lighthouse harness](../../completed/lighthouse/LH.1-global-dashboard-darkmode-audit-harness.md) (completed)
 - [LH.2 — Global dashboard dark mode: performance](../../completed/lighthouse/LH.2-global-dashboard-darkmode-performance.md) (completed)
-- [LH.3 — Global dashboard dark mode: accessibility](LH.3-global-dashboard-darkmode-accessibility.md)
+- [LH.3 — Global dashboard dark mode: accessibility](../../completed/lighthouse/LH.3-global-dashboard-darkmode-accessibility.md) (completed)

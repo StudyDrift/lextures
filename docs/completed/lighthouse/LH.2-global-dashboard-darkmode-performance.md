@@ -39,4 +39,4 @@
 - Dashboard: `clients/web/src/pages/lms/dashboard.tsx`
 - Lazy routes: `clients/web/src/lazy-pages.ts`, `clients/web/src/app.tsx`
 - Bundle check: `clients/web/scripts/check-bundle-size.mjs`
-- Related: [LH.1](LH.1-global-dashboard-darkmode-audit-harness.md), [LH.3](../../plan/lighthouse/LH.3-global-dashboard-darkmode-accessibility.md)
+- Related: [LH.1](LH.1-global-dashboard-darkmode-audit-harness.md), [LH.3](../completed/lighthouse/LH.3-global-dashboard-darkmode-accessibility.md)

@@ -1,5 +1,5 @@
 # Nightly Lighthouse harness for the signed-in global dashboard (LH.1).
-# Non-blocking until LH.2/LH.3 set performance budgets.
+# Accessibility gate is blocking (LH.3); performance remains informational until budgets land in CI.
 
 name: Lighthouse
 
@@ -25,7 +25,6 @@ jobs:
     name: Dashboard (dark mode)
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    continue-on-error: true
     env:
       E2E_USE_DOCKER: '0'
       E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
@@ -39,6 +38,7 @@ jobs:
       CI: 'true'
       PAGE_URL: http://localhost:5173/
       THEME: dark
+      LH_MIN_A11Y_SCORE: '0.95'
     services:
       postgres:
         image: postgres:16-alpine
@@ -105,6 +105,13 @@ jobs:
             }
             const perf = r.categories?.performance?.score;
             const a11y = r.categories?.accessibility?.score;
+            const minA11y = Number(process.env.LH_MIN_A11Y_SCORE ?? '0.95');
+            const weightedFails = (r.categories?.accessibility?.auditRefs ?? [])
+              .filter((ref) => ref.weight > 0)
+              .filter((ref) => {
+                const audit = r.audits?.[ref.id];
+                return audit && audit.score !== null && audit.score < 1;
+              });
             const summary = [
               '## Lighthouse — global dashboard (dark)',
               '',
@@ -113,9 +120,15 @@ jobs:
               '| Performance | ' + (perf != null ? Math.round(perf * 100) : 'n/a') + ' |',
               '| Accessibility | ' + (a11y != null ? Math.round(a11y * 100) : 'n/a') + ' |',
               '',
-              'Report: `docs/lighthouse/global-dashboard-darkmode.json`',
+              'Weighted a11y audit failures: ' + weightedFails.length,
+              '',
+              'Report: \`docs/lighthouse/global-dashboard-darkmode.json\`',
             ].join('\n');
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+            if (typeof a11y !== 'number' || a11y < minA11y) {
+              console.error('Accessibility score', a11y, 'below minimum', minA11y);
+              process.exit(1);
+            }
           "
 
       - name: Upload Lighthouse JSON

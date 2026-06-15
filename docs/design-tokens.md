@@ -92,6 +92,8 @@ All pairs achieve ≥ 4.5:1 (WCAG AA normal text).
 | `indigo-400` | `neutral-950` | 6.64:1 | Link / accent color on page background |
 | `indigo-400` | `neutral-900` | 6.25:1 | Link / accent color on card surfaces |
 
+Lighthouse accessibility baseline (LH.3): global dashboard dark mode scores **100** on mobile; see `docs/lighthouse/global-dashboard-darkmode.json`.
+
 ---
 
 ## Status colors — non-color differentiators (SC 1.4.1)
