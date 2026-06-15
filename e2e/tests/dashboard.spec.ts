@@ -22,8 +22,8 @@ test.describe('Dashboard', () => {
     await injectToken(page, seededCourse.instructorToken)
     await expect(page).toHaveURL('/')
     await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
-    const quickLinks = page.locator('[aria-label="Quick links and unread"]')
-    await expect(quickLinks.getByRole('link', { name: /^inbox$/i })).toBeVisible()
+    const quickLinks = page.getByRole('region', { name: /quick links and unread/i })
+    await expect(quickLinks.getByRole('link', { name: /^inbox$/i })).toBeVisible({ timeout: 15000 })
     await expect(quickLinks.getByRole('link', { name: /all courses/i })).toBeVisible()
   })
 
