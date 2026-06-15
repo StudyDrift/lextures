@@ -19,8 +19,15 @@ test.describe('Dashboard', () => {
   })
 
   test('shows quick links before course detail sections finish loading', async ({ page, seededCourse }) => {
+    const isCourseCatalogList = (url: string) => {
+      try {
+        return new URL(url).pathname === '/api/v1/courses'
+      } catch {
+        return false
+      }
+    }
     const coursesLoaded = page.waitForResponse(
-      (r) => r.url().includes('/api/v1/courses') && r.status() === 200,
+      (r) => isCourseCatalogList(r.url()) && r.status() === 200,
       { timeout: 20000 },
     )
     await injectToken(page, seededCourse.instructorToken)
