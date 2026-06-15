@@ -89,7 +89,10 @@ test.describe('Trust Center — public access', () => {
 
   test('has accessible table captions and headings', async ({ page }) => {
     await page.goto('/trust')
-    // Each table must have a caption (sr-only) or aria-label for accessibility.
+    await expect(page.getByRole('table', { name: /sub-processor list/i })).toBeVisible({
+      timeout: 15000,
+    })
+    await expect(page.getByRole('table', { name: /incident history/i })).toBeVisible()
     const tables = page.getByRole('table')
     const count = await tables.count()
     expect(count).toBeGreaterThanOrEqual(2)

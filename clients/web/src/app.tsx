@@ -1,121 +1,10 @@
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { RequireAuth } from './auth/require-auth'
 import { ApiErrorBoundary } from './components/api-error-boundary'
 import { AppShell } from './components/layout/app-shell'
-import Calendar from './pages/lms/calendar'
-import CourseCalendarPage from './pages/lms/course-calendar-page'
-import CourseEnrollments from './pages/lms/course-enrollments'
-import CourseFeedPage from './pages/lms/course-feed-page'
-import CourseDiscussionsPage from './pages/lms/course-discussions-page'
-import CourseCollabDocsPage from './pages/lms/course-collab-docs-page'
-import CourseFilesPage from './pages/lms/course-files-page'
-import CourseGroupsPage from './pages/lms/course-groups-page'
-import CourseGradebook from './pages/lms/course-gradebook'
-import CourseAtRiskPage from './pages/lms/course-at-risk'
-import StudentProgressPage from './pages/lms/student-progress-page'
-import CourseStudentReportsPage from './pages/lms/course-student-reports-page'
-import CourseMyGrades from './pages/lms/course-my-grades'
-import AdminAccommodationsPage from './pages/lms/admin-accommodations-page'
-import AdminCCRAchievementsPage from './pages/lms/admin-ccr-achievements-page'
-import AccommodationAuditPage from './pages/lms/accommodation-audit-page'
-import AdminQuarantinePage from './pages/lms/admin-quarantine-page'
-import CourseCreate from './pages/lms/course-create'
-import CourseDetail from './pages/lms/course-detail'
-import CourseLayout from './pages/lms/course-layout'
-import CourseModuleAssignmentPage from './pages/lms/course-module-assignment-page'
-import ModerationDashboard from './pages/lms/moderation-dashboard'
-import CourseModuleContentPage from './pages/lms/course-module-content-page'
-import CourseModuleExternalLinkPage from './pages/lms/course-module-external-link-page'
-import CourseModuleH5PPage from './pages/lms/course-module-h5p-page'
-import CourseModuleLtiPage from './pages/lms/course-module-lti-page'
-import CourseModuleVibeActivityPage from './pages/lms/course-module-vibe-activity-page'
-import CourseModuleTextbookResourcePage from './pages/lms/course-module-textbook-resource-page'
-import CourseModuleQuizPage from './pages/lms/course-module-quiz-page'
-import CourseModuleQuizAttemptPage from './pages/lms/course-module-quiz-attempt-page'
-import CourseDiagnosticPage from './pages/lms/course-diagnostic-page'
-import { CourseQuestionBankPage } from './pages/lms/course-question-bank-page'
-import CourseMisconceptionReportPage from './pages/lms/course-misconception-report-page'
-import CourseModules from './pages/lms/course-modules'
-import CourseLivePage from './pages/lms/course-live-page'
-import CourseOfficeHoursPage from './pages/lms/course-office-hours-page'
-import CourseNotebookPage from './pages/lms/course-notebook-page'
-import CourseSettings from './pages/lms/course-settings'
-import CourseStandardsCoveragePage from './pages/lms/course-standards-coverage-page'
-import CourseStandardsGradebook from './pages/lms/course-standards-gradebook'
-import CourseSyllabus from './pages/lms/course-syllabus'
-import Courses from './pages/lms/courses'
-import Dashboard from './pages/lms/dashboard'
-import MyCCR from './pages/lms/MyCCR'
-import CcrVerifyPage from './pages/verify/CcrVerify'
-import StudyInsightsPage from './pages/lms/study-insights-page'
-import AskAiPage from './pages/lms/ask-ai-page'
-import ReviewSessionPage from './pages/lms/review-session-page'
-import Inbox from './pages/lms/inbox'
-import GlobalNotebookPage from './pages/lms/global-notebook-page'
-import MyNotebooksPage from './pages/lms/my-notebooks-page'
-import Reports from './pages/lms/reports'
-import CourseEventLogPage from './pages/lms/course-event-log'
-import CourseMasteryHeatmap from './pages/lms/course-mastery-heatmap'
-import CourseOutcomesReport from './pages/lms/course-outcomes-report'
-import CourseWhatsWorking from './pages/lms/course-whats-working'
-import Settings from './pages/lms/settings'
-import ForgotPassword from './pages/forgot-password'
-import Login from './pages/login'
-import MfaLogin from './pages/mfa-login'
-import SamlCallback from './pages/saml-callback'
-import SsoError from './pages/sso-error'
-import AiDisclosurePage from './pages/ai-disclosure-page'
-import MagicLinkPage from './pages/magic-link'
-import ResetPassword from './pages/reset-password'
-import Signup from './pages/signup'
-import ParentDashboard from './pages/lms/parent/parent-dashboard'
-import ConferenceBooking from './pages/lms/parent/conference-booking'
-import ConferenceAvailabilitySetup from './pages/lms/conference-availability-setup'
-import TrustCenterPage from './pages/trust-center-page'
-import IsoComplianceAdminPage from './pages/iso-compliance-admin-page'
-import SecurityDisclosureAdminPage from './pages/security-disclosure-admin-page'
-import BackupOpsAdminPage from './pages/backup-ops-admin-page'
-import CaptionComplianceReportPage from './pages/admin/caption-compliance-report'
-import AttendanceDashboard from './pages/admin/AttendanceDashboard'
-import AttendanceExport from './pages/admin/AttendanceExport'
-import BehaviorDashboard from './pages/admin/BehaviorDashboard'
-import BroadcastComposer from './pages/admin/BroadcastComposer'
-import ConferenceScheduleGrid from './pages/admin/conference-schedule-grid'
-import ContentFilterSettingsPage from './pages/admin/content-filter-settings'
-import StudentDemographicsPage from './pages/admin/student-demographics'
-import SisIntegrationPage from './pages/admin/sis-integration'
-import BookstoreIntegrationPage from './pages/admin/BookstoreIntegration'
-import IncompletesAdminPage from './pages/admin/incompletes'
-import CourseCatalogPage from './pages/lms/course-catalog'
-import Title1ReportPage from './pages/admin/title1-report'
-import CourseAttendance from './pages/lms/CourseAttendance'
-import CourseBehavior from './pages/lms/CourseBehavior'
-import CourseReportCards from './pages/lms/CourseReportCards'
-import LibraryCatalogPage from './pages/lms/library-catalog-page'
-import ReadingLogPage from './pages/lms/reading-log-page'
-import ReadingDashboardPage from './pages/lms/reading-dashboard-page'
-import CourseWhiteboardPage from './pages/lms/course-whiteboard-page'
-import FinalGradeSubmission from './pages/lms/final-grade-submission'
-import GradeSubmissionStatus from './pages/admin/grade-submission-status'
-import AcademicCalendarAdminPage from './pages/admin/academic-calendar'
-import ConsentStudiesAdminPage from './pages/admin/consent-studies'
-import ResearchStudiesPage from './pages/lms/research-studies'
-import AccessibilityServicesPage from './pages/admin/accessibility-services'
-import MyAccommodationsPage from './pages/lms/my-accommodations'
-import CourseEvaluation from './pages/lms/CourseEvaluation'
-import CourseEvaluationResults from './pages/lms/CourseEvaluationResults'
-import EvaluationTemplates from './pages/admin/EvaluationTemplates'
-import EvaluationReport from './pages/admin/EvaluationReport'
-import PrivacyCentrePage from './pages/privacy-centre-page'
-import MyPortfoliosPage from './pages/lms/my-portfolios-page'
-import TranscriptsPage from './pages/lms/transcripts-page'
-import AdvisingNotesPage from './pages/lms/advising-notes'
-import PortfolioEditorPage from './pages/lms/portfolio-editor-page'
-import PortfolioArtifactContentPage from './pages/lms/portfolio-artifact-content-page'
-import PublicPortfolioPage from './pages/portfolio/public-portfolio-page'
-import PublicPortfolioContentPage from './pages/portfolio/public-portfolio-content-page'
-import CliAuthPage from './pages/cli-auth'
+import { RouteFallback } from './components/route-fallback'
+import * as Pages from './lazy-pages'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
 
 export default function App() {
@@ -141,139 +30,141 @@ export default function App() {
   }, [location.hash, location.pathname, location.search, navigate])
 
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/login/magic-link" element={<MagicLinkPage />} />
-      <Route path="/login/mfa" element={<MfaLogin />} />
-      <Route path="/saml-callback" element={<SamlCallback />} />
-      <Route path="/sso-error" element={<SsoError />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
-      <Route path="/ai-disclosure" element={<AiDisclosurePage />} />
-      <Route path="/trust" element={<TrustCenterPage />} />
-      <Route path="/p/:slug/content/:aid" element={<PublicPortfolioContentPage />} />
-      <Route path="/p/:slug" element={<PublicPortfolioPage />} />
-      <Route path="/verify/:token" element={<CcrVerifyPage />} />
-      <Route element={<RequireAuth />}>
-        <Route path="/cli-auth" element={<CliAuthPage />} />
-        <Route
-          element={
-            <ApiErrorBoundary>
-              <AppShell />
-            </ApiErrorBoundary>
-          }
-        >
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/privacy-centre" element={<PrivacyCentrePage />} />
-          <Route path="/me/study-insights" element={<StudyInsightsPage />} />
-          <Route path="/me/ccr" element={<MyCCR />} />
-          <Route path="/transcripts" element={<TranscriptsPage />} />
-          <Route path="/advising-notes" element={<AdvisingNotesPage />} />
-          <Route path="/me/research-studies" element={<ResearchStudiesPage />} />
-          <Route path="/me/accommodations" element={<MyAccommodationsPage />} />
-          <Route path="/parent" element={<ParentDashboard />} />
-          <Route path="/parent/conferences" element={<ConferenceBooking />} />
-          <Route path="/conferences/availability" element={<ConferenceAvailabilitySetup />} />
-          <Route path="/ai" element={<AskAiPage />} />
-          <Route path="/review" element={<ReviewSessionPage />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/notebooks/global" element={<GlobalNotebookPage />} />
-          <Route path="/notebooks" element={<MyNotebooksPage />} />
-          <Route path="/courses/create" element={<CourseCreate />} />
-          <Route path="/courses/:courseCode" element={<CourseLayout />}>
-            <Route path="settings/*" element={<CourseSettings />} />
-            <Route path="feed" element={<CourseFeedPage />} />
-            <Route path="discussions" element={<CourseDiscussionsPage />} />
-            <Route path="collab-docs/:docId?" element={<CourseCollabDocsPage />} />
-            <Route path="files" element={<CourseFilesPage />} />
-            <Route path="groups" element={<CourseGroupsPage />} />
-            <Route path="syllabus" element={<CourseSyllabus />} />
-            <Route path="modules/content/:itemId" element={<CourseModuleContentPage />} />
-            <Route path="modules/assignment/:itemId" element={<CourseModuleAssignmentPage />} />
-            <Route
-              path="modules/assignment/:itemId/moderation"
-              element={<ModerationDashboard />}
-            />
-            <Route path="modules/quiz/:itemId/attempt" element={<CourseModuleQuizAttemptPage />} />
-            <Route path="modules/quiz/:itemId" element={<CourseModuleQuizPage />} />
-            <Route path="diagnostic" element={<CourseDiagnosticPage />} />
-            <Route path="modules/external-link/:itemId" element={<CourseModuleExternalLinkPage />} />
-            <Route path="modules/h5p/:itemId" element={<CourseModuleH5PPage />} />
-            <Route path="modules/lti/:itemId" element={<CourseModuleLtiPage />} />
-            <Route path="modules/vibe-activity/:itemId" element={<CourseModuleVibeActivityPage />} />
-            <Route path="modules/textbook-resource/:itemId" element={<CourseModuleTextbookResourcePage />} />
-            <Route path="questions" element={<CourseQuestionBankPage />} />
-            <Route path="misconception-report" element={<CourseMisconceptionReportPage />} />
-            <Route path="modules" element={<CourseModules />} />
-            <Route path="live" element={<CourseLivePage />} />
-            <Route path="office-hours" element={<CourseOfficeHoursPage />} />
-            <Route path="notebook" element={<CourseNotebookPage />} />
-            <Route path="calendar" element={<CourseCalendarPage />} />
-            <Route path="my-grades" element={<CourseMyGrades />} />
-            <Route path="gradebook" element={<CourseGradebook />} />
-            <Route path="reports" element={<CourseStudentReportsPage />} />
-            <Route path="at-risk" element={<CourseAtRiskPage />} />
-            <Route path="event-log" element={<CourseEventLogPage />} />
-            <Route path="students/:enrollmentId/progress" element={<StudentProgressPage />} />
-            <Route path="standards-gradebook" element={<CourseStandardsGradebook />} />
-            <Route path="standards-coverage" element={<CourseStandardsCoveragePage />} />
-            <Route path="mastery-heatmap" element={<CourseMasteryHeatmap />} />
-            <Route path="outcomes-report" element={<CourseOutcomesReport />} />
-            <Route path="whats-working" element={<CourseWhatsWorking />} />
-            <Route path="enrollments" element={<CourseEnrollments />} />
-            <Route path="attendance" element={<CourseAttendance />} />
-            <Route path="behavior" element={<CourseBehavior />} />
-            <Route path="report-cards" element={<CourseReportCards />} />
-            <Route path="reading-dashboard" element={<ReadingDashboardPage />} />
-            <Route path="whiteboard" element={<CourseWhiteboardPage />} />
-            <Route path="whiteboard/:boardId" element={<CourseWhiteboardPage />} />
-            <Route path="final-grades" element={<FinalGradeSubmission />} />
-            <Route path="evaluation" element={<CourseEvaluation />} />
-            <Route path="evaluation-results" element={<CourseEvaluationResults />} />
-            <Route index element={<CourseDetail />} />
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route path="/login" element={<Pages.Login />} />
+        <Route path="/login/magic-link" element={<Pages.MagicLinkPage />} />
+        <Route path="/login/mfa" element={<Pages.MfaLogin />} />
+        <Route path="/saml-callback" element={<Pages.SamlCallback />} />
+        <Route path="/sso-error" element={<Pages.SsoError />} />
+        <Route path="/signup" element={<Pages.Signup />} />
+        <Route path="/forgot-password" element={<Pages.ForgotPassword />} />
+        <Route path="/reset-password" element={<Pages.ResetPassword />} />
+        <Route path="/ai-disclosure" element={<Pages.AiDisclosurePage />} />
+        <Route path="/trust" element={<Pages.TrustCenterPage />} />
+        <Route path="/p/:slug/content/:aid" element={<Pages.PublicPortfolioContentPage />} />
+        <Route path="/p/:slug" element={<Pages.PublicPortfolioPage />} />
+        <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
+        <Route element={<RequireAuth />}>
+          <Route path="/cli-auth" element={<Pages.CliAuthPage />} />
+          <Route
+            element={
+              <ApiErrorBoundary>
+                <AppShell />
+              </ApiErrorBoundary>
+            }
+          >
+            <Route path="/" element={<Pages.Dashboard />} />
+            <Route path="/privacy-centre" element={<Pages.PrivacyCentrePage />} />
+            <Route path="/me/study-insights" element={<Pages.StudyInsightsPage />} />
+            <Route path="/me/ccr" element={<Pages.MyCCR />} />
+            <Route path="/transcripts" element={<Pages.TranscriptsPage />} />
+            <Route path="/advising-notes" element={<Pages.AdvisingNotesPage />} />
+            <Route path="/me/research-studies" element={<Pages.ResearchStudiesPage />} />
+            <Route path="/me/accommodations" element={<Pages.MyAccommodationsPage />} />
+            <Route path="/parent" element={<Pages.ParentDashboard />} />
+            <Route path="/parent/conferences" element={<Pages.ConferenceBooking />} />
+            <Route path="/conferences/availability" element={<Pages.ConferenceAvailabilitySetup />} />
+            <Route path="/ai" element={<Pages.AskAiPage />} />
+            <Route path="/review" element={<Pages.ReviewSessionPage />} />
+            <Route path="/courses" element={<Pages.Courses />} />
+            <Route path="/notebooks/global" element={<Pages.GlobalNotebookPage />} />
+            <Route path="/notebooks" element={<Pages.MyNotebooksPage />} />
+            <Route path="/courses/create" element={<Pages.CourseCreate />} />
+            <Route path="/courses/:courseCode" element={<Pages.CourseLayout />}>
+              <Route path="settings/*" element={<Pages.CourseSettings />} />
+              <Route path="feed" element={<Pages.CourseFeedPage />} />
+              <Route path="discussions" element={<Pages.CourseDiscussionsPage />} />
+              <Route path="collab-docs/:docId?" element={<Pages.CourseCollabDocsPage />} />
+              <Route path="files" element={<Pages.CourseFilesPage />} />
+              <Route path="groups" element={<Pages.CourseGroupsPage />} />
+              <Route path="syllabus" element={<Pages.CourseSyllabus />} />
+              <Route path="modules/content/:itemId" element={<Pages.CourseModuleContentPage />} />
+              <Route path="modules/assignment/:itemId" element={<Pages.CourseModuleAssignmentPage />} />
+              <Route
+                path="modules/assignment/:itemId/moderation"
+                element={<Pages.ModerationDashboard />}
+              />
+              <Route path="modules/quiz/:itemId/attempt" element={<Pages.CourseModuleQuizAttemptPage />} />
+              <Route path="modules/quiz/:itemId" element={<Pages.CourseModuleQuizPage />} />
+              <Route path="diagnostic" element={<Pages.CourseDiagnosticPage />} />
+              <Route path="modules/external-link/:itemId" element={<Pages.CourseModuleExternalLinkPage />} />
+              <Route path="modules/h5p/:itemId" element={<Pages.CourseModuleH5PPage />} />
+              <Route path="modules/lti/:itemId" element={<Pages.CourseModuleLtiPage />} />
+              <Route path="modules/vibe-activity/:itemId" element={<Pages.CourseModuleVibeActivityPage />} />
+              <Route path="modules/textbook-resource/:itemId" element={<Pages.CourseModuleTextbookResourcePage />} />
+              <Route path="questions" element={<Pages.CourseQuestionBankPage />} />
+              <Route path="misconception-report" element={<Pages.CourseMisconceptionReportPage />} />
+              <Route path="modules" element={<Pages.CourseModules />} />
+              <Route path="live" element={<Pages.CourseLivePage />} />
+              <Route path="office-hours" element={<Pages.CourseOfficeHoursPage />} />
+              <Route path="notebook" element={<Pages.CourseNotebookPage />} />
+              <Route path="calendar" element={<Pages.CourseCalendarPage />} />
+              <Route path="my-grades" element={<Pages.CourseMyGrades />} />
+              <Route path="gradebook" element={<Pages.CourseGradebook />} />
+              <Route path="reports" element={<Pages.CourseStudentReportsPage />} />
+              <Route path="at-risk" element={<Pages.CourseAtRiskPage />} />
+              <Route path="event-log" element={<Pages.CourseEventLogPage />} />
+              <Route path="students/:enrollmentId/progress" element={<Pages.StudentProgressPage />} />
+              <Route path="standards-gradebook" element={<Pages.CourseStandardsGradebook />} />
+              <Route path="standards-coverage" element={<Pages.CourseStandardsCoveragePage />} />
+              <Route path="mastery-heatmap" element={<Pages.CourseMasteryHeatmap />} />
+              <Route path="outcomes-report" element={<Pages.CourseOutcomesReport />} />
+              <Route path="whats-working" element={<Pages.CourseWhatsWorking />} />
+              <Route path="enrollments" element={<Pages.CourseEnrollments />} />
+              <Route path="attendance" element={<Pages.CourseAttendance />} />
+              <Route path="behavior" element={<Pages.CourseBehavior />} />
+              <Route path="report-cards" element={<Pages.CourseReportCards />} />
+              <Route path="reading-dashboard" element={<Pages.ReadingDashboardPage />} />
+              <Route path="whiteboard" element={<Pages.CourseWhiteboardPage />} />
+              <Route path="whiteboard/:boardId" element={<Pages.CourseWhiteboardPage />} />
+              <Route path="final-grades" element={<Pages.FinalGradeSubmission />} />
+              <Route path="evaluation" element={<Pages.CourseEvaluation />} />
+              <Route path="evaluation-results" element={<Pages.CourseEvaluationResults />} />
+              <Route index element={<Pages.CourseDetail />} />
+            </Route>
+            <Route path="/calendar" element={<Pages.Calendar />} />
+            <Route path="/admin/accommodations" element={<Pages.AdminAccommodationsPage />} />
+            <Route path="/admin/accommodations/audit" element={<Pages.AccommodationAuditPage />} />
+            <Route path="/admin/ccr/achievements" element={<Pages.AdminCCRAchievementsPage />} />
+            <Route path="/admin/quarantine" element={<Pages.AdminQuarantinePage />} />
+            <Route path="/catalog" element={<Pages.CourseCatalogPage />} />
+            <Route path="/portfolios" element={<Pages.MyPortfoliosPage />} />
+            <Route path="/portfolios/:pid/content/:aid" element={<Pages.PortfolioArtifactContentPage />} />
+            <Route path="/portfolios/:pid" element={<Pages.PortfolioEditorPage />} />
+            <Route path="/library/:orgId" element={<Pages.LibraryCatalogPage />} />
+            <Route path="/reading-log" element={<Pages.ReadingLogPage />} />
+            <Route path="/admin/compliance/iso" element={<Pages.IsoComplianceAdminPage />} />
+            <Route path="/admin/compliance/security-reports" element={<Pages.SecurityDisclosureAdminPage />} />
+            <Route path="/admin/compliance/backup" element={<Pages.BackupOpsAdminPage />} />
+            <Route path="/admin/caption-compliance" element={<Pages.CaptionComplianceReportPage />} />
+            <Route path="/admin/attendance/dashboard" element={<Pages.AttendanceDashboard />} />
+            <Route path="/admin/attendance/export" element={<Pages.AttendanceExport />} />
+            <Route path="/admin/behavior/dashboard" element={<Pages.BehaviorDashboard />} />
+            <Route path="/admin/broadcasts/:orgId" element={<Pages.BroadcastComposer />} />
+            <Route path="/admin/conferences/schedule" element={<Pages.ConferenceScheduleGrid />} />
+            <Route path="/admin/demographics/student" element={<Pages.StudentDemographicsPage />} />
+            <Route path="/admin/demographics/title1" element={<Pages.Title1ReportPage />} />
+            <Route path="/admin/content-filter" element={<Pages.ContentFilterSettingsPage />} />
+            <Route path="/admin/sis" element={<Pages.SisIntegrationPage />} />
+            <Route path="/admin/bookstore" element={<Pages.BookstoreIntegrationPage />} />
+            <Route path="/admin/final-grades/status" element={<Pages.GradeSubmissionStatus />} />
+            <Route path="/admin/incompletes" element={<Pages.IncompletesAdminPage />} />
+            <Route path="/admin/academic-calendar" element={<Pages.AcademicCalendarAdminPage />} />
+            <Route path="/admin/consent-studies" element={<Pages.ConsentStudiesAdminPage />} />
+            <Route path="/admin/accessibility" element={<Pages.AccessibilityServicesPage />} />
+            <Route path="/admin/evaluations/templates" element={<Pages.EvaluationTemplates />} />
+            <Route path="/admin/evaluations/report" element={<Pages.EvaluationReport />} />
+            <Route path="/reports" element={<Pages.Reports />} />
+            <Route path="/inbox" element={<Pages.Inbox />} />
+            <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
+            <Route path="/settings/ai" element={<Navigate to="/settings/ai/models" replace />} />
+            <Route path="/settings/ai/:aiSection" element={<Pages.Settings />} />
+            <Route path="/settings/:tab" element={<Pages.Settings />} />
           </Route>
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/admin/accommodations" element={<AdminAccommodationsPage />} />
-          <Route path="/admin/accommodations/audit" element={<AccommodationAuditPage />} />
-          <Route path="/admin/ccr/achievements" element={<AdminCCRAchievementsPage />} />
-          <Route path="/admin/quarantine" element={<AdminQuarantinePage />} />
-          <Route path="/catalog" element={<CourseCatalogPage />} />
-          <Route path="/portfolios" element={<MyPortfoliosPage />} />
-          <Route path="/portfolios/:pid/content/:aid" element={<PortfolioArtifactContentPage />} />
-          <Route path="/portfolios/:pid" element={<PortfolioEditorPage />} />
-          <Route path="/library/:orgId" element={<LibraryCatalogPage />} />
-          <Route path="/reading-log" element={<ReadingLogPage />} />
-          <Route path="/admin/compliance/iso" element={<IsoComplianceAdminPage />} />
-          <Route path="/admin/compliance/security-reports" element={<SecurityDisclosureAdminPage />} />
-          <Route path="/admin/compliance/backup" element={<BackupOpsAdminPage />} />
-          <Route path="/admin/caption-compliance" element={<CaptionComplianceReportPage />} />
-          <Route path="/admin/attendance/dashboard" element={<AttendanceDashboard />} />
-          <Route path="/admin/attendance/export" element={<AttendanceExport />} />
-          <Route path="/admin/behavior/dashboard" element={<BehaviorDashboard />} />
-          <Route path="/admin/broadcasts/:orgId" element={<BroadcastComposer />} />
-          <Route path="/admin/conferences/schedule" element={<ConferenceScheduleGrid />} />
-          <Route path="/admin/demographics/student" element={<StudentDemographicsPage />} />
-          <Route path="/admin/demographics/title1" element={<Title1ReportPage />} />
-          <Route path="/admin/content-filter" element={<ContentFilterSettingsPage />} />
-          <Route path="/admin/sis" element={<SisIntegrationPage />} />
-          <Route path="/admin/bookstore" element={<BookstoreIntegrationPage />} />
-          <Route path="/admin/final-grades/status" element={<GradeSubmissionStatus />} />
-          <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
-          <Route path="/admin/academic-calendar" element={<AcademicCalendarAdminPage />} />
-          <Route path="/admin/consent-studies" element={<ConsentStudiesAdminPage />} />
-          <Route path="/admin/accessibility" element={<AccessibilityServicesPage />} />
-          <Route path="/admin/evaluations/templates" element={<EvaluationTemplates />} />
-          <Route path="/admin/evaluations/report" element={<EvaluationReport />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/inbox" element={<Inbox />} />
-          <Route path="/settings" element={<Navigate to="/settings/account" replace />} />
-          <Route path="/settings/ai" element={<Navigate to="/settings/ai/models" replace />} />
-          <Route path="/settings/ai/:aiSection" element={<Settings />} />
-          <Route path="/settings/:tab" element={<Settings />} />
         </Route>
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   )
 }

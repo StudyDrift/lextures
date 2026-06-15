@@ -10,7 +10,7 @@ describe('App routing', () => {
     clearAccessToken()
   })
 
-  it('redirects unauthenticated users from / to login', () => {
+  it('redirects unauthenticated users from / to login', async () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <PermissionsProvider>
@@ -18,10 +18,10 @@ describe('App routing', () => {
         </PermissionsProvider>
       </MemoryRouter>,
     )
-    expect(screen.getByRole('heading', { name: /sign in/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /sign in/i })).toBeInTheDocument()
   })
 
-  it('renders signup at /signup', () => {
+  it('renders signup at /signup', async () => {
     render(
       <MemoryRouter initialEntries={['/signup']}>
         <PermissionsProvider>
@@ -29,10 +29,10 @@ describe('App routing', () => {
         </PermissionsProvider>
       </MemoryRouter>,
     )
-    expect(screen.getByRole('heading', { name: /create your account/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /create your account/i })).toBeInTheDocument()
   })
 
-  it('shows the LMS dashboard at / when authenticated', () => {
+  it('shows the LMS dashboard at / when authenticated', async () => {
     setAccessToken('test-token')
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -41,7 +41,7 @@ describe('App routing', () => {
         </PermissionsProvider>
       </MemoryRouter>,
     )
-    expect(screen.getByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument()
     expect(screen.getByRole('navigation', { name: /main/i })).toBeInTheDocument()
   })
 

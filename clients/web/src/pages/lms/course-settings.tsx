@@ -41,6 +41,7 @@ import { CourseAccessibilitySettingsSection } from './course-accessibility-setti
 import { CoursePlagiarismSettingsSection } from './course-plagiarism-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { CourseHeroImage } from '../../components/course-hero-image'
 
 function isoToDatetimeLocal(iso: string | null): string {
   if (!iso) return ''
@@ -1170,7 +1171,7 @@ export default function CourseSettings() {
                   Generate a cover image with AI or upload your own (PNG, JPEG, GIF, or WebP up to 10MB).
                 </p>
                 {course.heroImageUrl && (
-                  <img
+                  <CourseHeroImage
                     src={course.heroImageUrl}
                     alt=""
                     className="mt-4 max-h-48 w-full max-w-md rounded-xl border border-slate-200 object-cover dark:border-neutral-805"
@@ -1546,7 +1547,7 @@ export default function CourseSettings() {
                 }}
                 onLostPointerCapture={() => setPositionDragging(false)}
               >
-                <img
+                <CourseHeroImage
                   src={course.heroImageUrl}
                   alt=""
                   draggable={false}
@@ -1686,7 +1687,7 @@ export default function CourseSettings() {
                     <span className="text-sm text-slate-500">Generating…</span>
                   )}
                   {genStatus !== 'loading' && previewUrl && (
-                    <img
+                    <CourseHeroImage
                       src={previewUrl}
                       alt=""
                       className="max-h-[min(360px,50vh)] w-full object-contain"

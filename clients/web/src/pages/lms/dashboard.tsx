@@ -53,7 +53,7 @@ import {
   type AssignmentGroupWeight,
   type GradebookColumnForFinal,
 } from './gradebook/compute-course-final-percent'
-import { DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { DashboardCourseSectionSkeleton, DashboardLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
 import {
   GradingBacklogList,
   type GradingBacklogItem,
@@ -68,6 +68,8 @@ import { LmsPage } from './lms-page'
 import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchCalendarEvents, type AcademicCalendarEvent } from '../../lib/courses-api'
+import { scheduleIdleTask } from '../../lib/schedule-idle'
+import { splitCoursesForPrefetch } from '../../lib/dashboard-course-prefetch'
 
 function startOfWeekMonday(now = new Date()): Date {
   const d = new Date(now)
@@ -210,6 +212,59 @@ async function loadAnnouncementPreview(course: CoursePublic): Promise<Announceme
   }
 }
 
+async function loadStudentRow(course: CoursePublic) {
+  let structure: CourseStructureItem[] = []
+  let myGrades: CourseMyGradesResponse | null = null
+  try {
+    structure = await fetchCourseStructure(course.courseCode)
+  } catch {
+    structure = []
+  }
+  const preview = getCourseViewAs(course.courseCode)
+  if (viewerShouldShowMyGradesNav(course.viewerEnrollmentRoles, preview)) {
+    try {
+      myGrades = await fetchCourseMyGrades(course.courseCode)
+    } catch {
+      myGrades = null
+    }
+  }
+  let announcement: AnnouncementPreview | null = null
+  if (course.feedEnabled !== false) {
+    announcement = await loadAnnouncementPreview(course)
+  }
+  return { course, structure, myGrades, announcement }
+}
+
+async function loadStaffRow(
+  course: CoursePublic,
+  allows: (permission: string) => boolean,
+) {
+  const code = course.courseCode
+  let emptyGradeCells: number | null = null
+  let gradingBacklog: GradingBacklogItem[] = []
+  if (allows(courseGradebookViewPermission(code))) {
+    try {
+      const grid = await fetchCourseGradebookGrid(code)
+      emptyGradeCells = countEmptyGradeCells(grid)
+    } catch {
+      emptyGradeCells = null
+    }
+    try {
+      const backlog = await fetchCourseGradingBacklog(code)
+      gradingBacklog = backlog.map((item) => ({
+        assignmentId: item.assignmentId,
+        assignmentTitle: item.assignmentTitle,
+        ungradedCount: item.ungradedCount,
+        courseCode: code,
+        courseTitle: course.title,
+      }))
+    } catch {
+      gradingBacklog = []
+    }
+  }
+  return { course, emptyGradeCells, gradingBacklog }
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   useEffect(() => {
@@ -235,7 +290,11 @@ export default function Dashboard() {
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([])
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
+  const [detailsLoading, setDetailsLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+  const [deferredStudentCourses, setDeferredStudentCourses] = useState<CoursePublic[]>([])
+  const [deferredStaffCourses, setDeferredStaffCourses] = useState<CoursePublic[]>([])
+  const [loadingMoreCourses, setLoadingMoreCourses] = useState(false)
 
   const [studentRows, setStudentRows] = useState<
     {
@@ -297,16 +356,19 @@ export default function Dashboard() {
     const uid = getJwtSubject()
     if (!uid) return
     let cancelled = false
-    void (async () => {
-      try {
-        const s = await fetchLearnerReviewStats(uid)
-        if (!cancelled) setReviewStats(s)
-      } catch {
-        if (!cancelled) setReviewStats(null)
-      }
-    })()
+    const cancelIdle = scheduleIdleTask(() => {
+      void (async () => {
+        try {
+          const s = await fetchLearnerReviewStats(uid)
+          if (!cancelled) setReviewStats(s)
+        } catch {
+          if (!cancelled) setReviewStats(null)
+        }
+      })()
+    })
     return () => {
       cancelled = true
+      cancelIdle()
     }
   }, [])
 
@@ -327,7 +389,12 @@ export default function Dashboard() {
           return
         }
         const data = raw as { courses?: CoursePublic[] }
-        if (!cancelled) setCatalog(data.courses ?? [])
+        const nextCatalog = data.courses ?? []
+        if (!cancelled) {
+          setCatalog(nextCatalog)
+          setCourses(nextCatalog)
+          performance.mark('dashboard:catalog-loaded')
+        }
       } catch {
         if (!cancelled) {
           setCatalog([])
@@ -346,15 +413,18 @@ export default function Dashboard() {
       return
     }
     let cancelled = false
-    void fetchCatalogSchedule()
-      .then((entries) => {
-        if (!cancelled) setSchedule(entries)
-      })
-      .catch(() => {
-        if (!cancelled) setSchedule([])
-      })
+    const cancelIdle = scheduleIdleTask(() => {
+      void fetchCatalogSchedule()
+        .then((entries) => {
+          if (!cancelled) setSchedule(entries)
+        })
+        .catch(() => {
+          if (!cancelled) setSchedule([])
+        })
+    })
     return () => {
       cancelled = true
+      cancelIdle()
     }
   }, [ffCatalogIntegration, coursesRevision])
 
@@ -369,11 +439,16 @@ export default function Dashboard() {
       setDetailError(null)
       setStudentRows([])
       setStaffRows([])
+      setDeferredStudentCourses([])
+      setDeferredStaffCourses([])
 
       if (!list.length) {
         setCourses([])
+        setDetailsLoading(false)
         return
       }
+
+      setDetailsLoading(true)
 
       try {
         const enriched = await mapPool(list, 4, async (c) => {
@@ -385,72 +460,57 @@ export default function Dashboard() {
         })
         if (detailGenRef.current !== gen) return
         setCourses(enriched)
+        performance.mark('dashboard:courses-enriched')
 
         const studentCourses = enriched.filter((c) => hasStudentRole(c.viewerEnrollmentRoles))
         const staffCourses = enriched.filter((c) => viewerIsCourseStaffEnrollment(c.viewerEnrollmentRoles))
 
-        const sRows = await mapPool(studentCourses, 3, async (course) => {
-          let structure: CourseStructureItem[] = []
-          let myGrades: CourseMyGradesResponse | null = null
-          try {
-            structure = await fetchCourseStructure(course.courseCode)
-          } catch {
-            structure = []
-          }
-          const preview = getCourseViewAs(course.courseCode)
-          if (viewerShouldShowMyGradesNav(course.viewerEnrollmentRoles, preview)) {
-            try {
-              myGrades = await fetchCourseMyGrades(course.courseCode)
-            } catch {
-              myGrades = null
-            }
-          }
-          let announcement: AnnouncementPreview | null = null
-          if (course.feedEnabled !== false) {
-            announcement = await loadAnnouncementPreview(course)
-          }
-          return { course, structure, myGrades, announcement }
-        })
+        const { initial: initialStudent, deferred: deferredStudent } = splitCoursesForPrefetch(studentCourses)
+        const { initial: initialStaff, deferred: deferredStaff } = splitCoursesForPrefetch(staffCourses)
 
+        const sRows = await mapPool(initialStudent, 3, (course) => loadStudentRow(course))
         if (detailGenRef.current !== gen) return
 
-        const tRows = await mapPool(staffCourses, 3, async (course) => {
-          const code = course.courseCode
-          let emptyGradeCells: number | null = null
-          let gradingBacklog: GradingBacklogItem[] = []
-          if (allows(courseGradebookViewPermission(code))) {
-            try {
-              const grid = await fetchCourseGradebookGrid(code)
-              emptyGradeCells = countEmptyGradeCells(grid)
-            } catch {
-              emptyGradeCells = null
-            }
-            try {
-              const backlog = await fetchCourseGradingBacklog(code)
-              gradingBacklog = backlog.map((item) => ({
-                assignmentId: item.assignmentId,
-                assignmentTitle: item.assignmentTitle,
-                ungradedCount: item.ungradedCount,
-                courseCode: code,
-                courseTitle: course.title,
-              }))
-            } catch {
-              gradingBacklog = []
-            }
-          }
-          return { course, emptyGradeCells, gradingBacklog }
-        })
-
+        const tRows = await mapPool(initialStaff, 3, (course) => loadStaffRow(course, allows))
         if (detailGenRef.current !== gen) return
+
         setStudentRows(sRows)
         setStaffRows(tRows)
+        setDeferredStudentCourses(deferredStudent)
+        setDeferredStaffCourses(deferredStaff)
+        setDetailsLoading(false)
+        performance.mark('dashboard:rows-loaded')
       } catch {
         if (detailGenRef.current !== gen) return
         setDetailError('Could not load dashboard details.')
         setCourses(list)
+        setDetailsLoading(false)
       }
     })()
   }, [catalog, permLoading, allows])
+
+  const loadMoreCourses = () => {
+    if (loadingMoreCourses) return
+    const pendingStudent = deferredStudentCourses
+    const pendingStaff = deferredStaffCourses
+    if (pendingStudent.length === 0 && pendingStaff.length === 0) return
+
+    setLoadingMoreCourses(true)
+    void (async () => {
+      try {
+        const [moreStudent, moreStaff] = await Promise.all([
+          mapPool(pendingStudent, 3, (course) => loadStudentRow(course)),
+          mapPool(pendingStaff, 3, (course) => loadStaffRow(course, allows)),
+        ])
+        setStudentRows((prev) => [...prev, ...moreStudent])
+        setStaffRows((prev) => [...prev, ...moreStaff])
+        setDeferredStudentCourses([])
+        setDeferredStaffCourses([])
+      } finally {
+        setLoadingMoreCourses(false)
+      }
+    })()
+  }
 
   useEffect(() => {
     const uid = getJwtSubject()
@@ -459,60 +519,68 @@ export default function Dashboard() {
     }
     const { course } = studentRows[0]
     let cancelled = false
-    void (async () => {
-      try {
-        const surfaces = ['continue', 'review', 'strengthen', 'challenge'] as const
-        const results = await Promise.all(
-          surfaces.map((s) => fetchLearnerRecommendations(uid, course.id, s, { limit: 4 })),
-        )
-        if (cancelled) return
-        const merged: RecommendationItem[] = []
-        let degraded = false
-        for (const r of results) {
-          merged.push(...r.recommendations)
-          if (r.degraded) degraded = true
+    const cancelIdle = scheduleIdleTask(() => {
+      void (async () => {
+        try {
+          const surfaces = ['continue', 'review', 'strengthen', 'challenge'] as const
+          const results = await Promise.all(
+            surfaces.map((s) => fetchLearnerRecommendations(uid, course.id, s, { limit: 4 })),
+          )
+          if (cancelled) return
+          const merged: RecommendationItem[] = []
+          let degraded = false
+          for (const r of results) {
+            merged.push(...r.recommendations)
+            if (r.degraded) degraded = true
+          }
+          merged.sort((a, b) => b.score - a.score)
+          const primary = merged[0] ?? null
+          const chips = merged.slice(1, 4)
+          setWhatsNextRaw({ course, primary, chips, degraded })
+          if (primary) {
+            void postRecommendationEvent({
+              courseId: course.id,
+              itemId: primary.itemId,
+              surface: primary.surface,
+              eventType: 'impression',
+              rank: 0,
+            }).catch(() => {})
+          }
+        } catch {
+          if (!cancelled) setWhatsNextRaw(null)
         }
-        merged.sort((a, b) => b.score - a.score)
-        const primary = merged[0] ?? null
-        const chips = merged.slice(1, 4)
-        setWhatsNextRaw({ course, primary, chips, degraded })
-        if (primary) {
-          void postRecommendationEvent({
-            courseId: course.id,
-            itemId: primary.itemId,
-            surface: primary.surface,
-            eventType: 'impression',
-            rank: 0,
-          }).catch(() => {})
-        }
-      } catch {
-        if (!cancelled) setWhatsNextRaw(null)
-      }
-    })()
+      })()
+    })
     return () => {
       cancelled = true
+      cancelIdle()
     }
   }, [studentRows])
 
   useEffect(() => {
     if (!ffAcademicCalendar || !courses?.length) return
     let cancelled = false
-    void (async () => {
-      const today = new Date().toISOString().slice(0, 10)
-      const pairs = new Map<string, string | undefined>()
-      for (const c of courses) {
-        if (c.orgId) pairs.set(c.orgId, c.termId ?? undefined)
-      }
-      const fetches = Array.from(pairs.entries()).map(([orgId, termId]) =>
-        fetchCalendarEvents(orgId, termId).catch(() => [] as AcademicCalendarEvent[]),
-      )
-      const results = await Promise.all(fetches)
-      if (cancelled) return
-      const all = results.flat().filter((e) => e.startDate >= today)
-      all.sort((a, b) => a.startDate.localeCompare(b.startDate))
-      setUpcomingCalendarEvents(all.slice(0, 5))
-    })()
-    return () => { cancelled = true }
+    const cancelIdle = scheduleIdleTask(() => {
+      void (async () => {
+        const today = new Date().toISOString().slice(0, 10)
+        const pairs = new Map<string, string | undefined>()
+        for (const c of courses) {
+          if (c.orgId) pairs.set(c.orgId, c.termId ?? undefined)
+        }
+        const fetches = Array.from(pairs.entries()).map(([orgId, termId]) =>
+          fetchCalendarEvents(orgId, termId).catch(() => [] as AcademicCalendarEvent[]),
+        )
+        const results = await Promise.all(fetches)
+        if (cancelled) return
+        const all = results.flat().filter((e) => e.startDate >= today)
+        all.sort((a, b) => a.startDate.localeCompare(b.startDate))
+        setUpcomingCalendarEvents(all.slice(0, 5))
+      })()
+    })
+    return () => {
+      cancelled = true
+      cancelIdle()
+    }
   }, [ffAcademicCalendar, courses])
 
   const weekStart = useMemo(() => startOfWeekMonday(), [])
@@ -550,7 +618,9 @@ export default function Dashboard() {
     [staffRows],
   )
 
-  const showLoading = catalog === null || courses === null
+  const hasCourses = (catalog?.length ?? 0) > 0
+  const showInitialLoading = catalog === null
+  const deferredCourseCount = deferredStudentCourses.length + deferredStaffCourses.length
 
   return (
     <LmsPage
@@ -568,9 +638,9 @@ export default function Dashboard() {
         </p>
       )}
 
-      {showLoading && !catalogError && <DashboardLoadingSkeleton />}
+      {showInitialLoading && !catalogError && <DashboardLoadingSkeleton />}
 
-      {courses && courses.length === 0 && !catalogError && (
+      {catalog && catalog.length === 0 && !catalogError && (
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50/80 px-6 py-8 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
           <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">No courses yet</p>
           <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
@@ -588,7 +658,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {courses && courses.length > 0 && (
+      {hasCourses && (
         <div data-onboarding="dashboard-main" className="mt-8 space-y-10">
           <section aria-label="Quick links and unread">
             <div className="flex flex-wrap gap-3">
@@ -642,6 +712,8 @@ export default function Dashboard() {
               )}
             </div>
           </section>
+
+          {detailsLoading && <DashboardCourseSectionSkeleton />}
 
           {whatsNext && anyStudentExperience && (
             <section aria-label="Recommended next step">
@@ -1239,11 +1311,26 @@ export default function Dashboard() {
             </section>
           )}
 
-          {!anyStudentExperience && !anyStaffExperience && courses.length > 0 && (
+          {!anyStudentExperience && !anyStaffExperience && hasCourses && (
             <p className="text-sm text-slate-500 dark:text-neutral-400">
               You have courses open, but no learner or instructor enrollments were returned. Open a course from the
               catalog for full details.
             </p>
+          )}
+
+          {deferredCourseCount > 0 && (
+            <div className="flex justify-center pt-2">
+              <button
+                type="button"
+                onClick={loadMoreCourses}
+                disabled={loadingMoreCourses}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+              >
+                {loadingMoreCourses
+                  ? 'Loading…'
+                  : `Load ${deferredCourseCount} more course${deferredCourseCount === 1 ? '' : 's'}`}
+              </button>
+            </div>
           )}
         </div>
       )}

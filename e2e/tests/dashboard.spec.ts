@@ -18,6 +18,14 @@ test.describe('Dashboard', () => {
     await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
   })
 
+  test('shows quick links when the instructor has courses', async ({ coursePage: page }) => {
+    await page.goto('/')
+    const dashboardMain = page.locator('[data-onboarding="dashboard-main"]')
+    await expect(dashboardMain).toBeVisible({ timeout: 30000 })
+    await expect(dashboardMain.getByRole('link', { name: /inbox/i })).toBeVisible()
+    await expect(dashboardMain.getByRole('link', { name: /all courses/i })).toBeVisible()
+  })
+
   test('shows empty state when user has no course enrollments', async ({ authedPage: page }) => {
     await expect(page).toHaveURL('/')
     // A fresh user has no enrollments — the app shows an empty/no-courses message.

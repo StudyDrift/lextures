@@ -28,7 +28,9 @@ test.describe('Equation editor', () => {
     await page.goto(
       `/courses/${seededCourse.courseCode}/modules/content/${contentPage.id}`,
     )
-    await page.getByRole('button', { name: /^edit$/i }).click()
+    const editBtn = page.getByRole('button', { name: /^edit$/i })
+    await expect(editBtn).toBeVisible({ timeout: 15000 })
+    await editBtn.click()
 
     const sectionBody = page.locator('[id^="canvas-md-"]').first()
     await sectionBody.click()

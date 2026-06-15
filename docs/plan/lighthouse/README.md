@@ -20,10 +20,10 @@ Implementation plans derived from Lighthouse reports stored in [`docs/lighthouse
 
 | Report | Page | Theme | Status | Plans |
 |---|---|---|---|---|
-| [`global-dashboard-darkmode.json`](../../lighthouse/global-dashboard-darkmode.json) | Global dashboard (`/`) | Dark (`.dark`) | **Valid** — run via `npm run lighthouse:dashboard:dark` (see [LH.1](../../completed/lighthouse/LH.1-global-dashboard-darkmode-audit-harness.md)) | [LH.2](LH.2-global-dashboard-darkmode-performance.md), [LH.3](LH.3-global-dashboard-darkmode-accessibility.md) |
+| [`global-dashboard-darkmode.json`](../../lighthouse/global-dashboard-darkmode.json) | Global dashboard (`/`) | Dark (`.dark`) | **Valid** — Performance re-baselined after LH.2 (see [LH.2](../../completed/lighthouse/LH.2-global-dashboard-darkmode-performance.md)) | [LH.3](LH.3-global-dashboard-darkmode-accessibility.md) |
 
 ## Plans
 
 - [LH.1 — Global dashboard dark mode: reproducible Lighthouse harness](../../completed/lighthouse/LH.1-global-dashboard-darkmode-audit-harness.md) (completed)
-- [LH.2 — Global dashboard dark mode: performance](LH.2-global-dashboard-darkmode-performance.md)
+- [LH.2 — Global dashboard dark mode: performance](../../completed/lighthouse/LH.2-global-dashboard-darkmode-performance.md) (completed)
 - [LH.3 — Global dashboard dark mode: accessibility](LH.3-global-dashboard-darkmode-accessibility.md)

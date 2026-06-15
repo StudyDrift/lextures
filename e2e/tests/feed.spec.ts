@@ -26,7 +26,9 @@ test.describe('Course feed', () => {
     }
 
     await page.goto(`/courses/${seededCourse.courseCode}/feed`)
-    await expect(page.getByRole('heading', { name: /feed|announcements|general/i })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: /feed|announcements|general/i }).first(),
+    ).toBeVisible()
     void channelId // used above
   })
 
