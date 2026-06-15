@@ -338,6 +338,10 @@ type Config struct {
 	// FFResearchConsent enables research / IRB consent studies, consent prompts, and gated data export (plan 14.15).
 	// Managed in Settings → Global platform (not process env).
 	FFResearchConsent bool
+	// FFAccessibilityIntake enables the accessibility services intake workflow: coordinator
+	// accommodation profiles propagated to assessment overrides (plan 14.16).
+	// Managed in Settings → Global platform (not process env).
+	FFAccessibilityIntake bool
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.

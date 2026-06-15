@@ -125,6 +125,7 @@ type platformSettingsJSON struct {
 	FFTranscripts                   bool `json:"ffTranscripts"`
 	FFAdvisingIntegration           bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               bool `json:"ffResearchConsent"`
+	FFAccessibilityIntake           bool `json:"ffAccessibilityIntake"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -300,6 +301,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFTranscripts:                   merged.FFTranscripts,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
+			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -451,6 +453,7 @@ type putPlatformBody struct {
 	FFTranscripts                   *bool `json:"ffTranscripts"`
 	FFAdvisingIntegration           *bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               *bool `json:"ffResearchConsent"`
+	FFAccessibilityIntake           *bool `json:"ffAccessibilityIntake"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -767,6 +770,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
 		setBool("ffadvisingintegration", body.FFAdvisingIntegration, func(v bool) { wr.FFAdvisingIntegration = &v })
 		setBool("ffresearchconsent", body.FFResearchConsent, func(v bool) { wr.FFResearchConsent = &v })
+		setBool("ffaccessibilityintake", body.FFAccessibilityIntake, func(v bool) { wr.FFAccessibilityIntake = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -894,6 +898,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFTranscripts:                   merged.FFTranscripts,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
+			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

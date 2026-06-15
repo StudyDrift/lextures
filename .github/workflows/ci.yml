@@ -244,8 +244,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shardIndex: [1, 2, 3, 4]
-        shardTotal: [4]
+        shardIndex: [1, 2, 3, 4, 5]
+        shardTotal: [5]
     env:
       E2E_USE_DOCKER: "0"
       E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable

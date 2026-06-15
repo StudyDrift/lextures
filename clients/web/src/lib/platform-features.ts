@@ -53,6 +53,7 @@ export type PlatformFeaturesSnapshot = {
   ffTranscripts?: boolean
   ffAdvisingIntegration?: boolean
   ffResearchConsent?: boolean
+  ffAccessibilityIntake?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -108,6 +109,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffTranscripts: false,
   ffAdvisingIntegration: false,
   ffResearchConsent: false,
+  ffAccessibilityIntake: false,
 }
 
 let loaded = false
