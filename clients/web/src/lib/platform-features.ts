@@ -52,6 +52,7 @@ export type PlatformFeaturesSnapshot = {
   ffBookstoreIntegration?: boolean
   ffTranscripts?: boolean
   ffAdvisingIntegration?: boolean
+  ffResearchConsent?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -106,6 +107,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffBookstoreIntegration: false,
   ffTranscripts: false,
   ffAdvisingIntegration: false,
+  ffResearchConsent: false,
 }
 
 let loaded = false

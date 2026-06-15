@@ -60,6 +60,7 @@ import {
 } from '../../components/dashboard/grading-backlog-list'
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
 import { DegreeProgressCard } from '../../components/dashboard/degree-progress-card'
+import { ConsentPrompt } from '../../components/research/consent-prompt'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import type { EnrollmentState } from '../../lib/enrollment-state-api'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
@@ -227,6 +228,7 @@ export default function Dashboard() {
     ffEportfolio,
     ffCoCurricularTranscript,
     ffAdvisingIntegration,
+    ffResearchConsent,
   } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
@@ -721,6 +723,8 @@ export default function Dashboard() {
           <StudyStatsCard />
 
           {ffAdvisingIntegration && anyStudentExperience ? <DegreeProgressCard /> : null}
+
+          {ffResearchConsent && anyStudentExperience ? <ConsentPrompt /> : null}
 
           {ffCoCurricularTranscript ? (
             <section aria-label="My achievements">

@@ -65,6 +65,7 @@ export type PlatformFeatures = {
   ffBookstoreIntegration: boolean
   ffTranscripts: boolean
   ffAdvisingIntegration: boolean
+  ffResearchConsent: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -120,6 +121,7 @@ const defaultFeatures: PlatformFeatures = {
   ffBookstoreIntegration: false,
   ffTranscripts: false,
   ffAdvisingIntegration: false,
+  ffResearchConsent: false,
   loading: true,
   refresh: async () => {},
 }
@@ -180,6 +182,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffBookstoreIntegration: false,
     ffTranscripts: false,
     ffAdvisingIntegration: false,
+    ffResearchConsent: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -241,6 +244,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffBookstoreIntegration: data.ffBookstoreIntegration === true,
           ffTranscripts: data.ffTranscripts === true,
           ffAdvisingIntegration: data.ffAdvisingIntegration === true,
+          ffResearchConsent: data.ffResearchConsent === true,
         }
         setFeatures({
           ...next,
@@ -269,6 +273,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffBookstoreIntegration: next.ffBookstoreIntegration === true,
           ffTranscripts: next.ffTranscripts === true,
           ffAdvisingIntegration: next.ffAdvisingIntegration === true,
+          ffResearchConsent: next.ffResearchConsent === true,
         })
         setPlatformFeaturesSnapshot(next)
       }
