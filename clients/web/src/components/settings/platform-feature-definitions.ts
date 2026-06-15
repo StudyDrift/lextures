@@ -79,6 +79,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'IRB consent studies: present consent forms to students, record decisions, and gate research data export to consenting participants.',
   },
   {
+    key: 'ffAccessibilityIntake',
+    label: 'Accessibility services intake',
+    description:
+      'Accommodation profiles managed by accessibility coordinators, propagated automatically to assessment overrides; instructors see only that an accommodation is active.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:

@@ -101,6 +101,8 @@ import GradeSubmissionStatus from './pages/admin/grade-submission-status'
 import AcademicCalendarAdminPage from './pages/admin/academic-calendar'
 import ConsentStudiesAdminPage from './pages/admin/consent-studies'
 import ResearchStudiesPage from './pages/lms/research-studies'
+import AccessibilityServicesPage from './pages/admin/accessibility-services'
+import MyAccommodationsPage from './pages/lms/my-accommodations'
 import CourseEvaluation from './pages/lms/CourseEvaluation'
 import CourseEvaluationResults from './pages/lms/CourseEvaluationResults'
 import EvaluationTemplates from './pages/admin/EvaluationTemplates'
@@ -169,6 +171,7 @@ export default function App() {
           <Route path="/transcripts" element={<TranscriptsPage />} />
           <Route path="/advising-notes" element={<AdvisingNotesPage />} />
           <Route path="/me/research-studies" element={<ResearchStudiesPage />} />
+          <Route path="/me/accommodations" element={<MyAccommodationsPage />} />
           <Route path="/parent" element={<ParentDashboard />} />
           <Route path="/parent/conferences" element={<ConferenceBooking />} />
           <Route path="/conferences/availability" element={<ConferenceAvailabilitySetup />} />
@@ -259,6 +262,7 @@ export default function App() {
           <Route path="/admin/incompletes" element={<IncompletesAdminPage />} />
           <Route path="/admin/academic-calendar" element={<AcademicCalendarAdminPage />} />
           <Route path="/admin/consent-studies" element={<ConsentStudiesAdminPage />} />
+          <Route path="/admin/accessibility" element={<AccessibilityServicesPage />} />
           <Route path="/admin/evaluations/templates" element={<EvaluationTemplates />} />
           <Route path="/admin/evaluations/report" element={<EvaluationReport />} />
           <Route path="/reports" element={<Reports />} />

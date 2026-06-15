@@ -44,7 +44,13 @@ export function SideNavSettingsLinks() {
   const canOrgRoles =
     !permLoading && (allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW))
   const { scimEnabled: platformScimEnabled } = usePlatformScimEnabled(canManageRbac)
-  const { ffBookstoreIntegration, ffTranscripts, ffAdvisingIntegration, ffResearchConsent } = usePlatformFeatures()
+  const {
+    ffBookstoreIntegration,
+    ffTranscripts,
+    ffAdvisingIntegration,
+    ffResearchConsent,
+    ffAccessibilityIntake,
+  } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
   const aiSectionActive = view === 'ai-models' || view === 'ai-prompts'
@@ -186,6 +192,17 @@ export function SideNavSettingsLinks() {
                   icon={<ShieldCheck className="h-5 w-5" />}
                 >
                   Research consent
+                </SideNavLink>
+              )}
+              {ffAccessibilityIntake && (
+                <SideNavLink
+                  to="/admin/accessibility"
+                  className={() =>
+                    location.pathname === '/admin/accessibility' ? sideNavActiveClass : ''
+                  }
+                  icon={<ShieldCheck className="h-5 w-5" />}
+                >
+                  Accessibility services
                 </SideNavLink>
               )}
               {ffBookstoreIntegration && (

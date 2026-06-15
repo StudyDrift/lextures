@@ -26,7 +26,14 @@ import { SideNavLink } from './side-nav-link'
 export function SideNavMainLinks() {
   const unreadInboxCount = useInboxUnreadCount()
   const { allows, loading: permLoading } = usePermissions()
-  const { accommodationsEngineEnabled, ffEportfolio, ffTranscripts, ffAdvisingIntegration, ffResearchConsent } =
+  const {
+    accommodationsEngineEnabled,
+    ffEportfolio,
+    ffTranscripts,
+    ffAdvisingIntegration,
+    ffResearchConsent,
+    ffAccessibilityIntake,
+  } =
     usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
@@ -76,6 +83,11 @@ export function SideNavMainLinks() {
       {ffResearchConsent ? (
         <SideNavLink to="/me/research-studies" icon={<ShieldCheck className="h-5 w-5" />}>
           Research studies
+        </SideNavLink>
+      ) : null}
+      {ffAccessibilityIntake ? (
+        <SideNavLink to="/me/accommodations" icon={<ShieldCheck className="h-5 w-5" />}>
+          My accommodations
         </SideNavLink>
       ) : null}
       <SideNavLink to="/calendar" icon={<Calendar className="h-5 w-5" />}>
