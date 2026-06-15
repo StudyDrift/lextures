@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   FolderOpen,
+  GraduationCap,
 } from 'lucide-react'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -58,6 +59,7 @@ import {
   type GradingBacklogItem,
 } from '../../components/dashboard/grading-backlog-list'
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
+import { DegreeProgressCard } from '../../components/dashboard/degree-progress-card'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import type { EnrollmentState } from '../../lib/enrollment-state-api'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
@@ -224,6 +226,7 @@ export default function Dashboard() {
     ffAcademicCalendar,
     ffEportfolio,
     ffCoCurricularTranscript,
+    ffAdvisingIntegration,
   } = usePlatformFeatures()
 
   const [catalog, setCatalog] = useState<CoursePublic[] | null>(null)
@@ -615,6 +618,15 @@ export default function Dashboard() {
                   My Portfolio
                 </Link>
               ) : null}
+              {ffAdvisingIntegration ? (
+                <Link
+                  to="/advising-notes"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                >
+                  <GraduationCap className="h-4 w-4 text-indigo-500" aria-hidden />
+                  Advising notes
+                </Link>
+              ) : null}
               {totalFeedUnread > 0 ? (
                 <span className="inline-flex items-center gap-2 rounded-xl border border-teal-200 bg-teal-50 px-4 py-2.5 text-sm font-medium text-teal-900 dark:border-teal-900/50 dark:bg-teal-950/40 dark:text-teal-50">
                   <MessageCircle className="h-4 w-4" aria-hidden />
@@ -707,6 +719,8 @@ export default function Dashboard() {
           )}
 
           <StudyStatsCard />
+
+          {ffAdvisingIntegration && anyStudentExperience ? <DegreeProgressCard /> : null}
 
           {ffCoCurricularTranscript ? (
             <section aria-label="My achievements">

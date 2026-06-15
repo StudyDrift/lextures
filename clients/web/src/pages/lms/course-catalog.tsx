@@ -258,6 +258,11 @@ export default function CourseCatalogPage() {
               {sec.instructorName && (
                 <p className="mt-1 text-xs text-slate-600 dark:text-neutral-300">{sec.instructorName}</p>
               )}
+              {sec.fulfillsRequirements && sec.fulfillsRequirements.length > 0 ? (
+                <p className="mt-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                  Fulfills: {sec.fulfillsRequirements.join(', ')}
+                </p>
+              ) : null}
             </button>
           ))}
         </div>
@@ -317,6 +322,11 @@ export default function CourseCatalogPage() {
                     <span className="font-medium">Instructor:</span> {detail.instructorName}
                   </p>
                 )}
+                {detail.fulfillsRequirements && detail.fulfillsRequirements.length > 0 ? (
+                  <p className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                    Fulfills: {detail.fulfillsRequirements.join(', ')}
+                  </p>
+                ) : null}
                 {detail.prerequisites && detail.prerequisites.length > 0 && (
                   <div>
                     <p className="font-medium">Prerequisites</p>

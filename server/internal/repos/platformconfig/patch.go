@@ -142,6 +142,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_eportfolio", w.FFEportfolio)
 	addBool("ff_bookstore_integration", w.FFBookstoreIntegration)
 	addBool("ff_transcripts", w.FFTranscripts)
+	addBool("ff_advising_integration", w.FFAdvisingIntegration)
 	addBool("lrs_anonymize_actors", w.LRSAnonymizeActors)
 	addBool("ferpa_workflow_enabled", w.FERPAWorkflowEnabled)
 	addBool("dpa_portal_enabled", w.DPAPortalEnabled)

@@ -60,6 +60,7 @@ type platformFeaturesJSON struct {
 	FFBookstoreIntegration      bool `json:"ffBookstoreIntegration"`
 	FFEportfolio                bool `json:"ffEportfolio"`
 	FFTranscripts               bool `json:"ffTranscripts"`
+	FFAdvisingIntegration       bool `json:"ffAdvisingIntegration"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -126,6 +127,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBookstoreIntegration:      cfg.FFBookstoreIntegration,
 		FFEportfolio:                cfg.FFEportfolio,
 		FFTranscripts:               cfg.FFTranscripts,
+		FFAdvisingIntegration:       cfg.FFAdvisingIntegration,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

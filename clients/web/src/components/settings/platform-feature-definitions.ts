@@ -67,6 +67,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let students request official transcripts from their institution via a configurable webhook.',
   },
   {
+    key: 'ffAdvisingIntegration',
+    label: 'Advising integration',
+    description:
+      'Degree progress widget, advising appointment links, and advisor notes on the student dashboard.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:

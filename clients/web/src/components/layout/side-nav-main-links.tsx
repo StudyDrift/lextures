@@ -6,6 +6,7 @@ import {
   Calendar,
   FileText,
   FolderOpen,
+  GraduationCap,
   Inbox,
   LayoutDashboard,
   Settings,
@@ -24,7 +25,7 @@ import { SideNavLink } from './side-nav-link'
 export function SideNavMainLinks() {
   const unreadInboxCount = useInboxUnreadCount()
   const { allows, loading: permLoading } = usePermissions()
-  const { accommodationsEngineEnabled, ffEportfolio, ffTranscripts } = usePlatformFeatures()
+  const { accommodationsEngineEnabled, ffEportfolio, ffTranscripts, ffAdvisingIntegration } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
@@ -63,6 +64,11 @@ export function SideNavMainLinks() {
       {ffTranscripts ? (
         <SideNavLink to="/transcripts" icon={<FileText className="h-5 w-5" />}>
           Transcripts
+        </SideNavLink>
+      ) : null}
+      {ffAdvisingIntegration ? (
+        <SideNavLink to="/advising-notes" icon={<GraduationCap className="h-5 w-5" />}>
+          Advising notes
         </SideNavLink>
       ) : null}
       <SideNavLink to="/calendar" icon={<Calendar className="h-5 w-5" />}>

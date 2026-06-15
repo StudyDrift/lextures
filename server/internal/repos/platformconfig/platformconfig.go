@@ -108,6 +108,7 @@ type Row struct {
 	FFEportfolio                    *bool
 	FFBookstoreIntegration          *bool
 	FFTranscripts                   *bool
+	FFAdvisingIntegration           *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -230,6 +231,7 @@ type Write struct {
 	FFEportfolio                    *bool
 	FFBookstoreIntegration          *bool
 	FFTranscripts                   *bool
+	FFAdvisingIntegration           *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -349,6 +351,7 @@ SELECT
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	ff_advising_integration,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -462,6 +465,7 @@ WHERE id = 1
 		&r.FFEportfolio,
 		&r.FFBookstoreIntegration,
 		&r.FFTranscripts,
+		&r.FFAdvisingIntegration,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -626,6 +630,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	ff_advising_integration,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -745,6 +750,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_eportfolio = COALESCE(EXCLUDED.ff_eportfolio, settings.platform_app_settings.ff_eportfolio),
 	ff_bookstore_integration = COALESCE(EXCLUDED.ff_bookstore_integration, settings.platform_app_settings.ff_bookstore_integration),
 	ff_transcripts = COALESCE(EXCLUDED.ff_transcripts, settings.platform_app_settings.ff_transcripts),
+	ff_advising_integration = COALESCE(EXCLUDED.ff_advising_integration, settings.platform_app_settings.ff_advising_integration),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
@@ -856,6 +862,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFEportfolio,
 		w.FFBookstoreIntegration,
 		w.FFTranscripts,
+		w.FFAdvisingIntegration,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

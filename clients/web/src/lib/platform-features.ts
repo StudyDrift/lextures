@@ -51,6 +51,7 @@ export type PlatformFeaturesSnapshot = {
   ffEportfolio?: boolean
   ffBookstoreIntegration?: boolean
   ffTranscripts?: boolean
+  ffAdvisingIntegration?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -104,6 +105,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffEportfolio: false,
   ffBookstoreIntegration: false,
   ffTranscripts: false,
+  ffAdvisingIntegration: false,
 }
 
 let loaded = false
@@ -249,6 +251,10 @@ export function bookstoreIntegrationEnabled(): boolean {
 
 export function transcriptsFeatureEnabled(): boolean {
   return loaded && snapshot.ffTranscripts === true
+}
+
+export function advisingIntegrationEnabled(): boolean {
+  return loaded && snapshot.ffAdvisingIntegration === true
 }
 
 export function eportfolioFeatureEnabled(): boolean {
