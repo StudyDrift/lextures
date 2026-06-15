@@ -151,13 +151,12 @@ UPDATE accessibility.accommodation_profiles SET
     updated_at      = NOW()
 WHERE id = $1
 RETURNING` + selectCols
-	var acc *[]string = patch.Accommodations
 	var params []byte
 	if len(patch.CustomParams) > 0 {
 		params = []byte(patch.CustomParams)
 	}
 	row := pool.QueryRow(ctx, q,
-		id, acc, params, patch.EffectiveFrom,
+		id, patch.Accommodations, params, patch.EffectiveFrom,
 		patch.EffectiveUntil != nil, patch.EffectiveUntil,
 		patch.IsActive,
 	)
