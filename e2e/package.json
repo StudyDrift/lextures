@@ -7,11 +7,15 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "lighthouse:dashboard:dark": "tsx scripts/run-lighthouse-dashboard.ts",
+    "lighthouse:dashboard": "tsx scripts/run-lighthouse-dashboard.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.11.3",
     "@playwright/test": "^1.49.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "lighthouse": "13.2.0",
+    "tsx": "^4.20.3"
   }
 }

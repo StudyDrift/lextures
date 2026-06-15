@@ -1,4 +1,4 @@
-.PHONY: e2e e2e-run e2e-teardown lint lint-server lint-web lint-cli lint-www server web cli www
+.PHONY: dev e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -26,6 +26,10 @@ lint-cli:
 
 lint-www:
 	cd www && npm run lint
+
+# Start the development stack (Postgres, RabbitMQ, Air-backed API, Vite) in detached mode.
+dev:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
 
 # Run the full e2e suite — automatically picks a strategy:
 #
@@ -67,6 +71,11 @@ e2e-run:
 # Force-remove the Docker e2e stack and ephemeral volumes.
 e2e-teardown:
 	docker compose -f docker-compose.e2e.yml down -v
+
+# Run Lighthouse on the signed-in global dashboard in dark mode (LH.1).
+# Requires API + web client already running (e.g. `make dev`).
+lighthouse-dashboard-dark:
+	cd e2e && npm run lighthouse:dashboard:dark
 
 cli:
 ifneq ($(filter lint,$(MAKECMDGOALS)),)

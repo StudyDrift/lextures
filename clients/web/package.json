@@ -19,7 +19,8 @@
     "analyze": "ANALYZE=1 vite build",
     "bundle:check": "node scripts/check-bundle-size.mjs",
     "i18n:check": "node scripts/check-i18n-locales.mjs",
-    "contrast:check": "node scripts/check-contrast.mjs"
+    "contrast:check": "node scripts/check-contrast.mjs",
+    "lighthouse:dashboard:dark": "npm run lighthouse:dashboard:dark --prefix ../../e2e"
   },
   "lint-staged": {
     "*.{ts,tsx}": "oxlint --fix"

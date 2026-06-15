@@ -1,0 +1,128 @@
+# Nightly Lighthouse harness for the signed-in global dashboard (LH.1).
+# Non-blocking until LH.2/LH.3 set performance budgets.
+
+name: Lighthouse
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'clients/web/**'
+      - 'e2e/**'
+      - 'docs/lighthouse/**'
+      - '.github/workflows/lighthouse.yml'
+
+concurrency:
+  group: lighthouse-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse-dashboard-dark:
+    name: Dashboard (dark mode)
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    continue-on-error: true
+    env:
+      E2E_USE_DOCKER: '0'
+      E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
+      E2E_API_PORT: '8080'
+      E2E_SERVER_BIN: ${{ github.workspace }}/.cache/e2e/server
+      E2E_WEB_MODE: preview
+      E2E_SKIP_DEPS: '1'
+      E2E_HEALTH_POLL_SECS: '1'
+      E2E_HEALTH_MAX_ATTEMPTS: '45'
+      E2E_ADMIN_EMAIL: admin@e2e.test
+      CI: 'true'
+      PAGE_URL: http://localhost:5173/
+      THEME: dark
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: e2e
+          POSTGRES_PASSWORD: e2e
+          POSTGRES_DB: e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U e2e -d e2e"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25.11'
+          cache-dependency-path: server/go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            clients/web/package-lock.json
+            e2e/package-lock.json
+
+      - name: Build API server binary
+        working-directory: server
+        run: |
+          mkdir -p "${{ github.workspace }}/.cache/e2e"
+          go build -trimpath -ldflags="-s -w" -o "${{ github.workspace }}/.cache/e2e/server" ./cmd/server
+
+      - name: Install and build web client
+        working-directory: clients/web
+        env:
+          VITE_API_URL: http://localhost:8080
+        run: |
+          npm ci --prefer-offline --quiet
+          npm run build
+
+      - name: Install e2e dependencies and Playwright browser
+        working-directory: e2e
+        run: |
+          npm ci --prefer-offline --quiet
+          npx playwright install --with-deps chromium
+
+      - name: Run Lighthouse harness (local stack)
+        run: bash e2e/scripts/lighthouse-local.sh
+
+      - name: Summarize category scores
+        if: success()
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = 'docs/lighthouse/global-dashboard-darkmode.json';
+            const r = JSON.parse(fs.readFileSync(p, 'utf8'));
+            if (r.runtimeError) {
+              console.error('runtimeError:', r.runtimeError.code);
+              process.exit(1);
+            }
+            const perf = r.categories?.performance?.score;
+            const a11y = r.categories?.accessibility?.score;
+            const summary = [
+              '## Lighthouse — global dashboard (dark)',
+              '',
+              '| Category | Score |',
+              '| --- | --- |',
+              '| Performance | ' + (perf != null ? Math.round(perf * 100) : 'n/a') + ' |',
+              '| Accessibility | ' + (a11y != null ? Math.round(a11y * 100) : 'n/a') + ' |',
+              '',
+              'Report: `docs/lighthouse/global-dashboard-darkmode.json`',
+            ].join('\n');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+          "
+
+      - name: Upload Lighthouse JSON
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-global-dashboard-darkmode
+          path: docs/lighthouse/global-dashboard-darkmode.json
+          retention-days: 14
+          if-no-files-found: warn
