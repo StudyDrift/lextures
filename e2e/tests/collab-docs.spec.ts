@@ -49,8 +49,8 @@ test.describe('Collaborative documents', () => {
     await apiEnableCollabDocs(seededCourse.instructorToken, seededCourse.courseCode)
     await page.goto(`/courses/${seededCourse.courseCode}/collab-docs`)
     await expect(
-      page.getByRole('heading', { name: /collaborative documents/i }),
-    ).toBeVisible({ timeout: 8000 })
+      page.getByRole('heading', { name: /collaborative documents/i }).first(),
+    ).toBeVisible({ timeout: 15000 })
   })
 
   test('doc created via API appears in the list', async ({

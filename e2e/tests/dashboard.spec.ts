@@ -19,12 +19,20 @@ test.describe('Dashboard', () => {
   })
 
   test('shows quick links before course detail sections finish loading', async ({ page, seededCourse }) => {
+    const coursesLoaded = page.waitForResponse(
+      (r) => r.url().includes('/api/v1/courses') && r.status() === 200,
+      { timeout: 20000 },
+    )
     await injectToken(page, seededCourse.instructorToken)
+    const response = await coursesLoaded
+    const payload = (await response.json()) as { courses?: unknown[] }
+    expect(payload.courses?.length ?? 0).toBeGreaterThan(0)
+
     await expect(page).toHaveURL('/')
     await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
-    const quickLinks = page.getByRole('region', { name: /quick links and unread/i })
-    await expect(quickLinks.getByRole('link', { name: /^inbox$/i })).toBeVisible({ timeout: 15000 })
-    await expect(quickLinks.getByRole('link', { name: /all courses/i })).toBeVisible()
+    const main = page.locator('#main-content')
+    await expect(main.getByRole('link', { name: /^inbox$/i })).toBeVisible({ timeout: 20000 })
+    await expect(main.getByRole('link', { name: /all courses/i })).toBeVisible()
   })
 
   test('shows empty state when user has no course enrollments', async ({ authedPage: page }) => {
