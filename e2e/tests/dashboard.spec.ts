@@ -22,8 +22,9 @@ test.describe('Dashboard', () => {
     await injectToken(page, seededCourse.instructorToken)
     await expect(page).toHaveURL('/')
     await expect(page.getByRole('heading', { name: /dashboard/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /inbox/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /all courses/i })).toBeVisible()
+    const quickLinks = page.locator('[aria-label="Quick links and unread"]')
+    await expect(quickLinks.getByRole('link', { name: /^inbox$/i })).toBeVisible()
+    await expect(quickLinks.getByRole('link', { name: /all courses/i })).toBeVisible()
   })
 
   test('shows empty state when user has no course enrollments', async ({ authedPage: page }) => {
