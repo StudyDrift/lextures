@@ -18,8 +18,8 @@ type myPermissionsResponse struct {
 	PermissionStrings []string `json:"permissionStrings"`
 }
 
-// meUserID returns the authenticated user id or writes 401/500 and returns false.
-func (d Deps) meUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
+// meSessionUserID requires a login JWT (not an access key). Used for session-only actions.
+func (d Deps) meSessionUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
 	if d.JWTSigner == nil {
 		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 		return uuid.UUID{}, false
@@ -34,6 +34,30 @@ func (d Deps) meUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool)
 		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 		return uuid.UUID{}, false
 	}
+	return d.validateMeUser(w, r, u, userID)
+}
+
+// meUserID returns the authenticated user id or writes 401/500 and returns false.
+func (d Deps) meUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
+	if d.JWTSigner == nil {
+		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
+		return uuid.UUID{}, false
+	}
+	u, ctx, err := auth.UserFromRequestOrAccessKey(r, d.JWTSigner, d.Pool)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
+		return uuid.UUID{}, false
+	}
+	*r = *r.WithContext(ctx)
+	userID, err := uuid.Parse(u.UserID)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
+		return uuid.UUID{}, false
+	}
+	return d.validateMeUser(w, r, u, userID)
+}
+
+func (d Deps) validateMeUser(w http.ResponseWriter, r *http.Request, u auth.AuthUser, userID uuid.UUID) (uuid.UUID, bool) {
 	if d.Pool == nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Server misconfiguration.")
 		return uuid.UUID{}, false
@@ -213,4 +237,5 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	d.registerTTSRoutes(r)
 	d.registerSelfReflectionRoutes(r)
 	d.registerCCRRoutes(r)
+	d.registerIntegrationsRoutes(r)
 }

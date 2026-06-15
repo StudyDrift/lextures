@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
@@ -61,6 +62,10 @@ func (d Deps) handleGetCourse() http.HandlerFunc {
 		cid, err := uuid.Parse(crow.ID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Invalid course id.")
+			return
+		}
+		if !auth.AccessKeyAllowsCourse(r.Context(), cid) {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
 		roles, err := enrollment.UserRolesInCourse(r.Context(), d.Pool, courseCode, userID)

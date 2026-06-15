@@ -289,6 +289,18 @@ func AddLike(ctx context.Context, pool *pgxpool.Pool, messageID, userID uuid.UUI
 	return err
 }
 
+// DeleteMessage removes a message when the caller is the author.
+func DeleteMessage(ctx context.Context, pool *pgxpool.Pool, messageID, authorID uuid.UUID) (bool, error) {
+	tag, err := pool.Exec(ctx, `
+		DELETE FROM course.feed_messages
+		WHERE id = $1 AND author_user_id = $2
+	`, messageID, authorID)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
 // RemoveLike deletes a like idempotently.
 func RemoveLike(ctx context.Context, pool *pgxpool.Pool, messageID, userID uuid.UUID) error {
 	_, err := pool.Exec(ctx, `

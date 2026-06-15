@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/canvasimportqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
+	"github.com/lextures/lextures/server/internal/feedevents"
 	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/notifevents"
@@ -46,6 +47,9 @@ type Deps struct {
 	PasswordChecker hibp.Checker
 	// NotifHub broadcasts SSE signals for real-time in-app notification bell updates (plan 6.3). Optional.
 	NotifHub *notifevents.Hub
+	// FeedHub fans out course-feed change signals to WebSocket subscribers so the
+	// SPA refreshes in real time when channels/messages change (including via CLI). Optional.
+	FeedHub *feedevents.Hub
 	// CanvasImportHub fans out queued Canvas import progress to WebSocket subscribers.
 	CanvasImportHub *canvasimportevents.Hub
 	// CanvasImportQueue publishes Canvas import jobs to RabbitMQ (or in-memory fallback).

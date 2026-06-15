@@ -4,6 +4,7 @@ package enrollment
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -131,6 +132,7 @@ type FeedRosterRow struct {
 	UserID      uuid.UUID
 	Email       string
 	DisplayName *string
+	AvatarURL   *string
 }
 
 // ListFeedRosterForCourse returns distinct users enrolled in the course, for @mentions in the course feed.
@@ -140,7 +142,8 @@ func ListFeedRosterForCourse(ctx context.Context, pool *pgxpool.Pool, courseCode
 SELECT DISTINCT ON (u.id)
 	u.id,
 	u.email,
-	u.display_name
+	u.display_name,
+	u.avatar_url
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
@@ -168,13 +171,20 @@ ORDER BY
 	for rows.Next() {
 		var r FeedRosterRow
 		var display sql.NullString
-		if err := rows.Scan(&r.UserID, &r.Email, &display); err != nil {
+		var avatar sql.NullString
+		if err := rows.Scan(&r.UserID, &r.Email, &display, &avatar); err != nil {
 			return nil, err
 		}
 		if display.Valid {
 			s := display.String
 			if s != "" {
 				r.DisplayName = &s
+			}
+		}
+		if avatar.Valid {
+			s := strings.TrimSpace(avatar.String)
+			if s != "" {
+				r.AvatarURL = &s
 			}
 		}
 		out = append(out, r)

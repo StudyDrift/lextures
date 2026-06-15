@@ -12,6 +12,7 @@ export type FeedRosterPerson = {
   userId: string
   email: string
   displayName: string | null
+  avatarUrl?: string | null
 }
 
 export type FeedMessage = {
@@ -163,6 +164,17 @@ export async function patchFeedMessage(courseCode: string, messageId: string, bo
   )
   const raw: unknown = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
+}
+
+export async function deleteFeedMessage(courseCode: string, messageId: string) {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${enc(courseCode)}/feed/messages/${encodeURIComponent(messageId)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw: unknown = await res.json().catch(() => ({}))
+    throw new Error(readApiErrorMessage(raw))
+  }
 }
 
 export async function pinFeedMessage(courseCode: string, messageId: string, pinned: boolean) {

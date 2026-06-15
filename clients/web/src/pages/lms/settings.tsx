@@ -35,6 +35,8 @@ import {
 } from '../../lib/rbac-api'
 import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-accounts-panel'
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
+import { IntegrationsAccessKeysPanel } from '../../components/settings/integrations-access-keys-panel'
+import { IntegrationsMcpPanel } from '../../components/settings/integrations-mcp-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
@@ -912,6 +914,8 @@ export default function Settings() {
           activeView === 'transcripts' ||
           activeView === 'advising'
             ? 'max-w-4xl'
+            : activeView === 'integrations'
+              ? 'max-w-3xl'
             : activeView === 'ai-prompts'
               ? 'max-w-3xl'
               : 'max-w-xl'
@@ -1599,6 +1603,17 @@ export default function Settings() {
               Control which events send you email and whether they arrive instantly or in a daily digest.
             </p>
             <NotificationPreferencesPanel />
+          </div>
+        )}
+
+        {activeView === 'integrations' && (
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Integrations</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              Create access keys for API tools and configure MCP so AI agents can work with your Lextures data.
+            </p>
+            <IntegrationsAccessKeysPanel />
+            <IntegrationsMcpPanel />
           </div>
         )}
 

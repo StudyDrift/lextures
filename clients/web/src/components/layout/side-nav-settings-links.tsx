@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Store,
   User,
+  Workflow,
 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
@@ -85,6 +86,13 @@ export function SideNavSettingsLinks() {
         icon={<Bell className="h-5 w-5" />}
       >
         Notifications
+      </SideNavLink>
+      <SideNavLink
+        to="/settings/integrations"
+        className={() => (view === 'integrations' ? sideNavActiveClass : '')}
+        icon={<Workflow className="h-5 w-5" />}
+      >
+        Integrations
       </SideNavLink>
       {(canOrgUnits || canOrgRoles || canManageRbac) && (
         <>

@@ -5,6 +5,7 @@ export type SettingsNavView =
   | 'ai-prompts'
   | 'account'
   | 'notifications'
+  | 'integrations'
   | 'roles'
   | 'lti-tools'
   | 'platform'
@@ -27,6 +28,7 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (
     raw === 'account' ||
     raw === 'notifications' ||
+    raw === 'integrations' ||
     raw === 'roles' ||
     raw === 'lti-tools' ||
     raw === 'platform' ||
