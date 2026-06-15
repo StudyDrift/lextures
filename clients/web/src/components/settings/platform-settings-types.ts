@@ -37,6 +37,7 @@ export type PlatformSettingsPayload = {
   ffCoCurricularTranscript: boolean
   ffEportfolio: boolean
   ffTranscripts: boolean
+  ffAdvisingIntegration: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean

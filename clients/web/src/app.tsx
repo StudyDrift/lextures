@@ -106,6 +106,7 @@ import EvaluationReport from './pages/admin/EvaluationReport'
 import PrivacyCentrePage from './pages/privacy-centre-page'
 import MyPortfoliosPage from './pages/lms/my-portfolios-page'
 import TranscriptsPage from './pages/lms/transcripts-page'
+import AdvisingNotesPage from './pages/lms/advising-notes'
 import PortfolioEditorPage from './pages/lms/portfolio-editor-page'
 import PortfolioArtifactContentPage from './pages/lms/portfolio-artifact-content-page'
 import PublicPortfolioPage from './pages/portfolio/public-portfolio-page'
@@ -164,6 +165,7 @@ export default function App() {
           <Route path="/me/study-insights" element={<StudyInsightsPage />} />
           <Route path="/me/ccr" element={<MyCCR />} />
           <Route path="/transcripts" element={<TranscriptsPage />} />
+          <Route path="/advising-notes" element={<AdvisingNotesPage />} />
           <Route path="/parent" element={<ParentDashboard />} />
           <Route path="/parent/conferences" element={<ConferenceBooking />} />
           <Route path="/conferences/availability" element={<ConferenceAvailabilitySetup />} />

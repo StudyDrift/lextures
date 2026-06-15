@@ -123,6 +123,7 @@ type platformSettingsJSON struct {
 	FFEportfolio                    bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   bool `json:"ffTranscripts"`
+	FFAdvisingIntegration           bool `json:"ffAdvisingIntegration"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -296,6 +297,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                    merged.FFEportfolio,
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
+			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -445,6 +447,7 @@ type putPlatformBody struct {
 	FFEportfolio                    *bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   *bool `json:"ffTranscripts"`
+	FFAdvisingIntegration           *bool `json:"ffAdvisingIntegration"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -759,6 +762,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffeportfolio", body.FFEportfolio, func(v bool) { wr.FFEportfolio = &v })
 		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
 		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
+		setBool("ffadvisingintegration", body.FFAdvisingIntegration, func(v bool) { wr.FFAdvisingIntegration = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -884,6 +888,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                    merged.FFEportfolio,
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
+			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

@@ -23,6 +23,7 @@ import { CloudProvidersPanel } from '../../components/settings/cloud-providers-p
 import { LRSSettingsPanel } from '../../components/settings/lrs-settings-panel'
 import { OERProvidersPanel } from '../../components/settings/oer-providers-panel'
 import { TranscriptsSettingsPanel } from '../../components/settings/transcripts-settings-panel'
+import { AdvisingSettingsPanel } from '../../components/settings/advising-settings-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { xapiEmissionFeatureEnabled } from '../../lib/platform-features'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -66,7 +67,8 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/cloud-providers' ||
     pathname === '/settings/lrs-integrations' ||
     pathname === '/settings/oer-providers' ||
-    pathname === '/settings/transcripts'
+    pathname === '/settings/transcripts' ||
+    pathname === '/settings/advising'
   )
 }
 
@@ -177,7 +179,7 @@ export default function Settings() {
   const { scimEnabled: platformScimEnabled, loading: platformScimFlagLoading } = usePlatformScimEnabled(
     canManageRbac && activeView === 'scim-provisioning',
   )
-  const { ffTranscripts, loading: featuresLoading } = usePlatformFeatures()
+  const { ffTranscripts, ffAdvisingIntegration, loading: featuresLoading } = usePlatformFeatures()
   const accountFormId = useId()
   const { setProfile: setLocaleProfile } = useLocaleFormatContext()
   const [displayLocale, setDisplayLocale] = useState(detectBrowserLocale())
@@ -888,6 +890,9 @@ export default function Settings() {
   if (activeView === 'transcripts' && canManageRbac && !featuresLoading && !ffTranscripts) {
     return <Navigate to="/settings/platform" replace />
   }
+  if (activeView === 'advising' && canManageRbac && !featuresLoading && !ffAdvisingIntegration) {
+    return <Navigate to="/settings/platform" replace />
+  }
 
   return (
     <LmsPage title="Settings" description="Account and learning preferences.">
@@ -904,7 +909,8 @@ export default function Settings() {
           activeView === 'cloud-providers' ||
           activeView === 'lrs-integrations' ||
           activeView === 'oer-providers' ||
-          activeView === 'transcripts'
+          activeView === 'transcripts' ||
+          activeView === 'advising'
             ? 'max-w-4xl'
             : activeView === 'ai-prompts'
               ? 'max-w-3xl'
@@ -1711,6 +1717,22 @@ export default function Settings() {
               }
             >
               <TranscriptsSettingsPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'advising' && ffAdvisingIntegration && (
+          <div>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                  You need permission to manage advising settings (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <AdvisingSettingsPanel />
             </RequirePermission>
           </div>
         )}

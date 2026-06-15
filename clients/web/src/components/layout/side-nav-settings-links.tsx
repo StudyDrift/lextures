@@ -10,6 +10,7 @@ import {
   ChevronDown,
   FileText,
   FolderTree,
+  GraduationCap,
   Link2,
   Palette,
   Plug,
@@ -42,7 +43,7 @@ export function SideNavSettingsLinks() {
   const canOrgRoles =
     !permLoading && (allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW))
   const { scimEnabled: platformScimEnabled } = usePlatformScimEnabled(canManageRbac)
-  const { ffBookstoreIntegration, ffTranscripts } = usePlatformFeatures()
+  const { ffBookstoreIntegration, ffTranscripts, ffAdvisingIntegration } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
   const aiSectionActive = view === 'ai-models' || view === 'ai-prompts'
@@ -164,6 +165,15 @@ export function SideNavSettingsLinks() {
                   icon={<FileText className="h-5 w-5" />}
                 >
                   Transcripts
+                </SideNavLink>
+              )}
+              {ffAdvisingIntegration && (
+                <SideNavLink
+                  to="/settings/advising"
+                  className={() => (view === 'advising' ? sideNavActiveClass : '')}
+                  icon={<GraduationCap className="h-5 w-5" />}
+                >
+                  Advising
                 </SideNavLink>
               )}
               {ffBookstoreIntegration && (

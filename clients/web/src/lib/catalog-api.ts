@@ -38,6 +38,7 @@ export type CatalogSection = {
   lmsCourseId?: string
   syncedAt?: string
   prerequisiteStatus?: PrereqStatus[]
+  fulfillsRequirements?: string[]
 }
 
 export type CatalogListFilter = {

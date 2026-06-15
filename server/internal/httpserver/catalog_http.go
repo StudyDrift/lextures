@@ -108,8 +108,11 @@ func (d Deps) handleCatalogSectionsList() http.HandlerFunc {
 			return
 		}
 		out := make([]map[string]any, 0, len(sections))
+		summary := d.degreeProgressForUser(r.Context(), userID)
 		for i := range sections {
-			out = append(out, sectionToPublicJSON(&sections[i]))
+			item := sectionToPublicJSON(&sections[i])
+			enrichSectionWithDegreeRequirements(item, summary)
+			out = append(out, item)
 		}
 		var nextCursor *string
 		if len(sections) == f.Limit && len(sections) > 0 {
@@ -163,6 +166,8 @@ func (d Deps) handleCatalogSectionDetail() http.HandlerFunc {
 		if len(prereqStatus) > 0 {
 			out["prerequisiteStatus"] = prereqStatus
 		}
+		summary := d.degreeProgressForUser(r.Context(), userID)
+		enrichSectionWithDegreeRequirements(out, summary)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"section": out})
 	}

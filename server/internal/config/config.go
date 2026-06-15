@@ -332,6 +332,9 @@ type Config struct {
 	// FFTranscripts enables student transcript requests and institution webhook configuration.
 	// Managed in Settings → Global platform (not process env).
 	FFTranscripts bool
+	// FFAdvisingIntegration enables advising appointment links, degree progress, and advisor notes (plan 14.14).
+	// Managed in Settings → Global platform (not process env).
+	FFAdvisingIntegration bool
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.
