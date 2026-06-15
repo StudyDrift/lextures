@@ -2,15 +2,16 @@ package auth
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
-	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
 // APITokenAuth carries scope grants from a personal access key.
@@ -42,8 +43,8 @@ func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpoo
 		if err != nil {
 			return AuthUser{}, r.Context(), ErrInvalidToken
 		}
-		row, err := user.FindByID(r.Context(), pool, rt.OwnerUserID)
-		if err != nil || row == nil {
+		row, err := lookupAccessKeyOwner(r.Context(), pool, rt.OwnerUserID)
+		if err != nil {
 			return AuthUser{}, r.Context(), ErrInvalidToken
 		}
 		ctx := context.WithValue(r.Context(), apiTokenAuthKey{}, &APITokenAuth{
@@ -51,10 +52,27 @@ func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpoo
 			Scopes:    rt.Scopes,
 			CourseIDs: rt.CourseIDs,
 		})
-		return AuthUser{UserID: row.ID, Email: row.Email}, ctx, nil
+		return AuthUser{UserID: row.ID.String(), Email: row.Email}, ctx, nil
 	}
 	u, err := signer.Verify(r.Context(), token)
 	return u, r.Context(), err
+}
+
+type accessKeyOwner struct {
+	ID    uuid.UUID
+	Email string
+}
+
+func lookupAccessKeyOwner(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*accessKeyOwner, error) {
+	var row accessKeyOwner
+	err := pool.QueryRow(ctx, `SELECT id, email FROM "user".users WHERE id = $1`, userID).Scan(&row.ID, &row.Email)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, ErrInvalidToken
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &row, nil
 }
 
 func timeNow() time.Time {

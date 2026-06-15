@@ -1,7 +1,9 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -13,6 +15,8 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type accessKeyCourse struct {
@@ -34,6 +38,22 @@ type accessKeyItem struct {
 	RevokedAt  *time.Time         `json:"revokedAt,omitempty"`
 	CreatedAt  time.Time          `json:"createdAt"`
 	UnusedDays *int               `json:"unusedDays,omitempty"`
+}
+
+func validateAccessKeyCourseIDsForUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courseIDs []uuid.UUID) error {
+	if len(courseIDs) == 0 {
+		return nil
+	}
+	for _, cid := range courseIDs {
+		ok, err := enrollment.UserHasAccessByCourseID(ctx, pool, cid, userID)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return errors.New("course not accessible")
+		}
+	}
+	return nil
 }
 
 func accessKeyItemFromRow(r apitokens.Row, courses []accessKeyCourse, now time.Time) accessKeyItem {
@@ -178,7 +198,7 @@ func (d Deps) handlePostMyAccessKey() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Each courseId must be a UUID.")
 			return
 		}
-		if err := apitokens.ValidateCourseIDsForUser(r.Context(), d.Pool, userID, courseIDs); err != nil {
+		if err := validateAccessKeyCourseIDsForUser(r.Context(), d.Pool, userID, courseIDs); err != nil {
 			if err.Error() == "course not accessible" {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "One or more courses are not accessible to your account.")
 				return

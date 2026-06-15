@@ -14,8 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-
-	"github.com/lextures/lextures/server/internal/repos/enrollment"
 )
 
 const (
@@ -206,21 +204,4 @@ func NormalizeCourseIDs(raw []string) ([]uuid.UUID, error) {
 		out = append(out, id)
 	}
 	return out, nil
-}
-
-// ValidateCourseIDsForUser ensures each course id is accessible to the user.
-func ValidateCourseIDsForUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courseIDs []uuid.UUID) error {
-	if len(courseIDs) == 0 {
-		return nil
-	}
-	for _, cid := range courseIDs {
-		ok, err := enrollment.UserHasAccessByCourseID(ctx, pool, cid, userID)
-		if err != nil {
-			return err
-		}
-		if !ok {
-			return errors.New("course not accessible")
-		}
-	}
-	return nil
 }
