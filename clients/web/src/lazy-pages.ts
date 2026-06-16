@@ -115,3 +115,5 @@ export const PortfolioArtifactContentPage = lazy(() => import('./pages/lms/portf
 export const PublicPortfolioPage = lazy(() => import('./pages/portfolio/public-portfolio-page'))
 export const PublicPortfolioContentPage = lazy(() => import('./pages/portfolio/public-portfolio-content-page'))
 export const CliAuthPage = lazy(() => import('./pages/cli-auth'))
+export const ExploreCatalogPage = lazy(() => import('./pages/explore-catalog-page'))
+export const ExploreCoursePage = lazy(() => import('./pages/explore-course-page'))

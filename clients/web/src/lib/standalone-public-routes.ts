@@ -9,6 +9,7 @@ const STANDALONE_PUBLIC_ROUTE_PREFIXES = [
   '/trust',
   '/p',
   '/verify',
+  '/explore',
 ] as const
 
 export function isStandalonePublicRoute(pathname: string): boolean {

@@ -348,6 +348,9 @@ type Config struct {
 	// FFConsortiumSharing enables multi-campus consortium course sharing and cross-institutional enrollment (plan 14.18).
 	// Managed in Settings → Global platform (not process env).
 	FFConsortiumSharing bool
+	// FFPublicCatalog enables the public, unauthenticated course catalog and search (plan 15.1).
+	// Managed in Settings → Global platform (not process env).
+	FFPublicCatalog bool
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.
