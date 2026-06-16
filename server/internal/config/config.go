@@ -348,6 +348,9 @@ type Config struct {
 	// FFConsortiumSharing enables multi-campus consortium course sharing and cross-institutional enrollment (plan 14.18).
 	// Managed in Settings → Global platform (not process env).
 	FFConsortiumSharing bool
+	// FFLearningPaths enables learning paths / course bundles for self-learners (plan 15.4).
+	// Managed in Settings → Global platform (not process env).
+	FFLearningPaths bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).

@@ -114,6 +114,7 @@ type Row struct {
 	FFCEUTracking                   *bool
 	FFConsortiumSharing             *bool
 	FFStripeBilling                 *bool
+	FFLearningPaths                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -242,6 +243,7 @@ type Write struct {
 	FFCEUTracking                   *bool
 	FFConsortiumSharing             *bool
 	FFStripeBilling                 *bool
+	FFLearningPaths                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -367,6 +369,7 @@ SELECT
 	ff_ceu_tracking,
 	ff_consortium_sharing,
 	ff_stripe_billing,
+	ff_learning_paths,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -486,6 +489,7 @@ WHERE id = 1
 		&r.FFCEUTracking,
 		&r.FFConsortiumSharing,
 		&r.FFStripeBilling,
+		&r.FFLearningPaths,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -656,6 +660,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_ceu_tracking,
 	ff_consortium_sharing,
 	ff_stripe_billing,
+	ff_learning_paths,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -682,7 +687,7 @@ INSERT INTO settings.platform_app_settings (
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
-	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -781,6 +786,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_ceu_tracking = COALESCE(EXCLUDED.ff_ceu_tracking, settings.platform_app_settings.ff_ceu_tracking),
 	ff_consortium_sharing = COALESCE(EXCLUDED.ff_consortium_sharing, settings.platform_app_settings.ff_consortium_sharing),
 	ff_stripe_billing = COALESCE(EXCLUDED.ff_stripe_billing, settings.platform_app_settings.ff_stripe_billing),
+	ff_learning_paths = COALESCE(EXCLUDED.ff_learning_paths, settings.platform_app_settings.ff_learning_paths),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
@@ -898,6 +904,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFCEUTracking,
 		w.FFConsortiumSharing,
 		w.FFStripeBilling,
+		w.FFLearningPaths,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

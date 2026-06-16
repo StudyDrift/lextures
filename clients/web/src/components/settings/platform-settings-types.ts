@@ -43,6 +43,7 @@ export type PlatformSettingsPayload = {
   ffCeuTracking: boolean
   ffConsortiumSharing: boolean
   ffStripeBilling: boolean
+  ffLearningPaths: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
