@@ -152,6 +152,7 @@ export default function App() {
             <Route path="/admin/incompletes" element={<Pages.IncompletesAdminPage />} />
             <Route path="/admin/academic-calendar" element={<Pages.AcademicCalendarAdminPage />} />
             <Route path="/admin/consent-studies" element={<Pages.ConsentStudiesAdminPage />} />
+            <Route path="/admin/consortium" element={<Pages.ConsortiumAgreementsPage />} />
             <Route path="/admin/accessibility" element={<Pages.AccessibilityServicesPage />} />
             <Route path="/admin/evaluations/templates" element={<Pages.EvaluationTemplates />} />
             <Route path="/admin/evaluations/report" element={<Pages.EvaluationReport />} />

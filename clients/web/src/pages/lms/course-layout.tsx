@@ -4,6 +4,7 @@ import { CourseLiveContext } from '../../context/course-live-context'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { useCourseStructureRevision } from '../../hooks/use-course-structure-ws'
 import { fetchEvaluationStatus } from '../../lib/course-evaluations-api'
+import { ConsortiumHomeBrandingBanner } from '../../components/consortium/consortium-home-branding-banner'
 import { CourseSyllabusAcceptanceOverlay } from './course-syllabus-acceptance-overlay'
 
 function EvaluationReminderBanner({ courseCode }: { courseCode: string }) {
@@ -61,6 +62,7 @@ export default function CourseLayout() {
       {courseCode && ffCourseEvaluations ? (
         <EvaluationReminderBanner courseCode={courseCode} />
       ) : null}
+      {courseCode ? <ConsortiumHomeBrandingBanner courseCode={courseCode} /> : null}
       <Outlet />
     </CourseLiveContext.Provider>
   )

@@ -20,7 +20,7 @@ SELECT EXISTS (
 	FROM course.course_enrollments ce
 	INNER JOIN course.courses c ON c.id = ce.course_id
 	INNER JOIN "user".users u ON u.id = ce.user_id
-	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 )
 `, courseCode, userID).Scan(&ok)
 	if err != nil {
@@ -38,7 +38,7 @@ SELECT EXISTS (
 	FROM course.course_enrollments ce
 	INNER JOIN course.courses c ON c.id = ce.course_id
 	INNER JOIN "user".users u ON u.id = ce.user_id
-	WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+	WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 )
 `, courseID, userID).Scan(&ok)
 	if err != nil {
@@ -57,7 +57,7 @@ FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
 INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
-WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 LIMIT 1
 `, courseID, userID).Scan(&id)
 	if err != nil {
@@ -79,7 +79,7 @@ FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
 INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
-WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 LIMIT 1
 `, courseID, userID).Scan(&sid)
 	if err != nil {
@@ -109,7 +109,7 @@ SELECT EXISTS (
 	INNER JOIN course.courses c ON c.id = ce.course_id
 	INNER JOIN "user".users u ON u.id = ce.user_id
 	INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_staff = true
-	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 )
 `, courseCode, userID).Scan(&ok)
 	if err != nil {
@@ -145,7 +145,7 @@ SELECT EXISTS (
 	FROM course.course_enrollments ce
 	INNER JOIN course.courses c ON c.id = ce.course_id
 	INNER JOIN "user".users u ON u.id = ce.user_id
-	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.role = $3 AND ce.active AND c.org_id = u.org_id
+	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.role = $3 AND ce.active AND ` + userCourseOrgMatch + `
 )
 `, courseCode, userID, role).Scan(&ok)
 	if err != nil {
@@ -165,7 +165,7 @@ SELECT EXISTS (
 	INNER JOIN course.courses c ON c.id = ce.course_id
 	INNER JOIN "user".users u ON u.id = ce.user_id
 	INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
-	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+	WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 )
 `, courseCode, userID).Scan(&ok)
 	if err != nil {
@@ -182,7 +182,7 @@ FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
 LEFT JOIN course.enrollment_roles er ON er.role_key = ce.role
-WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND c.org_id = u.org_id
+WHERE c.course_code = $1 AND ce.user_id = $2 AND ce.active AND ` + userCourseOrgMatch + `
 ORDER BY
 	COALESCE(er.sort_order, 999) ASC,
 	ce.role ASC

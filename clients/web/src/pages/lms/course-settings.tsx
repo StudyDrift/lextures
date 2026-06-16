@@ -39,6 +39,7 @@ import { CourseSectionsSettingsSection } from './course-sections-settings'
 import CourseTranslationsSettings from './course-translations-settings'
 import { CourseAccessibilitySettingsSection } from './course-accessibility-settings'
 import { CoursePlagiarismSettingsSection } from './course-plagiarism-settings-section'
+import { CourseConsortiumSettingsSection } from './course-consortium-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { CourseHeroImage } from '../../components/course-hero-image'
@@ -167,7 +168,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
 export default function CourseSettings() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const { allows, loading: permLoading } = usePermissions()
-  const { altTextEnforcementEnabled, ffPlagiarismChecks, loading: featuresLoading } = usePlatformFeatures()
+  const { altTextEnforcementEnabled, ffPlagiarismChecks, ffConsortiumSharing, loading: featuresLoading } = usePlatformFeatures()
   const location = useLocation()
   const [course, setCourse] = useState<CoursePublic | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -1404,6 +1405,9 @@ export default function CourseSettings() {
                 course={course}
                 onCourseUpdated={setCourse}
               />
+              {ffConsortiumSharing ? (
+                <CourseConsortiumSettingsSection courseCode={courseCode} />
+              ) : null}
             </>
           )}
           {section === 'accessibility' && (featuresLoading || altTextEnforcementEnabled) ? (
