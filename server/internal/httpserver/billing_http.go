@@ -95,9 +95,6 @@ func entitlementToJSON(e repoBilling.Entitlement) entitlementJSON {
 
 func (d Deps) handleBillingCheckout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.billingFeatureOff(w) {
-			return
-		}
 		if r.Method != http.MethodPost {
 			w.Header().Set("Allow", http.MethodPost)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -105,6 +102,9 @@ func (d Deps) handleBillingCheckout() http.HandlerFunc {
 		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.billingFeatureOff(w) {
 			return
 		}
 		if !d.checkBillingCheckoutRateLimit(userID) {
@@ -174,9 +174,6 @@ func (d Deps) handleBillingCheckout() http.HandlerFunc {
 
 func (d Deps) handleBillingPortal() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.billingFeatureOff(w) {
-			return
-		}
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -184,6 +181,9 @@ func (d Deps) handleBillingPortal() http.HandlerFunc {
 		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.billingFeatureOff(w) {
 			return
 		}
 		if d.Pool == nil {
@@ -212,9 +212,6 @@ func (d Deps) handleBillingPortal() http.HandlerFunc {
 
 func (d Deps) handleMyEntitlements() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.billingFeatureOff(w) {
-			return
-		}
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -222,6 +219,9 @@ func (d Deps) handleMyEntitlements() http.HandlerFunc {
 		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.billingFeatureOff(w) {
 			return
 		}
 		if d.Pool == nil {
@@ -244,9 +244,6 @@ func (d Deps) handleMyEntitlements() http.HandlerFunc {
 
 func (d Deps) handleInternalEntitlementCheck() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.billingFeatureOff(w) {
-			return
-		}
 		if r.Method != http.MethodGet {
 			w.Header().Set("Allow", http.MethodGet)
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -254,6 +251,9 @@ func (d Deps) handleInternalEntitlementCheck() http.HandlerFunc {
 		}
 		callerID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.billingFeatureOff(w) {
 			return
 		}
 		rawUser := strings.TrimSpace(r.URL.Query().Get("user_id"))

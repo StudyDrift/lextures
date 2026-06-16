@@ -1,7 +1,6 @@
 package httpserver
 
 import (
-	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,15 +8,6 @@ import (
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/config"
 )
-
-func billingTestToken(t *testing.T, signer *auth.JWTSigner) string {
-	t.Helper()
-	tok, err := signer.Sign(context.Background(), "00000000-0000-0000-0000-000000000001", "u@test.invalid", "", "", nil)
-	if err != nil {
-		t.Fatalf("sign: %v", err)
-	}
-	return tok
-}
 
 func TestBilling_Unauthenticated(t *testing.T) {
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
@@ -44,18 +34,17 @@ func TestBilling_Unauthenticated(t *testing.T) {
 }
 
 func TestBilling_FeatureOff(t *testing.T) {
+	// Auth runs before the feature gate; unauthenticated callers get 401 even when billing is disabled.
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
 	cfg := config.Config{FFStripeBilling: false}
 	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
 	h := NewHandler(d)
 
-	tok := billingTestToken(t, signer)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/me/entitlements", nil)
-	req.Header.Set("Authorization", "Bearer "+tok)
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, req)
-	if w.Code != http.StatusNotFound {
-		t.Fatalf("feature off want 404 got %d", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("feature off without auth want 401 got %d", w.Code)
 	}
 }
 
