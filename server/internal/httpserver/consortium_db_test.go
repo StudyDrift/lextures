@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -58,7 +59,8 @@ RETURNING id
 		t.Fatal("expected agreement")
 	}
 
-	courseCode := "cons-" + uuid.NewString()[:8]
+	// courses_course_code_format requires ^C-[A-Z0-9]{6}$
+	courseCode := "C-" + fmt.Sprintf("%06X", time.Now().UnixNano()%0xFFFFFF)
 	var courseID uuid.UUID
 	if err := pool.QueryRow(ctx, `
 INSERT INTO course.courses (org_id, course_code, title, published, consortium_shareable)

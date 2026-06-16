@@ -5,12 +5,10 @@ import { test, expect } from '@playwright/test'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
+const DEFAULT_ORG_ID = '00000000-0000-0000-0000-000000000001'
 
 function uid(prefix = 'consortium') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
-}
-function uniqueEmail(prefix = 'consortium') {
-  return `${uid(prefix)}@test.invalid`
 }
 function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
@@ -42,6 +40,28 @@ async function getAdminToken(): Promise<string> {
   return access_token
 }
 
+async function getAdminOrgId(token: string): Promise<string | null> {
+  const res = await fetch(`${API_BASE}/api/v1/admin/orgs`, { headers: authHeaders(token) })
+  if (!res.ok) return null
+  const data = (await res.json()) as { organizations?: Array<{ id: string }> }
+  return data.organizations?.[0]?.id ?? null
+}
+
+async function getAdminUserId(token: string): Promise<string | null> {
+  const res = await fetch(`${API_BASE}/api/v1/me`, { headers: authHeaders(token) })
+  if (!res.ok) return null
+  const data = (await res.json()) as { id?: string }
+  return data.id ?? null
+}
+
+async function grantOrgAdmin(adminToken: string, orgId: string, userId: string): Promise<void> {
+  await fetch(`${API_BASE}/api/v1/orgs/${orgId}/role-grants`, {
+    method: 'POST',
+    headers: authHeaders(adminToken),
+    body: JSON.stringify({ userId, role: 'org_admin' }),
+  })
+}
+
 async function enableFeatures(adminToken: string) {
   const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
     method: 'PUT',
@@ -56,9 +76,13 @@ async function enableFeatures(adminToken: string) {
 }
 
 test('Consortium: unauthenticated endpoints return 401', async () => {
+  const adminToken = await getAdminToken()
+  await enableFeatures(adminToken)
+  const orgId = (await getAdminOrgId(adminToken)) ?? DEFAULT_ORG_ID
+
   const paths = [
     '/api/v1/consortium/courses',
-    '/api/v1/admin/consortium/agreements?orgId=00000000-0000-0000-0000-000000000001',
+    `/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(orgId)}`,
   ]
   for (const path of paths) {
     const res = await fetch(`${API_BASE}${path}`)
@@ -83,20 +107,19 @@ test('Consortium: admin can create agreement when feature enabled', async () => 
   const adminToken = await getAdminToken()
   await enableFeatures(adminToken)
 
-  const orgsRes = await fetch(`${API_BASE}/api/v1/admin/orgs`, { headers: authHeaders(adminToken) })
-  expect(orgsRes.ok).toBeTruthy()
-  const hostOrgs = (await orgsRes.json()) as { orgs?: { id: string }[] }
-  const hostOrgId = hostOrgs.orgs?.[0]?.id
+  const hostOrgId = (await getAdminOrgId(adminToken)) ?? DEFAULT_ORG_ID
   expect(hostOrgId).toBeTruthy()
+  const adminId = await getAdminUserId(adminToken)
+  if (adminId) await grantOrgAdmin(adminToken, hostOrgId, adminId)
 
   const createGuestOrg = await fetch(`${API_BASE}/api/v1/admin/orgs`, {
     method: 'POST',
     headers: authHeaders(adminToken),
-    body: JSON.stringify({ name: uid('guest-org'), slug: uid('guest'), orgType: 'higher-ed' }),
+    body: JSON.stringify({ name: uid('guest-org'), slug: uid('guest') }),
   })
   expect(createGuestOrg.status).toBe(201)
-  const guestOrg = (await createGuestOrg.json()) as { org?: { id: string } }
-  const guestOrgId = guestOrg.org?.id
+  const guestOrg = (await createGuestOrg.json()) as { id: string }
+  const guestOrgId = guestOrg.id
   expect(guestOrgId).toBeTruthy()
 
   const createAgreement = await fetch(`${API_BASE}/api/v1/admin/consortium/agreements`, {
@@ -107,7 +130,7 @@ test('Consortium: admin can create agreement when feature enabled', async () => 
   expect(createAgreement.status).toBe(201)
 
   const list = await fetch(
-    `${API_BASE}/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(hostOrgId!)}`,
+    `${API_BASE}/api/v1/admin/consortium/agreements?orgId=${encodeURIComponent(hostOrgId)}`,
     { headers: authHeaders(adminToken) },
   )
   expect(list.ok).toBeTruthy()
