@@ -65,6 +65,7 @@ type platformFeaturesJSON struct {
 	FFAccessibilityIntake       bool `json:"ffAccessibilityIntake"`
 	FFCEUTracking               bool `json:"ffCeuTracking"`
 	FFConsortiumSharing         bool `json:"ffConsortiumSharing"`
+	FFStripeBilling             bool `json:"ffStripeBilling"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -136,6 +137,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFAccessibilityIntake:       cfg.FFAccessibilityIntake,
 		FFCEUTracking:               cfg.FFCEUTracking,
 		FFConsortiumSharing:         cfg.FFConsortiumSharing,
+		FFStripeBilling:             cfg.FFStripeBilling,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

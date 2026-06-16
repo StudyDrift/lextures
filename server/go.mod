@@ -9,6 +9,7 @@ require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/beevik/etree v1.6.0
+	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc
 	github.com/coder/websocket v1.8.12
 	github.com/conductor-oss/markitdown v0.0.1
 	github.com/coreos/go-oidc/v3 v3.12.0
@@ -25,9 +26,11 @@ require (
 	github.com/pquerna/otp v1.5.0
 	github.com/rabbitmq/amqp091-go v1.11.0
 	github.com/russellhaering/goxmldsig v1.6.0
+	github.com/stripe/stripe-go/v81 v81.4.0
 	github.com/yuin/goldmark v1.7.11
 	golang.org/x/crypto v0.51.0
 	golang.org/x/oauth2 v0.27.0
+	golang.org/x/sync v0.20.0
 )
 
 require (
@@ -36,7 +39,6 @@ require (
 	github.com/PuerkitoBio/goquery v1.9.2 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
-	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clipperhouse/uax29/v2 v2.7.0 // indirect
 	github.com/crewjam/httperr v0.2.0 // indirect
@@ -90,7 +92,6 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/image v0.39.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
 	golang.org/x/text v0.37.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

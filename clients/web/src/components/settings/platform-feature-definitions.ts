@@ -91,6 +91,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Multi-campus consortium agreements, cross-institutional enrollment, and partner course browse for shared online programs.',
   },
   {
+    key: 'ffStripeBilling',
+    label: 'Stripe billing (self-learner)',
+    description:
+      'Stripe Checkout for course purchases and subscriptions, entitlement gating, and learner billing portal.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:

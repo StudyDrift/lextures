@@ -56,6 +56,7 @@ export type PlatformFeaturesSnapshot = {
   ffAccessibilityIntake?: boolean
   ffCeuTracking?: boolean
   ffConsortiumSharing?: boolean
+  ffStripeBilling?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -114,6 +115,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffAccessibilityIntake: false,
   ffCeuTracking: false,
   ffConsortiumSharing: false,
+  ffStripeBilling: false,
 }
 
 let loaded = false
