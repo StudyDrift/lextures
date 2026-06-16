@@ -44,6 +44,8 @@ export default function App() {
         <Route path="/trust" element={<Pages.TrustCenterPage />} />
         <Route path="/p/:slug/content/:aid" element={<Pages.PublicPortfolioContentPage />} />
         <Route path="/p/:slug" element={<Pages.PublicPortfolioPage />} />
+        <Route path="/paths" element={<Pages.PathsCatalogPage />} />
+        <Route path="/paths/:slug" element={<Pages.PathLandingPage />} />
         <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
         <Route path="/explore" element={<Pages.ExploreCatalogPage />} />
         <Route path="/explore/:slug" element={<Pages.ExploreCoursePage />} />
@@ -61,6 +63,9 @@ export default function App() {
             <Route path="/me/study-insights" element={<Pages.StudyInsightsPage />} />
             <Route path="/me/ccr" element={<Pages.MyCCR />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
+            <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
+            <Route path="/checkout/success" element={<Pages.CheckoutSuccessPage />} />
+            <Route path="/checkout/cancel" element={<Pages.CheckoutCancelPage />} />
             <Route path="/transcripts" element={<Pages.TranscriptsPage />} />
             <Route path="/advising-notes" element={<Pages.AdvisingNotesPage />} />
             <Route path="/me/research-studies" element={<Pages.ResearchStudiesPage />} />
@@ -71,6 +76,8 @@ export default function App() {
             <Route path="/ai" element={<Pages.AskAiPage />} />
             <Route path="/review" element={<Pages.ReviewSessionPage />} />
             <Route path="/courses" element={<Pages.Courses />} />
+            <Route path="/my-paths" element={<Pages.MyPaths />} />
+            <Route path="/creator/learning-paths" element={<Pages.CreatorLearningPathsPage />} />
             <Route path="/notebooks/global" element={<Pages.GlobalNotebookPage />} />
             <Route path="/notebooks" element={<Pages.MyNotebooksPage />} />
             <Route path="/courses/create" element={<Pages.CourseCreate />} />

@@ -85,10 +85,22 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Accommodation profiles managed by accessibility coordinators, propagated automatically to assessment overrides; instructors see only that an accommodation is active.',
   },
   {
+    key: 'ffLearningPaths',
+    label: 'Learning paths / bundles',
+    description:
+      'Let creators build ordered multi-course specializations with bundle pricing, path enrollment, and learner progress tracking.',
+  },
+  {
     key: 'ffConsortiumSharing',
     label: 'Consortium course sharing',
     description:
       'Multi-campus consortium agreements, cross-institutional enrollment, and partner course browse for shared online programs.',
+  },
+  {
+    key: 'ffStripeBilling',
+    label: 'Stripe billing (self-learner)',
+    description:
+      'Stripe Checkout for course purchases and subscriptions, entitlement gating, and learner billing portal.',
   },
   {
     key: 'ffCoCurricularTranscript',

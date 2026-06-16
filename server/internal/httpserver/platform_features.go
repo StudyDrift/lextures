@@ -66,6 +66,8 @@ type platformFeaturesJSON struct {
 	FFCEUTracking               bool `json:"ffCeuTracking"`
 	FFConsortiumSharing         bool `json:"ffConsortiumSharing"`
 	FFPublicCatalog             bool `json:"ffPublicCatalog"`
+	FFStripeBilling             bool `json:"ffStripeBilling"`
+	FFLearningPaths             bool `json:"ffLearningPaths"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -138,6 +140,8 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFCEUTracking:               cfg.FFCEUTracking,
 		FFConsortiumSharing:         cfg.FFConsortiumSharing,
 		FFPublicCatalog:             cfg.FFPublicCatalog,
+		FFStripeBilling:             cfg.FFStripeBilling,
+		FFLearningPaths:             cfg.FFLearningPaths,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

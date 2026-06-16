@@ -148,6 +148,8 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_ceu_tracking", w.FFCEUTracking)
 	addBool("ff_consortium_sharing", w.FFConsortiumSharing)
 	addBool("ff_public_catalog", w.FFPublicCatalog)
+	addBool("ff_stripe_billing", w.FFStripeBilling)
+	addBool("ff_learning_paths", w.FFLearningPaths)
 	addBool("lrs_anonymize_actors", w.LRSAnonymizeActors)
 	addBool("ferpa_workflow_enabled", w.FERPAWorkflowEnabled)
 	addBool("dpa_portal_enabled", w.DPAPortalEnabled)
