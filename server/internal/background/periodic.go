@@ -17,6 +17,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/quizautosubmit"
+	seattimesvc "github.com/lextures/lextures/server/internal/service/seattime"
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
 	"github.com/lextures/lextures/server/internal/workers/h5pextract"
@@ -78,6 +79,16 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 	go runEvery(ctx, 15*time.Second, func() {
 		sweepPushJobs(context.Background(), pool, cfg, time.Now().UTC())
 	})
+	if cfg.FFCEUTracking {
+		seattimesvc.InitGlobalBuffer(pool)
+		go runEvery(ctx, 30*time.Second, func() {
+			if seattimesvc.GlobalBuffer != nil {
+				if err := seattimesvc.GlobalBuffer.Flush(context.Background()); err != nil {
+					slog.Warn("seat-time buffer flush failed", "err", err)
+				}
+			}
+		})
+	}
 	go runEvery(ctx, time.Hour, func() {
 		n, err := SweepStalledTusUploads(context.Background(), pool, time.Now().UTC())
 		if err != nil {

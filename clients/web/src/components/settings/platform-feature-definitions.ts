@@ -97,6 +97,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let students generate IMS CLR v2.0 comprehensive learner records with W3C verifiable credentials and public verification links.',
   },
   {
+    key: 'ffCeuTracking',
+    label: 'CEU seat-time tracking',
+    description:
+      'Track contact hours on module content, issue CEU certificates when thresholds are met, and provide CE transcripts.',
+  },
+  {
     key: 'ffEportfolio',
     label: 'ePortfolio / capstone artifacts',
     description:
