@@ -41,6 +41,7 @@ export type PlatformSettingsPayload = {
   ffResearchConsent: boolean
   ffAccessibilityIntake: boolean
   ffCeuTracking: boolean
+  ffConsortiumSharing: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean

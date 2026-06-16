@@ -63,6 +63,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffResearchConsent: false,
     ffAccessibilityIntake: false,
     ffCeuTracking: false,
+    ffConsortiumSharing: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,

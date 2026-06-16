@@ -14,7 +14,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// CoursePublic is the JSON body for a course in list/detail APIs (camelCase, matches Rust `CoursePublic`).
+// enrolledUserOrgScope limits listed courses to the viewer's org or consortium guest enrollments.
+const enrolledUserOrgScope = `
+  AND (
+    c.org_id = ucat.org_id
+    OR EXISTS (
+      SELECT 1 FROM course.course_enrollments ce_guest
+      WHERE ce_guest.course_id = c.id
+        AND ce_guest.user_id = ucat.id
+        AND ce_guest.home_org_id IS NOT NULL
+        AND ce_guest.home_org_id = ucat.org_id
+        AND ce_guest.active
+    )
+  )
+`
 type CoursePublic struct {
 	ID                            string           `json:"id"`
 	CourseCode                    string           `json:"courseCode"`
@@ -353,7 +366,7 @@ WHERE c.course_code = $1
 func ListForEnrolledUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
-INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
+INNER JOIN "user".users ucat ON ucat.id = $1
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (
@@ -362,7 +375,7 @@ WHERE c.id IN (
     AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
-  AND ($2::text IS NULL OR c.grade_level = $2::text)
+  AND ($2::text IS NULL OR c.grade_level = $2::text)` + enrolledUserOrgScope + `
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, gradeLevel)
 	if err != nil {
@@ -389,7 +402,7 @@ func ListForEnrolledUserInOrgUnits(ctx context.Context, pool *pgxpool.Pool, user
 	}
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
-INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
+INNER JOIN "user".users ucat ON ucat.id = $1
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (
@@ -398,9 +411,15 @@ WHERE c.id IN (
     AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
-  AND c.org_unit_id IS NOT NULL
-  AND c.org_unit_id = ANY($2::uuid[])
-  AND ($3::text IS NULL OR c.grade_level = $3::text)
+  AND (
+    (c.org_unit_id IS NOT NULL AND c.org_unit_id = ANY($2::uuid[]))
+    OR EXISTS (
+      SELECT 1 FROM course.course_enrollments ce_guest
+      WHERE ce_guest.course_id = c.id AND ce_guest.user_id = ucat.id
+        AND ce_guest.home_org_id IS NOT NULL AND ce_guest.home_org_id = ucat.org_id AND ce_guest.active
+    )
+  )
+  AND ($3::text IS NULL OR c.grade_level = $3::text)` + enrolledUserOrgScope + `
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, allowed, gradeLevel)
 	if err != nil {
@@ -424,7 +443,7 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 func ListForEnrolledUserByTerm(ctx context.Context, pool *pgxpool.Pool, userID, termID uuid.UUID, gradeLevel *string) ([]CoursePublic, error) {
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
-INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
+INNER JOIN "user".users ucat ON ucat.id = $1
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (
@@ -434,7 +453,7 @@ WHERE c.id IN (
 )
   AND c.archived = false
   AND c.term_id = $2
-  AND ($3::text IS NULL OR c.grade_level = $3::text)
+  AND ($3::text IS NULL OR c.grade_level = $3::text)` + enrolledUserOrgScope + `
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, termID, gradeLevel)
 	if err != nil {
@@ -460,7 +479,7 @@ func ListForEnrolledUserInOrgUnitsByTerm(ctx context.Context, pool *pgxpool.Pool
 	}
 	rows, err := pool.Query(ctx, `
 SELECT`+coursePublicSelect+coursePublicFrom+`
-INNER JOIN "user".users ucat ON ucat.id = $1 AND ucat.org_id = c.org_id
+INNER JOIN "user".users ucat ON ucat.id = $1
 LEFT JOIN course.user_course_catalog_order o
   ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (
@@ -469,10 +488,16 @@ WHERE c.id IN (
     AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
-  AND c.org_unit_id IS NOT NULL
-  AND c.org_unit_id = ANY($2::uuid[])
+  AND (
+    (c.org_unit_id IS NOT NULL AND c.org_unit_id = ANY($2::uuid[]))
+    OR EXISTS (
+      SELECT 1 FROM course.course_enrollments ce_guest
+      WHERE ce_guest.course_id = c.id AND ce_guest.user_id = ucat.id
+        AND ce_guest.home_org_id IS NOT NULL AND ce_guest.home_org_id = ucat.org_id AND ce_guest.active
+    )
+  )
   AND c.term_id = $3
-  AND ($4::text IS NULL OR c.grade_level = $4::text)
+  AND ($4::text IS NULL OR c.grade_level = $4::text)` + enrolledUserOrgScope + `
 ORDER BY o.sort_order NULLS LAST, c.title ASC
 `, userID, allowed, termID, gradeLevel)
 	if err != nil {

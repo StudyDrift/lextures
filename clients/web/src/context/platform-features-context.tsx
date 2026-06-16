@@ -68,6 +68,7 @@ export type PlatformFeatures = {
   ffResearchConsent: boolean
   ffAccessibilityIntake: boolean
   ffCeuTracking: boolean
+  ffConsortiumSharing: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -126,6 +127,7 @@ const defaultFeatures: PlatformFeatures = {
   ffResearchConsent: false,
   ffAccessibilityIntake: false,
   ffCeuTracking: false,
+  ffConsortiumSharing: false,
   loading: true,
   refresh: async () => {},
 }
@@ -189,6 +191,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffResearchConsent: false,
     ffAccessibilityIntake: false,
     ffCeuTracking: false,
+  ffConsortiumSharing: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -253,6 +256,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffResearchConsent: data.ffResearchConsent === true,
           ffAccessibilityIntake: data.ffAccessibilityIntake === true,
           ffCeuTracking: data.ffCeuTracking === true,
+          ffConsortiumSharing: data.ffConsortiumSharing === true,
         }
         setFeatures({
           ...next,
@@ -284,6 +288,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffResearchConsent: next.ffResearchConsent === true,
           ffAccessibilityIntake: next.ffAccessibilityIntake === true,
           ffCeuTracking: next.ffCeuTracking === true,
+          ffConsortiumSharing: next.ffConsortiumSharing === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

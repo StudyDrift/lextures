@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	repoConsortium "github.com/lextures/lextures/server/internal/repos/consortium"
 	repoSIS "github.com/lextures/lextures/server/internal/repos/sis"
 	serviceSIS "github.com/lextures/lextures/server/internal/service/sis"
 	"github.com/lextures/lextures/server/internal/workers/sissync"
@@ -332,6 +333,15 @@ func (d Deps) handleAdminSISGradePassback() http.HandlerFunc {
 			return
 		}
 		summary := repoSIS.SyncSummary{}
+		recordsSent := 0
+		if d.effectiveConfig().FFConsortiumSharing {
+			if count, countErr := repoConsortium.CountPassbackEnrollments(r.Context(), d.Pool, orgID, false); countErr == nil {
+				recordsSent += count
+			}
+			if count, countErr := repoConsortium.CountPassbackEnrollments(r.Context(), d.Pool, orgID, true); countErr == nil {
+				recordsSent += count
+			}
+		}
 		if err := repoSIS.FinishSyncLog(r.Context(), d.Pool, log.ID, repoSIS.SyncStatusSuccess, summary, nil); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to finish passback log.")
 			return
@@ -341,7 +351,7 @@ func (d Deps) handleAdminSISGradePassback() http.HandlerFunc {
 			"logId":         log.ID.String(),
 			"status":        repoSIS.SyncStatusSuccess,
 			"gradingPeriod": body.GradingPeriod,
-			"recordsSent":   0,
+			"recordsSent":   recordsSent,
 		})
 	}
 }

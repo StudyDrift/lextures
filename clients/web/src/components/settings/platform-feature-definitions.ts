@@ -85,6 +85,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Accommodation profiles managed by accessibility coordinators, propagated automatically to assessment overrides; instructors see only that an accommodation is active.',
   },
   {
+    key: 'ffConsortiumSharing',
+    label: 'Consortium course sharing',
+    description:
+      'Multi-campus consortium agreements, cross-institutional enrollment, and partner course browse for shared online programs.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:

@@ -25,6 +25,8 @@ type RosterRow struct {
 	State            string
 	StateChangedAt   *time.Time
 	StateReason      *string
+	HomeOrgID        *uuid.UUID
+	HomeOrgName      *string
 }
 
 // ListRosterForCourse returns enrollments for a course code, ordered for UI.
@@ -42,10 +44,13 @@ SELECT
 	cs.name,
 	COALESCE(ce.state::text, 'active'),
 	ce.state_changed_at,
-	ce.state_reason
+	ce.state_reason,
+	ce.home_org_id,
+	ho.name
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
+LEFT JOIN tenant.organizations ho ON ho.id = ce.home_org_id
 LEFT JOIN course.enrollment_roles er ON er.role_key = ce.role
 LEFT JOIN course.course_sections cs ON cs.id = ce.section_id
 WHERE c.course_code = $1
@@ -80,7 +85,9 @@ ORDER BY
 		var stateStr string
 		var stateChanged sql.NullTime
 		var stateReason sql.NullString
-		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason); err != nil {
+		var homeOrgID sql.NullString
+		var homeOrgName sql.NullString
+		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName); err != nil {
 			return nil, err
 		}
 		if display.Valid {
@@ -121,6 +128,16 @@ ORDER BY
 		if stateReason.Valid && stateReason.String != "" {
 			s := stateReason.String
 			r.StateReason = &s
+		}
+		if homeOrgID.Valid {
+			u, err := uuid.Parse(homeOrgID.String)
+			if err == nil {
+				r.HomeOrgID = &u
+			}
+		}
+		if homeOrgName.Valid && homeOrgName.String != "" {
+			s := homeOrgName.String
+			r.HomeOrgName = &s
 		}
 		out = append(out, r)
 	}
