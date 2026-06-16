@@ -173,13 +173,13 @@ func ListPublicCatalog(
 		like := "%" + q + "%"
 		ph := add(q)
 		phLike := add(like)
-		where.WriteString(fmt.Sprintf(`
+		fmt.Fprintf(&where, `
       AND (
           c.search_vector @@ websearch_to_tsquery('english', %s)
           OR c.title ILIKE %s
           OR c.description ILIKE %s
           OR COALESCE(u.display_name, '') ILIKE %s
-      )`, ph, phLike, phLike, phLike))
+      )`, ph, phLike, phLike, phLike)
 	}
 	if cat := strings.TrimSpace(f.Category); cat != "" {
 		where.WriteString("\n      AND c.catalog_category = " + add(cat))
@@ -246,7 +246,7 @@ func ListPublicCatalog(
 
 	// Total count for the "X courses found" UI. Reuse the same filter args (sans
 	// the rank/limit/offset placeholders, which the COUNT query does not reference).
-	countArgs := args
+	var countArgs []any
 	if f.Sort == CatalogSortRelevance && q != "" {
 		// drop the rank placeholder and limit/offset
 		countArgs = args[:len(args)-3]

@@ -53,12 +53,16 @@ func TestPublicCatalog_Isolation_Pg(t *testing.T) {
 		t.Fatalf("create draft: %v", err)
 	}
 
+	// Unique per run so the test is idempotent against a reused database.
+	suffix := time.Now().Format("150405.000000")
+	slug := "quantum-computing-basics-" + suffix
+	category := "Science-" + suffix
 	if _, err := pool.Exec(ctx, `
 		UPDATE course.courses
-		SET is_public = TRUE, published = TRUE, catalog_category = 'Science',
+		SET is_public = TRUE, published = TRUE, catalog_category = $2,
 		    difficulty_level = 'beginner', price_cents = 0, enrollment_count = 5,
-		    catalog_slug = 'quantum-computing-basics'
-		WHERE course_code = $1`, pub.CourseCode); err != nil {
+		    catalog_slug = $3
+		WHERE course_code = $1`, pub.CourseCode, category, slug); err != nil {
 		t.Fatalf("publish public: %v", err)
 	}
 	// Draft stays is_public = FALSE, published = FALSE.
@@ -76,10 +80,10 @@ func TestPublicCatalog_Isolation_Pg(t *testing.T) {
 	for _, c := range list {
 		if c.CourseCode == pub.CourseCode {
 			found = true
-			if c.Slug != "quantum-computing-basics" {
+			if c.Slug != slug {
 				t.Fatalf("slug = %q", c.Slug)
 			}
-			if c.Category == nil || *c.Category != "Science" {
+			if c.Category == nil || *c.Category != category {
 				t.Fatalf("category = %v", c.Category)
 			}
 		}
@@ -98,7 +102,7 @@ func TestPublicCatalog_Isolation_Pg(t *testing.T) {
 	}
 
 	// Detail by slug works for public, and returns nil for the draft's code.
-	got, err := GetPublicCourseBySlug(ctx, pool, "quantum-computing-basics")
+	got, err := GetPublicCourseBySlug(ctx, pool, slug)
 	if err != nil || got == nil {
 		t.Fatalf("detail by slug: got %v err %v", got, err)
 	}
@@ -127,7 +131,7 @@ func TestPublicCatalog_Isolation_Pg(t *testing.T) {
 	}
 	hasSci := false
 	for _, c := range cats {
-		if c.Category == "Science" {
+		if c.Category == category {
 			hasSci = true
 		}
 	}
