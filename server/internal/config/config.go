@@ -351,6 +351,25 @@ type Config struct {
 	// FFSelfPacedMode enables self-paced enrollment with no instructor for self-learner courses (plan 15.2).
 	// Managed in Settings → Global platform (not process env).
 	FFSelfPacedMode bool
+	// FFPublicCatalog enables the public, unauthenticated course catalog and search (plan 15.1).
+	// Managed in Settings → Global platform (not process env).
+	FFPublicCatalog bool
+	// FFLearningPaths enables learning paths / course bundles for self-learners (plan 15.4).
+	// Managed in Settings → Global platform (not process env).
+	FFLearningPaths bool
+
+	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
+	// Managed in Settings → Global platform (not process env).
+	FFStripeBilling bool
+
+	// StripeSecretKey is the Stripe API secret key (sk_live_… or sk_test_…).
+	StripeSecretKey string
+	// StripeWebhookSecret verifies Stripe webhook signatures (whsec_…).
+	StripeWebhookSecret string
+	// StripeMonthlyPriceID is the Stripe Price id for monthly platform subscription.
+	StripeMonthlyPriceID string
+	// StripeAnnualPriceID is the Stripe Price id for annual platform subscription.
+	StripeAnnualPriceID string
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.
@@ -519,6 +538,11 @@ func Load() Config {
 
 		CCRSigningSeedB64:  strings.TrimSpace(os.Getenv("CCR_SIGNING_SEED_B64")),
 		CCRInstitutionName: strings.TrimSpace(os.Getenv("CCR_INSTITUTION_NAME")),
+
+		StripeSecretKey:      strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
+		StripeWebhookSecret:  strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
+		StripeMonthlyPriceID: strings.TrimSpace(os.Getenv("STRIPE_MONTHLY_PRICE_ID")),
+		StripeAnnualPriceID:  strings.TrimSpace(os.Getenv("STRIPE_ANNUAL_PRICE_ID")),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

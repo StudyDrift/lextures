@@ -19,6 +19,7 @@ const (
 	IncompleteGranted      = "incomplete_granted"
 	IncompleteReminder     = "incomplete_reminder"
 	CEUAwarded             = "ceu_awarded"
+	PaymentFailed          = "payment_failed"
 )
 
 // All is the canonical list for defaults and UI.
@@ -40,4 +41,5 @@ var All = []string{
 	IncompleteGranted,
 	IncompleteReminder,
 	CEUAwarded,
+	PaymentFailed,
 }

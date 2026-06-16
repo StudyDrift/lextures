@@ -56,6 +56,8 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderIncompleteGranted(vars, logo, color)
 	case "incomplete_reminder":
 		return renderIncompleteReminder(vars, logo, color)
+	case "payment_failed":
+		return renderPaymentFailed(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {
@@ -303,6 +305,25 @@ Deadline: <strong>%s</strong> (%s days remaining)</p>
 		template.HTMLEscapeString(student),
 		template.HTMLEscapeString(deadline),
 		template.HTMLEscapeString(days),
+		template.HTMLEscapeString(link),
+		color,
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderPaymentFailed(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	link := vars["billingUrl"]
+	subject := "Payment failed — update your billing details"
+	bodyText := fmt.Sprintf(`We could not process your latest subscription payment.
+
+Update your payment method: %s
+`, link)
+	html, err := renderLayout("Payment failed", fmt.Sprintf(
+		`<p>We could not process your latest subscription payment. Your access may be limited until billing is updated.</p>
+<p><a href="%s" style="color:%s;font-weight:600;">Manage billing</a></p>`,
 		template.HTMLEscapeString(link),
 		color,
 	), logo, vars["unsubscribeUrl"])
