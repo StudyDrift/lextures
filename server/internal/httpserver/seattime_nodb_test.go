@@ -36,6 +36,7 @@ func TestSeatTime_Unauthenticated(t *testing.T) {
 }
 
 func TestSeatTime_FeatureOff(t *testing.T) {
+	// Auth runs before the feature gate; unauthenticated callers get 401 even when CEU is disabled.
 	signer := auth.NewJWTSigner("01234567890123456789012345678901")
 	cfg := config.Config{FFCEUTracking: false}
 	d := Deps{Pool: nil, JWTSigner: signer, Config: cfg}
@@ -44,7 +45,7 @@ func TestSeatTime_FeatureOff(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/me/ce-transcript", nil)
 	w := httptest.NewRecorder()
 	h.ServeHTTP(w, req)
-	if w.Code != http.StatusNotFound {
-		t.Fatalf("want 404 got %d", w.Code)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("feature off without auth want 401 got %d", w.Code)
 	}
 }

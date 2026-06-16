@@ -48,11 +48,11 @@ func (d Deps) handleSeatTimeHeartbeat() http.HandlerFunc {
 		SessionToken  string `json:"sessionToken"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ceuTrackingFeatureOff(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ceuTrackingFeatureOff(w) {
 			return
 		}
 		var req body
@@ -142,11 +142,11 @@ func jsonNumber(v float64) string {
 
 func (d Deps) handleGetMySeatTime() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ceuTrackingFeatureOff(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ceuTrackingFeatureOff(w) {
 			return
 		}
 		courseIDStr := strings.TrimSpace(r.URL.Query().Get("courseId"))
@@ -177,11 +177,11 @@ func (d Deps) handleGetMySeatTime() http.HandlerFunc {
 
 func (d Deps) handleGetMyCETranscript() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ceuTrackingFeatureOff(w) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		if d.ceuTrackingFeatureOff(w) {
 			return
 		}
 		ctx := r.Context()
@@ -248,11 +248,11 @@ func (d Deps) handleGetMyCETranscript() http.HandlerFunc {
 
 func (d Deps) handleGetCourseSeatTimeReport() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ceuTrackingFeatureOff(w) {
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
+			return
+		}
+		if d.ceuTrackingFeatureOff(w) {
 			return
 		}
 		has, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":gradebook:view")
@@ -299,10 +299,10 @@ func (d Deps) handlePostAdminCEUConfig() http.HandlerFunc {
 		Enabled             *bool   `json:"enabled"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if d.ceuTrackingFeatureOff(w) {
+		if _, ok := d.adminRbacUser(w, r); !ok {
 			return
 		}
-		if _, ok := d.adminRbacUser(w, r); !ok {
+		if d.ceuTrackingFeatureOff(w) {
 			return
 		}
 		courseCode := strings.TrimSpace(chi.URLParam(r, "course_code"))
