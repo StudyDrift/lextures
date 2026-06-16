@@ -1,8 +1,7 @@
 /**
  * CEU seat-time tracking (plan 14.17).
  */
-import { test, expect } from '@playwright/test'
-import { injectToken } from '../fixtures/test.js'
+import { test, expect, injectToken } from '../fixtures/test.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
 

@@ -37,7 +37,7 @@ func TestApplyHeartbeat_dailyCap(t *testing.T) {
 		LastCountedAt: now.Add(-61 * time.Second),
 		MinutesActive: 5,
 	}
-	state, counted := ApplyHeartbeat(state, now, MaxDailyMinutesPerCourse)
+	_, counted := ApplyHeartbeat(state, now, MaxDailyMinutesPerCourse)
 	if counted {
 		t.Fatal("expected daily cap to prevent counting")
 	}
