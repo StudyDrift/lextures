@@ -41,6 +41,8 @@ var demoChecksumRepairMigrations = []struct {
 	{267, "267_feature_flags_env_to_db.sql"},
 	// Idempotent ADD COLUMN IF NOT EXISTS; backfills the ff_ui_mode column the repo expected.
 	{268, "268_ff_ui_mode_column.sql"},
+	// Idempotent CREATE TABLE/INDEX IF NOT EXISTS; table may exist on DBs that applied billing SQL manually.
+	{278, "278_billing_stripe.sql"},
 }
 
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored

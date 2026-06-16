@@ -51,6 +51,7 @@
     "lib0": "^0.2.104",
     "lucide-react": "^1.7.0",
     "mark.js": "^8.11.1",
+    "markdown-it": "^14.2.0",
     "marked": "^17.0.6",
     "pdfjs-dist": "^4.10.38",
     "react": "^19.2.4",
@@ -73,7 +74,8 @@
   },
   "overrides": {
     "@babel/core": "^7.29.6",
-    "js-yaml": "^4.2.0"
+    "js-yaml": "^4.2.0",
+    "markdown-it": "^14.2.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",

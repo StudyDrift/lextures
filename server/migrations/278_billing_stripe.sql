@@ -20,7 +20,7 @@ COMMENT ON COLUMN course.courses.price_currency IS
 COMMENT ON COLUMN course.courses.freemium_free_items IS
     'Number of first module items free before payment/subscription is required (plan 15.3).';
 
-CREATE TABLE billing.user_entitlements (
+CREATE TABLE IF NOT EXISTS billing.user_entitlements (
     id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id           UUID NOT NULL REFERENCES "user".users (id) ON DELETE CASCADE,
     entitlement_type  TEXT NOT NULL,
@@ -44,10 +44,10 @@ CREATE TABLE billing.user_entitlements (
 COMMENT ON TABLE billing.user_entitlements IS
     'Paid access records derived from confirmed Stripe payments (plan 15.3).';
 
-CREATE INDEX idx_billing_entitlements_user_course
+CREATE INDEX IF NOT EXISTS idx_billing_entitlements_user_course
     ON billing.user_entitlements (user_id, course_id, status);
 
-CREATE INDEX idx_billing_entitlements_user_subscription
+CREATE INDEX IF NOT EXISTS idx_billing_entitlements_user_subscription
     ON billing.user_entitlements (user_id, entitlement_type, valid_until)
     WHERE entitlement_type LIKE 'subscription%';
 
