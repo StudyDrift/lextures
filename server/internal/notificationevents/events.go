@@ -18,6 +18,7 @@ const (
 	InboxMessage           = "inbox_message"
 	IncompleteGranted      = "incomplete_granted"
 	IncompleteReminder     = "incomplete_reminder"
+	CEUAwarded             = "ceu_awarded"
 )
 
 // All is the canonical list for defaults and UI.
@@ -38,4 +39,5 @@ var All = []string{
 	InboxMessage,
 	IncompleteGranted,
 	IncompleteReminder,
+	CEUAwarded,
 }

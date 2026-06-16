@@ -53,6 +53,9 @@ import {
   altTextEnforcementFeatureEnabled,
   altTextHardBlockEnabled,
 } from '../../lib/platform-features'
+import { SeatTimeProgressBar } from '../../components/seat-time/seat-time-progress-bar'
+import { useSeatTimeHeartbeat } from '../../hooks/use-seat-time-heartbeat'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
 
 function newLocalId(): string {
@@ -65,6 +68,7 @@ function newLocalId(): string {
 export default function CourseModuleContentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { allows, loading: permLoading } = usePermissions()
+  const { ffCeuTracking } = usePlatformFeatures()
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -160,6 +164,8 @@ export default function CourseModuleContentPage() {
   const canEdit = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)),
   )
+  const seatTimeEnabled = ffCeuTracking && !canEdit && !editing && Boolean(itemId)
+  useSeatTimeHeartbeat(itemId, seatTimeEnabled)
 
   const loadMarkups = useCallback(async () => {
     if (!courseCode || !itemId) return
@@ -577,6 +583,9 @@ export default function CourseModuleContentPage() {
                   </Link>
                 </div>
               </div>
+            ) : null}
+            {seatTimeEnabled && courseProfile?.id ? (
+              <SeatTimeProgressBar courseId={courseProfile.id} />
             ) : null}
             {!editing && courseProfile?.id ? (
               <ReflectionJournalPrompt courseId={courseProfile.id} />

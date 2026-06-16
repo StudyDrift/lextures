@@ -161,6 +161,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAVScanRoutes(r)
 	r.Post("/api/v1/xapi/statements", d.handlePostXAPIStatements())
 	d.registerEngagementRoutes(r)
+	d.registerSeatTimeRoutes(r)
 	d.registerInsightsRoutes(r)
 	d.registerOERRoutes(r)
 	d.registerCloudProviderRoutes(r)

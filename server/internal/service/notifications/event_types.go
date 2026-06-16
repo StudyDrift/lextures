@@ -19,6 +19,7 @@ const (
 	EventInboxMessage          = notificationevents.InboxMessage
 	EventIncompleteGranted     = notificationevents.IncompleteGranted
 	EventIncompleteReminder    = notificationevents.IncompleteReminder
+	EventCEUAwarded            = notificationevents.CEUAwarded
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

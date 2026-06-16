@@ -96,6 +96,8 @@ func defaultSubject(eventType string) string {
 		return "Incomplete grade granted"
 	case EventIncompleteReminder:
 		return "Incomplete grade deadline reminder"
+	case EventCEUAwarded:
+		return "CEU certificate earned"
 	default:
 		return "Notification from StudyDrift"
 	}

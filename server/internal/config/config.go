@@ -342,6 +342,9 @@ type Config struct {
 	// accommodation profiles propagated to assessment overrides (plan 14.16).
 	// Managed in Settings → Global platform (not process env).
 	FFAccessibilityIntake bool
+	// FFCEUTracking enables CEU seat-time tracking, certificates, and CE transcripts (plan 14.17).
+	// Managed in Settings → Global platform (not process env).
+	FFCEUTracking bool
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.

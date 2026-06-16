@@ -282,6 +282,7 @@ export default function Dashboard() {
     ffAcademicCalendar,
     ffEportfolio,
     ffCoCurricularTranscript,
+    ffCeuTracking,
     ffAdvisingIntegration,
     ffResearchConsent,
   } = usePlatformFeatures()
@@ -797,6 +798,26 @@ export default function Dashboard() {
           {ffAdvisingIntegration && anyStudentExperience ? <DegreeProgressCard /> : null}
 
           {ffResearchConsent && anyStudentExperience ? <ConsentPrompt /> : null}
+
+          {ffCeuTracking ? (
+            <section aria-label="Continuing education">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-100 bg-teal-50/80 px-5 py-4 dark:border-teal-900/40 dark:bg-teal-950/30">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Continuing education</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                    Track contact hours and download your CE transcript.
+                  </p>
+                </div>
+                <Link
+                  to="/me/ce-transcript"
+                  className="inline-flex items-center gap-1 rounded-lg bg-teal-600 px-3 py-2 text-sm font-medium text-white hover:bg-teal-700"
+                >
+                  CE transcript
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </div>
+            </section>
+          ) : null}
 
           {ffCoCurricularTranscript ? (
             <section aria-label="My achievements">

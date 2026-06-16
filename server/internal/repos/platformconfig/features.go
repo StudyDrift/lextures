@@ -77,6 +77,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFAdvisingIntegration = mergeBool(db.FFAdvisingIntegration, false)
 	out.FFResearchConsent = mergeBool(db.FFResearchConsent, false)
 	out.FFAccessibilityIntake = mergeBool(db.FFAccessibilityIntake, false)
+	out.FFCEUTracking = mergeBool(db.FFCEUTracking, false)
 	out.SpeechToTextEnabled = mergeBool(db.SpeechToTextEnabled, false)
 	out.AccommodationsEngineEnabled = mergeBool(db.AccommodationsEngineEnabled, false)
 	out.FFAccommodationsEngine = mergeBool(db.FFAccommodationsEngine, false)

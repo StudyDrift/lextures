@@ -111,6 +111,7 @@ type Row struct {
 	FFAdvisingIntegration           *bool
 	FFResearchConsent               *bool
 	FFAccessibilityIntake           *bool
+	FFCEUTracking                   *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -236,6 +237,7 @@ type Write struct {
 	FFAdvisingIntegration           *bool
 	FFResearchConsent               *bool
 	FFAccessibilityIntake           *bool
+	FFCEUTracking                   *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -358,6 +360,7 @@ SELECT
 	ff_advising_integration,
 	ff_research_consent,
 	ff_accessibility_intake,
+	ff_ceu_tracking,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -474,6 +477,7 @@ WHERE id = 1
 		&r.FFAdvisingIntegration,
 		&r.FFResearchConsent,
 		&r.FFAccessibilityIntake,
+		&r.FFCEUTracking,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -641,6 +645,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_advising_integration,
 	ff_research_consent,
 	ff_accessibility_intake,
+	ff_ceu_tracking,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -763,6 +768,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_advising_integration = COALESCE(EXCLUDED.ff_advising_integration, settings.platform_app_settings.ff_advising_integration),
 	ff_research_consent = COALESCE(EXCLUDED.ff_research_consent, settings.platform_app_settings.ff_research_consent),
 	ff_accessibility_intake = COALESCE(EXCLUDED.ff_accessibility_intake, settings.platform_app_settings.ff_accessibility_intake),
+	ff_ceu_tracking = COALESCE(EXCLUDED.ff_ceu_tracking, settings.platform_app_settings.ff_ceu_tracking),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
@@ -877,6 +883,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFAdvisingIntegration,
 		w.FFResearchConsent,
 		w.FFAccessibilityIntake,
+		w.FFCEUTracking,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,
