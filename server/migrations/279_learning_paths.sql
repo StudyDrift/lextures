@@ -52,33 +52,28 @@ CREATE INDEX idx_path_enrollments_path ON learningpath.path_enrollments (path_id
 COMMENT ON TABLE learningpath.path_enrollments IS
     'Learner enrollment in a learning path; bulk course enrollments are created atomically (plan 15.4).';
 
--- Minimal entitlement store for path bundle purchases (extended by plan 15.3 Stripe billing).
-CREATE SCHEMA IF NOT EXISTS billing;
+-- Extend billing.user_entitlements from plan 15.3 for learning-path bundle purchases (plan 15.4).
+ALTER TABLE billing.user_entitlements
+    ADD COLUMN IF NOT EXISTS path_id UUID REFERENCES learningpath.learning_paths (id) ON DELETE CASCADE;
 
-CREATE TABLE billing.user_entitlements (
-    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id           UUID NOT NULL REFERENCES "user".users (id) ON DELETE CASCADE,
-    entitlement_type  TEXT NOT NULL,
-    path_id           UUID REFERENCES learningpath.learning_paths (id) ON DELETE CASCADE,
-    course_id         UUID REFERENCES course.courses (id) ON DELETE CASCADE,
-    stripe_event_id   TEXT UNIQUE,
-    amount_paid_cents INT NOT NULL DEFAULT 0,
-    currency          TEXT NOT NULL DEFAULT 'usd',
-    valid_from        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    valid_until       TIMESTAMPTZ,
-    status            TEXT NOT NULL DEFAULT 'active'
-        CHECK (status IN ('active', 'expired', 'refunded')),
-    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CHECK (path_id IS NOT NULL OR course_id IS NOT NULL)
-);
+ALTER TABLE billing.user_entitlements
+    ALTER COLUMN stripe_event_id DROP NOT NULL;
 
-CREATE INDEX idx_entitlements_user_path
+ALTER TABLE billing.user_entitlements
+    DROP CONSTRAINT IF EXISTS user_entitlements_entitlement_type_check;
+
+ALTER TABLE billing.user_entitlements
+    ADD CONSTRAINT user_entitlements_entitlement_type_check
+    CHECK (entitlement_type IN (
+        'course_purchase',
+        'subscription_monthly',
+        'subscription_annual',
+        'path_bundle'
+    ));
+
+CREATE INDEX IF NOT EXISTS idx_entitlements_user_path
     ON billing.user_entitlements (user_id, path_id, status)
     WHERE path_id IS NOT NULL;
-
-CREATE INDEX idx_entitlements_user_course
-    ON billing.user_entitlements (user_id, course_id, status)
-    WHERE course_id IS NOT NULL;
 
 COMMENT ON TABLE billing.user_entitlements IS
     'Purchase and subscription entitlements for paid paths and courses (plans 15.3, 15.4).';
