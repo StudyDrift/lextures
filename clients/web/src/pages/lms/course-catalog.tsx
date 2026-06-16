@@ -6,6 +6,11 @@ import {
   type CatalogSection,
   type CatalogListFilter,
 } from '../../lib/catalog-api'
+import {
+  enrollConsortiumCourse,
+  listConsortiumCourses,
+  type ConsortiumSharedCourse,
+} from '../../lib/consortium-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
@@ -45,7 +50,11 @@ function prereqLabel(status: string): string {
 }
 
 export default function CourseCatalogPage() {
-  const { ffCatalogIntegration } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffConsortiumSharing } = usePlatformFeatures()
+  const [tab, setTab] = useState<'catalog' | 'partner'>('catalog')
+  const [partnerCourses, setPartnerCourses] = useState<ConsortiumSharedCourse[]>([])
+  const [partnerLoading, setPartnerLoading] = useState(false)
+  const [partnerError, setPartnerError] = useState<string | null>(null)
   const [sections, setSections] = useState<CatalogSection[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,6 +99,23 @@ export default function CourseCatalogPage() {
     void load()
   }, [ffCatalogIntegration, load])
 
+  const loadPartner = useCallback(async () => {
+    setPartnerLoading(true)
+    setPartnerError(null)
+    try {
+      setPartnerCourses(await listConsortiumCourses())
+    } catch {
+      setPartnerError('Failed to load partner institution courses.')
+    } finally {
+      setPartnerLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!ffConsortiumSharing || tab !== 'partner') return
+    void loadPartner()
+  }, [ffConsortiumSharing, tab, loadPartner])
+
   useEffect(() => {
     if (!selectedId) {
       setDetail(null)
@@ -107,13 +133,63 @@ export default function CourseCatalogPage() {
     void load()
   }
 
-  if (!ffCatalogIntegration) {
+  if (!ffCatalogIntegration && !ffConsortiumSharing) {
     return (
       <main className="mx-auto max-w-4xl p-6">
         <p className="text-sm text-slate-600 dark:text-neutral-400">
           Course catalog integration is not enabled on this platform. Enable{' '}
-          <strong>Course catalog integration</strong> in Settings → Global platform.
+          <strong>Course catalog integration</strong> or <strong>Consortium sharing</strong> in Settings → Global platform.
         </p>
+      </main>
+    )
+  }
+
+  if (tab === 'partner' && ffConsortiumSharing) {
+    return (
+      <LmsPage title="Partner institution courses" description="Courses offered by partner campuses through consortium sharing.">
+        {ffCatalogIntegration ? (
+          <div className="mb-4 flex gap-2">
+            <button type="button" onClick={() => setTab('catalog')} className="rounded-lg border px-3 py-1.5 text-sm">
+              Institution catalog
+            </button>
+            <button type="button" className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white">
+              Partner courses
+            </button>
+          </div>
+        ) : null}
+        {partnerLoading ? <p className="text-sm text-slate-500">Loading…</p> : null}
+        {partnerError ? <p className="text-sm text-rose-700">{partnerError}</p> : null}
+        {!partnerLoading && partnerCourses.length === 0 ? (
+          <p className="text-sm text-slate-600" role="status">No partner courses available.</p>
+        ) : null}
+        <ul className="mt-4 space-y-3">
+          {partnerCourses.map((c) => (
+            <li key={c.id} className="rounded-xl border border-slate-200 p-4 dark:border-neutral-700">
+              <p className="font-semibold">{c.title}</p>
+              <p className="text-sm text-slate-600">{c.hostOrgName} · {c.courseCode}</p>
+              <button
+                type="button"
+                className="mt-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white"
+                onClick={() => void enrollConsortiumCourse(c.id).then(() => loadPartner())}
+              >
+                Enroll
+              </button>
+            </li>
+          ))}
+        </ul>
+      </LmsPage>
+    )
+  }
+
+  if (!ffCatalogIntegration) {
+    return (
+      <main className="mx-auto max-w-4xl p-6">
+        <p className="text-sm text-slate-600 dark:text-neutral-400">
+          Browse partner courses using the Partner institution courses tab.
+        </p>
+        <button type="button" onClick={() => setTab('partner')} className="mt-3 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">
+          Partner institution courses
+        </button>
       </main>
     )
   }
@@ -123,6 +199,16 @@ export default function CourseCatalogPage() {
       title="Course catalog"
       description="Browse official sections synced from your institution's SIS."
     >
+      {ffConsortiumSharing ? (
+        <div className="mb-4 flex gap-2">
+          <button type="button" className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white">
+            Institution catalog
+          </button>
+          <button type="button" onClick={() => setTab('partner')} className="rounded-lg border px-3 py-1.5 text-sm">
+            Partner institution courses
+          </button>
+        </div>
+      ) : null}
       {lastSyncedAt && (
         <div
           className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100"

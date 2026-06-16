@@ -51,6 +51,7 @@ export function SideNavSettingsLinks() {
     ffAdvisingIntegration,
     ffResearchConsent,
     ffAccessibilityIntake,
+    ffConsortiumSharing,
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
@@ -211,6 +212,17 @@ export function SideNavSettingsLinks() {
                   icon={<ShieldCheck className="h-5 w-5" />}
                 >
                   Accessibility services
+                </SideNavLink>
+              )}
+              {ffConsortiumSharing && (
+                <SideNavLink
+                  to="/admin/consortium"
+                  className={() =>
+                    location.pathname === '/admin/consortium' ? sideNavActiveClass : ''
+                  }
+                  icon={<GraduationCap className="h-5 w-5" />}
+                >
+                  Consortium sharing
                 </SideNavLink>
               )}
               {ffBookstoreIntegration && (

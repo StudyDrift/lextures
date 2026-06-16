@@ -97,6 +97,7 @@ export const FinalGradeSubmission = lazy(() => import('./pages/lms/final-grade-s
 export const GradeSubmissionStatus = lazy(() => import('./pages/admin/grade-submission-status'))
 export const AcademicCalendarAdminPage = lazy(() => import('./pages/admin/academic-calendar'))
 export const ConsentStudiesAdminPage = lazy(() => import('./pages/admin/consent-studies'))
+export const ConsortiumAgreementsPage = lazy(() => import('./pages/admin/consortium-agreements'))
 export const ResearchStudiesPage = lazy(() => import('./pages/lms/research-studies'))
 export const AccessibilityServicesPage = lazy(() => import('./pages/admin/accessibility-services'))
 export const MyAccommodationsPage = lazy(() => import('./pages/lms/my-accommodations'))

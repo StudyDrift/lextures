@@ -839,6 +839,7 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 		State          *string `json:"state,omitempty"`
 		StateChangedAt *string `json:"stateChangedAt,omitempty"`
 		StateReason    *string `json:"stateReason,omitempty"`
+		HomeOrgName    *string `json:"homeOrgName,omitempty"`
 	}
 	type resp struct {
 		Enrollments []row `json:"enrollments"`
@@ -899,6 +900,9 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 					r.StateChangedAt = &ts
 				}
 				r.StateReason = e.StateReason
+			}
+			if e.HomeOrgName != nil {
+				r.HomeOrgName = e.HomeOrgName
 			}
 			out = append(out, r)
 		}
