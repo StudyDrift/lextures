@@ -216,10 +216,11 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 	amount := int(sess.AmountTotal)
 	currency := string(sess.Currency)
 	var validUntil *time.Time
-	if entType == repoBilling.TypeSubscriptionMonthly {
+	switch entType {
+	case repoBilling.TypeSubscriptionMonthly:
 		t := time.Now().UTC().AddDate(0, 1, 0)
 		validUntil = &t
-	} else if entType == repoBilling.TypeSubscriptionAnnual {
+	case repoBilling.TypeSubscriptionAnnual:
 		t := time.Now().UTC().AddDate(1, 0, 0)
 		validUntil = &t
 	}
