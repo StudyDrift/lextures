@@ -215,6 +215,8 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Put("/api/v1/me/notification-preferences", d.handlePutMyNotificationPreferences())
 	r.Get("/api/v1/me/reading-preferences", d.handleGetMyReadingPreferences())
 	r.Patch("/api/v1/me/reading-preferences", d.handlePatchMyReadingPreferences())
+	// Self-paced enrollments with progress for the Dashboard (plan 15.2)
+	r.Get("/api/v1/me/enrollments", d.handleMySelfPacedEnrollments())
 	r.Get("/api/unsubscribe", d.handleUnsubscribe())
 	r.Get("/api/v1/push/vapid-public-key", d.handleGetVAPIDPublicKey())
 	r.Post("/api/v1/me/push-subscriptions", d.handlePostMyPushSubscription())

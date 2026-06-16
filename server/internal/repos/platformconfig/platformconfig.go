@@ -113,6 +113,7 @@ type Row struct {
 	FFAccessibilityIntake           *bool
 	FFCEUTracking                   *bool
 	FFConsortiumSharing             *bool
+	FFSelfPacedMode                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -240,6 +241,7 @@ type Write struct {
 	FFAccessibilityIntake           *bool
 	FFCEUTracking                   *bool
 	FFConsortiumSharing             *bool
+	FFSelfPacedMode                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -364,6 +366,7 @@ SELECT
 	ff_accessibility_intake,
 	ff_ceu_tracking,
 	ff_consortium_sharing,
+	ff_self_paced_mode,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -482,6 +485,7 @@ WHERE id = 1
 		&r.FFAccessibilityIntake,
 		&r.FFCEUTracking,
 		&r.FFConsortiumSharing,
+		&r.FFSelfPacedMode,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -671,13 +675,14 @@ INSERT INTO settings.platform_app_settings (
 	adaptive_learner_model_enabled,
 	learner_model_ema_alpha,
 	ff_ui_mode,
+	ff_self_paced_mode,
 	updated_at
 ) VALUES (
 	1,
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
-	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -788,6 +793,7 @@ ON CONFLICT (id) DO UPDATE SET
 	adaptive_learner_model_enabled = COALESCE(EXCLUDED.adaptive_learner_model_enabled, settings.platform_app_settings.adaptive_learner_model_enabled),
 	learner_model_ema_alpha = COALESCE(EXCLUDED.learner_model_ema_alpha, settings.platform_app_settings.learner_model_ema_alpha),
 	ff_ui_mode = COALESCE(EXCLUDED.ff_ui_mode, settings.platform_app_settings.ff_ui_mode),
+	ff_self_paced_mode = COALESCE(EXCLUDED.ff_self_paced_mode, settings.platform_app_settings.ff_self_paced_mode),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -911,6 +917,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AdaptiveLearnerModelEnabled,
 		w.LearnerModelEMAAlpha,
 		w.FFUiMode,
+		w.FFSelfPacedMode,
 	)
 	if err != nil {
 		return nil, err

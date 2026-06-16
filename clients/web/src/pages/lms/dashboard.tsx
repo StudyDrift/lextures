@@ -59,6 +59,7 @@ import {
   type GradingBacklogItem,
 } from '../../components/dashboard/grading-backlog-list'
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
+import { SelfPacedDashboardSection } from '../../components/self-paced/self-paced-dashboard-section'
 import { DegreeProgressCard } from '../../components/dashboard/degree-progress-card'
 import { ConsentPrompt } from '../../components/research/consent-prompt'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
@@ -956,6 +957,8 @@ export default function Dashboard() {
               </ul>
             </section>
           )}
+
+          <SelfPacedDashboardSection />
 
           {continueTarget && (
             <section aria-label="Continue learning">

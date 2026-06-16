@@ -155,6 +155,12 @@ export type CoursePublic = {
   requireCaptions?: boolean
   /** `traditional` or `competency_based` (server default when omitted: traditional). */
   courseType?: string
+  /** Plan 15.2 — `instructor_led` (default) or `self_paced`. */
+  courseMode?: string
+  /** Plan 15.2 — any authenticated learner may self-enroll without instructor approval. */
+  openEnrollment?: boolean
+  /** Plan 15.2 — learner must complete module N before accessing module N+1. */
+  moduleGatingEnabled?: boolean
   createdAt: string
   updatedAt: string
   /** Present on single-course GET: raw enrollment roles for the viewer (`teacher`, `student`, …). */
