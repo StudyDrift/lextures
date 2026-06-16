@@ -44,6 +44,8 @@ export default function App() {
         <Route path="/trust" element={<Pages.TrustCenterPage />} />
         <Route path="/p/:slug/content/:aid" element={<Pages.PublicPortfolioContentPage />} />
         <Route path="/p/:slug" element={<Pages.PublicPortfolioPage />} />
+        <Route path="/paths" element={<Pages.PathsCatalogPage />} />
+        <Route path="/paths/:slug" element={<Pages.PathLandingPage />} />
         <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
         <Route element={<RequireAuth />}>
           <Route path="/cli-auth" element={<Pages.CliAuthPage />} />
@@ -69,6 +71,8 @@ export default function App() {
             <Route path="/ai" element={<Pages.AskAiPage />} />
             <Route path="/review" element={<Pages.ReviewSessionPage />} />
             <Route path="/courses" element={<Pages.Courses />} />
+            <Route path="/my-paths" element={<Pages.MyPaths />} />
+            <Route path="/creator/learning-paths" element={<Pages.CreatorLearningPathsPage />} />
             <Route path="/notebooks/global" element={<Pages.GlobalNotebookPage />} />
             <Route path="/notebooks" element={<Pages.MyNotebooksPage />} />
             <Route path="/courses/create" element={<Pages.CourseCreate />} />
