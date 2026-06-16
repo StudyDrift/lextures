@@ -61,6 +61,9 @@ export default function App() {
             <Route path="/me/study-insights" element={<Pages.StudyInsightsPage />} />
             <Route path="/me/ccr" element={<Pages.MyCCR />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
+            <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
+            <Route path="/checkout/success" element={<Pages.CheckoutSuccessPage />} />
+            <Route path="/checkout/cancel" element={<Pages.CheckoutCancelPage />} />
             <Route path="/transcripts" element={<Pages.TranscriptsPage />} />
             <Route path="/advising-notes" element={<Pages.AdvisingNotesPage />} />
             <Route path="/me/research-studies" element={<Pages.ResearchStudiesPage />} />

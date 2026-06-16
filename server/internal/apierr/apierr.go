@@ -33,6 +33,7 @@ const (
 	CodeAiProcessingDisabled     = "AI_PROCESSING_DISABLED"
 	CodeTenantAIPolicyDisabled   = "TENANT_AI_POLICY_DISABLED"
 	CodeOrgSuspended        = "ORG_SUSPENDED"
+	CodePaymentRequired     = "PAYMENT_REQUIRED"
 )
 
 // Body matches server/src/error.rs JSON error envelope.

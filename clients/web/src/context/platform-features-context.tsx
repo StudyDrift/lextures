@@ -69,6 +69,7 @@ export type PlatformFeatures = {
   ffAccessibilityIntake: boolean
   ffCeuTracking: boolean
   ffConsortiumSharing: boolean
+  ffStripeBilling: boolean
   ffLearningPaths: boolean
   loading: boolean
   refresh: () => Promise<void>
@@ -129,6 +130,7 @@ const defaultFeatures: PlatformFeatures = {
   ffAccessibilityIntake: false,
   ffCeuTracking: false,
   ffConsortiumSharing: false,
+  ffStripeBilling: false,
   ffLearningPaths: false,
   loading: true,
   refresh: async () => {},
@@ -194,6 +196,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffAccessibilityIntake: false,
     ffCeuTracking: false,
   ffConsortiumSharing: false,
+  ffStripeBilling: false,
   ffLearningPaths: false,
   })
   const [loading, setLoading] = useState(true)
@@ -260,6 +263,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffAccessibilityIntake: data.ffAccessibilityIntake === true,
           ffCeuTracking: data.ffCeuTracking === true,
           ffConsortiumSharing: data.ffConsortiumSharing === true,
+          ffStripeBilling: data.ffStripeBilling === true,
           ffLearningPaths: data.ffLearningPaths === true,
         }
         setFeatures({
@@ -293,6 +297,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffAccessibilityIntake: next.ffAccessibilityIntake === true,
           ffCeuTracking: next.ffCeuTracking === true,
           ffConsortiumSharing: next.ffConsortiumSharing === true,
+          ffStripeBilling: next.ffStripeBilling === true,
           ffLearningPaths: next.ffLearningPaths === true,
         })
         setPlatformFeaturesSnapshot(next)
