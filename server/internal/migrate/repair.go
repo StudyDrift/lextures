@@ -43,6 +43,8 @@ var demoChecksumRepairMigrations = []struct {
 	{268, "268_ff_ui_mode_column.sql"},
 	// Idempotent CREATE TABLE/INDEX IF NOT EXISTS; table may exist on DBs that applied billing SQL manually.
 	{278, "278_billing_stripe.sql"},
+	// Edited after apply in PR #288: extend billing.user_entitlements from 278 instead of recreating it.
+	{279, "279_learning_paths.sql"},
 }
 
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
