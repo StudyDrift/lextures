@@ -72,6 +72,9 @@ type CoursePublic struct {
 	WhiteboardEnabled             bool             `json:"whiteboardEnabled"`
 	RequireCaptions               bool             `json:"requireCaptions"`
 	CourseType                    string           `json:"courseType"`
+	CourseMode                    string           `json:"courseMode"`
+	OpenEnrollment                bool             `json:"openEnrollment"`
+	ModuleGatingEnabled           bool             `json:"moduleGatingEnabled"`
 	CreatedAt                     time.Time        `json:"createdAt"`
 	UpdatedAt                     time.Time        `json:"updatedAt"`
 	OrgID                         *string          `json:"orgId,omitempty"`
@@ -157,6 +160,9 @@ const coursePublicSelect = `
     c.course_home_content_item_id,
     c.course_timezone,
     c.grade_level,
+    c.course_mode,
+    c.open_enrollment,
+    c.module_gating_enabled,
     c.term_id,
     tr.id,
     tr.name,
@@ -249,6 +255,9 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&homeContentItem,
 		&courseTZ,
 		&gradeLevel,
+		&p.CourseMode,
+		&p.OpenEnrollment,
+		&p.ModuleGatingEnabled,
 		&termIDCol,
 		&trID,
 		&trName,

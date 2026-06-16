@@ -113,6 +113,7 @@ type Row struct {
 	FFAccessibilityIntake           *bool
 	FFCEUTracking                   *bool
 	FFConsortiumSharing             *bool
+	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
 	FFStripeBilling                 *bool
 	FFLearningPaths                 *bool
@@ -243,6 +244,7 @@ type Write struct {
 	FFAccessibilityIntake           *bool
 	FFCEUTracking                   *bool
 	FFConsortiumSharing             *bool
+	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
 	FFStripeBilling                 *bool
 	FFLearningPaths                 *bool
@@ -370,6 +372,7 @@ SELECT
 	ff_accessibility_intake,
 	ff_ceu_tracking,
 	ff_consortium_sharing,
+	ff_self_paced_mode,
 	ff_public_catalog,
 	ff_stripe_billing,
 	ff_learning_paths,
@@ -491,6 +494,7 @@ WHERE id = 1
 		&r.FFAccessibilityIntake,
 		&r.FFCEUTracking,
 		&r.FFConsortiumSharing,
+		&r.FFSelfPacedMode,
 		&r.FFPublicCatalog,
 		&r.FFStripeBilling,
 		&r.FFLearningPaths,
@@ -685,6 +689,7 @@ INSERT INTO settings.platform_app_settings (
 	adaptive_learner_model_enabled,
 	learner_model_ema_alpha,
 	ff_ui_mode,
+	ff_self_paced_mode,
 	ff_public_catalog,
 	updated_at
 ) VALUES (
@@ -692,7 +697,7 @@ INSERT INTO settings.platform_app_settings (
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
-	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -805,6 +810,7 @@ ON CONFLICT (id) DO UPDATE SET
 	adaptive_learner_model_enabled = COALESCE(EXCLUDED.adaptive_learner_model_enabled, settings.platform_app_settings.adaptive_learner_model_enabled),
 	learner_model_ema_alpha = COALESCE(EXCLUDED.learner_model_ema_alpha, settings.platform_app_settings.learner_model_ema_alpha),
 	ff_ui_mode = COALESCE(EXCLUDED.ff_ui_mode, settings.platform_app_settings.ff_ui_mode),
+	ff_self_paced_mode = COALESCE(EXCLUDED.ff_self_paced_mode, settings.platform_app_settings.ff_self_paced_mode),
 	ff_public_catalog = COALESCE(EXCLUDED.ff_public_catalog, settings.platform_app_settings.ff_public_catalog),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
@@ -931,6 +937,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AdaptiveLearnerModelEnabled,
 		w.LearnerModelEMAAlpha,
 		w.FFUiMode,
+		w.FFSelfPacedMode,
 		w.FFPublicCatalog,
 	)
 	if err != nil {

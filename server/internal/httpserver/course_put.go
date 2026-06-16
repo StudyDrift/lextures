@@ -35,6 +35,10 @@ type putCourseBody struct {
 	CourseHomeContentItemID *string `json:"courseHomeContentItemId"`
 	CourseTimezone          *string `json:"courseTimezone"`
 	GradeLevel              *string `json:"gradeLevel"`
+	// Self-paced enrollment (plan 15.2). Optional; omitted fields are left unchanged.
+	CourseMode          *string `json:"courseMode"`
+	OpenEnrollment      *bool   `json:"openEnrollment"`
+	ModuleGatingEnabled *bool   `json:"moduleGatingEnabled"`
 }
 
 // handlePutCourse is PUT /api/v1/courses/{course_code} (parity: server `update_handler`).
@@ -290,6 +294,29 @@ func (d Deps) handlePutCourse() http.HandlerFunc {
 			updated, err := course.SetGradeLevel(r.Context(), d.Pool, courseCode, glPtr)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update grade level.")
+				return
+			}
+			if updated != nil {
+				out = updated
+			}
+		}
+		if body.CourseMode != nil || body.OpenEnrollment != nil || body.ModuleGatingEnabled != nil {
+			if !d.effectiveConfig().FFSelfPacedMode {
+				apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Self-paced mode is not enabled.")
+				return
+			}
+			var modePtr *string
+			if body.CourseMode != nil {
+				m := strings.TrimSpace(*body.CourseMode)
+				if m != "instructor_led" && m != "self_paced" {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid courseMode.")
+					return
+				}
+				modePtr = &m
+			}
+			updated, err := course.SetSelfPacedSettings(r.Context(), d.Pool, courseCode, modePtr, body.OpenEnrollment, body.ModuleGatingEnabled)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update self-paced settings.")
 				return
 			}
 			if updated != nil {

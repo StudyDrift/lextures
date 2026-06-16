@@ -348,6 +348,9 @@ type Config struct {
 	// FFConsortiumSharing enables multi-campus consortium course sharing and cross-institutional enrollment (plan 14.18).
 	// Managed in Settings → Global platform (not process env).
 	FFConsortiumSharing bool
+	// FFSelfPacedMode enables self-paced enrollment with no instructor for self-learner courses (plan 15.2).
+	// Managed in Settings → Global platform (not process env).
+	FFSelfPacedMode bool
 	// FFPublicCatalog enables the public, unauthenticated course catalog and search (plan 15.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicCatalog bool

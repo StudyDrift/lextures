@@ -56,6 +56,7 @@ import { CourseModulesLoadingSkeleton } from '../../components/ui/lms-content-sk
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { toast, toastWithUndo } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
+import { SelfPacedProgressHeader } from '../../components/self-paced/self-paced-progress'
 import { OERSearchPanel } from '../../components/oer/oer-search-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { ModuleExternalLinkModal } from './module-external-link-modal'
@@ -996,7 +997,7 @@ function StaticChildRow({
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
 }) {
   return (
-    <li className="py-3 first:pt-0">
+    <li id={`item-row-${child.id}`} className="py-3 first:pt-0">
       <div className="min-w-0">
         <ChildRowContent
           child={child}
@@ -2506,6 +2507,18 @@ export default function CourseModules() {
         ) : null
       }
     >
+      {courseCode && courseMeta?.courseMode === 'self_paced' && !viewAsStudent && (
+        <div className="mt-6">
+          <SelfPacedProgressHeader
+            courseCode={courseCode}
+            onResume={(itemId) => {
+              document
+                .getElementById(`item-row-${itemId}`)
+                ?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            }}
+          />
+        </div>
+      )}
       {loadError && (
         <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">
           {loadError}

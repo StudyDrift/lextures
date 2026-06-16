@@ -128,6 +128,7 @@ type platformSettingsJSON struct {
 	FFAccessibilityIntake           bool `json:"ffAccessibilityIntake"`
 	FFCEUTracking                   bool `json:"ffCeuTracking"`
 	FFConsortiumSharing             bool `json:"ffConsortiumSharing"`
+	FFSelfPacedMode                 bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 bool `json:"ffPublicCatalog"`
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
@@ -309,6 +310,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
 			FFCEUTracking:                   merged.FFCEUTracking,
 			FFConsortiumSharing:             merged.FFConsortiumSharing,
+			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFLearningPaths:                 merged.FFLearningPaths,
@@ -466,6 +468,7 @@ type putPlatformBody struct {
 	FFAccessibilityIntake           *bool `json:"ffAccessibilityIntake"`
 	FFCEUTracking                   *bool `json:"ffCeuTracking"`
 	FFConsortiumSharing             *bool `json:"ffConsortiumSharing"`
+	FFSelfPacedMode                 *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 *bool `json:"ffPublicCatalog"`
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
@@ -788,6 +791,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffaccessibilityintake", body.FFAccessibilityIntake, func(v bool) { wr.FFAccessibilityIntake = &v })
 		setBool("ffceutracking", body.FFCEUTracking, func(v bool) { wr.FFCEUTracking = &v })
 		setBool("ffconsortiumsharing", body.FFConsortiumSharing, func(v bool) { wr.FFConsortiumSharing = &v })
+		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
@@ -921,6 +925,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
 			FFCEUTracking:                   merged.FFCEUTracking,
 			FFConsortiumSharing:             merged.FFConsortiumSharing,
+			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFLearningPaths:                 merged.FFLearningPaths,
