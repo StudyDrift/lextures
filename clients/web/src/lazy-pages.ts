@@ -122,3 +122,5 @@ export const BillingSettingsPage = lazy(() => import('./pages/lms/billing-settin
 export const CheckoutSuccessPage = lazy(() => import('./pages/checkout/success'))
 export const CheckoutCancelPage = lazy(() => import('./pages/checkout/cancel'))
 export const CliAuthPage = lazy(() => import('./pages/cli-auth'))
+export const ExploreCatalogPage = lazy(() => import('./pages/explore-catalog-page'))
+export const ExploreCoursePage = lazy(() => import('./pages/explore-course-page'))

@@ -65,6 +65,7 @@ type platformFeaturesJSON struct {
 	FFAccessibilityIntake       bool `json:"ffAccessibilityIntake"`
 	FFCEUTracking               bool `json:"ffCeuTracking"`
 	FFConsortiumSharing         bool `json:"ffConsortiumSharing"`
+	FFPublicCatalog             bool `json:"ffPublicCatalog"`
 	FFStripeBilling             bool `json:"ffStripeBilling"`
 	FFLearningPaths             bool `json:"ffLearningPaths"`
 
@@ -138,6 +139,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFAccessibilityIntake:       cfg.FFAccessibilityIntake,
 		FFCEUTracking:               cfg.FFCEUTracking,
 		FFConsortiumSharing:         cfg.FFConsortiumSharing,
+		FFPublicCatalog:             cfg.FFPublicCatalog,
 		FFStripeBilling:             cfg.FFStripeBilling,
 		FFLearningPaths:             cfg.FFLearningPaths,
 

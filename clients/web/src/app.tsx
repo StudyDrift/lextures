@@ -47,6 +47,8 @@ export default function App() {
         <Route path="/paths" element={<Pages.PathsCatalogPage />} />
         <Route path="/paths/:slug" element={<Pages.PathLandingPage />} />
         <Route path="/verify/:token" element={<Pages.CcrVerifyPage />} />
+        <Route path="/explore" element={<Pages.ExploreCatalogPage />} />
+        <Route path="/explore/:slug" element={<Pages.ExploreCoursePage />} />
         <Route element={<RequireAuth />}>
           <Route path="/cli-auth" element={<Pages.CliAuthPage />} />
           <Route

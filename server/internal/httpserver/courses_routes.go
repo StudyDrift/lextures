@@ -122,6 +122,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/files/items/{item_id}/preview", d.handleGetCourseFileItemPreview())
 	r.Get("/api/v1/courses/{course_code}/files/ws", d.handleCourseFilesWS())
 	r.Patch("/api/v1/courses/{course_code}/caption-policy", d.handlePatchCourseCaptionPolicy())
+	r.Get("/api/v1/courses/{course_code}/catalog-listing", d.handleGetCourseCatalogListing())
+	r.Put("/api/v1/courses/{course_code}/catalog-listing", d.handlePutCourseCatalogListing())
 	// DRM: license endpoint for protected files (plan 8.10)
 	r.Post("/api/v1/files/{object_id}/license", d.handlePostFileLicense())
 	r.Patch("/api/v1/courses/{course_code}/structure/items/{item_id}", d.handlePatchCourseStructureItem())
