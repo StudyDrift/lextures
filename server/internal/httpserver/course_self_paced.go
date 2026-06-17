@@ -11,8 +11,11 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/logging"
+	credrepo "github.com/lextures/lextures/server/internal/repos/credentials"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/learnerprogress"
+	credsvc "github.com/lextures/lextures/server/internal/service/credentials"
 	"github.com/lextures/lextures/server/internal/service/selfpaced"
 )
 
@@ -192,6 +195,12 @@ func (d Deps) handleCourseMyProgress() http.HandlerFunc {
 			s := resume.String()
 			resp.ResumeItemID = &s
 		}
+		if summary.Completed && d.effectiveConfig().FFCompletionCredentials {
+			if cred, err := credrepo.GetByRecipientAndSource(r.Context(), d.Pool, viewer, credrepo.SourceCourse, c.ID); err == nil && cred != nil {
+				id := cred.ID.String()
+				resp.CredentialID = &id
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	}
@@ -290,8 +299,22 @@ func (d Deps) handleCourseItemComplete() http.HandlerFunc {
 			resp.ResumeItemID = &s
 		}
 		resp.JustComplete = changed && summary.Completed
-		if resp.JustComplete {
-			resp.CredentialID = d.tryIssueCourseCredential(r, c.ID, viewer)
+		if resp.JustComplete && d.effectiveConfig().FFCompletionCredentials {
+			learnerName, nameErr := d.learnerDisplayName(r, viewer)
+			if nameErr == nil {
+				cfg := d.effectiveConfig()
+				cred, issueErr := credsvc.IssueCourseCompletion(r.Context(), d.Pool, cfg, credsvc.IssueCourseParams{
+					RecipientID: viewer,
+					LearnerName: learnerName,
+					CourseID:    c.ID,
+				})
+				if issueErr == nil && cred != nil {
+					logging.GlobalCredentialsMetrics.IncIssued()
+					d.notifyCertificateIssued(r, viewer, cred)
+					id := cred.ID.String()
+					resp.CredentialID = &id
+				}
+			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)

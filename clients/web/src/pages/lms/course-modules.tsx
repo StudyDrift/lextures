@@ -2511,6 +2511,7 @@ export default function CourseModules() {
         <div className="mt-6">
           <SelfPacedProgressHeader
             courseCode={courseCode}
+            courseTitle={courseMeta?.title}
             onResume={(itemId) => {
               document
                 .getElementById(`item-row-${itemId}`)

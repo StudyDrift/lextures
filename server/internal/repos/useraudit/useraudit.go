@@ -32,3 +32,20 @@ VALUES ($1, $2, $3, $4, NOW())
 `, userID, courseID, structureItemID, eventKind)
 	return err
 }
+
+// InsertCredentialShare records a credential share analytics event (plan 15.6).
+// structure_item_id stores the credential id for share events.
+func InsertCredentialShare(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	userID, courseID, credentialID uuid.UUID,
+	channel string,
+) error {
+	eventKind := "credential_share_" + channel
+	credID := credentialID
+	_, err := pool.Exec(ctx, `
+INSERT INTO "user".user_audit (user_id, course_id, structure_item_id, event_kind, occurred_at)
+VALUES ($1, $2, $3, $4, NOW())
+`, userID, courseID, &credID, eventKind)
+	return err
+}

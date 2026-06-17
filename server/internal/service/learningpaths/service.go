@@ -12,13 +12,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	repoCCR "github.com/lextures/lextures/server/internal/repos/ccr"
 	repoPaths "github.com/lextures/lextures/server/internal/repos/learningpaths"
+	"github.com/lextures/lextures/server/internal/config"
 	credsvc "github.com/lextures/lextures/server/internal/service/credentials"
 	"github.com/lextures/lextures/server/internal/courseroles"
 )
 
 // ProgressOptions carries optional credential issuance context (plan 15.5).
 type ProgressOptions struct {
-	CredDeps    *credsvc.IssueDeps
+	Cfg         config.Config
 	LearnerName string
 }
 
@@ -224,8 +225,13 @@ func completedCourseSet(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUI
 }
 
 func issuePathCertificate(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p *repoPaths.Path, opts *ProgressOptions) error {
-	if opts != nil && opts.CredDeps != nil && opts.CredDeps.Cfg.FFCompletionCredentials {
-		_, _, err := credsvc.IssueForPathCompletion(ctx, *opts.CredDeps, p.ID, userID, opts.LearnerName, p.Title)
+	if opts != nil && opts.Cfg.FFCompletionCredentials {
+		_, err := credsvc.IssuePathCompletion(ctx, pool, opts.Cfg, credsvc.IssuePathParams{
+			RecipientID: userID,
+			LearnerName: opts.LearnerName,
+			PathID:      p.ID,
+			PathTitle:   p.Title,
+		})
 		return err
 	}
 	sourceID := p.ID

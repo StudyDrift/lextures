@@ -1,307 +1,316 @@
-// Package credentials issues Open Badges 3.0 completion credentials (plan 15.5).
 package credentials
 
 import (
-	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/config"
-	"github.com/lextures/lextures/server/internal/logging"
-	ccrrepo "github.com/lextures/lextures/server/internal/repos/ccr"
-	repocred "github.com/lextures/lextures/server/internal/repos/credentials"
+	credrepo "github.com/lextures/lextures/server/internal/repos/credentials"
 	ccrsvc "github.com/lextures/lextures/server/internal/service/ccr"
-	"github.com/lextures/lextures/server/internal/service/filestorage"
-	"github.com/lextures/lextures/server/internal/service/notifications"
-	"github.com/lextures/lextures/server/internal/service/pdfrender"
 	vcsigning "github.com/lextures/lextures/server/internal/service/vc_signing"
-	"github.com/lextures/lextures/server/internal/notificationevents"
 )
 
-// IssueInput describes a credential issuance request.
-type IssueInput struct {
+const badgeExportTTL = 24 * time.Hour
+
+// IssueCourseParams controls course-completion credential issuance.
+type IssueCourseParams struct {
 	RecipientID uuid.UUID
 	LearnerName string
-	SourceType  repocred.SourceType
-	SourceID    uuid.UUID
-	Title       string
-	Description string
-	IssuedAt    time.Time
+	CourseID    uuid.UUID
+	Now         time.Time
 }
 
-// IssueDeps bundles runtime dependencies for issuance.
-type IssueDeps struct {
-	Pool        *pgxpool.Pool
-	Cfg         config.Config
-	Storage     filestorage.Driver
-	Notify      *notifications.Service
-}
-
-// Issue creates or returns an existing signed credential (idempotent).
-func Issue(ctx context.Context, deps IssueDeps, in IssueInput) (*repocred.IssuedCredential, bool, error) {
-	if deps.Pool == nil {
-		return nil, false, fmt.Errorf("credentials: missing database pool")
+// IssueCourseCompletion issues an Open Badges 3.0 credential for course completion (idempotent).
+func IssueCourseCompletion(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	cfg config.Config,
+	p IssueCourseParams,
+) (*credrepo.IssuedCredential, error) {
+	if p.Now.IsZero() {
+		p.Now = time.Now().UTC()
 	}
-	if !deps.Cfg.FFCompletionCredentials {
-		return nil, false, nil
-	}
-	issuedAt := IssuanceTimestamp(in.IssuedAt)
-	achievementName := DefaultAchievementName(string(in.SourceType), in.Title)
-	description := strings.TrimSpace(in.Description)
-	if description == "" {
-		description = fmt.Sprintf("Certificate of completion for %s.", achievementName)
-	}
-
-	key, err := ccrsvc.ResolveSigningKey(deps.Cfg, deps.Cfg.PublicWebOrigin, deps.Cfg.CCRSigningSeedB64)
-	if err != nil {
-		return nil, false, err
-	}
-	institution := institutionName(deps.Cfg)
-	subject := BuildAchievementSubject(
-		in.RecipientID,
-		in.LearnerName,
-		achievementName,
-		description,
-		CriteriaNarrativeForSource(string(in.SourceType)),
-	)
-	vc, err := vcsigning.SignAchievementCredential(subject, institution, key, issuedAt)
-	if err != nil {
-		return nil, false, err
-	}
-	vcBytes, err := json.Marshal(vc)
-	if err != nil {
-		return nil, false, err
-	}
-	proofRaw, _ := json.Marshal(vc["proof"])
-
-	created, isNew, err := repocred.InsertIssued(ctx, deps.Pool, repocred.IssuedCredential{
-		RecipientID:    in.RecipientID,
-		SourceType:     in.SourceType,
-		SourceID:       in.SourceID,
-		CredentialJSON: vcBytes,
-		Proof:          proofRaw,
-	})
-	if err != nil {
-		return nil, false, err
-	}
-	if isNew {
-		logging.GlobalCredentialMetrics.IncIssued(string(in.SourceType))
-		syncCCR(ctx, deps.Pool, in, achievementName, issuedAt, created.ID, deps.Cfg)
-		go finalizeCredential(context.WithoutCancel(ctx), deps, created, in, achievementName, institution, issuedAt)
-	}
-	return created, isNew, nil
-}
-
-// IssueForCourseCompletion issues a course credential when self-paced completion fires.
-func IssueForCourseCompletion(ctx context.Context, deps IssueDeps, courseID, recipientID uuid.UUID, learnerName string) (*repocred.IssuedCredential, bool, error) {
-	title, err := courseTitle(ctx, deps.Pool, courseID)
-	if err != nil {
-		return nil, false, err
-	}
-	return Issue(ctx, deps, IssueInput{
-		RecipientID: recipientID,
-		LearnerName: learnerName,
-		SourceType:  repocred.SourceCourse,
-		SourceID:    courseID,
-		Title:       title,
-	})
-}
-
-// IssueForPathCompletion issues a path-level credential.
-func IssueForPathCompletion(ctx context.Context, deps IssueDeps, pathID, recipientID uuid.UUID, learnerName, pathTitle string) (*repocred.IssuedCredential, bool, error) {
-	return Issue(ctx, deps, IssueInput{
-		RecipientID: recipientID,
-		LearnerName: learnerName,
-		SourceType:  repocred.SourcePath,
-		SourceID:    pathID,
-		Title:       pathTitle,
-	})
-}
-
-// VerifyResult is returned by public verification.
-type VerifyResult struct {
-	Valid        bool
-	Status       string
-	Revoked      bool
-	IssuerName   string
-	LearnerName  string
-	Achievement  string
-	IssuedAt     time.Time
-	Credential   map[string]any
-}
-
-// Verify checks signature and revocation for a stored credential.
-func Verify(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, id uuid.UUID) (*VerifyResult, error) {
-	row, err := repocred.GetByID(ctx, pool, id)
+	existing, err := credrepo.GetByRecipientAndSource(ctx, pool, p.RecipientID, credrepo.SourceCourse, p.CourseID)
 	if err != nil {
 		return nil, err
 	}
-	if row == nil {
-		return nil, nil
+	if existing != nil {
+		return existing, nil
 	}
-	var vc map[string]any
-	if err := json.Unmarshal(row.CredentialJSON, &vc); err != nil {
+
+	meta, err := credrepo.CourseMetaByID(ctx, pool, p.CourseID)
+	if err != nil {
 		return nil, err
 	}
+	if meta == nil {
+		return nil, fmt.Errorf("course not found")
+	}
+
+	institution := issuerName(cfg)
 	key, err := ccrsvc.ResolveSigningKey(cfg, cfg.PublicWebOrigin, cfg.CCRSigningSeedB64)
 	if err != nil {
 		return nil, err
 	}
-	valid, err := vcsigning.VerifyCredential(vc, key.PublicKey)
+
+	achievementID := fmt.Sprintf("%s/achievements/%s", strings.TrimRight(cfg.PublicWebOrigin, "/"), p.CourseID.String())
+	subject := map[string]any{
+		"id":   fmt.Sprintf("urn:uuid:user:%s", p.RecipientID.String()),
+		"type": []string{"AchievementSubject"},
+		"name": strings.TrimSpace(p.LearnerName),
+		"achievement": map[string]any{
+			"id":          achievementID,
+			"type":        []string{"Achievement"},
+			"name":        meta.Title,
+			"description": fmt.Sprintf("Completed all items in %s.", meta.Title),
+			"criteria": map[string]any{
+				"narrative": "Learner completed every item in the self-paced course.",
+			},
+		},
+	}
+
+	vc, err := vcsigning.SignAchievementCredential(subject, institution, key, p.Now)
 	if err != nil {
 		return nil, err
 	}
-	logging.GlobalCredentialMetrics.IncVerifications()
-
-	out := &VerifyResult{
-		Valid:       valid && !row.Revoked,
-		IssuerName:  institutionName(cfg),
-		LearnerName: extractLearnerName(vc),
-		Achievement: extractAchievementName(vc),
-		IssuedAt:    row.IssuedAt,
-		Credential:  vc,
-	}
-	if row.Revoked {
-		out.Status = "Revoked"
-		out.Valid = false
-	} else if valid {
-		out.Status = "Valid"
-	} else {
-		out.Status = "Invalid credential — signature mismatch."
-	}
-	return out, nil
-}
-
-// BuildPDFBytes renders the certificate PDF for download.
-func BuildPDFBytes(cfg config.Config, row *repocred.IssuedCredential, learnerName string) ([]byte, error) {
-	var vc map[string]any
-	if err := json.Unmarshal(row.CredentialJSON, &vc); err != nil {
+	vcBytes, err := json.Marshal(vc)
+	if err != nil {
 		return nil, err
 	}
-	verifyURL := verificationURL(cfg.PublicWebOrigin, row.ID)
-	return pdfrender.BuildCertificate(pdfrender.CertificateInput{
-		InstitutionName: institutionName(cfg),
-		LearnerName:     coalesce(learnerName, extractLearnerName(vc)),
-		AchievementName: extractAchievementName(vc),
-		Description:     extractDescription(vc),
-		IssuedAt:        row.IssuedAt,
+	subjectBytes, err := json.Marshal(subject)
+	if err != nil {
+		return nil, err
+	}
+
+	created, err := credrepo.Create(ctx, pool, credrepo.IssuedCredential{
+		RecipientID:    p.RecipientID,
+		SourceType:     credrepo.SourceCourse,
+		SourceID:       p.CourseID,
+		Title:          meta.Title,
+		CredentialJSON: subjectBytes,
+		Proof:          json.RawMessage(vcBytes),
+		IssuedAt:       p.Now,
+	})
+	if err != nil {
+		return nil, err
+	}
+	verifyURL := VerificationURL(cfg.PublicWebOrigin, created.ID)
+
+	pdfBytes, err := BuildPDF(PDFInput{
+		InstitutionName: institution,
+		LearnerName:     p.LearnerName,
+		CredentialName:  meta.Title,
+		IssuedAt:        created.IssuedAt,
 		VerificationURL: verifyURL,
 	})
-}
-
-func finalizeCredential(ctx context.Context, deps IssueDeps, row *repocred.IssuedCredential, in IssueInput, achievementName, institution string, issuedAt time.Time) {
-	pdfBytes, err := pdfrender.BuildCertificate(pdfrender.CertificateInput{
-		InstitutionName: institution,
-		LearnerName:     in.LearnerName,
-		AchievementName: achievementName,
-		Description:     in.Description,
-		IssuedAt:        issuedAt,
-		VerificationURL: verificationURL(deps.Cfg.PublicWebOrigin, row.ID),
-	})
-	if err == nil && deps.Storage != nil {
-		key := pdfObjectKey(row.ID)
-		_ = deps.Storage.PutObject(ctx, key, bytes.NewReader(pdfBytes), int64(len(pdfBytes)), "application/pdf")
-		_ = repocred.UpdatePDFKey(ctx, deps.Pool, row.ID, key)
+	if err == nil && len(pdfBytes) > 0 {
+		keyStr := fmt.Sprintf("credential:%s.pdf", created.ID.String())
+		created.PDFKey = &keyStr
+		_, _ = pool.Exec(ctx, `UPDATE credentials.issued_credentials SET pdf_key = $2 WHERE id = $1`, created.ID, keyStr)
 	}
-	if deps.Notify != nil {
-		verifyURL := verificationURL(deps.Cfg.PublicWebOrigin, row.ID)
-		_ = deps.Notify.EnqueueEmail(ctx, in.RecipientID, notificationevents.CertificateAwarded, "certificate_awarded", map[string]string{
-			"subject":         fmt.Sprintf("Your certificate: %s", achievementName),
-			"achievementName": achievementName,
-			"verificationUrl": verifyURL,
-			"link":            verifyURL,
-			"digestLine":      fmt.Sprintf("Certificate earned: %s", achievementName),
-		}, nil)
+
+	return created, nil
+}
+
+// IssuePathParams controls learning-path credential issuance.
+type IssuePathParams struct {
+	RecipientID uuid.UUID
+	LearnerName string
+	PathID      uuid.UUID
+	PathTitle   string
+	Now         time.Time
+}
+
+// IssuePathCompletion issues an Open Badges credential when a learner completes a path (idempotent).
+func IssuePathCompletion(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	cfg config.Config,
+	p IssuePathParams,
+) (*credrepo.IssuedCredential, error) {
+	if !cfg.FFCompletionCredentials {
+		return nil, nil
 	}
-}
-
-func syncCCR(ctx context.Context, pool *pgxpool.Pool, in IssueInput, title string, issuedAt time.Time, credentialID uuid.UUID, cfg config.Config) {
-	if !cfg.FFCoCurricularTranscript {
-		return
+	if p.Now.IsZero() {
+		p.Now = time.Now().UTC()
 	}
-	evidence := verificationURL(cfg.PublicWebOrigin, credentialID)
-	sourceID := in.SourceID
-	_, _ = ccrrepo.CreateAchievement(ctx, pool, ccrrepo.Achievement{
-		UserID:          in.RecipientID,
-		AchievementType: ccrrepo.TypeCertificate,
-		SourceID:        &sourceID,
-		Title:           title,
-		IssuedAt:        issuedAt,
-		EvidenceURL:     &evidence,
-	})
-}
-
-func courseTitle(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (string, error) {
-	var title string
-	err := pool.QueryRow(ctx, `SELECT title FROM course.courses WHERE id = $1`, courseID).Scan(&title)
-	return title, err
-}
-
-func institutionName(cfg config.Config) string {
-	if n := strings.TrimSpace(cfg.CCRInstitutionName); n != "" {
-		return n
-	}
-	return "Lextures"
-}
-
-func verificationURL(origin string, id uuid.UUID) string {
-	return fmt.Sprintf("%s/verify/%s", strings.TrimRight(strings.TrimSpace(origin), "/"), id.String())
-}
-
-func pdfObjectKey(id uuid.UUID) string {
-	return "platform/credentials/" + id.String() + ".pdf"
-}
-
-func coalesce(values ...string) string {
-	for _, v := range values {
-		if s := strings.TrimSpace(v); s != "" {
-			return s
-		}
-	}
-	return ""
-}
-
-func extractLearnerName(vc map[string]any) string {
-	subject, _ := vc["credentialSubject"].(map[string]any)
-	if name, _ := subject["name"].(string); strings.TrimSpace(name) != "" {
-		return name
-	}
-	return ""
-}
-
-func extractAchievementName(vc map[string]any) string {
-	subject, _ := vc["credentialSubject"].(map[string]any)
-	achievement, _ := subject["achievement"].(map[string]any)
-	if name, _ := achievement["name"].(string); strings.TrimSpace(name) != "" {
-		return name
-	}
-	return "Certificate of Completion"
-}
-
-func extractDescription(vc map[string]any) string {
-	subject, _ := vc["credentialSubject"].(map[string]any)
-	achievement, _ := subject["achievement"].(map[string]any)
-	if desc, _ := achievement["description"].(string); strings.TrimSpace(desc) != "" {
-		return desc
-	}
-	return ""
-}
-
-// ReadStoredPDF returns PDF bytes from object storage when available.
-func ReadStoredPDF(ctx context.Context, storage filestorage.Driver, pdfKey string) ([]byte, error) {
-	if storage == nil || strings.TrimSpace(pdfKey) == "" {
-		return nil, io.EOF
-	}
-	rc, err := storage.GetObject(ctx, pdfKey)
+	existing, err := credrepo.GetByRecipientAndSource(ctx, pool, p.RecipientID, credrepo.SourcePath, p.PathID)
 	if err != nil {
 		return nil, err
 	}
-	defer func() { _ = rc.Close() }()
-	return io.ReadAll(rc)
+	if existing != nil {
+		return existing, nil
+	}
+
+	title := strings.TrimSpace(p.PathTitle)
+	if title == "" {
+		title = "Learning Path"
+	}
+	if !strings.Contains(strings.ToLower(title), "learning path") {
+		title += " — Learning Path"
+	}
+
+	institution := issuerName(cfg)
+	key, err := ccrsvc.ResolveSigningKey(cfg, cfg.PublicWebOrigin, cfg.CCRSigningSeedB64)
+	if err != nil {
+		return nil, err
+	}
+
+	achievementID := fmt.Sprintf("%s/achievements/path/%s", strings.TrimRight(cfg.PublicWebOrigin, "/"), p.PathID.String())
+	subject := map[string]any{
+		"id":   fmt.Sprintf("urn:uuid:user:%s", p.RecipientID.String()),
+		"type": []string{"AchievementSubject"},
+		"name": strings.TrimSpace(p.LearnerName),
+		"achievement": map[string]any{
+			"id":          achievementID,
+			"type":        []string{"Achievement"},
+			"name":        title,
+			"description": fmt.Sprintf("Completed every course in %s.", strings.TrimSpace(p.PathTitle)),
+			"criteria": map[string]any{
+				"narrative": "Learner completed every course in the learning path.",
+			},
+		},
+	}
+
+	vc, err := vcsigning.SignAchievementCredential(subject, institution, key, p.Now)
+	if err != nil {
+		return nil, err
+	}
+	vcBytes, err := json.Marshal(vc)
+	if err != nil {
+		return nil, err
+	}
+	subjectBytes, err := json.Marshal(subject)
+	if err != nil {
+		return nil, err
+	}
+
+	created, err := credrepo.Create(ctx, pool, credrepo.IssuedCredential{
+		RecipientID:    p.RecipientID,
+		SourceType:     credrepo.SourcePath,
+		SourceID:       p.PathID,
+		Title:          title,
+		CredentialJSON: subjectBytes,
+		Proof:          json.RawMessage(vcBytes),
+		IssuedAt:       p.Now,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	verifyURL := VerificationURL(cfg.PublicWebOrigin, created.ID)
+	pdfBytes, err := BuildPDF(PDFInput{
+		InstitutionName: institution,
+		LearnerName:     p.LearnerName,
+		CredentialName:  title,
+		IssuedAt:        created.IssuedAt,
+		VerificationURL: verifyURL,
+	})
+	if err == nil && len(pdfBytes) > 0 {
+		keyStr := fmt.Sprintf("credential:%s.pdf", created.ID.String())
+		created.PDFKey = &keyStr
+		_, _ = pool.Exec(ctx, `UPDATE credentials.issued_credentials SET pdf_key = $2 WHERE id = $1`, created.ID, keyStr)
+	}
+
+	return created, nil
+}
+
+// VerificationURL builds the public verification page URL for a credential.
+func VerificationURL(origin string, credentialID uuid.UUID) string {
+	return fmt.Sprintf("%s/verify/%s", strings.TrimRight(strings.TrimSpace(origin), "/"), credentialID.String())
+}
+
+// LinkedInParamsForCredential returns pre-filled LinkedIn certification parameters.
+func LinkedInParamsForCredential(cfg config.Config, cred *credrepo.IssuedCredential) LinkedInParams {
+	verifyURL := VerificationURL(cfg.PublicWebOrigin, cred.ID)
+	return BuildLinkedInParams(cred.Title, issuerName(cfg), verifyURL, cred.ID.String(), cred.IssuedAt)
+}
+
+// BadgeExportToken issues an HMAC token for time-limited badge JSON download.
+func BadgeExportToken(cfg config.Config, credentialID uuid.UUID, now time.Time) (string, time.Time, error) {
+	secret := strings.TrimSpace(cfg.JWTSecret)
+	if secret == "" {
+		secret = strings.TrimSpace(cfg.CCRSigningSeedB64)
+	}
+	if secret == "" {
+		return "", time.Time{}, fmt.Errorf("signing secret unavailable")
+	}
+	expires := now.UTC().Add(badgeExportTTL)
+	payload := fmt.Sprintf("%s:%d", credentialID.String(), expires.Unix())
+	mac := hmac.New(sha256.New, []byte(secret))
+	_, _ = mac.Write([]byte(payload))
+	sig := hex.EncodeToString(mac.Sum(nil))
+	token := base64.RawURLEncoding.EncodeToString([]byte(payload + ":" + sig))
+	return token, expires, nil
+}
+
+// VerifyBadgeExportToken validates a badge export token and returns the credential id.
+func VerifyBadgeExportToken(cfg config.Config, token string, now time.Time) (uuid.UUID, error) {
+	secret := strings.TrimSpace(cfg.JWTSecret)
+	if secret == "" {
+		secret = strings.TrimSpace(cfg.CCRSigningSeedB64)
+	}
+	if secret == "" {
+		return uuid.UUID{}, fmt.Errorf("signing secret unavailable")
+	}
+	raw, err := base64.RawURLEncoding.DecodeString(strings.TrimSpace(token))
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("invalid token")
+	}
+	parts := strings.SplitN(string(raw), ":", 3)
+	if len(parts) != 3 {
+		return uuid.UUID{}, fmt.Errorf("invalid token")
+	}
+	id, err := uuid.Parse(parts[0])
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("invalid token")
+	}
+	var exp int64
+	if _, err := fmt.Sscanf(parts[1], "%d", &exp); err != nil {
+		return uuid.UUID{}, fmt.Errorf("invalid token")
+	}
+	if now.UTC().Unix() > exp {
+		return uuid.UUID{}, fmt.Errorf("token expired")
+	}
+	payload := fmt.Sprintf("%s:%d", parts[0], exp)
+	mac := hmac.New(sha256.New, []byte(secret))
+	_, _ = mac.Write([]byte(payload))
+	expected := hex.EncodeToString(mac.Sum(nil))
+	if !hmac.Equal([]byte(expected), []byte(parts[2])) {
+		return uuid.UUID{}, fmt.Errorf("invalid token")
+	}
+	return id, nil
+}
+
+// VerifyCredential checks the VC proof on a stored credential.
+func VerifyCredential(cfg config.Config, proof json.RawMessage) (bool, error) {
+	var vc map[string]any
+	if err := json.Unmarshal(proof, &vc); err != nil {
+		return false, err
+	}
+	key, err := ccrsvc.ResolveSigningKey(cfg, cfg.PublicWebOrigin, cfg.CCRSigningSeedB64)
+	if err != nil {
+		return false, err
+	}
+	return vcsigning.VerifyCredential(vc, key.PublicKey)
+}
+
+// FullCredentialJSON merges stored subject JSON with signed VC proof for export.
+func FullCredentialJSON(cred *credrepo.IssuedCredential) ([]byte, error) {
+	return cred.Proof, nil
+}
+
+func issuerName(cfg config.Config) string {
+	if strings.TrimSpace(cfg.CCRInstitutionName) != "" {
+		return strings.TrimSpace(cfg.CCRInstitutionName)
+	}
+	return "Lextures"
 }

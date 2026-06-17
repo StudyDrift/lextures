@@ -13,11 +13,10 @@ import (
 )
 
 const (
-	proofType            = "Ed25519Signature2020"
-	proofPurpose         = "assertionMethod"
-	vcContext            = "https://www.w3.org/2018/credentials/v1"
-	clrContext           = "https://purl.imsglobal.org/spec/clr/v2p0/context.json"
-	ob3Context           = "https://purl.imsglobal.org/spec/ob/v3p0/context.json"
+	proofType           = "Ed25519Signature2020"
+	proofPurpose        = "assertionMethod"
+	vcContext           = "https://www.w3.org/2018/credentials/v1"
+	clrContext          = "https://purl.imsglobal.org/spec/clr/v2p0/context.json"
 	verificationMethodID = "#key-1"
 )
 
@@ -89,22 +88,6 @@ func (k KeyMaterial) DIDDocument() map[string]any {
 	}
 }
 
-// SignAchievementCredential wraps an Open Badges 3.0 credentialSubject in a W3C VC.
-func SignAchievementCredential(credentialSubject map[string]any, issuerName string, key KeyMaterial, issuedAt time.Time) (map[string]any, error) {
-	unsigned := map[string]any{
-		"@context": []string{vcContext, ob3Context},
-		"type":     []string{"VerifiableCredential", "OpenBadgeCredential"},
-		"issuer": map[string]any{
-			"type": []string{"Profile"},
-			"id":   key.DID,
-			"name": issuerName,
-		},
-		"issuanceDate":      issuedAt.UTC().Format(time.RFC3339),
-		"credentialSubject": credentialSubject,
-	}
-	return attachProof(unsigned, key, issuedAt)
-}
-
 // SignCredential wraps clrSubject in a W3C VC and attaches an Ed25519 proof.
 func SignCredential(clrSubject map[string]any, issuerName string, key KeyMaterial, issuedAt time.Time) (map[string]any, error) {
 	unsigned := map[string]any{
@@ -114,13 +97,13 @@ func SignCredential(clrSubject map[string]any, issuerName string, key KeyMateria
 			"id":   key.DID,
 			"name": issuerName,
 		},
-		"issuanceDate": issuedAt.UTC().Format(time.RFC3339),
+		"issuanceDate":      issuedAt.UTC().Format(time.RFC3339),
 		"credentialSubject": clrSubject,
 	}
-	return attachProof(unsigned, key, issuedAt)
+	return signUnsigned(unsigned, key, issuedAt)
 }
 
-func attachProof(unsigned map[string]any, key KeyMaterial, issuedAt time.Time) (map[string]any, error) {
+func signUnsigned(unsigned map[string]any, key KeyMaterial, issuedAt time.Time) (map[string]any, error) {
 	canonical, err := canonicalJSON(unsigned)
 	if err != nil {
 		return nil, err

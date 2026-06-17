@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Award, ArrowRight } from 'lucide-react'
-import { fetchMyCredentials, type IssuedCredential } from '../../lib/credentials-api'
+import { fetchMyCredentials, type IssuedCredentialSummary } from '../../lib/credentials-api'
 
 export function RecentCertificatesCard() {
-  const [items, setItems] = useState<IssuedCredential[]>([])
+  const [items, setItems] = useState<IssuedCredentialSummary[]>([])
 
   useEffect(() => {
     void fetchMyCredentials()
