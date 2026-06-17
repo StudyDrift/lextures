@@ -24,5 +24,7 @@ log = "0.4"
 tauri = { version = "2.11.2", features = [] }
 tauri-plugin-log = "2"
 
-[target.'cfg(target_os = "linux")'.dependencies]
-glib = "0.20"
+# Tauri's GTK3 stack pins glib 0.18.x until upstream moves to gtk-rs 0.20.
+# Patch in the VariantStrIter unsoundness fix (RUSTSEC-2024-0429 / GHSA-wrw7-89jp-8q8g).
+[patch.crates-io]
+glib = { path = "patches/glib-0.18.5-patched" }

@@ -20,13 +20,16 @@ import {
   Store,
   User,
   Workflow,
+  Lock,
 } from 'lucide-react'
+import { SideNavAdminLinks } from './side-nav-admin-links'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { xapiEmissionFeatureEnabled } from '../../lib/platform-features'
 import {
+  PERM_ACCOMMODATIONS_MANAGE,
   PERM_RBAC_MANAGE,
   PERM_TENANT_ORG_ROLES_MANAGE,
   PERM_TENANT_ORG_ROLES_VIEW,
@@ -41,6 +44,7 @@ export function SideNavSettingsLinks() {
   const { allows, loading: permLoading } = usePermissions()
   const { sideNavCollapsed } = useShellNav()
   const canManageRbac = !permLoading && allows(PERM_RBAC_MANAGE)
+  const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
   const canOrgUnits = !permLoading && (canManageRbac || allows(PERM_TENANT_ORG_UNITS_ADMIN))
   const canOrgRoles =
     !permLoading && (allows(PERM_TENANT_ORG_ROLES_MANAGE) || allows(PERM_TENANT_ORG_ROLES_VIEW))
@@ -52,6 +56,7 @@ export function SideNavSettingsLinks() {
     ffResearchConsent,
     ffAccessibilityIntake,
     ffConsortiumSharing,
+    ffCoCurricularTranscript,
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
@@ -94,6 +99,13 @@ export function SideNavSettingsLinks() {
         icon={<Workflow className="h-5 w-5" />}
       >
         Integrations
+      </SideNavLink>
+      <SideNavLink
+        to="/privacy-centre"
+        className={() => (location.pathname === '/privacy-centre' ? sideNavActiveClass : '')}
+        icon={<Lock className="h-5 w-5" />}
+      >
+        Privacy Centre
       </SideNavLink>
       {(canOrgUnits || canOrgRoles || canManageRbac) && (
         <>
@@ -314,6 +326,9 @@ export function SideNavSettingsLinks() {
             </>
           )}
         </>
+      )}
+      {(canManageRbac || (canManageAccommodations && ffCoCurricularTranscript)) && (
+        <SideNavAdminLinks />
       )}
     </>
   )

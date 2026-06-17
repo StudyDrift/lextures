@@ -92,8 +92,10 @@ type CoursePublic struct {
 	CourseHomeContentItemID       *string          `json:"courseHomeContentItemId,omitempty"`
 	CourseTimezone                *string          `json:"courseTimezone,omitempty"`
 	GradeLevel                    *string          `json:"gradeLevel,omitempty"`
-	ViewerEnrollmentState         *string          `json:"viewerEnrollmentState,omitempty"`
-	ViewerEnrollmentStateChangedAt *time.Time      `json:"viewerEnrollmentStateChangedAt,omitempty"`
+	ViewerEnrollmentState              *string    `json:"viewerEnrollmentState,omitempty"`
+	ViewerEnrollmentStateChangedAt     *time.Time `json:"viewerEnrollmentStateChangedAt,omitempty"`
+	ViewerEnrollmentInvitationPending  bool       `json:"viewerEnrollmentInvitationPending,omitempty"`
+	ViewerPendingEnrollmentID          *string    `json:"viewerPendingEnrollmentId,omitempty"`
 	CatalogNickname               *string          `json:"catalogNickname,omitempty"`
 	CatalogPinned                 bool             `json:"catalogPinned,omitempty"`
 	KanbanColumnID                *string          `json:"kanbanColumnId,omitempty"`
@@ -381,7 +383,7 @@ LEFT JOIN course.user_course_catalog_order o
 WHERE c.id IN (
   SELECT e.course_id FROM course.course_enrollments e
   WHERE e.user_id = $1
-    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+    AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
   AND ($2::text IS NULL OR c.grade_level = $2::text)` + enrolledUserOrgScope + `
@@ -417,7 +419,7 @@ LEFT JOIN course.user_course_catalog_order o
 WHERE c.id IN (
   SELECT e.course_id FROM course.course_enrollments e
   WHERE e.user_id = $1
-    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+    AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
   AND (
@@ -458,7 +460,7 @@ LEFT JOIN course.user_course_catalog_order o
 WHERE c.id IN (
   SELECT e.course_id FROM course.course_enrollments e
   WHERE e.user_id = $1
-    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+    AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
   AND c.term_id = $2
@@ -494,7 +496,7 @@ LEFT JOIN course.user_course_catalog_order o
 WHERE c.id IN (
   SELECT e.course_id FROM course.course_enrollments e
   WHERE e.user_id = $1
-    AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+    AND (e.active OR e.invitation_pending OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 )
   AND c.archived = false
   AND (

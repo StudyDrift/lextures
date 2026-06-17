@@ -53,7 +53,7 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
   const { entries: importLog, append: appendImportLog, clear: clearImportLog } =
     useCanvasImportProgressLog()
   const importCancelledRef = useRef(false)
-  const activeCourseImportAbortRef = useRef<AbortController | null>(null)
+  const activeCourseImportAbortsRef = useRef<Set<AbortController>>(new Set())
   const [nameFilter, setNameFilter] = useState('')
   const [hideUnpublished, setHideUnpublished] = useState(false)
 
@@ -87,8 +87,10 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
     setNameFilter('')
     setHideUnpublished(false)
     importCancelledRef.current = false
-    activeCourseImportAbortRef.current?.abort()
-    activeCourseImportAbortRef.current = null
+    for (const controller of activeCourseImportAbortsRef.current) {
+      controller.abort()
+    }
+    activeCourseImportAbortsRef.current.clear()
   }, [clearImportLog])
 
   useEffect(() => {
@@ -175,7 +177,10 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
 
   function requestCancelImport() {
     importCancelledRef.current = true
-    activeCourseImportAbortRef.current?.abort()
+    for (const controller of activeCourseImportAbortsRef.current) {
+      controller.abort()
+    }
+    activeCourseImportAbortsRef.current.clear()
     appendImportLog('Stopping import…')
   }
 
@@ -184,49 +189,56 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
     setError(null)
     clearImportLog()
     importCancelledRef.current = false
-    activeCourseImportAbortRef.current = null
+    for (const controller of activeCourseImportAbortsRef.current) {
+      controller.abort()
+    }
+    activeCourseImportAbortsRef.current.clear()
     setStep('importing')
     setBusy(true)
     const base = canvasBaseUrl.trim()
     const token = canvasToken.trim()
     const toImport = coursesToImport
-    let ok = 0
 
-    for (let i = 0; i < toImport.length; i++) {
-      if (importCancelledRef.current) break
-      const canvasCourse = toImport[i]!
-      appendImportLog(`Importing ${i + 1} of ${toImport.length}: ${canvasCourse.name}`)
-      try {
-        const created = await createCourse({
-          title: canvasCourse.name,
-          description: canvasCourse.courseCode?.trim() || canvasCourse.name,
-        })
-        if (importCancelledRef.current) break
-        const courseAbort = new AbortController()
-        activeCourseImportAbortRef.current = courseAbort
-        await postCourseImportCanvas(
-          created.courseCode,
-          {
-            mode: 'erase',
-            canvasBaseUrl: base,
-            canvasCourseId: String(canvasCourse.id),
-            accessToken: token,
-            include: CANVAS_IMPORT_INCLUDE_ALL,
-          },
-          (message) => appendImportLog(`${canvasCourse.name}: ${message}`),
-          { signal: courseAbort.signal },
-        )
-        ok++
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Import failed'
-        if (msg === CANVAS_IMPORT_CANCELLED_MESSAGE || importCancelledRef.current) {
-          break
+    const results = await Promise.all(
+      toImport.map(async (canvasCourse, i) => {
+        if (importCancelledRef.current) return false
+        appendImportLog(`Importing ${i + 1} of ${toImport.length}: ${canvasCourse.name}`)
+        try {
+          const created = await createCourse({
+            title: canvasCourse.name,
+            description: canvasCourse.courseCode?.trim() || canvasCourse.name,
+          })
+          if (importCancelledRef.current) return false
+          const courseAbort = new AbortController()
+          activeCourseImportAbortsRef.current.add(courseAbort)
+          try {
+            await postCourseImportCanvas(
+              created.courseCode,
+              {
+                mode: 'erase',
+                canvasBaseUrl: base,
+                canvasCourseId: String(canvasCourse.id),
+                accessToken: token,
+                include: CANVAS_IMPORT_INCLUDE_ALL,
+              },
+              (message) => appendImportLog(`${canvasCourse.name}: ${message}`),
+              { signal: courseAbort.signal },
+            )
+            return true
+          } finally {
+            activeCourseImportAbortsRef.current.delete(courseAbort)
+          }
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'Import failed'
+          if (msg === CANVAS_IMPORT_CANCELLED_MESSAGE || importCancelledRef.current) {
+            return false
+          }
+          appendImportLog(`${canvasCourse.name}: ${msg}`)
+          return false
         }
-        appendImportLog(`${canvasCourse.name}: ${msg}`)
-      } finally {
-        activeCourseImportAbortRef.current = null
-      }
-    }
+      }),
+    )
+    const ok = results.filter(Boolean).length
 
     setBusy(false)
     if (ok > 0) onImported?.()

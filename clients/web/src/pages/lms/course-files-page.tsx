@@ -15,7 +15,7 @@ import {
   Trash2,
   Upload,
 } from 'lucide-react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { formatAbsoluteShort } from '../../lib/format-datetime'
 import { courseItemCreatePermission } from '../../lib/courses-api'
 import { usePermissions } from '../../context/use-permissions'
@@ -123,13 +123,16 @@ export default function CourseFilesPage() {
     }
   }, [courseCode, folderId])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    if (!canManage) return
+    void load()
+  }, [load, canManage])
 
   const loadRef = useRef(load)
   useEffect(() => { loadRef.current = load }, [load])
 
   useEffect(() => {
-    if (!courseCode) return
+    if (!courseCode || !canManage) return
     const token = getAccessToken()
     if (!token) return
     const ws = new WebSocket(wsUrl(`/api/v1/courses/${encodeURIComponent(courseCode)}/files/ws`))
@@ -141,7 +144,7 @@ export default function CourseFilesPage() {
       } catch { /* ignore */ }
     }
     return () => { ws.close() }
-  }, [courseCode])
+  }, [courseCode, canManage])
 
   useEffect(() => {
     setSelectedItems(new Set())
@@ -479,6 +482,22 @@ export default function CourseFilesPage() {
     e.preventDefault()
     e.stopPropagation()
     setContextMenu({ kind, item: item as FileFolder & FileItem, x: e.clientX, y: e.clientY })
+  }
+
+  if (!courseCode) {
+    return <Navigate to="/courses" replace />
+  }
+
+  if (permLoading) {
+    return (
+      <LmsPage title="Files">
+        <p className="text-sm text-slate-500 dark:text-neutral-400">Loading…</p>
+      </LmsPage>
+    )
+  }
+
+  if (!allows(courseItemCreatePermission(courseCode))) {
+    return <Navigate to={`/courses/${encodeURIComponent(courseCode)}`} replace />
   }
 
   return (

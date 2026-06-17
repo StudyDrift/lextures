@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   courseSettingsSectionFromPathname,
+  isSettingsShellRoute,
   settingsViewFromPathname,
 } from '../side-nav-path-utils'
 
@@ -18,6 +19,26 @@ describe('settingsViewFromPathname', () => {
 
   it('defaults to account for unknown settings paths', () => {
     expect(settingsViewFromPathname('/settings/unknown')).toBe('account')
+  })
+})
+
+describe('isSettingsShellRoute', () => {
+  it('matches settings and privacy routes', () => {
+    expect(isSettingsShellRoute('/settings/account')).toBe(true)
+    expect(isSettingsShellRoute('/privacy-centre')).toBe(true)
+    expect(isSettingsShellRoute('/creator/learning-paths')).toBe(true)
+  })
+
+  it('matches admin operations routes', () => {
+    expect(isSettingsShellRoute('/admin/compliance/iso')).toBe(true)
+    expect(isSettingsShellRoute('/admin/quarantine')).toBe(true)
+    expect(isSettingsShellRoute('/library/org-1')).toBe(true)
+  })
+
+  it('does not match main-shell learner routes', () => {
+    expect(isSettingsShellRoute('/courses')).toBe(false)
+    expect(isSettingsShellRoute('/admin/accommodations')).toBe(false)
+    expect(isSettingsShellRoute('/')).toBe(false)
   })
 })
 

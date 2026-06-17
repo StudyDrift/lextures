@@ -16,7 +16,7 @@ import (
 // Converts DOCX, XLSX, or PPTX to HTML for in-browser display (no client-side Office libraries).
 func (d Deps) handleGetCourseFileItemPreview() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, _, ok := d.requireCourseAccess(w, r)
+		courseCode, _, ok := d.requireCourseFilesManage(w, r)
 		if !ok {
 			return
 		}

@@ -43,6 +43,7 @@ describe('SideNavMainLinks', () => {
     )
     expect(screen.getByRole('link', { name: /^dashboard$/i })).toHaveAttribute('href', '/')
     expect(screen.getByRole('link', { name: /^courses$/i })).toHaveAttribute('href', '/courses')
+    expect(screen.getByRole('link', { name: /^ask ai$/i })).toHaveAttribute('href', '/ai')
     expect(screen.getByLabelText('2 unread')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^reports$/i })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /^my portfolio$/i })).not.toBeInTheDocument()

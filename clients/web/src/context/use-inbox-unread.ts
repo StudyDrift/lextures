@@ -18,6 +18,14 @@ export function useCoursesRevision() {
   return useContext(InboxUnreadContext)?.coursesRevision ?? 0
 }
 
+export function useEnrollmentsRevision() {
+  return useContext(InboxUnreadContext)?.enrollmentsRevision ?? 0
+}
+
+export function useEnrollmentsUpdateCourseCode() {
+  return useContext(InboxUnreadContext)?.enrollmentsUpdateCourseCode ?? null
+}
+
 export function useRefreshUnread() {
   return useContext(InboxUnreadContext)?.refreshUnread ?? (async () => {})
 }

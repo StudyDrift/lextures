@@ -6,6 +6,21 @@ export type MailboxParty = {
   email: string
 }
 
+export type MailboxMessageAction = {
+  id: string
+  label: string
+  style?: 'primary' | 'danger'
+}
+
+export type MailboxMessageMetadata = {
+  type?: string
+  enrollmentId?: string
+  courseCode?: string
+  courseTitle?: string
+  actions?: MailboxMessageAction[]
+  resolved?: 'approved' | 'declined' | string
+}
+
 export type MailboxMessage = {
   id: string
   from: MailboxParty
@@ -18,6 +33,7 @@ export type MailboxMessage = {
   starred: boolean
   folder: 'inbox' | 'sent' | 'drafts' | 'trash'
   has_attachment: boolean
+  metadata?: MailboxMessageMetadata | null
 }
 
 export type MailboxFolder = 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash'
@@ -27,6 +43,7 @@ type MailboxMessageWire = Omit<MailboxMessage, 'sent_at' | 'has_attachment'> & {
   sentAt?: string
   has_attachment?: boolean
   hasAttachment?: boolean
+  metadata?: MailboxMessageMetadata | null
 }
 
 function normalizeMailboxMessage(w: MailboxMessageWire): MailboxMessage {
@@ -34,6 +51,7 @@ function normalizeMailboxMessage(w: MailboxMessageWire): MailboxMessage {
     ...w,
     sent_at: w.sent_at ?? w.sentAt ?? '',
     has_attachment: w.has_attachment ?? w.hasAttachment ?? false,
+    metadata: w.metadata ?? null,
   }
 }
 
@@ -100,9 +118,15 @@ export function mailboxWebSocketUrl(): string | null {
   return `${u.origin}/api/v1/communication/ws`
 }
 
-export function parseMailboxWsMessage(raw: string): { type?: string } | null {
+export type MailboxWsMessage = {
+  type?: string
+  courseCode?: string
+  course_code?: string
+}
+
+export function parseMailboxWsMessage(raw: string): MailboxWsMessage | null {
   try {
-    return JSON.parse(raw) as { type?: string }
+    return JSON.parse(raw) as MailboxWsMessage
   } catch {
     return null
   }

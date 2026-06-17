@@ -15,17 +15,18 @@ type Party struct {
 
 // MailboxMessage is a single message view for the authenticated user's folder.
 type MailboxMessage struct {
-	ID            uuid.UUID `json:"id"`
-	From          Party     `json:"from"`
-	To            string    `json:"to"`
-	Subject       string    `json:"subject"`
-	Snippet       string    `json:"snippet"`
-	Body          string    `json:"body"`
-	SentAt        time.Time `json:"sentAt"`
-	Read          bool      `json:"read"`
-	Starred       bool      `json:"starred"`
-	Folder        string    `json:"folder"`
-	HasAttachment bool      `json:"hasAttachment"`
+	ID            uuid.UUID        `json:"id"`
+	From          Party            `json:"from"`
+	To            string           `json:"to"`
+	Subject       string           `json:"subject"`
+	Snippet       string           `json:"snippet"`
+	Body          string           `json:"body"`
+	SentAt        time.Time        `json:"sentAt"`
+	Read          bool             `json:"read"`
+	Starred       bool             `json:"starred"`
+	Folder        string           `json:"folder"`
+	HasAttachment bool             `json:"hasAttachment"`
+	Metadata      *MessageMetadata `json:"metadata,omitempty"`
 }
 
 // MailboxListResponse is returned by GET /api/v1/communication/messages?folder=...

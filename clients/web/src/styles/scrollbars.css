@@ -1,0 +1,56 @@
+/*
+ * macOS-style overlay scrollbars on Windows (thick default system scrollbars).
+ * Scoped to html[data-platform="windows"] so native macOS overlay scrollbars stay untouched.
+ */
+
+html[data-platform="windows"] {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(0 0 0 / 0.28) transparent;
+}
+
+html[data-platform="windows"].dark {
+  scrollbar-color: rgb(255 255 255 / 0.28) transparent;
+}
+
+html[data-platform="windows"] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html[data-platform="windows"] ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+html[data-platform="windows"] ::-webkit-scrollbar-thumb {
+  background-color: rgb(0 0 0 / 0.28);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+html[data-platform="windows"] ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(0 0 0 / 0.42);
+}
+
+html[data-platform="windows"].dark ::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.28);
+}
+
+html[data-platform="windows"].dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(255 255 255 / 0.42);
+}
+
+html[data-platform="windows"] ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+@media (forced-colors: active) {
+  html[data-platform="windows"] {
+    scrollbar-color: CanvasText Canvas;
+  }
+
+  html[data-platform="windows"] ::-webkit-scrollbar-thumb {
+    background-color: CanvasText;
+    border: none;
+  }
+}

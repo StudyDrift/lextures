@@ -139,6 +139,15 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 				}
 			}
 		}
+		for i := range courses {
+			inv, err := enrollment.ViewerInvitationForCourse(ctx, d.Pool, courses[i].CourseCode, userID)
+			if err != nil || !inv.Pending || inv.EnrollmentID == nil {
+				continue
+			}
+			courses[i].ViewerEnrollmentInvitationPending = true
+			s := inv.EnrollmentID.String()
+			courses[i].ViewerPendingEnrollmentID = &s
+		}
 		if err := course.AttachUserCatalogMeta(ctx, d.Pool, userID, courses); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to list courses.")
 			return

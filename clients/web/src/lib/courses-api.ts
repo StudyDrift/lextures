@@ -190,6 +190,9 @@ export type CoursePublic = {
   /** HE enrollment lifecycle state for the viewer's student enrollment (plan 14.3). */
   viewerEnrollmentState?: string | null
   viewerEnrollmentStateChangedAt?: string | null
+  /** True when the viewer must approve a pending course invitation. */
+  viewerEnrollmentInvitationPending?: boolean
+  viewerPendingEnrollmentId?: string | null
   /** What the course root shows: `data` overview, `calendar`, or `content_page`. */
   courseHomeLanding?: string
   /** When `courseHomeLanding` is `content_page`, the module item id. */

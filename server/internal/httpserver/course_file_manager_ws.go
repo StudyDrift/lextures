@@ -10,6 +10,7 @@ import (
 	"github.com/coder/websocket"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 )
 
@@ -103,6 +104,10 @@ func (d Deps) handleCourseFilesWS() http.HandlerFunc {
 		}
 		has, err := enrollment.UserHasAccess(r.Context(), d.Pool, courseCode, uid)
 		if err != nil || !has {
+			return
+		}
+		canManage, err := courseroles.UserHasPermission(r.Context(), d.Pool, uid, "course:"+courseCode+":item:create")
+		if err != nil || !canManage {
 			return
 		}
 

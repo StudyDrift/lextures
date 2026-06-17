@@ -5,6 +5,7 @@ import {
   BarChart3,
   BookMarked,
   Calendar,
+  ClipboardCheck,
   ClipboardList,
   Clock,
   FileText,
@@ -13,18 +14,22 @@ import {
   LayoutDashboard,
   Lightbulb,
   ListChecks,
+  Library,
   MessageSquare,
   MessagesSquare,
   NotebookPen,
   PenLine,
   Pencil,
+  Send,
   Settings,
+  Star,
+  Target,
+  TrendingUp,
   Users,
   UsersRound,
   Video,
   AlertTriangle,
   Activity,
-  Target,
 } from 'lucide-react'
 import { atRiskFeatureEnabled, atRiskI18n } from '../../lib/at-risk-i18n'
 import {
@@ -33,6 +38,7 @@ import {
   xapiEmissionFeatureEnabled,
 } from '../../lib/platform-features'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   courseEnrollmentsReadPermission,
@@ -47,7 +53,7 @@ import { useCourseViewAs } from '../../lib/course-view-as'
 import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { sideNavActiveClass } from './side-nav-styles'
 import { SideNavLink } from './side-nav-link'
-import { useShellNav } from './use-shell-nav'
+import { SideNavSectionLabel } from './side-nav-section-label'
 
 type SideNavCourseLinksProps = {
   courseCode: string
@@ -55,7 +61,6 @@ type SideNavCourseLinksProps = {
 
 export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
   const location = useLocation()
-  const { sideNavCollapsed } = useShellNav()
   const {
     notebookEnabled,
     feedEnabled,
@@ -73,6 +78,13 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     whiteboardEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
+  const {
+    instructorInsightsEnabled,
+    ffLibrary,
+    ffCourseEvaluations,
+    ffGradeSubmission,
+    ffClassroomSignals,
+  } = usePlatformFeatures()
   const courseViewPreview = useCourseViewAs(courseCode)
   const viewerEnrollmentRoles = useViewerEnrollmentRoles(courseCode)
 
@@ -88,150 +100,227 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
   const canManageCourse = !permLoading && allows(courseItemCreatePermission(courseCode))
   const canManageQuestionBank = !permLoading && allows(courseItemsCreatePermission(courseCode))
 
+  const showCollaboration =
+    feedEnabled ||
+    discussionsEnabled ||
+    collabDocsEnabled ||
+    groupSpacesEnabled ||
+    liveSessionsEnabled ||
+    officeHoursEnabled ||
+    (whiteboardEnabled && canManageCourse)
+
+  const showYourLearning =
+    notebookEnabled || calendarEnabled || attendanceEnabled || canViewMyGrades
+
+  const showGradingInsights =
+    canViewGradebook || (standardsAlignmentEnabled && canManageCourse)
+
+  const showAssessmentTools = canManageQuestionBank && questionBankEnabled
+
   return (
     <>
       <SideNavLink to="/courses" icon={<ArrowLeft className="h-5 w-5" />}>
         Back
       </SideNavLink>
-      {!sideNavCollapsed && (
-        <p className="px-3 pb-1 pt-3 text-sm font-bold tracking-tight text-slate-900 dark:text-neutral-100">
-          Course Menu
-        </p>
-      )}
       <SideNavLink to={base} end icon={<LayoutDashboard className="h-5 w-5" />}>
         Dashboard
       </SideNavLink>
-      {feedEnabled && (
-        <SideNavLink to={`${base}/feed`} icon={<MessageSquare className="h-5 w-5" />}>
-          Feed
-        </SideNavLink>
-      )}
-      {discussionsEnabled && (
-        <SideNavLink to={`${base}/discussions`} icon={<MessagesSquare className="h-5 w-5" />}>
-          Discussions
-        </SideNavLink>
-      )}
-      {collabDocsEnabled && (
-        <SideNavLink to={`${base}/collab-docs`} icon={<PenLine className="h-5 w-5" />}>
-          Collab docs
-        </SideNavLink>
-      )}
-      {groupSpacesEnabled && (
-        <SideNavLink to={`${base}/groups`} icon={<UsersRound className="h-5 w-5" />}>
-          Groups
-        </SideNavLink>
-      )}
+
+      <SideNavSectionLabel first>Content</SideNavSectionLabel>
       <SideNavLink to={`${base}/syllabus`} icon={<FileText className="h-5 w-5" />}>
         Syllabus
       </SideNavLink>
-      {filesEnabled && (
-        <SideNavLink to={`${base}/files`} icon={<FolderOpen className="h-5 w-5" />}>
-          Files
-        </SideNavLink>
-      )}
       <SideNavLink to={`${base}/modules`} icon={<Layers className="h-5 w-5" />}>
         Modules
       </SideNavLink>
-      {liveSessionsEnabled && (
-        <SideNavLink to={`${base}/live`} icon={<Video className="h-5 w-5" />}>
-          Live Sessions
+      {filesEnabled && canManageCourse ? (
+        <SideNavLink to={`${base}/files`} icon={<FolderOpen className="h-5 w-5" />}>
+          Files
         </SideNavLink>
-      )}
-      {officeHoursEnabled && (
-        <SideNavLink to={`${base}/office-hours`} icon={<Clock className="h-5 w-5" />}>
-          Office Hours
-        </SideNavLink>
-      )}
-      {attendanceEnabled && (
-        <SideNavLink to={`${base}/attendance`} icon={<ClipboardList className="h-5 w-5" />}>
-          Attendance
-        </SideNavLink>
-      )}
-      {whiteboardEnabled && canManageCourse && (
-        <SideNavLink to={`${base}/whiteboard`} icon={<Pencil className="h-5 w-5" />}>
-          Whiteboard
-        </SideNavLink>
-      )}
-      {canManageQuestionBank && questionBankEnabled && (
-        <SideNavLink to={`${base}/questions`} icon={<ListChecks className="h-5 w-5" />}>
-          Question bank
-        </SideNavLink>
-      )}
-      {canManageQuestionBank && questionBankEnabled && (
-        <SideNavLink to={`${base}/misconception-report`} icon={<Lightbulb className="h-5 w-5" />}>
-          Misconceptions
-        </SideNavLink>
-      )}
-      {notebookEnabled && (
-        <SideNavLink to={`${base}/notebook`} icon={<NotebookPen className="h-5 w-5" />}>
-          Notebook
-        </SideNavLink>
-      )}
-      {calendarEnabled && (
-        <SideNavLink to={`${base}/calendar`} icon={<Calendar className="h-5 w-5" />}>
-          Calendar
-        </SideNavLink>
-      )}
-      {canViewMyGrades && (
-        <SideNavLink to={`${base}/my-grades`} icon={<Award className="h-5 w-5" />}>
-          My grades
-        </SideNavLink>
-      )}
-      {canViewGradebook && (
-        <SideNavLink to={`${base}/gradebook`} icon={<ClipboardList className="h-5 w-5" />}>
-          Gradebook
-        </SideNavLink>
-      )}
-      {canViewGradebook && studentProgressFeatureEnabled() && (
-        <SideNavLink to={`${base}/reports`} icon={<BarChart3 className="h-5 w-5" />}>
-          Reports
-        </SideNavLink>
-      )}
-      {canViewGradebook && atRiskFeatureEnabled() && (
-        <SideNavLink to={`${base}/at-risk`} icon={<AlertTriangle className="h-5 w-5" />}>
-          {atRiskI18n.title}
-        </SideNavLink>
-      )}
-      {canViewGradebook && outcomesReportFeatureEnabled() && (
-        <SideNavLink to={`${base}/outcomes-report`} icon={<Target className="h-5 w-5" />}>
-          Outcomes report
-        </SideNavLink>
-      )}
-      {canViewGradebook && xapiEmissionFeatureEnabled() && (
-        <SideNavLink to={`${base}/event-log`} icon={<Activity className="h-5 w-5" />}>
-          Event log
-        </SideNavLink>
-      )}
-      {sbgEnabled && canViewGradebook && (
-        <SideNavLink to={`${base}/standards-gradebook`} icon={<BookMarked className="h-5 w-5" />}>
-          Standards gradebook
-        </SideNavLink>
-      )}
-      {standardsAlignmentEnabled && (canViewGradebook || canManageCourse) && (
-        <SideNavLink to={`${base}/standards-coverage`} icon={<BookMarked className="h-5 w-5" />}>
-          Standards coverage
-        </SideNavLink>
-      )}
-      {canViewEnrollments && (
-        <SideNavLink to={`${base}/enrollments`} icon={<Users className="h-5 w-5" />}>
-          Enrollments
-        </SideNavLink>
-      )}
-      {canManageCourse && (
-        <SideNavLink
-          to={`${base}/settings/general`}
-          className={() => {
-            const settingsPrefix = `${base}/settings`
-            const onSettings =
-              location.pathname === settingsPrefix ||
-              location.pathname.startsWith(`${settingsPrefix}/`)
-            return onSettings ? sideNavActiveClass : ''
-          }}
-          icon={<Settings className="h-5 w-5" />}
-        >
-          Settings
-        </SideNavLink>
-      )}
+      ) : null}
+
+      {showCollaboration ? (
+        <>
+          <SideNavSectionLabel>Collaboration</SideNavSectionLabel>
+          {feedEnabled ? (
+            <SideNavLink to={`${base}/feed`} icon={<MessageSquare className="h-5 w-5" />}>
+              Feed
+            </SideNavLink>
+          ) : null}
+          {discussionsEnabled ? (
+            <SideNavLink to={`${base}/discussions`} icon={<MessagesSquare className="h-5 w-5" />}>
+              Discussions
+            </SideNavLink>
+          ) : null}
+          {collabDocsEnabled ? (
+            <SideNavLink to={`${base}/collab-docs`} icon={<PenLine className="h-5 w-5" />}>
+              Collab docs
+            </SideNavLink>
+          ) : null}
+          {groupSpacesEnabled ? (
+            <SideNavLink to={`${base}/groups`} icon={<UsersRound className="h-5 w-5" />}>
+              Groups
+            </SideNavLink>
+          ) : null}
+          {liveSessionsEnabled ? (
+            <SideNavLink to={`${base}/live`} icon={<Video className="h-5 w-5" />}>
+              Live Sessions
+            </SideNavLink>
+          ) : null}
+          {officeHoursEnabled ? (
+            <SideNavLink to={`${base}/office-hours`} icon={<Clock className="h-5 w-5" />}>
+              Office Hours
+            </SideNavLink>
+          ) : null}
+          {whiteboardEnabled && canManageCourse ? (
+            <SideNavLink to={`${base}/whiteboard`} icon={<Pencil className="h-5 w-5" />}>
+              Whiteboard
+            </SideNavLink>
+          ) : null}
+        </>
+      ) : null}
+
+      {showYourLearning ? (
+        <>
+          <SideNavSectionLabel>Your learning</SideNavSectionLabel>
+          {notebookEnabled ? (
+            <SideNavLink to={`${base}/notebook`} icon={<NotebookPen className="h-5 w-5" />}>
+              Notebook
+            </SideNavLink>
+          ) : null}
+          {calendarEnabled ? (
+            <SideNavLink to={`${base}/calendar`} icon={<Calendar className="h-5 w-5" />}>
+              Calendar
+            </SideNavLink>
+          ) : null}
+          {attendanceEnabled ? (
+            <SideNavLink to={`${base}/attendance`} icon={<ClipboardList className="h-5 w-5" />}>
+              Attendance
+            </SideNavLink>
+          ) : null}
+          {canViewMyGrades ? (
+            <SideNavLink to={`${base}/my-grades`} icon={<Award className="h-5 w-5" />}>
+              My grades
+            </SideNavLink>
+          ) : null}
+        </>
+      ) : null}
+
+      {showAssessmentTools ? (
+        <>
+          <SideNavSectionLabel>Assessment</SideNavSectionLabel>
+          <SideNavLink to={`${base}/questions`} icon={<ListChecks className="h-5 w-5" />}>
+            Question bank
+          </SideNavLink>
+          <SideNavLink to={`${base}/misconception-report`} icon={<Lightbulb className="h-5 w-5" />}>
+            Misconceptions
+          </SideNavLink>
+        </>
+      ) : null}
+
+      {showGradingInsights ? (
+        <>
+          <SideNavSectionLabel>Grades & insights</SideNavSectionLabel>
+          {canViewGradebook ? (
+            <SideNavLink to={`${base}/gradebook`} icon={<ClipboardList className="h-5 w-5" />}>
+              Gradebook
+            </SideNavLink>
+          ) : null}
+          {canViewGradebook && studentProgressFeatureEnabled() ? (
+            <SideNavLink to={`${base}/reports`} icon={<BarChart3 className="h-5 w-5" />}>
+              Reports
+            </SideNavLink>
+          ) : null}
+          {canViewGradebook && atRiskFeatureEnabled() ? (
+            <SideNavLink to={`${base}/at-risk`} icon={<AlertTriangle className="h-5 w-5" />}>
+              {atRiskI18n.title}
+            </SideNavLink>
+          ) : null}
+          {canViewGradebook && outcomesReportFeatureEnabled() ? (
+            <SideNavLink to={`${base}/outcomes-report`} icon={<Target className="h-5 w-5" />}>
+              Outcomes report
+            </SideNavLink>
+          ) : null}
+          {canViewGradebook && xapiEmissionFeatureEnabled() ? (
+            <SideNavLink to={`${base}/event-log`} icon={<Activity className="h-5 w-5" />}>
+              Event log
+            </SideNavLink>
+          ) : null}
+          {sbgEnabled && canViewGradebook ? (
+            <SideNavLink to={`${base}/mastery-heatmap`} icon={<TrendingUp className="h-5 w-5" />}>
+              Mastery heatmap
+            </SideNavLink>
+          ) : null}
+          {instructorInsightsEnabled && canViewGradebook ? (
+            <SideNavLink to={`${base}/whats-working`} icon={<TrendingUp className="h-5 w-5" />}>
+              What&apos;s working
+            </SideNavLink>
+          ) : null}
+          {ffLibrary && canViewGradebook ? (
+            <SideNavLink to={`${base}/reading-dashboard`} icon={<Library className="h-5 w-5" />}>
+              Reading dashboard
+            </SideNavLink>
+          ) : null}
+          {canViewGradebook ? (
+            <SideNavLink to={`${base}/report-cards`} icon={<ClipboardCheck className="h-5 w-5" />}>
+              Report cards
+            </SideNavLink>
+          ) : null}
+          {ffClassroomSignals && canViewGradebook ? (
+            <SideNavLink to={`${base}/behavior`} icon={<Activity className="h-5 w-5" />}>
+              Behavior
+            </SideNavLink>
+          ) : null}
+          {ffCourseEvaluations && canViewGradebook ? (
+            <SideNavLink to={`${base}/evaluation-results`} icon={<Star className="h-5 w-5" />}>
+              Evaluation results
+            </SideNavLink>
+          ) : null}
+          {ffGradeSubmission && canViewGradebook ? (
+            <SideNavLink to={`${base}/final-grades`} icon={<Send className="h-5 w-5" />}>
+              Final grades
+            </SideNavLink>
+          ) : null}
+          {sbgEnabled && canViewGradebook ? (
+            <SideNavLink to={`${base}/standards-gradebook`} icon={<BookMarked className="h-5 w-5" />}>
+              Standards gradebook
+            </SideNavLink>
+          ) : null}
+          {standardsAlignmentEnabled && (canViewGradebook || canManageCourse) ? (
+            <SideNavLink to={`${base}/standards-coverage`} icon={<BookMarked className="h-5 w-5" />}>
+              Standards coverage
+            </SideNavLink>
+          ) : null}
+        </>
+      ) : null}
+
+      {canViewEnrollments ? (
+        <>
+          <SideNavSectionLabel>People</SideNavSectionLabel>
+          <SideNavLink to={`${base}/enrollments`} icon={<Users className="h-5 w-5" />}>
+            Enrollments
+          </SideNavLink>
+        </>
+      ) : null}
+
+      {canManageCourse ? (
+        <>
+          <SideNavSectionLabel>Manage</SideNavSectionLabel>
+          <SideNavLink
+            to={`${base}/settings/general`}
+            className={() => {
+              const settingsPrefix = `${base}/settings`
+              const onSettings =
+                location.pathname === settingsPrefix ||
+                location.pathname.startsWith(`${settingsPrefix}/`)
+              return onSettings ? sideNavActiveClass : ''
+            }}
+            icon={<Settings className="h-5 w-5" />}
+          >
+            Settings
+          </SideNavLink>
+        </>
+      ) : null}
     </>
   )
 }

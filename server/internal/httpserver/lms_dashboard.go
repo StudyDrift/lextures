@@ -838,8 +838,9 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 		SectionName    *string `json:"sectionName,omitempty"`
 		State          *string `json:"state,omitempty"`
 		StateChangedAt *string `json:"stateChangedAt,omitempty"`
-		StateReason    *string `json:"stateReason,omitempty"`
-		HomeOrgName    *string `json:"homeOrgName,omitempty"`
+		StateReason       *string `json:"stateReason,omitempty"`
+		HomeOrgName       *string `json:"homeOrgName,omitempty"`
+		InvitationPending bool    `json:"invitationPending,omitempty"`
 	}
 	type resp struct {
 		Enrollments []row `json:"enrollments"`
@@ -904,6 +905,7 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			if e.HomeOrgName != nil {
 				r.HomeOrgName = e.HomeOrgName
 			}
+			r.InvitationPending = e.InvitationPending
 			out = append(out, r)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

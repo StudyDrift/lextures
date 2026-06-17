@@ -71,7 +71,7 @@ test.describe('Course enrollments', () => {
     await removeBtnVis.click()
 
     // Confirm if a dialog appears.
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes/i }).first()
+    const confirmBtn = page.getByRole('button', { name: /confirm|yes|remove/i }).first()
     if (await confirmBtn.count() > 0) await confirmBtn.click()
 
     await expect(table.getByText('E2E Student')).not.toBeVisible({ timeout: 8000 })
