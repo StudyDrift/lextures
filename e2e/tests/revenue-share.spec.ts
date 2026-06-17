@@ -24,7 +24,7 @@ test.describe('Revenue share — API auth', () => {
 test.describe('Revenue share — authenticated API', () => {
   test('teacher can load earnings summary when feature enabled', async ({ seededCourse }) => {
     const res = await fetch(`${apiBase}/api/v1/creator/earnings`, {
-      headers: { Authorization: `Bearer ${seededCourse.teacherToken}` },
+      headers: { Authorization: `Bearer ${seededCourse.instructorToken}` },
     })
     if (res.status === 404) {
       test.skip(true, 'ff_revenue_share not enabled in this environment')
@@ -39,7 +39,7 @@ test.describe('Revenue share — authenticated API', () => {
 test.describe('Revenue share — UI', () => {
   test('creator earnings page loads when feature enabled', async ({ page, seededCourse }) => {
     const featRes = await fetch(`${apiBase}/api/v1/platform/features`, {
-      headers: { Authorization: `Bearer ${seededCourse.teacherToken}` },
+      headers: { Authorization: `Bearer ${seededCourse.instructorToken}` },
     })
     if (!featRes.ok) {
       test.skip(true, 'platform features unavailable')
@@ -49,7 +49,7 @@ test.describe('Revenue share — UI', () => {
       test.skip(true, 'ff_revenue_share not enabled in this environment')
     }
 
-    await injectToken(page, seededCourse.teacherToken)
+    await injectToken(page, seededCourse.instructorToken)
     await page.goto('/me/creator/earnings')
     await expect(page.getByRole('heading', { name: /creator earnings/i })).toBeVisible({
       timeout: 10_000,
