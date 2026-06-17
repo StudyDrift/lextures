@@ -78,7 +78,7 @@ test.describe('Reading level API', () => {
     await apiPatchContentPage(instructor.access_token, course.courseCode, page.id, {
       markdown: longBody,
     })
-    await apiEnroll(instructor.access_token, course.courseCode, studentEmail)
+    await apiEnroll(instructor.access_token, course.courseCode, studentEmail, 'student', student.access_token)
 
     const res = await request.get(
       `${API_BASE}/api/v1/courses/${course.courseCode}/items/${page.id}/simplify/4`,

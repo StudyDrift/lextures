@@ -63,7 +63,7 @@ test.describe('Translation memory API', () => {
     await apiPatchContentPage(instructor.access_token, course.courseCode, page.id, {
       markdown: englishBody,
     })
-    await apiEnroll(instructor.access_token, course.courseCode, studentEmail)
+    await apiEnroll(instructor.access_token, course.courseCode, studentEmail, 'student', student.access_token)
 
     const saveRes = await request.put(
       `${API_BASE}/api/v1/courses/${course.courseCode}/translations/${page.id}`,
@@ -117,7 +117,7 @@ test.describe('Translation memory API', () => {
     await apiPatchContentPage(instructor.access_token, course.courseCode, page.id, {
       markdown: englishBody,
     })
-    await apiEnroll(instructor.access_token, course.courseCode, studentEmail)
+    await apiEnroll(instructor.access_token, course.courseCode, studentEmail, 'student', student.access_token)
 
     const saveRes = await request.put(
       `${API_BASE}/api/v1/courses/${course.courseCode}/translations/${page.id}`,

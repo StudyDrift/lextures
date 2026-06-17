@@ -67,7 +67,7 @@ test('GET h5p completions: student without gradebook permission returns 403', as
   const { access_token: stuToken } = await apiSignup({ email: studentEmail, password: PASSWORD })
   const course = await apiCreateCourse(instToken, { title: 'H5P Gradebook Course' })
   await apiEnroll(instToken, course.courseCode, instructorEmail, 'teacher')
-  await apiEnroll(instToken, course.courseCode, studentEmail, 'student')
+  await apiEnroll(instToken, course.courseCode, studentEmail, 'student', stuToken)
   const fakeId = '00000000-0000-0000-0000-000000000099'
   const res = await fetch(
     `${API_BASE}/api/v1/courses/${course.courseCode}/h5p/${fakeId}/completions`,

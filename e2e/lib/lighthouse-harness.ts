@@ -161,7 +161,7 @@ export async function seedLighthouseDashboardUser(theme: UiTheme = 'dark'): Prom
   for (const title of ['LH Dashboard Course A', 'LH Dashboard Course B']) {
     const course = await apiCreateCourse(token, { title })
     await apiEnroll(token, course.courseCode, email, 'teacher')
-    await apiEnroll(token, course.courseCode, email, 'student')
+    await apiEnroll(token, course.courseCode, email, 'student', token)
     await apiCreateModule(token, course.courseCode, 'Unit 1')
   }
 

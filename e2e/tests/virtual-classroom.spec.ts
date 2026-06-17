@@ -73,7 +73,7 @@ test.describe('Virtual Classroom API', () => {
     const cc = course.courseCode
 
     // Enroll student.
-    await apiEnroll(instrToken, cc, studentEmail, 'student')
+    await apiEnroll(instrToken, cc, studentEmail, 'student', studentToken)
 
     // Student cannot create a meeting.
     const studentCreate = await request.post(`${API_BASE}/api/v1/courses/${cc}/meetings`, {
@@ -196,7 +196,7 @@ test.describe('Virtual Classroom API', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'Attendance VM Course' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
 
     const createRes = await request.post(`${API_BASE}/api/v1/courses/${cc}/meetings`, {
       headers: authHeaders(instrToken),
@@ -256,7 +256,7 @@ test.describe('Live Sessions UI', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'Stu UI VM' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
     await enableLiveSessions(instrToken, cc)
 
     await injectToken(page, stuToken)

@@ -83,7 +83,7 @@ test.describe('Office Hours API', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Perm Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
 
     const res = await request.post(`${API_BASE}/api/v1/courses/${cc}/availability`, {
       headers: authHeaders(stuToken),
@@ -158,7 +158,7 @@ test.describe('Office Hours API', () => {
     const { access_token: outsiderToken } = await apiSignup({ email: outsiderEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH List Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
 
     // Create a window so there's something to list.
     await request.post(`${API_BASE}/api/v1/courses/${cc}/availability`, {
@@ -191,8 +191,8 @@ test.describe('Office Hours API', () => {
     const { access_token: stu2Token } = await apiSignup({ email: stu2Email, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Book Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stu1Email, 'student')
-    await apiEnroll(instrToken, cc, stu2Email, 'student')
+    await apiEnroll(instrToken, cc, stu1Email, 'student', stu1Token)
+    await apiEnroll(instrToken, cc, stu2Email, 'student', stu2Token)
 
     // Create window with one slot.
     const windowDate = nextWeekdayDate(4) // Thursday
@@ -232,7 +232,7 @@ test.describe('Office Hours API', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Cancel Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
 
     const windowDate = nextWeekdayDate(5) // Friday
     const createRes = await request.post(`${API_BASE}/api/v1/courses/${cc}/availability`, {
@@ -264,7 +264,7 @@ test.describe('Office Hours API', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Me Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
 
     const windowDate = nextWeekdayDate(1) // Monday
     const createRes = await request.post(`${API_BASE}/api/v1/courses/${cc}/availability`, {
@@ -294,7 +294,7 @@ test.describe('Office Hours API', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH iCal Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
 
     const windowDate = nextWeekdayDate(3)
     const createRes = await request.post(`${API_BASE}/api/v1/courses/${cc}/availability`, {
@@ -333,8 +333,8 @@ test.describe('Office Hours API', () => {
     const { access_token: stu2Token } = await apiSignup({ email: stu2Email, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Privacy Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stu1Email, 'student')
-    await apiEnroll(instrToken, cc, stu2Email, 'student')
+    await apiEnroll(instrToken, cc, stu1Email, 'student', stu1Token)
+    await apiEnroll(instrToken, cc, stu2Email, 'student', stu2Token)
 
     const windowDate = nextWeekdayDate(2)
     const createRes = await request.post(`${API_BASE}/api/v1/courses/${cc}/availability`, {
@@ -434,7 +434,7 @@ test.describe('Office Hours UI', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Stu Test' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
     await enableOfficeHours(instrToken, cc)
 
     await injectToken(page, stuToken)
@@ -450,7 +450,7 @@ test.describe('Office Hours UI', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'OH Book UI' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
     await enableOfficeHours(instrToken, cc)
 
     // Seed a one-off window via API.

@@ -171,7 +171,7 @@ test('POST course-files: student (no item:create) returns 403', async () => {
   })
   const course = await apiCreateCourse(instructorToken, { title: 'FP Upload Course' })
   await apiEnroll(instructorToken, course.courseCode, instructorEmail, 'teacher')
-  await apiEnroll(instructorToken, course.courseCode, studentEmail, 'student')
+  await apiEnroll(instructorToken, course.courseCode, studentEmail, 'student', studentToken)
 
   const res = await fetch(
     `${API_BASE}/api/v1/courses/${course.courseCode}/course-files`,
