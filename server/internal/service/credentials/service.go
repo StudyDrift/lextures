@@ -120,6 +120,109 @@ func IssueCourseCompletion(
 	return created, nil
 }
 
+// IssuePathParams controls learning-path credential issuance.
+type IssuePathParams struct {
+	RecipientID uuid.UUID
+	LearnerName string
+	PathID      uuid.UUID
+	PathTitle   string
+	Now         time.Time
+}
+
+// IssuePathCompletion issues an Open Badges credential when a learner completes a path (idempotent).
+func IssuePathCompletion(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	cfg config.Config,
+	p IssuePathParams,
+) (*credrepo.IssuedCredential, error) {
+	if !cfg.FFCompletionCredentials {
+		return nil, nil
+	}
+	if p.Now.IsZero() {
+		p.Now = time.Now().UTC()
+	}
+	existing, err := credrepo.GetByRecipientAndSource(ctx, pool, p.RecipientID, credrepo.SourcePath, p.PathID)
+	if err != nil {
+		return nil, err
+	}
+	if existing != nil {
+		return existing, nil
+	}
+
+	title := strings.TrimSpace(p.PathTitle)
+	if title == "" {
+		title = "Learning Path"
+	}
+	if !strings.Contains(strings.ToLower(title), "learning path") {
+		title += " — Learning Path"
+	}
+
+	institution := issuerName(cfg)
+	key, err := ccrsvc.ResolveSigningKey(cfg, cfg.PublicWebOrigin, cfg.CCRSigningSeedB64)
+	if err != nil {
+		return nil, err
+	}
+
+	achievementID := fmt.Sprintf("%s/achievements/path/%s", strings.TrimRight(cfg.PublicWebOrigin, "/"), p.PathID.String())
+	subject := map[string]any{
+		"id":   fmt.Sprintf("urn:uuid:user:%s", p.RecipientID.String()),
+		"type": []string{"AchievementSubject"},
+		"name": strings.TrimSpace(p.LearnerName),
+		"achievement": map[string]any{
+			"id":          achievementID,
+			"type":        []string{"Achievement"},
+			"name":        title,
+			"description": fmt.Sprintf("Completed every course in %s.", strings.TrimSpace(p.PathTitle)),
+			"criteria": map[string]any{
+				"narrative": "Learner completed every course in the learning path.",
+			},
+		},
+	}
+
+	vc, err := vcsigning.SignAchievementCredential(subject, institution, key, p.Now)
+	if err != nil {
+		return nil, err
+	}
+	vcBytes, err := json.Marshal(vc)
+	if err != nil {
+		return nil, err
+	}
+	subjectBytes, err := json.Marshal(subject)
+	if err != nil {
+		return nil, err
+	}
+
+	created, err := credrepo.Create(ctx, pool, credrepo.IssuedCredential{
+		RecipientID:    p.RecipientID,
+		SourceType:     credrepo.SourcePath,
+		SourceID:       p.PathID,
+		Title:          title,
+		CredentialJSON: subjectBytes,
+		Proof:          json.RawMessage(vcBytes),
+		IssuedAt:       p.Now,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	verifyURL := VerificationURL(cfg.PublicWebOrigin, created.ID)
+	pdfBytes, err := BuildPDF(PDFInput{
+		InstitutionName: institution,
+		LearnerName:     p.LearnerName,
+		CredentialName:  title,
+		IssuedAt:        created.IssuedAt,
+		VerificationURL: verifyURL,
+	})
+	if err == nil && len(pdfBytes) > 0 {
+		keyStr := fmt.Sprintf("credential:%s.pdf", created.ID.String())
+		created.PDFKey = &keyStr
+		_, _ = pool.Exec(ctx, `UPDATE credentials.issued_credentials SET pdf_key = $2 WHERE id = $1`, created.ID, keyStr)
+	}
+
+	return created, nil
+}
+
 // VerificationURL builds the public verification page URL for a credential.
 func VerificationURL(origin string, credentialID uuid.UUID) string {
 	return fmt.Sprintf("%s/verify/%s", strings.TrimRight(strings.TrimSpace(origin), "/"), credentialID.String())

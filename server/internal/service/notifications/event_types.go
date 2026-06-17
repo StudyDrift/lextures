@@ -20,6 +20,7 @@ const (
 	EventIncompleteGranted     = notificationevents.IncompleteGranted
 	EventIncompleteReminder    = notificationevents.IncompleteReminder
 	EventCEUAwarded            = notificationevents.CEUAwarded
+	EventCertificateIssued     = notificationevents.CertificateIssued
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.

@@ -16,6 +16,7 @@ import (
 	credrepo "github.com/lextures/lextures/server/internal/repos/credentials"
 	"github.com/lextures/lextures/server/internal/repos/useraudit"
 	credsvc "github.com/lextures/lextures/server/internal/service/credentials"
+	svcPaths "github.com/lextures/lextures/server/internal/service/learningpaths"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
 
@@ -373,6 +374,18 @@ func extractLearnerName(proof json.RawMessage) string {
 		return name
 	}
 	return ""
+}
+
+func (d Deps) pathProgressOpts(r *http.Request, userID uuid.UUID) *svcPaths.ProgressOptions {
+	if !d.effectiveConfig().FFCompletionCredentials {
+		return nil
+	}
+	name, err := d.learnerDisplayName(r, userID)
+	if err != nil {
+		name = ""
+	}
+	cfg := d.effectiveConfig()
+	return &svcPaths.ProgressOptions{Cfg: cfg, LearnerName: name}
 }
 
 func sanitizeFilename(s string) string {
