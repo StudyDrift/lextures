@@ -25,6 +25,7 @@ export type SelfPacedProgress = {
   enrollmentId: string
   resumeItemId?: string
   justCompleted?: boolean
+  credentialId?: string
 }
 
 /** One self-paced enrollment with progress, for the Dashboard. */

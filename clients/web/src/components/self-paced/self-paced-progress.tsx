@@ -1,7 +1,9 @@
 // Self-paced learner progress UI: accessible progress bar, resume CTA, and a
 // completion celebration overlay (plan 15.2).
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { PartyPopper, Play } from 'lucide-react'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   fetchMyProgress,
   formatProgressLabel,
@@ -98,6 +100,8 @@ export function SelfPacedProgressHeader({
   courseCode: string
   onResume?: (itemId: string) => void
 }) {
+  const navigate = useNavigate()
+  const { ffCompletionCredentials } = usePlatformFeatures()
   const [progress, setProgress] = useState<SelfPacedProgress | null>(null)
   const [celebrate, setCelebrate] = useState(false)
 
@@ -142,7 +146,14 @@ export function SelfPacedProgressHeader({
         <SelfPacedProgressBar percent={progress.progressPercent} />
       </div>
       {celebrate ? (
-        <CompletionCelebration onClose={() => setCelebrate(false)} />
+        <CompletionCelebration
+          onClose={() => setCelebrate(false)}
+          onViewCertificate={
+            ffCompletionCredentials
+              ? () => navigate('/me/credentials')
+              : undefined
+          }
+        />
       ) : null}
     </section>
   )

@@ -117,6 +117,7 @@ type Row struct {
 	FFPublicCatalog                 *bool
 	FFStripeBilling                 *bool
 	FFLearningPaths                 *bool
+	FFCompletionCredentials         *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -248,6 +249,7 @@ type Write struct {
 	FFPublicCatalog                 *bool
 	FFStripeBilling                 *bool
 	FFLearningPaths                 *bool
+	FFCompletionCredentials         *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -376,6 +378,7 @@ SELECT
 	ff_public_catalog,
 	ff_stripe_billing,
 	ff_learning_paths,
+	ff_completion_credentials,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -498,6 +501,7 @@ WHERE id = 1
 		&r.FFPublicCatalog,
 		&r.FFStripeBilling,
 		&r.FFLearningPaths,
+		&r.FFCompletionCredentials,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -669,6 +673,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_consortium_sharing,
 	ff_stripe_billing,
 	ff_learning_paths,
+	ff_completion_credentials,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -797,6 +802,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_consortium_sharing = COALESCE(EXCLUDED.ff_consortium_sharing, settings.platform_app_settings.ff_consortium_sharing),
 	ff_stripe_billing = COALESCE(EXCLUDED.ff_stripe_billing, settings.platform_app_settings.ff_stripe_billing),
 	ff_learning_paths = COALESCE(EXCLUDED.ff_learning_paths, settings.platform_app_settings.ff_learning_paths),
+	ff_completion_credentials = COALESCE(EXCLUDED.ff_completion_credentials, settings.platform_app_settings.ff_completion_credentials),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
@@ -917,6 +923,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFConsortiumSharing,
 		w.FFStripeBilling,
 		w.FFLearningPaths,
+		w.FFCompletionCredentials,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

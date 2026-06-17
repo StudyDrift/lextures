@@ -239,5 +239,6 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	d.registerTTSRoutes(r)
 	d.registerSelfReflectionRoutes(r)
 	d.registerCCRRoutes(r)
+	d.registerCredentialRoutes(r)
 	d.registerIntegrationsRoutes(r)
 }

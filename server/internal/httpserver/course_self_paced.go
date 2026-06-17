@@ -139,7 +139,8 @@ type progressResponse struct {
 	selfpaced.Summary
 	EnrollmentID string  `json:"enrollmentId"`
 	ResumeItemID *string `json:"resumeItemId,omitempty"`
-	JustComplete bool    `json:"justCompleted,omitempty"`
+	JustComplete  bool    `json:"justCompleted,omitempty"`
+	CredentialID  *string `json:"credentialId,omitempty"`
 }
 
 // handleCourseMyProgress returns the viewer's self-paced progress for a course (FR-4, FR-5, AC-2).
@@ -288,10 +289,10 @@ func (d Deps) handleCourseItemComplete() http.HandlerFunc {
 			s := resume.String()
 			resp.ResumeItemID = &s
 		}
-		// 15.5 certificate: when the learner completes the final item, trigger the certificate
-		// flow. The certificate service is not yet wired; the response signals completion so the
-		// client shows the celebration screen and "View Certificate" CTA.
 		resp.JustComplete = changed && summary.Completed
+		if resp.JustComplete {
+			resp.CredentialID = d.tryIssueCourseCredential(r, c.ID, viewer)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	}

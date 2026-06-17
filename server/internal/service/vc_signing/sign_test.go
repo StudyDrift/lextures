@@ -53,6 +53,30 @@ func TestKeyFromPrivateSeedDeterministic(t *testing.T) {
 	}
 }
 
+func TestSignAndVerifyAchievementCredential(t *testing.T) {
+	key, err := GenerateKey("http://localhost:8080")
+	if err != nil {
+		t.Fatal(err)
+	}
+	subject := map[string]any{
+		"type": []string{"AchievementSubject"},
+		"id":   "urn:uuid:user:test",
+		"name": "Learner",
+		"achievement": map[string]any{
+			"type": []string{"Achievement"},
+			"name": "Course Complete",
+		},
+	}
+	vc, err := SignAchievementCredential(subject, "Lextures", key, time.Now().UTC())
+	if err != nil {
+		t.Fatal(err)
+	}
+	valid, err := VerifyCredential(vc, key.PublicKey)
+	if err != nil || !valid {
+		t.Fatalf("valid=%v err=%v", valid, err)
+	}
+}
+
 func TestVerifyCredentialRejectsTamperedProof(t *testing.T) {
 	key, err := GenerateKey("http://localhost:8080")
 	if err != nil {

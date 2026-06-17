@@ -365,8 +365,9 @@ func (d Deps) handleMeListPaths() http.HandlerFunc {
 			return
 		}
 		out := make([]pathProgressJSON, 0, len(enrollments))
+		opts := d.pathProgressOpts(r, uid)
 		for _, e := range enrollments {
-			prog, err := svcPaths.GetProgress(r.Context(), d.Pool, uid, e.PathID)
+			prog, err := svcPaths.GetProgress(r.Context(), d.Pool, uid, e.PathID, opts)
 			if err != nil || prog == nil {
 				continue
 			}
@@ -390,7 +391,7 @@ func (d Deps) handleMePathProgress() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid path id.")
 			return
 		}
-		prog, err := svcPaths.GetProgress(r.Context(), d.Pool, uid, pathID)
+		prog, err := svcPaths.GetProgress(r.Context(), d.Pool, uid, pathID, d.pathProgressOpts(r, uid))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load path progress.")
 			return
@@ -427,7 +428,7 @@ func (d Deps) handlePathEnroll() http.HandlerFunc {
 			}
 			return
 		}
-		prog, _ := svcPaths.GetProgress(r.Context(), d.Pool, uid, pathID)
+		prog, _ := svcPaths.GetProgress(r.Context(), d.Pool, uid, pathID, d.pathProgressOpts(r, uid))
 		writeJSON(w, http.StatusCreated, map[string]any{
 			"enrollmentId": enrollment.ID.String(),
 			"progress":     progressToJSON(prog),

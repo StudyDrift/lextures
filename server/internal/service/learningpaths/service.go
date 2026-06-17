@@ -12,8 +12,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	repoCCR "github.com/lextures/lextures/server/internal/repos/ccr"
 	repoPaths "github.com/lextures/lextures/server/internal/repos/learningpaths"
+	credsvc "github.com/lextures/lextures/server/internal/service/credentials"
 	"github.com/lextures/lextures/server/internal/courseroles"
 )
+
+// ProgressOptions carries optional credential issuance context (plan 15.5).
+type ProgressOptions struct {
+	CredDeps    *credsvc.IssueDeps
+	LearnerName string
+}
 
 var (
 	ErrPathNotFound       = errors.New("learning path not found")
@@ -132,7 +139,7 @@ VALUES ($1, $2, 'student', true)
 }
 
 // GetProgress returns path-level progress for a learner.
-func GetProgress(ctx context.Context, pool *pgxpool.Pool, userID, pathID uuid.UUID) (*PathProgress, error) {
+func GetProgress(ctx context.Context, pool *pgxpool.Pool, userID, pathID uuid.UUID, opts *ProgressOptions) (*PathProgress, error) {
 	p, err := repoPaths.GetPathByID(ctx, pool, pathID)
 	if err != nil || p == nil {
 		return nil, err
@@ -196,7 +203,7 @@ func GetProgress(ctx context.Context, pool *pgxpool.Pool, userID, pathID uuid.UU
 			prog.CompletedAt = &now
 			prog.JustCompleted = true
 			RecordCompletion()
-			if err := issuePathCertificate(ctx, pool, userID, p); err != nil {
+			if err := issuePathCertificate(ctx, pool, userID, p, opts); err != nil && !errors.Is(err, pgx.ErrNoRows) {
 				return nil, err
 			}
 		}
@@ -216,7 +223,11 @@ func completedCourseSet(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUI
 	return out, nil
 }
 
-func issuePathCertificate(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p *repoPaths.Path) error {
+func issuePathCertificate(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, p *repoPaths.Path, opts *ProgressOptions) error {
+	if opts != nil && opts.CredDeps != nil && opts.CredDeps.Cfg.FFCompletionCredentials {
+		_, _, err := credsvc.IssueForPathCompletion(ctx, *opts.CredDeps, p.ID, userID, opts.LearnerName, p.Title)
+		return err
+	}
 	sourceID := p.ID
 	title := p.Title + " — Learning Path"
 	_, err := repoCCR.CreateAchievement(ctx, pool, repoCCR.Achievement{

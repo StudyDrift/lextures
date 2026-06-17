@@ -61,6 +61,7 @@ import {
 import { NotebookTasksCard } from '../../components/dashboard/notebook-tasks-card'
 import { SelfPacedDashboardSection } from '../../components/self-paced/self-paced-dashboard-section'
 import { DegreeProgressCard } from '../../components/dashboard/degree-progress-card'
+import { RecentCertificatesCard } from '../../components/credentials/recent-certificates-card'
 import { DashboardLearningPathsCard } from '../../components/dashboard/dashboard-learning-paths-card'
 import { ConsentPrompt } from '../../components/research/consent-prompt'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
@@ -287,6 +288,7 @@ export default function Dashboard() {
     ffCeuTracking,
     ffAdvisingIntegration,
     ffLearningPaths,
+    ffCompletionCredentials,
     ffResearchConsent,
   } = usePlatformFeatures()
 
@@ -797,6 +799,8 @@ export default function Dashboard() {
           )}
 
           <StudyStatsCard />
+
+          {ffCompletionCredentials && anyStudentExperience ? <RecentCertificatesCard /> : null}
 
           {ffLearningPaths && anyStudentExperience ? <DashboardLearningPathsCard /> : null}
 

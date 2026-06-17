@@ -91,6 +91,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let creators build ordered multi-course specializations with bundle pricing, path enrollment, and learner progress tracking.',
   },
   {
+    key: 'ffCompletionCredentials',
+    label: 'Completion certificates (Open Badges)',
+    description:
+      'Issue verifiable Open Badges 3.0 certificates with PDF download and public verification when learners complete courses or paths.',
+  },
+  {
     key: 'ffConsortiumSharing',
     label: 'Consortium course sharing',
     description:

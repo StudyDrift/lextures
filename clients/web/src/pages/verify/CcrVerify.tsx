@@ -2,6 +2,20 @@ import { useEffect, useId, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { verifyCCRShareToken, type CCRVerifyResponse } from '../../lib/ccr-api'
+import { verifyCredential, type CredentialVerifyResponse } from '../../lib/credentials-api'
+
+type VerifyView = {
+  valid: boolean
+  status: string
+  issuerName: string
+  issuedAt: string
+  learnerName?: string
+  achievement?: string
+  credential: Record<string, unknown>
+  achievementList?: string[]
+}
+
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 function assertionTitles(credential: Record<string, unknown>): string[] {
   const subject = credential.credentialSubject as Record<string, unknown> | undefined
@@ -16,10 +30,44 @@ function assertionTitles(credential: Record<string, unknown>): string[] {
     .filter((name): name is string => Boolean(name))
 }
 
+function fromCCR(result: CCRVerifyResponse): VerifyView {
+  return {
+    valid: result.valid,
+    status: result.status,
+    issuerName: result.issuerName,
+    issuedAt: result.issuedAt,
+    credential: result.credential,
+    achievementList: assertionTitles(result.credential),
+  }
+}
+
+function fromCredential(result: CredentialVerifyResponse): VerifyView {
+  return {
+    valid: result.valid,
+    status: result.status,
+    issuerName: result.issuerName,
+    issuedAt: result.issuedAt,
+    learnerName: result.learnerName,
+    achievement: result.achievement,
+    credential: result.credential,
+  }
+}
+
+async function resolveVerification(token: string): Promise<VerifyView> {
+  if (uuidPattern.test(token)) {
+    try {
+      return fromCredential(await verifyCredential(token))
+    } catch {
+      // Fall through to CCR share-token verification.
+    }
+  }
+  return fromCCR(await verifyCCRShareToken(token))
+}
+
 export default function CcrVerifyPage() {
   const { token } = useParams<{ token: string }>()
   const statusId = useId()
-  const [result, setResult] = useState<CCRVerifyResponse | null>(null)
+  const [result, setResult] = useState<VerifyView | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -29,15 +77,13 @@ export default function CcrVerifyPage() {
       setLoading(false)
       return
     }
-    void verifyCCRShareToken(token)
+    void resolveVerification(token)
       .then(setResult)
       .catch((e: unknown) => {
         setError(e instanceof Error ? e.message : 'Verification failed.')
       })
       .finally(() => setLoading(false))
   }, [token])
-
-  const titles = result ? assertionTitles(result.credential) : []
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10 dark:bg-neutral-950">
@@ -76,6 +122,18 @@ export default function CcrVerifyPage() {
               )}
             </div>
             <dl className="grid gap-2 text-sm">
+              {result.learnerName ? (
+                <div>
+                  <dt className="font-medium text-slate-700 dark:text-neutral-300">Learner</dt>
+                  <dd>{result.learnerName}</dd>
+                </div>
+              ) : null}
+              {result.achievement ? (
+                <div>
+                  <dt className="font-medium text-slate-700 dark:text-neutral-300">Achievement</dt>
+                  <dd>{result.achievement}</dd>
+                </div>
+              ) : null}
               <div>
                 <dt className="font-medium text-slate-700 dark:text-neutral-300">Issuer</dt>
                 <dd>{result.issuerName}</dd>
@@ -85,11 +143,11 @@ export default function CcrVerifyPage() {
                 <dd>{result.issuedAt}</dd>
               </div>
             </dl>
-            {titles.length > 0 ? (
+            {result.achievementList && result.achievementList.length > 0 ? (
               <section aria-label="Achievements">
                 <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Achievements</h2>
                 <ul className="mt-2 list-disc pl-5 text-sm text-slate-700 dark:text-neutral-300">
-                  {titles.map((title) => (
+                  {result.achievementList.map((title) => (
                     <li key={title}>{title}</li>
                   ))}
                 </ul>
