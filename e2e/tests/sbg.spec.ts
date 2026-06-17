@@ -20,7 +20,7 @@
  *   [x] Student can access their own SBG report
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiSignup } from '../fixtures/api.js'
+import { apiSignup, apiEnroll } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
@@ -356,11 +356,7 @@ test('SBG: instructor can record a mastery score and retrieve heatmap', async ()
   if (!courseCode) { test.skip(true, 'no courseCode'); return }
 
   // Enroll student.
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   // List course standards (instructor view).
   const stdsRes = await fetch(
@@ -422,12 +418,12 @@ test('SBG: student cannot access instructor heatmap (403)', async () => {
   if (!courseCode) { test.skip(true, 'no courseCode'); return }
 
   // Sign up a separate student and try to access heatmap.
-  const { access_token: anotherStudentToken } = await apiSignup({ email: uniqueEmail('stu3'), password: PASSWORD })
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${studentToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: (await (await fetch(`${API_BASE}/api/v1/me`, { headers: { Authorization: `Bearer ${anotherStudentToken}` } })).json() as { email?: string }).email, courseRole: 'student' }),
+  const anotherStudentEmail = uniqueEmail('stu3')
+  const { access_token: anotherStudentToken } = await apiSignup({
+    email: anotherStudentEmail,
+    password: PASSWORD,
   })
+  await apiEnroll(studentToken, courseCode, anotherStudentEmail, 'student', anotherStudentToken)
 
   const res = await fetch(
     `${API_BASE}/api/v1/courses/${courseCode}/sbg/heatmap/Q1-2026`,

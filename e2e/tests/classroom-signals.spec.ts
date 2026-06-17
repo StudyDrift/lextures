@@ -9,7 +9,7 @@
  *   [x] Teacher can see questions in the queue (includes authorId for moderation)
  */
 import { test, expect } from '@playwright/test'
-import { apiSignup, apiCreateCourse } from '../fixtures/api.js'
+import { apiSignup, apiCreateCourse, apiEnroll } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
@@ -160,11 +160,7 @@ async function seedTeacherWithSection(): Promise<SeededSection | null> {
     body: JSON.stringify({ sectionsEnabled: true }),
   })
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: authHeaders(teacherToken),
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   const teacherId = await getUserId(teacherToken)
   const sectionRes = await fetch(`${API_BASE}/api/v1/courses/${courseCode}/sections`, {
@@ -177,10 +173,9 @@ async function seedTeacherWithSection(): Promise<SeededSection | null> {
   if (!section.id) return null
 
   // Move student into section.
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: authHeaders(teacherToken),
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student', sectionId: section.id }),
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', {
+    memberToken: studentToken,
+    sectionId: section.id,
   })
 
   const studentId = await getUserId(studentToken)

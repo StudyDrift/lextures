@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { matchPath, NavLink, useLocation } from 'react-router-dom'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import { BrandLogo } from '../brand-logo'
 import { useShellNav } from './use-shell-nav'
 import { SideNavCourseLinks } from './side-nav-course-links'
@@ -11,12 +10,11 @@ import { SideNavSettingsLinks } from './side-nav-settings-links'
 import { SideNavCommandPaletteTrigger } from './side-nav-command-palette'
 import { SideNavPinnedCourses } from './side-nav-pinned-courses'
 import { SideNavTooltip } from './side-nav-tooltip'
+import { isSettingsShellRoute } from './side-nav-path-utils'
 
 export function SideNav() {
   const { mobileNavOpen, closeMobileNav, sideNavCollapsed } = useShellNav()
   const location = useLocation()
-  const { ffBookstoreIntegration } = usePlatformFeatures()
-
   useEffect(() => {
     closeMobileNav()
   }, [location.pathname, closeMobileNav])
@@ -59,9 +57,7 @@ export function SideNav() {
   )
   const isCourseSettingsNav = Boolean(courseSettingsMatch)
   const isCourseNav = Boolean(courseCode)
-  const isSettingsNav =
-    location.pathname.startsWith('/settings') ||
-    (location.pathname === '/admin/bookstore' && ffBookstoreIntegration)
+  const isSettingsNav = isSettingsShellRoute(location.pathname)
 
   const showMainNav = !isCourseNav && !isSettingsNav
   const showCourseNav = isCourseNav && !isCourseSettingsNav

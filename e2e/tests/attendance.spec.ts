@@ -17,7 +17,7 @@
  *   [x] Parent cannot view non-linked student's attendance (403)
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiSignup } from '../fixtures/api.js'
+import { apiSignup, apiEnroll } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
@@ -264,7 +264,7 @@ test('Attendance: teacher can batch-save and retrieve attendance for a section',
   const studentEmail = uniqueEmail('stu')
   // Create course as TEACHER so teacher is the owner and has management rights.
   const { access_token: teacherToken } = await apiSignup({ email: teacherEmail, password: PASSWORD })
-  await apiSignup({ email: studentEmail, password: PASSWORD })
+  const { access_token: studentToken } = await apiSignup({ email: studentEmail, password: PASSWORD })
 
   const courseCreateRes = await fetch(`${API_BASE}/api/v1/courses`, {
     method: 'POST',
@@ -284,11 +284,7 @@ test('Attendance: teacher can batch-save and retrieve attendance for a section',
   })
 
   // Enroll student by email.
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   // Get teacher and student IDs.
   const teacherId = await getUserId(teacherToken)
@@ -316,10 +312,9 @@ test('Attendance: teacher can batch-save and retrieve attendance for a section',
   if (!sectionId) { test.skip(true, 'no sectionId'); return }
 
   // Move student into section by re-enrolling with sectionId.
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student', sectionId }),
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', {
+    memberToken: studentToken,
+    sectionId,
   })
 
   const date = new Date().toISOString().slice(0, 10)
@@ -378,7 +373,7 @@ test('Attendance: batch save is idempotent (re-save same records succeeds)', asy
   const teacherEmail = uniqueEmail('it')
   const studentEmail = uniqueEmail('is')
   const { access_token: teacherToken } = await apiSignup({ email: teacherEmail, password: PASSWORD })
-  await apiSignup({ email: studentEmail, password: PASSWORD })
+  const { access_token: studentToken } = await apiSignup({ email: studentEmail, password: PASSWORD })
 
   const courseCreateRes = await fetch(`${API_BASE}/api/v1/courses`, {
     method: 'POST',
@@ -395,11 +390,7 @@ test('Attendance: batch save is idempotent (re-save same records succeeds)', asy
     body: JSON.stringify({ sectionsEnabled: true, notebookEnabled: true, calendarEnabled: true }),
   })
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   const teacherId = await getUserId(teacherToken)
   if (!teacherId) { test.skip(true, 'missing teacherId'); return }
@@ -421,10 +412,9 @@ test('Attendance: batch save is idempotent (re-save same records succeeds)', asy
   const { id: sectionId } = (await sectionRes.json()) as { id?: string }
   if (!sectionId) { test.skip(true, 'no sectionId'); return }
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student', sectionId }),
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', {
+    memberToken: studentToken,
+    sectionId,
   })
 
   const date = new Date().toISOString().slice(0, 10)
@@ -470,7 +460,7 @@ test('Attendance: PUT with date 10 days in past returns 403 for non-admin teache
   const teacherEmail = uniqueEmail('ot')
   const studentEmail = uniqueEmail('os')
   const { access_token: teacherToken } = await apiSignup({ email: teacherEmail, password: PASSWORD })
-  await apiSignup({ email: studentEmail, password: PASSWORD })
+  const { access_token: studentToken } = await apiSignup({ email: studentEmail, password: PASSWORD })
 
   const courseCreateRes = await fetch(`${API_BASE}/api/v1/courses`, {
     method: 'POST',
@@ -487,11 +477,7 @@ test('Attendance: PUT with date 10 days in past returns 403 for non-admin teache
     body: JSON.stringify({ sectionsEnabled: true, notebookEnabled: true, calendarEnabled: true }),
   })
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   const teacherId = await getUserId(teacherToken)
   if (!teacherId) { test.skip(true, 'missing teacherId'); return }
@@ -513,10 +499,9 @@ test('Attendance: PUT with date 10 days in past returns 403 for non-admin teache
   const { id: sectionId } = (await sectionRes.json()) as { id?: string }
   if (!sectionId) { test.skip(true, 'no sectionId'); return }
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student', sectionId }),
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', {
+    memberToken: studentToken,
+    sectionId,
   })
 
   // Use a date 10 days in the past — past the 5-day edit window.

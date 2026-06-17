@@ -8,7 +8,7 @@
  *   [x] Gradebook includes former students section
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiSignup } from '../fixtures/api.js'
+import { apiSignup, apiEnroll } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
@@ -107,13 +107,19 @@ test('Student dashboard shows withdrawn status', async ({ page, seededCourse }) 
 
   const studentEmail = `withdrawn-student-${Date.now()}@e2e.test`
   const studentPassword = 'E2eTestPass1!'
-  await apiSignup({ email: studentEmail, password: studentPassword, displayName: 'Withdrawn E2E Student' })
-
-  await fetch(`${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/enrollments`, {
-    method: 'POST',
-    headers: authHeaders(seededCourse.instructorToken),
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
+  const { access_token: studentToken } = await apiSignup({
+    email: studentEmail,
+    password: studentPassword,
+    displayName: 'Withdrawn E2E Student',
   })
+
+  await apiEnroll(
+    seededCourse.instructorToken,
+    seededCourse.courseCode,
+    studentEmail,
+    'student',
+    studentToken,
+  )
 
   const enrollRes = await fetch(
     `${API_BASE}/api/v1/courses/${encodeURIComponent(seededCourse.courseCode)}/enrollments`,

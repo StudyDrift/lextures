@@ -1,4 +1,4 @@
-.PHONY: dev e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -30,6 +30,10 @@ lint-www:
 # Start the development stack (Postgres, RabbitMQ, Air-backed API, Vite) in detached mode.
 dev:
 	docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+
+# Build the Tauri desktop app, install it locally, and launch it.
+desktop:
+	bash scripts/desktop.sh
 
 # Run the full e2e suite — automatically picks a strategy:
 #

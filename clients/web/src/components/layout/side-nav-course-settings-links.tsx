@@ -19,7 +19,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { courseSettingsSectionFromPathname } from './side-nav-path-utils'
 import { sideNavActiveClass } from './side-nav-styles'
 import { SideNavLink } from './side-nav-link'
-import { useShellNav } from './use-shell-nav'
+import { SideNavSectionLabel } from './side-nav-section-label'
 
 type SideNavCourseSettingsLinksProps = {
   courseCode: string
@@ -27,11 +27,13 @@ type SideNavCourseSettingsLinksProps = {
 
 export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettingsLinksProps) {
   const location = useLocation()
-  const { sideNavCollapsed } = useShellNav()
   const { altTextEnforcementEnabled, ffPlagiarismChecks, loading: featuresLoading } = usePlatformFeatures()
   const { sectionsEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
+
+  const showAccessLocalization =
+    (!featuresLoading && altTextEnforcementEnabled) || isTranslationMemoryEnabled()
 
   return (
     <>
@@ -41,11 +43,8 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Back
       </SideNavLink>
-      {!sideNavCollapsed && (
-        <p className="px-3 pb-1 pt-3 text-sm font-bold tracking-tight text-slate-900 dark:text-neutral-100">
-          Course Settings
-        </p>
-      )}
+
+      <SideNavSectionLabel first>Course setup</SideNavSectionLabel>
       <SideNavLink
         to={`${base}/general`}
         className={() => (section === 'general' ? sideNavActiveClass : '')}
@@ -54,11 +53,36 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
         General
       </SideNavLink>
       <SideNavLink
+        to={`${base}/features`}
+        className={() => (section === 'features' ? sideNavActiveClass : '')}
+        icon={<SlidersHorizontal className="h-5 w-5" />}
+      >
+        Features
+      </SideNavLink>
+      {!courseFeaturesLoading && sectionsEnabled ? (
+        <SideNavLink
+          to={`${base}/sections`}
+          className={() => (section === 'sections' ? sideNavActiveClass : '')}
+          icon={<LayoutGrid className="h-5 w-5" />}
+        >
+          Sections
+        </SideNavLink>
+      ) : null}
+
+      <SideNavSectionLabel>Grading & outcomes</SideNavSectionLabel>
+      <SideNavLink
         to={`${base}/grading`}
         className={() => (section === 'grading' ? sideNavActiveClass : '')}
         icon={<Scale className="h-5 w-5" />}
       >
         Grading
+      </SideNavLink>
+      <SideNavLink
+        to={`${base}/outcomes`}
+        className={() => (section === 'outcomes' ? sideNavActiveClass : '')}
+        icon={<Target className="h-5 w-5" />}
+      >
+        Outcomes
       </SideNavLink>
       {!featuresLoading && ffPlagiarismChecks ? (
         <SideNavLink
@@ -69,47 +93,32 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
           Plagiarism
         </SideNavLink>
       ) : null}
-      <SideNavLink
-        to={`${base}/outcomes`}
-        className={() => (section === 'outcomes' ? sideNavActiveClass : '')}
-        icon={<Target className="h-5 w-5" />}
-      >
-        Outcomes
-      </SideNavLink>
-      <SideNavLink
-        to={`${base}/features`}
-        className={() => (section === 'features' ? sideNavActiveClass : '')}
-        icon={<SlidersHorizontal className="h-5 w-5" />}
-      >
-        Features
-      </SideNavLink>
-      {!featuresLoading && altTextEnforcementEnabled ? (
-        <SideNavLink
-          to={`${base}/accessibility`}
-          className={() => (section === 'accessibility' ? sideNavActiveClass : '')}
-          icon={<Eye className="h-5 w-5" />}
-        >
-          Accessibility
-        </SideNavLink>
+
+      {showAccessLocalization ? (
+        <>
+          <SideNavSectionLabel>Access & localization</SideNavSectionLabel>
+          {!featuresLoading && altTextEnforcementEnabled ? (
+            <SideNavLink
+              to={`${base}/accessibility`}
+              className={() => (section === 'accessibility' ? sideNavActiveClass : '')}
+              icon={<Eye className="h-5 w-5" />}
+            >
+              Accessibility
+            </SideNavLink>
+          ) : null}
+          {isTranslationMemoryEnabled() ? (
+            <SideNavLink
+              to={`${base}/translations`}
+              className={() => (section === 'translations' ? sideNavActiveClass : '')}
+              icon={<Languages className="h-5 w-5" />}
+            >
+              Translations
+            </SideNavLink>
+          ) : null}
+        </>
       ) : null}
-      {isTranslationMemoryEnabled() ? (
-        <SideNavLink
-          to={`${base}/translations`}
-          className={() => (section === 'translations' ? sideNavActiveClass : '')}
-          icon={<Languages className="h-5 w-5" />}
-        >
-          Translations
-        </SideNavLink>
-      ) : null}
-      {!courseFeaturesLoading && sectionsEnabled ? (
-        <SideNavLink
-          to={`${base}/sections`}
-          className={() => (section === 'sections' ? sideNavActiveClass : '')}
-          icon={<LayoutGrid className="h-5 w-5" />}
-        >
-          Sections
-        </SideNavLink>
-      ) : null}
+
+      <SideNavSectionLabel>Content & data</SideNavSectionLabel>
       <SideNavLink
         to={`${base}/import-export`}
         className={() => (section === 'import-export' ? sideNavActiveClass : '')}
@@ -124,6 +133,8 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Blueprint
       </SideNavLink>
+
+      <SideNavSectionLabel>Lifecycle</SideNavSectionLabel>
       <SideNavLink
         to={`${base}/archive`}
         className={() => (section === 'archive' ? sideNavActiveClass : '')}

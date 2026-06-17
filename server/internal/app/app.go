@@ -99,7 +99,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 
 	canvasImportHub := canvasimportevents.New()
-	canvasImportQueue, queueErr := canvasimportqueue.NewBus(merged.RabbitMQURL, merged.CanvasImportQueueName)
+	canvasImportQueue, queueErr := canvasimportqueue.NewBus(merged.RabbitMQURL, merged.CanvasImportQueueName, merged.CanvasImportConcurrency)
 	if queueErr != nil {
 		return fmt.Errorf("app: canvas import queue: %w", queueErr)
 	}

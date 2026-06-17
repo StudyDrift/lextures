@@ -23,6 +23,24 @@ import (
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 )
 
+// requireCourseFilesManage requires enrollment plus course:CODE:item:create (instructors/designers).
+func (d Deps) requireCourseFilesManage(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {
+	courseCode, viewer, ok = d.requireCourseAccess(w, r)
+	if !ok {
+		return "", uuid.UUID{}, false
+	}
+	canManage, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return "", uuid.UUID{}, false
+	}
+	if !canManage {
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view course files.")
+		return "", uuid.UUID{}, false
+	}
+	return courseCode, viewer, true
+}
+
 // courseIDFromCode fetches the course UUID for a given course code.
 func (d Deps) courseIDFromCode(ctx context.Context, courseCode string) (uuid.UUID, bool, error) {
 	var id uuid.UUID
@@ -37,7 +55,7 @@ func (d Deps) courseIDFromCode(ctx context.Context, courseCode string) (uuid.UUI
 // Returns root-level folders and files.
 func (d Deps) handleGetCourseFiles() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, _, ok := d.requireCourseAccess(w, r)
+		courseCode, _, ok := d.requireCourseFilesManage(w, r)
 		if !ok {
 			return
 		}
@@ -65,7 +83,7 @@ func (d Deps) handleGetCourseFiles() http.HandlerFunc {
 // Returns the folder's children.
 func (d Deps) handleGetCourseFilesFolder() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, _, ok := d.requireCourseAccess(w, r)
+		courseCode, _, ok := d.requireCourseFilesManage(w, r)
 		if !ok {
 			return
 		}
@@ -628,7 +646,7 @@ func (d Deps) handleDeleteCourseFileItem() http.HandlerFunc {
 // handleGetCourseFileItemContent is GET /api/v1/courses/{course_code}/files/items/{item_id}/content
 func (d Deps) handleGetCourseFileItemContent() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, _, ok := d.requireCourseAccess(w, r)
+		courseCode, _, ok := d.requireCourseFilesManage(w, r)
 		if !ok {
 			return
 		}

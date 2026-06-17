@@ -162,12 +162,57 @@ export async function apiCreateModule(
   return res.json() as Promise<{ id: string; title: string }>
 }
 
+async function apiApproveEnrollmentInvitation(
+  memberToken: string,
+  courseCode: string,
+  enrollmentId: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments/${encodeURIComponent(enrollmentId)}/invitation/approve`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${memberToken}` },
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Approve enrollment invitation failed (${res.status}): ${body}`)
+  }
+}
+
+async function apiFindPendingEnrollmentId(
+  memberToken: string,
+  courseCode: string,
+): Promise<string | null> {
+  const res = await fetch(`${apiBase}/api/v1/courses`, {
+    headers: { Authorization: `Bearer ${memberToken}` },
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`List courses failed (${res.status}): ${body}`)
+  }
+  const data = (await res.json()) as {
+    courses?: Array<{ courseCode: string; viewerPendingEnrollmentId?: string | null }>
+  }
+  const course = data.courses?.find((c) => c.courseCode === courseCode)
+  return course?.viewerPendingEnrollmentId ?? null
+}
+
+export type ApiEnrollOptions = {
+  /** Approve a pending student invitation as this enrolled user. */
+  memberToken?: string
+  sectionId?: string
+}
+
 export async function apiEnroll(
   token: string,
   courseCode: string,
   emails: string,
   courseRole = 'student',
+  options?: string | ApiEnrollOptions,
 ): Promise<void> {
+  const opts: ApiEnrollOptions =
+    typeof options === 'string' ? { memberToken: options } : (options ?? {})
   const res = await fetch(
     `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
     {
@@ -176,12 +221,22 @@ export async function apiEnroll(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ emails, courseRole }),
+      body: JSON.stringify({
+        emails,
+        courseRole,
+        ...(opts.sectionId ? { sectionId: opts.sectionId } : {}),
+      }),
     },
   )
   if (!res.ok) {
     const body = await res.text()
     throw new Error(`Enroll failed (${res.status}): ${body}`)
+  }
+  if (opts.memberToken) {
+    const enrollmentId = await apiFindPendingEnrollmentId(opts.memberToken, courseCode)
+    if (enrollmentId) {
+      await apiApproveEnrollmentInvitation(opts.memberToken, courseCode, enrollmentId)
+    }
   }
 }
 

@@ -53,11 +53,19 @@ import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
 import { CourseHeroImage } from '../../components/course-hero-image'
+import { CourseEnrollmentInvitationActions } from '../../components/enrollment/course-enrollment-invitation-actions'
 
 export type { CoursePublic } from '../../lib/courses-api'
 
 type CatalogNicknameChangeHandler = (courseId: string, nickname: string | null) => void
 type CatalogPinnedChangeHandler = (courseId: string, pinned: boolean) => void
+type CatalogInvitationResolvedHandler = (courseId: string, approved: boolean) => void
+
+function courseInvitationPending(course: CoursePublic): boolean {
+  return Boolean(
+    course.viewerEnrollmentInvitationPending && course.viewerPendingEnrollmentId,
+  )
+}
 
 function CreateCourseIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
@@ -122,11 +130,13 @@ function CourseCard({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: {
     listeners: Record<string, unknown>
     setNodeRef: (node: HTMLElement | null) => void
@@ -138,6 +148,41 @@ function CourseCard({
   const badgeLabel = courseCatalogStatusLabel(course)
   const descriptionBlurb = courseCatalogDescriptionBlurb(course)
   const displayTitle = courseCatalogDisplayTitle(course)
+  const invitationPending = courseInvitationPending(course)
+
+  const heroBlock = (
+    <>
+      <CourseHeroImage
+        data-lex-hero
+        src={course.heroImageUrl ?? '/course-card-hero.png'}
+        alt=""
+        draggable={false}
+        loading="lazy"
+        decoding="async"
+        className="h-40 w-full object-cover"
+        style={heroImageObjectStyle(course.heroImageObjectPosition)}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
+        aria-hidden
+      />
+      <span className="absolute start-3 top-3">
+        <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
+      </span>
+      {!invitationPending ? (
+        <span className="absolute end-3 top-3 z-10">
+          <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
+        </span>
+      ) : null}
+      <div className="absolute inset-x-0 bottom-0 p-4 pt-10">
+        <h2 className="text-lg font-semibold leading-snug tracking-tight text-white drop-shadow-sm line-clamp-2">
+          {displayTitle}
+        </h2>
+      </div>
+    </>
+  )
+
+  const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
 
   return (
     <article
@@ -152,56 +197,59 @@ function CourseCard({
         .join(' ')}
       {...(sortable ? sortable.listeners : {})}
     >
-      <Link
-        to={courseHref}
-        className="relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
-        aria-label={`Open ${displayTitle}`}
-        onClick={(e) => {
-          if (!suppressNavigateAfterDragRef?.current) return
-          e.preventDefault()
-          e.stopPropagation()
-          suppressNavigateAfterDragRef.current = false
-        }}
-      >
-        <CourseHeroImage
-          data-lex-hero
-          src={course.heroImageUrl ?? '/course-card-hero.png'}
-          alt=""
-          draggable={false}
-          loading="lazy"
-          decoding="async"
-          className="h-40 w-full object-cover"
-          style={heroImageObjectStyle(course.heroImageObjectPosition)}
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
-          aria-hidden
-        />
-        <span className="absolute start-3 top-3">
-          <CourseCatalogStatusPill label={badgeLabel} />
-        </span>
-        <span className="absolute end-3 top-3 z-10">
-          <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
-        </span>
-        <div className="absolute inset-x-0 bottom-0 p-4 pt-10">
-          <h2 className="text-lg font-semibold leading-snug tracking-tight text-white drop-shadow-sm line-clamp-2">
-            {displayTitle}
-          </h2>
-        </div>
-      </Link>
+      <div className={invitationMutedClass}>
+        {invitationPending ? (
+          <div className="relative block" aria-label={`${displayTitle} — invitation pending`}>
+            {heroBlock}
+          </div>
+        ) : (
+          <Link
+            to={courseHref}
+            className="relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
+            aria-label={`Open ${displayTitle}`}
+            onClick={(e) => {
+              if (!suppressNavigateAfterDragRef?.current) return
+              e.preventDefault()
+              e.stopPropagation()
+              suppressNavigateAfterDragRef.current = false
+            }}
+          >
+            {heroBlock}
+          </Link>
+        )}
+      </div>
 
       <div className="flex flex-1 flex-col justify-end px-5 pb-4 pt-3">
-        <CourseCatalogNicknameEditor
-          course={course}
-          compact
-          onNicknameChange={onNicknameChange}
-        />
-        {descriptionBlurb ? (
-          <p className="mt-3 text-start text-sm leading-snug text-slate-600 line-clamp-4 dark:text-neutral-400">
-            {descriptionBlurb}
-          </p>
-        ) : null}
-        <p className="mt-3 text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
+        <div className={invitationMutedClass}>
+          <CourseCatalogNicknameEditor
+            course={course}
+            compact
+            onNicknameChange={onNicknameChange}
+          />
+        </div>
+        {invitationPending && course.viewerPendingEnrollmentId ? (
+          <>
+            <p className="mt-3 text-start text-sm text-slate-600 dark:text-neutral-400">
+              You have been invited to this course. Approve to join or decline to remove the invitation.
+            </p>
+            <CourseEnrollmentInvitationActions
+              courseCode={course.courseCode}
+              enrollmentId={course.viewerPendingEnrollmentId}
+              onResolved={(approved) => onInvitationResolved?.(course.id, approved)}
+            />
+          </>
+        ) : (
+          <>
+            {descriptionBlurb ? (
+              <p className="mt-3 text-start text-sm leading-snug text-slate-600 line-clamp-4 dark:text-neutral-400">
+                {descriptionBlurb}
+              </p>
+            ) : null}
+            <p className="mt-3 text-start text-xs text-slate-400 dark:text-neutral-500">
+              {formatEditedAgo(course.updatedAt)}
+            </p>
+          </>
+        )}
       </div>
     </article>
   )
@@ -212,11 +260,13 @@ function SortableCourseCard({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -235,6 +285,7 @@ function SortableCourseCard({
         suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
         onNicknameChange={onNicknameChange}
         onPinnedChange={onPinnedChange}
+        onInvitationResolved={onInvitationResolved}
         sortable={{
           listeners: listeners as Record<string, unknown>,
           setNodeRef,
@@ -252,17 +303,21 @@ function CourseListRow({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
   const badgeLabel = courseCatalogStatusLabel(course)
   const descriptionBlurb = courseCatalogDescriptionBlurb(course)
   const displayTitle = courseCatalogDisplayTitle(course)
+  const invitationPending = courseInvitationPending(course)
+  const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
 
   return (
     <article
@@ -278,38 +333,62 @@ function CourseListRow({
       {...(sortable ? sortable.listeners : {})}
     >
       <div className="flex min-w-0 flex-1 items-stretch gap-4 p-3 sm:p-4">
-        <Link
-          to={courseHref}
-          className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 sm:h-20 sm:w-28"
-          aria-label={`Open ${displayTitle}`}
-          onClick={(e) => {
-            if (!suppressNavigateAfterDragRef?.current) return
-            e.preventDefault()
-            e.stopPropagation()
-            suppressNavigateAfterDragRef.current = false
-          }}
-        >
-          <CourseHeroImage
-            data-lex-hero
-            src={course.heroImageUrl ?? '/course-card-hero.png'}
-            alt=""
-            draggable={false}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover"
-            style={heroImageObjectStyle(course.heroImageObjectPosition)}
-          />
-        </Link>
+        <div className={invitationMutedClass}>
+        {invitationPending ? (
+          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg sm:h-20 sm:w-28" aria-hidden>
+            <CourseHeroImage
+              data-lex-hero
+              src={course.heroImageUrl ?? '/course-card-hero.png'}
+              alt=""
+              draggable={false}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+              style={heroImageObjectStyle(course.heroImageObjectPosition)}
+            />
+          </div>
+        ) : (
+          <Link
+            to={courseHref}
+            className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 sm:h-20 sm:w-28"
+            aria-label={`Open ${displayTitle}`}
+            onClick={(e) => {
+              if (!suppressNavigateAfterDragRef?.current) return
+              e.preventDefault()
+              e.stopPropagation()
+              suppressNavigateAfterDragRef.current = false
+            }}
+          >
+            <CourseHeroImage
+              data-lex-hero
+              src={course.heroImageUrl ?? '/course-card-hero.png'}
+              alt=""
+              draggable={false}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+              style={heroImageObjectStyle(course.heroImageObjectPosition)}
+            />
+          </Link>
+        )}
+        </div>
         <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className={`flex flex-wrap items-center gap-2 ${invitationMutedClass}`}>
             <CourseCatalogNicknameEditor
               course={course}
               titleClassName="text-base font-semibold leading-snug text-slate-900 line-clamp-1 dark:text-neutral-100"
               onNicknameChange={onNicknameChange}
             />
-            <CourseCatalogStatusPill label={badgeLabel} />
+            <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
           </div>
-          {descriptionBlurb ? (
+          {invitationPending && course.viewerPendingEnrollmentId ? (
+            <CourseEnrollmentInvitationActions
+              compact
+              courseCode={course.courseCode}
+              enrollmentId={course.viewerPendingEnrollmentId}
+              onResolved={(approved) => onInvitationResolved?.(course.id, approved)}
+            />
+          ) : descriptionBlurb ? (
             <Link
               to={courseHref}
               className="text-start text-sm leading-snug text-slate-600 line-clamp-2 hover:text-indigo-600 dark:text-neutral-400 dark:hover:text-indigo-300"
@@ -323,11 +402,15 @@ function CourseListRow({
               {descriptionBlurb}
             </Link>
           ) : null}
-          <p className="text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
+          {!invitationPending ? (
+            <p className="text-start text-xs text-slate-400 dark:text-neutral-500">{formatEditedAgo(course.updatedAt)}</p>
+          ) : null}
         </div>
-        <div className="flex shrink-0 items-start pt-1">
-          <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
-        </div>
+        {!invitationPending ? (
+          <div className="flex shrink-0 items-start pt-1">
+            <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+          </div>
+        ) : null}
       </div>
     </article>
   )
@@ -338,11 +421,13 @@ function SortableCourseListRow({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -360,6 +445,7 @@ function SortableCourseListRow({
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
+      onInvitationResolved={onInvitationResolved}
       sortable={{
         listeners: listeners as Record<string, unknown>,
         setNodeRef,
@@ -376,16 +462,20 @@ function CourseGalleryTile({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
   const badgeLabel = courseCatalogStatusLabel(course)
   const displayTitle = courseCatalogDisplayTitle(course)
+  const invitationPending = courseInvitationPending(course)
+  const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
 
   return (
     <article
@@ -400,6 +490,21 @@ function CourseGalleryTile({
         .join(' ')}
       {...(sortable ? sortable.listeners : {})}
     >
+      <div className={invitationMutedClass}>
+      {invitationPending ? (
+        <div className="relative block aspect-[4/3]" aria-hidden>
+          <CourseHeroImage
+            data-lex-hero
+            src={course.heroImageUrl ?? '/course-card-hero.png'}
+            alt=""
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+            style={heroImageObjectStyle(course.heroImageObjectPosition)}
+          />
+        </div>
+      ) : (
       <Link
         to={courseHref}
         className="relative block aspect-[4/3] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
@@ -426,17 +531,31 @@ function CourseGalleryTile({
           aria-hidden
         />
         <span className="absolute start-2 top-2">
-          <CourseCatalogStatusPill label={badgeLabel} />
+          <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
         </span>
-        <span className="absolute end-2 top-2 z-10">
-          <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
-        </span>
+        {!invitationPending ? (
+          <span className="absolute end-2 top-2 z-10">
+            <CourseCatalogPinButton course={course} onPinnedChange={onPinnedChange} />
+          </span>
+        ) : null}
         <h2 className="absolute inset-x-0 bottom-0 p-3 text-sm font-semibold leading-snug text-white drop-shadow-sm line-clamp-2">
           {displayTitle}
         </h2>
       </Link>
+      )}
+      </div>
       <div className="border-t border-slate-100 px-3 py-2 dark:border-neutral-800">
-        <CourseCatalogNicknameEditor course={course} compact onNicknameChange={onNicknameChange} />
+        <div className={invitationMutedClass}>
+          <CourseCatalogNicknameEditor course={course} compact onNicknameChange={onNicknameChange} />
+        </div>
+        {invitationPending && course.viewerPendingEnrollmentId ? (
+          <CourseEnrollmentInvitationActions
+            compact
+            courseCode={course.courseCode}
+            enrollmentId={course.viewerPendingEnrollmentId}
+            onResolved={(approved) => onInvitationResolved?.(course.id, approved)}
+          />
+        ) : null}
       </div>
     </article>
   )
@@ -447,11 +566,13 @@ function SortableCourseGalleryTile({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -469,6 +590,7 @@ function SortableCourseGalleryTile({
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
+      onInvitationResolved={onInvitationResolved}
       sortable={{
         listeners: listeners as Record<string, unknown>,
         setNodeRef,
@@ -500,15 +622,19 @@ function CourseTableRow({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef?: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
   sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
   const badgeLabel = courseCatalogStatusLabel(course)
+  const invitationPending = courseInvitationPending(course)
+  const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
 
   return (
     <article
@@ -525,34 +651,49 @@ function CourseTableRow({
     >
       <div className="flex min-w-0 items-start gap-2">
         <div className="min-w-0 flex-1">
-          <CourseCatalogNicknameEditor
-            course={course}
-            titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
-            onNicknameChange={onNicknameChange}
-          />
-          <Link
-            to={courseHref}
-            className="mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200"
-            onClick={(e) => {
-              if (!suppressNavigateAfterDragRef?.current) return
-              e.preventDefault()
-              e.stopPropagation()
-              suppressNavigateAfterDragRef.current = false
-            }}
-          >
-            Open course
-          </Link>
+          <div className={invitationMutedClass}>
+            <CourseCatalogNicknameEditor
+              course={course}
+              titleClassName="font-semibold text-slate-900 dark:text-neutral-100"
+              onNicknameChange={onNicknameChange}
+            />
+          </div>
+          {invitationPending && course.viewerPendingEnrollmentId ? (
+            <CourseEnrollmentInvitationActions
+              compact
+              courseCode={course.courseCode}
+              enrollmentId={course.viewerPendingEnrollmentId}
+              onResolved={(approved) => onInvitationResolved?.(course.id, approved)}
+            />
+          ) : (
+            <Link
+              to={courseHref}
+              className={`mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200 ${invitationMutedClass}`}
+              onClick={(e) => {
+                if (!suppressNavigateAfterDragRef?.current) return
+                e.preventDefault()
+                e.stopPropagation()
+                suppressNavigateAfterDragRef.current = false
+              }}
+            >
+              Open course
+            </Link>
+          )}
         </div>
-        <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+        {!invitationPending ? (
+          <CourseCatalogPinButton course={course} variant="inline" onPinnedChange={onPinnedChange} />
+        ) : null}
       </div>
-      <div className="self-center">
-        <CourseCatalogStatusPill label={badgeLabel} />
+      <div className={`self-center ${invitationMutedClass}`}>
+        <CourseCatalogStatusPill label={invitationPending ? 'Invitation' : badgeLabel} />
       </div>
-      <span className="self-center truncate text-slate-600 dark:text-neutral-400">{formatCourseTermLabel(course)}</span>
-      <span className="self-center whitespace-nowrap text-xs text-slate-500 dark:text-neutral-400">
+      <span className={`self-center truncate text-slate-600 dark:text-neutral-400 ${invitationMutedClass}`}>
+        {formatCourseTermLabel(course)}
+      </span>
+      <span className={`self-center whitespace-nowrap text-xs text-slate-500 dark:text-neutral-400 ${invitationMutedClass}`}>
         {formatRelativeCompact(course.updatedAt)}
       </span>
-      <span className="self-center truncate font-mono text-xs text-slate-500 dark:text-neutral-400">
+      <span className={`self-center truncate font-mono text-xs text-slate-500 dark:text-neutral-400 ${invitationMutedClass}`}>
         {course.courseCode}
       </span>
     </article>
@@ -564,11 +705,13 @@ function SortableCourseTableRow({
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
+  onInvitationResolved,
 }: {
   course: CoursePublic
   suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
+  onInvitationResolved?: CatalogInvitationResolvedHandler
 }) {
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
@@ -586,6 +729,7 @@ function SortableCourseTableRow({
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
+      onInvitationResolved={onInvitationResolved}
       sortable={{
         listeners: listeners as Record<string, unknown>,
         setNodeRef,
@@ -677,6 +821,25 @@ export default function Courses() {
     setCourses(
       (prev) =>
         prev?.map((course) => (course.id === courseId ? { ...course, catalogPinned: pinned } : course)) ?? prev,
+    )
+  }, [])
+
+  const handleInvitationResolved = useCallback((courseId: string, approved: boolean) => {
+    if (!approved) {
+      setCourses((prev) => prev?.filter((course) => course.id !== courseId) ?? prev)
+      return
+    }
+    setCourses(
+      (prev) =>
+        prev?.map((course) =>
+          course.id === courseId
+            ? {
+                ...course,
+                viewerEnrollmentInvitationPending: false,
+                viewerPendingEnrollmentId: null,
+              }
+            : course,
+        ) ?? prev,
     )
   }, [])
 
@@ -833,6 +996,7 @@ export default function Courses() {
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
+              onInvitationResolved={handleInvitationResolved}
             />
           )
         case 'gallery':
@@ -843,6 +1007,7 @@ export default function Courses() {
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
+              onInvitationResolved={handleInvitationResolved}
             />
           )
         case 'table':
@@ -853,6 +1018,7 @@ export default function Courses() {
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
+              onInvitationResolved={handleInvitationResolved}
             />
           )
         case 'list':
@@ -863,6 +1029,7 @@ export default function Courses() {
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
+              onInvitationResolved={handleInvitationResolved}
             />
           )
         case 'status':
@@ -873,7 +1040,7 @@ export default function Courses() {
         }
       }
     },
-    [catalogView, handleNicknameChange, handlePinnedChange],
+    [catalogView, handleInvitationResolved, handleNicknameChange, handlePinnedChange],
   )
 
   const renderCourseItems = useCallback(

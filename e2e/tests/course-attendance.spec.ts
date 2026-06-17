@@ -65,10 +65,10 @@ test.describe('Course Attendance API', () => {
     const instrEmail = uniqueEmail('instr')
     const stuEmail = uniqueEmail('stu')
     const { access_token: instrToken } = await apiSignup({ email: instrEmail, password: PASSWORD })
-    await apiSignup({ email: stuEmail, password: PASSWORD })
+    const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'Course Attendance E2E' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
     await enableAttendance(instrToken, cc)
 
     const rosterRes = await request.get(`${API_BASE}/api/v1/courses/${cc}/enrollments`, {
@@ -137,7 +137,7 @@ test.describe('Course Attendance API', () => {
     const { access_token: stuToken } = await apiSignup({ email: stuEmail, password: PASSWORD })
     const course = await apiCreateCourse(instrToken, { title: 'Self Report E2E' })
     const cc = course.courseCode
-    await apiEnroll(instrToken, cc, stuEmail, 'student')
+    await apiEnroll(instrToken, cc, stuEmail, 'student', stuToken)
     await enableAttendance(instrToken, cc)
 
     const now = new Date()

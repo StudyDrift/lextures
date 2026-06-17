@@ -13,6 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	commodels "github.com/lextures/lextures/server/internal/models/communication"
 	"github.com/lextures/lextures/server/internal/repos/communication"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
@@ -62,6 +63,32 @@ func (d Deps) notifyCoursesForUsers(userIDs ...uuid.UUID) {
 		}
 		seen[uid] = struct{}{}
 		d.notifyCourses(uid)
+	}
+}
+
+func (d Deps) notifyEnrollmentsForCourse(ctx context.Context, courseCode string) {
+	if d.Comm == nil || strings.TrimSpace(courseCode) == "" {
+		return
+	}
+	userIDs, err := enrollment.ListRosterRealtimeSubscriberUserIDs(ctx, d.Pool, courseCode)
+	if err != nil {
+		return
+	}
+	payload, err := json.Marshal(map[string]string{
+		"type":       "enrollments_updated",
+		"courseCode": courseCode,
+	})
+	if err != nil {
+		return
+	}
+	jsonStr := string(payload)
+	seen := make(map[uuid.UUID]struct{}, len(userIDs))
+	for _, uid := range userIDs {
+		if _, ok := seen[uid]; ok {
+			continue
+		}
+		seen[uid] = struct{}{}
+		d.Comm.Broadcast(uid, jsonStr)
 	}
 }
 

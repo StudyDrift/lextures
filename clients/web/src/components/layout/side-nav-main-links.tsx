@@ -1,16 +1,23 @@
 import {
   Accessibility,
+  Award,
   BarChart3,
   BookMarked,
   BookOpen,
+  Bot,
   Calendar,
+  CreditCard,
   FileText,
   FolderOpen,
   GraduationCap,
   Inbox,
   LayoutDashboard,
+  Library,
+  Route,
+  RotateCcw,
   Settings,
   ShieldCheck,
+  Sparkles,
   UsersRound,
 } from 'lucide-react'
 import { useInboxUnreadCount } from '../../context/use-inbox-unread'
@@ -22,19 +29,27 @@ import {
   PERM_REPORTS_VIEW,
 } from '../../lib/rbac-api'
 import { SideNavLink } from './side-nav-link'
+import { SideNavSectionLabel } from './side-nav-section-label'
 
 export function SideNavMainLinks() {
   const unreadInboxCount = useInboxUnreadCount()
   const { allows, loading: permLoading } = usePermissions()
   const {
     accommodationsEngineEnabled,
+    selfReflectionEnabled,
     ffEportfolio,
     ffTranscripts,
     ffAdvisingIntegration,
     ffResearchConsent,
     ffAccessibilityIntake,
-  } =
-    usePlatformFeatures()
+    ffCoCurricularTranscript,
+    ffCeuTracking,
+    ffStripeBilling,
+    ffLearningPaths,
+    ffCatalogIntegration,
+    ffLibrary,
+    ffConferenceScheduling,
+  } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
   const canManageAccommodations = !permLoading && allows(PERM_ACCOMMODATIONS_MANAGE)
@@ -49,65 +64,145 @@ export function SideNavMainLinks() {
     </span>
   )
 
+  const showRecords =
+    ffTranscripts ||
+    ffAdvisingIntegration ||
+    ffCoCurricularTranscript ||
+    ffCeuTracking ||
+    ffResearchConsent ||
+    ffAccessibilityIntake ||
+    ffStripeBilling
+
   return (
     <>
       <SideNavLink to="/" end icon={<LayoutDashboard className="h-5 w-5" />}>
         Dashboard
       </SideNavLink>
-      {isParent && (
-        <SideNavLink to="/parent" icon={<UsersRound className="h-5 w-5" />}>
-          Family
-        </SideNavLink>
-      )}
       <SideNavLink to="/courses" icon={<BookOpen className="h-5 w-5" />}>
         Courses
       </SideNavLink>
+      <SideNavLink to="/calendar" icon={<Calendar className="h-5 w-5" />}>
+        Calendar
+      </SideNavLink>
+
+      <SideNavSectionLabel first>Learning</SideNavSectionLabel>
+      <SideNavLink to="/ai" icon={<Bot className="h-5 w-5" />}>
+        Ask AI
+      </SideNavLink>
+      <SideNavLink to="/review" icon={<RotateCcw className="h-5 w-5" />}>
+        Review practice
+      </SideNavLink>
+      {selfReflectionEnabled ? (
+        <SideNavLink to="/me/study-insights" icon={<Sparkles className="h-5 w-5" />}>
+          Study insights
+        </SideNavLink>
+      ) : null}
+      {ffLearningPaths ? (
+        <SideNavLink to="/my-paths" icon={<Route className="h-5 w-5" />}>
+          My learning paths
+        </SideNavLink>
+      ) : null}
+      {ffCatalogIntegration ? (
+        <SideNavLink to="/catalog" icon={<GraduationCap className="h-5 w-5" />}>
+          Course catalog
+        </SideNavLink>
+      ) : null}
+      {ffLibrary ? (
+        <SideNavLink to="/reading-log" icon={<Library className="h-5 w-5" />}>
+          Reading log
+        </SideNavLink>
+      ) : null}
+
+      <SideNavSectionLabel>Notes & portfolio</SideNavSectionLabel>
       <SideNavLink to="/notebooks" icon={<BookMarked className="h-5 w-5" />}>
         My Notebooks
+      </SideNavLink>
+      <SideNavLink to="/notebooks/global" icon={<BookMarked className="h-5 w-5" />}>
+        Global notebook
       </SideNavLink>
       {ffEportfolio ? (
         <SideNavLink to="/portfolios" icon={<FolderOpen className="h-5 w-5" />}>
           My Portfolio
         </SideNavLink>
       ) : null}
-      {ffTranscripts ? (
-        <SideNavLink to="/transcripts" icon={<FileText className="h-5 w-5" />}>
-          Transcripts
-        </SideNavLink>
+
+      {showRecords ? (
+        <>
+          <SideNavSectionLabel>Records</SideNavSectionLabel>
+          {ffTranscripts ? (
+            <SideNavLink to="/transcripts" icon={<FileText className="h-5 w-5" />}>
+              Transcripts
+            </SideNavLink>
+          ) : null}
+          {ffAdvisingIntegration ? (
+            <SideNavLink to="/advising-notes" icon={<GraduationCap className="h-5 w-5" />}>
+              Advising notes
+            </SideNavLink>
+          ) : null}
+          {ffCoCurricularTranscript ? (
+            <SideNavLink to="/me/ccr" icon={<Award className="h-5 w-5" />}>
+              My achievements
+            </SideNavLink>
+          ) : null}
+          {ffCeuTracking ? (
+            <SideNavLink to="/me/ce-transcript" icon={<FileText className="h-5 w-5" />}>
+              CE transcript
+            </SideNavLink>
+          ) : null}
+          {ffResearchConsent ? (
+            <SideNavLink to="/me/research-studies" icon={<ShieldCheck className="h-5 w-5" />}>
+              Research studies
+            </SideNavLink>
+          ) : null}
+          {ffAccessibilityIntake ? (
+            <SideNavLink to="/me/accommodations" icon={<ShieldCheck className="h-5 w-5" />}>
+              My accommodations
+            </SideNavLink>
+          ) : null}
+          {ffStripeBilling ? (
+            <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
+              Billing
+            </SideNavLink>
+          ) : null}
+        </>
       ) : null}
-      {ffAdvisingIntegration ? (
-        <SideNavLink to="/advising-notes" icon={<GraduationCap className="h-5 w-5" />}>
-          Advising notes
-        </SideNavLink>
+
+      {isParent ? (
+        <>
+          <SideNavSectionLabel>Family</SideNavSectionLabel>
+          <SideNavLink to="/parent" icon={<UsersRound className="h-5 w-5" />}>
+            Family dashboard
+          </SideNavLink>
+          {ffConferenceScheduling ? (
+            <SideNavLink to="/parent/conferences" icon={<Calendar className="h-5 w-5" />}>
+              Conference booking
+            </SideNavLink>
+          ) : null}
+        </>
       ) : null}
-      {ffResearchConsent ? (
-        <SideNavLink to="/me/research-studies" icon={<ShieldCheck className="h-5 w-5" />}>
-          Research studies
-        </SideNavLink>
+
+      {(canViewReports || canManageAccommodations) ? (
+        <>
+          <SideNavSectionLabel>Administration</SideNavSectionLabel>
+          {canViewReports ? (
+            <SideNavLink to="/reports" icon={<BarChart3 className="h-5 w-5" />}>
+              Reports
+            </SideNavLink>
+          ) : null}
+          {canManageAccommodations ? (
+            <SideNavLink to="/admin/accommodations" icon={<Accessibility className="h-5 w-5" />}>
+              Accommodations
+            </SideNavLink>
+          ) : null}
+          {canManageAccommodations && accommodationsEngineEnabled ? (
+            <SideNavLink to="/admin/accommodations/audit" icon={<Accessibility className="h-5 w-5" />}>
+              Accommodation audit
+            </SideNavLink>
+          ) : null}
+        </>
       ) : null}
-      {ffAccessibilityIntake ? (
-        <SideNavLink to="/me/accommodations" icon={<ShieldCheck className="h-5 w-5" />}>
-          My accommodations
-        </SideNavLink>
-      ) : null}
-      <SideNavLink to="/calendar" icon={<Calendar className="h-5 w-5" />}>
-        Calendar
-      </SideNavLink>
-      {canViewReports && (
-        <SideNavLink to="/reports" icon={<BarChart3 className="h-5 w-5" />}>
-          Reports
-        </SideNavLink>
-      )}
-      {canManageAccommodations && (
-        <SideNavLink to="/admin/accommodations" icon={<Accessibility className="h-5 w-5" />}>
-          Accommodations
-        </SideNavLink>
-      )}
-      {canManageAccommodations && accommodationsEngineEnabled && (
-        <SideNavLink to="/admin/accommodations/audit" icon={<Accessibility className="h-5 w-5" />}>
-          Accommodation audit
-        </SideNavLink>
-      )}
+
+      <SideNavSectionLabel>Account</SideNavSectionLabel>
       <SideNavLink
         to="/inbox"
         data-onboarding="nav-inbox"

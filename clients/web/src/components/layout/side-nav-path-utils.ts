@@ -60,6 +60,40 @@ export type CourseSettingsSection =
   | 'blueprint'
   | 'archive'
 
+/** Routes that use the settings sidebar (user + system admin tools). */
+export function isSettingsShellRoute(pathname: string): boolean {
+  if (pathname.startsWith('/settings')) return true
+  if (pathname === '/privacy-centre') return true
+  if (pathname === '/conferences/availability') return true
+  if (pathname.startsWith('/creator/learning-paths')) return true
+  if (pathname.startsWith('/library/')) return true
+
+  const adminSettingsRoutes = [
+    '/admin/bookstore',
+    '/admin/consent-studies',
+    '/admin/consortium',
+    '/admin/accessibility',
+    '/admin/ccr/',
+    '/admin/quarantine',
+    '/admin/compliance/',
+    '/admin/caption-compliance',
+    '/admin/attendance/',
+    '/admin/behavior/',
+    '/admin/broadcasts/',
+    '/admin/conferences/',
+    '/admin/demographics/',
+    '/admin/content-filter',
+    '/admin/sis',
+    '/admin/final-grades/',
+    '/admin/incompletes',
+    '/admin/academic-calendar',
+    '/admin/evaluations/',
+  ]
+  return adminSettingsRoutes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix),
+  )
+}
+
 export function courseSettingsSectionFromPathname(pathname: string): CourseSettingsSection {
   const m = matchPath({ path: '/courses/:courseCode/settings/*', end: true }, pathname)
   const raw = m?.params['*']?.replace(/^\/+/, '') ?? ''

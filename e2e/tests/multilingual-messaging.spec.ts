@@ -275,7 +275,7 @@ test.describe('Multilingual Messaging UI', () => {
       email: studEmail, password: PASSWORD, displayName: 'ML Student',
     })
     const course = await apiCreateCourse(instrToken, { title: 'ML Feed Course' })
-    await apiEnroll(instrToken, course.courseCode, studEmail)
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
 
     // Enable feed and multilingual messaging
     await apiEnableCourseFeatures(instrToken, course.courseCode, { feedEnabled: true })

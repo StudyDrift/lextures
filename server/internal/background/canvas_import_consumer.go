@@ -19,7 +19,7 @@ func StartCanvasImportConsumer(ctx context.Context, queue *canvasimportqueue.Bus
 		return
 	}
 	go func() {
-		slog.Info("canvas import queue consumer started")
+		slog.Info("canvas import queue consumer started", "concurrency", queue.Concurrency())
 		if err := queue.Consume(ctx, func(msg canvasimportjobs.QueueMessage) error {
 			return processor.HandleCanvasImportQueueMessage(ctx, msg)
 		}); err != nil && ctx.Err() == nil {

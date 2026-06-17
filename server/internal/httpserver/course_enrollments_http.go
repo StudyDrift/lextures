@@ -3,6 +3,8 @@ package httpserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -46,8 +48,9 @@ func normalizeCourseEnrollmentRole(s string) string {
 
 // enrollmentRoleCapabilities holds catalog capability bits for a role.
 type enrollmentRoleCapabilities struct {
-	Valid    bool
-	IsStaff  bool
+	Valid               bool
+	IsStaff             bool
+	IsStudentEquivalent bool
 }
 
 // lookupEnrollmentRoleCapabilities queries course.enrollment_roles for capability bits.
@@ -55,10 +58,10 @@ type enrollmentRoleCapabilities struct {
 func lookupEnrollmentRoleCapabilities(ctx context.Context, pool *pgxpool.Pool, role string) (enrollmentRoleCapabilities, error) {
 	var caps enrollmentRoleCapabilities
 	err := pool.QueryRow(ctx, `
-SELECT true, is_staff
+SELECT true, is_staff, is_student_equivalent
 FROM course.enrollment_roles
 WHERE role_key = $1
-`, role).Scan(&caps.Valid, &caps.IsStaff)
+`, role).Scan(&caps.Valid, &caps.IsStaff, &caps.IsStudentEquivalent)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return enrollmentRoleCapabilities{Valid: false}, nil
@@ -66,6 +69,36 @@ WHERE role_key = $1
 		return enrollmentRoleCapabilities{}, err
 	}
 	return caps, nil
+}
+
+type addedEnrollmentRecord struct {
+	userID       uuid.UUID
+	enrollmentID uuid.UUID
+	email        string
+	invited      bool
+}
+
+func insertCourseEnrollment(
+	ctx context.Context,
+	tx pgx.Tx,
+	courseID, userID uuid.UUID,
+	role string,
+	invitationPending bool,
+) (inserted bool, enrollmentID uuid.UUID, err error) {
+	active := !invitationPending
+	err = tx.QueryRow(ctx, `
+INSERT INTO course.course_enrollments (course_id, user_id, role, active, invitation_pending)
+VALUES ($1, $2, $3, $4, $5)
+ON CONFLICT (course_id, user_id, role) DO NOTHING
+RETURNING id
+`, courseID, userID, role, active, invitationPending).Scan(&enrollmentID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, uuid.Nil, nil
+	}
+	if err != nil {
+		return false, uuid.Nil, err
+	}
+	return true, enrollmentID, nil
 }
 
 func chiCourseCode(w http.ResponseWriter, r *http.Request) (string, bool) {
@@ -125,9 +158,15 @@ func (d Deps) handleCourseEnrollmentsPost() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
 			return
 		}
+		var courseTitle string
+		if err := d.Pool.QueryRow(r.Context(), `SELECT title FROM course.courses WHERE id = $1`, *cid).Scan(&courseTitle); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
 		ctx := r.Context()
 		var added, already, notFound []string
 		var addedUserIDs []uuid.UUID
+		var invitedEnrollments []addedEnrollmentRecord
 		tx, err := d.Pool.BeginTx(ctx, pgx.TxOptions{})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start transaction.")
@@ -178,22 +217,23 @@ LIMIT 1
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to look up user.")
 					return
 				}
-				tag, err := tx.Exec(ctx, `
-INSERT INTO course.course_enrollments (course_id, user_id, role)
-VALUES ($1, $2, $3)
-ON CONFLICT (course_id, user_id, role) DO NOTHING
-`, *cid, uid, role)
+				invitationPending := roleCaps.IsStudentEquivalent && !roleCaps.IsStaff
+				inserted, eid, err := insertCourseEnrollment(ctx, tx, *cid, uid, role, invitationPending)
 				if err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to add enrollment.")
 					return
 				}
-				if tag.RowsAffected() == 0 {
+				if !inserted {
 					already = append(already, em)
-				} else {
-					added = append(added, em)
-					addedUserIDs = append(addedUserIDs, uid)
+					continue
 				}
-				if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
+				added = append(added, em)
+				addedUserIDs = append(addedUserIDs, uid)
+				if invitationPending {
+					invitedEnrollments = append(invitedEnrollments, addedEnrollmentRecord{
+						userID: uid, enrollmentID: eid, email: em, invited: true,
+					})
+				} else if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
 					return
 				}
@@ -229,31 +269,26 @@ LIMIT 1
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to look up user.")
 					return
 				}
-				tag, err := tx.Exec(ctx, `
-INSERT INTO course.course_enrollments (course_id, user_id, role)
-VALUES ($1, $2, 'student')
-ON CONFLICT (course_id, user_id, role) DO NOTHING
-`, *cid, uid)
+				inserted, eid, err := insertCourseEnrollment(ctx, tx, *cid, uid, "student", true)
 				if err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to add enrollment.")
 					return
 				}
-				if tag.RowsAffected() == 0 {
+				if !inserted {
 					already = append(already, em)
-				} else {
-					added = append(added, em)
-					addedUserIDs = append(addedUserIDs, uid)
+					continue
 				}
+				added = append(added, em)
+				addedUserIDs = append(addedUserIDs, uid)
+				invitedEnrollments = append(invitedEnrollments, addedEnrollmentRecord{
+					userID: uid, enrollmentID: eid, email: em, invited: true,
+				})
 				if _, err := tx.Exec(ctx, `
 INSERT INTO "user".user_app_roles (user_id, role_id)
 VALUES ($1, $2)
 ON CONFLICT (user_id, role_id) DO NOTHING
 `, uid, *body.AppRoleID); err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to link app role.")
-					return
-				}
-				if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
-					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
 					return
 				}
 			}
@@ -274,25 +309,20 @@ LIMIT 1
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to look up user.")
 					return
 				}
-				tag, err := tx.Exec(ctx, `
-INSERT INTO course.course_enrollments (course_id, user_id, role)
-VALUES ($1, $2, 'student')
-ON CONFLICT (course_id, user_id, role) DO NOTHING
-`, *cid, uid)
+				inserted, eid, err := insertCourseEnrollment(ctx, tx, *cid, uid, "student", true)
 				if err != nil {
 					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to add enrollment.")
 					return
 				}
-				if tag.RowsAffected() == 0 {
+				if !inserted {
 					already = append(already, em)
-				} else {
-					added = append(added, em)
-					addedUserIDs = append(addedUserIDs, uid)
+					continue
 				}
-				if err := courseroles.RefreshManagedGrantsForCourseUser(ctx, tx, uid, *cid, courseCode); err != nil {
-					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to sync course permissions.")
-					return
-				}
+				added = append(added, em)
+				addedUserIDs = append(addedUserIDs, uid)
+				invitedEnrollments = append(invitedEnrollments, addedEnrollmentRecord{
+					userID: uid, enrollmentID: eid, email: em, invited: true,
+				})
 			}
 		}
 		if err := tx.Commit(ctx); err != nil {
@@ -300,6 +330,15 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 			return
 		}
 		d.notifyCoursesForUsers(addedUserIDs...)
+		d.notifyEnrollmentsForCourse(ctx, courseCode)
+		for _, rec := range invitedEnrollments {
+			if _, err := communication.SendEnrollmentInvitationMessage(ctx, d.Pool, rec.email, courseCode, courseTitle, rec.enrollmentID); err != nil {
+				log.Printf("enrollment invitation message: user=%s enrollment=%s: %v", rec.userID, rec.enrollmentID, err)
+				continue
+			}
+			d.notifyMailbox(rec.userID)
+			d.emitInboxMessageNotification(ctx, rec.userID, communication.PlatformInboxSenderID, "Course invitation")
+		}
 		learningevents.EmitEnrollmentAsync(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, added)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(modelenrollment.AddEnrollmentsResponse{
@@ -468,7 +507,7 @@ SELECT c.org_id FROM course.courses c WHERE c.course_code = $1
 SELECT ce.user_id, ce.course_id
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
-WHERE ce.id = $1 AND c.course_code = $2 AND ce.active
+WHERE ce.id = $1 AND c.course_code = $2 AND (ce.active OR ce.invitation_pending)
 `, eid, courseCode).Scan(&uid, &courseID)
 		if err == pgx.ErrNoRows {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Enrollment not found.")
@@ -540,7 +579,7 @@ func (d Deps) handleCourseEnrollmentsDelete() http.HandlerFunc {
 SELECT ce.user_id, ce.course_id
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
-WHERE ce.id = $1 AND c.course_code = $2 AND ce.active
+WHERE ce.id = $1 AND c.course_code = $2 AND (ce.active OR ce.invitation_pending)
 `, eid, courseCode).Scan(&uid, &courseID)
 		if err == pgx.ErrNoRows {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Enrollment not found.")
@@ -563,6 +602,7 @@ WHERE ce.id = $1 AND c.course_code = $2 AND ce.active
 			return
 		}
 		d.notifyCourses(uid)
+		d.notifyEnrollmentsForCourse(ctx, courseCode)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

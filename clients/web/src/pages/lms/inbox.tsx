@@ -13,6 +13,8 @@ import {
 } from 'lucide-react'
 import { EmptyState } from '../../components/ui/empty-state'
 import { useMailboxRevision, useRefreshUnread } from '../../context/use-inbox-unread'
+import { CourseEnrollmentInvitationActions } from '../../components/enrollment/course-enrollment-invitation-actions'
+import { useCoursesRevision } from '../../context/use-inbox-unread'
 import {
   fetchMailboxMessages,
   patchMailbox,
@@ -80,8 +82,35 @@ function folderEmptyCopy(
   }
 }
 
+function InboxMessageActions({
+  message,
+  onResolved,
+}: {
+  message: MailboxMessage
+  onResolved: () => void
+}) {
+  const meta = message.metadata
+  if (!meta?.actions?.length || meta.resolved) return null
+
+  if (meta.type === 'enrollment_invitation' && meta.courseCode && meta.enrollmentId) {
+    return (
+      <div className="mt-6 border-t border-slate-100 pt-4">
+        <p className="mb-3 text-sm font-medium text-slate-700">Respond to this invitation</p>
+        <CourseEnrollmentInvitationActions
+          courseCode={meta.courseCode}
+          enrollmentId={meta.enrollmentId}
+          onResolved={() => onResolved()}
+        />
+      </div>
+    )
+  }
+
+  return null
+}
+
 export default function Inbox() {
   const mailboxRevision = useMailboxRevision()
+  const coursesRevision = useCoursesRevision()
   const refreshUnread = useRefreshUnread()
 
   const [messages, setMessages] = useState<MailboxMessage[]>([])
@@ -120,7 +149,7 @@ export default function Inbox() {
 
   useEffect(() => {
     void loadMessages()
-  }, [loadMessages, mailboxRevision])
+  }, [loadMessages, mailboxRevision, coursesRevision])
 
   useEffect(() => {
     if (!composeOpen) return
@@ -491,6 +520,16 @@ export default function Inbox() {
                         <span className="text-slate-400">Empty message.</span>
                       )}
                     </div>
+                    {selected.metadata?.resolved === 'approved' ? (
+                      <p className="mt-4 text-sm font-medium text-emerald-700">You approved this invitation.</p>
+                    ) : null}
+                    {selected.metadata?.resolved === 'declined' ? (
+                      <p className="mt-4 text-sm font-medium text-red-700">You declined this invitation.</p>
+                    ) : null}
+                    <InboxMessageActions
+                      message={selected}
+                      onResolved={() => void loadMessages()}
+                    />
                   </div>
                 </>
               ) : (

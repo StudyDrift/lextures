@@ -21,6 +21,8 @@ services:
     build:
       context: ./server
       dockerfile: Dockerfile.dev
+    env_file:
+      - ./server/.env
     environment:
       JWT_SECRET: dev-only-change-me-in-production
       RABBITMQ_URL: amqp://studydrift:studydrift@rabbitmq:5672/

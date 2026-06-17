@@ -29,24 +29,37 @@ type Consumer interface {
 
 // Bus combines publish and consume for wiring in app startup.
 type Bus struct {
-	pub Publisher
-	con Consumer
+	pub         Publisher
+	con         Consumer
+	concurrency int
 }
 
 // NewBus returns a RabbitMQ-backed bus when url is non-empty, otherwise an in-process memory bus.
-func NewBus(url, queueName string) (*Bus, error) {
+// concurrency is the number of import jobs processed in parallel (minimum 1).
+func NewBus(url, queueName string, concurrency int) (*Bus, error) {
 	if queueName == "" {
 		queueName = defaultQueueName
 	}
-	if url == "" {
-		mem := newMemoryBus()
-		return &Bus{pub: mem, con: mem}, nil
+	if concurrency < 1 {
+		concurrency = 1
 	}
-	rmq, err := newRabbitBus(url, queueName)
+	if url == "" {
+		mem := newMemoryBus(concurrency)
+		return &Bus{pub: mem, con: mem, concurrency: concurrency}, nil
+	}
+	rmq, err := newRabbitBus(url, queueName, concurrency)
 	if err != nil {
 		return nil, err
 	}
-	return &Bus{pub: rmq, con: rmq}, nil
+	return &Bus{pub: rmq, con: rmq, concurrency: concurrency}, nil
+}
+
+// Concurrency returns how many import jobs are processed in parallel.
+func (b *Bus) Concurrency() int {
+	if b == nil || b.concurrency < 1 {
+		return 1
+	}
+	return b.concurrency
 }
 
 func (b *Bus) Publish(ctx context.Context, msg canvasimportjobs.QueueMessage) error {
@@ -74,13 +87,14 @@ func (b *Bus) Close() error {
 }
 
 type rabbitBus struct {
-	url       string
-	queueName string
-	conn      *amqp.Connection
-	ch        *amqp.Channel
+	url         string
+	queueName   string
+	concurrency int
+	conn        *amqp.Connection
+	ch          *amqp.Channel
 }
 
-func newRabbitBus(url, queueName string) (*rabbitBus, error) {
+func newRabbitBus(url, queueName string, concurrency int) (*rabbitBus, error) {
 	conn, err := amqp.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("rabbitmq dial: %w", err)
@@ -95,7 +109,7 @@ func newRabbitBus(url, queueName string) (*rabbitBus, error) {
 		_ = conn.Close()
 		return nil, fmt.Errorf("rabbitmq queue declare: %w", err)
 	}
-	return &rabbitBus{url: url, queueName: queueName, conn: conn, ch: ch}, nil
+	return &rabbitBus{url: url, queueName: queueName, concurrency: concurrency, conn: conn, ch: ch}, nil
 }
 
 func (r *rabbitBus) Publish(_ context.Context, msg canvasimportjobs.QueueMessage) error {
@@ -111,10 +125,17 @@ func (r *rabbitBus) Publish(_ context.Context, msg canvasimportjobs.QueueMessage
 }
 
 func (r *rabbitBus) Consume(ctx context.Context, handler func(canvasimportjobs.QueueMessage) error) error {
+	if err := r.ch.Qos(r.concurrency, 0, false); err != nil {
+		return fmt.Errorf("rabbitmq qos: %w", err)
+	}
 	deliveries, err := r.ch.Consume(r.queueName, "", false, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("rabbitmq consume: %w", err)
 	}
+	sem := make(chan struct{}, r.concurrency)
+	var wg sync.WaitGroup
+	defer wg.Wait()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -123,18 +144,31 @@ func (r *rabbitBus) Consume(ctx context.Context, handler func(canvasimportjobs.Q
 			if !ok {
 				return nil
 			}
-			var msg canvasimportjobs.QueueMessage
-			if err := json.Unmarshal(d.Body, &msg); err != nil {
-				slog.Warn("canvas_import_queue: bad message", "err", err)
-				_ = d.Nack(false, false)
-				continue
-			}
-			if err := handler(msg); err != nil {
-				slog.Warn("canvas_import_queue: handler failed", "job_id", msg.JobID, "err", err)
+			select {
+			case sem <- struct{}{}:
+			case <-ctx.Done():
 				_ = d.Nack(false, true)
-				continue
+				return ctx.Err()
 			}
-			_ = d.Ack(false)
+			wg.Add(1)
+			go func(d amqp.Delivery) {
+				defer func() {
+					<-sem
+					wg.Done()
+				}()
+				var msg canvasimportjobs.QueueMessage
+				if err := json.Unmarshal(d.Body, &msg); err != nil {
+					slog.Warn("canvas_import_queue: bad message", "err", err)
+					_ = d.Nack(false, false)
+					return
+				}
+				if err := handler(msg); err != nil {
+					slog.Warn("canvas_import_queue: handler failed", "job_id", msg.JobID, "err", err)
+					_ = d.Nack(false, true)
+					return
+				}
+				_ = d.Ack(false)
+			}(d)
 		}
 	}
 }
@@ -150,16 +184,18 @@ func (r *rabbitBus) Close() error {
 }
 
 type memoryBus struct {
-	mu      sync.Mutex
-	ch      chan canvasimportjobs.QueueMessage
-	closed  bool
-	closeCh chan struct{}
+	mu          sync.Mutex
+	ch          chan canvasimportjobs.QueueMessage
+	closed      bool
+	closeCh     chan struct{}
+	concurrency int
 }
 
-func newMemoryBus() *memoryBus {
+func newMemoryBus(concurrency int) *memoryBus {
 	return &memoryBus{
-		ch:      make(chan canvasimportjobs.QueueMessage, 32),
-		closeCh: make(chan struct{}),
+		ch:          make(chan canvasimportjobs.QueueMessage, 32),
+		closeCh:     make(chan struct{}),
+		concurrency: concurrency,
 	}
 }
 
@@ -178,6 +214,10 @@ func (m *memoryBus) Publish(_ context.Context, msg canvasimportjobs.QueueMessage
 }
 
 func (m *memoryBus) Consume(ctx context.Context, handler func(canvasimportjobs.QueueMessage) error) error {
+	sem := make(chan struct{}, m.concurrency)
+	var wg sync.WaitGroup
+	defer wg.Wait()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -185,9 +225,21 @@ func (m *memoryBus) Consume(ctx context.Context, handler func(canvasimportjobs.Q
 		case <-m.closeCh:
 			return nil
 		case msg := <-m.ch:
-			if err := handler(msg); err != nil {
-				slog.Warn("canvas_import_queue: memory handler failed", "job_id", msg.JobID, "err", err)
+			select {
+			case sem <- struct{}{}:
+			case <-ctx.Done():
+				return ctx.Err()
 			}
+			wg.Add(1)
+			go func(msg canvasimportjobs.QueueMessage) {
+				defer func() {
+					<-sem
+					wg.Done()
+				}()
+				if err := handler(msg); err != nil {
+					slog.Warn("canvas_import_queue: memory handler failed", "job_id", msg.JobID, "err", err)
+				}
+			}(msg)
 		}
 	}
 }

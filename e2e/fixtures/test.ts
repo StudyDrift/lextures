@@ -90,7 +90,7 @@ export const test = base.extend<TestFixtures>({
       // runs and inserts the user_course_grants row for item:create.  CreateCourse only inserts
       // the course_enrollments row without triggering the grant refresh.
       await apiEnroll(instructorToken, course.courseCode, instructorEmail, 'teacher')
-      await apiEnroll(instructorToken, course.courseCode, studentEmail, 'student')
+      await apiEnroll(instructorToken, course.courseCode, studentEmail, 'student', studentToken)
       const mod = await apiCreateModule(instructorToken, course.courseCode, 'Unit 1')
 
       // Enable common course features so UI menus (feed, discussions, collab docs, sections, etc.)

@@ -86,7 +86,7 @@ test.describe('AI Tutor API', () => {
       displayName: 'Student',
     })
     const course = await apiCreateCourse(instrToken, { title: 'Tutor Test Course' })
-    await apiEnroll(instrToken, course.courseCode, studEmail)
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
     await enableAiTutor(instrToken, course.courseCode)
 
     const res = await request.get(
@@ -121,7 +121,7 @@ test.describe('AI Tutor API', () => {
       displayName: 'Student 2',
     })
     const course = await apiCreateCourse(instrToken, { title: 'No Tutor Course' })
-    await apiEnroll(instrToken, course.courseCode, studEmail)
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
     // Feature NOT enabled
 
     const res = await request.get(
@@ -145,7 +145,7 @@ test.describe('AI Tutor API', () => {
       displayName: 'Student 3',
     })
     const course = await apiCreateCourse(instrToken, { title: 'Tutor Reset Course' })
-    await apiEnroll(instrToken, course.courseCode, studEmail)
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
     await enableAiTutor(instrToken, course.courseCode)
 
     // First GET to create conversation
@@ -286,7 +286,7 @@ test.describe('AI Tutor UI', () => {
       displayName: 'Btn Student',
     })
     const course = await apiCreateCourse(instrToken, { title: 'BTN Course' })
-    await apiEnroll(instrToken, course.courseCode, studEmail)
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
     await enableAiTutor(instrToken, course.courseCode)
 
     await injectToken(page, studToken)
@@ -309,7 +309,7 @@ test.describe('AI Tutor UI', () => {
       displayName: 'Open Student',
     })
     const course = await apiCreateCourse(instrToken, { title: 'Open Tutor Course' })
-    await apiEnroll(instrToken, course.courseCode, studEmail)
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
     await enableAiTutor(instrToken, course.courseCode)
 
     await injectToken(page, studToken)

@@ -70,9 +70,9 @@ test.describe('Course enrollments', () => {
     await expect(removeBtnVis).toBeVisible({ timeout: 5000 })
     await removeBtnVis.click()
 
-    // Confirm if a dialog appears.
-    const confirmBtn = page.getByRole('button', { name: /confirm|yes/i }).first()
-    if (await confirmBtn.count() > 0) await confirmBtn.click()
+    const dialog = page.getByRole('dialog', { name: /remove enrollment/i })
+    await expect(dialog).toBeVisible({ timeout: 5000 })
+    await dialog.getByRole('button', { name: /^remove$/i }).click()
 
     await expect(table.getByText('E2E Student')).not.toBeVisible({ timeout: 8000 })
   })

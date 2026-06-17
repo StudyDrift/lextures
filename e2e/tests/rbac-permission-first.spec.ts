@@ -61,7 +61,7 @@ test.describe('5.11 permission-first RBAC — catalog-driven permission emission
     const { courseCode } = await apiCreateCourse(instructorToken, {
       title: 'RBAC Student Perm Course',
     })
-    await apiEnroll(instructorToken, courseCode, studentEmail, 'student')
+    await apiEnroll(instructorToken, courseCode, studentEmail, 'student', studentToken)
 
     const perms = await fetchPermissions(studentToken, courseCode)
     const studentPerm = `course:${courseCode}:enrollments:role-student`

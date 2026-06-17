@@ -235,6 +235,22 @@ describe('buildSearchItems', () => {
     expect(noPerm.some((i) => i.path === '/courses/X/whiteboard')).toBe(false)
   })
 
+  it('includes files when enabled and staff may edit the course', () => {
+    const allowsItems = (p: string) => p === courseItemCreatePermission('X')
+    const items = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', filesEnabled: true }],
+      [],
+      allowsItems,
+    )
+    expect(items.some((i) => i.path === '/courses/X/files')).toBe(true)
+    const noPerm = buildSearchItems(
+      [{ courseCode: 'X', title: 'Y', filesEnabled: true }],
+      [],
+      allowsNone,
+    )
+    expect(noPerm.some((i) => i.path === '/courses/X/files')).toBe(false)
+  })
+
   it('omits feed, notebook, and calendar search targets when disabled on the course', () => {
     const allowsRosterX = (p: string) => p === courseEnrollmentsReadPermission('X')
     const items = buildSearchItems(

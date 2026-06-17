@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 )
@@ -76,6 +77,7 @@ func canvasPrefetchModuleItemData(
 	}
 
 	g, gctx := canvasImportParallelGroup(ctx, len(assignKeys)+len(quizKeys)+len(slugKeys)+len(quizKeys))
+	var cacheMu sync.Mutex
 
 	for _, cid := range assignKeys {
 		cid := cid
@@ -87,7 +89,9 @@ func canvasPrefetchModuleItemData(
 			}
 			if obj != nil {
 				_ = canvasEnrichAssignmentWithRubric(gctx, client, canvasBase, accessToken, canvasCourseID, obj)
+				cacheMu.Lock()
 				cache.assignments[cid] = obj
+				cacheMu.Unlock()
 			}
 			return nil
 		})
@@ -102,7 +106,9 @@ func canvasPrefetchModuleItemData(
 				return fmt.Errorf("prefetch quiz %d: %w", cid, err)
 			}
 			if obj != nil {
+				cacheMu.Lock()
 				cache.quizzes[cid] = obj
+				cacheMu.Unlock()
 			}
 			return nil
 		})
@@ -115,7 +121,9 @@ func canvasPrefetchModuleItemData(
 			if err != nil {
 				return fmt.Errorf("prefetch quiz %d questions: %w", cid, err)
 			}
+			cacheMu.Lock()
 			cache.quizQuestions[cid] = qq
+			cacheMu.Unlock()
 			return nil
 		})
 	}
@@ -129,7 +137,9 @@ func canvasPrefetchModuleItemData(
 				return nil
 			}
 			if page != nil {
+				cacheMu.Lock()
 				cache.pages[slug] = page
+				cacheMu.Unlock()
 			}
 			return nil
 		})

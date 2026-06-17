@@ -400,6 +400,8 @@ type Config struct {
 	RabbitMQURL string
 	// CanvasImportQueueName is the RabbitMQ queue for Canvas LMS imports (default canvas.course.import).
 	CanvasImportQueueName string
+	// CanvasImportConcurrency is how many Canvas import jobs the queue consumer processes in parallel.
+	CanvasImportConcurrency int
 }
 
 // Load reads configuration from the environment.
@@ -548,8 +550,9 @@ func Load() Config {
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
-		RabbitMQURL:           firstNonEmptyTrimmed("RABBITMQ_URL"),
-		CanvasImportQueueName: stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
+		RabbitMQURL:             firstNonEmptyTrimmed("RABBITMQ_URL"),
+		CanvasImportQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
+		CanvasImportConcurrency: canvasImportConcurrency(),
 	}
 }
 
@@ -752,6 +755,18 @@ func httpAddr() string {
 	}
 	// e.g. "127.0.0.1:8080"
 	return p
+}
+
+func canvasImportConcurrency() int {
+	raw := strings.TrimSpace(os.Getenv("CANVAS_IMPORT_CONCURRENCY"))
+	if raw == "" {
+		return 3
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 1 {
+		return 3
+	}
+	return n
 }
 
 func tusUploadTTLHours() int {

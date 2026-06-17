@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
@@ -13,6 +14,7 @@ import { BarChart3, ClipboardList, Mail, Pencil, Send, Shuffle, Trash2, UsersRou
 import { EnrollmentRoleBadge } from './enrollment-role-badge'
 import { EnrollmentGroupsPanel } from './enrollment-groups-panel'
 import { EnrollmentsActionsMenu } from './enrollments-actions-menu'
+import { ConfirmDialog } from '../../components/confirm-dialog'
 import { IconActionTooltip } from '../../components/ui/icon-action-tooltip'
 import { LmsPage } from './lms-page'
 import { usePermission, usePermissions } from '../../context/use-permissions'
@@ -38,6 +40,10 @@ import {
   type EnrollmentGroupsTreeResponse,
 } from '../../lib/courses-api'
 import { notifyCourseViewerEnrollmentChanged, useCourseViewAs } from '../../lib/course-view-as'
+import {
+  useEnrollmentsRevision,
+  useEnrollmentsUpdateCourseCode,
+} from '../../context/use-inbox-unread'
 import { readApiErrorMessage } from '../../lib/errors'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { toast, toastSaveOk } from '../../lib/lms-toast'
@@ -64,6 +70,7 @@ export type CourseEnrollment = {
   state?: EnrollmentState | null
   stateChangedAt?: string | null
   stateReason?: string | null
+  invitationPending?: boolean
 }
 
 /** Blurred dim backdrop for roster modals (Escape closes in the keydown effect below). */
@@ -120,6 +127,8 @@ function enrollmentRoleRank(role: string): number {
 
 export default function CourseEnrollments() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const enrollmentsRevision = useEnrollmentsRevision()
+  const enrollmentsUpdateCourseCode = useEnrollmentsUpdateCourseCode()
   const { ffEnrollmentStateMachine } = usePlatformFeatures()
   const courseViewPreview = useCourseViewAs(courseCode)
   const { allows, loading: permLoading, refresh: refreshPermissions } = usePermissions()
@@ -155,6 +164,7 @@ export default function CourseEnrollments() {
   const [selfStudentStatus, setSelfStudentStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [selfStudentMessage, setSelfStudentMessage] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [removeConfirmTarget, setRemoveConfirmTarget] = useState<CourseEnrollment | null>(null)
   const [editTarget, setEditTarget] = useState<CourseEnrollment | null>(null)
   const [stateChangeTarget, setStateChangeTarget] = useState<CourseEnrollment | null>(null)
   const [stateChangeValue, setStateChangeValue] = useState<EnrollmentState>('active')
@@ -389,6 +399,8 @@ export default function CourseEnrollments() {
             : typeof o.state_reason === 'string'
               ? o.state_reason
               : null
+        const invitationPending =
+          o.invitationPending === true || o.invitation_pending === true
         return {
           id,
           userId,
@@ -403,6 +415,7 @@ export default function CourseEnrollments() {
           state,
           stateChangedAt,
           stateReason,
+          invitationPending,
           ...(groupMemberships?.length ? { groupMemberships } : {}),
         }
       })
@@ -443,6 +456,23 @@ export default function CourseEnrollments() {
     }, 0)
     return () => window.clearTimeout(id)
   }, [allows, courseCode, loadEnrollments, permLoading])
+
+  const prevEnrollmentsRevision = useRef(enrollmentsRevision)
+  useEffect(() => {
+    if (enrollmentsRevision === prevEnrollmentsRevision.current) return
+    prevEnrollmentsRevision.current = enrollmentsRevision
+    if (!courseCode || permLoading) return
+    if (!allows(courseEnrollmentsReadPermission(courseCode))) return
+    if (enrollmentsUpdateCourseCode && enrollmentsUpdateCourseCode !== courseCode) return
+    void loadEnrollments()
+  }, [
+    allows,
+    courseCode,
+    enrollmentsRevision,
+    enrollmentsUpdateCourseCode,
+    loadEnrollments,
+    permLoading,
+  ])
 
   useEffect(() => {
     if (!enrollments?.length) {
@@ -1076,7 +1106,14 @@ export default function CourseEnrollments() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-slate-700">
-                      <EnrollmentRoleBadge courseRoleKey={e.role} roleDisplay={e.roleDisplay} />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <EnrollmentRoleBadge courseRoleKey={e.role} roleDisplay={e.roleDisplay} />
+                        {e.invitationPending ? (
+                          <span className="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+                            Pending approval
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
                     {ffEnrollmentStateMachine ? (
                       <td className="px-4 py-3 text-slate-700">
@@ -1207,7 +1244,7 @@ export default function CourseEnrollments() {
                               <IconActionTooltip label="Remove enrollment">
                                 <button
                                   type="button"
-                                  onClick={() => void onRemoveEnrollment(e.id)}
+                                  onClick={() => setRemoveConfirmTarget(e)}
                                   disabled={removingId === e.id}
                                   className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
                                   aria-label={`Remove ${e.role} enrollment for ${e.displayName?.trim() || 'this person'}`}
@@ -1835,6 +1872,36 @@ export default function CourseEnrollments() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={removeConfirmTarget !== null}
+        title="Remove enrollment?"
+        description={
+          removeConfirmTarget ? (
+            <>
+              This will remove{' '}
+              <span className="font-medium text-slate-900 dark:text-neutral-100">
+                {removeConfirmTarget.displayName?.trim() || 'this person'}
+              </span>{' '}
+              from the course as a{' '}
+              <span className="font-medium text-slate-900 dark:text-neutral-100">
+                {removeConfirmTarget.roleDisplay?.trim() || removeConfirmTarget.role}
+              </span>
+              . This action cannot be undone.
+            </>
+          ) : null
+        }
+        confirmLabel="Remove"
+        variant="danger"
+        busy={removeConfirmTarget !== null && removingId === removeConfirmTarget.id}
+        onConfirm={() => {
+          if (!removeConfirmTarget) return
+          void onRemoveEnrollment(removeConfirmTarget.id).finally(() => setRemoveConfirmTarget(null))
+        }}
+        onClose={() => {
+          if (removingId === null) setRemoveConfirmTarget(null)
+        }}
+      />
     </LmsPage>
   )
 }

@@ -4,6 +4,7 @@ package communication
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -31,6 +32,7 @@ type listRow struct {
 	SenderEmail       string
 	SenderDisplayName *string
 	RecipientEmail    *string
+	MetadataRaw       []byte
 }
 
 func rowToMessage(row listRow) models.MailboxMessage {
@@ -46,7 +48,7 @@ func rowToMessage(row listRow) models.MailboxMessage {
 	if row.Folder == "inbox" {
 		read = row.ReadAt != nil
 	}
-	return models.MailboxMessage{
+	msg := models.MailboxMessage{
 		ID: row.MessageID,
 		From: models.Party{
 			Name:  sname,
@@ -62,6 +64,13 @@ func rowToMessage(row listRow) models.MailboxMessage {
 		Folder:        row.Folder,
 		HasAttachment: row.HasAttachment,
 	}
+	if len(row.MetadataRaw) > 0 {
+		var meta models.MessageMetadata
+		if err := json.Unmarshal(row.MetadataRaw, &meta); err == nil {
+			msg.Metadata = &meta
+		}
+	}
+	return msg
 }
 
 // ListForUser returns messages for a folder, optionally filtered by a search string (see Rust ILIKE).
@@ -77,7 +86,8 @@ SELECT
   m.subject, m.body, m.snippet, m.has_attachment, m.created_at,
   mb.folder, mb.read_at, mb.starred,
   sender.email AS sender_email, sender.display_name AS sender_display_name,
-  recipient.email AS recipient_email
+  recipient.email AS recipient_email,
+  m.metadata
 FROM communication.mailbox_entries mb
 INNER JOIN communication.messages m ON m.id = mb.message_id
 INNER JOIN %s sender ON sender.id = m.sender_user_id
@@ -107,7 +117,8 @@ SELECT
   m.subject, m.body, m.snippet, m.has_attachment, m.created_at,
   mb.folder, mb.read_at, mb.starred,
   sender.email AS sender_email, sender.display_name AS sender_display_name,
-  recipient.email AS recipient_email
+  recipient.email AS recipient_email,
+  m.metadata
 FROM communication.mailbox_entries mb
 INNER JOIN communication.messages m ON m.id = mb.message_id
 INNER JOIN %s sender ON sender.id = m.sender_user_id
@@ -134,7 +145,7 @@ func scanListRows(rows pgx.Rows) ([]models.MailboxMessage, error) {
 		if err := rows.Scan(
 			&r.MessageID, &r.Subject, &r.Body, &r.Snippet, &r.HasAttachment, &r.CreatedAt,
 			&r.Folder, &r.ReadAt, &r.Starred,
-			&r.SenderEmail, &displayName, &recipientEmail,
+			&r.SenderEmail, &displayName, &recipientEmail, &r.MetadataRaw,
 		); err != nil {
 			return nil, err
 		}
@@ -161,7 +172,8 @@ SELECT
   m.subject, m.body, m.snippet, m.has_attachment, m.created_at,
   mb.folder, mb.read_at, mb.starred,
   sender.email AS sender_email, sender.display_name AS sender_display_name,
-  recipient.email AS recipient_email
+  recipient.email AS recipient_email,
+  m.metadata
 FROM communication.mailbox_entries mb
 INNER JOIN communication.messages m ON m.id = mb.message_id
 INNER JOIN %s sender ON sender.id = m.sender_user_id
@@ -170,7 +182,7 @@ WHERE mb.user_id = $1 AND m.id = $2
 `, userTable, userTable), userID, messageID).Scan(
 		&r.MessageID, &r.Subject, &r.Body, &r.Snippet, &r.HasAttachment, &r.CreatedAt,
 		&r.Folder, &r.ReadAt, &r.Starred,
-		&r.SenderEmail, &displayName, &recipientEmail,
+		&r.SenderEmail, &displayName, &recipientEmail, &r.MetadataRaw,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
@@ -208,6 +220,11 @@ WHERE mb.user_id = $1
 
 // SendMessage inserts a sent message; returns (nil, nil) if the recipient email is not registered.
 func SendMessage(ctx context.Context, pool *pgxpool.Pool, senderID uuid.UUID, toEmail, subject, body string) (*uuid.UUID, error) {
+	return SendMessageWithMetadata(ctx, pool, senderID, toEmail, subject, body, nil)
+}
+
+// SendMessageWithMetadata inserts a sent message with optional structured metadata.
+func SendMessageWithMetadata(ctx context.Context, pool *pgxpool.Pool, senderID uuid.UUID, toEmail, subject, body string, metadata *models.MessageMetadata) (*uuid.UUID, error) {
 	toEmail = strings.TrimSpace(toEmail)
 	row, err := user.FindByEmail(ctx, pool, user.NormalizeEmail(toEmail))
 	if err != nil {
@@ -221,6 +238,13 @@ func SendMessage(ctx context.Context, pool *pgxpool.Pool, senderID uuid.UUID, to
 		return nil, err
 	}
 	snippet := MakeSnippet(body)
+	var metadataJSON []byte
+	if metadata != nil {
+		metadataJSON, err = json.Marshal(metadata)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	tx, err := pool.Begin(ctx)
 	if err != nil {
@@ -231,10 +255,10 @@ func SendMessage(ctx context.Context, pool *pgxpool.Pool, senderID uuid.UUID, to
 	var messageID uuid.UUID
 	err = tx.QueryRow(ctx, `
 INSERT INTO communication.messages
-  (sender_user_id, recipient_user_id, subject, body, snippet, has_attachment)
-VALUES ($1::uuid, $2::uuid, $3, $4, $5, FALSE)
+  (sender_user_id, recipient_user_id, subject, body, snippet, has_attachment, metadata)
+VALUES ($1::uuid, $2::uuid, $3, $4, $5, FALSE, $6::jsonb)
 RETURNING id
-`, senderID, recipientID, subject, body, snippet).Scan(&messageID)
+`, senderID, recipientID, subject, body, snippet, metadataJSON).Scan(&messageID)
 	if err != nil {
 		return nil, err
 	}

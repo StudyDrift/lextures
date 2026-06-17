@@ -25,8 +25,9 @@ type RosterRow struct {
 	State            string
 	StateChangedAt   *time.Time
 	StateReason      *string
-	HomeOrgID        *uuid.UUID
-	HomeOrgName      *string
+	HomeOrgID          *uuid.UUID
+	HomeOrgName        *string
+	InvitationPending  bool
 }
 
 // ListRosterForCourse returns enrollments for a course code, ordered for UI.
@@ -46,7 +47,8 @@ SELECT
 	ce.state_changed_at,
 	ce.state_reason,
 	ce.home_org_id,
-	ho.name
+	ho.name,
+	ce.invitation_pending
 FROM course.course_enrollments ce
 INNER JOIN course.courses c ON c.id = ce.course_id
 INNER JOIN "user".users u ON u.id = ce.user_id
@@ -54,7 +56,7 @@ LEFT JOIN tenant.organizations ho ON ho.id = ce.home_org_id
 LEFT JOIN course.enrollment_roles er ON er.role_key = ce.role
 LEFT JOIN course.course_sections cs ON cs.id = ce.section_id
 WHERE c.course_code = $1
-  AND (ce.active OR ce.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+  AND (ce.active OR ce.invitation_pending OR ce.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
 ORDER BY
 	CASE ce.role
 		WHEN 'owner' THEN 0
@@ -87,7 +89,7 @@ ORDER BY
 		var stateReason sql.NullString
 		var homeOrgID sql.NullString
 		var homeOrgName sql.NullString
-		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName); err != nil {
+		if err := rows.Scan(&r.ID, &r.UserID, &display, &avatar, &r.Role, &roleDisplay, &secID, &secCode, &secName, &stateStr, &stateChanged, &stateReason, &homeOrgID, &homeOrgName, &r.InvitationPending); err != nil {
 			return nil, err
 		}
 		if display.Valid {

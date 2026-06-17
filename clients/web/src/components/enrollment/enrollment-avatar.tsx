@@ -111,18 +111,22 @@ export function EnrollmentAvatar({
         ? createPortal(
             <div
               role="tooltip"
+              aria-label={label}
               style={{
                 top: previewPos.top,
                 left: previewPos.left,
                 transform: 'translateY(-50%)',
               }}
-              className="pointer-events-none fixed z-[200] overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-2xl ring-1 ring-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
+              className="pointer-events-none fixed z-[200] w-36 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900 dark:ring-white/10"
             >
               <img
                 src={resolvedAvatarUrl}
                 alt=""
-                className="h-32 w-32 rounded-xl object-cover"
+                className="h-32 w-full object-cover"
               />
+              <p className="truncate px-3 py-2 text-center text-sm font-medium text-slate-900 dark:text-neutral-100">
+                {label}
+              </p>
             </div>,
             document.body,
           )
