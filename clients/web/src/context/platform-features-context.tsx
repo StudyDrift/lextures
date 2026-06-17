@@ -70,6 +70,7 @@ export type PlatformFeatures = {
   ffCeuTracking: boolean
   ffConsortiumSharing: boolean
   ffStripeBilling: boolean
+  ffRevenueShare: boolean
   ffLearningPaths: boolean
   ffCompletionCredentials: boolean
   ffCourseReviews: boolean
@@ -137,6 +138,7 @@ const defaultFeatures: PlatformFeatures = {
   ffCeuTracking: false,
   ffConsortiumSharing: false,
   ffStripeBilling: false,
+  ffRevenueShare: false,
   ffLearningPaths: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
@@ -209,6 +211,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffCeuTracking: false,
   ffConsortiumSharing: false,
   ffStripeBilling: false,
+  ffRevenueShare: false,
   ffLearningPaths: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
@@ -282,6 +285,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCeuTracking: data.ffCeuTracking === true,
           ffConsortiumSharing: data.ffConsortiumSharing === true,
           ffStripeBilling: data.ffStripeBilling === true,
+          ffRevenueShare: data.ffRevenueShare === true,
           ffLearningPaths: data.ffLearningPaths === true,
           ffCompletionCredentials: data.ffCompletionCredentials === true,
           ffCourseReviews: data.ffCourseReviews === true,
@@ -322,6 +326,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCeuTracking: next.ffCeuTracking === true,
           ffConsortiumSharing: next.ffConsortiumSharing === true,
           ffStripeBilling: next.ffStripeBilling === true,
+          ffRevenueShare: next.ffRevenueShare === true,
           ffLearningPaths: next.ffLearningPaths === true,
           ffCompletionCredentials: next.ffCompletionCredentials === true,
           ffCourseReviews: next.ffCourseReviews === true,

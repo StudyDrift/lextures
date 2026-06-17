@@ -109,6 +109,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Stripe Checkout for course purchases and subscriptions, entitlement gating, and learner billing portal.',
   },
   {
+    key: 'ffRevenueShare',
+    label: 'Creator revenue share & affiliates',
+    description:
+      'Creator earnings ledger, affiliate referral links, and Stripe Connect payouts for course sales.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:

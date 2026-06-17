@@ -129,6 +129,7 @@ type platformSettingsJSON struct {
 	FFSelfPacedMode                 bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 bool `json:"ffPublicCatalog"`
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
+	FFRevenueShare                  bool `json:"ffRevenueShare"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
 	FFCompletionCredentials         bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                 bool `json:"ffCourseReviews"`
@@ -310,6 +311,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
 			FFStripeBilling:                 merged.FFStripeBilling,
+			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
 			FFCourseReviews:                 merged.FFCourseReviews,
@@ -466,6 +468,7 @@ type putPlatformBody struct {
 	FFSelfPacedMode                 *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 *bool `json:"ffPublicCatalog"`
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
+	FFRevenueShare                  *bool `json:"ffRevenueShare"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
 	FFCompletionCredentials         *bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                 *bool `json:"ffCourseReviews"`
@@ -768,6 +771,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
+		setBool("ffrevenueshare", body.FFRevenueShare, func(v bool) { wr.FFRevenueShare = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
 		setBool("ffcompletioncredentials", body.FFCompletionCredentials, func(v bool) { wr.FFCompletionCredentials = &v })
 		setBool("ffcoursereviews", body.FFCourseReviews, func(v bool) { wr.FFCourseReviews = &v })
@@ -903,6 +907,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
 			FFStripeBilling:                 merged.FFStripeBilling,
+			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
 			FFCourseReviews:                 merged.FFCourseReviews,

@@ -82,6 +82,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFSelfPacedMode = mergeBool(db.FFSelfPacedMode, false)
 	out.FFPublicCatalog = mergeBool(db.FFPublicCatalog, false)
 	out.FFStripeBilling = mergeBool(db.FFStripeBilling, false)
+	out.FFRevenueShare = mergeBool(db.FFRevenueShare, false)
 	out.FFLearningPaths = mergeBool(db.FFLearningPaths, false)
 	out.FFCompletionCredentials = mergeBool(db.FFCompletionCredentials, false)
 	out.FFCourseReviews = mergeBool(db.FFCourseReviews, false)

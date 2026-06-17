@@ -57,6 +57,7 @@ export type PlatformFeaturesSnapshot = {
   ffCeuTracking?: boolean
   ffConsortiumSharing?: boolean
   ffStripeBilling?: boolean
+  ffRevenueShare?: boolean
   ffLearningPaths?: boolean
   ffCompletionCredentials?: boolean
   ffCourseReviews?: boolean
@@ -123,6 +124,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffCeuTracking: false,
   ffConsortiumSharing: false,
   ffStripeBilling: false,
+  ffRevenueShare: false,
   ffLearningPaths: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,

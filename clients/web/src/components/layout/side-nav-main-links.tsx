@@ -7,6 +7,7 @@ import {
   Bot,
   Calendar,
   CreditCard,
+  DollarSign,
   FileText,
   FolderOpen,
   GraduationCap,
@@ -45,6 +46,7 @@ export function SideNavMainLinks() {
     ffCoCurricularTranscript,
     ffCeuTracking,
     ffStripeBilling,
+    ffRevenueShare,
     ffLearningPaths,
     ffCompletionCredentials,
     ffCatalogIntegration,
@@ -74,7 +76,8 @@ export function SideNavMainLinks() {
     ffCeuTracking ||
     ffResearchConsent ||
     ffAccessibilityIntake ||
-    ffStripeBilling
+    ffStripeBilling ||
+    ffRevenueShare
 
   return (
     <>
@@ -172,6 +175,11 @@ export function SideNavMainLinks() {
           {ffStripeBilling ? (
             <SideNavLink to="/me/billing" icon={<CreditCard className="h-5 w-5" />}>
               Billing
+            </SideNavLink>
+          ) : null}
+          {ffRevenueShare ? (
+            <SideNavLink to="/me/creator/earnings" icon={<DollarSign className="h-5 w-5" />}>
+              Creator earnings
             </SideNavLink>
           ) : null}
         </>

@@ -1,8 +1,12 @@
 import { useEffect, useId, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Star } from 'lucide-react'
 import { CourseReviewsSection } from '../components/reviews/course-reviews-section'
 import { fetchPublicCourseReviews, type ReviewsListResponse } from '../lib/course-reviews-api'
+import {
+  setAffiliateRefCookie,
+  trackAffiliateClick,
+} from '../lib/revenue-share-api'
 import {
   fetchPublicCatalogCourse,
   formatPrice,
@@ -27,6 +31,7 @@ function useCourseJsonLd(jsonLd: Record<string, unknown> | null) {
 
 export default function ExploreCoursePage() {
   const { slug } = useParams<{ slug: string }>()
+  const [searchParams] = useSearchParams()
   const [detail, setDetail] = useState<PublicCatalogCourseDetail | null>(null)
   const [reviews, setReviews] = useState<ReviewsListResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -63,6 +68,13 @@ export default function ExploreCoursePage() {
   }, [slug])
 
   useCourseJsonLd(detail?.jsonLd ?? null)
+
+  useEffect(() => {
+    const ref = searchParams.get('ref')?.trim()
+    if (!ref) return
+    setAffiliateRefCookie(ref)
+    void trackAffiliateClick(ref)
+  }, [searchParams])
 
   useEffect(() => {
     if (detail) document.title = `${detail.course.title} — Lextures`
