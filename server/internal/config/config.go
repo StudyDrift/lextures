@@ -367,6 +367,9 @@ type Config struct {
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).
 	FFStripeBilling bool
+	// FFRevenueShare enables creator revenue share, affiliate tracking, and Stripe Connect payouts (plan 15.8).
+	// Managed in Settings → Global platform (not process env).
+	FFRevenueShare bool
 
 	// StripeSecretKey is the Stripe API secret key (sk_live_… or sk_test_…).
 	StripeSecretKey string

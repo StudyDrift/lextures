@@ -16,6 +16,7 @@ export type CheckoutPayload = {
   courseId?: string
   plan?: 'monthly' | 'annual'
   promoCode?: string
+  affiliateCode?: string
   successUrl: string
   cancelUrl: string
 }

@@ -24,13 +24,14 @@ import (
 
 // CheckoutRequest is the learner checkout payload.
 type CheckoutRequest struct {
-	UserID     uuid.UUID
-	Email      string
-	CourseID   *uuid.UUID
-	Plan       string // monthly | annual
-	PromoCode  string
-	SuccessURL string
-	CancelURL  string
+	UserID        uuid.UUID
+	Email         string
+	CourseID      *uuid.UUID
+	Plan          string // monthly | annual
+	PromoCode     string
+	AffiliateCode string
+	SuccessURL    string
+	CancelURL     string
 }
 
 // CheckoutResult is a Stripe Checkout redirect.
@@ -105,6 +106,12 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		}
 		params.Metadata["course_id"] = req.CourseID.String()
 		params.Metadata["entitlement_type"] = repoBilling.TypeCoursePurchase
+		if code := strings.TrimSpace(req.AffiliateCode); code != "" {
+			params.Metadata["affiliate_code"] = code
+		}
+		params.PaymentIntentData = &stripe.CheckoutSessionPaymentIntentDataParams{
+			Metadata: params.Metadata,
+		}
 		params.LineItems = []*stripe.CheckoutSessionLineItemParams{
 			{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
@@ -169,8 +176,13 @@ type WebhookResult struct {
 	Created   bool
 }
 
+// WebhookOptions configures optional post-payment side effects.
+type WebhookOptions struct {
+	RevenueShareEnabled bool
+}
+
 // HandleWebhook verifies and processes a Stripe webhook payload.
-func HandleWebhook(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, body []byte, sigHeader string) (*WebhookResult, error) {
+func HandleWebhook(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, body []byte, sigHeader string, opts WebhookOptions) (*WebhookResult, error) {
 	if cfg.WebhookSecret == "" {
 		return nil, errors.New("stripe webhook secret not configured")
 	}
@@ -180,19 +192,21 @@ func HandleWebhook(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, bo
 	}
 	switch event.Type {
 	case "checkout.session.completed":
-		return handleCheckoutCompleted(ctx, pool, event)
+		return handleCheckoutCompleted(ctx, pool, event, opts)
 	case "invoice.payment_succeeded":
 		return handleInvoicePaymentSucceeded(ctx, pool, event)
 	case "invoice.payment_failed":
 		return handleInvoicePaymentFailed(ctx, pool, event)
 	case "customer.subscription.deleted":
 		return handleSubscriptionDeleted(ctx, pool, event)
+	case "charge.refunded":
+		return handleChargeRefunded(ctx, pool, event, opts)
 	default:
 		return &WebhookResult{EventType: string(event.Type)}, nil
 	}
 }
 
-func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stripe.Event) (*WebhookResult, error) {
+func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stripe.Event, opts WebhookOptions) (*WebhookResult, error) {
 	var sess stripe.CheckoutSession
 	if err := json.Unmarshal(event.Data.Raw, &sess); err != nil {
 		return nil, err
@@ -238,6 +252,18 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 	}
 	if created {
 		RecordPayment(amount, entType)
+		if opts.RevenueShareEnabled && courseID != nil && entType == repoBilling.TypeCoursePurchase {
+			if err := RecordSaleEarnings(ctx, pool, SaleEarningsInput{
+				BuyerUserID:   userID,
+				CourseID:      *courseID,
+				AmountCents:   amount,
+				Currency:      currency,
+				StripeEventID: event.ID,
+				AffiliateCode: strings.TrimSpace(sess.Metadata["affiliate_code"]),
+			}); err != nil {
+				return nil, err
+			}
+		}
 	}
 	return &WebhookResult{EventType: string(event.Type), Created: created}, nil
 }
@@ -311,6 +337,39 @@ func handleSubscriptionDeleted(ctx context.Context, pool *pgxpool.Pool, event st
 	}
 	_, err = repoBilling.ExpireActiveSubscriptions(ctx, pool, userID)
 	if err != nil {
+		return nil, err
+	}
+	return &WebhookResult{EventType: string(event.Type)}, nil
+}
+
+func handleChargeRefunded(ctx context.Context, pool *pgxpool.Pool, event stripe.Event, opts WebhookOptions) (*WebhookResult, error) {
+	if !opts.RevenueShareEnabled {
+		return &WebhookResult{EventType: string(event.Type)}, nil
+	}
+	var ch stripe.Charge
+	if err := json.Unmarshal(event.Data.Raw, &ch); err != nil {
+		return nil, err
+	}
+	rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
+	if rawCourse == "" {
+		return &WebhookResult{EventType: string(event.Type)}, nil
+	}
+	courseID, err := uuid.Parse(rawCourse)
+	if err != nil {
+		return &WebhookResult{EventType: string(event.Type)}, nil
+	}
+	refundAmount := int(ch.AmountRefunded)
+	if refundAmount <= 0 {
+		refundAmount = int(ch.Amount)
+	}
+	currency := string(ch.Currency)
+	if err := RecordRefundEarnings(ctx, pool, RefundEarningsInput{
+		CourseID:      courseID,
+		AmountCents:   refundAmount,
+		Currency:      currency,
+		StripeEventID: event.ID,
+		AffiliateCode: strings.TrimSpace(ch.Metadata["affiliate_code"]),
+	}); err != nil {
 		return nil, err
 	}
 	return &WebhookResult{EventType: string(event.Type)}, nil

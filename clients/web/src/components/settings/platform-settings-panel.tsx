@@ -64,6 +64,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffCeuTracking: false,
     ffConsortiumSharing: false,
     ffStripeBilling: false,
+    ffRevenueShare: false,
     ffLearningPaths: false,
     ffCompletionCredentials: false,
     translationMemoryEnabled: false,

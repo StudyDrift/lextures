@@ -116,11 +116,12 @@ func (d Deps) handleBillingCheckout() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			CourseID   *string `json:"courseId"`
-			Plan       string  `json:"plan"`
-			PromoCode  string  `json:"promoCode"`
-			SuccessURL string  `json:"successUrl"`
-			CancelURL  string  `json:"cancelUrl"`
+			CourseID      *string `json:"courseId"`
+			Plan          string  `json:"plan"`
+			PromoCode     string  `json:"promoCode"`
+			AffiliateCode string  `json:"affiliateCode"`
+			SuccessURL    string  `json:"successUrl"`
+			CancelURL     string  `json:"cancelUrl"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -152,13 +153,14 @@ func (d Deps) handleBillingCheckout() http.HandlerFunc {
 			return
 		}
 		result, err := svcBilling.CreateCheckoutSession(r.Context(), d.Pool, cfg, svcBilling.CheckoutRequest{
-			UserID:     userID,
-			Email:      email,
-			CourseID:   courseID,
-			Plan:       body.Plan,
-			PromoCode:  body.PromoCode,
-			SuccessURL: successURL,
-			CancelURL:  cancelURL,
+			UserID:        userID,
+			Email:         email,
+			CourseID:      courseID,
+			Plan:          body.Plan,
+			PromoCode:     body.PromoCode,
+			AffiliateCode: body.AffiliateCode,
+			SuccessURL:    successURL,
+			CancelURL:     cancelURL,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not start checkout.")
@@ -312,7 +314,9 @@ func (d Deps) handleStripeWebhook() http.HandlerFunc {
 		}
 		cfg := svcBilling.ConfigFrom(d.effectiveConfig())
 		sig := r.Header.Get("Stripe-Signature")
-		result, err := svcBilling.HandleWebhook(r.Context(), d.Pool, cfg, body, sig)
+		result, err := svcBilling.HandleWebhook(r.Context(), d.Pool, cfg, body, sig, svcBilling.WebhookOptions{
+			RevenueShareEnabled: d.effectiveConfig().FFRevenueShare,
+		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid webhook.")
 			return
