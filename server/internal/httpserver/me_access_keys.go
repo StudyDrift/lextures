@@ -270,28 +270,22 @@ func (d Deps) handleMyMCPConfig() http.HandlerFunc {
 			return
 		}
 		base := d.apiBaseURL(r)
+		mcpServer := map[string]any{
+			"command": "node",
+			"args":    []string{"clients/mcp/dist/index.js"},
+			"env": map[string]string{
+				"LEXTURES_API_URL":   base,
+				"LEXTURES_API_TOKEN": "<paste-your-access-key>",
+			},
+		}
 		cursorConfig := map[string]any{
 			"mcpServers": map[string]any{
-				"lextures": map[string]any{
-					"command": "npx",
-					"args":    []string{"-y", "@lextures/mcp-server"},
-					"env": map[string]string{
-						"LEXTURES_API_URL":   base,
-						"LEXTURES_API_TOKEN": "<paste-your-access-key>",
-					},
-				},
+				"lextures": mcpServer,
 			},
 		}
 		claudeConfig := map[string]any{
 			"mcpServers": map[string]any{
-				"lextures": map[string]any{
-					"command": "npx",
-					"args":    []string{"-y", "@lextures/mcp-server"},
-					"env": map[string]string{
-						"LEXTURES_API_URL":   base,
-						"LEXTURES_API_TOKEN": "<paste-your-access-key>",
-					},
-				},
+				"lextures": mcpServer,
 			},
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -300,6 +294,8 @@ func (d Deps) handleMyMCPConfig() http.HandlerFunc {
 			"cursorConfig":        cursorConfig,
 			"claudeDesktopConfig": claudeConfig,
 			"instructions": []string{
+				"From your Lextures repo clone, build the MCP server: cd clients/mcp && npm install && npm run build.",
+				"Open Cursor (or Claude Desktop) with the repo as the project root so clients/mcp/dist/index.js resolves.",
 				"Create an access key above with the MCP: Connect scope (and any data scopes your agent needs).",
 				"Copy the key when shown — it is only displayed once.",
 				"Paste the key into LEXTURES_API_TOKEN in the MCP config below.",

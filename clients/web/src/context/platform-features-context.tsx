@@ -73,6 +73,7 @@ export type PlatformFeatures = {
   ffLearningPaths: boolean
   ffCompletionCredentials: boolean
   ffCourseReviews: boolean
+  gdprModuleEnabled: boolean
   aiDisclosureEnabled: boolean
   openRouterConfigured: boolean
   ragNotebookEnabled: boolean
@@ -139,6 +140,7 @@ const defaultFeatures: PlatformFeatures = {
   ffLearningPaths: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
+  gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
   ragNotebookEnabled: false,
@@ -210,6 +212,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffLearningPaths: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
+  gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
   ragNotebookEnabled: false,
@@ -282,6 +285,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffLearningPaths: data.ffLearningPaths === true,
           ffCompletionCredentials: data.ffCompletionCredentials === true,
           ffCourseReviews: data.ffCourseReviews === true,
+          gdprModuleEnabled: data.gdprModuleEnabled === true,
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
           openRouterConfigured: data.openRouterConfigured === true,
           ragNotebookEnabled: data.ragNotebookEnabled === true,
@@ -321,6 +325,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffLearningPaths: next.ffLearningPaths === true,
           ffCompletionCredentials: next.ffCompletionCredentials === true,
           ffCourseReviews: next.ffCourseReviews === true,
+          gdprModuleEnabled: next.gdprModuleEnabled === true,
           aiDisclosureEnabled: next.aiDisclosureEnabled === true,
           openRouterConfigured: next.openRouterConfigured === true,
           ragNotebookEnabled: next.ragNotebookEnabled === true,

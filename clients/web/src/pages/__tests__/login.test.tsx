@@ -82,6 +82,41 @@ describe('Login', () => {
     })
   })
 
+  it('shows organization context and sends org_slug when signing in via /login/:orgSlug', async () => {
+    let loginBody: Record<string, unknown> | null = null
+    server.use(
+      http.get('http://localhost:8080/api/v1/public/orgs/by-slug/chase', () =>
+        HttpResponse.json({ slug: 'chase', name: "Chase's Org" }),
+      ),
+      http.post('http://localhost:8080/api/v1/auth/login', async ({ request }) => {
+        loginBody = (await request.json()) as Record<string, unknown>
+        return HttpResponse.json({
+          access_token: 'test-token',
+          token_type: 'Bearer',
+          expires_in: 3600,
+          user: { email: 'learner@example.com', uiTheme: 'system', locale: 'en' },
+        })
+      }),
+    )
+
+    const { user } = renderWithRouter(<Login />, { route: '/login/chase', path: '/login/:orgSlug' })
+
+    await waitFor(() => {
+      expect(screen.getByText(/Sign in to Chase's Org\./i)).toBeInTheDocument()
+    })
+
+    await user.type(screen.getByLabelText(/^email$/i), 'learner@example.com')
+    await user.type(screen.getByLabelText(/^password$/i), 'hunter2correct')
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }))
+
+    await waitFor(() => {
+      expect(loginBody).toMatchObject({
+        email: 'learner@example.com',
+        org_slug: 'chase',
+      })
+    })
+  })
+
   it('shows a friendly error when the request fails at the network layer', async () => {
     server.use(
       http.post('http://localhost:8080/api/v1/auth/login', () => HttpResponse.error()),

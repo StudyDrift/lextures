@@ -57,6 +57,7 @@ export function SideNavSettingsLinks() {
     ffAccessibilityIntake,
     ffConsortiumSharing,
     ffCoCurricularTranscript,
+    gdprModuleEnabled,
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
@@ -100,13 +101,15 @@ export function SideNavSettingsLinks() {
       >
         Integrations
       </SideNavLink>
-      <SideNavLink
-        to="/privacy-centre"
-        className={() => (location.pathname === '/privacy-centre' ? sideNavActiveClass : '')}
-        icon={<Lock className="h-5 w-5" />}
-      >
-        Privacy Centre
-      </SideNavLink>
+      {gdprModuleEnabled && (
+        <SideNavLink
+          to="/privacy-centre"
+          className={() => (location.pathname === '/privacy-centre' ? sideNavActiveClass : '')}
+          icon={<Lock className="h-5 w-5" />}
+        >
+          Privacy Center
+        </SideNavLink>
+      )}
       {(canOrgUnits || canOrgRoles || canManageRbac) && (
         <>
           {!sideNavCollapsed && (

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { usePlatformFeatures } from '../context/platform-features-context'
 import { formatDate } from '../lib/format'
 
 const API = '/api/v1/compliance/gdpr'
@@ -31,6 +32,7 @@ function purposeLabel(purpose: string): string {
 }
 
 export default function PrivacyCentrePage() {
+  const { gdprModuleEnabled, loading: featuresLoading } = usePlatformFeatures()
   const [consents, setConsents] = useState<Consent[]>([])
   const [dsars, setDsars] = useState<DSARRequest[]>([])
   const [loading, setLoading] = useState(true)
@@ -40,6 +42,8 @@ export default function PrivacyCentrePage() {
   const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
+    if (featuresLoading || !gdprModuleEnabled) return
+
     async function load() {
       try {
         const [cRes, dRes] = await Promise.all([
@@ -61,7 +65,7 @@ export default function PrivacyCentrePage() {
       }
     }
     load()
-  }, [])
+  }, [featuresLoading, gdprModuleEnabled])
 
   async function withdrawConsent(id: string) {
     setSubmitting(true)
@@ -111,7 +115,7 @@ export default function PrivacyCentrePage() {
     }
   }
 
-  if (loading) {
+  if (featuresLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]" role="status" aria-label="Loading">
         <div className="h-8 w-8 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin" />
@@ -119,10 +123,21 @@ export default function PrivacyCentrePage() {
     )
   }
 
+  if (!gdprModuleEnabled) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-50">Privacy Center</h1>
+        <p className="mt-2 text-sm text-slate-500 dark:text-neutral-400">
+          Privacy features are not enabled for this platform. Contact your system administrator.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-50">Privacy Centre</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-50">Privacy Center</h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
           Manage your data rights under GDPR / UK GDPR. You can view and withdraw consents, and
           request a copy or deletion of your personal data.

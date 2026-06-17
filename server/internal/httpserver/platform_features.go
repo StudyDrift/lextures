@@ -83,6 +83,7 @@ type platformFeaturesJSON struct {
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
+	GDPRModuleEnabled            bool    `json:"gdprModuleEnabled"`
 	DPAPortalEnabled             bool    `json:"dpaPortalEnabled"`
 	SOC2ModuleEnabled            bool    `json:"soc2ModuleEnabled"`
 	DiagnosticAssessmentsEnabled bool    `json:"diagnosticAssessmentsEnabled"`
@@ -160,6 +161,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,
+		GDPRModuleEnabled:            cfg.GDPRModuleEnabled,
 		DPAPortalEnabled:             cfg.DPAPortalEnabled,
 		SOC2ModuleEnabled:            cfg.SOC2ModuleEnabled,
 		DiagnosticAssessmentsEnabled: cfg.DiagnosticAssessmentsEnabled,

@@ -122,9 +122,9 @@ export function IntegrationsMcpPanel() {
           </div>
 
           <p className="text-xs text-slate-500 dark:text-neutral-400">
-            The MCP server runs via <code className="font-mono">@lextures/mcp-server</code> and calls the Lextures API
-            with your key. Install from this repository under <code className="font-mono">clients/mcp</code> for local
-            development, or use the published package when available.
+            The MCP server runs from <code className="font-mono">clients/mcp/dist/index.js</code> in this repository
+            and calls the Lextures API with your key. Build it with{' '}
+            <code className="font-mono">cd clients/mcp && npm install && npm run build</code> before connecting.
           </p>
         </div>
       )}

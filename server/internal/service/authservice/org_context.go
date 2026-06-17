@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lextures/lextures/server/internal/repos/organization"
 )
 
 // orgJWTFieldsForUser returns org id and slug from the user's tenant row plus organization status.
@@ -50,6 +51,41 @@ WHERE u.id = $1
 		return "", nil
 	}
 	return st, err
+}
+
+// ErrOrgNotFound is returned when login targets an unknown organization slug.
+var ErrOrgNotFound = errors.New("org not found")
+
+// validateLoginOrgSlug ensures the user belongs to the organization named by slug when slug is set.
+func validateLoginOrgSlug(ctx context.Context, pool *pgxpool.Pool, userID, requestedSlug string) error {
+	slug := organization.NormalizeSlug(requestedSlug)
+	if slug == "" {
+		return nil
+	}
+	row, err := organization.GetBySlug(ctx, pool, slug)
+	if err != nil {
+		return err
+	}
+	if row == nil {
+		return ErrOrgNotFound
+	}
+	if row.Status == "suspended" {
+		return ErrOrgSuspended
+	}
+	_, userSlug, status, err := orgJWTFieldsForUser(ctx, pool, userID)
+	if err != nil {
+		return err
+	}
+	if userSlug != slug {
+		return ErrInvalidCredentials
+	}
+	if status == "suspended" {
+		return ErrOrgSuspended
+	}
+	if status == "deleted" || status == "" {
+		return ErrInvalidCredentials
+	}
+	return nil
 }
 
 // orgAuthGate returns ErrOrgSuspended, ErrInvalidCredentials (deleted org), or nil.

@@ -112,10 +112,61 @@ VALUES ($1, $2, $3, $4)
 
 // Create inserts a new organization; slug is normalized to lowercase for uniqueness.
 func Create(ctx context.Context, pool *pgxpool.Pool, name, slug string, maxUsers, maxCourses *int32, dataRegion string, metadata json.RawMessage) (Row, error) {
-	slug = strings.TrimSpace(strings.ToLower(slug))
+	return insertOrg(ctx, pool, name, slug, maxUsers, maxCourses, dataRegion, metadata)
+}
+
+// CreateWithCreator provisions a tenant and moves the actor into it (Global Admin platform role is unchanged).
+func CreateWithCreator(ctx context.Context, pool *pgxpool.Pool, creatorID uuid.UUID, name, slug string, maxUsers, maxCourses *int32, dataRegion string, metadata json.RawMessage) (Row, error) {
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return Row{}, err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	row, err := insertOrgTx(ctx, tx, name, slug, maxUsers, maxCourses, dataRegion, metadata)
+	if err != nil {
+		return Row{}, err
+	}
+	tag, err := tx.Exec(ctx, `UPDATE "user".users SET org_id = $2 WHERE id = $1`, creatorID, row.ID)
+	if err != nil {
+		return Row{}, err
+	}
+	if tag.RowsAffected() == 0 {
+		return Row{}, errors.New("organization: creator user not found")
+	}
+	if err := insertAuditTx(ctx, tx, creatorID, row.ID, "org_created", map[string]any{
+		"slug":            row.Slug,
+		"name":            row.Name,
+		"creatorAssigned": true,
+	}); err != nil {
+		return Row{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return Row{}, err
+	}
+	return row, nil
+}
+
+func insertOrg(ctx context.Context, pool *pgxpool.Pool, name, slug string, maxUsers, maxCourses *int32, dataRegion string, metadata json.RawMessage) (Row, error) {
+	return insertOrgRow(ctx, pool, name, slug, maxUsers, maxCourses, dataRegion, metadata)
+}
+
+func insertOrgTx(ctx context.Context, tx pgx.Tx, name, slug string, maxUsers, maxCourses *int32, dataRegion string, metadata json.RawMessage) (Row, error) {
+	return insertOrgRow(ctx, tx, name, slug, maxUsers, maxCourses, dataRegion, metadata)
+}
+
+type queryRower interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+func insertOrgRow(ctx context.Context, q queryRower, name, slug string, maxUsers, maxCourses *int32, dataRegion string, metadata json.RawMessage) (Row, error) {
+	slug = NormalizeSlug(slug)
 	name = strings.TrimSpace(name)
-	if slug == "" || name == "" {
-		return Row{}, errors.New("organization: name and slug required")
+	if name == "" {
+		return Row{}, errors.New("organization: name required")
+	}
+	if err := ValidateSlug(slug); err != nil {
+		return Row{}, err
 	}
 	dr := strings.TrimSpace(dataRegion)
 	if dr == "" {
@@ -126,7 +177,7 @@ func Create(ctx context.Context, pool *pgxpool.Pool, name, slug string, maxUsers
 		meta = []byte("{}")
 	}
 	var r Row
-	err := pool.QueryRow(ctx, `
+	err := q.QueryRow(ctx, `
 INSERT INTO tenant.organizations (slug, name, status, max_users, max_courses, data_region, metadata)
 VALUES ($1, $2, 'active', $3, $4, $5, $6::jsonb)
 RETURNING id, slug, name, status, max_users, max_courses, data_region, metadata, created_at, updated_at
@@ -141,6 +192,24 @@ RETURNING id, slug, name, status, max_users, max_courses, data_region, metadata,
 		return Row{}, err
 	}
 	return r, nil
+}
+
+func insertAuditTx(ctx context.Context, tx pgx.Tx, actorID, orgID uuid.UUID, action string, payload any) error {
+	var pj []byte
+	if payload != nil {
+		var err error
+		pj, err = json.Marshal(payload)
+		if err != nil {
+			pj = []byte("{}")
+		}
+	} else {
+		pj = []byte("{}")
+	}
+	_, err := tx.Exec(ctx, `
+INSERT INTO tenant.organization_audit_events (actor_id, org_id, action, payload)
+VALUES ($1, $2, $3, $4)
+`, actorID, orgID, action, pj)
+	return err
 }
 
 // List returns organizations ordered by name (paginated).
@@ -165,6 +234,29 @@ LIMIT $1 OFFSET $2
 	}
 	defer rows.Close()
 	return scanOrgRows(rows)
+}
+
+// GetBySlug returns one active or suspended org by slug, or nil if not found / deleted.
+func GetBySlug(ctx context.Context, pool *pgxpool.Pool, slug string) (*Row, error) {
+	slug = NormalizeSlug(slug)
+	if slug == "" {
+		return nil, nil
+	}
+	row := pool.QueryRow(ctx, `
+SELECT o.id, o.slug, o.name, o.status, o.max_users, o.max_courses, o.data_region, o.metadata, o.created_at, o.updated_at,
+  (SELECT COUNT(*)::bigint FROM "user".users u WHERE u.org_id = o.id) AS user_count,
+  (SELECT COUNT(*)::bigint FROM course.courses c WHERE c.org_id = o.id) AS course_count
+FROM tenant.organizations o
+WHERE LOWER(o.slug) = $1 AND o.status <> 'deleted'
+`, slug)
+	r, err := scanOrgRow(row)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &r, nil
 }
 
 // GetByID returns one org or nil if not found / deleted.
