@@ -3,6 +3,7 @@ import { matchPath } from 'react-router-dom'
 export type SettingsNavView =
   | 'ai-models'
   | 'ai-prompts'
+  | 'ai-reports'
   | 'account'
   | 'notifications'
   | 'integrations'
@@ -22,6 +23,7 @@ export type SettingsNavView =
 
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (pathname.startsWith('/settings/ai/system-prompts')) return 'ai-prompts'
+  if (pathname.startsWith('/settings/ai/reports')) return 'ai-reports'
   if (pathname.startsWith('/settings/ai/models')) return 'ai-models'
   const m = matchPath({ path: '/settings/:tab', end: true }, pathname)
   const raw = m?.params.tab

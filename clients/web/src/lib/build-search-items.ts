@@ -66,6 +66,8 @@ export type SearchListItem = {
 export type GlobalSearchBuildOptions = {
   /** Effective platform SCIM flag (Settings → Global platform). */
   scimEnabled?: boolean
+  /** Notebook RAG / Ask AI when platform AI and OpenRouter are configured. */
+  ragNotebookEnabled?: boolean
 }
 
 type SearchPageDef = { title: string; subtitle: string; path: string; hint: string }
@@ -103,16 +105,17 @@ export function buildGlobalSearchItems(
   allows: (perm: string) => boolean,
   options: GlobalSearchBuildOptions = {},
 ): SearchListItem[] {
-  const items: SearchListItem[] = [
-    {
+  const items: SearchListItem[] = []
+  if (options.ragNotebookEnabled) {
+    items.push({
       id: 'global:ask-ai',
       group: 'ai',
       title: 'Ask AI',
       subtitle: 'Ask the AI any question you have permissions to',
       path: '/ai',
       haystack: 'ask ai assistant tutor help chat questions',
-    },
-  ]
+    })
+  }
 
   const globalPages: SearchPageDef[] = [
     { title: 'Dashboard', subtitle: 'Home', path: '/', hint: 'dashboard home' },
@@ -246,7 +249,7 @@ export function buildGlobalSearchItems(
         title: 'Global platform',
         subtitle: 'System settings',
         path: '/settings/platform',
-        hint: 'openrouter saml feature flags lti oneroster platform environment database admin',
+        hint: 'saml feature flags lti oneroster platform environment database admin',
       },
       {
         title: 'Organizations',
@@ -258,13 +261,19 @@ export function buildGlobalSearchItems(
         title: 'AI models',
         subtitle: 'System settings',
         path: '/settings/ai/models',
-        hint: 'ai intelligence openrouter models',
+        hint: 'ai intelligence openrouter api key models',
       },
       {
         title: 'System prompts',
         subtitle: 'System settings',
         path: '/settings/ai/system-prompts',
         hint: 'system prompts ai configuration admin intelligence',
+      },
+      {
+        title: 'AI reports',
+        subtitle: 'System settings',
+        path: '/settings/ai/reports',
+        hint: 'ai intelligence usage cost reports openrouter',
       },
     ]
     for (const g of systemPages) {

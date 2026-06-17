@@ -17,6 +17,7 @@ export type NotebookPageActionsMenuProps = {
   onMoveToGroup: (pageId: string, groupId: string) => void
   onMoveToRoot: (pageId: string) => void
   onFlashcards: () => void
+  flashcardsEnabled?: boolean
 }
 
 export function NotebookPageActionsMenu({
@@ -29,6 +30,7 @@ export function NotebookPageActionsMenu({
   onMoveToGroup,
   onMoveToRoot,
   onFlashcards,
+  flashcardsEnabled = true,
 }: NotebookPageActionsMenuProps) {
   const [moveOpen, setMoveOpen] = useState(false)
   const moveTargets = useMemo(
@@ -62,22 +64,26 @@ export function NotebookPageActionsMenu({
           role="menu"
           className="absolute right-0 top-full z-20 mt-1 w-56 rounded-xl border border-slate-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-900"
         >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              closeAll()
-              onFlashcards()
-            }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
-          >
-            <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
-            Create Flash Cards
-          </button>
+          {flashcardsEnabled ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                closeAll()
+                onFlashcards()
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            >
+              <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
+              Create Flash Cards
+            </button>
+          ) : null}
 
           {moveTargets.length > 0 || canMoveToRoot ? (
             <>
-              <div className="my-1 border-t border-slate-100 dark:border-neutral-800" role="separator" />
+              {flashcardsEnabled ? (
+                <div className="my-1 border-t border-slate-100 dark:border-neutral-800" role="separator" />
+              ) : null}
               <div className="relative">
                 <button
                   type="button"

@@ -179,15 +179,18 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 		})
 		if streamErr == nil {
 			d.logAIInferenceAllowed(r, userID, aigateway.FeatureAITutor, model, cleaned, gwDec)
+			d.recordAIUsage(ctx, AIUsageMeta{
+				UserID: userID, Feature: aigateway.FeatureAITutor, Model: model,
+			}, fullText.Usage, true)
 		}
 		if streamErr != nil {
 			tutorSSEError(w, flusher, "I'm having trouble right now. Please try again in a moment.")
 			return
 		}
 
-		estimated := estimateTutorTokens(cleaned + fullText)
+		estimated := estimateTutorTokens(cleaned + fullText.Text)
 		// Non-fatal: save response and update budget; if save fails the stream already sent.
-		_ = tutorrepo.AppendMessage(ctx, d.Pool, conv.ID, "assistant", fullText, estimated)
+		_ = tutorrepo.AppendMessage(ctx, d.Pool, conv.ID, "assistant", fullText.Text, estimated)
 		_ = tutorrepo.AddTokens(ctx, d.Pool, userID, orgID, estimated)
 
 		donePayload := fmt.Sprintf(`{"type":"done","conversationId":%q}`, conv.ID.String())

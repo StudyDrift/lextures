@@ -550,6 +550,7 @@ func (d Deps) registerSettingsRoutes(r chi.Router) {
 	r.Put("/api/v1/settings/timezone", d.handlePutSettingsTimezone())
 	r.Get("/api/v1/timezones", d.handleListTimezones())
 	r.Get("/api/v1/settings/ai/models", d.handleListAIModels())
+	r.Get("/api/v1/settings/ai/reports", d.handleGetSettingsAIReports())
 	r.Get("/api/v1/settings/ai", d.handleGetSettingsAI())
 	r.Put("/api/v1/settings/ai", d.handlePutSettingsAI())
 	r.Get("/api/v1/settings/platform", d.handleGetPlatformSettings())

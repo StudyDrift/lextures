@@ -38,8 +38,6 @@ func smtpPasswordMasked(dbRow *platformconfig.Row, mergedPassword string) string
 }
 
 type platformSettingsJSON struct {
-	OpenRouterAPIKey string `json:"openRouterApiKey"`
-
 	SAMLSSOEnabled      bool   `json:"samlSsoEnabled"`
 	SAMLPublicBaseURL   string `json:"samlPublicBaseUrl"`
 	SAMLSPEntityID      string `json:"samlSpEntityId"`
@@ -165,8 +163,6 @@ type platformSettingsJSON struct {
 }
 
 type platformSourcesJSON struct {
-	OpenRouterAPIKey string `json:"openRouterApiKey"`
-
 	SAMLSSOEnabled      string `json:"samlSsoEnabled"`
 	SAMLPublicBaseURL   string `json:"samlPublicBaseUrl"`
 	SAMLSPEntityID      string `json:"samlSpEntityId"`
@@ -223,7 +219,6 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 		merged := platformconfig.Merge(d.Config, dbRow)
 		sources := platformconfig.ResolveSources(d.Config, dbRow)
 		out := platformSettingsJSON{
-			OpenRouterAPIKey:                maskSecret(merged.OpenRouterAPIKey),
 			SAMLSSOEnabled:                  merged.SAMLSSOEnabled,
 			SAMLPublicBaseURL:               merged.SAMLPublicBaseURL,
 			SAMLSPEntityID:                  merged.SAMLSPEntityID,
@@ -339,7 +334,6 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			SMTPUser:                        merged.SMTPUser,
 			SMTPPassword:                    smtpPasswordMasked(dbRow, merged.SMTPPassword),
 			Sources: platformSourcesJSON{
-				OpenRouterAPIKey:            src(sources.OpenRouterAPIKey),
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
 				SAMLPublicBaseURL:           src(sources.SAMLPublicBaseURL),
 				SAMLSPEntityID:              src(sources.SAMLSPEntityID),
@@ -372,9 +366,6 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 }
 
 type putPlatformBody struct {
-	OpenRouterAPIKey      *string `json:"openRouterApiKey"`
-	ClearOpenRouterAPIKey bool    `json:"clearOpenRouterApiKey"`
-
 	SAMLSSOEnabled      *bool   `json:"samlSsoEnabled"`
 	SAMLPublicBaseURL   *string `json:"samlPublicBaseUrl"`
 	SAMLSPEntityID      *string `json:"samlSpEntityId"`
@@ -530,13 +521,8 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		}
 
 		wr := &platformconfig.Write{}
-		clearRouter := body.ClearOpenRouterAPIKey
 		clearSMTP := body.ClearSMTPPassword
 		if len(mask) > 0 {
-			clearRouter = false
-			if _, ok := mask["clearopenrouterapikey"]; ok {
-				clearRouter = true
-			}
 			clearSMTP = false
 			if _, ok := mask["clearsmtpassword"]; ok {
 				clearSMTP = true
@@ -554,24 +540,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 				}
 			}
 			apply()
-		}
-
-		set("openrouterapikey", body.OpenRouterAPIKey != nil, func() {
-			s := strings.TrimSpace(*body.OpenRouterAPIKey)
-			if s != "" && s != placeholderSecretResponse {
-				wr.OpenRouterAPIKey = &s
-			}
-		})
-
-		if clearRouter && wr.OpenRouterAPIKey != nil && strings.TrimSpace(*wr.OpenRouterAPIKey) != "" {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Cannot set openRouterApiKey and clearOpenRouterApiKey together.")
-			return
-		}
-		if clearRouter {
-			if err := platformconfig.ClearOpenRouterAPIKey(r.Context(), d.Pool); err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to clear OpenRouter override.")
-				return
-			}
 		}
 
 		smtpPortActive := len(mask) == 0
@@ -838,7 +806,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 
 		sources := platformconfig.ResolveSources(d.Config, dbRow)
 		out := platformSettingsJSON{
-			OpenRouterAPIKey:                maskSecret(merged.OpenRouterAPIKey),
 			SAMLSSOEnabled:                  merged.SAMLSSOEnabled,
 			SAMLPublicBaseURL:               merged.SAMLPublicBaseURL,
 			SAMLSPEntityID:                  merged.SAMLSPEntityID,
@@ -954,7 +921,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			SMTPUser:                        merged.SMTPUser,
 			SMTPPassword:                    smtpPasswordMasked(dbRow, merged.SMTPPassword),
 			Sources: platformSourcesJSON{
-				OpenRouterAPIKey:            src(sources.OpenRouterAPIKey),
 				SAMLSSOEnabled:              src(sources.SAMLSSOEnabled),
 				SAMLPublicBaseURL:           src(sources.SAMLPublicBaseURL),
 				SAMLSPEntityID:              src(sources.SAMLSPEntityID),

@@ -51,6 +51,7 @@ func TestAdmin_SettingsAI_Unauthorized(t *testing.T) {
 		method string
 	}{
 		{"/api/v1/settings/ai", http.MethodGet},
+		{"/api/v1/settings/ai/reports", http.MethodGet},
 		{"/api/v1/settings/ai/models?kind=text", http.MethodGet},
 	} {
 		srr := httptest.NewRecorder()

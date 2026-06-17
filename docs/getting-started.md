@@ -17,7 +17,7 @@ From the repository root:
    BOOTSTRAP_ADMIN_EMAIL=you@yourdomain.com
    ```
 
-   Optional: add `OPEN_ROUTER_API_KEY=...` for AI-related features.
+   Optional: configure an OpenRouter API key under **Settings → Intelligence → Models** for AI features.
 
 2. **Start the stack:**
 

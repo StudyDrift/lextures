@@ -40,11 +40,13 @@ import { IntegrationsMcpPanel } from '../../components/settings/integrations-mcp
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
+import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
 import { FALLBACK_IMAGE_MODEL_OPTIONS, FALLBACK_TEXT_MODEL_OPTIONS } from '../../lib/ai-models'
 import { apiUrl, authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
+import { PLATFORM_SECRET_PLACEHOLDER } from '../../lib/platform-settings'
 import { passwordStrengthEnglish, passwordStrengthKey, type PasswordStrengthKey } from '../../lib/password-strength'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { applyUiTheme, parseUiTheme, type UiTheme } from '../../lib/ui-theme'
@@ -211,6 +213,8 @@ export default function Settings() {
   const [modelsConfigured, setModelsConfigured] = useState(false)
   const [modelsError, setModelsError] = useState<string | null>(null)
   const [modelsRefreshing, setModelsRefreshing] = useState(false)
+  const [openRouterApiKey, setOpenRouterApiKey] = useState('')
+  const [openRouterApiKeyBaseline, setOpenRouterApiKeyBaseline] = useState('')
 
   const [accountLoading, setAccountLoading] = useState(false)
   const [accountSaving, setAccountSaving] = useState(false)
@@ -333,11 +337,17 @@ export default function Settings() {
             courseSetupModelId?: string
             notebookFlashcardsModelId?: string
             vibeActivityModelId?: string
+            openRouterApiKey?: string
           }
           if (!cancelled && data.imageModelId) setImageModelId(data.imageModelId)
           if (!cancelled && data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
           if (!cancelled && data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
           if (!cancelled && data.vibeActivityModelId) setVibeActivityModelId(data.vibeActivityModelId)
+          if (!cancelled) {
+            const key = data.openRouterApiKey ?? ''
+            setOpenRouterApiKey(key)
+            setOpenRouterApiKeyBaseline(key)
+          }
         }
         if (!cancelled) await loadModels()
       } catch {
@@ -364,15 +374,32 @@ export default function Settings() {
     setAiMessage(null)
     setAiError(null)
     try {
+      const body: Record<string, unknown> = {
+        imageModelId,
+        courseSetupModelId,
+        notebookFlashcardsModelId,
+        vibeActivityModelId,
+      }
+      const keyTrimmed = openRouterApiKey.trim()
+      const keyBaselineTrimmed = openRouterApiKeyBaseline.trim()
+      if (keyTrimmed !== keyBaselineTrimmed) {
+        const v = keyTrimmed
+        if (v && v !== PLATFORM_SECRET_PLACEHOLDER) {
+          body.openRouterApiKey = v
+        }
+        if (
+          keyBaselineTrimmed === PLATFORM_SECRET_PLACEHOLDER &&
+          v === '' &&
+          openRouterApiKey !== openRouterApiKeyBaseline
+        ) {
+          body.clearOpenRouterApiKey = true
+        }
+      }
+
       const res = await authorizedFetch('/api/v1/settings/ai', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageModelId,
-          courseSetupModelId,
-          notebookFlashcardsModelId,
-          vibeActivityModelId,
-        }),
+        body: JSON.stringify(body),
       })
       const raw: unknown = await res.json().catch(() => ({}))
       if (!res.ok) {
@@ -384,13 +411,19 @@ export default function Settings() {
         courseSetupModelId?: string
         notebookFlashcardsModelId?: string
         vibeActivityModelId?: string
+        openRouterApiKey?: string
       }
       if (data.imageModelId) setImageModelId(data.imageModelId)
       if (data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
       if (data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
       if (data.vibeActivityModelId) setVibeActivityModelId(data.vibeActivityModelId)
+      if (data.openRouterApiKey !== undefined) {
+        setOpenRouterApiKey(data.openRouterApiKey)
+        setOpenRouterApiKeyBaseline(data.openRouterApiKey)
+      }
       setAiMessage('Saved.')
-      toastSaveOk('AI defaults saved')
+      toastSaveOk('AI settings saved')
+      await loadModels()
     } catch {
       setAiError('Could not save settings.')
       toastMutationError('Could not save AI settings.')
@@ -918,6 +951,8 @@ export default function Settings() {
               ? 'max-w-3xl'
             : activeView === 'ai-prompts'
               ? 'max-w-3xl'
+              : activeView === 'ai-reports'
+                ? 'max-w-4xl'
               : 'max-w-xl'
         }`}
       >
@@ -935,8 +970,8 @@ export default function Settings() {
               >
                 OpenRouter&apos;s models API
               </a>{' '}
-              (text-capable and image-capable models). Generation still requires an API key on the
-              server.
+              (text-capable and image-capable models). Generation requires an OpenRouter API key
+              configured below.
             </p>
 
             {aiLoading && <p className="mt-4 text-sm text-slate-500">Loading…</p>}
@@ -947,11 +982,8 @@ export default function Settings() {
             )}
 
             {!modelsConfigured && !aiLoading && (
-              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Configure an OpenRouter API key under{' '}
-                <span className="font-medium">Settings → Global platform</span>, or set{' '}
-                <code className="rounded bg-amber-100/80 px-1.5 py-0.5 font-mono text-xs">OPENROUTER_API_KEY</code> in the
-                server environment, so AI features can call OpenRouter.
+              <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+                Add your OpenRouter API key below and save, so AI features can call OpenRouter.
               </p>
             )}
 
@@ -971,6 +1003,29 @@ export default function Settings() {
 
             {!aiLoading && (
               <form className="mt-6 space-y-5" onSubmit={onSaveAi}>
+                <div>
+                  <label
+                    htmlFor="openrouter-api-key"
+                    className="block text-sm font-medium text-slate-700 dark:text-neutral-200"
+                  >
+                    OpenRouter API key
+                  </label>
+                  <input
+                    id="openrouter-api-key"
+                    type="password"
+                    autoComplete="off"
+                    value={openRouterApiKey}
+                    onChange={(e) => setOpenRouterApiKey(e.target.value)}
+                    placeholder={PLATFORM_SECRET_PLACEHOLDER}
+                    disabled={aiSaving}
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+                    Platform-wide key for AI generation. Leave unchanged to keep the current key; clear
+                    the field and save to remove it.
+                  </p>
+                </div>
+
                 <div>
                   <ImageModelPicker
                     id="course-setup-model"
@@ -1132,6 +1187,20 @@ export default function Settings() {
               )}
             </RequirePermission>
           </div>
+        )}
+
+        {activeView === 'ai-reports' && (
+          <RequirePermission
+            permission={PERM_RBAC_MANAGE}
+            fallback={
+              <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                You need permission to view AI reports (
+                <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+              </p>
+            }
+          >
+            <AiReportsPanel />
+          </RequirePermission>
         )}
 
         {activeView === 'account' && (

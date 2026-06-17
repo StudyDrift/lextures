@@ -45,8 +45,7 @@ var configEnvKeys = []string{
 	"CLASSLINK_SSO_ENABLED",
 	"CLASSLINK_OIDC_CLIENT_ID",
 	"CLASSLINK_OIDC_CLIENT_SECRET",
-	"OPEN_ROUTER_API_KEY",
-	"OPENROUTER_API_KEY",
+
 	"ORIGINALITY_DETECTION_ENABLED",
 	"ORIGINALITY_STUB_EXTERNAL",
 	"PORT",
@@ -205,7 +204,6 @@ func TestJWTSecretAllowsInsecureFallback(t *testing.T) {
 
 func TestLoadTrimsAndUsesLegacyAliases(t *testing.T) {
 	baseEnv(t)
-	t.Setenv("OPEN_ROUTER_API_KEY", " api-key ")
 	t.Setenv("COURSE_FILES_ROOT", " /tmp/course-files ")
 	t.Setenv("CANVAS_ALLOWED_HOST_SUFFIXES", " *.Instructure.com, .canvas.example.edu, ")
 	t.Setenv("PUBLIC_WEB_ORIGIN", " https://app.example.edu/ ")
@@ -216,9 +214,6 @@ func TestLoadTrimsAndUsesLegacyAliases(t *testing.T) {
 	t.Setenv("SMTP_FROM", " no-reply@example.edu ")
 
 	c := Load()
-	if c.OpenRouterAPIKey != "api-key" {
-		t.Fatalf("OpenRouterAPIKey: %q", c.OpenRouterAPIKey)
-	}
 	if c.CourseFilesRoot != "/tmp/course-files" {
 		t.Fatalf("CourseFilesRoot: %q", c.CourseFilesRoot)
 	}

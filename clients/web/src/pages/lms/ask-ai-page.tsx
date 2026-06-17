@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -30,6 +31,7 @@ type NotebookRagResponse = {
 }
 
 export default function AskAiPage() {
+  const { ragNotebookEnabled, loading: featuresLoading } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const qParam = searchParams.get('q')?.trim() ?? ''
 
@@ -177,6 +179,10 @@ export default function AskAiPage() {
       setAskLoading(false)
     }
   }, [askText, hasNotes, notebooksForRag])
+
+  if (!featuresLoading && !ragNotebookEnabled) {
+    return <Navigate to="/" replace />
+  }
 
   return (
     <LmsPage

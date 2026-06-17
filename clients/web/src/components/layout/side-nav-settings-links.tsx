@@ -60,7 +60,7 @@ export function SideNavSettingsLinks() {
   } = usePlatformFeatures()
   const location = useLocation()
   const view = settingsViewFromPathname(location.pathname)
-  const aiSectionActive = view === 'ai-models' || view === 'ai-prompts'
+  const aiSectionActive = view === 'ai-models' || view === 'ai-prompts' || view === 'ai-reports'
   const [aiOpen, setAiOpen] = useState(() => location.pathname.startsWith('/settings/ai'))
 
   useEffect(() => {
@@ -277,7 +277,11 @@ export function SideNavSettingsLinks() {
                   onClick={() => setAiOpen((o) => !o)}
                   className={`${sideNavLinkClass} ${
                     sideNavCollapsed ? 'justify-center' : ''
-                  } ${aiSectionActive ? sideNavActiveClass : 'text-slate-500'}`}
+                  } ${
+                    aiOpen || aiSectionActive
+                      ? 'text-slate-900 dark:text-neutral-50'
+                      : 'text-slate-500 dark:text-neutral-400'
+                  }`}
                   aria-expanded={aiOpen}
                   title={sideNavCollapsed ? 'Intelligence' : undefined}
                 >
@@ -303,20 +307,15 @@ export function SideNavSettingsLinks() {
                     }`}
                   >
                     <div className="min-h-0 overflow-hidden">
-                      <div className="flex flex-col gap-0.5 border-s border-slate-200/80 ps-2 dark:border-neutral-600/80">
-                        <SideNavLink
-                          to="/settings/ai/models"
-                          className={() => (view === 'ai-models' ? sideNavActiveClass : '')}
-                          icon={null}
-                        >
+                      <div className="flex flex-col gap-0.5 pb-0.5">
+                        <SideNavLink to="/settings/ai/models" nested>
                           Models
                         </SideNavLink>
-                        <SideNavLink
-                          to="/settings/ai/system-prompts"
-                          className={() => (view === 'ai-prompts' ? sideNavActiveClass : '')}
-                          icon={null}
-                        >
+                        <SideNavLink to="/settings/ai/system-prompts" nested>
                           System Prompts
+                        </SideNavLink>
+                        <SideNavLink to="/settings/ai/reports" nested>
+                          Reports
                         </SideNavLink>
                       </div>
                     </div>

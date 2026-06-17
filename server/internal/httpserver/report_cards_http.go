@@ -475,7 +475,7 @@ func (d Deps) handleAIReportCardComment() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]any{"suggestion": strings.TrimSpace(suggestion)})
+		_ = json.NewEncoder(w).Encode(map[string]any{"suggestion": strings.TrimSpace(suggestion.Text)})
 	}
 }
 

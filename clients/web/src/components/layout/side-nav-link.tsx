@@ -1,16 +1,29 @@
 import { type ReactNode } from 'react'
 import { NavLink, type NavLinkProps } from 'react-router-dom'
-import { sideNavActiveClass, sideNavLinkClass } from './side-nav-styles'
+import {
+  sideNavActiveClass,
+  sideNavLinkClass,
+  sideNavSubActiveClass,
+  sideNavSubLinkClass,
+} from './side-nav-styles'
 import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
 
 interface SideNavLinkProps extends NavLinkProps {
-  icon: ReactNode
+  icon?: ReactNode
   children: ReactNode
   badge?: ReactNode
+  nested?: boolean
 }
 
-export function SideNavLink({ icon, children, badge, className, ...props }: SideNavLinkProps) {
+export function SideNavLink({
+  icon,
+  children,
+  badge,
+  nested = false,
+  className,
+  ...props
+}: SideNavLinkProps) {
   const { sideNavCollapsed } = useShellNav()
 
   const label = typeof children === 'string' ? children : ''
@@ -21,14 +34,21 @@ export function SideNavLink({ icon, children, badge, className, ...props }: Side
         {...props}
         className={(navProps) => {
           const baseClass = typeof className === 'function' ? className(navProps) : className
-          const activeClass = navProps.isActive ? sideNavActiveClass : ''
+          const activeClass = navProps.isActive
+            ? nested
+              ? sideNavSubActiveClass
+              : sideNavActiveClass
+            : ''
           const collapseClass = sideNavCollapsed ? 'justify-center' : ''
-          return `${sideNavLinkClass} ${activeClass} ${collapseClass} ${baseClass || ''}`
+          const linkClass = nested ? sideNavSubLinkClass : sideNavLinkClass
+          return `${linkClass} ${activeClass} ${collapseClass} ${baseClass || ''}`
         }}
       >
-        <span className="flex h-5 w-5 shrink-0 items-center justify-center text-current opacity-90">
-          {icon}
-        </span>
+        {!nested && (
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-current opacity-90">
+            {icon}
+          </span>
+        )}
         {!sideNavCollapsed && (
           <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
             <span className="truncate">{children}</span>

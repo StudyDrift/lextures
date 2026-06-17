@@ -440,7 +440,8 @@ func Load() Config {
 
 		BootstrapAdminEmail: strings.ToLower(strings.TrimSpace(os.Getenv("BOOTSTRAP_ADMIN_EMAIL"))),
 
-		OpenRouterAPIKey: firstNonEmptyTrimmed("OPENROUTER_API_KEY", "OPEN_ROUTER_API_KEY"),
+		// OpenRouterAPIKey is loaded from settings.platform_app_settings (Settings → Intelligence → Models).
+		OpenRouterAPIKey: "",
 		CourseFilesRoot:  stringDefault(firstNonEmptyTrimmed("COURSE_FILES_ROOT"), "data/course-files"),
 
 		CanvasAllowedHostSuffixes:     canvasAllowedHostSuffixes(),

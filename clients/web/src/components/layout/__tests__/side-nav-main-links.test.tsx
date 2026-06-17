@@ -8,6 +8,7 @@ import { SideNavMainLinks } from '../side-nav-main-links'
 const platformFeaturesMock = vi.fn(() => ({
   accommodationsEngineEnabled: false,
   ffEportfolio: false,
+  ragNotebookEnabled: true,
 }))
 
 vi.mock('../../../context/use-inbox-unread', () => ({
@@ -30,6 +31,7 @@ describe('SideNavMainLinks', () => {
     platformFeaturesMock.mockReturnValue({
       accommodationsEngineEnabled: false,
       ffEportfolio: false,
+      ragNotebookEnabled: true,
     })
   })
 
@@ -49,10 +51,29 @@ describe('SideNavMainLinks', () => {
     expect(screen.queryByRole('link', { name: /^my portfolio$/i })).not.toBeInTheDocument()
   })
 
+  it('hides Ask AI when notebook AI is disabled', () => {
+    platformFeaturesMock.mockReturnValue({
+      accommodationsEngineEnabled: false,
+      ffEportfolio: false,
+      ragNotebookEnabled: false,
+    })
+
+    render(
+      <MemoryRouter>
+        <ShellNavProvider>
+          <SideNavMainLinks />
+        </ShellNavProvider>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole('link', { name: /^ask ai$/i })).not.toBeInTheDocument()
+  })
+
   it('shows My Portfolio when ePortfolio is enabled', () => {
     platformFeaturesMock.mockReturnValue({
       accommodationsEngineEnabled: false,
       ffEportfolio: true,
+      ragNotebookEnabled: true,
     })
 
     render(

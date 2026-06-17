@@ -38,14 +38,14 @@ func GenerateTip(ctx context.Context, pool *pgxpool.Pool, client *openrouter.Cli
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: userMsg},
 	})
-	if genErr != nil || strings.TrimSpace(text) == "" {
+	if genErr != nil || strings.TrimSpace(text.Text) == "" {
 		return PickFallback(weekSeed), contextLine, false, genErr
 	}
-	text = strings.TrimSpace(text)
-	if len(text) > 500 {
-		text = text[:500]
+	textStr := strings.TrimSpace(text.Text)
+	if len(textStr) > 500 {
+		textStr = textStr[:500]
 	}
-	return text, contextLine, true, nil
+	return textStr, contextLine, true, nil
 }
 
 // WeekOfMonday returns the Monday date for the week containing t.

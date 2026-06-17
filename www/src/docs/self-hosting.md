@@ -25,11 +25,7 @@ To make **your** account the platform administrator:
 BOOTSTRAP_ADMIN_EMAIL=you@yourdomain.com
 ```
 
-Optional, for AI features:
-
-```bash
-OPEN_ROUTER_API_KEY=sk-or-...
-```
+Optional, for AI features: after signing in as a global admin, open **Settings → Intelligence → Models** and save your OpenRouter API key there (stored in the platform database).
 
 You can copy from [`.env.example`](https://github.com/StudyDrift/lextures/blob/main/.env.example) in the repo.
 

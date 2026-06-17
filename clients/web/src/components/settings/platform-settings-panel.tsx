@@ -23,7 +23,6 @@ function normalizePlatformPayload(data: PlatformSettingsPayload) {
 
 function emptyForm(): PlatformSettingsPayload {
   return {
-    openRouterApiKey: '',
     samlSsoEnabled: false,
     samlPublicBaseUrl: '',
     samlSpEntityId: '',
@@ -79,7 +78,6 @@ function emptyForm(): PlatformSettingsPayload {
     smtpUser: '',
     smtpPassword: '',
     sources: {
-      openRouterApiKey: 'environment',
       samlSsoEnabled: 'environment',
       samlPublicBaseUrl: 'environment',
       samlSpEntityId: 'environment',
@@ -271,27 +269,6 @@ export function PlatformSettingsPanel() {
         }
       }
 
-      maybe(
-        'openRouterApiKey',
-        baseline.openRouterApiKey,
-        form.openRouterApiKey,
-        () => {
-          const v = form.openRouterApiKey.trim()
-          if (v && v !== PLATFORM_SECRET_PLACEHOLDER) {
-            body.openRouterApiKey = v
-          }
-        },
-      )
-
-      if (
-        baseline.sources.openRouterApiKey === 'database' &&
-        form.openRouterApiKey.trim() === '' &&
-        baseline.openRouterApiKey !== form.openRouterApiKey
-      ) {
-        mask.push('clearOpenRouterApiKey')
-        body.clearOpenRouterApiKey = true
-      }
-
       maybe('samlSsoEnabled', baseline.samlSsoEnabled, form.samlSsoEnabled, () => {
         body.samlSsoEnabled = form.samlSsoEnabled
       })
@@ -457,24 +434,6 @@ export function PlatformSettingsPanel() {
               />
             </div>
           </div>
-        </section>
-
-        <section>
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">AI — OpenRouter</h3>
-          <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
-            Used for AI generation (models list, notebook RAG, etc.). Leave unchanged to keep the current key.
-          </p>
-          <label className="mt-4 block text-sm font-medium text-slate-700 dark:text-neutral-200">
-            API key {sourceBadge(form.sources.openRouterApiKey)}
-          </label>
-          <input
-            type="password"
-            autoComplete="off"
-            value={form.openRouterApiKey}
-            onChange={(e) => update('openRouterApiKey', e.target.value)}
-            placeholder={PLATFORM_SECRET_PLACEHOLDER}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 font-mono text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
-          />
         </section>
 
         <section>

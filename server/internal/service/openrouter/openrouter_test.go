@@ -19,8 +19,8 @@ func TestChatCompletion_OK(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != "## Hi\n- one" {
-		t.Fatalf("content: %q", got)
+	if got.Text != "## Hi\n- one" {
+		t.Fatalf("content: %q", got.Text)
 	}
 }
 

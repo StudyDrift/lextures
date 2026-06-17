@@ -20,6 +20,7 @@ import {
 import { pullStudentNotebooks } from '../../lib/student-notebook-sync'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { AiDisclosureBanner } from '../../components/ai-disclosure-banner'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 
 function snippet(text: string, max = 140): string {
@@ -40,6 +41,7 @@ type NotebookRagResponse = {
 }
 
 export default function MyNotebooksPage() {
+  const { ragNotebookEnabled } = usePlatformFeatures()
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [coursesError, setCoursesError] = useState<string | null>(null)
   const [notebookVersion, setNotebookVersion] = useState(0)
@@ -242,7 +244,7 @@ export default function MyNotebooksPage() {
             </div>
           </div>
 
-          {!askCardOpen ? (
+          {ragNotebookEnabled && !askCardOpen ? (
             <button
               type="button"
               onClick={() => setAskCardOpen(true)}
@@ -262,7 +264,7 @@ export default function MyNotebooksPage() {
                 </span>
               </span>
             </button>
-          ) : (
+          ) : ragNotebookEnabled ? (
             <div className="rounded-2xl border border-indigo-200/90 bg-gradient-to-b from-indigo-50/80 to-white p-4 shadow-sm dark:border-indigo-500/25 dark:from-indigo-950/40 dark:to-neutral-950 sm:p-5">
               <AiDisclosureBanner featureKey="rag_notebook" modelLabel="Claude 3.5 Sonnet" />
               <div className="flex items-start gap-3">
@@ -329,9 +331,9 @@ export default function MyNotebooksPage() {
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
-          {ragResult && (
+          {ragNotebookEnabled && ragResult && (
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-950 sm:p-5">
               <h2 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Answer</h2>
               <article className="mt-3 text-sm leading-relaxed text-slate-700 dark:text-neutral-200 [&_a]:text-indigo-600 [&_a]:underline dark:[&_a]:text-indigo-400 [&_li]:my-0.5 [&_ol]:my-2 [&_p]:my-2 [&_ul]:my-2">

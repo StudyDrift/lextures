@@ -529,7 +529,7 @@ WHERE id = 1
 	return &r, nil
 }
 
-// ClearOpenRouterAPIKey removes the stored OpenRouter override so the environment key is used again.
+// ClearOpenRouterAPIKey removes the stored OpenRouter API key.
 func ClearOpenRouterAPIKey(ctx context.Context, pool *pgxpool.Pool) error {
 	_, err := pool.Exec(ctx, `
 UPDATE settings.platform_app_settings
@@ -949,6 +949,8 @@ ON CONFLICT (id) DO UPDATE SET
 // Merge applies platform settings from the database (booleans) and optional DB overrides for secrets/URLs.
 func Merge(env config.Config, db *Row) config.Config {
 	out := env
+	// OpenRouter is configured only via platform settings (Intelligence → Models), not process env.
+	out.OpenRouterAPIKey = ""
 	applyPlatformBools(&out, db, DefaultDefaults())
 	if db == nil {
 		return out
@@ -1048,7 +1050,7 @@ func ResolveSources(env config.Config, db *Row) Sources {
 	if db == nil {
 		return sourcesAllEnvironment(env)
 	}
-	s.OpenRouterAPIKey = sourceString(env.OpenRouterAPIKey, db.OpenRouterAPIKey)
+	s.OpenRouterAPIKey = sourceOpenRouterAPIKey(db.OpenRouterAPIKey)
 	s.SAMLSSOEnabled = sourceBoolDB(db.SAMLSSOEnabled)
 	s.SAMLPublicBaseURL = sourceString(env.SAMLPublicBaseURL, db.SAMLPublicBaseURL)
 	s.SAMLSPEntityID = sourceString(env.SAMLSPEntityID, db.SAMLSPEntityID)
@@ -1079,7 +1081,7 @@ func ResolveSources(env config.Config, db *Row) Sources {
 func sourcesAllEnvironment(env config.Config) Sources {
 	_ = env
 	return Sources{
-		OpenRouterAPIKey:            SourceEnvironment,
+		OpenRouterAPIKey:            SourceDefault,
 		SAMLSSOEnabled:              SourceDefault,
 		SAMLPublicBaseURL:           SourceEnvironment,
 		SAMLSPEntityID:              SourceEnvironment,
@@ -1126,6 +1128,13 @@ func sourceSMTPPasswordCiphertext(ciphertext []byte) Source {
 		return SourceDatabase
 	}
 	return SourceEnvironment
+}
+
+func sourceOpenRouterAPIKey(dbPtr *string) Source {
+	if dbPtr != nil && strings.TrimSpace(*dbPtr) != "" {
+		return SourceDatabase
+	}
+	return SourceDefault
 }
 
 func sourceString(envVal string, dbPtr *string) Source {

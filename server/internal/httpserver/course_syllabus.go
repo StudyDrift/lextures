@@ -206,7 +206,7 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 
 		or := d.openRouterClient()
 		if or == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key in Platform Settings.")
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key under Settings → Intelligence → Models.")
 			return
 		}
 
@@ -244,8 +244,11 @@ func (d Deps) handleGenerateSyllabusSection() http.HandlerFunc {
 			return
 		}
 		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureSyllabusGeneration, model, promptMaterial, gwDec)
+		d.recordAIUsage(r.Context(), AIUsageMeta{
+			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureSyllabusGeneration, Model: model,
+		}, generated.Usage, true)
 
-		markdown := strings.TrimSpace(generated)
+		markdown := strings.TrimSpace(generated.Text)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp{Markdown: markdown})
 	}

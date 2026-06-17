@@ -1,10 +1,15 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/config"
+	aidisclosurerepo "github.com/lextures/lextures/server/internal/repos/aidisclosure"
+	"github.com/lextures/lextures/server/internal/repos/organization"
+	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 )
 
 type platformFeaturesJSON struct {
@@ -69,6 +74,10 @@ type platformFeaturesJSON struct {
 	FFPublicCatalog             bool `json:"ffPublicCatalog"`
 	FFStripeBilling             bool `json:"ffStripeBilling"`
 	FFLearningPaths             bool `json:"ffLearningPaths"`
+
+	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
+	OpenRouterConfigured bool `json:"openRouterConfigured"`
+	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -157,6 +166,28 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 	}
 }
 
+func (d Deps) effectiveRagNotebookEnabled(ctx context.Context, userID uuid.UUID) bool {
+	cfg := d.effectiveConfig()
+	if !cfg.AiDisclosureEnabled || d.openRouterClient() == nil {
+		return false
+	}
+	if d.Pool == nil {
+		return true
+	}
+	orgID, err := organization.OrgIDForUser(ctx, d.Pool, userID)
+	if err != nil {
+		return true
+	}
+	tc, err := aidisclosurerepo.GetTenantConfig(ctx, d.Pool, orgID)
+	if err != nil || tc == nil {
+		return true
+	}
+	if disabled, ok := tc.FeaturesEnabled[aigateway.FeatureRAGNotebook]; ok && !disabled {
+		return false
+	}
+	return true
+}
+
 // handleGetPlatformFeatures is GET /api/v1/platform/features (authenticated; read-only effective flags).
 func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -165,10 +196,15 @@ func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if _, ok := d.meUserID(w, r); !ok {
+		userID, ok := d.meUserID(w, r)
+		if !ok {
 			return
 		}
-		out := platformFeaturesFromConfig(d.effectiveConfig())
+		cfg := d.effectiveConfig()
+		out := platformFeaturesFromConfig(cfg)
+		out.AiDisclosureEnabled = cfg.AiDisclosureEnabled
+		out.OpenRouterConfigured = d.openRouterClient() != nil
+		out.RagNotebookEnabled = d.effectiveRagNotebookEnabled(r.Context(), userID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

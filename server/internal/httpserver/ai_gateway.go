@@ -1,12 +1,17 @@
 package httpserver
 
 import (
+	"context"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/aiusage"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
+	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 func (d Deps) aiGatewayConfig() aigateway.Config {
@@ -57,6 +62,38 @@ func (d Deps) enforceAIGateway(
 		return false
 	}
 	return true
+}
+
+// AIUsageMeta identifies who triggered an OpenRouter call for analytics.ai_usage_log.
+type AIUsageMeta struct {
+	UserID     uuid.UUID
+	CourseID   *uuid.UUID
+	CourseCode string
+	Feature    string
+	Model      string
+}
+
+// recordAIUsage appends token/cost usage for Intelligence reports (best-effort).
+func (d Deps) recordAIUsage(ctx context.Context, meta AIUsageMeta, usage openrouter.UsageInfo, succeeded bool) {
+	if d.Pool == nil || !usage.HasData() {
+		return
+	}
+	var userID *uuid.UUID
+	if meta.UserID != uuid.Nil {
+		uid := meta.UserID
+		userID = &uid
+	}
+	var courseID *uuid.UUID
+	if meta.CourseID != nil {
+		courseID = meta.CourseID
+	} else if code := strings.TrimSpace(meta.CourseCode); code != "" {
+		if row, err := course.GetPublicByCourseCode(ctx, d.Pool, code); err == nil && row != nil {
+			if cid, perr := uuid.Parse(row.ID); perr == nil {
+				courseID = &cid
+			}
+		}
+	}
+	_ = aiusage.Insert(ctx, d.Pool, aiusage.EntryFromUsage(userID, courseID, meta.Feature, meta.Model, usage, succeeded))
 }
 
 // logAIInferenceAllowed records a successful (non-blocked) inference after the external call completes.

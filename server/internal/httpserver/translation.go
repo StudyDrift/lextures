@@ -112,7 +112,7 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 			OptInConfirmed: true,
 		}
 
-		translated, sourceLang, err := callLLMTranslation(or, req.Text, req.TargetLang)
+		translated, sourceLang, usage, err := callLLMTranslation(or, req.Text, req.TargetLang)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Translation temporarily unavailable.")
 			return
@@ -120,6 +120,9 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 
 		_ = translation.Store(ctx, d.Pool, req.ContentType, contentID, sourceLang, req.TargetLang, translated, translationProvider)
 		d.logAIInferenceAllowed(r, userID, aigateway.FeatureTranslation, translationModel, req.Text, gwDec)
+		d.recordAIUsage(r.Context(), AIUsageMeta{
+			UserID: userID, Feature: aigateway.FeatureTranslation, Model: translationModel,
+		}, usage, true)
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(translateResponse{
@@ -130,8 +133,8 @@ func (d Deps) handleTranslate() http.HandlerFunc {
 	}
 }
 
-// callLLMTranslation sends a translation request to the LLM and returns (translated, sourceLang, error).
-func callLLMTranslation(or *openrouter.Client, text, targetLang string) (string, string, error) {
+// callLLMTranslation sends a translation request to the LLM and returns (translated, sourceLang, usage, error).
+func callLLMTranslation(or *openrouter.Client, text, targetLang string) (string, string, openrouter.UsageInfo, error) {
 	langName := langCodeToName(targetLang)
 	prompt := fmt.Sprintf(
 		"Detect the source language of the following text and translate it to %s. "+
@@ -144,23 +147,23 @@ func callLLMTranslation(or *openrouter.Client, text, targetLang string) (string,
 		{Role: "user", Content: text},
 	}
 
-	cfg, err := or.ChatCompletion("openai/gpt-4o-mini", messages)
+	completion, err := or.ChatCompletion("openai/gpt-4o-mini", messages)
 	if err != nil {
-		return "", "", fmt.Errorf("llm call failed: %w", err)
+		return "", "", openrouter.UsageInfo{}, fmt.Errorf("llm call failed: %w", err)
 	}
 
 	var result struct {
 		SourceLang string `json:"source_lang"`
 		Translated string `json:"translated"`
 	}
-	if err := json.Unmarshal([]byte(cfg), &result); err != nil {
+	if err := json.Unmarshal([]byte(completion.Text), &result); err != nil {
 		// If LLM didn't produce valid JSON, treat entire response as the translation.
-		return strings.TrimSpace(cfg), "und", nil
+		return strings.TrimSpace(completion.Text), "und", completion.Usage, nil
 	}
 	if result.SourceLang == "" {
 		result.SourceLang = "und"
 	}
-	return result.Translated, result.SourceLang, nil
+	return result.Translated, result.SourceLang, completion.Usage, nil
 }
 
 // langCodeToName converts a BCP 47 language code to a human-readable name for the prompt.

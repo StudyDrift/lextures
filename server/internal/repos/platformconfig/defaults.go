@@ -1,7 +1,8 @@
 package platformconfig
 
 // Defaults for platform boolean settings when the database column is NULL.
-// Secrets and integration endpoints still come from process environment.
+// Integration endpoints and some secrets still come from process environment.
+// OpenRouter API keys are stored in settings.platform_app_settings (Intelligence → Models).
 type Defaults struct {
 	BlindGradingEnabled         bool
 	GradePostingPoliciesEnabled bool

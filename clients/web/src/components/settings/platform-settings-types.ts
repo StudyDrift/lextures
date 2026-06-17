@@ -1,7 +1,6 @@
 export type FieldSource = 'environment' | 'database' | 'default'
 
 export type PlatformSettingsPayload = {
-  openRouterApiKey: string
   samlSsoEnabled: boolean
   samlPublicBaseUrl: string
   samlSpEntityId: string
@@ -57,7 +56,6 @@ export type PlatformSettingsPayload = {
   smtpUser: string
   smtpPassword: string
   sources: {
-    openRouterApiKey: FieldSource
     samlSsoEnabled: FieldSource
     samlPublicBaseUrl: FieldSource
     samlSpEntityId: FieldSource

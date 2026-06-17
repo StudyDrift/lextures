@@ -1,12 +1,14 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
@@ -85,21 +87,25 @@ func (d Deps) handleGetSettingsAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
 			return
 		}
+		cfg := d.effectiveConfig()
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"imageModelId":                img,
 			"courseSetupModelId":          course,
 			"notebookFlashcardsModelId":   flashcards,
 			"vibeActivityModelId":         vibe,
+			"openRouterApiKey":            maskSecret(cfg.OpenRouterAPIKey),
 		})
 	}
 }
 
 type putSettingsAIBody struct {
-	ImageModelID                string `json:"imageModelId"`
-	CourseSetupModelID          string `json:"courseSetupModelId"`
-	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
-	VibeActivityModelID         string `json:"vibeActivityModelId"`
+	ImageModelID                string  `json:"imageModelId"`
+	CourseSetupModelID          string  `json:"courseSetupModelId"`
+	NotebookFlashcardsModelID   string  `json:"notebookFlashcardsModelId"`
+	VibeActivityModelID         string  `json:"vibeActivityModelId"`
+	OpenRouterAPIKey            *string `json:"openRouterApiKey"`
+	ClearOpenRouterAPIKey       bool    `json:"clearOpenRouterApiKey"`
 }
 
 // handlePutSettingsAI is PUT /api/v1/settings/ai
@@ -143,17 +149,76 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 		if vibe == "" {
 			vibe = user.DefaultVibeActivityModelID
 		}
+		if err := d.applyOpenRouterAPIKeyUpdate(r.Context(), in.OpenRouterAPIKey, in.ClearOpenRouterAPIKey); err != nil {
+			if err == errOpenRouterAPIKeyConflict {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Cannot set openRouterApiKey and clearOpenRouterApiKey together.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save OpenRouter API key.")
+			return
+		}
+
 		imgOut, courseOut, flashcardsOut, vibeOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course, flashcards, vibe)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save AI settings.")
 			return
 		}
+		cfg := d.effectiveConfig()
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{
 			"imageModelId":                imgOut,
 			"courseSetupModelId":          courseOut,
 			"notebookFlashcardsModelId":   flashcardsOut,
 			"vibeActivityModelId":         vibeOut,
+			"openRouterApiKey":            maskSecret(cfg.OpenRouterAPIKey),
 		})
 	}
+}
+
+var errOpenRouterAPIKeyConflict = errOpenRouterKeyConflict{}
+
+type errOpenRouterKeyConflict struct{}
+
+func (errOpenRouterKeyConflict) Error() string {
+	return "openrouter api key conflict"
+}
+
+func (d Deps) applyOpenRouterAPIKeyUpdate(ctx context.Context, key *string, clear bool) error {
+	if d.Pool == nil {
+		return nil
+	}
+	if key == nil && !clear {
+		return nil
+	}
+
+	wr := &platformconfig.Write{}
+	if key != nil {
+		s := strings.TrimSpace(*key)
+		if s != "" && s != placeholderSecretResponse {
+			wr.OpenRouterAPIKey = &s
+		}
+	}
+	if clear && wr.OpenRouterAPIKey != nil && strings.TrimSpace(*wr.OpenRouterAPIKey) != "" {
+		return errOpenRouterAPIKeyConflict
+	}
+	if clear {
+		if err := platformconfig.ClearOpenRouterAPIKey(ctx, d.Pool); err != nil {
+			return err
+		}
+	}
+	if wr.OpenRouterAPIKey == nil {
+		return nil
+	}
+	dbRow, err := platformconfig.Upsert(ctx, d.Pool, wr)
+	if err != nil {
+		return err
+	}
+	merged := platformconfig.Merge(d.Config, dbRow)
+	if err := merged.Validate(); err != nil {
+		return err
+	}
+	if d.Platform != nil {
+		d.Platform.Reload(merged)
+	}
+	return nil
 }

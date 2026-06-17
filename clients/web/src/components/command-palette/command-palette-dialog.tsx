@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePlatformScimEnabled } from '../../hooks/use-platform-scim-enabled'
 import { PERM_RBAC_MANAGE } from '../../lib/rbac-api'
 import {
@@ -75,10 +76,14 @@ export function CommandPaletteDialog() {
   const location = useLocation()
   const { allows } = usePermissions()
   const canManageRbac = allows(PERM_RBAC_MANAGE)
+  const { ragNotebookEnabled } = usePlatformFeatures()
   const { scimEnabled } = usePlatformScimEnabled(canManageRbac)
   const globalSearchOptions = useMemo(
-    () => ({ scimEnabled: canManageRbac && scimEnabled }),
-    [canManageRbac, scimEnabled],
+    () => ({
+      scimEnabled: canManageRbac && scimEnabled,
+      ragNotebookEnabled,
+    }),
+    [canManageRbac, scimEnabled, ragNotebookEnabled],
   )
   const navFeatures = useCourseNavFeatures()
   const inputRef = useRef<HTMLInputElement>(null)

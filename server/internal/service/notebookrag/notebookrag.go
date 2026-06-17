@@ -314,7 +314,7 @@ func Answer(ctx context.Context, pool *pgxpool.Pool, or *openrouter.Client, user
 	if err != nil {
 		return Response{}, &GenerationError{Message: err.Error()}
 	}
-	answer := normalizeMarkdownOutput(text)
+	answer := normalizeMarkdownOutput(text.Text)
 	if answer == "" {
 		return Response{}, &GenerationError{Message: "The model returned an empty response."}
 	}

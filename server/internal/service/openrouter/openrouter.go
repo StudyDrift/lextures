@@ -63,13 +63,42 @@ type VisionMessage struct {
 	Content []ContentPart `json:"content"`
 }
 
+type chatCompletionResponse struct {
+	Choices []struct {
+		Message struct {
+			Content *string `json:"content"`
+		} `json:"message"`
+	} `json:"choices"`
+	Usage usagePayload `json:"usage"`
+}
+
+type usagePayload struct {
+	PromptTokens     int     `json:"prompt_tokens"`
+	CompletionTokens int     `json:"completion_tokens"`
+	TotalTokens      int     `json:"total_tokens"`
+	Cost             float64 `json:"cost"`
+}
+
+func usageFromPayload(u usagePayload) UsageInfo {
+	total := u.TotalTokens
+	if total == 0 {
+		total = u.PromptTokens + u.CompletionTokens
+	}
+	return UsageInfo{
+		PromptTokens:     u.PromptTokens,
+		CompletionTokens: u.CompletionTokens,
+		TotalTokens:      total,
+		CostUSD:          u.Cost,
+	}
+}
+
 // ChatCompletion sends a non-streaming chat request and returns the assistant text, if any.
-func (c *Client) ChatCompletion(model string, messages []Message) (string, error) {
+func (c *Client) ChatCompletion(model string, messages []Message) (ChatResult, error) {
 	if c == nil {
-		return "", fmt.Errorf("openrouter: nil client")
+		return ChatResult{}, fmt.Errorf("openrouter: nil client")
 	}
 	if c.apiKey == "" {
-		return "", fmt.Errorf("openrouter: missing API key")
+		return ChatResult{}, fmt.Errorf("openrouter: missing API key")
 	}
 	base := c.baseURL
 	if base == "" {
@@ -82,12 +111,12 @@ func (c *Client) ChatCompletion(model string, messages []Message) (string, error
 	}
 	buf, err := json.Marshal(body)
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	u := base + "/chat/completions"
 	req, err := http.NewRequest(http.MethodPost, u, bytes.NewReader(buf))
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
@@ -97,46 +126,41 @@ func (c *Client) ChatCompletion(model string, messages []Message) (string, error
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	defer func() { _ = res.Body.Close() }()
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		msg := string(b)
 		if len(msg) > 2000 {
 			msg = msg[:2000]
 		}
-		return "", fmt.Errorf("openrouter: status %d: %s", res.StatusCode, msg)
+		return ChatResult{}, fmt.Errorf("openrouter: status %d: %s", res.StatusCode, msg)
 	}
-	var parsed struct {
-		Choices []struct {
-			Message struct {
-				Content *string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
-	}
+	var parsed chatCompletionResponse
 	if err := json.Unmarshal(b, &parsed); err != nil {
-		return "", fmt.Errorf("openrouter: parse response: %w", err)
+		return ChatResult{}, fmt.Errorf("openrouter: parse response: %w", err)
 	}
 	if len(parsed.Choices) == 0 {
-		return "", fmt.Errorf("openrouter: no choices in response")
+		return ChatResult{}, fmt.Errorf("openrouter: no choices in response")
 	}
-	if parsed.Choices[0].Message.Content == nil {
-		return "", nil
+	out := ChatResult{Usage: usageFromPayload(parsed.Usage)}
+	if parsed.Choices[0].Message.Content != nil {
+		out.Text = *parsed.Choices[0].Message.Content
 	}
-	return *parsed.Choices[0].Message.Content, nil
+	return out, nil
 }
 
 // VisionCompletion sends a vision-capable chat request with one image URL.
-func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string) (string, error) {
+func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string) (ChatResult, error) {
 	if c == nil {
-		return "", fmt.Errorf("openrouter: nil client")
+		return ChatResult{}, fmt.Errorf("openrouter: nil client")
 	}
 	if c.apiKey == "" {
-		return "", fmt.Errorf("openrouter: missing API key")
+		return ChatResult{}, fmt.Errorf("openrouter: missing API key")
 	}
 	base := c.baseURL
 	if base == "" {
@@ -159,12 +183,12 @@ func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string
 	}
 	buf, err := json.Marshal(body)
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	u := base + "/chat/completions"
 	req, err := http.NewRequest(http.MethodPost, u, bytes.NewReader(buf))
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "Bearer "+c.apiKey)
@@ -174,35 +198,30 @@ func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	defer func() { _ = res.Body.Close() }()
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		return "", err
+		return ChatResult{}, err
 	}
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		msg := string(b)
 		if len(msg) > 2000 {
 			msg = msg[:2000]
 		}
-		return "", fmt.Errorf("openrouter: status %d: %s", res.StatusCode, msg)
+		return ChatResult{}, fmt.Errorf("openrouter: status %d: %s", res.StatusCode, msg)
 	}
-	var parsed struct {
-		Choices []struct {
-			Message struct {
-				Content *string `json:"content"`
-			} `json:"message"`
-		} `json:"choices"`
-	}
+	var parsed chatCompletionResponse
 	if err := json.Unmarshal(b, &parsed); err != nil {
-		return "", fmt.Errorf("openrouter: parse response: %w", err)
+		return ChatResult{}, fmt.Errorf("openrouter: parse response: %w", err)
 	}
 	if len(parsed.Choices) == 0 {
-		return "", fmt.Errorf("openrouter: no choices in response")
+		return ChatResult{}, fmt.Errorf("openrouter: no choices in response")
 	}
-	if parsed.Choices[0].Message.Content == nil {
-		return "", nil
+	out := ChatResult{Usage: usageFromPayload(parsed.Usage)}
+	if parsed.Choices[0].Message.Content != nil {
+		out.Text = *parsed.Choices[0].Message.Content
 	}
-	return *parsed.Choices[0].Message.Content, nil
+	return out, nil
 }

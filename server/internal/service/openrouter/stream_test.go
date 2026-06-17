@@ -27,8 +27,8 @@ func TestChatCompletionStream_OK(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if full != "Hello world" {
-		t.Errorf("full text: %q", full)
+	if full.Text != "Hello world" {
+		t.Errorf("full text: %q", full.Text)
 	}
 	if len(got) != 3 {
 		t.Errorf("chunk count: %d", len(got))
@@ -78,7 +78,7 @@ func TestChatCompletionStream_IgnoresNonDataLines(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if full != "ok" {
-		t.Errorf("full: %q", full)
+	if full.Text != "ok" {
+		t.Errorf("full: %q", full.Text)
 	}
 }

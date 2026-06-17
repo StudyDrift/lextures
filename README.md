@@ -56,7 +56,7 @@ Open-source learning platform for running courses end to end: structured modules
 | **Web app**       | React 19, Vite, TypeScript, Tailwind CSS v4, React Router, TipTap, Vitest |
 | **API**           | Go 1.25, Chi, pgx, Argon2id passwords, JWT access tokens                  |
 | **Data**          | PostgreSQL 16                                                             |
-| **AI (optional)** | OpenRouter API (`OPEN_ROUTER_API_KEY` / `OPENROUTER_API_KEY`)             |
+| **AI (optional)** | OpenRouter API key in **Settings → Intelligence → Models** (platform DB)   |
 
 
 For architecture notes (Compose port layout, dev vs prod web, testing conventions), see [docs/ARCH.md](docs/ARCH.md).
