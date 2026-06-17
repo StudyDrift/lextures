@@ -19,7 +19,7 @@
  *   [x] Referral requires description
  */
 import { test, expect } from '../fixtures/test.js'
-import { apiSignup } from '../fixtures/api.js'
+import { apiSignup, apiEnroll } from '../fixtures/api.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
@@ -261,11 +261,7 @@ test('Behavior: teacher can award PBIS points to a student', async () => {
   const { courseCode } = (await courseRes.json()) as { courseCode: string }
 
   // Enroll student
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   // Award points
   const awardRes = await fetch(`${API_BASE}/api/v1/pbis/awards`, {
@@ -314,14 +310,14 @@ test('Behavior: bulk award to multiple students succeeds', async () => {
 
   const students = await Promise.all(
     [1, 2, 3].map(async (i) => {
-      const { access_token: tok } = await apiSignup({
-        email: uniqueEmail(`bs${i}`),
-        password: PASSWORD,
-      })
-      return getUserId(tok)
+      const email = uniqueEmail(`bs${i}`)
+      const { access_token: tok } = await apiSignup({ email, password: PASSWORD })
+      const id = await getUserId(tok)
+      return { email, token: tok, id }
     }),
   )
-  const studentIds = students.filter((id): id is string => id !== null)
+  const enrolledStudents = students.filter((s): s is { email: string; token: string; id: string } => s.id !== null)
+  const studentIds = enrolledStudents.map((s) => s.id)
   if (studentIds.length === 0) { test.skip(true, 'no student ids'); return }
 
   const courseRes = await fetch(`${API_BASE}/api/v1/courses`, {
@@ -332,12 +328,8 @@ test('Behavior: bulk award to multiple students succeeds', async () => {
   if (!courseRes.ok) { test.skip(true, `course create failed: ${courseRes.status}`); return }
   const { courseCode } = (await courseRes.json()) as { courseCode: string }
 
-  for (const sid of studentIds) {
-    await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ emails: `${sid}`, courseRole: 'student' }),
-    })
+  for (const student of enrolledStudents) {
+    await apiEnroll(teacherToken, courseCode, student.email, 'student', student.token)
   }
 
   const awards = studentIds.map((sid) => ({
@@ -413,11 +405,7 @@ test('Behavior: teacher can file a behavior referral', async () => {
   if (!courseRes.ok) { test.skip(true, `course create failed: ${courseRes.status}`); return }
   const { courseCode } = (await courseRes.json()) as { courseCode: string }
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   const refRes = await fetch(`${API_BASE}/api/v1/behavior/referrals`, {
     method: 'POST',
@@ -505,11 +493,7 @@ test('Behavior: student behavior summary returns totalPoints and referrals after
   if (!courseRes.ok) { test.skip(true, `course create failed`); return }
   const { courseCode } = (await courseRes.json()) as { courseCode: string }
 
-  await fetch(`${API_BASE}/api/v1/courses/${courseCode}/enrollments`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${teacherToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ emails: studentEmail, courseRole: 'student' }),
-  })
+  await apiEnroll(teacherToken, courseCode, studentEmail, 'student', studentToken)
 
   // Award 3 points
   await fetch(`${API_BASE}/api/v1/pbis/awards`, {

@@ -198,13 +198,21 @@ async function apiFindPendingEnrollmentId(
   return course?.viewerPendingEnrollmentId ?? null
 }
 
+export type ApiEnrollOptions = {
+  /** Approve a pending student invitation as this enrolled user. */
+  memberToken?: string
+  sectionId?: string
+}
+
 export async function apiEnroll(
   token: string,
   courseCode: string,
   emails: string,
   courseRole = 'student',
-  memberToken?: string,
+  options?: string | ApiEnrollOptions,
 ): Promise<void> {
+  const opts: ApiEnrollOptions =
+    typeof options === 'string' ? { memberToken: options } : (options ?? {})
   const res = await fetch(
     `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments`,
     {
@@ -213,17 +221,21 @@ export async function apiEnroll(
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ emails, courseRole }),
+      body: JSON.stringify({
+        emails,
+        courseRole,
+        ...(opts.sectionId ? { sectionId: opts.sectionId } : {}),
+      }),
     },
   )
   if (!res.ok) {
     const body = await res.text()
     throw new Error(`Enroll failed (${res.status}): ${body}`)
   }
-  if (memberToken) {
-    const enrollmentId = await apiFindPendingEnrollmentId(memberToken, courseCode)
+  if (opts.memberToken) {
+    const enrollmentId = await apiFindPendingEnrollmentId(opts.memberToken, courseCode)
     if (enrollmentId) {
-      await apiApproveEnrollmentInvitation(memberToken, courseCode, enrollmentId)
+      await apiApproveEnrollmentInvitation(opts.memberToken, courseCode, enrollmentId)
     }
   }
 }
