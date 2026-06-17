@@ -90,7 +90,6 @@ func IssueCourseCompletion(
 		return nil, err
 	}
 
-	verifyURL := VerificationURL(cfg.PublicWebOrigin, uuid.Nil)
 	created, err := credrepo.Create(ctx, pool, credrepo.IssuedCredential{
 		RecipientID:    p.RecipientID,
 		SourceType:     credrepo.SourceCourse,
@@ -103,7 +102,7 @@ func IssueCourseCompletion(
 	if err != nil {
 		return nil, err
 	}
-	verifyURL = VerificationURL(cfg.PublicWebOrigin, created.ID)
+	verifyURL := VerificationURL(cfg.PublicWebOrigin, created.ID)
 
 	pdfBytes, err := BuildPDF(PDFInput{
 		InstitutionName: institution,
