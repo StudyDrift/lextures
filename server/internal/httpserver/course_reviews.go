@@ -152,8 +152,17 @@ func (d Deps) handleCourseReviewsSubmit() http.HandlerFunc {
 		if d.courseReviewsFeatureOff(w) {
 			return
 		}
-		courseCode, viewer, ok := d.requireCourseAccess(w, r)
+		viewer, ok := d.meUserID(w, r)
 		if !ok {
+			return
+		}
+		courseCode, ok := chiCourseCode(w, r)
+		if !ok {
+			return
+		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
 		enrolled, err := enrollment.UserHasStudentEquivalentEnrollment(r.Context(), d.Pool, courseCode, viewer)
@@ -163,12 +172,6 @@ func (d Deps) handleCourseReviewsSubmit() http.HandlerFunc {
 		}
 		if !enrolled {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Only enrolled learners may submit reviews.")
-			return
-		}
-
-		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
-		if err != nil || cid == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
 
