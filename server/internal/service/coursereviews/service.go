@@ -144,7 +144,7 @@ func Submit(ctx context.Context, pool *pgxpool.Pool, in SubmitInput, now time.Ti
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var review Review
 	if existing == nil {
@@ -337,7 +337,7 @@ func AdminRemove(ctx context.Context, pool *pgxpool.Pool, reviewID uuid.UUID) er
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var courseID uuid.UUID
 	var rating int
