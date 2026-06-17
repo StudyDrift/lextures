@@ -427,7 +427,7 @@ func MarkLedgerPaid(ctx context.Context, pool *pgxpool.Pool, payeeID uuid.UUID, 
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck
 
 	tag, err := tx.Exec(ctx, `
 UPDATE billing.earnings_ledger SET status = 'paid'
