@@ -1,7 +1,12 @@
 /**
  * Multi-campus consortium course sharing (plan 14.18)
  */
+import { execSync } from 'node:child_process'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { test, expect } from '@playwright/test'
+
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 const PASSWORD = 'E2eTestPass1!'
@@ -9,6 +14,10 @@ const DEFAULT_ORG_ID = '00000000-0000-0000-0000-000000000001'
 
 function uid(prefix = 'consortium') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+function uniqueEmail(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}@test.invalid`
 }
 
 /** URL-safe org slug within the 32-character server limit. */
@@ -67,6 +76,61 @@ async function grantOrgAdmin(adminToken: string, orgId: string, userId: string):
   })
 }
 
+function databaseUrlForBootstrap(): string | null {
+  return (
+    process.env.DATABASE_URL ??
+    process.env.E2E_DATABASE_URL ??
+    'postgres://studydrift:studydrift@localhost:5432/studydrift?sslmode=disable'
+  )
+}
+
+/** Provision a guest org without moving the shared host admin into that tenant. */
+async function createGuestOrgViaProvisioner(): Promise<string> {
+  const email = uniqueEmail('e2e-consortium-prov')
+  const signupRes = await fetch(`${API_BASE}/api/v1/auth/signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: PASSWORD, display_name: 'E2E Consortium Provisioner' }),
+  })
+  if (!signupRes.ok && signupRes.status !== 409) {
+    const body = await signupRes.text()
+    throw new Error(`Provisioner signup failed (${signupRes.status}): ${body}`)
+  }
+
+  const dsn = databaseUrlForBootstrap()
+  if (!dsn) {
+    test.skip(true, 'DATABASE_URL unavailable for Global Admin bootstrap')
+  }
+  execSync(`go run ./cmd/bootstrap-admin -email=${email}`, {
+    cwd: path.join(repoRoot, 'server'),
+    env: { ...process.env, DATABASE_URL: dsn },
+    stdio: 'pipe',
+  })
+
+  const loginRes = await fetch(`${API_BASE}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password: PASSWORD }),
+  })
+  if (!loginRes.ok) {
+    const body = await loginRes.text()
+    throw new Error(`Provisioner login failed (${loginRes.status}): ${body}`)
+  }
+  const { access_token: provisionerToken } = (await loginRes.json()) as { access_token: string }
+
+  const createGuestOrg = await fetch(`${API_BASE}/api/v1/admin/orgs`, {
+    method: 'POST',
+    headers: authHeaders(provisionerToken),
+    body: JSON.stringify({ name: uid('guest-org'), slug: uniqueOrgSlug('guest') }),
+  })
+  if (!createGuestOrg.ok) {
+    const body = await createGuestOrg.text()
+    throw new Error(`Create guest org failed (${createGuestOrg.status}): ${body}`)
+  }
+  const guestOrg = (await createGuestOrg.json()) as { id: string }
+  return guestOrg.id
+}
+
 async function enableFeatures(adminToken: string) {
   const res = await fetch(`${API_BASE}/api/v1/settings/platform`, {
     method: 'PUT',
@@ -117,14 +181,7 @@ test('Consortium: admin can create agreement when feature enabled', async () => 
   const adminId = await getAdminUserId(adminToken)
   if (adminId) await grantOrgAdmin(adminToken, hostOrgId, adminId)
 
-  const createGuestOrg = await fetch(`${API_BASE}/api/v1/admin/orgs`, {
-    method: 'POST',
-    headers: authHeaders(adminToken),
-    body: JSON.stringify({ name: uid('guest-org'), slug: uniqueOrgSlug('guest') }),
-  })
-  expect(createGuestOrg.status).toBe(201)
-  const guestOrg = (await createGuestOrg.json()) as { id: string }
-  const guestOrgId = guestOrg.id
+  const guestOrgId = await createGuestOrgViaProvisioner()
   expect(guestOrgId).toBeTruthy()
 
   const createAgreement = await fetch(`${API_BASE}/api/v1/admin/consortium/agreements`, {
