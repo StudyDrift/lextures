@@ -1,6 +1,8 @@
 import { useEffect, useId, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, Star } from 'lucide-react'
+import { CourseReviewsSection } from '../components/reviews/course-reviews-section'
+import { fetchPublicCourseReviews, type ReviewsListResponse } from '../lib/course-reviews-api'
 import {
   fetchPublicCatalogCourse,
   formatPrice,
@@ -9,8 +11,6 @@ import {
 
 const JSON_LD_ID = 'catalog-course-jsonld'
 
-// useCourseJsonLd injects a Schema.org Course JSON-LD <script> into <head> for
-// search-engine rich results (plan 15.1, FR-5/AC-3) and removes it on unmount.
 function useCourseJsonLd(jsonLd: Record<string, unknown> | null) {
   useEffect(() => {
     if (!jsonLd) return
@@ -28,6 +28,7 @@ function useCourseJsonLd(jsonLd: Record<string, unknown> | null) {
 export default function ExploreCoursePage() {
   const { slug } = useParams<{ slug: string }>()
   const [detail, setDetail] = useState<PublicCatalogCourseDetail | null>(null)
+  const [reviews, setReviews] = useState<ReviewsListResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const priceId = useId()
@@ -40,9 +41,15 @@ export default function ExploreCoursePage() {
     }
     let cancelled = false
     setLoading(true)
-    fetchPublicCatalogCourse(slug)
-      .then((d) => {
-        if (!cancelled) setDetail(d)
+    Promise.all([
+      fetchPublicCatalogCourse(slug),
+      fetchPublicCourseReviews(slug).catch(() => null),
+    ])
+      .then(([d, r]) => {
+        if (!cancelled) {
+          setDetail(d)
+          setReviews(r)
+        }
       })
       .catch((e: unknown) => {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Course not found.')
@@ -111,10 +118,13 @@ export default function ExploreCoursePage() {
                 ) : null}
                 <div className="mt-3 flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-                    {course.averageRating != null ? (
+                    {course.averageRating != null && (course.ratingCount ?? 0) > 0 ? (
                       <>
                         <Star className="h-4 w-4 fill-current" aria-hidden="true" />
                         {course.averageRating.toFixed(1)}
+                        <span className="text-slate-500 dark:text-neutral-400">
+                          ({course.ratingCount?.toLocaleString()} reviews)
+                        </span>
                       </>
                     ) : (
                       <span className="text-slate-400">Not yet rated</span>
@@ -135,6 +145,10 @@ export default function ExploreCoursePage() {
                 {course.description || 'No description provided yet.'}
               </p>
             </section>
+
+            {reviews ? (
+              <CourseReviewsSection summary={reviews.summary} reviews={reviews.reviews} />
+            ) : null}
 
             <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-neutral-800 dark:bg-neutral-900">
               <span id={priceId} className="text-2xl font-bold text-slate-900 dark:text-neutral-100">

@@ -118,6 +118,7 @@ type Row struct {
 	FFStripeBilling                 *bool
 	FFLearningPaths                 *bool
 	FFCompletionCredentials         *bool
+	FFCourseReviews                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -250,6 +251,7 @@ type Write struct {
 	FFStripeBilling                 *bool
 	FFLearningPaths                 *bool
 	FFCompletionCredentials         *bool
+	FFCourseReviews                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -379,6 +381,7 @@ SELECT
 	ff_stripe_billing,
 	ff_learning_paths,
 	ff_completion_credentials,
+	ff_course_reviews,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -502,6 +505,7 @@ WHERE id = 1
 		&r.FFStripeBilling,
 		&r.FFLearningPaths,
 		&r.FFCompletionCredentials,
+		&r.FFCourseReviews,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -674,6 +678,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_stripe_billing,
 	ff_learning_paths,
 	ff_completion_credentials,
+	ff_course_reviews,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -803,6 +808,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_stripe_billing = COALESCE(EXCLUDED.ff_stripe_billing, settings.platform_app_settings.ff_stripe_billing),
 	ff_learning_paths = COALESCE(EXCLUDED.ff_learning_paths, settings.platform_app_settings.ff_learning_paths),
 	ff_completion_credentials = COALESCE(EXCLUDED.ff_completion_credentials, settings.platform_app_settings.ff_completion_credentials),
+	ff_course_reviews = COALESCE(EXCLUDED.ff_course_reviews, settings.platform_app_settings.ff_course_reviews),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
@@ -924,6 +930,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFStripeBilling,
 		w.FFLearningPaths,
 		w.FFCompletionCredentials,
+		w.FFCourseReviews,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

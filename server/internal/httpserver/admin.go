@@ -553,4 +553,7 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Delete("/api/v1/admin/evaluation-templates/{template_id}", d.handleAdminEvaluationTemplateItem())
 	r.Post("/api/v1/admin/courses/{course_code}/evaluation-windows", d.handleAdminPostEvaluationWindow())
 	r.Get("/api/v1/admin/evaluations/report", d.handleAdminEvaluationReport())
+	// Course reviews moderation (plan 15.7)
+	r.Get("/api/v1/admin/reviews", d.handleAdminReviewsList())
+	r.Delete("/api/v1/admin/reviews/{review_id}", d.handleAdminReviewDelete())
 }

@@ -25,6 +25,7 @@ type PublicCatalogCourse struct {
 	PriceCents      int      `json:"priceCents"`
 	EnrollmentCount int      `json:"enrollmentCount"`
 	AverageRating   *float64 `json:"averageRating"`
+	RatingCount     int      `json:"ratingCount"`
 	InstructorName  *string  `json:"instructorName"`
 	CreatedAt       string   `json:"createdAt"`
 }
@@ -117,6 +118,7 @@ const publicCatalogSelect = `
     c.price_cents,
     c.enrollment_count,
     c.average_rating,
+    c.rating_count,
     NULLIF(TRIM(COALESCE(u.display_name,
         TRIM(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, '')))), '') AS instructor_name,
     c.created_at::text
@@ -137,7 +139,7 @@ func scanPublicCatalogCourse(scan func(dest ...any) error) (PublicCatalogCourse,
 	err := scan(
 		&c.ID, &c.Slug, &c.CourseCode, &c.Title, &c.Description, &c.HeroImageURL,
 		&c.Category, &c.DifficultyLevel, &c.Language, &c.PriceCents,
-		&c.EnrollmentCount, &c.AverageRating, &c.InstructorName, &c.CreatedAt,
+		&c.EnrollmentCount, &c.AverageRating, &c.RatingCount, &c.InstructorName, &c.CreatedAt,
 	)
 	return c, err
 }

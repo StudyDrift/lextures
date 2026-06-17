@@ -18,6 +18,7 @@ import (
 	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
 	repo "github.com/lextures/lextures/server/internal/repos/gdpr"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/service/coursereviews"
 )
 
 // AdminPermission gates GDPR admin actions (approve/reject DSARs, manage RoPA).
@@ -134,6 +135,9 @@ func ApproveDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID)
 		// Anonymise user data and mark completed.
 		if err := repo.AnonymiseUser(ctx, pool, r.UserID); err != nil {
 			return fmt.Errorf("gdpr: anonymise user: %w", err)
+		}
+		if err := coursereviews.AnonymizeReviewerReviews(ctx, pool, r.UserID); err != nil {
+			return fmt.Errorf("gdpr: anonymise course reviews: %w", err)
 		}
 		t := time.Now().UTC()
 		expiresAt := t.Add(ArchiveLinkTTL)

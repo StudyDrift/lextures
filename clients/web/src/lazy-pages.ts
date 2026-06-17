@@ -80,6 +80,7 @@ export const IsoComplianceAdminPage = lazy(() => import('./pages/iso-compliance-
 export const SecurityDisclosureAdminPage = lazy(() => import('./pages/security-disclosure-admin-page'))
 export const BackupOpsAdminPage = lazy(() => import('./pages/backup-ops-admin-page'))
 export const CaptionComplianceReportPage = lazy(() => import('./pages/admin/caption-compliance-report'))
+export const CourseReviewsModerationPage = lazy(() => import('./pages/admin/course-reviews-moderation'))
 export const AttendanceDashboard = lazy(() => import('./pages/admin/AttendanceDashboard'))
 export const AttendanceExport = lazy(() => import('./pages/admin/AttendanceExport'))
 export const BehaviorDashboard = lazy(() => import('./pages/admin/BehaviorDashboard'))
