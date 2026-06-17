@@ -163,6 +163,9 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 		}
 
 		d.logAIInferenceAllowed(r, userID, aigateway.FeatureRAGNotebook, model, notes, gwDec)
+		d.recordAIUsage(r.Context(), AIUsageMeta{
+			UserID: userID, Feature: aigateway.FeatureRAGNotebook, Model: model,
+		}, completion.Usage, true)
 
 		// Parse output to ensure it is valid JSON matching our expected flashcards structure
 		var parsed struct {
@@ -173,7 +176,7 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 		}
 
 		// Sometimes AI outputs Markdown JSON blocks (e.g. ```json ... ```)
-		cleanCompletion := completion
+		cleanCompletion := completion.Text
 		if idx := strings.Index(cleanCompletion, "```json"); idx != -1 {
 			cleanCompletion = cleanCompletion[idx+7:]
 			if endIdx := strings.Index(cleanCompletion, "```"); endIdx != -1 {
@@ -183,7 +186,7 @@ func (d Deps) handleGenerateNotebookFlashcards() http.HandlerFunc {
 		cleanCompletion = strings.TrimSpace(cleanCompletion)
 
 		if err := json.Unmarshal([]byte(cleanCompletion), &parsed); err != nil {
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, fmt.Sprintf("AI did not return valid JSON: %v. Raw response: %s", err, completion))
+			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, fmt.Sprintf("AI did not return valid JSON: %v. Raw response: %s", err, completion.Text))
 			return
 		}
 

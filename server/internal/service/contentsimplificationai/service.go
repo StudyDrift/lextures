@@ -34,5 +34,5 @@ func Simplify(client *openrouter.Client, model, text string, targetGrade int) (s
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSpace(out), nil
+	return strings.TrimSpace(out.Text), nil
 }

@@ -58,6 +58,9 @@ export type PlatformFeaturesSnapshot = {
   ffConsortiumSharing?: boolean
   ffStripeBilling?: boolean
   ffLearningPaths?: boolean
+  aiDisclosureEnabled?: boolean
+  openRouterConfigured?: boolean
+  ragNotebookEnabled?: boolean
 }
 
 const defaults: PlatformFeaturesSnapshot = {
@@ -118,6 +121,9 @@ const defaults: PlatformFeaturesSnapshot = {
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffLearningPaths: false,
+  aiDisclosureEnabled: false,
+  openRouterConfigured: false,
+  ragNotebookEnabled: false,
 }
 
 let loaded = false
@@ -275,6 +281,15 @@ export function eportfolioFeatureEnabled(): boolean {
 
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {
   return loaded && snapshot.ffIncompleteGradeWorkflow === true
+}
+
+/** Notebook RAG + flashcards when platform AI is on, OpenRouter is configured, and tenant policy allows it. */
+export function ragNotebookAiEnabled(s?: PlatformFeaturesSnapshot): boolean {
+  const snap = s ?? snapshot
+  if (!s && !loaded) {
+    return false
+  }
+  return snap.ragNotebookEnabled === true
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */

@@ -912,7 +912,7 @@ func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
 
 		or := d.openRouterClient()
 		if or == nil {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key in Platform Settings.")
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI generation is not configured. Set an OpenRouter API key under Settings → Intelligence → Models.")
 			return
 		}
 
@@ -945,8 +945,11 @@ func (d Deps) handleGenerateVibeActivityHTML() http.HandlerFunc {
 			return
 		}
 		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureVibeGeneration, model, prompt, gwDec)
+		d.recordAIUsage(r.Context(), AIUsageMeta{
+			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureVibeGeneration, Model: model,
+		}, generated.Usage, true)
 
-		html := strings.TrimSpace(generated)
+		html := strings.TrimSpace(generated.Text)
 		// Strip accidental markdown code fences if the model wraps output
 		if strings.HasPrefix(html, "```") {
 			lines := strings.SplitN(html, "\n", 2)

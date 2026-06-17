@@ -70,7 +70,7 @@ func (p InternalAIProvider) Scan(ctx context.Context, text string) (ScanResult, 
 	if err != nil {
 		return ScanResult{}, err
 	}
-	score := parseScorePercent(out)
+	score := parseScorePercent(out.Text)
 	if score == nil {
 		return ScanResult{}, fmt.Errorf("internal ai: could not parse score")
 	}

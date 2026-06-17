@@ -4,6 +4,7 @@ import { Navigate, useParams, useSearchParams } from 'react-router-dom'
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { MarkdownBodyEditor } from '../../components/editor/block-editor/markdown-body-editor'
 import { CourseNotebookSidebar } from '../../components/notebook/course-notebook-sidebar'
 import { FlashcardsModal } from '../../components/notebook/flashcards-modal'
@@ -36,6 +37,7 @@ export default function CourseNotebookPage() {
   const [searchParams] = useSearchParams()
   const { notebookEnabled: courseNotebookEnabled, loading: courseFeatureFlagsLoading } =
     useCourseNavFeatures()
+  const { ragNotebookEnabled } = usePlatformFeatures()
   const [data, setData] = useState<CourseNotebookStore | null>(null)
   const [courseTitle, setCourseTitle] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -408,6 +410,7 @@ export default function CourseNotebookPage() {
                     onMoveToGroup={onMovePageToGroup}
                     onMoveToRoot={onMovePageToRoot}
                     onFlashcards={() => setFlashcardsOpen(true)}
+                    flashcardsEnabled={ragNotebookEnabled}
                   />
                 </div>
                 <div className="mx-auto min-h-0 w-full max-w-[72ch] flex-1 overflow-y-auto px-4 py-4 text-[1.0625rem] leading-relaxed md:px-6 md:py-5">
@@ -465,12 +468,14 @@ export default function CourseNotebookPage() {
         }}
       />
 
-      <FlashcardsModal
-        open={flashcardsOpen}
-        notes={activePage?.contentMd ?? ''}
-        pageTitle={activePage?.title ?? ''}
-        onClose={() => setFlashcardsOpen(false)}
-      />
+      {ragNotebookEnabled ? (
+        <FlashcardsModal
+          open={flashcardsOpen}
+          notes={activePage?.contentMd ?? ''}
+          pageTitle={activePage?.title ?? ''}
+          onClose={() => setFlashcardsOpen(false)}
+        />
+      ) : null}
     </LmsPage>
   )
 }

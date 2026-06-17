@@ -49,7 +49,6 @@ services:
       # Demo DB may retain checksums from migrations 120/135 after follow-up PR edits; align before migrate.
       MIGRATE_REPAIR_CHECKSUMS: "1"
       PORT: "8080"
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       COURSE_FILES_ROOT: /mnt/lextures-db/course-files
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-studydrift}:${RABBITMQ_PASSWORD:-studydrift}@rabbitmq:5672/
     volumes:

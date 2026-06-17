@@ -71,6 +71,9 @@ export type PlatformFeatures = {
   ffConsortiumSharing: boolean
   ffStripeBilling: boolean
   ffLearningPaths: boolean
+  aiDisclosureEnabled: boolean
+  openRouterConfigured: boolean
+  ragNotebookEnabled: boolean
   loading: boolean
   refresh: () => Promise<void>
 }
@@ -132,6 +135,9 @@ const defaultFeatures: PlatformFeatures = {
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffLearningPaths: false,
+  aiDisclosureEnabled: false,
+  openRouterConfigured: false,
+  ragNotebookEnabled: false,
   loading: true,
   refresh: async () => {},
 }
@@ -198,6 +204,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffLearningPaths: false,
+  aiDisclosureEnabled: false,
+  openRouterConfigured: false,
+  ragNotebookEnabled: false,
   })
   const [loading, setLoading] = useState(true)
 
@@ -265,6 +274,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffConsortiumSharing: data.ffConsortiumSharing === true,
           ffStripeBilling: data.ffStripeBilling === true,
           ffLearningPaths: data.ffLearningPaths === true,
+          aiDisclosureEnabled: data.aiDisclosureEnabled === true,
+          openRouterConfigured: data.openRouterConfigured === true,
+          ragNotebookEnabled: data.ragNotebookEnabled === true,
         }
         setFeatures({
           ...next,
@@ -299,6 +311,9 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffConsortiumSharing: next.ffConsortiumSharing === true,
           ffStripeBilling: next.ffStripeBilling === true,
           ffLearningPaths: next.ffLearningPaths === true,
+          aiDisclosureEnabled: next.aiDisclosureEnabled === true,
+          openRouterConfigured: next.openRouterConfigured === true,
+          ragNotebookEnabled: next.ragNotebookEnabled === true,
         })
         setPlatformFeaturesSnapshot(next)
       }

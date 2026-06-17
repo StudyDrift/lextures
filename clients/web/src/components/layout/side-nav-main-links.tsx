@@ -49,6 +49,7 @@ export function SideNavMainLinks() {
     ffCatalogIntegration,
     ffLibrary,
     ffConferenceScheduling,
+    ragNotebookEnabled,
   } = usePlatformFeatures()
 
   const canViewReports = !permLoading && allows(PERM_REPORTS_VIEW)
@@ -86,9 +87,11 @@ export function SideNavMainLinks() {
       </SideNavLink>
 
       <SideNavSectionLabel first>Learning</SideNavSectionLabel>
-      <SideNavLink to="/ai" icon={<Bot className="h-5 w-5" />}>
-        Ask AI
-      </SideNavLink>
+      {ragNotebookEnabled ? (
+        <SideNavLink to="/ai" icon={<Bot className="h-5 w-5" />}>
+          Ask AI
+        </SideNavLink>
+      ) : null}
       <SideNavLink to="/review" icon={<RotateCcw className="h-5 w-5" />}>
         Review practice
       </SideNavLink>

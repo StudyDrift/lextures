@@ -8,16 +8,16 @@ import (
 	"github.com/lextures/lextures/server/internal/crypto/appsecrets"
 )
 
-func TestMerge_OpenRouterEmptyDBUsesEnv(t *testing.T) {
+func TestMerge_OpenRouterEmptyDBStaysEmpty(t *testing.T) {
 	env := config.Config{OpenRouterAPIKey: "env-key"}
 	db := Row{OpenRouterAPIKey: ptr("")}
 	got := Merge(env, &db)
-	if got.OpenRouterAPIKey != "env-key" {
-		t.Fatalf("OpenRouter: got %q want env", got.OpenRouterAPIKey)
+	if got.OpenRouterAPIKey != "" {
+		t.Fatalf("OpenRouter: got %q want empty (not loaded from env)", got.OpenRouterAPIKey)
 	}
 }
 
-func TestMerge_OpenRouterNonEmptyDBOverrides(t *testing.T) {
+func TestMerge_OpenRouterFromDB(t *testing.T) {
 	env := config.Config{OpenRouterAPIKey: "env-key"}
 	db := Row{OpenRouterAPIKey: ptr("db-key")}
 	got := Merge(env, &db)

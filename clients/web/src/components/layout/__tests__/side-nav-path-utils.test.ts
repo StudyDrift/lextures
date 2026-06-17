@@ -9,6 +9,7 @@ describe('settingsViewFromPathname', () => {
   it('detects AI routes before generic tab match', () => {
     expect(settingsViewFromPathname('/settings/ai/models')).toBe('ai-models')
     expect(settingsViewFromPathname('/settings/ai/system-prompts')).toBe('ai-prompts')
+    expect(settingsViewFromPathname('/settings/ai/reports')).toBe('ai-reports')
   })
 
   it('maps top-level settings tabs', () => {

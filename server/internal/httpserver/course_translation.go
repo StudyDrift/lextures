@@ -345,14 +345,14 @@ func (d Deps) handlePostCourseTranslationAIDraft() http.HandlerFunc {
 		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureContentTranslation, courseTranslationAIModel, text) {
 			return
 		}
-		translated, _, err := callLLMTranslation(or, text, req.TargetLocale)
+		translated, _, _, err := callLLMTranslation(or, text, req.TargetLocale)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeInternal, "AI draft translation failed.")
 			return
 		}
 		var tTitle *string
 		if strings.TrimSpace(title) != "" {
-			tTitleStr, _, tErr := callLLMTranslation(or, strings.TrimSpace(title), req.TargetLocale)
+			tTitleStr, _, _, tErr := callLLMTranslation(or, strings.TrimSpace(title), req.TargetLocale)
 			if tErr == nil {
 				tTitle = &tTitleStr
 			}

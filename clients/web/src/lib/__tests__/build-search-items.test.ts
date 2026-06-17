@@ -55,8 +55,8 @@ describe('buildSearchItems', () => {
     expect(enc?.path).toBe('/courses/a%2Fb')
   })
 
-  it('includes Ask AI as a global shortcut for every user', () => {
-    const items = buildSearchItems([], [], allowsNone)
+  it('includes Ask AI when notebook AI is enabled', () => {
+    const items = buildSearchItems([], [], allowsNone, { ragNotebookEnabled: true })
     const ask = items.find((i) => i.id === 'global:ask-ai')
     expect(ask).toMatchObject({
       group: 'ai',
@@ -64,6 +64,11 @@ describe('buildSearchItems', () => {
       title: 'Ask AI',
     })
     expect(ask?.haystack).toContain('ask ai')
+  })
+
+  it('omits Ask AI when notebook AI is disabled', () => {
+    const items = buildSearchItems([], [], allowsNone)
+    expect(items.some((i) => i.id === 'global:ask-ai')).toBe(false)
   })
 
   it('adds global page entries for every user', () => {
@@ -85,6 +90,7 @@ describe('buildSearchItems', () => {
     expect(items.some((i) => i.path === '/settings/cloud-providers')).toBe(true)
     expect(items.some((i) => i.path === '/settings/ai/models')).toBe(true)
     expect(items.some((i) => i.path === '/settings/ai/system-prompts')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/ai/reports')).toBe(true)
   })
 
   it('matches system settings by title (e.g. Global platform)', () => {

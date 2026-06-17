@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 
 import { ConfirmDialog } from '../../components/confirm-dialog'
 import { ReadingFocusToggle } from '../../components/layout/reading-focus-toggle'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { MarkdownBodyEditor } from '../../components/editor/block-editor/markdown-body-editor'
 import { CourseNotebookSidebar } from '../../components/notebook/course-notebook-sidebar'
 import { FlashcardsModal } from '../../components/notebook/flashcards-modal'
@@ -34,6 +35,7 @@ import { LmsPage } from './lms-page'
 const CONTENT_SAVE_MS = 500
 
 export default function GlobalNotebookPage() {
+  const { ragNotebookEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const [data, setData] = useState<CourseNotebookStore | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -364,6 +366,7 @@ export default function GlobalNotebookPage() {
                     onMoveToGroup={onMovePageToGroup}
                     onMoveToRoot={onMovePageToRoot}
                     onFlashcards={() => setFlashcardsOpen(true)}
+                    flashcardsEnabled={ragNotebookEnabled}
                   />
                 </div>
                 <div className="mx-auto min-h-0 w-full max-w-[72ch] flex-1 overflow-y-auto px-4 py-4 text-[1.0625rem] leading-relaxed md:px-6 md:py-5">
@@ -421,12 +424,14 @@ export default function GlobalNotebookPage() {
         }}
       />
 
-      <FlashcardsModal
-        open={flashcardsOpen}
-        notes={activePage?.contentMd ?? ''}
-        pageTitle={activePage?.title ?? ''}
-        onClose={() => setFlashcardsOpen(false)}
-      />
+      {ragNotebookEnabled ? (
+        <FlashcardsModal
+          open={flashcardsOpen}
+          notes={activePage?.contentMd ?? ''}
+          pageTitle={activePage?.title ?? ''}
+          onClose={() => setFlashcardsOpen(false)}
+        />
+      ) : null}
     </LmsPage>
   )
 }

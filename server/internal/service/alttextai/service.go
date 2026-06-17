@@ -37,7 +37,7 @@ func Suggest(client *openrouter.Client, model, imageURL, courseLanguage string) 
 	if err != nil {
 		return "", 0, err
 	}
-	suggestion := strings.TrimSpace(text)
+	suggestion := strings.TrimSpace(text.Text)
 	if suggestion == "" {
 		return "", 0, fmt.Errorf("alttextai: empty suggestion")
 	}
