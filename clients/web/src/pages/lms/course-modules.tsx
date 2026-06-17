@@ -57,6 +57,7 @@ import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-t
 import { toast, toastWithUndo } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
 import { SelfPacedProgressHeader } from '../../components/self-paced/self-paced-progress'
+import { CourseReviewPrompt } from '../../components/reviews/course-review-prompt'
 import { OERSearchPanel } from '../../components/oer/oer-search-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { ModuleExternalLinkModal } from './module-external-link-modal'
@@ -2520,6 +2521,15 @@ export default function CourseModules() {
           />
         </div>
       )}
+      {courseCode && courseMeta?.courseMode === 'self_paced' ? (
+        <div className="mt-4">
+          <CourseReviewPrompt
+            courseCode={courseCode}
+            viewAsStudent={viewAsStudent}
+            courseMode={courseMeta?.courseMode}
+          />
+        </div>
+      ) : null}
       {loadError && (
         <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">
           {loadError}

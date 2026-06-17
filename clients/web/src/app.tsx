@@ -167,6 +167,7 @@ export default function App() {
             <Route path="/admin/accessibility" element={<Pages.AccessibilityServicesPage />} />
             <Route path="/admin/evaluations/templates" element={<Pages.EvaluationTemplates />} />
             <Route path="/admin/evaluations/report" element={<Pages.EvaluationReport />} />
+            <Route path="/admin/reviews" element={<Pages.CourseReviewsModerationPage />} />
             <Route path="/reports" element={<Pages.Reports />} />
             <Route path="/inbox" element={<Pages.Inbox />} />
             <Route path="/settings" element={<Navigate to="/settings/account" replace />} />

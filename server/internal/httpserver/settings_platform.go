@@ -131,6 +131,7 @@ type platformSettingsJSON struct {
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
 	FFCompletionCredentials         bool `json:"ffCompletionCredentials"`
+	FFCourseReviews                 bool `json:"ffCourseReviews"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -311,6 +312,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
+			FFCourseReviews:                 merged.FFCourseReviews,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -466,6 +468,7 @@ type putPlatformBody struct {
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
 	FFCompletionCredentials         *bool `json:"ffCompletionCredentials"`
+	FFCourseReviews                 *bool `json:"ffCourseReviews"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -767,6 +770,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
 		setBool("ffcompletioncredentials", body.FFCompletionCredentials, func(v bool) { wr.FFCompletionCredentials = &v })
+		setBool("ffcoursereviews", body.FFCourseReviews, func(v bool) { wr.FFCourseReviews = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -901,6 +905,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
+			FFCourseReviews:                 merged.FFCourseReviews,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

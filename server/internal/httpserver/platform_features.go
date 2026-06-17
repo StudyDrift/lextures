@@ -75,6 +75,7 @@ type platformFeaturesJSON struct {
 	FFStripeBilling             bool `json:"ffStripeBilling"`
 	FFLearningPaths             bool `json:"ffLearningPaths"`
 	FFCompletionCredentials     bool `json:"ffCompletionCredentials"`
+	FFCourseReviews             bool `json:"ffCourseReviews"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -155,6 +156,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFStripeBilling:             cfg.FFStripeBilling,
 		FFLearningPaths:             cfg.FFLearningPaths,
 		FFCompletionCredentials:     cfg.FFCompletionCredentials,
+		FFCourseReviews:             cfg.FFCourseReviews,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

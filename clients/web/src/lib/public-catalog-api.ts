@@ -15,6 +15,7 @@ export type PublicCatalogCourse = {
   priceCents: number
   enrollmentCount: number
   averageRating: number | null
+  ratingCount?: number
   instructorName: string | null
   createdAt: string
 }

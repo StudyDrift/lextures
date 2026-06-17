@@ -360,6 +360,9 @@ type Config struct {
 	// FFCompletionCredentials enables course completion certificates, Open Badges export, and LinkedIn share (plans 15.5, 15.6).
 	// Managed in Settings → Global platform (not process env).
 	FFCompletionCredentials bool
+	// FFCourseReviews enables learner star ratings and text reviews on catalog and course pages (plan 15.7).
+	// Managed in Settings → Global platform (not process env).
+	FFCourseReviews bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).

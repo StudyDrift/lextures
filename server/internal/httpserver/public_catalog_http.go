@@ -18,6 +18,7 @@ func (d Deps) registerPublicCatalogRoutes(r chi.Router) {
 	r.Get("/api/v1/public/catalog/courses", d.handlePublicCatalogList())
 	r.Get("/api/v1/public/catalog/categories", d.handlePublicCatalogCategories())
 	r.Get("/api/v1/public/catalog/courses/{slug}", d.handlePublicCatalogDetail())
+	r.Get("/api/v1/public/catalog/courses/{slug}/reviews", d.handlePublicCatalogReviews())
 	r.Get("/api/v1/internal/catalog/courses/{slug}/json-ld", d.handlePublicCatalogJSONLD())
 }
 
