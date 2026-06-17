@@ -19,6 +19,7 @@ const (
 	IncompleteGranted      = "incomplete_granted"
 	IncompleteReminder     = "incomplete_reminder"
 	CEUAwarded             = "ceu_awarded"
+	CertificateIssued      = "certificate_issued"
 	PaymentFailed          = "payment_failed"
 )
 
@@ -41,5 +42,6 @@ var All = []string{
 	IncompleteGranted,
 	IncompleteReminder,
 	CEUAwarded,
+	CertificateIssued,
 	PaymentFailed,
 }

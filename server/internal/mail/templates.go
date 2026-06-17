@@ -58,6 +58,8 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderIncompleteReminder(vars, logo, color)
 	case "payment_failed":
 		return renderPaymentFailed(vars, logo, color)
+	case "certificate_issued":
+		return renderCertificateIssued(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {
@@ -306,6 +308,43 @@ Deadline: <strong>%s</strong> (%s days remaining)</p>
 		template.HTMLEscapeString(deadline),
 		template.HTMLEscapeString(days),
 		template.HTMLEscapeString(link),
+		color,
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderCertificateIssued(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	name := vars["credentialName"]
+	verify := vars["verifyUrl"]
+	linkedIn := vars["linkedInUrl"]
+	credentialsURL := vars["credentialsUrl"]
+	subject := fmt.Sprintf("Certificate earned: %s", name)
+	bodyText := fmt.Sprintf(`Congratulations! You earned a certificate for "%s".
+
+Verify your credential: %s
+Add to LinkedIn: %s
+View all credentials: %s
+`, name, verify, linkedIn, credentialsURL)
+	linkedInBtn := ""
+	if strings.TrimSpace(linkedIn) != "" {
+		linkedInBtn = fmt.Sprintf(
+			`<p><a href="%s" style="display:inline-block;background:#0A66C2;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:600;">Add to LinkedIn</a></p>`,
+			template.HTMLEscapeString(linkedIn),
+		)
+	}
+	html, err := renderLayout("Certificate earned", fmt.Sprintf(
+		`<p>Congratulations! You earned a certificate for <strong>%s</strong>.</p>
+%s
+<p><a href="%s" style="color:%s;font-weight:600;">Verify credential</a></p>
+<p><a href="%s" style="color:%s;font-weight:600;">View my credentials</a></p>`,
+		template.HTMLEscapeString(name),
+		linkedInBtn,
+		template.HTMLEscapeString(verify),
+		color,
+		template.HTMLEscapeString(credentialsURL),
 		color,
 	), logo, vars["unsubscribeUrl"])
 	if err != nil {

@@ -287,6 +287,7 @@ export default function Dashboard() {
     ffCeuTracking,
     ffAdvisingIntegration,
     ffLearningPaths,
+    ffCompletionCredentials,
     ffResearchConsent,
   } = usePlatformFeatures()
 
@@ -838,6 +839,26 @@ export default function Dashboard() {
                   className="inline-flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-700"
                 >
                   Open CCR
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </div>
+            </section>
+          ) : null}
+
+          {ffCompletionCredentials ? (
+            <section aria-label="My credentials">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-5 py-4 dark:border-emerald-900/40 dark:bg-emerald-950/30">
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-neutral-100">My credentials</p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
+                    Download certificates and share them to LinkedIn.
+                  </p>
+                </div>
+                <Link
+                  to="/me/credentials"
+                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700"
+                >
+                  View credentials
                   <ArrowRight className="h-4 w-4" aria-hidden />
                 </Link>
               </div>

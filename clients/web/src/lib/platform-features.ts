@@ -58,6 +58,7 @@ export type PlatformFeaturesSnapshot = {
   ffConsortiumSharing?: boolean
   ffStripeBilling?: boolean
   ffLearningPaths?: boolean
+  ffCompletionCredentials?: boolean
   aiDisclosureEnabled?: boolean
   openRouterConfigured?: boolean
   ragNotebookEnabled?: boolean
@@ -121,6 +122,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffLearningPaths: false,
+  ffCompletionCredentials: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
   ragNotebookEnabled: false,

@@ -357,6 +357,9 @@ type Config struct {
 	// FFLearningPaths enables learning paths / course bundles for self-learners (plan 15.4).
 	// Managed in Settings → Global platform (not process env).
 	FFLearningPaths bool
+	// FFCompletionCredentials enables course completion certificates, Open Badges export, and LinkedIn share (plans 15.5, 15.6).
+	// Managed in Settings → Global platform (not process env).
+	FFCompletionCredentials bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).
