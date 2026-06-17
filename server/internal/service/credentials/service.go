@@ -302,6 +302,6 @@ func ReadStoredPDF(ctx context.Context, storage filestorage.Driver, pdfKey strin
 	if err != nil {
 		return nil, err
 	}
-	defer rc.Close()
+	defer func() { _ = rc.Close() }()
 	return io.ReadAll(rc)
 }
