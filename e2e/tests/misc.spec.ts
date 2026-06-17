@@ -62,7 +62,7 @@ test.describe('Question bank', () => {
   test('question bank page loads', async ({ coursePage: page, seededCourse }) => {
     await page.goto(`/courses/${seededCourse.courseCode}/questions`)
     await expect(
-      page.getByRole('heading', { name: /question bank|questions/i }),
+      page.getByRole('heading', { name: /question bank|questions/i }).first(),
     ).toBeVisible()
   })
 

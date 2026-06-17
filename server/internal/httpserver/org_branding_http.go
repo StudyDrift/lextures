@@ -64,7 +64,16 @@ func (d Deps) handlePublicBrandingResolve() http.HandlerFunc {
 		}
 		ctx := r.Context()
 		host := effectiveHostForBranding(r)
-		res, err := d.brandingResolver().ResolveForHost(ctx, host)
+		var res orgbranding.Resolved
+		var err error
+		if slug := orgSlugFromBrandingQuery(r); slug != "" && d.Pool != nil {
+			if oid, lookupErr := orgbranding.OrgIDForSlug(ctx, d.Pool, slug); lookupErr == nil && oid != nil {
+				res, err = d.brandingResolver().ResolveForOrgID(ctx, *oid)
+			}
+		}
+		if res.OrgSlug == "" && res.OrgID == nil {
+			res, err = d.brandingResolver().ResolveForHost(ctx, host)
+		}
 		if err != nil {
 			res = orgbranding.Resolved{
 				PrimaryColor:   orgbranding.DefaultPrimaryHex,

@@ -122,6 +122,11 @@ func (r *Resolver) resolveUncached(ctx context.Context, host string) (Resolved, 
 	return defaultResolved(), nil
 }
 
+// ResolveForOrgID returns branding for a tenant organization id.
+func (r *Resolver) ResolveForOrgID(ctx context.Context, orgID uuid.UUID) (Resolved, error) {
+	return r.rowToResolved(ctx, orgID)
+}
+
 func (r *Resolver) rowToResolved(ctx context.Context, orgID uuid.UUID) (Resolved, error) {
 	slug, _ := OrgSlug(ctx, r.pool, orgID)
 	row, err := Get(ctx, r.pool, orgID)

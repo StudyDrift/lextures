@@ -19,8 +19,10 @@ import (
 )
 
 type loginBody struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email        string  `json:"email"`
+	Password     string  `json:"password"`
+	OrgSlugSnake *string `json:"org_slug"`
+	OrgSlugCamel *string `json:"orgSlug"`
 }
 
 type signupBody struct {
@@ -54,9 +56,17 @@ func (d Deps) handleLogin() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
+		orgSlug := ""
+		if b.OrgSlugSnake != nil {
+			orgSlug = strings.TrimSpace(*b.OrgSlugSnake)
+		}
+		if orgSlug == "" && b.OrgSlugCamel != nil {
+			orgSlug = strings.TrimSpace(*b.OrgSlugCamel)
+		}
 		res, err := authservice.Login(r.Context(), d.Pool, d.JWTSigner, d.effectiveConfig(), authservice.LoginRequest{
 			Email:    b.Email,
 			Password: b.Password,
+			OrgSlug:  orgSlug,
 			Client:   authservice.ClientMetaFromRequest(r),
 		})
 		if err != nil {

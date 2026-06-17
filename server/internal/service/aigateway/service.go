@@ -254,7 +254,7 @@ func BlockMessage(reason BlockReason) string {
 	case BlockCoppaAI:
 		return "AI features require parental consent for this account."
 	case BlockGDPRConsent:
-		return "AI processing requires your consent. Visit the Privacy Centre to grant consent for AI features."
+		return "AI processing requires your consent. Visit the Privacy Center to grant consent for AI features."
 	case BlockTenantFeature:
 		return "This AI feature is disabled by your organization."
 	case BlockTenantModel:

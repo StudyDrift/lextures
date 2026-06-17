@@ -39,6 +39,7 @@ import (
 type LoginRequest struct {
 	Email    string
 	Password string
+	OrgSlug  string
 	// Client is optional HTTP metadata stored on refresh tokens (login handler).
 	Client *ClientMeta
 }
@@ -138,8 +139,13 @@ func Login(ctx context.Context, pool *pgxpool.Pool, jwt *pauth.JWTSigner, cfg co
 	if row.DeactivatedAt != nil {
 		return AuthResponse{}, ErrInvalidCredentials
 	}
-	if err := orgAuthGate(ctx, pool, row.ID); err != nil {
+	if err := validateLoginOrgSlug(ctx, pool, row.ID, req.OrgSlug); err != nil {
 		return AuthResponse{}, err
+	}
+	if strings.TrimSpace(req.OrgSlug) == "" {
+		if err := orgAuthGate(ctx, pool, row.ID); err != nil {
+			return AuthResponse{}, err
+		}
 	}
 	ok, err := pauth.VerifyPassword(req.Password, row.PasswordHash)
 	if err != nil || !ok {
@@ -412,6 +418,9 @@ func HTTPErrorFor(err error) (status int, code, msg string) {
 	}
 	if errors.Is(err, ErrOrgSuspended) {
 		return http.StatusForbidden, apierr.CodeOrgSuspended, "This organization has been suspended."
+	}
+	if errors.Is(err, ErrOrgNotFound) {
+		return http.StatusNotFound, apierr.CodeNotFound, "No organization found for that sign-in address."
 	}
 	return http.StatusInternalServerError, apierr.CodeInternal, "Something went wrong."
 }

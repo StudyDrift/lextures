@@ -52,6 +52,14 @@ function applyFavicon(href: string | null) {
   link.href = url
 }
 
+function orgSlugFromLoginPath(pathname: string): string | null {
+  const prefix = '/login/'
+  if (!pathname.startsWith(prefix)) return null
+  const slug = pathname.slice(prefix.length).split('/')[0]?.trim().toLowerCase()
+  if (!slug || slug === 'mfa' || slug === 'magic-link') return null
+  return slug
+}
+
 export function OrgBrandingProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<OrgBrandingState>(defaultState)
 
@@ -60,7 +68,11 @@ export function OrgBrandingProvider({ children }: { children: ReactNode }) {
     ;(async () => {
       try {
         const host = window.location.host
-        const res = await fetch(apiUrl('/api/v1/public/branding/resolve'), {
+        const pathSlug = orgSlugFromLoginPath(window.location.pathname)
+        const brandingUrl = pathSlug
+          ? `/api/v1/public/branding/resolve?orgSlug=${encodeURIComponent(pathSlug)}`
+          : '/api/v1/public/branding/resolve'
+        const res = await fetch(apiUrl(brandingUrl), {
           headers: host ? { 'X-Branding-Host': host } : undefined,
         })
         const raw: unknown = await res.json().catch(() => ({}))

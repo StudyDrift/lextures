@@ -32,6 +32,7 @@ export default function App() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
+        <Route path="/login/:orgSlug" element={<Pages.Login />} />
         <Route path="/login" element={<Pages.Login />} />
         <Route path="/login/magic-link" element={<Pages.MagicLinkPage />} />
         <Route path="/login/mfa" element={<Pages.MfaLogin />} />

@@ -2,9 +2,16 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { server } from '../../test/mocks/server'
 import PrivacyCentrePage from '../privacy-centre-page'
+
+vi.mock('../../context/platform-features-context', () => ({
+  usePlatformFeatures: () => ({
+    gdprModuleEnabled: true,
+    loading: false,
+  }),
+}))
 
 const CONSENTS_URL = '/api/v1/compliance/gdpr/consents'
 const DSAR_URL = '/api/v1/compliance/gdpr/dsar'
@@ -40,11 +47,11 @@ function renderPage() {
 }
 
 describe('PrivacyCentrePage', () => {
-  it('renders the privacy centre heading', async () => {
+  it('renders the privacy center heading', async () => {
     setupHandlers()
     renderPage()
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1, name: /privacy centre/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { level: 1, name: /privacy center/i })).toBeInTheDocument()
     })
   })
 

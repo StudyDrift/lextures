@@ -107,9 +107,13 @@ func (d Deps) handleAdminOrgsCollection() http.HandlerFunc {
 				return
 			}
 			name := strings.TrimSpace(body.Name)
-			slug := strings.TrimSpace(body.Slug)
+			slug := organization.NormalizeSlug(body.Slug)
 			if slug == "" {
-				slug = strings.ToLower(strings.ReplaceAll(name, " ", "-"))
+				slug = organization.SuggestSlugFromName(name)
+			}
+			if err := organization.ValidateSlug(slug); err != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+				return
 			}
 			var dr *string
 			if body.DataRegion != nil && strings.TrimSpace(*body.DataRegion) != "" {
@@ -117,20 +121,19 @@ func (d Deps) handleAdminOrgsCollection() http.HandlerFunc {
 				dr = &s
 			}
 			meta := body.Metadata
-			row, err := organization.Create(ctx, d.Pool, name, slug, body.MaxUsers, body.MaxCourses, derefStr(dr), meta)
+			row, err := organization.CreateWithCreator(ctx, d.Pool, actorID, name, slug, body.MaxUsers, body.MaxCourses, derefStr(dr), meta)
 			if err != nil {
 				if strings.Contains(err.Error(), "slug already") {
 					apierr.WriteJSON(w, http.StatusConflict, apierr.CodeInvalidInput, "That slug is already in use.")
 					return
 				}
-				if strings.Contains(err.Error(), "required") {
+				if strings.Contains(err.Error(), "required") || strings.Contains(err.Error(), "slug ") {
 					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 					return
 				}
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create organization.")
 				return
 			}
-			_ = organization.InsertAudit(ctx, d.Pool, actorID, row.ID, "org_created", map[string]any{"slug": row.Slug, "name": row.Name})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusCreated)
 			_ = json.NewEncoder(w).Encode(orgRowToPublic(row))

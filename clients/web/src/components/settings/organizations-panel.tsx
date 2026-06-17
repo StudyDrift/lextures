@@ -1,8 +1,14 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Building2, Plus, RefreshCw } from 'lucide-react'
-import { authorizedFetch } from '../../lib/api'
+import { authorizedFetch, tryRefreshSession } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import {
+  normalizeOrgSlug,
+  orgLoginPath,
+  suggestOrgSlugFromName,
+  validateOrgSlug,
+} from '../../lib/org-slug'
 
 type OrgRow = {
   id: string
@@ -23,6 +29,8 @@ export function OrganizationsPanel() {
   const [error, setError] = useState<string | null>(null)
   const [newName, setNewName] = useState('')
   const [newSlug, setNewSlug] = useState('')
+  const [slugTouched, setSlugTouched] = useState(false)
+  const [slugError, setSlugError] = useState<string | null>(null)
   const [creating, setCreating] = useState(false)
 
   const load = useCallback(async () => {
@@ -45,25 +53,40 @@ export function OrganizationsPanel() {
     void load()
   }, [load])
 
+  useEffect(() => {
+    if (slugTouched) return
+    setNewSlug(suggestOrgSlugFromName(newName))
+  }, [newName, slugTouched])
+
+  useEffect(() => {
+    setSlugError(validateOrgSlug(newSlug))
+  }, [newSlug])
+
   async function createOrg(e: FormEvent) {
     e.preventDefault()
     const name = newName.trim()
-    if (!name) return
+    const slug = normalizeOrgSlug(newSlug)
+    const validation = validateOrgSlug(slug)
+    if (!name || validation) {
+      setSlugError(validation)
+      return
+    }
     setCreating(true)
     try {
-      const body: Record<string, unknown> = { name }
-      const s = newSlug.trim()
-      if (s) body.slug = s
       const res = await authorizedFetch('/api/v1/admin/orgs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ name, slug }),
       })
       const raw: unknown = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(readApiErrorMessage(raw))
-      toastSaveOk('Organization created.')
+      const created = raw as { slug?: string }
+      const loginPath = orgLoginPath(created.slug ?? slug)
+      await tryRefreshSession()
+      toastSaveOk(`Organization created. Your account is now in this tenant. Sign in at ${loginPath}`)
       setNewName('')
       setNewSlug('')
+      setSlugTouched(false)
       await load()
     } catch (err) {
       toastMutationError(err instanceof Error ? err.message : 'Request failed.')
@@ -91,11 +114,13 @@ export function OrganizationsPanel() {
     }
   }
 
+  const previewSlug = normalizeOrgSlug(newSlug)
+
   return (
     <div className="mt-6 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-600 dark:text-neutral-400">
-          Provision tenants and monitor usage. Slugs are unique and lowercased.
+          Provision tenants and monitor usage. Each organization gets a unique short name used for sign-in URLs.
         </p>
         <button
           type="button"
@@ -124,29 +149,51 @@ export function OrganizationsPanel() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
-              placeholder="Riverdale USD"
+              placeholder="Chase's Org"
               autoComplete="organization"
             />
           </label>
           <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs font-medium text-slate-700 dark:text-neutral-300">
-            Slug (optional)
+            Short name (slug)
             <input
               value={newSlug}
-              onChange={(e) => setNewSlug(e.target.value)}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-neutral-600 dark:bg-neutral-900"
-              placeholder="riverdale-usd"
+              onChange={(e) => {
+                setSlugTouched(true)
+                setNewSlug(normalizeOrgSlug(e.target.value))
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-sm dark:border-neutral-600 dark:bg-neutral-900"
+              placeholder="chase"
               autoComplete="off"
+              aria-invalid={slugError ? true : undefined}
+              aria-describedby={slugError ? 'new-org-slug-hint new-org-slug-error' : 'new-org-slug-hint'}
             />
           </label>
           <button
             type="submit"
-            disabled={creating || !newName.trim()}
+            disabled={creating || !newName.trim() || !!slugError}
             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Building2 className="h-4 w-4" aria-hidden />
             Create
           </button>
         </div>
+        <p id="new-org-slug-hint" className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+          {previewSlug ? (
+            <>
+              Sign-in URL:{' '}
+              <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[11px] text-slate-700 dark:bg-neutral-800 dark:text-neutral-200">
+                {orgLoginPath(previewSlug)}
+              </code>
+            </>
+          ) : (
+            'Choose a short, memorable slug such as chase or riverdale-usd.'
+          )}
+        </p>
+        {slugError && (
+          <p id="new-org-slug-error" className="mt-1 text-xs text-rose-700 dark:text-rose-300" role="alert">
+            {slugError}
+          </p>
+        )}
       </form>
 
       {error && (
@@ -177,6 +224,9 @@ export function OrganizationsPanel() {
                   Slug
                 </th>
                 <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
+                  Sign in
+                </th>
+                <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
                   Status
                 </th>
                 <th scope="col" className="px-3 py-2 font-medium text-slate-700 dark:text-neutral-200">
@@ -197,6 +247,14 @@ export function OrganizationsPanel() {
                     {o.name}
                   </th>
                   <td className="whitespace-nowrap px-3 py-2.5 font-mono text-xs text-slate-600 dark:text-neutral-300">{o.slug}</td>
+                  <td className="whitespace-nowrap px-3 py-2.5">
+                    <a
+                      href={orgLoginPath(o.slug)}
+                      className="font-mono text-xs text-indigo-600 hover:underline dark:text-indigo-400"
+                    >
+                      {orgLoginPath(o.slug)}
+                    </a>
+                  </td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">{o.status}</td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">{o.userCount}</td>
                   <td className="whitespace-nowrap px-3 py-2.5 text-slate-600 dark:text-neutral-300">{o.courseCount}</td>
