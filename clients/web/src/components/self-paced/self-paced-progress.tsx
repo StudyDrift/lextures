@@ -1,7 +1,10 @@
 // Self-paced learner progress UI: accessible progress bar, resume CTA, and a
 // completion celebration overlay (plan 15.2).
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { PartyPopper, Play } from 'lucide-react'
+import { CredentialShareActions } from '../credentials/credential-share-actions'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import type { IssuedCredentialSummary } from '../../lib/credentials-api'
 import {
   fetchMyProgress,
   formatProgressLabel,
@@ -43,10 +46,10 @@ export function SelfPacedProgressBar({
 /** Full-page completion celebration overlay shown when progress reaches 100%. */
 export function CompletionCelebration({
   onClose,
-  onViewCertificate,
+  credential,
 }: {
   onClose: () => void
-  onViewCertificate?: () => void
+  credential?: IssuedCredentialSummary | null
 }) {
   return (
     <div
@@ -63,20 +66,16 @@ export function CompletionCelebration({
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
           You finished every item in this course at your own pace. Nice work.
         </p>
-        <div className="mt-6 flex flex-col gap-2">
-          {onViewCertificate ? (
-            <button
-              type="button"
-              onClick={onViewCertificate}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-            >
-              View Certificate
-            </button>
-          ) : null}
+        {credential ? (
+          <div className="mt-6 text-left">
+            <CredentialShareActions credential={credential} layout="stack" />
+          </div>
+        ) : null}
+        <div className="mt-4">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="w-full rounded-lg px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Keep exploring
           </button>
@@ -93,19 +92,29 @@ export function CompletionCelebration({
  */
 export function SelfPacedProgressHeader({
   courseCode,
+  courseTitle,
   onResume,
 }: {
   courseCode: string
+  courseTitle?: string
   onResume?: (itemId: string) => void
 }) {
+  const { ffCompletionCredentials } = usePlatformFeatures()
   const [progress, setProgress] = useState<SelfPacedProgress | null>(null)
   const [celebrate, setCelebrate] = useState(false)
+  const [issuedCredentialId, setIssuedCredentialId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
       const p = await fetchMyProgress(courseCode)
       setProgress(p)
-      if (p.completed) setCelebrate(true)
+      if (p.justCompleted) {
+        setCelebrate(true)
+        if (p.credentialId) setIssuedCredentialId(p.credentialId)
+      } else if (p.completed) {
+        setCelebrate(true)
+        if (p.credentialId) setIssuedCredentialId(p.credentialId)
+      }
     } catch {
       setProgress(null)
     }
@@ -114,6 +123,20 @@ export function SelfPacedProgressHeader({
   useEffect(() => {
     void load()
   }, [load])
+
+  const celebrationCredential = useMemo((): IssuedCredentialSummary | null => {
+    if (!issuedCredentialId || !ffCompletionCredentials) return null
+    const origin = window.location.origin
+    return {
+      id: issuedCredentialId,
+      title: courseTitle ?? 'Course completion',
+      sourceType: 'course',
+      sourceId: courseCode,
+      issuedAt: new Date().toISOString(),
+      verificationUrl: `${origin}/verify/${issuedCredentialId}`,
+      revoked: false,
+    }
+  }, [issuedCredentialId, ffCompletionCredentials, courseTitle, courseCode])
 
   if (!progress) return null
 
@@ -142,7 +165,10 @@ export function SelfPacedProgressHeader({
         <SelfPacedProgressBar percent={progress.progressPercent} />
       </div>
       {celebrate ? (
-        <CompletionCelebration onClose={() => setCelebrate(false)} />
+        <CompletionCelebration
+          credential={celebrationCredential}
+          onClose={() => setCelebrate(false)}
+        />
       ) : null}
     </section>
   )

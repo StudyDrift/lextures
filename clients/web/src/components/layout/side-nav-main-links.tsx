@@ -46,6 +46,7 @@ export function SideNavMainLinks() {
     ffCeuTracking,
     ffStripeBilling,
     ffLearningPaths,
+    ffCompletionCredentials,
     ffCatalogIntegration,
     ffLibrary,
     ffConferenceScheduling,
@@ -69,6 +70,7 @@ export function SideNavMainLinks() {
     ffTranscripts ||
     ffAdvisingIntegration ||
     ffCoCurricularTranscript ||
+    ffCompletionCredentials ||
     ffCeuTracking ||
     ffResearchConsent ||
     ffAccessibilityIntake ||
@@ -145,6 +147,11 @@ export function SideNavMainLinks() {
           {ffCoCurricularTranscript ? (
             <SideNavLink to="/me/ccr" icon={<Award className="h-5 w-5" />}>
               My achievements
+            </SideNavLink>
+          ) : null}
+          {ffCompletionCredentials ? (
+            <SideNavLink to="/me/credentials" icon={<Award className="h-5 w-5" />}>
+              My credentials
             </SideNavLink>
           ) : null}
           {ffCeuTracking ? (

@@ -62,6 +62,7 @@ export default function App() {
             <Route path="/privacy-centre" element={<Pages.PrivacyCentrePage />} />
             <Route path="/me/study-insights" element={<Pages.StudyInsightsPage />} />
             <Route path="/me/ccr" element={<Pages.MyCCR />} />
+            <Route path="/me/credentials" element={<Pages.MyCredentials />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
             <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
             <Route path="/checkout/success" element={<Pages.CheckoutSuccessPage />} />

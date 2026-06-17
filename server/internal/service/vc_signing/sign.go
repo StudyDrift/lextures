@@ -97,9 +97,13 @@ func SignCredential(clrSubject map[string]any, issuerName string, key KeyMateria
 			"id":   key.DID,
 			"name": issuerName,
 		},
-		"issuanceDate": issuedAt.UTC().Format(time.RFC3339),
+		"issuanceDate":      issuedAt.UTC().Format(time.RFC3339),
 		"credentialSubject": clrSubject,
 	}
+	return signUnsigned(unsigned, key, issuedAt)
+}
+
+func signUnsigned(unsigned map[string]any, key KeyMaterial, issuedAt time.Time) (map[string]any, error) {
 	canonical, err := canonicalJSON(unsigned)
 	if err != nil {
 		return nil, err
