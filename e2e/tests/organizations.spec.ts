@@ -52,11 +52,7 @@ async function bootstrapGlobalAdmin(email: string): Promise<void> {
 }
 
 async function ensureGlobalAdminCredentials(): Promise<{ email: string; password: string; token: string }> {
-  let token = await getAdminToken()
-  if (await adminCanManageOrgs(token)) {
-    return { email: ADMIN_EMAIL, password: PASSWORD, token }
-  }
-
+  // Use a dedicated Global Admin so org creation does not move the shared E2E admin tenant.
   const email = uniqueEmail('e2e-ga')
   const signupRes = await fetch(`${API_BASE}/api/v1/auth/signup`, {
     method: 'POST',
@@ -79,7 +75,7 @@ async function ensureGlobalAdminCredentials(): Promise<{ email: string; password
   if (login.status !== 200 || !login.access_token) {
     test.skip(true, 'promoted Global Admin could not log in')
   }
-  token = login.access_token
+  const token = login.access_token
   if (!(await adminCanManageOrgs(token))) {
     test.skip(true, 'bootstrap Global Admin did not grant rbac:manage')
   }

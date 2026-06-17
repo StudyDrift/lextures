@@ -10,6 +10,11 @@ const DEFAULT_ORG_ID = '00000000-0000-0000-0000-000000000001'
 function uid(prefix = 'consortium') {
   return `e2e-${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
+
+/** URL-safe org slug within the 32-character server limit. */
+function uniqueOrgSlug(prefix = 'guest') {
+  return `e2e-${prefix}-${Date.now().toString(36).slice(-8)}`
+}
 function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 }
@@ -115,7 +120,7 @@ test('Consortium: admin can create agreement when feature enabled', async () => 
   const createGuestOrg = await fetch(`${API_BASE}/api/v1/admin/orgs`, {
     method: 'POST',
     headers: authHeaders(adminToken),
-    body: JSON.stringify({ name: uid('guest-org'), slug: uid('guest') }),
+    body: JSON.stringify({ name: uid('guest-org'), slug: uniqueOrgSlug('guest') }),
   })
   expect(createGuestOrg.status).toBe(201)
   const guestOrg = (await createGuestOrg.json()) as { id: string }
