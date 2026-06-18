@@ -63,6 +63,7 @@ export type PlatformFeaturesSnapshot = {
   ffCompletionCredentials?: boolean
   ffCourseReviews?: boolean
   ffGamification?: boolean
+  ffOnboardingFlow?: boolean
   ffStudyReminders?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
@@ -133,6 +134,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffCompletionCredentials: false,
   ffCourseReviews: false,
   ffGamification: false,
+  ffOnboardingFlow: false,
   ffStudyReminders: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,

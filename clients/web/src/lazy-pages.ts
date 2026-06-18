@@ -47,6 +47,7 @@ export const PathLandingPage = lazy(() => import('./pages/lms/path-landing-page'
 export const PathsCatalogPage = lazy(() => import('./pages/lms/paths-catalog-page'))
 export const CreatorLearningPathsPage = lazy(() => import('./pages/lms/creator-learning-paths-page'))
 export const Dashboard = lazy(() => import('./pages/lms/dashboard'))
+export const OnboardingPage = lazy(() => import('./pages/onboarding/onboarding-page'))
 export const MyCCR = lazy(() => import('./pages/lms/MyCCR'))
 export const MyCredentials = lazy(() => import('./pages/lms/MyCredentials'))
 export const CeTranscript = lazy(() => import('./pages/lms/CeTranscript'))

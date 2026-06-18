@@ -253,6 +253,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Reuse prior translations when localizing course content.',
   },
   {
+    key: 'ffOnboardingFlow',
+    label: 'Self-learner onboarding',
+    description:
+      'Multi-step onboarding wizard with goal capture, optional diagnostic placement, and Start Here recommendations (plan 15.11).',
+  },
+  {
     key: 'mfaEnabled',
     label: 'Two-factor authentication',
     description: 'Offer TOTP authenticator apps and passkeys as optional login factors.',

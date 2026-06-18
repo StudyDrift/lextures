@@ -135,6 +135,7 @@ type platformSettingsJSON struct {
 	FFCompletionCredentials         bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                 bool `json:"ffCourseReviews"`
 	FFGamification                  bool `json:"ffGamification"`
+	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                bool `json:"ffStudyReminders"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
@@ -320,6 +321,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
 			FFCourseReviews:                 merged.FFCourseReviews,
 			FFGamification:                  merged.FFGamification,
+			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
@@ -480,6 +482,7 @@ type putPlatformBody struct {
 	FFCompletionCredentials         *bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                 *bool `json:"ffCourseReviews"`
 	FFGamification                  *bool `json:"ffGamification"`
+	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                *bool `json:"ffStudyReminders"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
@@ -786,6 +789,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcompletioncredentials", body.FFCompletionCredentials, func(v bool) { wr.FFCompletionCredentials = &v })
 		setBool("ffcoursereviews", body.FFCourseReviews, func(v bool) { wr.FFCourseReviews = &v })
 		setBool("ffgamification", body.FFGamification, func(v bool) { wr.FFGamification = &v })
+		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
@@ -925,6 +929,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
 			FFCourseReviews:                 merged.FFCourseReviews,
 			FFGamification:                  merged.FFGamification,
+			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,

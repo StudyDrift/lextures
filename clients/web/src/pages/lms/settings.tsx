@@ -38,6 +38,7 @@ import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { IntegrationsAccessKeysPanel } from '../../components/settings/integrations-access-keys-panel'
 import { IntegrationsMcpPanel } from '../../components/settings/integrations-mcp-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
+import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-panel'
 import { StudyRemindersSettingsPanel } from '../../components/settings/study-reminders-settings-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
@@ -1721,6 +1722,7 @@ export default function Settings() {
               Control which events send you email and whether they arrive instantly or in a daily digest.
             </p>
             <NotificationPreferencesPanel />
+            <LearningGoalsPanel />
           </div>
         )}
 
