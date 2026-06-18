@@ -50,6 +50,7 @@ import {
   type GradingBacklogItem,
 } from '../../components/dashboard/grading-backlog-list'
 import { CourseHeroImage } from '../../components/course-hero-image'
+import { LeaderboardWidget } from './LeaderboardWidget'
 
 function formatIsoDurationHuman(iso: string | null | undefined): string {
   if (!iso?.trim()) return '—'
@@ -201,7 +202,7 @@ export default function CourseDetail() {
   const { calendarEnabled: courseCalendarEnabled, loading: courseFeatureFlagsLoading } =
     useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
-  const { ffCatalogIntegration } = usePlatformFeatures()
+  const { ffCatalogIntegration, ffGamification } = usePlatformFeatures()
 
   const [course, setCourse] = useState<CoursePublic | null>(null)
   const [catalogInfo, setCatalogInfo] = useState<CatalogSection | null>(null)
@@ -528,6 +529,8 @@ export default function CourseDetail() {
               </Link>
             </section>
           ) : null}
+
+          {ffGamification && courseCode ? <LeaderboardWidget courseCode={courseCode} /> : null}
 
           {catalogInfo && (
             <aside

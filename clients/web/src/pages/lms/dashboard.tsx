@@ -67,6 +67,7 @@ import { ConsentPrompt } from '../../components/research/consent-prompt'
 import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-state-badge'
 import type { EnrollmentState } from '../../lib/enrollment-state-api'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
+import { GamificationDashboardCard } from '../../components/gamification/gamification-dashboard-card'
 import { LmsPage } from './lms-page'
 import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -289,6 +290,7 @@ export default function Dashboard() {
     ffAdvisingIntegration,
     ffLearningPaths,
     ffCompletionCredentials,
+    ffGamification,
     ffResearchConsent,
   } = usePlatformFeatures()
 
@@ -799,6 +801,8 @@ export default function Dashboard() {
           )}
 
           <StudyStatsCard />
+
+          {ffGamification && anyStudentExperience ? <GamificationDashboardCard /> : null}
 
           {ffCompletionCredentials && anyStudentExperience ? <RecentCertificatesCard /> : null}
 

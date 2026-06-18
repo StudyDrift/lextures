@@ -120,6 +120,7 @@ type Row struct {
 	FFLearningPaths                 *bool
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
+	FFGamification                  *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -254,6 +255,7 @@ type Write struct {
 	FFLearningPaths                 *bool
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
+	FFGamification                  *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -384,6 +386,7 @@ SELECT
 	ff_learning_paths,
 	ff_completion_credentials,
 	ff_course_reviews,
+	ff_gamification,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -509,6 +512,7 @@ WHERE id = 1
 		&r.FFLearningPaths,
 		&r.FFCompletionCredentials,
 		&r.FFCourseReviews,
+		&r.FFGamification,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -683,6 +687,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_learning_paths,
 	ff_completion_credentials,
 	ff_course_reviews,
+	ff_gamification,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -814,6 +819,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_learning_paths = COALESCE(EXCLUDED.ff_learning_paths, settings.platform_app_settings.ff_learning_paths),
 	ff_completion_credentials = COALESCE(EXCLUDED.ff_completion_credentials, settings.platform_app_settings.ff_completion_credentials),
 	ff_course_reviews = COALESCE(EXCLUDED.ff_course_reviews, settings.platform_app_settings.ff_course_reviews),
+	ff_gamification = COALESCE(EXCLUDED.ff_gamification, settings.platform_app_settings.ff_gamification),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -937,6 +943,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFLearningPaths,
 		w.FFCompletionCredentials,
 		w.FFCourseReviews,
+		w.FFGamification,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

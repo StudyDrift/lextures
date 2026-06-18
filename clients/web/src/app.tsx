@@ -62,6 +62,7 @@ export default function App() {
             <Route path="/" element={<Pages.Dashboard />} />
             <Route path="/privacy-centre" element={<Pages.PrivacyCentrePage />} />
             <Route path="/me/study-insights" element={<Pages.StudyInsightsPage />} />
+            <Route path="/me/profile" element={<Pages.MyProfilePage />} />
             <Route path="/me/ccr" element={<Pages.MyCCR />} />
             <Route path="/me/credentials" element={<Pages.MyCredentials />} />
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />

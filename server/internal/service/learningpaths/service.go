@@ -14,6 +14,7 @@ import (
 	repoPaths "github.com/lextures/lextures/server/internal/repos/learningpaths"
 	"github.com/lextures/lextures/server/internal/config"
 	credsvc "github.com/lextures/lextures/server/internal/service/credentials"
+	"github.com/lextures/lextures/server/internal/service/gamification"
 	"github.com/lextures/lextures/server/internal/courseroles"
 )
 
@@ -204,6 +205,9 @@ func GetProgress(ctx context.Context, pool *pgxpool.Pool, userID, pathID uuid.UU
 			prog.CompletedAt = &now
 			prog.JustCompleted = true
 			RecordCompletion()
+			if opts != nil {
+				gamification.EmitPathCompleted(pool, opts.Cfg, userID, pathID)
+			}
 			if err := issuePathCertificate(ctx, pool, userID, p, opts); err != nil && !errors.Is(err, pgx.ErrNoRows) {
 				return nil, err
 			}
