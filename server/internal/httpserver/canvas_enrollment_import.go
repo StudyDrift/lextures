@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -78,6 +79,10 @@ func canvasRosterEmailsByCanvasUserID(
 		}
 	}
 	return out, nil
+}
+
+func canvasIsDefaultAvatarURL(raw string) bool {
+	return user.IsMissingOrDefaultBlankAvatarURL(raw)
 }
 
 func canvasAvatarURLFromMaps(enrollment, canvasUser map[string]any) string {
@@ -157,19 +162,19 @@ func canvasImportEnrollmentUserAvatar(
 	if tx == nil || userID == uuid.Nil {
 		return nil
 	}
-	var hasAvatar bool
+	var currentAvatar sql.NullString
 	if err := tx.QueryRow(ctx, `
-SELECT avatar_url IS NOT NULL AND TRIM(avatar_url) <> ''
+SELECT avatar_url
 FROM "user".users
 WHERE id = $1
-`, userID).Scan(&hasAvatar); err != nil {
+`, userID).Scan(&currentAvatar); err != nil {
 		return err
 	}
-	if hasAvatar {
+	if !user.IsMissingOrDefaultBlankAvatarURL(currentAvatar.String) {
 		return nil
 	}
 	avatarURL := canvasAvatarURLFromMaps(enrollment, canvasUser)
-	if avatarURL == "" {
+	if avatarURL == "" || canvasIsDefaultAvatarURL(avatarURL) {
 		return nil
 	}
 	data, contentType, err := canvasDownloadAvatarImage(ctx, client, avatarURL, accessToken)
@@ -180,7 +185,10 @@ WHERE id = $1
 	if err != nil {
 		return nil
 	}
-	updated, err := user.SetAvatarURLIfEmptyTx(ctx, tx, userID, dataURL)
+	if canvasIsDefaultAvatarURL(dataURL) {
+		return nil
+	}
+	updated, err := user.SetAvatarURLTx(ctx, tx, userID, dataURL)
 	if err != nil {
 		return err
 	}

@@ -230,6 +230,8 @@ type Config struct {
 	EquationEditorEnabled bool
 	// ReadingLevelEnabled gates Flesch-Kincaid scoring and AI content simplification (plan 11.6).
 	ReadingLevelEnabled bool
+	// GraderAgentEnabled enables the instructor-authored grading agent in SpeedGrader (plan 19.16).
+	GraderAgentEnabled bool
 	// AltTextEnforcementEnabled gates alt-text prompts, AI suggestions, and coverage reporting (plan 12.5).
 	AltTextEnforcementEnabled bool
 	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).

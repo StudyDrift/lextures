@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
+	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
@@ -66,6 +67,8 @@ type Deps struct {
 	CanvasSubmissionSyncJobs *canvassubmissionsyncjobs.Registry
 	// SmsNotificationQueue publishes SMS notification jobs to RabbitMQ (or in-memory fallback).
 	SmsNotificationQueue *smsnotificationqueue.Bus
+	// GradingAgentQueue publishes grading-agent batch jobs to RabbitMQ (or in-memory fallback).
+	GradingAgentQueue *gradingagentqueue.Bus
 	// Storage is the object-storage driver (plan 8.1). When nil, falls back to local disk reads.
 	Storage filestorage.Driver
 	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.

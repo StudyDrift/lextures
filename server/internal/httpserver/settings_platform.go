@@ -86,6 +86,7 @@ type platformSettingsJSON struct {
 	XAPIEmissionEnabled             bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled           bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled              bool `json:"graderAgentEnabled"`
 	AltTextEnforcementEnabled       bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled             bool `json:"speechToTextEnabled"`
@@ -269,6 +270,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
+			GraderAgentEnabled:              merged.GraderAgentEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
 			SpeechToTextEnabled:             merged.SpeechToTextEnabled,
@@ -422,6 +424,7 @@ type putPlatformBody struct {
 	XAPIEmissionEnabled             *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled           *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             *bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled              *bool `json:"graderAgentEnabled"`
 	AltTextEnforcementEnabled       *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            *bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled             *bool `json:"speechToTextEnabled"`
@@ -723,6 +726,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
+		setBool("graderagentenabled", body.GraderAgentEnabled, func(v bool) { wr.GraderAgentEnabled = &v })
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
 		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
@@ -868,6 +872,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
+			GraderAgentEnabled:              merged.GraderAgentEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
 			SpeechToTextEnabled:             merged.SpeechToTextEnabled,

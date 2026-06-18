@@ -5,6 +5,7 @@ type AiSettingsUpdateRequest struct {
 	CourseSetupModelID          string `json:"courseSetupModelId"`
 	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
 	VibeActivityModelID         string `json:"vibeActivityModelId"`
+	GraderAgentModelID          string `json:"graderAgentModelId"`
 }
 
 type AiSettingsResponse struct {
@@ -12,6 +13,7 @@ type AiSettingsResponse struct {
 	CourseSetupModelID          string `json:"courseSetupModelId"`
 	NotebookFlashcardsModelID   string `json:"notebookFlashcardsModelId"`
 	VibeActivityModelID         string `json:"vibeActivityModelId"`
+	GraderAgentModelID          string `json:"graderAgentModelId"`
 }
 
 type AiModelOption struct {

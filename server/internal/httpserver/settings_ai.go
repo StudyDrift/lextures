@@ -87,6 +87,11 @@ func (d Deps) handleGetSettingsAI() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
 			return
 		}
+		grader, err := user.GetGraderAgentModelID(r.Context(), d.Pool, uid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load AI settings.")
+			return
+		}
 		cfg := d.effectiveConfig()
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]string{
@@ -94,6 +99,7 @@ func (d Deps) handleGetSettingsAI() http.HandlerFunc {
 			"courseSetupModelId":          course,
 			"notebookFlashcardsModelId":   flashcards,
 			"vibeActivityModelId":         vibe,
+			"graderAgentModelId":          grader,
 			"openRouterApiKey":            maskSecret(cfg.OpenRouterAPIKey),
 		})
 	}
@@ -104,6 +110,7 @@ type putSettingsAIBody struct {
 	CourseSetupModelID          string  `json:"courseSetupModelId"`
 	NotebookFlashcardsModelID   string  `json:"notebookFlashcardsModelId"`
 	VibeActivityModelID         string  `json:"vibeActivityModelId"`
+	GraderAgentModelID          string  `json:"graderAgentModelId"`
 	OpenRouterAPIKey            *string `json:"openRouterApiKey"`
 	ClearOpenRouterAPIKey       bool    `json:"clearOpenRouterApiKey"`
 }
@@ -149,6 +156,10 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 		if vibe == "" {
 			vibe = user.DefaultVibeActivityModelID
 		}
+		grader := strings.TrimSpace(in.GraderAgentModelID)
+		if grader == "" {
+			grader = user.DefaultGraderAgentModelID
+		}
 		if err := d.applyOpenRouterAPIKeyUpdate(r.Context(), in.OpenRouterAPIKey, in.ClearOpenRouterAPIKey); err != nil {
 			if err == errOpenRouterAPIKeyConflict {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Cannot set openRouterApiKey and clearOpenRouterApiKey together.")
@@ -158,7 +169,7 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 			return
 		}
 
-		imgOut, courseOut, flashcardsOut, vibeOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course, flashcards, vibe)
+		imgOut, courseOut, flashcardsOut, vibeOut, graderOut, err := user.UpsertAISettings(r.Context(), d.Pool, uid, img, course, flashcards, vibe, grader)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save AI settings.")
 			return
@@ -170,6 +181,7 @@ func (d Deps) handlePutSettingsAI() http.HandlerFunc {
 			"courseSetupModelId":          courseOut,
 			"notebookFlashcardsModelId":   flashcardsOut,
 			"vibeActivityModelId":         vibeOut,
+			"graderAgentModelId":          graderOut,
 			"openRouterApiKey":            maskSecret(cfg.OpenRouterAPIKey),
 		})
 	}

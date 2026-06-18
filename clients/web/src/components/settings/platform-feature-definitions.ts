@@ -216,6 +216,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Discrimination and difficulty statistics for quiz questions.',
   },
   {
+    key: 'graderAgentEnabled',
+    label: 'Grader agent',
+    description: 'Instructor-authored AI grading agent in SpeedGrader with dry-run and batch runs.',
+  },
+  {
     key: 'readingLevelEnabled',
     label: 'Reading level adaptation',
     description: 'Adjust displayed reading complexity for supported content types.',

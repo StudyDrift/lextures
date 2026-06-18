@@ -25,6 +25,7 @@ type platformFeaturesJSON struct {
 	XAPIEmissionEnabled         bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled       bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled         bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled          bool `json:"graderAgentEnabled"`
 	AltTextEnforcementEnabled   bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement        bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
@@ -109,6 +110,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		XAPIEmissionEnabled:         cfg.XAPIEmissionEnabled,
 		EquationEditorEnabled:       cfg.EquationEditorEnabled,
 		ReadingLevelEnabled:         cfg.ReadingLevelEnabled,
+		GraderAgentEnabled:          cfg.GraderAgentEnabled,
 		AltTextEnforcementEnabled:   cfg.AltTextEnforcementEnabled,
 		FFAltTextEnforcement:        cfg.FFAltTextEnforcement,
 		SpeechToTextEnabled:         cfg.SpeechToTextEnabled,

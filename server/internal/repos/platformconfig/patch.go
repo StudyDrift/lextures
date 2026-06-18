@@ -98,6 +98,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("outcomes_report_enabled", w.OutcomesReportEnabled)
 	addBool("equation_editor_enabled", w.EquationEditorEnabled)
 	addBool("reading_level_enabled", w.ReadingLevelEnabled)
+	addBool("grader_agent_enabled", w.GraderAgentEnabled)
 	addBool("alt_text_enforcement_enabled", w.AltTextEnforcementEnabled)
 	addBool("ff_alt_text_enforcement", w.FFAltTextEnforcement)
 	addBool("speech_to_text_enabled", w.SpeechToTextEnabled)

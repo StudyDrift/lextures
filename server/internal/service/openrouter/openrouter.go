@@ -92,8 +92,18 @@ func usageFromPayload(u usagePayload) UsageInfo {
 	}
 }
 
+// ChatOptions configures optional chat completion behavior.
+type ChatOptions struct {
+	// JSONMode requests structured JSON output when the model supports it.
+	JSONMode bool
+}
+
 // ChatCompletion sends a non-streaming chat request and returns the assistant text, if any.
-func (c *Client) ChatCompletion(model string, messages []Message) (ChatResult, error) {
+func (c *Client) ChatCompletion(model string, messages []Message, opts ...ChatOptions) (ChatResult, error) {
+	var opt ChatOptions
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
 	if c == nil {
 		return ChatResult{}, fmt.Errorf("openrouter: nil client")
 	}
@@ -108,6 +118,9 @@ func (c *Client) ChatCompletion(model string, messages []Message) (ChatResult, e
 		"model":    model,
 		"messages": messages,
 		"stream":   false,
+	}
+	if opt.JSONMode {
+		body["response_format"] = map[string]string{"type": "json_object"}
 	}
 	buf, err := json.Marshal(body)
 	if err != nil {

@@ -37,6 +37,15 @@ func TestCanvasImageBytesToDataURL_rejectsNonImage(t *testing.T) {
 	}
 }
 
+func TestCanvasIsDefaultAvatarURL_detectsCanvasPlaceholder(t *testing.T) {
+	if !canvasIsDefaultAvatarURL("https://canvas.example.edu/images/messages/avatar-50.png") {
+		t.Fatal("expected Canvas default avatar URL to be treated as blank")
+	}
+	if canvasIsDefaultAvatarURL("https://canvas.example.edu/files/12345/download?ver=1") {
+		t.Fatal("custom Canvas file URL should not be treated as blank")
+	}
+}
+
 func TestCanvasEnrollmentListQuery_includesAvatarURL(t *testing.T) {
 	q := canvasEnrollmentListQuery()
 	includes := q["include[]"]

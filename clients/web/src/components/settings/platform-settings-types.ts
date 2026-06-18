@@ -29,6 +29,7 @@ export type PlatformSettingsPayload = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  graderAgentEnabled: boolean
   speechToTextEnabled: boolean
   accommodationsEngineEnabled: boolean
   ffAccommodationsEngine: boolean
