@@ -156,6 +156,15 @@ export const handlers = [
     /* Accept mailbox WS; client only needs connect + optional auth message. */
   }),
 
+  http.get('http://localhost:8080/api/v1/platform/features', () => {
+    return HttpResponse.json({})
+  }),
+  http.get('http://localhost:8080/api/v1/me/onboarding-status', () => {
+    return HttpResponse.json({ completed: true, step: 6, shouldShowFlow: false })
+  }),
+  http.get('http://localhost:8080/api/v1/me/goals', () => {
+    return HttpResponse.json({ goals: null })
+  }),
   http.post('http://localhost:8080/api/v1/auth/signup', async ({ request }) => {
     const body = (await request.json()) as {
       email: string
