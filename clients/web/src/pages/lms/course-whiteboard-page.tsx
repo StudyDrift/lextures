@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useWhiteboardCanvas } from '../../components/whiteboard/use-whiteboard-canvas'
 import { WhiteboardToolbar } from '../../components/whiteboard/whiteboard-toolbar'
 import {
@@ -142,6 +143,8 @@ export default function CourseWhiteboardPage() {
       .then(setBoards)
       .catch(() => {})
   }, [courseCode])
+
+  useCoursePageTitle(currentBoard?.title ?? null)
 
   function clearCanvas() {
     wb.clearCanvas()

@@ -9,6 +9,7 @@ import {
   type ModuleQuizPayload,
   type QuizAdvancedSettings,
 } from '../../lib/courses-api'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 
 export default function CourseModuleQuizAttemptPage() {
@@ -51,6 +52,8 @@ export default function CourseModuleQuizAttemptPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && quiz?.title ? quiz.title : null)
 
   if (!courseCode || !itemId) {
     return (

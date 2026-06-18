@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { apiUrl } from '../../lib/api'
 import { fetchModuleLtiLink, postModuleLtiEmbedTicket } from '../../lib/courses-api'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
@@ -49,6 +50,8 @@ export default function CourseModuleLtiPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && title ? title : null)
 
   const safeTitle = title ?? 'LTI tool'
 

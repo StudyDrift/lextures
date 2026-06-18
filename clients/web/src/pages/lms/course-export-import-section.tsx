@@ -35,6 +35,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
   const { entries: canvasImportLog, append: appendCanvasImportLog, clear: clearCanvasImportLog } =
     useCanvasImportProgressLog()
   const [rememberCanvasCredentials, setRememberCanvasCredentials] = useState(false)
+  const [enableCanvasGradeSyncOnImport, setEnableCanvasGradeSyncOnImport] = useState(false)
 
   useEffect(() => {
     const saved = loadCanvasImportCredentials()
@@ -119,6 +120,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
           canvasCourseId: canvasCourseId.trim(),
           accessToken: canvasToken.trim(),
           include: canvasInclude,
+          ...(enableCanvasGradeSyncOnImport ? { canvasGradeSyncEnabled: true } : {}),
         },
         (message) => appendCanvasImportLog(message),
       )
@@ -372,6 +374,23 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-500">
                 Reuses the same connection when you import into other courses in Lextures. Stored
                 only in this browser; avoid on shared computers.
+              </span>
+            </span>
+          </label>
+          <label className="mt-3 flex cursor-pointer items-start gap-2 rounded-xl border border-sky-200 bg-sky-50/80 p-3 dark:border-sky-900/50 dark:bg-sky-950/30">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={enableCanvasGradeSyncOnImport}
+              onChange={(e) => setEnableCanvasGradeSyncOnImport(e.target.checked)}
+            />
+            <span>
+              <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                Sync grades back to Canvas when grading
+              </span>
+              <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+                When enabled, saving a grade in Lextures automatically pushes it to Canvas. Your
+                token needs permission to update grades in Canvas.
               </span>
             </span>
           </label>

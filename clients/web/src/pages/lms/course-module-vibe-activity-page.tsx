@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { LmsPage } from './lms-page'
 import { fetchModuleVibeActivityByItem, type ModuleVibeActivityPayload } from '../../lib/courses-api'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
@@ -37,6 +38,8 @@ export default function CourseModuleVibeActivityPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && payload?.title ? payload.title : null)
 
   if (!courseCode || !itemId) {
     return <LmsPage title="Vibe Activity">Invalid route.</LmsPage>

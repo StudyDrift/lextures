@@ -68,6 +68,7 @@ export const courseSchema = z
     filesEnabled: z.boolean().optional(),
     attendanceEnabled: z.boolean().optional(),
     whiteboardEnabled: z.boolean().optional(),
+    canvasGradeSyncEnabled: z.boolean().optional(),
     courseType: z.string().optional(),
     courseMode: z.string().optional(),
     openEnrollment: z.boolean().optional(),

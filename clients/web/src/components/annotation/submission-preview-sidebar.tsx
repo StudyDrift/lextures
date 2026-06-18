@@ -11,9 +11,11 @@ type SubmissionPreviewSidebarProps = {
   courseCode: string
   itemId: string
   submissionId: string | null
+  studentUserId?: string | null
   rubric: RubricDefinition | null
   maxPoints: number | null
   gradingDisabled?: boolean
+  gradeRefreshKey?: number
   filename: string
   filePath: string | null
   submittedAt?: string | null
@@ -28,9 +30,11 @@ export function SubmissionPreviewSidebar({
   courseCode,
   itemId,
   submissionId,
+  studentUserId = null,
   rubric,
   maxPoints,
   gradingDisabled = false,
+  gradeRefreshKey = 0,
   filename,
   filePath,
   submittedAt,
@@ -105,12 +109,16 @@ export function SubmissionPreviewSidebar({
 
       {tab === 'grade' ? (
         <SubmissionGradingPanel
+          key={submissionId ?? studentUserId ?? 'none'}
           courseCode={courseCode}
           itemId={itemId}
           submissionId={submissionId}
+          studentUserId={studentUserId}
           rubric={rubric}
           maxPoints={maxPoints}
           disabled={gradingDisabled}
+          gradeRefreshKey={gradeRefreshKey}
+          autoFocusScore
           onGradeSaved={onGradeSaved}
           onGradeCleared={onGradeCleared}
         />

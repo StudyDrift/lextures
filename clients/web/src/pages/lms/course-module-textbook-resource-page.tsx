@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { BookCopy } from 'lucide-react'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   fetchModuleTextbookResource,
@@ -89,6 +90,8 @@ export default function CourseModuleTextbookResourcePage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && data?.metadata?.title ? data.metadata.title : null)
 
   async function onOpen() {
     if (!courseCode || !itemId || !data) return

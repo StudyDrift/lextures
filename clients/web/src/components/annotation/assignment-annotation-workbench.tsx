@@ -37,7 +37,13 @@ import { FeedbackMediaRecorder } from './feedback-media-recorder'
 import { FilePreviewBody } from '../file-preview'
 import { detectPreviewType } from '../../lib/file-type'
 import { SubmissionNavigator } from './submission-navigator'
-import { sortSubmissionsByStudentLabel, type GradedFilter } from './submission-navigator-utils'
+import { useSpeedGraderHotkeys } from './speed-grader-shortcuts'
+import {
+  defaultSubmissionIndex,
+  sortSubmissionsByStudentLabel,
+  submissionsMatch,
+  type GradedFilter,
+} from './submission-navigator-utils'
 import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
 import type { RubricDefinition } from '../../lib/courses-api'
@@ -141,6 +147,7 @@ export function AssignmentAnnotationWorkbench({
   const [revisionBusy, setRevisionBusy] = useState(false)
   const [deadlineNow, setDeadlineNow] = useState(() => Date.now())
 
+
   const originalityActive = originalityDetection !== 'disabled'
 
   const current: ModuleAssignmentSubmissionApi | null =
@@ -169,14 +176,15 @@ export function AssignmentAnnotationWorkbench({
   }, [current?.id])
 
   useEffect(() => {
-    if (!resubmissionWorkflowEnabled || mode !== 'staff' || !current?.id) {
+    const submissionId = current?.id
+    if (!resubmissionWorkflowEnabled || mode !== 'staff' || !submissionId) {
       setSubmissionVersions([])
       return
     }
     let c = true
     void (async () => {
       try {
-        const v = await fetchSubmissionVersions(courseCode, itemId, current.id)
+        const v = await fetchSubmissionVersions(courseCode, itemId, submissionId)
         if (!c) return
         setSubmissionVersions(v)
         setViewVersionNumber((prev) => {
@@ -233,18 +241,18 @@ export function AssignmentAnnotationWorkbench({
     try {
       const list = await fetchModuleAssignmentSubmissions(courseCode, itemId, { graded: gradedFilter })
       const sorted = sortSubmissionsByStudentLabel(list)
-      const preserveId = staffNavRef.current.submissions[staffNavRef.current.idx]?.id
+      const preserveCurrent = staffNavRef.current.submissions[staffNavRef.current.idx]
       setSubmissions(sorted)
       setIdx(() => {
         if (initialStudentUserId) {
           const targetIdx = sorted.findIndex((s) => s.submittedBy === initialStudentUserId)
           if (targetIdx >= 0) return targetIdx
         }
-        if (preserveId) {
-          const nextIdx = sorted.findIndex((s) => s.id === preserveId)
+        if (preserveCurrent) {
+          const nextIdx = sorted.findIndex((s) => submissionsMatch(s, preserveCurrent))
           if (nextIdx >= 0) return nextIdx
         }
-        return 0
+        return defaultSubmissionIndex(sorted)
       })
     } catch (e) {
       setSubmissions([])
@@ -271,22 +279,22 @@ export function AssignmentAnnotationWorkbench({
   }, [mode, reloadMine, reloadStaffList, presentation, modalOpen])
 
   const handleGradeSaved = useCallback(() => {
-    if (!current?.id) return
+    if (!current) return
     setSubmissions((prev) =>
       prev.map((sub) =>
-        sub.id === current.id ? { ...sub, isGraded: true } : sub
+        submissionsMatch(sub, current) ? { ...sub, isGraded: true } : sub
       )
     )
-  }, [current?.id])
+  }, [current])
 
   const handleGradeCleared = useCallback(() => {
-    if (!current?.id) return
+    if (!current) return
     setSubmissions((prev) =>
       prev.map((sub) =>
-        sub.id === current.id ? { ...sub, isGraded: false } : sub
+        submissionsMatch(sub, current) ? { ...sub, isGraded: false } : sub
       )
     )
-  }, [current?.id])
+  }, [current])
 
   const myUid = getJwtSubject()
   const isListedGrader = Boolean(
@@ -603,7 +611,35 @@ export function AssignmentAnnotationWorkbench({
   const showMediaPanel = feedbackMediaEnabled
   const both = showDocPanel && showMediaPanel
   const staffPreviewOnly = mode === 'staff' && filePreviewActive && !annotationsActive
+  const staffGradingSidebarActive = mode === 'staff' && submissionReviewActive
+
+  useSpeedGraderHotkeys({
+    enabled: staffGradingSidebarActive && (presentation !== 'modal' || modalOpen),
+    disabled: busy,
+    submissions,
+    index: idx,
+    onIndexChange: setIdx,
+  })
   const previewErrorVariant = presentation === 'modal' ? 'message-only' : 'standalone'
+  const gradingSidebar = staffGradingSidebarActive ? (
+    <SubmissionPreviewSidebar
+      mode={mode}
+      courseCode={courseCode}
+      itemId={itemId}
+      submissionId={current?.id ?? null}
+      studentUserId={current?.submittedBy ?? null}
+      rubric={assignmentRubric}
+      maxPoints={assignmentPointsWorth}
+      gradingDisabled={busy}
+      filename={displayFilename}
+      filePath={displayFilePath ?? null}
+      submittedAt={current?.submittedAt}
+      blindLabel={current?.blindLabel}
+      mimeType={displayMimeType}
+      onGradeSaved={handleGradeSaved}
+      onGradeCleared={handleGradeCleared}
+    />
+  ) : null
   const modalTitleId = useId()
   const modalCloseRef = useRef<HTMLButtonElement>(null)
 
@@ -757,6 +793,7 @@ export function AssignmentAnnotationWorkbench({
                     setIdx(0)
                   }}
                   disabled={busy}
+                  showShortcuts
                   anonymisedAriaLabel={
                     current?.blindLabel
                       ? `Anonymised student, label ${current.blindLabel}`
@@ -798,24 +835,7 @@ export function AssignmentAnnotationWorkbench({
                 {documentPreviewContent}
               </div>
             }
-            secondary={
-              <SubmissionPreviewSidebar
-                mode={mode}
-                courseCode={courseCode}
-                itemId={itemId}
-                submissionId={current?.id ?? null}
-                rubric={assignmentRubric}
-                maxPoints={assignmentPointsWorth}
-                gradingDisabled={busy}
-                filename={displayFilename}
-                filePath={displayFilePath ?? null}
-                submittedAt={current?.submittedAt}
-                blindLabel={current?.blindLabel}
-                mimeType={displayMimeType}
-                onGradeSaved={handleGradeSaved}
-                onGradeCleared={handleGradeCleared}
-              />
-            }
+            secondary={gradingSidebar}
           />
         </div>
       </div>
@@ -897,6 +917,7 @@ export function AssignmentAnnotationWorkbench({
                 setIdx(0)
               }}
               disabled={busy}
+              showShortcuts
               anonymisedAriaLabel={
                 current?.blindLabel
                   ? `Anonymised student, label ${current.blindLabel}`
@@ -1044,13 +1065,14 @@ export function AssignmentAnnotationWorkbench({
               type="button"
               disabled={provisionalBusy}
               onClick={() => {
-                if (!current?.id) return
+                const submissionId = current?.id
+                if (!submissionId) return
                 const n = Number(provisionalInput)
                 if (!Number.isFinite(n) || n < 0) return
                 setProvisionalBusy(true)
                 void (async () => {
                   try {
-                    await postProvisionalGrade(courseCode, itemId, current.id, { score: n })
+                    await postProvisionalGrade(courseCode, itemId, submissionId, { score: n })
                   } finally {
                     setProvisionalBusy(false)
                   }
@@ -1182,31 +1204,66 @@ export function AssignmentAnnotationWorkbench({
       ) : null}
 
       {showDocPanel && panel === 'document' ? (
-        <>
-          {annotationsActive ? (
-            <AnnotationToolbar
-              tool={tool}
-              onToolChange={setTool}
-              colour={colour}
-              onColourChange={setColour}
-              disabled={busy || !(current?.attachmentFileId || displayFilePath)}
-              readOnly={readOnlyDocument}
+        staffGradingSidebarActive && gradingSidebar ? (
+          <div className="min-h-[min(70vh,720px)]">
+            <ResizableSplitPane
+              storageKey="lextures:submission-grade-sidebar-width-inline"
+              primary={
+                <div className="flex h-full min-h-0 flex-col gap-4">
+                  {annotationsActive ? (
+                    <AnnotationToolbar
+                      tool={tool}
+                      onToolChange={setTool}
+                      colour={colour}
+                      onColourChange={setColour}
+                      disabled={busy || !(current?.attachmentFileId || displayFilePath)}
+                      readOnly={readOnlyDocument}
+                    />
+                  ) : null}
+                  <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-start">
+                    <div className="min-h-0 min-w-0 flex-1">{documentPreviewContent}</div>
+                    {annotationsActive ? (
+                      <AnnotationCommentPanel
+                        annotations={annotations}
+                        selectedId={selectedId}
+                        onSelect={setSelectedId}
+                        readOnly={readOnlyDocument}
+                        onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
+                      />
+                    ) : null}
+                  </div>
+                </div>
+              }
+              secondary={gradingSidebar}
             />
-          ) : null}
-
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-            <div className="min-w-0 flex-1">{documentPreviewContent}</div>
+          </div>
+        ) : (
+          <>
             {annotationsActive ? (
-              <AnnotationCommentPanel
-                annotations={annotations}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
+              <AnnotationToolbar
+                tool={tool}
+                onToolChange={setTool}
+                colour={colour}
+                onColourChange={setColour}
+                disabled={busy || !(current?.attachmentFileId || displayFilePath)}
                 readOnly={readOnlyDocument}
-                onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
               />
             ) : null}
-          </div>
-        </>
+
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+              <div className="min-w-0 flex-1">{documentPreviewContent}</div>
+              {annotationsActive ? (
+                <AnnotationCommentPanel
+                  annotations={annotations}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  readOnly={readOnlyDocument}
+                  onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
+                />
+              ) : null}
+            </div>
+          </>
+        )
       ) : null}
 
       {showMediaPanel && (both ? panel === 'media' : true) && current?.id ? (

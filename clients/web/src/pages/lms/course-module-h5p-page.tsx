@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { H5PPlayer } from '../../components/h5p-player'
 import { fetchModuleH5PByItem, type ModuleH5PPayload } from '../../lib/courses-api'
 import { h5pI18n } from '../../lib/h5p-i18n'
@@ -32,6 +33,8 @@ export default function CourseModuleH5PPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && payload?.title ? payload.title : null)
 
   if (!courseCode || !itemId) {
     return null

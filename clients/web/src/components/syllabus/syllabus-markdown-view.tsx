@@ -7,7 +7,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import { Download } from 'lucide-react'
 import 'katex/dist/katex.min.css'
-import { FilePreview } from '../file-preview'
+import { FilePreview, FilePreviewBody } from '../file-preview'
 import { CourseFileMarkdownImage } from './course-file-markdown-image'
 import { normalizeMarkdownLists } from './normalize-markdown-lists'
 import { remarkMergeAdjacentLists } from './remark-merge-adjacent-lists'
@@ -27,8 +27,6 @@ const lexturesCourseFileRe = /^\/api\/v1\/courses\/[^/]+\/files\/items\/[^/]+\/c
 function CourseFileLink({
   href,
   children,
-  className,
-  style,
 }: {
   href: string
   children: React.ReactNode
@@ -48,42 +46,55 @@ function CourseFileLink({
     }
   }, [href, children])
 
+  async function downloadFile() {
+    try {
+      const res = await authorizedFetch(filePath)
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch { /* noop */ }
+  }
+
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setPreviewOpen(true)}
-        className={className}
-        style={style}
-      >
-        {children}
-      </button>
-      {' '}
-      <button
-        type="button"
-        className="inline-flex items-center text-slate-400 hover:text-slate-600 dark:text-neutral-500 dark:hover:text-neutral-300"
-        title={`Download ${filename}`}
-        aria-label={`Download ${filename}`}
-        onClick={async (e) => {
-          e.stopPropagation()
-          try {
-            const res = await authorizedFetch(filePath)
-            if (!res.ok) return
-            const blob = await res.blob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = filename
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            setTimeout(() => URL.revokeObjectURL(url), 1000)
-          } catch { /* noop */ }
-        }}
-      >
-        <Download className="h-3 w-3" aria-hidden />
-      </button>
-      {previewOpen && (
+    <div className="not-prose my-4 overflow-hidden rounded-xl border border-slate-200/90 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900/80">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 px-3 py-2 dark:border-neutral-700">
+        <button
+          type="button"
+          onClick={() => setPreviewOpen(true)}
+          className="min-w-0 truncate text-left text-sm font-medium text-indigo-700 hover:text-indigo-600 dark:text-indigo-300 dark:hover:text-indigo-200"
+        >
+          {filename}
+        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            className="inline-flex items-center rounded-lg px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+            onClick={() => setPreviewOpen(true)}
+          >
+            Full screen
+          </button>
+          <button
+            type="button"
+            className="inline-flex items-center rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            title={`Download ${filename}`}
+            aria-label={`Download ${filename}`}
+            onClick={() => void downloadFile()}
+          >
+            <Download className="h-4 w-4" aria-hidden />
+          </button>
+        </div>
+      </div>
+      <div className="min-h-[min(28rem,60vh)] bg-slate-50 dark:bg-neutral-950/60">
+        <FilePreviewBody filePath={filePath} filename={filename} mimeType={null} className="h-[min(28rem,60vh)]" />
+      </div>
+      {previewOpen ? (
         <FilePreview
           open={previewOpen}
           filePath={filePath}
@@ -91,8 +102,8 @@ function CourseFileLink({
           mimeType={null}
           onClose={() => setPreviewOpen(false)}
         />
-      )}
-    </>
+      ) : null}
+    </div>
   )
 }
 
@@ -120,11 +131,7 @@ function createMarkdownComponents(
     ...base,
     a: ({ children, href }) => {
       if (href && lexturesCourseFileRe.test(href)) {
-        return (
-          <CourseFileLink href={href} className={c.a} style={o.a}>
-            {children}
-          </CourseFileLink>
-        )
+        return <CourseFileLink href={href}>{children}</CourseFileLink>
       }
       if (href?.startsWith('/courses/')) {
         return (

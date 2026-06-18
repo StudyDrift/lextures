@@ -3,24 +3,53 @@ package httpserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/gradingredaction"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
+var errAssignmentNotFound = errors.New("assignment not found")
+
 func submissionAttachmentContentPath(courseCode string, fileID uuid.UUID) string {
 	return "/api/v1/courses/" + courseCode + "/course-files/" + fileID.String() + "/content"
+}
+
+func loadAssignmentForSubmissionsByIDs(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	courseCode string,
+	itemID uuid.UUID,
+) (*uuid.UUID, *coursemoduleassignments.CourseItemAssignmentRow, error) {
+	cid, err := course.GetIDByCourseCode(ctx, pool, courseCode)
+	if err != nil {
+		return nil, nil, err
+	}
+	if cid == nil {
+		return nil, nil, errAssignmentNotFound
+	}
+	row, err := coursemoduleassignments.GetForCourseItem(ctx, pool, *cid, itemID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if row == nil {
+		return nil, nil, errAssignmentNotFound
+	}
+	return cid, row, nil
 }
 
 func (d Deps) loadAssignmentForSubmissions(
@@ -110,6 +139,86 @@ func parseSubmissionGradedFilter(q string) moduleassignmentsubmissions.GradedFil
 	}
 }
 
+type assignmentRosterEntry struct {
+	UserID      uuid.UUID
+	DisplayName string
+	Submission  *moduleassignmentsubmissions.SubmissionRow
+}
+
+func submissionMatchesGradedFilter(isGraded bool, filter moduleassignmentsubmissions.GradedFilter) bool {
+	switch filter {
+	case moduleassignmentsubmissions.GradedFilterGraded:
+		return isGraded
+	case moduleassignmentsubmissions.GradedFilterUngraded:
+		return !isGraded
+	default:
+		return true
+	}
+}
+
+func buildAssignmentRosterEntries(
+	students []struct {
+		UserID      uuid.UUID
+		DisplayName string
+	},
+	submissions []moduleassignmentsubmissions.SubmissionRow,
+) []assignmentRosterEntry {
+	subByUser := make(map[uuid.UUID]moduleassignmentsubmissions.SubmissionRow, len(submissions))
+	for _, s := range submissions {
+		subByUser[s.SubmittedBy] = s
+	}
+	seen := make(map[uuid.UUID]struct{}, len(students)+len(submissions))
+	out := make([]assignmentRosterEntry, 0, len(students)+len(submissions))
+	for _, st := range students {
+		entry := assignmentRosterEntry{UserID: st.UserID, DisplayName: st.DisplayName}
+		if sub, ok := subByUser[st.UserID]; ok {
+			subCopy := sub
+			entry.Submission = &subCopy
+		}
+		out = append(out, entry)
+		seen[st.UserID] = struct{}{}
+	}
+	for _, s := range submissions {
+		if _, ok := seen[s.SubmittedBy]; ok {
+			continue
+		}
+		out = append(out, assignmentRosterEntry{
+			UserID:     s.SubmittedBy,
+			Submission: &s,
+		})
+	}
+	return out
+}
+
+func sortAssignmentRosterEntries(entries []assignmentRosterEntry, displayNames map[uuid.UUID]string) {
+	sort.Slice(entries, func(i, j int) bool {
+		labelI := strings.TrimSpace(displayNames[entries[i].UserID])
+		if labelI == "" {
+			labelI = entries[i].DisplayName
+		}
+		labelJ := strings.TrimSpace(displayNames[entries[j].UserID])
+		if labelJ == "" {
+			labelJ = entries[j].DisplayName
+		}
+		if labelI != labelJ {
+			return strings.ToLower(labelI) < strings.ToLower(labelJ)
+		}
+		return entries[i].UserID.String() < entries[j].UserID.String()
+	})
+}
+
+func blindRanksForRoster(entries []assignmentRosterEntry) map[uuid.UUID]int {
+	sorted := append([]assignmentRosterEntry(nil), entries...)
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].UserID.String() < sorted[j].UserID.String()
+	})
+	out := make(map[uuid.UUID]int, len(sorted))
+	for i, e := range sorted {
+		out[e.UserID] = i + 1
+	}
+	return out
+}
+
 // handleListAssignmentSubmissions is GET /api/v1/courses/{course_code}/assignments/{item_id}/submissions.
 func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -145,11 +254,19 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 			return
 		}
 		filter := parseSubmissionGradedFilter(r.URL.Query().Get("graded"))
-		rows, err := moduleassignmentsubmissions.ListForAssignment(r.Context(), d.Pool, *cid, itemID, filter)
+		students, err := enrollment.ListStudentUsersForCourseCode(r.Context(), d.Pool, courseCode, nil)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course roster.")
+			return
+		}
+		rows, err := moduleassignmentsubmissions.ListForAssignment(
+			r.Context(), d.Pool, *cid, itemID, moduleassignmentsubmissions.GradedFilterAll,
+		)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submissions.")
 			return
 		}
+		roster := buildAssignmentRosterEntries(students, rows)
 		cfg := d.effectiveConfig()
 		identitiesRevealed := assignRow.IdentitiesRevealedAt != nil
 		redact := gradingredaction.ShouldRedactSubmissionPiiForStaff(
@@ -157,24 +274,25 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 			assignRow.BlindGrading,
 			identitiesRevealed,
 		)
-		newestFirst := make([]uuid.UUID, len(rows))
-		for i := range rows {
-			newestFirst[len(rows)-1-i] = rows[i].ID
-		}
-		rankByID := gradingredaction.SubmissionRankByID(newestFirst)
 		displayNames := map[uuid.UUID]string{}
 		if !redact {
-			userIDs := make([]uuid.UUID, 0, len(rows))
-			for _, s := range rows {
-				userIDs = append(userIDs, s.SubmittedBy)
+			userIDs := make([]uuid.UUID, 0, len(roster))
+			for _, entry := range roster {
+				userIDs = append(userIDs, entry.UserID)
 			}
-			var err error
 			displayNames, err = user.DisplayLabelsByIDs(r.Context(), d.Pool, userIDs)
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submitter names.")
 				return
 			}
+			for _, entry := range roster {
+				if strings.TrimSpace(displayNames[entry.UserID]) == "" && strings.TrimSpace(entry.DisplayName) != "" {
+					displayNames[entry.UserID] = strings.TrimSpace(entry.DisplayName)
+				}
+			}
 		}
+		sortAssignmentRosterEntries(roster, displayNames)
+		blindRanks := blindRanksForRoster(roster)
 		gradedMap := make(map[uuid.UUID]bool)
 		gradeRows, err := d.Pool.Query(r.Context(), `
 			SELECT student_user_id 
@@ -195,11 +313,35 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 			gradedMap[sID] = true
 		}
 
-		items := make([]map[string]any, 0, len(rows))
-		for _, s := range rows {
-			rank := rankByID[s.ID]
-			item := d.submissionToJSON(r.Context(), courseCode, s, redact, rank, displayNames[s.SubmittedBy])
-			item["isGraded"] = gradedMap[s.SubmittedBy]
+		items := make([]map[string]any, 0, len(roster))
+		for _, entry := range roster {
+			isGraded := gradedMap[entry.UserID]
+			if !submissionMatchesGradedFilter(isGraded, filter) {
+				continue
+			}
+			label := strings.TrimSpace(displayNames[entry.UserID])
+			if label == "" {
+				label = strings.TrimSpace(entry.DisplayName)
+			}
+			var item map[string]any
+			if entry.Submission != nil {
+				item = d.submissionToJSON(
+					r.Context(), courseCode, *entry.Submission, redact, blindRanks[entry.UserID], label,
+				)
+			} else {
+				item = map[string]any{
+					"attachmentFileId": nil,
+				}
+				if redact {
+					item["blindLabel"] = gradingredaction.BlindStudentLabel(blindRanks[entry.UserID])
+				} else {
+					item["submittedBy"] = entry.UserID.String()
+					if label != "" {
+						item["submittedByDisplayName"] = label
+					}
+				}
+			}
+			item["isGraded"] = isGraded
 			items = append(items, item)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

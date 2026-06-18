@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { Pencil, FastForward, Download, CheckCircle, Loader2 } from 'lucide-react'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
@@ -229,6 +230,8 @@ export default function CourseModuleContentPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && title ? title : null)
 
   useEffect(() => {
     if (

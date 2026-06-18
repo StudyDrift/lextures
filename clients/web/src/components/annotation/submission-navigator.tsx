@@ -2,15 +2,39 @@ import { ChevronDown, CheckSquare } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { ModuleAssignmentSubmissionApi } from '../../lib/courses-api'
 import {
+  submissionNavigatorKey,
   submissionStudentLabel,
   type GradedFilter,
 } from './submission-navigator-utils'
+import { SpeedGraderShortcutsPopover } from './speed-grader-shortcuts'
 
 type SubmissionStudentPickerProps = {
   submissions: ModuleAssignmentSubmissionApi[]
   index: number
   disabled?: boolean
   onIndexChange: (i: number) => void
+}
+
+function SubmissionStatusBadge({ submission }: { submission: ModuleAssignmentSubmissionApi }) {
+  const hasSubmission = Boolean(submission.id)
+  if (!hasSubmission) {
+    return (
+      <span
+        className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500"
+        title="No submission"
+      >
+        Missing
+      </span>
+    )
+  }
+  if (submission.isGraded) {
+    return (
+      <span title="Graded" className="inline-flex shrink-0">
+        <CheckSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+      </span>
+    )
+  }
+  return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" title="Ungraded" />
 }
 
 function SubmissionStudentPicker({
@@ -82,15 +106,7 @@ function SubmissionStudentPicker({
         className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-start text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
       >
         <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
-        {current && (
-          current.isGraded ? (
-            <span title="Graded" className="inline-flex shrink-0">
-              <CheckSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-            </span>
-          ) : (
-            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" title="Ungraded" />
-          )
-        )}
+        {current ? <SubmissionStatusBadge submission={current} /> : null}
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
             open ? 'rotate-180' : ''
@@ -138,7 +154,7 @@ function SubmissionStudentPicker({
                 const active = i === index
                 return (
                   <button
-                    key={submission.id}
+                    key={submissionNavigatorKey(submission, i)}
                     type="button"
                     role="menuitemradio"
                     aria-checked={active}
@@ -156,13 +172,7 @@ function SubmissionStudentPicker({
                       {i + 1}.
                     </span>
                     <span className="min-w-0 flex-1 truncate">{label}</span>
-                    {submission.isGraded ? (
-                      <span title="Graded" className="inline-flex shrink-0">
-                        <CheckSquare className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
-                      </span>
-                    ) : (
-                      <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" title="Ungraded" />
-                    )}
+                    <SubmissionStatusBadge submission={submission} />
                   </button>
                 )
               })
@@ -183,6 +193,8 @@ export type SubmissionNavigatorProps = {
   disabled?: boolean
   /** When blind grading is active, exposes WCAG label for the current submission. */
   anonymisedAriaLabel?: string
+  /** Show SpeedGrader keyboard shortcut reference popover. */
+  showShortcuts?: boolean
 }
 
 export function SubmissionNavigator({
@@ -193,6 +205,7 @@ export function SubmissionNavigator({
   onGradedFilterChange,
   disabled,
   anonymisedAriaLabel,
+  showShortcuts = false,
 }: SubmissionNavigatorProps) {
   const prev = () => onIndexChange(Math.max(0, index - 1))
   const next = () => onIndexChange(Math.min(Math.max(submissions.length - 1, 0), index + 1))
@@ -249,6 +262,8 @@ export function SubmissionNavigator({
           Next
         </button>
       </div>
+
+      {showShortcuts ? <SpeedGraderShortcutsPopover disabled={disabled} /> : null}
     </div>
   )
 }

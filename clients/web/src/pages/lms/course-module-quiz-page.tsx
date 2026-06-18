@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOnlineStatus } from '../../hooks/use-online-status'
 import { useOfflineContent } from '../../hooks/use-offline-content'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
@@ -457,6 +458,8 @@ export default function CourseModuleQuizPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && title ? title : null)
 
   useEffect(() => {
     if (!questionsOpen || !courseCode) return
