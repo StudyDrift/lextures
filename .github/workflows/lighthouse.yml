@@ -64,8 +64,8 @@ jobs:
       - name: Build API server binary
         working-directory: server
         run: |
-          mkdir -p "${{ github.workspace }}/.cache/e2e"
-          go build -buildvcs=false -trimpath -ldflags="-s -w" -o "${{ github.workspace }}/.cache/e2e/server" ./cmd/server
+          mkdir -p ../.cache/e2e
+          go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../.cache/e2e/server ./cmd/server
 
       - name: Cache web node_modules
         id: web-node-modules
