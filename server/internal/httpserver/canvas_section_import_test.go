@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/uuid"
@@ -58,7 +59,7 @@ func TestCanvasApplyCanvasDateOverrides_skipsBaseAndMissingSection(t *testing.T)
 		{"due_at": "2026-03-01T00:00:00Z"},
 	}
 	sectionMap := map[int64]uuid.UUID{1: uuid.New()}
-	n, err := canvasApplyCanvasDateOverrides(nil, nil, overrides, sectionMap, uuid.New())
+	n, err := canvasApplyCanvasDateOverrides(context.TODO(), nil, overrides, sectionMap, uuid.New())
 	if err != nil {
 		t.Fatalf("canvasApplyCanvasDateOverrides: %v", err)
 	}

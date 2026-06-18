@@ -233,7 +233,6 @@ func canvasStreamAndStoreSubmissionAttachment(
 		return nil, nil
 	}
 	filename := canvasSubmissionAttachmentFilename(att)
-	mimeType := strAt(att, "content-type", "application/octet-stream")
 	declaredSize := canvasAttachmentByteSize(att)
 	if declaredSize > canvasMaxImportedSubmissionFileBytes {
 		log.Printf("canvas-import: skip submission attachment %q: declared size %d exceeds %d byte limit",
@@ -263,7 +262,7 @@ func canvasStreamAndStoreSubmissionAttachment(
 			filename, contentLen, canvasMaxImportedSubmissionFileBytes)
 		return nil, nil
 	}
-	mimeType = canvasSubmissionAttachmentMimeType(att, resp.Header.Get("Content-Type"))
+	mimeType := canvasSubmissionAttachmentMimeType(att, resp.Header.Get("Content-Type"))
 
 	storageKey, filename := canvasSubmissionAttachmentStorageKey(deps.CourseCode, filename, mimeType)
 	root := strings.TrimSpace(deps.FilesRoot)
