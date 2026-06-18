@@ -100,6 +100,12 @@ func defaultSubject(eventType string) string {
 		return "CEU certificate earned"
 	case EventCertificateIssued:
 		return "Certificate of completion"
+	case EventStudyReminderDaily:
+		return "Daily study reminder"
+	case EventStudyReminderStreakAtRisk:
+		return "Streak at risk"
+	case EventStudyReminderWeeklySummary:
+		return "Weekly learning summary"
 	default:
 		return "Notification from StudyDrift"
 	}

@@ -640,6 +640,21 @@ export function AssignmentAnnotationWorkbench({
       onGradeCleared={handleGradeCleared}
     />
   ) : null
+  const studentFeedbackSidebar =
+    mode === 'student' && current?.id ? (
+      <SubmissionPreviewSidebar
+        mode="student"
+        courseCode={courseCode}
+        itemId={itemId}
+        submissionId={current.id}
+        rubric={assignmentRubric}
+        maxPoints={assignmentPointsWorth}
+        filename={displayFilename}
+        filePath={displayFilePath ?? null}
+        submittedAt={current.submittedAt}
+        mimeType={displayMimeType}
+      />
+    ) : null
   const modalTitleId = useId()
   const modalCloseRef = useRef<HTMLButtonElement>(null)
 
@@ -1262,6 +1277,11 @@ export function AssignmentAnnotationWorkbench({
                 />
               ) : null}
             </div>
+            {studentFeedbackSidebar ? (
+              <div className="min-h-[min(40vh,480px)] overflow-hidden rounded-xl border border-slate-200 dark:border-neutral-600">
+                {studentFeedbackSidebar}
+              </div>
+            ) : null}
           </>
         )
       ) : null}

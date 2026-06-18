@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import { GraderAgentDrawer } from './grader-agent-drawer'
+import { postGraderAgentRegradeRequest } from '../../lib/courses-api'
 import {
   fetchAssignmentStudentGrade,
   fetchCourseCanvasLink,
@@ -18,6 +22,7 @@ import { altKeyHint } from './speed-grader-shortcuts'
 type GradeMode = 'rubric' | 'points'
 
 type SubmissionGradingPanelProps = {
+  mode?: 'staff' | 'student'
   courseCode: string
   itemId: string
   submissionId: string | null
@@ -42,6 +47,7 @@ function initialGradeMode(grade: SubmissionGradeApi, hasRubric: boolean): GradeM
 }
 
 export function SubmissionGradingPanel({
+  mode = 'staff',
   courseCode,
   itemId,
   submissionId,
@@ -54,6 +60,10 @@ export function SubmissionGradingPanel({
   onGradeSaved,
   onGradeCleared,
 }: SubmissionGradingPanelProps) {
+  const { t } = useTranslation('common')
+  const { graderAgentEnabled } = usePlatformFeatures()
+  const [agentOpen, setAgentOpen] = useState(false)
+  const [agentApplyKey, setAgentApplyKey] = useState(0)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -63,6 +73,7 @@ export function SubmissionGradingPanel({
   const [pointsInput, setPointsInput] = useState('')
   const [rubricScores, setRubricScores] = useState<Record<string, number>>({})
   const [posted, setPosted] = useState(false)
+  const [gradedByAi, setGradedByAi] = useState(false)
   const [gradeMode, setGradeMode] = useState<GradeMode>('points')
   const [fetchedRubric, setFetchedRubric] = useState<RubricDefinition | null>(null)
   const [hasGrade, setHasGrade] = useState(false)
@@ -126,6 +137,7 @@ export function SubmissionGradingPanel({
     (grade: SubmissionGradeApi) => {
       setComment(grade.instructorComment ?? '')
       setPosted(Boolean(grade.posted))
+      setGradedByAi(Boolean(grade.gradedByAi))
       setGradeMode(initialGradeMode(grade, hasRubric))
       const hasPoints = grade.pointsEarned != null && Number.isFinite(grade.pointsEarned)
       const hasRubricScores = Boolean(grade.rubricScores && Object.keys(grade.rubricScores).length > 0)
@@ -181,7 +193,7 @@ export function SubmissionGradingPanel({
     return () => {
       cancelled = true
     }
-  }, [applyGrade, courseCode, gradeRefreshKey, hasRubric, itemId, studentUserId, submissionId])
+  }, [applyGrade, courseCode, gradeRefreshKey, agentApplyKey, hasRubric, itemId, studentUserId, submissionId])
 
   useEffect(() => {
     if (!autoFocusScore || !focusTarget) {
@@ -439,17 +451,41 @@ export function SubmissionGradingPanel({
                 ) : null}
               </p>
             </div>
-            {posted ? (
-              <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200">
-                Posted
-              </span>
-            ) : (
-              <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
-                Draft
-              </span>
-            )}
+            <div className="flex flex-col items-end gap-2">
+              {mode === 'staff' && graderAgentEnabled && submissionId ? (
+                <button
+                  type="button"
+                  onClick={() => setAgentOpen(true)}
+                  className="rounded-lg border border-indigo-300 px-2.5 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 dark:border-indigo-800 dark:text-indigo-300"
+                >
+                  {t('gradingAgent.button')}
+                </button>
+              ) : null}
+              {posted ? (
+                <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200">
+                  Posted
+                </span>
+              ) : (
+                <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
+                  Draft
+                </span>
+              )}
+            </div>
           </div>
         </div>
+
+        {mode === 'student' && posted && gradedByAi ? (
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm dark:border-neutral-600 dark:bg-neutral-900/40">
+            <p className="text-slate-700 dark:text-neutral-200">{t('gradingAgent.student.disclosure')}</p>
+            <button
+              type="button"
+              className="mt-2 text-sm font-semibold text-indigo-700 hover:underline dark:text-indigo-300"
+              onClick={() => void postGraderAgentRegradeRequest(courseCode, itemId)}
+            >
+              {t('gradingAgent.student.regradeRequest')}
+            </button>
+          </div>
+        ) : null}
 
         {loading ? (
           <p className="text-sm text-slate-500 dark:text-neutral-400" role="status">
@@ -601,6 +637,19 @@ export function SubmissionGradingPanel({
           </button>
         </div>
       </div>
+      <GraderAgentDrawer
+        open={agentOpen}
+        onClose={() => setAgentOpen(false)}
+        courseCode={courseCode}
+        itemId={itemId}
+        submissionId={submissionId}
+        rubric={rubric}
+        maxPoints={maxPoints}
+        onApplied={() => {
+          onGradeSaved?.()
+          setAgentApplyKey((k) => k + 1)
+        }}
+      />
     </section>
   )
 }

@@ -230,6 +230,8 @@ type Config struct {
 	EquationEditorEnabled bool
 	// ReadingLevelEnabled gates Flesch-Kincaid scoring and AI content simplification (plan 11.6).
 	ReadingLevelEnabled bool
+	// GraderAgentEnabled enables the instructor-authored grading agent in SpeedGrader (plan 19.16).
+	GraderAgentEnabled bool
 	// AltTextEnforcementEnabled gates alt-text prompts, AI suggestions, and coverage reporting (plan 12.5).
 	AltTextEnforcementEnabled bool
 	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).
@@ -371,6 +373,9 @@ type Config struct {
 	// FFOnboardingFlow enables the self-learner onboarding wizard with goal capture and diagnostic placement (plan 15.11).
 	// Managed in Settings → Global platform (not process env).
 	FFOnboardingFlow bool
+	// FFStudyReminders enables daily study goal reminders and weekly progress summaries (plan 15.10).
+	// Managed in Settings → Global platform (not process env).
+	FFStudyReminders bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).

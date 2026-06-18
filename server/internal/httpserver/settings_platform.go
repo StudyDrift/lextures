@@ -86,6 +86,7 @@ type platformSettingsJSON struct {
 	XAPIEmissionEnabled             bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled           bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled              bool `json:"graderAgentEnabled"`
 	AltTextEnforcementEnabled       bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled             bool `json:"speechToTextEnabled"`
@@ -135,6 +136,7 @@ type platformSettingsJSON struct {
 	FFCourseReviews                 bool `json:"ffCourseReviews"`
 	FFGamification                  bool `json:"ffGamification"`
 	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
+	FFStudyReminders                bool `json:"ffStudyReminders"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -270,6 +272,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
+			GraderAgentEnabled:              merged.GraderAgentEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
 			SpeechToTextEnabled:             merged.SpeechToTextEnabled,
@@ -319,6 +322,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFCourseReviews:                 merged.FFCourseReviews,
 			FFGamification:                  merged.FFGamification,
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
+			FFStudyReminders:                merged.FFStudyReminders,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -424,6 +428,7 @@ type putPlatformBody struct {
 	XAPIEmissionEnabled             *bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled           *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             *bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled              *bool `json:"graderAgentEnabled"`
 	AltTextEnforcementEnabled       *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            *bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled             *bool `json:"speechToTextEnabled"`
@@ -478,6 +483,7 @@ type putPlatformBody struct {
 	FFCourseReviews                 *bool `json:"ffCourseReviews"`
 	FFGamification                  *bool `json:"ffGamification"`
 	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
+	FFStudyReminders                *bool `json:"ffStudyReminders"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -726,6 +732,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("instructorinsightsenabled", body.InstructorInsightsEnabled, func(v bool) { wr.InstructorInsightsEnabled = &v })
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
+		setBool("graderagentenabled", body.GraderAgentEnabled, func(v bool) { wr.GraderAgentEnabled = &v })
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
 		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
@@ -783,6 +790,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcoursereviews", body.FFCourseReviews, func(v bool) { wr.FFCourseReviews = &v })
 		setBool("ffgamification", body.FFGamification, func(v bool) { wr.FFGamification = &v })
 		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
+		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -872,6 +880,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			XAPIEmissionEnabled:             merged.XAPIEmissionEnabled,
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
+			GraderAgentEnabled:              merged.GraderAgentEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
 			SpeechToTextEnabled:             merged.SpeechToTextEnabled,
@@ -921,6 +930,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFCourseReviews:                 merged.FFCourseReviews,
 			FFGamification:                  merged.FFGamification,
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
+			FFStudyReminders:                merged.FFStudyReminders,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

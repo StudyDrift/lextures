@@ -26,6 +26,7 @@ export type PlatformFeatures = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  graderAgentEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
@@ -76,6 +77,7 @@ export type PlatformFeatures = {
   ffCourseReviews: boolean
   ffGamification: boolean
   ffOnboardingFlow: boolean
+  ffStudyReminders: boolean
   gdprModuleEnabled: boolean
   aiDisclosureEnabled: boolean
   openRouterConfigured: boolean
@@ -96,6 +98,7 @@ const defaultFeatures: PlatformFeatures = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  graderAgentEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,
@@ -146,6 +149,7 @@ const defaultFeatures: PlatformFeatures = {
   ffCourseReviews: false,
   ffGamification: false,
   ffOnboardingFlow: false,
+  ffStudyReminders: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
@@ -171,6 +175,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+  graderAgentEnabled: false,
     altTextEnforcementEnabled: false,
     ffAltTextEnforcement: false,
     speechToTextEnabled: false,
@@ -221,6 +226,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffCourseReviews: false,
   ffGamification: false,
   ffOnboardingFlow: false,
+  ffStudyReminders: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
@@ -247,6 +253,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
+          graderAgentEnabled: data.graderAgentEnabled === true,
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,
           speechToTextEnabled: data.speechToTextEnabled === true,
@@ -297,6 +304,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCourseReviews: data.ffCourseReviews === true,
           ffGamification: data.ffGamification === true,
           ffOnboardingFlow: data.ffOnboardingFlow === true,
+          ffStudyReminders: data.ffStudyReminders === true,
           gdprModuleEnabled: data.gdprModuleEnabled === true,
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
           openRouterConfigured: data.openRouterConfigured === true,
@@ -340,6 +348,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCourseReviews: next.ffCourseReviews === true,
           ffGamification: next.ffGamification === true,
           ffOnboardingFlow: next.ffOnboardingFlow === true,
+          ffStudyReminders: next.ffStudyReminders === true,
           gdprModuleEnabled: next.gdprModuleEnabled === true,
           aiDisclosureEnabled: next.aiDisclosureEnabled === true,
           openRouterConfigured: next.openRouterConfigured === true,

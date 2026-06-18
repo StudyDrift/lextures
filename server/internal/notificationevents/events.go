@@ -21,6 +21,9 @@ const (
 	CEUAwarded             = "ceu_awarded"
 	CertificateIssued      = "certificate_issued"
 	PaymentFailed          = "payment_failed"
+	StudyReminderDaily         = "study_reminder_daily"
+	StudyReminderStreakAtRisk  = "study_reminder_streak_at_risk"
+	StudyReminderWeeklySummary = "study_reminder_weekly_summary"
 )
 
 // All is the canonical list for defaults and UI.
@@ -44,4 +47,7 @@ var All = []string{
 	CEUAwarded,
 	CertificateIssued,
 	PaymentFailed,
+	StudyReminderDaily,
+	StudyReminderStreakAtRisk,
+	StudyReminderWeeklySummary,
 }

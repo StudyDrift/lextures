@@ -240,6 +240,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	d.registerSelfReflectionRoutes(r)
 	d.registerGamificationRoutes(r)
 	d.registerOnboardingGoalsRoutes(r)
+	d.registerStudyReminderRoutes(r)
 	d.registerCCRRoutes(r)
 	d.registerCredentialsRoutes(r)
 	d.registerIntegrationsRoutes(r)

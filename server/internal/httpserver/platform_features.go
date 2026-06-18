@@ -25,6 +25,7 @@ type platformFeaturesJSON struct {
 	XAPIEmissionEnabled         bool `json:"xapiEmissionEnabled"`
 	EquationEditorEnabled       bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled         bool `json:"readingLevelEnabled"`
+	GraderAgentEnabled          bool `json:"graderAgentEnabled"`
 	AltTextEnforcementEnabled   bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement        bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
@@ -79,6 +80,7 @@ type platformFeaturesJSON struct {
 	FFCourseReviews             bool `json:"ffCourseReviews"`
 	FFGamification              bool `json:"ffGamification"`
 	FFOnboardingFlow            bool `json:"ffOnboardingFlow"`
+	FFStudyReminders            bool `json:"ffStudyReminders"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -110,6 +112,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		XAPIEmissionEnabled:         cfg.XAPIEmissionEnabled,
 		EquationEditorEnabled:       cfg.EquationEditorEnabled,
 		ReadingLevelEnabled:         cfg.ReadingLevelEnabled,
+		GraderAgentEnabled:          cfg.GraderAgentEnabled,
 		AltTextEnforcementEnabled:   cfg.AltTextEnforcementEnabled,
 		FFAltTextEnforcement:        cfg.FFAltTextEnforcement,
 		SpeechToTextEnabled:         cfg.SpeechToTextEnabled,
@@ -164,6 +167,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFCourseReviews:             cfg.FFCourseReviews,
 		FFGamification:              cfg.FFGamification,
 		FFOnboardingFlow:            cfg.FFOnboardingFlow,
+		FFStudyReminders:            cfg.FFStudyReminders,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

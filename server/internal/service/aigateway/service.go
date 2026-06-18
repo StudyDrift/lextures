@@ -31,6 +31,7 @@ const (
 	FeatureContentTranslation          = "content_translation"
 	FeatureAltTextSuggestion           = "alt_text_suggestion"
 	FeatureVibeGeneration              = "vibe_generation"
+	FeatureGraderAgent                 = "grader_agent"
 )
 
 // BlockReason explains why a call was blocked.

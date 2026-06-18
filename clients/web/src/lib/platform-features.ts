@@ -12,6 +12,7 @@ export type PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  graderAgentEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
@@ -63,6 +64,7 @@ export type PlatformFeaturesSnapshot = {
   ffCourseReviews?: boolean
   ffGamification?: boolean
   ffOnboardingFlow?: boolean
+  ffStudyReminders?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
   openRouterConfigured?: boolean
@@ -81,6 +83,7 @@ const defaults: PlatformFeaturesSnapshot = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  graderAgentEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,
@@ -132,6 +135,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffCourseReviews: false,
   ffGamification: false,
   ffOnboardingFlow: false,
+  ffStudyReminders: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,

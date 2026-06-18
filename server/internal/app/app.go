@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
+	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
@@ -131,6 +132,12 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 	defer func() { _ = canvasSubmissionSyncQueue.Close() }()
 
+	gradingAgentQueue, gradingQueueErr := gradingagentqueue.NewBus(merged.RabbitMQURL, "grading.agent.run", 2)
+	if gradingQueueErr != nil {
+		return fmt.Errorf("app: grading agent queue: %w", gradingQueueErr)
+	}
+	defer func() { _ = gradingAgentQueue.Close() }()
+
 	deps := httpserver.Deps{
 		Pool:              pool,
 		JWTSigner:         auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
@@ -147,12 +154,14 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		CanvasSubmissionSyncHub:   canvasSubmissionSyncHub,
 		CanvasSubmissionSyncQueue: canvasSubmissionSyncQueue,
 		CanvasSubmissionSyncJobs:  canvasSubmissionSyncJobs,
+		GradingAgentQueue:         gradingAgentQueue,
 		SmsNotificationQueue:      smsNotificationQueue,
 		Storage:                   storage,
 		StorageQuota:      quotaSvc,
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
+	background.StartGradingAgentConsumer(ctx, gradingAgentQueue, deps)
 	background.StartSmsNotificationConsumer(ctx, smsNotificationQueue, pool, merged)
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,

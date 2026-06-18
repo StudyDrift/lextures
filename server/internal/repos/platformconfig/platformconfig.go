@@ -63,6 +63,7 @@ type Row struct {
 	OutcomesReportEnabled           *bool
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
+	GraderAgentEnabled              *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
 	SpeechToTextEnabled             *bool
@@ -122,6 +123,9 @@ type Row struct {
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
 	FFOnboardingFlow                *bool
+	FFStudyReminders                *bool
+
+	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
 	FERPAWorkflowEnabled         *bool
 	DPAPortalEnabled             *bool
@@ -197,6 +201,7 @@ type Write struct {
 	OutcomesReportEnabled           *bool
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
+	GraderAgentEnabled              *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
 	SpeechToTextEnabled             *bool
@@ -256,6 +261,9 @@ type Write struct {
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
 	FFOnboardingFlow                *bool
+	FFStudyReminders                *bool
+
+	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
 	FERPAWorkflowEnabled         *bool
 	DPAPortalEnabled             *bool
@@ -329,6 +337,7 @@ SELECT
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	reading_level_enabled,
+	grader_agent_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
@@ -386,6 +395,7 @@ SELECT
 	ff_course_reviews,
 	ff_gamification,
 	ff_onboarding_flow,
+	ff_study_reminders,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -456,6 +466,7 @@ WHERE id = 1
 		&r.OutcomesReportEnabled,
 		&r.EquationEditorEnabled,
 		&r.ReadingLevelEnabled,
+		&r.GraderAgentEnabled,
 		&r.AltTextEnforcementEnabled,
 		&r.FFAltTextEnforcement,
 		&r.SpeechToTextEnabled,
@@ -513,6 +524,7 @@ WHERE id = 1
 		&r.FFCourseReviews,
 		&r.FFGamification,
 		&r.FFOnboardingFlow,
+		&r.FFStudyReminders,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -634,6 +646,7 @@ INSERT INTO settings.platform_app_settings (
 	outcomes_report_enabled,
 	equation_editor_enabled,
 	reading_level_enabled,
+	grader_agent_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
@@ -689,6 +702,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_course_reviews,
 	ff_gamification,
 	ff_onboarding_flow,
+	ff_study_reminders,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -767,6 +781,7 @@ ON CONFLICT (id) DO UPDATE SET
 	outcomes_report_enabled = COALESCE(EXCLUDED.outcomes_report_enabled, settings.platform_app_settings.outcomes_report_enabled),
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	reading_level_enabled = COALESCE(EXCLUDED.reading_level_enabled, settings.platform_app_settings.reading_level_enabled),
+	grader_agent_enabled = COALESCE(EXCLUDED.grader_agent_enabled, settings.platform_app_settings.grader_agent_enabled),
 	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
 	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
 	speech_to_text_enabled = COALESCE(EXCLUDED.speech_to_text_enabled, settings.platform_app_settings.speech_to_text_enabled),
@@ -822,6 +837,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_course_reviews = COALESCE(EXCLUDED.ff_course_reviews, settings.platform_app_settings.ff_course_reviews),
 	ff_gamification = COALESCE(EXCLUDED.ff_gamification, settings.platform_app_settings.ff_gamification),
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
+	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -892,6 +908,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.OutcomesReportEnabled,
 		w.EquationEditorEnabled,
 		w.ReadingLevelEnabled,
+		w.GraderAgentEnabled,
 		w.AltTextEnforcementEnabled,
 		w.FFAltTextEnforcement,
 		w.SpeechToTextEnabled,
@@ -947,6 +964,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFCourseReviews,
 		w.FFGamification,
 		w.FFOnboardingFlow,
+		w.FFStudyReminders,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

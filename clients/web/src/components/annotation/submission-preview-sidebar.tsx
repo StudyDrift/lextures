@@ -50,15 +50,27 @@ export function SubmissionPreviewSidebar({
     return (
       <aside
         className="flex h-full min-h-0 w-full flex-col overflow-y-auto bg-slate-100 dark:bg-neutral-800"
-        aria-label="Submission file details"
+        aria-label="Submission feedback"
       >
-        <SubmissionFileDetailsPanel
-          filename={filename}
-          filePath={filePath}
-          submittedAt={submittedAt}
-          blindLabel={blindLabel}
-          mimeType={mimeType}
-        />
+        {submissionId ? (
+          <SubmissionGradingPanel
+            mode="student"
+            courseCode={courseCode}
+            itemId={itemId}
+            submissionId={submissionId}
+            rubric={hasRubric ? rubric : null}
+            maxPoints={maxPoints}
+            disabled
+          />
+        ) : (
+          <SubmissionFileDetailsPanel
+            filename={filename}
+            filePath={filePath}
+            submittedAt={submittedAt}
+            blindLabel={blindLabel}
+            mimeType={mimeType}
+          />
+        )}
       </aside>
     )
   }
@@ -110,6 +122,7 @@ export function SubmissionPreviewSidebar({
       {tab === 'grade' ? (
         <SubmissionGradingPanel
           key={submissionId ?? studentUserId ?? 'none'}
+          mode={mode}
           courseCode={courseCode}
           itemId={itemId}
           submissionId={submissionId}

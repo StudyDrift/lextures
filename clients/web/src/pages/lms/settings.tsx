@@ -39,6 +39,7 @@ import { IntegrationsAccessKeysPanel } from '../../components/settings/integrati
 import { IntegrationsMcpPanel } from '../../components/settings/integrations-mcp-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-panel'
+import { StudyRemindersSettingsPanel } from '../../components/settings/study-reminders-settings-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
@@ -203,6 +204,7 @@ export default function Settings() {
   const [courseSetupModelId, setCourseSetupModelId] = useState('')
   const [notebookFlashcardsModelId, setNotebookFlashcardsModelId] = useState('')
   const [vibeActivityModelId, setVibeActivityModelId] = useState('')
+  const [graderAgentModelId, setGraderAgentModelId] = useState('')
   const [aiLoading, setAiLoading] = useState(true)
   const [aiSaving, setAiSaving] = useState(false)
   const [aiMessage, setAiMessage] = useState<string | null>(null)
@@ -340,12 +342,14 @@ export default function Settings() {
             courseSetupModelId?: string
             notebookFlashcardsModelId?: string
             vibeActivityModelId?: string
+            graderAgentModelId?: string
             openRouterApiKey?: string
           }
           if (!cancelled && data.imageModelId) setImageModelId(data.imageModelId)
           if (!cancelled && data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
           if (!cancelled && data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
           if (!cancelled && data.vibeActivityModelId) setVibeActivityModelId(data.vibeActivityModelId)
+          if (!cancelled && data.graderAgentModelId) setGraderAgentModelId(data.graderAgentModelId)
           if (!cancelled) {
             const key = data.openRouterApiKey ?? ''
             setOpenRouterApiKey(key)
@@ -382,6 +386,7 @@ export default function Settings() {
         courseSetupModelId,
         notebookFlashcardsModelId,
         vibeActivityModelId,
+        graderAgentModelId,
       }
       const keyTrimmed = openRouterApiKey.trim()
       const keyBaselineTrimmed = openRouterApiKeyBaseline.trim()
@@ -414,12 +419,14 @@ export default function Settings() {
         courseSetupModelId?: string
         notebookFlashcardsModelId?: string
         vibeActivityModelId?: string
+        graderAgentModelId?: string
         openRouterApiKey?: string
       }
       if (data.imageModelId) setImageModelId(data.imageModelId)
       if (data.courseSetupModelId) setCourseSetupModelId(data.courseSetupModelId)
       if (data.notebookFlashcardsModelId) setNotebookFlashcardsModelId(data.notebookFlashcardsModelId)
       if (data.vibeActivityModelId) setVibeActivityModelId(data.vibeActivityModelId)
+      if (data.graderAgentModelId) setGraderAgentModelId(data.graderAgentModelId)
       if (data.openRouterApiKey !== undefined) {
         setOpenRouterApiKey(data.openRouterApiKey)
         setOpenRouterApiKeyBaseline(data.openRouterApiKey)
@@ -1085,6 +1092,22 @@ export default function Settings() {
 
                 <div>
                   <ImageModelPicker
+                    id="grader-agent-model"
+                    label="Grading agent model"
+                    models={textModels}
+                    value={graderAgentModelId}
+                    onChange={setGraderAgentModelId}
+                    disabled={aiSaving}
+                    onRefresh={refreshModels}
+                    refreshing={modelsRefreshing}
+                  />
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Text-to-text model used when instructors dry-run or batch-run the SpeedGrader grading agent.
+                  </p>
+                </div>
+
+                <div>
+                  <ImageModelPicker
                     id="image-model"
                     label="Image model"
                     models={imageModels}
@@ -1687,6 +1710,7 @@ export default function Settings() {
               </div>
             )}
             {!accountLoading && <OidcConnectedAccountsPanel />}
+            {!accountLoading && <StudyRemindersSettingsPanel />}
             {!accountLoading && <MfaFactorsPanel />}
           </div>
         )}

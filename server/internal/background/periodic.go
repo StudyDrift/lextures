@@ -192,6 +192,13 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		slog.Info("weekly coaching tips sweep started")
 	}
 
+	if cfg.FFStudyReminders {
+		go runEvery(ctx, time.Minute, func() {
+			sweepStudyReminders(context.Background(), pool, cfg, time.Now().UTC())
+		})
+		slog.Info("study reminders sweep started")
+	}
+
 	if cfg.ReportExportEnabled {
 		go runEvery(ctx, time.Minute, func() {
 			sweepScheduledReports(context.Background(), pool, cfg, time.Now().UTC())

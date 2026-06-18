@@ -47,6 +47,97 @@ var demoChecksumRepairMigrations = []struct {
 	{279, "279_learning_paths.sql"},
 }
 
+// repairMigration289RenumberCollision fixes dev/demo DBs that applied grading_agent as v289
+// and grader_agent_model as v290 before main's 289_study_reminders.sql landed and the agent
+// migrations were renumbered to 290/291 (commit aa57337a).
+func repairMigration289RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
+	if !migrateRepairChecksumsEnabled() {
+		return nil
+	}
+	var v289Desc string
+	err := c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 289`,
+	).Scan(&v289Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v289 renumber: %w", err)
+	}
+	if v289Desc != "grading_agent" {
+		return nil
+	}
+	var v290Desc string
+	err = c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 290`,
+	).Scan(&v290Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v289 renumber: %w", err)
+	}
+	if v290Desc != "grader_agent_model" {
+		return nil
+	}
+	var studyRemindersExists bool
+	err = c.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'studyreminders' AND table_name = 'configs')`,
+	).Scan(&studyRemindersExists)
+	if err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: %w", err)
+	}
+	if studyRemindersExists {
+		return nil
+	}
+
+	studyBody, err := fs.ReadFile(fsys, dir+"/289_study_reminders.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: read study_reminders: %w", err)
+	}
+	if _, err := c.Exec(ctx, string(studyBody)); err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: apply study_reminders: %w", err)
+	}
+
+	studySum := sqlxChecksum(studyBody)
+	gradingBody, err := fs.ReadFile(fsys, dir+"/290_grading_agent.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: read grading_agent: %w", err)
+	}
+	gradingSum := sqlxChecksum(gradingBody)
+	modelBody, err := fs.ReadFile(fsys, dir+"/291_grader_agent_model.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: read grader_agent_model: %w", err)
+	}
+	modelSum := sqlxChecksum(modelBody)
+
+	tx, err := c.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 289`,
+		"study_reminders", studySum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: update v289: %w", err)
+	}
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 290`,
+		"grading_agent", gradingSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: update v290: %w", err)
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO `+sqlxMigrationsTable+` (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, 0)`,
+		int64(291), "grader_agent_model", modelSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v289 renumber: insert v291: %w", err)
+	}
+	return tx.Commit(ctx)
+}
+
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
 // checksum does not match the embedded file. Only runs when MIGRATE_REPAIR_CHECKSUMS
 // is enabled.

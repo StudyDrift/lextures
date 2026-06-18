@@ -5442,8 +5442,147 @@ export type SubmissionGradeApi = {
   instructorComment?: string | null
   posted?: boolean
   excused?: boolean
+  gradedByAi?: boolean
   /** True when the grade was pushed to Canvas successfully. */
   syncedToCanvas?: boolean
+}
+
+export type GraderAgentConfigApi = {
+  id?: string
+  prompt: string
+  includeAssignmentContent: boolean
+  includeRubric: boolean
+  status: 'draft' | 'accepted' | 'archived'
+  autoGradeNew?: boolean
+  modelId?: string
+  updatedAt?: string
+}
+
+export type GraderAgentDryRunResult = {
+  suggestedPoints: number
+  rubricScores?: Record<string, number>
+  comment: string
+  confidence: number
+  promptTokens?: number
+  completionTokens?: number
+}
+
+export type GraderAgentRunStatus = {
+  status: string
+  totalCount: number
+  completedCount: number
+  failedCount: number
+  results: Array<{
+    submissionId: string
+    status: string
+    suggestedPoints?: number
+    error?: string
+  }>
+}
+
+export async function fetchGraderAgentConfig(
+  courseCode: string,
+  itemId: string,
+): Promise<{ config: GraderAgentConfigApi | null }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { config: GraderAgentConfigApi | null }
+}
+
+export async function putGraderAgentConfig(
+  courseCode: string,
+  itemId: string,
+  body: {
+    prompt: string
+    includeAssignmentContent: boolean
+    includeRubric: boolean
+    status: 'draft' | 'accepted' | 'archived'
+    autoGradeNew?: boolean
+    modelId?: string
+  },
+): Promise<{ config: GraderAgentConfigApi }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { config: GraderAgentConfigApi }
+}
+
+export async function postGraderAgentDryRun(
+  courseCode: string,
+  itemId: string,
+  body: {
+    prompt: string
+    includeAssignmentContent: boolean
+    includeRubric: boolean
+    submissionId: string
+    modelId?: string
+  },
+): Promise<GraderAgentDryRunResult> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/dry-run`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as GraderAgentDryRunResult
+}
+
+export async function postGraderAgentRun(
+  courseCode: string,
+  itemId: string,
+  body: { scope: 'current' | 'ungraded' | 'all'; submissionId?: string; overwrite?: boolean },
+): Promise<{ runId: string; totalCount: number }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { runId: string; totalCount: number }
+}
+
+export async function fetchGraderAgentRun(
+  courseCode: string,
+  itemId: string,
+  runId: string,
+): Promise<GraderAgentRunStatus> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs/${encodeURIComponent(runId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as GraderAgentRunStatus
+}
+
+export async function postGraderAgentRegradeRequest(
+  courseCode: string,
+  itemId: string,
+): Promise<{ ok: boolean }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/regrade-request`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { ok: boolean }
 }
 
 export async function fetchSubmissionGrade(
@@ -5468,6 +5607,7 @@ export async function putSubmissionGrade(
     rubricScores?: Record<string, number>
     instructorComment?: string | null
     clearGrade?: boolean
+    gradedByAi?: boolean
   },
 ): Promise<SubmissionGradeApi> {
   const res = await authorizedFetch(
