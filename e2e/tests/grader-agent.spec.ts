@@ -104,7 +104,9 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
     })
   })
 
-  await coursePage.goto(`/courses/${seededCourse.courseCode}/assignments/${assignment.id}`)
+  await coursePage.goto(
+    `/courses/${seededCourse.courseCode}/assignments/${assignment.id}?preview=submissions`,
+  )
   await expect(coursePage.getByRole('button', { name: 'Grader Agent' })).toBeVisible({ timeout: 15_000 })
   await coursePage.getByRole('button', { name: 'Grader Agent' }).click()
   await expect(coursePage.getByRole('dialog', { name: 'Grading agent' })).toBeVisible()
@@ -135,10 +137,12 @@ test('Student sees AI disclosure on posted agent grade', async ({ page, seededCo
   )
 
   await page.route('**/api/v1/platform/features', async (route) => {
+    const res = await route.fetch()
+    const data = (await res.json()) as Record<string, unknown>
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ graderAgentEnabled: true }),
+      body: JSON.stringify({ ...data, graderAgentEnabled: true }),
     })
   })
 
