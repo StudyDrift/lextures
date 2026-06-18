@@ -38,6 +38,7 @@ import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { IntegrationsAccessKeysPanel } from '../../components/settings/integrations-access-keys-panel'
 import { IntegrationsMcpPanel } from '../../components/settings/integrations-mcp-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
+import { StudyRemindersSettingsPanel } from '../../components/settings/study-reminders-settings-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
@@ -1686,6 +1687,7 @@ export default function Settings() {
               </div>
             )}
             {!accountLoading && <OidcConnectedAccountsPanel />}
+            {!accountLoading && <StudyRemindersSettingsPanel />}
             {!accountLoading && <MfaFactorsPanel />}
           </div>
         )}

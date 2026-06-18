@@ -21,6 +21,9 @@ const (
 	EventIncompleteReminder    = notificationevents.IncompleteReminder
 	EventCEUAwarded            = notificationevents.CEUAwarded
 	EventCertificateIssued     = notificationevents.CertificateIssued
+	EventStudyReminderDaily         = notificationevents.StudyReminderDaily
+	EventStudyReminderStreakAtRisk  = notificationevents.StudyReminderStreakAtRisk
+	EventStudyReminderWeeklySummary = notificationevents.StudyReminderWeeklySummary
 )
 
 // AllEventTypes re-exports the canonical event list for callers outside this package.
