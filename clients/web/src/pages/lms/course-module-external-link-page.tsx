@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { ExternalLink } from 'lucide-react'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { usePermissions } from '../../context/use-permissions'
 import {
   fetchModuleExternalLink,
@@ -80,6 +81,8 @@ export default function CourseModuleExternalLinkPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useCoursePageTitle(!loading && data?.title ? data.title : null)
 
   useEffect(() => {
     setAutoOpenDone(false)

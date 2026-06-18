@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { EnrollmentAvatar } from '../../components/enrollment/enrollment-avatar'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { LmsPage } from './lms-page'
 import { fetchCourse } from '../../lib/courses-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
@@ -284,6 +285,11 @@ export default function StudentProgressPage() {
   }, [data?.summary.canManageNotes])
 
   const chartCaptionId = `${tabsId}-quiz-chart`
+  const progressPageTitle =
+    data?.summary.studentDisplayName ??
+    (isSelf ? studentProgressI18n.myProgressTitle : studentProgressI18n.progressTitle)
+
+  useCoursePageTitle(loadState === 'ok' ? progressPageTitle : null)
 
   if (!courseCode || !enrollmentId) {
     return <Navigate to="/courses" replace />

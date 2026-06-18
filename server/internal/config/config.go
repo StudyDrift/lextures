@@ -411,6 +411,10 @@ type Config struct {
 	CanvasImportQueueName string
 	// CanvasImportConcurrency is how many Canvas import jobs the queue consumer processes in parallel.
 	CanvasImportConcurrency int
+	// CanvasSubmissionSyncQueueName is the RabbitMQ queue for Canvas grade pushes (default canvas.submission.sync).
+	CanvasSubmissionSyncQueueName string
+	// CanvasSubmissionSyncConcurrency is how many Canvas grade-push jobs the queue consumer processes in parallel.
+	CanvasSubmissionSyncConcurrency int
 }
 
 // Load reads configuration from the environment.
@@ -560,9 +564,11 @@ func Load() Config {
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
-		RabbitMQURL:             firstNonEmptyTrimmed("RABBITMQ_URL"),
-		CanvasImportQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
-		CanvasImportConcurrency: canvasImportConcurrency(),
+		RabbitMQURL:                       firstNonEmptyTrimmed("RABBITMQ_URL"),
+		CanvasImportQueueName:             stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
+		CanvasImportConcurrency:           canvasImportConcurrency(),
+		CanvasSubmissionSyncQueueName:     stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
+		CanvasSubmissionSyncConcurrency:   canvasSubmissionSyncConcurrency(),
 	}
 }
 
@@ -775,6 +781,18 @@ func canvasImportConcurrency() int {
 	n, err := strconv.Atoi(raw)
 	if err != nil || n < 1 {
 		return 3
+	}
+	return n
+}
+
+func canvasSubmissionSyncConcurrency() int {
+	raw := strings.TrimSpace(os.Getenv("CANVAS_SUBMISSION_SYNC_CONCURRENCY"))
+	if raw == "" {
+		return 5
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 1 {
+		return 5
 	}
 	return n
 }

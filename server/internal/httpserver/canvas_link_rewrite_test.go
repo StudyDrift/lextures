@@ -67,3 +67,22 @@ func TestCanvasLinkRewriteCtx_RewriteMarkdownAndHTML(t *testing.T) {
 		t.Fatalf("expected no Canvas hosts left, got:\n%s", got)
 	}
 }
+
+func TestCanvasLinkRewriteCtx_RewriteEmbeddedFileURL(t *testing.T) {
+	fileID := uuid.MustParse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")
+	rc := &canvasLinkRewriteCtx{
+		CanvasBase:          "https://school.instructure.com",
+		CanvasCourseID:      42,
+		CourseCode:          "C-TEST",
+		FileIDs:             map[int64]uuid.UUID{99: fileID},
+		FileNames:           map[int64]string{99: "doc.pdf"},
+		AllowedHostSuffixes: []string{"instructure.com"},
+	}
+	html := `<p><iframe src="/courses/42/files/99/preview" title="doc.pdf"></iframe></p>`
+	md := markdownFromHTML(html)
+	got := rc.rewriteMarkdown(md)
+	want := "/api/v1/courses/C-TEST/files/items/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/content?name=doc.pdf"
+	if !strings.Contains(got, want) {
+		t.Fatalf("rewriteMarkdown() = %q, want substring %q", got, want)
+	}
+}

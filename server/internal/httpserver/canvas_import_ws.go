@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"net"
 	"net/http"
@@ -369,7 +370,12 @@ func (d Deps) runCanvasImport(
 				switch bodyTable {
 				case "content":
 					md := ""
-					if kind == "content_page" {
+					if strAt(it, "type", "") == "File" {
+						if cid := int64At(it, "content_id"); cid > 0 {
+							name := strAt(it, "title", itemTitle)
+							md = fmt.Sprintf("[%s](/courses/%d/files/%d)", name, canvasCourseID, cid)
+						}
+					} else if kind == "content_page" {
 						pageURL := strAt(it, "page_url", "")
 						if pageURL != "" {
 							slug := strings.ToLower(strings.TrimSpace(pageURL))
@@ -839,11 +845,69 @@ func arrAt(m map[string]any, k string) []map[string]any {
 	return out
 }
 
+var (
+	canvasFileIframeRe = regexp.MustCompile(`(?is)<iframe\b[^>]*>`)
+	canvasFileEmbedRe  = regexp.MustCompile(`(?is)<embed\b[^>]*>`)
+	htmlMediaSrcRe     = regexp.MustCompile(`(?i)\bsrc\s*=\s*["']([^"']+)["']`)
+	htmlMediaTitleRe   = regexp.MustCompile(`(?i)\btitle\s*=\s*["']([^"']*)["']`)
+)
+
+// preprocessCanvasHTMLForMarkdown converts Canvas file embeds (iframes/embeds pointing at
+// /courses/:id/files/:id) into anchor links so html-to-markdown preserves them.
+func preprocessCanvasHTMLForMarkdown(s string) string {
+	replaceMediaEmbed := func(tagRe *regexp.Regexp) {
+		s = tagRe.ReplaceAllStringFunc(s, func(tag string) string {
+			srcM := htmlMediaSrcRe.FindStringSubmatch(tag)
+			if len(srcM) < 2 {
+				return tag
+			}
+			href, title, ok := canvasEmbeddedFileLinkFromURL(srcM[1], tag)
+			if !ok {
+				return tag
+			}
+			return fmt.Sprintf(`<p><a href="%s">%s</a></p>`, html.EscapeString(href), html.EscapeString(title))
+		})
+	}
+	replaceMediaEmbed(canvasFileIframeRe)
+	replaceMediaEmbed(canvasFileEmbedRe)
+	return s
+}
+
+func canvasEmbeddedFileLinkFromURL(rawURL, tag string) (href, title string, ok bool) {
+	u, err := url.Parse(strings.TrimSpace(rawURL))
+	if err != nil {
+		return "", "", false
+	}
+	path := u.EscapedPath()
+	if path == "" {
+		path = u.Path
+	}
+	if !canvasFilePathRe.MatchString(path) {
+		return "", "", false
+	}
+	href = path
+	if u.RawQuery != "" {
+		href += "?" + u.RawQuery
+	}
+	if u.IsAbs() {
+		href = u.String()
+	}
+	titleM := htmlMediaTitleRe.FindStringSubmatch(tag)
+	if len(titleM) >= 2 {
+		title = strings.TrimSpace(titleM[1])
+	}
+	if title == "" {
+		title = "Embedded file"
+	}
+	return href, title, true
+}
+
 func markdownFromHTML(s string) string {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return ""
 	}
+	s = preprocessCanvasHTMLForMarkdown(s)
 	converter := md.NewConverter("", true, nil)
 	out, err := converter.ConvertString(s)
 	if err == nil {
@@ -1294,7 +1358,9 @@ func mapCanvasTypeToKind(t string) (kind string, bodyTable string) {
 		return "assignment", "assignment"
 	case "Quiz":
 		return "quiz", "quiz"
-	case "ExternalUrl", "ExternalTool", "File":
+	case "File":
+		return "content_page", "content"
+	case "ExternalUrl", "ExternalTool":
 		return "external_link", "external"
 	case "Discussion":
 		return "content_page", "content"

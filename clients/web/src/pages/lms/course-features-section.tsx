@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FeatureToggleRow } from '../../components/settings/feature-toggle-row'
 import { useCourseNavFeatures } from '../../context/course-nav-features-context'
-import { patchCourseFeatures } from '../../lib/courses-api'
+import { fetchCourseCanvasLink, patchCourseCanvasGradeSync, patchCourseFeatures } from '../../lib/courses-api'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import type { CoursePublic } from '../../lib/courses-api'
 
@@ -17,6 +17,22 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [canvasLinked, setCanvasLinked] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const link = await fetchCourseCanvasLink(courseCode)
+        if (!cancelled) setCanvasLinked(Boolean(link.linked))
+      } catch {
+        if (!cancelled) setCanvasLinked(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
 
   const notebookEnabled = course.notebookEnabled !== false
   const feedEnabled = course.feedEnabled !== false
@@ -39,6 +55,31 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const filesEnabled = course.filesEnabled !== false
   const attendanceEnabled = course.attendanceEnabled === true
   const whiteboardEnabled = course.whiteboardEnabled === true
+  const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
+
+  const persistCanvasGradeSync = useCallback(
+    async (enabled: boolean) => {
+      setSaving(true)
+      setMessage(null)
+      setError(null)
+      try {
+        const link = await patchCourseCanvasGradeSync(courseCode, enabled)
+        onCourseUpdated({
+          ...course,
+          canvasGradeSyncEnabled: Boolean(link.gradeSyncEnabled),
+        })
+        setMessage('Saved.')
+        toastSaveOk('Course tools updated')
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Could not save.'
+        setError(msg)
+        toastMutationError(msg)
+      } finally {
+        setSaving(false)
+      }
+    },
+    [course, courseCode, onCourseUpdated],
+  )
 
   const persist = useCallback(
     async (patch: {
@@ -165,6 +206,17 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           enabled: calendarEnabled,
           onToggle: () => void persist({ calendarEnabled: !calendarEnabled }),
         },
+        ...(canvasLinked
+          ? [
+              {
+                label: 'Canvas grade sync',
+                description:
+                  'When enabled, saving a grade in Lextures automatically pushes it back to the linked Canvas course. Requires a Canvas access token with grade-update permission saved in this browser (from Import settings).',
+                enabled: canvasGradeSyncEnabled,
+                onToggle: () => void persistCanvasGradeSync(!canvasGradeSyncEnabled),
+              },
+            ]
+          : []),
         {
           label: 'Collaborative documents',
           description:
@@ -293,6 +345,8 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       aiTutorEnabled,
       attendanceEnabled,
       calendarEnabled,
+      canvasGradeSyncEnabled,
+      canvasLinked,
       collabDocsEnabled,
       sectionsEnabled,
       discussionsEnabled,
@@ -311,6 +365,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       standardsAlignmentEnabled,
       whiteboardEnabled,
       persist,
+      persistCanvasGradeSync,
     ],
   )
 

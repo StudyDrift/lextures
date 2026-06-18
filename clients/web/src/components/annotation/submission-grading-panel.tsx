@@ -1,13 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
+  fetchAssignmentStudentGrade,
+  fetchCourseCanvasLink,
   fetchModuleAssignment,
   fetchSubmissionGrade,
+  putAssignmentStudentGrade,
   putSubmissionGrade,
+  type CourseCanvasLinkApi,
   type RubricDefinition,
   type SubmissionGradeApi,
 } from '../../lib/courses-api'
+import { queueCanvasGradeSync, type CanvasGradePushPayload } from '../canvas/canvas-grade-sync'
 import { RubricGradePicker } from '../grading/rubric-grade-picker'
 import { formatPointsCell, rubricScoresComplete, rubricTotal } from '../../lib/rubric-utils'
+import { altKeyHint } from './speed-grader-shortcuts'
 
 type GradeMode = 'rubric' | 'points'
 
@@ -15,9 +21,15 @@ type SubmissionGradingPanelProps = {
   courseCode: string
   itemId: string
   submissionId: string | null
+  /** Used when the roster row has no submission yet. */
+  studentUserId?: string | null
   rubric: RubricDefinition | null
   maxPoints: number | null
   disabled?: boolean
+  /** Increment to reload grade from server (e.g. after Canvas sync from toolbar). */
+  gradeRefreshKey?: number
+  /** Focus the score input after the grade loads (SpeedGrader). */
+  autoFocusScore?: boolean
   onGradeSaved?: () => void
   onGradeCleared?: () => void
 }
@@ -33,9 +45,12 @@ export function SubmissionGradingPanel({
   courseCode,
   itemId,
   submissionId,
+  studentUserId = null,
   rubric: rubricProp,
   maxPoints,
   disabled = false,
+  gradeRefreshKey = 0,
+  autoFocusScore = false,
   onGradeSaved,
   onGradeCleared,
 }: SubmissionGradingPanelProps) {
@@ -52,9 +67,44 @@ export function SubmissionGradingPanel({
   const [fetchedRubric, setFetchedRubric] = useState<RubricDefinition | null>(null)
   const [hasGrade, setHasGrade] = useState(false)
   const [flashMsg, setFlashMsg] = useState('')
+  const [canvasLink, setCanvasLink] = useState<CourseCanvasLinkApi | null>(null)
+  const [canvasSyncPending, setCanvasSyncPending] = useState(false)
+  const scoreInputRef = useRef<HTMLInputElement>(null)
+  const canvasSyncAbortRef = useRef<(() => void) | null>(null)
+  const focusTarget = submissionId ?? studentUserId ?? null
+  const focusTargetRef = useRef(focusTarget)
+  focusTargetRef.current = focusTarget
+  const pendingScoreFocusRef = useRef<string | null>(null)
 
   const rubric = rubricProp ?? fetchedRubric
   const hasRubric = Boolean(rubric && rubric.criteria.length > 0)
+
+  useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const link = await fetchCourseCanvasLink(courseCode)
+        if (!cancelled) setCanvasLink(link)
+      } catch {
+        if (!cancelled) setCanvasLink({ linked: false, gradeSyncEnabled: false })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
+
+  useEffect(() => {
+    canvasSyncAbortRef.current?.()
+    canvasSyncAbortRef.current = null
+    setCanvasSyncPending(false)
+  }, [submissionId])
+
+  useEffect(() => {
+    return () => {
+      canvasSyncAbortRef.current?.()
+    }
+  }, [])
 
   useEffect(() => {
     if (rubricProp) return
@@ -95,7 +145,7 @@ export function SubmissionGradingPanel({
   )
 
   useEffect(() => {
-    if (!submissionId) {
+    if (!submissionId && !studentUserId) {
       setComment('')
       setPointsInput('')
       setRubricScores({})
@@ -110,7 +160,9 @@ export function SubmissionGradingPanel({
     setLoadError(null)
     void (async () => {
       try {
-        const grade = await fetchSubmissionGrade(courseCode, itemId, submissionId)
+        const grade = submissionId
+          ? await fetchSubmissionGrade(courseCode, itemId, submissionId)
+          : await fetchAssignmentStudentGrade(courseCode, itemId, studentUserId!)
         if (!cancelled) applyGrade(grade)
       } catch (e) {
         if (!cancelled) {
@@ -129,16 +181,49 @@ export function SubmissionGradingPanel({
     return () => {
       cancelled = true
     }
-  }, [applyGrade, courseCode, itemId, submissionId])
+  }, [applyGrade, courseCode, gradeRefreshKey, hasRubric, itemId, studentUserId, submissionId])
+
+  useEffect(() => {
+    if (!autoFocusScore || !focusTarget) {
+      pendingScoreFocusRef.current = null
+      return
+    }
+    pendingScoreFocusRef.current = focusTarget
+  }, [autoFocusScore, focusTarget])
+
+  useEffect(() => {
+    if (!autoFocusScore || !focusTarget || loading) return
+    if (pendingScoreFocusRef.current !== focusTarget) return
+    if (hasRubric && gradeMode === 'rubric' && Object.keys(rubricScores).length === 0) {
+      setGradeMode('points')
+      return
+    }
+    if (hasRubric && gradeMode === 'rubric') {
+      pendingScoreFocusRef.current = null
+      return
+    }
+    const frame = window.requestAnimationFrame(() => {
+      const input = scoreInputRef.current
+      if (!input || input.disabled) return
+      input.focus()
+      input.select()
+      pendingScoreFocusRef.current = null
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [autoFocusScore, focusTarget, gradeMode, hasRubric, loading, rubricScores])
 
   useEffect(() => {
     if (!hasRubric) return
     const hasSavedRubric = Object.keys(rubricScores).length > 0
     const hasSavedPoints = pointsInput.trim() !== ''
-    if (hasSavedRubric || !hasSavedPoints) {
+    if (hasSavedRubric) {
+      setGradeMode('rubric')
+      return
+    }
+    if (!hasSavedPoints && !autoFocusScore) {
       setGradeMode('rubric')
     }
-  }, [hasRubric, pointsInput, rubricScores])
+  }, [autoFocusScore, hasRubric, pointsInput, rubricScores])
 
   useEffect(() => {
     if (hasRubric && gradeMode === 'points' && !pointsInput && rubric) {
@@ -156,18 +241,43 @@ export function SubmissionGradingPanel({
     return '—'
   }, [gradeMode, hasRubric, pointsInput, rubric, rubricScores])
 
-  async function handleSave() {
-    if (!submissionId) return
+  const canvasGradePayload = useMemo((): CanvasGradePushPayload | undefined => {
+    if (hasRubric && gradeMode === 'rubric' && rubric && rubricScoresComplete(rubric, rubricScores)) {
+      return {
+        rubricScores,
+        instructorComment: comment.trim() || null,
+      }
+    }
+    const trimmed = pointsInput.trim()
+    if (trimmed !== '') {
+      const n = Number.parseFloat(trimmed.replace(',', ''))
+      if (Number.isFinite(n) && n >= 0) {
+        return {
+          pointsEarned: n,
+          instructorComment: comment.trim() || null,
+        }
+      }
+    }
+    return undefined
+  }, [comment, gradeMode, hasRubric, pointsInput, rubric, rubricScores])
+
+  const handleSave = useCallback(async () => {
+    if (!submissionId && !studentUserId) return
     setSaving(true)
     setSaveError(null)
     setSavedFlash(false)
     try {
+      const saveGrade = submissionId
+        ? (body: Parameters<typeof putSubmissionGrade>[3]) =>
+            putSubmissionGrade(courseCode, itemId, submissionId, body)
+        : (body: Parameters<typeof putAssignmentStudentGrade>[3]) =>
+            putAssignmentStudentGrade(courseCode, itemId, studentUserId!, body)
       if (hasRubric && gradeMode === 'rubric' && rubric) {
         if (!rubricScoresComplete(rubric, rubricScores)) {
           setSaveError('Select a rating for every rubric criterion.')
           return
         }
-        await putSubmissionGrade(courseCode, itemId, submissionId, {
+        await saveGrade({
           rubricScores,
           instructorComment: comment.trim() || null,
         })
@@ -186,33 +296,96 @@ export function SubmissionGradingPanel({
           setSaveError(`Score cannot exceed ${maxPoints} points.`)
           return
         }
-        await putSubmissionGrade(courseCode, itemId, submissionId, {
+        await saveGrade({
           pointsEarned: n,
           instructorComment: comment.trim() || null,
         })
       }
-      setFlashMsg('Grade saved' + (posted ? '' : ' (held until posted)'))
+      const savedMsg = 'Grade saved' + (posted ? '' : ' (held until posted)')
+      setFlashMsg(savedMsg)
       setSavedFlash(true)
       setPosted(true)
       setHasGrade(true)
-      onGradeSaved?.()
-      window.setTimeout(() => setSavedFlash(false), 2500)
+      pendingScoreFocusRef.current = null
+      scoreInputRef.current?.blur()
+      if (focusTargetRef.current === focusTarget) {
+        onGradeSaved?.()
+      }
+      let startedCanvasSync = false
+      if (submissionId && canvasLink && canvasGradePayload) {
+        canvasSyncAbortRef.current?.()
+        const syncHandle = queueCanvasGradeSync({
+          courseCode,
+          itemId,
+          submissionId,
+          canvasLink,
+          gradePayload: canvasGradePayload,
+          onComplete: (grade) => {
+            if (focusTargetRef.current !== focusTarget) return
+            setCanvasSyncPending(false)
+            applyGrade(grade)
+            setFlashMsg('Grade saved and synced to Canvas.')
+            setSavedFlash(true)
+            onGradeSaved?.()
+            window.setTimeout(() => setSavedFlash(false), 2500)
+          },
+          onError: (message) => {
+            if (focusTargetRef.current !== focusTarget) return
+            setCanvasSyncPending(false)
+            setFlashMsg(message)
+            setSavedFlash(true)
+            window.setTimeout(() => setSavedFlash(false), 4000)
+          },
+        })
+        if (syncHandle) {
+          canvasSyncAbortRef.current = syncHandle.abort
+          setCanvasSyncPending(true)
+          startedCanvasSync = true
+        }
+      }
+      if (!startedCanvasSync) {
+        window.setTimeout(() => setSavedFlash(false), 2500)
+      }
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Could not save grade.')
     } finally {
       setSaving(false)
     }
-  }
+  }, [
+    applyGrade,
+    canvasGradePayload,
+    canvasLink,
+    comment,
+    courseCode,
+    gradeMode,
+    hasRubric,
+    itemId,
+    maxPoints,
+    onGradeSaved,
+    pointsInput,
+    posted,
+    rubric,
+    rubricScores,
+    focusTarget,
+    studentUserId,
+    submissionId,
+  ])
 
   async function handleClearGrade() {
-    if (!submissionId) return
+    if (!submissionId && !studentUserId) return
     setSaving(true)
     setSaveError(null)
     setSavedFlash(false)
     try {
-      await putSubmissionGrade(courseCode, itemId, submissionId, {
-        clearGrade: true,
-      })
+      if (submissionId) {
+        await putSubmissionGrade(courseCode, itemId, submissionId, {
+          clearGrade: true,
+        })
+      } else {
+        await putAssignmentStudentGrade(courseCode, itemId, studentUserId!, {
+          clearGrade: true,
+        })
+      }
       setPointsInput('')
       setRubricScores({})
       setComment('')
@@ -229,10 +402,10 @@ export function SubmissionGradingPanel({
     }
   }
 
-  if (!submissionId) {
+  if (!submissionId && !studentUserId) {
     return (
       <div className="flex h-full items-center justify-center p-6 text-center text-sm text-slate-600 dark:text-neutral-400">
-        Select a submission to grade.
+        Select a student to grade.
       </div>
     )
   }
@@ -240,7 +413,16 @@ export function SubmissionGradingPanel({
   const formDisabled = disabled || saving || loading
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col" aria-label="Grade submission">
+    <section
+      className="flex min-h-0 flex-1 flex-col"
+      aria-label="Grade submission"
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' || (!e.altKey && !e.getModifierState('Alt'))) return
+        if (formDisabled) return
+        e.preventDefault()
+        void handleSave()
+      }}
+    >
       <div className="flex-1 space-y-4 overflow-y-auto p-5">
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-600 dark:bg-neutral-900/60">
           <div className="flex items-end justify-between gap-3">
@@ -331,7 +513,9 @@ export function SubmissionGradingPanel({
                   Override score{maxPoints != null ? ` (out of ${maxPoints})` : ''}
                 </span>
                 <input
+                  ref={scoreInputRef}
                   type="number"
+                  data-speed-grader-score="true"
                   min={0}
                   max={maxPoints ?? undefined}
                   step="any"
@@ -352,7 +536,9 @@ export function SubmissionGradingPanel({
               Score{maxPoints != null ? ` (out of ${maxPoints})` : ''}
             </span>
             <input
+              ref={scoreInputRef}
               type="number"
+              data-speed-grader-score="true"
               min={0}
               max={maxPoints ?? undefined}
               step="any"
@@ -385,9 +571,12 @@ export function SubmissionGradingPanel({
             {saveError}
           </p>
         ) : null}
-        {savedFlash ? (
-          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300" role="status">
-            {flashMsg}
+        {savedFlash || canvasSyncPending ? (
+          <p
+            className={`text-sm font-medium ${canvasSyncPending ? 'text-sky-700 dark:text-sky-300' : 'text-emerald-700 dark:text-emerald-300'}`}
+            role="status"
+          >
+            {canvasSyncPending ? 'Syncing grade to Canvas…' : flashMsg}
           </p>
         ) : null}
         <div className="flex gap-2">
@@ -405,6 +594,7 @@ export function SubmissionGradingPanel({
             type="button"
             disabled={formDisabled}
             onClick={() => void handleSave()}
+            title={`Save grade (${altKeyHint()}+Enter)`}
             className={`${hasGrade ? 'flex-1' : 'w-full'} rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {saving ? 'Saving…' : 'Save grade'}

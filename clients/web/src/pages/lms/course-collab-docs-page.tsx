@@ -5,6 +5,7 @@ import { CollabEditor } from '../../components/collab/collab-editor'
 import { CollabDocsList } from '../../components/collab/collab-docs-list'
 import { fetchCollabDoc, fetchCollabDocs, type CollabDoc } from '../../lib/collab-docs-api'
 import { courseItemCreatePermission, fetchCourse } from '../../lib/courses-api'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { usePermissions } from '../../context/use-permissions'
 import { LmsPage } from './lms-page'
 
@@ -77,6 +78,8 @@ export default function CourseCollabDocsPage() {
       void loadList()
     }
   }, [docId, loadDoc, loadList])
+
+  useCoursePageTitle(docId && !docLoading && activeDoc?.title ? activeDoc.title : null)
 
   if (docId) {
     const showEditorLoading = docLoading || !activeDoc

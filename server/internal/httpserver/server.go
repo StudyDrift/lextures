@@ -12,6 +12,9 @@ import (
 	"github.com/lextures/lextures/server/internal/auth/hibp"
 	"github.com/lextures/lextures/server/internal/canvasimportevents"
 	"github.com/lextures/lextures/server/internal/canvasimportqueue"
+	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
+	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
+	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/feedevents"
@@ -54,6 +57,12 @@ type Deps struct {
 	CanvasImportHub *canvasimportevents.Hub
 	// CanvasImportQueue publishes Canvas import jobs to RabbitMQ (or in-memory fallback).
 	CanvasImportQueue *canvasimportqueue.Bus
+	// CanvasSubmissionSyncHub fans out queued Canvas grade-push results to WebSocket subscribers.
+	CanvasSubmissionSyncHub *canvassubmissionsyncevents.Hub
+	// CanvasSubmissionSyncQueue publishes Canvas grade-push jobs to RabbitMQ (or in-memory fallback).
+	CanvasSubmissionSyncQueue *canvassubmissionsyncqueue.Bus
+	// CanvasSubmissionSyncJobs tracks in-flight Canvas grade-push jobs for auth and reconnect.
+	CanvasSubmissionSyncJobs *canvassubmissionsyncjobs.Registry
 	// Storage is the object-storage driver (plan 8.1). When nil, falls back to local disk reads.
 	Storage filestorage.Driver
 	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.
@@ -162,6 +171,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerTusRoutes(r)
 	d.registerTranscodeRoutes(r)
 	d.registerCanvasImportRoutes(r)
+	d.registerCanvasSubmissionSyncRoutes(r)
 	d.registerCaptionRoutes(r)
 	d.registerStorageQuotaRoutes(r)
 	d.registerAVScanRoutes(r)

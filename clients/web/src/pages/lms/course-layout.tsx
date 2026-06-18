@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, Outlet, useParams } from 'react-router-dom'
+import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
+import { CourseDocumentTitleProvider } from '../../context/course-document-title-context'
 import { CourseLiveContext } from '../../context/course-live-context'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { useCourseStructureRevision } from '../../hooks/use-course-structure-ws'
 import { fetchEvaluationStatus } from '../../lib/course-evaluations-api'
+import { coursePageTitleFromPath } from '../../lib/course-page-title'
+import { fetchCourse, type CoursePublic } from '../../lib/courses-api'
 import { ConsortiumHomeBrandingBanner } from '../../components/consortium/consortium-home-branding-banner'
 import { CourseSyllabusAcceptanceOverlay } from './course-syllabus-acceptance-overlay'
 
@@ -49,12 +52,33 @@ function EvaluationReminderBanner({ courseCode }: { courseCode: string }) {
  */
 export default function CourseLayout() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const location = useLocation()
   const { ffCourseEvaluations } = usePlatformFeatures()
   const structureRevision = useCourseStructureRevision(courseCode)
+  const [course, setCourse] = useState<CoursePublic | null>(null)
   const liveValue = useMemo(
     () => ({ structureRevision }),
     [structureRevision],
   )
+  const defaultPageTitle = courseCode ? coursePageTitleFromPath(location.pathname) : null
+
+  useEffect(() => {
+    if (!courseCode) {
+      setCourse(null)
+      return
+    }
+    let cancelled = false
+    fetchCourse(courseCode)
+      .then((row) => {
+        if (!cancelled) setCourse(row)
+      })
+      .catch(() => {
+        if (!cancelled) setCourse(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
 
   return (
     <CourseLiveContext.Provider value={liveValue}>
@@ -63,7 +87,12 @@ export default function CourseLayout() {
         <EvaluationReminderBanner courseCode={courseCode} />
       ) : null}
       {courseCode ? <ConsortiumHomeBrandingBanner courseCode={courseCode} /> : null}
-      <Outlet />
+      <CourseDocumentTitleProvider
+        courseTitle={course?.title ?? null}
+        defaultPageTitle={defaultPageTitle}
+      >
+        <Outlet context={{ course }} />
+      </CourseDocumentTitleProvider>
     </CourseLiveContext.Provider>
   )
 }

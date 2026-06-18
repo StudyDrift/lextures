@@ -56,6 +56,7 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
   const activeCourseImportAbortsRef = useRef<Set<AbortController>>(new Set())
   const [nameFilter, setNameFilter] = useState('')
   const [hideUnpublished, setHideUnpublished] = useState(false)
+  const [enableCanvasGradeSync, setEnableCanvasGradeSync] = useState(false)
 
   const filteredCourses = useMemo(() => {
     if (!courses) return []
@@ -86,6 +87,7 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
     clearImportLog()
     setNameFilter('')
     setHideUnpublished(false)
+    setEnableCanvasGradeSync(false)
     importCancelledRef.current = false
     for (const controller of activeCourseImportAbortsRef.current) {
       controller.abort()
@@ -220,6 +222,7 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
                 canvasCourseId: String(canvasCourse.id),
                 accessToken: token,
                 include: CANVAS_IMPORT_INCLUDE_ALL,
+                ...(enableCanvasGradeSync ? { canvasGradeSyncEnabled: true } : {}),
               },
               (message) => appendImportLog(`${canvasCourse.name}: ${message}`),
               { signal: courseAbort.signal },
@@ -398,6 +401,24 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
                     Hide unpublished courses
                   </span>
                 </label>
+                <label className="flex cursor-pointer items-start gap-2 rounded-xl border border-sky-200 bg-sky-50/80 p-3 dark:border-sky-900/50 dark:bg-sky-950/30">
+                  <input
+                    type="checkbox"
+                    className="mt-0.5"
+                    checked={enableCanvasGradeSync}
+                    onChange={(e) => setEnableCanvasGradeSync(e.target.checked)}
+                  />
+                  <span>
+                    <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
+                      Sync grades back to Canvas when grading
+                    </span>
+                    <span className="mt-0.5 block text-xs text-slate-600 dark:text-neutral-400">
+                      When enabled, saving a grade in Lextures automatically pushes it to Canvas.
+                      Requires a Canvas token with grade-update permission (saved in this browser if
+                      you chose Remember).
+                    </span>
+                  </span>
+                </label>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -490,7 +511,7 @@ export function CanvasImportCoursesModal({ open, onClose, onImported }: Props) {
           {step === 'importing' && (
             <div className="flex min-h-[280px] flex-col gap-4 py-2">
               {busy && (
-                <div className="flex shrink-0 justify-center overflow-visible px-6 pt-4" aria-hidden>
+                <div className="flex shrink-0 justify-center overflow-visible px-6 pt-8" aria-hidden>
                   <span className="inline-flex origin-center scale-[0.65] sm:scale-[0.75]">
                     <BookLoader className="![--quiz-book-loader-color:rgb(79,70,229)] dark:![--quiz-book-loader-color:rgb(129,140,248)]" />
                   </span>

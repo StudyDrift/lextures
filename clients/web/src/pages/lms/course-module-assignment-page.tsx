@@ -30,6 +30,7 @@ import {
   type ResolvedMarkdownTheme,
   resolveMarkdownTheme,
 } from '../../lib/markdown-theme'
+import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useLmsDarkMode } from '../../hooks/use-lms-dark-mode'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { getJwtSubject } from '../../lib/auth'
@@ -404,6 +405,8 @@ export default function CourseModuleAssignmentPage() {
     void load()
   }, [load])
 
+  useCoursePageTitle(!loading && title ? title : null)
+
   const viewerIsCourseStaff = viewerIsCourseStaffEnrollment(viewerEnrollmentRoles)
 
   const assignmentAcceptsSubmissions = submissionTypesAreSet(
@@ -448,7 +451,7 @@ export default function CourseModuleAssignmentPage() {
           fetchCourseEnrollmentsList(courseCode),
         ])
         if (!cancelled) {
-          setSubmissionCount(submissions.length)
+          setSubmissionCount(submissions.filter((submission) => Boolean(submission.id)).length)
           setEnrolledStudentCount(countEnrolledStudents(enrollments))
         }
       } catch {

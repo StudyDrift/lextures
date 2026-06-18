@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/canvasimportevents"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/canvasimportjobs"
+	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 )
 
@@ -54,11 +55,12 @@ func (d Deps) handleCourseImportCanvasPost() http.HandlerFunc {
 		}
 
 		var req struct {
-			Mode           string              `json:"mode"`
-			CanvasBaseURL  string              `json:"canvasBaseUrl"`
-			CanvasCourseID string              `json:"canvasCourseId"`
-			AccessToken    string              `json:"accessToken"`
-			Include        canvasImportInclude `json:"include"`
+			Mode                   string              `json:"mode"`
+			CanvasBaseURL          string              `json:"canvasBaseUrl"`
+			CanvasCourseID         string              `json:"canvasCourseId"`
+			AccessToken            string              `json:"accessToken"`
+			Include                canvasImportInclude `json:"include"`
+			CanvasGradeSyncEnabled *bool               `json:"canvasGradeSyncEnabled"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -74,6 +76,12 @@ func (d Deps) handleCourseImportCanvasPost() http.HandlerFunc {
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to queue Canvas import.")
 			return
+		}
+		if req.CanvasGradeSyncEnabled != nil && *req.CanvasGradeSyncEnabled {
+			if _, err := course.SetCanvasGradeSyncEnabled(r.Context(), d.Pool, courseCode, true); err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to enable Canvas grade sync.")
+				return
+			}
 		}
 		msg := canvasimportjobs.QueueMessage{
 			JobID:          jobID,

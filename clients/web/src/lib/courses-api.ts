@@ -151,6 +151,8 @@ export type CoursePublic = {
   attendanceEnabled?: boolean
   /** Whiteboard canvas tool for teachers (default off). */
   whiteboardEnabled?: boolean
+  /** When true, saved grades are pushed back to the linked Canvas course (default off). */
+  canvasGradeSyncEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
   requireCaptions?: boolean
   /** `traditional` or `competency_based` (server default when omitted: traditional). */
@@ -5173,6 +5175,8 @@ export type PostCourseImportCanvasBody = {
   accessToken: string
   /** When omitted, every category is imported (server default). */
   include?: CanvasImportInclude
+  /** Enable pushing grades back to Canvas when grading (off by default). */
+  canvasGradeSyncEnabled?: boolean
 }
 
 export const CANVAS_IMPORT_CANCELLED_MESSAGE = 'Import cancelled.'
@@ -5215,6 +5219,7 @@ export async function postCourseImportCanvas(
       canvasCourseId: body.canvasCourseId,
       accessToken: body.accessToken,
       include: body.include ?? CANVAS_IMPORT_INCLUDE_ALL,
+      ...(body.canvasGradeSyncEnabled ? { canvasGradeSyncEnabled: true } : {}),
     }),
     signal,
   })
@@ -5304,7 +5309,8 @@ export async function postCourseImportCanvas(
 
 /** Row from `/assignments/:itemId/submissions` (plan 3.1). */
 export type ModuleAssignmentSubmissionApi = {
-  id: string
+  /** Omitted for enrolled students who have not submitted yet. */
+  id?: string
   /** Omitted when blind grading hides student identity (plan 3.3). */
   submittedBy?: string
   /** Human-readable submitter name when identities are visible. */
@@ -5312,8 +5318,8 @@ export type ModuleAssignmentSubmissionApi = {
   /** Set when blind grading is active (plan 3.3). */
   blindLabel?: string
   attachmentFileId: string | null
-  submittedAt: string
-  updatedAt: string
+  submittedAt?: string
+  updatedAt?: string
   attachmentContentPath?: string | null
   attachmentMimeType?: string | null
   attachmentFilename?: string | null
@@ -5428,13 +5434,16 @@ export async function fetchModuleAssignmentSubmissions(
 
 /** Grade for one submission (`GET/PUT .../submissions/:id/grade`). */
 export type SubmissionGradeApi = {
-  submissionId: string
+  submissionId?: string
+  studentUserId?: string
   pointsEarned?: number
   maxPoints?: number | null
   rubricScores?: Record<string, number>
   instructorComment?: string | null
   posted?: boolean
   excused?: boolean
+  /** True when the grade was pushed to Canvas successfully. */
+  syncedToCanvas?: boolean
 }
 
 export async function fetchSubmissionGrade(
@@ -5472,6 +5481,224 @@ export async function putSubmissionGrade(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as SubmissionGradeApi
+}
+
+export async function fetchAssignmentStudentGrade(
+  courseCode: string,
+  itemId: string,
+  studentUserId: string,
+): Promise<SubmissionGradeApi> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/students/${encodeURIComponent(studentUserId)}/grade`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as SubmissionGradeApi
+}
+
+export async function putAssignmentStudentGrade(
+  courseCode: string,
+  itemId: string,
+  studentUserId: string,
+  body: {
+    pointsEarned?: number
+    rubricScores?: Record<string, number>
+    instructorComment?: string | null
+    clearGrade?: boolean
+  },
+): Promise<SubmissionGradeApi> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/students/${encodeURIComponent(studentUserId)}/grade`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as SubmissionGradeApi
+}
+
+export type CourseCanvasLinkApi = {
+  linked: boolean
+  canvasBaseUrl?: string
+  canvasCourseId?: string
+  gradeSyncEnabled?: boolean
+}
+
+export async function fetchCourseCanvasLink(courseCode: string): Promise<CourseCanvasLinkApi> {
+  const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}/canvas-link`)
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as CourseCanvasLinkApi
+}
+
+export async function patchCourseCanvasGradeSync(
+  courseCode: string,
+  gradeSyncEnabled: boolean,
+): Promise<CourseCanvasLinkApi> {
+  const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}/canvas-link`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gradeSyncEnabled }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as CourseCanvasLinkApi
+}
+
+export type CanvasSubmissionSyncQueuedResponse = {
+  jobId: string
+  message: string
+}
+
+function canvasSubmissionSyncWebSocketUrl(jobId: string): string | null {
+  if (!getAccessToken()) return null
+  const base = apiBaseUrl()
+  const u = new URL(base)
+  u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:'
+  return `${u.origin}/api/v1/ws/canvas-submission-sync/${encodeURIComponent(jobId)}`
+}
+
+/** Queues a Canvas grade push for one submission (RabbitMQ) and waits for completion over a job WebSocket. */
+export async function syncSubmissionToCanvas(
+  courseCode: string,
+  itemId: string,
+  submissionId: string,
+  body: {
+    canvasBaseUrl?: string
+    accessToken: string
+    pointsEarned?: number
+    rubricScores?: Record<string, number>
+    instructorComment?: string | null
+  },
+  options?: { signal?: AbortSignal },
+): Promise<SubmissionGradeApi> {
+  const authToken = getAccessToken()
+  if (!authToken) {
+    throw new Error('Sign in to sync grades to Canvas.')
+  }
+
+  const signal = options?.signal
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/${encodeURIComponent(submissionId)}/sync-canvas`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal,
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+
+  const queued = raw as CanvasSubmissionSyncQueuedResponse
+  if (!queued.jobId?.trim()) {
+    throw new Error('Server did not return a sync job id.')
+  }
+
+  const url = canvasSubmissionSyncWebSocketUrl(queued.jobId)
+  if (!url) {
+    throw new Error('Sign in to sync grades to Canvas.')
+  }
+
+  return new Promise<SubmissionGradeApi>((resolve, reject) => {
+    const ws = new WebSocket(url)
+    let settled = false
+    let aborted = false
+
+    const fail = (msg: string) => {
+      if (settled) return
+      settled = true
+      reject(new Error(msg))
+    }
+
+    const onAbort = () => {
+      aborted = true
+      if (settled) return
+      settled = true
+      ws.close()
+      reject(new Error('Canvas sync cancelled.'))
+    }
+
+    signal?.addEventListener('abort', onAbort, { once: true })
+
+    ws.onopen = () => {
+      if (signal?.aborted) {
+        onAbort()
+        return
+      }
+      ws.send(JSON.stringify({ authToken }))
+    }
+
+    ws.onmessage = (ev) => {
+      let rawMsg: unknown
+      try {
+        rawMsg = JSON.parse(String(ev.data))
+      } catch {
+        fail('Unexpected message from server.')
+        ws.close()
+        return
+      }
+      const o = rawMsg as { type?: string; message?: string; grade?: SubmissionGradeApi }
+      if (o.type === 'complete') {
+        if (!settled) {
+          settled = true
+          ws.close()
+          if (o.grade && typeof o.grade === 'object') {
+            resolve(o.grade)
+          } else {
+            resolve({ submissionId, syncedToCanvas: true })
+          }
+        }
+        return
+      }
+      if (o.type === 'error') {
+        fail(typeof o.message === 'string' ? o.message : 'Could not sync to Canvas.')
+        ws.close()
+      }
+    }
+
+    ws.onerror = () => {
+      fail('Connection error during Canvas sync.')
+    }
+
+    ws.onclose = () => {
+      if (!settled && !aborted) {
+        fail('Connection closed before Canvas sync finished.')
+      }
+    }
+  })
+}
+
+/** Queues a Canvas grade push and invokes callbacks when the background job finishes. */
+export function queueSubmissionSyncToCanvas(
+  courseCode: string,
+  itemId: string,
+  submissionId: string,
+  body: {
+    canvasBaseUrl?: string
+    accessToken: string
+    pointsEarned?: number
+    rubricScores?: Record<string, number>
+    instructorComment?: string | null
+  },
+  handlers: {
+    onComplete?: (grade: SubmissionGradeApi) => void
+    onError?: (message: string) => void
+  },
+): { abort: () => void } {
+  const controller = new AbortController()
+  void syncSubmissionToCanvas(courseCode, itemId, submissionId, body, {
+    signal: controller.signal,
+  })
+    .then((grade) => handlers.onComplete?.(grade))
+    .catch((e) => {
+      if (controller.signal.aborted) return
+      handlers.onError?.(e instanceof Error ? e.message : 'Could not sync to Canvas.')
+    })
+  return { abort: () => controller.abort() }
 }
 
 export async function uploadModuleAssignmentSubmissionFile(

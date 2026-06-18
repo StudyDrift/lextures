@@ -19,6 +19,9 @@ import (
 	"github.com/lextures/lextures/server/internal/background"
 	"github.com/lextures/lextures/server/internal/canvasimportevents"
 	"github.com/lextures/lextures/server/internal/canvasimportqueue"
+	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
+	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
+	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
@@ -105,6 +108,18 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 	defer func() { _ = canvasImportQueue.Close() }()
 
+	canvasSubmissionSyncHub := canvassubmissionsyncevents.New()
+	canvasSubmissionSyncJobs := canvassubmissionsyncjobs.NewRegistry()
+	canvasSubmissionSyncQueue, syncQueueErr := canvassubmissionsyncqueue.NewBus(
+		merged.RabbitMQURL,
+		merged.CanvasSubmissionSyncQueueName,
+		merged.CanvasSubmissionSyncConcurrency,
+	)
+	if syncQueueErr != nil {
+		return fmt.Errorf("app: canvas submission sync queue: %w", syncQueueErr)
+	}
+	defer func() { _ = canvasSubmissionSyncQueue.Close() }()
+
 	deps := httpserver.Deps{
 		Pool:              pool,
 		JWTSigner:         auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
@@ -116,12 +131,16 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		BrandingResolver:  brandingResolver,
 		NotifHub:          notifevents.New(),
 		FeedHub:           feedevents.New(),
-		CanvasImportHub:   canvasImportHub,
-		CanvasImportQueue: canvasImportQueue,
-		Storage:           storage,
+		CanvasImportHub:           canvasImportHub,
+		CanvasImportQueue:         canvasImportQueue,
+		CanvasSubmissionSyncHub:   canvasSubmissionSyncHub,
+		CanvasSubmissionSyncQueue: canvasSubmissionSyncQueue,
+		CanvasSubmissionSyncJobs:  canvasSubmissionSyncJobs,
+		Storage:                   storage,
 		StorageQuota:      quotaSvc,
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
+	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,
 		Handler: httpserver.NewHandler(deps),
