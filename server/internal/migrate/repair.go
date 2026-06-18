@@ -138,6 +138,76 @@ func repairMigration289RenumberCollision(ctx context.Context, c *pgx.Conn, fsys 
 	return tx.Commit(ctx)
 }
 
+// repairMigration294RenumberCollision fixes dev/demo DBs that applied study_buddy as v294
+// before main's 294_course_files_submission_size_500mb.sql landed and study_buddy was renumbered to 296.
+func repairMigration294RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
+	if !migrateRepairChecksumsEnabled() {
+		return nil
+	}
+	var v294Desc string
+	err := c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 294`,
+	).Scan(&v294Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v294 renumber: %w", err)
+	}
+	if v294Desc != "study_buddy" {
+		return nil
+	}
+	var courseFilesAt500mb bool
+	err = c.QueryRow(ctx, `
+SELECT EXISTS (
+    SELECT 1
+    FROM pg_constraint
+    WHERE conname = 'course_files_byte_size_check'
+      AND pg_get_constraintdef(oid) LIKE '%524288000%'
+)`).Scan(&courseFilesAt500mb)
+	if err != nil {
+		return fmt.Errorf("migrate repair v294 renumber: %w", err)
+	}
+	if courseFilesAt500mb {
+		return nil
+	}
+
+	courseFilesBody, err := fs.ReadFile(fsys, dir+"/294_course_files_submission_size_500mb.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v294 renumber: read course_files: %w", err)
+	}
+	if _, err := c.Exec(ctx, string(courseFilesBody)); err != nil {
+		return fmt.Errorf("migrate repair v294 renumber: apply course_files: %w", err)
+	}
+
+	courseFilesSum := sqlxChecksum(courseFilesBody)
+	studyBuddyBody, err := fs.ReadFile(fsys, dir+"/296_study_buddy.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v294 renumber: read study_buddy: %w", err)
+	}
+	studyBuddySum := sqlxChecksum(studyBuddyBody)
+
+	tx, err := c.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 294`,
+		"course_files_submission_size_500mb", courseFilesSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v294 renumber: update v294: %w", err)
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO `+sqlxMigrationsTable+` (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, 0)`,
+		int64(296), "study_buddy", studyBuddySum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v294 renumber: insert v296: %w", err)
+	}
+	return tx.Commit(ctx)
+}
+
 // repairMigration292RenumberCollision fixes dev/demo DBs that applied instructor_comments_json
 // as v292 before main's 292_learner_goals.sql landed and instructor_comments was renumbered to 293.
 func repairMigration292RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
