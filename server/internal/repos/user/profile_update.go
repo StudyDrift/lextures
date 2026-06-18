@@ -35,7 +35,8 @@ func UpdateProfile(
 	userID uuid.UUID,
 	firstName, lastName, avatarURL, uiTheme *string,
 	showHelpPopover *bool,
-	timezone *string,
+	timezone, phoneNumber *string,
+	updatePhoneNumber bool,
 ) (*Row, error) {
 	const q = `UPDATE "user".users
 SET
@@ -44,10 +45,11 @@ SET
 	avatar_url = $4,
 	ui_theme = COALESCE($5, ui_theme),
 	show_help_popover = COALESCE($6, show_help_popover),
-	timezone = COALESCE($7, timezone)
+	timezone = COALESCE($7, timezone),
+	phone_number = CASE WHEN $9 THEN $8 ELSE phone_number END
 WHERE id = $1
 RETURNING ` + userRowColumns
-	row := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover, timezone)
+	row := pool.QueryRow(ctx, q, userID, firstName, lastName, avatarURL, uiTheme, showHelpPopover, timezone, phoneNumber, updatePhoneNumber)
 	r, err := scanInsertedUserRow(row)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

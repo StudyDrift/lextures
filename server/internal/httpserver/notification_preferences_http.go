@@ -31,6 +31,7 @@ func (d Deps) handlePutMyNotificationPreferences() http.HandlerFunc {
 		EventType    string  `json:"eventType"`
 		EmailEnabled *bool   `json:"emailEnabled"`
 		PushEnabled  *bool   `json:"pushEnabled"`
+		SmsEnabled   *bool   `json:"smsEnabled"`
 		DigestMode   *string `json:"digestMode"`
 	}
 	type body struct {
@@ -62,7 +63,7 @@ func (d Deps) handlePutMyNotificationPreferences() http.HandlerFunc {
 					return
 				}
 			}
-			if err := notificationprefs.UpsertItem(r.Context(), d.Pool, userID, p.EventType, p.EmailEnabled, p.PushEnabled, p.DigestMode); err != nil {
+			if err := notificationprefs.UpsertItem(r.Context(), d.Pool, userID, p.EventType, p.EmailEnabled, p.PushEnabled, p.SmsEnabled, p.DigestMode); err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save preferences.")
 				return
 			}

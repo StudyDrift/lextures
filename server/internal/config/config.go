@@ -119,6 +119,8 @@ type Config struct {
 
 	// PushNotificationsEnabled gates Web Push (VAPID) notifications (plan 6.3).
 	PushNotificationsEnabled bool
+	// SmsNotificationsEnabled gates SMS notification enqueueing (Twilio delivery).
+	SmsNotificationsEnabled bool
 	// VAPIDPublicKey is the base64url-encoded P-256 public key for VAPID.
 	VAPIDPublicKey string
 	// VAPIDPrivateKey is the base64url-encoded P-256 private key for VAPID signing.
@@ -418,6 +420,17 @@ type Config struct {
 	CanvasSubmissionSyncQueueName string
 	// CanvasSubmissionSyncConcurrency is how many Canvas grade-push jobs the queue consumer processes in parallel.
 	CanvasSubmissionSyncConcurrency int
+	// SmsNotificationQueueName is the RabbitMQ queue for SMS notifications (default notifications.sms).
+	SmsNotificationQueueName string
+	// SmsNotificationConcurrency is how many SMS jobs the queue consumer processes in parallel.
+	SmsNotificationConcurrency int
+
+	// TwilioAccountSID is the Twilio account SID for SMS delivery.
+	TwilioAccountSID string
+	// TwilioAuthToken is the Twilio auth token for SMS delivery.
+	TwilioAuthToken string
+	// TwilioFromNumber is the Twilio sender phone number (E.164).
+	TwilioFromNumber string
 }
 
 // Load reads configuration from the environment.
@@ -572,6 +585,12 @@ func Load() Config {
 		CanvasImportConcurrency:           canvasImportConcurrency(),
 		CanvasSubmissionSyncQueueName:     stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
 		CanvasSubmissionSyncConcurrency:   canvasSubmissionSyncConcurrency(),
+		SmsNotificationsEnabled:           boolEnv("SMS_NOTIFICATIONS_ENABLED"),
+		SmsNotificationQueueName:          stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
+		SmsNotificationConcurrency:        smsNotificationConcurrency(),
+		TwilioAccountSID:                  firstNonEmptyTrimmed("TWILIO_ACCOUNT_SID"),
+		TwilioAuthToken:                   firstNonEmptyTrimmed("TWILIO_AUTH_TOKEN"),
+		TwilioFromNumber:                  firstNonEmptyTrimmed("TWILIO_FROM_NUMBER"),
 	}
 }
 
@@ -790,6 +809,18 @@ func canvasImportConcurrency() int {
 
 func canvasSubmissionSyncConcurrency() int {
 	raw := strings.TrimSpace(os.Getenv("CANVAS_SUBMISSION_SYNC_CONCURRENCY"))
+	if raw == "" {
+		return 5
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 1 {
+		return 5
+	}
+	return n
+}
+
+func smsNotificationConcurrency() int {
+	raw := strings.TrimSpace(os.Getenv("SMS_NOTIFICATION_CONCURRENCY"))
 	if raw == "" {
 		return 5
 	}

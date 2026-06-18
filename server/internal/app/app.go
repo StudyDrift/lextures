@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
@@ -91,7 +92,17 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		return fmt.Errorf("app: storage: %w", storageErr)
 	}
 
-	background.StartWithStorage(ctx, pool, merged, storage)
+	smsNotificationQueue, smsQueueErr := smsnotificationqueue.NewBus(
+		merged.RabbitMQURL,
+		merged.SmsNotificationQueueName,
+		merged.SmsNotificationConcurrency,
+	)
+	if smsQueueErr != nil {
+		return fmt.Errorf("app: sms notification queue: %w", smsQueueErr)
+	}
+	defer func() { _ = smsNotificationQueue.Close() }()
+
+	background.StartWithStorage(ctx, pool, merged, storage, smsNotificationQueue)
 
 	ltiRT := lti.NewFromConfig(merged)
 	brandingResolver := orgbranding.NewResolver(pool, merged.BrandingMultitenantHostSuffix, webHostFromOrigin(merged.PublicWebOrigin))
@@ -136,11 +147,13 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		CanvasSubmissionSyncHub:   canvasSubmissionSyncHub,
 		CanvasSubmissionSyncQueue: canvasSubmissionSyncQueue,
 		CanvasSubmissionSyncJobs:  canvasSubmissionSyncJobs,
+		SmsNotificationQueue:      smsNotificationQueue,
 		Storage:                   storage,
 		StorageQuota:      quotaSvc,
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
+	background.StartSmsNotificationConsumer(ctx, smsNotificationQueue, pool, merged)
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,
 		Handler: httpserver.NewHandler(deps),

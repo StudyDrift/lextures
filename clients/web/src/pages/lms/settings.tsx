@@ -121,6 +121,7 @@ type AccountProfile = {
   displayName?: string | null
   firstName?: string | null
   lastName?: string | null
+  phoneNumber?: string | null
   avatarUrl?: string | null
   uiTheme?: string | null
   showHelpPopover?: boolean
@@ -223,6 +224,7 @@ export default function Settings() {
   const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null)
   const [avatarModalOpen, setAvatarModalOpen] = useState(false)
@@ -446,6 +448,7 @@ export default function Settings() {
       setEmail(data.email ?? '')
       setFirstName(data.firstName ?? '')
       setLastName(data.lastName ?? '')
+      setPhoneNumber(data.phoneNumber ?? '')
       const currentAvatar = data.avatarUrl ?? ''
       setAvatarUrl(currentAvatar)
       setAvatarPreviewUrl(currentAvatar || null)
@@ -806,6 +809,7 @@ export default function Settings() {
         body: JSON.stringify({
           firstName,
           lastName,
+          phoneNumber: phoneNumber.trim() || null,
           avatarUrl: avatarUrl.trim() || null,
           uiTheme,
           showHelpPopover,
@@ -819,6 +823,7 @@ export default function Settings() {
       const data = raw as AccountProfile
       setFirstName(data.firstName ?? '')
       setLastName(data.lastName ?? '')
+      setPhoneNumber(data.phoneNumber ?? '')
       setStudentId(data.sid?.trim() ? data.sid.trim() : null)
       setSessionManagementUiEnabled(data.sessionManagementUiEnabled === true)
       const nextAvatar = data.avatarUrl ?? ''
@@ -1337,6 +1342,26 @@ export default function Settings() {
                       disabled
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-500"
                     />
+                  </div>
+
+                  <div>
+                    <label htmlFor="account-phone" className="mb-1.5 block text-sm font-medium text-slate-700">
+                      Phone number
+                    </label>
+                    <input
+                      id="account-phone"
+                      form={accountFormId}
+                      type="tel"
+                      autoComplete="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      maxLength={30}
+                      placeholder="+1 (555) 555-0100"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2"
+                    />
+                    <p className="mt-1 text-xs text-slate-500">
+                      Used for SMS notifications when enabled on the Notifications page.
+                    </p>
                   </div>
 
                   <div>

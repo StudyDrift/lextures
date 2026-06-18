@@ -23,17 +23,18 @@ import (
 	"github.com/lextures/lextures/server/internal/workers/h5pextract"
 	"github.com/lextures/lextures/server/internal/workers/catalogsync"
 	"github.com/lextures/lextures/server/internal/workers/sissync"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 	"github.com/lextures/lextures/server/internal/workers/transcode"
 )
 
 // Start launches quiz auto-submit and (when enabled) grade-posting sweeps on a 30s ticker
 // (Rust `server/src/lib.rs`).
 func Start(ctx context.Context, pool *pgxpool.Pool, cfg config.Config) {
-	StartWithStorage(ctx, pool, cfg, nil)
+	StartWithStorage(ctx, pool, cfg, nil, nil)
 }
 
 // StartWithStorage is Start extended with an optional storage driver for transcode jobs.
-func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, storage filestorage.Driver) {
+func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, storage filestorage.Driver, smsQueue *smsnotificationqueue.Bus) {
 	if pool == nil {
 		return
 	}
@@ -44,7 +45,7 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		if !cfg.GradePostingPoliciesEnabled {
 			return
 		}
-		sweepScheduledReleases(context.Background(), pool, cfg, time.Now().UTC())
+		sweepScheduledReleases(context.Background(), pool, cfg, smsQueue, time.Now().UTC())
 	})
 	go runEvery(ctx, 30*time.Second, func() {
 		n, err := terms.SweepStatuses(context.Background(), pool, time.Now().UTC())

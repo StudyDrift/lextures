@@ -10,11 +10,12 @@ import (
 
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
-// NotifyAutoPostedFromGradebookPut emails students when automatic posting policy released grades from the grid save.
-func NotifyAutoPostedFromGradebookPut(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, grades map[string]map[string]string) {
-	if !cfg.EmailNotificationsEnabled || len(grades) == 0 {
+// NotifyAutoPostedFromGradebookPut emails and SMS-notifies students when automatic posting policy released grades from the grid save.
+func NotifyAutoPostedFromGradebookPut(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, grades map[string]map[string]string, smsQueue *smsnotificationqueue.Bus) {
+	if (!cfg.EmailNotificationsEnabled && !cfg.SmsNotificationsEnabled) || len(grades) == 0 {
 		return
 	}
 	itemSet := make(map[uuid.UUID]struct{})
@@ -76,6 +77,6 @@ WHERE cg.course_id = $1
 			continue
 		}
 		seen[k] = struct{}{}
-		NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, itemID, []coursegrades.PostedCell{{StudentUserID: studentID}})
+		NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, itemID, []coursegrades.PostedCell{{StudentUserID: studentID}}, smsQueue)
 	}
 }

@@ -10,11 +10,15 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
-// NotifyGradesPostedAfterRelease emails students for cells just marked posted.
-func NotifyGradesPostedAfterRelease(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID, moduleItemID uuid.UUID, cells []coursegrades.PostedCell) {
-	if !cfg.EmailNotificationsEnabled || len(cells) == 0 {
+// NotifyGradesPostedAfterRelease emails and SMS-notifies students for cells just marked posted.
+func NotifyGradesPostedAfterRelease(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID, moduleItemID uuid.UUID, cells []coursegrades.PostedCell, smsQueue *smsnotificationqueue.Bus) {
+	if len(cells) == 0 {
+		return
+	}
+	if !cfg.EmailNotificationsEnabled && !cfg.SmsNotificationsEnabled {
 		return
 	}
 	code, err := course.GetCourseCodeByID(ctx, pool, courseID)
@@ -34,8 +38,14 @@ WHERE c.id = $1
 	orgPtr := &orgID
 
 	ns := &Service{Pool: pool, Config: cfg}
+	smsSvc := &SmsService{Pool: pool, Config: cfg, Queue: smsQueue}
 	for _, cell := range cells {
-		ns.NotifyGradePosted(ctx, cell.StudentUserID, courseTitle, assignmentTitle, *code, orgPtr)
+		if cfg.EmailNotificationsEnabled {
+			ns.NotifyGradePosted(ctx, cell.StudentUserID, courseTitle, assignmentTitle, *code, orgPtr)
+		}
+		if cfg.SmsNotificationsEnabled {
+			smsSvc.NotifyGradePosted(ctx, cell.StudentUserID, courseTitle, assignmentTitle, *code)
+		}
 	}
 	if len(cells) > 0 {
 		slog.Info("notifications.grade_posted", "course_id", courseID, "count", len(cells))
