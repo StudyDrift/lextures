@@ -557,5 +557,8 @@ func (d Deps) registerSettingsRoutes(r chi.Router) {
 	r.Put("/api/v1/settings/platform", d.handlePutPlatformSettings())
 	r.Get("/api/v1/settings/system-prompts", d.handleListSystemPrompts())
 	r.Put("/api/v1/settings/system-prompts/{key}", d.handlePutSystemPrompt())
+	r.Get("/api/v1/settings/archived-courses", d.handleGetArchivedCourses())
+	r.Post("/api/v1/settings/archived-courses/{course_code}/restore", d.handleRestoreArchivedCourse())
+	r.Delete("/api/v1/settings/archived-courses/{course_code}", d.handleDeleteArchivedCourse())
 	r.Route("/api/v1/settings", func(s chi.Router) { d.registerSettingsRBAC(s) })
 }

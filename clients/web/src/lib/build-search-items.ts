@@ -252,6 +252,12 @@ export function buildGlobalSearchItems(
         hint: 'saml feature flags lti oneroster platform environment database admin',
       },
       {
+        title: 'Archive',
+        subtitle: 'System settings',
+        path: '/settings/archive',
+        hint: 'archived courses restore delete permanently trash catalog',
+      },
+      {
         title: 'Organizations',
         subtitle: 'System settings',
         path: '/settings/organizations',

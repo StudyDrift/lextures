@@ -259,6 +259,8 @@ async function loadStaffRow(
     try {
       const backlog = await fetchCourseGradingBacklog(code)
       gradingBacklog = backlog.map((item) => ({
+        itemId: item.itemId ?? item.assignmentId,
+        itemType: item.itemType ?? 'assignment',
         assignmentId: item.assignmentId,
         assignmentTitle: item.assignmentTitle,
         ungradedCount: item.ungradedCount,
@@ -1064,7 +1066,7 @@ export default function Dashboard() {
                         </div>
                         <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800">
                           <div
-                            className="h-full rounded-full bg-indigo-500 transition-[width]"
+                            className="h-full rounded-full bg-indigo-500 motion-safe:transition-[width]"
                             style={{ width: `${Math.round(weekFrac * 100)}%` }}
                           />
                         </div>

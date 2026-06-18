@@ -314,6 +314,7 @@ export default function CourseGradebook() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const [searchParams] = useSearchParams()
   const highlightStudentId = searchParams.get('student')?.trim() || null
+  const highlightColumnId = searchParams.get('item')?.trim() || null
   const { allows, loading } = usePermissions()
   const { ffGradeSubmission, ffIncompleteGradeWorkflow } = usePlatformFeatures()
   const [students, setStudents] = useState<CourseGradebookGridStudent[]>([])
@@ -944,6 +945,7 @@ export default function CourseGradebook() {
             onGradeSubmission={canEditGrades ? openGradeSubmission : undefined}
             onOpenGradeHistory={openGradeHistory}
             highlightStudentId={highlightStudentId}
+            highlightColumnId={highlightColumnId}
             gradingScheme={gradingScheme}
             gradeHeld={gradeHeld}
             droppedGrades={droppedGrades}

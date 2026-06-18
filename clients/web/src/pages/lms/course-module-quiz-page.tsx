@@ -62,6 +62,7 @@ import {
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
+import { QuizSubmissionsPanel } from '../../components/quiz/quiz-submissions-panel'
 import { ProctoringPreExamChecklist } from '../../components/quiz/proctoring-pre-exam-checklist'
 import { fetchQuizProctoringConfig, type ProctoringConfig } from '../../lib/courses-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -250,6 +251,9 @@ export default function CourseModuleQuizPage() {
   const canEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
   const canEditQuizItems = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemsCreate(courseCode)),
+  )
+  const canViewGradebook = Boolean(
+    courseCode && !permLoading && allows(courseGradebookViewPermission(courseCode)),
   )
 
   const [title, setTitle] = useState('')
@@ -1125,7 +1129,7 @@ export default function CourseModuleQuizPage() {
                       className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
                     >
                       {offlineStatus === 'saving' ? (
-                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                        <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
                       ) : offlineStatus === 'cached' ? (
                         <CheckCircle className="h-4 w-4 text-emerald-600" aria-hidden />
                       ) : (
@@ -1361,6 +1365,10 @@ export default function CourseModuleQuizPage() {
             </aside>
           </div>
         )}
+
+        {!loading && !loadError && !editingContent && canViewGradebook && courseCode && itemId && !isAdaptive ? (
+          <QuizSubmissionsPanel courseCode={courseCode} itemId={itemId} />
+        ) : null}
       </div>
 
       {!loading && !loadError && editingContent && (
@@ -1893,7 +1901,7 @@ export default function CourseModuleQuizPage() {
                           {q.choices.map((choice, choiceIdx) => (
                             <div
                               key={`${q.id}-choice-${choiceIdx}`}
-                              className="group flex items-center gap-2 rounded-lg border border-transparent py-0.5 ps-0.5 pe-1 transition-colors hover:border-slate-100 hover:bg-slate-50/60"
+                              className="group flex items-center gap-2 rounded-lg border border-transparent py-0.5 ps-0.5 pe-1 motion-safe:transition-colors hover:border-slate-100 hover:bg-slate-50/60"
                             >
                               <button
                                 type="button"

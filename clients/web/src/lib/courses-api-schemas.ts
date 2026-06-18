@@ -563,6 +563,8 @@ export const quizAttemptSummaryApiSchema = z.object({
   scorePercent: z.number().nullable().optional(),
   pointsEarned: z.number(),
   pointsPossible: z.number(),
+  studentName: z.string().optional(),
+  needsManualGrading: z.boolean().optional(),
 })
 
 export const quizAttemptsListPayloadSchema = z.object({

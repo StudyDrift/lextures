@@ -18,7 +18,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { BookOpen, Plus } from 'lucide-react'
 import { KeyboardSensor as SharedKeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
-import { CanvasImportCoursesModal } from './canvas-import-courses-modal'
+import { useCanvasImport } from '../../context/canvas-import-context'
 import { CourseCatalogImportMenu } from './course-catalog-import-menu'
 import {
   CourseCatalogViewMenu,
@@ -743,9 +743,9 @@ export default function Courses() {
   const { allows, loading: permLoading } = usePermissions()
   const showCourseCreateActions = canCreateCourses(allows, permLoading)
   const coursesRevision = useCoursesRevision()
+  const { open: openCanvasImport } = useCanvasImport()
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [canvasImportOpen, setCanvasImportOpen] = useState(false)
   const [termFilter, setTermFilter] = useState<string>('')
   const [termList, setTermList] = useState<OrgTerm[]>([])
   const [gradeLevelFilter, setGradeLevelFilter] = useState<string>('')
@@ -1091,7 +1091,7 @@ export default function Courses() {
       actions={
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           {showCourseCreateActions ? (
-            <CourseCatalogImportMenu onImportCanvas={() => setCanvasImportOpen(true)} />
+            <CourseCatalogImportMenu onImportCanvas={openCanvasImport} />
           ) : null}
           <CourseCatalogViewMenu value={catalogView} onChange={handleCatalogViewChange} />
           {showCourseCreateActions ? (
@@ -1245,12 +1245,7 @@ export default function Courses() {
           </SortableContext>
         </DndContext>
       )}
-      {showCourseCreateActions ? (
-        <CanvasImportCoursesModal
-          open={canvasImportOpen}
-          onClose={() => setCanvasImportOpen(false)}
-        />
-      ) : null}
+
     </LmsPage>
   )
 }

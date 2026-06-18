@@ -76,6 +76,8 @@ type GradebookGridProps = {
    * Also pre-populates the student name filter so the gradebook is filtered down to that specific student.
    */
   highlightStudentId?: string | null
+  /** When set, pre-filters columns to this module item (e.g. grading backlog quiz link `?item=`). */
+  highlightColumnId?: string | null
   /** Active course grading scheme (letter bands, pass threshold, etc.). */
   gradingScheme?: { type: string; scaleJson: unknown } | null
   /** Plan 3.8 — held (unposted) manual cells; instructor still sees the score. */
@@ -258,6 +260,7 @@ export function GradebookGrid({
   onOpenGradeHistory,
   courseCode,
   highlightStudentId = null,
+  highlightColumnId = null,
   gradingScheme = null,
   gradeHeld = undefined,
   droppedGrades = undefined,
@@ -285,7 +288,13 @@ export function GradebookGrid({
     }
     return ''
   })
-  const [assignmentFilter, setAssignmentFilter] = useState('')
+  const [assignmentFilter, setAssignmentFilter] = useState(() => {
+    if (highlightColumnId && columns.length > 0) {
+      const col = columns.find((c) => c.id === highlightColumnId)
+      if (col?.title) return col.title
+    }
+    return ''
+  })
   const [focusRow, setFocusRow] = useState(0)
   const [focusCol, setFocusCol] = useState(0)
   /** Fixed corner for Shift+arrows / Shift+click / drag rectangle selection; `null` for a plain single-cell focus. */
@@ -524,6 +533,17 @@ export function GradebookGrid({
     }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [highlightStudentId, sortedStudents]) // eslint-disable-line react-hooks/exhaustive-deps -- intentional: studentFilter in guard would cause re-runs/loops on set; we only want to react to highlight + data arrival
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- pre-populate column filter from ?item= URL param */
+    if (!highlightColumnId) return
+    if (assignmentFilter.trim() !== '') return
+    const col = columns.find((c) => c.id === highlightColumnId)
+    if (col?.title) {
+      setAssignmentFilter(col.title)
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [highlightColumnId, columns]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- clear grade sort when its column is removed or filtered out */
@@ -1869,7 +1889,7 @@ export function GradebookGrid({
                             type="button"
                             tabIndex={-1}
                             aria-label="Fill — drag to copy the selection down or across"
-                            className="absolute -bottom-px -right-px z-[3] h-2.5 w-2.5 cursor-crosshair border border-white bg-indigo-600 shadow-sm hover:bg-indigo-500 dark:border-neutral-900 dark:bg-indigo-500 dark:hover:bg-indigo-400 touch-none"
+                            className="absolute -bottom-px -end-px z-[3] h-2.5 w-2.5 cursor-crosshair border border-white bg-indigo-600 shadow-sm hover:bg-indigo-500 dark:border-neutral-900 dark:bg-indigo-500 dark:hover:bg-indigo-400 touch-none"
                             onPointerDown={(e) => handleFillKnobPointerDown(e, activeSelectionBounds)}
                           />
                         )}

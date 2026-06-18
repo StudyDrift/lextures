@@ -26,6 +26,11 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
   )
   const wsRef = useRef<WebSocket | null>(null)
   const wsTokenRef = useRef<string | null>(null)
+  const wsReconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const bumpCoursesRevision = useCallback(() => {
+    setCoursesRevision((r) => r + 1)
+  }, [])
 
   const refreshUnread = useCallback(async () => {
     if (!getAccessToken()) {
@@ -62,12 +67,13 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const token = getAccessToken()
     if (!token) {
+      if (wsReconnectTimerRef.current) {
+        clearTimeout(wsReconnectTimerRef.current)
+        wsReconnectTimerRef.current = null
+      }
       wsRef.current?.close()
       wsRef.current = null
       wsTokenRef.current = null
-      return
-    }
-    if (wsRef.current && wsTokenRef.current === token) {
       return
     }
 
@@ -76,39 +82,76 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    wsRef.current?.close()
-    wsTokenRef.current = token
+    let cancelled = false
 
-    const ws = new WebSocket(url)
-    wsRef.current = ws
-    ws.onopen = () => {
+    const scheduleReconnect = () => {
+      if (cancelled || wsReconnectTimerRef.current) return
+      wsReconnectTimerRef.current = setTimeout(() => {
+        wsReconnectTimerRef.current = null
+        if (!cancelled) connect()
+      }, 2000)
+    }
+
+    const connect = () => {
+      if (cancelled) return
       const authToken = getAccessToken()
-      if (!authToken) {
-        ws.close()
+      if (!authToken) return
+
+      if (wsRef.current && wsTokenRef.current === authToken) {
         return
       }
-      ws.send(JSON.stringify({ authToken }))
-    }
 
-    ws.onmessage = (ev) => {
-      const msg = parseMailboxWsMessage(String(ev.data))
-      if (msg?.type === 'mailbox_updated') {
-        void refreshUnread()
-        setMailboxRevision((r) => r + 1)
-      } else if (msg?.type === 'courses_updated') {
-        setCoursesRevision((r) => r + 1)
-      } else if (msg?.type === 'enrollments_updated') {
-        const code = msg.courseCode ?? msg.course_code ?? null
-        setEnrollmentsUpdateCourseCode(code)
-        setEnrollmentsRevision((r) => r + 1)
+      wsRef.current?.close()
+      wsTokenRef.current = authToken
+
+      const ws = new WebSocket(url)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        const currentToken = getAccessToken()
+        if (!currentToken) {
+          ws.close()
+          return
+        }
+        ws.send(JSON.stringify({ authToken: currentToken }))
+      }
+
+      ws.onmessage = (ev) => {
+        const msg = parseMailboxWsMessage(String(ev.data))
+        if (msg?.type === 'mailbox_updated') {
+          void refreshUnread()
+          setMailboxRevision((r) => r + 1)
+        } else if (msg?.type === 'courses_updated') {
+          setCoursesRevision((r) => r + 1)
+        } else if (msg?.type === 'enrollments_updated') {
+          const code = msg.courseCode ?? msg.course_code ?? null
+          setEnrollmentsUpdateCourseCode(code)
+          setEnrollmentsRevision((r) => r + 1)
+        }
+      }
+
+      ws.onclose = () => {
+        if (wsRef.current === ws) {
+          wsRef.current = null
+        }
+        scheduleReconnect()
+      }
+
+      ws.onerror = () => {
+        ws.close()
       }
     }
+
+    connect()
 
     return () => {
-      ws.close()
-      if (wsRef.current === ws) {
-        wsRef.current = null
+      cancelled = true
+      if (wsReconnectTimerRef.current) {
+        clearTimeout(wsReconnectTimerRef.current)
+        wsReconnectTimerRef.current = null
       }
+      wsRef.current?.close()
+      wsRef.current = null
     }
   }, [location.pathname, refreshUnread])
 
@@ -120,6 +163,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       enrollmentsRevision,
       enrollmentsUpdateCourseCode,
       refreshUnread,
+      bumpCoursesRevision,
     }),
     [
       unreadInboxCount,
@@ -128,6 +172,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       enrollmentsRevision,
       enrollmentsUpdateCourseCode,
       refreshUnread,
+      bumpCoursesRevision,
     ],
   )
 

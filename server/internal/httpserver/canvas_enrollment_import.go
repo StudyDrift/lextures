@@ -458,17 +458,24 @@ func canvasApplyEnrollment(
 	courseCode string,
 	userID uuid.UUID,
 	role string,
+	sectionID *uuid.UUID,
 	stats *canvasEnrollmentImportStats,
 ) error {
+	var sec any
+	if sectionID != nil {
+		sec = *sectionID
+	}
 	tag, err := tx.Exec(ctx, `
-		INSERT INTO course.course_enrollments (course_id, user_id, role, active)
-		SELECT $1, $2, $3, true
+		INSERT INTO course.course_enrollments (course_id, user_id, role, active, section_id)
+		SELECT $1, $2, $3, true, $4
 		WHERE NOT EXISTS (
 			SELECT 1 FROM course.course_enrollments
 			WHERE course_id = $1 AND user_id = $2 AND role = 'owner'
 		)
-		ON CONFLICT (course_id, user_id, role) DO NOTHING
-	`, courseID, userID, role)
+		ON CONFLICT (course_id, user_id, role) DO UPDATE SET
+			active = true,
+			section_id = COALESCE(EXCLUDED.section_id, course.course_enrollments.section_id)
+	`, courseID, userID, role, sec)
 	if err != nil {
 		return err
 	}

@@ -11,6 +11,8 @@ export type InboxUnreadValue = {
   /** Course code from the latest enrollments_updated event, when provided. */
   enrollmentsUpdateCourseCode: string | null
   refreshUnread: () => Promise<void>
+  /** Bump coursesRevision so catalog pages refetch (e.g. after Canvas import WS complete). */
+  bumpCoursesRevision: () => void
 }
 
 export const InboxUnreadContext = createContext<InboxUnreadValue | null>(null)

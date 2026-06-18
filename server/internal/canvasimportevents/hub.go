@@ -10,8 +10,9 @@ import (
 
 // Message is a JSON-serializable WebSocket payload (progress, error, or complete).
 type Message struct {
-	Type    string `json:"type"`
-	Message string `json:"message,omitempty"`
+	Type       string `json:"type"`
+	Message    string `json:"message,omitempty"`
+	CourseCode string `json:"courseCode,omitempty"`
 }
 
 // Hub broadcasts import events to subscribers keyed by job ID.

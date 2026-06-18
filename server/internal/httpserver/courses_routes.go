@@ -118,6 +118,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/grading-scheme", d.handleGetCourseGradingScheme())
 	r.Put("/api/v1/courses/{course_code}/grading-scheme", d.handlePutCourseGradingScheme())
 	r.Get("/api/v1/courses/{course_code}/course-files/{file_id}/content", d.handleGetCourseFileContent())
+	r.Get("/api/v1/courses/{course_code}/course-files/{file_id}/preview", d.handleGetCourseFilePreview())
 	r.Post("/api/v1/courses/{course_code}/course-files", d.handlePostCourseFile())
 	r.Delete("/api/v1/courses/{course_code}/course-files/{file_id}", d.handleDeleteCourseFile())
 	// Course Files Manager (Drive-like)

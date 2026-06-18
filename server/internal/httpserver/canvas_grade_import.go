@@ -214,16 +214,66 @@ func coerceCanvasJSONNumber(v any) (float64, bool) {
 	}
 }
 
-func submissionScoreAndExcused(sub map[string]any) (excused bool, score float64, hasScore bool) {
+// canvasSubmissionIsGradedForImport reports whether Canvas considers this submission graded
+// (as opposed to submitted and awaiting grading). Resubmissions keep workflow_state=submitted
+// even when submission_history still carries the prior attempt's score.
+func canvasSubmissionIsGradedForImport(sub map[string]any) bool {
+	if sub == nil {
+		return false
+	}
+	if boolAt(sub, "excused", false) {
+		return true
+	}
+	state := strings.ToLower(strings.TrimSpace(strAt(sub, "workflow_state", "")))
+	switch state {
+	case "graded":
+		return true
+	case "submitted", "unsubmitted", "deleted":
+		return false
+	case "pending_review":
+		// Moderated grading: instructor entered a score awaiting release.
+		_, _, hasScore := canvasSubmissionTopLevelNumericScore(sub)
+		return hasScore
+	case "":
+		// Some Canvas list payloads omit workflow_state; infer from top-level score only.
+		_, _, hasScore := canvasSubmissionTopLevelNumericScore(sub)
+		return hasScore
+	default:
+		return false
+	}
+}
+
+func canvasSubmissionTopLevelNumericScore(sub map[string]any) (excused bool, score float64, hasScore bool) {
 	if sub == nil {
 		return false, 0, false
 	}
-	excused = boolAt(sub, "excused", false)
-	if excused {
+	if excused = boolAt(sub, "excused", false); excused {
 		return true, 0, false
 	}
 	if sc, ok := coerceCanvasJSONNumber(sub["score"]); ok {
 		return false, sc, true
+	}
+	if sc, ok := coerceCanvasJSONNumber(sub["entered_score"]); ok {
+		return false, sc, true
+	}
+	if assessment := objAt(sub, "rubric_assessment"); assessment != nil {
+		if sc, ok := coerceCanvasJSONNumber(assessment["score"]); ok {
+			return false, sc, true
+		}
+	}
+	return false, 0, false
+}
+
+func submissionScoreAndExcused(sub map[string]any) (excused bool, score float64, hasScore bool) {
+	if sub == nil {
+		return false, 0, false
+	}
+	if exc, sc, ok := canvasSubmissionTopLevelNumericScore(sub); ok || exc {
+		return exc, sc, ok
+	}
+	// Only fall back to submission_history when Canvas marks the current attempt graded.
+	if !canvasSubmissionIsGradedForImport(sub) {
+		return false, 0, false
 	}
 	if hist, ok := sub["submission_history"].([]any); ok && len(hist) > 0 {
 		for i := len(hist) - 1; i >= 0; i-- {
@@ -240,6 +290,18 @@ func submissionScoreAndExcused(sub map[string]any) (excused bool, score float64,
 		}
 	}
 	return false, 0, false
+}
+
+func deleteCourseGradeFromCanvasImport(
+	ctx context.Context,
+	tx pgx.Tx,
+	studentID, moduleItemID uuid.UUID,
+) error {
+	_, err := tx.Exec(ctx, `
+DELETE FROM course.course_grades
+WHERE student_user_id = $1 AND module_item_id = $2
+`, studentID, moduleItemID)
+	return err
 }
 
 func upsertCourseGradeFromCanvas(
@@ -332,6 +394,15 @@ func canvasImportAssignmentGrades(
 				continue
 			}
 			if importGrades {
+				if !canvasSubmissionIsGradedForImport(raw) {
+					if err := deleteCourseGradeFromCanvasImport(ctx, tx, studentID, itemID); err != nil {
+						return fmt.Errorf("clear stale grade for assignment canvas id %d: %w", canvasAID, err)
+					}
+					// #region agent log
+					skipNoScore++
+					// #endregion agent log
+					continue
+				}
 				synced, parseErr := canvasGradeFromSubmissionPayload(raw, nil, canvasUserToLocal)
 				if parseErr != nil {
 					return fmt.Errorf("parse grade for assignment canvas id %d: %w", canvasAID, parseErr)
@@ -348,6 +419,9 @@ func canvasImportAssignmentGrades(
 					upserts++
 					// #endregion agent log
 				} else {
+					if err := deleteCourseGradeFromCanvasImport(ctx, tx, studentID, itemID); err != nil {
+						return fmt.Errorf("clear empty grade for assignment canvas id %d: %w", canvasAID, err)
+					}
 					// #region agent log
 					skipNoScore++
 					// #endregion agent log
@@ -429,6 +503,8 @@ func canvasGetQuizSubmissionsPaginated(
 	out := make([]map[string]any, 0)
 	for page := 1; ; page++ {
 		qp := cloneQuery(q)
+		qp.Add("include[]", "user")
+		qp.Add("include[]", "submission")
 		qp.Set("per_page", "100")
 		qp.Set("page", strconv.Itoa(page))
 		v, err := canvasGetJSON(ctx, client, base, token,
@@ -462,6 +538,26 @@ func quizSubmissionImportRank(m map[string]any) int64 {
 		return 500_000 + att
 	default:
 		return att
+	}
+}
+
+// canvasQuizSubmissionIsGradedForImport reports whether Canvas considers a quiz submission fully graded.
+// pending_review means the learner submitted but manual question grading is still outstanding.
+func canvasQuizSubmissionIsGradedForImport(raw map[string]any) bool {
+	if raw == nil {
+		return false
+	}
+	if boolAt(raw, "excused", false) {
+		return true
+	}
+	state := strings.ToLower(strings.TrimSpace(strAt(raw, "workflow_state", "")))
+	switch state {
+	case "complete", "graded":
+		return true
+	case "pending_review", "submitted", "unsubmitted", "deleted":
+		return false
+	default:
+		return false
 	}
 }
 
@@ -502,7 +598,7 @@ func canvasImportQuizGrades(
 		// #endregion agent log
 		byCanvasUser := make(map[int64]map[string]any)
 		for _, raw := range subs {
-			canvasUserID := int64At(raw, "user_id")
+			canvasUserID := canvasCanvasUserIDFromMap(raw)
 			if canvasUserID <= 0 {
 				continue
 			}
@@ -521,6 +617,15 @@ func canvasImportQuizGrades(
 		for canvasUserID, raw := range byCanvasUser {
 			studentID, ok := canvasUserToLocal[canvasUserID]
 			if !ok {
+				continue
+			}
+			if !canvasQuizSubmissionIsGradedForImport(raw) {
+				if err := deleteCourseGradeFromCanvasImport(ctx, tx, studentID, itemID); err != nil {
+					return fmt.Errorf("clear stale grade for quiz canvas id %d: %w", canvasQID, err)
+				}
+				// #region agent log
+				quizSkipNoScore++
+				// #endregion agent log
 				continue
 			}
 			exc := boolAt(raw, "excused", false)
@@ -547,6 +652,9 @@ func canvasImportQuizGrades(
 				}
 			}
 			if !exc && !hasScore {
+				if err := deleteCourseGradeFromCanvasImport(ctx, tx, studentID, itemID); err != nil {
+					return fmt.Errorf("clear stale grade for quiz canvas id %d: %w", canvasQID, err)
+				}
 				// #region agent log
 				quizSkipNoScore++
 				// #endregion agent log
@@ -588,6 +696,7 @@ func canvasImportAllCanvasGrades(
 	canvasAssignToItem map[int64]uuid.UUID,
 	canvasQuizToItem map[int64]uuid.UUID,
 	canvasQuizToQuestions map[int64][]coursemodulequiz.QuizQuestion,
+	canvasQuizToAssignmentID map[int64]int64,
 	canvasUserToLocal map[int64]uuid.UUID,
 	submissionDeps *canvasAssignmentSubmissionImportDeps,
 ) error {
@@ -608,13 +717,16 @@ func canvasImportAllCanvasGrades(
 	if err != nil {
 		return err
 	}
+	if err := canvasBackfillQuizSubmissionsByUser(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizToItem, canvasUserToLocal, quizSubsByQuiz); err != nil {
+		return err
+	}
 	if err := canvasImportAssignmentGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasUserToLocal, submissionDeps, true); err != nil {
 		return err
 	}
 	if err := canvasImportQuizGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasUserToLocal, quizSubsByQuiz); err != nil {
 		return err
 	}
-	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal, quizSubsByQuiz); err != nil {
+	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasQuizToAssignmentID, canvasUserToLocal, quizSubsByQuiz); err != nil {
 		return err
 	}
 	return nil

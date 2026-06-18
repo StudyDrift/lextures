@@ -21,6 +21,7 @@ import (
 )
 
 func (d Deps) registerQuizDeliveryRoutes(r chi.Router) {
+	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts", d.handleQuizAttemptsList())
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/start", d.handleQuizStart())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/current-question", d.handleQuizCurrentQuestion())
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/focus-loss", d.handleQuizFocusLossPost())

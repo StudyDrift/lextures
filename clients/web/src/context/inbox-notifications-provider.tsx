@@ -6,9 +6,11 @@ import {
   loadNotificationToastedIds,
 } from '../lib/notification-toast'
 import { toast } from '../lib/lms-toast'
+import { useBumpCoursesRevision } from './use-inbox-unread'
 import { InboxNotificationsContext, type InboxNotification } from './inbox-notifications-context'
 
 export function InboxNotificationsProvider({ children }: { children: ReactNode }) {
+  const bumpCoursesRevision = useBumpCoursesRevision()
   const [notifications, setNotifications] = useState<InboxNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -36,6 +38,9 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
         return result.next
       })
       for (const n of toToast) {
+        if (n.eventType === 'canvas_course_imported') {
+          bumpCoursesRevision()
+        }
         if (n.eventType === 'inbox_message') {
           toast.info(n.title, { description: n.body })
         } else {
@@ -48,7 +53,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [bumpCoursesRevision])
 
   const markRead = useCallback(async (id: string) => {
     try {
