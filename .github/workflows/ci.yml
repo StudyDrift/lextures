@@ -199,6 +199,8 @@ jobs:
     name: E2E build (API + web)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.49.1-jammy
     steps:
       - uses: actions/checkout@v4
 
@@ -245,23 +247,13 @@ jobs:
           path: e2e/node_modules
           key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
-      - name: Cache Playwright browsers
-        id: playwright-browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
-          restore-keys: |
-            playwright-chromium-${{ runner.os }}-
-
-      # System deps (apt) run once here so parallel shards avoid lock contention.
-      - name: Install e2e dependencies and Playwright system deps (once)
+      # Playwright browsers + OS deps ship in the job container; only install npm packages.
+      - name: Install e2e dependencies
         working-directory: e2e
         run: |
           if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
             npm ci --prefer-offline --quiet
           fi
-          npx playwright install --with-deps chromium
 
       - name: Upload e2e build artifacts
         uses: actions/upload-artifact@v4
@@ -271,6 +263,123 @@ jobs:
             .cache/e2e/server
             clients/web/dist
           retention-days: 1
+
+  lighthouse-dashboard-dark:
+    name: Dashboard (dark mode)
+    needs: e2e-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.49.1-jammy
+    env:
+      E2E_USE_DOCKER: "0"
+      E2E_DATABASE_URL: postgres://e2e:e2e@postgres:5432/e2e?sslmode=disable
+      E2E_API_PORT: "8080"
+      E2E_SERVER_BIN: ${{ github.workspace }}/.cache/e2e/server
+      E2E_WEB_MODE: preview
+      E2E_SKIP_DEPS: "1"
+      E2E_HEALTH_POLL_SECS: "1"
+      E2E_HEALTH_MAX_ATTEMPTS: "45"
+      E2E_ADMIN_EMAIL: admin@e2e.test
+      CI: "true"
+      PAGE_URL: http://localhost:5173/
+      THEME: dark
+      LH_MIN_A11Y_SCORE: "0.95"
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: e2e
+          POSTGRES_PASSWORD: e2e
+          POSTGRES_DB: e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U e2e -d e2e"
+          --health-interval 3s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download e2e build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-build
+
+      - name: Restore server binary permissions
+        run: chmod +x "${{ github.workspace }}/.cache/e2e/server"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: e2e/package-lock.json
+
+      - name: Cache e2e node_modules
+        id: e2e-node-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: |
+          if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
+            npm ci --prefer-offline --quiet
+          fi
+
+      - name: Run Lighthouse harness (local stack)
+        run: bash e2e/scripts/lighthouse-local.sh
+
+      - name: Summarize category scores
+        if: success()
+        run: |
+          node -e "
+            const fs = require('fs');
+            const p = 'docs/lighthouse/global-dashboard-darkmode.json';
+            const r = JSON.parse(fs.readFileSync(p, 'utf8'));
+            if (r.runtimeError) {
+              console.error('runtimeError:', r.runtimeError.code);
+              process.exit(1);
+            }
+            const perf = r.categories?.performance?.score;
+            const a11y = r.categories?.accessibility?.score;
+            const minA11y = Number(process.env.LH_MIN_A11Y_SCORE ?? '0.95');
+            const weightedFails = (r.categories?.accessibility?.auditRefs ?? [])
+              .filter((ref) => ref.weight > 0)
+              .filter((ref) => {
+                const audit = r.audits?.[ref.id];
+                return audit && audit.score !== null && audit.score < 1;
+              });
+            const summary = [
+              '## Lighthouse — global dashboard (dark)',
+              '',
+              '| Category | Score |',
+              '| --- | --- |',
+              '| Performance | ' + (perf != null ? Math.round(perf * 100) : 'n/a') + ' |',
+              '| Accessibility | ' + (a11y != null ? Math.round(a11y * 100) : 'n/a') + ' |',
+              '',
+              'Weighted a11y audit failures: ' + weightedFails.length,
+              '',
+              'Report: \`docs/lighthouse/global-dashboard-darkmode.json\`',
+            ].join('\n');
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary + '\n');
+            if (typeof a11y !== 'number' || a11y < minA11y) {
+              console.error('Accessibility score', a11y, 'below minimum', minA11y);
+              process.exit(1);
+            }
+          "
+
+      - name: Upload Lighthouse JSON
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-global-dashboard-darkmode
+          path: docs/lighthouse/global-dashboard-darkmode.json
+          retention-days: 14
+          if-no-files-found: warn
 
   e2e:
     name: E2E shard ${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
@@ -351,7 +460,7 @@ jobs:
           restore-keys: |
             playwright-chromium-${{ runner.os }}-
 
-      # node_modules + browser bundle only; apt deps were installed in e2e-build.
+      # node_modules + browser bundle only; apt deps were installed in e2e-build (Playwright image).
       - name: Restore e2e runtime
         run: |
           if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
