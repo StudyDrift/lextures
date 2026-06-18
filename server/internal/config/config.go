@@ -363,6 +363,9 @@ type Config struct {
 	// FFCourseReviews enables learner star ratings and text reviews on catalog and course pages (plan 15.7).
 	// Managed in Settings → Global platform (not process env).
 	FFCourseReviews bool
+	// FFGamification enables streaks, XP, leaderboards, and badges for self-learner courses (plan 15.9).
+	// Managed in Settings → Global platform (not process env).
+	FFGamification bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).

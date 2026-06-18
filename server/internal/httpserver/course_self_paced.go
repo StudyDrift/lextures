@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/learnerprogress"
 	credsvc "github.com/lextures/lextures/server/internal/service/credentials"
+	"github.com/lextures/lextures/server/internal/service/gamification"
 	"github.com/lextures/lextures/server/internal/service/selfpaced"
 )
 
@@ -283,6 +284,10 @@ func (d Deps) handleCourseItemComplete() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to mark item complete.")
 			return
 		}
+		if changed {
+			cfg := d.effectiveConfig()
+			gamification.EmitModuleItemCompleted(d.Pool, cfg, viewer, c.ID, itemID)
+		}
 		summary, err := selfpaced.LoadSummary(r.Context(), d.Pool, c.ID, *eid, c.GatingEnabled)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to compute progress.")
@@ -299,6 +304,10 @@ func (d Deps) handleCourseItemComplete() http.HandlerFunc {
 			resp.ResumeItemID = &s
 		}
 		resp.JustComplete = changed && summary.Completed
+		if resp.JustComplete {
+			cfg := d.effectiveConfig()
+			gamification.EmitCourseCompleted(d.Pool, cfg, viewer, c.ID)
+		}
 		if resp.JustComplete && d.effectiveConfig().FFCompletionCredentials {
 			learnerName, nameErr := d.learnerDisplayName(r, viewer)
 			if nameErr == nil {

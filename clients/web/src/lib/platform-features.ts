@@ -61,6 +61,7 @@ export type PlatformFeaturesSnapshot = {
   ffLearningPaths?: boolean
   ffCompletionCredentials?: boolean
   ffCourseReviews?: boolean
+  ffGamification?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
   openRouterConfigured?: boolean
@@ -128,6 +129,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffLearningPaths: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
+  ffGamification: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,

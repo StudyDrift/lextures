@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
+	"github.com/lextures/lextures/server/internal/service/gamification"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/quizattemptgrading"
 )
@@ -182,6 +183,9 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 		}
 
 		learningevents.EmitQuizGradedAsync(d.Pool, d.effectiveConfig(), body.AttemptID)
+		if score >= 60 && cid != nil {
+			gamification.EmitQuizPassed(d.Pool, d.effectiveConfig(), viewer, *cid, body.AttemptID)
+		}
 
 		out := coursemodulequiz.QuizSubmitResponse{
 			AttemptID:      body.AttemptID,

@@ -238,6 +238,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Post("/api/v1/stt/transcribe", d.handlePostSTTTranscribe())
 	d.registerTTSRoutes(r)
 	d.registerSelfReflectionRoutes(r)
+	d.registerGamificationRoutes(r)
 	d.registerCCRRoutes(r)
 	d.registerCredentialsRoutes(r)
 	d.registerIntegrationsRoutes(r)
