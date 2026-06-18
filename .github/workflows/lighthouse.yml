@@ -1,5 +1,5 @@
 # Nightly Lighthouse harness for the signed-in global dashboard (LH.1).
-# Accessibility gate is blocking (LH.3); performance remains informational until budgets land in CI.
+# Pull requests run the same job in ci.yml (reuses e2e-build artifacts; no duplicate stack build).
 
 name: Lighthouse
 
@@ -7,14 +7,6 @@ on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'clients/web/**'
-      - 'e2e/**'
-      - 'docs/lighthouse/**'
-      - '.github/workflows/lighthouse.yml'
 
 concurrency:
   group: lighthouse-${{ github.workflow }}-${{ github.ref }}
@@ -25,9 +17,11 @@ jobs:
     name: Dashboard (dark mode)
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.49.1-jammy
     env:
       E2E_USE_DOCKER: '0'
-      E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
+      E2E_DATABASE_URL: postgres://e2e:e2e@postgres:5432/e2e?sslmode=disable
       E2E_API_PORT: '8080'
       E2E_SERVER_BIN: ${{ github.workspace }}/.cache/e2e/server
       E2E_WEB_MODE: preview
@@ -46,8 +40,6 @@ jobs:
           POSTGRES_USER: e2e
           POSTGRES_PASSWORD: e2e
           POSTGRES_DB: e2e
-        ports:
-          - 5432:5432
         options: >-
           --health-cmd "pg_isready -U e2e -d e2e"
           --health-interval 3s
@@ -72,22 +64,39 @@ jobs:
       - name: Build API server binary
         working-directory: server
         run: |
-          mkdir -p "${{ github.workspace }}/.cache/e2e"
-          go build -trimpath -ldflags="-s -w" -o "${{ github.workspace }}/.cache/e2e/server" ./cmd/server
+          mkdir -p ../.cache/e2e
+          go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../.cache/e2e/server ./cmd/server
+
+      - name: Cache web node_modules
+        id: web-node-modules
+        uses: actions/cache@v4
+        with:
+          path: clients/web/node_modules
+          key: web-node-modules-${{ runner.os }}-${{ hashFiles('clients/web/package-lock.json') }}
 
       - name: Install and build web client
         working-directory: clients/web
         env:
           VITE_API_URL: http://localhost:8080
         run: |
-          npm ci --prefer-offline --quiet
+          if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
+            npm ci --prefer-offline --quiet
+          fi
           npm run build
 
-      - name: Install e2e dependencies and Playwright browser
+      - name: Cache e2e node_modules
+        id: e2e-node-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Install e2e dependencies
         working-directory: e2e
         run: |
-          npm ci --prefer-offline --quiet
-          npx playwright install --with-deps chromium
+          if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
+            npm ci --prefer-offline --quiet
+          fi
 
       - name: Run Lighthouse harness (local stack)
         run: bash e2e/scripts/lighthouse-local.sh

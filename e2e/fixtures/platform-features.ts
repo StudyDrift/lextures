@@ -86,6 +86,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       ffPlagiarismChecks: true,
       originalityDetectionEnabled: true,
       originalityStubExternal: true,
+      ffAiStudyBuddy: true,
       updateMask: [
         'h5pEnabled',
         'oerLibraryEnabled',
@@ -135,6 +136,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'ffPlagiarismChecks',
         'originalityDetectionEnabled',
         'originalityStubExternal',
+        'ffAiStudyBuddy',
       ],
     }),
   })

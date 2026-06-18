@@ -249,6 +249,27 @@ func retrieveChunks(question string, notebooks []DocInput) []scoredChunk {
 	return candidates
 }
 
+// RetrieveTopSources returns up to maxChunks citation sources for a question over document inputs.
+func RetrieveTopSources(question string, notebooks []DocInput, maxChunks int) []Source {
+	if maxChunks <= 0 {
+		maxChunks = maxChunksInPrompt
+	}
+	chunks := retrieveChunks(question, notebooks)
+	if len(chunks) > maxChunks {
+		chunks = chunks[:maxChunks]
+	}
+	sources := make([]Source, 0, len(chunks))
+	for i := range chunks {
+		ch := &chunks[i]
+		sources = append(sources, Source{
+			CourseCode:  ch.courseCode,
+			CourseTitle: ch.courseTitle,
+			Excerpt:     excerpt(ch.text),
+		})
+	}
+	return sources
+}
+
 func excerpt(s string) string {
 	t := strings.ReplaceAll(s, "\n", " ")
 	t = strings.ReplaceAll(t, "\r", "")
