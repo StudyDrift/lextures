@@ -167,15 +167,6 @@ func (d Deps) handleGetSubmissionGrade() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		has, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
-			return
-		}
-		if !has {
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view grades.")
-			return
-		}
 		itemID, submissionID, cid, assignRow, subRow, ok := d.loadSubmissionGradeContext(w, r, courseCode)
 		if !ok {
 			return
@@ -183,6 +174,15 @@ func (d Deps) handleGetSubmissionGrade() http.HandlerFunc {
 		cell, err := coursegrades.GetCell(r.Context(), d.Pool, *cid, subRow.SubmittedBy, itemID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grade.")
+			return
+		}
+		has, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		if !has && !d.viewerMayReadPostedSubmissionGrade(viewer, subRow, cell) {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view grades.")
 			return
 		}
 		out := submissionGradeCellToJSON(&submissionID, subRow.SubmittedBy, assignRow, cell)
@@ -380,6 +380,17 @@ func (d Deps) loadAssignmentStudentGradeContext(
 	}
 	ok = true
 	return
+}
+
+func (d Deps) viewerMayReadPostedSubmissionGrade(
+	viewer uuid.UUID,
+	subRow *moduleassignmentsubmissions.SubmissionRow,
+	cell *coursegrades.CellRow,
+) bool {
+	if subRow == nil || subRow.SubmittedBy != viewer {
+		return false
+	}
+	return cell != nil && cell.PostedAt != nil
 }
 
 func parseAssignmentRubricJSON(raw []byte) (*assignmentrubric.RubricDefinition, error) {

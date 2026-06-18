@@ -1,7 +1,9 @@
 import { test, expect, injectToken } from '../fixtures/test.js'
 import {
   apiCreateAssignment,
+  apiPatchAssignment,
   apiPatchAssignmentSubmissionTypes,
+  apiPutSubmissionGrade,
   apiUploadAssignmentSubmission,
 } from '../fixtures/api.js'
 
@@ -104,10 +106,12 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
     })
   })
 
-  await coursePage.goto(
-    `/courses/${seededCourse.courseCode}/assignments/${assignment.id}?preview=submissions`,
-  )
-  await expect(coursePage.getByRole('button', { name: 'Grader Agent' })).toBeVisible({ timeout: 15_000 })
+  await coursePage.goto(`/courses/${seededCourse.courseCode}/assignments/${assignment.id}`)
+  const gradeSubmissions = coursePage.getByRole('button', { name: /Grade submissions/i })
+  await expect(gradeSubmissions).toBeVisible({ timeout: 20_000 })
+  await gradeSubmissions.click()
+  await expect(coursePage.getByRole('dialog')).toBeVisible({ timeout: 15_000 })
+  await expect(coursePage.getByRole('button', { name: 'Grader Agent' })).toBeVisible({ timeout: 30_000 })
   await coursePage.getByRole('button', { name: 'Grader Agent' }).click()
   await expect(coursePage.getByRole('dialog', { name: 'Grading agent' })).toBeVisible()
 
@@ -129,38 +133,30 @@ test('Student sees AI disclosure on posted agent grade', async ({ page, seededCo
     seededCourse.courseCode,
     assignment.id,
   )
-  await apiUploadAssignmentSubmission(
+  await apiPatchAssignment(seededCourse.instructorToken, seededCourse.courseCode, assignment.id, {
+    postingPolicy: 'automatic',
+  })
+  const upload = await apiUploadAssignmentSubmission(
     seededCourse.studentToken,
     seededCourse.courseCode,
     assignment.id,
     'Student essay body for disclosure test.',
   )
-
-  await page.route('**/api/v1/platform/features', async (route) => {
-    const res = await route.fetch()
-    const data = (await res.json()) as Record<string, unknown>
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({ ...data, graderAgentEnabled: true }),
-    })
-  })
-
-  await page.route(`**/submissions/*/grade`, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        pointsEarned: 90,
-        posted: true,
-        gradedByAi: true,
-        instructorComment: 'Well argued.',
-      }),
-    })
-  })
+  await apiPutSubmissionGrade(
+    seededCourse.instructorToken,
+    seededCourse.courseCode,
+    assignment.id,
+    upload.submission.id,
+    {
+      pointsEarned: 90,
+      instructorComment: 'Well argued.',
+      gradedByAi: true,
+    },
+  )
 
   await injectToken(page, seededCourse.studentToken)
   await page.goto(`/courses/${seededCourse.courseCode}/assignments/${assignment.id}`)
+  await expect(page.getByRole('heading', { name: 'Your submission' })).toBeVisible({ timeout: 20_000 })
   await expect(
     page.getByText(/drafted by an AI grading agent/i),
   ).toBeVisible({ timeout: 15_000 })

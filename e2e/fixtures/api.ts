@@ -1435,6 +1435,34 @@ export async function apiUploadAssignmentSubmission(
   return res.json() as Promise<{ submission: { id: string } }>
 }
 
+export async function apiPutSubmissionGrade(
+  token: string,
+  courseCode: string,
+  assignmentId: string,
+  submissionId: string,
+  body: {
+    pointsEarned: number
+    instructorComment?: string
+    gradedByAi?: boolean
+  },
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(assignmentId)}/submissions/${encodeURIComponent(submissionId)}/grade`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Put submission grade failed (${res.status}): ${text}`)
+  }
+}
+
 export async function apiPatchAssignmentSubmissionTypes(
   token: string,
   courseCode: string,
