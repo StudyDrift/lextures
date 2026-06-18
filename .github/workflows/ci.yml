@@ -321,11 +321,20 @@ jobs:
           path: e2e/node_modules
           key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
 
-      - name: Install e2e dependencies
-        working-directory: e2e
+      - name: Cache web node_modules
+        id: web-node-modules
+        uses: actions/cache@v4
+        with:
+          path: clients/web/node_modules
+          key: web-node-modules-${{ runner.os }}-${{ hashFiles('clients/web/package-lock.json') }}
+
+      - name: Install e2e and web dependencies
         run: |
           if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
-            npm ci --prefer-offline --quiet
+            (cd e2e && npm ci --prefer-offline --quiet)
+          fi
+          if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
+            (cd clients/web && npm ci --prefer-offline --quiet)
           fi
 
       - name: Cache Playwright browsers

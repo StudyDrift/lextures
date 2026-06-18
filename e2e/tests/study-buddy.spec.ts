@@ -25,14 +25,15 @@ test.describe('AI Study Buddy API', () => {
     }
   })
 
-  test('feature off returns 404 for prompts', async ({ request }) => {
+  test('feature on returns prompts for enrolled learner', async ({ request }) => {
     const featuresRes = await request.get(`${API_BASE}/api/v1/platform/features`, {
       headers: authHeaders('invalid'),
     })
     expect(featuresRes.status()).toBe(401)
 
+    const email = uniqueEmail()
     const { access_token } = await apiSignup({
-      email: uniqueEmail(),
+      email,
       password: PASSWORD,
       displayName: 'Study Buddy User',
     })
@@ -47,7 +48,7 @@ test.describe('AI Study Buddy API', () => {
     }
 
     const { courseCode } = await apiCreateCourse(access_token, { title: 'Study Buddy Course' })
-    await apiEnroll(access_token, courseCode)
+    await apiEnroll(access_token, courseCode, email)
 
     const res = await request.get(
       `${API_BASE}/api/v1/courses/${courseCode}/study-buddy/prompts`,
@@ -68,13 +69,14 @@ test.describe('AI Study Buddy API', () => {
       test.skip(true, 'ffAiStudyBuddy is false on the API')
     }
 
+    const email = uniqueEmail('msg')
     const { access_token } = await apiSignup({
-      email: uniqueEmail('msg'),
+      email,
       password: PASSWORD,
       displayName: 'SB Msg User',
     })
     const { courseCode } = await apiCreateCourse(access_token, { title: 'SB Msg Course' })
-    await apiEnroll(access_token, courseCode)
+    await apiEnroll(access_token, courseCode, email)
 
     const res = await request.post(
       `${API_BASE}/api/v1/courses/${courseCode}/study-buddy/message`,
