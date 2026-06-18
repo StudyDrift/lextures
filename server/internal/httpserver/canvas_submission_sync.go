@@ -684,29 +684,6 @@ func canvasFindCanvasUserIDForEmail(
 	}
 }
 
-func canvasFetchSingleAssignmentSubmission(
-	ctx context.Context,
-	client *http.Client,
-	canvasBase, accessToken string,
-	canvasCourseID, canvasAssignID, canvasUserID int64,
-) (map[string]any, error) {
-	q := url.Values{}
-	q.Add("include[]", "rubric_assessment")
-	q.Add("include[]", "submission_comments")
-	q.Add("include[]", "submission_html_comments")
-	q.Add("include[]", "submission_history")
-	q.Add("include[]", "assignment")
-	path := fmt.Sprintf("courses/%d/assignments/%d/submissions/%d", canvasCourseID, canvasAssignID, canvasUserID)
-	sub, err := canvasGetObject(ctx, client, canvasBase, accessToken, path, q)
-	if err != nil || sub == nil {
-		return sub, err
-	}
-	if assign := objAt(sub, "assignment"); assign != nil {
-		_ = canvasEnrichAssignmentWithRubric(ctx, client, canvasBase, accessToken, canvasCourseID, assign)
-	}
-	return sub, nil
-}
-
 type canvasSyncedGrade struct {
 	points          float64
 	rubricJSON      []byte
@@ -773,7 +750,7 @@ func canvasMapRubricAssessmentScores(
 		return nil, 0, false
 	}
 	data := objAt(assessment, "data")
-	if data == nil || len(data) == 0 {
+	if len(data) == 0 {
 		if sc, ok := coerceCanvasJSONNumber(assessment["score"]); ok {
 			return nil, sc, true
 		}
