@@ -69,6 +69,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffLearningPaths: false,
     ffCompletionCredentials: false,
     ffOnboardingFlow: false,
+    ffAiStudyBuddy: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,

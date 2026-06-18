@@ -207,7 +207,7 @@ export function StudyBuddyWidget({ courseCode, floating = true }: StudyBuddyWidg
                     <li key={`${c.itemId}-${c.title}`}>
                       {c.itemId ? (
                         <Link
-                          to={learnerCourseItemHref(courseCode, c.itemId, 'content_page')}
+                          to={learnerCourseItemHref(courseCode, { kind: 'content_page', id: c.itemId })}
                           className="font-medium text-indigo-700 underline underline-offset-2 dark:text-indigo-300"
                         >
                           {c.title}
