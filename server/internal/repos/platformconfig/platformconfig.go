@@ -121,8 +121,7 @@ type Row struct {
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
-
-	// Previously env-only flags (categories B and C), now platform-managed.
+	FFOnboardingFlow                *bool
 	LRSAnonymizeActors           *bool
 	FERPAWorkflowEnabled         *bool
 	DPAPortalEnabled             *bool
@@ -256,8 +255,7 @@ type Write struct {
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
-
-	// Previously env-only flags (categories B and C), now platform-managed.
+	FFOnboardingFlow                *bool
 	LRSAnonymizeActors           *bool
 	FERPAWorkflowEnabled         *bool
 	DPAPortalEnabled             *bool
@@ -387,6 +385,7 @@ SELECT
 	ff_completion_credentials,
 	ff_course_reviews,
 	ff_gamification,
+	ff_onboarding_flow,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -513,6 +512,7 @@ WHERE id = 1
 		&r.FFCompletionCredentials,
 		&r.FFCourseReviews,
 		&r.FFGamification,
+		&r.FFOnboardingFlow,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -688,6 +688,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_completion_credentials,
 	ff_course_reviews,
 	ff_gamification,
+	ff_onboarding_flow,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -820,6 +821,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_completion_credentials = COALESCE(EXCLUDED.ff_completion_credentials, settings.platform_app_settings.ff_completion_credentials),
 	ff_course_reviews = COALESCE(EXCLUDED.ff_course_reviews, settings.platform_app_settings.ff_course_reviews),
 	ff_gamification = COALESCE(EXCLUDED.ff_gamification, settings.platform_app_settings.ff_gamification),
+	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -944,6 +946,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFCompletionCredentials,
 		w.FFCourseReviews,
 		w.FFGamification,
+		w.FFOnboardingFlow,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

@@ -5,6 +5,7 @@ import { ApiErrorBoundary } from './components/api-error-boundary'
 import { AppShell } from './components/layout/app-shell'
 import { RouteFallback } from './components/route-fallback'
 import * as Pages from './lazy-pages'
+import { OnboardingRedirect } from './components/onboarding/onboarding-redirect'
 import { applyDocumentScrollMode, isStandalonePublicRoute } from './lib/standalone-public-routes'
 
 export default function App() {
@@ -51,11 +52,14 @@ export default function App() {
         <Route path="/explore" element={<Pages.ExploreCatalogPage />} />
         <Route path="/explore/:slug" element={<Pages.ExploreCoursePage />} />
         <Route element={<RequireAuth />}>
+          <Route path="/onboarding" element={<Pages.OnboardingPage />} />
           <Route path="/cli-auth" element={<Pages.CliAuthPage />} />
           <Route
             element={
               <ApiErrorBoundary>
-                <AppShell />
+                <OnboardingRedirect>
+                  <AppShell />
+                </OnboardingRedirect>
               </ApiErrorBoundary>
             }
           >

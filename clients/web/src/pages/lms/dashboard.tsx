@@ -68,6 +68,7 @@ import { EnrollmentStateBadge } from '../../components/enrollment/enrollment-sta
 import type { EnrollmentState } from '../../lib/enrollment-state-api'
 import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { GamificationDashboardCard } from '../../components/gamification/gamification-dashboard-card'
+import { StartHereCard } from '../../components/onboarding/start-here-card'
 import { LmsPage } from './lms-page'
 import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -720,6 +721,8 @@ export default function Dashboard() {
               )}
             </div>
           </section>
+
+          <StartHereCard />
 
           {detailsLoading && <DashboardCourseSectionSkeleton />}
 

@@ -155,6 +155,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_completion_credentials", w.FFCompletionCredentials)
 	addBool("ff_course_reviews", w.FFCourseReviews)
 	addBool("ff_gamification", w.FFGamification)
+	addBool("ff_onboarding_flow", w.FFOnboardingFlow)
 	addBool("lrs_anonymize_actors", w.LRSAnonymizeActors)
 	addBool("ferpa_workflow_enabled", w.FERPAWorkflowEnabled)
 	addBool("dpa_portal_enabled", w.DPAPortalEnabled)
