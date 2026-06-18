@@ -24,7 +24,7 @@ func TestCanvasGradeFromSubmissionPayload_pointsOnly(t *testing.T) {
 			},
 		},
 	}
-	got, err := canvasGradeFromSubmissionPayload(sub, nil)
+	got, err := canvasGradeFromSubmissionPayload(sub, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -34,8 +34,8 @@ func TestCanvasGradeFromSubmissionPayload_pointsOnly(t *testing.T) {
 	if got.points != 8.5 {
 		t.Fatalf("points=%v want 8.5", got.points)
 	}
-	if got.comment == nil || *got.comment != "Nice work." {
-		t.Fatalf("comment=%v", got.comment)
+	if got.comment == nil || *got.comment != "User 1: Nice work.\n\nStudent: Student reply" {
+		t.Fatalf("comment=%q", *got.comment)
 	}
 }
 
@@ -81,7 +81,7 @@ func TestCanvasGradeFromSubmissionPayload_enteredScoreUnposted(t *testing.T) {
 		"entered_score":  9.0,
 		"workflow_state": "graded",
 	}
-	got, err := canvasGradeFromSubmissionPayload(sub, nil)
+	got, err := canvasGradeFromSubmissionPayload(sub, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,15 +163,15 @@ func TestCanvasGradeFromSubmissionPayload_commentOnlyNoScore(t *testing.T) {
 			},
 		},
 	}
-	got, err := canvasGradeFromSubmissionPayload(sub, nil)
+	got, err := canvasGradeFromSubmissionPayload(sub, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if got.hasNumericScore {
 		t.Fatal("did not expect numeric score")
 	}
-	if got.comment == nil || *got.comment != "Please revise the intro." {
-		t.Fatalf("comment=%v", got.comment)
+	if got.comment == nil || *got.comment != "User 1: Please revise the intro." {
+		t.Fatalf("comment=%q", *got.comment)
 	}
 }
 
@@ -220,6 +220,8 @@ func TestCanvasBuildCanvasGradePushForm_rubricByTitle(t *testing.T) {
 			},
 		},
 	}
+	comment := "See rubric notes."
+	grade.comment = &comment
 	form := canvasBuildCanvasGradePushForm(grade, rubric, canvasAssign)
 	if form.Get("rubric_assessment[_10][points]") != "4" {
 		t.Fatalf("points=%q", form.Get("rubric_assessment[_10][points]"))
@@ -229,6 +231,9 @@ func TestCanvasBuildCanvasGradePushForm_rubricByTitle(t *testing.T) {
 	}
 	if form.Get("submission[posted_grade]") != "" {
 		t.Fatalf("expected rubric-only form, got posted_grade=%q", form.Get("submission[posted_grade]"))
+	}
+	if form.Get("comment[text_comment]") != comment {
+		t.Fatalf("comment=%q", form.Get("comment[text_comment]"))
 	}
 }
 
@@ -240,18 +245,86 @@ func TestCanvasBuildCanvasGradePushForm_excused(t *testing.T) {
 	}
 }
 
-func TestCanvasInstructorCommentFromSubmission_skipsStudent(t *testing.T) {
+func TestCanvasInstructorCommentFromSubmission_readsHistoryComments(t *testing.T) {
+	sub := map[string]any{
+		"user_id": float64(9),
+		"submission_history": []any{
+			map[string]any{
+				"submission_comments": []any{
+					map[string]any{
+						"author_id":  float64(2),
+						"comment":    "Feedback from an earlier attempt.",
+						"created_at": "2024-01-01T00:00:00Z",
+					},
+				},
+			},
+		},
+	}
+	got := canvasInstructorCommentFromSubmission(sub)
+	if got != "User 2: Feedback from an earlier attempt." {
+		t.Fatalf("got %q", got)
+	}
+}
+
+func TestCanvasInstructorCommentFromSubmission_includesAllParticipants(t *testing.T) {
 	sub := map[string]any{
 		"user_id": float64(9),
 		"submission_comments": []any{
 			map[string]any{"author_id": float64(9), "comment": "mine", "created_at": "2024-01-01T00:00:00Z"},
-			map[string]any{"author_id": float64(2), "comment": "grader one", "created_at": "2024-01-02T00:00:00Z"},
-			map[string]any{"author_id": float64(3), "comment": "grader two", "created_at": "2024-01-03T00:00:00Z"},
+			map[string]any{"author_id": float64(2), "author_name": "TA Lee", "comment": "grader one", "created_at": "2024-01-02T00:00:00Z"},
+			map[string]any{"author_id": float64(3), "author_name": "Prof Kim", "comment": "grader two", "created_at": "2024-01-03T00:00:00Z"},
 		},
 	}
 	got := canvasInstructorCommentFromSubmission(sub)
-	want := "grader one\n\ngrader two"
+	want := "Student: mine\n\nTA Lee: grader one\n\nProf Kim: grader two"
 	if got != want {
 		t.Fatalf("got %q want %q", got, want)
+	}
+}
+
+func TestCanvasSubmissionCommentsFromPayload_structured(t *testing.T) {
+	localUser := uuid.New()
+	sub := map[string]any{
+		"user_id": float64(42),
+		"submission_comments": []any{
+			map[string]any{
+				"id":         float64(10),
+				"author_id":  float64(1),
+				"comment":    "Nice work.",
+				"created_at": "2024-01-02T00:00:00Z",
+				"author": map[string]any{
+					"display_name": "Prof Kim",
+					"avatar_url":   "https://canvas.example/avatar.png",
+				},
+			},
+			map[string]any{
+				"author_id":  float64(42),
+				"comment":    "Student reply",
+				"created_at": "2024-01-03T00:00:00Z",
+			},
+		},
+	}
+	got := canvasSubmissionCommentsFromPayload(sub, map[int64]uuid.UUID{1: localUser})
+	if len(got) != 2 {
+		t.Fatalf("len=%d", len(got))
+	}
+	if got[0].DisplayName != "Prof Kim" || got[0].Body != "Nice work." || got[0].CreatedAt != "2024-01-02T00:00:00Z" {
+		t.Fatalf("first=%+v", got[0])
+	}
+	if got[0].UserID == nil || *got[0].UserID != localUser.String() {
+		t.Fatalf("userId=%v", got[0].UserID)
+	}
+	if got[0].AvatarURL == nil || *got[0].AvatarURL != "https://canvas.example/avatar.png" {
+		t.Fatalf("avatar=%v", got[0].AvatarURL)
+	}
+	if got[1].DisplayName != "Student" || got[1].Body != "Student reply" {
+		t.Fatalf("second=%+v", got[1])
+	}
+}
+
+func TestCanvasNormalizeCanvasSubmissionCommentText_stripsHTML(t *testing.T) {
+	got := canvasNormalizeCanvasSubmissionCommentText("<p>Hello <strong>world</strong></p>")
+	if got != "Hello world" {
+		t.Fatalf("got %q", got)
 	}
 }

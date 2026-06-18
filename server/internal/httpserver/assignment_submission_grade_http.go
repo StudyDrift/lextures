@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
+	"github.com/lextures/lextures/server/internal/models/gradecomment"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
@@ -45,6 +47,10 @@ func submissionGradeCellToJSON(
 		if cell.PointsEarned != nil {
 			out["pointsEarned"] = *cell.PointsEarned
 		}
+		comments := gradecomment.ResolveList(cell.InstructorCommentsJSON, cell.InstructorComment)
+		if len(comments) > 0 {
+			out["comments"] = gradecomment.CommentsToJSON(comments)
+		}
 		if cell.InstructorComment != nil {
 			out["instructorComment"] = *cell.InstructorComment
 		}
@@ -68,6 +74,7 @@ func (d Deps) writeSubmissionGrade(
 	studentUserID uuid.UUID,
 	submissionID *uuid.UUID,
 	assignRow *coursemoduleassignments.CourseItemAssignmentRow,
+	viewer uuid.UUID,
 	b submissionGradeWriteBody,
 ) bool {
 	if b.ClearGrade {
@@ -78,7 +85,17 @@ func (d Deps) writeSubmissionGrade(
 		w.WriteHeader(http.StatusNoContent)
 		return true
 	}
+	existingCell, err := coursegrades.GetCell(r.Context(), d.Pool, cid, studentUserID, itemID)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grade.")
+		return false
+	}
+	existingComments := gradecomment.ResolveList(nil, nil)
+	if existingCell != nil {
+		existingComments = gradecomment.ResolveList(existingCell.InstructorCommentsJSON, existingCell.InstructorComment)
+	}
 	var comment *string
+	var commentsJSON []byte
 	if b.InstructorComment != nil {
 		t := strings.TrimSpace(*b.InstructorComment)
 		if len(t) > maxInstructorCommentLen {
@@ -86,8 +103,26 @@ func (d Deps) writeSubmissionGrade(
 			return false
 		}
 		if t != "" {
-			comment = &t
+			authorName, authorAvatar := d.gradeCommentAuthorProfile(r.Context(), viewer)
+			userID := viewer.String()
+			nextComments, raw, flat, aerr := gradecomment.Append(existingComments, gradecomment.Comment{
+				UserID:      &userID,
+				DisplayName: authorName,
+				AvatarURL:   authorAvatar,
+				Body:        t,
+				Source:      "lextures",
+			})
+			if aerr != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid comment.")
+				return false
+			}
+			existingComments = nextComments
+			commentsJSON = raw
+			comment = flat
 		}
+	} else if existingCell != nil {
+		commentsJSON = existingCell.InstructorCommentsJSON
+		comment = existingCell.InstructorComment
 	}
 	rubricDef, _ := parseAssignmentRubricJSON(assignRow.RubricJSON)
 	var rubricJSON []byte
@@ -114,6 +149,23 @@ func (d Deps) writeSubmissionGrade(
 	} else if b.PointsEarned != nil {
 		points = *b.PointsEarned
 		hasPoints = true
+	} else if existingCell != nil && b.InstructorComment != nil && strings.TrimSpace(*b.InstructorComment) != "" {
+		if len(existingCell.RubricScoresJSON) > 0 {
+			rubricJSON = existingCell.RubricScoresJSON
+			hasPoints = true
+			if rubricDef != nil {
+				if scores, perr := coursegrades.ParseRubricScoresMap(rubricJSON); perr == nil && len(scores) > 0 {
+					uuidScores := parseUUIDScoreMap(scores)
+					if total, verr := assignmentrubric.ValidateRubricScoresForGrade(rubricDef, uuidScores); verr == nil {
+						points = total
+					}
+				}
+			}
+		}
+		if !hasPoints && existingCell.PointsEarned != nil {
+			points = *existingCell.PointsEarned
+			hasPoints = true
+		}
 	}
 	if !hasPoints {
 		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Provide pointsEarned or rubricScores.")
@@ -133,7 +185,7 @@ func (d Deps) writeSubmissionGrade(
 	}
 	if err := coursegrades.UpsertCellWithFlags(
 		r.Context(), d.Pool, cid, studentUserID, itemID,
-		points, rubricJSON, comment, posting, gradedByAI,
+		points, rubricJSON, comment, commentsJSON, posting, gradedByAI,
 	); err != nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save grade.")
 		return false
@@ -144,12 +196,52 @@ func (d Deps) writeSubmissionGrade(
 		"posted":        posting == "automatic",
 		"gradedByAi":    gradedByAI,
 	}
+	if len(existingComments) > 0 {
+		out["comments"] = gradecomment.CommentsToJSON(existingComments)
+	}
+	if comment != nil {
+		out["instructorComment"] = *comment
+	}
+	if scores, perr := coursegrades.ParseRubricScoresMap(rubricJSON); perr == nil && len(scores) > 0 {
+		out["rubricScores"] = scores
+	}
 	if submissionID != nil {
 		out["submissionId"] = submissionID.String()
 	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_ = json.NewEncoder(w).Encode(out)
 	return true
+}
+
+func (d Deps) gradeCommentAuthorProfile(ctx context.Context, userID uuid.UUID) (string, *string) {
+	if d.Pool == nil {
+		return "Staff", nil
+	}
+	var displayName, email, avatarURL *string
+	err := d.Pool.QueryRow(ctx, `
+SELECT display_name, email, avatar_url
+FROM "user".users
+WHERE id = $1
+`, userID).Scan(&displayName, &email, &avatarURL)
+	if err != nil {
+		return "Staff", nil
+	}
+	name := ""
+	if displayName != nil {
+		name = strings.TrimSpace(*displayName)
+	}
+	if name == "" && email != nil {
+		name = strings.TrimSpace(*email)
+	}
+	if name == "" {
+		name = "Staff"
+	}
+	if avatarURL != nil {
+		if u := strings.TrimSpace(*avatarURL); u != "" {
+			return name, &u
+		}
+	}
+	return name, nil
 }
 
 func (d Deps) handleGetSubmissionGrade() http.HandlerFunc {
@@ -268,7 +360,7 @@ func (d Deps) handlePutSubmissionGrade() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		_ = d.writeSubmissionGrade(w, r, *cid, itemID, subRow.SubmittedBy, &submissionID, assignRow, b)
+		_ = d.writeSubmissionGrade(w, r, *cid, itemID, subRow.SubmittedBy, &submissionID, assignRow, viewer, b)
 	}
 }
 
@@ -310,7 +402,7 @@ func (d Deps) handlePutAssignmentStudentGrade() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		_ = d.writeSubmissionGrade(w, r, *cid, itemID, studentUserID, nil, assignRow, b)
+		_ = d.writeSubmissionGrade(w, r, *cid, itemID, studentUserID, nil, assignRow, viewer, b)
 	}
 }
 

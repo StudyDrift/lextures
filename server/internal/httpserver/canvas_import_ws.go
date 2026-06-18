@@ -216,8 +216,7 @@ func (d Deps) runCanvasImport(
 	if needEnrollmentRows {
 		prefetchGroup.Go(func() error {
 			var loadErr error
-			enrollmentRows, loadErr = canvasGetArrayPaginated(prefetchCtx, client, canvasBase, accessToken,
-				fmt.Sprintf("courses/%d/enrollments", canvasCourseID), canvasEnrollmentListQuery())
+			enrollmentRows, loadErr = canvasFetchEnrollmentRowsForImport(prefetchCtx, client, canvasBase, accessToken, canvasCourseID)
 			return loadErr
 		})
 		prefetchGroup.Go(func() error {
@@ -229,7 +228,11 @@ func (d Deps) runCanvasImport(
 	if err := prefetchGroup.Wait(); err != nil {
 		return err
 	}
-	if !progress("Loaded course data from Canvas.") {
+	if needEnrollmentRows {
+		if !progress(fmt.Sprintf("Loaded course data from Canvas (%d enrollment row(s) for import).", len(enrollmentRows))) {
+			return context.Canceled
+		}
+	} else if !progress("Loaded course data from Canvas.") {
 		return context.Canceled
 	}
 
@@ -473,49 +476,60 @@ func (d Deps) runCanvasImport(
 		}
 	}
 
-	needFinalizeTx := include.Enrollments || include.Grades || (include.Assignments && len(canvasAssignToItem) > 0)
-	var tx pgx.Tx
-	if needFinalizeTx {
-		tx, err = d.Pool.Begin(ctx)
-		if err != nil {
-			return errors.New("Failed to start import transaction.")
-		}
-		defer func() { _ = tx.Rollback(ctx) }()
-	}
-
 	if include.Enrollments {
 		if !progress("Applying enrollments from Canvas...") {
 			return context.Canceled
 		}
+		enrollTx, enrollErr := d.Pool.Begin(ctx)
+		if enrollErr != nil {
+			return errors.New("Failed to start import transaction.")
+		}
+		enrollFailed := false
+		defer func() {
+			if enrollFailed {
+				_ = enrollTx.Rollback(ctx)
+			}
+		}()
 		var enrollStats canvasEnrollmentImportStats
 		for _, e := range enrollmentRows {
 			u := objAt(e, "user")
-			canvasUID := int64At(u, "id")
-			email := rosterEmailByCanvasUID[canvasUID]
-			if email == "" {
-				email = normalizedLexturesEmailGuessFromCanvasUserMap(u)
+			canvasUID := canvasCanvasUserIDFromEnrollment(e, u)
+			if canvasUID <= 0 {
+				continue
 			}
-			userID, err := canvasResolveLexturesUserForEnrollment(ctx, d.Pool, tx, orgID, email, u, &enrollStats)
+			userID, err := canvasResolveLexturesUserForEnrollment(ctx, d.Pool, enrollTx, orgID, canvasUID, rosterEmailByCanvasUID[canvasUID], u, &enrollStats)
 			if err != nil {
+				enrollFailed = true
 				return err
 			}
 			if userID == uuid.Nil {
 				continue
 			}
-			if err := canvasImportEnrollmentUserAvatar(ctx, tx, client, accessToken, userID, e, u, &enrollStats); err != nil {
+			if err := canvasImportEnrollmentUserAvatar(ctx, enrollTx, client, accessToken, userID, e, u, &enrollStats); err != nil {
+				enrollFailed = true
 				return err
 			}
-			role := canvasEnrollmentTypeToRole(strAt(e, "type", ""))
+			role := canvasEnrollmentTypeToRole(canvasEnrollmentTypeFromRow(e))
 			if (include.Grades || include.Assignments) && canvasUID > 0 {
 				if canvasUserToLocal == nil {
 					canvasUserToLocal = make(map[int64]uuid.UUID)
 				}
 				canvasUserToLocal[canvasUID] = userID
 			}
-			if err := canvasApplyEnrollment(ctx, tx, courseID, courseCode, userID, role, &enrollStats); err != nil {
+			if err := canvasApplyEnrollment(ctx, enrollTx, courseID, courseCode, userID, role, &enrollStats); err != nil {
+				enrollFailed = true
 				return errors.New("Failed to apply enrollment from Canvas.")
 			}
 		}
+		if !progress("Saving enrollments from Canvas...") {
+			enrollFailed = true
+			return context.Canceled
+		}
+		if err := enrollTx.Commit(ctx); err != nil {
+			enrollFailed = true
+			return errors.New("Something went wrong while saving enrollments.")
+		}
+		d.notifyEnrollmentsForCourse(ctx, courseCode)
 		msg := fmt.Sprintf("Applied %d enrollment(s) from Canvas.", enrollStats.Enrolled)
 		if enrollStats.AccountsCreated > 0 {
 			msg += fmt.Sprintf(" Created %d new Lextures account(s) from Canvas emails.", enrollStats.AccountsCreated)
@@ -529,6 +543,16 @@ func (d Deps) runCanvasImport(
 		if !progress(msg) {
 			return context.Canceled
 		}
+	}
+
+	needGradesTx := include.Grades || (include.Assignments && len(canvasAssignToItem) > 0)
+	var tx pgx.Tx
+	if needGradesTx {
+		tx, err = d.Pool.Begin(ctx)
+		if err != nil {
+			return errors.New("Failed to start import transaction.")
+		}
+		defer func() { _ = tx.Rollback(ctx) }()
 	}
 
 	cfg := d.effectiveConfig()
@@ -582,8 +606,8 @@ func (d Deps) runCanvasImport(
 		}
 	}
 
-	if needFinalizeTx {
-		if !progress("Saving imported content into your course...") {
+	if needGradesTx {
+		if !progress("Saving imported grades and submissions...") {
 			return context.Canceled
 		}
 		if err = tx.Commit(ctx); err != nil {

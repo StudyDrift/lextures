@@ -140,6 +140,11 @@ describe('buildSearchItems', () => {
     expect(create?.path).toBe('/courses/create')
   })
 
+  it('omits Create course action without PERM_COURSE_CREATE', () => {
+    const items = buildSearchItems([], [], allowsNone)
+    expect(items.some((i) => i.id === 'action:/courses/create')).toBe(false)
+  })
+
   it('adds per-course page shortcuts and enrollment actions', () => {
     const allowsRosterX = (p: string) => p === courseEnrollmentsReadPermission('X')
     const items = buildSearchItems([{ courseCode: 'X', title: 'Y' }], [], allowsRosterX)

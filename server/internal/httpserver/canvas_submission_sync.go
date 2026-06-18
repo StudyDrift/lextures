@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
+	"github.com/lextures/lextures/server/internal/models/gradecomment"
 	"github.com/lextures/lextures/server/internal/repos/canvasimportjobs"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
@@ -411,11 +412,9 @@ func resolveLexturesGradeForCanvasPush(
 		if t != "" {
 			out.comment = &t
 		}
-	} else if cell != nil && cell.InstructorComment != nil {
-		t := strings.TrimSpace(*cell.InstructorComment)
-		if t != "" {
-			out.comment = &t
-		}
+	} else if cell != nil {
+		comments := gradecomment.ResolveList(cell.InstructorCommentsJSON, cell.InstructorComment)
+		out.comment = gradecomment.LatestBody(comments)
 	}
 
 	if cell != nil {
@@ -535,6 +534,9 @@ func canvasBuildCanvasGradePushForm(
 			rubricMapped = true
 		}
 		if rubricMapped {
+			if grade.comment != nil {
+				form.Set("comment[text_comment]", *grade.comment)
+			}
 			return form
 		}
 	}
@@ -688,6 +690,7 @@ type canvasSyncedGrade struct {
 	points          float64
 	rubricJSON      []byte
 	comment         *string
+	commentsJSON    []byte
 	excused         bool
 	hasNumericScore bool
 }
@@ -695,6 +698,7 @@ type canvasSyncedGrade struct {
 func canvasGradeFromSubmissionPayload(
 	sub map[string]any,
 	lexturesRubric *assignmentrubric.RubricDefinition,
+	canvasUserToLocal map[int64]uuid.UUID,
 ) (canvasSyncedGrade, error) {
 	var out canvasSyncedGrade
 	if sub == nil {
@@ -731,9 +735,17 @@ func canvasGradeFromSubmissionPayload(
 		}
 	}
 
-	comment := canvasInstructorCommentFromSubmission(sub)
-	if comment != "" {
-		out.comment = &comment
+	comments := canvasSubmissionCommentsFromPayload(sub, canvasUserToLocal)
+	if len(comments) > 0 {
+		raw, err := gradecomment.MarshalList(comments)
+		if err != nil {
+			return out, err
+		}
+		out.commentsJSON = raw
+		flat := gradecomment.Flatten(comments)
+		if flat != "" {
+			out.comment = &flat
+		}
 	}
 	return out, nil
 }
@@ -890,11 +902,67 @@ func canvasRubricCriterionTitles(criteria []map[string]any) map[string]string {
 	return out
 }
 
+func canvasSubmissionCommentAuthorLabel(c map[string]any, studentCanvasUID int64) string {
+	if c == nil {
+		return "Comment"
+	}
+	if name := strings.TrimSpace(strAt(c, "author_name", "")); name != "" {
+		return name
+	}
+	if author := objAt(c, "author"); author != nil {
+		for _, k := range []string{"display_name", "name", "short_name", "sortable_name"} {
+			if n := strings.TrimSpace(strAt(author, k, "")); n != "" {
+				return n
+			}
+		}
+	}
+	authorID := int64At(c, "author_id")
+	if studentCanvasUID > 0 && authorID == studentCanvasUID {
+		return "Student"
+	}
+	if authorID > 0 {
+		return fmt.Sprintf("User %d", authorID)
+	}
+	return "Comment"
+}
+
+func canvasNormalizeCanvasSubmissionCommentText(raw string) string {
+	text := strings.TrimSpace(raw)
+	if text == "" {
+		return ""
+	}
+	if strings.Contains(text, "<") && strings.Contains(text, ">") {
+		if plain := strings.TrimSpace(htmlToPlainText(text)); plain != "" {
+			return plain
+		}
+	}
+	return text
+}
+
+// canvasInstructorCommentFromSubmission builds legacy flat text for tests and callers.
 func canvasInstructorCommentFromSubmission(sub map[string]any) string {
-	studentID := int64At(sub, "user_id")
+	comments := canvasSubmissionCommentsFromPayload(sub, nil)
+	flat := gradecomment.Flatten(comments)
+	if len(flat) > maxInstructorCommentLen {
+		flat = flat[:maxInstructorCommentLen]
+	}
+	return flat
+}
+
+// canvasSubmissionCommentsFromPayload builds structured SpeedGrader comments for import.
+func canvasSubmissionCommentsFromPayload(
+	sub map[string]any,
+	canvasUserToLocal map[int64]uuid.UUID,
+) []gradecomment.Comment {
+	studentCanvasUID := int64At(sub, "user_id")
 	type commentRow struct {
 		created string
+		author  string
 		text    string
+		key     string
+		userID  *string
+		avatar  *string
+		source  string
 	}
 	rows := make([]commentRow, 0)
 	appendCanvasSubmissionComments := func(comments []map[string]any) {
@@ -902,45 +970,81 @@ func canvasInstructorCommentFromSubmission(sub map[string]any) string {
 			if c == nil {
 				continue
 			}
-			text := strings.TrimSpace(strAt(c, "comment", ""))
+			text := canvasNormalizeCanvasSubmissionCommentText(strAt(c, "comment", ""))
 			if text == "" {
 				continue
 			}
-			authorID := int64At(c, "author_id")
-			if studentID > 0 && authorID == studentID {
-				continue
+			author := canvasSubmissionCommentAuthorLabel(c, studentCanvasUID)
+			created := strAt(c, "created_at", "")
+			canvasCommentID := int64At(c, "id")
+			key := fmt.Sprintf("%s|%s|%s|%d", created, author, text, canvasCommentID)
+			var userID *string
+			authorCanvasID := int64At(c, "author_id")
+			if authorCanvasID > 0 && canvasUserToLocal != nil {
+				if localID, ok := canvasUserToLocal[authorCanvasID]; ok {
+					s := localID.String()
+					userID = &s
+				}
+			}
+			var avatar *string
+			if authorObj := objAt(c, "author"); authorObj != nil {
+				if u := strings.TrimSpace(strAt(authorObj, "avatar_url", "")); u != "" {
+					avatar = &u
+				}
 			}
 			rows = append(rows, commentRow{
-				created: strAt(c, "created_at", ""),
+				created: created,
+				author:  author,
 				text:    text,
+				key:     key,
+				userID:  userID,
+				avatar:  avatar,
+				source:  "canvas",
 			})
 		}
 	}
 	appendCanvasSubmissionComments(arrAt(sub, "submission_comments"))
 	appendCanvasSubmissionComments(arrAt(sub, "submission_html_comments"))
+	for _, hist := range arrAt(sub, "submission_history") {
+		appendCanvasSubmissionComments(arrAt(hist, "submission_comments"))
+		appendCanvasSubmissionComments(arrAt(hist, "submission_html_comments"))
+	}
 	for _, text := range canvasRubricCriterionComments(sub) {
-		rows = append(rows, commentRow{text: text})
+		rows = append(rows, commentRow{
+			author: "Rubric",
+			text:   text,
+			key:    "rubric|" + text,
+			source: "rubric",
+		})
 	}
 	if len(rows) == 0 {
-		return ""
+		return nil
 	}
 	sort.SliceStable(rows, func(i, j int) bool {
 		return rows[i].created < rows[j].created
 	})
-	parts := make([]string, 0, len(rows))
+	out := make([]gradecomment.Comment, 0, len(rows))
 	seen := make(map[string]struct{}, len(rows))
 	for _, row := range rows {
-		if _, dup := seen[row.text]; dup {
+		if _, dup := seen[row.key]; dup {
 			continue
 		}
-		seen[row.text] = struct{}{}
-		parts = append(parts, row.text)
+		seen[row.key] = struct{}{}
+		id := row.key
+		if strings.HasPrefix(row.source, "canvas") {
+			id = "canvas-" + row.key
+		}
+		out = append(out, gradecomment.Comment{
+			ID:          id,
+			UserID:      row.userID,
+			DisplayName: row.author,
+			AvatarURL:   row.avatar,
+			Body:        row.text,
+			CreatedAt:   row.created,
+			Source:      row.source,
+		})
 	}
-	joined := strings.Join(parts, "\n\n")
-	if len(joined) > maxInstructorCommentLen {
-		joined = joined[:maxInstructorCommentLen]
-	}
-	return joined
+	return out
 }
 
 func canvasRubricCriterionComments(sub map[string]any) []string {

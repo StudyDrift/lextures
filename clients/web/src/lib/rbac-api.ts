@@ -16,6 +16,14 @@ export const PERM_COURSE_ROLE_STUDENT = 'course:*:enrollments:role-student' as c
 /** Create new courses (Courses page + POST /api/v1/courses). */
 export const PERM_COURSE_CREATE = 'global:app:course:create' as const
 
+/** True when the signed-in user may create or import courses on the platform. */
+export function canCreateCourses(
+  allows: (permission: string) => boolean,
+  loading = false,
+): boolean {
+  return !loading && allows(PERM_COURSE_CREATE)
+}
+
 /** Manage org hierarchy (schools / departments) within the user's org, or all orgs as platform admin. */
 export const PERM_TENANT_ORG_UNITS_ADMIN = 'tenant:org:units:admin' as const
 

@@ -138,6 +138,72 @@ func repairMigration289RenumberCollision(ctx context.Context, c *pgx.Conn, fsys 
 	return tx.Commit(ctx)
 }
 
+// repairMigration292RenumberCollision fixes dev/demo DBs that applied instructor_comments_json
+// as v292 before main's 292_learner_goals.sql landed and instructor_comments was renumbered to 293.
+func repairMigration292RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
+	if !migrateRepairChecksumsEnabled() {
+		return nil
+	}
+	var v292Desc string
+	err := c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 292`,
+	).Scan(&v292Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v292 renumber: %w", err)
+	}
+	if v292Desc != "instructor_comments_json" {
+		return nil
+	}
+	var learnerGoalsExists bool
+	err = c.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'user' AND table_name = 'learner_goals')`,
+	).Scan(&learnerGoalsExists)
+	if err != nil {
+		return fmt.Errorf("migrate repair v292 renumber: %w", err)
+	}
+	if learnerGoalsExists {
+		return nil
+	}
+
+	learnerBody, err := fs.ReadFile(fsys, dir+"/292_learner_goals.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v292 renumber: read learner_goals: %w", err)
+	}
+	if _, err := c.Exec(ctx, string(learnerBody)); err != nil {
+		return fmt.Errorf("migrate repair v292 renumber: apply learner_goals: %w", err)
+	}
+
+	learnerSum := sqlxChecksum(learnerBody)
+	commentsBody, err := fs.ReadFile(fsys, dir+"/293_instructor_comments_json.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v292 renumber: read instructor_comments_json: %w", err)
+	}
+	commentsSum := sqlxChecksum(commentsBody)
+
+	tx, err := c.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 292`,
+		"learner_goals", learnerSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v292 renumber: update v292: %w", err)
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO `+sqlxMigrationsTable+` (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, 0)`,
+		int64(293), "instructor_comments_json", commentsSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v292 renumber: insert v293: %w", err)
+	}
+	return tx.Commit(ctx)
+}
+
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
 // checksum does not match the embedded file. Only runs when MIGRATE_REPAIR_CHECKSUMS
 // is enabled.
