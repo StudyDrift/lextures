@@ -42,6 +42,7 @@ import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-p
 import { StudyRemindersSettingsPanel } from '../../components/settings/study-reminders-settings-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
+import { ArchivedCoursesPanel } from '../../components/settings/archived-courses-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
@@ -74,7 +75,8 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/lrs-integrations' ||
     pathname === '/settings/oer-providers' ||
     pathname === '/settings/transcripts' ||
-    pathname === '/settings/advising'
+    pathname === '/settings/advising' ||
+    pathname === '/settings/archive'
   )
 }
 
@@ -958,7 +960,8 @@ export default function Settings() {
           activeView === 'lrs-integrations' ||
           activeView === 'oer-providers' ||
           activeView === 'transcripts' ||
-          activeView === 'advising'
+          activeView === 'advising' ||
+          activeView === 'archive'
             ? 'max-w-4xl'
             : activeView === 'integrations'
               ? 'max-w-3xl'
@@ -1915,6 +1918,26 @@ export default function Settings() {
             </p>
             <OrgBranding />
             <AiGovernancePanel />
+          </div>
+        )}
+
+        {activeView === 'archive' && (
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">Archive</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              Review archived courses, restore them to the catalog, or permanently delete them.
+            </p>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                  You need permission to manage archived courses (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <ArchivedCoursesPanel />
+            </RequirePermission>
           </div>
         )}
 

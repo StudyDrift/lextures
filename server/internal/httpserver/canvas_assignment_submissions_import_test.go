@@ -55,3 +55,20 @@ func TestCanvasFirstSubmissionAttachment(t *testing.T) {
 		t.Fatalf("expected first attachment, got %#v", att)
 	}
 }
+
+func TestCanvasAttachmentByteSize(t *testing.T) {
+	att := map[string]any{"size": float64(32 << 20)}
+	if got := canvasAttachmentByteSize(att); got != 32<<20 {
+		t.Fatalf("expected 32 MiB, got %d", got)
+	}
+	if canvasAttachmentByteSize(nil) != 0 {
+		t.Fatal("nil attachment should report size 0")
+	}
+}
+
+func TestCanvasMaxImportedSubmissionFileBytesAllowsLargeVideo(t *testing.T) {
+	// Regression: Canvas video submissions (e.g. 32 MB) must not hit the old 20 MB cap.
+	if canvasMaxImportedSubmissionFileBytes < 32<<20 {
+		t.Fatalf("import cap %d is below 32 MiB", canvasMaxImportedSubmissionFileBytes)
+	}
+}

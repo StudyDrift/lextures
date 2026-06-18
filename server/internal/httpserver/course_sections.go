@@ -446,7 +446,7 @@ WHERE s.id = $1
 
 func applySectionAssignmentOverrides(items []coursestructure.ItemResponse, ovm map[uuid.UUID]coursesections.Override) {
 	for i := range items {
-		if items[i].Kind != "assignment" {
+		if items[i].Kind != "assignment" && items[i].Kind != "quiz" {
 			continue
 		}
 		id, err := uuid.Parse(items[i].ID)

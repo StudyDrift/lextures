@@ -154,7 +154,8 @@ func TestCanvasMapRubricAssessmentScores_totalOnlyWhenCriteriaUnmapped(t *testin
 
 func TestCanvasGradeFromSubmissionPayload_commentOnlyNoScore(t *testing.T) {
 	sub := map[string]any{
-		"user_id": float64(42),
+		"user_id":         float64(42),
+		"workflow_state":  "submitted",
 		"submission_comments": []any{
 			map[string]any{
 				"author_id":  float64(1),
@@ -170,8 +171,8 @@ func TestCanvasGradeFromSubmissionPayload_commentOnlyNoScore(t *testing.T) {
 	if got.hasNumericScore {
 		t.Fatal("did not expect numeric score")
 	}
-	if got.comment == nil || *got.comment != "User 1: Please revise the intro." {
-		t.Fatalf("comment=%q", *got.comment)
+	if got.comment != nil {
+		t.Fatalf("submitted attempt with feedback only should stay ungraded, comment=%q", *got.comment)
 	}
 }
 

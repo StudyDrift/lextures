@@ -3237,6 +3237,8 @@ export type QuizAttemptSummaryApi = {
   scorePercent?: number | null
   pointsEarned: number
   pointsPossible: number
+  studentName?: string
+  needsManualGrading?: boolean
 }
 
 export type QuizAttemptsListPayload = {
@@ -5209,7 +5211,7 @@ export async function postCourseImportCanvas(
   courseCode: string,
   body: PostCourseImportCanvasBody,
   onProgress?: (message: string) => void,
-  options?: { signal?: AbortSignal },
+  options?: { signal?: AbortSignal; onCoursesUpdated?: () => void },
 ): Promise<void> {
   const authToken = getAccessToken()
   if (!authToken) {
@@ -5288,7 +5290,8 @@ export async function postCourseImportCanvas(
         onProgress?.(o.message)
         return
       }
-      if (o.type === 'complete') {
+      if (o.type === 'complete' || o.type === 'courses_updated') {
+        options?.onCoursesUpdated?.()
         if (!settled) {
           settled = true
           ws.close()
@@ -5408,6 +5411,8 @@ export async function revealModuleAssignmentIdentities(
 }
 
 export type GradingBacklogItemApi = {
+  itemId?: string
+  itemType?: 'assignment' | 'quiz'
   assignmentId: string
   assignmentTitle: string
   ungradedCount: number

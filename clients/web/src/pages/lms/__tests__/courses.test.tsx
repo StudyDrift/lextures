@@ -15,6 +15,10 @@ vi.mock('../../../context/use-inbox-unread', () => ({
   useCoursesRevision: () => 0,
 }))
 
+vi.mock('../../../context/canvas-import-context', () => ({
+  useCanvasImport: () => ({ open: vi.fn() }),
+}))
+
 vi.mock('../../../lib/api', () => ({
   authorizedFetch: (...args: unknown[]) => authorizedFetch(...args),
 }))

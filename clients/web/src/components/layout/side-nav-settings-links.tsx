@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
+  Archive,
   ArrowLeft,
   Bell,
   BookOpen,
@@ -257,6 +258,13 @@ export function SideNavSettingsLinks() {
                 icon={<Settings2 className="h-5 w-5" />}
               >
                 Global platform
+              </SideNavLink>
+              <SideNavLink
+                to="/settings/archive"
+                className={() => (view === 'archive' ? sideNavActiveClass : '')}
+                icon={<Archive className="h-5 w-5" />}
+              >
+                Archive
               </SideNavLink>
               <SideNavLink
                 to="/settings/organizations"

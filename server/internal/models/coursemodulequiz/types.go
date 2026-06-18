@@ -184,7 +184,16 @@ type QuizStartResponse struct {
 	AttemptID uuid.UUID `json:"attemptId"`; AttemptNumber int32 `json:"attemptNumber"`; StartedAt time.Time `json:"startedAt"`; LockdownMode string `json:"lockdownMode"`; HintsDisabled bool `json:"hintsDisabled"`; BackNavigationAllowed bool `json:"backNavigationAllowed"`; CurrentQuestionIndex int32 `json:"currentQuestionIndex"`; DeadlineAt *time.Time `json:"deadlineAt,omitempty"`; ReducedDistractionMode bool `json:"reducedDistractionMode"`; ExtendedTimeActive bool `json:"extendedTimeActive"`; HintScaffoldingEnabled bool `json:"hintScaffoldingEnabled"`; MisconceptionDetectionEnabled bool `json:"misconceptionDetectionEnabled"`; RetakePolicy string `json:"retakePolicy"`; MaxAttempts *int32 `json:"maxAttempts,omitempty"`; RemainingAttempts *int32 `json:"remainingAttempts,omitempty"`
 }
 type QuizAttemptsListResponse struct{ Attempts []QuizAttemptSummary `json:"attempts"`; PolicyScorePercent *float64 `json:"policyScorePercent,omitempty"`; RetakePolicy string `json:"retakePolicy"` }
-type QuizAttemptSummary struct{ ID uuid.UUID `json:"id"`; AttemptNumber int32 `json:"attemptNumber"`; SubmittedAt time.Time `json:"submittedAt"`; ScorePercent *float32 `json:"scorePercent,omitempty"`; PointsEarned float64 `json:"pointsEarned"`; PointsPossible float64 `json:"pointsPossible"` }
+type QuizAttemptSummary struct {
+	ID                 uuid.UUID  `json:"id"`
+	AttemptNumber      int32      `json:"attemptNumber"`
+	SubmittedAt        time.Time  `json:"submittedAt"`
+	ScorePercent       *float32   `json:"scorePercent,omitempty"`
+	PointsEarned       float64    `json:"pointsEarned"`
+	PointsPossible     float64    `json:"pointsPossible"`
+	StudentName        *string    `json:"studentName,omitempty"`
+	NeedsManualGrading bool       `json:"needsManualGrading,omitempty"`
+}
 type EnrollmentQuizOverrideUpsertRequest struct{ QuizID uuid.UUID `json:"quizId"`; ExtraAttempts int32 `json:"extraAttempts"`; TimeMultiplier *float64 `json:"timeMultiplier"` }
 type QuizCurrentQuestionResponse struct{ Question *QuizQuestion `json:"question,omitempty"`; QuestionIndex int32 `json:"questionIndex"`; TotalQuestions uint `json:"totalQuestions"`; Completed bool `json:"completed"` }
 type QuizAdvanceResponse struct{ Locked bool `json:"locked"`; CurrentQuestionIndex int32 `json:"currentQuestionIndex"`; Completed bool `json:"completed"` }

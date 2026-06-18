@@ -16,6 +16,12 @@
   --quiz-book-loader-color: #94a3b8;
 }
 
+/* Square icon buttons: pages extend above the 12px box, so nudge down for optical center. */
+.quiz-book-loader-icon {
+  transform: scale(0.34) translateY(17px);
+  transform-origin: center center;
+}
+
 .quiz-book-loader .inner {
   width: 32px;
   height: 12px;

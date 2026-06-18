@@ -710,6 +710,11 @@ func canvasGradeFromSubmissionPayload(
 		return out, nil
 	}
 
+	gradedForImport := canvasSubmissionIsGradedForImport(sub)
+	if !gradedForImport {
+		return out, nil
+	}
+
 	rubricScores, rubricTotal, hasRubric := canvasMapRubricAssessmentScores(sub, lexturesRubric)
 	if hasRubric {
 		out.points = rubricTotal
@@ -852,21 +857,11 @@ func canvasSubmissionEffectiveScore(sub map[string]any) (excused bool, score flo
 	if sub == nil {
 		return false, 0, false
 	}
-	if exc, sc, ok := submissionScoreAndExcused(sub); ok {
-		return exc, sc, true
+	if exc, sc, ok := submissionScoreAndExcused(sub); ok || exc {
+		return exc, sc, ok
 	}
-	if excused = boolAt(sub, "excused", false); excused {
-		return true, 0, false
-	}
-	for _, key := range []string{"entered_score", "score"} {
-		if sc, ok := coerceCanvasJSONNumber(sub[key]); ok {
-			return false, sc, true
-		}
-	}
-	if assessment := objAt(sub, "rubric_assessment"); assessment != nil {
-		if sc, ok := coerceCanvasJSONNumber(assessment["score"]); ok {
-			return false, sc, true
-		}
+	if !canvasSubmissionIsGradedForImport(sub) {
+		return false, 0, false
 	}
 	if grade := strings.TrimSpace(strAt(sub, "grade", "")); grade != "" {
 		if sc, ok := coerceCanvasJSONNumber(grade); ok {

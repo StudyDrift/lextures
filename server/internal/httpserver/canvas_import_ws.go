@@ -185,8 +185,10 @@ func (d Deps) runCanvasImport(
 	var course map[string]any
 	modules := []map[string]any{}
 	enrollmentRows := []map[string]any{}
+	canvasSections := []map[string]any{}
 	rosterEmailByCanvasUID := make(map[int64]string)
 	needEnrollmentRows := include.Enrollments || include.Grades || include.Assignments
+	needCanvasSections := needEnrollmentRows || include.Assignments || include.Quizzes || include.Modules
 
 	if !progress("Loading course data from Canvas...") {
 		return context.Canceled
@@ -197,6 +199,9 @@ func (d Deps) runCanvasImport(
 	}
 	if needEnrollmentRows {
 		prefetchTasks += 2
+	}
+	if needCanvasSections {
+		prefetchTasks++
 	}
 	prefetchGroup, prefetchCtx := canvasImportParallelGroup(ctx, prefetchTasks)
 	prefetchGroup.Go(func() error {
@@ -222,6 +227,13 @@ func (d Deps) runCanvasImport(
 		prefetchGroup.Go(func() error {
 			var loadErr error
 			rosterEmailByCanvasUID, loadErr = canvasRosterEmailsByCanvasUserID(prefetchCtx, client, canvasBase, accessToken, canvasCourseID)
+			return loadErr
+		})
+	}
+	if needCanvasSections {
+		prefetchGroup.Go(func() error {
+			var loadErr error
+			canvasSections, loadErr = canvasFetchCourseSections(prefetchCtx, client, canvasBase, accessToken, canvasCourseID)
 			return loadErr
 		})
 	}
@@ -260,6 +272,27 @@ func (d Deps) runCanvasImport(
 	}
 	if err != nil {
 		return errors.New("Failed to load course.")
+	}
+
+	var canvasSectionMap map[int64]uuid.UUID
+	if len(canvasSections) > 0 {
+		if !progress(fmt.Sprintf("Importing %d Canvas section(s)...", len(canvasSections))) {
+			return context.Canceled
+		}
+		var sectionStats *canvasSectionImportStats
+		canvasSectionMap, sectionStats, err = canvasImportCourseSections(ctx, d.Pool, courseID, orgID, canvasSections)
+		if err != nil {
+			return err
+		}
+		if sectionStats != nil {
+			msg := fmt.Sprintf("Imported %d course section(s) from Canvas.", sectionStats.SectionsCreated+sectionStats.SectionsUpdated)
+			if sectionStats.CrossListLinked {
+				msg += " Linked cross-listed sections for a combined gradebook."
+			}
+			if !progress(msg) {
+				return context.Canceled
+			}
+		}
 	}
 
 	if include.Settings {
@@ -324,6 +357,7 @@ func (d Deps) runCanvasImport(
 	canvasAssignToItem := make(map[int64]uuid.UUID)
 	canvasQuizToItem := make(map[int64]uuid.UUID)
 	canvasQuizToQuestions := make(map[int64][]coursemodulequiz.QuizQuestion)
+	canvasQuizToAssignmentID := make(map[int64]int64)
 	canvasPageSlugToItem := make(map[string]uuid.UUID)
 	if include.Modules {
 		if !progress("Importing modules and items...") {
@@ -442,6 +476,9 @@ func (d Deps) runCanvasImport(
 								dueAt = canvasTimeAt(obj, "due_at")
 								availFrom = canvasTimeAt(obj, "unlock_at")
 								availUntil = canvasTimeAt(obj, "lock_at")
+								if aid := int64At(obj, "assignment_id"); aid > 0 {
+									canvasQuizToAssignmentID[cid] = aid
+								}
 							}
 							questions = moduleItemCache.quizQuestions[cid]
 							canvasQuizToQuestions[cid] = questions
@@ -473,6 +510,24 @@ func (d Deps) runCanvasImport(
 				return errors.New("Something went wrong while saving the import.")
 			}
 			broadcastStructureChanged(courseCode)
+		}
+	}
+
+	if len(canvasSectionMap) > 0 && (include.Assignments || include.Quizzes) && len(canvasAssignToItem)+len(canvasQuizToItem) > 0 {
+		if !progress("Importing per-section due dates from Canvas...") {
+			return context.Canceled
+		}
+		overrideCount, overrideErr := canvasImportSectionAssignmentOverrides(
+			ctx, d.Pool, client, canvasBase, accessToken, canvasCourseID, courseID,
+			canvasAssignToItem, canvasQuizToItem, canvasSectionMap,
+		)
+		if overrideErr != nil {
+			return overrideErr
+		}
+		if overrideCount > 0 {
+			if !progress(fmt.Sprintf("Imported %d per-section due date override(s) from Canvas.", overrideCount)) {
+				return context.Canceled
+			}
 		}
 	}
 
@@ -516,9 +571,23 @@ func (d Deps) runCanvasImport(
 				}
 				canvasUserToLocal[canvasUID] = userID
 			}
-			if err := canvasApplyEnrollment(ctx, enrollTx, courseID, courseCode, userID, role, &enrollStats); err != nil {
+			var sectionID *uuid.UUID
+			if canvasSectionMap != nil {
+				if canvasSecID := canvasEnrollmentSectionID(e); canvasSecID > 0 {
+					if sid, ok := canvasSectionMap[canvasSecID]; ok {
+						sectionID = &sid
+					}
+				}
+			}
+			if err := canvasApplyEnrollment(ctx, enrollTx, courseID, courseCode, userID, role, sectionID, &enrollStats); err != nil {
 				enrollFailed = true
 				return errors.New("Failed to apply enrollment from Canvas.")
+			}
+			if sectionID != nil && (role == "teacher" || role == "instructor") {
+				if err := canvasAssignSectionInstructor(ctx, enrollTx, canvasSectionMap, canvasEnrollmentSectionID(e), userID); err != nil {
+					enrollFailed = true
+					return errors.New("Failed to assign section instructor from Canvas.")
+				}
 			}
 		}
 		if !progress("Saving enrollments from Canvas...") {
@@ -591,7 +660,7 @@ func (d Deps) runCanvasImport(
 			"userMapLen":         len(canvasUserToLocal),
 		})
 		// #endregion agent log
-		if err := canvasImportAllCanvasGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasQuizToItem, canvasQuizToQuestions, canvasUserToLocal, submissionDeps); err != nil {
+		if err := canvasImportAllCanvasGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasAssignToItem, canvasQuizToItem, canvasQuizToQuestions, canvasQuizToAssignmentID, canvasUserToLocal, submissionDeps); err != nil {
 			return err
 		}
 	} else if include.Assignments && len(canvasAssignToItem) > 0 {
@@ -808,6 +877,23 @@ func boolAt(m map[string]any, k string, def bool) bool {
 		return v
 	}
 	return def
+}
+
+// canvasCanvasUserIDFromMap reads Canvas user id from submission/enrollment payloads that may
+// nest the user object unless include[]=user was requested on the list endpoint.
+func canvasCanvasUserIDFromMap(m map[string]any) int64 {
+	if m == nil {
+		return 0
+	}
+	if uid := int64At(m, "user_id"); uid > 0 {
+		return uid
+	}
+	if u, ok := m["user"].(map[string]any); ok && u != nil {
+		if uid := int64At(u, "id"); uid > 0 {
+			return uid
+		}
+	}
+	return 0
 }
 
 func int64At(m map[string]any, k string) int64 {

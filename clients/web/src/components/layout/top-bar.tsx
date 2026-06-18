@@ -19,6 +19,7 @@ import {
 } from './top-bar-utils'
 import { useShellNav } from './use-shell-nav'
 import { TopBarBreadcrumbs } from './top-bar-breadcrumbs'
+import { CanvasImportHeaderWidget } from '../../context/canvas-import-context'
 import { HelpWidgetMenu } from './help-widget'
 import { NotificationsDrawer, NotificationsDrawerTrigger } from './notifications-drawer'
 import { TopBarMobileCommandPaletteButton } from './side-nav-command-palette'
@@ -305,6 +306,7 @@ export function TopBar() {
           </button>
         )}
         {courseCode && aiTutorEnabled ? <AiTutorMenu courseCode={courseCode} /> : null}
+        <CanvasImportHeaderWidget />
         <HelpWidgetMenu />
         <NotificationsDrawerTrigger open={notificationsOpen} onOpen={() => setNotificationsOpen(true)} />
         <CourseEnrollmentViewDropdown />

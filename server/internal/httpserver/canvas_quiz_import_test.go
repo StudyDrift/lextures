@@ -180,6 +180,15 @@ func TestCanvasParseSubmissionData(t *testing.T) {
 	}
 }
 
+func TestCanvasCanvasUserIDFromMap_nestedUser(t *testing.T) {
+	raw := map[string]any{
+		"user": map[string]any{"id": float64(42)},
+	}
+	if got := canvasCanvasUserIDFromMap(raw); got != 42 {
+		t.Fatalf("expected 42, got %d", got)
+	}
+}
+
 func TestCanvasUnwrapQuizSubmission(t *testing.T) {
 	wrapped := map[string]any{
 		"quiz_submissions": []any{

@@ -358,6 +358,8 @@ export default function CourseDetail() {
               if (!cancelled) {
                 setGradingBacklog(
                   items.map((item) => ({
+                    itemId: item.itemId ?? item.assignmentId,
+                    itemType: item.itemType ?? 'assignment',
                     assignmentId: item.assignmentId,
                     assignmentTitle: item.assignmentTitle,
                     ungradedCount: item.ungradedCount,

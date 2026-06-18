@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"sync"
 
 	"github.com/google/uuid"
@@ -19,6 +20,51 @@ func canvasQuizIDsFromMap(m map[int64]uuid.UUID) []int64 {
 		ids = append(ids, id)
 	}
 	return ids
+}
+
+// canvasBackfillQuizSubmissionsByUser fetches per-learner quiz submissions when the course-wide
+// list endpoint returns none (common when Canvas omits user_id without include[]=user).
+func canvasBackfillQuizSubmissionsByUser(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID int64,
+	canvasQuizToItem map[int64]uuid.UUID,
+	canvasUserToLocal map[int64]uuid.UUID,
+	quizSubsByQuiz map[int64][]map[string]any,
+) error {
+	if len(canvasQuizToItem) == 0 || len(canvasUserToLocal) == 0 {
+		return nil
+	}
+	canvasUserIDs := make([]int64, 0, len(canvasUserToLocal))
+	for canvasUID := range canvasUserToLocal {
+		if canvasUID > 0 {
+			canvasUserIDs = append(canvasUserIDs, canvasUID)
+		}
+	}
+	for canvasQID := range canvasQuizToItem {
+		if len(quizSubsByQuiz[canvasQID]) > 0 {
+			continue
+		}
+		backfill := make([]map[string]any, 0)
+		for _, canvasUID := range canvasUserIDs {
+			q := url.Values{}
+			q.Set("user_id", strconv.FormatInt(canvasUID, 10))
+			subs, err := canvasGetQuizSubmissionsPaginated(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID, q)
+			if err != nil {
+				return fmt.Errorf("Canvas quiz %d submission for user %d: %w", canvasQID, canvasUID, err)
+			}
+			for _, raw := range subs {
+				if canvasQuizSubmissionImportable(raw) {
+					backfill = append(backfill, raw)
+				}
+			}
+		}
+		if len(backfill) > 0 {
+			quizSubsByQuiz[canvasQID] = backfill
+		}
+	}
+	return nil
 }
 
 func canvasFetchQuizSubmissionsParallel(

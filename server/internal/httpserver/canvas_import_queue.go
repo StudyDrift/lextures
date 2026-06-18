@@ -199,7 +199,7 @@ func (d Deps) handleCanvasImportJobWS() http.HandlerFunc {
 func terminalWSMessage(ctx context.Context, conn *websocket.Conn, job *canvasimportjobs.Job) bool {
 	switch job.Status {
 	case canvasimportjobs.StatusCompleted:
-		_ = wsWriteJSON(ctx, conn, map[string]any{"type": "complete"})
+		_ = wsWriteJSON(ctx, conn, map[string]any{"type": "complete", "courseCode": job.CourseCode})
 		return true
 	case canvasimportjobs.StatusFailed:
 		msg := "Canvas import failed."
@@ -257,7 +257,9 @@ func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimp
 	}
 	if canvasImportJobAlreadyTerminal(job.Status) {
 		if job.Status == canvasimportjobs.StatusCompleted && d.CanvasImportHub != nil {
-			d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "complete"})
+			d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{
+				Type: "complete", CourseCode: msg.CourseCode,
+			})
 		}
 		if job.Status == canvasimportjobs.StatusFailed && d.CanvasImportHub != nil {
 			errMsg := "Canvas import failed."
@@ -301,7 +303,9 @@ func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimp
 	d.notifyCourses(msg.UserID)
 	broadcastStructureChanged(msg.CourseCode)
 	if d.CanvasImportHub != nil {
-		d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{Type: "complete"})
+		d.CanvasImportHub.Broadcast(msg.JobID, canvasimportevents.Message{
+			Type: "complete", CourseCode: msg.CourseCode,
+		})
 	}
 	return nil
 }

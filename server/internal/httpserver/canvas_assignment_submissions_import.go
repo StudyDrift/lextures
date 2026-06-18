@@ -5,7 +5,9 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -19,8 +21,11 @@ import (
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 )
 
-// Matches course.course_files.byte_size CHECK (migration 052).
-const canvasMaxImportedSubmissionFileBytes = 20 << 20
+// Matches course.course_files.byte_size CHECK (migration 294).
+const canvasMaxImportedSubmissionFileBytes = 524288000 // 500 MB
+
+// Only prefetch small attachments in parallel; larger files stream during per-submission import.
+const canvasPrefetchSubmissionAttachmentBytes = 10 << 20
 
 // canvasAssignmentSubmissionImportDeps carries blob + DB context for importing submission bodies/attachments.
 type canvasAssignmentSubmissionImportDeps struct {
@@ -120,6 +125,13 @@ func canvasFirstSubmissionAttachment(sub map[string]any) map[string]any {
 	return atts[0]
 }
 
+func canvasAttachmentByteSize(att map[string]any) int64 {
+	if att == nil {
+		return 0
+	}
+	return int64At(att, "size")
+}
+
 func canvasSubmissionSubmittedAt(sub map[string]any) time.Time {
 	if t := canvasTimeAt(sub, "submitted_at"); t != nil {
 		return *t
@@ -170,17 +182,28 @@ func canvasDownloadCanvasURL(
 	return data, ct, nil
 }
 
-func canvasStoreImportedSubmissionBlob(
-	ctx context.Context,
-	tx pgx.Tx,
-	deps canvasAssignmentSubmissionImportDeps,
-	courseID uuid.UUID,
-	filename, mimeType string,
-	data []byte,
-) (*uuid.UUID, error) {
-	if len(data) == 0 || len(data) > canvasMaxImportedSubmissionFileBytes {
-		return nil, nil
+func canvasSubmissionAttachmentFilename(att map[string]any) string {
+	return strAt(att, "filename", strAt(att, "display_name", "submission"))
+}
+
+func canvasSubmissionAttachmentMimeType(att map[string]any, responseContentType string) string {
+	mimeType := strAt(att, "content-type", "application/octet-stream")
+	ct := strings.TrimSpace(responseContentType)
+	if ct != "" {
+		if i := strings.Index(ct, ";"); i >= 0 {
+			ct = strings.TrimSpace(ct[:i])
+		}
+		if mimeType == "" || mimeType == "application/octet-stream" {
+			mimeType = ct
+		}
 	}
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
+	return mimeType
+}
+
+func canvasSubmissionAttachmentStorageKey(courseCode, filename, mimeType string) (storageKey, resolvedFilename string) {
 	ext := filepath.Ext(filename)
 	if ext == "" {
 		switch mimeType {
@@ -193,7 +216,131 @@ func canvasStoreImportedSubmissionBlob(
 		}
 		filename += ext
 	}
-	storageKey := fmt.Sprintf("submissions/import/%s/%s%s", deps.CourseCode, uuid.New().String(), ext)
+	return fmt.Sprintf("submissions/import/%s/%s%s", courseCode, uuid.New().String(), ext), filename
+}
+
+func canvasStreamAndStoreSubmissionAttachment(
+	ctx context.Context,
+	tx pgx.Tx,
+	client *http.Client,
+	accessToken string,
+	deps canvasAssignmentSubmissionImportDeps,
+	courseID uuid.UUID,
+	att map[string]any,
+) (*uuid.UUID, error) {
+	downloadURL := strAt(att, "url", "")
+	if downloadURL == "" {
+		return nil, nil
+	}
+	filename := canvasSubmissionAttachmentFilename(att)
+	mimeType := strAt(att, "content-type", "application/octet-stream")
+	declaredSize := canvasAttachmentByteSize(att)
+	if declaredSize > canvasMaxImportedSubmissionFileBytes {
+		log.Printf("canvas-import: skip submission attachment %q: declared size %d exceeds %d byte limit",
+			filename, declaredSize, canvasMaxImportedSubmissionFileBytes)
+		return nil, nil
+	}
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, downloadURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	if strings.TrimSpace(accessToken) != "" {
+		req.Header.Set("Authorization", "Bearer "+accessToken)
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return nil, fmt.Errorf("download status %d", resp.StatusCode)
+	}
+
+	contentLen := resp.ContentLength
+	if contentLen > canvasMaxImportedSubmissionFileBytes {
+		log.Printf("canvas-import: skip submission attachment %q: content-length %d exceeds %d byte limit",
+			filename, contentLen, canvasMaxImportedSubmissionFileBytes)
+		return nil, nil
+	}
+	mimeType = canvasSubmissionAttachmentMimeType(att, resp.Header.Get("Content-Type"))
+
+	storageKey, filename := canvasSubmissionAttachmentStorageKey(deps.CourseCode, filename, mimeType)
+	root := strings.TrimSpace(deps.FilesRoot)
+	if root == "" {
+		root = "data/course-files"
+	}
+
+	byteSize := contentLen
+	if byteSize <= 0 {
+		byteSize = declaredSize
+	}
+
+	limitedBody := io.LimitReader(resp.Body, canvasMaxImportedSubmissionFileBytes+1)
+	if deps.Storage != nil {
+		if byteSize <= 0 {
+			data, readErr := io.ReadAll(limitedBody)
+			if readErr != nil {
+				return nil, readErr
+			}
+			if int64(len(data)) > canvasMaxImportedSubmissionFileBytes {
+				log.Printf("canvas-import: skip submission attachment %q: downloaded %d bytes exceeds limit", filename, len(data))
+				return nil, nil
+			}
+			return canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, filename, mimeType, data)
+		}
+		if err := deps.Storage.PutObject(ctx, storageKey, limitedBody, byteSize, mimeType); err != nil {
+			return nil, err
+		}
+	} else {
+		p := coursefiles.BlobDiskPath(root, deps.CourseCode, storageKey)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			return nil, err
+		}
+		f, err := os.Create(p)
+		if err != nil {
+			return nil, err
+		}
+		n, copyErr := io.Copy(f, limitedBody)
+		closeErr := f.Close()
+		if copyErr != nil {
+			_ = os.Remove(p)
+			return nil, copyErr
+		}
+		if closeErr != nil {
+			_ = os.Remove(p)
+			return nil, closeErr
+		}
+		if n > canvasMaxImportedSubmissionFileBytes {
+			_ = os.Remove(p)
+			log.Printf("canvas-import: skip submission attachment %q: downloaded %d bytes exceeds limit", filename, n)
+			return nil, nil
+		}
+		byteSize = n
+	}
+
+	fileID, err := coursefiles.CreateInTransaction(
+		ctx, tx, courseID, deps.ImporterUserID,
+		storageKey, filename, mimeType, byteSize,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &fileID, nil
+}
+
+func canvasStoreImportedSubmissionBlob(
+	ctx context.Context,
+	tx pgx.Tx,
+	deps canvasAssignmentSubmissionImportDeps,
+	courseID uuid.UUID,
+	filename, mimeType string,
+	data []byte,
+) (*uuid.UUID, error) {
+	if len(data) == 0 || len(data) > canvasMaxImportedSubmissionFileBytes {
+		return nil, nil
+	}
+	storageKey, filename := canvasSubmissionAttachmentStorageKey(deps.CourseCode, filename, mimeType)
 	root := strings.TrimSpace(deps.FilesRoot)
 	if root == "" {
 		root = "data/course-files"
@@ -255,6 +402,10 @@ func canvasPrefetchSubmissionAttachmentsParallel(
 			if att == nil {
 				return nil
 			}
+			size := canvasAttachmentByteSize(att)
+			if size <= 0 || size > canvasPrefetchSubmissionAttachmentBytes {
+				return nil
+			}
 			downloadURL := strAt(att, "url", "")
 			if downloadURL == "" {
 				return nil
@@ -305,21 +456,10 @@ func canvasImportOneAssignmentSubmission(
 			attachmentFileID = id
 		}
 	} else if att := canvasFirstSubmissionAttachment(sub); att != nil {
-		downloadURL := strAt(att, "url", "")
-		filename := strAt(att, "filename", strAt(att, "display_name", "submission"))
-		mimeType := strAt(att, "content-type", "application/octet-stream")
-		if downloadURL != "" {
-			data, ct, err := canvasDownloadCanvasURL(ctx, client, downloadURL, accessToken)
-			if err == nil && len(data) > 0 {
-				if mimeType == "" || mimeType == "application/octet-stream" {
-					mimeType = ct
-				}
-				if id, storeErr := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, filename, mimeType, data); storeErr != nil {
-					return storeErr
-				} else if id != nil {
-					attachmentFileID = id
-				}
-			}
+		if id, storeErr := canvasStreamAndStoreSubmissionAttachment(ctx, tx, client, accessToken, deps, courseID, att); storeErr != nil {
+			return storeErr
+		} else if id != nil {
+			attachmentFileID = id
 		}
 	}
 

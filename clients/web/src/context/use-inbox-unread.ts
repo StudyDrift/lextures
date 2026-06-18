@@ -18,6 +18,10 @@ export function useCoursesRevision() {
   return useContext(InboxUnreadContext)?.coursesRevision ?? 0
 }
 
+export function useBumpCoursesRevision() {
+  return useContext(InboxUnreadContext)?.bumpCoursesRevision ?? (() => {})
+}
+
 export function useEnrollmentsRevision() {
   return useContext(InboxUnreadContext)?.enrollmentsRevision ?? 0
 }

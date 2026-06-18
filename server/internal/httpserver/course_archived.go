@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/course"
 )
 
 type patchCourseArchivedBody struct {
@@ -43,7 +44,11 @@ func (d Deps) handlePatchCourseArchived() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		out, err := course.SetArchived(r.Context(), d.Pool, courseCode, req.Archived)
+		var archivedBy *uuid.UUID
+		if req.Archived {
+			archivedBy = &viewer
+		}
+		out, err := course.SetArchived(r.Context(), d.Pool, courseCode, req.Archived, archivedBy)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update course.")
 			return

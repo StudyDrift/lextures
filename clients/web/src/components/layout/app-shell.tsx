@@ -5,6 +5,7 @@ import { KeyboardShortcutsProvider } from '../keyboard-shortcuts/keyboard-shortc
 import { CourseFeedUnreadProvider } from '../../context/course-feed-unread-provider'
 import { CoursePinnedProvider } from '../../context/course-pinned-context'
 import { InboxNotificationsProvider } from '../../context/inbox-notifications-provider'
+import { CanvasImportProvider } from '../../context/canvas-import-context'
 import { InboxUnreadProvider } from '../../context/inbox-unread-provider'
 import { CourseNavFeaturesProvider } from '../../context/course-nav-features-context'
 import { ContentFilterProvider } from '../../context/content-filter-context'
@@ -82,6 +83,7 @@ export function AppShell() {
     <ContentFilterProvider>
     <ReadingPreferencesProvider>
     <InboxUnreadProvider>
+      <CanvasImportProvider>
       <CoursePinnedProvider>
       <InboxNotificationsProvider>
       <CourseFeedUnreadProvider>
@@ -99,6 +101,7 @@ export function AppShell() {
       </CourseFeedUnreadProvider>
       </InboxNotificationsProvider>
       </CoursePinnedProvider>
+      </CanvasImportProvider>
     </InboxUnreadProvider>
     </ReadingPreferencesProvider>
     </ContentFilterProvider>

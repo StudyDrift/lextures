@@ -13,7 +13,9 @@ import (
 	"github.com/lextures/lextures/server/internal/relativeschedule"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
+	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 )
@@ -184,6 +186,27 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		disp := *row
+		if !canEdit {
+			crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
+			if err == nil && crow != nil && crow.SectionsEnabled {
+				secID, err := enrollment.GetStudentSectionID(r.Context(), d.Pool, *cid, viewer)
+				if err == nil && secID != nil {
+					ov, err := coursesections.GetOverride(r.Context(), d.Pool, *secID, itemID)
+					if err == nil && ov != nil {
+						if ov.DueAt != nil {
+							disp.DueAt = ov.DueAt
+						}
+						if ov.AvailableFrom != nil {
+							disp.AvailableFrom = ov.AvailableFrom
+						}
+						if ov.AvailableUntil != nil {
+							disp.AvailableUntil = ov.AvailableUntil
+						}
+					}
+				}
+			}
+		}
 		var shift *relativeschedule.Context
 		if !canEdit {
 			shift, err = relativeschedule.LoadForUser(r.Context(), d.Pool, *cid, viewer)
@@ -217,7 +240,7 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 		if !canEdit {
 			resolved = coursemodulequiz.SanitizeQuizQuestionsForLearner(resolved)
 		}
-		out := buildModuleQuizResponse(itemID, row, canEdit, shift, meta, resolved, usesServer)
+		out := buildModuleQuizResponse(itemID, &disp, canEdit, shift, meta, resolved, usesServer)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

@@ -16,6 +16,7 @@ describe('settingsViewFromPathname', () => {
     expect(settingsViewFromPathname('/settings/account')).toBe('account')
     expect(settingsViewFromPathname('/settings/notifications')).toBe('notifications')
     expect(settingsViewFromPathname('/settings/roles')).toBe('roles')
+    expect(settingsViewFromPathname('/settings/archive')).toBe('archive')
   })
 
   it('defaults to account for unknown settings paths', () => {
