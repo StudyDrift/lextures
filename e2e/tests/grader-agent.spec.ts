@@ -106,7 +106,7 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
     })
   })
 
-  await coursePage.goto(`/courses/${seededCourse.courseCode}/assignments/${assignment.id}`)
+  await coursePage.goto(`/courses/${seededCourse.courseCode}/modules/assignment/${assignment.id}`)
   const gradeSubmissions = coursePage.getByRole('button', { name: /Grade submissions/i })
   await expect(gradeSubmissions).toBeVisible({ timeout: 20_000 })
   await gradeSubmissions.click()
@@ -155,7 +155,7 @@ test('Student sees AI disclosure on posted agent grade', async ({ page, seededCo
   )
 
   await injectToken(page, seededCourse.studentToken)
-  await page.goto(`/courses/${seededCourse.courseCode}/assignments/${assignment.id}`)
+  await page.goto(`/courses/${seededCourse.courseCode}/modules/assignment/${assignment.id}`)
   await expect(page.getByRole('heading', { name: 'Your submission' })).toBeVisible({ timeout: 20_000 })
   await expect(
     page.getByText(/drafted by an AI grading agent/i),
