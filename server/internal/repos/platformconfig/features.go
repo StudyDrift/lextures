@@ -50,6 +50,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.InstructorInsightsEnabled = mergeBool(db.InstructorInsightsEnabled, false)
 	out.EquationEditorEnabled = mergeBool(db.EquationEditorEnabled, false)
 	out.ReadingLevelEnabled = mergeBool(db.ReadingLevelEnabled, false)
+	out.GraderAgentEnabled = mergeBool(db.GraderAgentEnabled, false)
 	out.AltTextEnforcementEnabled = mergeBool(db.AltTextEnforcementEnabled, false)
 	out.FFAltTextEnforcement = mergeBool(db.FFAltTextEnforcement, false)
 	out.FFHighContrastReducedMotion = mergeBool(db.FFHighContrastReducedMotion, false)

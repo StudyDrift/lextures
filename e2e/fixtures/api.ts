@@ -1410,3 +1410,81 @@ export async function apiFetchEnrollmentAccommodationSummary(
   }
   return res.json() as Promise<{ hasAccommodation: boolean; flags: string[] }>
 }
+
+export async function apiUploadAssignmentSubmission(
+  token: string,
+  courseCode: string,
+  itemId: string,
+  text: string,
+  filename = 'essay.txt',
+): Promise<{ submission: { id: string } }> {
+  const fd = new FormData()
+  fd.set('file', new Blob([text], { type: 'text/plain' }), filename)
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/upload`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: fd,
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Upload submission failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ submission: { id: string } }>
+}
+
+export async function apiPutSubmissionGrade(
+  token: string,
+  courseCode: string,
+  assignmentId: string,
+  submissionId: string,
+  body: {
+    pointsEarned: number
+    instructorComment?: string
+    gradedByAi?: boolean
+  },
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(assignmentId)}/submissions/${encodeURIComponent(submissionId)}/grade`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Put submission grade failed (${res.status}): ${text}`)
+  }
+}
+
+export async function apiPatchAssignmentSubmissionTypes(
+  token: string,
+  courseCode: string,
+  assignmentId: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(assignmentId)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        submissionAllowText: true,
+        submissionAllowFileUpload: true,
+        postingPolicy: 'manual',
+      }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Patch assignment submission types failed (${res.status}): ${body}`)
+  }
+}

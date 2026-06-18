@@ -26,6 +26,7 @@ export type PlatformFeatures = {
   xapiEmissionEnabled: boolean
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
+  graderAgentEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
@@ -96,6 +97,7 @@ const defaultFeatures: PlatformFeatures = {
   xapiEmissionEnabled: false,
   equationEditorEnabled: false,
   readingLevelEnabled: false,
+  graderAgentEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,
@@ -171,6 +173,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+  graderAgentEnabled: false,
     altTextEnforcementEnabled: false,
     ffAltTextEnforcement: false,
     speechToTextEnabled: false,
@@ -247,6 +250,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           xapiEmissionEnabled: data.xapiEmissionEnabled === true,
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
+          graderAgentEnabled: data.graderAgentEnabled === true,
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,
           speechToTextEnabled: data.speechToTextEnabled === true,

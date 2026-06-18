@@ -16,6 +16,7 @@ const (
 	DefaultCourseSetupModelID          = "arcee-ai/trinity-mini:free"
 	DefaultNotebookFlashcardsModelID   = "arcee-ai/trinity-mini:free"
 	DefaultVibeActivityModelID         = "arcee-ai/trinity-mini:free"
+	DefaultGraderAgentModelID          = "arcee-ai/trinity-mini:free"
 )
 
 // GetImageModelID returns the user's image model, or the global default.
@@ -82,21 +83,38 @@ func GetVibeActivityModelID(ctx context.Context, pool *pgxpool.Pool, userID uuid
 	return s, nil
 }
 
-// UpsertAISettings sets image, course setup, notebook flashcards, and vibe activity models; returns the stored values.
-func UpsertAISettings(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, imageModelID, courseSetupModelID, notebookFlashcardsModelID, vibeActivityModelID string) (imgOut, courseOut, flashcardsOut, vibeOut string, err error) {
+// GetGraderAgentModelID returns the model to use for the grading agent.
+func GetGraderAgentModelID(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (string, error) {
 	if pool == nil {
-		return "", "", "", "", errors.New("db pool is nil")
+		return "", errors.New("db pool is nil")
+	}
+	var s string
+	err := pool.QueryRow(ctx, `SELECT grader_agent_model_id FROM "user".user_ai_settings WHERE user_id = $1`, userID).Scan(&s)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return DefaultGraderAgentModelID, nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return s, nil
+}
+
+// UpsertAISettings sets platform AI model preferences; returns the stored values.
+func UpsertAISettings(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, imageModelID, courseSetupModelID, notebookFlashcardsModelID, vibeActivityModelID, graderAgentModelID string) (imgOut, courseOut, flashcardsOut, vibeOut, graderOut string, err error) {
+	if pool == nil {
+		return "", "", "", "", "", errors.New("db pool is nil")
 	}
 	err = pool.QueryRow(ctx, `
-INSERT INTO "user".user_ai_settings (user_id, image_model_id, course_setup_model_id, notebook_flashcards_model_id, vibe_activity_model_id, updated_at)
-VALUES ($1, $2, $3, $4, $5, now())
+INSERT INTO "user".user_ai_settings (user_id, image_model_id, course_setup_model_id, notebook_flashcards_model_id, vibe_activity_model_id, grader_agent_model_id, updated_at)
+VALUES ($1, $2, $3, $4, $5, $6, now())
 ON CONFLICT (user_id) DO UPDATE SET
 	image_model_id = EXCLUDED.image_model_id,
 	course_setup_model_id = EXCLUDED.course_setup_model_id,
 	notebook_flashcards_model_id = EXCLUDED.notebook_flashcards_model_id,
 	vibe_activity_model_id = EXCLUDED.vibe_activity_model_id,
+	grader_agent_model_id = EXCLUDED.grader_agent_model_id,
 	updated_at = now()
-RETURNING image_model_id, course_setup_model_id, notebook_flashcards_model_id, vibe_activity_model_id
-`, userID, imageModelID, courseSetupModelID, notebookFlashcardsModelID, vibeActivityModelID).Scan(&imgOut, &courseOut, &flashcardsOut, &vibeOut)
-	return imgOut, courseOut, flashcardsOut, vibeOut, err
+RETURNING image_model_id, course_setup_model_id, notebook_flashcards_model_id, vibe_activity_model_id, grader_agent_model_id
+`, userID, imageModelID, courseSetupModelID, notebookFlashcardsModelID, vibeActivityModelID, graderAgentModelID).Scan(&imgOut, &courseOut, &flashcardsOut, &vibeOut, &graderOut)
+	return imgOut, courseOut, flashcardsOut, vibeOut, graderOut, err
 }

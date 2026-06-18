@@ -28,6 +28,23 @@ WHERE id = $1
 	return tag.RowsAffected() > 0, nil
 }
 
+// SetAvatarURLTx stores an avatar URL for one user.
+func SetAvatarURLTx(ctx context.Context, tx pgx.Tx, userID uuid.UUID, avatarURL string) (bool, error) {
+	avatarURL = strings.TrimSpace(avatarURL)
+	if avatarURL == "" {
+		return false, nil
+	}
+	tag, err := tx.Exec(ctx, `
+UPDATE "user".users
+SET avatar_url = $2
+WHERE id = $1
+`, userID, avatarURL)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
+}
+
 // UpdateProfile patches account profile fields for one user.
 func UpdateProfile(
 	ctx context.Context,

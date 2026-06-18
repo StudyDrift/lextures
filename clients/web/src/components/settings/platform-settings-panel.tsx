@@ -51,6 +51,7 @@ function emptyForm(): PlatformSettingsPayload {
     xapiEmissionEnabled: false,
     equationEditorEnabled: false,
     readingLevelEnabled: false,
+    graderAgentEnabled: false,
     speechToTextEnabled: false,
     accommodationsEngineEnabled: false,
     ffAccommodationsEngine: false,

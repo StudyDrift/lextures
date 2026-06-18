@@ -211,7 +211,9 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: clients/web/package-lock.json
+          cache-dependency-path: |
+            clients/web/package-lock.json
+            e2e/package-lock.json
 
       - name: Build API server binary
         working-directory: server
@@ -219,13 +221,47 @@ jobs:
           mkdir -p "${{ github.workspace }}/.cache/e2e"
           go build -trimpath -ldflags="-s -w" -o "${{ github.workspace }}/.cache/e2e/server" ./cmd/server
 
+      - name: Cache web node_modules
+        id: web-node-modules
+        uses: actions/cache@v4
+        with:
+          path: clients/web/node_modules
+          key: web-node-modules-${{ runner.os }}-${{ hashFiles('clients/web/package-lock.json') }}
+
       - name: Install and build web client
         working-directory: clients/web
         env:
           VITE_API_URL: http://localhost:8080
         run: |
-          npm ci
+          if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
+            npm ci
+          fi
           npm run build
+
+      - name: Cache e2e node_modules
+        id: e2e-node-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
+      - name: Cache Playwright browsers
+        id: playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
+      # System deps (apt) run once here so parallel shards avoid lock contention.
+      - name: Install e2e dependencies and Playwright system deps (once)
+        working-directory: e2e
+        run: |
+          if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
+            npm ci --prefer-offline --quiet
+          fi
+          npx playwright install --with-deps chromium
 
       - name: Upload e2e build artifacts
         uses: actions/upload-artifact@v4
@@ -292,7 +328,22 @@ jobs:
             clients/web/package-lock.json
             e2e/package-lock.json
 
+      - name: Cache web node_modules
+        id: web-node-modules
+        uses: actions/cache@v4
+        with:
+          path: clients/web/node_modules
+          key: web-node-modules-${{ runner.os }}-${{ hashFiles('clients/web/package-lock.json') }}
+
+      - name: Cache e2e node_modules
+        id: e2e-node-modules
+        uses: actions/cache@v4
+        with:
+          path: e2e/node_modules
+          key: e2e-node-modules-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+
       - name: Cache Playwright browsers
+        id: playwright-browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
@@ -300,15 +351,16 @@ jobs:
           restore-keys: |
             playwright-chromium-${{ runner.os }}-
 
-      - name: Install web client (preview runtime)
-        working-directory: clients/web
-        run: npm ci --prefer-offline --quiet
-
-      - name: Install e2e dependencies and Playwright browser
-        working-directory: e2e
+      # node_modules + browser bundle only; apt deps were installed in e2e-build.
+      - name: Restore e2e runtime
         run: |
-          npm ci --prefer-offline --quiet
-          npx playwright install --with-deps chromium
+          if [ "${{ steps.web-node-modules.outputs.cache-hit }}" != "true" ]; then
+            (cd clients/web && npm ci --prefer-offline --quiet)
+          fi
+          if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
+            (cd e2e && npm ci --prefer-offline --quiet)
+          fi
+          (cd e2e && npx playwright install chromium)
 
       - name: Run e2e shard (local stack)
         run: bash e2e/scripts/e2e-local.sh --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
