@@ -95,6 +95,11 @@ func (d Deps) handleUnsubscribe() http.HandlerFunc {
 			http.Error(w, "Could not update preferences.", http.StatusInternalServerError)
 			return
 		}
+		switch eventType {
+		case notifications.EventStudyReminderDaily, notifications.EventStudyReminderStreakAtRisk, notifications.EventStudyReminderWeeklySummary:
+			svc := d.studyReminderService()
+			_ = svc.Disable(r.Context(), userID)
+		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		_, _ = w.Write([]byte(`<!DOCTYPE html><html><body style="font-family:system-ui;padding:2rem;">
 <h1>Unsubscribed</h1>

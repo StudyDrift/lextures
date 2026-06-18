@@ -368,6 +368,9 @@ type Config struct {
 	// FFGamification enables streaks, XP, leaderboards, and badges for self-learner courses (plan 15.9).
 	// Managed in Settings → Global platform (not process env).
 	FFGamification bool
+	// FFStudyReminders enables daily study goal reminders and weekly progress summaries (plan 15.10).
+	// Managed in Settings → Global platform (not process env).
+	FFStudyReminders bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).
