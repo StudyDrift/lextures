@@ -19,6 +19,9 @@ import (
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 )
 
+// Matches course.course_files.byte_size CHECK (migration 052).
+const canvasMaxImportedSubmissionFileBytes = 20 << 20
+
 // canvasAssignmentSubmissionImportDeps carries blob + DB context for importing submission bodies/attachments.
 type canvasAssignmentSubmissionImportDeps struct {
 	CourseCode     string
@@ -150,9 +153,12 @@ func canvasDownloadCanvasURL(
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return nil, "", fmt.Errorf("download status %d", resp.StatusCode)
 	}
-	data, err := io.ReadAll(io.LimitReader(resp.Body, 64<<20))
+	data, err := io.ReadAll(io.LimitReader(resp.Body, canvasMaxImportedSubmissionFileBytes+1))
 	if err != nil {
 		return nil, "", err
+	}
+	if len(data) > canvasMaxImportedSubmissionFileBytes {
+		return nil, "", fmt.Errorf("attachment exceeds %d byte limit", canvasMaxImportedSubmissionFileBytes)
 	}
 	ct := strings.TrimSpace(resp.Header.Get("Content-Type"))
 	if ct == "" {
@@ -172,7 +178,7 @@ func canvasStoreImportedSubmissionBlob(
 	filename, mimeType string,
 	data []byte,
 ) (*uuid.UUID, error) {
-	if len(data) == 0 {
+	if len(data) == 0 || len(data) > canvasMaxImportedSubmissionFileBytes {
 		return nil, nil
 	}
 	ext := filepath.Ext(filename)
@@ -293,11 +299,11 @@ func canvasImportOneAssignmentSubmission(
 	var attachmentFileID *uuid.UUID
 
 	if prefetched != nil && len(prefetched.data) > 0 {
-		id, storeErr := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, prefetched.filename, prefetched.mimeType, prefetched.data)
-		if storeErr != nil {
+		if id, storeErr := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, prefetched.filename, prefetched.mimeType, prefetched.data); storeErr != nil {
 			return storeErr
+		} else if id != nil {
+			attachmentFileID = id
 		}
-		attachmentFileID = id
 	} else if att := canvasFirstSubmissionAttachment(sub); att != nil {
 		downloadURL := strAt(att, "url", "")
 		filename := strAt(att, "filename", strAt(att, "display_name", "submission"))
@@ -308,11 +314,11 @@ func canvasImportOneAssignmentSubmission(
 				if mimeType == "" || mimeType == "application/octet-stream" {
 					mimeType = ct
 				}
-				id, storeErr := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, filename, mimeType, data)
-				if storeErr != nil {
+				if id, storeErr := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, filename, mimeType, data); storeErr != nil {
 					return storeErr
+				} else if id != nil {
+					attachmentFileID = id
 				}
-				attachmentFileID = id
 			}
 		}
 	}

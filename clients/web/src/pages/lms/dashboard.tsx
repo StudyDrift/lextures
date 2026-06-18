@@ -47,6 +47,7 @@ import { DeadlineDateTime } from '../../components/timezone/deadline-datetime'
 import { useInboxUnreadCount, useCoursesRevision } from '../../context/use-inbox-unread'
 import { useCourseFeedUnread } from '../../context/use-course-feed-unread'
 import { usePermissions } from '../../context/use-permissions'
+import { canCreateCourses } from '../../lib/rbac-api'
 import {
   computeCourseFinalPercent,
   formatFinalPercent,
@@ -279,6 +280,7 @@ export default function Dashboard() {
     }
   }, [navigate])
   const { allows, loading: permLoading } = usePermissions()
+  const showCourseCreateActions = canCreateCourses(allows, permLoading)
   const inboxUnread = useInboxUnreadCount()
   const coursesRevision = useCoursesRevision()
   const { totalFeedUnread } = useCourseFeedUnread()
@@ -655,7 +657,9 @@ export default function Dashboard() {
         <div className="mt-10 rounded-2xl border border-slate-200 bg-slate-50/80 px-6 py-8 text-center dark:border-neutral-700 dark:bg-neutral-900/50">
           <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">No courses yet</p>
           <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
-            Join a course from an invite link, or create one if you teach.
+            {showCourseCreateActions
+              ? 'Join a course from an invite link, or create one if you teach.'
+              : 'Join a course from an invite link. When an instructor adds you, courses will appear here.'}
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link

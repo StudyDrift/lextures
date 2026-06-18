@@ -21,13 +21,68 @@ import (
 	"github.com/lextures/lextures/server/internal/service/authservice"
 )
 
-const canvasAvatarMaxBytes = 512 << 10
+const (
+	canvasAvatarMaxBytes              = 512 << 10
+	canvasImportProvisioningEmailDomain = "canvas-import.invalid"
+)
 
 type canvasEnrollmentImportStats struct {
 	Enrolled        int
 	AccountsCreated int
 	SkippedNoEmail  int
 	AvatarsImported int
+}
+
+func canvasCanvasUserIDFromEnrollment(enrollment, canvasUser map[string]any) int64 {
+	if uid := int64At(canvasUser, "id"); uid > 0 {
+		return uid
+	}
+	return int64At(enrollment, "user_id")
+}
+
+func canvasSanitizeEmailLocal(raw string) string {
+	s := strings.ToLower(strings.TrimSpace(raw))
+	if s == "" {
+		return ""
+	}
+	var b strings.Builder
+	for _, r := range s {
+		switch {
+		case r >= 'a' && r <= 'z', r >= '0' && r <= '9':
+			b.WriteRune(r)
+		case r == '.', r == '_', r == '-', r == '+':
+			b.WriteRune(r)
+		default:
+			b.WriteRune('-')
+		}
+	}
+	out := strings.Trim(b.String(), ".-_")
+	if len(out) > 48 {
+		out = out[:48]
+	}
+	return out
+}
+
+// canvasResolveProvisioningEmail picks a stable Lextures login for a Canvas roster member.
+// Canvas often omits email on enrollment payloads; login_id, sis_user_id, and canvas user id
+// are used as deterministic fallbacks so accounts and enrollments can still be created.
+func canvasResolveProvisioningEmail(canvasUID int64, canvasUser map[string]any, rosterEmail string) string {
+	if rosterEmail = strings.TrimSpace(rosterEmail); strings.Contains(rosterEmail, "@") {
+		return user.NormalizeEmail(rosterEmail)
+	}
+	if em := normalizedLexturesEmailGuessFromCanvasUserMap(canvasUser); em != "" {
+		return em
+	}
+	if canvasUID <= 0 {
+		return ""
+	}
+	if lid := canvasSanitizeEmailLocal(strAt(canvasUser, "login_id", "")); lid != "" {
+		return fmt.Sprintf("canvas+%s-%d@%s", lid, canvasUID, canvasImportProvisioningEmailDomain)
+	}
+	if sis := canvasSanitizeEmailLocal(strAt(canvasUser, "sis_user_id", "")); sis != "" {
+		return fmt.Sprintf("canvas+sis-%s-%d@%s", sis, canvasUID, canvasImportProvisioningEmailDomain)
+	}
+	return fmt.Sprintf("canvas+%d@%s", canvasUID, canvasImportProvisioningEmailDomain)
 }
 
 func canvasUserDisplayName(u map[string]any, email string) string {
@@ -48,12 +103,119 @@ func canvasUserDisplayName(u map[string]any, email string) string {
 
 func canvasEnrollmentListQuery() url.Values {
 	q := url.Values{}
-	q.Add("state[]", "active")
-	q.Add("state[]", "invited")
-	q.Add("state[]", "creation_pending")
+	// Include concluded/inactive enrollments — common when importing completed Canvas courses.
+	for _, state := range []string{"active", "invited", "creation_pending", "completed", "inactive"} {
+		q.Add("state[]", state)
+	}
 	q.Add("include[]", "user")
 	q.Add("include[]", "avatar_url")
 	return q
+}
+
+func canvasEnrollmentImportableState(state string) bool {
+	switch strings.ToLower(strings.TrimSpace(state)) {
+	case "active", "invited", "creation_pending", "completed", "inactive", "":
+		return true
+	default:
+		return false
+	}
+}
+
+func canvasEnrollmentTypeFromRow(row map[string]any) string {
+	if row == nil {
+		return ""
+	}
+	if typ := strings.TrimSpace(strAt(row, "type", "")); typ != "" {
+		return typ
+	}
+	return strings.TrimSpace(strAt(row, "role", ""))
+}
+
+func canvasEnrollmentRowWithUser(row, canvasUser map[string]any, canvasUID int64) map[string]any {
+	out := make(map[string]any, len(row)+2)
+	for k, v := range row {
+		out[k] = v
+	}
+	if canvasUID > 0 {
+		out["user_id"] = canvasUID
+	}
+	if canvasUser != nil {
+		out["user"] = canvasUser
+	}
+	return out
+}
+
+// canvasEnrollmentRowsFromCourseUsers builds enrollment-shaped rows from the course roster.
+// Some Canvas tokens can list course users but not the full enrollments index.
+func canvasEnrollmentRowsFromCourseUsers(users []map[string]any) []map[string]any {
+	out := make([]map[string]any, 0, len(users))
+	for _, u := range users {
+		canvasUID := int64At(u, "id")
+		if canvasUID <= 0 {
+			continue
+		}
+		enrollments := arrAt(u, "enrollments")
+		if len(enrollments) == 0 {
+			out = append(out, canvasEnrollmentRowWithUser(map[string]any{
+				"type":             "StudentEnrollment",
+				"enrollment_state": "active",
+			}, u, canvasUID))
+			continue
+		}
+		for _, e := range enrollments {
+			state := strAt(e, "enrollment_state", strAt(e, "state", "active"))
+			if !canvasEnrollmentImportableState(state) {
+				continue
+			}
+			row := canvasEnrollmentRowWithUser(e, u, canvasUID)
+			if canvasEnrollmentTypeFromRow(row) == "" {
+				row["type"] = "StudentEnrollment"
+			}
+			out = append(out, row)
+		}
+	}
+	return out
+}
+
+func canvasFilterImportableEnrollmentRows(rows []map[string]any) []map[string]any {
+	if len(rows) == 0 {
+		return rows
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		state := strAt(row, "enrollment_state", strAt(row, "state", "active"))
+		if !canvasEnrollmentImportableState(state) {
+			continue
+		}
+		out = append(out, row)
+	}
+	return out
+}
+
+// canvasFetchEnrollmentRowsForImport loads Canvas enrollments for import, falling back to the
+// course users roster when the enrollments index is empty (concluded courses, limited tokens).
+func canvasFetchEnrollmentRowsForImport(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID int64,
+) ([]map[string]any, error) {
+	rows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/enrollments", canvasCourseID), canvasEnrollmentListQuery())
+	if err != nil {
+		return nil, err
+	}
+	rows = canvasFilterImportableEnrollmentRows(rows)
+	if len(rows) > 0 {
+		return rows, nil
+	}
+	users, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
+		fmt.Sprintf("courses/%d/users", canvasCourseID),
+		url.Values{"include[]": []string{"email", "avatar_url", "login_id", "enrollments"}})
+	if err != nil {
+		return nil, err
+	}
+	return canvasEnrollmentRowsFromCourseUsers(users), nil
 }
 
 func canvasRosterEmailsByCanvasUserID(
@@ -64,7 +226,7 @@ func canvasRosterEmailsByCanvasUserID(
 ) (map[int64]string, error) {
 	rows, err := canvasGetArrayPaginated(ctx, client, canvasBase, accessToken,
 		fmt.Sprintf("courses/%d/users", canvasCourseID),
-		url.Values{"include[]": []string{"email", "avatar_url"}})
+		url.Values{"include[]": []string{"email", "avatar_url", "login_id"}})
 	if err != nil {
 		return nil, err
 	}
@@ -204,11 +366,12 @@ func canvasResolveLexturesUserForEnrollment(
 	pool *pgxpool.Pool,
 	tx pgx.Tx,
 	orgID uuid.UUID,
-	email string,
+	canvasUID int64,
+	rosterEmail string,
 	canvasUser map[string]any,
 	stats *canvasEnrollmentImportStats,
 ) (uuid.UUID, error) {
-	em := user.NormalizeEmail(email)
+	em := canvasResolveProvisioningEmail(canvasUID, canvasUser, rosterEmail)
 	if !strings.Contains(em, "@") {
 		if stats != nil {
 			stats.SkippedNoEmail++
@@ -267,18 +430,14 @@ func canvasFillGradeUserMap(
 	}
 	for _, e := range enrollmentRows {
 		u := objAt(e, "user")
-		canvasUID := int64At(u, "id")
+		canvasUID := canvasCanvasUserIDFromEnrollment(e, u)
 		if canvasUID <= 0 {
 			continue
 		}
 		if _, ok := out[canvasUID]; ok {
 			continue
 		}
-		email := rosterEmailByCanvasUID[canvasUID]
-		if email == "" {
-			email = normalizedLexturesEmailGuessFromCanvasUserMap(u)
-		}
-		userID, err := canvasResolveLexturesUserForEnrollment(ctx, pool, tx, orgID, email, u, stats)
+		userID, err := canvasResolveLexturesUserForEnrollment(ctx, pool, tx, orgID, canvasUID, rosterEmailByCanvasUID[canvasUID], u, stats)
 		if err != nil {
 			return err
 		}
@@ -302,8 +461,8 @@ func canvasApplyEnrollment(
 	stats *canvasEnrollmentImportStats,
 ) error {
 	tag, err := tx.Exec(ctx, `
-		INSERT INTO course.course_enrollments (course_id, user_id, role)
-		SELECT $1, $2, $3
+		INSERT INTO course.course_enrollments (course_id, user_id, role, active)
+		SELECT $1, $2, $3, true
 		WHERE NOT EXISTS (
 			SELECT 1 FROM course.course_enrollments
 			WHERE course_id = $1 AND user_id = $2 AND role = 'owner'

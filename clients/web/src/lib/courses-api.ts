@@ -4246,6 +4246,7 @@ export type CourseEnrollmentRosterRow = {
   id: string
   userId: string
   displayName: string | null
+  avatarUrl?: string | null
   role: string
   sectionId?: string | null
   sectionCode?: string | null
@@ -4271,6 +4272,12 @@ export async function fetchCourseEnrollmentsList(
     const role = typeof o.role === 'string' ? o.role : ''
     if (!id || !userId) continue
     const displayName = typeof o.displayName === 'string' ? o.displayName : null
+    const avatarUrl =
+      typeof o.avatarUrl === 'string'
+        ? o.avatarUrl
+        : typeof o.avatar_url === 'string'
+          ? o.avatar_url
+          : null
     const sectionId =
       typeof o.sectionId === 'string' ? o.sectionId : typeof o.section_id === 'string' ? o.section_id : null
     const sectionCode =
@@ -4285,7 +4292,7 @@ export async function fetchCourseEnrollmentsList(
         : typeof o.section_name === 'string'
           ? o.section_name
           : null
-    out.push({ id, userId, displayName, role, sectionId, sectionCode, sectionName })
+    out.push({ id, userId, displayName, avatarUrl, role, sectionId, sectionCode, sectionName })
   }
   return out
 }
@@ -5433,6 +5440,16 @@ export async function fetchModuleAssignmentSubmissions(
 }
 
 /** Grade for one submission (`GET/PUT .../submissions/:id/grade`). */
+export type GradeCommentApi = {
+  id?: string
+  userId?: string | null
+  displayName?: string | null
+  avatarUrl?: string | null
+  body: string
+  createdAt?: string | null
+  source?: string | null
+}
+
 export type SubmissionGradeApi = {
   submissionId?: string
   studentUserId?: string
@@ -5440,11 +5457,58 @@ export type SubmissionGradeApi = {
   maxPoints?: number | null
   rubricScores?: Record<string, number>
   instructorComment?: string | null
+  comments?: GradeCommentApi[]
   posted?: boolean
   excused?: boolean
   gradedByAi?: boolean
   /** True when the grade was pushed to Canvas successfully. */
   syncedToCanvas?: boolean
+}
+
+function parseGradeComments(raw: unknown): GradeCommentApi[] | undefined {
+  if (!Array.isArray(raw)) return undefined
+  const out: GradeCommentApi[] = []
+  for (const row of raw) {
+    if (!row || typeof row !== 'object') continue
+    const o = row as Record<string, unknown>
+    const body = typeof o.body === 'string' ? o.body.trim() : ''
+    if (!body) continue
+    out.push({
+      id: typeof o.id === 'string' ? o.id : undefined,
+      userId:
+        typeof o.userId === 'string'
+          ? o.userId
+          : typeof o.user_id === 'string'
+            ? o.user_id
+            : null,
+      displayName:
+        typeof o.displayName === 'string'
+          ? o.displayName
+          : typeof o.display_name === 'string'
+            ? o.display_name
+            : null,
+      avatarUrl:
+        typeof o.avatarUrl === 'string'
+          ? o.avatarUrl
+          : typeof o.avatar_url === 'string'
+            ? o.avatar_url
+            : null,
+      body,
+      createdAt:
+        typeof o.createdAt === 'string'
+          ? o.createdAt
+          : typeof o.created_at === 'string'
+            ? o.created_at
+            : null,
+      source: typeof o.source === 'string' ? o.source : null,
+    })
+  }
+  return out.length ? out : undefined
+}
+
+function normalizeSubmissionGradeApi(raw: SubmissionGradeApi): SubmissionGradeApi {
+  const comments = parseGradeComments((raw as { comments?: unknown }).comments)
+  return comments ? { ...raw, comments } : raw
 }
 
 export type GraderAgentConfigApi = {
@@ -5595,7 +5659,7 @@ export async function fetchSubmissionGrade(
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as SubmissionGradeApi
+  return normalizeSubmissionGradeApi(raw as SubmissionGradeApi)
 }
 
 export async function putSubmissionGrade(
@@ -5620,7 +5684,7 @@ export async function putSubmissionGrade(
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as SubmissionGradeApi
+  return normalizeSubmissionGradeApi(raw as SubmissionGradeApi)
 }
 
 export async function fetchAssignmentStudentGrade(
@@ -5633,7 +5697,7 @@ export async function fetchAssignmentStudentGrade(
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as SubmissionGradeApi
+  return normalizeSubmissionGradeApi(raw as SubmissionGradeApi)
 }
 
 export async function putAssignmentStudentGrade(
@@ -5657,7 +5721,7 @@ export async function putAssignmentStudentGrade(
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as SubmissionGradeApi
+  return normalizeSubmissionGradeApi(raw as SubmissionGradeApi)
 }
 
 export type CourseCanvasLinkApi = {

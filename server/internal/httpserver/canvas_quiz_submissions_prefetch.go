@@ -72,6 +72,9 @@ func canvasFetchAssignmentSubmissionsParallel(
 	}
 	assignmentSubsQuery := url.Values{}
 	assignmentSubsQuery.Add("include[]", "submission_history")
+	assignmentSubsQuery.Add("include[]", "submission_comments")
+	assignmentSubsQuery.Add("include[]", "submission_html_comments")
+	assignmentSubsQuery.Add("include[]", "rubric_assessment")
 
 	out := make(map[int64][]map[string]any, len(canvasAssignToItem))
 	var mu sync.Mutex

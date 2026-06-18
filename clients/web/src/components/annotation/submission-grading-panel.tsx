@@ -6,14 +6,20 @@ import { postGraderAgentRegradeRequest } from '../../lib/courses-api'
 import {
   fetchAssignmentStudentGrade,
   fetchCourseCanvasLink,
+  fetchCourseEnrollmentsList,
   fetchModuleAssignment,
   fetchSubmissionGrade,
   putAssignmentStudentGrade,
   putSubmissionGrade,
   type CourseCanvasLinkApi,
+  type GradeCommentApi,
   type RubricDefinition,
   type SubmissionGradeApi,
 } from '../../lib/courses-api'
+import {
+  SubmissionCommentThread,
+  type CommentRosterPerson,
+} from './submission-comment-thread'
 import { queueCanvasGradeSync, type CanvasGradePushPayload } from '../canvas/canvas-grade-sync'
 import { RubricGradePicker } from '../grading/rubric-grade-picker'
 import { formatPointsCell, rubricScoresComplete, rubricTotal } from '../../lib/rubric-utils'
@@ -70,6 +76,10 @@ export function SubmissionGradingPanel({
   const [saveError, setSaveError] = useState<string | null>(null)
   const [savedFlash, setSavedFlash] = useState(false)
   const [comment, setComment] = useState('')
+  const [threadComments, setThreadComments] = useState<GradeCommentApi[]>([])
+  const [rosterByUserId, setRosterByUserId] = useState<Map<string, CommentRosterPerson>>(
+    () => new Map(),
+  )
   const [pointsInput, setPointsInput] = useState('')
   const [rubricScores, setRubricScores] = useState<Record<string, number>>({})
   const [posted, setPosted] = useState(false)
@@ -106,6 +116,30 @@ export function SubmissionGradingPanel({
   }, [courseCode])
 
   useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const roster = await fetchCourseEnrollmentsList(courseCode)
+        if (cancelled) return
+        const map = new Map<string, CommentRosterPerson>()
+        for (const person of roster) {
+          map.set(person.userId.toLowerCase(), {
+            userId: person.userId,
+            displayName: person.displayName,
+            avatarUrl: person.avatarUrl,
+          })
+        }
+        setRosterByUserId(map)
+      } catch {
+        if (!cancelled) setRosterByUserId(new Map())
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
+
+  useEffect(() => {
     canvasSyncAbortRef.current?.()
     canvasSyncAbortRef.current = null
     setCanvasSyncPending(false)
@@ -134,8 +168,11 @@ export function SubmissionGradingPanel({
   }, [courseCode, itemId, rubricProp])
 
   const applyGrade = useCallback(
-    (grade: SubmissionGradeApi) => {
-      setComment(grade.instructorComment ?? '')
+    (grade: SubmissionGradeApi, options?: { preserveDraft?: boolean }) => {
+      setThreadComments(grade.comments ?? [])
+      if (!options?.preserveDraft) {
+        setComment('')
+      }
       setPosted(Boolean(grade.posted))
       setGradedByAi(Boolean(grade.gradedByAi))
       setGradeMode(initialGradeMode(grade, hasRubric))
@@ -159,6 +196,7 @@ export function SubmissionGradingPanel({
   useEffect(() => {
     if (!submissionId && !studentUserId) {
       setComment('')
+      setThreadComments([])
       setPointsInput('')
       setRubricScores({})
       setPosted(false)
@@ -179,6 +217,7 @@ export function SubmissionGradingPanel({
       } catch (e) {
         if (!cancelled) {
           setComment('')
+          setThreadComments([])
           setPointsInput('')
           setRubricScores({})
           setPosted(false)
@@ -254,10 +293,11 @@ export function SubmissionGradingPanel({
   }, [gradeMode, hasRubric, pointsInput, rubric, rubricScores])
 
   const canvasGradePayload = useMemo((): CanvasGradePushPayload | undefined => {
-    if (hasRubric && gradeMode === 'rubric' && rubric && rubricScoresComplete(rubric, rubricScores)) {
+    const instructorComment = comment.trim() || null
+    if (hasRubric && rubric && rubricScoresComplete(rubric, rubricScores)) {
       return {
         rubricScores,
-        instructorComment: comment.trim() || null,
+        instructorComment,
       }
     }
     const trimmed = pointsInput.trim()
@@ -266,12 +306,18 @@ export function SubmissionGradingPanel({
       if (Number.isFinite(n) && n >= 0) {
         return {
           pointsEarned: n,
-          instructorComment: comment.trim() || null,
+          instructorComment,
         }
       }
     }
+    if (hasGrade && instructorComment) {
+      if (Object.keys(rubricScores).length > 0) {
+        return { rubricScores, instructorComment }
+      }
+      return { instructorComment }
+    }
     return undefined
-  }, [comment, gradeMode, hasRubric, pointsInput, rubric, rubricScores])
+  }, [comment, hasGrade, hasRubric, pointsInput, rubric, rubricScores])
 
   const handleSave = useCallback(async () => {
     if (!submissionId && !studentUserId) return
@@ -284,15 +330,70 @@ export function SubmissionGradingPanel({
             putSubmissionGrade(courseCode, itemId, submissionId, body)
         : (body: Parameters<typeof putAssignmentStudentGrade>[3]) =>
             putAssignmentStudentGrade(courseCode, itemId, studentUserId!, body)
+      const trimmedComment = comment.trim()
+      const commentOnlySave =
+        hasGrade &&
+        trimmedComment !== '' &&
+        pointsInput.trim() === '' &&
+        (!hasRubric || !rubric || Object.keys(rubricScores).length === 0)
+      if (commentOnlySave) {
+        const saved = await saveGrade({ instructorComment: trimmedComment })
+        applyGrade(saved)
+        const savedMsg = 'Comment saved' + (posted ? '' : ' (held until posted)')
+        setFlashMsg(savedMsg)
+        setSavedFlash(true)
+        setPosted(true)
+        pendingScoreFocusRef.current = null
+        scoreInputRef.current?.blur()
+        if (focusTargetRef.current === focusTarget) {
+          onGradeSaved?.()
+        }
+        let startedCanvasSync = false
+        if (submissionId && canvasLink && canvasGradePayload) {
+          canvasSyncAbortRef.current?.()
+          const syncHandle = queueCanvasGradeSync({
+            courseCode,
+            itemId,
+            submissionId,
+            canvasLink,
+            gradePayload: canvasGradePayload,
+            onComplete: () => {
+              if (focusTargetRef.current !== focusTarget) return
+              setCanvasSyncPending(false)
+              setFlashMsg('Comment saved and synced to Canvas.')
+              setSavedFlash(true)
+              onGradeSaved?.()
+              window.setTimeout(() => setSavedFlash(false), 2500)
+            },
+            onError: (message) => {
+              if (focusTargetRef.current !== focusTarget) return
+              setCanvasSyncPending(false)
+              setFlashMsg(message)
+              setSavedFlash(true)
+              window.setTimeout(() => setSavedFlash(false), 4000)
+            },
+          })
+          if (syncHandle) {
+            canvasSyncAbortRef.current = syncHandle.abort
+            setCanvasSyncPending(true)
+            startedCanvasSync = true
+          }
+        }
+        if (!startedCanvasSync) {
+          window.setTimeout(() => setSavedFlash(false), 2500)
+        }
+        return
+      }
       if (hasRubric && gradeMode === 'rubric' && rubric) {
         if (!rubricScoresComplete(rubric, rubricScores)) {
           setSaveError('Select a rating for every rubric criterion.')
           return
         }
-        await saveGrade({
+        const saved = await saveGrade({
           rubricScores,
-          instructorComment: comment.trim() || null,
+          instructorComment: trimmedComment || null,
         })
+        applyGrade(saved)
       } else {
         const trimmed = pointsInput.trim()
         if (trimmed === '') {
@@ -308,10 +409,11 @@ export function SubmissionGradingPanel({
           setSaveError(`Score cannot exceed ${maxPoints} points.`)
           return
         }
-        await saveGrade({
+        const saved = await saveGrade({
           pointsEarned: n,
-          instructorComment: comment.trim() || null,
+          instructorComment: trimmedComment || null,
         })
+        applyGrade(saved)
       }
       const savedMsg = 'Grade saved' + (posted ? '' : ' (held until posted)')
       setFlashMsg(savedMsg)
@@ -335,8 +437,14 @@ export function SubmissionGradingPanel({
           onComplete: (grade) => {
             if (focusTargetRef.current !== focusTarget) return
             setCanvasSyncPending(false)
-            applyGrade(grade)
-            setFlashMsg('Grade saved and synced to Canvas.')
+            if (grade.comments?.length) {
+              applyGrade(grade)
+            }
+            setFlashMsg(
+              trimmedComment
+                ? 'Grade and comment saved and synced to Canvas.'
+                : 'Grade saved and synced to Canvas.',
+            )
             setSavedFlash(true)
             onGradeSaved?.()
             window.setTimeout(() => setSavedFlash(false), 2500)
@@ -368,6 +476,7 @@ export function SubmissionGradingPanel({
     canvasGradePayload,
     canvasLink,
     comment,
+    hasGrade,
     courseCode,
     gradeMode,
     hasRubric,
@@ -401,6 +510,7 @@ export function SubmissionGradingPanel({
       setPointsInput('')
       setRubricScores({})
       setComment('')
+      setThreadComments([])
       setPosted(false)
       setHasGrade(false)
       setFlashMsg('Grade cleared.')
@@ -586,19 +696,40 @@ export function SubmissionGradingPanel({
           </label>
         )}
 
-        <label className="block text-sm text-slate-700 dark:text-neutral-200">
-          <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
-            Feedback comment
-          </span>
-          <textarea
-            className="min-h-28 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm leading-relaxed dark:border-neutral-600 dark:bg-neutral-950"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            disabled={formDisabled}
-            placeholder="Share feedback the student will see with their grade…"
-            rows={5}
-          />
-        </label>
+        <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+          <div>
+            <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+              Feedback conversation
+            </span>
+            <SubmissionCommentThread
+              comments={threadComments}
+              roster={rosterByUserId}
+              emptyLabel={
+                mode === 'student'
+                  ? 'No feedback has been posted yet.'
+                  : 'No feedback yet. Add a comment below when you save the grade.'
+              }
+            />
+          </div>
+          {mode === 'staff' ? (
+            <label className="block">
+              <span className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-neutral-400">
+                Add comment
+              </span>
+              <textarea
+                className="min-h-24 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm leading-relaxed dark:border-neutral-600 dark:bg-neutral-950"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                disabled={formDisabled}
+                placeholder="Write feedback to add to the conversation…"
+                rows={4}
+              />
+              <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+                Your comment is added to the thread when you save the grade.
+              </p>
+            </label>
+          ) : null}
+        </div>
       </div>
 
       <div className="shrink-0 space-y-2 border-t border-slate-200 bg-slate-50 p-4 dark:border-neutral-600 dark:bg-neutral-900/80">

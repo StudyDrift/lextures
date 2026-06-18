@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/lextures/lextures/server/internal/models/gradecomment"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
@@ -98,7 +99,12 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 		posting = "automatic"
 	}
 	gradedByAI := true
-	if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, &comment, posting, gradedByAI); err != nil {
+	_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
+		DisplayName: "Grading agent",
+		Body:        comment,
+		Source:      "lextures",
+	})
+	if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, flatComment, commentJSON, posting, gradedByAI); err != nil {
 		return d.failGradingAgentItem(ctx, msg, "failed to write grade")
 	}
 	_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{

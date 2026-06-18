@@ -40,7 +40,6 @@ import type { CourseCatalogView, KanbanColumnId } from '../../lib/course-catalog
 import { EmptyState } from '../../components/ui/empty-state'
 import { CoursesCatalogSkeleton } from '../../components/ui/lms-content-skeletons'
 import { LmsPage } from './lms-page'
-import { RequirePermission } from '../../components/require-permission'
 import { usePermissions } from '../../context/use-permissions'
 import { useCoursesRevision } from '../../context/use-inbox-unread'
 import { authorizedFetch } from '../../lib/api'
@@ -51,7 +50,7 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { heroImageObjectStyle } from '../../lib/hero-image-position'
 import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
-import { PERM_COURSE_CREATE } from '../../lib/rbac-api'
+import { canCreateCourses } from '../../lib/rbac-api'
 import { CourseHeroImage } from '../../components/course-hero-image'
 import { CourseEnrollmentInvitationActions } from '../../components/enrollment/course-enrollment-invitation-actions'
 
@@ -742,6 +741,7 @@ function SortableCourseTableRow({
 
 export default function Courses() {
   const { allows, loading: permLoading } = usePermissions()
+  const showCourseCreateActions = canCreateCourses(allows, permLoading)
   const coursesRevision = useCoursesRevision()
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -1090,11 +1090,11 @@ export default function Courses() {
       description="Browse and open your enrolled courses. Drag to reorder your catalog."
       actions={
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <RequirePermission permission={PERM_COURSE_CREATE} fallback={null}>
+          {showCourseCreateActions ? (
             <CourseCatalogImportMenu onImportCanvas={() => setCanvasImportOpen(true)} />
-          </RequirePermission>
+          ) : null}
           <CourseCatalogViewMenu value={catalogView} onChange={handleCatalogViewChange} />
-          <RequirePermission permission={PERM_COURSE_CREATE} fallback={null}>
+          {showCourseCreateActions ? (
             <Link
               to="/courses/create"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
@@ -1102,7 +1102,7 @@ export default function Courses() {
               <Plus className="h-4 w-4" aria-hidden />
               New course
             </Link>
-          </RequirePermission>
+          ) : null}
         </div>
       }
     >
@@ -1174,7 +1174,7 @@ export default function Courses() {
 
       {courses && courses.length === 0 && !error && (
         <div className="mt-8">
-          {!permLoading && allows(PERM_COURSE_CREATE) ? (
+          {showCourseCreateActions ? (
             <EmptyState
               icon={CreateCourseIcon}
               title="Create your first course"
@@ -1245,10 +1245,12 @@ export default function Courses() {
           </SortableContext>
         </DndContext>
       )}
-      <CanvasImportCoursesModal
-        open={canvasImportOpen}
-        onClose={() => setCanvasImportOpen(false)}
-      />
+      {showCourseCreateActions ? (
+        <CanvasImportCoursesModal
+          open={canvasImportOpen}
+          onClose={() => setCanvasImportOpen(false)}
+        />
+      ) : null}
     </LmsPage>
   )
 }

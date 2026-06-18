@@ -45,8 +45,11 @@ function SubmissionStudentPicker({
 }: SubmissionStudentPickerProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [highlightedIndex, setHighlightedIndex] = useState(0)
   const rootRef = useRef<HTMLDivElement>(null)
   const filterRef = useRef<HTMLInputElement>(null)
+  const listItemRefs = useRef<Map<number, HTMLButtonElement>>(new Map())
+  const openedRef = useRef(false)
   const buttonId = useId()
   const menuId = useId()
   const filterId = useId()
@@ -66,14 +69,35 @@ function SubmissionStudentPicker({
 
   useEffect(() => {
     if (!open) {
+      openedRef.current = false
       setQuery('')
+      setHighlightedIndex(0)
       return
     }
+    if (openedRef.current) return
+    openedRef.current = true
+    const currentEntryIndex = visibleEntries.findIndex((entry) => entry.i === index)
+    setHighlightedIndex(currentEntryIndex >= 0 ? currentEntryIndex : 0)
     const frame = window.requestAnimationFrame(() => {
       filterRef.current?.focus()
     })
     return () => window.cancelAnimationFrame(frame)
-  }, [open])
+  }, [index, open, visibleEntries])
+
+  useEffect(() => {
+    if (!open) return
+    setHighlightedIndex(0)
+  }, [query])
+
+  useEffect(() => {
+    if (!open || visibleEntries.length === 0) return
+    const clamped = Math.min(highlightedIndex, visibleEntries.length - 1)
+    if (clamped !== highlightedIndex) {
+      setHighlightedIndex(clamped)
+      return
+    }
+    listItemRefs.current.get(clamped)?.scrollIntoView({ block: 'nearest' })
+  }, [highlightedIndex, open, visibleEntries.length])
 
   useEffect(() => {
     if (!open) return
@@ -138,6 +162,27 @@ function SubmissionStudentPicker({
                 if (e.key === 'Escape') {
                   e.stopPropagation()
                   setOpen(false)
+                  return
+                }
+                if (visibleEntries.length === 0) return
+
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault()
+                  setHighlightedIndex((prev) => Math.min(prev + 1, visibleEntries.length - 1))
+                  return
+                }
+                if (e.key === 'ArrowUp') {
+                  e.preventDefault()
+                  setHighlightedIndex((prev) => Math.max(prev - 1, 0))
+                  return
+                }
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  const entry = visibleEntries[highlightedIndex]
+                  if (entry) {
+                    onIndexChange(entry.i)
+                    setOpen(false)
+                  }
                 }
               }}
               className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-900 outline-none ring-indigo-500/0 placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-400"
@@ -150,22 +195,30 @@ function SubmissionStudentPicker({
             ) : visibleEntries.length === 0 ? (
               <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">No matching students.</p>
             ) : (
-              visibleEntries.map(({ submission, i, label }) => {
+              visibleEntries.map(({ submission, i, label }, visibleIndex) => {
                 const active = i === index
+                const highlighted = visibleIndex === highlightedIndex
                 return (
                   <button
                     key={submissionNavigatorKey(submission, i)}
+                    ref={(el) => {
+                      if (el) listItemRefs.current.set(visibleIndex, el)
+                      else listItemRefs.current.delete(visibleIndex)
+                    }}
                     type="button"
                     role="menuitemradio"
                     aria-checked={active}
+                    onMouseEnter={() => setHighlightedIndex(visibleIndex)}
                     onClick={() => {
                       onIndexChange(i)
                       setOpen(false)
                     }}
                     className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition ${
-                      active
+                      highlighted
                         ? 'bg-indigo-50 font-semibold text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
-                        : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
+                        : active
+                          ? 'font-semibold text-indigo-800 dark:text-indigo-200'
+                          : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800'
                     }`}
                   >
                     <span className="w-5 shrink-0 tabular-nums text-slate-400 dark:text-neutral-500">

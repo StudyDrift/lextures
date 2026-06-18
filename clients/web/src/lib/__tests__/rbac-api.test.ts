@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isValidPermissionString } from '../rbac-api'
+import { canCreateCourses, isValidPermissionString, PERM_COURSE_CREATE } from '../rbac-api'
 
 describe('isValidPermissionString', () => {
   it('accepts exactly four colon-separated non-empty parts', () => {
@@ -19,5 +19,21 @@ describe('isValidPermissionString', () => {
 
   it('trims whitespace before validating', () => {
     expect(isValidPermissionString('  a:b:c:d  ')).toBe(true)
+  })
+})
+
+describe('canCreateCourses', () => {
+  it('is false while permissions are loading', () => {
+    const allows = (p: string) => p === PERM_COURSE_CREATE
+    expect(canCreateCourses(allows, true)).toBe(false)
+  })
+
+  it('is true when PERM_COURSE_CREATE is granted', () => {
+    const allows = (p: string) => p === PERM_COURSE_CREATE
+    expect(canCreateCourses(allows, false)).toBe(true)
+  })
+
+  it('is false without PERM_COURSE_CREATE', () => {
+    expect(canCreateCourses(() => false, false)).toBe(false)
   })
 })

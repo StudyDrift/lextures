@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"net/http"
 	"net/url"
@@ -247,6 +248,9 @@ func upsertCourseGradeFromCanvas(
 	courseID, studentID, moduleItemID uuid.UUID,
 	pointsEarned float64,
 	excused bool,
+	instructorComment *string,
+	instructorCommentsJSON []byte,
+	rubricJSON []byte,
 ) error {
 	if pointsEarned < 0 {
 		pointsEarned = 0
@@ -254,17 +258,28 @@ func upsertCourseGradeFromCanvas(
 	if pointsEarned > 1e9 {
 		pointsEarned = 1e9
 	}
+	var rubric any
+	if len(rubricJSON) > 0 {
+		rubric = rubricJSON
+	}
+	var comments any
+	if len(instructorCommentsJSON) > 0 {
+		comments = instructorCommentsJSON
+	}
 	_, err := tx.Exec(ctx, `
 INSERT INTO course.course_grades (
-	course_id, student_user_id, module_item_id, points_earned, updated_at, posted_at, excused
-) VALUES ($1, $2, $3, $4, NOW(), NOW(), $5)
+	course_id, student_user_id, module_item_id, points_earned, rubric_scores_json, instructor_comment, instructor_comments_json, updated_at, posted_at, excused
+) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), $8)
 ON CONFLICT (student_user_id, module_item_id) DO UPDATE SET
 	course_id = EXCLUDED.course_id,
 	points_earned = EXCLUDED.points_earned,
+	rubric_scores_json = EXCLUDED.rubric_scores_json,
+	instructor_comment = EXCLUDED.instructor_comment,
+	instructor_comments_json = EXCLUDED.instructor_comments_json,
 	updated_at = NOW(),
-	posted_at = EXCLUDED.posted_at,
+	posted_at = COALESCE(course.course_grades.posted_at, NOW()),
 	excused = EXCLUDED.excused
-`, courseID, studentID, moduleItemID, pointsEarned, excused)
+`, courseID, studentID, moduleItemID, pointsEarned, rubric, instructorComment, comments, excused)
 	return err
 }
 
@@ -317,13 +332,16 @@ func canvasImportAssignmentGrades(
 				continue
 			}
 			if importGrades {
-				exc, score, hasScore := submissionScoreAndExcused(raw)
-				if exc || hasScore {
+				synced, parseErr := canvasGradeFromSubmissionPayload(raw, nil, canvasUserToLocal)
+				if parseErr != nil {
+					return fmt.Errorf("parse grade for assignment canvas id %d: %w", canvasAID, parseErr)
+				}
+				if synced.hasNumericScore || synced.excused || synced.comment != nil || len(synced.rubricJSON) > 0 {
 					pts := 0.0
-					if hasScore {
-						pts = score
+					if synced.hasNumericScore {
+						pts = synced.points
 					}
-					if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, exc); err != nil {
+					if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, synced.excused, synced.comment, synced.commentsJSON, synced.rubricJSON); err != nil {
 						return fmt.Errorf("save grade for assignment canvas id %d: %w", canvasAID, err)
 					}
 					// #region agent log
@@ -345,7 +363,8 @@ func canvasImportAssignmentGrades(
 				if err := canvasImportOneAssignmentSubmission(
 					ctx, tx, client, accessToken, *submissionDeps, courseID, itemID, studentID, raw, prefetched,
 				); err != nil {
-					return fmt.Errorf("import submission for assignment canvas id %d: %w", canvasAID, err)
+					log.Printf("canvas-import: skip submission for assignment canvas id %d user %s: %v", canvasAID, studentID, err)
+					continue
 				}
 				if canvasAssignmentSubmissionImportable(raw) {
 					submissionRowsUpserted++
@@ -537,7 +556,7 @@ func canvasImportQuizGrades(
 			if hasScore {
 				pts = score
 			}
-			if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, exc); err != nil {
+			if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, exc, nil, nil, nil); err != nil {
 				return fmt.Errorf("save grade for quiz canvas id %d: %w", canvasQID, err)
 			}
 			// #region agent log
