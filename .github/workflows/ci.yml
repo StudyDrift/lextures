@@ -269,13 +269,11 @@ jobs:
     needs: e2e-build
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    container:
-      image: mcr.microsoft.com/playwright:v1.49.1-jammy
     env:
       E2E_USE_DOCKER: "0"
-      E2E_DATABASE_URL: postgres://e2e:e2e@postgres:5432/e2e?sslmode=disable
+      E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
       E2E_API_PORT: "8080"
-      E2E_SERVER_BIN: ${{ github.workspace }}/.cache/e2e/server
+      E2E_SERVER_BIN: .cache/e2e/server
       E2E_WEB_MODE: preview
       E2E_SKIP_DEPS: "1"
       E2E_HEALTH_POLL_SECS: "1"
@@ -308,7 +306,7 @@ jobs:
           name: e2e-build
 
       - name: Restore server binary permissions
-        run: chmod +x "${{ github.workspace }}/.cache/e2e/server"
+        run: chmod +x .cache/e2e/server
 
       - uses: actions/setup-node@v4
         with:
@@ -329,6 +327,19 @@ jobs:
           if [ "${{ steps.e2e-node-modules.outputs.cache-hit }}" != "true" ]; then
             npm ci --prefer-offline --quiet
           fi
+
+      - name: Cache Playwright browsers
+        id: playwright-browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('e2e/package-lock.json') }}
+          restore-keys: |
+            playwright-chromium-${{ runner.os }}-
+
+      - name: Install Playwright browser
+        working-directory: e2e
+        run: npx playwright install chromium
 
       - name: Run Lighthouse harness (local stack)
         run: bash e2e/scripts/lighthouse-local.sh
@@ -395,7 +406,7 @@ jobs:
       E2E_USE_DOCKER: "0"
       E2E_DATABASE_URL: postgres://e2e:e2e@localhost:5432/e2e?sslmode=disable
       E2E_API_PORT: "8080"
-      E2E_SERVER_BIN: ${{ github.workspace }}/.cache/e2e/server
+      E2E_SERVER_BIN: .cache/e2e/server
       E2E_WEB_MODE: preview
       E2E_SKIP_DEPS: "1"
       E2E_HEALTH_POLL_SECS: "1"
@@ -427,7 +438,7 @@ jobs:
 
       # upload-artifact does not preserve the executable bit on the API binary.
       - name: Restore server binary permissions
-        run: chmod +x "${{ github.workspace }}/.cache/e2e/server"
+        run: chmod +x .cache/e2e/server
 
       - uses: actions/setup-node@v4
         with:
