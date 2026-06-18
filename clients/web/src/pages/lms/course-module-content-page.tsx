@@ -57,6 +57,7 @@ import {
 import { SeatTimeProgressBar } from '../../components/seat-time/seat-time-progress-bar'
 import { useSeatTimeHeartbeat } from '../../hooks/use-seat-time-heartbeat'
 import { usePlatformFeatures } from '../../context/platform-features-context'
+import { StudyBuddyWidget } from '../../components/notebook/study-buddy-widget'
 import { summarizeSectionsAltText } from '../../lib/image-alt-validation'
 
 function newLocalId(): string {
@@ -69,7 +70,7 @@ function newLocalId(): string {
 export default function CourseModuleContentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const { allows, loading: permLoading } = usePermissions()
-  const { ffCeuTracking } = usePlatformFeatures()
+  const { ffCeuTracking, aiStudyBuddyEnabled } = usePlatformFeatures()
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -631,6 +632,7 @@ export default function CourseModuleContentPage() {
           simplifyDlg.setOpen(false)
         }}
       />
+      {aiStudyBuddyEnabled && courseCode ? <StudyBuddyWidget courseCode={courseCode} /> : null}
     </LmsPage>
   )
 }

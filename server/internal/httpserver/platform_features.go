@@ -81,10 +81,12 @@ type platformFeaturesJSON struct {
 	FFGamification              bool `json:"ffGamification"`
 	FFOnboardingFlow            bool `json:"ffOnboardingFlow"`
 	FFStudyReminders            bool `json:"ffStudyReminders"`
+	FFAIStudyBuddy              bool `json:"ffAiStudyBuddy"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
 	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
+	AiStudyBuddyEnabled  bool `json:"aiStudyBuddyEnabled"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -168,6 +170,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFGamification:              cfg.FFGamification,
 		FFOnboardingFlow:            cfg.FFOnboardingFlow,
 		FFStudyReminders:            cfg.FFStudyReminders,
+		FFAIStudyBuddy:              cfg.FFAIStudyBuddy,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,
@@ -204,6 +207,28 @@ func (d Deps) effectiveRagNotebookEnabled(ctx context.Context, userID uuid.UUID)
 	return true
 }
 
+func (d Deps) effectiveAIStudyBuddyEnabled(ctx context.Context, userID uuid.UUID) bool {
+	cfg := d.effectiveConfig()
+	if !cfg.FFAIStudyBuddy || !cfg.AiDisclosureEnabled || d.openRouterClient() == nil {
+		return false
+	}
+	if d.Pool == nil {
+		return true
+	}
+	orgID, err := organization.OrgIDForUser(ctx, d.Pool, userID)
+	if err != nil {
+		return true
+	}
+	tc, err := aidisclosurerepo.GetTenantConfig(ctx, d.Pool, orgID)
+	if err != nil || tc == nil {
+		return true
+	}
+	if disabled, ok := tc.FeaturesEnabled[aigateway.FeatureAIStudyBuddy]; ok && !disabled {
+		return false
+	}
+	return true
+}
+
 // handleGetPlatformFeatures is GET /api/v1/platform/features (authenticated; read-only effective flags).
 func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -221,6 +246,7 @@ func (d Deps) handleGetPlatformFeatures() http.HandlerFunc {
 		out.AiDisclosureEnabled = cfg.AiDisclosureEnabled
 		out.OpenRouterConfigured = d.openRouterClient() != nil
 		out.RagNotebookEnabled = d.effectiveRagNotebookEnabled(r.Context(), userID)
+		out.AiStudyBuddyEnabled = d.effectiveAIStudyBuddyEnabled(r.Context(), userID)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(out)
 	}

@@ -376,6 +376,9 @@ type Config struct {
 	// FFStudyReminders enables daily study goal reminders and weekly progress summaries (plan 15.10).
 	// Managed in Settings → Global platform (not process env).
 	FFStudyReminders bool
+	// FFAIStudyBuddy enables the self-learner AI study buddy with persistent memory (plan 15.12).
+	// Managed in Settings → Global platform (not process env).
+	FFAIStudyBuddy bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).

@@ -78,6 +78,8 @@ export type PlatformFeatures = {
   ffGamification: boolean
   ffOnboardingFlow: boolean
   ffStudyReminders: boolean
+  ffAiStudyBuddy: boolean
+  aiStudyBuddyEnabled: boolean
   gdprModuleEnabled: boolean
   aiDisclosureEnabled: boolean
   openRouterConfigured: boolean
@@ -150,6 +152,8 @@ const defaultFeatures: PlatformFeatures = {
   ffGamification: false,
   ffOnboardingFlow: false,
   ffStudyReminders: false,
+  ffAiStudyBuddy: false,
+  aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
@@ -227,6 +231,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffGamification: false,
   ffOnboardingFlow: false,
   ffStudyReminders: false,
+  ffAiStudyBuddy: false,
+  aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,
@@ -305,6 +311,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffGamification: data.ffGamification === true,
           ffOnboardingFlow: data.ffOnboardingFlow === true,
           ffStudyReminders: data.ffStudyReminders === true,
+          ffAiStudyBuddy: data.ffAiStudyBuddy === true,
+          aiStudyBuddyEnabled: data.aiStudyBuddyEnabled === true,
           gdprModuleEnabled: data.gdprModuleEnabled === true,
           aiDisclosureEnabled: data.aiDisclosureEnabled === true,
           openRouterConfigured: data.openRouterConfigured === true,
@@ -349,6 +357,8 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffGamification: next.ffGamification === true,
           ffOnboardingFlow: next.ffOnboardingFlow === true,
           ffStudyReminders: next.ffStudyReminders === true,
+          ffAiStudyBuddy: next.ffAiStudyBuddy === true,
+          aiStudyBuddyEnabled: next.aiStudyBuddyEnabled === true,
           gdprModuleEnabled: next.gdprModuleEnabled === true,
           aiDisclosureEnabled: next.aiDisclosureEnabled === true,
           openRouterConfigured: next.openRouterConfigured === true,

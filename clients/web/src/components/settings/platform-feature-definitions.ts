@@ -259,6 +259,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Multi-step onboarding wizard with goal capture, optional diagnostic placement, and Start Here recommendations (plan 15.11).',
   },
   {
+    key: 'ffAiStudyBuddy',
+    label: 'AI study buddy',
+    description:
+      'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
+  },
+  {
     key: 'mfaEnabled',
     label: 'Two-factor authentication',
     description: 'Offer TOTP authenticator apps and passkeys as optional login factors.',

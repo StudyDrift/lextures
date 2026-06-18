@@ -65,6 +65,8 @@ export type PlatformFeaturesSnapshot = {
   ffGamification?: boolean
   ffOnboardingFlow?: boolean
   ffStudyReminders?: boolean
+  ffAiStudyBuddy?: boolean
+  aiStudyBuddyEnabled?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
   openRouterConfigured?: boolean
@@ -136,6 +138,8 @@ const defaults: PlatformFeaturesSnapshot = {
   ffGamification: false,
   ffOnboardingFlow: false,
   ffStudyReminders: false,
+  ffAiStudyBuddy: false,
+  aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
   openRouterConfigured: false,

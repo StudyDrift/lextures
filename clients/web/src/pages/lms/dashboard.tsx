@@ -71,6 +71,7 @@ import { StudyStatsCard } from '../../components/study-stats/study-stats-card'
 import { GamificationDashboardCard } from '../../components/gamification/gamification-dashboard-card'
 import { StartHereCard } from '../../components/onboarding/start-here-card'
 import { DailyGoalProgressCard } from '../../components/study-reminders/daily-goal-progress-card'
+import { StudyBuddyPromptsCard, StudyBuddyWidget } from '../../components/notebook/study-buddy-widget'
 import { LmsPage } from './lms-page'
 import { fetchCatalogSchedule, type ScheduleEntry } from '../../lib/catalog-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -296,6 +297,7 @@ export default function Dashboard() {
     ffCompletionCredentials,
     ffGamification,
     ffStudyReminders,
+    aiStudyBuddyEnabled,
     ffResearchConsent,
   } = usePlatformFeatures()
 
@@ -362,6 +364,8 @@ export default function Dashboard() {
     if (!uid || !top || !whatsNextRaw) return null
     return whatsNextRaw.course.id === top.id ? whatsNextRaw : null
   }, [whatsNextRaw, studentRows])
+
+  const studyBuddyCourseCode = studentRows[0]?.course?.courseCode ?? null
 
   const detailGenRef = useRef(0)
 
@@ -812,6 +816,10 @@ export default function Dashboard() {
           <StudyStatsCard />
 
           {ffStudyReminders && anyStudentExperience ? <DailyGoalProgressCard /> : null}
+
+          {aiStudyBuddyEnabled && studyBuddyCourseCode && anyStudentExperience ? (
+            <StudyBuddyPromptsCard courseCode={studyBuddyCourseCode} />
+          ) : null}
 
           {ffGamification && anyStudentExperience ? <GamificationDashboardCard /> : null}
 
@@ -1401,6 +1409,9 @@ export default function Dashboard() {
           )}
         </div>
       )}
+      {aiStudyBuddyEnabled && studyBuddyCourseCode ? (
+        <StudyBuddyWidget courseCode={studyBuddyCourseCode} />
+      ) : null}
     </LmsPage>
   )
 }

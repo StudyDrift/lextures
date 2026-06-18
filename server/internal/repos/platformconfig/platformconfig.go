@@ -124,6 +124,7 @@ type Row struct {
 	FFGamification                  *bool
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
+	FFAIStudyBuddy                  *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -262,6 +263,7 @@ type Write struct {
 	FFGamification                  *bool
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
+	FFAIStudyBuddy                  *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -396,6 +398,7 @@ SELECT
 	ff_gamification,
 	ff_onboarding_flow,
 	ff_study_reminders,
+	ff_ai_study_buddy,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -525,6 +528,7 @@ WHERE id = 1
 		&r.FFGamification,
 		&r.FFOnboardingFlow,
 		&r.FFStudyReminders,
+		&r.FFAIStudyBuddy,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -703,6 +707,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_gamification,
 	ff_onboarding_flow,
 	ff_study_reminders,
+	ff_ai_study_buddy,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -838,6 +843,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_gamification = COALESCE(EXCLUDED.ff_gamification, settings.platform_app_settings.ff_gamification),
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
+	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -965,6 +971,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFGamification,
 		w.FFOnboardingFlow,
 		w.FFStudyReminders,
+		w.FFAIStudyBuddy,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

@@ -137,6 +137,7 @@ type platformSettingsJSON struct {
 	FFGamification                  bool `json:"ffGamification"`
 	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                bool `json:"ffStudyReminders"`
+	FFAIStudyBuddy                  bool `json:"ffAiStudyBuddy"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -323,6 +324,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFGamification:                  merged.FFGamification,
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
+			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -484,6 +486,7 @@ type putPlatformBody struct {
 	FFGamification                  *bool `json:"ffGamification"`
 	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                *bool `json:"ffStudyReminders"`
+	FFAIStudyBuddy                  *bool `json:"ffAiStudyBuddy"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -791,6 +794,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffgamification", body.FFGamification, func(v bool) { wr.FFGamification = &v })
 		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
+		setBool("ffaistudybuddy", body.FFAIStudyBuddy, func(v bool) { wr.FFAIStudyBuddy = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -931,6 +935,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFGamification:                  merged.FFGamification,
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
+			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
