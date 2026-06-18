@@ -27,6 +27,14 @@ func (d Deps) pushNotificationService() *notifications.PushService {
 	}
 }
 
+func (d Deps) smsNotificationService() *notifications.SmsService {
+	return &notifications.SmsService{
+		Pool:   d.Pool,
+		Config: d.effectiveConfig(),
+		Queue:  d.SmsNotificationQueue,
+	}
+}
+
 func (d Deps) emitDiscussionReplyNotifications(ctx context.Context, courseID uuid.UUID, courseCode string, threadID, authorID uuid.UUID, threadTitle string) {
 	ns := d.notificationsService()
 	if !ns.Config.EmailNotificationsEnabled {
@@ -46,6 +54,7 @@ func (d Deps) emitDiscussionReplyNotifications(ctx context.Context, courseID uui
 		orgID = oid
 	}
 	ns.NotifyDiscussionReply(ctx, participants, courseName, threadTitle, courseCode, threadID.String(), orgID)
+	d.smsNotificationService().NotifyDiscussionReply(ctx, participants, courseName, threadTitle, courseCode, threadID.String())
 }
 
 func (d Deps) emitInboxMessageNotification(ctx context.Context, recipientID, senderID uuid.UUID, subject string) {
@@ -68,6 +77,7 @@ func (d Deps) emitInboxMessageNotification(ctx context.Context, recipientID, sen
 	if err := d.pushNotificationService().Enqueue(ctx, recipientID, notifications.EventInboxMessage, title, body, "/inbox"); err != nil {
 		slog.Warn("inbox_message.notification", "err", err, "recipient_id", recipientID.String())
 	}
+	d.smsNotificationService().NotifyInboxMessage(ctx, recipientID, title, body)
 }
 
 func (d Deps) emitAssignmentCreatedNotifications(ctx context.Context, courseCode, assignmentTitle string) {
@@ -93,4 +103,5 @@ func (d Deps) emitAssignmentCreatedNotifications(ctx context.Context, courseCode
 		ids = append(ids, s.UserID)
 	}
 	ns.NotifyAssignmentCreated(ctx, ids, courseName, assignmentTitle, courseCode, orgID)
+	d.smsNotificationService().NotifyAssignmentCreated(ctx, ids, courseName, assignmentTitle, courseCode)
 }

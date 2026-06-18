@@ -9,6 +9,7 @@ type PreferenceRow = {
   eventType: string
   emailEnabled: boolean
   pushEnabled: boolean
+  smsEnabled: boolean
   digestMode: 'instant' | 'daily' | 'off'
 }
 
@@ -145,6 +146,9 @@ export function NotificationPreferencesPanel() {
                 Push
               </th>
               <th className="px-4 py-3" scope="col">
+                SMS
+              </th>
+              <th className="px-4 py-3" scope="col">
                 Delivery
               </th>
             </tr>
@@ -153,6 +157,7 @@ export function NotificationPreferencesPanel() {
             {rows.map((row) => {
               const emailId = `${baseId}-${row.eventType}-email`
               const pushId = `${baseId}-${row.eventType}-push`
+              const smsId = `${baseId}-${row.eventType}-sms`
               const digestId = `${baseId}-${row.eventType}-digest`
               const label = EVENT_LABELS[row.eventType] ?? row.eventType
               return (
@@ -202,6 +207,29 @@ export function NotificationPreferencesPanel() {
                       <span
                         className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
                           row.pushEnabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <label htmlFor={smsId} className="sr-only">
+                      SMS for {label}
+                    </label>
+                    <button
+                      id={smsId}
+                      type="button"
+                      role="switch"
+                      aria-checked={row.smsEnabled}
+                      onClick={() =>
+                        updateRow(row.eventType, { smsEnabled: !row.smsEnabled })
+                      }
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                        row.smsEnabled ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-neutral-600'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                          row.smsEnabled ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
                     </button>

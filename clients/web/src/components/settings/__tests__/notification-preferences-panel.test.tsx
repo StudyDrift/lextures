@@ -19,12 +19,13 @@ const mockPrefs = [
     eventType: 'grade_posted',
     emailEnabled: true,
     pushEnabled: true,
+    smsEnabled: false,
     digestMode: 'instant',
   },
 ]
 
 describe('NotificationPreferencesPanel', () => {
-  it('loads and displays preference rows with push column', async () => {
+  it('loads and displays preference rows with push and SMS columns', async () => {
     vi.mocked(authorizedFetch).mockResolvedValueOnce({
       ok: true,
       json: async () => ({ preferences: mockPrefs }),
@@ -43,8 +44,12 @@ describe('NotificationPreferencesPanel', () => {
       'aria-checked',
       'true',
     )
-    // Push column header should exist
     expect(screen.getByText('Push')).toBeInTheDocument()
+    expect(screen.getByText('SMS')).toBeInTheDocument()
+    expect(screen.getByRole('switch', { name: /sms for grade posted/i })).toHaveAttribute(
+      'aria-checked',
+      'false',
+    )
   })
 
   it('toggles push preference', async () => {
@@ -67,6 +72,36 @@ describe('NotificationPreferencesPanel', () => {
 
     const pushSwitch = screen.getByRole('switch', { name: /push for grade posted/i })
     await user.click(pushSwitch)
+    await user.click(screen.getByRole('button', { name: /save preferences/i }))
+
+    await waitFor(() => {
+      expect(authorizedFetch).toHaveBeenCalledWith(
+        '/api/v1/me/notification-preferences',
+        expect.objectContaining({ method: 'PUT' }),
+      )
+    })
+  })
+
+  it('toggles SMS preference', async () => {
+    vi.mocked(authorizedFetch)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ preferences: mockPrefs }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          preferences: [{ ...mockPrefs[0], smsEnabled: true }],
+        }),
+      } as Response)
+
+    const user = userEvent.setup()
+    render(<NotificationPreferencesPanel />)
+
+    await waitFor(() => expect(screen.getByText('Grade posted')).toBeInTheDocument())
+
+    const smsSwitch = screen.getByRole('switch', { name: /sms for grade posted/i })
+    await user.click(smsSwitch)
     await user.click(screen.getByRole('button', { name: /save preferences/i }))
 
     await waitFor(() => {

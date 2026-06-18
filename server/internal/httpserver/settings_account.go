@@ -3,12 +3,15 @@ package httpserver
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/l10n"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
+
+var phoneNumberPattern = regexp.MustCompile(`^[\d\s().+-]+$`)
 
 type accountProfileResponse struct {
 	Email                      string  `json:"email"`
@@ -24,6 +27,7 @@ type accountProfileResponse struct {
 	SessionManagementUIEnabled bool    `json:"sessionManagementUiEnabled"`
 	AccountType                string  `json:"accountType"`
 	Timezone                   *string `json:"timezone"`
+	PhoneNumber                *string `json:"phoneNumber"`
 }
 
 type patchAccountBody struct {
@@ -33,6 +37,7 @@ type patchAccountBody struct {
 	UITheme         *string `json:"uiTheme"`
 	ShowHelpPopover *bool   `json:"showHelpPopover"`
 	Timezone        *string `json:"timezone"`
+	PhoneNumber     *string `json:"phoneNumber"`
 }
 
 func normalizeName(s *string, label string) (*string, error) {
@@ -64,6 +69,23 @@ func normalizeAvatarURL(s *string) (*string, error) {
 	isData := strings.HasPrefix(t, "data:image/")
 	if !isHTTP && !isData {
 		return nil, apierrError("Avatar must be an http(s) URL or a data:image upload.")
+	}
+	return &t, nil
+}
+
+func normalizePhoneNumber(s *string) (*string, error) {
+	if s == nil {
+		return nil, nil
+	}
+	t := strings.TrimSpace(*s)
+	if t == "" {
+		return nil, nil
+	}
+	if len(t) > 30 {
+		return nil, apierrError("Phone number is too long.")
+	}
+	if !phoneNumberPattern.MatchString(t) {
+		return nil, apierrError("Phone number may only contain digits, spaces, and + ( ) . - characters.")
 	}
 	return &t, nil
 }
@@ -130,6 +152,7 @@ func (d Deps) handleGetSettingsAccount() http.HandlerFunc {
 			RTLEnabled:                 d.effectiveConfig().RTLEnabled,
 			AccountType:                at,
 			Timezone:                   row.Timezone,
+			PhoneNumber:                row.PhoneNumber,
 		})
 	}
 }
@@ -179,7 +202,18 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			}
 			timezonePtr = &norm
 		}
-		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover, timezonePtr)
+		var phoneNumberPtr *string
+		updatePhoneNumber := false
+		if req.PhoneNumber != nil {
+			updatePhoneNumber = true
+			phoneNumber, err := normalizePhoneNumber(req.PhoneNumber)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+				return
+			}
+			phoneNumberPtr = phoneNumber
+		}
+		row, err := user.UpdateProfile(r.Context(), d.Pool, userID, firstName, lastName, avatarURL, uiTheme, req.ShowHelpPopover, timezonePtr, phoneNumberPtr, updatePhoneNumber)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update account.")
 			return
@@ -206,6 +240,7 @@ func (d Deps) handlePatchSettingsAccount() http.HandlerFunc {
 			RTLEnabled:                 d.effectiveConfig().RTLEnabled,
 			AccountType:                at,
 			Timezone:                   row.Timezone,
+			PhoneNumber:                row.PhoneNumber,
 		})
 	}
 }

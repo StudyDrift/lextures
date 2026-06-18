@@ -87,7 +87,7 @@ func (d Deps) handlePutCourseGradebookGrades() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
-		notifications.NotifyAutoPostedFromGradebookPut(r.Context(), d.Pool, d.effectiveConfig(), *cid, b.Grades)
+		notifications.NotifyAutoPostedFromGradebookPut(r.Context(), d.Pool, d.effectiveConfig(), *cid, b.Grades, d.SmsNotificationQueue)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

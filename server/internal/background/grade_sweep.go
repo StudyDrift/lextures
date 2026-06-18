@@ -13,9 +13,10 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/gradeauditevents"
 	"github.com/lextures/lextures/server/internal/service/notifications"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
-func sweepScheduledReleases(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, now time.Time) {
+func sweepScheduledReleases(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, smsQueue *smsnotificationqueue.Bus, now time.Time) {
 	if pool == nil {
 		return
 	}
@@ -25,13 +26,13 @@ func sweepScheduledReleases(ctx context.Context, pool *pgxpool.Pool, cfg config.
 		return
 	}
 	for _, p := range pairs {
-		if err := markPostedScheduled(ctx, pool, cfg, p.CourseID, p.StructureItemID, now); err != nil {
+		if err := markPostedScheduled(ctx, pool, cfg, smsQueue, p.CourseID, p.StructureItemID, now); err != nil {
 			slog.Warn("grade_posting.scheduled_release_skipped", "course_id", p.CourseID, "item_id", p.StructureItemID, "err", err)
 		}
 	}
 }
 
-func markPostedScheduled(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID, moduleItemID uuid.UUID, at time.Time) error {
+func markPostedScheduled(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, smsQueue *smsnotificationqueue.Bus, courseID, moduleItemID uuid.UUID, at time.Time) error {
 	tx, err := pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -55,7 +56,7 @@ func markPostedScheduled(ctx context.Context, pool *pgxpool.Pool, cfg config.Con
 	if err := tx.Commit(ctx); err != nil {
 		return err
 	}
-	notifications.NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, moduleItemID, posted)
+	notifications.NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, moduleItemID, posted, smsQueue)
 	slog.Info("grade_posting_completed", "course_id", courseID, "module_item_id", moduleItemID, "n", len(posted))
 	return coursemoduleassignments.ClearReleaseAt(ctx, pool, courseID, moduleItemID)
 }
