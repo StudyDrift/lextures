@@ -60,6 +60,12 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderPaymentFailed(vars, logo, color)
 	case "certificate_issued":
 		return renderCertificateIssued(vars, logo, color)
+	case "study_reminder_daily":
+		return renderStudyReminderDaily(vars, logo, color)
+	case "study_reminder_streak_at_risk":
+		return renderStudyReminderStreakAtRisk(vars, logo, color)
+	case "study_reminder_weekly_summary":
+		return renderStudyReminderWeeklySummary(vars, logo, color)
 	default:
 		subject := vars["subject"]
 		if subject == "" {
