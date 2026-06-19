@@ -26,6 +26,8 @@ func AllScopes() []Scope {
 		{ID: "grades:read", Label: "Read grades", Description: "View gradebook data and posted grades.", Group: "Grades"},
 		{ID: "grades:write", Label: "Write grades", Description: "Post and update grades.", Group: "Grades"},
 		{ID: "users:read", Label: "Read users", Description: "View basic user directory data.", Group: "Users"},
+		{ID: "pii:read", Label: "Read PII", Description: "View email and full name in user API responses.", Group: "Users"},
+		{ID: "graphql:read", Label: "Read GraphQL schema", Description: "Access the GraphQL schema stub endpoint.", Group: "Integrations"},
 		{ID: "feed:read", Label: "Read activity feed", Description: "Read course activity feed events.", Group: "Feed"},
 		{ID: "files:read", Label: "Read files", Description: "Download course files you can access.", Group: "Files"},
 		{ID: "mcp:connect", Label: "Connect MCP agents", Description: "Allow AI agents to connect via MCP using this key.", Group: "Integrations"},
