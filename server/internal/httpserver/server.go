@@ -100,6 +100,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(logging.AccessLog)
+	r.Use(d.publicAPIMiddleware)
 	ready := d.Ready
 	if ready == nil {
 		ready = defaultReady(d.Pool)

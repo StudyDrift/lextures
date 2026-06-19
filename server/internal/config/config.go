@@ -358,6 +358,11 @@ type Config struct {
 	// FFPublicCatalog enables the public, unauthenticated course catalog and search (plan 15.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPublicCatalog bool
+	// FFPublicAPI enables the versioned public REST API for third-party integrations (plan 16.1).
+	// Managed in Settings → Global platform (not process env).
+	FFPublicAPI bool
+	// EnableAPIDocs serves Swagger UI and ReDoc at /api/v1/docs and /api/v1/redoc (plan 16.1).
+	EnableAPIDocs bool
 	// FFLearningPaths enables learning paths / course bundles for self-learners (plan 15.4).
 	// Managed in Settings → Global platform (not process env).
 	FFLearningPaths bool
@@ -602,6 +607,8 @@ func Load() Config {
 		TwilioAccountSID:                  firstNonEmptyTrimmed("TWILIO_ACCOUNT_SID"),
 		TwilioAuthToken:                   firstNonEmptyTrimmed("TWILIO_AUTH_TOKEN"),
 		TwilioFromNumber:                  firstNonEmptyTrimmed("TWILIO_FROM_NUMBER"),
+
+		EnableAPIDocs: boolEnv("ENABLE_API_DOCS"),
 	}
 }
 

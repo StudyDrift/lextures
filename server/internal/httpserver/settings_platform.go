@@ -129,6 +129,7 @@ type platformSettingsJSON struct {
 	FFConsortiumSharing             bool `json:"ffConsortiumSharing"`
 	FFSelfPacedMode                 bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 bool `json:"ffPublicCatalog"`
+	FFPublicAPI                     bool `json:"ffPublicApi"`
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
 	FFRevenueShare                  bool `json:"ffRevenueShare"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
@@ -316,6 +317,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFConsortiumSharing:             merged.FFConsortiumSharing,
 			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
+			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
@@ -478,6 +480,7 @@ type putPlatformBody struct {
 	FFConsortiumSharing             *bool `json:"ffConsortiumSharing"`
 	FFSelfPacedMode                 *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 *bool `json:"ffPublicCatalog"`
+	FFPublicAPI                     *bool `json:"ffPublicApi"`
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
 	FFRevenueShare                  *bool `json:"ffRevenueShare"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
@@ -786,6 +789,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffconsortiumsharing", body.FFConsortiumSharing, func(v bool) { wr.FFConsortiumSharing = &v })
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
+		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("ffrevenueshare", body.FFRevenueShare, func(v bool) { wr.FFRevenueShare = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
@@ -927,6 +931,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFConsortiumSharing:             merged.FFConsortiumSharing,
 			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
+			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,

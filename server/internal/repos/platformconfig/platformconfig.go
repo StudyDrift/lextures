@@ -116,6 +116,7 @@ type Row struct {
 	FFConsortiumSharing             *bool
 	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
+	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
 	FFLearningPaths                 *bool
@@ -255,6 +256,7 @@ type Write struct {
 	FFConsortiumSharing             *bool
 	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
+	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
 	FFLearningPaths                 *bool
@@ -391,6 +393,7 @@ SELECT
 	ff_consortium_sharing,
 	ff_self_paced_mode,
 	ff_public_catalog,
+	ff_public_api,
 	ff_stripe_billing,
 	ff_learning_paths,
 	ff_completion_credentials,
@@ -521,6 +524,7 @@ WHERE id = 1
 		&r.FFConsortiumSharing,
 		&r.FFSelfPacedMode,
 		&r.FFPublicCatalog,
+		&r.FFPublicAPI,
 		&r.FFStripeBilling,
 		&r.FFLearningPaths,
 		&r.FFCompletionCredentials,
@@ -860,6 +864,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_ui_mode = COALESCE(EXCLUDED.ff_ui_mode, settings.platform_app_settings.ff_ui_mode),
 	ff_self_paced_mode = COALESCE(EXCLUDED.ff_self_paced_mode, settings.platform_app_settings.ff_self_paced_mode),
 	ff_public_catalog = COALESCE(EXCLUDED.ff_public_catalog, settings.platform_app_settings.ff_public_catalog),
+	ff_public_api = COALESCE(EXCLUDED.ff_public_api, settings.platform_app_settings.ff_public_api),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
