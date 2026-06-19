@@ -42,17 +42,17 @@ func (d Deps) publicAPIMiddleware(next http.Handler) http.Handler {
 			publicapi.ServeReDoc(w, r)
 			return
 		}
-		// Protected resources require the public API feature flag.
-		if !d.effectiveConfig().FFPublicAPI {
-			publicapi.WriteServiceUnavailable(w, r.URL.Path)
-			return
-		}
+		// Protected resources: JWT/session requests use the legacy SPA handlers unchanged.
 		if !publicapi.IsAccessKeyRequest(r) {
-			if rt.Scope != "" && strings.TrimSpace(r.Header.Get("Authorization")) == "" {
+			if d.effectiveConfig().FFPublicAPI && rt.Scope != "" && strings.TrimSpace(r.Header.Get("Authorization")) == "" {
 				publicapi.WriteUnauthorized(w, r.URL.Path)
 				return
 			}
 			next.ServeHTTP(w, r)
+			return
+		}
+		if !d.effectiveConfig().FFPublicAPI {
+			publicapi.WriteServiceUnavailable(w, r.URL.Path)
 			return
 		}
 		start := time.Now()

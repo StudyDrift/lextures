@@ -9,7 +9,7 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 )
 
-func TestPublicAPI_FeatureOff_Returns503(t *testing.T) {
+func TestPublicAPI_FeatureOff_AccessKey_Returns503(t *testing.T) {
 	h := NewHandler(Deps{Pool: nil, Config: config.Config{FFPublicAPI: false}})
 	rr := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/courses", nil)
@@ -17,6 +17,17 @@ func TestPublicAPI_FeatureOff_Returns503(t *testing.T) {
 	h.ServeHTTP(rr, req)
 	if rr.Code != http.StatusServiceUnavailable {
 		t.Fatalf("got %d body %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestPublicAPI_FeatureOff_JWTPassesThrough(t *testing.T) {
+	h := NewHandler(Deps{Pool: nil, JWTSigner: nil, Config: config.Config{FFPublicAPI: false}})
+	rr := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/courses", nil)
+	h.ServeHTTP(rr, req)
+	// Legacy handler returns 401 (not public API 503) when JWT signer is nil.
+	if rr.Code == http.StatusServiceUnavailable {
+		t.Fatalf("JWT request should not be blocked by public API middleware, got 503")
 	}
 }
 
