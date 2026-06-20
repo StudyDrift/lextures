@@ -12,6 +12,7 @@ import {
   type RubricLevel,
 } from '../../lib/courses-api'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
+import { AssignToEditor } from './assign-to-editor'
 
 export type AssignmentPageSettingsPanelProps = {
   disabled?: boolean
@@ -281,6 +282,12 @@ export function AssignmentPageSettingsPanel({
             </Field>
           </div>
         </SettingsAccordion>
+
+        {courseCode && assignmentItemId ? (
+          <SettingsAccordion title="Assign To">
+            <AssignToEditor courseCode={courseCode} itemId={assignmentItemId} disabled={disabled} />
+          </SettingsAccordion>
+        ) : null}
 
         <SettingsAccordion title="Submission type">
           <div className="divide-y divide-slate-100/90 pt-1 dark:divide-neutral-800/80">

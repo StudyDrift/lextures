@@ -204,6 +204,10 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Delete("/api/v1/courses/{course_code}/sections/{section_id}", d.handleCourseSectionItem())
 	r.Patch("/api/v1/enrollments/{enrollment_id}/section", d.handleEnrollmentSectionTransfer())
 	r.Put("/api/v1/sections/{section_id}/overrides/{item_id}", d.handleSectionAssignmentOverride())
+	// Differentiated assignments / "assign to" targeting (plan 2.15).
+	r.Get("/api/v1/courses/{course_code}/items/{item_id}/overrides", d.handleItemAssignToOverrides())
+	r.Put("/api/v1/courses/{course_code}/items/{item_id}/overrides", d.handleItemAssignToOverrides())
+	r.Post("/api/v1/courses/{course_code}/items/{item_id}/overrides/bulk-extend", d.handleItemAssignToBulkExtend())
 	r.Patch("/api/v1/courses/{course_code}/features", d.handlePatchCourseFeatures())
 	r.Get("/api/v1/courses/{course_code}/whiteboards", d.handleCourseWhiteboardsList())
 	r.Post("/api/v1/courses/{course_code}/whiteboards", d.handleCourseWhiteboardsPost())

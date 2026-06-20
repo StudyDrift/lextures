@@ -288,6 +288,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'iCal and CalDAV calendar feed subscriptions for assignment and quiz deadlines (plan 16.5).',
   },
   {
+    key: 'ffAssignToOverrides',
+    label: 'Assign to (differentiated assignments)',
+    description:
+      'Targeted assignment/quiz audiences (everyone, sections, groups, or students) with per-target due dates and availability windows (plan 2.15).',
+  },
+  {
     key: 'mfaEnabled',
     label: 'Two-factor authentication',
     description: 'Offer TOTP authenticator apps and passkeys as optional login factors.',

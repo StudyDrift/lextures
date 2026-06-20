@@ -10,11 +10,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/courseroles"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
-	"github.com/lextures/lextures/server/internal/courseroles"
 )
 
 func sectionJSON(s *coursesections.Section) map[string]any {
@@ -435,31 +435,11 @@ WHERE s.id = $1
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
-		if err := coursesections.UpsertOverride(r.Context(), d.Pool, sid, itemID, body.DueAt, body.AvailableFrom, body.AvailableUntil); err != nil {
+		if err := coursesections.UpsertOverride(r.Context(), d.Pool, sid, itemID, body.DueAt, body.AvailableFrom, body.AvailableUntil, viewer); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save override.")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
-	}
-}
-
-func applySectionAssignmentOverrides(items []coursestructure.ItemResponse, ovm map[uuid.UUID]coursesections.Override) {
-	for i := range items {
-		if items[i].Kind != "assignment" && items[i].Kind != "quiz" {
-			continue
-		}
-		id, err := uuid.Parse(items[i].ID)
-		if err != nil {
-			continue
-		}
-		ov, ok := ovm[id]
-		if !ok {
-			continue
-		}
-		if ov.DueAt != nil {
-			t := *ov.DueAt
-			items[i].DueAt = &t
-		}
 	}
 }

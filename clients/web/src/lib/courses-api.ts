@@ -4464,6 +4464,97 @@ export async function putSectionAssignmentOverride(
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
 }
 
+/** Plan 2.15 — differentiated assignments / "assign to" targeting. */
+export type AssignToTargetType = 'everyone' | 'section' | 'group' | 'student'
+
+export type AssignToTarget = {
+  targetType: AssignToTargetType
+  targetId?: string | null
+  dueAt?: string | null
+  availableFrom?: string | null
+  availableUntil?: string | null
+  extraAttempts?: number | null
+  timeMultiplier?: number | null
+}
+
+export type AssignToOverridesResponse = {
+  targets: AssignToTarget[]
+  orphaned: boolean
+}
+
+function parseAssignToOverridesResponse(raw: unknown): AssignToOverridesResponse {
+  const o = (raw ?? {}) as { targets?: unknown; orphaned?: unknown }
+  const targets: AssignToTarget[] = []
+  if (Array.isArray(o.targets)) {
+    for (const row of o.targets) {
+      if (!row || typeof row !== 'object') continue
+      const r = row as Record<string, unknown>
+      const targetType = typeof r.targetType === 'string' ? r.targetType : null
+      if (targetType !== 'everyone' && targetType !== 'section' && targetType !== 'group' && targetType !== 'student') {
+        continue
+      }
+      targets.push({
+        targetType,
+        targetId: typeof r.targetId === 'string' ? r.targetId : null,
+        dueAt: typeof r.dueAt === 'string' ? r.dueAt : null,
+        availableFrom: typeof r.availableFrom === 'string' ? r.availableFrom : null,
+        availableUntil: typeof r.availableUntil === 'string' ? r.availableUntil : null,
+        extraAttempts: typeof r.extraAttempts === 'number' ? r.extraAttempts : null,
+        timeMultiplier: typeof r.timeMultiplier === 'number' ? r.timeMultiplier : null,
+      })
+    }
+  }
+  return { targets, orphaned: Boolean(o.orphaned) }
+}
+
+export async function fetchItemAssignToOverrides(
+  courseCode: string,
+  itemId: string,
+): Promise<AssignToOverridesResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseAssignToOverridesResponse(raw)
+}
+
+export async function putItemAssignToOverrides(
+  courseCode: string,
+  itemId: string,
+  targets: AssignToTarget[],
+): Promise<AssignToOverridesResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targets }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseAssignToOverridesResponse(raw)
+}
+
+export async function postItemAssignToBulkExtend(
+  courseCode: string,
+  itemId: string,
+  enrollmentIds: string[],
+  dueAt: string,
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides/bulk-extend`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enrollmentIds, dueAt }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+}
+
 export type ModerationProvisionalGrade = {
   submissionId: string
   graderId: string

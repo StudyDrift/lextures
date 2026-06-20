@@ -10,14 +10,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/relativeschedule"
+	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
-	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
-	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
-	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
+	ctrepo "github.com/lextures/lextures/server/internal/repos/coursetranslation"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	rlrepo "github.com/lextures/lextures/server/internal/repos/readinglevel"
 )
 
 // moduleAssignmentGetResponse matches `ModuleContentPageResponse` in Rust (assignment branch).
@@ -186,6 +186,7 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
 			return
 		}
+		var sctx studentAssignToContext
 		if !canEdit {
 			visible, err := coursestructure.AssignmentVisibleToStudent(
 				r.Context(), d.Pool, *cid, itemID, viewer, time.Now().UTC(),
@@ -198,6 +199,22 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 				return
 			}
+			sctx, err = loadStudentAssignToContext(r.Context(), d.Pool, *cid, viewer)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to check assignment access.")
+				return
+			}
+			if sctx.EnrollmentID != nil {
+				assignVisible, _, err := assignmentoverrides.Resolve(r.Context(), d.Pool, itemID, *sctx.EnrollmentID, sctx.SectionID, sctx.GroupIDs)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to check assignment access.")
+					return
+				}
+				if !assignVisible {
+					apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+					return
+				}
+			}
 		}
 		row, err := coursemoduleassignments.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 		if err != nil {
@@ -209,23 +226,17 @@ func (d Deps) handleGetModuleAssignment() http.HandlerFunc {
 			return
 		}
 		disp := *row
-		if !canEdit {
-			crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
-			if err == nil && crow != nil && crow.SectionsEnabled {
-				secID, err := enrollment.GetStudentSectionID(r.Context(), d.Pool, *cid, viewer)
-				if err == nil && secID != nil {
-					ov, err := coursesections.GetOverride(r.Context(), d.Pool, *secID, itemID)
-					if err == nil && ov != nil {
-						if ov.DueAt != nil {
-							disp.DueAt = ov.DueAt
-						}
-						if ov.AvailableFrom != nil {
-							disp.AvailableFrom = ov.AvailableFrom
-						}
-						if ov.AvailableUntil != nil {
-							disp.AvailableUntil = ov.AvailableUntil
-						}
-					}
+		if !canEdit && sctx.EnrollmentID != nil {
+			_, eff, err := assignmentoverrides.Resolve(r.Context(), d.Pool, itemID, *sctx.EnrollmentID, sctx.SectionID, sctx.GroupIDs)
+			if err == nil {
+				if eff.DueAt != nil {
+					disp.DueAt = eff.DueAt
+				}
+				if eff.AvailableFrom != nil {
+					disp.AvailableFrom = eff.AvailableFrom
+				}
+				if eff.AvailableUntil != nil {
+					disp.AvailableUntil = eff.AvailableUntil
 				}
 			}
 		}

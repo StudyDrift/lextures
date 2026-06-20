@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 )
 
 // Section is one row of course.course_sections.
@@ -271,61 +272,61 @@ WHERE ce.id = $1 AND ce.active
 }
 
 // Override holds optional due / availability overrides for one assignment in a section.
+//
+// Storage was generalized in plan 2.15 into course.assignment_overrides (target_type = 'section');
+// these functions are thin section-scoped wrappers kept for the existing section settings UI and API.
 type Override struct {
 	DueAt          *time.Time
 	AvailableFrom  *time.Time
 	AvailableUntil *time.Time
 }
 
-// GetOverride returns override row if any.
+// GetOverride returns the section-level override row for an item, if any.
 func GetOverride(ctx context.Context, pool *pgxpool.Pool, sectionID, structureItemID uuid.UUID) (*Override, error) {
-	row := pool.QueryRow(ctx, `
-SELECT due_at, available_from, available_until
-FROM course.section_assignment_overrides
-WHERE section_id = $1 AND structure_item_id = $2
-`, sectionID, structureItemID)
-	var o Override
-	var due, af, au sql.NullTime
-	if err := row.Scan(&due, &af, &au); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
+	rows, err := assignmentoverrides.ListForItem(ctx, pool, structureItemID)
+	if err != nil {
 		return nil, err
 	}
-	if due.Valid {
-		t := due.Time
-		o.DueAt = &t
+	for _, r := range rows {
+		if r.TargetType == assignmentoverrides.TargetSection && r.TargetID != nil && *r.TargetID == sectionID {
+			return &Override{DueAt: r.DueAt, AvailableFrom: r.AvailableFrom, AvailableUntil: r.AvailableUntil}, nil
+		}
 	}
-	if af.Valid {
-		t := af.Time
-		o.AvailableFrom = &t
-	}
-	if au.Valid {
-		t := au.Time
-		o.AvailableUntil = &t
-	}
-	return &o, nil
+	return nil, nil
 }
 
-// UpsertOverride sets override columns for a section/item pair.
-func UpsertOverride(ctx context.Context, pool *pgxpool.Pool, sectionID, structureItemID uuid.UUID, dueAt, availableFrom, availableUntil *time.Time) error {
-	_, err := pool.Exec(ctx, `
-INSERT INTO course.section_assignment_overrides (section_id, structure_item_id, due_at, available_from, available_until)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (section_id, structure_item_id) DO UPDATE SET
-  due_at = EXCLUDED.due_at,
-  available_from = EXCLUDED.available_from,
-  available_until = EXCLUDED.available_until
-`, sectionID, structureItemID, dueAt, availableFrom, availableUntil)
-	return err
+// UpsertOverride sets the section-level override for a section/item pair, replacing any existing one.
+// Other targets (groups, students, other sections) already set on the item are preserved.
+func UpsertOverride(ctx context.Context, pool *pgxpool.Pool, sectionID, structureItemID uuid.UUID, dueAt, availableFrom, availableUntil *time.Time, actor uuid.UUID) error {
+	existing, err := assignmentoverrides.ListForItem(ctx, pool, structureItemID)
+	if err != nil {
+		return err
+	}
+	writes := make([]assignmentoverrides.OverrideWrite, 0, len(existing)+1)
+	for _, r := range existing {
+		if r.TargetType == assignmentoverrides.TargetSection && r.TargetID != nil && *r.TargetID == sectionID {
+			continue // replaced below
+		}
+		writes = append(writes, assignmentoverrides.OverrideWrite{
+			TargetType: r.TargetType, TargetID: r.TargetID,
+			DueAt: r.DueAt, AvailableFrom: r.AvailableFrom, AvailableUntil: r.AvailableUntil,
+			ExtraAttempts: r.ExtraAttempts, TimeMultiplier: r.TimeMultiplier,
+		})
+	}
+	sid := sectionID
+	writes = append(writes, assignmentoverrides.OverrideWrite{
+		TargetType: assignmentoverrides.TargetSection, TargetID: &sid,
+		DueAt: dueAt, AvailableFrom: availableFrom, AvailableUntil: availableUntil,
+	})
+	return assignmentoverrides.ReplaceForItem(ctx, pool, structureItemID, writes, actor)
 }
 
-// ListOverridesForSection returns all assignment overrides for a section keyed by structure_item_id.
+// ListOverridesForSection returns all section-level overrides for a section keyed by structure_item_id.
 func ListOverridesForSection(ctx context.Context, pool *pgxpool.Pool, sectionID uuid.UUID) (map[uuid.UUID]Override, error) {
 	rows, err := pool.Query(ctx, `
 SELECT structure_item_id, due_at, available_from, available_until
-FROM course.section_assignment_overrides
-WHERE section_id = $1
+FROM course.assignment_overrides
+WHERE target_type = 'section' AND target_id = $1
 `, sectionID)
 	if err != nil {
 		return nil, err

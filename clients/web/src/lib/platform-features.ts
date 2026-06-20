@@ -69,6 +69,7 @@ export type PlatformFeaturesSnapshot = {
   ffStudyReminders?: boolean
   ffAiStudyBuddy?: boolean
   ffCalendarFeeds?: boolean
+  ffAssignToOverrides?: boolean
   aiStudyBuddyEnabled?: boolean
   gdprModuleEnabled?: boolean
   aiDisclosureEnabled?: boolean
@@ -145,6 +146,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
   ffCalendarFeeds: false,
+  ffAssignToOverrides: false,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,
@@ -223,6 +225,10 @@ export function ffAccommodationsEngineEnabled(): boolean {
 
 export function readAloudFeatureEnabled(): boolean {
   return loaded && snapshot.readAloudEnabled && snapshot.ffReadAloud
+}
+
+export function assignToOverridesFeatureEnabled(): boolean {
+  return loaded && Boolean(snapshot.ffAssignToOverrides)
 }
 
 export function translationMemoryFeatureEnabled(): boolean {

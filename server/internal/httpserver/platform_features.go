@@ -90,6 +90,7 @@ type platformFeaturesJSON struct {
 	FFBotTeams                  bool `json:"ffBotTeams"`
 	FFBotDiscord                bool `json:"ffBotDiscord"`
 	FFCalendarFeeds             bool `json:"ffCalendarFeeds"`
+	FFAssignToOverrides         bool `json:"ffAssignToOverrides"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -187,6 +188,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBotTeams:                  cfg.FFBotTeams,
 		FFBotDiscord:                cfg.FFBotDiscord,
 		FFCalendarFeeds:             cfg.FFCalendarFeeds,
+		FFAssignToOverrides:         cfg.FFAssignToOverrides,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

@@ -11,13 +11,13 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 	"github.com/lextures/lextures/server/internal/relativeschedule"
+	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
-	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
-	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/repos/studentaccommodations"
 )
 
 func effectiveLockdownMode(courseLockdownEnabled bool, rowSetting string) string {
@@ -103,7 +103,7 @@ func buildModuleQuizResponse(
 		QuizAccessCode:                quizAccess,
 		AdaptiveDifficulty:            row.AdaptiveDifficulty,
 		AdaptiveTopicBalance:          row.AdaptiveTopicBalance,
-		AdaptiveStopRule:            row.AdaptiveStopRule,
+		AdaptiveStopRule:              row.AdaptiveStopRule,
 		RandomQuestionPoolCount:       row.RandomQuestionPoolCount,
 		Questions:                     questions,
 		UsesServerQuestionSampling:    usesServerQuestionSampling,
@@ -113,7 +113,7 @@ func buildModuleQuizResponse(
 		AdaptiveSourceItemIDs:         adaptiveSources,
 		AdaptiveQuestionCount:         row.AdaptiveQuestionCount,
 		AdaptiveDeliveryMode:          row.AdaptiveDeliveryMode,
-		AssignmentGroupID:            row.AssignmentGroupID,
+		AssignmentGroupID:             row.AssignmentGroupID,
 		HintScaffoldingEnabled:        meta.HintScaffoldingEnabled,
 		MisconceptionDetectionEnabled: meta.MisconceptionDetectionEnabled,
 		NeverDrop:                     row.NeverDrop,
@@ -166,6 +166,7 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
 			return
 		}
+		var sctx studentAssignToContext
 		if !canEdit {
 			visible, err := coursestructure.QuizVisibleToStudent(r.Context(), d.Pool, *cid, itemID, viewer, time.Now().UTC())
 			if err != nil {
@@ -175,6 +176,22 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 			if !visible {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 				return
+			}
+			sctx, err = loadStudentAssignToContext(r.Context(), d.Pool, *cid, viewer)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to check quiz access.")
+				return
+			}
+			if sctx.EnrollmentID != nil {
+				assignVisible, _, err := assignmentoverrides.Resolve(r.Context(), d.Pool, itemID, *sctx.EnrollmentID, sctx.SectionID, sctx.GroupIDs)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to check quiz access.")
+					return
+				}
+				if !assignVisible {
+					apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
+					return
+				}
 			}
 		}
 		row, err := coursemodulequizzes.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
@@ -187,23 +204,44 @@ func (d Deps) handleGetModuleQuiz() http.HandlerFunc {
 			return
 		}
 		disp := *row
-		if !canEdit {
-			crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
-			if err == nil && crow != nil && crow.SectionsEnabled {
-				secID, err := enrollment.GetStudentSectionID(r.Context(), d.Pool, *cid, viewer)
-				if err == nil && secID != nil {
-					ov, err := coursesections.GetOverride(r.Context(), d.Pool, *secID, itemID)
-					if err == nil && ov != nil {
-						if ov.DueAt != nil {
-							disp.DueAt = ov.DueAt
+		if !canEdit && sctx.EnrollmentID != nil {
+			_, eff, err := assignmentoverrides.Resolve(r.Context(), d.Pool, itemID, *sctx.EnrollmentID, sctx.SectionID, sctx.GroupIDs)
+			if err == nil {
+				if eff.DueAt != nil {
+					disp.DueAt = eff.DueAt
+				}
+				if eff.AvailableFrom != nil {
+					disp.AvailableFrom = eff.AvailableFrom
+				}
+				if eff.AvailableUntil != nil {
+					disp.AvailableUntil = eff.AvailableUntil
+				}
+				extraAttempts := eff.ExtraAttempts
+				timeMultiplier := eff.TimeMultiplier
+				// FR-6: fall back to the student's accommodation grant when no per-item override
+				// sets a value, so accommodations and assign-to overrides flow through one model.
+				if extraAttempts == nil || timeMultiplier == nil {
+					acc, aerr := studentaccommodations.FindActiveForCourse(r.Context(), d.Pool, viewer, *cid)
+					if aerr == nil && acc == nil {
+						acc, aerr = studentaccommodations.FindActiveGlobal(r.Context(), d.Pool, viewer)
+					}
+					if aerr == nil && acc != nil {
+						if extraAttempts == nil && acc.ExtraAttempts > 0 {
+							ea := acc.ExtraAttempts
+							extraAttempts = &ea
 						}
-						if ov.AvailableFrom != nil {
-							disp.AvailableFrom = ov.AvailableFrom
-						}
-						if ov.AvailableUntil != nil {
-							disp.AvailableUntil = ov.AvailableUntil
+						if timeMultiplier == nil && acc.TimeMultiplier > 1.0 {
+							tm := acc.TimeMultiplier
+							timeMultiplier = &tm
 						}
 					}
+				}
+				if extraAttempts != nil && !disp.UnlimitedAttempts {
+					disp.MaxAttempts += *extraAttempts
+				}
+				if timeMultiplier != nil && disp.TimeLimitMinutes != nil {
+					adjusted := int32(float64(*disp.TimeLimitMinutes) * *timeMultiplier)
+					disp.TimeLimitMinutes = &adjusted
 				}
 			}
 		}
@@ -278,7 +316,7 @@ func (d Deps) handlePatchModuleQuiz() http.HandlerFunc {
 			return
 		}
 		var req struct {
-			TimeLimitMinutes *int32                         `json:"timeLimitMinutes"`
+			TimeLimitMinutes *int32                           `json:"timeLimitMinutes"`
 			Questions        *[]coursemodulequiz.QuizQuestion `json:"questions"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {

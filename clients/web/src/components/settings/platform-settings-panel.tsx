@@ -74,6 +74,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffAiStudyBuddy: false,
     ffApiTokens: false,
     ffCalendarFeeds: false,
+    ffAssignToOverrides: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,

@@ -405,6 +405,9 @@ type Config struct {
 	// FFCalendarFeeds enables iCal/CalDAV calendar feed subscriptions (plan 16.5).
 	// Managed in Settings → Global platform (not process env).
 	FFCalendarFeeds bool
+	// FFAssignToOverrides enables the "Assign To" section/group/student targeting editor with
+	// per-target due dates and availability (plan 2.15). Managed in Settings → Global platform.
+	FFAssignToOverrides bool
 
 	// SlackBotClientID is the Slack app client id for bot OAuth (plan 16.6).
 	SlackBotClientID string
