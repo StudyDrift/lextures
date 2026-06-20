@@ -110,6 +110,16 @@ import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
 import { h5pFeatureEnabled } from '../../lib/h5p-i18n'
 import { heLibraryIntegrationEnabled, bookstoreIntegrationEnabled } from '../../lib/platform-features'
+import { usePlatformFeatures } from '../../context/platform-features-context'
+import {
+  fetchModulesProgress,
+  itemLockState,
+  moduleLockState,
+  type LockReason,
+  type ModulesProgressSnapshot,
+} from '../../lib/conditional-release-api'
+import { ModuleRequirementsPanel } from '../../components/modules/module-requirements-panel'
+import { ConditionalReleaseLockBadge } from '../../components/modules/conditional-release-lock-badge'
 
 const MODULE_SORT_ID = 'sortable-modules'
 
@@ -419,11 +429,15 @@ function ChildRowContent({
   child,
   courseCode,
   studentGradeContext,
+  gatingLocked,
+  gatingReason,
 }: {
   child: CourseStructureItem
   courseCode: string
   /** When set, learners see due/progress chips for their gradebook-linked work. */
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
+  gatingLocked?: boolean
+  gatingReason?: LockReason | null
 }) {
   const meta = moduleChildItemMetaLine(child)
   const studentMetrics = studentGradeContext
@@ -433,6 +447,11 @@ function ChildRowContent({
     studentGradeContext ? (
       <ModuleChildStudentStatusRow child={child} studentMetrics={studentMetrics} />
     ) : null
+  const gatingFooter = gatingLocked ? (
+    <div className="mt-2">
+      <ConditionalReleaseLockBadge reason={gatingReason} />
+    </div>
+  ) : null
   return (
     <>
       {child.kind === 'content_page' ? (
@@ -455,6 +474,8 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : child.kind === 'assignment' ? (
@@ -477,6 +498,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : child.kind === 'quiz' ? (
@@ -515,6 +537,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : child.kind === 'external_link' ? (
@@ -548,6 +571,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : child.kind === 'lti_link' ? (
@@ -570,6 +594,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : child.kind === 'h5p' ? (
@@ -592,6 +617,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : (child.kind as CourseStructureItem['kind']) === 'vibe_activity' ? (
@@ -614,6 +640,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : (child.kind as CourseStructureItem['kind']) === 'library_resource' ? (
@@ -636,6 +663,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : (child.kind as CourseStructureItem['kind']) === 'textbook_resource' ? (
@@ -658,6 +686,7 @@ function ChildRowContent({
             </div>
             {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
             {studentFooter}
+            {gatingFooter}
           </div>
         </div>
       ) : (
@@ -670,6 +699,7 @@ function ChildRowContent({
           </div>
           {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
           {studentFooter}
+          {gatingFooter}
         </div>
       )}
     </>
@@ -992,11 +1022,14 @@ function StaticChildRow({
   child,
   courseCode,
   studentGradeContext,
+  gatingProgress,
 }: {
   child: CourseStructureItem
   courseCode: string
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
+  gatingProgress: ModulesProgressSnapshot | null
 }) {
+  const lock = itemLockState(gatingProgress, child.id)
   return (
     <li id={`item-row-${child.id}`} className="py-3 first:pt-0">
       <div className="min-w-0">
@@ -1004,6 +1037,8 @@ function StaticChildRow({
           child={child}
           courseCode={courseCode}
           studentGradeContext={studentGradeContext}
+          gatingLocked={lock?.locked === true}
+          gatingReason={lock?.reason ?? null}
         />
       </div>
     </li>
@@ -1372,6 +1407,8 @@ type SortableModuleCardProps = {
   onOpenEditChildTitle: (child: CourseStructureItem) => void
   onArchiveChild: (child: CourseStructureItem) => void
   courseAdaptivePathsEnabled: boolean
+  conditionalReleaseEnabled: boolean
+  allModules: { id: string; title: string }[]
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
 }
 
@@ -1403,6 +1440,8 @@ function SortableModuleCard({
   onOpenEditChildTitle,
   onArchiveChild,
   courseAdaptivePathsEnabled,
+  conditionalReleaseEnabled,
+  allModules,
   studentGradeContext,
 }: SortableModuleCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -1489,9 +1528,18 @@ function SortableModuleCard({
           ) : null
         }
         footerExtra={
-          canEditModules && courseAdaptivePathsEnabled && !minified ? (
-            <ModuleAdaptivePathPanel courseCode={courseCode} moduleId={item.id} />
-          ) : null
+          <>
+            {canEditModules && conditionalReleaseEnabled && !minified ? (
+              <ModuleRequirementsPanel
+                courseCode={courseCode}
+                moduleId={item.id}
+                allModules={allModules}
+              />
+            ) : null}
+            {canEditModules && courseAdaptivePathsEnabled && !minified ? (
+              <ModuleAdaptivePathPanel courseCode={courseCode} moduleId={item.id} />
+            ) : null}
+          </>
         }
         childrenList={childrenList}
       />
@@ -1504,14 +1552,17 @@ function StaticModuleCard({
   courseCode,
   moduleChildrenById,
   studentGradeContext,
+  gatingProgress,
 }: {
   item: CourseStructureItem
   courseCode: string
   moduleChildrenById: Map<string, CourseStructureItem[]>
   studentGradeContext: { columns: CourseGradebookGridColumn[]; grades: Record<string, string> } | null
+  gatingProgress: ModulesProgressSnapshot | null
 }) {
   const [collapsed, setCollapsed] = useState(false)
   const children = moduleChildrenById.get(item.id) ?? []
+  const modLock = moduleLockState(gatingProgress, item.id)
   const childrenList =
     !collapsed && children.length > 0 ? (
       <ul
@@ -1524,6 +1575,7 @@ function StaticModuleCard({
             child={child}
             courseCode={courseCode}
             studentGradeContext={studentGradeContext}
+            gatingProgress={gatingProgress}
           />
         ))}
       </ul>
@@ -1547,6 +1599,13 @@ function StaticModuleCard({
         onUnpublishAllItems={() => {}}
         onOpenModuleSettings={() => {}}
         moduleDragHandle={null}
+        footerExtra={
+          modLock?.locked ? (
+            <div className="mt-2">
+              <ConditionalReleaseLockBadge reason={modLock.reason} />
+            </div>
+          ) : null
+        }
         childrenList={childrenList}
       />
     </li>
@@ -1649,6 +1708,8 @@ export default function CourseModules() {
   const [collapsedModuleIds, setCollapsedModuleIds] = useState<Set<string>>(() => new Set())
   const [dragHandlesVisible, setDragHandlesVisible] = useState(false)
   const [courseMeta, setCourseMeta] = useState<CoursePublic | null>(null)
+  const [gatingProgress, setGatingProgress] = useState<ModulesProgressSnapshot | null>(null)
+  const { ffConditionalRelease } = usePlatformFeatures()
 
   const toggleModuleCollapsed = useCallback((moduleId: string) => {
     setCollapsedModuleIds((prev) => {
@@ -1725,13 +1786,17 @@ export default function CourseModules() {
     setLoadError(null)
     setModuleActionError(null)
     try {
-      const [list, myGrades] = await Promise.all([
+      const [list, myGrades, progress] = await Promise.all([
         fetchCourseStructure(courseCode),
         canLoadStudentGrades
           ? fetchCourseMyGrades(courseCode).catch(() => null)
           : Promise.resolve(null),
+        ffConditionalRelease && !canEditModules
+          ? fetchModulesProgress(courseCode).catch(() => null)
+          : Promise.resolve(null),
       ])
       setItems(list)
+      setGatingProgress(progress)
       if (myGrades) {
         setStudentGradeContext({ columns: myGrades.columns, grades: myGrades.grades })
       } else {
@@ -1741,10 +1806,11 @@ export default function CourseModules() {
       setLoadError(e instanceof Error ? e.message : 'Could not load course structure.')
       setItems([])
       setStudentGradeContext(null)
+      setGatingProgress(null)
     } finally {
       if (!silent) setLoading(false)
     }
-  }, [courseCode, canLoadStudentGrades])
+  }, [courseCode, canLoadStudentGrades, canEditModules, ffConditionalRelease])
 
   const structureRevision = useCourseLiveStructureRevision()
 
@@ -2276,6 +2342,14 @@ export default function CourseModules() {
     return sortedTopLevel.filter((i) => i.kind === 'module').map((m) => m.id)
   }, [sortedTopLevel])
 
+  const allModules = useMemo(
+    () =>
+      sortedTopLevel
+        .filter((i) => i.kind === 'module')
+        .map((m) => ({ id: m.id, title: m.title })),
+    [sortedTopLevel],
+  )
+
   const handleCollapseExpandAllModules = useCallback(() => {
     setCollapsedModuleIds((prev) => {
       const allCollapsed =
@@ -2662,6 +2736,8 @@ export default function CourseModules() {
                     onOpenEditChildTitle={openEditChildTitle}
                     onArchiveChild={requestArchiveChild}
                     courseAdaptivePathsEnabled={courseMeta?.adaptivePathsEnabled === true}
+                    conditionalReleaseEnabled={ffConditionalRelease}
+                    allModules={allModules}
                     studentGradeContext={studentGradeContext}
                   />
                 ))}
@@ -2728,6 +2804,7 @@ export default function CourseModules() {
                   courseCode={courseCode!}
                   moduleChildrenById={moduleChildrenById}
                   studentGradeContext={studentGradeContext}
+                  gatingProgress={gatingProgress}
                 />
               ))}
           </ul>

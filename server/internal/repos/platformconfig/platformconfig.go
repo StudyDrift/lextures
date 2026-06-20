@@ -121,6 +121,7 @@ type Row struct {
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
 	FFLearningPaths                 *bool
+	FFConditionalRelease            *bool
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
@@ -267,6 +268,7 @@ type Write struct {
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
 	FFLearningPaths                 *bool
+	FFConditionalRelease            *bool
 	FFCompletionCredentials         *bool
 	FFCourseReviews                 *bool
 	FFGamification                  *bool
@@ -409,6 +411,7 @@ SELECT
 	ff_public_api,
 	ff_stripe_billing,
 	ff_learning_paths,
+	ff_conditional_release,
 	ff_completion_credentials,
 	ff_course_reviews,
 	ff_gamification,
@@ -546,6 +549,7 @@ WHERE id = 1
 		&r.FFPublicAPI,
 		&r.FFStripeBilling,
 		&r.FFLearningPaths,
+		&r.FFConditionalRelease,
 		&r.FFCompletionCredentials,
 		&r.FFCourseReviews,
 		&r.FFGamification,
@@ -731,6 +735,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_consortium_sharing,
 	ff_stripe_billing,
 	ff_learning_paths,
+	ff_conditional_release,
 	ff_completion_credentials,
 	ff_course_reviews,
 	ff_gamification,
@@ -873,6 +878,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_consortium_sharing = COALESCE(EXCLUDED.ff_consortium_sharing, settings.platform_app_settings.ff_consortium_sharing),
 	ff_stripe_billing = COALESCE(EXCLUDED.ff_stripe_billing, settings.platform_app_settings.ff_stripe_billing),
 	ff_learning_paths = COALESCE(EXCLUDED.ff_learning_paths, settings.platform_app_settings.ff_learning_paths),
+	ff_conditional_release = COALESCE(EXCLUDED.ff_conditional_release, settings.platform_app_settings.ff_conditional_release),
 	ff_completion_credentials = COALESCE(EXCLUDED.ff_completion_credentials, settings.platform_app_settings.ff_completion_credentials),
 	ff_course_reviews = COALESCE(EXCLUDED.ff_course_reviews, settings.platform_app_settings.ff_course_reviews),
 	ff_gamification = COALESCE(EXCLUDED.ff_gamification, settings.platform_app_settings.ff_gamification),
@@ -1008,6 +1014,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFConsortiumSharing,
 		w.FFStripeBilling,
 		w.FFLearningPaths,
+		w.FFConditionalRelease,
 		w.FFCompletionCredentials,
 		w.FFCourseReviews,
 		w.FFGamification,

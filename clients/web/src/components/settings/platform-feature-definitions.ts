@@ -96,6 +96,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let creators build ordered multi-course specializations with bundle pricing, path enrollment, and learner progress tracking.',
   },
   {
+    key: 'ffConditionalRelease',
+    label: 'Conditional release & module requirements',
+    description:
+      'Rule-based module gating: per-item completion requirements, module prerequisites, date unlocks, and instructor progress reports.',
+  },
+  {
     key: 'ffCompletionCredentials',
     label: 'Completion certificates (Open Badges)',
     description:

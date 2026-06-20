@@ -288,6 +288,7 @@ func (d Deps) handleCourseItemComplete() http.HandlerFunc {
 			cfg := d.effectiveConfig()
 			gamification.EmitModuleItemCompleted(d.Pool, cfg, viewer, c.ID, itemID)
 		}
+		d.recordConditionalReleaseProgress(r, c.ID, viewer, itemID)
 		summary, err := selfpaced.LoadSummary(r.Context(), d.Pool, c.ID, *eid, c.GatingEnabled)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to compute progress.")
