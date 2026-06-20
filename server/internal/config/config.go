@@ -390,6 +390,9 @@ type Config struct {
 	// FFAPITokens enables personal and institutional API access keys (plan 16.2).
 	// Managed in Settings → Global platform (not process env).
 	FFAPITokens bool
+	// FFCalendarFeeds enables iCal/CalDAV calendar feed subscriptions (plan 16.5).
+	// Managed in Settings → Global platform (not process env).
+	FFCalendarFeeds bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).

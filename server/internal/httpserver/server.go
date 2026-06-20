@@ -156,6 +156,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerSBGReportRoutes(r)
 	d.registerSISRoutes(r)
 	d.registerWebhookRoutes(r)
+	d.registerCalendarFeedRoutes(r)
 	d.registerFinalGradeRoutes(r)
 	d.registerCatalogRoutes(r)
 	d.registerLibraryRoutes(r)

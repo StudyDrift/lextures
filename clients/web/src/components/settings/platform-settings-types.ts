@@ -50,6 +50,7 @@ export type PlatformSettingsPayload = {
   ffOnboardingFlow: boolean
   ffAiStudyBuddy: boolean
   ffApiTokens: boolean
+  ffCalendarFeeds: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean
