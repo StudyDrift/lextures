@@ -70,6 +70,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffCompletionCredentials: false,
     ffOnboardingFlow: false,
     ffAiStudyBuddy: false,
+    ffApiTokens: false,
     translationMemoryEnabled: false,
     storageQuotasEnabled: false,
     avScanningEnabled: false,
