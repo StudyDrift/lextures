@@ -355,7 +355,7 @@ func (s Service) evaluateRule(
 		ok, err := crrepo.ItemHasDiscussionContribution(ctx, s.Pool, courseID, userID, itemID)
 		return ok, map[string]string{"type": "contribute"}, err
 	default:
-		var never conditionalrelease.RuleType = rule.RuleType
+		var never = rule.RuleType
 		_ = never
 		return false, nil, fmt.Errorf("competencygating: unknown rule type %q", rule.RuleType)
 	}
