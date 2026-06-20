@@ -103,7 +103,7 @@ func (d Deps) publicAPIAuth(w http.ResponseWriter, r *http.Request, requiredScop
 		publicapi.WriteUnauthorized(w, r.URL.Path)
 		return uuid.UUID{}, r.Context(), nil, false
 	}
-	u, ctx, err := auth.UserFromRequestOrAccessKey(r, d.JWTSigner, d.Pool)
+	u, ctx, err := auth.UserFromRequestOrAccessKey(r, d.JWTSigner, d.Pool, d.apiTokenIPHashKey(), d.apiTokensEnabled() || d.effectiveConfig().FFPublicAPI)
 	if err != nil || !publicapi.IsAccessKeyRequest(r) {
 		publicapi.WriteUnauthorized(w, r.URL.Path)
 		return uuid.UUID{}, r.Context(), nil, false
