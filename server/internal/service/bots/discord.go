@@ -52,17 +52,3 @@ func (c *discordClient) postMessage(ctx context.Context, token, channelID string
 	}
 	return resp.StatusCode, string(raw), latency, nil
 }
-
-func discordInteractionResponse(text string, ephemeral bool) map[string]any {
-	flags := 0
-	if ephemeral {
-		flags = 1 << 6
-	}
-	return map[string]any{
-		"type": 4,
-		"data": map[string]any{
-			"content": text,
-			"flags":   flags,
-		},
-	}
-}

@@ -57,35 +57,3 @@ func (c *teamsClient) postActivity(ctx context.Context, serviceURL, conversation
 	}
 	return resp.StatusCode, string(raw), latency, nil
 }
-
-func teamsReply(ctx context.Context, httpClient *http.Client, serviceURL, conversationID, activityID, token string, card map[string]any) error {
-	payload := map[string]any{
-		"type": "message",
-		"attachments": []map[string]any{{
-			"contentType": "application/vnd.microsoft.card.adaptive",
-			"content":     card,
-		}},
-	}
-	body, _ := json.Marshal(payload)
-	url := fmt.Sprintf("%s/v3/conversations/%s/activities/%s", serviceURL, conversationID, activityID)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+token)
-	client := httpClient
-	if client == nil {
-		client = http.DefaultClient
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		raw, _ := io.ReadAll(io.LimitReader(resp.Body, 1024))
-		return fmt.Errorf("teams reply: %s", string(raw))
-	}
-	return nil
-}

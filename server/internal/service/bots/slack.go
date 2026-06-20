@@ -76,39 +76,6 @@ func parseRetryAfter(v string) time.Duration {
 	return time.Minute
 }
 
-func slackPostEphemeral(ctx context.Context, httpClient *http.Client, token, channel, userID, text string) error {
-	body, _ := json.Marshal(map[string]any{
-		"channel": channel,
-		"user":    userID,
-		"text":    text,
-	})
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, slackAPIBase+"chat.postEphemeral", bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Authorization", "Bearer "+token)
-	client := httpClient
-	if client == nil {
-		client = http.DefaultClient
-	}
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	raw, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
-	var out struct {
-		OK    bool   `json:"ok"`
-		Error string `json:"error"`
-	}
-	_ = json.Unmarshal(raw, &out)
-	if !out.OK {
-		return fmt.Errorf("slack ephemeral: %s", out.Error)
-	}
-	return nil
-}
-
 func slackOpenDM(ctx context.Context, httpClient *http.Client, token, platformUserID string) (string, error) {
 	body, _ := json.Marshal(map[string]any{"users": platformUserID})
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, slackAPIBase+"conversations.open", bytes.NewReader(body))
