@@ -556,4 +556,5 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	// Course reviews moderation (plan 15.7)
 	r.Get("/api/v1/admin/reviews", d.handleAdminReviewsList())
 	r.Delete("/api/v1/admin/reviews/{review_id}", d.handleAdminReviewDelete())
+	d.registerAdminTokenRoutes(r)
 }

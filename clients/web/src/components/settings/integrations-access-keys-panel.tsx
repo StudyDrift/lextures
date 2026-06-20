@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { KeyRound, Plus, Trash2 } from 'lucide-react'
+import { KeyRound, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import {
   AccessKeyCreatedModal,
   CreateAccessKeyModal,
@@ -85,6 +85,33 @@ export function IntegrationsAccessKeysPanel() {
     setCreatedKey(result)
     toastSaveOk('Access key created.')
     void load()
+  }
+
+  async function rotate(id: string) {
+    if (!globalThis.confirm('Rotate this access key? The current key stays valid for 24 hours, then stops working.')) return
+    setError(null)
+    try {
+      const res = await authorizedFetch(`/api/v1/me/access-keys/${encodeURIComponent(id)}/rotate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ overlapHours: 24 }),
+      })
+      const raw: unknown = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        toastMutationError(readApiErrorMessage(raw))
+        return
+      }
+      const created = raw as { token?: string; label?: string }
+      if (!created.token) {
+        toastMutationError('Key was rotated but the secret was missing from the response.')
+        return
+      }
+      setCreatedKey({ token: created.token, label: created.label ?? 'Rotated key' })
+      toastSaveOk('Access key rotated.')
+      await load()
+    } catch {
+      toastMutationError('Could not rotate access key.')
+    }
   }
 
   async function revoke(id: string) {
@@ -188,14 +215,24 @@ export function IntegrationsAccessKeysPanel() {
                       </p>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => void revoke(t.id)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-sm text-rose-700 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-300 dark:hover:bg-rose-950/40"
-                  >
-                    <Trash2 className="h-4 w-4" aria-hidden />
-                    Revoke
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void rotate(t.id)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                    >
+                      <RefreshCw className="h-4 w-4" aria-hidden />
+                      Rotate
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void revoke(t.id)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-sm text-rose-700 hover:bg-rose-50 dark:border-rose-900/50 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden />
+                      Revoke
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

@@ -43,12 +43,16 @@ func (d Deps) meUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool)
 		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 		return uuid.UUID{}, false
 	}
-	u, ctx, err := auth.UserFromRequestOrAccessKey(r, d.JWTSigner, d.Pool)
+	u, ctx, err := auth.UserFromRequestOrAccessKey(r, d.JWTSigner, d.Pool, d.apiTokenIPHashKey(), d.apiTokensEnabled())
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")
 		return uuid.UUID{}, false
 	}
 	*r = *r.WithContext(ctx)
+	if auth.IsServiceTokenAuth(ctx) {
+		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Service tokens cannot access this endpoint.")
+		return uuid.UUID{}, false
+	}
 	userID, err := uuid.Parse(u.UserID)
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusUnauthorized, apierr.CodeUnauthorized, "Sign in required.")

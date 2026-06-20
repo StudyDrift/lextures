@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
+	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -26,18 +27,20 @@ type accessKeyCourse struct {
 }
 
 type accessKeyItem struct {
-	ID         string             `json:"id"`
-	Label      string             `json:"label"`
-	TokenMask  string             `json:"tokenMask"`
-	Scopes     []string           `json:"scopes"`
-	CourseIds  []string           `json:"courseIds"`
-	Courses    []accessKeyCourse  `json:"courses,omitempty"`
-	AllCourses bool               `json:"allCourses"`
-	ExpiresAt  *time.Time         `json:"expiresAt,omitempty"`
-	LastUsedAt *time.Time         `json:"lastUsedAt,omitempty"`
-	RevokedAt  *time.Time         `json:"revokedAt,omitempty"`
-	CreatedAt  time.Time          `json:"createdAt"`
-	UnusedDays *int               `json:"unusedDays,omitempty"`
+	ID                 string            `json:"id"`
+	Label              string            `json:"label"`
+	TokenMask          string            `json:"tokenMask"`
+	Scopes             []string          `json:"scopes"`
+	CourseIds          []string          `json:"courseIds"`
+	Courses            []accessKeyCourse `json:"courses,omitempty"`
+	AllCourses         bool              `json:"allCourses"`
+	IsServiceToken     bool              `json:"isServiceToken,omitempty"`
+	ServiceAccountName *string           `json:"serviceAccountName,omitempty"`
+	ExpiresAt          *time.Time        `json:"expiresAt,omitempty"`
+	LastUsedAt         *time.Time        `json:"lastUsedAt,omitempty"`
+	RevokedAt          *time.Time        `json:"revokedAt,omitempty"`
+	CreatedAt          time.Time         `json:"createdAt"`
+	UnusedDays         *int              `json:"unusedDays,omitempty"`
 }
 
 func validateAccessKeyCourseIDsForUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, courseIDs []uuid.UUID) error {
@@ -62,17 +65,19 @@ func accessKeyItemFromRow(r apitokens.Row, courses []accessKeyCourse, now time.T
 		courseIds = append(courseIds, id.String())
 	}
 	item := accessKeyItem{
-		ID:         r.ID.String(),
-		Label:      r.Label,
-		TokenMask:  apitokens.MaskedDisplay(r.TokenPrefix),
-		Scopes:     r.Scopes,
-		CourseIds:  courseIds,
-		Courses:    courses,
-		AllCourses: len(r.CourseIDs) == 0,
-		ExpiresAt:  r.ExpiresAt,
-		LastUsedAt: r.LastUsedAt,
-		RevokedAt:  r.RevokedAt,
-		CreatedAt:  r.CreatedAt,
+		ID:                 r.ID.String(),
+		Label:              r.Label,
+		TokenMask:          apitokens.MaskedDisplay(r.TokenPrefix),
+		Scopes:             r.Scopes,
+		CourseIds:          courseIds,
+		Courses:            courses,
+		AllCourses:         len(r.CourseIDs) == 0,
+		IsServiceToken:     r.IsServiceToken(),
+		ServiceAccountName: r.ServiceAccountName,
+		ExpiresAt:          r.ExpiresAt,
+		LastUsedAt:         r.LastUsedAt,
+		RevokedAt:          r.RevokedAt,
+		CreatedAt:          r.CreatedAt,
 	}
 	if r.RevokedAt == nil {
 		ref := r.CreatedAt
@@ -108,6 +113,9 @@ func (d Deps) handleListAccessKeyScopes() http.HandlerFunc {
 		if _, ok := d.meSessionUserID(w, r); !ok {
 			return
 		}
+		if !d.requireAPITokensEnabled(w) {
+			return
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"scopes": api.AllScopes()})
 	}
@@ -117,6 +125,9 @@ func (d Deps) handleListMyAccessKeys() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meSessionUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireAPITokensEnabled(w) {
 			return
 		}
 		rows, err := apitokens.ListByUser(r.Context(), d.Pool, userID)
@@ -152,16 +163,34 @@ func (d Deps) handleListMyAccessKeys() http.HandlerFunc {
 }
 
 type postAccessKeyBody struct {
-	Label      string   `json:"label"`
-	Scopes     []string `json:"scopes"`
-	CourseIds  []string `json:"courseIds"`
-	ExpiresAt  *string  `json:"expiresAt"`
+	Label     string   `json:"label"`
+	Scopes    []string `json:"scopes"`
+	CourseIds []string `json:"courseIds"`
+	ExpiresAt *string  `json:"expiresAt"`
+}
+
+func parseOptionalExpiresAt(raw *string) (*time.Time, error) {
+	if raw == nil || strings.TrimSpace(*raw) == "" {
+		return nil, nil
+	}
+	t, err := time.Parse(time.RFC3339, strings.TrimSpace(*raw))
+	if err != nil {
+		return nil, errors.New("expiresAt must be RFC3339")
+	}
+	utc := t.UTC()
+	if !utc.After(time.Now().UTC()) {
+		return nil, errors.New("expiresAt must be in the future")
+	}
+	return &utc, nil
 }
 
 func (d Deps) handlePostMyAccessKey() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meSessionUserID(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireAPITokensEnabled(w) {
 			return
 		}
 		var body postAccessKeyBody
@@ -179,19 +208,10 @@ func (d Deps) handlePostMyAccessKey() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Label is required.")
 			return
 		}
-		var expiresAt *time.Time
-		if body.ExpiresAt != nil && strings.TrimSpace(*body.ExpiresAt) != "" {
-			t, err := time.Parse(time.RFC3339, strings.TrimSpace(*body.ExpiresAt))
-			if err != nil {
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "expiresAt must be RFC3339.")
-				return
-			}
-			utc := t.UTC()
-			if !utc.After(time.Now().UTC()) {
-				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "expiresAt must be in the future.")
-				return
-			}
-			expiresAt = &utc
+		expiresAt, err := parseOptionalExpiresAt(body.ExpiresAt)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+			return
 		}
 		courseIDs, err := apitokens.NormalizeCourseIDs(body.CourseIds)
 		if err != nil {
@@ -215,6 +235,8 @@ func (d Deps) handlePostMyAccessKey() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not create access key.")
 			return
 		}
+		orgID, _ := organization.OrgIDForUser(r.Context(), d.Pool, userID)
+		apitokens.AuditCreate(r.Context(), d.Pool, userID, &orgID, row.ID, scopes, r)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		_ = json.NewEncoder(w).Encode(map[string]any{
@@ -236,6 +258,9 @@ func (d Deps) handleDeleteMyAccessKey() http.HandlerFunc {
 		if !ok {
 			return
 		}
+		if !d.requireAPITokensEnabled(w) {
+			return
+		}
 		raw := chi.URLParam(r, "id")
 		tokenID, err := uuid.Parse(strings.TrimSpace(raw))
 		if err != nil {
@@ -251,8 +276,60 @@ func (d Deps) handleDeleteMyAccessKey() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Access key not found.")
 			return
 		}
+		orgID, _ := organization.OrgIDForUser(r.Context(), d.Pool, userID)
+		apitokens.AuditRevoke(r.Context(), d.Pool, userID, &orgID, tokenID, r)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]bool{"ok": true})
+	}
+}
+
+type rotateAccessKeyBody struct {
+	OverlapHours *int `json:"overlapHours"`
+}
+
+func (d Deps) handleRotateMyAccessKey() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := d.meSessionUserID(w, r)
+		if !ok {
+			return
+		}
+		if !d.requireAPITokensEnabled(w) {
+			return
+		}
+		raw := chi.URLParam(r, "id")
+		tokenID, err := uuid.Parse(strings.TrimSpace(raw))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid access key id.")
+			return
+		}
+		var body rotateAccessKeyBody
+		_ = json.NewDecoder(r.Body).Decode(&body)
+		overlap := 24 * time.Hour
+		if body.OverlapHours != nil && *body.OverlapHours > 0 {
+			overlap = time.Duration(*body.OverlapHours) * time.Hour
+		}
+		row, secret, err := apitokens.RotateForUser(r.Context(), d.Pool, userID, tokenID, overlap, time.Now().UTC())
+		if err != nil {
+			if err.Error() == "not found" {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Access key not found.")
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not rotate access key.")
+			return
+		}
+		orgID, _ := organization.OrgIDForUser(r.Context(), d.Pool, userID)
+		apitokens.AuditRotate(r.Context(), d.Pool, userID, &orgID, tokenID, row.ID, r)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"id":           row.ID.String(),
+			"token":        secret,
+			"label":        row.Label,
+			"scopes":       row.Scopes,
+			"overlapHours": int(overlap / time.Hour),
+			"expiresAt":    row.ExpiresAt,
+			"createdAt":    row.CreatedAt,
+		})
 	}
 }
 
@@ -267,6 +344,9 @@ func courseIDsToStrings(ids []uuid.UUID) []string {
 func (d Deps) handleMyMCPConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if _, ok := d.meSessionUserID(w, r); !ok {
+			return
+		}
+		if !d.requireAPITokensEnabled(w) {
 			return
 		}
 		base := d.apiBaseURL(r)
@@ -310,5 +390,6 @@ func (d Deps) registerIntegrationsRoutes(r chi.Router) {
 	r.Get("/api/v1/me/access-keys", d.handleListMyAccessKeys())
 	r.Post("/api/v1/me/access-keys", d.handlePostMyAccessKey())
 	r.Delete("/api/v1/me/access-keys/{id}", d.handleDeleteMyAccessKey())
+	r.Post("/api/v1/me/access-keys/{id}/rotate", d.handleRotateMyAccessKey())
 	r.Get("/api/v1/me/integrations/mcp", d.handleMyMCPConfig())
 }

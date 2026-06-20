@@ -83,6 +83,7 @@ type platformFeaturesJSON struct {
 	FFOnboardingFlow            bool `json:"ffOnboardingFlow"`
 	FFStudyReminders            bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy              bool `json:"ffAiStudyBuddy"`
+	FFAPITokens                 bool `json:"ffApiTokens"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -173,6 +174,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFOnboardingFlow:            cfg.FFOnboardingFlow,
 		FFStudyReminders:            cfg.FFStudyReminders,
 		FFAIStudyBuddy:              cfg.FFAIStudyBuddy,
+		FFAPITokens:                 cfg.FFAPITokens,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,
