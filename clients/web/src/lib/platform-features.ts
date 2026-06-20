@@ -144,7 +144,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffOnboardingFlow: false,
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
-  ffCalendarFeeds: false,
+  ffCalendarFeeds: true,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
   aiDisclosureEnabled: false,

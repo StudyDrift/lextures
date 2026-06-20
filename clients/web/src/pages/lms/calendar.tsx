@@ -8,6 +8,7 @@ import {
   type CoursePublic,
   type CourseStructureItem,
 } from '../../lib/courses-api'
+import { CalendarActionsMenu } from './calendar-actions-menu'
 import { CourseCalendar, type CourseCalendarAssignment } from './course-calendar'
 import { LmsPage } from './lms-page'
 
@@ -233,6 +234,7 @@ export default function Calendar() {
       title="Calendar"
       description="Month, week, and to-do views across your courses. Toggle courses on the left to show or hide their due dates."
       fillHeight
+      actions={<CalendarActionsMenu scope="global" />}
     >
       {coursesError && (
         <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">

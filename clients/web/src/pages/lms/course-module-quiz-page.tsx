@@ -62,7 +62,7 @@ import {
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
-import { QuizSubmissionsPanel } from '../../components/quiz/quiz-submissions-panel'
+
 import { ProctoringPreExamChecklist } from '../../components/quiz/proctoring-pre-exam-checklist'
 import { fetchQuizProctoringConfig, type ProctoringConfig } from '../../lib/courses-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -252,10 +252,6 @@ export default function CourseModuleQuizPage() {
   const canEditQuizItems = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemsCreate(courseCode)),
   )
-  const canViewGradebook = Boolean(
-    courseCode && !permLoading && allows(courseGradebookViewPermission(courseCode)),
-  )
-
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
   const [dueAt, setDueAt] = useState<string | null>(null)
@@ -1366,9 +1362,6 @@ export default function CourseModuleQuizPage() {
           </div>
         )}
 
-        {!loading && !loadError && !editingContent && canViewGradebook && courseCode && itemId && !isAdaptive ? (
-          <QuizSubmissionsPanel courseCode={courseCode} itemId={itemId} />
-        ) : null}
       </div>
 
       {!loading && !loadError && editingContent && (

@@ -40,6 +40,14 @@ func (d Deps) registerCalendarFeedMeRoutes(r chi.Router) {
 	r.Get("/api/v1/me/calendar-token", d.handleGetMeCalendarToken())
 }
 
+// calendarFeedUserID resolves the user from ?token= or the authenticated session (in-app download).
+func (d Deps) calendarFeedUserID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {
+	if strings.TrimSpace(r.URL.Query().Get("token")) != "" {
+		return d.calendarTokenUserID(w, r)
+	}
+	return d.meUserID(w, r)
+}
+
 // handleMeCalendarICS is GET /api/v1/me/calendar.ics?token= — personal iCal feed for all enrolled courses.
 func (d Deps) handleMeCalendarICS() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +59,7 @@ func (d Deps) handleMeCalendarICS() http.HandlerFunc {
 		if !d.requireCalendarFeedsEnabled(w) {
 			return
 		}
-		userID, ok := d.calendarTokenUserID(w, r)
+		userID, ok := d.calendarFeedUserID(w, r)
 		if !ok {
 			return
 		}
@@ -73,28 +81,30 @@ func (d Deps) handleCourseCalendarICS() http.HandlerFunc {
 			return
 		}
 
-		if d.calendarFeedsEnabled() && strings.TrimSpace(r.URL.Query().Get("token")) != "" {
-			userID, ok := d.calendarTokenUserID(w, r)
-			if !ok {
+		if d.calendarFeedsEnabled() {
+			userID, ok := d.calendarFeedUserID(w, r)
+			if ok {
+				ctx := r.Context()
+				crow, err := courserepo.GetPublicByCourseCode(ctx, d.Pool, courseCode)
+				if err != nil || crow == nil {
+					apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+					return
+				}
+				if !d.userCanAccessCourseCalendar(ctx, userID, courseCode, crow.ID) {
+					apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+					return
+				}
+				cid, err := uuid.Parse(crow.ID)
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Invalid course id.")
+					return
+				}
+				d.serveUserCalendarFeed(w, r, userID, &cid)
 				return
 			}
-			ctx := r.Context()
-			crow, err := courserepo.GetPublicByCourseCode(ctx, d.Pool, courseCode)
-			if err != nil || crow == nil {
-				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			if strings.TrimSpace(r.URL.Query().Get("token")) != "" {
 				return
 			}
-			if !d.userCanAccessCourseCalendar(ctx, userID, courseCode, crow.ID) {
-				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
-				return
-			}
-			cid, err := uuid.Parse(crow.ID)
-			if err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Invalid course id.")
-				return
-			}
-			d.serveUserCalendarFeed(w, r, userID, &cid)
-			return
 		}
 
 		// Legacy session-authenticated term-only feed (pre-16.5).
