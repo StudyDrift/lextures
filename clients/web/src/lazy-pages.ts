@@ -91,6 +91,7 @@ export const ConferenceScheduleGrid = lazy(() => import('./pages/admin/conferenc
 export const ContentFilterSettingsPage = lazy(() => import('./pages/admin/content-filter-settings'))
 export const StudentDemographicsPage = lazy(() => import('./pages/admin/student-demographics'))
 export const SisIntegrationPage = lazy(() => import('./pages/admin/sis-integration'))
+export const WebhooksAdminPage = lazy(() => import('./pages/admin/webhooks'))
 export const BookstoreIntegrationPage = lazy(() => import('./pages/admin/BookstoreIntegration'))
 export const IncompletesAdminPage = lazy(() => import('./pages/admin/incompletes'))
 export const CourseCatalogPage = lazy(() => import('./pages/lms/course-catalog'))

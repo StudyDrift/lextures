@@ -59,6 +59,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffCoCurricularTranscript: false,
     ffEportfolio: false,
     ffTranscripts: false,
+    ffWebhooks: false,
     ffAdvisingIntegration: false,
     ffResearchConsent: false,
     ffAccessibilityIntake: false,

@@ -61,6 +61,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Aggregate mastery and coverage reports across course learning outcomes.',
   },
   {
+    key: 'ffWebhooks',
+    label: 'Outbound webhooks',
+    description: 'Let org admins register HTTPS endpoints for signed grade, enrollment, and submission events.',
+  },
+  {
     key: 'ffTranscripts',
     label: 'Transcripts',
     description:
