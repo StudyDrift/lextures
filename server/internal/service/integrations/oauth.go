@@ -152,7 +152,7 @@ func (s *Service) tokenRequest(ctx context.Context, p Provider, form url.Values)
 	if err != nil {
 		return Tokens{}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return Tokens{}, fmt.Errorf("integrations: token endpoint status %d: %s", resp.StatusCode, strings.TrimSpace(string(body)))
@@ -200,7 +200,7 @@ func (s *Service) googleUserID(ctx context.Context, accessToken string) (string,
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("integrations: userinfo status %d", resp.StatusCode)

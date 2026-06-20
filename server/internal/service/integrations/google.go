@@ -70,7 +70,7 @@ func (c *httpClassroomClient) get(ctx context.Context, accessToken, path string,
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	body, _ := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("integrations: classroom %s status %d", path, resp.StatusCode)

@@ -118,7 +118,7 @@ func oauthEscape(s string) string {
 			c == '-' || c == '.' || c == '_' || c == '~' {
 			b.WriteByte(c)
 		} else {
-			b.WriteString(fmt.Sprintf("%%%02X", c))
+			fmt.Fprintf(&b, "%%%02X", c)
 		}
 	}
 	return b.String()

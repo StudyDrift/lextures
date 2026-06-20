@@ -79,12 +79,12 @@ func TestResolveAccountHTTPNonGoogleDeterministic(t *testing.T) {
 func TestHTTPClassroomClient(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		switch {
-		case r.URL.Path == "/courses/c1/students":
+		switch r.URL.Path {
+		case "/courses/c1/students":
 			_, _ = w.Write([]byte(`{"students":[{"userId":"u1","profile":{"name":{"fullName":"Stu"},"emailAddress":"stu@example.com"}}]}`))
-		case r.URL.Path == "/courses/c1/teachers":
+		case "/courses/c1/teachers":
 			_, _ = w.Write([]byte(`{"teachers":[{"userId":"t1","profile":{"name":{"fullName":"Teach"},"emailAddress":"teach@example.com"}}]}`))
-		case r.URL.Path == "/courses/c1/courseWork":
+		case "/courses/c1/courseWork":
 			_, _ = w.Write([]byte(`{"courseWork":[{"id":"a1","title":"HW1","maxPoints":100,"dueDate":{"year":2026,"month":6,"day":1}}]}`))
 		default:
 			http.NotFound(w, r)
