@@ -15,11 +15,10 @@ import (
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
-	"github.com/lextures/lextures/server/internal/gradingagentqueue"
-	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/feedevents"
+	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/notifevents"
@@ -29,9 +28,11 @@ import (
 	"github.com/lextures/lextures/server/internal/service/cleverauth"
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
+	integrationsservice "github.com/lextures/lextures/server/internal/service/integrations"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
 // Deps is the minimal set of server dependencies. Expand with auth, LTI, etc. during the migration.
@@ -76,6 +77,9 @@ type Deps struct {
 	// StorageQuota enforces per-tenant/course/user storage limits (plan 8.5).
 	// When nil, quota endpoints return 501 and upload enforcement is skipped.
 	StorageQuota *storagequota.Service
+	// Integrations powers inbound third-party connectors (Google Classroom,
+	// Teams, Canva, LTI 1.1 embeds) — plan 16.4. When nil, endpoints return 501.
+	Integrations *integrationsservice.Service
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -189,6 +193,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerInsightsRoutes(r)
 	d.registerOERRoutes(r)
 	d.registerCloudProviderRoutes(r)
+	d.registerIntegrationRoutes(r)
 	d.registerLegalRoutes(r)
 	d.registerTrustRoutes(r)
 	d.registerFERPARoutes(r)
