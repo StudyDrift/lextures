@@ -61,6 +61,7 @@ export type PlatformFeaturesSnapshot = {
   ffStripeBilling?: boolean
   ffRevenueShare?: boolean
   ffLearningPaths?: boolean
+  ffConditionalRelease?: boolean
   ffCompletionCredentials?: boolean
   ffCourseReviews?: boolean
   ffGamification?: boolean
@@ -136,6 +137,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffStripeBilling: false,
   ffRevenueShare: false,
   ffLearningPaths: false,
+  ffConditionalRelease: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
   ffGamification: false,

@@ -155,6 +155,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_stripe_billing", w.FFStripeBilling)
 	addBool("ff_revenue_share", w.FFRevenueShare)
 	addBool("ff_learning_paths", w.FFLearningPaths)
+	addBool("ff_conditional_release", w.FFConditionalRelease)
 	addBool("ff_completion_credentials", w.FFCompletionCredentials)
 	addBool("ff_course_reviews", w.FFCourseReviews)
 	addBool("ff_gamification", w.FFGamification)

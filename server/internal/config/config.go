@@ -369,6 +369,9 @@ type Config struct {
 	// FFLearningPaths enables learning paths / course bundles for self-learners (plan 15.4).
 	// Managed in Settings → Global platform (not process env).
 	FFLearningPaths bool
+	// FFConditionalRelease enables rule-based module requirements and conditional release (plan 1.11).
+	// Managed in Settings → Global platform (not process env).
+	FFConditionalRelease bool
 	// FFCompletionCredentials enables course completion certificates, Open Badges export, and LinkedIn share (plans 15.5, 15.6).
 	// Managed in Settings → Global platform (not process env).
 	FFCompletionCredentials bool

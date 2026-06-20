@@ -128,6 +128,10 @@ func (d Deps) handleGetModuleContentPage() http.HandlerFunc {
 				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 				return
 			}
+			if !d.enforceConditionalRelease(w, r, *cid, viewer, itemID, canEdit) {
+				return
+			}
+			d.recordConditionalReleaseView(r, *cid, viewer, itemID)
 		}
 		row, err := coursemodulecontent.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 		if err != nil {

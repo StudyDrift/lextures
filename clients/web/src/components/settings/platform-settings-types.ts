@@ -46,6 +46,7 @@ export type PlatformSettingsPayload = {
   ffStripeBilling: boolean
   ffRevenueShare: boolean
   ffLearningPaths: boolean
+  ffConditionalRelease: boolean
   ffCompletionCredentials: boolean
   ffOnboardingFlow: boolean
   ffAiStudyBuddy: boolean

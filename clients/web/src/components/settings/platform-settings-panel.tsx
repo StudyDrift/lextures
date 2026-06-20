@@ -68,6 +68,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffStripeBilling: false,
     ffRevenueShare: false,
     ffLearningPaths: false,
+    ffConditionalRelease: false,
     ffCompletionCredentials: false,
     ffOnboardingFlow: false,
     ffAiStudyBuddy: false,
