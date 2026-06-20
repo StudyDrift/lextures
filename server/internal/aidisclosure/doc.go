@@ -1,7 +1,5 @@
-// Package aidisclosure holds static AI disclosure documents and hashing helpers (plan 10.17).
+// Package aidisclosure builds public AI disclosure documents and hashing helpers (plan 10.17).
 package aidisclosure
-
-import _ "embed"
 
 import (
 	"crypto/hmac"
@@ -11,9 +9,6 @@ import (
 
 	"github.com/google/uuid"
 )
-
-//go:embed disclosure_models.json
-var PublicDisclosureJSON []byte
 
 // UserIDHash is HMAC-SHA256 of the user UUID for audit logs.
 func UserIDHash(secret string, userID uuid.UUID) string {
