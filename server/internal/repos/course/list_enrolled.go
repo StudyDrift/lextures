@@ -374,22 +374,6 @@ WHERE c.course_code = $1
 	return &p, nil
 }
 
-// GetPublicByID returns a course by primary key, or nil if not found.
-func GetPublicByID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (*CoursePublic, error) {
-	row := pool.QueryRow(ctx, `
-SELECT`+coursePublicSelect+coursePublicFrom+`
-WHERE c.id = $1
-`, courseID)
-	p, err := scanCoursePublicFromRow(row)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &p, nil
-}
-
 // ListForEnrolledUser returns non-archived courses the user is enrolled in, in catalog order (parity with Rust `list_for_enrolled_user`).
 // Relative-schedule “materialization” for students is not applied here yet.
 // gradeLevel filters by course.grade_level when non-nil; nil returns all grades.

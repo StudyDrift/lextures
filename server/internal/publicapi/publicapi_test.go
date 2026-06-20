@@ -4,97 +4,117 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
+	"time"
 )
 
-func TestEncodeDecodeCursor(t *testing.T) {
+func TestEncodeDecodeCursorRoundTrip(t *testing.T) {
 	t.Parallel()
-	c := EncodeCursor(25)
-	off, err := DecodeCursor(c)
-	if err != nil || off != 25 {
-		t.Fatalf("round trip: off=%d err=%v", off, err)
+	for _, off := range []int{0, 25, 100} {
+		c := EncodeCursor(off)
+		got, err := DecodeCursor(c)
+		if err != nil || got != off {
+			t.Fatalf("offset %d: got %d err %v", off, got, err)
+		}
 	}
-	if _, err := DecodeCursor("!!!"); err == nil {
-		t.Fatal("expected invalid cursor error")
+}
+
+func TestDecodeCursor_Invalid(t *testing.T) {
+	t.Parallel()
+	if _, err := DecodeCursor("not-valid"); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
+func TestSlicePage(t *testing.T) {
+	t.Parallel()
+	all := []int{1, 2, 3, 4, 5}
+	slice, total := SlicePage(all, 1, 2)
+	if total != 5 || len(slice) != 2 || slice[0] != 2 {
+		t.Fatalf("got %v total %d", slice, total)
+	}
+}
+
+func TestBuildCollectionResponse_LinkHeader(t *testing.T) {
+	t.Parallel()
+	items := []any{map[string]string{"id": "1"}, map[string]string{"id": "2"}}
+	resp := BuildCollectionResponse(items, 10, 0, 2, "/api/v1/courses", nil)
+	if resp.Meta.Total != 10 || resp.Links.Next == "" {
+		t.Fatalf("meta/links: %+v", resp)
+	}
+	w := httptest.NewRecorder()
+	SetLinkHeader(w, resp.Links)
+	if w.Header().Get("Link") == "" {
+		t.Fatal("expected Link header")
 	}
 }
 
 func TestHasScope(t *testing.T) {
 	t.Parallel()
 	if !HasScope([]string{"courses:read", "grades:read"}, "courses:read") {
-		t.Fatal("expected scope match")
+		t.Fatal("expected match")
 	}
 	if HasScope([]string{"courses:read"}, "grades:read") {
-		t.Fatal("expected missing scope")
+		t.Fatal("expected no match")
 	}
 }
 
-func TestWriteProblem(t *testing.T) {
+func TestWriteUnauthorized_ProblemJSON(t *testing.T) {
 	t.Parallel()
-	rr := httptest.NewRecorder()
-	WriteProblem(rr, Problem{Type: "unauthorized", Title: "Unauthorized", Status: http.StatusUnauthorized, Detail: "nope", Instance: "/api/v1/courses"})
-	if rr.Code != 401 {
-		t.Fatalf("status: %d", rr.Code)
+	w := httptest.NewRecorder()
+	WriteUnauthorized(w, "/api/v1/courses")
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("status %d", w.Code)
 	}
-	if ct := rr.Header().Get("Content-Type"); !strings.Contains(ct, "problem+json") {
-		t.Fatalf("content-type: %q", ct)
+	if ct := w.Header().Get("Content-Type"); ct != "application/problem+json; charset=utf-8" {
+		t.Fatalf("content-type %q", ct)
 	}
 	var p Problem
-	if err := json.NewDecoder(rr.Body).Decode(&p); err != nil {
-		t.Fatal(err)
-	}
-	if !strings.HasPrefix(p.Type, "https://lextures.io/errors/") {
-		t.Fatalf("type: %q", p.Type)
+	if err := json.NewDecoder(w.Body).Decode(&p); err != nil || p.Title != "Unauthorized" {
+		t.Fatalf("body %+v err %v", p, err)
 	}
 }
 
-func TestAllowTokenRateLimit(t *testing.T) {
+func TestMatch_Routes(t *testing.T) {
 	t.Parallel()
-	ResetRateLimits()
-	if ok, _ := AllowToken("tok-a", 2); !ok {
+	cases := []struct {
+		method, path string
+		want         bool
+	}{
+		{http.MethodGet, "/api/v1/courses", true},
+		{http.MethodGet, "/api/v1/openapi.json", true},
+		{http.MethodGet, "/api/v1/courses/00000000-0000-0000-0000-000000000001", true},
+		{http.MethodGet, "/api/v1/courses/C-ABC123", false},
+		{http.MethodGet, "/api/v1/me", false},
+	}
+	for _, tc := range cases {
+		_, _, ok := Match(tc.method, tc.path)
+		if ok != tc.want {
+			t.Fatalf("%s %s: got %v want %v", tc.method, tc.path, ok, tc.want)
+		}
+	}
+}
+
+func TestTokenLimiter_Deny(t *testing.T) {
+	t.Parallel()
+	l := NewTokenLimiter(1, time.Minute)
+	now := time.Unix(1_700_000_000, 0)
+	if ok, _ := l.Allow("k", now); !ok {
 		t.Fatal("first request should pass")
 	}
-	if ok, _ := AllowToken("tok-a", 2); !ok {
-		t.Fatal("second request should pass")
-	}
-	if ok, retry := AllowToken("tok-a", 2); ok || retry < 1 {
-		t.Fatalf("third should be limited, ok=%v retry=%d", ok, retry)
+	if ok, retry := l.Allow("k", now); ok || retry < 1 {
+		t.Fatalf("second request should be denied, got ok=%v retry=%d", ok, retry)
 	}
 }
 
-func TestPaginateSlice(t *testing.T) {
+func TestApplyFieldset(t *testing.T) {
 	t.Parallel()
-	items := []int{1, 2, 3, 4, 5}
-	page, next := PaginateSlice(items, 0, 2)
-	if len(page) != 2 || next == "" {
-		t.Fatalf("page=%v next=%q", page, next)
+	v := map[string]any{"id": "1", "title": "T", "secret": "x"}
+	out := ApplyFieldset(v, map[string]struct{}{"title": {}}).(map[string]any)
+	if out["title"] != "T" || out["id"] != "1" {
+		t.Fatalf("got %v", out)
 	}
-	page, next = PaginateSlice(items, 4, 2)
-	if len(page) != 1 || next != "" {
-		t.Fatalf("tail page=%v next=%q", page, next)
-	}
-}
-
-func TestFilterObjectSparseFields(t *testing.T) {
-	t.Parallel()
-	fields := map[string]struct{}{"title": {}}
-	out := FilterObject(fields, map[string]any{"id": "1", "title": "A", "description": "x"})
-	if _, ok := out["description"]; ok {
-		t.Fatal("description should be omitted")
-	}
-	if out["id"] != "1" || out["title"] != "A" {
-		t.Fatalf("out: %#v", out)
-	}
-}
-
-func TestOpenAPI31ValidJSON(t *testing.T) {
-	t.Parallel()
-	var doc map[string]any
-	if err := json.Unmarshal([]byte(OpenAPI31Document), &doc); err != nil {
-		t.Fatal(err)
-	}
-	if doc["openapi"] != "3.1.0" {
-		t.Fatalf("version: %v", doc["openapi"])
+	if _, ok := out["secret"]; ok {
+		t.Fatal("secret should be stripped")
 	}
 }

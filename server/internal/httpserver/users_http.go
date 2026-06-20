@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/lextures/lextures/server/internal/apierr"
-	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/authservice"
@@ -155,20 +154,14 @@ LIMIT $%d OFFSET $%d
 // GET /api/v1/users/{user_id}
 func (d Deps) handleUsersGet() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if _, ok := d.adminRbacUser(w, r); !ok {
+			return
+		}
+
 		rawID := chi.URLParam(r, "user_id")
 		decoded, err := url.PathUnescape(rawID)
 		if err != nil {
 			decoded = rawID
-		}
-		if targetID, err := uuid.Parse(decoded); err == nil {
-			if d.serveIfPublicAPIToken(w, r, func(pctx *publicAPIContext, tok *auth.APITokenAuth) {
-				d.publicAPIGetUser(w, r, pctx, tok, targetID)
-			}) {
-				return
-			}
-		}
-		if _, ok := d.adminRbacUser(w, r); !ok {
-			return
 		}
 
 		const baseSelect = `

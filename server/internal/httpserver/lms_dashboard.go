@@ -855,14 +855,6 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		courseParam := chi.URLParam(r, "course_code")
-		if id, err := uuid.Parse(courseParam); err == nil {
-			if d.serveIfPublicAPIToken(w, r, func(pctx *publicAPIContext, tok *auth.APITokenAuth) {
-				d.publicAPIListEnrollments(w, r, pctx, tok, id)
-			}) {
-				return
-			}
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
 			return

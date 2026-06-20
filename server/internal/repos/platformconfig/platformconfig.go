@@ -116,6 +116,7 @@ type Row struct {
 	FFConsortiumSharing             *bool
 	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
+	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
 	FFLearningPaths                 *bool
@@ -125,8 +126,6 @@ type Row struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
-	FFPublicAPI                     *bool
-	FFAPIDocs                       *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -257,6 +256,7 @@ type Write struct {
 	FFConsortiumSharing             *bool
 	FFSelfPacedMode                 *bool
 	FFPublicCatalog                 *bool
+	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
 	FFLearningPaths                 *bool
@@ -266,8 +266,6 @@ type Write struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
-	FFPublicAPI                     *bool
-	FFAPIDocs                       *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -395,6 +393,7 @@ SELECT
 	ff_consortium_sharing,
 	ff_self_paced_mode,
 	ff_public_catalog,
+	ff_public_api,
 	ff_stripe_billing,
 	ff_learning_paths,
 	ff_completion_credentials,
@@ -403,8 +402,6 @@ SELECT
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
-	ff_public_api,
-	ff_api_docs,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -527,6 +524,7 @@ WHERE id = 1
 		&r.FFConsortiumSharing,
 		&r.FFSelfPacedMode,
 		&r.FFPublicCatalog,
+		&r.FFPublicAPI,
 		&r.FFStripeBilling,
 		&r.FFLearningPaths,
 		&r.FFCompletionCredentials,
@@ -535,8 +533,6 @@ WHERE id = 1
 		&r.FFOnboardingFlow,
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
-		&r.FFPublicAPI,
-		&r.FFAPIDocs,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -716,8 +712,6 @@ INSERT INTO settings.platform_app_settings (
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
-	ff_public_api,
-	ff_api_docs,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -854,8 +848,6 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
-	ff_public_api = COALESCE(EXCLUDED.ff_public_api, settings.platform_app_settings.ff_public_api),
-	ff_api_docs = COALESCE(EXCLUDED.ff_api_docs, settings.platform_app_settings.ff_api_docs),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -872,6 +864,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_ui_mode = COALESCE(EXCLUDED.ff_ui_mode, settings.platform_app_settings.ff_ui_mode),
 	ff_self_paced_mode = COALESCE(EXCLUDED.ff_self_paced_mode, settings.platform_app_settings.ff_self_paced_mode),
 	ff_public_catalog = COALESCE(EXCLUDED.ff_public_catalog, settings.platform_app_settings.ff_public_catalog),
+	ff_public_api = COALESCE(EXCLUDED.ff_public_api, settings.platform_app_settings.ff_public_api),
 	mfa_enabled = COALESCE(EXCLUDED.mfa_enabled, settings.platform_app_settings.mfa_enabled),
 	mfa_enforcement = COALESCE(EXCLUDED.mfa_enforcement, settings.platform_app_settings.mfa_enforcement),
 	smtp_host = COALESCE(EXCLUDED.smtp_host, settings.platform_app_settings.smtp_host),
@@ -984,8 +977,6 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFOnboardingFlow,
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
-		w.FFPublicAPI,
-		w.FFAPIDocs,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

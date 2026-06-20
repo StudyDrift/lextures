@@ -1,8 +1,21 @@
 package publicapi
 
-import "slices"
+// HasScope reports whether granted scopes include the required scope id.
+func HasScope(granted []string, required string) bool {
+	for _, s := range granted {
+		if s == required {
+			return true
+		}
+	}
+	return false
+}
 
-// HasScope reports whether required is granted in scopes.
-func HasScope(scopes []string, required string) bool {
-	return slices.Contains(scopes, required)
+// HasAnyScope reports whether any of the required scopes is granted.
+func HasAnyScope(granted, required []string) bool {
+	for _, req := range required {
+		if HasScope(granted, req) {
+			return true
+		}
+	}
+	return false
 }

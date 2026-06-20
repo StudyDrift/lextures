@@ -73,6 +73,7 @@ type platformFeaturesJSON struct {
 	FFConsortiumSharing         bool `json:"ffConsortiumSharing"`
 	FFSelfPacedMode             bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog             bool `json:"ffPublicCatalog"`
+	FFPublicAPI                 bool `json:"ffPublicApi"`
 	FFStripeBilling             bool `json:"ffStripeBilling"`
 	FFRevenueShare              bool `json:"ffRevenueShare"`
 	FFLearningPaths             bool `json:"ffLearningPaths"`
@@ -82,8 +83,6 @@ type platformFeaturesJSON struct {
 	FFOnboardingFlow            bool `json:"ffOnboardingFlow"`
 	FFStudyReminders            bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy              bool `json:"ffAiStudyBuddy"`
-	FFPublicAPI                 bool `json:"ffPublicApi"`
-	FFAPIDocs                   bool `json:"ffApiDocs"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -164,6 +163,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFConsortiumSharing:         cfg.FFConsortiumSharing,
 		FFSelfPacedMode:             cfg.FFSelfPacedMode,
 		FFPublicCatalog:             cfg.FFPublicCatalog,
+		FFPublicAPI:                 cfg.FFPublicAPI,
 		FFStripeBilling:             cfg.FFStripeBilling,
 		FFRevenueShare:              cfg.FFRevenueShare,
 		FFLearningPaths:             cfg.FFLearningPaths,
@@ -173,8 +173,6 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFOnboardingFlow:            cfg.FFOnboardingFlow,
 		FFStudyReminders:            cfg.FFStudyReminders,
 		FFAIStudyBuddy:              cfg.FFAIStudyBuddy,
-		FFPublicAPI:                 cfg.FFPublicAPI,
-		FFAPIDocs:                   cfg.FFAPIDocs,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

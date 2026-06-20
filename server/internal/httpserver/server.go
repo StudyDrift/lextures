@@ -100,6 +100,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(logging.AccessLog)
+	r.Use(d.publicAPIMiddleware)
 	ready := d.Ready
 	if ready == nil {
 		ready = defaultReady(d.Pool)
@@ -114,7 +115,6 @@ func NewHandler(d Deps) http.Handler {
 	r.Get("/api/v1/public/locale-defaults", d.handleGetPublicLocaleDefaults())
 	r.Get("/api/v1/public/org-branding/{orgId}/{asset}", d.handlePublicOrgBrandAsset())
 	d.registerPublicCatalogRoutes(r)
-	d.registerPublicAPIRoutes(r)
 	r.Get("/api/v1/search", d.handleSearchIndex())
 	r.Get("/api/v1/search/query", d.handleSearchQuery())
 	r.Get("/api/v1/reports/learning-activity", d.handleLearningActivityReport())

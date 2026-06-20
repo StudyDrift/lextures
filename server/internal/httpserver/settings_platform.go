@@ -129,6 +129,7 @@ type platformSettingsJSON struct {
 	FFConsortiumSharing             bool `json:"ffConsortiumSharing"`
 	FFSelfPacedMode                 bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 bool `json:"ffPublicCatalog"`
+	FFPublicAPI                     bool `json:"ffPublicApi"`
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
 	FFRevenueShare                  bool `json:"ffRevenueShare"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
@@ -138,8 +139,6 @@ type platformSettingsJSON struct {
 	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  bool `json:"ffAiStudyBuddy"`
-	FFPublicAPI                     bool `json:"ffPublicApi"`
-	FFAPIDocs                       bool `json:"ffApiDocs"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -318,6 +317,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFConsortiumSharing:             merged.FFConsortiumSharing,
 			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
+			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
@@ -327,8 +327,6 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
-			FFPublicAPI:                     merged.FFPublicAPI,
-			FFAPIDocs:                       merged.FFAPIDocs,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -482,6 +480,7 @@ type putPlatformBody struct {
 	FFConsortiumSharing             *bool `json:"ffConsortiumSharing"`
 	FFSelfPacedMode                 *bool `json:"ffSelfPacedMode"`
 	FFPublicCatalog                 *bool `json:"ffPublicCatalog"`
+	FFPublicAPI                     *bool `json:"ffPublicApi"`
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
 	FFRevenueShare                  *bool `json:"ffRevenueShare"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
@@ -491,8 +490,6 @@ type putPlatformBody struct {
 	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                *bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  *bool `json:"ffAiStudyBuddy"`
-	FFPublicAPI                     *bool `json:"ffPublicApi"`
-	FFAPIDocs                       *bool `json:"ffApiDocs"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -792,6 +789,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffconsortiumsharing", body.FFConsortiumSharing, func(v bool) { wr.FFConsortiumSharing = &v })
 		setBool("ffselfpacedmode", body.FFSelfPacedMode, func(v bool) { wr.FFSelfPacedMode = &v })
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
+		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("ffrevenueshare", body.FFRevenueShare, func(v bool) { wr.FFRevenueShare = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
@@ -801,8 +799,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("ffaistudybuddy", body.FFAIStudyBuddy, func(v bool) { wr.FFAIStudyBuddy = &v })
-		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
-		setBool("ffapidocs", body.FFAPIDocs, func(v bool) { wr.FFAPIDocs = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -935,6 +931,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFConsortiumSharing:             merged.FFConsortiumSharing,
 			FFSelfPacedMode:                 merged.FFSelfPacedMode,
 			FFPublicCatalog:                 merged.FFPublicCatalog,
+			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
@@ -944,8 +941,6 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
-			FFPublicAPI:                     merged.FFPublicAPI,
-			FFAPIDocs:                       merged.FFAPIDocs,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

@@ -1,15 +1,15 @@
+// Package publicapi implements the versioned public REST API surface (plan 16.1).
 package publicapi
 
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
-const errorTypeBase = "https://lextures.io/errors/"
+const problemBaseType = "https://lextures.io/errors/"
 
-// Problem is an RFC 7807 problem details document.
+// Problem is an RFC 7807 Problem Details object.
 type Problem struct {
 	Type     string `json:"type"`
 	Title    string `json:"title"`
@@ -20,50 +20,49 @@ type Problem struct {
 
 // WriteProblem writes application/problem+json.
 func WriteProblem(w http.ResponseWriter, p Problem) {
-	if p.Type != "" && !strings.HasPrefix(p.Type, "http") {
-		p.Type = errorTypeBase + p.Type
-	}
-	if p.Title == "" {
-		p.Title = http.StatusText(p.Status)
-	}
 	w.Header().Set("Content-Type", "application/problem+json; charset=utf-8")
 	w.WriteHeader(p.Status)
 	_ = json.NewEncoder(w).Encode(p)
 }
 
-// Unauthorized writes a 401 problem response.
-func Unauthorized(w http.ResponseWriter, instance, detail string) {
-	if detail == "" {
-		detail = "A valid Bearer token is required."
-	}
+// WriteUnauthorized returns 401 for missing/invalid bearer tokens.
+func WriteUnauthorized(w http.ResponseWriter, instance string) {
 	WriteProblem(w, Problem{
-		Type:     "unauthorized",
+		Type:     problemBaseType + "unauthorized",
 		Title:    "Unauthorized",
 		Status:   http.StatusUnauthorized,
+		Detail:   "A valid Bearer token is required.",
+		Instance: instance,
+	})
+}
+
+// WriteForbidden returns 403 for insufficient scope.
+func WriteForbidden(w http.ResponseWriter, instance, detail string) {
+	WriteProblem(w, Problem{
+		Type:     problemBaseType + "forbidden",
+		Title:    "Forbidden",
+		Status:   http.StatusForbidden,
 		Detail:   detail,
 		Instance: instance,
 	})
 }
 
-// ForbiddenScope writes a 403 problem for a missing scope.
-func ForbiddenScope(w http.ResponseWriter, instance, scope string) {
+// WriteNotFound returns 404.
+func WriteNotFound(w http.ResponseWriter, instance string) {
 	WriteProblem(w, Problem{
-		Type:     "forbidden",
-		Title:    "Forbidden",
-		Status:   http.StatusForbidden,
-		Detail:   "Missing required scope: " + scope,
+		Type:     problemBaseType + "not-found",
+		Title:    "Not Found",
+		Status:   http.StatusNotFound,
+		Detail:   "The requested resource was not found.",
 		Instance: instance,
 	})
 }
 
-// RateLimited writes 429 with Retry-After.
-func RateLimited(w http.ResponseWriter, instance string, retryAfterSec int) {
-	if retryAfterSec < 1 {
-		retryAfterSec = 60
-	}
-	w.Header().Set("Retry-After", fmtRetryAfter(retryAfterSec))
+// WriteRateLimited returns 429 with Retry-After.
+func WriteRateLimited(w http.ResponseWriter, instance string, retryAfterSec int) {
+	w.Header().Set("Retry-After", itoa(retryAfterSec))
 	WriteProblem(w, Problem{
-		Type:     "rate-limited",
+		Type:     problemBaseType + "rate-limited",
 		Title:    "Too Many Requests",
 		Status:   http.StatusTooManyRequests,
 		Detail:   "Token quota exceeded.",
@@ -71,6 +70,48 @@ func RateLimited(w http.ResponseWriter, instance string, retryAfterSec int) {
 	})
 }
 
-func fmtRetryAfter(sec int) string {
-	return strconv.Itoa(sec)
+// WriteServiceUnavailable returns 503 when the public API feature flag is off.
+func WriteServiceUnavailable(w http.ResponseWriter, instance string) {
+	w.Header().Set("Retry-After", "300")
+	WriteProblem(w, Problem{
+		Type:     problemBaseType + "service-unavailable",
+		Title:    "Service Unavailable",
+		Status:   http.StatusServiceUnavailable,
+		Detail:   "The public API is not enabled on this deployment.",
+		Instance: instance,
+	})
+}
+
+// WriteBadRequest returns 400 for malformed query parameters.
+func WriteBadRequest(w http.ResponseWriter, instance, detail string) {
+	WriteProblem(w, Problem{
+		Type:     problemBaseType + "bad-request",
+		Title:    "Bad Request",
+		Status:   http.StatusBadRequest,
+		Detail:   detail,
+		Instance: instance,
+	})
+}
+
+// WriteInternal returns 500.
+func WriteInternal(w http.ResponseWriter, instance string) {
+	WriteProblem(w, Problem{
+		Type:     problemBaseType + "internal",
+		Title:    "Internal Server Error",
+		Status:   http.StatusInternalServerError,
+		Detail:   "An unexpected error occurred.",
+		Instance: instance,
+	})
+}
+
+func itoa(n int) string {
+	if n <= 0 {
+		return "1"
+	}
+	return strings.TrimSpace(strings.ReplaceAll(jsonNumber(n), `"`, ""))
+}
+
+func jsonNumber(n int) string {
+	b, _ := json.Marshal(n)
+	return string(b)
 }

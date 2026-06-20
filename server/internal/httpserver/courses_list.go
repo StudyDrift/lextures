@@ -27,11 +27,6 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if d.serveIfPublicAPIToken(w, r, func(pctx *publicAPIContext, tok *auth.APITokenAuth) {
-			d.publicAPIListCourses(w, r, pctx, tok)
-		}) {
-			return
-		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return
