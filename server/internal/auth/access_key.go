@@ -11,14 +11,18 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/lextures/lextures/server/internal/api"
+	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
 )
 
-// APITokenAuth carries scope grants from a personal access key.
+// APITokenAuth carries scope grants from a personal or service access key.
 type APITokenAuth struct {
-	TokenID   uuid.UUID
-	Scopes    []string
-	CourseIDs []uuid.UUID
+	TokenID            uuid.UUID
+	Scopes             []string
+	CourseIDs          []uuid.UUID
+	OrgID              *uuid.UUID
+	ServiceAccountName *string
 }
 
 type apiTokenAuthKey struct{}
@@ -29,29 +33,73 @@ func APITokenFromContext(ctx context.Context) (*APITokenAuth, bool) {
 	return v, ok && v != nil
 }
 
-// UserFromRequestOrAccessKey authenticates via login JWT or personal access key (ltk_…).
-func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpool.Pool) (AuthUser, context.Context, error) {
+// IsServiceTokenAuth reports whether the request authenticated with an org service token.
+func IsServiceTokenAuth(ctx context.Context) bool {
+	tok, ok := APITokenFromContext(ctx)
+	return ok && tok != nil && tok.OrgID != nil && tok.ServiceAccountName != nil
+}
+
+// RequireAccessKeyScope writes 403 when an access key lacks the required scope; JWT sessions pass through.
+func RequireAccessKeyScope(w http.ResponseWriter, ctx context.Context, required string) bool {
+	tok, ok := APITokenFromContext(ctx)
+	if !ok {
+		return true
+	}
+	if api.HasScope(tok.Scopes, required) {
+		return true
+	}
+	apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden,
+		"Access key missing required scope: "+required+".")
+	return false
+}
+
+// UserFromRequestOrAccessKey authenticates via login JWT or access key (ltk_…).
+func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpool.Pool, ipHashKey string, tokensEnabled bool) (AuthUser, context.Context, error) {
 	token, ok := BearerToken(r.Header)
 	if !ok {
 		return AuthUser{}, r.Context(), ErrInvalidToken
 	}
 	if strings.HasPrefix(token, "ltk_") {
-		if pool == nil {
+		if !tokensEnabled || pool == nil {
 			return AuthUser{}, r.Context(), ErrInvalidToken
 		}
 		rt, err := apitokens.ResolveBearer(r.Context(), pool, token, timeNow())
 		if err != nil {
 			return AuthUser{}, r.Context(), ErrInvalidToken
 		}
-		row, err := lookupAccessKeyOwner(r.Context(), pool, rt.OwnerUserID)
-		if err != nil {
-			return AuthUser{}, r.Context(), ErrInvalidToken
-		}
-		ctx := context.WithValue(r.Context(), apiTokenAuthKey{}, &APITokenAuth{
+		ipHash := apitokens.HashClientIP(ipHashKey, apitokens.ClientIPFromRequest(r))
+		apitokens.RecordUsage(rt.ID, ipHash)
+
+		meta := &APITokenAuth{
 			TokenID:   rt.ID,
 			Scopes:    rt.Scopes,
 			CourseIDs: rt.CourseIDs,
-		})
+			OrgID:     rt.OrgID,
+		}
+		if rt.ServiceAccountName != nil {
+			meta.ServiceAccountName = rt.ServiceAccountName
+		}
+
+		if rt.OrgID != nil && rt.OwnerUserID == nil {
+			email := "service-token"
+			if rt.ServiceAccountName != nil && strings.TrimSpace(*rt.ServiceAccountName) != "" {
+				email = strings.TrimSpace(*rt.ServiceAccountName)
+			}
+			ctx := context.WithValue(r.Context(), apiTokenAuthKey{}, meta)
+			return AuthUser{
+				UserID: uuid.Nil.String(),
+				Email:  email,
+				OrgID:  rt.OrgID.String(),
+			}, ctx, nil
+		}
+		if rt.OwnerUserID == nil {
+			return AuthUser{}, r.Context(), ErrInvalidToken
+		}
+		row, err := lookupAccessKeyOwner(r.Context(), pool, *rt.OwnerUserID)
+		if err != nil {
+			return AuthUser{}, r.Context(), ErrInvalidToken
+		}
+		ctx := context.WithValue(r.Context(), apiTokenAuthKey{}, meta)
 		return AuthUser{UserID: row.ID.String(), Email: row.Email}, ctx, nil
 	}
 	u, err := signer.Verify(r.Context(), token)

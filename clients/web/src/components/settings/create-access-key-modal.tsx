@@ -543,9 +543,9 @@ export function AccessKeyCreatedModal({ open, token, label, onClose }: AccessKey
           <p
             className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-100"
             role="status"
+            aria-live="polite"
           >
-            This is the only time we&apos;ll show the full key. Store it in your password manager or paste it into your
-            tool now.
+            Token generated — copy now. This is the only time we&apos;ll show the full key.
           </p>
           <code className="block break-all rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 font-mono text-xs text-slate-800 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100">
             {token}

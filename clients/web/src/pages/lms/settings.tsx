@@ -36,6 +36,7 @@ import {
 import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-accounts-panel'
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { IntegrationsAccessKeysPanel } from '../../components/settings/integrations-access-keys-panel'
+import { AdminServiceTokensPanel } from '../../components/settings/admin-service-tokens-panel'
 import { IntegrationsMcpPanel } from '../../components/settings/integrations-mcp-panel'
 import { NotificationPreferencesPanel } from '../../components/settings/notification-preferences-panel'
 import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-panel'
@@ -1736,6 +1737,7 @@ export default function Settings() {
               Create access keys for API tools and configure MCP so AI agents can work with your Lextures data.
             </p>
             <IntegrationsAccessKeysPanel />
+            <AdminServiceTokensPanel />
             <IntegrationsMcpPanel />
           </div>
         )}

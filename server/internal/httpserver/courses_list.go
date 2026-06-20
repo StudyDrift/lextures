@@ -32,6 +32,9 @@ func (d Deps) handleListCourses() http.HandlerFunc {
 			return
 		}
 		ctx := r.Context()
+		if !auth.RequireAccessKeyScope(w, ctx, "courses:read") {
+			return
+		}
 		termIDStr := strings.TrimSpace(r.URL.Query().Get("term_id"))
 		if termIDStr == "" {
 			termIDStr = strings.TrimSpace(r.URL.Query().Get("termId"))

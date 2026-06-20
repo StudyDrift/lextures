@@ -160,6 +160,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_onboarding_flow", w.FFOnboardingFlow)
 	addBool("ff_study_reminders", w.FFStudyReminders)
 	addBool("ff_ai_study_buddy", w.FFAIStudyBuddy)
+	addBool("ff_api_tokens", w.FFAPITokens)
 	addBool("lrs_anonymize_actors", w.LRSAnonymizeActors)
 	addBool("ferpa_workflow_enabled", w.FERPAWorkflowEnabled)
 	addBool("dpa_portal_enabled", w.DPAPortalEnabled)

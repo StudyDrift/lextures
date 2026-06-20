@@ -265,6 +265,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
   },
   {
+    key: 'ffApiTokens',
+    label: 'API access keys',
+    description:
+      'Personal and institutional API tokens with scoped access for integrations, automation, and MCP agents (plan 16.2).',
+  },
+  {
     key: 'mfaEnabled',
     label: 'Two-factor authentication',
     description: 'Offer TOTP authenticator apps and passkeys as optional login factors.',

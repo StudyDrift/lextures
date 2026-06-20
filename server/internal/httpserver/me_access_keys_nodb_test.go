@@ -21,6 +21,8 @@ func TestAccessKeysRoutes_NoDB(t *testing.T) {
 		{http.MethodGet, "/api/v1/me/access-keys"},
 		{http.MethodPost, "/api/v1/me/access-keys"},
 		{http.MethodDelete, "/api/v1/me/access-keys/00000000-0000-0000-0000-000000000001"},
+		{http.MethodPost, "/api/v1/me/access-keys/00000000-0000-0000-0000-000000000001/rotate"},
+		{http.MethodGet, "/api/v1/admin/tokens"},
 		{http.MethodGet, "/api/v1/me/integrations/mcp"},
 	}
 	for _, rt := range routes {

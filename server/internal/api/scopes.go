@@ -30,6 +30,8 @@ func AllScopes() []Scope {
 		{ID: "graphql:read", Label: "Read GraphQL schema", Description: "Access the GraphQL schema stub endpoint.", Group: "Integrations"},
 		{ID: "feed:read", Label: "Read activity feed", Description: "Read course activity feed events.", Group: "Feed"},
 		{ID: "files:read", Label: "Read files", Description: "Download course files you can access.", Group: "Files"},
+		{ID: "webhooks:manage", Label: "Manage webhooks", Description: "Create and manage outbound webhook subscriptions.", Group: "Integrations"},
+		{ID: "pii:read", Label: "Read PII", Description: "Access personally identifiable information in API responses.", Group: "Privacy"},
 		{ID: "mcp:connect", Label: "Connect MCP agents", Description: "Allow AI agents to connect via MCP using this key.", Group: "Integrations"},
 	}
 	sort.Slice(scopes, func(i, j int) bool { return scopes[i].ID < scopes[j].ID })
@@ -66,4 +68,15 @@ func NormalizeScopes(ids []string) ([]string, bool) {
 	}
 	sort.Strings(out)
 	return out, true
+}
+
+// HasScope returns true when scopes includes the required scope id.
+func HasScope(scopes []string, required string) bool {
+	required = strings.TrimSpace(required)
+	for _, s := range scopes {
+		if strings.TrimSpace(s) == required {
+			return true
+		}
+	}
+	return false
 }
