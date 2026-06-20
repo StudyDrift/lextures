@@ -18,6 +18,12 @@ const (
 	EventGradePosted        EventType = "grade.posted"
 	EventEnrollmentCreated  EventType = "enrollment.created"
 	EventAssignmentSubmitted EventType = "assignment.submitted"
+
+	// Bot notification events (plan 16.6).
+	EventAssignmentCreated   EventType = "assignment.created"
+	EventAssignmentDueSoon   EventType = "assignment.due_soon"
+	EventGradeReleased       EventType = "grade.released"
+	EventAnnouncementCreated EventType = "announcement.created"
 )
 
 // AllEventTypes returns the supported event type strings sorted.
@@ -26,6 +32,10 @@ func AllEventTypes() []string {
 		EventGradePosted,
 		EventEnrollmentCreated,
 		EventAssignmentSubmitted,
+		EventAssignmentCreated,
+		EventAssignmentDueSoon,
+		EventGradeReleased,
+		EventAnnouncementCreated,
 	}
 	out := make([]string, 0, len(types))
 	for _, t := range types {
@@ -108,8 +118,9 @@ type EventGroup struct {
 // EventGroups returns event types grouped by domain prefix for admin UI.
 func EventGroups() []EventGroup {
 	return []EventGroup{
-		{Domain: "Grades", Types: []string{string(EventGradePosted)}},
+		{Domain: "Grades", Types: []string{string(EventGradePosted), string(EventGradeReleased)}},
 		{Domain: "Enrollments", Types: []string{string(EventEnrollmentCreated)}},
-		{Domain: "Assignments", Types: []string{string(EventAssignmentSubmitted)}},
+		{Domain: "Assignments", Types: []string{string(EventAssignmentSubmitted), string(EventAssignmentCreated), string(EventAssignmentDueSoon)}},
+		{Domain: "Announcements", Types: []string{string(EventAnnouncementCreated)}},
 	}
 }

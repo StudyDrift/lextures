@@ -17,7 +17,9 @@ import (
 
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/mail"
+	botsrepo "github.com/lextures/lextures/server/internal/repos/bots"
 	webhooksrepo "github.com/lextures/lextures/server/internal/repos/webhooks"
+	bots "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/webhooks"
 )
 
@@ -102,13 +104,6 @@ func deliverJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, job 
 	if err != nil || sub == nil || !sub.Active || sub.PausedAt != nil {
 		return err
 	}
-	if len(cfg.PlatformSecretsKey) != 32 {
-		return fmt.Errorf("platform secrets key not configured")
-	}
-	signingKey, err := webhooks.DecryptSigningKey(sub.SigningKeyEnc, cfg.PlatformSecretsKey)
-	if err != nil {
-		return err
-	}
 	payload := []byte("")
 	if job.LastResponse != nil {
 		payload = []byte(*job.LastResponse)
@@ -118,6 +113,51 @@ func deliverJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, job 
 		if err != nil || len(payload) == 0 {
 			return fmt.Errorf("missing delivery payload")
 		}
+	}
+
+	// Bot connections register as webhook subscribers; deliver via platform APIs (plan 16.6).
+	if conn, cerr := botsrepo.ConnectionForSubscription(ctx, pool, job.SubscriptionID); cerr == nil && conn != nil {
+		svc := botsServiceFromConfig(cfg, pool)
+		if svc != nil && svc.AnyEnabled(cfg) {
+			status, snippet, latency, derr := bots.DeliverWebhookJob(ctx, pool, cfg, svc, job.SubscriptionID, job.EventType, payload)
+			latencyMS := int(latency.Milliseconds())
+			if derr == nil && status >= 200 && status < 300 {
+				return webhooksrepo.MarkDelivered(ctx, pool, job.ID, now, status, latencyMS, snippet)
+			}
+			msg := snippet
+			if derr != nil {
+				msg = derr.Error()
+			}
+			attempts := job.AttemptCount + 1
+			dead := attempts >= maxAttempts
+			var next time.Time
+			if !dead {
+				idx := attempts - 1
+				if idx >= len(retryDelays) {
+					idx = len(retryDelays) - 1
+				}
+				next = now.Add(retryDelays[idx])
+				if strings.Contains(strings.ToLower(msg), "rate limit") {
+					next = now.Add(time.Minute)
+				}
+			}
+			if err := webhooksrepo.MarkFailed(ctx, pool, job.ID, attempts, next, dead, status, msg, payload); err != nil {
+				return err
+			}
+			if dead {
+				_ = webhooksrepo.Pause(ctx, pool, sub.ID)
+				notifyPausedSubscription(ctx, pool, cfg, sub)
+			}
+			return fmt.Errorf("%s", msg)
+		}
+	}
+
+	if len(cfg.PlatformSecretsKey) != 32 {
+		return fmt.Errorf("platform secrets key not configured")
+	}
+	signingKey, err := webhooks.DecryptSigningKey(sub.SigningKeyEnc, cfg.PlatformSecretsKey)
+	if err != nil {
+		return err
 	}
 	client := outboundClient(sub.TLSSkipVerify)
 	start := time.Now()
@@ -252,3 +292,11 @@ func DeliverTest(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, sub
 }
 
 func strPtr(s string) *string { return &s }
+
+func botsServiceFromConfig(cfg config.Config, pool *pgxpool.Pool) *bots.Service {
+	publicBase := cfg.OIDCPublicBaseURL
+	if publicBase == "" {
+		publicBase = cfg.SAMLPublicBaseURL
+	}
+	return bots.NewFromConfig(cfg, pool, publicBase)
+}

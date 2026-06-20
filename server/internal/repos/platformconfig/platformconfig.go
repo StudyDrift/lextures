@@ -128,6 +128,9 @@ type Row struct {
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
 	FFAPITokens                     *bool
+	FFBotSlack                      *bool
+	FFBotTeams                      *bool
+	FFBotDiscord                    *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -270,6 +273,9 @@ type Write struct {
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
 	FFAPITokens                     *bool
+	FFBotSlack                      *bool
+	FFBotTeams                      *bool
+	FFBotDiscord                    *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -408,6 +414,9 @@ SELECT
 	ff_study_reminders,
 	ff_ai_study_buddy,
 	ff_api_tokens,
+	ff_bot_slack,
+	ff_bot_teams,
+	ff_bot_discord,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -541,6 +550,9 @@ WHERE id = 1
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
 		&r.FFAPITokens,
+		&r.FFBotSlack,
+		&r.FFBotTeams,
+		&r.FFBotDiscord,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -722,6 +734,9 @@ INSERT INTO settings.platform_app_settings (
 	ff_study_reminders,
 	ff_ai_study_buddy,
 	ff_api_tokens,
+	ff_bot_slack,
+	ff_bot_teams,
+	ff_bot_discord,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -860,6 +875,9 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
 	ff_api_tokens = COALESCE(EXCLUDED.ff_api_tokens, settings.platform_app_settings.ff_api_tokens),
+	ff_bot_slack = COALESCE(EXCLUDED.ff_bot_slack, settings.platform_app_settings.ff_bot_slack),
+	ff_bot_teams = COALESCE(EXCLUDED.ff_bot_teams, settings.platform_app_settings.ff_bot_teams),
+	ff_bot_discord = COALESCE(EXCLUDED.ff_bot_discord, settings.platform_app_settings.ff_bot_discord),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -991,6 +1009,9 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
 		w.FFAPITokens,
+		w.FFBotSlack,
+		w.FFBotTeams,
+		w.FFBotDiscord,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

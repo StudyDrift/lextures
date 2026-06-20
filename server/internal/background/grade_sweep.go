@@ -59,6 +59,9 @@ func markPostedScheduled(ctx context.Context, pool *pgxpool.Pool, cfg config.Con
 	}
 	notifications.NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, moduleItemID, posted, smsQueue)
 	webhooksvc.EmitGradePostedCells(ctx, pool, cfg, courseID, moduleItemID, posted)
+	for _, cell := range posted {
+		webhooksvc.EmitGradeReleasedEvent(ctx, pool, cfg, courseID, moduleItemID, cell.StudentUserID, cell.PointsEarned)
+	}
 	slog.Info("grade_posting_completed", "course_id", courseID, "module_item_id", moduleItemID, "n", len(posted))
 	return coursemoduleassignments.ClearReleaseAt(ctx, pool, courseID, moduleItemID)
 }

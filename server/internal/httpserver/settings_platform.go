@@ -141,6 +141,9 @@ type platformSettingsJSON struct {
 	FFStudyReminders                bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  bool `json:"ffAiStudyBuddy"`
 	FFAPITokens                     bool `json:"ffApiTokens"`
+	FFBotSlack                      bool `json:"ffBotSlack"`
+	FFBotTeams                      bool `json:"ffBotTeams"`
+	FFBotDiscord                    bool `json:"ffBotDiscord"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -331,6 +334,9 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
 			FFAPITokens:                     merged.FFAPITokens,
+			FFBotSlack:                      merged.FFBotSlack,
+			FFBotTeams:                      merged.FFBotTeams,
+			FFBotDiscord:                    merged.FFBotDiscord,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -496,6 +502,9 @@ type putPlatformBody struct {
 	FFStudyReminders                *bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  *bool `json:"ffAiStudyBuddy"`
 	FFAPITokens                     *bool `json:"ffApiTokens"`
+	FFBotSlack                      *bool `json:"ffBotSlack"`
+	FFBotTeams                      *bool `json:"ffBotTeams"`
+	FFBotDiscord                    *bool `json:"ffBotDiscord"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -807,6 +816,9 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("ffaistudybuddy", body.FFAIStudyBuddy, func(v bool) { wr.FFAIStudyBuddy = &v })
 		setBool("ffapitokens", body.FFAPITokens, func(v bool) { wr.FFAPITokens = &v })
+		setBool("ffbotslack", body.FFBotSlack, func(v bool) { wr.FFBotSlack = &v })
+		setBool("ffbotteams", body.FFBotTeams, func(v bool) { wr.FFBotTeams = &v })
+		setBool("ffbotdiscord", body.FFBotDiscord, func(v bool) { wr.FFBotDiscord = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -951,6 +963,9 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
 			FFAPITokens:                     merged.FFAPITokens,
+			FFBotSlack:                      merged.FFBotSlack,
+			FFBotTeams:                      merged.FFBotTeams,
+			FFBotDiscord:                    merged.FFBotDiscord,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

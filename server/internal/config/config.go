@@ -390,6 +390,28 @@ type Config struct {
 	// FFAPITokens enables personal and institutional API access keys (plan 16.2).
 	// Managed in Settings → Global platform (not process env).
 	FFAPITokens bool
+	// FFBotSlack enables the Lextures Slack classroom bot (plan 16.6).
+	// Managed in Settings → Global platform (not process env).
+	FFBotSlack bool
+	// FFBotTeams enables the Lextures Microsoft Teams bot (plan 16.6).
+	// Managed in Settings → Global platform (not process env).
+	FFBotTeams bool
+	// FFBotDiscord enables the Lextures Discord bot (plan 16.6).
+	// Managed in Settings → Global platform (not process env).
+	FFBotDiscord bool
+
+	// SlackBotClientID is the Slack app client id for bot OAuth (plan 16.6).
+	SlackBotClientID string
+	// SlackBotClientSecret is the Slack app client secret for bot OAuth (plan 16.6).
+	SlackBotClientSecret string
+	// DiscordBotClientID is the Discord application id (plan 16.6).
+	DiscordBotClientID string
+	// DiscordBotPublicKey is the Discord interaction verification public key hex (plan 16.6).
+	DiscordBotPublicKey string
+	// TeamsBotAppID is the Microsoft Bot Framework app id (plan 16.6).
+	TeamsBotAppID string
+	// TeamsBotAppPassword is the Microsoft Bot Framework app password (plan 16.6).
+	TeamsBotAppPassword string
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).
@@ -592,6 +614,13 @@ func Load() Config {
 
 		CCRSigningSeedB64:  strings.TrimSpace(os.Getenv("CCR_SIGNING_SEED_B64")),
 		CCRInstitutionName: strings.TrimSpace(os.Getenv("CCR_INSTITUTION_NAME")),
+
+		SlackBotClientID:     firstNonEmptyTrimmed("SLACK_BOT_CLIENT_ID"),
+		SlackBotClientSecret: firstNonEmptyTrimmed("SLACK_BOT_CLIENT_SECRET"),
+		DiscordBotClientID:   firstNonEmptyTrimmed("DISCORD_BOT_CLIENT_ID"),
+		DiscordBotPublicKey:  firstNonEmptyTrimmed("DISCORD_BOT_PUBLIC_KEY"),
+		TeamsBotAppID:        firstNonEmptyTrimmed("TEAMS_BOT_APP_ID"),
+		TeamsBotAppPassword:  firstNonEmptyTrimmed("TEAMS_BOT_APP_PASSWORD"),
 
 		StripeSecretKey:      strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
 		StripeWebhookSecret:  strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
