@@ -12,7 +12,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursegrading"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
-	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/gradingschemes"
@@ -78,14 +77,10 @@ func (d Deps) handleCourseMyGrades() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course structure.")
 			return
 		}
-		crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
-		if err == nil && crow != nil && crow.SectionsEnabled {
-			secID, err := enrollment.GetStudentSectionID(r.Context(), d.Pool, courseID, viewer)
-			if err == nil && secID != nil {
-				ovm, err := coursesections.ListOverridesForSection(r.Context(), d.Pool, *secID)
-				if err == nil && len(ovm) > 0 {
-					applySectionAssignmentOverrides(items, ovm)
-				}
+		eid, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, courseID, viewer)
+		if err == nil && eid != nil {
+			if filtered, err := coursestructure.ApplyAssignToForStudent(r.Context(), d.Pool, *eid, items); err == nil {
+				items = filtered
 			}
 		}
 

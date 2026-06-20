@@ -271,6 +271,10 @@ WHERE ce.id = $1 AND ce.active
 }
 
 // Override holds optional due / availability overrides for one assignment in a section.
+//
+// Backed by course.assignment_overrides (target_type='section') — plan 2.15 generalized the
+// section-only table from migration 131 into the unified assign-to model so there is one
+// source of effective dates. This type/API is kept for the existing section-scoped endpoint.
 type Override struct {
 	DueAt          *time.Time
 	AvailableFrom  *time.Time
@@ -281,8 +285,8 @@ type Override struct {
 func GetOverride(ctx context.Context, pool *pgxpool.Pool, sectionID, structureItemID uuid.UUID) (*Override, error) {
 	row := pool.QueryRow(ctx, `
 SELECT due_at, available_from, available_until
-FROM course.section_assignment_overrides
-WHERE section_id = $1 AND structure_item_id = $2
+FROM course.assignment_overrides
+WHERE target_type = 'section' AND target_id = $1 AND structure_item_id = $2
 `, sectionID, structureItemID)
 	var o Override
 	var due, af, au sql.NullTime
@@ -310,12 +314,14 @@ WHERE section_id = $1 AND structure_item_id = $2
 // UpsertOverride sets override columns for a section/item pair.
 func UpsertOverride(ctx context.Context, pool *pgxpool.Pool, sectionID, structureItemID uuid.UUID, dueAt, availableFrom, availableUntil *time.Time) error {
 	_, err := pool.Exec(ctx, `
-INSERT INTO course.section_assignment_overrides (section_id, structure_item_id, due_at, available_from, available_until)
-VALUES ($1, $2, $3, $4, $5)
-ON CONFLICT (section_id, structure_item_id) DO UPDATE SET
+INSERT INTO course.assignment_overrides (structure_item_id, item_type, target_type, target_id, due_at, available_from, available_until)
+SELECT $2, csi.kind, 'section', $1, $3, $4, $5
+FROM course.course_structure_items csi WHERE csi.id = $2
+ON CONFLICT (structure_item_id, target_type, target_id) WHERE target_type <> 'everyone' DO UPDATE SET
   due_at = EXCLUDED.due_at,
   available_from = EXCLUDED.available_from,
-  available_until = EXCLUDED.available_until
+  available_until = EXCLUDED.available_until,
+  updated_at = NOW()
 `, sectionID, structureItemID, dueAt, availableFrom, availableUntil)
 	return err
 }
@@ -324,8 +330,8 @@ ON CONFLICT (section_id, structure_item_id) DO UPDATE SET
 func ListOverridesForSection(ctx context.Context, pool *pgxpool.Pool, sectionID uuid.UUID) (map[uuid.UUID]Override, error) {
 	rows, err := pool.Query(ctx, `
 SELECT structure_item_id, due_at, available_from, available_until
-FROM course.section_assignment_overrides
-WHERE section_id = $1
+FROM course.assignment_overrides
+WHERE target_type = 'section' AND target_id = $1
 `, sectionID)
 	if err != nil {
 		return nil, err

@@ -10,8 +10,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
-	courserepo "github.com/lextures/lextures/server/internal/repos/course"
 	calendartokens "github.com/lextures/lextures/server/internal/repos/calendartokens"
+	courserepo "github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	calendarsvc "github.com/lextures/lextures/server/internal/service/calendar"
@@ -149,7 +149,7 @@ func (d Deps) serveUserCalendarFeed(w http.ResponseWriter, r *http.Request, user
 		return
 	}
 
-	events, err := calendarsvc.LoadEventsForCourses(ctx, d.Pool, courseIDs, rangeStart, rangeEnd)
+	events, err := calendarsvc.LoadEventsForCourses(ctx, d.Pool, courseIDs, userID, rangeStart, rangeEnd)
 	if err != nil {
 		d.serveCalendarWithCacheFallback(w, cacheKey, "Failed to generate calendar feed.")
 		return

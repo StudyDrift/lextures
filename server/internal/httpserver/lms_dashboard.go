@@ -18,7 +18,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefeed"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
-	"github.com/lextures/lextures/server/internal/repos/coursesections"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
@@ -357,13 +356,11 @@ func (d Deps) handleCourseStructure() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course structure.")
 			return
 		}
-		crow, err := course.GetPublicByCourseCode(r.Context(), d.Pool, courseCode)
-		if err == nil && crow != nil && crow.SectionsEnabled && !staffView {
-			secID, err := enrollment.GetStudentSectionID(r.Context(), d.Pool, *cid, viewer)
-			if err == nil && secID != nil {
-				ovm, err := coursesections.ListOverridesForSection(r.Context(), d.Pool, *secID)
-				if err == nil && len(ovm) > 0 {
-					applySectionAssignmentOverrides(items, ovm)
+		if !staffView {
+			eid, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, *cid, viewer)
+			if err == nil && eid != nil {
+				if filtered, err := coursestructure.ApplyAssignToForStudent(r.Context(), d.Pool, *eid, items); err == nil {
+					items = filtered
 				}
 			}
 		}
@@ -827,17 +824,17 @@ func (d Deps) handleFeedMessagePost() http.HandlerFunc {
 
 func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 	type row struct {
-		ID             string  `json:"id"`
-		UserID         string  `json:"userId"`
-		DisplayName    *string `json:"displayName"`
-		AvatarURL      *string `json:"avatarUrl,omitempty"`
-		Role           string  `json:"role"`
-		RoleDisplay    *string `json:"roleDisplay,omitempty"`
-		SectionID      *string `json:"sectionId,omitempty"`
-		SectionCode    *string `json:"sectionCode,omitempty"`
-		SectionName    *string `json:"sectionName,omitempty"`
-		State          *string `json:"state,omitempty"`
-		StateChangedAt *string `json:"stateChangedAt,omitempty"`
+		ID                string  `json:"id"`
+		UserID            string  `json:"userId"`
+		DisplayName       *string `json:"displayName"`
+		AvatarURL         *string `json:"avatarUrl,omitempty"`
+		Role              string  `json:"role"`
+		RoleDisplay       *string `json:"roleDisplay,omitempty"`
+		SectionID         *string `json:"sectionId,omitempty"`
+		SectionCode       *string `json:"sectionCode,omitempty"`
+		SectionName       *string `json:"sectionName,omitempty"`
+		State             *string `json:"state,omitempty"`
+		StateChangedAt    *string `json:"stateChangedAt,omitempty"`
 		StateReason       *string `json:"stateReason,omitempty"`
 		HomeOrgName       *string `json:"homeOrgName,omitempty"`
 		InvitationPending bool    `json:"invitationPending,omitempty"`

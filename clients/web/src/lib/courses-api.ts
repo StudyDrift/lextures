@@ -4464,6 +4464,98 @@ export async function putSectionAssignmentOverride(
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
 }
 
+export type AssignToTargetType = 'everyone' | 'section' | 'group' | 'student'
+
+export type AssignToTarget = {
+  id: string
+  targetType: AssignToTargetType
+  targetId: string | null
+  dueAt: string | null
+  availableFrom: string | null
+  availableUntil: string | null
+  createdAt: string
+}
+
+export type AssignToTargetWrite = {
+  targetType: AssignToTargetType
+  targetId?: string | null
+  dueAt?: string | null
+  availableFrom?: string | null
+  availableUntil?: string | null
+}
+
+function readAssignToTarget(row: unknown): AssignToTarget | null {
+  if (!row || typeof row !== 'object') return null
+  const o = row as Record<string, unknown>
+  const id = typeof o.id === 'string' ? o.id : null
+  const targetType = typeof o.targetType === 'string' ? (o.targetType as AssignToTargetType) : null
+  if (!id || !targetType) return null
+  return {
+    id,
+    targetType,
+    targetId: typeof o.targetId === 'string' ? o.targetId : null,
+    dueAt: typeof o.dueAt === 'string' ? o.dueAt : null,
+    availableFrom: typeof o.availableFrom === 'string' ? o.availableFrom : null,
+    availableUntil: typeof o.availableUntil === 'string' ? o.availableUntil : null,
+    createdAt: typeof o.createdAt === 'string' ? o.createdAt : '',
+  }
+}
+
+function readAssignToResponse(raw: unknown): { targets: AssignToTarget[]; orphaned: boolean } {
+  const o = (raw ?? {}) as Record<string, unknown>
+  const list = Array.isArray(o.targets) ? o.targets : []
+  const targets = list.map(readAssignToTarget).filter((t): t is AssignToTarget => t !== null)
+  return { targets, orphaned: o.orphaned === true }
+}
+
+export async function fetchAssignToTargets(
+  courseCode: string,
+  itemId: string,
+): Promise<{ targets: AssignToTarget[]; orphaned: boolean }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return readAssignToResponse(raw)
+}
+
+export async function putAssignToTargets(
+  courseCode: string,
+  itemId: string,
+  targets: AssignToTargetWrite[],
+): Promise<{ targets: AssignToTarget[]; orphaned: boolean }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ targets }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return readAssignToResponse(raw)
+}
+
+export async function bulkExtendAssignToDueDate(
+  courseCode: string,
+  itemId: string,
+  enrollmentIds: string[],
+  dueAt: string,
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides/bulk-extend`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enrollmentIds, dueAt }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+}
+
 export type ModerationProvisionalGrade = {
   submissionId: string
   graderId: string

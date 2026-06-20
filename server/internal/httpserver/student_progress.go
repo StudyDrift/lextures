@@ -13,14 +13,49 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
 	modelsp "github.com/lextures/lextures/server/internal/models/studentprogress"
+	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 	"github.com/lextures/lextures/server/internal/repos/coursegrants"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	stprog "github.com/lextures/lextures/server/internal/repos/studentprogress"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
+
+// applyAssignToDueDates patches missing/assignment row due dates in place with each item's
+// plan 2.15 effective (assign-to resolved) due date for this enrollment, so late detection
+// and missing-item due dates agree with the dates shown on the student's dashboard/calendar.
+func applyAssignToDueDates(ctx context.Context, pool *pgxpool.Pool, enrollmentID uuid.UUID, missing []stprog.MissingItemRow, assignRows []stprog.AssignmentRow) {
+	ids := make([]uuid.UUID, 0, len(missing)+len(assignRows))
+	bases := make(map[uuid.UUID]assignmentoverrides.BaseDates)
+	for _, m := range missing {
+		ids = append(ids, m.ItemID)
+		bases[m.ItemID] = assignmentoverrides.BaseDates{DueAt: m.DueAt}
+	}
+	for _, a := range assignRows {
+		ids = append(ids, a.ItemID)
+		bases[a.ItemID] = assignmentoverrides.BaseDates{DueAt: a.DueAt}
+	}
+	if len(ids) == 0 {
+		return
+	}
+	effMap, err := assignmentoverrides.EffectiveForStudentBatch(ctx, pool, enrollmentID, ids, bases)
+	if err != nil {
+		return
+	}
+	for i := range missing {
+		if eff, ok := effMap[missing[i].ItemID]; ok {
+			missing[i].DueAt = eff.DueAt
+		}
+	}
+	for i := range assignRows {
+		if eff, ok := effMap[assignRows[i].ItemID]; ok {
+			assignRows[i].DueAt = eff.DueAt
+		}
+	}
+}
 
 func (d Deps) studentProgressEnabled() bool {
 	return d.effectiveConfig().StudentProgressEnabled
@@ -188,6 +223,9 @@ func (d Deps) handleEnrollmentProgressGet() http.HandlerFunc {
 		missing, _ := stprog.ListMissing(ctx, d.Pool, en.CourseID, en.UserID, time.Now().UTC())
 		assignRows, _ := stprog.ListAssignments(ctx, d.Pool, en.CourseID, en.UserID)
 		quizRows, _ := stprog.ListQuizAttempts(ctx, d.Pool, en.CourseID, en.UserID)
+		// Plan 2.15: late detection and missing-item due dates must use this student's
+		// effective (assign-to resolved) due date, not the item's base due date.
+		applyAssignToDueDates(ctx, d.Pool, en.ID, missing, assignRows)
 
 		var avgQuiz *float64
 		if snap.AvgQuizScore != nil {
