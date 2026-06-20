@@ -22,12 +22,11 @@ import (
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncevents"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncjobs"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
-	"github.com/lextures/lextures/server/internal/gradingagentqueue"
-	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 	"github.com/lextures/lextures/server/internal/commevents"
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/db"
 	"github.com/lextures/lextures/server/internal/feedevents"
+	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	"github.com/lextures/lextures/server/internal/httpserver"
 	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
@@ -37,8 +36,10 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
+	"github.com/lextures/lextures/server/internal/service/integrations"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
+	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
 // Run starts the API. Pass the migration file tree (e.g. serverdata.Migrations from the module root).
@@ -139,16 +140,16 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	defer func() { _ = gradingAgentQueue.Close() }()
 
 	deps := httpserver.Deps{
-		Pool:              pool,
-		JWTSigner:         auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
-		Config:            cfg,
-		Platform:          platformstate.New(merged),
-		OIDC:              oidcauth.NewService(merged),
-		Comm:              commevents.New(),
-		Lti:               ltiRT,
-		BrandingResolver:  brandingResolver,
-		NotifHub:          notifevents.New(),
-		FeedHub:           feedevents.New(),
+		Pool:                      pool,
+		JWTSigner:                 auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
+		Config:                    cfg,
+		Platform:                  platformstate.New(merged),
+		OIDC:                      oidcauth.NewService(merged),
+		Comm:                      commevents.New(),
+		Lti:                       ltiRT,
+		BrandingResolver:          brandingResolver,
+		NotifHub:                  notifevents.New(),
+		FeedHub:                   feedevents.New(),
 		CanvasImportHub:           canvasImportHub,
 		CanvasImportQueue:         canvasImportQueue,
 		CanvasSubmissionSyncHub:   canvasSubmissionSyncHub,
@@ -157,7 +158,8 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		GradingAgentQueue:         gradingAgentQueue,
 		SmsNotificationQueue:      smsNotificationQueue,
 		Storage:                   storage,
-		StorageQuota:      quotaSvc,
+		StorageQuota:              quotaSvc,
+		Integrations:              integrations.NewService(pool, integrationsPublicBase(merged), []byte(cfg.JWTSecret)),
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
@@ -183,6 +185,15 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		}
 		return nil
 	}
+}
+
+// integrationsPublicBase returns the externally reachable server base URL used
+// to build OAuth redirect URIs for inbound integrations (plan 16.4).
+func integrationsPublicBase(cfg config.Config) string {
+	if cfg.OIDCPublicBaseURL != "" {
+		return cfg.OIDCPublicBaseURL
+	}
+	return cfg.SAMLPublicBaseURL
 }
 
 func isUndefinedTable(err error) bool {
