@@ -243,9 +243,7 @@ func DeliverTest(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, sub
 		PayloadHash:    hash,
 		LastResponse:   strPtr(string(body)),
 	}
-	if err := deliverJob(ctx, pool, cfg, job, time.Now().UTC()); err != nil {
-		// still return delivery row for log
-	}
+	_ = deliverJob(ctx, pool, cfg, job, time.Now().UTC())
 	deliveries, err := webhooksrepo.ListDeliveries(ctx, pool, sub.ID, 1)
 	if err != nil || len(deliveries) == 0 {
 		return nil, err
