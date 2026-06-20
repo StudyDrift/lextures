@@ -100,7 +100,7 @@ CREATE TABLE course.module_unlock_overrides (
     id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     enrollment_id  UUID NOT NULL REFERENCES course.course_enrollments (id) ON DELETE CASCADE,
     module_id      UUID NOT NULL REFERENCES course.course_structure_items (id) ON DELETE CASCADE,
-    granted_by     UUID NOT NULL REFERENCES auth.users (id),
+    granted_by     UUID NOT NULL REFERENCES "user".users (id),
     granted_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     UNIQUE (enrollment_id, module_id)
 );
