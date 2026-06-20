@@ -128,6 +128,7 @@ type Row struct {
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
 	FFAPITokens                     *bool
+	FFCalendarFeeds                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -270,6 +271,7 @@ type Write struct {
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
 	FFAPITokens                     *bool
+	FFCalendarFeeds                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -408,6 +410,7 @@ SELECT
 	ff_study_reminders,
 	ff_ai_study_buddy,
 	ff_api_tokens,
+	ff_calendar_feeds,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -541,6 +544,7 @@ WHERE id = 1
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
 		&r.FFAPITokens,
+		&r.FFCalendarFeeds,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -722,6 +726,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_study_reminders,
 	ff_ai_study_buddy,
 	ff_api_tokens,
+	ff_calendar_feeds,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -751,7 +756,7 @@ INSERT INTO settings.platform_app_settings (
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
-	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -860,6 +865,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
 	ff_api_tokens = COALESCE(EXCLUDED.ff_api_tokens, settings.platform_app_settings.ff_api_tokens),
+	ff_calendar_feeds = COALESCE(EXCLUDED.ff_calendar_feeds, settings.platform_app_settings.ff_calendar_feeds),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -991,6 +997,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
 		w.FFAPITokens,
+		w.FFCalendarFeeds,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,
