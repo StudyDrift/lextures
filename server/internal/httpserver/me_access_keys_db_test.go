@@ -58,7 +58,7 @@ func TestAccessKeys_CreateListRevokeScope_Pg(t *testing.T) {
 	h := NewHandler(Deps{
 		Pool:      pool,
 		JWTSigner: signer,
-		Config:    config.Config{FFAPITokens: true, JWTSecret: jwtSecret},
+		Config:    config.Config{FFAPITokens: true, FFPublicAPI: true, JWTSecret: jwtSecret},
 	})
 
 	createBody := []byte(`{"label":"Test key","scopes":["courses:read"]}`)
