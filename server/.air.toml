@@ -5,7 +5,7 @@ tmp_dir = "tmp"
 
 [build]
   bin = "./tmp/main"
-  cmd = "go build -p 1 -o ./tmp/main ./cmd/server"
+  cmd = "go build -o ./tmp/main ./cmd/server"
   delay = 200
   exclude_dir = ["tmp", "vendor"]
   exclude_unchanged = true
