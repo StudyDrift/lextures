@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Calendar, Copy, RefreshCw } from 'lucide-react'
+import { ConfirmDialog } from '../confirm-dialog'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { formatDateTime } from '../../lib/format'
@@ -35,6 +36,8 @@ export function CalendarSubscriptionsPanel() {
   const [courseFeeds, setCourseFeeds] = useState<CourseFeed[]>([])
   const [hasActiveToken, setHasActiveToken] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [regenerateConfirmOpen, setRegenerateConfirmOpen] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -67,15 +70,9 @@ export function CalendarSubscriptionsPanel() {
     if (!featuresLoading && ffCalendarFeeds) void load()
   }, [featuresLoading, ffCalendarFeeds, load])
 
-  async function regenerate() {
-    if (
-      !globalThis.confirm(
-        'Regenerate your calendar URL? The old link will stop working immediately.',
-      )
-    ) {
-      return
-    }
+  const regenerate = useCallback(async () => {
     setError(null)
+    setRegenerating(true)
     try {
       const res = await authorizedFetch('/api/v1/me/calendar-token', { method: 'POST' })
       const raw: unknown = await res.json().catch(() => ({}))
@@ -90,7 +87,17 @@ export function CalendarSubscriptionsPanel() {
       await load()
     } catch (e) {
       toastMutationError(e instanceof Error ? e.message : 'Could not regenerate calendar URL.')
+    } finally {
+      setRegenerating(false)
     }
+  }, [load])
+
+  function requestRegenerate() {
+    if (token || hasActiveToken) {
+      setRegenerateConfirmOpen(true)
+      return
+    }
+    void regenerate()
   }
 
   async function copyText(label: string, text: string) {
@@ -213,16 +220,33 @@ export function CalendarSubscriptionsPanel() {
 
               <button
                 type="button"
-                onClick={() => void regenerate()}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
+                onClick={requestRegenerate}
+                disabled={regenerating}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-white"
               >
                 <RefreshCw className="h-4 w-4" aria-hidden />
-                {token ? 'Regenerate URL' : 'Generate URL'}
+                {token || hasActiveToken ? 'Regenerate URL' : 'Generate URL'}
               </button>
             </div>
           )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={regenerateConfirmOpen}
+        title="Regenerate calendar URL?"
+        description="The old link will stop working immediately. Update any calendar apps that use the current feed URL."
+        confirmLabel="Regenerate"
+        variant="danger"
+        busy={regenerating}
+        onClose={() => {
+          if (!regenerating) setRegenerateConfirmOpen(false)
+        }}
+        onConfirm={() => {
+          setRegenerateConfirmOpen(false)
+          void regenerate()
+        }}
+      />
     </section>
   )
 }

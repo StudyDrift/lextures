@@ -4,6 +4,7 @@ import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import { usePermissions } from '../../context/use-permissions'
 import { fetchCourseStructure, type CourseStructureItem } from '../../lib/courses-api'
 import { permCourseItemsCreate } from '../../lib/rbac-api'
+import { CalendarActionsMenu } from './calendar-actions-menu'
 import { CourseCalendar, type CourseCalendarAssignment } from './course-calendar'
 import { LmsPage } from './lms-page'
 
@@ -75,6 +76,7 @@ export default function CourseCalendarPage() {
       title="Calendar"
       description={`Assignments and due dates for course ${courseCode}.`}
       fillHeight
+      actions={<CalendarActionsMenu scope="course" courseCode={courseCode} />}
     >
       {error && (
         <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">
