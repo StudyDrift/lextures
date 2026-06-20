@@ -17,6 +17,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 )
 
 // handlePostAssignmentSubmissionUpload is POST .../assignments/{item_id}/submissions/upload
@@ -106,6 +107,7 @@ func (d Deps) handlePostAssignmentSubmissionUpload() http.HandlerFunc {
 			return
 		}
 		d.maybeEnqueueAutoGrade(r, courseCode, *cid, itemID, subRow.ID)
+		webhooksvc.EmitAssignmentSubmittedEvent(r.Context(), d.Pool, d.effectiveConfig(), *cid, courseCode, itemID, subRow.ID, viewer)
 		out := d.submissionToJSON(r.Context(), courseCode, *subRow, false, 0, "")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"submission": out})

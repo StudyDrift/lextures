@@ -66,6 +66,7 @@ type platformFeaturesJSON struct {
 	FFBookstoreIntegration      bool `json:"ffBookstoreIntegration"`
 	FFEportfolio                bool `json:"ffEportfolio"`
 	FFTranscripts               bool `json:"ffTranscripts"`
+	FFWebhooks                  bool `json:"ffWebhooks"`
 	FFAdvisingIntegration       bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent           bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake       bool `json:"ffAccessibilityIntake"`
@@ -83,6 +84,7 @@ type platformFeaturesJSON struct {
 	FFOnboardingFlow            bool `json:"ffOnboardingFlow"`
 	FFStudyReminders            bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy              bool `json:"ffAiStudyBuddy"`
+	FFAPITokens                 bool `json:"ffApiTokens"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -156,6 +158,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBookstoreIntegration:      cfg.FFBookstoreIntegration,
 		FFEportfolio:                cfg.FFEportfolio,
 		FFTranscripts:               cfg.FFTranscripts,
+		FFWebhooks:                  cfg.FFWebhooks,
 		FFAdvisingIntegration:       cfg.FFAdvisingIntegration,
 		FFResearchConsent:           cfg.FFResearchConsent,
 		FFAccessibilityIntake:       cfg.FFAccessibilityIntake,
@@ -173,6 +176,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFOnboardingFlow:            cfg.FFOnboardingFlow,
 		FFStudyReminders:            cfg.FFStudyReminders,
 		FFAIStudyBuddy:              cfg.FFAIStudyBuddy,
+		FFAPITokens:                 cfg.FFAPITokens,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

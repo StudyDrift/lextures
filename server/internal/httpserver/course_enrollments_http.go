@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
+	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 )
 
 func parseEnrollmentEmails(raw string) []string {
@@ -340,6 +341,9 @@ LIMIT 1
 			d.emitInboxMessageNotification(ctx, rec.userID, communication.PlatformInboxSenderID, "Course invitation")
 		}
 		learningevents.EmitEnrollmentAsync(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, added)
+		for _, rec := range invitedEnrollments {
+			webhooksvc.EmitEnrollmentCreatedEvent(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, rec.enrollmentID, rec.userID, "student")
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(modelenrollment.AddEnrollmentsResponse{
 			Added:           added,

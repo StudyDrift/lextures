@@ -37,6 +37,7 @@ export type PlatformSettingsPayload = {
   ffCoCurricularTranscript: boolean
   ffEportfolio: boolean
   ffTranscripts: boolean
+  ffWebhooks: boolean
   ffAdvisingIntegration: boolean
   ffResearchConsent: boolean
   ffAccessibilityIntake: boolean
@@ -48,6 +49,7 @@ export type PlatformSettingsPayload = {
   ffCompletionCredentials: boolean
   ffOnboardingFlow: boolean
   ffAiStudyBuddy: boolean
+  ffApiTokens: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean

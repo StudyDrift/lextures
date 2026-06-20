@@ -52,6 +52,7 @@ export type PlatformFeatures = {
   ffDemographics: boolean
   ffContentFilterIntegration: boolean
   ffSisIntegration: boolean
+  ffWebhooks: boolean
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
   ffGradeSubmission: boolean
@@ -126,6 +127,7 @@ const defaultFeatures: PlatformFeatures = {
   ffDemographics: false,
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
+  ffWebhooks: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
   ffGradeSubmission: false,
@@ -205,6 +207,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffDemographics: false,
     ffContentFilterIntegration: false,
     ffSisIntegration: false,
+  ffWebhooks: false,
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
     ffGradeSubmission: false,
@@ -285,6 +288,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffDemographics: data.ffDemographics === true,
           ffContentFilterIntegration: data.ffContentFilterIntegration === true,
           ffSisIntegration: data.ffSisIntegration === true,
+          ffWebhooks: data.ffWebhooks === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
           ffGradeSubmission: data.ffGradeSubmission === true,
@@ -331,6 +335,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffDemographics: next.ffDemographics === true,
           ffContentFilterIntegration: next.ffContentFilterIntegration === true,
           ffSisIntegration: next.ffSisIntegration === true,
+          ffWebhooks: next.ffWebhooks === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,
           ffGradeSubmission: next.ffGradeSubmission === true,

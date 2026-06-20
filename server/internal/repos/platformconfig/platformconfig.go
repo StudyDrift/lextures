@@ -109,6 +109,7 @@ type Row struct {
 	FFEportfolio                    *bool
 	FFBookstoreIntegration          *bool
 	FFTranscripts                   *bool
+	FFWebhooks                      *bool
 	FFAdvisingIntegration           *bool
 	FFResearchConsent               *bool
 	FFAccessibilityIntake           *bool
@@ -126,6 +127,7 @@ type Row struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
+	FFAPITokens                     *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -249,6 +251,7 @@ type Write struct {
 	FFEportfolio                    *bool
 	FFBookstoreIntegration          *bool
 	FFTranscripts                   *bool
+	FFWebhooks                      *bool
 	FFAdvisingIntegration           *bool
 	FFResearchConsent               *bool
 	FFAccessibilityIntake           *bool
@@ -266,6 +269,7 @@ type Write struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
+	FFAPITokens                     *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -386,6 +390,7 @@ SELECT
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	ff_webhooks,
 	ff_advising_integration,
 	ff_research_consent,
 	ff_accessibility_intake,
@@ -402,6 +407,7 @@ SELECT
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
+	ff_api_tokens,
 	ff_revenue_share,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
@@ -517,6 +523,7 @@ WHERE id = 1
 		&r.FFEportfolio,
 		&r.FFBookstoreIntegration,
 		&r.FFTranscripts,
+		&r.FFWebhooks,
 		&r.FFAdvisingIntegration,
 		&r.FFResearchConsent,
 		&r.FFAccessibilityIntake,
@@ -533,6 +540,7 @@ WHERE id = 1
 		&r.FFOnboardingFlow,
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
+		&r.FFAPITokens,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
@@ -699,6 +707,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_eportfolio,
 	ff_bookstore_integration,
 	ff_transcripts,
+	ff_webhooks,
 	ff_advising_integration,
 	ff_research_consent,
 	ff_accessibility_intake,
@@ -712,6 +721,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
+	ff_api_tokens,
 	ff_revenue_share,
 	mfa_enabled,
 	mfa_enforcement,
@@ -741,7 +751,7 @@ INSERT INTO settings.platform_app_settings (
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
-	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -835,6 +845,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_eportfolio = COALESCE(EXCLUDED.ff_eportfolio, settings.platform_app_settings.ff_eportfolio),
 	ff_bookstore_integration = COALESCE(EXCLUDED.ff_bookstore_integration, settings.platform_app_settings.ff_bookstore_integration),
 	ff_transcripts = COALESCE(EXCLUDED.ff_transcripts, settings.platform_app_settings.ff_transcripts),
+	ff_webhooks = COALESCE(EXCLUDED.ff_webhooks, settings.platform_app_settings.ff_webhooks),
 	ff_advising_integration = COALESCE(EXCLUDED.ff_advising_integration, settings.platform_app_settings.ff_advising_integration),
 	ff_research_consent = COALESCE(EXCLUDED.ff_research_consent, settings.platform_app_settings.ff_research_consent),
 	ff_accessibility_intake = COALESCE(EXCLUDED.ff_accessibility_intake, settings.platform_app_settings.ff_accessibility_intake),
@@ -848,6 +859,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
+	ff_api_tokens = COALESCE(EXCLUDED.ff_api_tokens, settings.platform_app_settings.ff_api_tokens),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
@@ -964,6 +976,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFEportfolio,
 		w.FFBookstoreIntegration,
 		w.FFTranscripts,
+		w.FFWebhooks,
 		w.FFAdvisingIntegration,
 		w.FFResearchConsent,
 		w.FFAccessibilityIntake,
@@ -977,6 +990,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFOnboardingFlow,
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
+		w.FFAPITokens,
 		w.FFRevenueShare,
 		w.MFAEnabled,
 		w.MFAEnforcement,

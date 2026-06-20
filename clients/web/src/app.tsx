@@ -166,6 +166,7 @@ export default function App() {
             <Route path="/admin/content-filter" element={<Pages.ContentFilterSettingsPage />} />
             <Route path="/admin/sis" element={<Pages.SisIntegrationPage />} />
             <Route path="/admin/integrations" element={<Pages.IntegrationsAdminPage />} />
+            <Route path="/admin/webhooks" element={<Pages.WebhooksAdminPage />} />
             <Route path="/admin/bookstore" element={<Pages.BookstoreIntegrationPage />} />
             <Route path="/admin/final-grades/status" element={<Pages.GradeSubmissionStatus />} />
             <Route path="/admin/incompletes" element={<Pages.IncompletesAdminPage />} />

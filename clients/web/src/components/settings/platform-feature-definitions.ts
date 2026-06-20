@@ -61,6 +61,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Aggregate mastery and coverage reports across course learning outcomes.',
   },
   {
+    key: 'ffWebhooks',
+    label: 'Outbound webhooks',
+    description: 'Let org admins register HTTPS endpoints for signed grade, enrollment, and submission events.',
+  },
+  {
     key: 'ffTranscripts',
     label: 'Transcripts',
     description:
@@ -263,6 +268,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     label: 'AI study buddy',
     description:
       'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
+  },
+  {
+    key: 'ffApiTokens',
+    label: 'API access keys',
+    description:
+      'Personal and institutional API tokens with scoped access for integrations, automation, and MCP agents (plan 16.2).',
   },
   {
     key: 'mfaEnabled',

@@ -14,6 +14,16 @@ func TestNormalizeScopes(t *testing.T) {
 	}
 }
 
+func TestHasScope(t *testing.T) {
+	t.Parallel()
+	if !HasScope([]string{"courses:read", "grades:read"}, "grades:read") {
+		t.Fatal("expected match")
+	}
+	if HasScope([]string{"courses:read"}, "grades:read") {
+		t.Fatal("expected no match")
+	}
+}
+
 func TestAllScopesNonEmpty(t *testing.T) {
 	t.Parallel()
 	for _, s := range AllScopes() {

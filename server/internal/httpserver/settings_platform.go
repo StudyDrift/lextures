@@ -122,6 +122,7 @@ type platformSettingsJSON struct {
 	FFEportfolio                    bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   bool `json:"ffTranscripts"`
+	FFWebhooks                      bool `json:"ffWebhooks"`
 	FFAdvisingIntegration           bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake           bool `json:"ffAccessibilityIntake"`
@@ -139,6 +140,7 @@ type platformSettingsJSON struct {
 	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  bool `json:"ffAiStudyBuddy"`
+	FFAPITokens                     bool `json:"ffApiTokens"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -310,6 +312,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                    merged.FFEportfolio,
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
+			FFWebhooks:                      merged.FFWebhooks,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
@@ -327,6 +330,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
+			FFAPITokens:                     merged.FFAPITokens,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -473,6 +477,7 @@ type putPlatformBody struct {
 	FFEportfolio                    *bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   *bool `json:"ffTranscripts"`
+	FFWebhooks                      *bool `json:"ffWebhooks"`
 	FFAdvisingIntegration           *bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               *bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake           *bool `json:"ffAccessibilityIntake"`
@@ -490,6 +495,7 @@ type putPlatformBody struct {
 	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                *bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  *bool `json:"ffAiStudyBuddy"`
+	FFAPITokens                     *bool `json:"ffApiTokens"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -782,6 +788,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffeportfolio", body.FFEportfolio, func(v bool) { wr.FFEportfolio = &v })
 		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
 		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
+		setBool("ffwebhooks", body.FFWebhooks, func(v bool) { wr.FFWebhooks = &v })
 		setBool("ffadvisingintegration", body.FFAdvisingIntegration, func(v bool) { wr.FFAdvisingIntegration = &v })
 		setBool("ffresearchconsent", body.FFResearchConsent, func(v bool) { wr.FFResearchConsent = &v })
 		setBool("ffaccessibilityintake", body.FFAccessibilityIntake, func(v bool) { wr.FFAccessibilityIntake = &v })
@@ -799,6 +806,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("ffaistudybuddy", body.FFAIStudyBuddy, func(v bool) { wr.FFAIStudyBuddy = &v })
+		setBool("ffapitokens", body.FFAPITokens, func(v bool) { wr.FFAPITokens = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -924,6 +932,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                    merged.FFEportfolio,
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
+			FFWebhooks:                      merged.FFWebhooks,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
@@ -941,6 +950,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
+			FFAPITokens:                     merged.FFAPITokens,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

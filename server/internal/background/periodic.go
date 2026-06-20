@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/config"
 	repoitemanalysis "github.com/lextures/lextures/server/internal/repos/itemanalysis"
+	"github.com/lextures/lextures/server/internal/repos/apitokens"
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/terms"
 	"github.com/lextures/lextures/server/internal/service/clamav"
@@ -55,6 +56,11 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		}
 		if n > 0 {
 			slog.Info("term status sweep updated rows", "count", n)
+		}
+	})
+	go runEvery(ctx, 30*time.Second, func() {
+		if _, err := apitokens.FlushUsage(context.Background(), pool); err != nil {
+			slog.Warn("api token usage flush failed", "err", err)
 		}
 	})
 	go runEvery(ctx, 30*time.Second, func() {
@@ -216,6 +222,14 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		})
 		slog.Info("av scanning worker started", "clamav_addr", cfg.ClamAVAddr, "stub", cfg.ClamAVStub)
 	}
+
+	go runEvery(ctx, 15*time.Second, func() {
+		now := time.Now().UTC()
+		sweepWebhookDeliveries(context.Background(), pool, cfg, now)
+	})
+	go runEvery(ctx, 24*time.Hour, func() {
+		sweepWebhookRetention(context.Background(), pool, cfg, time.Now().UTC())
+	})
 
 	if cfg.FFPlagiarismChecks && cfg.OriginalityDetectionEnabled {
 		go runEvery(ctx, 30*time.Second, func() {

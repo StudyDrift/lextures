@@ -13,6 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/gradeauditevents"
 	"github.com/lextures/lextures/server/internal/service/notifications"
+	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
@@ -57,6 +58,7 @@ func markPostedScheduled(ctx context.Context, pool *pgxpool.Pool, cfg config.Con
 		return err
 	}
 	notifications.NotifyGradesPostedAfterRelease(ctx, pool, cfg, courseID, moduleItemID, posted, smsQueue)
+	webhooksvc.EmitGradePostedCells(ctx, pool, cfg, courseID, moduleItemID, posted)
 	slog.Info("grade_posting_completed", "course_id", courseID, "module_item_id", moduleItemID, "n", len(posted))
 	return coursemoduleassignments.ClearReleaseAt(ctx, pool, courseID, moduleItemID)
 }

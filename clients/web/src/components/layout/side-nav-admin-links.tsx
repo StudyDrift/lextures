@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   Users,
   Video,
+  Webhook,
   Archive,
   Activity,
 } from 'lucide-react'
@@ -51,6 +52,7 @@ export function SideNavAdminLinks() {
     ffBroadcasts,
     ffConferenceScheduling,
     ffSisIntegration,
+    ffWebhooks,
     ffContentFilterIntegration,
     ffIncompleteGradeWorkflow,
     ffGradeSubmission,
@@ -69,7 +71,7 @@ export function SideNavAdminLinks() {
     location.pathname === path || location.pathname.startsWith(`${path}/`)
 
   const showCcrAdmin = canManageAccommodations && ffCoCurricularTranscript
-  const showIntegrations = ffSisIntegration || ffContentFilterIntegration
+  const showIntegrations = ffSisIntegration || ffWebhooks || ffContentFilterIntegration
   const showStudentRecords =
     ffDemographics ||
     ffIncompleteGradeWorkflow ||
@@ -155,6 +157,15 @@ export function SideNavAdminLinks() {
                   icon={<School className="h-5 w-5" />}
                 >
                   SIS integration
+                </SideNavLink>
+              ) : null}
+              {ffWebhooks ? (
+                <SideNavLink
+                  to={orgPath('/admin/webhooks', orgId)}
+                  className={() => (active('/admin/webhooks') ? sideNavActiveClass : '')}
+                  icon={<Webhook className="h-5 w-5" />}
+                >
+                  Webhooks
                 </SideNavLink>
               ) : null}
               {ffContentFilterIntegration ? (

@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/gradingdisplay"
 	"github.com/lextures/lextures/server/internal/gradingdrops"
 	"github.com/lextures/lextures/server/internal/repos/attendancesessions"
@@ -89,6 +90,9 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
+			return
+		}
+		if !auth.RequireAccessKeyScope(w, r.Context(), "grades:read") {
 			return
 		}
 		ok, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":gradebook:view")
