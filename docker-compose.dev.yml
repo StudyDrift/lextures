@@ -26,8 +26,9 @@ services:
     environment:
       JWT_SECRET: dev-only-change-me-in-production
       RABBITMQ_URL: amqp://studydrift:studydrift@rabbitmq:5672/
-      # Limit parallel package builds so cold compiles fit in ~2GB Docker Desktop / VM limits.
-      GOFLAGS: -p=1
+      # Limit parallel package builds and compiler memory for internal/httpserver in ~2GB Docker VMs.
+      GOFLAGS: -p=1 -gcflags=all=-l
+      GOMAXPROCS: "1"
     volumes:
       - ./server:/app
       - ./data/course-files:/var/course-files
