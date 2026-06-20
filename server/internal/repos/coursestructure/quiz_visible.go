@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/relativeschedule"
+	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 )
 
 // QuizVisibleToStudent mirrors `course_structure::quiz_visible_to_student` (competency gating not yet ported).
@@ -20,6 +21,7 @@ func QuizVisibleToStudent(
 		mVF                      *time.Time
 		scheduleMode             string
 		crsAnchor                *time.Time
+		enrollID                 *uuid.UUID
 		enrollCreatedAt          *time.Time
 	)
 	err := pool.QueryRow(ctx, `
@@ -31,6 +33,7 @@ func QuizVisibleToStudent(
 			m.visible_from,
 			crs.schedule_mode,
 			crs.relative_schedule_anchor_at,
+			stu.id,
 			stu.created_at
 		FROM course.course_structure_items page
 		INNER JOIN course.course_structure_items m
@@ -40,7 +43,7 @@ func QuizVisibleToStudent(
 			ON stu.course_id = crs.id AND stu.user_id = $3 AND stu.role = 'student' AND stu.active
 		WHERE page.id = $1 AND page.course_id = $2 AND page.kind = 'quiz'
 	`, quizItemID, courseID, userID).Scan(
-		&cPub, &cArch, &mPub, &mArch, &mVF, &scheduleMode, &crsAnchor, &enrollCreatedAt,
+		&cPub, &cArch, &mPub, &mArch, &mVF, &scheduleMode, &crsAnchor, &enrollID, &enrollCreatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return false, nil
@@ -59,6 +62,16 @@ func QuizVisibleToStudent(
 		}
 	} else {
 		effVF = mVF
+	}
+	if enrollID != nil {
+		// Plan 2.15: assign-to targeting hides the quiz entirely from students not in any target.
+		eff, oerr := assignmentoverrides.EffectiveForStudent(ctx, pool, quizItemID, *enrollID, assignmentoverrides.BaseDates{})
+		if oerr != nil {
+			return false, oerr
+		}
+		if !eff.Visible {
+			return false, nil
+		}
 	}
 	base := cPub && !cArch && mPub && !mArch && moduleVisibleFromOK(effVF, utc)
 	return base, nil

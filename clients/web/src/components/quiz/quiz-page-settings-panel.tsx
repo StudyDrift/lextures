@@ -12,6 +12,7 @@ import type {
   ShowScoreTiming,
 } from '../../lib/courses-api'
 import { ModuleItemOutcomesMappingAccordion } from '../outcomes/module-item-outcomes-mapping-accordion'
+import { AssignToEditor } from '../assignment/assign-to-editor'
 
 export type QuizPageSettingsPanelProps = {
   disabled?: boolean
@@ -640,6 +641,12 @@ export function QuizPageSettingsPanel({
               disabled={disabled}
               quizQuestions={quizOutcomesQuestions ?? []}
             />
+          </SettingsAccordion>
+        ) : null}
+
+        {courseCode && quizItemId ? (
+          <SettingsAccordion title="Assign to">
+            <AssignToEditor courseCode={courseCode} itemId={quizItemId} disabled={disabled} />
           </SettingsAccordion>
         ) : null}
 

@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/relativeschedule"
+	"github.com/lextures/lextures/server/internal/repos/assignmentoverrides"
 )
 
 // AssignmentVisibleToStudent mirrors `course_structure::assignment_visible_to_student` (competency gating not yet ported).
@@ -16,11 +17,12 @@ func AssignmentVisibleToStudent(
 	ctx context.Context, pool *pgxpool.Pool, courseID, assignmentID, userID uuid.UUID, now time.Time,
 ) (bool, error) {
 	var (
-		cPub, cArch, mPub, mArch            bool
-		mVF, maAF, maAU                    *time.Time
-		scheduleMode                        string
-		crsAnchor                          *time.Time
-		enrollCreatedAt                    *time.Time
+		cPub, cArch, mPub, mArch bool
+		mVF, maAF, maAU          *time.Time
+		scheduleMode             string
+		crsAnchor                *time.Time
+		enrollID                 *uuid.UUID
+		enrollCreatedAt          *time.Time
 	)
 	err := pool.QueryRow(ctx, `
 		SELECT
@@ -31,6 +33,7 @@ func AssignmentVisibleToStudent(
 			m.visible_from,
 			crs.schedule_mode,
 			crs.relative_schedule_anchor_at,
+			stu.id,
 			stu.created_at,
 			ma.available_from,
 			ma.available_until
@@ -43,7 +46,7 @@ func AssignmentVisibleToStudent(
 		LEFT JOIN course.module_assignments ma ON ma.structure_item_id = page.id
 		WHERE page.id = $1 AND page.course_id = $2 AND page.kind = 'assignment'
 	`, assignmentID, courseID, userID).Scan(
-		&cPub, &cArch, &mPub, &mArch, &mVF, &scheduleMode, &crsAnchor, &enrollCreatedAt, &maAF, &maAU,
+		&cPub, &cArch, &mPub, &mArch, &mVF, &scheduleMode, &crsAnchor, &enrollID, &enrollCreatedAt, &maAF, &maAU,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return false, nil
@@ -68,6 +71,20 @@ func AssignmentVisibleToStudent(
 		effVF = mVF
 		effAF = maAF
 		effAU = maAU
+	}
+	if enrollID != nil {
+		// Plan 2.15: assign-to targeting can override availability per student/section/group,
+		// and hides the item entirely from students not in any target.
+		eff, oerr := assignmentoverrides.EffectiveForStudent(ctx, pool, assignmentID, *enrollID, assignmentoverrides.BaseDates{
+			AvailableFrom: effAF, AvailableUntil: effAU,
+		})
+		if oerr != nil {
+			return false, oerr
+		}
+		if !eff.Visible {
+			return false, nil
+		}
+		effAF, effAU = eff.AvailableFrom, eff.AvailableUntil
 	}
 	within := availabilityFromOK(effAF, utc) && availabilityUntilOK(effAU, utc)
 	base := cPub && !cArch && mPub && !mArch && moduleVisibleFromOK(effVF, utc) && within
