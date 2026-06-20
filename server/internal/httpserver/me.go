@@ -248,4 +248,5 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	d.registerCCRRoutes(r)
 	d.registerCredentialsRoutes(r)
 	d.registerIntegrationsRoutes(r)
+	d.registerCalendarFeedMeRoutes(r)
 }

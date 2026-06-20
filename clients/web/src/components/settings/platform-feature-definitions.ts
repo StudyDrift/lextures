@@ -276,6 +276,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Personal and institutional API tokens with scoped access for integrations, automation, and MCP agents (plan 16.2).',
   },
   {
+    key: 'ffCalendarFeeds',
+    label: 'Calendar feeds',
+    description:
+      'iCal and CalDAV calendar feed subscriptions for assignment and quiz deadlines (plan 16.5).',
+  },
+  {
     key: 'mfaEnabled',
     label: 'Two-factor authentication',
     description: 'Offer TOTP authenticator apps and passkeys as optional login factors.',

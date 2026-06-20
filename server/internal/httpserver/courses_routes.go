@@ -15,7 +15,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses", d.handleCreateCourse())
 	r.Post("/api/v1/integrations/canvas/courses", d.handleCanvasListCourses())
 	// iCalendar feed must register before the /api/v1/courses/{course_code} subtree.
-	r.Get("/api/v1/courses/{course_code}/calendar.ics", d.handleCourseICS())
+	r.Get("/api/v1/courses/{course_code}/calendar.ics", d.handleCourseCalendarICS())
 	r.Route("/api/v1/courses/{course_code}", func(cr chi.Router) {
 		cr.Get("/", d.handleGetCourse())
 		cr.Put("/", d.handlePutCourse())

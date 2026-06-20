@@ -399,6 +399,9 @@ type Config struct {
 	// FFBotDiscord enables the Lextures Discord bot (plan 16.6).
 	// Managed in Settings → Global platform (not process env).
 	FFBotDiscord bool
+	// FFCalendarFeeds enables iCal/CalDAV calendar feed subscriptions (plan 16.5).
+	// Managed in Settings → Global platform (not process env).
+	FFCalendarFeeds bool
 
 	// SlackBotClientID is the Slack app client id for bot OAuth (plan 16.6).
 	SlackBotClientID string
