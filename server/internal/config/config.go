@@ -379,6 +379,14 @@ type Config struct {
 	// FFAIStudyBuddy enables the self-learner AI study buddy with persistent memory (plan 15.12).
 	// Managed in Settings → Global platform (not process env).
 	FFAIStudyBuddy bool
+	// FFPublicAPI enables the versioned public REST API for institutional integrations (plan 16.1).
+	// Managed in Settings → Global platform (not process env).
+	FFPublicAPI bool
+	// FFAPIDocs enables Swagger UI and ReDoc for the public API (plan 16.1).
+	// Managed in Settings → Global platform (not process env).
+	FFAPIDocs bool
+	// EnableAPIDocs enables /api/v1/docs when ENABLE_API_DOCS=1 (plan 16.1).
+	EnableAPIDocs bool
 
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).
@@ -588,6 +596,7 @@ func Load() Config {
 		StripeAnnualPriceID:  strings.TrimSpace(os.Getenv("STRIPE_ANNUAL_PRICE_ID")),
 
 		AppEnv:              appEnv(),
+		EnableAPIDocs:       boolEnv("ENABLE_API_DOCS"),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 

@@ -37,6 +37,13 @@ func (d Deps) handleGetCourse() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing course code.")
 			return
 		}
+		if id, err := uuid.Parse(courseCode); err == nil {
+			if d.serveIfPublicAPIToken(w, r, func(pctx *publicAPIContext, tok *auth.APITokenAuth) {
+				d.publicAPIGetCourseByID(w, r, pctx, tok, id)
+			}) {
+				return
+			}
+		}
 		userID, ok := d.meUserID(w, r)
 		if !ok {
 			return

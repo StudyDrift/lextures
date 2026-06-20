@@ -63,6 +63,9 @@ jobs:
           pkgs=$(go list -f "$FORMAT" ./internal/...)
           go test $pkgs -count=1 -timeout=5m -coverprofile=coverage.out -covermode=atomic
 
+      - name: Public API OpenAPI snapshot (plan 16.1)
+        run: go test ./internal/publicapi -run TestOpenAPI31DocumentMatchesCommittedSnapshot -count=1
+
       - name: govulncheck
         run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 

@@ -114,6 +114,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Get("/api/v1/public/locale-defaults", d.handleGetPublicLocaleDefaults())
 	r.Get("/api/v1/public/org-branding/{orgId}/{asset}", d.handlePublicOrgBrandAsset())
 	d.registerPublicCatalogRoutes(r)
+	d.registerPublicAPIRoutes(r)
 	r.Get("/api/v1/search", d.handleSearchIndex())
 	r.Get("/api/v1/search/query", d.handleSearchQuery())
 	r.Get("/api/v1/reports/learning-activity", d.handleLearningActivityReport())
