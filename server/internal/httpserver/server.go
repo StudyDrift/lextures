@@ -29,6 +29,7 @@ import (
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	integrationsservice "github.com/lextures/lextures/server/internal/service/integrations"
+	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
@@ -80,6 +81,8 @@ type Deps struct {
 	// Integrations powers inbound third-party connectors (Google Classroom,
 	// Teams, Canva, LTI 1.1 embeds) — plan 16.4. When nil, endpoints return 501.
 	Integrations *integrationsservice.Service
+	// Bots powers Slack/Teams/Discord classroom bots (plan 16.6). When nil, endpoints return 501.
+	Bots *botsservice.Service
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -196,6 +199,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerOERRoutes(r)
 	d.registerCloudProviderRoutes(r)
 	d.registerIntegrationRoutes(r)
+	d.registerBotRoutes(r)
 	d.registerLegalRoutes(r)
 	d.registerTrustRoutes(r)
 	d.registerFERPARoutes(r)

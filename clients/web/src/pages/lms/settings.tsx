@@ -34,6 +34,7 @@ import {
   PERM_TENANT_ORG_UNITS_ADMIN,
 } from '../../lib/rbac-api'
 import { OidcConnectedAccountsPanel } from '../../components/oidc-connected-accounts-panel'
+import { BotConnectedAccountsPanel } from '../../components/bot-connected-accounts-panel'
 import { MfaFactorsPanel } from '../../components/settings/mfa-factors-panel'
 import { IntegrationsAccessKeysPanel } from '../../components/settings/integrations-access-keys-panel'
 import { CalendarSubscriptionsPanel } from '../../components/settings/calendar-subscriptions-panel'
@@ -1715,6 +1716,7 @@ export default function Settings() {
               </div>
             )}
             {!accountLoading && <OidcConnectedAccountsPanel />}
+            {!accountLoading && <BotConnectedAccountsPanel />}
             {!accountLoading && <StudyRemindersSettingsPanel />}
             {!accountLoading && <MfaFactorsPanel />}
           </div>

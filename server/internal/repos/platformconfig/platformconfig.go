@@ -128,6 +128,9 @@ type Row struct {
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
 	FFAPITokens                     *bool
+	FFBotSlack                      *bool
+	FFBotTeams                      *bool
+	FFBotDiscord                    *bool
 	FFCalendarFeeds                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
@@ -271,6 +274,9 @@ type Write struct {
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
 	FFAPITokens                     *bool
+	FFBotSlack                      *bool
+	FFBotTeams                      *bool
+	FFBotDiscord                    *bool
 	FFCalendarFeeds                 *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
@@ -410,6 +416,9 @@ SELECT
 	ff_study_reminders,
 	ff_ai_study_buddy,
 	ff_api_tokens,
+	ff_bot_slack,
+	ff_bot_teams,
+	ff_bot_discord,
 	ff_calendar_feeds,
 	ff_revenue_share,
 	lrs_anonymize_actors,
@@ -544,6 +553,9 @@ WHERE id = 1
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
 		&r.FFAPITokens,
+		&r.FFBotSlack,
+		&r.FFBotTeams,
+		&r.FFBotDiscord,
 		&r.FFCalendarFeeds,
 		&r.FFRevenueShare,
 		&r.LRSAnonymizeActors,
@@ -726,6 +738,9 @@ INSERT INTO settings.platform_app_settings (
 	ff_study_reminders,
 	ff_ai_study_buddy,
 	ff_api_tokens,
+	ff_bot_slack,
+	ff_bot_teams,
+	ff_bot_discord,
 	ff_calendar_feeds,
 	ff_revenue_share,
 	mfa_enabled,
@@ -865,6 +880,9 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
 	ff_api_tokens = COALESCE(EXCLUDED.ff_api_tokens, settings.platform_app_settings.ff_api_tokens),
+	ff_bot_slack = COALESCE(EXCLUDED.ff_bot_slack, settings.platform_app_settings.ff_bot_slack),
+	ff_bot_teams = COALESCE(EXCLUDED.ff_bot_teams, settings.platform_app_settings.ff_bot_teams),
+	ff_bot_discord = COALESCE(EXCLUDED.ff_bot_discord, settings.platform_app_settings.ff_bot_discord),
 	ff_calendar_feeds = COALESCE(EXCLUDED.ff_calendar_feeds, settings.platform_app_settings.ff_calendar_feeds),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
@@ -997,6 +1015,9 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
 		w.FFAPITokens,
+		w.FFBotSlack,
+		w.FFBotTeams,
+		w.FFBotDiscord,
 		w.FFCalendarFeeds,
 		w.FFRevenueShare,
 		w.MFAEnabled,

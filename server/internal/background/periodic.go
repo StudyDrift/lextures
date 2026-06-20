@@ -230,6 +230,9 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 	go runEvery(ctx, 24*time.Hour, func() {
 		sweepWebhookRetention(context.Background(), pool, cfg, time.Now().UTC())
 	})
+	go runEvery(ctx, time.Minute, func() {
+		sweepBotDueSoonReminders(context.Background(), pool, cfg, time.Now().UTC())
+	})
 
 	if cfg.FFPlagiarismChecks && cfg.OriginalityDetectionEnabled {
 		go runEvery(ctx, 30*time.Second, func() {

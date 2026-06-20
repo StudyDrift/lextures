@@ -37,6 +37,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/integrations"
+	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -160,6 +161,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		Storage:                   storage,
 		StorageQuota:              quotaSvc,
 		Integrations:              integrations.NewService(pool, integrationsPublicBase(merged), []byte(cfg.JWTSecret)),
+		Bots: botsservice.NewFromConfig(merged, pool, integrationsPublicBase(merged)),
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
