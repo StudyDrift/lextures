@@ -57,7 +57,7 @@ func RotateForUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, no
 	if err != nil {
 		return Row{}, "", err
 	}
-	defer tx.Rollback(ctx)
+	defer tx.Rollback(ctx) //nolint:errcheck
 
 	if _, err := tx.Exec(ctx, `DELETE FROM auth.calendar_tokens WHERE user_id = $1`, userID); err != nil {
 		return Row{}, "", err
