@@ -122,6 +122,7 @@ type platformSettingsJSON struct {
 	FFEportfolio                    bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   bool `json:"ffTranscripts"`
+	FFWebhooks                      bool `json:"ffWebhooks"`
 	FFAdvisingIntegration           bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake           bool `json:"ffAccessibilityIntake"`
@@ -311,6 +312,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                    merged.FFEportfolio,
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
+			FFWebhooks:                      merged.FFWebhooks,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
@@ -475,6 +477,7 @@ type putPlatformBody struct {
 	FFEportfolio                    *bool `json:"ffEportfolio"`
 	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   *bool `json:"ffTranscripts"`
+	FFWebhooks                      *bool `json:"ffWebhooks"`
 	FFAdvisingIntegration           *bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               *bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake           *bool `json:"ffAccessibilityIntake"`
@@ -785,6 +788,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffeportfolio", body.FFEportfolio, func(v bool) { wr.FFEportfolio = &v })
 		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
 		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
+		setBool("ffwebhooks", body.FFWebhooks, func(v bool) { wr.FFWebhooks = &v })
 		setBool("ffadvisingintegration", body.FFAdvisingIntegration, func(v bool) { wr.FFAdvisingIntegration = &v })
 		setBool("ffresearchconsent", body.FFResearchConsent, func(v bool) { wr.FFResearchConsent = &v })
 		setBool("ffaccessibilityintake", body.FFAccessibilityIntake, func(v bool) { wr.FFAccessibilityIntake = &v })
@@ -928,6 +932,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFEportfolio:                    merged.FFEportfolio,
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
+			FFWebhooks:                      merged.FFWebhooks,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,

@@ -223,6 +223,14 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		slog.Info("av scanning worker started", "clamav_addr", cfg.ClamAVAddr, "stub", cfg.ClamAVStub)
 	}
 
+	go runEvery(ctx, 15*time.Second, func() {
+		now := time.Now().UTC()
+		sweepWebhookDeliveries(context.Background(), pool, cfg, now)
+	})
+	go runEvery(ctx, 24*time.Hour, func() {
+		sweepWebhookRetention(context.Background(), pool, cfg, time.Now().UTC())
+	})
+
 	if cfg.FFPlagiarismChecks && cfg.OriginalityDetectionEnabled {
 		go runEvery(ctx, 30*time.Second, func() {
 			sweepOriginalityScans(context.Background(), pool, cfg)

@@ -33,6 +33,7 @@ func AllScopes() []Scope {
 		{ID: "webhooks:manage", Label: "Manage webhooks", Description: "Create and manage outbound webhook subscriptions.", Group: "Integrations"},
 		{ID: "pii:read", Label: "Read PII", Description: "Access personally identifiable information in API responses.", Group: "Privacy"},
 		{ID: "mcp:connect", Label: "Connect MCP agents", Description: "Allow AI agents to connect via MCP using this key.", Group: "Integrations"},
+		{ID: "webhooks:manage", Label: "Manage webhooks", Description: "Create and manage outbound webhook subscriptions.", Group: "Integrations"},
 	}
 	sort.Slice(scopes, func(i, j int) bool { return scopes[i].ID < scopes[j].ID })
 	return scopes

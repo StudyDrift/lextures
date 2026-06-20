@@ -38,6 +38,7 @@ export type PlatformFeaturesSnapshot = {
   ffDemographics?: boolean
   ffContentFilterIntegration?: boolean
   ffSisIntegration?: boolean
+  ffWebhooks?: boolean
   ffCatalogIntegration?: boolean
   ffEnrollmentStateMachine?: boolean
   ffIncompleteGradeWorkflow?: boolean
@@ -111,6 +112,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffDemographics: false,
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
+  ffWebhooks: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
   ffIncompleteGradeWorkflow: false,

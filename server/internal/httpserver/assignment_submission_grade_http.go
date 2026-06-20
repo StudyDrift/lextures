@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 )
 
 const maxInstructorCommentLen = 8000
@@ -189,6 +190,9 @@ func (d Deps) writeSubmissionGrade(
 	); err != nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save grade.")
 		return false
+	}
+	if posting == "automatic" {
+		webhooksvc.EmitSingleGradePosted(r.Context(), d.Pool, d.effectiveConfig(), cid, itemID, studentUserID, points)
 	}
 	out := map[string]any{
 		"studentUserId": studentUserID.String(),
