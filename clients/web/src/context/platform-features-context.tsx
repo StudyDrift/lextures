@@ -76,6 +76,7 @@ export type PlatformFeatures = {
   ffRevenueShare: boolean
   ffLearningPaths: boolean
   ffConditionalRelease: boolean
+  ffPeerReview: boolean
   ffCompletionCredentials: boolean
   ffCourseReviews: boolean
   ffGamification: boolean
@@ -154,6 +155,7 @@ const defaultFeatures: PlatformFeatures = {
   ffRevenueShare: false,
   ffLearningPaths: false,
   ffConditionalRelease: false,
+  ffPeerReview: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
   ffGamification: false,
@@ -237,6 +239,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffRevenueShare: false,
   ffLearningPaths: false,
   ffConditionalRelease: false,
+  ffPeerReview: false,
   ffCompletionCredentials: false,
   ffCourseReviews: false,
   ffGamification: false,
@@ -321,6 +324,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffRevenueShare: data.ffRevenueShare === true,
           ffLearningPaths: data.ffLearningPaths === true,
           ffConditionalRelease: data.ffConditionalRelease === true,
+          ffPeerReview: data.ffPeerReview === true,
           ffCompletionCredentials: data.ffCompletionCredentials === true,
           ffCourseReviews: data.ffCourseReviews === true,
           ffGamification: data.ffGamification === true,
@@ -370,6 +374,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffRevenueShare: next.ffRevenueShare === true,
           ffLearningPaths: next.ffLearningPaths === true,
           ffConditionalRelease: next.ffConditionalRelease === true,
+          ffPeerReview: next.ffPeerReview === true,
           ffCompletionCredentials: next.ffCompletionCredentials === true,
           ffCourseReviews: next.ffCourseReviews === true,
           ffGamification: next.ffGamification === true,
