@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
@@ -24,6 +25,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/crosslisting"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/incompletegrades"
+	"github.com/lextures/lextures/server/internal/repos/gradecurves"
 	"github.com/lextures/lextures/server/internal/repos/gradingschemes"
 	"github.com/lextures/lextures/server/internal/courseroles"
 )
@@ -63,6 +65,11 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		Type      string          `json:"type"`
 		ScaleJSON json.RawMessage `json:"scaleJson"`
 	}
+	type curveColOut struct {
+		CurveID   string `json:"curveId"`
+		Method    string `json:"method"`
+		AppliedAt string `json:"appliedAt"`
+	}
 	type gridResp struct {
 		Students            []studentOut                            `json:"students"`
 		Columns             []gradebookGridColumn                   `json:"columns"`
@@ -72,6 +79,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		GradeHeld           map[string]map[string]bool              `json:"gradeHeld,omitempty"`
 		DroppedGrades       map[string]map[string]bool              `json:"droppedGrades,omitempty"`
 		ExcusedGrades       map[string]map[string]bool              `json:"excusedGrades,omitempty"`
+		ActiveCurves        map[string]curveColOut                  `json:"activeCurves,omitempty"`
 		GradingScheme       *schemeSum                              `json:"gradingScheme,omitempty"`
 		GradebookCsvEnabled bool                                    `json:"gradebookCsvEnabled"`
 		CrossListGroupID    *string                                 `json:"crossListGroupId,omitempty"`
@@ -487,7 +495,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(gridResp{
+		resp := gridResp{
 			Students:            students,
 			Columns:             outCols,
 			Grades:              grades,
@@ -500,7 +508,20 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 			GradebookCsvEnabled: d.effectiveConfig().GradebookCSVEnabled,
 			CrossListGroupID:    crossListGroupID,
 			CrossListMerged:     crossListMerged,
-		})
+		}
+		if d.effectiveConfig().FFGradeCurving {
+			if curves, err := gradecurves.ListActiveForCourse(r.Context(), d.Pool, *cid); err == nil && len(curves) > 0 {
+				resp.ActiveCurves = make(map[string]curveColOut, len(curves))
+				for itemID, c := range curves {
+					resp.ActiveCurves[itemID] = curveColOut{
+						CurveID:   c.CurveID.String(),
+						Method:    c.Method,
+						AppliedAt: c.AppliedAt.UTC().Format(time.RFC3339),
+					}
+				}
+			}
+		}
+		_ = json.NewEncoder(w).Encode(resp)
 	}
 }
 

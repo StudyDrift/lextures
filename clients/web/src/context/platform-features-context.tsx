@@ -58,6 +58,7 @@ export type PlatformFeatures = {
   ffEnrollmentStateMachine: boolean
   ffGradeSubmission: boolean
   ffWhatifGrades: boolean
+  ffGradeCurving: boolean
   ffPlagiarismChecks: boolean
   ffIncompleteGradeWorkflow: boolean
   ffAcademicCalendar: boolean
@@ -138,6 +139,7 @@ const defaultFeatures: PlatformFeatures = {
   ffEnrollmentStateMachine: false,
   ffGradeSubmission: false,
   ffWhatifGrades: false,
+  ffGradeCurving: false,
   ffPlagiarismChecks: false,
   ffIncompleteGradeWorkflow: false,
   ffAcademicCalendar: false,
@@ -223,6 +225,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffEnrollmentStateMachine: false,
     ffGradeSubmission: false,
   ffWhatifGrades: false,
+  ffGradeCurving: false,
     ffPlagiarismChecks: false,
     ffIncompleteGradeWorkflow: false,
     ffAcademicCalendar: false,
@@ -309,6 +312,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
           ffGradeSubmission: data.ffGradeSubmission === true,
           ffWhatifGrades: data.ffWhatifGrades === true,
+          ffGradeCurving: data.ffGradeCurving === true,
           ffPlagiarismChecks: data.ffPlagiarismChecks === true,
           ffIncompleteGradeWorkflow: data.ffIncompleteGradeWorkflow === true,
           ffAcademicCalendar: data.ffAcademicCalendar === true,
@@ -360,6 +364,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,
           ffGradeSubmission: next.ffGradeSubmission === true,
           ffWhatifGrades: next.ffWhatifGrades === true,
+          ffGradeCurving: next.ffGradeCurving === true,
           ffPlagiarismChecks: next.ffPlagiarismChecks === true,
           ffIncompleteGradeWorkflow: next.ffIncompleteGradeWorkflow === true,
           ffAcademicCalendar: next.ffAcademicCalendar === true,

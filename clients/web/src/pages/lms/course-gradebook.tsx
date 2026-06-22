@@ -35,6 +35,7 @@ import { TabPresenceHint } from '../../components/presence/tab-presence-hint'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { GradeHistoryPanel } from '../../components/grading/grade-history-panel'
 import { GradebookImportModal } from '../../components/grading/gradebook-import-modal'
+import { GradeCurveModal } from '../../components/grading/grade-curve-modal'
 import { LmsPage } from './lms-page'
 import { IncompleteGradeModal } from './gradebook/IncompleteGradeModal'
 import {
@@ -316,7 +317,7 @@ export default function CourseGradebook() {
   const highlightStudentId = searchParams.get('student')?.trim() || null
   const highlightColumnId = searchParams.get('item')?.trim() || null
   const { allows, loading } = usePermissions()
-  const { ffGradeSubmission, ffIncompleteGradeWorkflow } = usePlatformFeatures()
+  const { ffGradeSubmission, ffIncompleteGradeWorkflow, ffGradeCurving } = usePlatformFeatures()
   const [students, setStudents] = useState<CourseGradebookGridStudent[]>([])
   const [enrollmentIdByUserId, setEnrollmentIdByUserId] = useState<Record<string, string>>({})
   const [columns, setColumns] = useState<CourseGradebookGridColumn[]>([])
@@ -352,6 +353,10 @@ export default function CourseGradebook() {
   const [gradeHistoryEvents, setGradeHistoryEvents] = useState<GradeHistoryEvent[] | null>(null)
   const [gradebookCsvEnabled, setGradebookCsvEnabled] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [activeCurves, setActiveCurves] = useState<
+    Record<string, { curveId: string; method: string; appliedAt: string }>
+  >({})
+  const [curveModalColumn, setCurveModalColumn] = useState<GradebookColumn | null>(null)
   const [sectionsEnabled, setSectionsEnabled] = useState(false)
   const [sections, setSections] = useState<CourseSection[]>([])
   const [gradebookSectionId, setGradebookSectionId] = useState<string>('')
@@ -505,6 +510,7 @@ export default function CourseGradebook() {
       setDroppedGrades(data.droppedGrades)
       setGradingScheme(data.gradingScheme ?? null)
       setGradeExcused(data.excusedGrades)
+      setActiveCurves(data.activeCurves ?? {})
       const merged = mergeGradesFromApi(
         gridSt,
         gridCols,
@@ -535,6 +541,7 @@ export default function CourseGradebook() {
       setGradeHeld(undefined)
       setDroppedGrades(undefined)
       setGradeExcused(undefined)
+      setActiveCurves({})
       setGradingScheme(null)
       setAssignmentGroups([])
       setGradebookCsvEnabled(false)
@@ -953,6 +960,15 @@ export default function CourseGradebook() {
             onToggleExcused={canEditGrades ? handleToggleExcused : undefined}
             onPostAssignmentGrades={canEditGrades ? handlePostAssignmentGrades : undefined}
             postGradesPending={postGradesPending}
+            activeCurves={activeCurves}
+            onCurveGrades={
+              ffGradeCurving && canEditGrades
+                ? (columnId) => {
+                    const col = gridColumns.find((c) => c.id === columnId)
+                    if (col) setCurveModalColumn(col)
+                  }
+                : undefined
+            }
             onIncompleteAction={
               ffIncompleteGradeWorkflow && canEditGrades
                 ? (student) => {
@@ -1070,6 +1086,22 @@ export default function CourseGradebook() {
               courseCode={courseCode}
               columns={columns.map((c) => ({ id: c.id, title: c.title }))}
               onClose={() => setImportModalOpen(false)}
+              onApplied={() => void loadGrid()}
+            />
+          ) : null}
+          {courseCode && curveModalColumn ? (
+            <GradeCurveModal
+              open={curveModalColumn != null}
+              courseCode={courseCode}
+              column={{
+                id: curveModalColumn.id,
+                title: curveModalColumn.title,
+                kind: curveModalColumn.kind ?? 'assignment',
+                maxPoints: curveModalColumn.maxPoints,
+              }}
+              activeCurveId={activeCurves[curveModalColumn.id]?.curveId ?? null}
+              studentsById={Object.fromEntries(gridStudents.map((s) => [s.id, { name: s.name }]))}
+              onClose={() => setCurveModalColumn(null)}
               onApplied={() => void loadGrid()}
             />
           ) : null}

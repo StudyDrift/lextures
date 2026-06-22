@@ -103,6 +103,7 @@ type Row struct {
 	FFUiMode                        *bool
 	FFGradeSubmission               *bool
 	FFWhatifGrades                  *bool
+	FFGradeCurving                  *bool
 	FFAcademicCalendar              *bool
 	FFPlagiarismChecks              *bool
 	FFCourseEvaluations             *bool
@@ -253,6 +254,7 @@ type Write struct {
 	FFUiMode                        *bool
 	FFGradeSubmission               *bool
 	FFWhatifGrades                  *bool
+	FFGradeCurving                  *bool
 	FFAcademicCalendar              *bool
 	FFPlagiarismChecks              *bool
 	FFCourseEvaluations             *bool
@@ -400,6 +402,7 @@ SELECT
 	ff_content_filter_integration,
 	ff_grade_submission,
 	ff_whatif_grades,
+	ff_grade_curving,
 	ff_academic_calendar,
 	ff_plagiarism_checks,
 	ff_course_evaluations,
@@ -541,6 +544,7 @@ WHERE id = 1
 		&r.FFContentFilterIntegration,
 		&r.FFGradeSubmission,
 		&r.FFWhatifGrades,
+		&r.FFGradeCurving,
 		&r.FFAcademicCalendar,
 		&r.FFPlagiarismChecks,
 		&r.FFCourseEvaluations,
@@ -733,6 +737,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_content_filter_integration,
 	ff_grade_submission,
 	ff_whatif_grades,
+	ff_grade_curving,
 	ff_academic_calendar,
 	ff_plagiarism_checks,
 	ff_course_evaluations,
@@ -879,6 +884,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_content_filter_integration = COALESCE(EXCLUDED.ff_content_filter_integration, settings.platform_app_settings.ff_content_filter_integration),
 	ff_grade_submission = COALESCE(EXCLUDED.ff_grade_submission, settings.platform_app_settings.ff_grade_submission),
 	ff_whatif_grades = COALESCE(EXCLUDED.ff_whatif_grades, settings.platform_app_settings.ff_whatif_grades),
+	ff_grade_curving = COALESCE(EXCLUDED.ff_grade_curving, settings.platform_app_settings.ff_grade_curving),
 	ff_academic_calendar = COALESCE(EXCLUDED.ff_academic_calendar, settings.platform_app_settings.ff_academic_calendar),
 	ff_plagiarism_checks = COALESCE(EXCLUDED.ff_plagiarism_checks, settings.platform_app_settings.ff_plagiarism_checks),
 	ff_course_evaluations = COALESCE(EXCLUDED.ff_course_evaluations, settings.platform_app_settings.ff_course_evaluations),
@@ -1018,6 +1024,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFContentFilterIntegration,
 		w.FFGradeSubmission,
 		w.FFWhatifGrades,
+		w.FFGradeCurving,
 		w.FFAcademicCalendar,
 		w.FFPlagiarismChecks,
 		w.FFCourseEvaluations,

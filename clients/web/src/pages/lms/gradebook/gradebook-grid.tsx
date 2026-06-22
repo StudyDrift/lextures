@@ -91,6 +91,10 @@ type GradebookGridProps = {
   /** When set, show “Post grades” in column header for manual assignment columns. */
   onPostAssignmentGrades?: (itemId: string) => void
   postGradesPending?: string | null
+  /** Plan 3.17 — active curves by column id. */
+  activeCurves?: Record<string, { curveId: string; method: string; appliedAt: string }>
+  /** Open curve dialog for a column. */
+  onCurveGrades?: (columnId: string) => void
   /** Plan 14.4 — open grant/resolve incomplete modal for a student row. */
   onIncompleteAction?: (student: GradebookStudent) => void
 }
@@ -268,6 +272,8 @@ export function GradebookGrid({
   onToggleExcused,
   onPostAssignmentGrades,
   postGradesPending = null,
+  activeCurves = undefined,
+  onCurveGrades,
   onIncompleteAction,
 }: GradebookGridProps) {
   const density = useUiDensity()
@@ -1511,6 +1517,7 @@ export function GradebookGrid({
                           <span className="text-xs font-semibold text-slate-800 dark:text-neutral-200">{col.title}</span>
                           <span className="text-[0.65rem] font-normal text-slate-500 dark:text-neutral-400">
                             {col.maxPoints != null ? `Out of ${col.maxPoints}` : 'Max points not set'}
+                            {activeCurves?.[col.id] ? ' · Curved' : ''}
                           </span>
                           {col.kind === 'assignment' &&
                             col.postingPolicy === 'manual' &&
@@ -1975,6 +1982,23 @@ export function GradebookGrid({
           >
             Grade (Z → A)
           </button>
+          {onCurveGrades &&
+          (visibleColumns.find((c) => c.id === headerMenu.columnId)?.kind === 'assignment' ||
+            visibleColumns.find((c) => c.id === headerMenu.columnId)?.kind === 'quiz') ? (
+            <>
+              <div className="my-1 border-t border-slate-100 dark:border-neutral-700" />
+              <button
+                type="button"
+                className={menuItemClass()}
+                onClick={() => {
+                  onCurveGrades(headerMenu.columnId)
+                  closeHeaderMenu()
+                }}
+              >
+                {activeCurves?.[headerMenu.columnId] ? 'Edit curve…' : 'Curve grades…'}
+              </button>
+            </>
+          ) : null}
           <button type="button" className={`${menuItemClass()} text-slate-500 dark:text-neutral-500`} onClick={clearSort}>
             Reset to course order
           </button>

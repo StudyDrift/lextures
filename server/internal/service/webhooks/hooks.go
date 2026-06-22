@@ -85,6 +85,18 @@ type GradeReleasedData struct {
 	URL           string  `json:"url,omitempty"`
 }
 
+// GradeCurveAppliedData is the grade.curve.applied event payload (plan 3.17).
+type GradeCurveAppliedData struct {
+	CourseID     string `json:"courseId"`
+	CourseCode   string `json:"courseCode,omitempty"`
+	ModuleItemID string `json:"moduleItemId"`
+	CurveID      string `json:"curveId"`
+	Method       string `json:"method"`
+	AppliedBy    string `json:"appliedBy"`
+	AppliedAt    string `json:"appliedAt"`
+	Affected     int    `json:"affectedCount"`
+}
+
 // AnnouncementCreatedData is the announcement.created event payload.
 type AnnouncementCreatedData struct {
 	CourseID   string `json:"courseId"`
@@ -107,6 +119,11 @@ func EmitAssignmentDueSoon(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUI
 // EmitGradeReleased notifies subscribers when a grade is released to a student.
 func EmitGradeReleased(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data GradeReleasedData) {
 	EmitAsync(pool, cfg, orgID, webhooks.EventGradeReleased, data)
+}
+
+// EmitGradeCurveApplied notifies subscribers when an instructor applies a grade curve (plan 3.17).
+func EmitGradeCurveApplied(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data GradeCurveAppliedData) {
+	EmitAsync(pool, cfg, orgID, webhooks.EventGradeCurveApplied, data)
 }
 
 // EmitAnnouncementCreated notifies subscribers when an announcement is posted.
