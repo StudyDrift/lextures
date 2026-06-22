@@ -1235,6 +1235,49 @@ export async function createCourse(body: {
   return parseApiResponse('createCourse', courseSchema, raw)
 }
 
+/** Mirrors server `coursecopy.Include`; all default true when omitted. */
+export type CourseCopyInclude = {
+  modules: boolean
+  assignments: boolean
+  quizzes: boolean
+  enrollments: boolean
+  grades: boolean
+  settings: boolean
+  files: boolean
+}
+
+export const COURSE_COPY_INCLUDE_ALL: CourseCopyInclude = {
+  modules: true,
+  assignments: true,
+  quizzes: true,
+  enrollments: true,
+  grades: true,
+  settings: true,
+  files: true,
+}
+
+/** POST /api/v1/courses/import/from-course — create a new course by copying from an existing one. */
+export async function postCourseImportFromCourse(body: {
+  sourceCourseCode: string
+  title: string
+  description?: string
+  include?: CourseCopyInclude
+}): Promise<CoursePublic> {
+  const res = await authorizedFetch('/api/v1/courses/import/from-course', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sourceCourseCode: body.sourceCourseCode.trim(),
+      title: body.title.trim(),
+      ...(body.description !== undefined ? { description: body.description } : {}),
+      include: body.include ?? COURSE_COPY_INCLUDE_ALL,
+    }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('postCourseImportFromCourse', courseSchema, raw)
+}
+
 /** `PUT /api/v1/courses/:courseCode` — general course fields (matches course settings save). */
 export async function putCourse(
   courseCode: string,

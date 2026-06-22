@@ -15,6 +15,8 @@ const (
 	ConferenceReminder       = "conference_reminder"
 	CoachingTipWeekly      = "coaching_tip_weekly"
 	CanvasCourseImported   = "canvas_course_imported"
+	CourseCopyImported     = "course_copy_imported"
+	CourseCopyImportFailed = "course_copy_import_failed"
 	InboxMessage           = "inbox_message"
 	IncompleteGranted      = "incomplete_granted"
 	IncompleteReminder     = "incomplete_reminder"
@@ -41,6 +43,8 @@ var All = []string{
 	ConferenceReminder,
 	CoachingTipWeekly,
 	CanvasCourseImported,
+	CourseCopyImported,
+	CourseCopyImportFailed,
 	InboxMessage,
 	IncompleteGranted,
 	IncompleteReminder,

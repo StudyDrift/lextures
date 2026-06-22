@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
-import { authorizedFetch, apiUrl } from '../lib/api'
+import { useLocation } from 'react-router-dom'
+import { authorizedFetch } from '../lib/api'
 import { getAccessToken } from '../lib/auth'
+import {
+  notificationsWebSocketUrl,
+  parseNotificationsWsMessage,
+} from '../lib/notifications-realtime'
 import {
   applyInboxRefreshForToasts,
   loadNotificationToastedIds,
@@ -10,11 +15,14 @@ import { useBumpCoursesRevision } from './use-inbox-unread'
 import { InboxNotificationsContext, type InboxNotification } from './inbox-notifications-context'
 
 export function InboxNotificationsProvider({ children }: { children: ReactNode }) {
+  const location = useLocation()
   const bumpCoursesRevision = useBumpCoursesRevision()
   const [notifications, setNotifications] = useState<InboxNotification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(false)
-  const sseRef = useRef<EventSource | null>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+  const wsTokenRef = useRef<string | null>(null)
+  const wsReconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inboxHydratedRef = useRef(false)
   const toastedIdsRef = useRef<Set<string>>(loadNotificationToastedIds())
 
@@ -38,11 +46,13 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
         return result.next
       })
       for (const n of toToast) {
-        if (n.eventType === 'canvas_course_imported') {
+        if (n.eventType === 'canvas_course_imported' || n.eventType === 'course_copy_imported') {
           bumpCoursesRevision()
         }
         if (n.eventType === 'inbox_message') {
           toast.info(n.title, { description: n.body })
+        } else if (n.eventType === 'course_copy_import_failed') {
+          toast.error(n.title, { description: n.body })
         } else {
           toast.success(n.title, { description: n.body })
         }
@@ -77,29 +87,91 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
 
   useEffect(() => {
     void refresh()
+  }, [refresh, location.pathname])
 
-    if (typeof EventSource === 'undefined') return
-
+  useEffect(() => {
     const token = getAccessToken()
-    if (!token) return
-
-    const url = apiUrl(`/api/v1/me/notifications/sse?token=${encodeURIComponent(token)}`)
-    const es = new EventSource(url)
-    sseRef.current = es
-
-    es.addEventListener('notification', () => {
-      void refresh()
-    })
-
-    es.onerror = () => {
-      es.close()
+    if (!token) {
+      if (wsReconnectTimerRef.current) {
+        clearTimeout(wsReconnectTimerRef.current)
+        wsReconnectTimerRef.current = null
+      }
+      wsRef.current?.close()
+      wsRef.current = null
+      wsTokenRef.current = null
+      return
     }
+
+    const url = notificationsWebSocketUrl()
+    if (!url) {
+      return
+    }
+
+    let cancelled = false
+
+    const scheduleReconnect = () => {
+      if (cancelled || wsReconnectTimerRef.current) return
+      wsReconnectTimerRef.current = setTimeout(() => {
+        wsReconnectTimerRef.current = null
+        if (!cancelled) connect()
+      }, 2000)
+    }
+
+    const connect = () => {
+      if (cancelled) return
+      const authToken = getAccessToken()
+      if (!authToken) return
+
+      if (wsRef.current && wsTokenRef.current === authToken) {
+        return
+      }
+
+      wsRef.current?.close()
+      wsTokenRef.current = authToken
+
+      const ws = new WebSocket(url)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        const currentToken = getAccessToken()
+        if (!currentToken) {
+          ws.close()
+          return
+        }
+        ws.send(JSON.stringify({ authToken: currentToken }))
+      }
+
+      ws.onmessage = (ev) => {
+        const msg = parseNotificationsWsMessage(String(ev.data))
+        if (msg?.type === 'notification_updated') {
+          void refresh()
+        }
+      }
+
+      ws.onclose = () => {
+        if (wsRef.current === ws) {
+          wsRef.current = null
+        }
+        scheduleReconnect()
+      }
+
+      ws.onerror = () => {
+        ws.close()
+      }
+    }
+
+    connect()
 
     return () => {
-      es.close()
-      sseRef.current = null
+      cancelled = true
+      if (wsReconnectTimerRef.current) {
+        clearTimeout(wsReconnectTimerRef.current)
+        wsReconnectTimerRef.current = null
+      }
+      wsRef.current?.close()
+      wsRef.current = null
     }
-  }, [refresh])
+  }, [location.pathname, refresh])
 
   const value = { notifications, unreadCount, loading, refresh, markRead, markAllRead }
 

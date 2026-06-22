@@ -1,6 +1,11 @@
 import type { InboxNotification } from '../context/inbox-notifications-context'
 
-const TOAST_EVENT_TYPES = new Set(['canvas_course_imported', 'inbox_message'])
+const TOAST_EVENT_TYPES = new Set([
+  'canvas_course_imported',
+  'course_copy_imported',
+  'course_copy_import_failed',
+  'inbox_message',
+])
 
 /** localStorage key for notification ids that already triggered a toast. */
 export const NOTIFICATION_TOASTED_IDS_KEY = 'lextures:notification-toasted-ids'

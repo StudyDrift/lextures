@@ -229,6 +229,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Post("/api/v1/me/notifications/{id}/read", d.handleMarkNotificationRead())
 	r.Post("/api/v1/me/notifications/read-all", d.handleMarkAllNotificationsRead())
 	r.Get("/api/v1/me/notifications/sse", d.handleNotificationsSSE())
+	r.Get("/api/v1/ws/notifications", d.handleNotificationsWS())
 	r.Get("/api/v1/me/sessions", d.handleListMySessions())
 	r.Delete("/api/v1/me/sessions", d.handleDeleteMyOtherSessions())
 	r.Delete("/api/v1/me/sessions/{id}", d.handleDeleteMySession())

@@ -13,6 +13,7 @@ vi.mock('../../../context/use-permissions', () => ({
 
 vi.mock('../../../context/use-inbox-unread', () => ({
   useCoursesRevision: () => 0,
+  useBumpCoursesRevision: () => vi.fn(),
 }))
 
 vi.mock('../../../context/canvas-import-context', () => ({

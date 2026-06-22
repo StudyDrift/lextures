@@ -19,6 +19,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { BookOpen, Plus } from 'lucide-react'
 import { KeyboardSensor as SharedKeyboardSensor, defaultKeyboardSensorOptions } from '../../lib/dnd/keyboardSensorConfig'
 import { useCanvasImport } from '../../context/canvas-import-context'
+import { CourseCatalogImportFromCourseModal } from './course-catalog-import-from-course-modal'
 import { CourseCatalogImportMenu } from './course-catalog-import-menu'
 import {
   CourseCatalogViewMenu,
@@ -41,7 +42,7 @@ import { EmptyState } from '../../components/ui/empty-state'
 import { CoursesCatalogSkeleton } from '../../components/ui/lms-content-skeletons'
 import { LmsPage } from './lms-page'
 import { usePermissions } from '../../context/use-permissions'
-import { useCoursesRevision } from '../../context/use-inbox-unread'
+import { useBumpCoursesRevision, useCoursesRevision } from '../../context/use-inbox-unread'
 import { authorizedFetch } from '../../lib/api'
 import { putCourseCatalogOrder, type CoursePublic, fetchOrgTerms, fetchOrgType, type OrgTerm, type OrgType } from '../../lib/courses-api'
 import { decodeJwtPayload } from '../../lib/jwt-payload'
@@ -743,7 +744,9 @@ export default function Courses() {
   const { allows, loading: permLoading } = usePermissions()
   const showCourseCreateActions = canCreateCourses(allows, permLoading)
   const coursesRevision = useCoursesRevision()
+  const bumpCoursesRevision = useBumpCoursesRevision()
   const { open: openCanvasImport } = useCanvasImport()
+  const [importFromCourseOpen, setImportFromCourseOpen] = useState(false)
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [termFilter, setTermFilter] = useState<string>('')
@@ -1091,7 +1094,10 @@ export default function Courses() {
       actions={
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           {showCourseCreateActions ? (
-            <CourseCatalogImportMenu onImportCanvas={openCanvasImport} />
+            <CourseCatalogImportMenu
+              onImportCanvas={openCanvasImport}
+              onImportFromCourse={() => setImportFromCourseOpen(true)}
+            />
           ) : null}
           <CourseCatalogViewMenu value={catalogView} onChange={handleCatalogViewChange} />
           {showCourseCreateActions ? (
@@ -1246,6 +1252,14 @@ export default function Courses() {
         </DndContext>
       )}
 
+      <CourseCatalogImportFromCourseModal
+        open={importFromCourseOpen}
+        courses={courses ?? []}
+        onClose={() => setImportFromCourseOpen(false)}
+        onImported={() => {
+          bumpCoursesRevision()
+        }}
+      />
     </LmsPage>
   )
 }
