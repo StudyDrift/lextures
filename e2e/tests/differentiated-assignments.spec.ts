@@ -15,6 +15,7 @@ import {
   apiBulkExtendAssignToDueDate,
   apiGetCourseStructure,
   apiGetCourseEnrollments,
+  apiTransferEnrollmentToSection,
 } from '../fixtures/api.js'
 
 const PASSWORD = 'E2eTestPass1!'
@@ -77,22 +78,8 @@ async function setupDifferentiatedCourse() {
   const sectionA = await apiCreateCourseSection(instructorToken, course.courseCode, 'SEC-A', 'Section A')
   const sectionB = await apiCreateCourseSection(instructorToken, course.courseCode, 'SEC-B', 'Section B')
 
-  await apiEnroll(instructorToken, course.courseCode, studentAEmail, 'student', {
-    memberToken: studentAToken,
-    sectionId: sectionA.id,
-  })
-  await apiEnroll(instructorToken, course.courseCode, studentBEmail, 'student', {
-    memberToken: studentBToken,
-    sectionId: sectionB.id,
-  })
-
-  const mod = await apiCreateModule(instructorToken, course.courseCode, 'Unit 1')
-  const assignment = await apiCreateAssignment(
-    instructorToken,
-    course.courseCode,
-    mod.id,
-    'Differentiated Essay',
-  )
+  await apiEnroll(instructorToken, course.courseCode, studentAEmail, 'student', studentAToken)
+  await apiEnroll(instructorToken, course.courseCode, studentBEmail, 'student', studentBToken)
 
   const [userIdA, userIdB] = await Promise.all([
     apiMeUserId(studentAToken),
@@ -101,6 +88,19 @@ async function setupDifferentiatedCourse() {
   const enrollments = await apiGetCourseEnrollments(instructorToken, course.courseCode)
   const enrollmentA = enrollments.find((e) => e.role === 'student' && e.userId === userIdA)
   const enrollmentB = enrollments.find((e) => e.role === 'student' && e.userId === userIdB)
+  if (!enrollmentA?.id || !enrollmentB?.id) {
+    throw new Error('Expected student enrollments for section transfer setup')
+  }
+  await apiTransferEnrollmentToSection(instructorToken, enrollmentA.id, sectionA.id)
+  await apiTransferEnrollmentToSection(instructorToken, enrollmentB.id, sectionB.id)
+
+  const mod = await apiCreateModule(instructorToken, course.courseCode, 'Unit 1')
+  const assignment = await apiCreateAssignment(
+    instructorToken,
+    course.courseCode,
+    mod.id,
+    'Differentiated Essay',
+  )
 
   return {
     instructorToken,
@@ -222,10 +222,9 @@ test.describe('Differentiated assignments (2.15)', () => {
       `/courses/${seededCourse.courseCode}/modules/assignment/${assignment.id}`,
     )
     await coursePage.getByRole('button', { name: /^Edit$/i }).click()
-    await expect(coursePage.getByRole('button', { name: /^Assign to$/i })).toBeVisible({
-      timeout: 12000,
-    })
-    await coursePage.getByRole('button', { name: /^Assign to$/i }).click()
+    const assignToSummary = coursePage.locator('summary').filter({ hasText: /^Assign to$/ })
+    await expect(assignToSummary).toBeVisible({ timeout: 12000 })
+    await assignToSummary.click()
     await expect(coursePage.getByRole('button', { name: /Save assign-to targets/i })).toBeVisible()
     await expect(coursePage.getByRole('button', { name: /Add audience/i })).toBeVisible()
   })

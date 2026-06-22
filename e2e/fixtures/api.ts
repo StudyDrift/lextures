@@ -789,6 +789,25 @@ export async function apiGetCourseEnrollments(
   return raw.enrollments
 }
 
+export async function apiTransferEnrollmentToSection(
+  token: string,
+  enrollmentId: string,
+  sectionId: string,
+): Promise<void> {
+  const res = await fetch(`${apiBase}/api/v1/enrollments/${encodeURIComponent(enrollmentId)}/section`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ sectionId }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Transfer enrollment to section failed (${res.status}): ${body}`)
+  }
+}
+
 export interface ApiOutcomesReportOutcome {
   outcomeId: string
   title: string
