@@ -48,7 +48,7 @@ Gaps found by scanning `docs/completed`, `docs/plan`, and the codebase (handlers
 |---|---|---|---|---|
 | 3.15 | [Peer review & peer assessment](03-submissions-grading-integrity/3.15-peer-review-assessment.md) | BLOCKER (HE) / MAJOR | HE · K12 · SL | Explicitly deferred 3× (3.3/3.4/3.13); required by writing programs, large-lecture peer grading, MOOC cohorts |
 | 2.15 | [Differentiated assignments (assign-to / multiple due dates)](02-assessment-and-authoring/2.15-differentiated-assignments.md) | MAJOR | K12 · HE | Only quiz time/attempt overrides exist; no per-section/group/student targeting — core differentiation & multi-section workflow |
-| 3.16 | [What-if grades (student projection)](03-submissions-grading-integrity/3.16-what-if-grades.md) | MAJOR | HE · K12 · SL | Baseline student gradebook expectation (Canvas parity); absent entirely |
+| 3.16 | ~~What-if grades (student projection)~~ → [completed](../completed/03-submissions-grading-integrity/3.16-what-if-grades.md) | MAJOR | HE · K12 · SL | Done |
 | 3.17 | [Grade curving & scaling](03-submissions-grading-integrity/3.17-grade-curving-scaling.md) | MAJOR (HE) | HE · K12 · SL | Faculty cannot curve/scale grades; forces error-prone spreadsheet round-trips |
 | 15.13 | [Tax compliance (Stripe Tax / VAT / GST)](15-self-learner-specific/15.13-tax-compliance.md) | BLOCKER (global) | SL · HE (CE) | Deferred to "phase 2" in 15.3/16.8; legally required to sell paid courses in EU/UK and US-nexus states |
 

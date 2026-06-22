@@ -275,6 +275,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Reuse prior translations when localizing course content.',
   },
   {
+    key: 'ffWhatifGrades',
+    label: 'What-if grades',
+    description:
+      'Let students model hypothetical scores and projected course grades on My Grades (plan 3.16).',
+  },
+  {
     key: 'ffOnboardingFlow',
     label: 'Self-learner onboarding',
     description:

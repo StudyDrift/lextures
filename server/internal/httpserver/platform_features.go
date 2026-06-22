@@ -58,6 +58,7 @@ type platformFeaturesJSON struct {
 	FFIncompleteGradeWorkflow   bool `json:"ffIncompleteGradeWorkflow"`
 	FFUiMode                    bool `json:"ffUiMode"`
 	FFGradeSubmission           bool `json:"ffGradeSubmission"`
+	FFWhatifGrades              bool `json:"ffWhatifGrades"`
 	FFAcademicCalendar          bool `json:"ffAcademicCalendar"`
 	FFPlagiarismChecks          bool `json:"ffPlagiarismChecks"`
 	FFCourseEvaluations         bool `json:"ffCourseEvaluations"`
@@ -157,6 +158,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFIncompleteGradeWorkflow:   cfg.FFIncompleteGradeWorkflow,
 		FFUiMode:                    cfg.FFUiMode,
 		FFGradeSubmission:           cfg.FFGradeSubmission,
+		FFWhatifGrades:              cfg.FFWhatifGrades,
 		FFAcademicCalendar:          cfg.FFAcademicCalendar,
 		FFPlagiarismChecks:          cfg.FFPlagiarismChecks,
 		FFCourseEvaluations:         cfg.FFCourseEvaluations,

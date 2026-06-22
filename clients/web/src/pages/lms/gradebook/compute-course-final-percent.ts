@@ -29,11 +29,45 @@ type Scored = {
   isFinal: boolean
 }
 
+export type ComputeFinalOptions = {
+  /** When `whatIf`, items with hypothetical overrides are included even if not yet due. */
+  mode?: 'actual' | 'whatIf'
+  /** Hypothetical score overrides (itemId → points). Client-only; never persisted. */
+  whatIfOverrides?: Record<string, string>
+  /** Held/unposted items — real scores are never merged into what-if calculations. */
+  heldItemIds?: ReadonlySet<string>
+  now?: Date | string | number
+}
+
+export type ScoreNeededResult =
+  | { achievable: false; reason: string }
+  | { achievable: true; scorePercent: number; itemIds: string[] }
+
 function parseEarned(raw: string | undefined): number {
   const t = (raw ?? '').trim()
   if (!t) return 0
   const n = Number.parseFloat(t.replace(/,/g, ''))
   return Number.isFinite(n) ? n : 0
+}
+
+/**
+ * Merge actual grades with what-if overrides. Held items never expose real scores.
+ */
+export function mergeGradesForWhatIf(
+  actualGrades: Record<string, string>,
+  overrides: Record<string, string>,
+  heldItemIds: ReadonlySet<string>,
+): Record<string, string> {
+  const merged: Record<string, string> = { ...actualGrades }
+  for (const id of heldItemIds) {
+    delete merged[id]
+  }
+  for (const [id, val] of Object.entries(overrides)) {
+    const t = val.trim()
+    if (t === '') delete merged[id]
+    else merged[id] = t
+  }
+  return merged
 }
 
 /**
@@ -43,9 +77,10 @@ function parseEarned(raw: string | undefined): number {
 export function groupEffectiveEarnedAndMax(
   policy: GroupPolicy,
   lines: { itemId: string; max: number; earned: number; neverDrop: boolean; isFinal: boolean }[],
-): { effectiveEarned: number; effectiveMax: number } {
+): { effectiveEarned: number; effectiveMax: number; droppedIds: Set<string> } {
+  const dropped = new Set<string>()
   if (lines.length === 0) {
-    return { effectiveEarned: 0, effectiveMax: 0 }
+    return { effectiveEarned: 0, effectiveMax: 0, droppedIds: dropped }
   }
   const rows: Scored[] = lines
     .map((l) => {
@@ -67,7 +102,6 @@ export function groupEffectiveEarnedAndMax(
 
   rows.sort((a, b) => (a.pct !== b.pct ? a.pct - b.pct : a.id.localeCompare(b.id)))
   const work: Scored[] = rows.filter((r) => r.canDrop)
-  const dropped = new Set<string>()
 
   const nLow = Math.max(0, policy.dropLowest)
   const nHigh = Math.max(0, policy.dropHighest)
@@ -105,7 +139,53 @@ export function groupEffectiveEarnedAndMax(
       }
     }
   }
-  return { effectiveEarned, effectiveMax }
+  return { effectiveEarned, effectiveMax, droppedIds: dropped }
+}
+
+function shouldIncludeColumn(
+  col: GradebookColumnForFinal,
+  gradeStr: string | undefined,
+  hasOverride: boolean,
+  mode: 'actual' | 'whatIf',
+  nowMs: number,
+): boolean {
+  if (mode === 'whatIf' && hasOverride) return true
+  const hasGrade = typeof gradeStr === 'string' && gradeStr.trim() !== ''
+  let isPastDue = false
+  if (col.dueAt) {
+    const d = new Date(col.dueAt)
+    if (!Number.isNaN(d.getTime())) {
+      isPastDue = d.getTime() < nowMs
+    }
+  }
+  return hasGrade || isPastDue
+}
+
+function resolveOptions(
+  nowOrOptions: Date | string | number | ComputeFinalOptions,
+): Required<Pick<ComputeFinalOptions, 'mode' | 'whatIfOverrides' | 'heldItemIds' | 'now'>> {
+  if (
+    typeof nowOrOptions === 'object' &&
+    !(nowOrOptions instanceof Date) &&
+    ('mode' in nowOrOptions ||
+      'whatIfOverrides' in nowOrOptions ||
+      'heldItemIds' in nowOrOptions ||
+      'now' in nowOrOptions)
+  ) {
+    const o = nowOrOptions as ComputeFinalOptions
+    return {
+      mode: o.mode ?? 'actual',
+      whatIfOverrides: o.whatIfOverrides ?? {},
+      heldItemIds: o.heldItemIds ?? new Set<string>(),
+      now: o.now ?? new Date(),
+    }
+  }
+  return {
+    mode: 'actual',
+    whatIfOverrides: {},
+    heldItemIds: new Set<string>(),
+    now: nowOrOptions as Date | string | number,
+  }
 }
 
 /**
@@ -114,15 +194,22 @@ export function groupEffectiveEarnedAndMax(
  *
  * Only includes assignments that (a) have a grade entered for the student, or (b) are past their
  * due date (missing work counts as 0 toward the average). Future/not-due assignments with no
- * grade are excluded from the denominator and numerator.
+ * grade are excluded from the denominator and numerator unless `mode` is `whatIf` and the item
+ * has a hypothetical override.
  */
 export function computeCourseFinalPercent(
   columns: GradebookColumnForFinal[],
   gradesByItemId: Record<string, string>,
   assignmentGroups: AssignmentGroupWeight[],
   excusedByItemId: Record<string, boolean> = {},
-  now: Date | string | number = new Date(),
+  nowOrOptions: Date | string | number | ComputeFinalOptions = new Date(),
 ): number | null {
+  const { mode, whatIfOverrides, heldItemIds, now } = resolveOptions(nowOrOptions)
+  const mergedGrades =
+    mode === 'whatIf'
+      ? mergeGradesForWhatIf(gradesByItemId, whatIfOverrides, heldItemIds)
+      : gradesByItemId
+
   const settingsIds = new Set(assignmentGroups.map((g) => g.id))
   const polByG = new Map<string, GroupPolicy>()
   for (const g of assignmentGroups) {
@@ -136,8 +223,10 @@ export function computeCourseFinalPercent(
   const maxByBucket = new Map<string, number>()
   const earnedByBucket = new Map<string, number>()
 
-  const byGroup: Map<string, { itemId: string; max: number; earned: number; neverDrop: boolean; isFinal: boolean }[]> =
-    new Map()
+  const byGroup: Map<
+    string,
+    { itemId: string; max: number; earned: number; neverDrop: boolean; isFinal: boolean }[]
+  > = new Map()
 
   const nowDate = now instanceof Date ? now : new Date(now)
   const nowMs = nowDate.getTime()
@@ -147,20 +236,12 @@ export function computeCourseFinalPercent(
     if (max == null || max <= 0) continue
     if (excusedByItemId[col.id] === true) continue
 
-    // New rule: only count assignments with a grade entered OR that are past due (missing).
-    // This excludes "not yet taken" future assignments from the current final grade calc.
-    const gradeStr = gradesByItemId[col.id]
-    const hasGrade = typeof gradeStr === 'string' && gradeStr.trim() !== ''
-    let isPastDue = false
-    if (col.dueAt) {
-      const d = new Date(col.dueAt)
-      if (!Number.isNaN(d.getTime())) {
-        isPastDue = d.getTime() < nowMs
-      }
-    }
-    if (!hasGrade && !isPastDue) continue
+    const hasOverride =
+      mode === 'whatIf' && (whatIfOverrides[col.id] ?? '').trim() !== ''
+    const gradeStr = mergedGrades[col.id]
+    if (!shouldIncludeColumn(col, gradeStr, hasOverride, mode, nowMs)) continue
 
-    const earned = parseEarned(gradesByItemId[col.id])
+    const earned = parseEarned(gradeStr)
     const gid = col.assignmentGroupId?.trim()
     const bucket = gid && settingsIds.has(gid) ? gid : UNGROUPED
     const isFinal = col.replaceWithFinal === true
@@ -244,8 +325,206 @@ export function computeCourseFinalPercent(
   return acc * 100
 }
 
+/** What-if projection using merged actual + hypothetical scores (plan 3.16). */
+export function computeWhatIfFinalPercent(
+  columns: GradebookColumnForFinal[],
+  actualGrades: Record<string, string>,
+  assignmentGroups: AssignmentGroupWeight[],
+  excusedByItemId: Record<string, boolean>,
+  whatIfOverrides: Record<string, string>,
+  heldItemIds: ReadonlySet<string>,
+  now: Date | string | number = new Date(),
+): number | null {
+  return computeCourseFinalPercent(columns, actualGrades, assignmentGroups, excusedByItemId, {
+    mode: 'whatIf',
+    whatIfOverrides,
+    heldItemIds,
+    now,
+  })
+}
+
+/** Recompute which items are dropped under current grades/overrides (plan 3.9 + 3.16). */
+export function computeDroppedGrades(
+  columns: GradebookColumnForFinal[],
+  gradesByItemId: Record<string, string>,
+  assignmentGroups: AssignmentGroupWeight[],
+  excusedByItemId: Record<string, boolean> = {},
+  options: ComputeFinalOptions = {},
+): Record<string, boolean> {
+  const { mode, whatIfOverrides, heldItemIds, now } = resolveOptions(options)
+  const mergedGrades =
+    mode === 'whatIf'
+      ? mergeGradesForWhatIf(gradesByItemId, whatIfOverrides, heldItemIds)
+      : gradesByItemId
+
+  const settingsIds = new Set(assignmentGroups.map((g) => g.id))
+  const polByG = new Map<string, GroupPolicy>()
+  for (const g of assignmentGroups) {
+    polByG.set(g.id, {
+      dropLowest: g.dropLowest != null && g.dropLowest > 0 ? g.dropLowest : 0,
+      dropHighest: g.dropHighest != null && g.dropHighest > 0 ? g.dropHighest : 0,
+      replaceLowestWithFinal: g.replaceLowestWithFinal === true,
+    })
+  }
+
+  const byGroup: Map<
+    string,
+    { itemId: string; max: number; earned: number; neverDrop: boolean; isFinal: boolean }[]
+  > = new Map()
+
+  const nowDate = now instanceof Date ? now : new Date(now)
+  const nowMs = nowDate.getTime()
+  const dropped: Record<string, boolean> = {}
+
+  for (const col of columns) {
+    const max = col.maxPoints
+    if (max == null || max <= 0) continue
+    if (excusedByItemId[col.id] === true) continue
+
+    const hasOverride =
+      mode === 'whatIf' && (whatIfOverrides[col.id] ?? '').trim() !== ''
+    const gradeStr = mergedGrades[col.id]
+    if (!shouldIncludeColumn(col, gradeStr, hasOverride, mode, nowMs)) continue
+
+    const earned = parseEarned(gradeStr)
+    const gid = col.assignmentGroupId?.trim()
+    const bucket = gid && settingsIds.has(gid) ? gid : UNGROUPED
+    if (bucket === UNGROUPED) continue
+
+    if (!byGroup.has(bucket)) byGroup.set(bucket, [])
+    byGroup.get(bucket)!.push({
+      itemId: col.id,
+      max,
+      earned,
+      neverDrop: col.neverDrop === true,
+      isFinal: col.replaceWithFinal === true,
+    })
+  }
+
+  for (const [gid, lines] of byGroup) {
+    const p = polByG.get(gid) ?? { dropLowest: 0, dropHighest: 0, replaceLowestWithFinal: false }
+    const { droppedIds } = groupEffectiveEarnedAndMax(p, lines)
+    for (const id of droppedIds) dropped[id] = true
+  }
+
+  return dropped
+}
+
+/** Items eligible for equal-score target calculation (ungraded, non-held, non-excused). */
+export function remainingItemsForTarget(
+  columns: GradebookColumnForFinal[],
+  actualGrades: Record<string, string>,
+  excusedByItemId: Record<string, boolean>,
+  heldItemIds: ReadonlySet<string>,
+  whatIfOverrides: Record<string, string>,
+): GradebookColumnForFinal[] {
+  return columns.filter((col) => {
+    if (col.maxPoints == null || col.maxPoints <= 0) return false
+    if (excusedByItemId[col.id] === true) return false
+    if (heldItemIds.has(col.id)) return false
+    const hasActual = (actualGrades[col.id] ?? '').trim() !== ''
+    const hasOverride = (whatIfOverrides[col.id] ?? '').trim() !== ''
+    return !hasActual && !hasOverride
+  })
+}
+
+/**
+ * Given a target course percentage, estimate the equal score (0–100%) needed on each remaining
+ * ungraded item. Uses binary search over the shared grade-calculation engine.
+ */
+export function computeScoreNeededForTarget(
+  targetPercent: number,
+  columns: GradebookColumnForFinal[],
+  actualGrades: Record<string, string>,
+  assignmentGroups: AssignmentGroupWeight[],
+  excusedByItemId: Record<string, boolean>,
+  heldItemIds: ReadonlySet<string>,
+  whatIfOverrides: Record<string, string>,
+  now: Date | string | number = new Date(),
+): ScoreNeededResult {
+  if (!Number.isFinite(targetPercent)) {
+    return { achievable: false, reason: 'Enter a valid target grade.' }
+  }
+
+  const remaining = remainingItemsForTarget(
+    columns,
+    actualGrades,
+    excusedByItemId,
+    heldItemIds,
+    whatIfOverrides,
+  )
+  if (remaining.length === 0) {
+    return { achievable: false, reason: 'No remaining ungraded items to model.' }
+  }
+
+  const baseOpts: ComputeFinalOptions = {
+    mode: 'whatIf',
+    whatIfOverrides,
+    heldItemIds,
+    now,
+  }
+
+  const current = computeCourseFinalPercent(
+    columns,
+    actualGrades,
+    assignmentGroups,
+    excusedByItemId,
+    baseOpts,
+  )
+  if (current != null && current + 1e-9 >= targetPercent) {
+    return { achievable: false, reason: 'You already meet or exceed this target with current grades.' }
+  }
+
+  const itemIds = remaining.map((c) => c.id)
+
+  function finalWithEqualScore(scorePct: number): number | null {
+    const trialOverrides = { ...whatIfOverrides }
+    for (const col of remaining) {
+      const max = col.maxPoints ?? 0
+      trialOverrides[col.id] = String(Math.round((scorePct / 100) * max * 1000) / 1000)
+    }
+    return computeCourseFinalPercent(columns, actualGrades, assignmentGroups, excusedByItemId, {
+      ...baseOpts,
+      whatIfOverrides: trialOverrides,
+    })
+  }
+
+  const at100 = finalWithEqualScore(100)
+  if (at100 == null || at100 + 1e-9 < targetPercent) {
+    return { achievable: false, reason: 'This target is not achievable even with 100% on remaining items.' }
+  }
+
+  let lo = 0
+  let hi = 100
+  for (let i = 0; i < 48; i++) {
+    const mid = (lo + hi) / 2
+    const pct = finalWithEqualScore(mid)
+    if (pct != null && pct + 1e-9 >= targetPercent) hi = mid
+    else lo = mid
+  }
+
+  return { achievable: true, scorePercent: Math.ceil(hi * 10) / 10, itemIds }
+}
+
 export function formatFinalPercent(pct: number | null): string {
   if (pct == null || !Number.isFinite(pct)) return '—'
   const rounded = Math.round(pct * 10) / 10
   return `${rounded}%`
+}
+
+/** Lightweight client-only usage metric (plan 3.16 observability). */
+export function recordWhatIfSession(): void {
+  try {
+    sessionStorage.setItem('whatif_sessions', '1')
+  } catch {
+    // ignore storage errors
+  }
+}
+
+export function hasWhatIfSession(): boolean {
+  try {
+    return sessionStorage.getItem('whatif_sessions') === '1'
+  } catch {
+    return false
+  }
 }

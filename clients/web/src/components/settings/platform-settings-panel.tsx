@@ -73,6 +73,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffPeerReview: false,
     ffCompletionCredentials: false,
     ffOnboardingFlow: false,
+    ffWhatifGrades: false,
     ffAiStudyBuddy: false,
     ffApiTokens: false,
     ffCalendarFeeds: true,

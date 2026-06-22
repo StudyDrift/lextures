@@ -114,6 +114,7 @@ type platformSettingsJSON struct {
 	FFCatalogIntegration            bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        bool `json:"ffEnrollmentStateMachine"`
 	FFGradeSubmission               bool `json:"ffGradeSubmission"`
+	FFWhatifGrades                  bool `json:"ffWhatifGrades"`
 	FFPlagiarismChecks              bool `json:"ffPlagiarismChecks"`
 	FFIncompleteGradeWorkflow       bool `json:"ffIncompleteGradeWorkflow"`
 	FFAcademicCalendar              bool `json:"ffAcademicCalendar"`
@@ -311,6 +312,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFCatalogIntegration:            merged.FFCatalogIntegration,
 			FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 			FFGradeSubmission:               merged.FFGradeSubmission,
+			FFWhatifGrades:                  merged.FFWhatifGrades,
 			FFPlagiarismChecks:              merged.FFPlagiarismChecks,
 			FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
 			FFAcademicCalendar:              merged.FFAcademicCalendar,
@@ -483,6 +485,7 @@ type putPlatformBody struct {
 	FFCatalogIntegration            *bool `json:"ffCatalogIntegration"`
 	FFEnrollmentStateMachine        *bool `json:"ffEnrollmentStateMachine"`
 	FFGradeSubmission               *bool `json:"ffGradeSubmission"`
+	FFWhatifGrades                  *bool `json:"ffWhatifGrades"`
 	FFPlagiarismChecks              *bool `json:"ffPlagiarismChecks"`
 	FFIncompleteGradeWorkflow       *bool `json:"ffIncompleteGradeWorkflow"`
 	FFAcademicCalendar              *bool `json:"ffAcademicCalendar"`
@@ -801,6 +804,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffcatalogintegration", body.FFCatalogIntegration, func(v bool) { wr.FFCatalogIntegration = &v })
 		setBool("ffenrollmentstatemachine", body.FFEnrollmentStateMachine, func(v bool) { wr.FFEnrollmentStateMachine = &v })
 		setBool("ffgradesubmission", body.FFGradeSubmission, func(v bool) { wr.FFGradeSubmission = &v })
+		setBool("ffwhatifgrades", body.FFWhatifGrades, func(v bool) { wr.FFWhatifGrades = &v })
 		setBool("ffplagiarismchecks", body.FFPlagiarismChecks, func(v bool) { wr.FFPlagiarismChecks = &v })
 		setBool("ffincompletegradeworkflow", body.FFIncompleteGradeWorkflow, func(v bool) { wr.FFIncompleteGradeWorkflow = &v })
 		setBool("ffacademiccalendar", body.FFAcademicCalendar, func(v bool) { wr.FFAcademicCalendar = &v })
@@ -952,6 +956,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFCatalogIntegration:            merged.FFCatalogIntegration,
 			FFEnrollmentStateMachine:        merged.FFEnrollmentStateMachine,
 			FFGradeSubmission:               merged.FFGradeSubmission,
+			FFWhatifGrades:                  merged.FFWhatifGrades,
 			FFPlagiarismChecks:              merged.FFPlagiarismChecks,
 			FFIncompleteGradeWorkflow:       merged.FFIncompleteGradeWorkflow,
 			FFAcademicCalendar:              merged.FFAcademicCalendar,

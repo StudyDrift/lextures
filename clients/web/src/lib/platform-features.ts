@@ -45,6 +45,7 @@ export type PlatformFeaturesSnapshot = {
   ffIncompleteGradeWorkflow?: boolean
   ffUiMode?: boolean
   ffGradeSubmission?: boolean
+  ffWhatifGrades?: boolean
   ffAcademicCalendar?: boolean
   ffPlagiarismChecks?: boolean
   ffCourseEvaluations?: boolean
@@ -123,6 +124,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffIncompleteGradeWorkflow: false,
   ffUiMode: false,
   ffGradeSubmission: false,
+  ffWhatifGrades: false,
   ffAcademicCalendar: false,
   ffPlagiarismChecks: false,
   ffCourseEvaluations: false,
