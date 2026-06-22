@@ -1,13 +1,17 @@
 /**
  * Peer Review (plan 3.15)
  */
-import { test, expect } from '../fixtures/test.js'
+import { test, expect, uniqueEmail } from '../fixtures/test.js'
 import {
   apiEnablePeerReview,
   apiPutPeerReviewConfig,
   apiPostPeerReviewAllocate,
   apiGetPeerReviewAssigned,
   apiCreateAssignment,
+  apiPatchAssignmentSubmissionTypes,
+  apiUploadAssignmentSubmission,
+  apiSignup,
+  apiEnroll,
 } from '../fixtures/api.js'
 
 test.describe('Peer Review', () => {
@@ -20,7 +24,7 @@ test.describe('Peer Review', () => {
   })
 
   test('API round-trip after enabling feature', async ({ seededCourse }) => {
-    await apiEnablePeerReview(seededCourse.instructorToken)
+    await apiEnablePeerReview()
     const assigned = await apiGetPeerReviewAssigned(seededCourse.studentToken)
     expect(Array.isArray(assigned)).toBe(true)
   })
@@ -28,13 +32,19 @@ test.describe('Peer Review', () => {
 
 test.describe('Peer Review — instructor setup', () => {
   test('configure and allocate on assignment', async ({ seededCourse }) => {
-    await apiEnablePeerReview(seededCourse.instructorToken)
+    await apiEnablePeerReview()
 
     const assignment = await apiCreateAssignment(
       seededCourse.instructorToken,
       seededCourse.courseCode,
       seededCourse.moduleId,
       'Peer review E2E assignment',
+    )
+
+    await apiPatchAssignmentSubmissionTypes(
+      seededCourse.instructorToken,
+      seededCourse.courseCode,
+      assignment.id,
     )
 
     await apiPutPeerReviewConfig(
@@ -49,11 +59,32 @@ test.describe('Peer Review — instructor setup', () => {
       },
     )
 
+    await apiUploadAssignmentSubmission(
+      seededCourse.studentToken,
+      seededCourse.courseCode,
+      assignment.id,
+      'First student submission for peer review E2E.',
+    )
+
+    const student2Email = uniqueEmail('peer2')
+    const { access_token: student2Token } = await apiSignup({
+      email: student2Email,
+      password: 'E2eTestPass1!',
+      displayName: 'Peer Student 2',
+    })
+    await apiEnroll(seededCourse.instructorToken, seededCourse.courseCode, student2Email, 'student')
+    await apiUploadAssignmentSubmission(
+      student2Token,
+      seededCourse.courseCode,
+      assignment.id,
+      'Second student submission for peer review E2E.',
+    )
+
     const alloc = await apiPostPeerReviewAllocate(
       seededCourse.instructorToken,
       seededCourse.courseCode,
       assignment.id,
     )
-    expect(typeof alloc.allocationsCreated).toBe('number')
+    expect(alloc.allocationsCreated).toBeGreaterThanOrEqual(0)
   })
 })

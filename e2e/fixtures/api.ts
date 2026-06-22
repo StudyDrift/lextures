@@ -1633,19 +1633,37 @@ export async function apiGetCourseStructure(
 // Peer Review helpers (plan 3.15)
 // ---------------------------------------------------------------------------
 
-export async function apiEnablePeerReview(token: string): Promise<void> {
-  const res = await fetch(`${apiBase}/api/v1/settings/platform`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ ffPeerReview: true }),
+const E2E_PLATFORM_ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL ?? 'admin@e2e.test'
+const E2E_PLATFORM_ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD ?? 'E2eTestPass1!'
+
+async function apiGetPlatformAdminToken(): Promise<string> {
+  const loginRes = await fetch(`${apiBase}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: E2E_PLATFORM_ADMIN_EMAIL,
+      password: E2E_PLATFORM_ADMIN_PASSWORD,
+    }),
   })
-  if (!res.ok) {
-    const body = await res.text()
-    throw new Error(`Enable peer review failed (${res.status}): ${body}`)
+  if (loginRes.ok) {
+    const { access_token } = (await loginRes.json()) as { access_token: string }
+    return access_token
   }
+  const { access_token } = await apiSignup({
+    email: E2E_PLATFORM_ADMIN_EMAIL,
+    password: E2E_PLATFORM_ADMIN_PASSWORD,
+    displayName: 'E2E Admin',
+  })
+  return access_token
+}
+
+/** Enable peer review via Settings → Global platform (requires platform admin). */
+export async function apiEnablePeerReview(): Promise<void> {
+  const token = await apiGetPlatformAdminToken()
+  await apiPatchPlatformSettings(token, {
+    ffPeerReview: true,
+    updateMask: ['ffPeerReview'],
+  })
 }
 
 export async function apiPutPeerReviewConfig(
