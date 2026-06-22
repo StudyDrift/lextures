@@ -222,6 +222,7 @@ test.describe('Differentiated assignments (2.15)', () => {
       `/courses/${seededCourse.courseCode}/modules/assignment/${assignment.id}`,
     )
     await coursePage.getByRole('button', { name: /^Edit$/i }).click()
+    await coursePage.getByRole('tab', { name: /^Settings$/i }).click()
     const assignToSummary = coursePage.locator('summary').filter({ hasText: /^Assign to$/ })
     await expect(assignToSummary).toBeVisible({ timeout: 12000 })
     await assignToSummary.click()
