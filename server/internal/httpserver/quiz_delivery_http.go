@@ -71,6 +71,9 @@ func (d Deps) handleQuizStart() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
+		if !d.enforceConditionalReleaseForLearner(w, r, courseCode, *cid, viewer, itemID) {
+			return
+		}
 		row, err := coursemodulequizzes.GetForCourseItem(ctx, d.Pool, *cid, itemID)
 		if err != nil || row == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")

@@ -48,6 +48,14 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 		}
 
 		ctx := r.Context()
+		cid, err := course.GetIDByCourseCode(ctx, d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		if !d.enforceConditionalReleaseForLearner(w, r, courseCode, *cid, viewer, itemID) {
+			return
+		}
 		attempt, err := quizattempts.GetAttempt(ctx, d.Pool, body.AttemptID)
 		if err != nil || attempt == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
@@ -57,8 +65,7 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
 			return
 		}
-		cid, err := course.GetIDByCourseCode(ctx, d.Pool, courseCode)
-		if err != nil || cid == nil || attempt.CourseID != *cid {
+		if attempt.CourseID != *cid {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Attempt not found.")
 			return
 		}

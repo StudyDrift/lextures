@@ -299,16 +299,171 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
   },
   {
+    key: 'ffAcademicCalendar',
+    label: 'Academic calendar',
+    description:
+      'Institution academic calendar with terms, holidays, and iCal feeds on the dashboard and admin tools (plan 14.6).',
+  },
+  {
+    key: 'ffAltTextEnforcement',
+    label: 'Alt-text hard block',
+    description:
+      'Block publishing course images that lack alt text when alt-text enforcement is enabled (accessibility plan 12.5).',
+  },
+  {
     key: 'ffApiTokens',
     label: 'API access keys',
     description:
       'Personal and institutional API tokens with scoped access for integrations, automation, and MCP agents (plan 16.2).',
   },
   {
+    key: 'ffBotDiscord',
+    label: 'Discord classroom bot',
+    description: 'Connect Discord servers for assignment reminders and classroom announcements (plan 16.6).',
+  },
+  {
+    key: 'ffBotSlack',
+    label: 'Slack classroom bot',
+    description: 'Connect Slack workspaces for assignment reminders and classroom announcements (plan 16.6).',
+  },
+  {
+    key: 'ffBotTeams',
+    label: 'Microsoft Teams classroom bot',
+    description: 'Connect Microsoft Teams for assignment reminders and classroom announcements (plan 16.6).',
+  },
+  {
+    key: 'ffBroadcasts',
+    label: 'Institution broadcasts',
+    description: 'Compose and send institution-wide broadcast messages from the admin console.',
+  },
+  {
     key: 'ffCalendarFeeds',
     label: 'Calendar feeds',
     description:
       'iCal and CalDAV calendar feed subscriptions for assignment and quiz deadlines (plan 16.5).',
+  },
+  {
+    key: 'ffCatalogIntegration',
+    label: 'Course catalog & registration',
+    description:
+      'Browse and register for catalog courses from the main navigation and learner dashboard (plan 14.2).',
+  },
+  {
+    key: 'ffClassroomSignals',
+    label: 'Classroom signals',
+    description:
+      'K-12 classroom engagement widgets on course and admin dashboards (plan 13.9).',
+  },
+  {
+    key: 'ffConferenceScheduling',
+    label: 'Parent-teacher conferences',
+    description:
+      'Schedule parent-teacher conferences from the parent portal and instructor dashboard (plan 13.12).',
+  },
+  {
+    key: 'ffCourseEvaluations',
+    label: 'Course evaluations',
+    description:
+      'Evaluation templates, learner surveys, and institutional evaluation reports (plan 14.7).',
+  },
+  {
+    key: 'ffCourseReviews',
+    label: 'Course reviews',
+    description: 'Learner star ratings and written reviews on self-paced catalog courses.',
+  },
+  {
+    key: 'ffDemographics',
+    label: 'Student demographics reporting',
+    description: 'Title I and student demographics admin reports for K-12 compliance (plan 13.x).',
+  },
+  {
+    key: 'ffEnrollmentStateMachine',
+    label: 'Enrollment lifecycle',
+    description:
+      'Formal enrollment states (active, dropped, withdrawn) with transitions on the course enrollments page.',
+  },
+  {
+    key: 'ffGamification',
+    label: 'Gamification & leaderboards',
+    description:
+      'Points, badges, and course leaderboards on the dashboard, course home, and learner profile.',
+  },
+  {
+    key: 'ffGradeSubmission',
+    label: 'Final grade submission',
+    description:
+      'Instructor final grade submission workflow and admin grade-submission status reporting (plan 14.x).',
+  },
+  {
+    key: 'ffIncompleteGradeWorkflow',
+    label: 'Incomplete grade workflow',
+    description:
+      'Track and resolve incomplete (I) grades from the admin incompletes view and gradebook (plan 14.4).',
+  },
+  {
+    key: 'ffLibrary',
+    label: 'Learner library & reading log',
+    description:
+      'Reading log, reading dashboard, and library catalog pages for independent reading programs (plan 14.10).',
+  },
+  {
+    key: 'ffLibraryIntegration',
+    label: 'Library system integration',
+    description: 'Admin configuration for external library catalog integrations (plan 14.10).',
+  },
+  {
+    key: 'ffParentPortal',
+    label: 'Parent portal',
+    description:
+      'K-12 parent/guardian portal with child linking, read-only grade access, and notification preferences (plan 13.1).',
+  },
+  {
+    key: 'ffProctoringIntegration',
+    label: 'Proctoring integration',
+    description:
+      'Third-party proctoring launch and session hooks on high-stakes quizzes (plan 14.9).',
+  },
+  {
+    key: 'ffPublicApi',
+    label: 'Public REST API',
+    description: 'Expose the documented public API for external integrations and developer access.',
+  },
+  {
+    key: 'ffPublicCatalog',
+    label: 'Public course catalog',
+    description: 'Marketing-style public catalog browse and course detail pages for open enrollment.',
+  },
+  {
+    key: 'ffReadAloud',
+    label: 'Read-aloud (text-to-speech)',
+    description:
+      'Learner read-aloud controls in the top bar when read-aloud is enabled platform-wide (plan 12.8).',
+  },
+  {
+    key: 'ffReadingPreferences',
+    label: 'Reading preferences',
+    description:
+      'Learner reading preference controls (font, spacing, contrast) in the top bar (plan 12.x).',
+  },
+  {
+    key: 'ffReportCards',
+    label: 'Report cards',
+    description: 'Standards-based report card generation and distribution for K-12 terms.',
+  },
+  {
+    key: 'ffSelfPacedMode',
+    label: 'Self-paced course mode',
+    description: 'Self-paced enrollments, progress tracking, and dashboard sections for catalog learners.',
+  },
+  {
+    key: 'ffSisIntegration',
+    label: 'SIS integration',
+    description: 'Student information system integration settings and sync tools in admin (plan 14.1).',
+  },
+  {
+    key: 'ffUiMode',
+    label: 'UI mode switcher',
+    description: 'Let learners switch between simplified and standard interface modes where supported.',
   },
   {
     key: 'mfaEnabled',

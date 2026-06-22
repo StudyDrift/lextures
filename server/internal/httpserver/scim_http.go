@@ -125,6 +125,8 @@ func (d Deps) handleSCIMSchemas() http.HandlerFunc {
 			"description": "Group resource",
 			"attributes": []map[string]any{
 				{"name": "displayName", "type": "string", "multiValued": false, "required": false},
+				{"name": "externalId", "type": "string", "multiValued": false, "required": false},
+				{"name": "members", "type": "complex", "multiValued": true, "required": false},
 			},
 		}
 		_ = json.NewEncoder(w).Encode([]any{userSchema, groupSchema})
@@ -277,14 +279,50 @@ func (d Deps) handleSCIMUserOne() http.HandlerFunc {
 
 func (d Deps) handleSCIMGroupsCollection() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		inst, ok := scimInstitutionFrom(r.Context())
+		if !ok {
+			writeSCIMError(w, http.StatusUnauthorized, "invalidCredentials", "Unauthorized")
+			return
+		}
 		base := d.scimPublicBaseURL(r)
 		switch r.Method {
 		case http.MethodGet:
-			scim.WriteGroupList(w)
+			filter := strings.TrimSpace(r.URL.Query().Get("filter"))
+			list, err := scim.ListGroups(r.Context(), d.Pool, inst, filter, base)
+			if err != nil {
+				writeSCIMError(w, http.StatusInternalServerError, "invalidSyntax", "Failed to list groups")
+				return
+			}
+			w.Header().Set("Content-Type", "application/scim+json")
+			_ = json.NewEncoder(w).Encode(list)
 		case http.MethodPost:
-			_, _ = io.ReadAll(io.LimitReader(r.Body, 1<<20))
-			id := uuid.NewString()
-			scim.WriteGroupCreated(w, base, id)
+			b, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+			if err != nil {
+				writeSCIMError(w, http.StatusBadRequest, "invalidSyntax", "Invalid body")
+				return
+			}
+			var g scim.GroupResource
+			if err := json.Unmarshal(b, &g); err != nil {
+				writeSCIMError(w, http.StatusBadRequest, "invalidSyntax", "Invalid JSON")
+				return
+			}
+			out, err := scim.CreateGroup(r.Context(), d.Pool, inst, &g, base)
+			if errors.Is(err, scim.ErrUniqueness) {
+				writeSCIMError(w, http.StatusConflict, "uniqueness", "Resource already exists")
+				return
+			}
+			if errors.Is(err, scim.ErrInvalidValue) {
+				writeSCIMError(w, http.StatusBadRequest, "invalidValue", "Invalid attribute value")
+				return
+			}
+			if err != nil {
+				writeSCIMError(w, http.StatusInternalServerError, "invalidSyntax", "Create failed")
+				return
+			}
+			w.Header().Set("Content-Type", "application/scim+json")
+			w.Header().Set("Location", base+"/scim/v2/Groups/"+out.ID)
+			w.WriteHeader(http.StatusCreated)
+			_ = json.NewEncoder(w).Encode(out)
 		default:
 			w.Header().Set("Allow", strings.Join([]string{http.MethodGet, http.MethodPost}, ", "))
 			writeSCIMError(w, http.StatusMethodNotAllowed, "invalidSyntax", "Method not allowed")
@@ -292,14 +330,98 @@ func (d Deps) handleSCIMGroupsCollection() http.HandlerFunc {
 	}
 }
 
-func (d Deps) handleSCIMGroupPatch() http.HandlerFunc {
+func (d Deps) handleSCIMGroupOne() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPatch {
-			w.Header().Set("Allow", http.MethodPatch)
-			writeSCIMError(w, http.StatusMethodNotAllowed, "invalidSyntax", "Method not allowed")
+		inst, ok := scimInstitutionFrom(r.Context())
+		if !ok {
+			writeSCIMError(w, http.StatusUnauthorized, "invalidCredentials", "Unauthorized")
 			return
 		}
-		writeSCIMError(w, http.StatusNotImplemented, "invalidSyntax", "Group PATCH not implemented")
+		id := strings.TrimSpace(chi.URLParam(r, "id"))
+		base := d.scimPublicBaseURL(r)
+		switch r.Method {
+		case http.MethodGet:
+			g, err := scim.GetGroup(r.Context(), d.Pool, inst, id, base)
+			if errors.Is(err, scim.ErrNotFound) {
+				writeSCIMError(w, http.StatusNotFound, "", "Resource not found")
+				return
+			}
+			if err != nil {
+				writeSCIMError(w, http.StatusInternalServerError, "invalidSyntax", "Lookup failed")
+				return
+			}
+			w.Header().Set("Content-Type", "application/scim+json")
+			_ = json.NewEncoder(w).Encode(g)
+		case http.MethodPut:
+			b, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+			if err != nil {
+				writeSCIMError(w, http.StatusBadRequest, "invalidSyntax", "Invalid body")
+				return
+			}
+			var body scim.GroupResource
+			if err := json.Unmarshal(b, &body); err != nil {
+				writeSCIMError(w, http.StatusBadRequest, "invalidSyntax", "Invalid JSON")
+				return
+			}
+			out, err := scim.ReplaceGroup(r.Context(), d.Pool, inst, id, &body, base)
+			if errors.Is(err, scim.ErrNotFound) {
+				writeSCIMError(w, http.StatusNotFound, "", "Resource not found")
+				return
+			}
+			if errors.Is(err, scim.ErrUniqueness) {
+				writeSCIMError(w, http.StatusConflict, "uniqueness", "Uniqueness violation")
+				return
+			}
+			if errors.Is(err, scim.ErrInvalidValue) {
+				writeSCIMError(w, http.StatusBadRequest, "invalidValue", "Invalid attribute value")
+				return
+			}
+			if err != nil {
+				writeSCIMError(w, http.StatusInternalServerError, "invalidSyntax", "Update failed")
+				return
+			}
+			w.Header().Set("Content-Type", "application/scim+json")
+			_ = json.NewEncoder(w).Encode(out)
+		case http.MethodPatch:
+			b, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+			if err != nil {
+				writeSCIMError(w, http.StatusBadRequest, "invalidSyntax", "Invalid body")
+				return
+			}
+			out, err := scim.PatchGroup(r.Context(), d.Pool, inst, id, b, base)
+			if errors.Is(err, scim.ErrNotFound) {
+				writeSCIMError(w, http.StatusNotFound, "", "Resource not found")
+				return
+			}
+			if errors.Is(err, scim.ErrUniqueness) {
+				writeSCIMError(w, http.StatusConflict, "uniqueness", "Uniqueness violation")
+				return
+			}
+			if errors.Is(err, scim.ErrInvalidValue) {
+				writeSCIMError(w, http.StatusBadRequest, "invalidValue", "Invalid patch")
+				return
+			}
+			if err != nil {
+				writeSCIMError(w, http.StatusInternalServerError, "invalidSyntax", "Patch failed")
+				return
+			}
+			w.Header().Set("Content-Type", "application/scim+json")
+			_ = json.NewEncoder(w).Encode(out)
+		case http.MethodDelete:
+			err := scim.DeleteGroup(r.Context(), d.Pool, inst, id)
+			if errors.Is(err, scim.ErrNotFound) {
+				writeSCIMError(w, http.StatusNotFound, "", "Resource not found")
+				return
+			}
+			if err != nil {
+				writeSCIMError(w, http.StatusInternalServerError, "invalidSyntax", "Delete failed")
+				return
+			}
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			w.Header().Set("Allow", strings.Join([]string{http.MethodGet, http.MethodPut, http.MethodPatch, http.MethodDelete}, ", "))
+			writeSCIMError(w, http.StatusMethodNotAllowed, "invalidSyntax", "Method not allowed")
+		}
 	}
 }
 
@@ -316,6 +438,9 @@ func (d Deps) registerSCIMRoutes(r chi.Router) {
 		sr.Delete("/Users/{id}", d.handleSCIMUserOne())
 		sr.Get("/Groups", d.handleSCIMGroupsCollection())
 		sr.Post("/Groups", d.handleSCIMGroupsCollection())
-		sr.Patch("/Groups/{id}", d.handleSCIMGroupPatch())
+		sr.Get("/Groups/{id}", d.handleSCIMGroupOne())
+		sr.Put("/Groups/{id}", d.handleSCIMGroupOne())
+		sr.Patch("/Groups/{id}", d.handleSCIMGroupOne())
+		sr.Delete("/Groups/{id}", d.handleSCIMGroupOne())
 	})
 }

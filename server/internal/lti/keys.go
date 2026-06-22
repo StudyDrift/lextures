@@ -25,6 +25,11 @@ type RsaKeyPair struct {
 // KeyID returns the LTI JOSE kid.
 func (k *RsaKeyPair) KeyID() string { return k.kid }
 
+// PublicKey returns the RSA public key for verifying platform-issued JWTs.
+func (k *RsaKeyPair) PublicKey() *rsa.PublicKey {
+	return &k.private.PublicKey
+}
+
 // FromPKCS8PEM parses a PKCS#8 RSA private key PEM and wraps it with a kid
 // (server/src/lti_keys.rs: LtiRsaKeyPair::from_pkcs8_pem).
 func FromPKCS8PEM(pemData string, kid string) (*RsaKeyPair, error) {

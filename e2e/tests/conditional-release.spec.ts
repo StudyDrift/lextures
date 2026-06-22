@@ -7,7 +7,10 @@ import {
   apiCreateCourse,
   apiCreateModule,
   apiCreateContentPage,
+  apiCreateAssignment,
   apiEnroll,
+  apiPatchAssignmentSubmissionTypes,
+  apiStartQuiz,
 } from '../fixtures/api.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
@@ -131,5 +134,128 @@ test.describe('Conditional release', () => {
       { headers: authHeaders(student.access_token) },
     )
     expect(unlocked.ok).toBeTruthy()
+  })
+
+  test('module prerequisite blocks quiz start, quiz submit, and assignment upload', async () => {
+    const adminToken = await getAdminToken()
+    const enabled = await enableConditionalRelease(adminToken)
+    if (!enabled) {
+      test.skip(true, 'Could not enable ff_conditional_release (no platform admin)')
+      return
+    }
+
+    const instructor = await apiSignup({
+      email: `${uid('inst')}@e2e.test`,
+      password: PASSWORD,
+      displayName: 'Instructor',
+    })
+    const studentEmail = `${uid('stu')}@e2e.test`
+    const student = await apiSignup({
+      email: studentEmail,
+      password: PASSWORD,
+      displayName: 'Student',
+    })
+
+    const course = await apiCreateCourse(instructor.access_token, { title: 'Gating 102' })
+    const modA = await apiCreateModule(instructor.access_token, course.courseCode, 'Module A')
+    const modB = await apiCreateModule(instructor.access_token, course.courseCode, 'Module B')
+    const itemA = await apiCreateContentPage(
+      instructor.access_token,
+      course.courseCode,
+      modA.id,
+      'Lesson A',
+    )
+    const quizBRes = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/structure/modules/${encodeURIComponent(modB.id)}/quizzes`,
+      {
+        method: 'POST',
+        headers: authHeaders(instructor.access_token),
+        body: JSON.stringify({ title: 'Quiz B' }),
+      },
+    )
+    expect(quizBRes.ok).toBeTruthy()
+    const quizB = (await quizBRes.json()) as { id: string }
+    const assignmentB = await apiCreateAssignment(
+      instructor.access_token,
+      course.courseCode,
+      modB.id,
+      'Assignment B',
+    )
+    await apiPatchAssignmentSubmissionTypes(
+      instructor.access_token,
+      course.courseCode,
+      assignmentB.id,
+    )
+
+    const reqRes = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/structure/modules/${encodeURIComponent(modB.id)}/requirements`,
+      {
+        method: 'PUT',
+        headers: authHeaders(instructor.access_token),
+        body: JSON.stringify({
+          completionMode: 'all_items',
+          prerequisiteModuleIds: [modA.id],
+        }),
+      },
+    )
+    expect(reqRes.ok).toBeTruthy()
+
+    const ruleRes = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/items/${encodeURIComponent(itemA.id)}/completion-rule`,
+      {
+        method: 'PUT',
+        headers: authHeaders(instructor.access_token),
+        body: JSON.stringify({ ruleType: 'must_view' }),
+      },
+    )
+    expect(ruleRes.ok).toBeTruthy()
+
+    await apiEnroll(instructor.access_token, course.courseCode, studentEmail, 'student', student.access_token)
+
+    const blockedQuizStart = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/quizzes/${encodeURIComponent(quizB.id)}/start`,
+      {
+        method: 'POST',
+        headers: authHeaders(student.access_token),
+        body: JSON.stringify({}),
+      },
+    )
+    expect(blockedQuizStart.status).toBe(403)
+    const blockedQuizStartBody = (await blockedQuizStart.json()) as { reason?: unknown }
+    expect(blockedQuizStartBody.reason).toBeTruthy()
+
+    const blockedQuizSubmit = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/quizzes/${encodeURIComponent(quizB.id)}/submit`,
+      {
+        method: 'POST',
+        headers: authHeaders(student.access_token),
+        body: JSON.stringify({
+          attemptId: '00000000-0000-0000-0000-000000000099',
+          responses: [],
+        }),
+      },
+    )
+    expect(blockedQuizSubmit.status).toBe(403)
+
+    const fd = new FormData()
+    fd.set('file', new Blob(['locked module essay'], { type: 'text/plain' }), 'essay.txt')
+    const blockedUpload = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/assignments/${encodeURIComponent(assignmentB.id)}/submissions/upload`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${student.access_token}` },
+        body: fd,
+      },
+    )
+    expect(blockedUpload.status).toBe(403)
+
+    const viewA = await fetch(
+      `${apiBase}/api/v1/courses/${encodeURIComponent(course.courseCode)}/content-pages/${encodeURIComponent(itemA.id)}`,
+      { headers: authHeaders(student.access_token) },
+    )
+    expect(viewA.ok).toBeTruthy()
+
+    const unlockedQuizStart = await apiStartQuiz(student.access_token, course.courseCode, quizB.id)
+    expect(unlockedQuizStart.attemptId).toBeTruthy()
   })
 })
