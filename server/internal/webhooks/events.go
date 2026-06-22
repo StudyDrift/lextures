@@ -23,6 +23,7 @@ const (
 	EventAssignmentCreated   EventType = "assignment.created"
 	EventAssignmentDueSoon   EventType = "assignment.due_soon"
 	EventGradeReleased       EventType = "grade.released"
+	EventGradeCurveApplied   EventType = "grade.curve.applied"
 	EventAnnouncementCreated EventType = "announcement.created"
 )
 
@@ -35,6 +36,7 @@ func AllEventTypes() []string {
 		EventAssignmentCreated,
 		EventAssignmentDueSoon,
 		EventGradeReleased,
+		EventGradeCurveApplied,
 		EventAnnouncementCreated,
 	}
 	out := make([]string, 0, len(types))
@@ -118,7 +120,7 @@ type EventGroup struct {
 // EventGroups returns event types grouped by domain prefix for admin UI.
 func EventGroups() []EventGroup {
 	return []EventGroup{
-		{Domain: "Grades", Types: []string{string(EventGradePosted), string(EventGradeReleased)}},
+		{Domain: "Grades", Types: []string{string(EventGradePosted), string(EventGradeReleased), string(EventGradeCurveApplied)}},
 		{Domain: "Enrollments", Types: []string{string(EventEnrollmentCreated)}},
 		{Domain: "Assignments", Types: []string{string(EventAssignmentSubmitted), string(EventAssignmentCreated), string(EventAssignmentDueSoon)}},
 		{Domain: "Announcements", Types: []string{string(EventAnnouncementCreated)}},

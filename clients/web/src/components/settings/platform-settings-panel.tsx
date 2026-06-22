@@ -74,6 +74,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffCompletionCredentials: false,
     ffOnboardingFlow: false,
     ffWhatifGrades: false,
+    ffGradeCurving: false,
     ffAiStudyBuddy: false,
     ffApiTokens: false,
     ffCalendarFeeds: true,

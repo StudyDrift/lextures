@@ -1739,6 +1739,8 @@ export type CourseGradebookGridResponse = {
   crossListMerged?: boolean
   /** Plan 3.12 */
   excusedGrades?: Record<string, Record<string, boolean>>
+  /** Plan 3.17 — active grade curves by column item id. */
+  activeCurves?: Record<string, { curveId: string; method: string; appliedAt: string }>
 }
 
 export async function fetchCourseGradebookGrid(
@@ -2020,6 +2022,98 @@ export async function retractCourseAssignmentGrades(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/post-grades`,
     { method: 'DELETE' },
   )
+  if (res.ok) return
+  const raw = await parseJson(res)
+  throw new Error(readApiErrorMessage(raw))
+}
+
+export type GradeCurveMethod =
+  | 'flat_bonus'
+  | 'linear_scale'
+  | 'sqrt_curve'
+  | 'set_minimum'
+  | 'custom_mapping'
+
+export type GradeCurveParams = {
+  bonus?: number
+  targetMean?: number
+  targetMax?: number
+  minimum?: number
+  mapping?: Record<string, number>
+}
+
+export type GradeCurvePreviewResult = {
+  studentId: string
+  rawScore: number
+  adjustedScore: number
+  delta: number
+  changed: boolean
+}
+
+export type GradeCurvePreviewResponse = {
+  preview: {
+    eligibleCount: number
+    meanBefore?: number | null
+    meanAfter?: number | null
+    medianBefore?: number | null
+    medianAfter?: number | null
+    histogramBefore: { label: string; min: number; max: number; count: number }[]
+    histogramAfter: { label: string; min: number; max: number; count: number }[]
+    results: GradeCurvePreviewResult[]
+  }
+  activeCurveId?: string | null
+  maxPoints: number
+}
+
+function gradeCurveItemPath(courseCode: string, itemId: string, kind: 'assignment' | 'quiz'): string {
+  const segment = kind === 'quiz' ? 'quizzes' : 'assignments'
+  return `/api/v1/courses/${encodeURIComponent(courseCode)}/${segment}/${encodeURIComponent(itemId)}`
+}
+
+export async function postAssignmentCurvePreview(
+  courseCode: string,
+  itemId: string,
+  body: { method: GradeCurveMethod; params: GradeCurveParams; allowAboveMax: boolean },
+  kind: 'assignment' | 'quiz' = 'assignment',
+): Promise<GradeCurvePreviewResponse> {
+  const res = await authorizedFetch(`${gradeCurveItemPath(courseCode, itemId, kind)}/curve/preview`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      method: body.method,
+      params: body.params,
+      allowAboveMax: body.allowAboveMax,
+    }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as GradeCurvePreviewResponse
+}
+
+export async function postAssignmentCurve(
+  courseCode: string,
+  itemId: string,
+  body: { method: GradeCurveMethod; params: GradeCurveParams; allowAboveMax: boolean },
+  kind: 'assignment' | 'quiz' = 'assignment',
+): Promise<{ curveId: string }> {
+  const res = await authorizedFetch(`${gradeCurveItemPath(courseCode, itemId, kind)}/curve`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      method: body.method,
+      params: body.params,
+      allowAboveMax: body.allowAboveMax,
+    }),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { curveId: string }
+}
+
+export async function deleteGradeCurve(curveId: string): Promise<void> {
+  const res = await authorizedFetch(`/api/v1/curves/${encodeURIComponent(curveId)}`, {
+    method: 'DELETE',
+  })
   if (res.ok) return
   const raw = await parseJson(res)
   throw new Error(readApiErrorMessage(raw))
