@@ -1488,3 +1488,124 @@ export async function apiPatchAssignmentSubmissionTypes(
     throw new Error(`Patch assignment submission types failed (${res.status}): ${body}`)
   }
 }
+
+export type AssignToTargetType = 'everyone' | 'section' | 'group' | 'student'
+
+export type AssignToTargetWrite = {
+  targetType: AssignToTargetType
+  targetId?: string | null
+  dueAt?: string | null
+  availableFrom?: string | null
+  availableUntil?: string | null
+}
+
+export async function apiCreateCourseSection(
+  token: string,
+  courseCode: string,
+  sectionCode: string,
+  name?: string,
+): Promise<{ id: string; sectionCode: string }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/sections`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ sectionCode, ...(name ? { name } : {}) }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Create section failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ id: string; sectionCode: string }>
+}
+
+export async function apiGetAssignToTargets(
+  token: string,
+  courseCode: string,
+  itemId: string,
+): Promise<{ targets: unknown[]; orphaned: boolean }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Get assign-to targets failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ targets: unknown[]; orphaned: boolean }>
+}
+
+export async function apiPutAssignToTargets(
+  token: string,
+  courseCode: string,
+  itemId: string,
+  targets: AssignToTargetWrite[],
+): Promise<{ targets: unknown[]; orphaned: boolean }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ targets }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Put assign-to targets failed (${res.status}): ${body}`)
+  }
+  return res.json() as Promise<{ targets: unknown[]; orphaned: boolean }>
+}
+
+export async function apiBulkExtendAssignToDueDate(
+  token: string,
+  courseCode: string,
+  itemId: string,
+  enrollmentIds: string[],
+  dueAt: string,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/overrides/bulk-extend`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ enrollmentIds, dueAt }),
+    },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Bulk extend due date failed (${res.status}): ${body}`)
+  }
+}
+
+export type ApiStructureItem = {
+  id: string
+  kind: string
+  title: string
+  dueAt?: string | null
+}
+
+export async function apiGetCourseStructure(
+  token: string,
+  courseCode: string,
+): Promise<ApiStructureItem[]> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/structure`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Get course structure failed (${res.status}): ${body}`)
+  }
+  const raw = (await res.json()) as { items?: ApiStructureItem[] }
+  return raw.items ?? []
+}
