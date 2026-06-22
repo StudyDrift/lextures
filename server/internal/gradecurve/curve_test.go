@@ -106,11 +106,15 @@ func TestSqrtCurve(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if prev.Results[0].AdjustedScore != 50 {
-		t.Fatalf("sqrt(25/100)*100 = 50, got %v", prev.Results[0].AdjustedScore)
+	byRaw := make(map[float64]float64, len(prev.Results))
+	for _, r := range prev.Results {
+		byRaw[r.RawScore] = r.AdjustedScore
 	}
-	if prev.Results[1].AdjustedScore != 100 {
-		t.Fatalf("sqrt(100/100)*100 = 100, got %v", prev.Results[1].AdjustedScore)
+	if byRaw[25] != 50 {
+		t.Fatalf("sqrt(25/100)*100 = 50, got %v", byRaw[25])
+	}
+	if byRaw[100] != 100 {
+		t.Fatalf("sqrt(100/100)*100 = 100, got %v", byRaw[100])
 	}
 }
 
