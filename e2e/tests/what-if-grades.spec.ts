@@ -24,7 +24,7 @@ test.describe('What-if grades', () => {
     const { instructorToken, courseCode, moduleId, studentToken } = seededCourse
 
     await apiPutCourseGrading(instructorToken, courseCode, {
-      gradingScale: 'percentage',
+      gradingScale: 'percent',
       assignmentGroups: [
         { name: 'Coursework', sortOrder: 0, weightPercent: 40 },
         { name: 'Final', sortOrder: 1, weightPercent: 60 },
