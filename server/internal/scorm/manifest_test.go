@@ -77,17 +77,19 @@ func TestParseAndValidateZip_SCORM12(t *testing.T) {
 }
 
 func TestParseAndValidateZip_rejectsCMI5(t *testing.T) {
-	data, err := buildTestZip("", map[string]string{"cmi5.xml": "<course/>"})
+	buf := new(bytes.Buffer)
+	w := zip.NewWriter(buf)
+	f, err := w.Create("cmi5.xml")
 	if err != nil {
 		t.Fatal(err)
 	}
-	// overwrite with cmi5 only zip
-	buf := new(bytes.Buffer)
-	w := zip.NewWriter(buf)
-	f, _ := w.Create("cmi5.xml")
-	_, _ = f.Write([]byte("<course/>"))
-	_ = w.Close()
-	data = buf.Bytes()
+	if _, err := f.Write([]byte("<course/>")); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	data := buf.Bytes()
 	_, _, err = ParseAndValidateZip(bytes.NewReader(data), int64(len(data)))
 	if err == nil {
 		t.Fatal("expected cmi5 rejection")
