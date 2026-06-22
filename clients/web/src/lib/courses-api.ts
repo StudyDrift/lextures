@@ -5814,6 +5814,23 @@ function normalizeSubmissionGradeApi(raw: SubmissionGradeApi): SubmissionGradeAp
   return comments ? { ...raw, comments } : raw
 }
 
+export type GraderWorkflowGraphApi = {
+  version: number
+  nodes: Array<{
+    id: string
+    type: 'output' | 'grader' | 'assignmentContext' | 'submission'
+    position: { x: number; y: number }
+    data: Record<string, unknown>
+  }>
+  edges: Array<{
+    id: string
+    source: string
+    sourceHandle?: string
+    target: string
+    targetHandle?: string
+  }>
+}
+
 export type GraderAgentConfigApi = {
   id?: string
   prompt: string
@@ -5823,6 +5840,7 @@ export type GraderAgentConfigApi = {
   autoGradeNew?: boolean
   modelId?: string
   updatedAt?: string
+  workflowGraph?: GraderWorkflowGraphApi
 }
 
 export type GraderAgentDryRunResult = {
@@ -5869,6 +5887,7 @@ export async function putGraderAgentConfig(
     status: 'draft' | 'accepted' | 'archived'
     autoGradeNew?: boolean
     modelId?: string
+    workflowGraph?: GraderWorkflowGraphApi
   },
 ): Promise<{ config: GraderAgentConfigApi }> {
   const res = await authorizedFetch(
@@ -5888,11 +5907,12 @@ export async function postGraderAgentDryRun(
   courseCode: string,
   itemId: string,
   body: {
-    prompt: string
-    includeAssignmentContent: boolean
-    includeRubric: boolean
+    prompt?: string
+    includeAssignmentContent?: boolean
+    includeRubric?: boolean
     submissionId: string
     modelId?: string
+    workflowGraph?: GraderWorkflowGraphApi
   },
 ): Promise<GraderAgentDryRunResult> {
   const res = await authorizedFetch(
@@ -5911,7 +5931,12 @@ export async function postGraderAgentDryRun(
 export async function postGraderAgentRun(
   courseCode: string,
   itemId: string,
-  body: { scope: 'current' | 'ungraded' | 'all'; submissionId?: string; overwrite?: boolean },
+  body: {
+    scope: 'current' | 'ungraded' | 'all'
+    submissionId?: string
+    overwrite?: boolean
+    authoredVia?: 'canvas' | 'form'
+  },
 ): Promise<{ runId: string; totalCount: number }> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs`,
