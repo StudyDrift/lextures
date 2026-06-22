@@ -398,10 +398,10 @@ func (d Deps) handleLtiConsumerTarget() http.HandlerFunc {
 			dest = public + "/"
 		}
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		_, _ = w.Write([]byte(fmt.Sprintf(`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>LTI launch</title>
+		_, _ = fmt.Fprintf(w, `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/><title>LTI launch</title>
 <meta http-equiv="refresh" content="0;url=%s"/></head>
 <body><p>Continuing to your course… <a href="%s">Click here</a> if you are not redirected.</p></body></html>`,
-			html.EscapeString(dest), html.EscapeString(dest))))
+			html.EscapeString(dest), html.EscapeString(dest))
 	}
 }
 
