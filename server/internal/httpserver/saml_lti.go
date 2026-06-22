@@ -15,6 +15,7 @@ func (d Deps) registerSAMLBrowserRoutes(r chi.Router) {
 	r.Get("/auth/saml/metadata", d.handleSAMLMetadata())
 	r.Get("/auth/saml/login", d.handleSAMLLoginGet())
 	r.Post("/auth/saml/acs", d.handleSAMLACS())
+	r.Get("/auth/saml/slo", d.handleSAMLSLO())
 	r.Post("/auth/saml/slo", d.handleSAMLSLO())
 }
 
@@ -75,12 +76,25 @@ func (d Deps) handleSAMLACS() http.HandlerFunc {
 }
 
 func (d Deps) handleSAMLSLO() http.HandlerFunc {
-	_ = d
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Parity: server/src/routes/saml.rs saml_slo_unimplemented
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.WriteHeader(http.StatusNotImplemented)
-		_, _ = w.Write([]byte("SAML Single Logout is not implemented yet."))
+		if !d.effectiveConfig().SAMLSSOEnabled {
+			writeSAMLorLTIErr(w, http.StatusBadRequest, "SAML is not enabled on this server.")
+			return
+		}
+		if d.Pool == nil {
+			writeSAMLorLTIErr(w, http.StatusInternalServerError, "Database is not configured.")
+			return
+		}
+		err := browsersaml.HandleSLO(r.Context(), d.Pool, d.effectiveConfig(), d.effectiveConfig().PublicWebOrigin, w, r)
+		if err == nil {
+			return
+		}
+		var he *browsersaml.HTTPStatusError
+		if errors.As(err, &he) {
+			writeSAMLorLTIErr(w, he.Code, he.Msg)
+			return
+		}
+		writeSAMLorLTIErr(w, http.StatusInternalServerError, err.Error())
 	}
 }
 
@@ -93,7 +107,7 @@ func writeSAMLorLTIErr(w http.ResponseWriter, status int, msg string) {
 	})
 }
 
-// LTI: JWKS, provider OIDC, NRPS, AGS, consumer frame; 501 for Rust-stub LTI subroutes.
+// LTI: JWKS, provider OIDC, NRPS, AGS, consumer OIDC/deep-link/launch, consumer frame.
 func (d Deps) registerLTIHTTPRoutes(r chi.Router) {
 	r.Get("/.well-known/jwks.json", d.handlePlatformJWKS())
 	r.Get("/api/v1/lti/provider/jwks", d.handlePlatformJWKS())
@@ -102,10 +116,11 @@ func (d Deps) registerLTIHTTPRoutes(r chi.Router) {
 	r.Post("/api/v1/lti/provider/launch", d.handleLtiProviderLaunch())
 	r.Get("/api/v1/lti/provider/nrps/memberships", d.handleLtiNRPSMemberships())
 	r.Post("/api/v1/lti/scores", d.handleLtiAGSScores())
-	r.Post("/api/v1/lti/deep-link", d.lti501DeepLink())
-	r.Get("/api/v1/lti/callback", d.lti501Callback())
-	r.Post("/api/v1/lti/launch/{registration_id}", d.lti501LaunchReg())
+	r.Post("/api/v1/lti/deep-link", d.handleLtiDeepLink())
+	r.Get("/api/v1/lti/callback", d.handleLtiConsumerCallback())
+	r.Post("/api/v1/lti/launch/{registration_id}", d.handleLtiPlatformLaunch())
 	r.Get("/api/v1/lti/consumer/frame", d.handleLtiConsumerFrame())
+	r.Get("/api/v1/lti/consumer/target", d.handleLtiConsumerTarget())
 	r.Get("/api/v1/admin/lti/registrations", d.handleAdminListLTIRegistrations())
 	r.Post("/api/v1/admin/lti/registrations", d.handleAdminPostLtiParentRegistration())
 	r.Post("/api/v1/admin/lti/external-tools", d.handleAdminPostExternalTool())
@@ -113,45 +128,6 @@ func (d Deps) registerLTIHTTPRoutes(r chi.Router) {
 	r.Delete("/api/v1/admin/lti/registrations/{id}", d.handleAdminDeleteLtiParentRegistration())
 	r.Put("/api/v1/admin/lti/external-tools/{id}", d.handleAdminPutLtiExternalTool())
 	r.Delete("/api/v1/admin/lti/external-tools/{id}", d.handleAdminDeleteLtiExternalTool())
-}
-
-func (d Deps) lti501DeepLink() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if !d.requireLtiHandler(w) {
-			return
-		}
-		lti501JSON("Deep Linking 2.0 handler not yet implemented.")(w, r)
-	}
-}
-
-func (d Deps) lti501Callback() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if !d.requireLtiHandler(w) {
-			return
-		}
-		lti501JSON("LTI consumer OIDC callback not yet implemented.")(w, r)
-	}
-}
-
-func (d Deps) lti501LaunchReg() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		if !d.requireLtiHandler(w) {
-			return
-		}
-		lti501JSON("LTI platform launch initiation not yet implemented.")(w, r)
-	}
 }
 
 func (d Deps) handlePlatformJWKS() http.HandlerFunc {

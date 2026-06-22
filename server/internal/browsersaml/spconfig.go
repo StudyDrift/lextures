@@ -20,13 +20,20 @@ import (
 )
 
 // IDPMetadataXMLFromRow matches Rust `idp_row_to_metadata_xml` (minimal EntityDescriptor).
-func IDPMetadataXMLFromRow(entityID, ssoURL, idpCertPEM string) (string, error) {
+func IDPMetadataXMLFromRow(entityID, ssoURL, idpCertPEM string, sloURL *string) (string, error) {
 	certB64, err := pemBodyB64(idpCertPEM)
 	if err != nil {
 		return "", err
 	}
 	ent := xmlEscape(entityID)
 	sso := xmlEscape(ssoURL)
+	sloBinding := ""
+	if sloURL != nil && strings.TrimSpace(*sloURL) != "" {
+		slo := xmlEscape(strings.TrimSpace(*sloURL))
+		sloBinding = fmt.Sprintf(`
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="%s"/>
+    <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="%s"/>`, slo, slo)
+	}
 	return fmt.Sprintf(
 		`<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
   entityID="%s">
@@ -38,10 +45,10 @@ func IDPMetadataXMLFromRow(entityID, ssoURL, idpCertPEM string) (string, error) 
         </ds:X509Data>
       </ds:KeyInfo>
     </md:KeyDescriptor>
-    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="%s"/>
+    <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="%s"/>%s
   </md:IDPSSODescriptor>
 </md:EntityDescriptor>`,
-		ent, certB64, sso,
+		ent, certB64, sso, sloBinding,
 	), nil
 }
 

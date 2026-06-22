@@ -3,12 +3,37 @@ package samlidp
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+// GetIDPByEntityID returns the IdP row matching entity_id, or nil when not found.
+func GetIDPByEntityID(ctx context.Context, pool *pgxpool.Pool, entityID string) (*IDPRow, error) {
+	entityID = strings.TrimSpace(entityID)
+	if entityID == "" {
+		return nil, nil
+	}
+	r, err := scanIdP(pool.QueryRow(ctx, `
+SELECT
+	id, institution_id, display_name, entity_id, sso_url, slo_url,
+	idp_cert_pem, attribute_mapping, force_saml
+FROM settings.saml_idp_configurations
+WHERE entity_id = $1
+ORDER BY created_at ASC
+LIMIT 1
+`, entityID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return r, nil
+}
 
 // GetIDPByID returns a single IdP row (Rust `get_idp_by_id`).
 func GetIDPByID(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*IDPRow, error) {

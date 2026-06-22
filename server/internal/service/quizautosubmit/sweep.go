@@ -6,18 +6,22 @@ import (
 	"math"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/config"
+	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
+	"github.com/lextures/lextures/server/internal/repos/questionbank"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
+	"github.com/lextures/lextures/server/internal/service/learnerstate"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 )
 
 const defaultSweepBatch = 200
 
 // SweepExpiredAttempts finalizes timed quiz attempts past deadline (Rust `quiz_auto_submit::sweep_expired_attempts`).
-// Non-adaptive mastery updates from `learner_state::apply_mastery_from_saved_responses` are not yet ported in Go;
-// scores are still finalized so learners receive credit.
 func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, now time.Time, limit int64) (int, error) {
 	if pool == nil {
 		return 0, nil
@@ -44,8 +48,13 @@ func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, cfg config.Co
 			_ = tx.Rollback(ctx)
 			return n, err
 		}
-		// Rust runs question_bank + learner_state here for !is_adaptive; mastery path omitted in Go.
-		_ = att.IsAdaptive
+
+		if !att.IsAdaptive {
+			if err := applyMasteryForAutoSubmit(ctx, pool, tx, cfg, att.CourseID, att.StructureItemID, att.StudentUserID, id); err != nil {
+				_ = tx.Rollback(ctx)
+				return n, err
+			}
+		}
 
 		var score float32
 		if possible > 0 {
@@ -66,4 +75,43 @@ func SweepExpiredAttempts(ctx context.Context, pool *pgxpool.Pool, cfg config.Co
 		}
 	}
 	return n, nil
+}
+
+func applyMasteryForAutoSubmit(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	tx pgx.Tx,
+	cfg config.Config,
+	courseID, structureItemID, studentUserID, attemptID uuid.UUID,
+) error {
+	meta, err := course.GetCourseQuizMeta(ctx, pool, courseID)
+	if err != nil || meta == nil {
+		return err
+	}
+	row, err := coursemodulequizzes.GetForCourseItem(ctx, pool, courseID, structureItemID)
+	if err != nil || row == nil {
+		return err
+	}
+	attemptPtr := &attemptID
+	questions, _, err := questionbank.ResolveDeliveryQuestionsForGet(
+		ctx, pool, courseID, structureItemID, meta.QuestionBankEnabled, row.Questions, attemptPtr, false,
+	)
+	if err != nil {
+		return err
+	}
+	responses, err := quizattempts.ListResponses(ctx, pool, attemptID)
+	if err != nil {
+		return err
+	}
+	return learnerstate.ApplyMasteryFromSavedResponses(ctx, pool, tx, learnerstate.ApplyMasteryParams{
+		CourseID:                      courseID,
+		UserID:                        studentUserID,
+		AttemptID:                     attemptID,
+		Questions:                     questions,
+		Responses:                     responses,
+		HintScaffoldingEnabled:        meta.HintScaffoldingEnabled,
+		MisconceptionDetectionEnabled: meta.MisconceptionDetectionEnabled,
+		LearnerModelEnabled:           cfg.AdaptiveLearnerModelEnabled,
+		EMAAlpha:                      cfg.LearnerModelEMAAlpha,
+	})
 }

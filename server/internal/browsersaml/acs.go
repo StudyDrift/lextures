@@ -67,7 +67,7 @@ func HandleLoginRedirect(ctx context.Context, pool *pgxpool.Pool, cfg config.Con
 	if row == nil {
 		return &HTTPStatusError{http.StatusNotFound, "IdP not found."}
 	}
-	xmlStr, err := IDPMetadataXMLFromRow(row.EntityID, row.SSOURL, row.IDPCertPem)
+	xmlStr, err := IDPMetadataXMLFromRow(row.EntityID, row.SSOURL, row.IDPCertPem, row.SLOURL)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func HandleACS(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, signe
 	if idpRow == nil {
 		return &HTTPStatusError{http.StatusNotFound, "IdP not found."}
 	}
-	xmlStr, err := IDPMetadataXMLFromRow(idpRow.EntityID, idpRow.SSOURL, idpRow.IDPCertPem)
+	xmlStr, err := IDPMetadataXMLFromRow(idpRow.EntityID, idpRow.SSOURL, idpRow.IDPCertPem, idpRow.SLOURL)
 	if err != nil {
 		return err
 	}

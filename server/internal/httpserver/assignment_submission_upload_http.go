@@ -37,6 +37,9 @@ func (d Deps) handlePostAssignmentSubmissionUpload() http.HandlerFunc {
 		if !ok || assignRow == nil || cid == nil {
 			return
 		}
+		if !d.enforceConditionalReleaseForLearner(w, r, courseCode, *cid, viewer, itemID) {
+			return
+		}
 		if !assignRow.SubmissionAllowFileUpload && !assignRow.SubmissionAllowText {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "This assignment does not accept submissions.")
 			return

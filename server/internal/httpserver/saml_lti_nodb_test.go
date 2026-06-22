@@ -24,13 +24,28 @@ func TestNewHandler_JWKS_ltiOff(t *testing.T) {
 	}
 }
 
-func TestNewHandler_SAML_slo_501(t *testing.T) {
+func TestNewHandler_SAML_slo_disabled(t *testing.T) {
 	h := NewHandler(Deps{Config: config.Config{}})
 	rr := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/auth/saml/slo", nil)
 	h.ServeHTTP(rr, r)
-	if rr.Code != http.StatusNotImplemented {
-		t.Fatalf("slo: %d", rr.Code)
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("slo: %d %s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestNewHandler_SAML_slo_missingPayload(t *testing.T) {
+	h := NewHandler(Deps{Config: config.Config{
+		SAMLSSOEnabled: true,
+		SAMLSPX509PEM:  "x",
+		SAMLPublicBaseURL: "https://sp.example.com",
+		SAMLSPEntityID:  "https://sp.example.com/auth/saml/metadata",
+	}})
+	rr := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/auth/saml/slo", nil)
+	h.ServeHTTP(rr, r)
+	if rr.Code != http.StatusInternalServerError {
+		t.Fatalf("slo without db: %d %s", rr.Code, rr.Body.String())
 	}
 }
 

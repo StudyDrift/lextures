@@ -274,6 +274,92 @@ func repairMigration292RenumberCollision(ctx context.Context, c *pgx.Conn, fsys 
 	return tx.Commit(ctx)
 }
 
+// repairMigration308RenumberCollision fixes dev/demo DBs that applied submission_attachments as v308
+// before main's 308_grade_curving.sql landed and submission_attachments was renumbered to 309 (PR #332).
+func repairMigration308RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
+	if !migrateRepairChecksumsEnabled() {
+		return nil
+	}
+	var v308Desc string
+	err := c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 308`,
+	).Scan(&v308Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v308 renumber: %w", err)
+	}
+	var gradeCurvingApplied bool
+	err = c.QueryRow(ctx, `
+SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'settings'
+      AND table_name = 'platform_app_settings'
+      AND column_name = 'ff_grade_curving'
+)`).Scan(&gradeCurvingApplied)
+	if err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: %w", err)
+	}
+	if gradeCurvingApplied {
+		return nil
+	}
+	if v308Desc != "submission_attachments" {
+		return nil
+	}
+
+	gradeBody, err := fs.ReadFile(fsys, dir+"/308_grade_curving.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: read grade_curving: %w", err)
+	}
+	if _, err := c.Exec(ctx, string(gradeBody)); err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: apply grade_curving: %w", err)
+	}
+
+	gradeSum := sqlxChecksum(gradeBody)
+	attachmentsBody, err := fs.ReadFile(fsys, dir+"/309_submission_attachments.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: read submission_attachments: %w", err)
+	}
+	attachmentsSum := sqlxChecksum(attachmentsBody)
+
+	tx, err := c.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 308`,
+		"grade_curving", gradeSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: update v308: %w", err)
+	}
+
+	var v309Exists bool
+	if err := tx.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM `+sqlxMigrationsTable+` WHERE version = 309)`,
+	).Scan(&v309Exists); err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: check v309: %w", err)
+	}
+	if !v309Exists {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO `+sqlxMigrationsTable+` (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, 0)`,
+			int64(309), "submission_attachments", attachmentsSum[:],
+		); err != nil {
+			return fmt.Errorf("migrate repair v308 renumber: insert v309: %w", err)
+		}
+	} else if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 309`,
+		"submission_attachments", attachmentsSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v308 renumber: update v309: %w", err)
+	}
+
+	return tx.Commit(ctx)
+}
+
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
 // checksum does not match the embedded file. Only runs when MIGRATE_REPAIR_CHECKSUMS
 // is enabled.

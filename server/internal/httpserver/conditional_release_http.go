@@ -344,6 +344,18 @@ func (d Deps) handlePostModuleUnlockOverride() http.HandlerFunc {
 	}
 }
 
+// enforceConditionalReleaseForLearner blocks student access to locked items; instructors bypass gating.
+func (d Deps) enforceConditionalReleaseForLearner(
+	w http.ResponseWriter, r *http.Request, courseCode string, courseID uuid.UUID, viewer uuid.UUID, itemID uuid.UUID,
+) bool {
+	canEdit, err := rbac.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":item:create")
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+		return false
+	}
+	return d.enforceConditionalRelease(w, r, courseID, viewer, itemID, canEdit)
+}
+
 // enforceConditionalRelease blocks student access to locked items when the feature is enabled.
 // Instructors (canEdit) bypass gating. Returns true when the request may proceed.
 func (d Deps) enforceConditionalRelease(

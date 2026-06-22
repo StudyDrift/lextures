@@ -1,4 +1,4 @@
-// LTI 1.3 platform routes (parity with server/src/routes/lti.rs, except Rust-stub 501s kept as 501).
+// LTI 1.3 platform routes (provider login/launch, NRPS, AGS, consumer frame).
 package httpserver
 
 import (
@@ -616,14 +616,4 @@ func (d Deps) handleLtiConsumerFrame() http.HandlerFunc {
 	}
 }
 
-func lti501JSON(msg string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodOptions {
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusNotImplemented)
-		_ = json.NewEncoder(w).Encode(map[string]any{"message": msg})
-	}
-}
+

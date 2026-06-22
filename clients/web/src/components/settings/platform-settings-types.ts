@@ -56,6 +56,37 @@ export type PlatformSettingsPayload = {
   ffAiStudyBuddy: boolean
   ffApiTokens: boolean
   ffCalendarFeeds: boolean
+  ffAcademicCalendar: boolean
+  ffClassroomSignals: boolean
+  ffConferenceScheduling: boolean
+  ffBotSlack: boolean
+  ffBotTeams: boolean
+  ffBotDiscord: boolean
+  ffBroadcasts: boolean
+  ffCourseEvaluations: boolean
+  ffSisIntegration: boolean
+  ffGamification: boolean
+  ffDemographics: boolean
+  ffEnrollmentStateMachine: boolean
+  ffIncompleteGradeWorkflow: boolean
+  ffGradeSubmission: boolean
+  ffCatalogIntegration: boolean
+  ffLibrary: boolean
+  ffLibraryIntegration: boolean
+  ffReadingPreferences: boolean
+  ffUiMode: boolean
+  ffReadAloud: boolean
+  ffAltTextEnforcement: boolean
+  ffProctoringIntegration: boolean
+  ffCourseReviews: boolean
+  ffParentPortal: boolean
+  ffReportCards: boolean
+  ffPublicCatalog: boolean
+  ffSelfPacedMode: boolean
+  ffPublicApi: boolean
+  ffContentFilterIntegration: boolean
+  ffPlagiarismChecks: boolean
+  ffStudyReminders: boolean
   translationMemoryEnabled: boolean
   storageQuotasEnabled: boolean
   avScanningEnabled: boolean

@@ -380,6 +380,9 @@ func (d Deps) handleSurveyRespond() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Forbidden.")
 			return
 		}
+		if !d.enforceConditionalReleaseForLearner(w, r, *cc, survey.CourseID, viewer, id) {
+			return
+		}
 		known, already, err := coursemodulesurveys.SubmitResponse(r.Context(), d.Pool, id, viewer, req.Answers)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to submit response.")

@@ -1,3 +1,2 @@
-// Package learnerstate is a placeholder for a port of server/src/services/learnerstate/.
-// Types and query helpers are added as handlers are implemented.
+// Package learnerstate ports learner knowledge-state updates from server/src/services/learner_state.rs.
 package learnerstate

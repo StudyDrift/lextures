@@ -57,6 +57,29 @@ func TestPostSubmissionOriginalityRetry_FeatureDisabled(t *testing.T) {
 	}
 }
 
+func TestStudentMayViewOriginality(t *testing.T) {
+	tests := []struct {
+		visibility  string
+		gradePosted bool
+		want        bool
+	}{
+		{visibility: "show", gradePosted: false, want: true},
+		{visibility: "show", gradePosted: true, want: true},
+		{visibility: "show_after_grading", gradePosted: false, want: false},
+		{visibility: "show_after_grading", gradePosted: true, want: true},
+		{visibility: "hide", gradePosted: false, want: false},
+		{visibility: "hide", gradePosted: true, want: false},
+		{visibility: "", gradePosted: false, want: false},
+		{visibility: "unknown", gradePosted: true, want: false},
+	}
+	for _, tc := range tests {
+		got := studentMayViewOriginality(tc.visibility, tc.gradePosted)
+		if got != tc.want {
+			t.Errorf("studentMayViewOriginality(%q, %v) = %v, want %v", tc.visibility, tc.gradePosted, got, tc.want)
+		}
+	}
+}
+
 func TestGetCoursePlagiarismSettings_FeatureDisabled(t *testing.T) {
 	cfg := config.Config{FFPlagiarismChecks: false, OriginalityDetectionEnabled: true}
 	d := Deps{Pool: nil, Config: cfg}

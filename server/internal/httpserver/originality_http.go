@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/originalityreports"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/plagiarism"
@@ -110,6 +111,18 @@ func summaryFromReports(reports []originalityreports.Report) map[string]any {
 	return summary
 }
 
+// studentMayViewOriginality reports whether the submitting student may view originality reports.
+func studentMayViewOriginality(visibility string, gradePosted bool) bool {
+	switch visibility {
+	case "show":
+		return true
+	case "show_after_grading":
+		return gradePosted
+	default:
+		return false
+	}
+}
+
 func (d Deps) canViewOriginality(w http.ResponseWriter, r *http.Request, courseCode string, viewer uuid.UUID, sc *originalityreports.SubmissionContext) bool {
 	if sc == nil {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Submission not found.")
@@ -120,16 +133,20 @@ func (d Deps) canViewOriginality(w http.ResponseWriter, r *http.Request, courseC
 		return false
 	}
 	if sc.SubmittedBy == viewer {
-		switch sc.StudentVisibility {
-		case "show":
-			return true
-		case "show_after_grading":
-			// MVP: allow student view when visibility is configured (grade check deferred).
-			return true
-		default:
-			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Forbidden.")
-			return false
+		var gradePosted bool
+		if sc.StudentVisibility == "show_after_grading" {
+			cell, err := coursegrades.GetCell(r.Context(), d.Pool, sc.CourseID, sc.SubmittedBy, sc.ModuleItemID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify grade status.")
+				return false
+			}
+			gradePosted = cell != nil && cell.PostedAt != nil
 		}
+		if studentMayViewOriginality(sc.StudentVisibility, gradePosted) {
+			return true
+		}
+		apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Forbidden.")
+		return false
 	}
 	ok, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":gradebook:view")
 	if err != nil {
