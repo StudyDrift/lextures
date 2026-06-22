@@ -103,6 +103,11 @@ export default function App() {
                 path="modules/assignment/:itemId/moderation"
                 element={<Pages.ModerationDashboard />}
               />
+              <Route
+                path="modules/assignment/:itemId/peer-review"
+                element={<Pages.PeerReviewSummaryPage />}
+              />
+              <Route path="peer-reviews" element={<Pages.PeerReviewsPage />} />
               <Route path="modules/quiz/:itemId/attempt" element={<Pages.CourseModuleQuizAttemptPage />} />
               <Route path="modules/quiz/:itemId" element={<Pages.CourseModuleQuizPage />} />
               <Route path="diagnostic" element={<Pages.CourseDiagnosticPage />} />

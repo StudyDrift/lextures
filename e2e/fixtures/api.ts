@@ -1628,3 +1628,76 @@ export async function apiGetCourseStructure(
   const raw = (await res.json()) as { items?: ApiStructureItem[] }
   return raw.items ?? []
 }
+
+// ---------------------------------------------------------------------------
+// Peer Review helpers (plan 3.15)
+// ---------------------------------------------------------------------------
+
+export async function apiEnablePeerReview(token: string): Promise<void> {
+  const res = await fetch(`${apiBase}/api/v1/settings/platform`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ ffPeerReview: true }),
+  })
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Enable peer review failed (${res.status}): ${body}`)
+  }
+}
+
+export async function apiPutPeerReviewConfig(
+  token: string,
+  courseCode: string,
+  itemId: string,
+  body: Record<string, unknown>,
+): Promise<void> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/peer-review`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Put peer review config failed (${res.status}): ${text}`)
+  }
+}
+
+export async function apiPostPeerReviewAllocate(
+  token: string,
+  courseCode: string,
+  itemId: string,
+): Promise<{ allocationsCreated: number }> {
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/peer-review/allocate`,
+    {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  )
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Peer review allocate failed (${res.status}): ${text}`)
+  }
+  return res.json() as Promise<{ allocationsCreated: number }>
+}
+
+export async function apiGetPeerReviewAssigned(token: string): Promise<unknown[]> {
+  const res = await fetch(`${apiBase}/api/v1/peer-review/assigned`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Get peer review assigned failed (${res.status}): ${text}`)
+  }
+  const raw = (await res.json()) as { allocations?: unknown[] }
+  return raw.allocations ?? []
+}

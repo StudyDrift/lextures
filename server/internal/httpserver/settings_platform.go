@@ -136,6 +136,7 @@ type platformSettingsJSON struct {
 	FFRevenueShare                  bool `json:"ffRevenueShare"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
 	FFConditionalRelease            bool `json:"ffConditionalRelease"`
+	FFPeerReview                    bool `json:"ffPeerReview"`
 	FFCompletionCredentials         bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                 bool `json:"ffCourseReviews"`
 	FFGamification                  bool `json:"ffGamification"`
@@ -332,6 +333,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFConditionalRelease:            merged.FFConditionalRelease,
+			FFPeerReview:                    merged.FFPeerReview,
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
 			FFCourseReviews:                 merged.FFCourseReviews,
 			FFGamification:                  merged.FFGamification,
@@ -503,6 +505,7 @@ type putPlatformBody struct {
 	FFRevenueShare                  *bool `json:"ffRevenueShare"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
 	FFConditionalRelease            *bool `json:"ffConditionalRelease"`
+	FFPeerReview                    *bool `json:"ffPeerReview"`
 	FFCompletionCredentials         *bool `json:"ffCompletionCredentials"`
 	FFCourseReviews                 *bool `json:"ffCourseReviews"`
 	FFGamification                  *bool `json:"ffGamification"`
@@ -820,6 +823,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffrevenueshare", body.FFRevenueShare, func(v bool) { wr.FFRevenueShare = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
 		setBool("ffconditionalrelease", body.FFConditionalRelease, func(v bool) { wr.FFConditionalRelease = &v })
+		setBool("ffpeerreview", body.FFPeerReview, func(v bool) { wr.FFPeerReview = &v })
 		setBool("ffcompletioncredentials", body.FFCompletionCredentials, func(v bool) { wr.FFCompletionCredentials = &v })
 		setBool("ffcoursereviews", body.FFCourseReviews, func(v bool) { wr.FFCourseReviews = &v })
 		setBool("ffgamification", body.FFGamification, func(v bool) { wr.FFGamification = &v })
@@ -970,6 +974,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFConditionalRelease:            merged.FFConditionalRelease,
+			FFPeerReview:                    merged.FFPeerReview,
 			FFCompletionCredentials:         merged.FFCompletionCredentials,
 			FFCourseReviews:                 merged.FFCourseReviews,
 			FFGamification:                  merged.FFGamification,

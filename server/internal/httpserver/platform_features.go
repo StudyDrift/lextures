@@ -80,6 +80,7 @@ type platformFeaturesJSON struct {
 	FFRevenueShare              bool `json:"ffRevenueShare"`
 	FFLearningPaths             bool `json:"ffLearningPaths"`
 	FFConditionalRelease        bool `json:"ffConditionalRelease"`
+	FFPeerReview                bool `json:"ffPeerReview"`
 	FFCompletionCredentials     bool `json:"ffCompletionCredentials"`
 	FFCourseReviews             bool `json:"ffCourseReviews"`
 	FFGamification              bool `json:"ffGamification"`
@@ -178,6 +179,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFRevenueShare:              cfg.FFRevenueShare,
 		FFLearningPaths:             cfg.FFLearningPaths,
 		FFConditionalRelease:        cfg.FFConditionalRelease,
+		FFPeerReview:                cfg.FFPeerReview,
 		FFCompletionCredentials:     cfg.FFCompletionCredentials,
 		FFCourseReviews:             cfg.FFCourseReviews,
 		FFGamification:              cfg.FFGamification,

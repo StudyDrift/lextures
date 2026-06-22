@@ -374,6 +374,9 @@ type Config struct {
 	// FFConditionalRelease enables rule-based module requirements and conditional release (plan 1.11).
 	// Managed in Settings → Global platform (not process env).
 	FFConditionalRelease bool
+	// FFPeerReview enables peer review configuration, allocation, and student review workspace (plan 3.15).
+	// Managed in Settings → Global platform (not process env).
+	FFPeerReview bool
 	// FFCompletionCredentials enables course completion certificates, Open Badges export, and LinkedIn share (plans 15.5, 15.6).
 	// Managed in Settings → Global platform (not process env).
 	FFCompletionCredentials bool

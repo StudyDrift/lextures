@@ -102,6 +102,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Rule-based module gating: per-item completion requirements, module prerequisites, date unlocks, and instructor progress reports.',
   },
   {
+    key: 'ffPeerReview',
+    label: 'Peer review & assessment',
+    description:
+      'Let instructors configure peer review on assignments with anonymous rubric reviews, allocation, and optional grade blending.',
+  },
+  {
     key: 'ffCompletionCredentials',
     label: 'Completion certificates (Open Badges)',
     description:

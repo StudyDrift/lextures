@@ -49,6 +49,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/textbook-resources", d.handleCreateModuleTextbookResource())
 	r.Post("/api/v1/courses/{course_code}/structure/modules/{module_id}/vibe-activities", d.handleCreateModuleVibeActivity())
 	d.registerConditionalReleaseRoutes(r)
+	d.registerPeerReviewRoutes(r)
 	r.Post("/api/v1/courses/{course_code}/vibe-activities/generate", d.handleGenerateVibeActivityHTML())
 	r.Get("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handleGetModuleVibeActivity())
 	r.Patch("/api/v1/courses/{course_code}/vibe-activities/{item_id}", d.handlePatchModuleVibeActivity())
