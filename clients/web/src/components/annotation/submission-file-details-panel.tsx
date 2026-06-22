@@ -2,81 +2,95 @@ import { Download } from 'lucide-react'
 import { formatDateTime } from '../../lib/format'
 import { splitFilename } from '../../lib/file-type'
 import { downloadAuthorizedFile } from '../../lib/download-file'
+import type { SubmissionAttachmentApi } from '../../lib/courses-api'
 
 type SubmissionFileDetailsPanelProps = {
-  filename: string
-  filePath: string | null
+  files: SubmissionAttachmentApi[]
+  selectedFileId: string | null
+  onSelectFile: (fileId: string) => void
   submittedAt?: string | null
   blindLabel?: string | null
-  mimeType?: string | null
+  onDownloadAll?: () => void
+  downloadAllBusy?: boolean
 }
 
-function extensionFromMime(mimeType: string | null | undefined): string | null {
-  const mt = (mimeType ?? '').toLowerCase().trim()
-  if (!mt) return null
-  const map: Record<string, string> = {
-    'image/png': 'png',
-    'image/jpeg': 'jpg',
-    'image/gif': 'gif',
-    'image/webp': 'webp',
-    'application/pdf': 'pdf',
-    'text/plain': 'txt',
-  }
-  return map[mt] ?? null
+function displayLabel(filename: string): string {
+  const trimmed = filename.trim()
+  if (trimmed) return trimmed
+  return 'submission'
 }
 
 export function SubmissionFileDetailsPanel({
-  filename,
-  filePath,
+  files,
+  selectedFileId,
+  onSelectFile,
   submittedAt,
   blindLabel,
-  mimeType,
+  onDownloadAll,
+  downloadAllBusy = false,
 }: SubmissionFileDetailsPanelProps) {
-  const { name, extension: extFromName } = splitFilename(filename)
-  const extension = extFromName ?? extensionFromMime(mimeType)
-  const hasFile = Boolean(filePath)
+  const hasFiles = files.length > 0
+  const activeFileId = selectedFileId ?? files[0]?.fileId ?? null
 
-  async function handleDownload() {
-    if (!filePath) return
+  async function handleDownload(file: SubmissionAttachmentApi) {
     try {
-      await downloadAuthorizedFile(filePath, filename)
+      await downloadAuthorizedFile(file.contentPath, file.filename)
     } catch {
       /* noop */
     }
   }
 
   return (
-    <div className="flex flex-col gap-5 p-5" aria-label="Submission file details">
+    <div className="flex flex-col gap-5 p-5" aria-label="Submission files">
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-          Submission file
+          Submission files
         </h3>
-        {hasFile ? (
-          <dl className="mt-3 space-y-3 text-sm">
-            <div>
-              <dt className="text-xs font-medium text-slate-500 dark:text-neutral-400">File name</dt>
-              <dd className="mt-1 break-words font-medium leading-snug text-slate-900 dark:text-neutral-100">
-                {name}
-                {extension ? `.${extension}` : ''}
-              </dd>
-            </div>
-            {extension ? (
-              <div>
-                <dt className="text-xs font-medium text-slate-500 dark:text-neutral-400">Extension</dt>
-                <dd className="mt-1 font-mono text-slate-700 dark:text-neutral-300">.{extension}</dd>
-              </div>
-            ) : null}
-            {mimeType ? (
-              <div>
-                <dt className="text-xs font-medium text-slate-500 dark:text-neutral-400">Type</dt>
-                <dd className="mt-1 break-all font-mono text-xs text-slate-600 dark:text-neutral-400">
-                  {mimeType}
-                </dd>
-              </div>
-            ) : null}
-          </dl>
+        {hasFiles ? (
+          <ul className="mt-3 space-y-1" role="list">
+            {files.map((file) => {
+              const label = displayLabel(file.filename)
+              const { extension } = splitFilename(label)
+              const selected = file.fileId === activeFileId
+              return (
+                <li key={file.fileId}>
+                  <div
+                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
+                      selected
+                        ? 'border-indigo-300 bg-indigo-50/80 dark:border-indigo-800 dark:bg-indigo-950/40'
+                        : 'border-slate-200 bg-white dark:border-neutral-600 dark:bg-neutral-950'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onSelectFile(file.fileId)}
+                      className={`min-w-0 flex-1 text-left text-sm font-medium leading-snug ${
+                        selected
+                          ? 'text-indigo-900 dark:text-indigo-100'
+                          : 'text-slate-800 hover:text-indigo-700 dark:text-neutral-100 dark:hover:text-indigo-300'
+                      }`}
+                      aria-current={selected ? 'true' : undefined}
+                    >
+                      <span className="break-words">{label}</span>
+                      {extension ? (
+                        <span className="sr-only">{` (${extension})`}</span>
+                      ) : null}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleDownload(file)}
+                      className="inline-flex shrink-0 items-center justify-center rounded-lg border border-slate-300 p-2 text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-900"
+                      aria-label={`Download ${label}`}
+                    >
+                      <Download className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
         ) : (
-          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">No file attached to this submission.</p>
+          <p className="mt-3 text-sm text-slate-600 dark:text-neutral-400">No files attached to this submission.</p>
         )}
       </div>
 
@@ -95,10 +109,21 @@ export function SubmissionFileDetailsPanel({
         </div>
       ) : null}
 
-      {hasFile ? (
+      {hasFiles && files.length > 1 && onDownloadAll ? (
         <button
           type="button"
-          onClick={() => void handleDownload()}
+          onClick={() => void onDownloadAll()}
+          disabled={downloadAllBusy}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
+        >
+          <Download className="h-4 w-4" aria-hidden="true" />
+          Download all files
+        </button>
+      ) : null}
+      {hasFiles && files.length === 1 ? (
+        <button
+          type="button"
+          onClick={() => void handleDownload(files[0]!)}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
         >
           <Download className="h-4 w-4" aria-hidden="true" />

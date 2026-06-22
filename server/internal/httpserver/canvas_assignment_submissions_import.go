@@ -18,6 +18,7 @@ import (
 
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	"github.com/lextures/lextures/server/internal/repos/submissionattachments"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 )
 
@@ -117,8 +118,22 @@ func canvasSubmissionTextForImport(sub map[string]any) (string, bool) {
 	return out, true
 }
 
-func canvasFirstSubmissionAttachment(sub map[string]any) map[string]any {
+func canvasSubmissionAttachments(sub map[string]any) []map[string]any {
 	atts := arrAt(canvasEffectiveSubmissionPayload(sub), "attachments")
+	if len(atts) == 0 {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(atts))
+	for _, att := range atts {
+		if att != nil {
+			out = append(out, att)
+		}
+	}
+	return out
+}
+
+func canvasFirstSubmissionAttachment(sub map[string]any) map[string]any {
+	atts := canvasSubmissionAttachments(sub)
 	if len(atts) == 0 {
 		return nil
 	}
@@ -375,19 +390,22 @@ func canvasPrefetchSubmissionAttachmentsParallel(
 	client *http.Client,
 	accessToken string,
 	subs []map[string]any,
-) map[int64]canvasPrefetchedSubmissionAttachment {
-	out := make(map[int64]canvasPrefetchedSubmissionAttachment)
+) map[int64][]canvasPrefetchedSubmissionAttachment {
+	out := make(map[int64][]canvasPrefetchedSubmissionAttachment)
 	type job struct {
 		canvasUserID int64
-		sub          map[string]any
+		attIndex     int
+		att          map[string]any
 	}
-	jobs := make([]job, 0, len(subs))
+	jobs := make([]job, 0)
 	for _, sub := range subs {
 		canvasUserID := int64At(sub, "user_id")
-		if canvasUserID <= 0 || canvasFirstSubmissionAttachment(sub) == nil {
+		if canvasUserID <= 0 {
 			continue
 		}
-		jobs = append(jobs, job{canvasUserID: canvasUserID, sub: sub})
+		for i, att := range canvasSubmissionAttachments(sub) {
+			jobs = append(jobs, job{canvasUserID: canvasUserID, attIndex: i, att: att})
+		}
 	}
 	if len(jobs) == 0 {
 		return out
@@ -397,7 +415,7 @@ func canvasPrefetchSubmissionAttachmentsParallel(
 	for _, j := range jobs {
 		j := j
 		g.Go(func() error {
-			att := canvasFirstSubmissionAttachment(j.sub)
+			att := j.att
 			if att == nil {
 				return nil
 			}
@@ -419,11 +437,16 @@ func canvasPrefetchSubmissionAttachmentsParallel(
 				mimeType = ct
 			}
 			mu.Lock()
-			out[j.canvasUserID] = canvasPrefetchedSubmissionAttachment{
+			slice := out[j.canvasUserID]
+			for len(slice) <= j.attIndex {
+				slice = append(slice, canvasPrefetchedSubmissionAttachment{})
+			}
+			slice[j.attIndex] = canvasPrefetchedSubmissionAttachment{
 				filename: filename,
 				mimeType: mimeType,
 				data:     data,
 			}
+			out[j.canvasUserID] = slice
 			mu.Unlock()
 			return nil
 		})
@@ -440,40 +463,56 @@ func canvasImportOneAssignmentSubmission(
 	deps canvasAssignmentSubmissionImportDeps,
 	courseID, moduleItemID, studentID uuid.UUID,
 	sub map[string]any,
-	prefetched *canvasPrefetchedSubmissionAttachment,
+	prefetched []canvasPrefetchedSubmissionAttachment,
 ) error {
 	if !canvasAssignmentSubmissionImportable(sub) {
 		return nil
 	}
 	submittedAt := canvasSubmissionSubmittedAt(sub)
+	attachments := canvasSubmissionAttachments(sub)
+	fileIDs := make([]uuid.UUID, 0, len(attachments))
+
+	for i, att := range attachments {
+		var fileID *uuid.UUID
+		var storeErr error
+		if i < len(prefetched) && len(prefetched[i].data) > 0 {
+			fileID, storeErr = canvasStoreImportedSubmissionBlob(
+				ctx, tx, deps, courseID, prefetched[i].filename, prefetched[i].mimeType, prefetched[i].data,
+			)
+		} else {
+			fileID, storeErr = canvasStreamAndStoreSubmissionAttachment(ctx, tx, client, accessToken, deps, courseID, att)
+		}
+		if storeErr != nil {
+			return storeErr
+		}
+		if fileID != nil {
+			fileIDs = append(fileIDs, *fileID)
+		}
+	}
+
 	var attachmentFileID *uuid.UUID
-
-	if prefetched != nil && len(prefetched.data) > 0 {
-		if id, storeErr := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, prefetched.filename, prefetched.mimeType, prefetched.data); storeErr != nil {
-			return storeErr
-		} else if id != nil {
-			attachmentFileID = id
+	if len(fileIDs) > 0 {
+		attachmentFileID = &fileIDs[0]
+	} else if text, ok := canvasSubmissionTextForImport(sub); ok {
+		filename := fmt.Sprintf("submission-%s.txt", studentID.String())
+		id, err := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, filename, "text/plain", []byte(text))
+		if err != nil {
+			return err
 		}
-	} else if att := canvasFirstSubmissionAttachment(sub); att != nil {
-		if id, storeErr := canvasStreamAndStoreSubmissionAttachment(ctx, tx, client, accessToken, deps, courseID, att); storeErr != nil {
-			return storeErr
-		} else if id != nil {
+		if id != nil {
 			attachmentFileID = id
-		}
-	}
-
-	if attachmentFileID == nil {
-		if text, ok := canvasSubmissionTextForImport(sub); ok {
-			filename := fmt.Sprintf("submission-%s.txt", studentID.String())
-			id, err := canvasStoreImportedSubmissionBlob(ctx, tx, deps, courseID, filename, "text/plain", []byte(text))
-			if err != nil {
-				return err
-			}
-			attachmentFileID = id
+			fileIDs = append(fileIDs, *id)
 		}
 	}
 
-	return moduleassignmentsubmissions.UpsertImportedInTransaction(
+	submissionID, err := moduleassignmentsubmissions.UpsertImportedInTransaction(
 		ctx, tx, courseID, moduleItemID, studentID, attachmentFileID, submittedAt,
 	)
+	if err != nil {
+		return err
+	}
+	if len(fileIDs) == 0 {
+		return nil
+	}
+	return submissionattachments.ReplaceForSubmissionInTransaction(ctx, tx, submissionID, fileIDs)
 }

@@ -15,6 +15,12 @@ type Item struct {
 	DetailURL   string
 }
 
+// Candidate is a user with pending digest items and their timezone.
+type Candidate struct {
+	UserID   uuid.UUID
+	Timezone *string
+}
+
 // Append adds a digest line for a user.
 func Append(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, eventType, summaryLine, detailURL string) error {
 	_, err := pool.Exec(ctx, `
@@ -46,22 +52,24 @@ RETURNING event_type, summary_line, COALESCE(detail_url, '')
 	return out, rows.Err()
 }
 
-// UsersWithDigestItems returns user IDs that have pending digest items.
-func UsersWithDigestItems(ctx context.Context, pool *pgxpool.Pool) ([]uuid.UUID, error) {
+// ListCandidates returns users with pending digest items and their timezone.
+func ListCandidates(ctx context.Context, pool *pgxpool.Pool) ([]Candidate, error) {
 	rows, err := pool.Query(ctx, `
-SELECT DISTINCT user_id FROM settings.email_digest_items
+SELECT DISTINCT d.user_id, u.timezone
+FROM settings.email_digest_items d
+JOIN "user".users u ON u.id = d.user_id
 `)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var ids []uuid.UUID
+	var out []Candidate
 	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
+		var c Candidate
+		if err := rows.Scan(&c.UserID, &c.Timezone); err != nil {
 			return nil, err
 		}
-		ids = append(ids, id)
+		out = append(out, c)
 	}
-	return ids, rows.Err()
+	return out, rows.Err()
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	"github.com/lextures/lextures/server/internal/repos/submissionattachments"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
 
@@ -27,6 +28,10 @@ var errAssignmentNotFound = errors.New("assignment not found")
 
 func submissionAttachmentContentPath(courseCode string, fileID uuid.UUID) string {
 	return "/api/v1/courses/" + courseCode + "/course-files/" + fileID.String() + "/content"
+}
+
+func (d Deps) viewerCanViewAssignmentSubmissions(ctx context.Context, courseCode string, viewer uuid.UUID) (bool, error) {
+	return courseroles.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":gradebook:view")
 }
 
 func loadAssignmentForSubmissionsByIDs(
@@ -83,6 +88,30 @@ func (d Deps) loadAssignmentForSubmissions(
 	return cid, row, true
 }
 
+func submissionAttachmentToJSON(courseCode string, fileID uuid.UUID, filename, mimeType string) map[string]any {
+	return map[string]any{
+		"fileId":      fileID.String(),
+		"filename":    filename,
+		"mimeType":    mimeType,
+		"contentPath": submissionAttachmentContentPath(courseCode, fileID),
+	}
+}
+
+func (d Deps) submissionAttachmentsToJSON(ctx context.Context, courseCode string, submissionID uuid.UUID) []map[string]any {
+	if d.Pool == nil {
+		return nil
+	}
+	rows, err := submissionattachments.ListForSubmission(ctx, d.Pool, submissionID)
+	if err != nil || len(rows) == 0 {
+		return nil
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, submissionAttachmentToJSON(courseCode, row.FileID, row.OriginalFilename, row.MimeType))
+	}
+	return out
+}
+
 func (d Deps) submissionToJSON(
 	ctx context.Context,
 	courseCode string,
@@ -94,15 +123,26 @@ func (d Deps) submissionToJSON(
 	out := map[string]any{
 		"id":               s.ID.String(),
 		"attachmentFileId": nil,
+		"attachments":      []map[string]any{},
 		"submittedAt":      s.SubmittedAt.UTC().Format(time.RFC3339),
 		"updatedAt":        s.UpdatedAt.UTC().Format(time.RFC3339),
 	}
-	if s.AttachmentFileID != nil {
+	attachmentItems := d.submissionAttachmentsToJSON(ctx, courseCode, s.ID)
+	if len(attachmentItems) > 0 {
+		out["attachments"] = attachmentItems
+		first := attachmentItems[0]
+		out["attachmentFileId"] = first["fileId"]
+		out["attachmentContentPath"] = first["contentPath"]
+		out["attachmentMimeType"] = first["mimeType"]
+		out["attachmentFilename"] = first["filename"]
+	} else if s.AttachmentFileID != nil {
 		out["attachmentFileId"] = s.AttachmentFileID.String()
 		if file, err := coursefiles.GetForCourse(ctx, d.Pool, courseCode, *s.AttachmentFileID); err == nil && file != nil {
 			out["attachmentContentPath"] = submissionAttachmentContentPath(courseCode, file.ID)
 			out["attachmentMimeType"] = file.MimeType
 			out["attachmentFilename"] = file.OriginalFilename
+			item := submissionAttachmentToJSON(courseCode, file.ID, file.OriginalFilename, file.MimeType)
+			out["attachments"] = []map[string]any{item}
 		}
 	}
 	if s.ResubmissionRequested {

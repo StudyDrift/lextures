@@ -429,11 +429,7 @@ func canvasImportAssignmentGrades(
 			}
 			if submissionDeps != nil {
 				hadContent := canvasSubmissionHasContent(raw)
-				var prefetched *canvasPrefetchedSubmissionAttachment
-				if blob, ok := prefetchedAttachments[canvasUserID]; ok {
-					blobCopy := blob
-					prefetched = &blobCopy
-				}
+				prefetched := prefetchedAttachments[canvasUserID]
 				if err := canvasImportOneAssignmentSubmission(
 					ctx, tx, client, accessToken, *submissionDeps, courseID, itemID, studentID, raw, prefetched,
 				); err != nil {

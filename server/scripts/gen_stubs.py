@@ -59,7 +59,7 @@ SERVICES = [
     "moderatedgrading", "originality", "outcomes", "qtiimport", "qtiparser", "questionbank",
     "quizattempt", "quizattemptgrading", "quizsubmissions", "quizautosubmit", "quizlockdown", "quizgenerationai",
     "recommendations", "relativeschedule", "settingsops", "srs", "srsscheduler", "standards", "submissionannotatedpdf",
-    "syllabussectionai", "zipimport", "irt", "irtcalibrationjob",
+    "syllabussectionai", "zipimport", "irt",
 ]
 
 # Remove duplicates, skip existing

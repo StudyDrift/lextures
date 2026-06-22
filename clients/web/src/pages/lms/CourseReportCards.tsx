@@ -10,8 +10,21 @@ import {
   type CommentBankEntry,
 } from '../../lib/report-cards-api'
 import { authorizedFetch } from '../../lib/api'
+import { LmsPage } from './lms-page'
 
 type RosterEntry = { userId: string; email: string; displayName?: string | null }
+
+const INPUT_CLASS =
+  'rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
+
+const BTN_PRIMARY =
+  'inline-flex items-center rounded-lg bg-indigo-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
+
+const BTN_SECONDARY =
+  'inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+
+const BTN_SUCCESS =
+  'inline-flex items-center rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50'
 
 function studentLabel(s: RosterEntry): string {
   return s.displayName?.trim() || s.email
@@ -21,6 +34,19 @@ function currentQuarter(): string {
   const now = new Date()
   const q = Math.ceil((now.getMonth() + 1) / 3)
   return `Q${q}-${now.getFullYear()}`
+}
+
+function reportCardStatusBadgeClass(status: string | undefined): string {
+  switch (status) {
+    case 'released':
+      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+    case 'approved':
+      return 'bg-sky-100 text-sky-900 dark:bg-sky-950/50 dark:text-sky-200'
+    case 'submitted':
+      return 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'
+    default:
+      return 'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-400'
+  }
 }
 
 export default function CourseReportCards() {
@@ -227,7 +253,7 @@ export default function CourseReportCards() {
   const releasedCount = cards.filter((c) => c.status === 'released').length
 
   return (
-    <main className="p-4 max-w-5xl mx-auto" aria-label="Report Card Authoring">
+    <LmsPage title="Report Cards">
       <div
         ref={announceRef}
         role="status"
@@ -236,248 +262,251 @@ export default function CourseReportCards() {
         className="sr-only"
       />
 
-      <h1 className="text-2xl font-bold mb-4">Report Cards</h1>
-
-      {/* Period selector */}
-      <div className="flex flex-wrap gap-3 items-center mb-6">
-        <label htmlFor="grading-period" className="font-medium text-sm">
-          Grading Period:
-        </label>
-        <input
-          id="grading-period"
-          type="text"
-          value={period}
-          onChange={(e) => setPeriod(e.target.value)}
-          className="border rounded px-2 py-1 text-sm w-32"
-          placeholder="Q1-2026"
-          aria-describedby="period-hint"
-        />
-        <span id="period-hint" className="text-xs text-gray-500">
-          e.g. Q1-2026, S1-2026
-        </span>
-        <span className="ms-auto text-sm text-gray-600">
-          {approvedCount} approved · {releasedCount} released of {roster.length} students
-        </span>
-      </div>
-
-      {error && (
-        <div role="alert" className="bg-red-50 border border-red-300 text-red-700 rounded p-3 mb-4 text-sm">
-          {error}
-        </div>
-      )}
-      {successMsg && (
-        <div role="status" className="bg-green-50 border border-green-300 text-green-700 rounded p-3 mb-4 text-sm">
-          {successMsg}
-        </div>
-      )}
-
-      {/* Comment bank sidebar */}
-      {commentBank.length > 0 && editingCardId && (
-        <aside
-          aria-label="Comment Bank"
-          className="mb-4 border rounded p-3 bg-gray-50 text-sm"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <strong>Comment Bank</strong>
-            <select
-              value={bankCategory}
-              onChange={(e) => setBankCategory(e.target.value)}
-              className="text-xs border rounded px-1 py-0.5"
-              aria-label="Filter by category"
-            >
-              {bankCategories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat === 'all' ? 'All categories' : cat}
-                </option>
-              ))}
-            </select>
-          </div>
-          <ul className="flex flex-col gap-1 max-h-40 overflow-y-auto">
-            {filteredBank.map((entry) => (
-              <li key={entry.id}>
-                <button
-                  type="button"
-                  onClick={() => insertBankPhrase(editingCardId, entry.text)}
-                  className="text-start text-blue-700 hover:underline text-xs w-full"
-                  aria-label={`Insert: ${entry.text}`}
-                >
-                  {entry.text}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
-      )}
-
-      {loading && <p className="text-sm text-gray-500">Loading report cards…</p>}
-
-      {/* Student table */}
-      {!loading && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm border-collapse" role="grid" aria-label="Report cards">
-            <thead>
-              <tr className="bg-gray-100 text-start">
-                <th scope="col" className="px-3 py-2 border font-medium">Student</th>
-                <th scope="col" className="px-3 py-2 border font-medium">Final %</th>
-                <th scope="col" className="px-3 py-2 border font-medium">Letter</th>
-                <th scope="col" className="px-3 py-2 border font-medium">Status</th>
-                <th scope="col" className="px-3 py-2 border font-medium">Comment</th>
-                <th scope="col" className="px-3 py-2 border font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {roster.map((student) => {
-                const card = cardForStudent(student.userId)
-                const isEditing = card && editingCardId === card.id
-                const isSaving = card && saving === card.id
-                const isAILoading = card && aiLoading === card.id
-                return (
-                  <tr key={student.userId} className="border-b hover:bg-gray-50">
-                    <td className="px-3 py-2 border">{studentLabel(student)}</td>
-                    <td className="px-3 py-2 border">
-                      {card?.finalGradePct != null ? `${card.finalGradePct.toFixed(1)}%` : '—'}
-                    </td>
-                    <td className="px-3 py-2 border">{card?.letterGrade ?? '—'}</td>
-                    <td className="px-3 py-2 border">
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium ${
-                          card?.status === 'released'
-                            ? 'bg-green-100 text-green-700'
-                            : card?.status === 'approved'
-                              ? 'bg-blue-100 text-blue-700'
-                              : card?.status === 'submitted'
-                                ? 'bg-yellow-100 text-yellow-700'
-                                : 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {card?.status ?? 'not started'}
-                      </span>
-                    </td>
-                    <td className="px-3 py-2 border max-w-xs">
-                      {isEditing && card ? (
-                        <textarea
-                          rows={3}
-                          className="w-full border rounded px-2 py-1 text-xs resize-y"
-                          value={draftComments[card.id] ?? ''}
-                          onChange={(e) =>
-                            setDraftComments((prev) => ({ ...prev, [card.id]: e.target.value }))
-                          }
-                          aria-label={`Comment for ${studentLabel(student)}`}
-                          autoFocus
-                        />
-                      ) : (
-                        <span className="text-xs text-gray-600 line-clamp-2">
-                          {card?.comment || <em className="text-gray-400">No comment</em>}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 border">
-                      {card ? (
-                        <div className="flex flex-wrap gap-1">
-                          {isEditing ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => void handleSaveComment(card.id)}
-                                disabled={!!isSaving}
-                                className="px-2 py-1 bg-blue-600 text-white text-xs rounded disabled:opacity-50"
-                              >
-                                {isSaving ? 'Saving…' : 'Save'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => void handleSubmitCard(card.id)}
-                                disabled={!!isSaving}
-                                className="px-2 py-1 bg-green-600 text-white text-xs rounded disabled:opacity-50"
-                              >
-                                Submit
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => void handleAISuggest(student.userId, card.id)}
-                                disabled={!!isAILoading}
-                                className="px-2 py-1 bg-purple-600 text-white text-xs rounded disabled:opacity-50"
-                                aria-label="Get AI comment suggestion"
-                              >
-                                {isAILoading ? 'AI…' : 'AI Suggest'}
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingCardId(null)}
-                                className="px-2 py-1 border text-xs rounded"
-                              >
-                                Cancel
-                              </button>
-                            </>
-                          ) : (
-                            <>
-                              {(card.status === 'draft' || card.status === 'submitted') && (
-                                <button
-                                  type="button"
-                                  onClick={() => setEditingCardId(card.id)}
-                                  className="px-2 py-1 border text-xs rounded hover:bg-gray-100"
-                                >
-                                  Edit
-                                </button>
-                              )}
-                              {card.status === 'submitted' && (
-                                <button
-                                  type="button"
-                                  onClick={() => void handleApproveCard(card.id)}
-                                  disabled={!!isSaving}
-                                  className="px-2 py-1 bg-blue-600 text-white text-xs rounded disabled:opacity-50"
-                                >
-                                  Approve
-                                </button>
-                              )}
-                              {card.pdfUrl && (
-                                <a
-                                  href={`/api/v1/report-cards/${card.id}/pdf`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="px-2 py-1 bg-gray-600 text-white text-xs rounded"
-                                >
-                                  PDF
-                                </a>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">No card yet</span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-              {roster.length === 0 && !loading && (
-                <tr>
-                  <td colSpan={6} className="text-center py-6 text-sm text-gray-400">
-                    No students enrolled.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Release action */}
-      {approvedCount > 0 && (
-        <div className="mt-4 flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => void handleRelease()}
-            disabled={releasing}
-            className="px-4 py-2 bg-green-700 text-white rounded text-sm font-medium disabled:opacity-50"
-          >
-            {releasing ? 'Releasing…' : `Release ${approvedCount} Approved Card(s) to Parents`}
-          </button>
-          <span className="text-xs text-gray-500">
-            Parents will see released report cards in the parent portal.
+      <div className="space-y-4">
+        {/* Period selector */}
+        <div className="flex flex-wrap items-center gap-3">
+          <label htmlFor="grading-period" className="text-sm font-medium text-slate-900 dark:text-neutral-100">
+            Grading Period:
+          </label>
+          <input
+            id="grading-period"
+            type="text"
+            value={period}
+            onChange={(e) => setPeriod(e.target.value)}
+            className={`${INPUT_CLASS} w-32`}
+            placeholder="Q1-2026"
+            aria-describedby="period-hint"
+          />
+          <span id="period-hint" className="text-xs text-muted-foreground">
+            e.g. Q1-2026, S1-2026
+          </span>
+          <span className="ms-auto text-sm text-muted-foreground">
+            {approvedCount} approved · {releasedCount} released of {roster.length} students
           </span>
         </div>
-      )}
-    </main>
+
+        {error && (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+          >
+            {error}
+          </div>
+        )}
+        {successMsg && (
+          <div
+            role="status"
+            className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200"
+          >
+            {successMsg}
+          </div>
+        )}
+
+        {/* Comment bank sidebar */}
+        {commentBank.length > 0 && editingCardId && (
+          <aside
+            aria-label="Comment Bank"
+            className="rounded-lg border bg-card p-3 text-sm"
+          >
+            <div className="mb-2 flex items-center gap-2">
+              <strong className="text-slate-900 dark:text-neutral-100">Comment Bank</strong>
+              <select
+                value={bankCategory}
+                onChange={(e) => setBankCategory(e.target.value)}
+                className={`${INPUT_CLASS} text-xs`}
+                aria-label="Filter by category"
+              >
+                {bankCategories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat === 'all' ? 'All categories' : cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <ul className="flex max-h-40 flex-col gap-1 overflow-y-auto">
+              {filteredBank.map((entry) => (
+                <li key={entry.id}>
+                  <button
+                    type="button"
+                    onClick={() => insertBankPhrase(editingCardId, entry.text)}
+                    className="w-full text-start text-xs text-indigo-700 hover:underline dark:text-indigo-300"
+                    aria-label={`Insert: ${entry.text}`}
+                  >
+                    {entry.text}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+
+        {loading && <p className="text-sm text-muted-foreground">Loading report cards…</p>}
+
+        {/* Student table */}
+        {!loading && (
+          <div className="overflow-x-auto rounded-lg border bg-card">
+            <table className="w-full text-sm" role="grid" aria-label="Report cards">
+              <thead>
+                <tr className="border-b text-start text-xs text-muted-foreground">
+                  <th scope="col" className="px-3 py-2 font-medium">Student</th>
+                  <th scope="col" className="px-3 py-2 font-medium">Final %</th>
+                  <th scope="col" className="px-3 py-2 font-medium">Letter</th>
+                  <th scope="col" className="px-3 py-2 font-medium">Status</th>
+                  <th scope="col" className="px-3 py-2 font-medium">Comment</th>
+                  <th scope="col" className="px-3 py-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {roster.map((student) => {
+                  const card = cardForStudent(student.userId)
+                  const isEditing = card && editingCardId === card.id
+                  const isSaving = card && saving === card.id
+                  const isAILoading = card && aiLoading === card.id
+                  return (
+                    <tr
+                      key={student.userId}
+                      className="border-b last:border-0 hover:bg-muted/50"
+                    >
+                      <td className="px-3 py-2 font-medium text-slate-900 dark:text-neutral-100">
+                        {studentLabel(student)}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums">
+                        {card?.finalGradePct != null ? `${card.finalGradePct.toFixed(1)}%` : '—'}
+                      </td>
+                      <td className="px-3 py-2">{card?.letterGrade ?? '—'}</td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${reportCardStatusBadgeClass(card?.status)}`}
+                        >
+                          {card?.status ?? 'not started'}
+                        </span>
+                      </td>
+                      <td className="max-w-xs px-3 py-2">
+                        {isEditing && card ? (
+                          <textarea
+                            rows={3}
+                            className={`${INPUT_CLASS} w-full resize-y text-xs`}
+                            value={draftComments[card.id] ?? ''}
+                            onChange={(e) =>
+                              setDraftComments((prev) => ({ ...prev, [card.id]: e.target.value }))
+                            }
+                            aria-label={`Comment for ${studentLabel(student)}`}
+                            autoFocus
+                          />
+                        ) : (
+                          <span className="line-clamp-2 text-xs text-muted-foreground">
+                            {card?.comment || <em className="text-muted-foreground/70">No comment</em>}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-2">
+                        {card ? (
+                          <div className="flex flex-wrap gap-1">
+                            {isEditing ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleSaveComment(card.id)}
+                                  disabled={!!isSaving}
+                                  className={BTN_PRIMARY}
+                                >
+                                  {isSaving ? 'Saving…' : 'Save'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleSubmitCard(card.id)}
+                                  disabled={!!isSaving}
+                                  className={BTN_SUCCESS}
+                                >
+                                  Submit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => void handleAISuggest(student.userId, card.id)}
+                                  disabled={!!isAILoading}
+                                  className="inline-flex items-center rounded-lg bg-violet-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                  aria-label="Get AI comment suggestion"
+                                >
+                                  {isAILoading ? 'AI…' : 'AI Suggest'}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingCardId(null)}
+                                  className={BTN_SECONDARY}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {(card.status === 'draft' || card.status === 'submitted') && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setEditingCardId(card.id)}
+                                    className={BTN_SECONDARY}
+                                  >
+                                    Edit
+                                  </button>
+                                )}
+                                {card.status === 'submitted' && (
+                                  <button
+                                    type="button"
+                                    onClick={() => void handleApproveCard(card.id)}
+                                    disabled={!!isSaving}
+                                    className={BTN_PRIMARY}
+                                  >
+                                    Approve
+                                  </button>
+                                )}
+                                {card.pdfUrl && (
+                                  <a
+                                    href={`/api/v1/report-cards/${card.id}/pdf`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center rounded-lg bg-slate-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-slate-500 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+                                  >
+                                    PDF
+                                  </a>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No card yet</span>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+                {roster.length === 0 && !loading && (
+                  <tr>
+                    <td colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                      No students enrolled.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Release action */}
+        {approvedCount > 0 && (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => void handleRelease()}
+              disabled={releasing}
+              className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {releasing ? 'Releasing…' : `Release ${approvedCount} Approved Card(s) to Parents`}
+            </button>
+            <span className="text-xs text-muted-foreground">
+              Parents will see released report cards in the parent portal.
+            </span>
+          </div>
+        )}
+      </div>
+    </LmsPage>
   )
 }

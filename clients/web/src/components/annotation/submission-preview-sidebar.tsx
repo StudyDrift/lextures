@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { FileText } from 'lucide-react'
-import type { RubricDefinition } from '../../lib/courses-api'
+import { Files } from 'lucide-react'
+import type { RubricDefinition, SubmissionAttachmentApi } from '../../lib/courses-api'
 import { SubmissionFileDetailsPanel } from './submission-file-details-panel'
 import { SubmissionGradingPanel } from './submission-grading-panel'
 
-type SidebarTab = 'grade' | 'file'
+type SidebarTab = 'grade' | 'files'
 
 type SubmissionPreviewSidebarProps = {
   mode: 'staff' | 'student'
@@ -16,11 +16,13 @@ type SubmissionPreviewSidebarProps = {
   maxPoints: number | null
   gradingDisabled?: boolean
   gradeRefreshKey?: number
-  filename: string
-  filePath: string | null
+  files: SubmissionAttachmentApi[]
+  selectedFileId: string | null
+  onSelectFile: (fileId: string) => void
   submittedAt?: string | null
   blindLabel?: string | null
-  mimeType?: string | null
+  onDownloadAll?: () => void
+  downloadAllBusy?: boolean
   onGradeSaved?: () => void
   onGradeCleared?: () => void
 }
@@ -35,11 +37,13 @@ export function SubmissionPreviewSidebar({
   maxPoints,
   gradingDisabled = false,
   gradeRefreshKey = 0,
-  filename,
-  filePath,
+  files,
+  selectedFileId,
+  onSelectFile,
   submittedAt,
   blindLabel,
-  mimeType,
+  onDownloadAll,
+  downloadAllBusy = false,
   onGradeSaved,
   onGradeCleared,
 }: SubmissionPreviewSidebarProps) {
@@ -64,11 +68,13 @@ export function SubmissionPreviewSidebar({
           />
         ) : (
           <SubmissionFileDetailsPanel
-            filename={filename}
-            filePath={filePath}
+            files={files}
+            selectedFileId={selectedFileId}
+            onSelectFile={onSelectFile}
             submittedAt={submittedAt}
             blindLabel={blindLabel}
-            mimeType={mimeType}
+            onDownloadAll={onDownloadAll}
+            downloadAllBusy={downloadAllBusy}
           />
         )}
       </aside>
@@ -106,16 +112,16 @@ export function SubmissionPreviewSidebar({
         <button
           type="button"
           role="tab"
-          aria-selected={tab === 'file'}
-          onClick={() => setTab('file')}
+          aria-selected={tab === 'files'}
+          onClick={() => setTab('files')}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition ${
-            tab === 'file'
+            tab === 'files'
               ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
               : 'text-slate-600 hover:bg-white/70 dark:text-neutral-400 dark:hover:bg-neutral-800/60'
           }`}
         >
-          <FileText className="h-4 w-4" aria-hidden="true" />
-          File
+          <Files className="h-4 w-4" aria-hidden="true" />
+          Files
         </button>
       </div>
 
@@ -138,11 +144,13 @@ export function SubmissionPreviewSidebar({
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <SubmissionFileDetailsPanel
-            filename={filename}
-            filePath={filePath}
+            files={files}
+            selectedFileId={selectedFileId}
+            onSelectFile={onSelectFile}
             submittedAt={submittedAt}
             blindLabel={blindLabel}
-            mimeType={mimeType}
+            onDownloadAll={onDownloadAll}
+            downloadAllBusy={downloadAllBusy}
           />
         </div>
       )}
