@@ -38,6 +38,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
     },
     body: JSON.stringify({
       h5pEnabled: true,
+      scormIngestionEnabled: true,
       oerLibraryEnabled: true,
       oerStub: true,
       studentProgressEnabled: true,
@@ -89,6 +90,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       ffAiStudyBuddy: true,
       updateMask: [
         'h5pEnabled',
+        'scormIngestionEnabled',
         'oerLibraryEnabled',
         'oerStub',
         'studentProgressEnabled',
@@ -187,6 +189,14 @@ export async function isH5PEnabled(): Promise<boolean> {
   if (process.env.FEATURE_H5P === 'true') return true
   // unauthed to guarded h5p route: 401 when on, 404 when off
   const res = await fetch(`${apiBase}/api/v1/courses/FAKE/h5p/00000000-0000-0000-0000-000000000000`)
+  return res.status === 401
+}
+
+export async function isScormIngestionEnabled(): Promise<boolean> {
+  if (process.env.FEATURE_SCORM_INGESTION === 'true') return true
+  const res = await fetch(
+    `${apiBase}/api/v1/courses/FAKE/scorm-items/00000000-0000-0000-0000-000000000000`,
+  )
   return res.status === 401
 }
 

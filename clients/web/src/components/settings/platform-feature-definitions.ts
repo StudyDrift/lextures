@@ -172,6 +172,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Embed interactive H5P packages as module items and track attempt results.',
   },
   {
+    key: 'scormIngestionEnabled',
+    label: 'SCORM / cmi5 ingestion',
+    description: 'Upload SCORM 1.2 packages as module items with grade and progress tracking.',
+  },
+  {
     key: 'selfReflectionEnabled',
     label: 'Learner self-reflection & coaching',
     description: 'Prompt learners to reflect on progress and receive lightweight coaching nudges.',

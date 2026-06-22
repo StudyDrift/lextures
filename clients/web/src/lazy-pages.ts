@@ -25,6 +25,7 @@ export const ModerationDashboard = lazy(() => import('./pages/lms/moderation-das
 export const CourseModuleContentPage = lazy(() => import('./pages/lms/course-module-content-page'))
 export const CourseModuleExternalLinkPage = lazy(() => import('./pages/lms/course-module-external-link-page'))
 export const CourseModuleH5PPage = lazy(() => import('./pages/lms/course-module-h5p-page'))
+export const CourseModuleScormPage = lazy(() => import('./pages/lms/course-module-scorm-page'))
 export const CourseModuleLtiPage = lazy(() => import('./pages/lms/course-module-lti-page'))
 export const CourseModuleVibeActivityPage = lazy(() => import('./pages/lms/course-module-vibe-activity-page'))
 export const CourseModuleTextbookResourcePage = lazy(() => import('./pages/lms/course-module-textbook-resource-page'))

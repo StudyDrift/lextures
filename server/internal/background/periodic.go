@@ -22,6 +22,7 @@ import (
 	"github.com/lextures/lextures/server/internal/workers/avscan"
 	"github.com/lextures/lextures/server/internal/workers/captioning"
 	"github.com/lextures/lextures/server/internal/workers/h5pextract"
+	"github.com/lextures/lextures/server/internal/workers/scormextract"
 	"github.com/lextures/lextures/server/internal/workers/catalogsync"
 	"github.com/lextures/lextures/server/internal/workers/sissync"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
@@ -161,6 +162,23 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 			}
 		})
 		slog.Info("h5p extract worker started")
+	}
+
+	if cfg.ScormIngestionEnabled && storage != nil {
+		scormWorker := scormextract.New(pool, storage)
+		go runEvery(ctx, 15*time.Second, func() {
+			for {
+				done, err := scormWorker.ProcessNext(context.Background())
+				if err != nil {
+					slog.Warn("scorm extract sweep: error", "err", err)
+					break
+				}
+				if !done {
+					break
+				}
+			}
+		})
+		slog.Info("scorm extract worker started")
 	}
 
 	go runEvery(ctx, time.Hour, func() {

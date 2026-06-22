@@ -108,6 +108,7 @@ export default function App() {
               <Route path="diagnostic" element={<Pages.CourseDiagnosticPage />} />
               <Route path="modules/external-link/:itemId" element={<Pages.CourseModuleExternalLinkPage />} />
               <Route path="modules/h5p/:itemId" element={<Pages.CourseModuleH5PPage />} />
+              <Route path="modules/scorm/:itemId" element={<Pages.CourseModuleScormPage />} />
               <Route path="modules/lti/:itemId" element={<Pages.CourseModuleLtiPage />} />
               <Route path="modules/vibe-activity/:itemId" element={<Pages.CourseModuleVibeActivityPage />} />
               <Route path="modules/textbook-resource/:itemId" element={<Pages.CourseModuleTextbookResourcePage />} />

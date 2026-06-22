@@ -54,6 +54,7 @@ type Row struct {
 	AvScanningEnabled               *bool
 	ClamAVStub                      *bool
 	H5PEnabled                      *bool
+	ScormIngestionEnabled           *bool
 	OERLibraryEnabled               *bool
 	OERStub                         *bool
 	ItemAnalysisEnabled             *bool
@@ -201,6 +202,7 @@ type Write struct {
 	AvScanningEnabled               *bool
 	ClamAVStub                      *bool
 	H5PEnabled                      *bool
+	ScormIngestionEnabled           *bool
 	OERLibraryEnabled               *bool
 	OERStub                         *bool
 	ItemAnalysisEnabled             *bool
@@ -346,6 +348,7 @@ SELECT
 	av_scanning_enabled,
 	clamav_stub,
 	h5p_enabled,
+	scorm_ingestion_enabled,
 	oer_library_enabled,
 	oer_stub,
 	item_analysis_enabled,
@@ -484,6 +487,7 @@ WHERE id = 1
 		&r.AvScanningEnabled,
 		&r.ClamAVStub,
 		&r.H5PEnabled,
+		&r.ScormIngestionEnabled,
 		&r.OERLibraryEnabled,
 		&r.OERStub,
 		&r.ItemAnalysisEnabled,
@@ -673,6 +677,7 @@ INSERT INTO settings.platform_app_settings (
 	av_scanning_enabled,
 	clamav_stub,
 	h5p_enabled,
+	scorm_ingestion_enabled,
 	oer_library_enabled,
 	oer_stub,
 	item_analysis_enabled,
@@ -816,6 +821,7 @@ ON CONFLICT (id) DO UPDATE SET
 	av_scanning_enabled = COALESCE(EXCLUDED.av_scanning_enabled, settings.platform_app_settings.av_scanning_enabled),
 	clamav_stub = COALESCE(EXCLUDED.clamav_stub, settings.platform_app_settings.clamav_stub),
 	h5p_enabled = COALESCE(EXCLUDED.h5p_enabled, settings.platform_app_settings.h5p_enabled),
+	scorm_ingestion_enabled = COALESCE(EXCLUDED.scorm_ingestion_enabled, settings.platform_app_settings.scorm_ingestion_enabled),
 	oer_library_enabled = COALESCE(EXCLUDED.oer_library_enabled, settings.platform_app_settings.oer_library_enabled),
 	oer_stub = COALESCE(EXCLUDED.oer_stub, settings.platform_app_settings.oer_stub),
 	item_analysis_enabled = COALESCE(EXCLUDED.item_analysis_enabled, settings.platform_app_settings.item_analysis_enabled),
@@ -952,6 +958,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AvScanningEnabled,
 		w.ClamAVStub,
 		w.H5PEnabled,
+		w.ScormIngestionEnabled,
 		w.OERLibraryEnabled,
 		w.OERStub,
 		w.ItemAnalysisEnabled,

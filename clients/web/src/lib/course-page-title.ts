@@ -69,6 +69,7 @@ export function coursePageTitleFromPath(pathname: string): string | null {
   if (/^modules\/quiz\//.test(sub)) return 'Quiz'
   if (/^modules\/external-link\//.test(sub)) return 'External link'
   if (/^modules\/h5p\//.test(sub)) return 'Interactive activity'
+  if (/^modules\/scorm\//.test(sub)) return 'SCORM activity'
   if (/^modules\/lti\//.test(sub)) return 'LTI tool'
   if (/^modules\/vibe-activity\//.test(sub)) return 'Vibe Activity'
   if (/^modules\/textbook-resource\//.test(sub)) return 'Textbook'

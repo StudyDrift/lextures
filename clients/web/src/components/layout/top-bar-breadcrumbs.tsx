@@ -273,6 +273,7 @@ const MODULE_ITEM_PATTERNS = [
   '/courses/:courseCode/modules/quiz/:itemId',
   '/courses/:courseCode/modules/external-link/:itemId',
   '/courses/:courseCode/modules/h5p/:itemId',
+  '/courses/:courseCode/modules/scorm/:itemId',
   '/courses/:courseCode/modules/lti/:itemId',
   '/courses/:courseCode/modules/vibe-activity/:itemId',
 ] as const

@@ -89,6 +89,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("av_scanning_enabled", w.AvScanningEnabled)
 	addBool("clamav_stub", w.ClamAVStub)
 	addBool("h5p_enabled", w.H5PEnabled)
+	addBool("scorm_ingestion_enabled", w.ScormIngestionEnabled)
 	addBool("oer_library_enabled", w.OERLibraryEnabled)
 	addBool("oer_stub", w.OERStub)
 	addBool("item_analysis_enabled", w.ItemAnalysisEnabled)

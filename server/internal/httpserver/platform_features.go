@@ -16,6 +16,7 @@ type platformFeaturesJSON struct {
 	StudentProgressEnabled      bool `json:"studentProgressEnabled"`
 	AtRiskAlertsEnabled         bool `json:"atRiskAlertsEnabled"`
 	H5PEnabled                  bool `json:"h5pEnabled"`
+	ScormIngestionEnabled       bool `json:"scormIngestionEnabled"`
 	OERLibraryEnabled           bool `json:"oerLibraryEnabled"`
 	ItemAnalysisEnabled         bool `json:"itemAnalysisEnabled"`
 	OutcomesReportEnabled       bool `json:"outcomesReportEnabled"`
@@ -113,6 +114,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		StudentProgressEnabled:      cfg.StudentProgressEnabled,
 		AtRiskAlertsEnabled:         cfg.AtRiskAlertsEnabled,
 		H5PEnabled:                  cfg.H5PEnabled,
+		ScormIngestionEnabled:       cfg.ScormIngestionEnabled,
 		OERLibraryEnabled:           cfg.OERLibraryEnabled,
 		ItemAnalysisEnabled:         cfg.ItemAnalysisEnabled,
 		EngagementTrackingEnabled:   cfg.EngagementTrackingEnabled,

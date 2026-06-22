@@ -62,6 +62,7 @@ import { OERSearchPanel } from '../../components/oer/oer-search-panel'
 import { oerLibraryEnabled } from '../../lib/oer-api'
 import { ModuleExternalLinkModal } from './module-external-link-modal'
 import { H5PUploadModal } from './h5p-upload-modal'
+import { ScormUploadModal } from './scorm-upload-modal'
 import { ModuleLtiLinkModal } from './module-lti-link-modal'
 import { ModuleNameModal } from './module-name-modal'
 import { VibeActivityCreateModal } from './vibe-activity-create-modal'
@@ -77,6 +78,7 @@ import {
   unarchiveCourseStructureItem,
   createModuleExternalLink,
   createModuleH5P,
+  createModuleScorm,
   patchModuleExternalLink,
   createModuleLtiLink,
   createModuleVibeActivity,
@@ -109,6 +111,7 @@ import { useViewerEnrollmentRoles } from '../../lib/use-viewer-enrollment-roles'
 import { permCourseItemCreate } from '../../lib/rbac-api'
 import { formatDueShort } from '../../lib/course-calendar-utils'
 import { h5pFeatureEnabled } from '../../lib/h5p-i18n'
+import { scormIngestionFeatureEnabled } from '../../lib/scorm-i18n'
 import { heLibraryIntegrationEnabled, bookstoreIntegrationEnabled } from '../../lib/platform-features'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
@@ -150,6 +153,7 @@ const STRUCTURE_CHILD_KINDS = new Set<CourseStructureItem['kind']>([
   'survey',
   'lti_link',
   'h5p',
+  'scorm',
   'vibe_activity',
   'library_resource',
   'textbook_resource',
@@ -620,6 +624,29 @@ function ChildRowContent({
             {gatingFooter}
           </div>
         </div>
+      ) : child.kind === 'scorm' ? (
+        <div className="flex items-center gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-violet-200/90 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-950/55 dark:text-violet-200"
+            aria-hidden
+          >
+            <BookCopy className="h-4 w-4" strokeWidth={2} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <Link
+                to={`/courses/${encodeURIComponent(courseCode)}/modules/scorm/${encodeURIComponent(child.id)}`}
+                className="min-w-0 flex-1 text-base font-semibold leading-snug tracking-tight text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              >
+                {child.title}
+              </Link>
+              <BlueprintLockIcon locked={child.blueprintLocked} />
+            </div>
+            {meta ? <p className={moduleChildMetaLineClasses}>{meta}</p> : null}
+            {studentFooter}
+            {gatingFooter}
+          </div>
+        </div>
       ) : (child.kind as CourseStructureItem['kind']) === 'vibe_activity' ? (
         <div className="flex items-center gap-3">
           <span
@@ -1052,6 +1079,7 @@ type ModuleCardBodyProps = {
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
   h5pEnabled?: boolean
+  scormIngestionEnabled?: boolean
   ltiToolsAvailable?: boolean
   heLibraryEnabled?: boolean
   bookstoreEnabled?: boolean
@@ -1078,6 +1106,7 @@ function ModuleCardBody({
   anyModalBusy,
   onModuleItemAdd,
   h5pEnabled,
+  scormIngestionEnabled,
   ltiToolsAvailable,
   heLibraryEnabled,
   bookstoreEnabled,
@@ -1194,6 +1223,7 @@ function ModuleCardBody({
               oerLibraryEnabled={oerEnabled}
               disabled={anyModalBusy}
               h5pEnabled={h5pEnabled}
+              scormIngestionEnabled={scormIngestionEnabled}
               ltiToolsAvailable={ltiToolsAvailable}
               heLibraryEnabled={heLibraryEnabled}
               bookstoreEnabled={bookstoreEnabled}
@@ -1387,6 +1417,7 @@ type SortableModuleCardProps = {
   anyModalBusy: boolean
   onModuleItemAdd: (moduleId: string, kind: ModuleItemKind) => void
   h5pEnabled?: boolean
+  scormIngestionEnabled?: boolean
   ltiToolsAvailable?: boolean
   heLibraryEnabled?: boolean
   bookstoreEnabled?: boolean
@@ -1420,6 +1451,7 @@ function SortableModuleCard({
   anyModalBusy,
   onModuleItemAdd,
   h5pEnabled,
+  scormIngestionEnabled,
   ltiToolsAvailable,
   heLibraryEnabled,
   bookstoreEnabled,
@@ -1496,6 +1528,7 @@ function SortableModuleCard({
         anyModalBusy={anyModalBusy}
         onModuleItemAdd={onModuleItemAdd}
         h5pEnabled={h5pEnabled}
+        scormIngestionEnabled={scormIngestionEnabled}
         ltiToolsAvailable={ltiToolsAvailable}
         heLibraryEnabled={heLibraryEnabled}
         bookstoreEnabled={bookstoreEnabled}
@@ -1664,6 +1697,11 @@ export default function CourseModules() {
   const [h5pModuleId, setH5pModuleId] = useState<string | null>(null)
   const [h5pSaving, setH5pSaving] = useState(false)
   const [h5pSaveError, setH5pSaveError] = useState<string | null>(null)
+  const [scormModalOpen, setScormModalOpen] = useState(false)
+  const [scormModalKey, setScormModalKey] = useState(0)
+  const [scormModuleId, setScormModuleId] = useState<string | null>(null)
+  const [scormSaving, setScormSaving] = useState(false)
+  const [scormSaveError, setScormSaveError] = useState<string | null>(null)
   const [vibeActivityModalOpen, setVibeActivityModalOpen] = useState(false)
   const [vibeActivityModalKey, setVibeActivityModalKey] = useState(0)
   const [vibeActivityModuleId, setVibeActivityModuleId] = useState<string | null>(null)
@@ -1759,6 +1797,8 @@ export default function CourseModules() {
     externalLinkModalOpen ||
     h5pSaving ||
     h5pModalOpen ||
+    scormSaving ||
+    scormModalOpen ||
     oerPanelOpen ||
     ltiLinkSaving ||
     ltiLinkModalOpen ||
@@ -2010,6 +2050,25 @@ export default function CourseModules() {
     [courseCode, h5pModuleId, load],
   )
 
+  const saveScorm = useCallback(
+    async (title: string, file: File) => {
+      if (!courseCode || !scormModuleId) return
+      setScormSaveError(null)
+      setScormSaving(true)
+      try {
+        await createModuleScorm(courseCode, scormModuleId, title, file)
+        await load({ silent: true })
+        setScormModalOpen(false)
+        setScormModuleId(null)
+      } catch (e) {
+        setScormSaveError(e instanceof Error ? e.message : 'Could not upload SCORM package.')
+      } finally {
+        setScormSaving(false)
+      }
+    },
+    [courseCode, scormModuleId, load],
+  )
+
   const saveVibeActivity = useCallback(
     async (title: string, html: string) => {
       if (!courseCode || !vibeActivityModuleId) return
@@ -2106,6 +2165,13 @@ export default function CourseModules() {
       setH5pModuleId(moduleId)
       setH5pModalKey((k) => k + 1)
       setH5pModalOpen(true)
+      return
+    }
+    if (kind === 'scorm') {
+      setScormSaveError(null)
+      setScormModuleId(moduleId)
+      setScormModalKey((k) => k + 1)
+      setScormModalOpen(true)
       return
     }
     if (kind === 'vibe_activity') {
@@ -2371,6 +2437,7 @@ export default function CourseModules() {
           i.kind === 'survey' ||
           i.kind === 'lti_link' ||
           i.kind === 'h5p' ||
+          i.kind === 'scorm' ||
           i.kind === 'vibe_activity') &&
         i.parentId
       ) {
@@ -2713,6 +2780,7 @@ export default function CourseModules() {
                     anyModalBusy={anyModalBusy}
                     onModuleItemAdd={onModuleItemAdd}
                     h5pEnabled={h5pFeatureEnabled()}
+                    scormIngestionEnabled={scormIngestionFeatureEnabled()}
                     ltiToolsAvailable={!ltiExternalToolsLoading && ltiExternalTools.length > 0}
                     heLibraryEnabled={heLibraryIntegrationEnabled()}
                     bookstoreEnabled={bookstoreIntegrationEnabled()}
@@ -2771,7 +2839,9 @@ export default function CourseModules() {
                               ? 'LTI tool'
                               : activeItem.kind === 'h5p'
                                 ? 'Interactive H5P'
-                                : 'Heading'}
+                                : activeItem.kind === 'scorm'
+                                  ? 'SCORM package'
+                                  : 'Heading'}
                   </p>
                 </div>
               )}
@@ -2895,6 +2965,20 @@ export default function CourseModules() {
         onSave={(title, file) => saveH5P(title, file)}
         saving={h5pSaving}
         errorMessage={h5pSaveError}
+      />
+
+      <ScormUploadModal
+        key={`scorm-${scormModalKey}`}
+        open={scormModalOpen}
+        onClose={() => {
+          if (!scormSaving) {
+            setScormModalOpen(false)
+            setScormModuleId(null)
+          }
+        }}
+        onSave={(title, file) => saveScorm(title, file)}
+        saving={scormSaving}
+        errorMessage={scormSaveError}
       />
 
       {courseCode && oerModuleId && (

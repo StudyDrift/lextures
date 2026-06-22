@@ -4,6 +4,7 @@ export type PlatformFeaturesSnapshot = {
   studentProgressEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean
+  scormIngestionEnabled: boolean
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
   engagementTrackingEnabled: boolean
@@ -80,6 +81,7 @@ const defaults: PlatformFeaturesSnapshot = {
   studentProgressEnabled: false,
   atRiskAlertsEnabled: false,
   h5pEnabled: false,
+  scormIngestionEnabled: false,
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
   engagementTrackingEnabled: false,
@@ -187,6 +189,10 @@ export function atRiskFeatureEnabled(): boolean {
 
 export function h5pFeatureEnabled(): boolean {
   return loaded && snapshot.h5pEnabled
+}
+
+export function scormIngestionFeatureEnabled(): boolean {
+  return loaded && snapshot.scormIngestionEnabled
 }
 
 export function oerLibraryEnabled(): boolean {

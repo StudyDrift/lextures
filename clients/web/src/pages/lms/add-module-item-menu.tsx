@@ -23,6 +23,7 @@ export type ModuleItemKind =
   | 'external_link'
   | 'lti_link'
   | 'h5p'
+  | 'scorm'
   | 'vibe_activity'
   | 'library_resource'
   | 'textbook_resource'
@@ -33,6 +34,7 @@ type AddModuleItemMenuProps = {
   oerLibraryEnabled?: boolean
   disabled?: boolean
   h5pEnabled?: boolean
+  scormIngestionEnabled?: boolean
   /** When false, LTI tool is shown disabled (no registered external tools). */
   ltiToolsAvailable?: boolean
   /** When true, shows the Library Resource option (HE e-reserves). */
@@ -47,6 +49,7 @@ export function AddModuleItemMenu({
   oerLibraryEnabled = false,
   disabled,
   h5pEnabled,
+  scormIngestionEnabled,
   ltiToolsAvailable = true,
   heLibraryEnabled = false,
   bookstoreEnabled = false,
@@ -208,6 +211,24 @@ export function AddModuleItemMenu({
                 <span className="font-semibold text-slate-950 dark:text-neutral-100">Interactive H5P</span>
                 <span className="text-xs text-slate-500 dark:text-neutral-400">
                   Upload an interactive .h5p activity
+                </span>
+              </span>
+            </button>
+          ) : null}
+          {scormIngestionEnabled ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => pick('scorm')}
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            >
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-200/90 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-950 dark:text-violet-200">
+                <BookCopy className="h-4 w-4" aria-hidden />
+              </span>
+              <span className="min-w-0 flex flex-col gap-0.5">
+                <span className="font-semibold text-slate-950 dark:text-neutral-100">SCORM package</span>
+                <span className="text-xs text-slate-500 dark:text-neutral-400">
+                  Upload a SCORM 1.2 .zip package
                 </span>
               </span>
             </button>
