@@ -166,7 +166,7 @@ func AggregateScores(scores []float64, mode peerreview.Aggregation) *float64 {
 		trimmed := sorted[1 : len(sorted)-1]
 		return AggregateScores(trimmed, peerreview.AggregationMean)
 	default:
-		var _ peerreview.Aggregation = mode
+		var _ = mode
 		return AggregateScores(sorted, peerreview.AggregationMean)
 	}
 }
