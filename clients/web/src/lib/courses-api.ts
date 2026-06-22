@@ -5513,6 +5513,13 @@ export async function postCourseImportCanvas(
   })
 }
 
+export type SubmissionAttachmentApi = {
+  fileId: string
+  filename: string
+  mimeType: string
+  contentPath: string
+}
+
 /** Row from `/assignments/:itemId/submissions` (plan 3.1). */
 export type ModuleAssignmentSubmissionApi = {
   /** Omitted for enrolled students who have not submitted yet. */
@@ -5524,6 +5531,7 @@ export type ModuleAssignmentSubmissionApi = {
   /** Set when blind grading is active (plan 3.3). */
   blindLabel?: string
   attachmentFileId: string | null
+  attachments?: SubmissionAttachmentApi[]
   submittedAt?: string
   updatedAt?: string
   attachmentContentPath?: string | null
@@ -6366,6 +6374,52 @@ export async function deleteSubmissionFeedbackMedia(
   if (res.status === 204) return
   const raw = await parseJson(res)
   throw new Error(readApiErrorMessage(raw))
+}
+
+export function submissionAttachmentsFromRow(
+  row: Pick<
+    ModuleAssignmentSubmissionApi,
+    'attachments' | 'attachmentFileId' | 'attachmentContentPath' | 'attachmentFilename' | 'attachmentMimeType'
+  > | null | undefined,
+): SubmissionAttachmentApi[] {
+  if (!row) return []
+  if (row.attachments && row.attachments.length > 0) return row.attachments
+  if (row.attachmentFileId && row.attachmentContentPath) {
+    return [
+      {
+        fileId: row.attachmentFileId,
+        filename: row.attachmentFilename ?? 'submission',
+        mimeType: row.attachmentMimeType ?? 'application/octet-stream',
+        contentPath: row.attachmentContentPath,
+      },
+    ]
+  }
+  return []
+}
+
+export async function downloadSubmissionAttachmentsArchive(
+  courseCode: string,
+  itemId: string,
+  submissionId: string,
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/${encodeURIComponent(submissionId)}/attachments/archive`,
+  )
+  if (!res.ok) {
+    const raw = await parseJson(res)
+    throw new Error(readApiErrorMessage(raw))
+  }
+  const blob = await res.blob()
+  const disposition = res.headers.get('Content-Disposition') ?? ''
+  const match = /filename="([^"]+)"/i.exec(disposition)
+  const filename = match?.[1] ?? (blob.type.includes('zip') ? 'submission-files.zip' : 'submission')
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.rel = 'noopener'
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 export async function downloadSubmissionAnnotatedPdf(

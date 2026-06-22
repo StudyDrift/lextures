@@ -17,6 +17,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	"github.com/lextures/lextures/server/internal/repos/submissionattachments"
 	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 )
 
@@ -104,6 +105,10 @@ func (d Deps) handlePostAssignmentSubmissionUpload() http.HandlerFunc {
 		subRow, err := moduleassignmentsubmissions.UpsertAttachment(r.Context(), d.Pool, *cid, itemID, viewer, fileID)
 		if err != nil || subRow == nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save submission.")
+			return
+		}
+		if err := submissionattachments.ReplaceForSubmission(r.Context(), d.Pool, subRow.ID, []uuid.UUID{fileID}); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save submission files.")
 			return
 		}
 		d.maybeEnqueueAutoGrade(r, courseCode, *cid, itemID, subRow.ID)

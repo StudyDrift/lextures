@@ -4,6 +4,7 @@ import { formatDateTime } from '../../lib/format'
 import {
   deleteSubmissionAnnotation,
   downloadSubmissionAnnotatedPdf,
+  downloadSubmissionAttachmentsArchive,
   fetchModuleAssignmentMySubmission,
   fetchModuleAssignmentSubmissions,
   fetchProvisionalGrades,
@@ -24,6 +25,8 @@ import {
   type PostSubmissionAnnotationInput,
   type SubmissionAnnotationApi,
   type SubmissionFeedbackMediaApi,
+  submissionAttachmentsFromRow,
+  type SubmissionAttachmentApi,
   type SubmissionVersionApi,
 } from '../../lib/courses-api'
 import { OriginalityBadge } from '../grading/originality-badge'
@@ -146,7 +149,8 @@ export function AssignmentAnnotationWorkbench({
   const [revFeedback, setRevFeedback] = useState('')
   const [revisionBusy, setRevisionBusy] = useState(false)
   const [deadlineNow, setDeadlineNow] = useState(() => Date.now())
-
+  const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null)
+  const [downloadAllBusy, setDownloadAllBusy] = useState(false)
 
   const originalityActive = originalityDetection !== 'disabled'
 
@@ -173,6 +177,7 @@ export function AssignmentAnnotationWorkbench({
 
   useEffect(() => {
     setViewVersionNumber(null)
+    setSelectedAttachmentId(null)
   }, [current?.id])
 
   useEffect(() => {
@@ -214,13 +219,36 @@ export function AssignmentAnnotationWorkbench({
       ? true
       : versionForView.versionNumber === (current?.versionNumber ?? 0)
 
-  const displayAttachmentFileId = versionForView?.attachmentFileId ?? current?.attachmentFileId ?? null
-  const displayFilePath = submissionContentPath(
-    versionForView ? versionForView.attachmentContentPath : current?.attachmentContentPath,
-  )
-  const displayMimeType = versionForView ? versionForView.attachmentMimeType : current?.attachmentMimeType
-  const displayFilename =
-    versionForView?.attachmentFilename ?? current?.attachmentFilename ?? 'submission'
+  const displayAttachments = useMemo((): SubmissionAttachmentApi[] => {
+    if (versionForView) {
+      if (versionForView.attachmentFileId && versionForView.attachmentContentPath) {
+        return [
+          {
+            fileId: versionForView.attachmentFileId,
+            filename: versionForView.attachmentFilename ?? 'submission',
+            mimeType: versionForView.attachmentMimeType ?? 'application/octet-stream',
+            contentPath: versionForView.attachmentContentPath,
+          },
+        ]
+      }
+      return []
+    }
+    return submissionAttachmentsFromRow(current)
+  }, [current, versionForView])
+
+  const selectedAttachment = useMemo((): SubmissionAttachmentApi | null => {
+    if (displayAttachments.length === 0) return null
+    if (selectedAttachmentId) {
+      const found = displayAttachments.find((file) => file.fileId === selectedAttachmentId)
+      if (found) return found
+    }
+    return displayAttachments[0] ?? null
+  }, [displayAttachments, selectedAttachmentId])
+
+  const displayAttachmentFileId = selectedAttachment?.fileId ?? versionForView?.attachmentFileId ?? current?.attachmentFileId ?? null
+  const displayFilePath = submissionContentPath(selectedAttachment?.contentPath)
+  const displayMimeType = selectedAttachment?.mimeType ?? versionForView?.attachmentMimeType ?? current?.attachmentMimeType
+  const displayFilename = selectedAttachment?.filename ?? versionForView?.attachmentFilename ?? current?.attachmentFilename ?? 'submission'
   const displayPreviewType = displayFilePath
     ? detectPreviewType(displayMimeType, displayFilename)
     : 'none'
@@ -604,6 +632,18 @@ export function AssignmentAnnotationWorkbench({
     }
   }
 
+  async function onDownloadAllAttachments() {
+    if (!current?.id) return
+    setDownloadAllBusy(true)
+    try {
+      await downloadSubmissionAttachmentsArchive(courseCode, itemId, current.id)
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Download failed.')
+    } finally {
+      setDownloadAllBusy(false)
+    }
+  }
+
   const submissionReviewActive =
     mode === 'staff' && (submissionAllowsFile || submissionAllowsText || submissionAllowsUrl)
   const filePreviewActive = submissionAllowsFile || submissionAllowsText || submissionAllowsUrl
@@ -631,11 +671,13 @@ export function AssignmentAnnotationWorkbench({
       rubric={assignmentRubric}
       maxPoints={assignmentPointsWorth}
       gradingDisabled={busy}
-      filename={displayFilename}
-      filePath={displayFilePath ?? null}
+      files={displayAttachments}
+      selectedFileId={selectedAttachment?.fileId ?? null}
+      onSelectFile={setSelectedAttachmentId}
       submittedAt={current?.submittedAt}
       blindLabel={current?.blindLabel}
-      mimeType={displayMimeType}
+      onDownloadAll={displayAttachments.length > 1 ? onDownloadAllAttachments : undefined}
+      downloadAllBusy={downloadAllBusy}
       onGradeSaved={handleGradeSaved}
       onGradeCleared={handleGradeCleared}
     />
@@ -649,10 +691,12 @@ export function AssignmentAnnotationWorkbench({
         submissionId={current.id}
         rubric={assignmentRubric}
         maxPoints={assignmentPointsWorth}
-        filename={displayFilename}
-        filePath={displayFilePath ?? null}
+        files={displayAttachments}
+        selectedFileId={selectedAttachment?.fileId ?? null}
+        onSelectFile={setSelectedAttachmentId}
         submittedAt={current.submittedAt}
-        mimeType={displayMimeType}
+        onDownloadAll={displayAttachments.length > 1 ? onDownloadAllAttachments : undefined}
+        downloadAllBusy={downloadAllBusy}
       />
     ) : null
   const modalTitleId = useId()

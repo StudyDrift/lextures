@@ -89,6 +89,20 @@ UPDATE settings.email_jobs SET status = 'sent', sent_at = $2, next_retry_at = NU
 	return err
 }
 
+// DigestEnqueuedSince reports whether a daily digest job was already queued since since.
+func DigestEnqueuedSince(ctx context.Context, pool *pgxpool.Pool, recipientID uuid.UUID, since time.Time) (bool, error) {
+	var exists bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+    SELECT 1 FROM settings.email_jobs
+    WHERE recipient_id = $1
+      AND event_type = 'daily_digest'
+      AND created_at >= $2
+)
+`, recipientID, since).Scan(&exists)
+	return exists, err
+}
+
 // MarkRetry schedules retry or dead-letter after max attempts.
 func MarkRetry(ctx context.Context, pool *pgxpool.Pool, jobID uuid.UUID, attempts int, nextRetry time.Time, dead bool) error {
 	status := "failed"

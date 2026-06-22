@@ -186,8 +186,9 @@ func UpsertImportedInTransaction(
 	courseID, moduleItemID, submittedBy uuid.UUID,
 	attachmentFileID *uuid.UUID,
 	submittedAt time.Time,
-) error {
-	_, err := tx.Exec(ctx, `
+) (uuid.UUID, error) {
+	var id uuid.UUID
+	err := tx.QueryRow(ctx, `
 INSERT INTO course.module_assignment_submissions (
 	course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at
 ) VALUES ($1, $2, $3, $4, $5, $5)
@@ -198,8 +199,9 @@ ON CONFLICT (module_item_id, submitted_by) DO UPDATE SET
 		ELSE course.module_assignment_submissions.submitted_at
 	END,
 	updated_at = GREATEST(course.module_assignment_submissions.updated_at, EXCLUDED.updated_at)
-`, courseID, moduleItemID, submittedBy, attachmentFileID, submittedAt)
-	return err
+RETURNING id
+`, courseID, moduleItemID, submittedBy, attachmentFileID, submittedAt).Scan(&id)
+	return id, err
 }
 
 func ResubmitVersionedInTransaction(ctx context.Context, tx pgx.Tx, now time.Time, courseID, submissionID, newAttachmentFileID uuid.UUID) (*SubmissionRow, error) {

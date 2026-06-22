@@ -43,12 +43,16 @@ func TestCanvasEffectiveSubmissionPayloadUsesHistory(t *testing.T) {
 	}
 }
 
-func TestCanvasFirstSubmissionAttachment(t *testing.T) {
+func TestCanvasSubmissionAttachments(t *testing.T) {
 	sub := map[string]any{
 		"attachments": []any{
 			map[string]any{"id": float64(1), "filename": "a.pdf"},
 			map[string]any{"id": float64(2), "filename": "b.pdf"},
 		},
+	}
+	atts := canvasSubmissionAttachments(sub)
+	if len(atts) != 2 {
+		t.Fatalf("expected 2 attachments, got %d", len(atts))
 	}
 	att := canvasFirstSubmissionAttachment(sub)
 	if att == nil || int64At(att, "id") != 1 {

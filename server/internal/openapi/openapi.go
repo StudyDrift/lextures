@@ -401,7 +401,7 @@ const spec = `{
     "/api/v1/admin/jobs/irt-calibrate": {
       "post": {
         "tags": ["admin"],
-        "summary": "Start IRT calibration (202 + jobId; 2PL body not yet ported in Go — background is a no-op log)",
+        "summary": "Start IRT 2PL calibration job (202 + jobId); fits a/b for active uncalibrated or pilot items with ≥200 responses; optional conceptId scopes to one concept",
         "security": [ { "bearerAuth": [] } ],
         "responses": { "202": { "description": "Accepted" }, "401": { "description": "Not signed in" }, "403": { "description": "Forbidden" } }
       }

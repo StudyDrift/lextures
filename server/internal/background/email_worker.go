@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/emailjobs"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/organization"
+	digestsvc "github.com/lextures/lextures/server/internal/service/emaildigest"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
 
@@ -99,19 +100,23 @@ func sweepDailyDigests(ctx context.Context, pool *pgxpool.Pool, cfg config.Confi
 	if !cfg.EmailNotificationsEnabled || pool == nil {
 		return
 	}
-	// 07:00 UTC daily window (simplified; per-user TZ deferred).
-	if now.Hour() != 7 || now.Minute() > 1 {
-		return
-	}
-	userIDs, err := emaildigest.UsersWithDigestItems(ctx, pool)
+	candidates, err := emaildigest.ListCandidates(ctx, pool)
 	if err != nil {
 		slog.Warn("email_digest.users", "err", err)
 		return
 	}
-	since := now.Add(-25 * time.Hour)
 	ns := &notifications.Service{Pool: pool, Config: cfg}
-	for _, uid := range userIDs {
-		items, err := emaildigest.ListAndClear(ctx, pool, uid, since)
+	for _, c := range candidates {
+		if !digestsvc.ShouldSendDigest(now, c.Timezone) {
+			continue
+		}
+		dayStart := digestsvc.LocalDayStartUTC(now, c.Timezone)
+		already, err := emailjobs.DigestEnqueuedSince(ctx, pool, c.UserID, dayStart)
+		if err != nil || already {
+			continue
+		}
+		since := digestsvc.DigestSince(now, c.Timezone)
+		items, err := emaildigest.ListAndClear(ctx, pool, c.UserID, since)
 		if err != nil || len(items) == 0 {
 			continue
 		}
@@ -125,11 +130,11 @@ func sweepDailyDigests(ctx context.Context, pool *pgxpool.Pool, cfg config.Confi
 			linesHTML.WriteString("</li>")
 		}
 		vars := map[string]string{
-			"lines":           lines.String(),
-			"linesHtml":       linesHTML.String(),
-			"subject":         "Your daily StudyDrift summary",
-			"unsubscribeUrl":  ns.UnsubscribeURL(uid, notifications.EventGradePosted),
+			"lines":          lines.String(),
+			"linesHtml":      linesHTML.String(),
+			"subject":        "Your daily StudyDrift summary",
+			"unsubscribeUrl": ns.UnsubscribeURL(c.UserID, notifications.EventGradePosted),
 		}
-		_, _ = emailjobs.Enqueue(ctx, pool, uid, "daily_digest", vars["subject"], "daily_digest", vars)
+		_, _ = emailjobs.Enqueue(ctx, pool, c.UserID, "daily_digest", vars["subject"], "daily_digest", vars)
 	}
 }
