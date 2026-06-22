@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { usePlatformFeatures } from '../../context/platform-features-context'
-import { GraderAgentDrawer } from './grader-agent-drawer'
+import { GraderAgentWorkflowModal } from './grader-agent/grader-agent-workflow-modal'
 import { postGraderAgentRegradeRequest } from '../../lib/courses-api'
 import {
   fetchAssignmentStudentGrade,
@@ -768,7 +768,7 @@ export function SubmissionGradingPanel({
           </button>
         </div>
       </div>
-      <GraderAgentDrawer
+      <GraderAgentWorkflowModal
         open={agentOpen}
         onClose={() => setAgentOpen(false)}
         courseCode={courseCode}

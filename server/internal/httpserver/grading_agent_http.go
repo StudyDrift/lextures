@@ -100,7 +100,26 @@ func graderAgentConfigToJSON(row *gradingagentrepo.ConfigRow) map[string]any {
 	if row.ModelID != nil {
 		out["modelId"] = *row.ModelID
 	}
+	if g, err := gradingagentsvc.EffectiveWorkflowGraph(row.WorkflowGraph, row.Prompt, row.IncludeAssignmentContent, row.IncludeRubric); err == nil && g != nil {
+		out["workflowGraph"] = g
+	}
 	return out
+}
+
+func writeGraderAgentValidationError(w http.ResponseWriter, err error) {
+	if ve, ok := err.(gradingagentsvc.ValidationError); ok {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusBadRequest)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"error": map[string]string{
+				"code":    apierr.CodeInvalidInput,
+				"message": ve.Message,
+			},
+			"field": ve.Field,
+		})
+		return
+	}
+	apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 }
 
 func (d Deps) handleGetGraderAgentConfig() http.HandlerFunc {
@@ -133,12 +152,13 @@ func (d Deps) handleGetGraderAgentConfig() http.HandlerFunc {
 }
 
 type putGraderAgentConfigBody struct {
-	Prompt                   string  `json:"prompt"`
-	IncludeAssignmentContent bool    `json:"includeAssignmentContent"`
-	IncludeRubric            bool    `json:"includeRubric"`
-	Status                   string  `json:"status"`
-	AutoGradeNew             *bool   `json:"autoGradeNew"`
-	ModelID                  *string `json:"modelId"`
+	Prompt                   string                           `json:"prompt"`
+	IncludeAssignmentContent bool                             `json:"includeAssignmentContent"`
+	IncludeRubric            bool                             `json:"includeRubric"`
+	Status                   string                           `json:"status"`
+	AutoGradeNew             *bool                            `json:"autoGradeNew"`
+	ModelID                  *string                          `json:"modelId"`
+	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
 }
 
 func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
@@ -167,6 +187,30 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 			return
 		}
 		prompt := strings.TrimSpace(body.Prompt)
+		includeContent := body.IncludeAssignmentContent
+		includeRubric := body.IncludeRubric
+		var workflowGraphBytes []byte
+		if body.WorkflowGraph != nil {
+			if err := gradingagentsvc.ValidateWorkflowGraph(body.WorkflowGraph); err != nil {
+				writeGraderAgentValidationError(w, err)
+				return
+			}
+			derivedPrompt, derivedContent, derivedRubric, derivedModel := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
+			if derivedPrompt != "" {
+				prompt = derivedPrompt
+			}
+			includeContent = derivedContent
+			includeRubric = derivedRubric
+			raw, marshalErr := gradingagentsvc.WorkflowGraphToJSON(body.WorkflowGraph)
+			if marshalErr != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid workflow graph.")
+				return
+			}
+			workflowGraphBytes = raw
+			if derivedModel != nil && (body.ModelID == nil || strings.TrimSpace(*body.ModelID) == "") {
+				body.ModelID = derivedModel
+			}
+		}
 		if prompt == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
 			return
@@ -197,9 +241,10 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 			ModuleItemID:             itemID,
 			Status:                   status,
 			Prompt:                   prompt,
-			IncludeAssignmentContent: body.IncludeAssignmentContent,
-			IncludeRubric:            body.IncludeRubric,
+			IncludeAssignmentContent: includeContent,
+			IncludeRubric:            includeRubric,
 			ModelID:                  &modelID,
+			WorkflowGraph:            workflowGraphBytes,
 			AutoGradeNew:             autoGrade,
 			CreatedBy:                viewer,
 		})
@@ -213,11 +258,12 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 }
 
 type dryRunGraderAgentBody struct {
-	Prompt                   string  `json:"prompt"`
-	IncludeAssignmentContent bool    `json:"includeAssignmentContent"`
-	IncludeRubric            bool    `json:"includeRubric"`
-	SubmissionID             string  `json:"submissionId"`
-	ModelID                  *string `json:"modelId"`
+	Prompt                   string                           `json:"prompt"`
+	IncludeAssignmentContent bool                             `json:"includeAssignmentContent"`
+	IncludeRubric            bool                             `json:"includeRubric"`
+	SubmissionID             string                           `json:"submissionId"`
+	ModelID                  *string                          `json:"modelId"`
+	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
 }
 
 func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
@@ -282,12 +328,34 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 		if body.ModelID != nil {
 			explicitModel = strings.TrimSpace(*body.ModelID)
 		}
+		var scoreReq gradingagentsvc.ScoreRequest
+		governancePrompt := strings.TrimSpace(body.Prompt)
+		if body.WorkflowGraph != nil {
+			compiled, compileErr := gradingagentsvc.CompileWorkflowGraph(body.WorkflowGraph, submissionText)
+			if compileErr != nil {
+				writeGraderAgentValidationError(w, compileErr)
+				return
+			}
+			scoreReq = compiled.ScoreRequest
+			governancePrompt = scoreReq.InstructorPrompt
+			if compiled.ScoreRequest.ModelID != "" {
+				explicitModel = compiled.ScoreRequest.ModelID
+			}
+		} else {
+			scoreReq = gradingagentsvc.ScoreRequest{
+				InstructorPrompt:         strings.TrimSpace(body.Prompt),
+				IncludeAssignmentContent: body.IncludeAssignmentContent,
+				IncludeRubric:            body.IncludeRubric,
+				SubmissionText:           submissionText,
+			}
+		}
 		modelID, modelErr := d.resolveGraderAgentModelID(r.Context(), viewer, explicitModel, nil)
 		if modelErr != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, gradingagentsvc.UserFacingScoreError(modelErr))
 			return
 		}
-		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(body.Prompt, submissionText)) {
+		scoreReq.ModelID = modelID
+		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText)) {
 			return
 		}
 		if d.openRouterClient() == nil || strings.TrimSpace(d.effectiveConfig().OpenRouterAPIKey) == "" {
@@ -295,16 +363,10 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 			return
 		}
 		rubric, _ := gradingagentsvc.ParseAssignmentRubric(assignRow)
-		result, err := svc.Score(r.Context(), gradingagentsvc.ScoreRequest{
-			InstructorPrompt:         strings.TrimSpace(body.Prompt),
-			IncludeAssignmentContent: body.IncludeAssignmentContent,
-			IncludeRubric:            body.IncludeRubric,
-			ModelID:                  modelID,
-			AssignmentMarkdown:       assignRow.Markdown,
-			Rubric:                   rubric,
-			MaxPoints:                gradingagentsvc.MaxPointsFromAssignment(assignRow),
-			SubmissionText:           submissionText,
-		})
+		scoreReq.AssignmentMarkdown = assignRow.Markdown
+		scoreReq.Rubric = rubric
+		scoreReq.MaxPoints = gradingagentsvc.MaxPointsFromAssignment(assignRow)
+		result, err := svc.Score(r.Context(), scoreReq)
 		if err != nil {
 			log.Printf("grading-agent dry-run: Score course=%s submission=%s err=%v", courseCode, submissionID, err)
 			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, gradingagentsvc.UserFacingScoreError(err))
@@ -313,17 +375,20 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 		d.recordAIUsage(r.Context(), AIUsageMeta{
 			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureGraderAgent, Model: result.ModelID,
 		}, openrouterUsageFromScore(result), true)
-		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureGraderAgent, result.ModelID, gradingagentsvc.ContentHashInput(body.Prompt, submissionText), aigateway.Decision{Allowed: true, OptInConfirmed: true})
+		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureGraderAgent, result.ModelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText), aigateway.Decision{Allowed: true, OptInConfirmed: true})
 
 		cfg, _ := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
 		var configID uuid.UUID
+		savePrompt := governancePrompt
+		saveIncludeContent := scoreReq.IncludeAssignmentContent
+		saveIncludeRubric := scoreReq.IncludeRubric
 		if cfg != nil {
 			configID = cfg.ID
 		} else {
 			saved, saveErr := gradingagentrepo.UpsertConfig(r.Context(), d.Pool, gradingagentrepo.UpsertConfigInput{
 				CourseID: *cid, ModuleItemID: itemID, Status: gradingagentrepo.StatusDraft,
-				Prompt: body.Prompt, IncludeAssignmentContent: body.IncludeAssignmentContent,
-				IncludeRubric: body.IncludeRubric, CreatedBy: viewer,
+				Prompt: savePrompt, IncludeAssignmentContent: saveIncludeContent,
+				IncludeRubric: saveIncludeRubric, CreatedBy: viewer,
 			})
 			if saveErr == nil && saved != nil {
 				configID = saved.ID
@@ -358,9 +423,10 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 }
 
 type postGraderAgentRunBody struct {
-	Scope        string `json:"scope"`
-	SubmissionID string `json:"submissionId"`
-	Overwrite    bool   `json:"overwrite"`
+	Scope        string  `json:"scope"`
+	SubmissionID string  `json:"submissionId"`
+	Overwrite    bool    `json:"overwrite"`
+	AuthoredVia  *string `json:"authoredVia"`
 }
 
 func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
@@ -404,7 +470,14 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 			return
 		}
 		initiatedBy := viewer
-		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, &initiatedBy, len(submissions))
+		var authoredVia *string
+		if body.AuthoredVia != nil {
+			v := strings.TrimSpace(*body.AuthoredVia)
+			if v == "canvas" || v == "form" {
+				authoredVia = &v
+			}
+		}
+		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, &initiatedBy, authoredVia, len(submissions))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start run.")
 			return

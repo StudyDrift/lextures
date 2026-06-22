@@ -48,6 +48,7 @@ type ConfigRow struct {
 	IncludeAssignmentContent bool
 	IncludeRubric            bool
 	ModelID                  *string
+	WorkflowGraph            []byte
 	AutoGradeNew             bool
 	PostPolicy               string
 	ConfidenceFloor          *float64
@@ -61,6 +62,7 @@ type RunRow struct {
 	ConfigID       uuid.UUID
 	Scope          RunScope
 	InitiatedBy    *uuid.UUID
+	AuthoredVia    *string
 	TotalCount     int
 	CompletedCount int
 	FailedCount    int
@@ -94,15 +96,16 @@ func GetConfigByItem(ctx context.Context, pool *pgxpool.Pool, moduleItemID uuid.
 	}
 	var r ConfigRow
 	var status string
+	var workflowGraph []byte
 	err := pool.QueryRow(ctx, `
 SELECT id, course_id, module_item_id, status::text, prompt,
-       include_assignment_content, include_rubric, model_id, auto_grade_new, post_policy,
+       include_assignment_content, include_rubric, model_id, workflow_graph, auto_grade_new, post_policy,
        confidence_floor, created_by, created_at, updated_at
 FROM assessment.grading_agent_configs
 WHERE module_item_id = $1
 `, moduleItemID).Scan(
 		&r.ID, &r.CourseID, &r.ModuleItemID, &status, &r.Prompt,
-		&r.IncludeAssignmentContent, &r.IncludeRubric, &r.ModelID, &r.AutoGradeNew, &r.PostPolicy,
+		&r.IncludeAssignmentContent, &r.IncludeRubric, &r.ModelID, &workflowGraph, &r.AutoGradeNew, &r.PostPolicy,
 		&r.ConfidenceFloor, &r.CreatedBy, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -112,6 +115,7 @@ WHERE module_item_id = $1
 		return nil, err
 	}
 	r.Status = Status(status)
+	r.WorkflowGraph = workflowGraph
 	return &r, nil
 }
 
@@ -123,6 +127,7 @@ type UpsertConfigInput struct {
 	IncludeAssignmentContent bool
 	IncludeRubric            bool
 	ModelID                  *string
+	WorkflowGraph            []byte
 	AutoGradeNew             bool
 	CreatedBy                uuid.UUID
 }
@@ -133,48 +138,51 @@ func UpsertConfig(ctx context.Context, pool *pgxpool.Pool, in UpsertConfigInput)
 	}
 	var r ConfigRow
 	var status string
+	var workflowGraph []byte
 	err := pool.QueryRow(ctx, `
 INSERT INTO assessment.grading_agent_configs (
 	course_id, module_item_id, status, prompt,
-	include_assignment_content, include_rubric, model_id, auto_grade_new, created_by, updated_at
-) VALUES ($1, $2, $3::assessment.grading_agent_status, $4, $5, $6, $7, $8, $9, NOW())
+	include_assignment_content, include_rubric, model_id, workflow_graph, auto_grade_new, created_by, updated_at
+) VALUES ($1, $2, $3::assessment.grading_agent_status, $4, $5, $6, $7, $8, $9, $10, NOW())
 ON CONFLICT (module_item_id) DO UPDATE SET
 	status = EXCLUDED.status,
 	prompt = EXCLUDED.prompt,
 	include_assignment_content = EXCLUDED.include_assignment_content,
 	include_rubric = EXCLUDED.include_rubric,
 	model_id = COALESCE(EXCLUDED.model_id, assessment.grading_agent_configs.model_id),
+	workflow_graph = COALESCE(EXCLUDED.workflow_graph, assessment.grading_agent_configs.workflow_graph),
 	auto_grade_new = EXCLUDED.auto_grade_new,
 	updated_at = NOW()
 RETURNING id, course_id, module_item_id, status::text, prompt,
-          include_assignment_content, include_rubric, model_id, auto_grade_new, post_policy,
+          include_assignment_content, include_rubric, model_id, workflow_graph, auto_grade_new, post_policy,
           confidence_floor, created_by, created_at, updated_at
 `, in.CourseID, in.ModuleItemID, string(in.Status), in.Prompt,
-		in.IncludeAssignmentContent, in.IncludeRubric, in.ModelID, in.AutoGradeNew, in.CreatedBy,
+		in.IncludeAssignmentContent, in.IncludeRubric, in.ModelID, nullableJSON(in.WorkflowGraph), in.AutoGradeNew, in.CreatedBy,
 	).Scan(
 		&r.ID, &r.CourseID, &r.ModuleItemID, &status, &r.Prompt,
-		&r.IncludeAssignmentContent, &r.IncludeRubric, &r.ModelID, &r.AutoGradeNew, &r.PostPolicy,
+		&r.IncludeAssignmentContent, &r.IncludeRubric, &r.ModelID, &workflowGraph, &r.AutoGradeNew, &r.PostPolicy,
 		&r.ConfidenceFloor, &r.CreatedBy, &r.CreatedAt, &r.UpdatedAt,
 	)
 	if err != nil {
 		return nil, err
 	}
 	r.Status = Status(status)
+	r.WorkflowGraph = workflowGraph
 	return &r, nil
 }
 
-func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scope RunScope, initiatedBy *uuid.UUID, total int) (*RunRow, error) {
+func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scope RunScope, initiatedBy *uuid.UUID, authoredVia *string, total int) (*RunRow, error) {
 	if pool == nil {
 		return nil, errors.New("nil pool")
 	}
 	var r RunRow
 	var scopeStr string
 	err := pool.QueryRow(ctx, `
-INSERT INTO assessment.grading_agent_runs (config_id, scope, initiated_by, total_count, status)
-VALUES ($1, $2::assessment.grading_agent_run_scope, $3, $4, 'queued')
-RETURNING id, config_id, scope::text, initiated_by, total_count, completed_count, failed_count, status, created_at, finished_at
-`, configID, string(scope), initiatedBy, total).Scan(
-		&r.ID, &r.ConfigID, &scopeStr, &r.InitiatedBy, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
+INSERT INTO assessment.grading_agent_runs (config_id, scope, initiated_by, authored_via, total_count, status)
+VALUES ($1, $2::assessment.grading_agent_run_scope, $3, $4, $5, 'queued')
+RETURNING id, config_id, scope::text, initiated_by, authored_via, total_count, completed_count, failed_count, status, created_at, finished_at
+`, configID, string(scope), initiatedBy, authoredVia, total).Scan(
+		&r.ID, &r.ConfigID, &scopeStr, &r.InitiatedBy, &r.AuthoredVia, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
 		&r.Status, &r.CreatedAt, &r.FinishedAt,
 	)
 	if err != nil {
@@ -191,10 +199,10 @@ func GetRun(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (*RunRow, 
 	var r RunRow
 	var scopeStr string
 	err := pool.QueryRow(ctx, `
-SELECT id, config_id, scope::text, initiated_by, total_count, completed_count, failed_count, status, created_at, finished_at
+SELECT id, config_id, scope::text, initiated_by, authored_via, total_count, completed_count, failed_count, status, created_at, finished_at
 FROM assessment.grading_agent_runs WHERE id = $1
 `, runID).Scan(
-		&r.ID, &r.ConfigID, &scopeStr, &r.InitiatedBy, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
+		&r.ID, &r.ConfigID, &scopeStr, &r.InitiatedBy, &r.AuthoredVia, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
 		&r.Status, &r.CreatedAt, &r.FinishedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {

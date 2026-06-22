@@ -42,6 +42,7 @@
     "@tiptap/y-tiptap": "^3.0.4",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/turndown": "^5.0.6",
+    "@xyflow/react": "^12.11.1",
     "dexie": "^4.4.2",
     "hls.js": "^1.6.16",
     "i18next": "^25.10.10",

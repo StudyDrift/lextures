@@ -115,6 +115,7 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   await coursePage.getByRole('button', { name: 'Grader Agent' }).click()
   await expect(coursePage.getByRole('dialog', { name: 'Grading agent' })).toBeVisible()
 
+  await coursePage.getByRole('button', { name: 'Form view' }).click()
   await coursePage.getByPlaceholder(/clear thesis/i).fill('Award full marks for a working thesis.')
   await coursePage.getByRole('button', { name: 'Dry run' }).click()
   await expect(coursePage.getByText('Strong thesis')).toBeVisible({ timeout: 10_000 })

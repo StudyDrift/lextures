@@ -10,7 +10,7 @@
 | **Section** | AI-Specific Capabilities |
 | **Severity** | MAJOR |
 | **Markets** | K12, HE, SL |
-| **Status (today)** | PARTIAL (19.16 shipped a prompt-and-toggle drawer; this replaces the UX with a visual workflow editor) |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4 w) |
 | **Owner (proposed)** | AI / Grading team |
 | **Depends on** | 19.16 (grading-agent service, runs/results schema, governance + grade-write paths), 19.3 (`graded_by_ai` flag), 19.10 (model governance), 19.11 (PII redaction) |
