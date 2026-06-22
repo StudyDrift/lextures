@@ -1096,7 +1096,7 @@ export default function CourseGradebook() {
               column={{
                 id: curveModalColumn.id,
                 title: curveModalColumn.title,
-                kind: curveModalColumn.kind,
+                kind: curveModalColumn.kind ?? 'assignment',
                 maxPoints: curveModalColumn.maxPoints,
               }}
               activeCurveId={activeCurves[curveModalColumn.id]?.curveId ?? null}

@@ -103,7 +103,7 @@ export function GradeCurveModal(props: {
       onApplied()
       onClose()
     } catch (e: unknown) {
-      toastMutationError(e, 'Could not apply curve.')
+      toastMutationError(e instanceof Error ? e.message : 'Could not apply curve.')
     } finally {
       setApplying(false)
     }
@@ -119,7 +119,7 @@ export function GradeCurveModal(props: {
       onApplied()
       onClose()
     } catch (e: unknown) {
-      toastMutationError(e, 'Could not revert curve.')
+      toastMutationError(e instanceof Error ? e.message : 'Could not revert curve.')
     } finally {
       setReverting(false)
     }
