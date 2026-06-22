@@ -281,6 +281,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Let students model hypothetical scores and projected course grades on My Grades (plan 3.16).',
   },
   {
+    key: 'ffGradeCurving',
+    label: 'Grade curving',
+    description:
+      'Let instructors curve or scale assignment grades with preview, undo, and audit trail (plan 3.17).',
+  },
+  {
     key: 'ffOnboardingFlow',
     label: 'Self-learner onboarding',
     description:

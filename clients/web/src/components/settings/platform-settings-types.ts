@@ -52,6 +52,7 @@ export type PlatformSettingsPayload = {
   ffCompletionCredentials: boolean
   ffOnboardingFlow: boolean
   ffWhatifGrades: boolean
+  ffGradeCurving: boolean
   ffAiStudyBuddy: boolean
   ffApiTokens: boolean
   ffCalendarFeeds: boolean

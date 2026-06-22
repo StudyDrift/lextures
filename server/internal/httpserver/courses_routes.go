@@ -83,6 +83,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}", d.handleGetModuleAssignment())
 	r.Patch("/api/v1/courses/{course_code}/assignments/{item_id}", d.handlePatchModuleAssignment())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grades/{student_id}/history", d.handleGetAssignmentGradeHistory())
+	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/curve/preview", d.handlePostAssignmentCurvePreview())
+	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/curve", d.handlePostAssignmentCurve())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}", d.handleGetModuleQuiz())
 	r.Patch("/api/v1/courses/{course_code}/quizzes/{item_id}", d.handlePatchModuleQuiz())
 	d.registerQuizDeliveryRoutes(r)
@@ -92,6 +94,8 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Delete("/api/v1/courses/{course_code}/quizzes/{item_id}/proctoring-config", d.handleDeleteQuizProctoringConfig())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/proctoring-session", d.handleGetQuizProctoringSession())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/analytics", d.handleGetQuizAnalytics())
+	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/curve/preview", d.handlePostAssignmentCurvePreview())
+	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/curve", d.handlePostAssignmentCurve())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/item-analysis", d.handleGetItemAnalysis())
 	r.Post("/api/v1/courses/{course_code}/quizzes/{item_id}/item-analysis/compute", d.handleComputeItemAnalysis())
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/item-analysis/export.csv", d.handleExportItemAnalysisCSV())
@@ -288,4 +292,5 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Put("/api/v1/courses/{course_code}/analytics/outcomes/settings", d.handleCourseOutcomesAnalyticsSettingsPut())
 	r.Post("/api/v1/courses/{course_code}/analytics/outcomes/refresh", d.handleCourseOutcomesAnalyticsRefreshPost())
 	r.Put("/api/v1/courses/{course_code}/outcomes/{outcome_id}/notes", d.handleCourseOutcomeImprovementNotePut())
+	r.Delete("/api/v1/curves/{curve_id}", d.handleDeleteGradeCurve())
 }

@@ -382,6 +382,16 @@ export const courseGradebookGridResponseSchema = z.object({
   excusedGrades: z
     .record(z.string(), z.record(z.string(), z.boolean()))
     .optional(),
+  activeCurves: z
+    .record(
+      z.string(),
+      z.object({
+        curveId: z.string(),
+        method: z.string(),
+        appliedAt: z.string(),
+      }),
+    )
+    .optional(),
   gradingScheme: z
     .object({
       type: z.string(),
