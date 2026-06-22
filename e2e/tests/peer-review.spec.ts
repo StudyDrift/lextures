@@ -72,7 +72,13 @@ test.describe('Peer Review — instructor setup', () => {
       password: 'E2eTestPass1!',
       displayName: 'Peer Student 2',
     })
-    await apiEnroll(seededCourse.instructorToken, seededCourse.courseCode, student2Email, 'student')
+    await apiEnroll(
+      seededCourse.instructorToken,
+      seededCourse.courseCode,
+      student2Email,
+      'student',
+      student2Token,
+    )
     await apiUploadAssignmentSubmission(
       student2Token,
       seededCourse.courseCode,
