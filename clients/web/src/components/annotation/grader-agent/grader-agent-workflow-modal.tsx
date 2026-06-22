@@ -118,7 +118,7 @@ export function GraderAgentWorkflowModal({
               </button>
             ))}
           </div>
-          {!accepted ? (
+          {!accepted && viewMode === 'canvas' ? (
             <button
               type="button"
               disabled={dryRunning || !runnable || !submissionId}

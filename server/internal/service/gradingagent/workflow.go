@@ -110,7 +110,6 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 	}
 
 	outputSlotEdges := map[string]string{} // targetHandle -> edge id
-	inDegree := make(map[string]int, len(g.Nodes))
 	adj := make(map[string][]string, len(g.Nodes))
 	for _, e := range g.Edges {
 		src, ok := nodeByID[e.Source]
@@ -135,10 +134,6 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 			outputSlotEdges[slot] = e.ID
 		}
 		adj[e.Source] = append(adj[e.Source], e.Target)
-		inDegree[e.Target]++
-		if _, ok := inDegree[e.Source]; !ok {
-			inDegree[e.Source] = inDegree[e.Source]
-		}
 	}
 
 	if _, ok := outputSlotEdges[HandleGrade]; !ok {
