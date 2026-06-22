@@ -16,6 +16,8 @@ const (
 	EventConferenceReminder    = notificationevents.ConferenceReminder
 	EventCoachingTipWeekly     = notificationevents.CoachingTipWeekly
 	EventCanvasCourseImported  = notificationevents.CanvasCourseImported
+	EventCourseCopyImported    = notificationevents.CourseCopyImported
+	EventCourseCopyImportFailed = notificationevents.CourseCopyImportFailed
 	EventInboxMessage          = notificationevents.InboxMessage
 	EventIncompleteGranted     = notificationevents.IncompleteGranted
 	EventIncompleteReminder    = notificationevents.IncompleteReminder

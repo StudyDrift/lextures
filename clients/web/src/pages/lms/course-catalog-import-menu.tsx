@@ -3,9 +3,10 @@ import { ChevronDown, Download } from 'lucide-react'
 
 type Props = {
   onImportCanvas: () => void
+  onImportFromCourse: () => void
 }
 
-export function CourseCatalogImportMenu({ onImportCanvas }: Props) {
+export function CourseCatalogImportMenu({ onImportCanvas, onImportFromCourse }: Props) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const menuId = useId()
@@ -44,6 +45,20 @@ export function CourseCatalogImportMenu({ onImportCanvas }: Props) {
           aria-label="Import course from"
           className="absolute start-0 end-0 z-50 mt-1 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 sm:left-auto sm:end-0 sm:min-w-[14rem] dark:border-neutral-600 dark:bg-neutral-800 dark:shadow-black/40"
         >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onImportFromCourse()
+              setOpen(false)
+            }}
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+          >
+            <span className="font-semibold text-slate-950 dark:text-neutral-100">From another course</span>
+            <span className="text-xs text-slate-500 dark:text-neutral-400">
+              Copy content from a course you already teach in Lextures
+            </span>
+          </button>
           <button
             type="button"
             role="menuitem"

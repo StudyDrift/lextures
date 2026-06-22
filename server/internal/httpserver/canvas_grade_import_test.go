@@ -59,3 +59,18 @@ func TestCanvasQuizSubmissionIsGradedForImport_complete(t *testing.T) {
 		t.Fatal("complete quiz submission should be treated as graded")
 	}
 }
+
+func TestCanvasImportUngradedSubmissionsStillImportable(t *testing.T) {
+	// Regression: grade import must not skip submission body import for workflow_state=submitted.
+	raw := map[string]any{
+		"workflow_state": "submitted",
+		"user_id":        float64(42),
+		"body":           "<p>My answer</p>",
+	}
+	if canvasSubmissionIsGradedForImport(raw) {
+		t.Fatal("ungraded submission should not be treated as graded")
+	}
+	if !canvasAssignmentSubmissionImportable(raw) {
+		t.Fatal("ungraded submitted attempt should still be imported")
+	}
+}

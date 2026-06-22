@@ -401,30 +401,30 @@ func canvasImportAssignmentGrades(
 					// #region agent log
 					skipNoScore++
 					// #endregion agent log
-					continue
-				}
-				synced, parseErr := canvasGradeFromSubmissionPayload(raw, nil, canvasUserToLocal)
-				if parseErr != nil {
-					return fmt.Errorf("parse grade for assignment canvas id %d: %w", canvasAID, parseErr)
-				}
-				if synced.hasNumericScore || synced.excused || synced.comment != nil || len(synced.rubricJSON) > 0 {
-					pts := 0.0
-					if synced.hasNumericScore {
-						pts = synced.points
-					}
-					if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, synced.excused, synced.comment, synced.commentsJSON, synced.rubricJSON); err != nil {
-						return fmt.Errorf("save grade for assignment canvas id %d: %w", canvasAID, err)
-					}
-					// #region agent log
-					upserts++
-					// #endregion agent log
 				} else {
-					if err := deleteCourseGradeFromCanvasImport(ctx, tx, studentID, itemID); err != nil {
-						return fmt.Errorf("clear empty grade for assignment canvas id %d: %w", canvasAID, err)
+					synced, parseErr := canvasGradeFromSubmissionPayload(raw, nil, canvasUserToLocal)
+					if parseErr != nil {
+						return fmt.Errorf("parse grade for assignment canvas id %d: %w", canvasAID, parseErr)
 					}
-					// #region agent log
-					skipNoScore++
-					// #endregion agent log
+					if synced.hasNumericScore || synced.excused || synced.comment != nil || len(synced.rubricJSON) > 0 {
+						pts := 0.0
+						if synced.hasNumericScore {
+							pts = synced.points
+						}
+						if err := upsertCourseGradeFromCanvas(ctx, tx, courseID, studentID, itemID, pts, synced.excused, synced.comment, synced.commentsJSON, synced.rubricJSON); err != nil {
+							return fmt.Errorf("save grade for assignment canvas id %d: %w", canvasAID, err)
+						}
+						// #region agent log
+						upserts++
+						// #endregion agent log
+					} else {
+						if err := deleteCourseGradeFromCanvasImport(ctx, tx, studentID, itemID); err != nil {
+							return fmt.Errorf("clear empty grade for assignment canvas id %d: %w", canvasAID, err)
+						}
+						// #region agent log
+						skipNoScore++
+						// #endregion agent log
+					}
 				}
 			}
 			if submissionDeps != nil {
