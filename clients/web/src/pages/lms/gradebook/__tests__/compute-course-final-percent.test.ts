@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { computeCourseFinalPercent } from '../compute-course-final-percent'
+import {
+  computeCourseFinalPercent,
+  computeDroppedGrades,
+  computeScoreNeededForTarget,
+  computeWhatIfFinalPercent,
+  mergeGradesForWhatIf,
+} from '../compute-course-final-percent'
 
 describe('computeCourseFinalPercent', () => {
   it('returns null when no columns have max points', () => {
@@ -138,5 +144,105 @@ describe('computeCourseFinalPercent', () => {
       '2025-07-01T00:00:00Z',
     )
     expect(after).toBe(0)
+  })
+})
+
+describe('what-if grades (plan 3.16)', () => {
+  const future = '2099-01-01T00:00:00Z'
+  const groups = [{ id: 'ex', weightPercent: 40 }, { id: 'fi', weightPercent: 60 }]
+
+  it('includes a future ungraded item when a hypothetical override is entered', () => {
+    const cols = [
+      { id: 'hw', maxPoints: 100, assignmentGroupId: 'ex', dueAt: '2000-01-01T00:00:00Z' },
+      { id: 'final', maxPoints: 100, assignmentGroupId: 'fi', dueAt: future },
+    ]
+    const actual = computeCourseFinalPercent(cols, { hw: '80', final: '' }, groups)
+    // Only coursework is in the denominator until the final receives a hypothetical score.
+    expect(actual).toBeCloseTo(80, 5)
+
+    const projected = computeWhatIfFinalPercent(
+      cols,
+      { hw: '80', final: '' },
+      groups,
+      {},
+      { final: '90' },
+      new Set(),
+    )
+    expect(projected).toBeCloseTo(0.4 * 80 + 0.6 * 90, 5)
+  })
+
+  it('never merges held item real scores into what-if calculations', () => {
+    const held = new Set(['secret'])
+    const merged = mergeGradesForWhatIf({ secret: '99' }, {}, held)
+    expect(merged.secret).toBeUndefined()
+
+    const withOverride = mergeGradesForWhatIf({ secret: '99' }, { secret: '70' }, held)
+    expect(withOverride.secret).toBe('70')
+  })
+
+  it('recomputes dropped items when what-if overrides change drop order', () => {
+    const cols = [
+      { id: 'a', maxPoints: 100, assignmentGroupId: 'g' },
+      { id: 'b', maxPoints: 100, assignmentGroupId: 'g' },
+      { id: 'c', maxPoints: 100, assignmentGroupId: 'g' },
+    ]
+    const groupsWithDrop = [{ id: 'g', weightPercent: 100, dropLowest: 1 }]
+    const actualDrops = computeDroppedGrades(
+      cols,
+      { a: '60', b: '70', c: '80' },
+      groupsWithDrop,
+    )
+    expect(actualDrops.a).toBe(true)
+
+    const whatIfDrops = computeDroppedGrades(
+      cols,
+      { a: '60', b: '70', c: '80' },
+      groupsWithDrop,
+      {},
+      { mode: 'whatIf', whatIfOverrides: { a: '95' }, heldItemIds: new Set() },
+    )
+    expect(whatIfDrops.b).toBe(true)
+    expect(whatIfDrops.a).toBeUndefined()
+  })
+
+  it('computes score needed for a target letter grade', () => {
+    const cols = [
+      { id: 'done', maxPoints: 100, assignmentGroupId: 'g', dueAt: '2000-01-01T00:00:00Z' },
+      { id: 'left', maxPoints: 100, assignmentGroupId: 'g', dueAt: future },
+    ]
+    const result = computeScoreNeededForTarget(
+      80,
+      cols,
+      { done: '70', left: '' },
+      [{ id: 'g', weightPercent: 100 }],
+      {},
+      new Set(),
+      {},
+    )
+    expect(result.achievable).toBe(true)
+    if (result.achievable) {
+      expect(result.scorePercent).toBeGreaterThanOrEqual(89)
+      expect(result.itemIds).toEqual(['left'])
+    }
+  })
+
+  it('reports not achievable when target exceeds 100% on remaining items', () => {
+    const cols = [
+      { id: 'done', maxPoints: 100, assignmentGroupId: 'g', dueAt: '2000-01-01T00:00:00Z' },
+      { id: 'left', maxPoints: 100, assignmentGroupId: 'g', dueAt: future },
+    ]
+    const result = computeScoreNeededForTarget(
+      95,
+      cols,
+      { done: '0', left: '' },
+      [{ id: 'g', weightPercent: 100 }],
+      {},
+      new Set(),
+      {},
+    )
+    expect(result.achievable).toBe(false)
+    if (!result.achievable) {
+      expect(result.reason).toMatch(/not achievable/i)
+    }
   })
 })

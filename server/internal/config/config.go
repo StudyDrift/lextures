@@ -318,6 +318,8 @@ type Config struct {
 	FFUiMode bool
 	// FFGradeSubmission enables the final grade roll-up, review-and-confirm step, and SIS export (plan 14.5).
 	FFGradeSubmission bool
+	// FFWhatifGrades enables student what-if grade projection on My Grades (plan 3.16).
+	FFWhatifGrades bool
 	// FFAcademicCalendar enables institutional academic calendar events, dashboard upcoming-dates panel, and iCal feed (plan 14.6).
 	FFAcademicCalendar bool
 	// FFPlagiarismChecks enables HE plagiarism workflow APIs and async scans (plan 14.8).

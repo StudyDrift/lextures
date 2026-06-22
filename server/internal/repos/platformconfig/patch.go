@@ -136,6 +136,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_demographics", w.FFDemographics)
 	addBool("ff_content_filter_integration", w.FFContentFilterIntegration)
 	addBool("ff_grade_submission", w.FFGradeSubmission)
+	addBool("ff_whatif_grades", w.FFWhatifGrades)
 	addBool("ff_academic_calendar", w.FFAcademicCalendar)
 	addBool("ff_plagiarism_checks", w.FFPlagiarismChecks)
 	addBool("ff_course_evaluations", w.FFCourseEvaluations)
