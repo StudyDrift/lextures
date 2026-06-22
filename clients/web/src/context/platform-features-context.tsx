@@ -18,6 +18,7 @@ export type PlatformFeatures = {
   studentProgressEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean
+  scormIngestionEnabled: boolean
   oerLibraryEnabled: boolean
   itemAnalysisEnabled: boolean
   outcomesReportEnabled: boolean
@@ -95,6 +96,7 @@ const defaultFeatures: PlatformFeatures = {
   studentProgressEnabled: false,
   atRiskAlertsEnabled: false,
   h5pEnabled: false,
+  scormIngestionEnabled: false,
   oerLibraryEnabled: false,
   itemAnalysisEnabled: false,
   outcomesReportEnabled: false,
@@ -177,6 +179,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     studentProgressEnabled: false,
     atRiskAlertsEnabled: false,
     h5pEnabled: false,
+  scormIngestionEnabled: false,
     oerLibraryEnabled: false,
     itemAnalysisEnabled: false,
     outcomesReportEnabled: false,
@@ -260,6 +263,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           studentProgressEnabled: data.studentProgressEnabled === true,
           atRiskAlertsEnabled: data.atRiskAlertsEnabled === true,
           h5pEnabled: data.h5pEnabled === true,
+          scormIngestionEnabled: data.scormIngestionEnabled === true,
           oerLibraryEnabled: data.oerLibraryEnabled === true,
           itemAnalysisEnabled: data.itemAnalysisEnabled === true,
           outcomesReportEnabled: data.outcomesReportEnabled === true,

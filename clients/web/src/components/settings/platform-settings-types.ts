@@ -23,6 +23,7 @@ export type PlatformSettingsPayload = {
   outcomesReportEnabled: boolean
   atRiskAlertsEnabled: boolean
   h5pEnabled: boolean
+  scormIngestionEnabled: boolean
   oerLibraryEnabled: boolean
   oerStub: boolean
   itemAnalysisEnabled: boolean

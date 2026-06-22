@@ -40,6 +40,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.AvScanningEnabled = mergeBool(db.AvScanningEnabled, false)
 	out.ClamAVStub = mergeBool(db.ClamAVStub, false)
 	out.H5PEnabled = mergeBool(db.H5PEnabled, false)
+	out.ScormIngestionEnabled = mergeBool(db.ScormIngestionEnabled, false)
 	out.OERLibraryEnabled = mergeBool(db.OERLibraryEnabled, false)
 	out.OERStub = mergeBool(db.OERStub, false)
 	out.ItemAnalysisEnabled = mergeBool(db.ItemAnalysisEnabled, false)

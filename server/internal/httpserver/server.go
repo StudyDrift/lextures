@@ -193,6 +193,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerStorageQuotaRoutes(r)
 	d.registerAVScanRoutes(r)
 	r.Post("/api/v1/xapi/statements", d.handlePostXAPIStatements())
+	r.Post("/api/v1/scorm/rte/{registration_id}/commit", d.handlePostScormRTECommit())
 	d.registerEngagementRoutes(r)
 	d.registerSeatTimeRoutes(r)
 	d.registerInsightsRoutes(r)

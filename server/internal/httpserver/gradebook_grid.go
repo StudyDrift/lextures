@@ -288,7 +288,7 @@ func (d Deps) handleGradebookGrid() http.HandlerFunc {
 		}
 		var cols []colWork
 		for i := range items {
-			if items[i].Kind != "assignment" && items[i].Kind != "quiz" && items[i].Kind != "h5p" && items[i].Kind != "attendance" {
+			if items[i].Kind != "assignment" && items[i].Kind != "quiz" && items[i].Kind != "h5p" && items[i].Kind != "scorm" && items[i].Kind != "attendance" {
 				continue
 			}
 			itemID, err := uuid.Parse(items[i].ID)

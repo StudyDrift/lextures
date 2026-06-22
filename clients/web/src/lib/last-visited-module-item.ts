@@ -7,6 +7,7 @@ export type LastVisitedModuleKind =
   | 'external_link'
   | 'lti_link'
   | 'h5p'
+  | 'scorm'
   | 'vibe_activity'
 
 export type LastVisitedModuleEntry = {
@@ -100,6 +101,8 @@ export function hrefForLastVisited(courseCode: string, kind: LastVisitedModuleKi
       return `/courses/${cc}/modules/lti/${id}`
     case 'h5p':
       return `/courses/${cc}/modules/h5p/${id}`
+    case 'scorm':
+      return `/courses/${cc}/modules/scorm/${id}`
     case 'vibe_activity':
       return `/courses/${cc}/modules/vibe-activity/${id}`
     default: {

@@ -53,6 +53,7 @@ describe('isEquationEditorEnabled', () => {
       studentProgressEnabled: false,
       atRiskAlertsEnabled: false,
       h5pEnabled: false,
+      scormIngestionEnabled: false,
       oerLibraryEnabled: false,
       itemAnalysisEnabled: false,
       outcomesReportEnabled: false,

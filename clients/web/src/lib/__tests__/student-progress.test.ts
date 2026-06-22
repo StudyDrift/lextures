@@ -19,6 +19,7 @@ describe('studentProgressFeatureEnabled', () => {
       studentProgressEnabled: true,
       atRiskAlertsEnabled: false,
       h5pEnabled: false,
+      scormIngestionEnabled: false,
       oerLibraryEnabled: false,
       itemAnalysisEnabled: false,
       outcomesReportEnabled: false,

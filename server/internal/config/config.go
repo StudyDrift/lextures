@@ -202,6 +202,8 @@ type Config struct {
 
 	// H5PEnabled gates interactive H5P module items and xAPI completion (plan 8.12).
 	H5PEnabled bool
+	// ScormIngestionEnabled gates SCORM/cmi5 package upload and player (plan 2.14).
+	ScormIngestionEnabled bool
 	// ClamAVAddr is the clamd TCP address (default localhost:3310).
 	ClamAVAddr string
 	// ClamAVStub when true uses in-process EICAR detection (tests/dev without clamd).

@@ -1573,6 +1573,7 @@ export type CourseStructureItem = {
     | 'survey'
     | 'lti_link'
     | 'h5p'
+    | 'scorm'
     | 'vibe_activity'
     | 'library_resource'
     | 'textbook_resource'
@@ -2468,6 +2469,66 @@ export async function createModuleH5P(
   form.append('file', file)
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/h5p`,
+    { method: 'POST', body: form },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('CourseStructureItem', courseStructureItemSchema, raw)
+}
+
+export type ModuleScormPayload = {
+  packageId: string
+  itemId?: string
+  title: string
+  packageType: string
+  extractStatus: string
+  assetsBaseUrl: string
+  downloadUrl?: string
+  scos: Array<{ id: string; identifier: string; title: string; launchHref: string }>
+}
+
+export async function fetchModuleScormByItem(
+  courseCode: string,
+  itemId: string,
+): Promise<ModuleScormPayload> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/scorm-items/${encodeURIComponent(itemId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const row = raw as Record<string, unknown>
+  const scosRaw = Array.isArray(row.scos) ? row.scos : []
+  return {
+    packageId: String(row.packageId ?? ''),
+    itemId: row.itemId != null ? String(row.itemId) : undefined,
+    title: String(row.title ?? ''),
+    packageType: String(row.packageType ?? ''),
+    extractStatus: String(row.extractStatus ?? ''),
+    assetsBaseUrl: String(row.assetsBaseUrl ?? ''),
+    downloadUrl: row.downloadUrl != null ? String(row.downloadUrl) : undefined,
+    scos: scosRaw.map((s) => {
+      const sco = s as Record<string, unknown>
+      return {
+        id: String(sco.id ?? ''),
+        identifier: String(sco.identifier ?? ''),
+        title: String(sco.title ?? ''),
+        launchHref: String(sco.launchHref ?? ''),
+      }
+    }),
+  }
+}
+
+export async function createModuleScorm(
+  courseCode: string,
+  moduleId: string,
+  title: string,
+  file: File,
+): Promise<CourseStructureItem> {
+  const form = new FormData()
+  form.append('title', title)
+  form.append('file', file)
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/scorm`,
     { method: 'POST', body: form },
   )
   const raw = await parseJson(res)

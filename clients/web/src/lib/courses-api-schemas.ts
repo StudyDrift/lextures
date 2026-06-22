@@ -256,6 +256,7 @@ export const courseStructureItemSchema = z
       'survey',
       'lti_link',
       'h5p',
+      'scorm',
       'vibe_activity',
       'library_resource',
       'textbook_resource',

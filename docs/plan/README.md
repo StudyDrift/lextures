@@ -47,7 +47,6 @@ Gaps found by scanning `docs/completed`, `docs/plan`, and the codebase (handlers
 | ID | Plan | Severity | Markets | Why it blocks adoption |
 |---|---|---|---|---|
 | 3.15 | [Peer review & peer assessment](03-submissions-grading-integrity/3.15-peer-review-assessment.md) | BLOCKER (HE) / MAJOR | HE · K12 · SL | Explicitly deferred 3× (3.3/3.4/3.13); required by writing programs, large-lecture peer grading, MOOC cohorts |
-| 2.14 | [SCORM / xAPI / cmi5 ingestion](02-assessment-and-authoring/2.14-scorm-xapi-cmi5.md) | MAJOR | HE · K12 · SL | Dangling reference (2.12/2.13 link a `2.14` that was never written); publisher/CE/OER courseware is SCORM-packaged |
 | 2.15 | [Differentiated assignments (assign-to / multiple due dates)](02-assessment-and-authoring/2.15-differentiated-assignments.md) | MAJOR | K12 · HE | Only quiz time/attempt overrides exist; no per-section/group/student targeting — core differentiation & multi-section workflow |
 | 3.16 | [What-if grades (student projection)](03-submissions-grading-integrity/3.16-what-if-grades.md) | MAJOR | HE · K12 · SL | Baseline student gradebook expectation (Canvas parity); absent entirely |
 | 3.17 | [Grade curving & scaling](03-submissions-grading-integrity/3.17-grade-curving-scaling.md) | MAJOR (HE) | HE · K12 · SL | Faculty cannot curve/scale grades; forces error-prone spreadsheet round-trips |

@@ -12,6 +12,7 @@ describe('course-translation-api feature gate', () => {
       studentProgressEnabled: false,
       atRiskAlertsEnabled: false,
       h5pEnabled: false,
+      scormIngestionEnabled: false,
       oerLibraryEnabled: false,
       itemAnalysisEnabled: false,
       engagementTrackingEnabled: false,

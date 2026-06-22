@@ -75,6 +75,7 @@ type platformSettingsJSON struct {
 	AvScanningEnabled               bool `json:"avScanningEnabled"`
 	ClamAVStub                      bool `json:"clamavStub"`
 	H5PEnabled                      bool `json:"h5pEnabled"`
+	ScormIngestionEnabled           bool `json:"scormIngestionEnabled"`
 	OERLibraryEnabled               bool `json:"oerLibraryEnabled"`
 	OERStub                         bool `json:"oerStub"`
 	ItemAnalysisEnabled             bool `json:"itemAnalysisEnabled"`
@@ -270,6 +271,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			AvScanningEnabled:               merged.AvScanningEnabled,
 			ClamAVStub:                      merged.ClamAVStub,
 			H5PEnabled:                      merged.H5PEnabled,
+			ScormIngestionEnabled:           merged.ScormIngestionEnabled,
 			OERLibraryEnabled:               merged.OERLibraryEnabled,
 			OERStub:                         merged.OERStub,
 			ItemAnalysisEnabled:             merged.ItemAnalysisEnabled,
@@ -435,6 +437,7 @@ type putPlatformBody struct {
 	AvScanningEnabled               *bool `json:"avScanningEnabled"`
 	ClamAVStub                      *bool `json:"clamavStub"`
 	H5PEnabled                      *bool `json:"h5pEnabled"`
+	ScormIngestionEnabled           *bool `json:"scormIngestionEnabled"`
 	OERLibraryEnabled               *bool `json:"oerLibraryEnabled"`
 	OERStub                         *bool `json:"oerStub"`
 	ItemAnalysisEnabled             *bool `json:"itemAnalysisEnabled"`
@@ -749,6 +752,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("avscanningenabled", body.AvScanningEnabled, func(v bool) { wr.AvScanningEnabled = &v })
 		setBool("clamavstub", body.ClamAVStub, func(v bool) { wr.ClamAVStub = &v })
 		setBool("h5penabled", body.H5PEnabled, func(v bool) { wr.H5PEnabled = &v })
+		setBool("scormingestionenabled", body.ScormIngestionEnabled, func(v bool) { wr.ScormIngestionEnabled = &v })
 		setBool("oerlibraryenabled", body.OERLibraryEnabled, func(v bool) { wr.OERLibraryEnabled = &v })
 		setBool("oerstub", body.OERStub, func(v bool) { wr.OERStub = &v })
 		setBool("itemanalysisenabled", body.ItemAnalysisEnabled, func(v bool) { wr.ItemAnalysisEnabled = &v })
@@ -905,6 +909,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			AvScanningEnabled:               merged.AvScanningEnabled,
 			ClamAVStub:                      merged.ClamAVStub,
 			H5PEnabled:                      merged.H5PEnabled,
+			ScormIngestionEnabled:           merged.ScormIngestionEnabled,
 			OERLibraryEnabled:               merged.OERLibraryEnabled,
 			OERStub:                         merged.OERStub,
 			ItemAnalysisEnabled:             merged.ItemAnalysisEnabled,
