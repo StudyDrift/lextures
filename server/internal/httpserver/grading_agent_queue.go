@@ -50,10 +50,11 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if subRow.AttachmentFileID == nil {
 		return d.failGradingAgentItem(ctx, msg, "submission has no file attachment")
 	}
-	submissionText, err := svc.LoadSubmissionTextForSubmission(ctx, msg.CourseCode, subRow)
+	submissions, err := svc.LoadSubmissionMarkdownsForSubmission(ctx, msg.CourseCode, subRow)
 	if err != nil {
 		return d.failGradingAgentItem(ctx, msg, err.Error())
 	}
+	submissionText := gradingagentsvc.JoinSubmissions(submissions)
 	modelUser := cfg.CreatedBy
 	if run.InitiatedBy != nil {
 		modelUser = *run.InitiatedBy
@@ -108,7 +109,7 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 			promptNodeID,
 			scoreReq.InstructorPrompt,
 			gradingagentsvc.PromptVariableContext{
-				SubmissionText:  submissionText,
+				Submissions:     submissions,
 				ContentMarkdown: contentRow.Markdown,
 				Rubric:          rubric,
 			},

@@ -43,7 +43,7 @@ describe('workflow prompt variables', () => {
   })
 
   it('maps output handles to property names', () => {
-    expect(workflowOutputHandleToProperty('submission')).toBe('Submission')
+    expect(workflowOutputHandleToProperty('submission')).toBe('Submissions')
     expect(workflowOutputHandleToProperty('content')).toBe('Content')
     expect(workflowOutputHandleToProperty('rubric')).toBe('Rubric')
     expect(workflowOutputHandleToProperty('output')).toBe('Output')
@@ -53,7 +53,7 @@ describe('workflow prompt variables', () => {
     const nodes = workflowPromptVariableNodes(sampleGraph(), 'ai1', defaults)
     expect(nodes).toHaveLength(2)
     expect(nodes.find((node) => node.variableName === 'StudentSubmission')?.properties).toEqual([
-      { property: 'Submission', handle: 'submission' },
+      { property: 'Submissions', handle: 'submission' },
     ])
     expect(nodes.find((node) => node.variableName === 'Activity')?.properties).toEqual([
       { property: 'Content', handle: 'content' },
@@ -96,13 +96,13 @@ describe('workflow prompt variables', () => {
   })
 
   it('substitutes variables in prompts', () => {
-    const prompt = `Content: $Activity.Content\nRubric: $Activity.Rubric\nSubmission: $StudentSubmission.Submission`
+    const prompt = `Content: $Activity.Content\nRubric: $Activity.Rubric\nSubmission: $StudentSubmission.Submissions`
     const resolved = substitutePromptVariables(prompt, {
       Activity: { Content: 'Essay prompt', Rubric: 'Rubric text' },
-      StudentSubmission: { Submission: 'Student answer' },
+      StudentSubmission: { Submissions: 'Essay part one\n\nEssay part two' },
     })
     expect(resolved).toBe(
-      'Content: Essay prompt\nRubric: Rubric text\nSubmission: Student answer',
+      'Content: Essay prompt\nRubric: Rubric text\nSubmission: Essay part one\n\nEssay part two',
     )
     expect(
       substitutePromptVariables('Unknown: $Missing.Value', { Activity: { Content: 'x' } }),

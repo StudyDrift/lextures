@@ -4,6 +4,9 @@ import { createContext, useContext, type ReactNode } from 'react'
 type WorkflowCanvasContextValue = {
   readOnly: boolean
   onNodeLabelChange: (nodeId: string, label: string | null) => void
+  renameRequestNodeId: string | null
+  requestNodeRename: (nodeId: string) => void
+  clearRenameRequest: () => void
 }
 
 const WorkflowCanvasContext = createContext<WorkflowCanvasContextValue | null>(null)
@@ -11,10 +14,15 @@ const WorkflowCanvasContext = createContext<WorkflowCanvasContextValue | null>(n
 export function WorkflowCanvasProvider({
   readOnly,
   onNodeLabelChange,
+  renameRequestNodeId,
+  requestNodeRename,
+  clearRenameRequest,
   children,
 }: WorkflowCanvasContextValue & { children: ReactNode }) {
   return (
-    <WorkflowCanvasContext.Provider value={{ readOnly, onNodeLabelChange }}>
+    <WorkflowCanvasContext.Provider
+      value={{ readOnly, onNodeLabelChange, renameRequestNodeId, requestNodeRename, clearRenameRequest }}
+    >
       {children}
     </WorkflowCanvasContext.Provider>
   )

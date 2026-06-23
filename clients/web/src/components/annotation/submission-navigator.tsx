@@ -37,7 +37,7 @@ function SubmissionStatusBadge({ submission }: { submission: ModuleAssignmentSub
   return <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" title="Ungraded" />
 }
 
-function SubmissionStudentPicker({
+export function SubmissionStudentPicker({
   submissions,
   index,
   disabled,
@@ -87,7 +87,7 @@ function SubmissionStudentPicker({
   useEffect(() => {
     if (!open) return
     setHighlightedIndex(0)
-  }, [query])
+  }, [query, open])
 
   useEffect(() => {
     if (!open || visibleEntries.length === 0) return

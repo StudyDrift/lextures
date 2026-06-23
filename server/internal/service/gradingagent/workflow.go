@@ -538,16 +538,22 @@ func activityAssignmentItemID(n WorkflowNode) string {
 	return ""
 }
 
-func resolveWiredActivityItemIDs(g *WorkflowGraph, graderID string, nodeByID map[string]WorkflowNode) (contentItemID, rubricItemID string) {
+func resolveWiredActivityItemIDs(g *WorkflowGraph, promptNodeID string, nodeByID map[string]WorkflowNode) (contentItemID, rubricItemID string) {
+	promptNode, ok := nodeByID[promptNodeID]
+	if !ok {
+		return "", ""
+	}
 	for _, e := range g.Edges {
-		if e.Target != graderID {
+		if e.Target != promptNodeID {
 			continue
 		}
 		src, ok := nodeByID[e.Source]
 		if !ok || !isActivityNodeType(src.Type) {
 			continue
 		}
-		switch e.TargetHandle {
+		targetHandle := strings.TrimSpace(e.TargetHandle)
+		sourceHandle := strings.TrimSpace(e.SourceHandle)
+		switch targetHandle {
 		case HandleContent:
 			contentItemID = activityAssignmentItemID(src)
 		case HandleRubric:
@@ -562,12 +568,35 @@ func resolveWiredActivityItemIDs(g *WorkflowGraph, graderID string, nodeByID map
 			if rubricItemID == "" {
 				rubricItemID = activityAssignmentItemID(src)
 			}
+		case HandleAIInput:
+			if !isAINodeType(promptNode.Type) {
+				continue
+			}
+			switch sourceHandle {
+			case HandleContent:
+				contentItemID = activityAssignmentItemID(src)
+			case HandleRubric:
+				rubricItemID = activityAssignmentItemID(src)
+			}
 		}
 	}
 	return contentItemID, rubricItemID
 }
 
-// CompileWorkflowGraph turns a validated graph into a ScoreRequest for the wired grader.
+func findGradeSourceNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) string {
+	for _, e := range g.Edges {
+		tgt, ok := nodeByID[e.Target]
+		if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleGrade {
+			continue
+		}
+		if src, ok := nodeByID[e.Source]; ok && (src.Type == NodeTypeGrader || src.Type == NodeTypeAI) {
+			return src.ID
+		}
+	}
+	return ""
+}
+
+// CompileWorkflowGraph turns a validated graph into a ScoreRequest for the wired grade source.
 func CompileWorkflowGraph(g *WorkflowGraph, submissionText string) (CompiledWorkflow, error) {
 	if err := ValidateWorkflowGraph(g); err != nil {
 		return CompiledWorkflow{}, err
@@ -576,14 +605,14 @@ func CompileWorkflowGraph(g *WorkflowGraph, submissionText string) (CompiledWork
 	for _, n := range g.Nodes {
 		nodeByID[n.ID] = n
 	}
-	graderID := findGradeGraderNode(g, nodeByID)
-	if graderID == "" {
+	gradeSourceID := findGradeSourceNode(g, nodeByID)
+	if gradeSourceID == "" {
 		return CompiledWorkflow{}, ValidationError{Field: "output.grade", Message: "Connect the grade slot before running."}
 	}
-	grader := nodeByID[graderID]
-	prompt := graderPrompt(grader)
-	includeContent, includeRubric := deriveIncludeFlags(g, graderID, nodeByID)
-	modelID := graderModelID(grader)
+	gradeSource := nodeByID[gradeSourceID]
+	prompt := graderPrompt(gradeSource)
+	includeContent, includeRubric := deriveIncludeFlags(g, gradeSourceID, nodeByID)
+	modelID := graderModelID(gradeSource)
 	commentSource := ""
 	for _, e := range g.Edges {
 		tgt, ok := nodeByID[e.Target]
@@ -601,10 +630,10 @@ func CompileWorkflowGraph(g *WorkflowGraph, submissionText string) (CompiledWork
 	if modelID != "" {
 		req.ModelID = modelID
 	}
-	contentItemID, rubricItemID := resolveWiredActivityItemIDs(g, graderID, nodeByID)
+	contentItemID, rubricItemID := resolveWiredActivityItemIDs(g, gradeSourceID, nodeByID)
 	return CompiledWorkflow{
 		ScoreRequest:  req,
-		GradeSource:   graderID,
+		GradeSource:   gradeSourceID,
 		CommentSource: commentSource,
 		ContentItemID: contentItemID,
 		RubricItemID:  rubricItemID,

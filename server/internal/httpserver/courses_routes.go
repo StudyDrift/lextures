@@ -118,6 +118,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent", d.handleGetGraderAgentConfig())
 	r.Put("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent", d.handlePutGraderAgentConfig())
 	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/dry-run", d.handlePostGraderAgentDryRun())
+	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/dry-run/ws", d.handleGraderAgentDryRunWS())
 	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs", d.handlePostGraderAgentRun())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs/{run_id}", d.handleGetGraderAgentRun())
 	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/regrade-request", d.handlePostGraderAgentRegradeRequest())

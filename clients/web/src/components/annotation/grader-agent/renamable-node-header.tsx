@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react'
+import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWorkflowCanvas } from './workflow-canvas-context'
 import { workflowNodeDisplayLabel, workflowNodeLabel } from './workflow-node-label'
@@ -10,10 +10,11 @@ type RenamableNodeHeaderProps = {
   headerClassName: string
   dotClassName?: string
   titleClassName?: string
+  trailing?: ReactNode
 }
 
 function useRenamableNodeLabel(nodeId: string, data: Record<string, unknown>, defaultLabel: string) {
-  const { readOnly, onNodeLabelChange } = useWorkflowCanvas()
+  const { readOnly, onNodeLabelChange, renameRequestNodeId, clearRenameRequest } = useWorkflowCanvas()
   const displayLabel = workflowNodeDisplayLabel(data, defaultLabel)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(displayLabel)
@@ -29,6 +30,13 @@ function useRenamableNodeLabel(nodeId: string, data: Record<string, unknown>, de
       inputRef.current?.select()
     }
   }, [editing])
+
+  useEffect(() => {
+    if (readOnly || renameRequestNodeId !== nodeId) return
+    setDraft(displayLabel)
+    setEditing(true)
+    clearRenameRequest()
+  }, [clearRenameRequest, displayLabel, nodeId, readOnly, renameRequestNodeId])
 
   const startEditing = (event: MouseEvent) => {
     if (readOnly) return
@@ -83,6 +91,7 @@ export function RenamableNodeHeader({
   headerClassName,
   dotClassName,
   titleClassName = 'text-sm font-semibold text-slate-800 dark:text-neutral-100',
+  trailing,
 }: RenamableNodeHeaderProps) {
   const { t } = useTranslation('common')
   const {
@@ -119,8 +128,9 @@ export function RenamableNodeHeader({
           aria-label={t('gradingAgent.canvas.nodeLabel.renameInput')}
         />
       ) : (
-        <p className={`min-w-0 truncate ${titleClassName}`}>{displayLabel}</p>
+        <p className={`min-w-0 flex-1 truncate ${titleClassName}`}>{displayLabel}</p>
       )}
+      {trailing}
     </div>
   )
 }

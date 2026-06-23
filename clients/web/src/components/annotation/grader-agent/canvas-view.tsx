@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from 'react'
-import type { DragEvent } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { DragEvent, MouseEvent as ReactMouseEvent } from 'react'
 import {
   ReactFlow,
   Background,
@@ -31,6 +31,11 @@ import { connectionIsValid } from './validation'
 import type { GraderWorkflowGraph, PaletteNodeType } from './types'
 import { graderAgentNodeTypes } from './workflow-node-types'
 import { WorkflowCanvasProvider } from './workflow-canvas-context'
+import {
+  WorkflowCanvasContextMenu,
+  type WorkflowCanvasContextMenuItem,
+  type WorkflowCanvasContextMenuState,
+} from './workflow-canvas-context-menu'
 import { workflowHasAttachedRubric } from './workflow-grade-slot'
 
 /** Cap zoom-in so a lone output node does not fill the canvas on first paint. */
@@ -45,6 +50,7 @@ function graphToFlow(
   graph: GraderWorkflowGraph,
   selectedNodeId: string | null,
   readOnly: boolean,
+  nodeExecutionStates: Record<string, string>,
 ): { nodes: Node[]; edges: Edge[] } {
   const gradeSlotUsesRubric = workflowHasAttachedRubric(graph)
   return {
@@ -52,10 +58,10 @@ function graphToFlow(
       id: n.id,
       type: n.type,
       position: n.position,
-      data:
-        n.type === 'output'
-          ? { ...n.data, gradeSlotUsesRubric }
-          : n.data,
+      data: {
+        ...(n.type === 'output' ? { ...n.data, gradeSlotUsesRubric } : n.data),
+        executionStatus: nodeExecutionStates[n.id] ?? 'idle',
+      },
       selected: n.id === selectedNodeId,
       deletable: n.type !== 'output',
       selectable: true,
@@ -74,6 +80,7 @@ function graphToFlow(
 function flowNodeData(node: Node): Record<string, unknown> {
   const data = { ...((node.data ?? {}) as Record<string, unknown>) }
   if (node.type === 'output') delete data.gradeSlotUsesRubric
+  delete data.executionStatus
   return data
 }
 
@@ -116,9 +123,21 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
   const didFitView = useRef(false)
   const graphRef = useRef<GraderWorkflowGraph | null>(null)
   const { screenToFlowPosition, fitView } = useReactFlow()
-  const { graph, updateGraph, setSelectedNodeId, selectedNodeId, addPaletteNode, updateNodeLabel } = workflow
+  const {
+    graph,
+    updateGraph,
+    setSelectedNodeId,
+    selectedNodeId,
+    addPaletteNode,
+    updateNodeLabel,
+    removeNode,
+    removeEdge,
+    nodeExecutionStates,
+  } = workflow
   const [nodes, setNodes] = useNodesState<Node>([])
   const [edges, setEdges] = useEdgesState<Edge>([])
+  const [contextMenu, setContextMenu] = useState<WorkflowCanvasContextMenuState>(null)
+  const [renameRequestNodeId, setRenameRequestNodeId] = useState<string | null>(null)
   const nodesRef = useRef(nodes)
   const edgesRef = useRef(edges)
 
@@ -128,12 +147,12 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
 
   useEffect(() => {
     if (!graph) return
-    const flow = graphToFlow(graph, selectedNodeId, readOnly)
+    const flow = graphToFlow(graph, selectedNodeId, readOnly, nodeExecutionStates)
     nodesRef.current = flow.nodes
     edgesRef.current = flow.edges
     setNodes(flow.nodes)
     setEdges(flow.edges)
-  }, [graph, readOnly, selectedNodeId, setNodes, setEdges])
+  }, [graph, readOnly, selectedNodeId, nodeExecutionStates, setNodes, setEdges])
 
   useEffect(() => {
     if (!graph || didFitView.current) return
@@ -207,6 +226,62 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
     event.dataTransfer.dropEffect = 'move'
   }, [])
 
+  const closeContextMenu = useCallback(() => setContextMenu(null), [])
+
+  const requestNodeRename = useCallback((nodeId: string) => {
+    setRenameRequestNodeId(nodeId)
+  }, [])
+
+  const clearRenameRequest = useCallback(() => {
+    setRenameRequestNodeId(null)
+  }, [])
+
+  const onNodeContextMenu = useCallback(
+    (event: ReactMouseEvent, node: Node) => {
+      event.preventDefault()
+      setSelectedNodeId(node.id)
+      if (readOnly) return
+      setContextMenu({ kind: 'node', nodeId: node.id, top: event.clientY, left: event.clientX })
+    },
+    [readOnly, setSelectedNodeId],
+  )
+
+  const onEdgeContextMenu = useCallback((event: ReactMouseEvent, edge: Edge) => {
+    event.preventDefault()
+    setContextMenu({
+      kind: 'edge',
+      edgeId: edge.id,
+      sourceId: edge.source,
+      targetId: edge.target,
+      top: event.clientY,
+      left: event.clientX,
+    })
+  }, [])
+
+  const handleContextMenuSelect = useCallback(
+    (item: WorkflowCanvasContextMenuItem) => {
+      if (!contextMenu || !graph) return
+      if (contextMenu.kind === 'node') {
+        if (item.kind === 'rename') requestNodeRename(contextMenu.nodeId)
+        if (item.kind === 'deleteNode') removeNode(contextMenu.nodeId)
+      } else {
+        if (item.kind === 'selectSource') setSelectedNodeId(contextMenu.sourceId)
+        if (item.kind === 'selectTarget') setSelectedNodeId(contextMenu.targetId)
+        if (item.kind === 'deleteEdge') removeEdge(contextMenu.edgeId)
+      }
+      closeContextMenu()
+    },
+    [
+      closeContextMenu,
+      contextMenu,
+      graph,
+      removeEdge,
+      removeNode,
+      requestNodeRename,
+      setSelectedNodeId,
+    ],
+  )
+
   const onDrop = useCallback(
     (event: DragEvent) => {
       event.preventDefault()
@@ -234,7 +309,13 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
-      <WorkflowCanvasProvider readOnly={readOnly} onNodeLabelChange={updateNodeLabel}>
+      <WorkflowCanvasProvider
+        readOnly={readOnly}
+        onNodeLabelChange={updateNodeLabel}
+        renameRequestNodeId={renameRequestNodeId}
+        requestNodeRename={requestNodeRename}
+        clearRenameRequest={clearRenameRequest}
+      >
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -242,8 +323,17 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onNodeClick={(_, node) => setSelectedNodeId(node.id)}
-          onPaneClick={() => setSelectedNodeId(null)}
+          onNodeClick={(_, node) => {
+            closeContextMenu()
+            setSelectedNodeId(node.id)
+          }}
+          onEdgeClick={() => closeContextMenu()}
+          onPaneClick={() => {
+            closeContextMenu()
+            setSelectedNodeId(null)
+          }}
+          onNodeContextMenu={onNodeContextMenu}
+          onEdgeContextMenu={onEdgeContextMenu}
           nodesFocusable
           edgesFocusable
           proOptions={{ hideAttribution: true }}
@@ -254,6 +344,15 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
           <Controls />
           <MiniMap pannable zoomable />
         </ReactFlow>
+        {contextMenu ? (
+          <WorkflowCanvasContextMenu
+            menu={contextMenu}
+            graph={graph}
+            readOnly={readOnly}
+            onClose={closeContextMenu}
+            onSelect={handleContextMenuSelect}
+          />
+        ) : null}
       </WorkflowCanvasProvider>
       {readOnly ? (
         <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">

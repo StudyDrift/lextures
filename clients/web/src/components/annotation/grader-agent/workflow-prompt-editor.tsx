@@ -42,6 +42,7 @@ export function WorkflowPromptEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [caret, setCaret] = useState(value.length)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [suppressedStart, setSuppressedStart] = useState<number | null>(null)
 
   const variableNodes = useMemo(
     () => workflowPromptVariableNodes(graph, promptNodeId, defaults),
@@ -66,9 +67,24 @@ export function WorkflowPromptEditor({
     }))
   }, [variableNodes, variableState])
 
-  const listOpen = Boolean(variableState && !disabled && rowsForPicker.length > 0)
+  const listOpen = Boolean(
+    variableState &&
+      !disabled &&
+      rowsForPicker.length > 0 &&
+      variableState.start !== suppressedStart,
+  )
   const variablePickerQuery =
     variableState?.kind === 'node' ? variableState.query : variableState?.nodeQuery
+
+  useEffect(() => {
+    if (!variableState) setSuppressedStart(null)
+  }, [variableState])
+
+  useEffect(() => {
+    if (variableState && suppressedStart !== null && variableState.start !== suppressedStart) {
+      setSuppressedStart(null)
+    }
+  }, [variableState, suppressedStart])
 
   useEffect(() => {
     setActiveIndex(0)
@@ -87,14 +103,16 @@ export function WorkflowPromptEditor({
     (row: PickerRow) => {
       if (!variableState || !textareaRef.current) return
       const element = textareaRef.current
+      const tokenStart = variableState.start
       const pos = element.selectionStart ?? value.length
       const insertion =
         row.kind === 'node'
           ? `$${row.node.variableName}.`
           : `$${row.node.variableName}.${row.property.property}`
-      const next = `${value.slice(0, variableState.start)}${insertion}${value.slice(pos)}`
+      const next = `${value.slice(0, tokenStart)}${insertion}${value.slice(pos)}`
+      if (row.kind === 'property') setSuppressedStart(tokenStart)
       onChange(next)
-      const nextCaret = variableState.start + insertion.length
+      const nextCaret = tokenStart + insertion.length
       requestAnimationFrame(() => {
         element.focus()
         element.setSelectionRange(nextCaret, nextCaret)
@@ -125,9 +143,11 @@ export function WorkflowPromptEditor({
       }
       if (event.key === 'Escape') {
         event.preventDefault()
+        event.stopPropagation()
+        if (variableState) setSuppressedStart(variableState.start)
       }
     },
-    [activeIndex, applyPick, listOpen, rowsForPicker],
+    [activeIndex, applyPick, listOpen, rowsForPicker, variableState],
   )
 
   return (
@@ -138,6 +158,12 @@ export function WorkflowPromptEditor({
         onChange={(event) => {
           onChange(event.target.value)
           syncCaret(event.target)
+          setSuppressedStart((prev) => {
+            if (prev === null) return prev
+            const nextCaret = event.target.selectionStart ?? event.target.value.length
+            const state = getPromptVariableState(event.target.value, nextCaret)
+            return state?.start === prev ? null : prev
+          })
         }}
         onClick={(event) => syncCaret(event.currentTarget)}
         onKeyUp={(event) => syncCaret(event.currentTarget)}

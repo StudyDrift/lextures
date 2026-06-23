@@ -1,4 +1,4 @@
-import { apiBaseUrl, apiUrl, authorizedFetch } from './api'
+import { apiBaseUrl, apiUrl, authorizedFetch, wsUrl } from './api'
 import { getAccessToken } from './auth'
 import { readApiErrorMessage } from './errors'
 import {
@@ -5951,6 +5951,106 @@ export async function postGraderAgentDryRun(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as GraderAgentDryRunResult
+}
+
+export type GraderAgentDryRunEvent = {
+  type: 'log' | 'node_start' | 'node_complete' | 'result' | 'error' | 'complete'
+  nodeId?: string
+  nodeType?: string
+  nodeLabel?: string
+  status?: 'success' | 'error'
+  message?: string
+  level?: 'info' | 'warn' | 'error'
+  compiledPrompt?: string
+  compiledSystemPrompt?: string
+  compiledInput?: string
+  compiledOutput?: string
+  result?: GraderAgentDryRunResult
+}
+
+function graderAgentDryRunWebSocketUrl(courseCode: string, itemId: string): string | null {
+  if (!getAccessToken()) return null
+  return wsUrl(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/dry-run/ws`,
+  )
+}
+
+/** Streams a step-by-step workflow dry run over WebSocket. */
+export async function streamGraderAgentDryRun(
+  courseCode: string,
+  itemId: string,
+  body: {
+    submissionId: string
+    workflowGraph: GraderWorkflowGraphApi
+  },
+  onEvent: (event: GraderAgentDryRunEvent) => void,
+): Promise<GraderAgentDryRunResult> {
+  const authToken = getAccessToken()
+  if (!authToken) {
+    throw new Error('Sign in to dry run the grading agent.')
+  }
+  const url = graderAgentDryRunWebSocketUrl(courseCode, itemId)
+  if (!url) {
+    throw new Error('Sign in to dry run the grading agent.')
+  }
+
+  return new Promise<GraderAgentDryRunResult>((resolve, reject) => {
+    const ws = new WebSocket(url)
+    let settled = false
+    let result: GraderAgentDryRunResult | null = null
+
+    const fail = (msg: string) => {
+      if (settled) return
+      settled = true
+      ws.close()
+      reject(new Error(msg))
+    }
+
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          authToken,
+          submissionId: body.submissionId,
+          workflowGraph: body.workflowGraph,
+        }),
+      )
+    }
+
+    ws.onmessage = (ev) => {
+      let parsed: GraderAgentDryRunEvent
+      try {
+        parsed = JSON.parse(String(ev.data)) as GraderAgentDryRunEvent
+      } catch {
+        fail('Unexpected message from server.')
+        return
+      }
+      onEvent(parsed)
+      if (parsed.type === 'result' && parsed.result) {
+        result = parsed.result
+      }
+      if (parsed.type === 'error') {
+        fail(parsed.message ?? 'Dry run failed.')
+        return
+      }
+      if (parsed.type === 'complete') {
+        if (settled) return
+        settled = true
+        ws.close()
+        if (result) {
+          resolve(result)
+        } else {
+          reject(new Error('Dry run finished without a result.'))
+        }
+      }
+    }
+
+    ws.onerror = () => fail('Connection error during dry run.')
+    ws.onclose = () => {
+      if (!settled) {
+        fail('Dry run connection closed unexpectedly.')
+      }
+    }
+  })
 }
 
 export async function postGraderAgentRun(

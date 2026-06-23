@@ -13,9 +13,9 @@ var promptVariablePattern = regexp.MustCompile(`\$([A-Za-z][A-Za-z0-9]*)\.([A-Za
 
 // PromptVariableContext supplies runtime values for wired prompt variables.
 type PromptVariableContext struct {
-	SubmissionText    string
-	ContentMarkdown   string
-	Rubric            *assignmentrubric.RubricDefinition
+	Submissions     []string
+	ContentMarkdown string
+	Rubric          *assignmentrubric.RubricDefinition
 }
 
 func workflowNodeVariableName(label string) string {
@@ -59,7 +59,7 @@ func workflowNodeDisplayLabel(data map[string]any, nodeType string) string {
 func workflowOutputHandleToProperty(handle string) string {
 	switch handle {
 	case HandleSubmission:
-		return "Submission"
+		return "Submissions"
 	case HandleContent:
 		return "Content"
 	case HandleRubric:
@@ -107,7 +107,7 @@ func formatRubricVariableText(rubric *assignmentrubric.RubricDefinition) string 
 func propertyValue(handle string, ctx PromptVariableContext) string {
 	switch handle {
 	case HandleSubmission:
-		return strings.TrimSpace(ctx.SubmissionText)
+		return JoinSubmissions(ctx.Submissions)
 	case HandleContent:
 		return strings.TrimSpace(ctx.ContentMarkdown)
 	case HandleRubric:

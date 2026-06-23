@@ -64,6 +64,28 @@ func (d Deps) enforceAIGateway(
 	return true
 }
 
+// evaluateAIGatewayBlock returns a user-facing block message when AI processing is disallowed.
+func (d Deps) evaluateAIGatewayBlock(ctx context.Context, userID uuid.UUID, feature, modelID, contentForHash string) (string, bool) {
+	if d.Pool == nil {
+		return aigateway.BlockMessage(aigateway.BlockServiceError), true
+	}
+	var orgID *uuid.UUID
+	if oid, err := organization.OrgIDForUser(ctx, d.Pool, userID); err == nil {
+		orgID = &oid
+	}
+	hash := aigateway.ContentHash(contentForHash)
+	dec, err := aigateway.Evaluate(ctx, d.Pool, d.aiGatewayConfig(), userID, orgID, feature, modelID, hash)
+	if err != nil {
+		_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, aigateway.ProviderOpenRouter, hash, true)
+		return aigateway.BlockMessage(aigateway.BlockServiceError), true
+	}
+	if !dec.Allowed {
+		_ = aigateway.LogInference(ctx, d.Pool, orgID, dec, feature, modelID, aigateway.ProviderOpenRouter, hash, true)
+		return aigateway.BlockMessage(dec.Reason), true
+	}
+	return "", false
+}
+
 // AIUsageMeta identifies who triggered an OpenRouter call for analytics.ai_usage_log.
 type AIUsageMeta struct {
 	UserID     uuid.UUID

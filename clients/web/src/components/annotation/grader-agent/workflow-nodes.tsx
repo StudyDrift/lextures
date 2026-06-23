@@ -1,7 +1,31 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
+import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { RenamableNodeHeader, RenamableNodeTitle } from './renamable-node-header'
+import type { NodeExecutionStatus } from './use-grader-agent-workflow'
+
+function executionStatusClass(status: NodeExecutionStatus | undefined, selected: boolean): string {
+  switch (status) {
+    case 'running':
+      return 'border-indigo-400 ring-2 ring-indigo-400/40 motion-safe:animate-pulse'
+    case 'success':
+      return 'border-emerald-400 ring-2 ring-emerald-400/30'
+    case 'error':
+      return 'border-rose-400 ring-2 ring-rose-400/30'
+    default:
+      return selected ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-slate-200 dark:border-neutral-700'
+  }
+}
+
+function ExecutionBadge({ status }: { status: NodeExecutionStatus | undefined }) {
+  if (status !== 'running') return null
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
+      <Loader2 className="h-3 w-3 motion-safe:animate-spin" aria-hidden />
+    </span>
+  )
+}
 
 function InputSlotRow({
   handleId,
@@ -56,17 +80,20 @@ function OutputSlotRow({
 export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
   const gradeSlotUsesRubric = nodeData.gradeSlotUsesRubric === true
   const gradeSlotLabel = gradeSlotUsesRubric
     ? t('gradingAgent.canvas.slots.gradeRubric')
     : t('gradingAgent.canvas.slots.gradeScore')
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-emerald-400/80 ring-2 ring-emerald-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
   return (
     <div
-      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
-        selected
-          ? 'border-emerald-400/80 ring-2 ring-emerald-500/20'
-          : 'border-slate-200 dark:border-neutral-700'
-      }`}
+      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}
     >
       <RenamableNodeHeader
         nodeId={id}
@@ -74,6 +101,7 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
         defaultLabel={t('gradingAgent.canvas.nodes.output.title')}
         dotClassName="bg-emerald-500"
         headerClassName="border-b border-emerald-500/15 bg-emerald-500/5 dark:border-emerald-500/10 dark:bg-emerald-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
         <InputSlotRow
@@ -96,19 +124,25 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
 export const GraderNode = memo(function GraderNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
   const prompt = typeof nodeData.prompt === 'string' ? nodeData.prompt : ''
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-indigo-500 ring-2 ring-indigo-200'
+        : 'border-indigo-300 dark:border-indigo-800'
   return (
-    <div
-      className={`min-w-[200px] rounded-xl border bg-white px-3 py-2 shadow-md dark:bg-neutral-900 ${
-        selected ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-indigo-300 dark:border-indigo-800'
-      }`}
-    >
-      <RenamableNodeTitle
-        nodeId={id}
-        data={nodeData}
-        defaultLabel={t('gradingAgent.canvas.nodes.grader.title')}
-        className="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300"
-      />
+    <div className={`min-w-[200px] rounded-xl border bg-white px-3 py-2 shadow-md dark:bg-neutral-900 ${statusClass}`}>
+      <div className="flex items-center justify-between gap-2">
+        <RenamableNodeTitle
+          nodeId={id}
+          data={nodeData}
+          defaultLabel={t('gradingAgent.canvas.nodes.grader.title')}
+          className="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300"
+        />
+        <ExecutionBadge status={executionStatus} />
+      </div>
       <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-neutral-400">
         {prompt.trim() || t('gradingAgent.canvas.nodes.grader.emptyPrompt')}
       </p>
@@ -133,20 +167,22 @@ export const GraderNode = memo(function GraderNode({ id, data, selected }: NodeP
 export const ActivityNode = memo(function ActivityNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-amber-400/80 ring-2 ring-amber-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
   return (
-    <div
-      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
-        selected
-          ? 'border-amber-400/80 ring-2 ring-amber-500/20'
-          : 'border-slate-200 dark:border-neutral-700'
-      }`}
-    >
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
         defaultLabel={t('gradingAgent.canvas.nodes.activity.title')}
         dotClassName="bg-amber-500"
         headerClassName="border-b border-amber-500/15 bg-amber-500/5 dark:border-amber-500/10 dark:bg-amber-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
         <OutputSlotRow
@@ -169,20 +205,22 @@ export const ActivityNode = memo(function ActivityNode({ id, data, selected }: N
 export const StudentSubmissionNode = memo(function StudentSubmissionNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-slate-400/80 ring-2 ring-slate-400/20'
+        : 'border-slate-200 dark:border-neutral-700'
   return (
-    <div
-      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
-        selected
-          ? 'border-slate-400/80 ring-2 ring-slate-400/20'
-          : 'border-slate-200 dark:border-neutral-700'
-      }`}
-    >
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
         defaultLabel={t('gradingAgent.canvas.nodes.studentSubmission.title')}
         dotClassName="bg-slate-400 dark:bg-neutral-300"
         headerClassName="border-b border-slate-500/15 bg-slate-500/5 dark:border-neutral-500/10 dark:bg-neutral-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
         <OutputSlotRow
@@ -205,20 +243,22 @@ export const AssignmentContextNode = ActivityNode
 export const AiNode = memo(function AiNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-indigo-400/80 ring-2 ring-indigo-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
   return (
-    <div
-      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
-        selected
-          ? 'border-indigo-400/80 ring-2 ring-indigo-500/20'
-          : 'border-slate-200 dark:border-neutral-700'
-      }`}
-    >
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
       <RenamableNodeHeader
         nodeId={id}
         data={nodeData}
         defaultLabel={t('gradingAgent.canvas.nodes.ai.title')}
         dotClassName="bg-indigo-500"
         headerClassName="border-b border-indigo-500/15 bg-indigo-500/5 dark:border-indigo-500/10 dark:bg-indigo-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
         <InputSlotRow

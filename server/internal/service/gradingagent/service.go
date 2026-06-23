@@ -10,13 +10,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
-	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
@@ -51,38 +49,46 @@ type Service struct {
 	Pool      *pgxpool.Pool
 }
 
-// LoadSubmissionTextForSubmission reads gradable text from a student's current submission attachment.
-func (s *Service) LoadSubmissionTextForSubmission(ctx context.Context, courseCode string, sub *moduleassignmentsubmissions.SubmissionRow) (string, error) {
-	if sub == nil {
-		return "", fmt.Errorf("no submission text available")
+// RunPrompt executes an AI workflow node prompt with a fixed system prompt and optional JSON mode.
+func (s *Service) RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, jsonMode bool) (string, int, int, error) {
+	if s.Client == nil {
+		return "", 0, 0, fmt.Errorf("AI provider not configured")
 	}
-	return s.LoadSubmissionText(ctx, courseCode, sub.AttachmentFileID)
-}
-
-// LoadSubmissionText reads extractable text from a submission attachment file.
-func (s *Service) LoadSubmissionText(ctx context.Context, courseCode string, fileID *uuid.UUID) (string, error) {
-	if fileID == nil {
-		return "", fmt.Errorf("no submission text available")
+	model := strings.TrimSpace(modelID)
+	if model == "" {
+		return "", 0, 0, fmt.Errorf("grader agent model not configured")
 	}
-	if s.Pool == nil {
-		return "", fmt.Errorf("database unavailable")
+	systemPrompt = strings.TrimSpace(systemPrompt)
+	prompt = strings.TrimSpace(prompt)
+	input = strings.TrimSpace(input)
+	messages := make([]openrouter.Message, 0, 3)
+	if systemPrompt != "" {
+		messages = append(messages, openrouter.Message{Role: "system", Content: systemPrompt})
 	}
-	row, err := coursefiles.GetForCourse(ctx, s.Pool, courseCode, *fileID)
-	if err != nil || row == nil {
-		return "", fmt.Errorf("submission file not found")
+	if prompt != "" {
+		messages = append(messages, openrouter.Message{Role: "user", Content: prompt})
 	}
-	b, err := s.readSubmissionBlob(ctx, courseCode, row)
+	if input != "" {
+		messages = append(messages, openrouter.Message{Role: "user", Content: input})
+	}
+	var chat openrouter.ChatResult
+	var err error
+	if jsonMode {
+		chat, err = s.Client.ChatCompletion(model, messages, openrouter.ChatOptions{JSONMode: true})
+		if err != nil && (strings.Contains(err.Error(), "response_format") || strings.Contains(err.Error(), "status 400")) {
+			chat, err = s.Client.ChatCompletion(model, messages)
+		}
+	} else {
+		chat, err = s.Client.ChatCompletion(model, messages)
+	}
 	if err != nil {
-		return "", err
+		return "", 0, 0, err
 	}
-	text := strings.TrimSpace(string(b))
+	text := strings.TrimSpace(chat.Text)
 	if text == "" {
-		return "", fmt.Errorf("empty submission text")
+		return "", chat.Usage.PromptTokens, chat.Usage.CompletionTokens, fmt.Errorf("openrouter: empty model response")
 	}
-	if len(text) > 512<<10 {
-		text = text[:512<<10]
-	}
-	return text, nil
+	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, nil
 }
 
 // Score runs the grading agent against one submission.
