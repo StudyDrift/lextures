@@ -818,14 +818,10 @@ func (d Deps) handlePutGraderAgentTemplate() http.HandlerFunc {
 			return
 		}
 		prompt := strings.TrimSpace(body.Prompt)
-		includeContent := body.IncludeAssignmentContent
-		includeRubric := body.IncludeRubric
-		derivedPrompt, derivedContent, derivedRubric, _ := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
+		derivedPrompt, includeContent, includeRubric, _ := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
 		if derivedPrompt != "" {
 			prompt = derivedPrompt
 		}
-		includeContent = derivedContent
-		includeRubric = derivedRubric
 		prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
 		if prompt == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
@@ -924,14 +920,10 @@ func (d Deps) handlePostGraderAgentTemplate() http.HandlerFunc {
 			return
 		}
 		prompt := strings.TrimSpace(body.Prompt)
-		includeContent := body.IncludeAssignmentContent
-		includeRubric := body.IncludeRubric
-		derivedPrompt, derivedContent, derivedRubric, _ := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
+		derivedPrompt, includeContent, includeRubric, _ := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
 		if derivedPrompt != "" {
 			prompt = derivedPrompt
 		}
-		includeContent = derivedContent
-		includeRubric = derivedRubric
 		prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
 		if prompt == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
