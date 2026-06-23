@@ -1,8 +1,19 @@
-import { OutputNode, GraderNode, AssignmentContextNode, SubmissionNode } from './workflow-nodes'
+import {
+  OutputNode,
+  GraderNode,
+  AiNode,
+  ActivityNode,
+  StudentSubmissionNode,
+  SubmissionNode,
+  AssignmentContextNode,
+} from './workflow-nodes'
 
 export const graderAgentNodeTypes = {
   output: OutputNode,
   grader: GraderNode,
-  assignmentContext: AssignmentContextNode,
+  ai: AiNode,
+  activity: ActivityNode,
+  studentSubmission: StudentSubmissionNode,
   submission: SubmissionNode,
+  assignmentContext: AssignmentContextNode,
 }

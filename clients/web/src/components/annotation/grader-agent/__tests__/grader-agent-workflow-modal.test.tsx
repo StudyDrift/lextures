@@ -47,4 +47,19 @@ describe('GraderAgentWorkflowModal', () => {
     )
     expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
+
+  it('shows a save button while the agent is editable', () => {
+    render(
+      <GraderAgentWorkflowModal
+        open
+        onClose={() => undefined}
+        courseCode="demo"
+        itemId="00000000-0000-0000-0000-000000000001"
+        submissionId="00000000-0000-0000-0000-000000000002"
+        rubric={null}
+        maxPoints={100}
+      />,
+    )
+    expect(screen.getByRole('button', { name: 'gradingAgent.save' })).toBeInTheDocument()
+  })
 })

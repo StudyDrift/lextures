@@ -8,6 +8,7 @@ import {
   LayoutGrid,
   Scale,
   Languages,
+  Bot,
   SlidersHorizontal,
   Target,
   Eye,
@@ -27,7 +28,8 @@ type SideNavCourseSettingsLinksProps = {
 
 export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettingsLinksProps) {
   const location = useLocation()
-  const { altTextEnforcementEnabled, ffPlagiarismChecks, loading: featuresLoading } = usePlatformFeatures()
+  const { altTextEnforcementEnabled, ffPlagiarismChecks, graderAgentEnabled, loading: featuresLoading } =
+    usePlatformFeatures()
   const { sectionsEnabled, loading: courseFeaturesLoading } = useCourseNavFeatures()
   const section = courseSettingsSectionFromPathname(location.pathname)
   const base = `/courses/${encodeURIComponent(courseCode)}/settings`
@@ -84,6 +86,15 @@ export function SideNavCourseSettingsLinks({ courseCode }: SideNavCourseSettings
       >
         Outcomes
       </SideNavLink>
+      {!featuresLoading && graderAgentEnabled ? (
+        <SideNavLink
+          to={`${base}/grading-agents`}
+          className={() => (section === 'grading-agents' ? sideNavActiveClass : '')}
+          icon={<Bot className="h-5 w-5" />}
+        >
+          Grading agents
+        </SideNavLink>
+      ) : null}
       {!featuresLoading && ffPlagiarismChecks ? (
         <SideNavLink
           to={`${base}/plagiarism`}

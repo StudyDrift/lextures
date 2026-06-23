@@ -90,6 +90,49 @@ type ResultRow struct {
 	CreatedAt        time.Time
 }
 
+type CourseConfigSummary struct {
+	ID               uuid.UUID
+	ModuleItemID     uuid.UUID
+	AssignmentTitle  string
+	AssignmentArchived bool
+	Status           Status
+	AutoGradeNew     bool
+	HasWorkflowGraph bool
+	UpdatedAt        time.Time
+}
+
+func ListConfigsByCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]CourseConfigSummary, error) {
+	if pool == nil {
+		return nil, errors.New("nil pool")
+	}
+	rows, err := pool.Query(ctx, `
+SELECT g.id, g.module_item_id, csi.title, csi.archived, g.status::text, g.auto_grade_new,
+       (g.workflow_graph IS NOT NULL) AS has_workflow_graph, g.updated_at
+FROM assessment.grading_agent_configs g
+INNER JOIN course.course_structure_items csi ON csi.id = g.module_item_id
+WHERE g.course_id = $1
+ORDER BY csi.title ASC
+`, courseID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]CourseConfigSummary, 0)
+	for rows.Next() {
+		var row CourseConfigSummary
+		var status string
+		if err := rows.Scan(
+			&row.ID, &row.ModuleItemID, &row.AssignmentTitle, &row.AssignmentArchived, &status,
+			&row.AutoGradeNew, &row.HasWorkflowGraph, &row.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		row.Status = Status(status)
+		out = append(out, row)
+	}
+	return out, rows.Err()
+}
+
 func GetConfigByItem(ctx context.Context, pool *pgxpool.Pool, moduleItemID uuid.UUID) (*ConfigRow, error) {
 	if pool == nil {
 		return nil, errors.New("nil pool")

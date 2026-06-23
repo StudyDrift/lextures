@@ -69,17 +69,52 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if svc.Client == nil {
 		return d.failGradingAgentItem(ctx, msg, "AI provider not configured")
 	}
-	rubric, _ := gradingagentsvc.ParseAssignmentRubric(assignRow)
-	result, err := svc.Score(ctx, gradingagentsvc.ScoreRequest{
+	scoreReq := gradingagentsvc.ScoreRequest{
 		InstructorPrompt:         cfg.Prompt,
 		IncludeAssignmentContent: cfg.IncludeAssignmentContent,
 		IncludeRubric:            cfg.IncludeRubric,
 		ModelID:                  modelID,
-		AssignmentMarkdown:       assignRow.Markdown,
-		Rubric:                   rubric,
-		MaxPoints:                gradingagentsvc.MaxPointsFromAssignment(assignRow),
 		SubmissionText:           submissionText,
-	})
+	}
+	var contentItemID string
+	var rubricItemID string
+	var workflowGraph *gradingagentsvc.WorkflowGraph
+	var promptNodeID string
+	if wg, wgErr := gradingagentsvc.EffectiveWorkflowGraph(cfg.WorkflowGraph, cfg.Prompt, cfg.IncludeAssignmentContent, cfg.IncludeRubric); wgErr == nil && wg != nil {
+		if compiled, compileErr := gradingagentsvc.CompileWorkflowGraph(wg, submissionText); compileErr == nil {
+			scoreReq = compiled.ScoreRequest
+			scoreReq.ModelID = modelID
+			contentItemID = compiled.ContentItemID
+			rubricItemID = compiled.RubricItemID
+			workflowGraph = wg
+			promptNodeID = compiled.GradeSource
+		}
+	}
+	contentRow, contentErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, contentItemID)
+	if contentErr != nil {
+		return d.failGradingAgentItem(ctx, msg, contentErr.Error())
+	}
+	rubricRow, rubricErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, rubricItemID)
+	if rubricErr != nil {
+		return d.failGradingAgentItem(ctx, msg, rubricErr.Error())
+	}
+	rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
+	scoreReq.AssignmentMarkdown = contentRow.Markdown
+	scoreReq.Rubric = rubric
+	scoreReq.MaxPoints = gradingagentsvc.MaxPointsFromAssignment(assignRow)
+	if workflowGraph != nil && strings.TrimSpace(promptNodeID) != "" {
+		scoreReq.InstructorPrompt = gradingagentsvc.SubstituteWorkflowPromptVariables(
+			workflowGraph,
+			promptNodeID,
+			scoreReq.InstructorPrompt,
+			gradingagentsvc.PromptVariableContext{
+				SubmissionText:  submissionText,
+				ContentMarkdown: contentRow.Markdown,
+				Rubric:          rubric,
+			},
+		)
+	}
+	result, err := svc.Score(ctx, scoreReq)
 	if err != nil {
 		return d.failGradingAgentItem(ctx, msg, err.Error())
 	}

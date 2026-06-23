@@ -1,85 +1,239 @@
 import { memo } from 'react'
 import { Handle, Position, type NodeProps } from '@xyflow/react'
 import { useTranslation } from 'react-i18next'
+import { RenamableNodeHeader, RenamableNodeTitle } from './renamable-node-header'
 
-export const OutputNode = memo(function OutputNode(_props: NodeProps) {
-  const { t } = useTranslation('common')
+function InputSlotRow({
+  handleId,
+  label,
+  dotClass,
+  handleClass,
+}: {
+  handleId: string
+  label: string
+  dotClass: string
+  handleClass: string
+}) {
   return (
-    <div className="min-w-[180px] rounded-xl border-2 border-emerald-500 bg-white px-3 py-2 shadow-md dark:bg-neutral-900">
-      <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-        {t('gradingAgent.canvas.nodes.output.title')}
-      </p>
+    <div className="relative flex items-center justify-start gap-2.5 px-3 py-2.5">
       <Handle
         type="target"
         position={Position.Left}
-        id="grade"
-        className="!bg-emerald-500"
-        style={{ top: '35%' }}
+        id={handleId}
+        className={`grader-slot-handle ${handleClass}`}
       />
-      <span className="absolute start-[-4.5rem] top-[28%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
-        {t('gradingAgent.canvas.slots.grade')}
-      </span>
+      <span className={`size-1.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
+      <span className="text-start text-xs font-medium text-slate-600 dark:text-neutral-300">{label}</span>
+    </div>
+  )
+}
+
+function OutputSlotRow({
+  handleId,
+  label,
+  dotClass,
+  handleClass,
+}: {
+  handleId: string
+  label: string
+  dotClass: string
+  handleClass: string
+}) {
+  return (
+    <div className="relative flex items-center justify-end gap-2.5 px-3 py-2.5">
+      <span className="text-end text-xs font-medium text-slate-600 dark:text-neutral-300">{label}</span>
+      <span className={`size-1.5 shrink-0 rounded-full ${dotClass}`} aria-hidden />
       <Handle
-        type="target"
-        position={Position.Left}
-        id="comments"
-        className="!bg-sky-500"
-        style={{ top: '70%' }}
+        type="source"
+        position={Position.Right}
+        id={handleId}
+        className={`grader-source-slot-handle ${handleClass}`}
       />
-      <span className="absolute start-[-5.5rem] top-[63%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
-        {t('gradingAgent.canvas.slots.comments')}
-      </span>
+    </div>
+  )
+}
+
+export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const gradeSlotUsesRubric = nodeData.gradeSlotUsesRubric === true
+  const gradeSlotLabel = gradeSlotUsesRubric
+    ? t('gradingAgent.canvas.slots.gradeRubric')
+    : t('gradingAgent.canvas.slots.gradeScore')
+  return (
+    <div
+      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
+        selected
+          ? 'border-emerald-400/80 ring-2 ring-emerald-500/20'
+          : 'border-slate-200 dark:border-neutral-700'
+      }`}
+    >
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.output.title')}
+        dotClassName="bg-emerald-500"
+        headerClassName="border-b border-emerald-500/15 bg-emerald-500/5 dark:border-emerald-500/10 dark:bg-emerald-500/10"
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="grade"
+          label={gradeSlotLabel}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <InputSlotRow
+          handleId="comments"
+          label={t('gradingAgent.canvas.slots.comments')}
+          dotClass="bg-sky-500"
+          handleClass="!bg-sky-500"
+        />
+      </div>
     </div>
   )
 })
 
-export const GraderNode = memo(function GraderNode({ data, selected }: NodeProps) {
+export const GraderNode = memo(function GraderNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
-  const prompt = typeof data.prompt === 'string' ? data.prompt : ''
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const prompt = typeof nodeData.prompt === 'string' ? nodeData.prompt : ''
   return (
     <div
       className={`min-w-[200px] rounded-xl border bg-white px-3 py-2 shadow-md dark:bg-neutral-900 ${
         selected ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-indigo-300 dark:border-indigo-800'
       }`}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300">
-        {t('gradingAgent.canvas.nodes.grader.title')}
-      </p>
+      <RenamableNodeTitle
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.grader.title')}
+        className="text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:text-indigo-300"
+      />
       <p className="mt-1 line-clamp-2 text-xs text-slate-600 dark:text-neutral-400">
         {prompt.trim() || t('gradingAgent.canvas.nodes.grader.emptyPrompt')}
       </p>
-      <Handle type="target" position={Position.Left} id="submission" style={{ top: '30%' }} />
-      <Handle type="target" position={Position.Left} id="context" style={{ top: '70%' }} />
+      <Handle type="target" position={Position.Left} id="submission" style={{ top: '22%' }} />
+      <span className="absolute start-[-5.5rem] top-[15%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
+        {t('gradingAgent.canvas.slots.submission')}
+      </span>
+      <Handle type="target" position={Position.Left} id="content" className="!bg-amber-500" style={{ top: '50%' }} />
+      <span className="absolute start-[-4.5rem] top-[43%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
+        {t('gradingAgent.canvas.slots.content')}
+      </span>
+      <Handle type="target" position={Position.Left} id="rubric" className="!bg-orange-500" style={{ top: '78%' }} />
+      <span className="absolute start-[-4rem] top-[71%] text-[10px] font-medium text-slate-600 dark:text-neutral-300">
+        {t('gradingAgent.canvas.slots.rubric')}
+      </span>
       <Handle type="source" position={Position.Right} id="grade" className="!bg-emerald-500" style={{ top: '35%' }} />
       <Handle type="source" position={Position.Right} id="comments" className="!bg-sky-500" style={{ top: '70%' }} />
     </div>
   )
 })
 
-export const AssignmentContextNode = memo(function AssignmentContextNode({ selected }: NodeProps) {
+export const ActivityNode = memo(function ActivityNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
   return (
     <div
-      className={`min-w-[180px] rounded-xl border bg-white px-3 py-2 shadow-md dark:bg-neutral-900 ${
-        selected ? 'border-amber-500 ring-2 ring-amber-200' : 'border-amber-300 dark:border-amber-800'
+      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
+        selected
+          ? 'border-amber-400/80 ring-2 ring-amber-500/20'
+          : 'border-slate-200 dark:border-neutral-700'
       }`}
     >
-      <p className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-        {t('gradingAgent.canvas.nodes.context.title')}
-      </p>
-      <Handle type="source" position={Position.Right} id="context" />
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.activity.title')}
+        dotClassName="bg-amber-500"
+        headerClassName="border-b border-amber-500/15 bg-amber-500/5 dark:border-amber-500/10 dark:bg-amber-500/10"
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <OutputSlotRow
+          handleId="content"
+          label={t('gradingAgent.canvas.slots.content')}
+          dotClass="bg-amber-500"
+          handleClass="!bg-amber-500"
+        />
+        <OutputSlotRow
+          handleId="rubric"
+          label={t('gradingAgent.canvas.slots.rubric')}
+          dotClass="bg-orange-500"
+          handleClass="!bg-orange-500"
+        />
+      </div>
     </div>
   )
 })
 
-export const SubmissionNode = memo(function SubmissionNode(_props: NodeProps) {
+export const StudentSubmissionNode = memo(function StudentSubmissionNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
   return (
-    <div className="min-w-[160px] rounded-xl border border-slate-300 bg-slate-50 px-3 py-2 shadow-sm dark:border-neutral-600 dark:bg-neutral-800">
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-neutral-300">
-        {t('gradingAgent.canvas.nodes.submission.title')}
-      </p>
-      <Handle type="source" position={Position.Right} id="submission" />
+    <div
+      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
+        selected
+          ? 'border-slate-400/80 ring-2 ring-slate-400/20'
+          : 'border-slate-200 dark:border-neutral-700'
+      }`}
+    >
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.studentSubmission.title')}
+        dotClassName="bg-slate-400 dark:bg-neutral-300"
+        headerClassName="border-b border-slate-500/15 bg-slate-500/5 dark:border-neutral-500/10 dark:bg-neutral-500/10"
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <OutputSlotRow
+          handleId="submission"
+          label={t('gradingAgent.canvas.slots.submission')}
+          dotClass="bg-slate-400 dark:bg-neutral-300"
+          handleClass="!bg-slate-400 dark:!bg-neutral-300"
+        />
+      </div>
+    </div>
+  )
+})
+
+/** @deprecated Legacy graphs may still reference the submission node type. */
+export const SubmissionNode = StudentSubmissionNode
+
+/** @deprecated Legacy graphs may still reference the assignmentContext node type. */
+export const AssignmentContextNode = ActivityNode
+
+export const AiNode = memo(function AiNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  return (
+    <div
+      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${
+        selected
+          ? 'border-indigo-400/80 ring-2 ring-indigo-500/20'
+          : 'border-slate-200 dark:border-neutral-700'
+      }`}
+    >
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.ai.title')}
+        dotClassName="bg-indigo-500"
+        headerClassName="border-b border-indigo-500/15 bg-indigo-500/5 dark:border-indigo-500/10 dark:bg-indigo-500/10"
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="input"
+          label={t('gradingAgent.canvas.slots.input')}
+          dotClass="bg-indigo-400"
+          handleClass="!bg-indigo-400"
+        />
+        <OutputSlotRow
+          handleId="output"
+          label={t('gradingAgent.canvas.slots.aiOutput')}
+          dotClass="bg-indigo-500"
+          handleClass="!bg-indigo-500"
+        />
+      </div>
     </div>
   )
 })

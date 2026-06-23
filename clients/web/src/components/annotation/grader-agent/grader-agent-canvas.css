@@ -1,0 +1,51 @@
+/* Strip React Flow's default node chrome so custom cards render cleanly. */
+.grader-agent-canvas .react-flow__node {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+.grader-agent-canvas .react-flow__node.selected {
+  box-shadow: none !important;
+}
+
+.grader-agent-canvas .grader-slot-handle {
+  position: absolute !important;
+  left: -5px !important;
+  top: 50% !important;
+  width: 10px !important;
+  height: 10px !important;
+  transform: translateY(-50%) !important;
+  border: 2px solid #fff !important;
+  transition: transform 0.15s ease;
+}
+
+.grader-agent-canvas.dark .grader-slot-handle {
+  border-color: #171717 !important;
+}
+
+.grader-agent-canvas .grader-slot-handle:hover {
+  transform: translateY(-50%) scale(1.15) !important;
+}
+
+.grader-agent-canvas .grader-source-slot-handle {
+  position: absolute !important;
+  right: -5px !important;
+  left: auto !important;
+  top: 50% !important;
+  width: 10px !important;
+  height: 10px !important;
+  transform: translateY(-50%) !important;
+  border: 2px solid #fff !important;
+  transition: transform 0.15s ease;
+}
+
+.grader-agent-canvas.dark .grader-source-slot-handle {
+  border-color: #171717 !important;
+}
+
+.grader-agent-canvas .grader-source-slot-handle:hover {
+  transform: translateY(-50%) scale(1.15) !important;
+}

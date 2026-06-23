@@ -639,6 +639,7 @@ const courseSettingsSectionDefs: {
   title: string
   hint: string
   requiredPermission?: (courseCode: string) => string
+  whenPlatform?: () => boolean
 }[] = [
   {
     suffix: '/settings/grading',
@@ -651,6 +652,13 @@ const courseSettingsSectionDefs: {
     title: 'Course outcomes',
     hint: 'learning outcomes objectives alignment evidence quiz questions progress',
     requiredPermission: courseItemCreatePermission,
+  },
+  {
+    suffix: '/settings/grading-agents',
+    title: 'Grading agents',
+    hint: 'ai grading agent workflow assignment speedgrader automation',
+    requiredPermission: courseItemCreatePermission,
+    whenPlatform: () => getPlatformFeatures().graderAgentEnabled === true,
   },
   {
     suffix: '/settings/features',
@@ -703,6 +711,7 @@ export function buildCoursePageItems(
       })
     }
     for (const def of courseSettingsSectionDefs) {
+      if (def.whenPlatform && !def.whenPlatform()) continue
       if (def.requiredPermission && !allows(def.requiredPermission(c.courseCode))) {
         continue
       }
