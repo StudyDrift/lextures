@@ -245,7 +245,7 @@ export function AiTutorMenu({ courseCode }: AiTutorMenuProps) {
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-neutral-800">
                 <div
-                  className={`h-full rounded-full transition-all ${budgetWarning ? 'bg-amber-500' : 'bg-indigo-500'}`}
+                  className={`h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300 ${budgetWarning ? 'bg-amber-500' : 'bg-indigo-500'}`}
                   style={{ width: `${budgetPct}%` }}
                 />
               </div>

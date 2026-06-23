@@ -323,9 +323,11 @@ export function VideoPlayer({
         <button
           onClick={togglePlay}
           aria-label={playing ? 'Pause' : 'Play'}
-          className="rounded p-1 hover:bg-gray-700"
+          className="lex-icon-hit rounded hover:bg-gray-700"
         >
-          {playing ? '⏸' : '▶'}
+          <span className={playing ? '' : 'ms-px'} aria-hidden>
+            {playing ? '⏸' : '▶'}
+          </span>
         </button>
 
         <button

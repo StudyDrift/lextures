@@ -164,10 +164,10 @@ function CourseImageNodeView(props: NodeViewProps) {
             alt={decorative ? '' : alt}
             draggable={false}
             data-drag-handle=""
-            className={`box-border max-w-full rounded-lg border object-contain ${
+            className={`box-border max-w-full rounded-lg object-contain ${
               showMissingBadge
-                ? 'border-amber-400 ring-2 ring-amber-300/60 dark:border-amber-600'
-                : 'border-slate-200 dark:border-neutral-700'
+                ? 'border border-amber-400 ring-2 ring-amber-300/60 dark:border-amber-600'
+                : 'lex-content-img'
             }`}
             style={
               typeof effectiveW === 'number' && typeof effectiveH === 'number'

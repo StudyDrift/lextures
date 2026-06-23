@@ -444,7 +444,7 @@ export function AnnotationViewer({
           <img
             src={imageUrl}
             alt="Submission"
-            className="block h-auto max-h-[80vh] max-w-full object-contain"
+            className="lex-content-img block h-auto max-h-[80vh] max-w-full object-contain"
             onLoad={(e) => {
               const el = e.currentTarget
               setImageDisplaySize({ w: el.offsetWidth || 400, h: el.offsetHeight || 300 })

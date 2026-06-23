@@ -15,7 +15,7 @@ export function createThemedMarkdownComponents(
   const c = theme.classes
   const imgClass =
     opts?.imgClassName
-    ?? 'max-h-[min(28rem,80vh)] w-auto max-w-full rounded-lg border border-slate-200 dark:border-neutral-700'
+    ?? 'lex-content-img max-h-[min(28rem,80vh)] w-auto max-w-full rounded-lg'
 
   return {
     h1: ({ children }) => (

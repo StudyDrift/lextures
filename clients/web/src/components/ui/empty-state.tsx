@@ -16,7 +16,7 @@ export type EmptyStateProps = {
 
 function ActionButton({ action, variant }: { action: EmptyStateAction; variant: 'primary' | 'secondary' }) {
   const base =
-    'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950'
+    'inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-neutral-950'
   if ('to' in action) {
     return (
       <Link
@@ -50,12 +50,12 @@ export function EmptyState({ icon: Icon, title, body, primaryAction, secondaryAc
   const titleId = useId()
   return (
     <section
-      className={`rounded-2xl border border-slate-200/90 bg-slate-50/80 px-6 py-12 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/40 ${className}`}
+      className={`rounded-2xl bg-slate-50/80 px-6 py-12 shadow-card dark:bg-neutral-900/40 ${className}`}
       role="status"
       aria-labelledby={titleId}
     >
       <div className="mx-auto flex max-w-md flex-col items-center text-center">
-        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-400 shadow-sm ring-1 ring-slate-200/80 dark:bg-neutral-950 dark:text-neutral-500 dark:ring-neutral-700">
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm ring-1 ring-slate-200/80 dark:bg-neutral-950 dark:text-neutral-500 dark:ring-neutral-700">
           <Icon className="h-6 w-6 shrink-0" aria-hidden />
         </span>
         <h2

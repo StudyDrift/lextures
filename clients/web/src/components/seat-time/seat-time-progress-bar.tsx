@@ -62,7 +62,7 @@ export function SeatTimeProgressBar({ courseId, compact = false }: Props) {
   if (compact) {
     return (
       <p className="text-xs text-slate-600 dark:text-neutral-400" aria-live="polite">
-        CE: {contactHours}/{required}h
+        CE: <span className="lex-num">{contactHours}</span>/<span className="lex-num">{required}</span>h
       </p>
     )
   }
@@ -76,7 +76,7 @@ export function SeatTimeProgressBar({ courseId, compact = false }: Props) {
         Continuing education progress
       </p>
       <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
-        Contact hours: {contactHours} / {required}
+        Contact hours: <span className="lex-num">{contactHours}</span> / <span className="lex-num">{required}</span>
       </p>
       <div
         className="mt-2 h-2 overflow-hidden rounded-full bg-teal-100 dark:bg-teal-900/50"
@@ -87,15 +87,19 @@ export function SeatTimeProgressBar({ courseId, compact = false }: Props) {
         aria-label={`CE contact hours ${pct} percent complete`}
       >
         <div
-          className="h-full rounded-full bg-teal-600 transition-all dark:bg-teal-400"
+          className="h-full rounded-full bg-teal-600 motion-safe:transition-[width] motion-safe:duration-300 dark:bg-teal-400"
           style={{ width: `${pct}%` }}
         />
       </div>
       <p className="mt-2 text-xs font-medium text-teal-800 dark:text-teal-200" aria-live="polite">
         {progress.awarded ? (
-          <>CEU earned! {earnedLabel} CEU awarded.</>
+          <>
+            CEU earned! <span className="lex-num">{earnedLabel}</span> CEU awarded.
+          </>
         ) : (
-          <>CEU credit: {earnedLabel} earned</>
+          <>
+            CEU credit: <span className="lex-num">{earnedLabel}</span> earned
+          </>
         )}
       </p>
     </section>

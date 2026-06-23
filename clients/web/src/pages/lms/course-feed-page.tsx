@@ -1158,7 +1158,7 @@ function MessageBlock({
               <button
                 type="button"
                 onClick={onToggleLike}
-                className={`ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[10px] font-medium transition-all ${
+                className={`ml-auto inline-flex items-center gap-0.5 rounded-full px-1.5 py-px text-[10px] font-medium transition-colors ${
                   m.viewerHasLiked
                     ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400'
                     : 'bg-neutral-700/60 text-neutral-400 hover:bg-neutral-600 hover:text-neutral-200 opacity-70 group-hover/replyrow:opacity-100'

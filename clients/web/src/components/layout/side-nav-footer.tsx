@@ -77,7 +77,7 @@ export function SideNavFooter() {
               aria-expanded={open}
               aria-controls={menuId}
               onClick={() => setOpen((prev) => !prev)}
-              className="flex w-full items-center justify-between rounded-lg border border-slate-200/60 bg-white/50 px-2 py-1.5 font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm motion-safe:transition-all duration-200 hover:border-slate-300 hover:bg-white hover:text-slate-900 dark:border-neutral-800/60 dark:bg-neutral-900/40 dark:hover:border-neutral-700 dark:hover:bg-neutral-900 dark:hover:text-neutral-100"
+              className="flex w-full items-center justify-between rounded-lg border border-slate-200/60 bg-white/50 px-2 py-1.5 font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)] backdrop-blur-sm motion-safe:transition-[border-color,background-color,color,box-shadow] duration-200 hover:border-slate-300 hover:bg-white hover:text-slate-900 dark:border-neutral-800/60 dark:bg-neutral-900/40 dark:hover:border-neutral-700 dark:hover:bg-neutral-900 dark:hover:text-neutral-100"
             >
               <span className="flex items-center gap-1.5">
                 <Scale className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500" aria-hidden="true" />

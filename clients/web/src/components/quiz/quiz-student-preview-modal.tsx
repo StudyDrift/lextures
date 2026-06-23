@@ -433,7 +433,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
               <img
                 src={q.typeConfig.imageUrl}
                 alt="Hotspot prompt"
-                className="max-h-72 w-full object-contain"
+                className="lex-content-img max-h-72 w-full object-contain"
               />
               {hotspotClick ? (
                 <span

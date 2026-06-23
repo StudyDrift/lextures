@@ -106,7 +106,7 @@ export default function ExploreCoursePage() {
           <article>
             <header className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
               {course.heroImageUrl ? (
-                <img src={course.heroImageUrl} alt="" className="h-56 w-full object-cover" />
+                <img src={course.heroImageUrl} alt="" className="lex-content-img h-56 w-full object-cover" />
               ) : (
                 <div className="h-40 w-full bg-gradient-to-br from-indigo-100 to-sky-100 dark:from-indigo-950 dark:to-sky-950" />
               )}

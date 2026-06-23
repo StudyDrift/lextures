@@ -46,7 +46,7 @@ export function GamificationDashboardCard() {
         <div className="relative rounded-2xl border border-rose-100 bg-rose-50/90 px-5 py-4 dark:border-rose-900/40 dark:bg-rose-950/30">
           <button
             type="button"
-            className="absolute end-3 top-3 rounded-lg p-1 text-rose-800 hover:bg-rose-100/80 dark:text-rose-200 dark:hover:bg-rose-900/50"
+            className="lex-icon-hit absolute end-3 top-3 rounded-lg text-rose-800 hover:bg-rose-100/80 dark:text-rose-200 dark:hover:bg-rose-900/50"
             aria-label="Dismiss streak ended notice"
             onClick={() => setDismissedEnded(true)}
           >
@@ -96,7 +96,7 @@ export function GamificationDashboardCard() {
                 aria-label={`${profile.currentStreak}-day learning streak`}
               >
                 <Flame className="h-4 w-4" aria-hidden />
-                {profile.currentStreak.toLocaleString()}-day streak
+                <span className="lex-num">{profile.currentStreak.toLocaleString()}</span>-day streak
               </p>
             ) : empty ? (
               <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">
@@ -106,7 +106,8 @@ export function GamificationDashboardCard() {
               <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">Complete a module to start your streak</p>
             )}
             <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">
-              Level {profile.level} · {profile.xpTotal.toLocaleString()} XP
+              Level <span className="lex-num">{profile.level}</span> ·{' '}
+              <span className="lex-num">{profile.xpTotal.toLocaleString()}</span> XP
             </p>
           </div>
           <Link
@@ -127,12 +128,13 @@ export function GamificationDashboardCard() {
             aria-label={`XP progress toward level ${profile.level + 1}`}
           >
             <div
-              className="h-full rounded-full bg-orange-600 transition-all dark:bg-orange-500"
+              className="h-full rounded-full bg-orange-600 motion-safe:transition-[width] motion-safe:duration-300 dark:bg-orange-500"
               style={{ width: `${profile.levelProgressPct}%` }}
             />
           </div>
           <p className="mt-2 text-xs text-slate-700 dark:text-neutral-300">
-            {profile.xpToNextLevel.toLocaleString()} XP to level {profile.level + 1}
+            <span className="lex-num">{profile.xpToNextLevel.toLocaleString()}</span> XP to level{' '}
+            <span className="lex-num">{profile.level + 1}</span>
           </p>
         </div>
 
