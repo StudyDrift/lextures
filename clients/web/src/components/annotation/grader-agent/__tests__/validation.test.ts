@@ -169,4 +169,99 @@ describe('grader agent workflow validation', () => {
     expect(isWorkflowRunnable(wired)).toBe(true)
     expect(connectionIsValid(wired, 'act', 'content', 'ai1', 'input')).toBe(false)
   })
+
+  it('accepts code test runner wired to output grade', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'sub1', type: 'studentSubmission', position: { x: -640, y: -80 }, data: {} },
+        {
+          id: 'ctr1',
+          type: 'codeTestRunner',
+          position: { x: -320, y: -40 },
+          data: {
+            runtime: 'python3.12',
+            mapping: { type: 'linear', maxPoints: 10 },
+            testCases: [{ id: 't1', input: '', expectedOutput: '1' }],
+          },
+        },
+      ],
+      edges: [
+        { id: 'e-sub', source: 'sub1', sourceHandle: 'submission', target: 'ctr1', targetHandle: 'submission' },
+        { id: 'e-grade', source: 'ctr1', sourceHandle: 'grade', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(isWorkflowRunnable(g)).toBe(true)
+  })
+
+  it('rejects router else branch that does not reach grade slot', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'sub', type: 'studentSubmission', position: { x: -640, y: 0 }, data: {} },
+        {
+          id: 'r1',
+          type: 'conditionalRouter',
+          position: { x: -320, y: 0 },
+          data: { condition: { field: 'isEmpty', operator: 'isTrue', value: true } },
+        },
+        { id: 'ai1', type: 'ai', position: { x: -160, y: 80 }, data: { prompt: 'Grade' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'sub', sourceHandle: 'submission', target: 'r1', targetHandle: 'input' },
+        { id: 'e2', source: 'r1', sourceHandle: 'then', target: 'output', targetHandle: 'grade' },
+        { id: 'e3', source: 'r1', sourceHandle: 'else', target: 'ai1', targetHandle: 'input' },
+      ],
+    }
+    expect(isWorkflowRunnable(g)).toBe(false)
+    expect(validateWorkflowGraph(g).some((i) => i.field === 'node:r1.else')).toBe(true)
+  })
+
+  it('accepts router with both branches reaching grade slot', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'sub', type: 'studentSubmission', position: { x: -640, y: 0 }, data: {} },
+        {
+          id: 'r1',
+          type: 'conditionalRouter',
+          position: { x: -320, y: 0 },
+          data: { condition: { field: 'isEmpty', operator: 'isTrue', value: true } },
+        },
+        { id: 'ai1', type: 'ai', position: { x: -160, y: 80 }, data: { prompt: 'Grade fairly' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'sub', sourceHandle: 'submission', target: 'r1', targetHandle: 'input' },
+        { id: 'e2', source: 'r1', sourceHandle: 'then', target: 'output', targetHandle: 'grade' },
+        { id: 'e3', source: 'r1', sourceHandle: 'else', target: 'ai1', targetHandle: 'input' },
+        { id: 'e4', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(isWorkflowRunnable(g)).toBe(true)
+  })
+
+  it('rejects confidence field without upstream grade on router input path', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'sub', type: 'studentSubmission', position: { x: -640, y: 0 }, data: {} },
+        {
+          id: 'r1',
+          type: 'conditionalRouter',
+          position: { x: -320, y: 0 },
+          data: { condition: { field: 'confidence', operator: '<', value: 0.6 } },
+        },
+      ],
+      edges: [
+        { id: 'e1', source: 'sub', sourceHandle: 'submission', target: 'r1', targetHandle: 'input' },
+        { id: 'e2', source: 'r1', sourceHandle: 'then', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(isWorkflowRunnable(g)).toBe(false)
+    expect(validateWorkflowGraph(g).some((i) => i.field === 'node:r1.condition.field')).toBe(true)
+  })
 })

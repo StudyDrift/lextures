@@ -32,6 +32,8 @@ function defaultLabelForNodeType(type: string, t: TFunction): string {
       return t('gradingAgent.canvas.nodes.activity.title')
     case 'ai':
       return t('gradingAgent.canvas.nodes.ai.title')
+    case 'codeTestRunner':
+      return t('gradingAgent.canvas.nodes.codeTests.title')
     case 'grader':
       return t('gradingAgent.canvas.nodes.grader.title')
     case 'output':

@@ -717,6 +717,242 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 	}
 }
 
+type postGraderAgentTemplateBody struct {
+	Name                     string                           `json:"name"`
+	Prompt                   string                           `json:"prompt"`
+	IncludeAssignmentContent bool                             `json:"includeAssignmentContent"`
+	IncludeRubric            bool                             `json:"includeRubric"`
+	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
+}
+
+func graderAgentTemplateToJSON(row *gradingagentrepo.TemplateRow) map[string]any {
+	if row == nil {
+		return nil
+	}
+	out := map[string]any{
+		"id":                       row.ID.String(),
+		"name":                     row.Name,
+		"prompt":                   row.Prompt,
+		"includeAssignmentContent": row.IncludeAssignmentContent,
+		"includeRubric":            row.IncludeRubric,
+		"createdAt":                row.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+		"updatedAt":                row.UpdatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+	}
+	if g, err := gradingagentsvc.EffectiveWorkflowGraph(row.WorkflowGraph, row.Prompt, row.IncludeAssignmentContent, row.IncludeRubric); err == nil && g != nil {
+		out["workflowGraph"] = g
+	}
+	return out
+}
+
+func (d Deps) handleGetGraderAgentTemplate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		templateID, err := uuid.Parse(chi.URLParam(r, "template_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid template id.")
+			return
+		}
+		cid, found, err := d.courseIDFromCode(r.Context(), courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if !found {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		tmpl, err := gradingagentrepo.GetTemplateByCourseAndID(r.Context(), d.Pool, cid, templateID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Template not found.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"template": graderAgentTemplateToJSON(tmpl)})
+	}
+}
+
+func (d Deps) handlePutGraderAgentTemplate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		templateID, err := uuid.Parse(chi.URLParam(r, "template_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid template id.")
+			return
+		}
+		cid, found, err := d.courseIDFromCode(r.Context(), courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if !found {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")
+			return
+		}
+		var body postGraderAgentTemplateBody
+		if err := json.Unmarshal(payload, &body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		name := strings.TrimSpace(body.Name)
+		if name == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Template name is required.")
+			return
+		}
+		if body.WorkflowGraph == nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Workflow graph is required.")
+			return
+		}
+		if err := gradingagentsvc.ValidateWorkflowGraphForPersistence(body.WorkflowGraph); err != nil {
+			writeGraderAgentValidationError(w, err)
+			return
+		}
+		prompt := strings.TrimSpace(body.Prompt)
+		derivedPrompt, includeContent, includeRubric, _ := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
+		if derivedPrompt != "" {
+			prompt = derivedPrompt
+		}
+		prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
+		if prompt == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
+			return
+		}
+		raw, marshalErr := gradingagentsvc.WorkflowGraphToJSON(body.WorkflowGraph)
+		if marshalErr != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid workflow graph.")
+			return
+		}
+		tmpl, err := gradingagentrepo.UpdateTemplate(r.Context(), d.Pool, cid, templateID, gradingagentrepo.UpdateTemplateInput{
+			Name:                     name,
+			Prompt:                   prompt,
+			IncludeAssignmentContent: includeContent,
+			IncludeRubric:            includeRubric,
+			WorkflowGraph:            raw,
+		})
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Template not found.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"template": graderAgentTemplateToJSON(tmpl)})
+	}
+}
+
+func (d Deps) handleListGraderAgentTemplates() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, found, err := d.courseIDFromCode(r.Context(), courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if !found {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		rows, err := gradingagentrepo.ListTemplatesByCourse(r.Context(), d.Pool, cid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load templates.")
+			return
+		}
+		templates := make([]map[string]any, 0, len(rows))
+		for _, row := range rows {
+			templates = append(templates, map[string]any{
+				"id":        row.ID.String(),
+				"name":      row.Name,
+				"updatedAt": row.UpdatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+			})
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"templates": templates})
+	}
+}
+
+func (d Deps) handlePostGraderAgentTemplate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, viewer, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, found, err := d.courseIDFromCode(r.Context(), courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if !found {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")
+			return
+		}
+		var body postGraderAgentTemplateBody
+		if err := json.Unmarshal(payload, &body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		name := strings.TrimSpace(body.Name)
+		if name == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Template name is required.")
+			return
+		}
+		if body.WorkflowGraph == nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Workflow graph is required.")
+			return
+		}
+		if err := gradingagentsvc.ValidateWorkflowGraphForPersistence(body.WorkflowGraph); err != nil {
+			writeGraderAgentValidationError(w, err)
+			return
+		}
+		prompt := strings.TrimSpace(body.Prompt)
+		derivedPrompt, includeContent, includeRubric, _ := gradingagentsvc.DeriveLegacyFields(body.WorkflowGraph)
+		if derivedPrompt != "" {
+			prompt = derivedPrompt
+		}
+		prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
+		if prompt == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
+			return
+		}
+		raw, marshalErr := gradingagentsvc.WorkflowGraphToJSON(body.WorkflowGraph)
+		if marshalErr != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid workflow graph.")
+			return
+		}
+		tmpl, err := gradingagentrepo.CreateTemplate(r.Context(), d.Pool, gradingagentrepo.CreateTemplateInput{
+			CourseID:                 cid,
+			Name:                     name,
+			Prompt:                   prompt,
+			IncludeAssignmentContent: includeContent,
+			IncludeRubric:            includeRubric,
+			WorkflowGraph:            raw,
+			CreatedBy:                viewer,
+		})
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save template.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(map[string]any{"template": graderAgentTemplateToJSON(tmpl)})
+	}
+}
+
 func (d Deps) handlePostGraderAgentRegradeRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !d.graderAgentEnabled() {

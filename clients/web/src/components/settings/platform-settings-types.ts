@@ -31,6 +31,7 @@ export type PlatformSettingsPayload = {
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
   graderAgentEnabled: boolean
+  codeExecutionEnabled: boolean
   speechToTextEnabled: boolean
   accommodationsEngineEnabled: boolean
   ffAccommodationsEngine: boolean

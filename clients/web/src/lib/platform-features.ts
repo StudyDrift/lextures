@@ -14,6 +14,7 @@ export type PlatformFeaturesSnapshot = {
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
   graderAgentEnabled?: boolean
+  codeExecutionEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
@@ -94,6 +95,7 @@ const defaults: PlatformFeaturesSnapshot = {
   equationEditorEnabled: false,
   readingLevelEnabled: false,
   graderAgentEnabled: false,
+  codeExecutionEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,

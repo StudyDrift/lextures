@@ -16,9 +16,13 @@ const (
 	NodeTypeAI                = "ai"
 	NodeTypeActivity          = "activity"
 	NodeTypeStudentSubmission = "studentSubmission"
+	NodeTypeCodeTestRunner    = "codeTestRunner"
+	NodeTypeConditionalRouter = "conditionalRouter"
 	NodeTypeAssignmentCtx     = "assignmentContext" // legacy
 	NodeTypeSubmission        = "submission"        // legacy
 	HandleGrade               = "grade"
+	HandleReport              = "report"
+	HandleScore               = "score"
 	HandleComments            = "comments"
 	HandleContent             = "content"
 	HandleRubric              = "rubric"
@@ -26,6 +30,8 @@ const (
 	HandleSubmission          = "submission"
 	HandleAIInput             = "input"
 	HandleAIOutput            = "output"
+	HandleThen                = "then"
+	HandleElse                = "else"
 )
 
 // WorkflowGraph is the persisted React Flow graph for the grading agent canvas.
@@ -79,6 +85,10 @@ func isAINodeType(nodeType string) bool {
 	return nodeType == NodeTypeAI
 }
 
+func isCodeTestRunnerNodeType(nodeType string) bool {
+	return nodeType == NodeTypeCodeTestRunner
+}
+
 func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool {
 	switch tgtHandle {
 	case HandleGrade:
@@ -88,8 +98,17 @@ func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool
 		if srcHandle == HandleAIOutput && src.Type == NodeTypeAI {
 			return true
 		}
+		if srcHandle == HandleGrade && isCodeTestRunnerNodeType(src.Type) {
+			return true
+		}
+		if (srcHandle == HandleThen || srcHandle == HandleElse) && isConditionalRouterNodeType(src.Type) {
+			return true
+		}
 	case HandleComments:
 		if srcHandle == HandleComments && src.Type == NodeTypeGrader {
+			return true
+		}
+		if srcHandle == HandleReport && isCodeTestRunnerNodeType(src.Type) {
 			return true
 		}
 	}
@@ -104,6 +123,9 @@ func aiInputSourceIsValid(sourceType, sourceHandle string) bool {
 		return true
 	}
 	if isAINodeType(sourceType) && sourceHandle == HandleAIOutput {
+		return true
+	}
+	if isConditionalRouterNodeType(sourceType) && (sourceHandle == HandleThen || sourceHandle == HandleElse) {
 		return true
 	}
 	return false
@@ -170,7 +192,7 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		}
 		nodeByID[n.ID] = n
 		switch n.Type {
-		case NodeTypeOutput, NodeTypeGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeOutput, NodeTypeGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeAssignmentCtx, NodeTypeSubmission:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -225,16 +247,16 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		switch n.Type {
 		case NodeTypeOutput:
 			outputCount++
-		case NodeTypeGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeAssignmentCtx, NodeTypeSubmission:
 		default:
-			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
+			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
 		}
 	}
 	if outputCount != 1 {
 		return ValidationError{Field: "workflowGraph.nodes", Message: "Graph must contain exactly one output node."}
 	}
 
-	outputSlotEdges := map[string]string{} // targetHandle -> edge id
+	outputSlotEdges := map[string][]string{} // targetHandle -> edge ids
 	adj := make(map[string][]string, len(g.Nodes))
 	for _, e := range g.Edges {
 		src, ok := nodeByID[e.Source]
@@ -253,15 +275,15 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 			if slot != HandleGrade && slot != HandleComments {
 				return ValidationError{Field: "output", Message: "Output node edges must target grade or comments slots."}
 			}
-			if _, taken := outputSlotEdges[slot]; taken {
+			if len(outputSlotEdges[slot]) > 0 && slot == HandleComments {
 				return ValidationError{Field: "output." + slot, Message: "Each output slot accepts at most one inbound edge."}
 			}
-			outputSlotEdges[slot] = e.ID
+			outputSlotEdges[slot] = append(outputSlotEdges[slot], e.ID)
 		}
 		adj[e.Source] = append(adj[e.Source], e.Target)
 	}
 
-	if _, ok := outputSlotEdges[HandleGrade]; !ok {
+	if len(outputSlotEdges[HandleGrade]) == 0 {
 		return ValidationError{Field: "output.grade", Message: "Connect the grade slot before running."}
 	}
 
@@ -276,6 +298,21 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		if n.Type == NodeTypeAI && !graderPromptPresent(n) {
 			return ValidationError{Field: "node:" + n.ID + ".prompt", Message: "AI node prompt is required."}
 		}
+		if n.Type == NodeTypeCodeTestRunner && !codeTestRunnerHasConfig(n) {
+			return ValidationError{Field: "node:" + n.ID + ".testCases", Message: "Add at least one test case or select a test suite."}
+		}
+		if n.Type == NodeTypeConditionalRouter {
+			if _, err := routerConditionFromNode(n); err != nil {
+				return ValidationError{Field: "node:" + n.ID + ".condition", Message: err.Error()}
+			}
+		}
+	}
+
+	if err := validateRouterFieldAvailability(g, nodeByID); err != nil {
+		return err
+	}
+	if err := validateRouterPathReachability(g, nodeByID); err != nil {
+		return err
 	}
 
 	return nil
@@ -291,7 +328,7 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 			return ValidationError{Field: "output", Message: "Output node edges must target grade or comments slots."}
 		}
 		if !outputSlotSourceIsValid(src, srcHandle, tgtHandle) {
-			return ValidationError{Field: "output." + tgtHandle, Message: "Grade slot accepts Grader or AI outputs; comments slot accepts Grader comments only."}
+			return ValidationError{Field: "output." + tgtHandle, Message: "Grade slot accepts Grader, AI, Code Test Runner, or Conditional Router branch outputs; comments slot accepts Grader comments or test reports."}
 		}
 	case NodeTypeGrader:
 		switch tgtHandle {
@@ -323,6 +360,23 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 		}
 		if isAINodeType(src.Type) && srcHandle != HandleAIOutput {
 			return ValidationError{Field: "node:" + src.ID, Message: "AI node edges must originate from the output slot."}
+		}
+	case NodeTypeCodeTestRunner:
+		if tgtHandle != HandleSubmission {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Code Test Runner accepts a submission input only."}
+		}
+		if !isStudentSubmissionNodeType(src.Type) {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
+		}
+	case NodeTypeConditionalRouter:
+		if tgtHandle != HandleAIInput {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Conditional Router edges must target the input slot."}
+		}
+		if !routerInputSourceIsValid(src.Type, srcHandle) {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Router input must come from a submission, grade, or upstream branch output."}
+		}
+		if isConditionalRouterNodeType(src.Type) && srcHandle != HandleThen && srcHandle != HandleElse {
+			return ValidationError{Field: "node:" + src.ID, Message: "Conditional Router edges must originate from then or else outputs."}
 		}
 	default:
 		return ValidationError{Field: "workflowGraph.edges", Message: "Invalid edge target."}
@@ -458,16 +512,20 @@ func findWorkflowPromptNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) 
 		if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleGrade {
 			continue
 		}
-		if src, ok := nodeByID[e.Source]; ok && (src.Type == NodeTypeGrader || src.Type == NodeTypeAI) {
+		if src, ok := nodeByID[e.Source]; ok && gradeSourceNodeType(src.Type) {
 			return src.ID
 		}
 	}
 	for _, n := range g.Nodes {
-		if n.Type == NodeTypeGrader || n.Type == NodeTypeAI {
+		if gradeSourceNodeType(n.Type) {
 			return n.ID
 		}
 	}
 	return ""
+}
+
+func gradeSourceNodeType(nodeType string) bool {
+	return nodeType == NodeTypeGrader || nodeType == NodeTypeAI || nodeType == NodeTypeCodeTestRunner
 }
 
 func graderPrompt(n WorkflowNode) string {
@@ -576,7 +634,7 @@ func findGradeSourceNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) str
 		if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleGrade {
 			continue
 		}
-		if src, ok := nodeByID[e.Source]; ok && (src.Type == NodeTypeGrader || src.Type == NodeTypeAI) {
+		if src, ok := nodeByID[e.Source]; ok && gradeSourceNodeType(src.Type) {
 			return src.ID
 		}
 	}
@@ -597,6 +655,17 @@ func CompileWorkflowGraph(g *WorkflowGraph, submissionText string) (CompiledWork
 		return CompiledWorkflow{}, ValidationError{Field: "output.grade", Message: "Connect the grade slot before running."}
 	}
 	gradeSource := nodeByID[gradeSourceID]
+	if isCodeTestRunnerNodeType(gradeSource.Type) {
+		commentSource := ""
+		for _, e := range g.Edges {
+			tgt, ok := nodeByID[e.Target]
+			if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleComments {
+				continue
+			}
+			commentSource = e.Source
+		}
+		return CompiledWorkflow{GradeSource: gradeSourceID, CommentSource: commentSource}, nil
+	}
 	prompt := graderPrompt(gradeSource)
 	includeContent, includeRubric := deriveIncludeFlags(g, gradeSourceID, nodeByID)
 	modelID := graderModelID(gradeSource)

@@ -43,6 +43,8 @@ export type WorkflowNodeDefaultLabels = {
   studentSubmission: string
   activity: string
   ai: string
+  codeTestRunner?: string
+  conditionalRouter?: string
   grader: string
   output: string
 }
@@ -73,6 +75,8 @@ function defaultLabelForNodeType(type: string, defaults: WorkflowNodeDefaultLabe
   if (isStudentSubmissionNodeType(type)) return defaults.studentSubmission
   if (isActivityNodeType(type)) return defaults.activity
   if (isAiNodeType(type)) return defaults.ai
+  if (type === 'codeTestRunner') return defaults.codeTestRunner ?? 'Code Test Runner'
+  if (type === 'conditionalRouter') return defaults.conditionalRouter ?? 'Conditional Router'
   if (type === 'grader') return defaults.grader
   if (type === 'output') return defaults.output
   return type

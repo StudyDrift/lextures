@@ -42,6 +42,10 @@ func defaultNodeLabel(nodeType string) string {
 		return "AI"
 	case NodeTypeGrader:
 		return "Grader (LLM)"
+	case NodeTypeCodeTestRunner:
+		return "Code Test Runner"
+	case NodeTypeConditionalRouter:
+		return "Conditional Router"
 	case NodeTypeOutput:
 		return "Student grade"
 	default:

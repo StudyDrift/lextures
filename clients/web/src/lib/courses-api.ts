@@ -5928,6 +5928,96 @@ export async function putGraderAgentConfig(
   return raw as { config: GraderAgentConfigApi }
 }
 
+export type GraderAgentTemplateApi = {
+  id: string
+  name: string
+  prompt: string
+  includeAssignmentContent: boolean
+  includeRubric: boolean
+  workflowGraph?: GraderWorkflowGraphApi
+  createdAt: string
+  updatedAt: string
+}
+
+export type CourseGradingAgentTemplateSummary = {
+  id: string
+  name: string
+  updatedAt: string
+}
+
+export async function fetchCourseGradingAgentTemplates(
+  courseCode: string,
+): Promise<{ templates: CourseGradingAgentTemplateSummary[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grader-agent-templates`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const templates = Array.isArray((raw as { templates?: unknown }).templates)
+    ? ((raw as { templates: CourseGradingAgentTemplateSummary[] }).templates ?? [])
+    : []
+  return { templates }
+}
+
+export async function fetchGraderAgentTemplate(
+  courseCode: string,
+  templateId: string,
+): Promise<{ template: GraderAgentTemplateApi }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grader-agent-templates/${encodeURIComponent(templateId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { template: GraderAgentTemplateApi }
+}
+
+export async function putGraderAgentTemplate(
+  courseCode: string,
+  templateId: string,
+  body: {
+    name: string
+    prompt: string
+    includeAssignmentContent: boolean
+    includeRubric: boolean
+    workflowGraph: GraderWorkflowGraphApi
+  },
+): Promise<{ template: GraderAgentTemplateApi }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grader-agent-templates/${encodeURIComponent(templateId)}`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { template: GraderAgentTemplateApi }
+}
+
+export async function postGraderAgentTemplate(
+  courseCode: string,
+  body: {
+    name: string
+    prompt: string
+    includeAssignmentContent: boolean
+    includeRubric: boolean
+    workflowGraph: GraderWorkflowGraphApi
+  },
+): Promise<{ template: GraderAgentTemplateApi }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grader-agent-templates`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { template: GraderAgentTemplateApi }
+}
+
 export async function postGraderAgentDryRun(
   courseCode: string,
   itemId: string,
@@ -5958,7 +6048,7 @@ export type GraderAgentDryRunEvent = {
   nodeId?: string
   nodeType?: string
   nodeLabel?: string
-  status?: 'success' | 'error'
+  status?: 'success' | 'error' | 'skipped'
   message?: string
   level?: 'info' | 'warn' | 'error'
   compiledPrompt?: string

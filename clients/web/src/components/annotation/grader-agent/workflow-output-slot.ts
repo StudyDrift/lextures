@@ -2,7 +2,12 @@ import {
   HANDLE_AI_OUTPUT,
   HANDLE_COMMENTS,
   HANDLE_GRADE,
+  HANDLE_REPORT,
+  HANDLE_THEN,
+  HANDLE_ELSE,
   isAiNodeType,
+  isCodeTestRunnerNodeType,
+  isConditionalRouterNodeType,
 } from './types'
 
 /** Whether a source may wire into a Student Grade output slot. */
@@ -14,10 +19,16 @@ export function outputSlotSourceIsValid(
   if (targetHandle === HANDLE_GRADE) {
     if (sourceHandle === HANDLE_GRADE && sourceType === 'grader') return true
     if (sourceHandle === HANDLE_AI_OUTPUT && isAiNodeType(sourceType)) return true
+    if (sourceHandle === HANDLE_GRADE && isCodeTestRunnerNodeType(sourceType)) return true
+    if ((sourceHandle === HANDLE_THEN || sourceHandle === HANDLE_ELSE) && isConditionalRouterNodeType(sourceType)) {
+      return true
+    }
     return false
   }
   if (targetHandle === HANDLE_COMMENTS) {
-    return sourceHandle === HANDLE_COMMENTS && sourceType === 'grader'
+    if (sourceHandle === HANDLE_COMMENTS && sourceType === 'grader') return true
+    if (sourceHandle === HANDLE_REPORT && isCodeTestRunnerNodeType(sourceType)) return true
+    return false
   }
   return false
 }

@@ -65,6 +65,7 @@ type Row struct {
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
 	GraderAgentEnabled              *bool
+	CodeExecutionEnabled            *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
 	SpeechToTextEnabled             *bool
@@ -216,6 +217,7 @@ type Write struct {
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
 	GraderAgentEnabled              *bool
+	CodeExecutionEnabled            *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
 	SpeechToTextEnabled             *bool
@@ -365,6 +367,7 @@ SELECT
 	equation_editor_enabled,
 	reading_level_enabled,
 	grader_agent_enabled,
+	code_execution_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
@@ -507,6 +510,7 @@ WHERE id = 1
 		&r.EquationEditorEnabled,
 		&r.ReadingLevelEnabled,
 		&r.GraderAgentEnabled,
+		&r.CodeExecutionEnabled,
 		&r.AltTextEnforcementEnabled,
 		&r.FFAltTextEnforcement,
 		&r.SpeechToTextEnabled,
@@ -700,6 +704,7 @@ INSERT INTO settings.platform_app_settings (
 	equation_editor_enabled,
 	reading_level_enabled,
 	grader_agent_enabled,
+	code_execution_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
 	speech_to_text_enabled,
@@ -847,6 +852,7 @@ ON CONFLICT (id) DO UPDATE SET
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	reading_level_enabled = COALESCE(EXCLUDED.reading_level_enabled, settings.platform_app_settings.reading_level_enabled),
 	grader_agent_enabled = COALESCE(EXCLUDED.grader_agent_enabled, settings.platform_app_settings.grader_agent_enabled),
+	code_execution_enabled = COALESCE(EXCLUDED.code_execution_enabled, settings.platform_app_settings.code_execution_enabled),
 	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
 	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
 	speech_to_text_enabled = COALESCE(EXCLUDED.speech_to_text_enabled, settings.platform_app_settings.speech_to_text_enabled),
@@ -987,6 +993,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.EquationEditorEnabled,
 		w.ReadingLevelEnabled,
 		w.GraderAgentEnabled,
+		w.CodeExecutionEnabled,
 		w.AltTextEnforcementEnabled,
 		w.FFAltTextEnforcement,
 		w.SpeechToTextEnabled,

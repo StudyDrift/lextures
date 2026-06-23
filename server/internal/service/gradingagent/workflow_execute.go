@@ -48,12 +48,14 @@ type DryRunRunner interface {
 type DryRunExecutionInput struct {
 	Graph            *WorkflowGraph
 	Submissions      []string
+	IsLate           bool
 	DefaultMarkdown  string
 	DefaultRubric    *assignmentrubric.RubricDefinition
 	MaxPoints        float64
 	ModelID          string
 	ResolveActivity  ActivitySource
 	Runner           DryRunRunner
+	CodeRunner       CodeTestRunner
 	Emit             func(DryRunEvent)
 }
 
@@ -61,10 +63,12 @@ type slotValue struct {
 	text   string
 	grade  *GradeOutput
 	rubric *assignmentrubric.RubricDefinition
+	score  *float64
 }
 
 type executionState struct {
-	values map[string]slotValue // key: nodeID:handle
+	values     map[string]slotValue // key: nodeID:handle
+	edgeActive map[string]bool      // edge id -> active for branch routing
 }
 
 func (s *executionState) set(nodeID, handle string, v slotValue) {
@@ -80,6 +84,97 @@ func (s *executionState) get(nodeID, handle string) (slotValue, bool) {
 	}
 	v, ok := s.values[nodeID+":"+handle]
 	return v, ok
+}
+
+func newExecutionState(g *WorkflowGraph) *executionState {
+	edgeActive := make(map[string]bool, len(g.Edges))
+	for _, e := range g.Edges {
+		edgeActive[e.ID] = true
+	}
+	return &executionState{values: make(map[string]slotValue), edgeActive: edgeActive}
+}
+
+func (s *executionState) deactivateRouterBranch(g *WorkflowGraph, routerID, handle string) {
+	for _, e := range g.Edges {
+		if e.Source == routerID && strings.TrimSpace(e.SourceHandle) == handle {
+			s.edgeActive[e.ID] = false
+		}
+	}
+}
+
+func nodeHasActiveInput(g *WorkflowGraph, nodeID string, nodeByID map[string]WorkflowNode, state *executionState) bool {
+	n, ok := nodeByID[nodeID]
+	if !ok {
+		return false
+	}
+	if isWorkflowSourceNode(n.Type) {
+		return true
+	}
+
+	activeInbound := 0
+	valuedInbound := 0
+	hasAnyInbound := false
+	for _, e := range g.Edges {
+		if e.Target != nodeID {
+			continue
+		}
+		hasAnyInbound = true
+		if !state.edgeActive[e.ID] {
+			continue
+		}
+		activeInbound++
+		srcHandle := strings.TrimSpace(e.SourceHandle)
+		if _, ok := state.get(e.Source, srcHandle); ok {
+			valuedInbound++
+		}
+	}
+
+	if activeInbound > 0 {
+		return valuedInbound > 0
+	}
+	if hasAnyInbound {
+		return false
+	}
+	return nodeRunsWithoutWiredInput(n.Type)
+}
+
+func nodeRunsWithoutWiredInput(nodeType string) bool {
+	switch nodeType {
+	case NodeTypeGrader, NodeTypeAI, NodeTypeCodeTestRunner:
+		return true
+	default:
+		return false
+	}
+}
+
+func gatherRouterInput(g *WorkflowGraph, routerID string, nodeByID map[string]WorkflowNode, state *executionState) (slotValue, bool) {
+	for _, e := range g.Edges {
+		if e.Target != routerID || strings.TrimSpace(e.TargetHandle) != HandleAIInput {
+			continue
+		}
+		if !state.edgeActive[e.ID] {
+			continue
+		}
+		srcHandle := strings.TrimSpace(e.SourceHandle)
+		if v, ok := state.get(e.Source, srcHandle); ok {
+			return v, true
+		}
+	}
+	return slotValue{}, false
+}
+
+func buildPredicateContext(in DryRunExecutionInput, input slotValue) PredicateEvalContext {
+	ctx := PredicateEvalContext{
+		SubmissionText: JoinSubmissions(in.Submissions),
+		IsLate:         in.IsLate,
+	}
+	if input.grade != nil {
+		ctx.InputGrade = input.grade
+	}
+	if input.score != nil {
+		ctx.InputScore = input.score
+	}
+	return ctx
 }
 
 // NodeDisplayLabel returns the instructor-facing label for a workflow node.
@@ -138,8 +233,11 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 	if err := ValidateWorkflowGraph(in.Graph); err != nil {
 		return DryRunPreview{}, err
 	}
-	if in.Runner == nil {
+	if in.Runner == nil && workflowUsesLLM(in.Graph) {
 		return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
+	}
+	if !workflowUsesLLM(in.Graph) && in.CodeRunner == nil {
+		return DryRunPreview{}, fmt.Errorf("code execution service is not configured")
 	}
 	emit := in.Emit
 	if emit == nil {
@@ -155,7 +253,7 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 		return DryRunPreview{}, err
 	}
 
-	state := &executionState{}
+	state := newExecutionState(in.Graph)
 	var preview DryRunPreview
 	var totalPromptTokens, totalCompletionTokens int
 
@@ -165,6 +263,17 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			continue
 		}
 		label := NodeDisplayLabel(node.Data, node.Type)
+
+		if !nodeHasActiveInput(in.Graph, node.ID, nodeByID, state) {
+			emit(DryRunEvent{Type: "node_start", NodeID: node.ID, NodeType: node.Type, NodeLabel: label})
+			emit(DryRunEvent{
+				Type: "log", Level: "info",
+				Message: fmt.Sprintf("[%s] Skipped (inactive branch).", label),
+			})
+			emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, NodeType: node.Type, Status: "skipped"})
+			continue
+		}
+
 		emit(DryRunEvent{Type: "node_start", NodeID: node.ID, NodeType: node.Type, NodeLabel: label})
 
 		var compiledPrompt, compiledSystemPrompt, compiledInput, compiledOutput string
@@ -197,6 +306,10 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			outputFormat := AIOutputFormatForNode(in.Graph, node.ID)
 			rubricForOutput := resolveAIRubric(in.Graph, node.ID, nodeByID, state, in.DefaultRubric)
 			systemPrompt := BuildAISystemPrompt(outputFormat, rubricForOutput, in.MaxPoints)
+			if in.Runner == nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
+			}
 			out, pt, ct, runErr := in.Runner.RunPrompt(ctx, in.ModelID, systemPrompt, prompt, inputText, true)
 			if runErr != nil {
 				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
@@ -226,6 +339,10 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, buildErr
 			}
+			if in.Runner == nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
+			}
 			result, scoreErr := in.Runner.Score(ctx, req)
 			if scoreErr != nil {
 				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(scoreErr))})
@@ -240,6 +357,44 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			emit(DryRunEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Suggested score %.2f (confidence %.0f%%).", label, grade.TotalPoints, grade.Confidence*100),
+			})
+		case NodeTypeCodeTestRunner:
+			if execErr := executeCodeTestRunnerNode(ctx, node, in.Graph, nodeByID, state, in.CodeRunner, emit, label); execErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, execErr
+			}
+		case NodeTypeConditionalRouter:
+			cond, condErr := routerConditionFromNode(node)
+			if condErr != nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, ValidationError{Field: "node:" + node.ID + ".condition", Message: condErr.Error()}
+			}
+			inputVal, hasInput := gatherRouterInput(in.Graph, node.ID, nodeByID, state)
+			if !hasInput {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, ValidationError{Field: "node:" + node.ID, Message: "Router input is required."}
+			}
+			predCtx := buildPredicateContext(in, inputVal)
+			result, evalErr := EvaluateRouterCondition(cond, predCtx)
+			if evalErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, evalErr.Error())})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, evalErr
+			}
+			takenHandle := HandleElse
+			untakenHandle := HandleThen
+			branchLabel := "else"
+			if result {
+				takenHandle = HandleThen
+				untakenHandle = HandleElse
+				branchLabel = "then"
+			}
+			state.set(node.ID, takenHandle, inputVal)
+			state.deactivateRouterBranch(in.Graph, node.ID, untakenHandle)
+			emit(DryRunEvent{
+				Type: "log", Level: "info",
+				Message: fmt.Sprintf("[%s] Condition %s → %s branch.", label, formatRouterConditionSentence(cond), branchLabel),
 			})
 		case NodeTypeOutput:
 			preview, err = assembleOutputPreview(in.Graph, nodeByID, state, in.MaxPoints)
@@ -317,6 +472,9 @@ func gatherAIInput(g *WorkflowGraph, nodeID string, nodeByID map[string]Workflow
 		if e.Target != nodeID || strings.TrimSpace(e.TargetHandle) != HandleAIInput {
 			continue
 		}
+		if !state.edgeActive[e.ID] {
+			continue
+		}
 		src, ok := nodeByID[e.Source]
 		if !ok {
 			continue
@@ -346,6 +504,9 @@ func buildPromptContext(
 	}
 	for _, e := range g.Edges {
 		if e.Target != nodeID {
+			continue
+		}
+		if !state.edgeActive[e.ID] {
 			continue
 		}
 		src, ok := nodeByID[e.Source]
@@ -388,6 +549,9 @@ func buildGraderScoreRequest(
 
 	for _, e := range in.Graph.Edges {
 		if e.Target != node.ID {
+			continue
+		}
+		if !state.edgeActive[e.ID] {
 			continue
 		}
 		src, ok := nodeByID[e.Source]
@@ -462,6 +626,9 @@ func assembleOutputPreview(
 		if !ok || tgt.Type != NodeTypeOutput {
 			continue
 		}
+		if !state.edgeActive[e.ID] {
+			continue
+		}
 		src, ok := nodeByID[e.Source]
 		if !ok {
 			continue
@@ -480,6 +647,9 @@ func assembleOutputPreview(
 				if strings.TrimSpace(preview.Comment) == "" {
 					preview.Comment = v.grade.Comment
 				}
+			} else if strings.TrimSpace(v.text) == "" && predCtxEmptyGrade(v) {
+				preview.SuggestedPoints = 0
+				preview.Confidence = 1
 			} else if strings.TrimSpace(v.text) != "" {
 				if pts, err := strconv.ParseFloat(strings.Fields(v.text)[0], 64); err == nil {
 					preview.SuggestedPoints = pts
@@ -509,4 +679,8 @@ func truncateLog(s string, max int) string {
 		return s
 	}
 	return s[:max] + "…"
+}
+
+func predCtxEmptyGrade(v slotValue) bool {
+	return v.grade == nil && strings.TrimSpace(v.text) == ""
 }

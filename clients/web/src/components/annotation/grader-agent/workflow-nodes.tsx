@@ -4,6 +4,8 @@ import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { RenamableNodeHeader, RenamableNodeTitle } from './renamable-node-header'
 import type { NodeExecutionStatus } from './use-grader-agent-workflow'
+import type { ConditionalRouterCondition } from './types'
+import { formatRouterConditionSentence } from './router-condition'
 
 function executionStatusClass(status: NodeExecutionStatus | undefined, selected: boolean): string {
   switch (status) {
@@ -13,6 +15,8 @@ function executionStatusClass(status: NodeExecutionStatus | undefined, selected:
       return 'border-emerald-400 ring-2 ring-emerald-400/30'
     case 'error':
       return 'border-rose-400 ring-2 ring-rose-400/30'
+    case 'skipped':
+      return 'border-slate-300 opacity-50 ring-1 ring-slate-300/40 dark:border-neutral-600 dark:ring-neutral-600/40'
     default:
       return selected ? 'border-indigo-500 ring-2 ring-indigo-200' : 'border-slate-200 dark:border-neutral-700'
   }
@@ -272,6 +276,106 @@ export const AiNode = memo(function AiNode({ id, data, selected }: NodeProps) {
           label={t('gradingAgent.canvas.slots.aiOutput')}
           dotClass="bg-indigo-500"
           handleClass="!bg-indigo-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const CodeTestRunnerNode = memo(function CodeTestRunnerNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const runtime = typeof nodeData.runtime === 'string' ? nodeData.runtime : 'python3.12'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-cyan-400/80 ring-2 ring-cyan-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.codeTests.title')}
+        dotClassName="bg-cyan-500"
+        headerClassName="border-b border-cyan-500/15 bg-cyan-500/5 dark:border-cyan-500/10 dark:bg-cyan-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <p className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
+        {t('gradingAgent.canvas.nodes.codeTests.runtimeLabel', { runtime })}
+      </p>
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="submission"
+          label={t('gradingAgent.canvas.slots.submission')}
+          dotClass="bg-slate-400 dark:bg-neutral-300"
+          handleClass="!bg-slate-400 dark:!bg-neutral-300"
+        />
+        <OutputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.gradeScore')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <OutputSlotRow
+          handleId="report"
+          label={t('gradingAgent.canvas.slots.report')}
+          dotClass="bg-sky-500"
+          handleClass="!bg-sky-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const ConditionalRouterNode = memo(function ConditionalRouterNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const condition = nodeData.condition as ConditionalRouterCondition | undefined
+  const conditionText =
+    condition?.field && condition.operator
+      ? formatRouterConditionSentence(condition)
+      : t('gradingAgent.canvas.nodes.router.emptyCondition')
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-slate-400/80 ring-2 ring-slate-400/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.router.title')}
+        dotClassName="bg-slate-500"
+        headerClassName="border-b border-slate-500/15 bg-slate-500/5 dark:border-slate-500/10 dark:bg-slate-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <p className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400" aria-live="polite">
+        {t('gradingAgent.canvas.nodes.router.ifPrefix')} {conditionText}
+      </p>
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="input"
+          label={t('gradingAgent.canvas.slots.input')}
+          dotClass="bg-slate-400"
+          handleClass="!bg-slate-400"
+        />
+        <OutputSlotRow
+          handleId="then"
+          label={t('gradingAgent.canvas.slots.then')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <OutputSlotRow
+          handleId="else"
+          label={t('gradingAgent.canvas.slots.else')}
+          dotClass="bg-amber-500"
+          handleClass="!bg-amber-500"
         />
       </div>
     </div>

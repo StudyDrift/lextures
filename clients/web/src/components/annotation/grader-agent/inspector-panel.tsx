@@ -5,10 +5,13 @@ import { useTextModels } from '../../../hooks/use-text-models'
 import { activityAssignmentItemId } from './activity-node-data'
 import { AssignmentPicker } from './assignment-picker'
 import type { GraderAgentWorkflowState } from './use-grader-agent-workflow'
-import { isActivityNodeType, isAiNodeType, isStudentSubmissionNodeType } from './types'
+import { isActivityNodeType, isAiNodeType, isCodeTestRunnerNodeType, isConditionalRouterNodeType, isStudentSubmissionNodeType } from './types'
+import { CodeTestRunnerInspector } from './code-test-runner-inspector'
+import { ConditionalRouterInspector } from './conditional-router-inspector'
 import { AiNodeCompiledPrompt } from './ai-node-compiled-prompt'
 import { AiNodeOutputFormat } from './ai-node-output-format'
-import type { RubricDefinition } from '../../../lib/courses-api'
+import type { ModuleAssignmentSubmissionApi, RubricDefinition } from '../../../lib/courses-api'
+import { SubmissionInspectorSection } from './submission-inspector-section'
 import { WorkflowPromptEditor } from './workflow-prompt-editor'
 import { workflowNodeDisplayLabel } from './workflow-node-label'
 import { workflowHasAttachedRubric } from './workflow-grade-slot'
@@ -16,12 +19,12 @@ import type { WorkflowNodeDefaultLabels } from './workflow-prompt-variable'
 
 type InspectorPanelProps = {
   workflow: GraderAgentWorkflowState
-  accepted: boolean
   courseCode: string
   itemId: string
   assignmentTitle?: string
   rubric?: RubricDefinition | null
   maxPoints?: number | null
+  selectedSubmission?: ModuleAssignmentSubmissionApi | null
 }
 
 const fieldClass =
@@ -29,12 +32,12 @@ const fieldClass =
 
 export function InspectorPanel({
   workflow,
-  accepted,
   courseCode,
   itemId,
   assignmentTitle,
   rubric,
   maxPoints,
+  selectedSubmission = null,
 }: InspectorPanelProps) {
   const { t } = useTranslation('common')
   const {
@@ -43,6 +46,8 @@ export function InspectorPanel({
     updateGraderNode,
     updateAiNode,
     updateActivityNode,
+    updateCodeTestRunnerNode,
+    updateConditionalRouterNode,
     removeNode,
     nodeDryRunDetails,
     nodeExecutionStates,
@@ -63,6 +68,8 @@ export function InspectorPanel({
       studentSubmission: t('gradingAgent.canvas.nodes.studentSubmission.title'),
       activity: t('gradingAgent.canvas.nodes.activity.title'),
       ai: t('gradingAgent.canvas.nodes.ai.title'),
+      codeTestRunner: t('gradingAgent.canvas.nodes.codeTests.title'),
+      conditionalRouter: t('gradingAgent.canvas.nodes.router.title'),
       grader: t('gradingAgent.canvas.nodes.grader.title'),
       output: t('gradingAgent.canvas.nodes.output.title'),
     }),
@@ -86,7 +93,11 @@ export function InspectorPanel({
     )
   }
   const node = graph.nodes.find((n) => n.id === selectedNodeId)
-  if (!node) return null
+  if (!node) {
+    return (
+      <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.empty')}</p>
+    )
+  }
 
   const modelId = typeof node.data.modelId === 'string' ? node.data.modelId : ''
   const nodeTitle = (key: string) => workflowNodeDisplayLabel(node.data, t(key))
@@ -131,7 +142,6 @@ export function InspectorPanel({
             graph={graph}
             promptNodeId={node.id}
             defaults={variableDefaults}
-            disabled={accepted}
             className={fieldClass}
             placeholder={t('gradingAgent.prompt.placeholder')}
           />
@@ -141,7 +151,6 @@ export function InspectorPanel({
           <select
             value={modelId}
             onChange={(e) => updateGraderNode(node.id, { modelId: e.target.value || null })}
-            disabled={accepted}
             className={fieldClass}
           >
             <option value="">{t('gradingAgent.model.default')}</option>
@@ -153,15 +162,13 @@ export function InspectorPanel({
           </select>
           <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.model.help')}</p>
         </label>
-        {!accepted ? (
-          <button
-            type="button"
-            onClick={() => removeNode(node.id)}
-            className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
-          >
-            {t('gradingAgent.canvas.inspector.deleteNode')}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => removeNode(node.id)}
+          className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
+        >
+          {t('gradingAgent.canvas.inspector.deleteNode')}
+        </button>
       </div>
     )
   }
@@ -180,7 +187,6 @@ export function InspectorPanel({
           <AssignmentPicker
             assignments={pickerAssignments}
             value={selectedAssignmentId}
-            disabled={accepted}
             loading={assignmentsLoading}
             filterPlaceholder={t('gradingAgent.canvas.inspector.activityAssignmentFilter')}
             emptyLabel={t('gradingAgent.canvas.inspector.activityAssignmentEmpty')}
@@ -194,15 +200,13 @@ export function InspectorPanel({
             <p className="mt-1.5 text-xs text-rose-700 dark:text-rose-300">{assignmentsError}</p>
           ) : null}
         </label>
-        {!accepted ? (
-          <button
-            type="button"
-            onClick={() => removeNode(node.id)}
-            className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
-          >
-            {t('gradingAgent.canvas.inspector.deleteNode')}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => removeNode(node.id)}
+          className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
+        >
+          {t('gradingAgent.canvas.inspector.deleteNode')}
+        </button>
       </div>
     )
   }
@@ -225,40 +229,61 @@ export function InspectorPanel({
             graph={graph}
             promptNodeId={node.id}
             defaults={variableDefaults}
-            disabled={accepted}
             className={fieldClass}
             placeholder={t('gradingAgent.prompt.placeholder')}
           />
         </label>
         {showCompiledPrompt ? <AiNodeCompiledPrompt detail={dryRunDetail} /> : null}
-        {!accepted ? (
-          <button
-            type="button"
-            onClick={() => removeNode(node.id)}
-            className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
-          >
-            {t('gradingAgent.canvas.inspector.deleteNode')}
-          </button>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => removeNode(node.id)}
+          className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
+        >
+          {t('gradingAgent.canvas.inspector.deleteNode')}
+        </button>
       </div>
     )
   }
 
   if (isStudentSubmissionNodeType(node.type)) {
     return (
-      <div className="space-y-2 text-sm text-slate-700 dark:text-neutral-200">
+      <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
         <p className="font-medium">{nodeTitle('gradingAgent.canvas.nodes.studentSubmission.title')}</p>
         <p>{t('gradingAgent.canvas.inspector.submissionHelp')}</p>
-        {!accepted ? (
-          <button
-            type="button"
-            onClick={() => removeNode(node.id)}
-            className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
-          >
-            {t('gradingAgent.canvas.inspector.deleteNode')}
-          </button>
-        ) : null}
+        <SubmissionInspectorSection submission={selectedSubmission} />
+        <button
+          type="button"
+          onClick={() => removeNode(node.id)}
+          className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
+        >
+          {t('gradingAgent.canvas.inspector.deleteNode')}
+        </button>
       </div>
+    )
+  }
+
+  if (isCodeTestRunnerNodeType(node.type)) {
+    return (
+      <CodeTestRunnerInspector
+        data={node.data}
+        maxPoints={maxPoints}
+        title={nodeTitle('gradingAgent.canvas.nodes.codeTests.title')}
+        onChange={(patch) => updateCodeTestRunnerNode(node.id, patch)}
+        onDelete={() => removeNode(node.id)}
+      />
+    )
+  }
+
+  if (isConditionalRouterNodeType(node.type)) {
+    return (
+      <ConditionalRouterInspector
+        nodeId={node.id}
+        graph={graph}
+        data={node.data}
+        title={nodeTitle('gradingAgent.canvas.nodes.router.title')}
+        onChange={(patch) => updateConditionalRouterNode(node.id, patch)}
+        onDelete={() => removeNode(node.id)}
+      />
     )
   }
 

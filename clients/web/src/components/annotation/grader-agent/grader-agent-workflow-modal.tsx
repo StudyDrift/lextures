@@ -2,13 +2,21 @@ import { lazy, Suspense, useEffect, useId, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { RubricDefinition } from '../../../lib/courses-api'
+import { usePlatformFeatures } from '../../../context/platform-features-context'
 import { SubmissionStudentPicker } from '../submission-navigator'
 import { InspectorPanel } from './inspector-panel'
 import { NodePalette } from './node-palette'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { DryRunDock } from './dry-run-dock'
+import { RunAgentPopover } from './run-agent-popover'
+import { SaveWorkflowMenu } from './save-workflow-menu'
 import { useGraderAgentSubmissions } from './use-grader-agent-submissions'
-import { primaryValidationMessage, useGraderAgentWorkflow } from './use-grader-agent-workflow'
+import {
+  primaryValidationMessage,
+  useGraderAgentWorkflow,
+  type GraderAgentTemplateMode,
+  type GraderAgentWorkflowSeed,
+} from './use-grader-agent-workflow'
 
 const CanvasView = lazy(() =>
   import('./canvas-view').then((m) => ({ default: m.CanvasView })),
@@ -23,6 +31,8 @@ type GraderAgentWorkflowModalProps = {
   submissionId: string | null
   rubric: RubricDefinition | null
   maxPoints: number | null
+  seedWorkflow?: GraderAgentWorkflowSeed | null
+  templateMode?: GraderAgentTemplateMode | null
   onApplied?: () => void
 }
 
@@ -35,9 +45,13 @@ export function GraderAgentWorkflowModal({
   submissionId,
   rubric,
   maxPoints,
+  seedWorkflow = null,
+  templateMode = null,
   onApplied,
 }: GraderAgentWorkflowModalProps) {
   const { t } = useTranslation('common')
+  const isTemplateMode = templateMode != null
+  const { codeExecutionEnabled } = usePlatformFeatures()
   const titleId = useId()
   const statusId = useId()
   const modalRef = useRef<HTMLDivElement>(null)
@@ -46,6 +60,7 @@ export function GraderAgentWorkflowModal({
     submissions,
     index: submissionIndex,
     setIndex: setSubmissionIndex,
+    selectedSubmission,
     selectedSubmissionId,
     loading: submissionsLoading,
     loadError: submissionsLoadError,
@@ -54,12 +69,16 @@ export function GraderAgentWorkflowModal({
     courseCode,
     itemId,
     initialSubmissionId: submissionId,
+    enabled: !isTemplateMode,
   })
   const workflow = useGraderAgentWorkflow({
     open,
     courseCode,
     itemId,
     submissionId: selectedSubmissionId,
+    rubric,
+    seedWorkflow,
+    templateMode,
     onApplied,
   })
 
@@ -81,6 +100,7 @@ export function GraderAgentWorkflowModal({
     statusMessage,
     handleDryRun,
     handleSave,
+    handleSaveAsTemplate,
     handleAccept,
     handleRun,
     handleToggleAutoGrade,
@@ -130,27 +150,68 @@ export function GraderAgentWorkflowModal({
       >
         <header className="flex shrink-0 flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
-              {t('gradingAgent.canvas.modal.title')}
-            </h2>
-            {assignmentTitle ? (
-              <p className="truncate text-sm text-slate-500 dark:text-neutral-400">{assignmentTitle}</p>
-            ) : null}
+            <div className="flex items-center gap-3">
+              <div className="min-w-0">
+                <h2 id={titleId} className="text-lg font-semibold text-slate-900 dark:text-neutral-50">
+                  {isTemplateMode
+                    ? t('gradingAgent.settings.create.templateEditorTitle')
+                    : t('gradingAgent.canvas.modal.title')}
+                </h2>
+                {isTemplateMode ? (
+                  <p className="truncate text-sm text-slate-500 dark:text-neutral-400">{templateMode.name}</p>
+                ) : assignmentTitle ? (
+                  <p className="truncate text-sm text-slate-500 dark:text-neutral-400">{assignmentTitle}</p>
+                ) : null}
+              </div>
+              {!isTemplateMode && config ? (
+                <span
+                  className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                    accepted
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+                      : 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200'
+                  }`}
+                >
+                  {accepted
+                    ? t('gradingAgent.settings.status.accepted')
+                    : t('gradingAgent.settings.status.draft')}
+                </span>
+              ) : null}
+            </div>
           </div>
-          <div className="flex min-w-[14rem] max-w-xs items-center gap-2">
-            <SubmissionStudentPicker
-              submissions={submissions}
-              index={submissionIndex}
-              disabled={submissionsLoading}
-              onIndexChange={setSubmissionIndex}
-            />
-            {submissions.length > 0 ? (
-              <span className="w-10 shrink-0 text-end text-xs tabular-nums text-slate-500 dark:text-neutral-400">
-                {submissionIndex + 1}/{submissions.length}
-              </span>
-            ) : null}
-          </div>
-          {!accepted ? (
+          {!isTemplateMode ? (
+            <div className="flex min-w-[14rem] max-w-xs items-center gap-2">
+              <SubmissionStudentPicker
+                submissions={submissions}
+                index={submissionIndex}
+                disabled={submissionsLoading}
+                onIndexChange={setSubmissionIndex}
+              />
+              {submissions.length > 0 ? (
+                <span className="w-10 shrink-0 text-end text-xs tabular-nums text-slate-500 dark:text-neutral-400">
+                  {submissionIndex + 1}/{submissions.length}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+          {isTemplateMode ? (
+            <ActionErrorTooltip message={!runnable ? validationMsg : null}>
+              <button
+                type="button"
+                disabled={saving || !runnable}
+                onClick={() => void handleSave()}
+                className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+                    <span>{t('gradingAgent.save.saving')}</span>
+                  </>
+                ) : (
+                  t('gradingAgent.save.asTemplate')
+                )}
+              </button>
+            </ActionErrorTooltip>
+          ) : !accepted ? (
             <ActionErrorTooltip message={dryRunTooltip}>
               <button
                 type="button"
@@ -169,18 +230,25 @@ export function GraderAgentWorkflowModal({
               </button>
             </ActionErrorTooltip>
           ) : (
-            <ActionErrorTooltip message={runTooltip}>
-              <button
-                type="button"
-                disabled={runDisabled}
-                onClick={() => void handleRun()}
-                className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {confirmOverwrite ? t('gradingAgent.run.confirm') : t('gradingAgent.run.start')}
-              </button>
-            </ActionErrorTooltip>
+            <RunAgentPopover
+              disabled={runDisabled}
+              tooltip={runTooltip}
+              dryRunDisabled={dryRunDisabled}
+              dryRunTooltip={dryRunTooltip}
+              dryRunning={dryRunning}
+              runScope={runScope}
+              setRunScope={setRunScope}
+              confirmOverwrite={confirmOverwrite}
+              setConfirmOverwrite={setConfirmOverwrite}
+              runProgress={runProgress}
+              autoGradeNew={Boolean(config?.autoGradeNew)}
+              saving={saving}
+              onDryRun={handleDryRun}
+              onToggleAutoGrade={handleToggleAutoGrade}
+              onRun={handleRun}
+            />
           )}
-          {!accepted ? (
+          {!isTemplateMode && !accepted ? (
             <ActionErrorTooltip message={acceptTooltip}>
               <button
                 type="button"
@@ -192,15 +260,17 @@ export function GraderAgentWorkflowModal({
               </button>
             </ActionErrorTooltip>
           ) : null}
-          {!accepted ? (
-            <button
-              type="button"
-              disabled={saving || !workflow.graph}
-              onClick={() => void handleSave()}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800 disabled:opacity-50"
-            >
-              {saving ? t('gradingAgent.save.saving') : t('gradingAgent.save')}
-            </button>
+          {!isTemplateMode ? (
+            <SaveWorkflowMenu
+              saving={saving}
+              defaultTemplateName={assignmentTitle}
+              acceptVisible={!accepted}
+              acceptDisabled={acceptDisabled}
+              acceptTooltip={acceptTooltip}
+              onSave={handleSave}
+              onSaveAsTemplate={handleSaveAsTemplate}
+              onAccept={() => void handleAccept()}
+            />
           ) : null}
           <button
             ref={closeRef}
@@ -216,7 +286,13 @@ export function GraderAgentWorkflowModal({
           {statusMessage}
         </div>
 
-        {submissionsLoadError ? (
+        {!isTemplateMode && dryRunError ? (
+          <p className="shrink-0 border-b border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+            {dryRunError}
+          </p>
+        ) : null}
+
+        {!isTemplateMode && submissionsLoadError ? (
           <p className="shrink-0 border-b border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
             {submissionsLoadError}
           </p>
@@ -224,11 +300,11 @@ export function GraderAgentWorkflowModal({
 
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
           <aside className="w-full shrink-0 border-b border-slate-200 p-3 lg:w-48 lg:border-b-0 lg:border-e dark:border-neutral-700">
-            <NodePalette disabled={accepted} onAddNode={addPaletteNode} />
+            <NodePalette codeExecutionEnabled={codeExecutionEnabled} onAddNode={addPaletteNode} />
           </aside>
           <main className="min-h-0 flex-1 p-3">
             <Suspense fallback={<div className="h-full motion-safe:animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />}>
-              <CanvasView workflow={workflow} readOnly={accepted} />
+              <CanvasView workflow={workflow} />
             </Suspense>
           </main>
           <aside className="flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 p-3 lg:w-72 lg:border-t-0 lg:border-s dark:border-neutral-700">
@@ -238,73 +314,30 @@ export function GraderAgentWorkflowModal({
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <InspectorPanel
                 workflow={workflow}
-                accepted={accepted}
                 courseCode={courseCode}
                 itemId={itemId}
                 assignmentTitle={assignmentTitle}
                 rubric={rubric}
                 maxPoints={maxPoints}
+                selectedSubmission={selectedSubmission}
               />
             </div>
           </aside>
         </div>
 
-        <footer className="shrink-0 border-t border-slate-200 dark:border-neutral-700">
-          <DryRunDock
-            workflow={workflow}
-            rubric={rubric}
-            maxPoints={maxPoints}
-            submissionId={selectedSubmissionId}
-            consoleOpen={dryRunConsoleOpen}
-            logs={dryRunLogs}
-            running={dryRunning}
-          />
-          {accepted ? (
-            <div className="space-y-2 px-4 py-4">
-              <p className="text-sm font-medium">{t('gradingAgent.run.title')}</p>
-              <div className="flex flex-wrap gap-2">
-                {(['current', 'ungraded', 'all'] as const).map((scope) => (
-                  <button
-                    key={scope}
-                    type="button"
-                    aria-pressed={runScope === scope}
-                    onClick={() => {
-                      setRunScope(scope)
-                      setConfirmOverwrite(false)
-                    }}
-                    className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                      runScope === scope
-                        ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-200'
-                        : 'bg-slate-100 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300'
-                    }`}
-                  >
-                    {t(`gradingAgent.run.scope.${scope}`)}
-                  </button>
-                ))}
-              </div>
-              {confirmOverwrite ? (
-                <p className="text-sm text-amber-800 dark:text-amber-200">{t('gradingAgent.run.overwriteWarning')}</p>
-              ) : null}
-              {runProgress ? (
-                <p className="text-sm text-slate-600 dark:text-neutral-400">
-                  {t('gradingAgent.run.progress', {
-                    completed: runProgress.completed,
-                    failed: runProgress.failed,
-                    total: runProgress.total,
-                  })}
-                </p>
-              ) : null}
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={Boolean(config?.autoGradeNew)}
-                  onChange={(e) => void handleToggleAutoGrade(e.target.checked)}
-                />
-                {t('gradingAgent.autoGradeNew')}
-              </label>
-            </div>
-          ) : null}
-        </footer>
+        {!isTemplateMode ? (
+          <footer className="shrink-0 border-t border-slate-200 dark:border-neutral-700">
+            <DryRunDock
+              workflow={workflow}
+              rubric={rubric}
+              maxPoints={maxPoints}
+              submissionId={selectedSubmissionId}
+              consoleOpen={dryRunConsoleOpen}
+              logs={dryRunLogs}
+              running={dryRunning}
+            />
+          </footer>
+        ) : null}
       </div>
     </div>
   )

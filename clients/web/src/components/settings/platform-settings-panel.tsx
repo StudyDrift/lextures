@@ -53,6 +53,7 @@ function emptyForm(): PlatformSettingsPayload {
     equationEditorEnabled: false,
     readingLevelEnabled: false,
     graderAgentEnabled: false,
+    codeExecutionEnabled: false,
     speechToTextEnabled: false,
     accommodationsEngineEnabled: false,
     ffAccommodationsEngine: false,

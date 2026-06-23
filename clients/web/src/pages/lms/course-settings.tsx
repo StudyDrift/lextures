@@ -1,6 +1,7 @@
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
-import { Check, ImageIcon, Move, Save, Upload, X } from 'lucide-react'
+import { Check, ImageIcon, Move, Plus, Save, Upload, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { LmsPage } from './lms-page'
 import { usePermissions } from '../../context/use-permissions'
 import { authorizedFetch } from '../../lib/api'
@@ -170,8 +171,10 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
 }
 
 export default function CourseSettings() {
+  const { t } = useTranslation('common')
   const { courseCode } = useParams<{ courseCode: string }>()
   const { allows, loading: permLoading } = usePermissions()
+  const [createGradingAgentOpen, setCreateGradingAgentOpen] = useState(false)
   const {
     altTextEnforcementEnabled,
     ffPlagiarismChecks,
@@ -856,8 +859,20 @@ export default function CourseSettings() {
                     ? 'Module items you archived from the outline. Restore them when you want them visible again.'
                     : ''
 
+  const pageActions =
+    section === 'grading-agents' ? (
+      <button
+        type="button"
+        onClick={() => setCreateGradingAgentOpen(true)}
+        className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+      >
+        <Plus className="h-4 w-4" aria-hidden />
+        {t('gradingAgent.settings.create.button')}
+      </button>
+    ) : undefined
+
   return (
-    <LmsPage title={pageTitle} description={pageDescription}>
+    <LmsPage title={pageTitle} description={pageDescription} actions={pageActions}>
       <p className="mt-2">
         <Link
           to={`/courses/${encodeURIComponent(courseCode)}`}
@@ -1402,7 +1417,13 @@ export default function CourseSettings() {
           )}
 
           {section === 'grading' && <CourseGradingSettingsSection courseCode={courseCode} />}
-          {section === 'grading-agents' && <CourseGradingAgentsSection courseCode={courseCode} />}
+          {section === 'grading-agents' && (
+            <CourseGradingAgentsSection
+              courseCode={courseCode}
+              createModalOpen={createGradingAgentOpen}
+              onCreateModalOpenChange={setCreateGradingAgentOpen}
+            />
+          )}
           {section === 'plagiarism' && (featuresLoading || ffPlagiarismChecks) ? (
             featuresLoading ? (
               <p className="text-sm text-slate-600 dark:text-neutral-300">Loading plagiarism settings…</p>

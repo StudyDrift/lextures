@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { beginPaletteDrag, consumePaletteDragType, endPaletteDrag, peekPaletteDragType } from '../palette-drag'
+import { beginPaletteDrag, consumePaletteDragType, endPaletteDrag, parsePaletteNodeType, peekPaletteDragType } from '../palette-drag'
 
 describe('palette drag store', () => {
   it('carries node type from drag start through drop', () => {
@@ -18,5 +18,11 @@ describe('palette drag store', () => {
   it('carries AI node type through drag', () => {
     beginPaletteDrag('ai')
     expect(consumePaletteDragType()).toBe('ai')
+  })
+
+  it('parsePaletteNodeType accepts all palette kinds', () => {
+    expect(parsePaletteNodeType('conditionalRouter')).toBe('conditionalRouter')
+    expect(parsePaletteNodeType('codeTestRunner')).toBe('codeTestRunner')
+    expect(parsePaletteNodeType('unknown')).toBeNull()
   })
 })
