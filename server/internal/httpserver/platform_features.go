@@ -27,6 +27,7 @@ type platformFeaturesJSON struct {
 	EquationEditorEnabled       bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled         bool `json:"readingLevelEnabled"`
 	GraderAgentEnabled          bool `json:"graderAgentEnabled"`
+	CodeExecutionEnabled        bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled   bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement        bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled         bool `json:"speechToTextEnabled"`
@@ -128,6 +129,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		EquationEditorEnabled:       cfg.EquationEditorEnabled,
 		ReadingLevelEnabled:         cfg.ReadingLevelEnabled,
 		GraderAgentEnabled:          cfg.GraderAgentEnabled,
+		CodeExecutionEnabled:        cfg.CodeExecutionEnabled,
 		AltTextEnforcementEnabled:   cfg.AltTextEnforcementEnabled,
 		FFAltTextEnforcement:        cfg.FFAltTextEnforcement,
 		SpeechToTextEnabled:         cfg.SpeechToTextEnabled,

@@ -1,3 +1,9 @@
+.grader-agent-canvas {
+  --xy-background-color: transparent;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
 /* Strip React Flow's default node chrome so custom cards render cleanly. */
 .grader-agent-canvas .react-flow__node {
   background: transparent !important;

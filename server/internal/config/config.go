@@ -234,6 +234,8 @@ type Config struct {
 	ReadingLevelEnabled bool
 	// GraderAgentEnabled enables the instructor-authored grading agent in SpeedGrader (plan 19.16).
 	GraderAgentEnabled bool
+	// CodeExecutionEnabled enables sandboxed code execution for quiz and grader agent nodes (plan 2.4 / 19.17.7).
+	CodeExecutionEnabled bool
 	// AltTextEnforcementEnabled gates alt-text prompts, AI suggestions, and coverage reporting (plan 12.5).
 	AltTextEnforcementEnabled bool
 	// FFAltTextEnforcement when true hard-blocks content save until alt text is resolved (plan 12.5).

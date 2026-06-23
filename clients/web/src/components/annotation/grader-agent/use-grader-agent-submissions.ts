@@ -13,6 +13,7 @@ type UseGraderAgentSubmissionsArgs = {
   courseCode: string
   itemId: string
   initialSubmissionId: string | null
+  enabled?: boolean
 }
 
 export function useGraderAgentSubmissions({
@@ -20,6 +21,7 @@ export function useGraderAgentSubmissions({
   courseCode,
   itemId,
   initialSubmissionId,
+  enabled = true,
 }: UseGraderAgentSubmissionsArgs) {
   const [submissions, setSubmissions] = useState<ModuleAssignmentSubmissionApi[]>([])
   const [index, setIndex] = useState(0)
@@ -27,7 +29,7 @@ export function useGraderAgentSubmissions({
   const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !enabled || !itemId.trim()) {
       setSubmissions([])
       setIndex(0)
       setLoadError(null)
@@ -64,7 +66,7 @@ export function useGraderAgentSubmissions({
     return () => {
       cancelled = true
     }
-  }, [open, courseCode, itemId, initialSubmissionId])
+  }, [open, enabled, courseCode, itemId, initialSubmissionId])
 
   const selectedSubmission = submissions[index] ?? null
   const selectedSubmissionId = selectedSubmission?.id ?? null
@@ -73,6 +75,7 @@ export function useGraderAgentSubmissions({
     submissions,
     index,
     setIndex,
+    selectedSubmission,
     selectedSubmissionId,
     loading,
     loadError,

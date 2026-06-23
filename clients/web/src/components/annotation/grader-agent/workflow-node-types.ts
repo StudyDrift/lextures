@@ -6,6 +6,8 @@ import {
   StudentSubmissionNode,
   SubmissionNode,
   AssignmentContextNode,
+  CodeTestRunnerNode,
+  ConditionalRouterNode,
 } from './workflow-nodes'
 
 export const graderAgentNodeTypes = {
@@ -16,4 +18,6 @@ export const graderAgentNodeTypes = {
   studentSubmission: StudentSubmissionNode,
   submission: SubmissionNode,
   assignmentContext: AssignmentContextNode,
+  codeTestRunner: CodeTestRunnerNode,
+  conditionalRouter: ConditionalRouterNode,
 }

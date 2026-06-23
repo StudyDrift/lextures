@@ -243,6 +243,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Instructor-authored AI grading agent in SpeedGrader with dry-run and batch runs.',
   },
   {
+    key: 'codeExecutionEnabled',
+    label: 'Code execution',
+    description: 'Sandboxed code execution for quiz code questions and the grader agent Code Test Runner node.',
+  },
+  {
     key: 'readingLevelEnabled',
     label: 'Reading level adaptation',
     description: 'Adjust displayed reading complexity for supported content types.',

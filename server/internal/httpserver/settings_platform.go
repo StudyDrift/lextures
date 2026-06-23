@@ -88,6 +88,7 @@ type platformSettingsJSON struct {
 	EquationEditorEnabled           bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             bool `json:"readingLevelEnabled"`
 	GraderAgentEnabled              bool `json:"graderAgentEnabled"`
+	CodeExecutionEnabled            bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled       bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled             bool `json:"speechToTextEnabled"`
@@ -287,6 +288,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
 			GraderAgentEnabled:              merged.GraderAgentEnabled,
+			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
 			SpeechToTextEnabled:             merged.SpeechToTextEnabled,
@@ -456,6 +458,7 @@ type putPlatformBody struct {
 	EquationEditorEnabled           *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             *bool `json:"readingLevelEnabled"`
 	GraderAgentEnabled              *bool `json:"graderAgentEnabled"`
+	CodeExecutionEnabled            *bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled       *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            *bool `json:"ffAltTextEnforcement"`
 	SpeechToTextEnabled             *bool `json:"speechToTextEnabled"`
@@ -773,6 +776,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
 		setBool("graderagentenabled", body.GraderAgentEnabled, func(v bool) { wr.GraderAgentEnabled = &v })
+		setBool("codeexecutionenabled", body.CodeExecutionEnabled, func(v bool) { wr.CodeExecutionEnabled = &v })
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
 		setBool("speechtotextenabled", body.SpeechToTextEnabled, func(v bool) { wr.SpeechToTextEnabled = &v })
@@ -934,6 +938,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
 			GraderAgentEnabled:              merged.GraderAgentEnabled,
+			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
 			SpeechToTextEnabled:             merged.SpeechToTextEnabled,

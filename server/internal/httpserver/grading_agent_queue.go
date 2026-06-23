@@ -11,6 +11,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
+	"github.com/lextures/lextures/server/internal/service/codeexecution"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 )
@@ -59,6 +60,71 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if run.InitiatedBy != nil {
 		modelUser = *run.InitiatedBy
 	}
+
+	var contentItemID string
+	var rubricItemID string
+	var workflowGraph *gradingagentsvc.WorkflowGraph
+	var gradeSourceID string
+	var compiled gradingagentsvc.CompiledWorkflow
+	if wg, wgErr := gradingagentsvc.EffectiveWorkflowGraph(cfg.WorkflowGraph, cfg.Prompt, cfg.IncludeAssignmentContent, cfg.IncludeRubric); wgErr == nil && wg != nil {
+		if c, compileErr := gradingagentsvc.CompileWorkflowGraph(wg, submissionText); compileErr == nil {
+			compiled = c
+			contentItemID = c.ContentItemID
+			rubricItemID = c.RubricItemID
+			workflowGraph = wg
+			gradeSourceID = c.GradeSource
+		}
+	}
+	contentRow, contentErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, contentItemID)
+	if contentErr != nil {
+		return d.failGradingAgentItem(ctx, msg, contentErr.Error())
+	}
+	rubricRow, rubricErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, rubricItemID)
+	if rubricErr != nil {
+		return d.failGradingAgentItem(ctx, msg, rubricErr.Error())
+	}
+	rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
+	maxPoints := gradingagentsvc.MaxPointsFromAssignment(assignRow)
+
+	if workflowGraph != nil && gradeSourceID != "" {
+		for _, n := range workflowGraph.Nodes {
+			if n.ID == gradeSourceID && n.Type == gradingagentsvc.NodeTypeCodeTestRunner {
+				preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(ctx, gradingagentsvc.DryRunExecutionInput{
+					Graph:           workflowGraph,
+					Submissions:     submissions,
+					DefaultMarkdown: contentRow.Markdown,
+					DefaultRubric:   rubric,
+					MaxPoints:       maxPoints,
+					CodeRunner:      codeexecution.New(),
+				})
+				if execErr != nil {
+					return d.failGradingAgentItem(ctx, msg, execErr.Error())
+				}
+				comment := preview.Comment
+				conf := preview.Confidence
+				pts := preview.SuggestedPoints
+				posting := "manual"
+				if strings.TrimSpace(assignRow.PostingPolicy) == "automatic" && cfg.PostPolicy == "auto_post" {
+					posting = "automatic"
+				}
+				_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
+					DisplayName: "Grading agent",
+					Body:        comment,
+					Source:      "lextures",
+				})
+				if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, nil, flatComment, commentJSON, posting, false); err != nil {
+					return d.failGradingAgentItem(ctx, msg, "failed to write grade")
+				}
+				_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
+					RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
+					SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
+					Status: gradingagentrepo.ItemApplied,
+				})
+				return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+			}
+		}
+	}
+
 	modelID, modelErr := d.resolveGraderAgentModelID(ctx, modelUser, "", cfg.ModelID)
 	if modelErr != nil {
 		return d.failGradingAgentItem(ctx, msg, modelErr.Error())
@@ -77,36 +143,17 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 		ModelID:                  modelID,
 		SubmissionText:           submissionText,
 	}
-	var contentItemID string
-	var rubricItemID string
-	var workflowGraph *gradingagentsvc.WorkflowGraph
-	var promptNodeID string
-	if wg, wgErr := gradingagentsvc.EffectiveWorkflowGraph(cfg.WorkflowGraph, cfg.Prompt, cfg.IncludeAssignmentContent, cfg.IncludeRubric); wgErr == nil && wg != nil {
-		if compiled, compileErr := gradingagentsvc.CompileWorkflowGraph(wg, submissionText); compileErr == nil {
-			scoreReq = compiled.ScoreRequest
-			scoreReq.ModelID = modelID
-			contentItemID = compiled.ContentItemID
-			rubricItemID = compiled.RubricItemID
-			workflowGraph = wg
-			promptNodeID = compiled.GradeSource
-		}
+	if compiled.GradeSource != "" {
+		scoreReq = compiled.ScoreRequest
+		scoreReq.ModelID = modelID
 	}
-	contentRow, contentErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, contentItemID)
-	if contentErr != nil {
-		return d.failGradingAgentItem(ctx, msg, contentErr.Error())
-	}
-	rubricRow, rubricErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, rubricItemID)
-	if rubricErr != nil {
-		return d.failGradingAgentItem(ctx, msg, rubricErr.Error())
-	}
-	rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
 	scoreReq.AssignmentMarkdown = contentRow.Markdown
 	scoreReq.Rubric = rubric
-	scoreReq.MaxPoints = gradingagentsvc.MaxPointsFromAssignment(assignRow)
-	if workflowGraph != nil && strings.TrimSpace(promptNodeID) != "" {
+	scoreReq.MaxPoints = maxPoints
+	if workflowGraph != nil && strings.TrimSpace(gradeSourceID) != "" {
 		scoreReq.InstructorPrompt = gradingagentsvc.SubstituteWorkflowPromptVariables(
 			workflowGraph,
-			promptNodeID,
+			gradeSourceID,
 			scoreReq.InstructorPrompt,
 			gradingagentsvc.PromptVariableContext{
 				Submissions:     submissions,

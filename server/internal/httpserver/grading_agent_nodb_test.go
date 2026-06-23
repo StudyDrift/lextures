@@ -27,3 +27,25 @@ func TestGraderAgent_DryRunDisabledReturns404(t *testing.T) {
 		t.Fatalf("status=%d want 404", rec.Code)
 	}
 }
+
+func TestGraderAgent_TemplateDisabledReturns404(t *testing.T) {
+	d := Deps{Config: config.Config{GraderAgentEnabled: false}}
+	tests := []struct {
+		method string
+		path   string
+		run    func(http.ResponseWriter, *http.Request)
+	}{
+		{http.MethodGet, "/api/v1/courses/demo/grader-agent-templates", d.handleListGraderAgentTemplates()},
+		{http.MethodPost, "/api/v1/courses/demo/grader-agent-templates", d.handlePostGraderAgentTemplate()},
+		{http.MethodGet, "/api/v1/courses/demo/grader-agent-templates/00000000-0000-0000-0000-000000000001", d.handleGetGraderAgentTemplate()},
+		{http.MethodPut, "/api/v1/courses/demo/grader-agent-templates/00000000-0000-0000-0000-000000000001", d.handlePutGraderAgentTemplate()},
+	}
+	for _, tc := range tests {
+		req := httptest.NewRequest(tc.method, tc.path, nil)
+		rec := httptest.NewRecorder()
+		tc.run(rec, req)
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("%s %s status=%d want 404", tc.method, tc.path, rec.Code)
+		}
+	}
+}

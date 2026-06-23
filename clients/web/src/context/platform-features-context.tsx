@@ -28,6 +28,7 @@ export type PlatformFeatures = {
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
   graderAgentEnabled?: boolean
+  codeExecutionEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
   speechToTextEnabled: boolean
@@ -109,6 +110,7 @@ const defaultFeatures: PlatformFeatures = {
   equationEditorEnabled: false,
   readingLevelEnabled: false,
   graderAgentEnabled: false,
+  codeExecutionEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
   speechToTextEnabled: false,
@@ -195,6 +197,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     equationEditorEnabled: false,
     readingLevelEnabled: false,
   graderAgentEnabled: false,
+    codeExecutionEnabled: false,
     altTextEnforcementEnabled: false,
     ffAltTextEnforcement: false,
     speechToTextEnabled: false,
@@ -282,6 +285,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
           graderAgentEnabled: data.graderAgentEnabled === true,
+          codeExecutionEnabled: data.codeExecutionEnabled === true,
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,
           speechToTextEnabled: data.speechToTextEnabled === true,

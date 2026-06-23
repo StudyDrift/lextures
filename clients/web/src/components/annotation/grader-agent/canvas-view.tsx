@@ -17,6 +17,7 @@ import {
   type OnConnect,
   type OnEdgesChange,
   type OnNodesChange,
+  type OnSelectionChangeFunc,
   applyEdgeChanges,
   applyNodeChanges,
 } from '@xyflow/react'
@@ -26,7 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { useLmsDarkMode } from '../../../hooks/use-lms-dark-mode'
 import type { GraderAgentWorkflowState } from './use-grader-agent-workflow'
 import { GRADER_AGENT_DRAG_MIME } from './node-palette'
-import { consumePaletteDragType } from './palette-drag'
+import { parsePaletteNodeType, consumePaletteDragType } from './palette-drag'
 import { connectionIsValid } from './validation'
 import type { GraderWorkflowGraph, PaletteNodeType } from './types'
 import { graderAgentNodeTypes } from './workflow-node-types'
@@ -110,11 +111,8 @@ function shouldPersistNodeChange(change: NodeChange): boolean {
 }
 
 function resolveDroppedPaletteType(event: DragEvent): PaletteNodeType | null {
-  const fromStore = consumePaletteDragType()
-  const fromTransfer = event.dataTransfer.getData(GRADER_AGENT_DRAG_MIME)
-  const raw = fromStore ?? fromTransfer
-  if (raw === 'studentSubmission' || raw === 'activity' || raw === 'ai') return raw
-  return null
+  const raw = consumePaletteDragType() ?? event.dataTransfer.getData(GRADER_AGENT_DRAG_MIME)
+  return parsePaletteNodeType(raw)
 }
 
 function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
@@ -226,6 +224,14 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
     event.dataTransfer.dropEffect = 'move'
   }, [])
 
+  const onSelectionChange: OnSelectionChangeFunc = useCallback(
+    ({ nodes: selectedNodes }) => {
+      const nextId = selectedNodes[0]?.id ?? null
+      setSelectedNodeId((current) => (current === nextId ? current : nextId))
+    },
+    [setSelectedNodeId],
+  )
+
   const closeContextMenu = useCallback(() => setContextMenu(null), [])
 
   const requestNodeRename = useCallback((nodeId: string) => {
@@ -304,7 +310,7 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
 
   return (
     <div
-      className="h-full min-h-[320px] w-full rounded-xl border border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950"
+      className="h-full min-h-[320px] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950"
       onDragEnter={onDragOver}
       onDragOver={onDragOver}
       onDrop={onDrop}
@@ -323,9 +329,9 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
-          onNodeClick={(_, node) => {
+          onSelectionChange={onSelectionChange}
+          onNodeClick={() => {
             closeContextMenu()
-            setSelectedNodeId(node.id)
           }}
           onEdgeClick={() => closeContextMenu()}
           onPaneClick={() => {

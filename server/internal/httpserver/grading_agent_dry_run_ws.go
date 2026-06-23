@@ -16,6 +16,7 @@ import (
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	"github.com/lextures/lextures/server/internal/service/codeexecution"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
 	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
@@ -121,20 +122,26 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			return
 		}
 
-		explicitModel := compiled.ScoreRequest.ModelID
-		modelID, modelErr := d.resolveGraderAgentModelID(r.Context(), viewer, explicitModel, nil)
-		if modelErr != nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: gradingagentsvc.UserFacingScoreError(modelErr)})
-			return
-		}
-		governancePrompt := compiled.ScoreRequest.InstructorPrompt
-		if blockMsg, blocked := d.evaluateAIGatewayBlock(r.Context(), viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText)); blocked {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: blockMsg})
-			return
-		}
-		if d.openRouterClient() == nil || strings.TrimSpace(d.effectiveConfig().OpenRouterAPIKey) == "" {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "AI provider is not configured."})
-			return
+		needsLLM := gradingagentsvc.WorkflowUsesLLM(first.WorkflowGraph)
+		var modelID string
+		var governancePrompt string
+		if needsLLM {
+			explicitModel := compiled.ScoreRequest.ModelID
+			var modelErr error
+			modelID, modelErr = d.resolveGraderAgentModelID(r.Context(), viewer, explicitModel, nil)
+			if modelErr != nil {
+				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: gradingagentsvc.UserFacingScoreError(modelErr)})
+				return
+			}
+			governancePrompt = compiled.ScoreRequest.InstructorPrompt
+			if blockMsg, blocked := d.evaluateAIGatewayBlock(r.Context(), viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText)); blocked {
+				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: blockMsg})
+				return
+			}
+			if d.openRouterClient() == nil || strings.TrimSpace(d.effectiveConfig().OpenRouterAPIKey) == "" {
+				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "AI provider is not configured."})
+				return
+			}
 		}
 
 		contentRow, contentErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, compiled.ContentItemID)
@@ -171,8 +178,9 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 				r, _ := gradingagentsvc.ParseAssignmentRubric(row)
 				return row.Markdown, r, nil
 			},
-			Runner: svc,
-			Emit:   emit,
+			Runner:     svc,
+			CodeRunner: codeexecution.New(),
+			Emit:       emit,
 		})
 		if execErr != nil {
 			msg := gradingagentsvc.UserFacingScoreError(execErr)
@@ -183,14 +191,16 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			return
 		}
 
-		d.recordAIUsage(runCtx, AIUsageMeta{
-			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureGraderAgent, Model: modelID,
-		}, openrouter.UsageInfo{
-			PromptTokens:     preview.PromptTokens,
-			CompletionTokens: preview.CompletionTokens,
-			TotalTokens:      preview.PromptTokens + preview.CompletionTokens,
-		}, true)
-		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText), aigateway.Decision{Allowed: true, OptInConfirmed: true})
+		if needsLLM {
+			d.recordAIUsage(runCtx, AIUsageMeta{
+				UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureGraderAgent, Model: modelID,
+			}, openrouter.UsageInfo{
+				PromptTokens:     preview.PromptTokens,
+				CompletionTokens: preview.CompletionTokens,
+				TotalTokens:      preview.PromptTokens + preview.CompletionTokens,
+			}, true)
+			d.logAIInferenceAllowed(r, viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText), aigateway.Decision{Allowed: true, OptInConfirmed: true})
+		}
 
 		cfg, _ := gradingagentrepo.GetConfigByItem(runCtx, d.Pool, itemID)
 		var configID uuid.UUID

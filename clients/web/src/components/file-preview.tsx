@@ -15,6 +15,8 @@ export type FilePreviewProps = {
   filename: string
   mimeType: string | null
   onClose: () => void
+  /** Render above parent modals (e.g. grading agent workflow at z-520). */
+  stackAbove?: boolean
 }
 
 // ── Image Lightbox ───────────────────────────────────────────────────────────
@@ -384,7 +386,14 @@ export function FilePreviewBody({
 
 // ── FilePreview modal ────────────────────────────────────────────────────────
 
-export function FilePreview({ open, filePath, filename, mimeType, onClose }: FilePreviewProps) {
+export function FilePreview({
+  open,
+  filePath,
+  filename,
+  mimeType,
+  onClose,
+  stackAbove = false,
+}: FilePreviewProps) {
   const titleId = useId()
   const closeRef = useRef<HTMLButtonElement>(null)
 
@@ -414,7 +423,7 @@ export function FilePreview({ open, filePath, filename, mimeType, onClose }: Fil
 
   return (
     <div
-      className="fixed inset-0 z-[500] flex items-stretch justify-center p-0 md:items-center md:p-2"
+      className={`fixed inset-0 flex items-stretch justify-center p-0 md:items-center md:p-2 ${stackAbove ? 'z-[530]' : 'z-[500]'}`}
       role="presentation"
     >
       {/* Backdrop */}

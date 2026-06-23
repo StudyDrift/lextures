@@ -7,6 +7,7 @@ export const GRADER_AGENT_DRAG_MIME = 'text/plain'
 
 type NodePaletteProps = {
   disabled?: boolean
+  codeExecutionEnabled?: boolean
   onAddNode: (type: PaletteNodeType) => void
 }
 
@@ -16,6 +17,12 @@ function paletteItemClass(kind: PaletteNodeType): string {
   }
   if (kind === 'ai') {
     return 'border-indigo-200 text-indigo-900 hover:bg-indigo-50 dark:border-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-950/40'
+  }
+  if (kind === 'codeTestRunner') {
+    return 'border-cyan-200 text-cyan-900 hover:bg-cyan-50 dark:border-cyan-900 dark:text-cyan-200 dark:hover:bg-cyan-950/40'
+  }
+  if (kind === 'conditionalRouter') {
+    return 'border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800'
   }
   return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
 }
@@ -87,7 +94,7 @@ function PaletteItem({
   )
 }
 
-export function NodePalette({ disabled, onAddNode }: NodePaletteProps) {
+export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode }: NodePaletteProps) {
   const { t } = useTranslation('common')
 
   return (
@@ -95,32 +102,51 @@ export function NodePalette({ disabled, onAddNode }: NodePaletteProps) {
       <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
         {t('gradingAgent.canvas.palette.title')}
       </p>
-      {!disabled ? (
-        <div className="flex flex-col gap-4">
-          <PaletteGroup title={t('gradingAgent.canvas.palette.groupInput')}>
+      <div className={`flex flex-col gap-4${disabled ? ' pointer-events-none opacity-50' : ''}`}>
+        <PaletteGroup title={t('gradingAgent.canvas.palette.groupInput')}>
+          <PaletteItem
+            type="studentSubmission"
+            label={t('gradingAgent.canvas.palette.studentSubmission')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+          <PaletteItem
+            type="activity"
+            label={t('gradingAgent.canvas.palette.activity')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+        </PaletteGroup>
+        <PaletteGroup title={t('gradingAgent.canvas.palette.groupProcessing')}>
+          <PaletteItem
+            type="ai"
+            label={t('gradingAgent.canvas.palette.ai')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+          {codeExecutionEnabled ? (
             <PaletteItem
-              type="studentSubmission"
-              label={t('gradingAgent.canvas.palette.studentSubmission')}
+              type="codeTestRunner"
+              label={t('gradingAgent.canvas.palette.codeTests')}
               disabled={disabled}
               onAddNode={onAddNode}
             />
-            <PaletteItem
-              type="activity"
-              label={t('gradingAgent.canvas.palette.activity')}
-              disabled={disabled}
-              onAddNode={onAddNode}
-            />
-          </PaletteGroup>
-          <PaletteGroup title={t('gradingAgent.canvas.palette.groupProcessing')}>
-            <PaletteItem
-              type="ai"
-              label={t('gradingAgent.canvas.palette.ai')}
-              disabled={disabled}
-              onAddNode={onAddNode}
-            />
-          </PaletteGroup>
-        </div>
-      ) : null}
+          ) : (
+            <div
+              className="rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-400 dark:border-neutral-700 dark:text-neutral-500"
+              title={t('gradingAgent.canvas.palette.codeTestsDisabledTooltip')}
+            >
+              {t('gradingAgent.canvas.palette.codeTests')}
+            </div>
+          )}
+          <PaletteItem
+            type="conditionalRouter"
+            label={t('gradingAgent.canvas.palette.router')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+        </PaletteGroup>
+      </div>
     </>
   )
 }
