@@ -470,19 +470,6 @@ func findWorkflowPromptNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) 
 	return ""
 }
 
-func findGradeGraderNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) string {
-	for _, e := range g.Edges {
-		tgt, ok := nodeByID[e.Target]
-		if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleGrade {
-			continue
-		}
-		if src, ok := nodeByID[e.Source]; ok && src.Type == NodeTypeGrader {
-			return src.ID
-		}
-	}
-	return ""
-}
-
 func graderPrompt(n WorkflowNode) string {
 	if n.Data == nil {
 		return ""

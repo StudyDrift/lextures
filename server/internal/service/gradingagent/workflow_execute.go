@@ -382,7 +382,7 @@ func buildGraderScoreRequest(
 ) (ScoreRequest, error) {
 	submissionText := JoinSubmissions(in.Submissions)
 	contentMarkdown := in.DefaultMarkdown
-	var rubric *assignmentrubric.RubricDefinition = in.DefaultRubric
+	var rubric = in.DefaultRubric
 	includeContent := false
 	includeRubric := false
 

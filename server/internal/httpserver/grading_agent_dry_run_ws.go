@@ -52,7 +52,7 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 		if err != nil {
 			return
 		}
-		defer conn.Close(websocket.StatusNormalClosure, "")
+		defer func() { _ = conn.Close(websocket.StatusNormalClosure, "") }()
 
 		readCtx, cancelRead := context.WithTimeout(r.Context(), 2*time.Minute)
 		defer cancelRead()
