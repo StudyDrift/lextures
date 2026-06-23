@@ -141,8 +141,12 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   await expect(coursePage.getByRole('dialog', { name: 'Grading agent' })).toBeVisible()
 
   await coursePage.getByRole('button', { name: 'Dry run' }).click()
-  await expect(coursePage.getByDisplayValue(/Strong thesis/)).toBeVisible({ timeout: 10_000 })
-  await coursePage.getByRole('button', { name: 'Apply to this student' }).click()
+  const gradingDialog = coursePage.getByRole('dialog', { name: 'Grading agent' })
+  await expect(gradingDialog.getByRole('button', { name: 'Apply to this student' })).toBeVisible({
+    timeout: 10_000,
+  })
+  await expect(gradingDialog.getByRole('textbox')).toHaveValue(/Strong thesis/)
+  await gradingDialog.getByRole('button', { name: 'Apply to this student' }).click()
 })
 
 test('Student sees AI disclosure on posted agent grade', async ({ page, seededCourse }) => {
