@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   fetchGraderAgentConfig,
   fetchGraderAgentRun,
-  postGraderAgentDryRun,
   postGraderAgentRun,
   putGraderAgentConfig,
   putSubmissionGrade,
+  streamGraderAgentDryRun,
   type GraderAgentConfigApi,
   type GraderAgentDryRunResult,
   type GraderWorkflowGraphApi,
@@ -18,6 +18,20 @@ import { newWorkflowNodeId } from './workflow-node-id'
 import { patchWorkflowNodeLabel } from './workflow-node-label'
 
 export type RunScope = 'current' | 'ungraded' | 'all'
+
+export type NodeExecutionStatus = 'idle' | 'running' | 'success' | 'error'
+
+export type DryRunLogEntry = {
+  message: string
+  level: 'info' | 'warn' | 'error'
+}
+
+export type NodeDryRunDetail = {
+  compiledPrompt?: string
+  compiledSystemPrompt?: string
+  compiledInput?: string
+  compiledOutput?: string
+}
 
 type UseGraderAgentWorkflowArgs = {
   open: boolean
@@ -48,6 +62,10 @@ export function useGraderAgentWorkflow({
   const [runProgress, setRunProgress] = useState<{ completed: number; failed: number; total: number } | null>(null)
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
+  const [nodeExecutionStates, setNodeExecutionStates] = useState<Record<string, NodeExecutionStatus>>({})
+  const [dryRunLogs, setDryRunLogs] = useState<DryRunLogEntry[]>([])
+  const [dryRunConsoleOpen, setDryRunConsoleOpen] = useState(false)
+  const [nodeDryRunDetails, setNodeDryRunDetails] = useState<Record<string, NodeDryRunDetail>>({})
 
   const validationIssues = useMemo(() => validateWorkflowGraph(graph), [graph])
   const runnable = isWorkflowRunnable(graph)
@@ -208,6 +226,38 @@ export function useGraderAgentWorkflow({
     [graph, selectedNodeId],
   )
 
+  const removeEdge = useCallback(
+    (edgeId: string) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        edges: graph.edges.filter((e) => e.id !== edgeId),
+      })
+    },
+    [graph],
+  )
+
+  const resetDryRunVisualState = useCallback(() => {
+    setNodeExecutionStates({})
+    setDryRunLogs([])
+    setNodeDryRunDetails({})
+  }, [])
+
+  const prevSubmissionIdRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!open) {
+      prevSubmissionIdRef.current = null
+      return
+    }
+    if (prevSubmissionIdRef.current !== null && prevSubmissionIdRef.current !== submissionId) {
+      setDryRunResult(null)
+      setDryRunError(null)
+      setHadDryRun(false)
+      resetDryRunVisualState()
+    }
+    prevSubmissionIdRef.current = submissionId
+  }, [open, submissionId, resetDryRunVisualState])
+
   const handleDryRun = async () => {
     if (!submissionId || !graph) {
       setDryRunError('Open a submission before dry running.')
@@ -219,12 +269,56 @@ export function useGraderAgentWorkflow({
     }
     setDryRunning(true)
     setDryRunError(null)
+    setDryRunResult(null)
+    setDryRunConsoleOpen(true)
+    resetDryRunVisualState()
     setStatusMessage('Running dry run…')
     try {
-      const result = await postGraderAgentDryRun(courseCode, itemId, {
-        workflowGraph: graph as GraderWorkflowGraphApi,
-        submissionId,
-      })
+      const result = await streamGraderAgentDryRun(
+        courseCode,
+        itemId,
+        {
+          workflowGraph: graph as GraderWorkflowGraphApi,
+          submissionId,
+        },
+        (event) => {
+          if (event.type === 'log' && event.message) {
+            setDryRunLogs((prev) => [
+              ...prev,
+              { message: event.message!, level: event.level ?? 'info' },
+            ])
+          }
+          if (event.type === 'node_start' && event.nodeId) {
+            setNodeExecutionStates((prev) => ({ ...prev, [event.nodeId!]: 'running' }))
+          }
+          if (event.type === 'node_complete' && event.nodeId) {
+            setNodeExecutionStates((prev) => ({
+              ...prev,
+              [event.nodeId!]: event.status === 'error' ? 'error' : 'success',
+            }))
+            if (
+              event.status === 'success' &&
+              (event.compiledPrompt ||
+                event.compiledSystemPrompt ||
+                event.compiledInput ||
+                event.compiledOutput)
+            ) {
+              setNodeDryRunDetails((prev) => ({
+                ...prev,
+                [event.nodeId!]: {
+                  compiledPrompt: event.compiledPrompt,
+                  compiledSystemPrompt: event.compiledSystemPrompt,
+                  compiledInput: event.compiledInput,
+                  compiledOutput: event.compiledOutput,
+                },
+              }))
+            }
+          }
+          if (event.type === 'result' && event.result) {
+            setDryRunResult(event.result)
+          }
+        },
+      )
       setDryRunResult(result)
       setHadDryRun(true)
       setStatusMessage('Dry run complete.')
@@ -386,12 +480,17 @@ export function useGraderAgentWorkflow({
     updateNodeLabel,
     addPaletteNode,
     removeNode,
+    removeEdge,
     handleDryRun,
     handleApply,
     handleSave,
     handleAccept,
     handleRun,
     handleToggleAutoGrade,
+    nodeExecutionStates,
+    dryRunLogs,
+    dryRunConsoleOpen,
+    nodeDryRunDetails,
   }
 }
 

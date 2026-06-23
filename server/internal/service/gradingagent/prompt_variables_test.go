@@ -27,10 +27,10 @@ func TestSubstituteWorkflowPromptVariables(t *testing.T) {
 	prompt := strings.Join([]string{
 		"Content: $AssignmentContext.Content",
 		"Rubric: $AssignmentContext.Rubric",
-		"Submission: $StudentSubmission.Submission",
+		"Submission: $StudentSubmission.Submissions",
 	}, "\n")
 	resolved := SubstituteWorkflowPromptVariables(&g, "ai1", prompt, PromptVariableContext{
-		SubmissionText:  "Student answer",
+		Submissions: []string{"Student answer"},
 		ContentMarkdown: "Essay prompt",
 		Rubric:          nil,
 	})

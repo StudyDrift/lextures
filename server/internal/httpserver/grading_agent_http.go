@@ -375,9 +375,9 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 			return
 		}
 		svc := d.gradingAgentService()
-		submissionText, err := svc.LoadSubmissionTextForSubmission(r.Context(), courseCode, subRow)
+		submissions, err := svc.LoadSubmissionMarkdownsForSubmission(r.Context(), courseCode, subRow)
 		if err != nil {
-			log.Printf("grading-agent dry-run: LoadSubmissionText course=%s submission=%s file=%s err=%v",
+			log.Printf("grading-agent dry-run: LoadSubmissionMarkdowns course=%s submission=%s file=%s err=%v",
 				courseCode, submissionID, subRow.AttachmentFileID, err)
 			msg := "Could not read submission content."
 			switch {
@@ -393,6 +393,7 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, msg)
 			return
 		}
+		submissionText := gradingagentsvc.JoinSubmissions(submissions)
 		explicitModel := ""
 		if body.ModelID != nil {
 			explicitModel = strings.TrimSpace(*body.ModelID)
@@ -459,7 +460,7 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 				promptNodeID,
 				scoreReq.InstructorPrompt,
 				gradingagentsvc.PromptVariableContext{
-					SubmissionText:  submissionText,
+					Submissions:     submissions,
 					ContentMarkdown: contentRow.Markdown,
 					Rubric:          rubric,
 				},

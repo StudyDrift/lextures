@@ -6,6 +6,9 @@ import { activityAssignmentItemId } from './activity-node-data'
 import { AssignmentPicker } from './assignment-picker'
 import type { GraderAgentWorkflowState } from './use-grader-agent-workflow'
 import { isActivityNodeType, isAiNodeType, isStudentSubmissionNodeType } from './types'
+import { AiNodeCompiledPrompt } from './ai-node-compiled-prompt'
+import { AiNodeOutputFormat } from './ai-node-output-format'
+import type { RubricDefinition } from '../../../lib/courses-api'
 import { WorkflowPromptEditor } from './workflow-prompt-editor'
 import { workflowNodeDisplayLabel } from './workflow-node-label'
 import { workflowHasAttachedRubric } from './workflow-grade-slot'
@@ -17,6 +20,8 @@ type InspectorPanelProps = {
   courseCode: string
   itemId: string
   assignmentTitle?: string
+  rubric?: RubricDefinition | null
+  maxPoints?: number | null
 }
 
 const fieldClass =
@@ -28,9 +33,20 @@ export function InspectorPanel({
   courseCode,
   itemId,
   assignmentTitle,
+  rubric,
+  maxPoints,
 }: InspectorPanelProps) {
   const { t } = useTranslation('common')
-  const { graph, selectedNodeId, updateGraderNode, updateAiNode, updateActivityNode, removeNode } = workflow
+  const {
+    graph,
+    selectedNodeId,
+    updateGraderNode,
+    updateAiNode,
+    updateActivityNode,
+    removeNode,
+    nodeDryRunDetails,
+    nodeExecutionStates,
+  } = workflow
   const selectedNode = graph?.nodes.find((n) => n.id === selectedNodeId) ?? null
   const showActivityInspector = Boolean(selectedNode && isActivityNodeType(selectedNode.type))
   const { models } = useTextModels(Boolean(graph && selectedNodeId && selectedNode?.type === 'grader'))
@@ -192,12 +208,15 @@ export function InspectorPanel({
   }
 
   if (isAiNodeType(node.type)) {
+    const dryRunDetail = nodeDryRunDetails[node.id]
+    const showCompiledPrompt = nodeExecutionStates[node.id] === 'success' && dryRunDetail
     return (
       <div className="space-y-3">
         <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
           {nodeTitle('gradingAgent.canvas.nodes.ai.title')}
         </p>
         <p className="text-sm text-slate-700 dark:text-neutral-200">{t('gradingAgent.canvas.inspector.aiHelp')}</p>
+        <AiNodeOutputFormat graph={graph} nodeId={node.id} rubric={rubric} maxPoints={maxPoints} />
         <label className="block text-sm text-slate-700 dark:text-neutral-200">
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
@@ -211,6 +230,7 @@ export function InspectorPanel({
             placeholder={t('gradingAgent.prompt.placeholder')}
           />
         </label>
+        {showCompiledPrompt ? <AiNodeCompiledPrompt detail={dryRunDetail} /> : null}
         {!accepted ? (
           <button
             type="button"

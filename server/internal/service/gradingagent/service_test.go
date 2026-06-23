@@ -11,18 +11,9 @@ import (
 	"testing"
 
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
-	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
-
-func TestLoadSubmissionTextForSubmission_RequiresAttachment(t *testing.T) {
-	svc := &Service{}
-	_, err := svc.LoadSubmissionTextForSubmission(context.Background(), "C-TEST", &moduleassignmentsubmissions.SubmissionRow{})
-	if err == nil {
-		t.Fatal("expected error without attachment")
-	}
-}
 
 func TestReadSubmissionBlob_StorageDriverKey(t *testing.T) {
 	dir := t.TempDir()

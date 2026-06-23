@@ -57,7 +57,7 @@ const PROMPT_VARIABLE_RE = /\$([A-Za-z][A-Za-z0-9]*)\.([A-Za-z][A-Za-z0-9]*)/g
 export function workflowOutputHandleToProperty(handle: string): string | null {
   switch (handle) {
     case HANDLE_SUBMISSION:
-      return 'Submission'
+      return 'Submissions'
     case HANDLE_CONTENT:
       return 'Content'
     case HANDLE_RUBRIC:

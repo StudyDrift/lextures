@@ -91,11 +91,11 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
     await route.continue()
   })
 
-  await coursePage.route(`**/grader-agent/dry-run`, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify(dryRunBody),
+  await coursePage.routeWebSocket('**/grader-agent/dry-run/ws', (ws) => {
+    ws.onMessage(() => {
+      ws.send(JSON.stringify({ type: 'log', level: 'info', message: 'Starting dry run…' }))
+      ws.send(JSON.stringify({ type: 'result', result: dryRunBody }))
+      ws.send(JSON.stringify({ type: 'complete' }))
     })
   })
 
@@ -141,8 +141,12 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   await expect(coursePage.getByRole('dialog', { name: 'Grading agent' })).toBeVisible()
 
   await coursePage.getByRole('button', { name: 'Dry run' }).click()
-  await expect(coursePage.getByText('Strong thesis')).toBeVisible({ timeout: 10_000 })
-  await coursePage.getByRole('button', { name: 'Apply to this student' }).click()
+  const gradingDialog = coursePage.getByRole('dialog', { name: 'Grading agent' })
+  await expect(gradingDialog.getByRole('button', { name: 'Apply to this student' })).toBeVisible({
+    timeout: 10_000,
+  })
+  await expect(gradingDialog.getByRole('textbox')).toHaveValue(/Strong thesis/)
+  await gradingDialog.getByRole('button', { name: 'Apply to this student' }).click()
 })
 
 test('Student sees AI disclosure on posted agent grade', async ({ page, seededCourse }) => {
