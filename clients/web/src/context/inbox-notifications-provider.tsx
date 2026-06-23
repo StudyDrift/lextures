@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
 import { authorizedFetch } from '../lib/api'
+import { closeWebSocket } from '../lib/close-websocket'
 import { getAccessToken } from '../lib/auth'
 import {
   notificationsWebSocketUrl,
@@ -96,7 +97,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
         clearTimeout(wsReconnectTimerRef.current)
         wsReconnectTimerRef.current = null
       }
-      wsRef.current?.close()
+      closeWebSocket(wsRef.current)
       wsRef.current = null
       wsTokenRef.current = null
       return
@@ -126,7 +127,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
         return
       }
 
-      wsRef.current?.close()
+      closeWebSocket(wsRef.current)
       wsTokenRef.current = authToken
 
       const ws = new WebSocket(url)
@@ -135,7 +136,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
       ws.onopen = () => {
         const currentToken = getAccessToken()
         if (!currentToken) {
-          ws.close()
+          closeWebSocket(ws)
           return
         }
         ws.send(JSON.stringify({ authToken: currentToken }))
@@ -156,7 +157,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
       }
 
       ws.onerror = () => {
-        ws.close()
+        closeWebSocket(ws)
       }
     }
 
@@ -168,7 +169,7 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
         clearTimeout(wsReconnectTimerRef.current)
         wsReconnectTimerRef.current = null
       }
-      wsRef.current?.close()
+      closeWebSocket(wsRef.current)
       wsRef.current = null
     }
   }, [location.pathname, refresh])

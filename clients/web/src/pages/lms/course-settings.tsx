@@ -39,6 +39,7 @@ import { CourseSectionsSettingsSection } from './course-sections-settings'
 import CourseTranslationsSettings from './course-translations-settings'
 import { CourseAccessibilitySettingsSection } from './course-accessibility-settings'
 import { CoursePlagiarismSettingsSection } from './course-plagiarism-settings-section'
+import { CourseGradingAgentsSection } from './course-grading-agents-section'
 import { CourseConsortiumSettingsSection } from './course-consortium-settings-section'
 import { isTranslationMemoryEnabled } from '../../lib/course-translation-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -113,6 +114,7 @@ type SavePayload = {
 type SettingsSection =
   | 'general'
   | 'grading'
+  | 'grading-agents'
   | 'plagiarism'
   | 'outcomes'
   | 'features'
@@ -153,6 +155,7 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
   const seg = parts[0]
   if (seg === 'general') return 'general'
   if (seg === 'grading') return 'grading'
+  if (seg === 'grading-agents') return 'grading-agents'
   if (seg === 'plagiarism') return 'plagiarism'
   if (seg === 'outcomes') return 'outcomes'
   if (seg === 'features') return 'features'
@@ -168,7 +171,13 @@ function parseSettingsSection(courseCode: string, pathname: string): SettingsSec
 export default function CourseSettings() {
   const { courseCode } = useParams<{ courseCode: string }>()
   const { allows, loading: permLoading } = usePermissions()
-  const { altTextEnforcementEnabled, ffPlagiarismChecks, ffConsortiumSharing, loading: featuresLoading } = usePlatformFeatures()
+  const {
+    altTextEnforcementEnabled,
+    ffPlagiarismChecks,
+    ffConsortiumSharing,
+    graderAgentEnabled,
+    loading: featuresLoading,
+  } = usePlatformFeatures()
   const location = useLocation()
   const [course, setCourse] = useState<CoursePublic | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -760,7 +769,8 @@ export default function CourseSettings() {
     section === 'invalid' ||
     (section === 'translations' && !isTranslationMemoryEnabled()) ||
     (section === 'accessibility' && !featuresLoading && !altTextEnforcementEnabled) ||
-    (section === 'plagiarism' && !featuresLoading && !ffPlagiarismChecks)
+    (section === 'plagiarism' && !featuresLoading && !ffPlagiarismChecks) ||
+    (section === 'grading-agents' && !featuresLoading && !graderAgentEnabled)
   ) {
     return <Navigate to={`${settingsBase}/general`} replace />
   }
@@ -774,7 +784,11 @@ export default function CourseSettings() {
         ? course?.title
           ? `${course.title} — grading`
           : 'Grading'
-        : section === 'plagiarism'
+        : section === 'grading-agents'
+          ? course?.title
+            ? `${course.title} — grading agents`
+            : 'Grading agents'
+          : section === 'plagiarism'
           ? course?.title
             ? `${course.title} — plagiarism`
             : 'Plagiarism'
@@ -819,7 +833,9 @@ export default function CourseSettings() {
       ? 'Basics, course home, schedule, visibility, hero image, and reading theme for this course.'
       : section === 'grading'
         ? 'Grading scale, weighted assignment groups, and how items map to each group.'
-        : section === 'plagiarism'
+        : section === 'grading-agents'
+          ? 'Review and edit grading agents configured for assignments in this course.'
+          : section === 'plagiarism'
           ? 'Course-wide plagiarism and AI-authorship check settings, provider, and alert thresholds.'
         : section === 'outcomes'
           ? 'Define learning outcomes, map assignments and quizzes (including individual questions) with measurement and intensity levels, and review class progress from grades and attempts.'
@@ -859,7 +875,7 @@ export default function CourseSettings() {
 
       {course && !loading && (
         <div
-          className="mt-8 max-w-4xl space-y-6"
+          className={`mt-8 space-y-6 ${section === 'grading-agents' ? 'w-full' : 'max-w-4xl'}`}
         >
           {section === 'general' && (
             <form
@@ -1385,6 +1401,7 @@ export default function CourseSettings() {
           )}
 
           {section === 'grading' && <CourseGradingSettingsSection courseCode={courseCode} />}
+          {section === 'grading-agents' && <CourseGradingAgentsSection courseCode={courseCode} />}
           {section === 'plagiarism' && (featuresLoading || ffPlagiarismChecks) ? (
             featuresLoading ? (
               <p className="text-sm text-slate-600 dark:text-neutral-300">Loading plagiarism settings…</p>
@@ -1445,7 +1462,7 @@ export default function CourseSettings() {
       )}
 
       {section === 'general' && isDirty && (
-        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
+        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 duration-300">
           <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-850 dark:bg-neutral-900/90">
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>
@@ -1474,7 +1491,7 @@ export default function CourseSettings() {
               >
                 {saveStatus === 'saving' ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 motion-safe:animate-spin" />
                     Saving...
                   </>
                 ) : (

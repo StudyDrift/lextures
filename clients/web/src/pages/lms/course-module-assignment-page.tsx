@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { Eye, Pencil } from 'lucide-react'
+import { Eye } from 'lucide-react'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import { ContentPageReader } from '../../components/content-page/content-page-reader'
 import { SyllabusBlockEditor } from '../../components/syllabus/syllabus-block-editor'
 import { markdownToSectionsForEditor, sectionsToMarkdown } from '../../components/syllabus/syllabus-section-markdown'
@@ -35,7 +36,9 @@ import { useLmsDarkMode } from '../../hooks/use-lms-dark-mode'
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { getJwtSubject } from '../../lib/auth'
 import { permCourseItemCreate } from '../../lib/rbac-api'
+import { AssignmentPageActionsMenu } from '../../components/assignment/assignment-page-actions-menu'
 import { AssignmentPageSettingsPanel } from '../../components/assignment/assignment-page-settings-panel'
+import { GraderAgentWorkflowModal } from '../../components/annotation/grader-agent/grader-agent-workflow-modal'
 import { AcademicIntegrityNotice } from '../../components/assignment/academic-integrity-notice'
 import { AssignmentAnnotationWorkbench } from '../../components/annotation/assignment-annotation-workbench'
 import { LmsPage } from './lms-page'
@@ -156,6 +159,7 @@ export default function CourseModuleAssignmentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
+  const { graderAgentEnabled } = usePlatformFeatures()
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -230,6 +234,7 @@ export default function CourseModuleAssignmentPage() {
   const [identitiesRevealedAt, setIdentitiesRevealedAt] = useState<string | null>(null)
   const [viewerCanRevealIdentities, setViewerCanRevealIdentities] = useState(false)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
+  const [gradingAgentOpen, setGradingAgentOpen] = useState(false)
   const [submissionCount, setSubmissionCount] = useState<number | null>(null)
   const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
 
@@ -431,6 +436,8 @@ export default function CourseModuleAssignmentPage() {
       viewerCanPreviewSubmissions &&
       assignmentAcceptsSubmissions,
   )
+
+  const showAssignmentActionsMenu = Boolean(!loading && !loadError && !editing && canEdit)
 
   const gradeSubmissionsLabel =
     submissionCount != null && enrolledStudentCount != null
@@ -694,6 +701,14 @@ export default function CourseModuleAssignmentPage() {
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-2">
+            {showAssignmentActionsMenu ? (
+              <AssignmentPageActionsMenu
+                disabled={loading}
+                onEdit={beginEdit}
+                showGradingAgent={graderAgentEnabled}
+                onGradingAgent={() => setGradingAgentOpen(true)}
+              />
+            ) : null}
             {showPreviewSubmissionsAction ? (
               <button
                 type="button"
@@ -704,17 +719,7 @@ export default function CourseModuleAssignmentPage() {
                 {gradeSubmissionsLabel}
               </button>
             ) : null}
-            {canEdit ? (
-              <button
-                type="button"
-                onClick={beginEdit}
-                disabled={loading}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Pencil className="h-4 w-4" aria-hidden />
-                Edit
-              </button>
-            ) : null}
+
             {viewerCanModerate && moderatedGrading ? (
               <Link
                 to={moderationDashboardPath}
@@ -979,6 +984,16 @@ export default function CourseModuleAssignmentPage() {
           </div>
         </div>
       )}
+      <GraderAgentWorkflowModal
+        open={gradingAgentOpen}
+        onClose={() => setGradingAgentOpen(false)}
+        courseCode={courseCode}
+        itemId={itemId}
+        assignmentTitle={title}
+        submissionId={null}
+        rubric={rubric}
+        maxPoints={pointsWorth}
+      />
     </LmsPage>
   )
 }

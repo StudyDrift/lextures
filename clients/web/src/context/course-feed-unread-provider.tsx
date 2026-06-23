@@ -10,6 +10,7 @@ import {
 import { matchPath, useLocation } from 'react-router-dom'
 import { getAccessToken, getJwtSubject } from '../lib/auth'
 import { wsUrl } from '../lib/api'
+import { closeWebSocket } from '../lib/close-websocket'
 import { CourseFeedUnreadContext } from './course-feed-unread-context'
 
 /** courseCode -> channelId -> count */
@@ -138,7 +139,7 @@ export function CourseFeedUnreadProvider({ children }: { children: ReactNode }) 
     }
 
     return () => {
-      ws.close()
+      closeWebSocket(ws)
     }
   }, [activeCourseCode])
 

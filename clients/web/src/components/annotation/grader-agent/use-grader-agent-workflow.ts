@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   fetchGraderAgentConfig,
   fetchGraderAgentRun,
@@ -12,7 +13,9 @@ import {
 } from '../../../lib/courses-api'
 import { effectiveWorkflowGraph } from './default-graph'
 import { isWorkflowRunnable, validateWorkflowGraph } from './validation'
-import type { GraderAgentViewMode, GraderWorkflowGraph, WorkflowValidationIssue } from './types'
+import type { GraderWorkflowGraph, PaletteNodeType, WorkflowValidationIssue } from './types'
+import { newWorkflowNodeId } from './workflow-node-id'
+import { patchWorkflowNodeLabel } from './workflow-node-label'
 
 export type RunScope = 'current' | 'ungraded' | 'all'
 
@@ -31,9 +34,9 @@ export function useGraderAgentWorkflow({
   submissionId,
   onApplied,
 }: UseGraderAgentWorkflowArgs) {
+  const { t } = useTranslation('common')
   const [config, setConfig] = useState<GraderAgentConfigApi | null>(null)
   const [graph, setGraph] = useState<GraderWorkflowGraph | null>(null)
-  const [viewMode, setViewMode] = useState<GraderAgentViewMode>('canvas')
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [dryRunning, setDryRunning] = useState(false)
   const [dryRunError, setDryRunError] = useState<string | null>(null)
@@ -61,12 +64,12 @@ export function useGraderAgentWorkflow({
         c.includeRubric,
       )
       setGraph(g)
-      setSelectedNodeId(g.nodes.find((n) => n.type === 'grader')?.id ?? null)
+      setSelectedNodeId(null)
       setHadDryRun(c.status === 'accepted')
     } else {
       const g = effectiveWorkflowGraph(null, '', false, false)
       setGraph(g)
-      setSelectedNodeId(g.nodes.find((n) => n.type === 'grader')?.id ?? null)
+      setSelectedNodeId(null)
     }
   }, [courseCode, itemId])
 
@@ -84,12 +87,6 @@ export function useGraderAgentWorkflow({
       cancelled = true
     }
   }, [open, loadConfig])
-
-  useEffect(() => {
-    if (!open) return
-    const narrow = window.matchMedia('(max-width: 768px)').matches
-    if (narrow) setViewMode('form')
-  }, [open])
 
   useEffect(() => {
     if (!open || !runId) return
@@ -129,8 +126,8 @@ export function useGraderAgentWorkflow({
     [graph],
   )
 
-  const updateContextNode = useCallback(
-    (nodeId: string, patch: { includeContent?: boolean; includeRubric?: boolean }) => {
+  const updateAiNode = useCallback(
+    (nodeId: string, patch: { prompt?: string }) => {
       if (!graph) return
       setGraph({
         ...graph,
@@ -142,45 +139,65 @@ export function useGraderAgentWorkflow({
     [graph],
   )
 
-  const addGraderNode = useCallback(() => {
-    if (!graph) return
-    const id = `g${Date.now()}`
-    setGraph({
-      ...graph,
-      nodes: [
-        ...graph.nodes,
-        {
-          id,
-          type: 'grader',
-          position: { x: -320, y: 120 + graph.nodes.length * 40 },
-          data: { prompt: '', modelId: null },
-        },
-      ],
-    })
-    setSelectedNodeId(id)
-  }, [graph])
+  const addPaletteNode = useCallback(
+    (type: PaletteNodeType, position?: { x: number; y: number }) => {
+      const prefix = type === 'studentSubmission' ? 'sub' : type === 'activity' ? 'act' : 'ai'
+      const id = newWorkflowNodeId(prefix)
+      setSelectedNodeId(id)
+      setGraph((current) => {
+        if (!current) return current
+        const fallback =
+          type === 'studentSubmission'
+            ? { x: -640, y: -80 + current.nodes.length * 40 }
+            : type === 'activity'
+              ? { x: -640, y: 120 + current.nodes.length * 40 }
+              : { x: -320, y: 40 + current.nodes.length * 40 }
+        return {
+          ...current,
+          nodes: [
+            ...current.nodes,
+            {
+              id,
+              type,
+              position: position ?? fallback,
+              data: type === 'activity' ? { assignmentItemId: itemId } : {},
+            },
+          ],
+        }
+      })
+    },
+    [itemId],
+  )
 
-  const addContextNode = useCallback(() => {
-    if (!graph) return
-    const id = `ctx${Date.now()}`
-    setGraph({
-      ...graph,
-      nodes: [
-        ...graph.nodes,
-        {
-          id,
-          type: 'assignmentContext',
-          position: { x: -640, y: 160 + graph.nodes.length * 40 },
-          data: { includeContent: true, includeRubric: true },
-        },
-      ],
-    })
-    setSelectedNodeId(id)
-  }, [graph])
+  const updateActivityNode = useCallback(
+    (nodeId: string, patch: { assignmentItemId?: string | null }) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
+  const updateNodeLabel = useCallback(
+    (nodeId: string, label: string | null) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: patchWorkflowNodeLabel(n.data, label) } : n,
+        ),
+      })
+    },
+    [graph],
+  )
 
   const removeNode = useCallback(
     (nodeId: string) => {
-      if (!graph || nodeId === 'output' || nodeId === 'sub') return
+      if (!graph || nodeId === 'output') return
       setGraph({
         ...graph,
         nodes: graph.nodes.filter((n) => n.id !== nodeId),
@@ -238,6 +255,37 @@ export function useGraderAgentWorkflow({
     }
   }
 
+  const handleSave = async () => {
+    if (!graph || config?.status === 'accepted') return
+    setSaving(true)
+    setDryRunError(null)
+    setStatusMessage('')
+    try {
+      const res = await putGraderAgentConfig(courseCode, itemId, {
+        prompt: config?.prompt ?? '',
+        includeAssignmentContent: config?.includeAssignmentContent ?? false,
+        includeRubric: config?.includeRubric ?? false,
+        status: 'draft',
+        autoGradeNew: config?.autoGradeNew ?? false,
+        workflowGraph: graph as GraderWorkflowGraphApi,
+      })
+      setConfig(res.config)
+      const savedGraph = effectiveWorkflowGraph(
+        res.config.workflowGraph as GraderWorkflowGraph | undefined,
+        res.config.prompt,
+        res.config.includeAssignmentContent,
+        res.config.includeRubric,
+      )
+      setGraph(savedGraph)
+      setStatusMessage(t('gradingAgent.save.saved'))
+    } catch (e) {
+      setDryRunError(e instanceof Error ? e.message : t('gradingAgent.error.save'))
+      setStatusMessage('')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleAccept = async () => {
     if (!graph || !runnable) return
     setSaving(true)
@@ -286,7 +334,7 @@ export function useGraderAgentWorkflow({
         scope: runScope,
         submissionId: runScope === 'current' ? submissionId ?? undefined : undefined,
         overwrite: runScope === 'all',
-        authoredVia: viewMode,
+        authoredVia: 'canvas',
       })
       setRunId(res.runId)
       setRunProgress({ completed: 0, failed: 0, total: res.totalCount })
@@ -315,8 +363,6 @@ export function useGraderAgentWorkflow({
   return {
     config,
     graph,
-    viewMode,
-    setViewMode,
     selectedNodeId,
     setSelectedNodeId,
     dryRunning,
@@ -335,12 +381,14 @@ export function useGraderAgentWorkflow({
     runnable,
     updateGraph,
     updateGraderNode,
-    updateContextNode,
-    addGraderNode,
-    addContextNode,
+    updateAiNode,
+    updateActivityNode,
+    updateNodeLabel,
+    addPaletteNode,
     removeNode,
     handleDryRun,
     handleApply,
+    handleSave,
     handleAccept,
     handleRun,
     handleToggleAutoGrade,

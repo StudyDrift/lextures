@@ -54,12 +54,37 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
     completionTokens: 180,
   }
 
+  const workflowGraph = {
+    version: 1,
+    nodes: [
+      { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+      {
+        id: 'ai1',
+        type: 'ai',
+        position: { x: -320, y: 0 },
+        data: { prompt: 'Award full marks for a working thesis.' },
+      },
+    ],
+    edges: [
+      { id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+    ],
+  }
+
   await coursePage.route(`**/api/v1/courses/${seededCourse.courseCode}/assignments/${assignment.id}/grader-agent`, async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ config: null }),
+        body: JSON.stringify({
+          config: {
+            prompt: '',
+            includeAssignmentContent: false,
+            includeRubric: false,
+            status: 'draft',
+            autoGradeNew: false,
+            workflowGraph,
+          },
+        }),
       })
       return
     }
@@ -115,8 +140,6 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   await coursePage.getByRole('button', { name: 'Grader Agent' }).click()
   await expect(coursePage.getByRole('dialog', { name: 'Grading agent' })).toBeVisible()
 
-  await coursePage.getByRole('button', { name: 'Form view' }).click()
-  await coursePage.getByPlaceholder(/clear thesis/i).fill('Award full marks for a working thesis.')
   await coursePage.getByRole('button', { name: 'Dry run' }).click()
   await expect(coursePage.getByText('Strong thesis')).toBeVisible({ timeout: 10_000 })
   await coursePage.getByRole('button', { name: 'Apply to this student' }).click()

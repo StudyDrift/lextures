@@ -1,11 +1,83 @@
+import { normalizeWorkflowGraph } from './default-graph'
+import { outputSlotSourceIsValid } from './workflow-output-slot'
+import { workflowPromptIsPresent } from './workflow-prompt'
 import type { GraderWorkflowGraph, WorkflowValidationIssue } from './types'
-import { WORKFLOW_VERSION } from './types'
+import {
+  HANDLE_AI_INPUT,
+  HANDLE_AI_OUTPUT,
+  HANDLE_COMMENTS,
+  HANDLE_CONTENT,
+  HANDLE_CONTEXT,
+  HANDLE_GRADE,
+  HANDLE_RUBRIC,
+  HANDLE_SUBMISSION,
+  WORKFLOW_VERSION,
+  isActivityNodeType,
+  isAiNodeType,
+  isStudentSubmissionNodeType,
+} from './types'
 
 const MAX_NODES = 50
 const MAX_EDGES = 100
 
-function graderPrompt(data: Record<string, unknown>): string {
-  return typeof data.prompt === 'string' ? data.prompt.trim() : ''
+function aiInputSourceIsValid(
+  sourceType: string,
+  sourceHandle: string,
+): boolean {
+  if (isStudentSubmissionNodeType(sourceType) && sourceHandle === HANDLE_SUBMISSION) return true
+  if (isActivityNodeType(sourceType) && (sourceHandle === HANDLE_CONTENT || sourceHandle === HANDLE_RUBRIC)) {
+    return true
+  }
+  if (isAiNodeType(sourceType) && sourceHandle === HANDLE_AI_OUTPUT) return true
+  return false
+}
+
+function aiInputEdgeExists(
+  edges: GraderWorkflowGraph['edges'],
+  target: string,
+  source: string,
+  sourceHandle: string,
+): boolean {
+  return edges.some(
+    (edge) =>
+      edge.target === target &&
+      edge.targetHandle === HANDLE_AI_INPUT &&
+      edge.source === source &&
+      (edge.sourceHandle ?? '') === sourceHandle,
+  )
+}
+
+function aiInputHasUpstreamType(
+  edges: GraderWorkflowGraph['edges'],
+  nodeById: Map<string, GraderWorkflowGraph['nodes'][number]>,
+  target: string,
+  matches: (type: string) => boolean,
+): boolean {
+  return edges.some((edge) => {
+    if (edge.target !== target || edge.targetHandle !== HANDLE_AI_INPUT) return false
+    const upstream = nodeById.get(edge.source)
+    return Boolean(upstream && matches(upstream.type))
+  })
+}
+
+function aiInputAllowsEdge(
+  edges: GraderWorkflowGraph['edges'],
+  nodeById: Map<string, GraderWorkflowGraph['nodes'][number]>,
+  source: string,
+  sourceHandle: string,
+  target: string,
+): boolean {
+  if (aiInputEdgeExists(edges, target, source, sourceHandle)) return false
+  const src = nodeById.get(source)
+  if (!src || !aiInputSourceIsValid(src.type, sourceHandle)) return false
+  if (isAiNodeType(src.type) && aiInputHasUpstreamType(edges, nodeById, target, isAiNodeType)) return false
+  if (
+    isStudentSubmissionNodeType(src.type) &&
+    aiInputHasUpstreamType(edges, nodeById, target, isStudentSubmissionNodeType)
+  ) {
+    return false
+  }
+  return true
 }
 
 function hasCycle(adj: Map<string, string[]>, nodeIds: string[]): boolean {
@@ -34,20 +106,21 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
     issues.push({ field: 'workflowGraph', message: 'Workflow graph is required.' })
     return issues
   }
-  if (graph.version !== WORKFLOW_VERSION) {
+  const { version, nodes, edges } = normalizeWorkflowGraph(graph)
+  if (version !== WORKFLOW_VERSION) {
     issues.push({ field: 'workflowGraph.version', message: 'Unsupported workflow graph version.' })
     return issues
   }
-  if (graph.nodes.length > MAX_NODES) {
+  if (nodes.length > MAX_NODES) {
     issues.push({ field: 'workflowGraph.nodes', message: `Graph exceeds ${MAX_NODES} node limit.` })
   }
-  if (graph.edges.length > MAX_EDGES) {
+  if (edges.length > MAX_EDGES) {
     issues.push({ field: 'workflowGraph.edges', message: `Graph exceeds ${MAX_EDGES} edge limit.` })
   }
 
-  const nodeById = new Map(graph.nodes.map((n) => [n.id, n]))
+  const nodeById = new Map(nodes.map((n) => [n.id, n]))
   let outputCount = 0
-  for (const n of graph.nodes) {
+  for (const n of nodes) {
     if (n.type === 'output') outputCount++
   }
   if (outputCount !== 1) {
@@ -56,7 +129,7 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
 
   const outputSlots = new Set<string>()
   const adj = new Map<string, string[]>()
-  for (const e of graph.edges) {
+  for (const e of edges) {
     const src = nodeById.get(e.source)
     const tgt = nodeById.get(e.target)
     if (!src || !tgt) {
@@ -65,12 +138,12 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
     }
     if (tgt.type === 'output') {
       const slot = e.targetHandle ?? ''
-      if (slot !== 'grade' && slot !== 'comments') {
+      if (slot !== HANDLE_GRADE && slot !== HANDLE_COMMENTS) {
         issues.push({ field: 'output', message: 'Output node edges must target grade or comments slots.' })
-      } else if (e.sourceHandle !== slot) {
+      } else if (!outputSlotSourceIsValid(src.type, e.sourceHandle ?? '', slot)) {
         issues.push({
           field: `output.${slot}`,
-          message: 'Grade sources must connect to the grade slot; comments sources to the comments slot.',
+          message: 'Grade slot accepts Grader or AI outputs; comments slot accepts Grader comments only.',
         })
       } else if (outputSlots.has(slot)) {
         issues.push({ field: `output.${slot}`, message: 'Each output slot accepts at most one inbound edge.' })
@@ -79,29 +152,58 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
       }
     }
     if (tgt.type === 'grader') {
-      if (e.targetHandle === 'context' && src.type !== 'assignmentContext') {
-        issues.push({ field: `node:${tgt.id}`, message: 'Context input must come from an assignment context node.' })
+      const th = e.targetHandle ?? ''
+      if (th === HANDLE_CONTENT) {
+        if (!isActivityNodeType(src.type) || e.sourceHandle !== HANDLE_CONTENT) {
+          issues.push({ field: `node:${tgt.id}`, message: 'Content input must come from an Activity content output.' })
+        }
+      } else if (th === HANDLE_RUBRIC) {
+        if (!isActivityNodeType(src.type) || e.sourceHandle !== HANDLE_RUBRIC) {
+          issues.push({ field: `node:${tgt.id}`, message: 'Rubric input must come from an Activity rubric output.' })
+        }
+      } else if (th === HANDLE_SUBMISSION) {
+        if (!isStudentSubmissionNodeType(src.type)) {
+          issues.push({ field: `node:${tgt.id}`, message: 'Submission input must come from a Student Submission node.' })
+        }
+      } else if (th === HANDLE_CONTEXT) {
+        if (!isActivityNodeType(src.type)) {
+          issues.push({ field: `node:${tgt.id}`, message: 'Context input must come from an Activity node.' })
+        }
       }
-      if (e.targetHandle === 'submission' && src.type !== 'submission') {
-        issues.push({ field: `node:${tgt.id}`, message: 'Submission input must come from a submission node.' })
+    }
+    if (isAiNodeType(tgt.type)) {
+      const th = e.targetHandle ?? ''
+      if (th !== HANDLE_AI_INPUT) {
+        issues.push({ field: `node:${tgt.id}`, message: 'AI node edges must target the input slot.' })
+      } else if (!aiInputSourceIsValid(src.type, e.sourceHandle ?? '')) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'AI input must come from a submission, activity, or upstream AI output.',
+        })
       }
+    }
+    if (isAiNodeType(src.type) && (e.sourceHandle ?? '') !== HANDLE_AI_OUTPUT) {
+      issues.push({ field: `node:${src.id}`, message: 'AI node edges must originate from the output slot.' })
     }
     const list = adj.get(e.source) ?? []
     list.push(e.target)
     adj.set(e.source, list)
   }
 
-  if (!outputSlots.has('grade')) {
+  if (!outputSlots.has(HANDLE_GRADE)) {
     issues.push({ field: 'output.grade', message: 'Connect the grade slot before running.' })
   }
 
-  if (hasCycle(adj, graph.nodes.map((n) => n.id))) {
+  if (hasCycle(adj, nodes.map((n) => n.id))) {
     issues.push({ field: 'workflowGraph.edges', message: 'Workflow graph must be acyclic.' })
   }
 
-  for (const n of graph.nodes) {
-    if (n.type === 'grader' && graderPrompt(n.data) === '') {
+  for (const n of nodes) {
+    if (n.type === 'grader' && !workflowPromptIsPresent(n.data)) {
       issues.push({ field: `node:${n.id}.prompt`, message: 'Grader node prompt is required.' })
+    }
+    if (isAiNodeType(n.type) && !workflowPromptIsPresent(n.data)) {
+      issues.push({ field: `node:${n.id}.prompt`, message: 'AI node prompt is required.' })
     }
   }
 
@@ -119,19 +221,27 @@ export function connectionIsValid(
   target: string,
   targetHandle: string | null | undefined,
 ): boolean {
-  const nodeById = new Map(graph.nodes.map((n) => [n.id, n]))
+  const { nodes, edges } = normalizeWorkflowGraph(graph)
+  const nodeById = new Map(nodes.map((n) => [n.id, n]))
   const src = nodeById.get(source)
   const tgt = nodeById.get(target)
   if (!src || !tgt) return false
   const sh = sourceHandle ?? ''
   const th = targetHandle ?? ''
   if (tgt.type === 'output') {
-    if (sh !== 'grade' && sh !== 'comments') return false
-    return sh === th && !graph.edges.some((e) => e.target === target && e.targetHandle === th)
+    if (th !== HANDLE_GRADE && th !== HANDLE_COMMENTS) return false
+    if (!outputSlotSourceIsValid(src.type, sh, th)) return false
+    return !edges.some((e) => e.target === target && e.targetHandle === th)
   }
   if (tgt.type === 'grader') {
-    if (th === 'context') return src.type === 'assignmentContext'
-    if (th === 'submission') return src.type === 'submission'
+    if (th === HANDLE_CONTENT) return isActivityNodeType(src.type) && sh === HANDLE_CONTENT
+    if (th === HANDLE_RUBRIC) return isActivityNodeType(src.type) && sh === HANDLE_RUBRIC
+    if (th === HANDLE_SUBMISSION) return isStudentSubmissionNodeType(src.type)
+    if (th === HANDLE_CONTEXT) return isActivityNodeType(src.type)
+  }
+  if (isAiNodeType(tgt.type)) {
+    if (th !== HANDLE_AI_INPUT) return false
+    return aiInputAllowsEdge(edges, nodeById, source, sh, target)
   }
   return false
 }

@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { useLocation } from 'react-router-dom'
 import { getAccessToken } from '../lib/auth'
+import { closeWebSocket } from '../lib/close-websocket'
 import {
   fetchUnreadInboxCount,
   mailboxWebSocketUrl,
@@ -71,7 +72,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
         clearTimeout(wsReconnectTimerRef.current)
         wsReconnectTimerRef.current = null
       }
-      wsRef.current?.close()
+      closeWebSocket(wsRef.current)
       wsRef.current = null
       wsTokenRef.current = null
       return
@@ -101,7 +102,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      wsRef.current?.close()
+      closeWebSocket(wsRef.current)
       wsTokenRef.current = authToken
 
       const ws = new WebSocket(url)
@@ -110,7 +111,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       ws.onopen = () => {
         const currentToken = getAccessToken()
         if (!currentToken) {
-          ws.close()
+          closeWebSocket(ws)
           return
         }
         ws.send(JSON.stringify({ authToken: currentToken }))
@@ -138,7 +139,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
       }
 
       ws.onerror = () => {
-        ws.close()
+        closeWebSocket(ws)
       }
     }
 
@@ -150,7 +151,7 @@ export function InboxUnreadProvider({ children }: { children: ReactNode }) {
         clearTimeout(wsReconnectTimerRef.current)
         wsReconnectTimerRef.current = null
       }
-      wsRef.current?.close()
+      closeWebSocket(wsRef.current)
       wsRef.current = null
     }
   }, [location.pathname, refreshUnread])

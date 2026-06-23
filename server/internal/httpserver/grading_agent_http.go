@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
@@ -106,6 +107,28 @@ func graderAgentConfigToJSON(row *gradingagentrepo.ConfigRow) map[string]any {
 	return out
 }
 
+func (d Deps) assignmentRowForActivitySource(
+	ctx context.Context,
+	courseID uuid.UUID,
+	defaultItemID uuid.UUID,
+	defaultRow *coursemoduleassignments.CourseItemAssignmentRow,
+	overrideItemID string,
+) (*coursemoduleassignments.CourseItemAssignmentRow, error) {
+	overrideItemID = strings.TrimSpace(overrideItemID)
+	if overrideItemID == "" || overrideItemID == defaultItemID.String() {
+		return defaultRow, nil
+	}
+	itemID, err := uuid.Parse(overrideItemID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid activity assignment id")
+	}
+	row, err := coursemoduleassignments.GetForCourseItem(ctx, d.Pool, courseID, itemID)
+	if err != nil || row == nil {
+		return nil, fmt.Errorf("activity assignment not found")
+	}
+	return row, nil
+}
+
 func writeGraderAgentValidationError(w http.ResponseWriter, err error) {
 	if ve, ok := err.(gradingagentsvc.ValidationError); ok {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -120,6 +143,44 @@ func writeGraderAgentValidationError(w http.ResponseWriter, err error) {
 		return
 	}
 	apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+}
+
+func (d Deps) handleListCourseGradingAgents() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		cid, found, err := d.courseIDFromCode(r.Context(), courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if !found {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		rows, err := gradingagentrepo.ListConfigsByCourse(r.Context(), d.Pool, cid)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grading agents.")
+			return
+		}
+		agents := make([]map[string]any, 0, len(rows))
+		for _, row := range rows {
+			agents = append(agents, map[string]any{
+				"id":                 row.ID.String(),
+				"itemId":             row.ModuleItemID.String(),
+				"assignmentTitle":    row.AssignmentTitle,
+				"assignmentArchived": row.AssignmentArchived,
+				"status":             string(row.Status),
+				"autoGradeNew":       row.AutoGradeNew,
+				"hasWorkflowGraph":   row.HasWorkflowGraph,
+				"updatedAt":          row.UpdatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+			})
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"agents": agents})
+	}
 }
 
 func (d Deps) handleGetGraderAgentConfig() http.HandlerFunc {
@@ -189,9 +250,21 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 		prompt := strings.TrimSpace(body.Prompt)
 		includeContent := body.IncludeAssignmentContent
 		includeRubric := body.IncludeRubric
+		status := gradingagentrepo.StatusDraft
+		switch strings.ToLower(strings.TrimSpace(body.Status)) {
+		case "accepted":
+			status = gradingagentrepo.StatusAccepted
+		case "archived":
+			status = gradingagentrepo.StatusArchived
+		}
 		var workflowGraphBytes []byte
 		if body.WorkflowGraph != nil {
-			if err := gradingagentsvc.ValidateWorkflowGraph(body.WorkflowGraph); err != nil {
+			if status == gradingagentrepo.StatusAccepted {
+				if err := gradingagentsvc.ValidateWorkflowGraph(body.WorkflowGraph); err != nil {
+					writeGraderAgentValidationError(w, err)
+					return
+				}
+			} else if err := gradingagentsvc.ValidateWorkflowGraphForPersistence(body.WorkflowGraph); err != nil {
 				writeGraderAgentValidationError(w, err)
 				return
 			}
@@ -210,17 +283,13 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 			if derivedModel != nil && (body.ModelID == nil || strings.TrimSpace(*body.ModelID) == "") {
 				body.ModelID = derivedModel
 			}
+			if status == gradingagentrepo.StatusDraft {
+				prompt = gradingagentsvc.PersistencePrompt(body.WorkflowGraph, prompt)
+			}
 		}
 		if prompt == "" {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Prompt is required.")
 			return
-		}
-		status := gradingagentrepo.StatusDraft
-		switch strings.ToLower(strings.TrimSpace(body.Status)) {
-		case "accepted":
-			status = gradingagentrepo.StatusAccepted
-		case "archived":
-			status = gradingagentrepo.StatusArchived
 		}
 		autoGrade := false
 		if body.AutoGradeNew != nil {
@@ -329,6 +398,10 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 			explicitModel = strings.TrimSpace(*body.ModelID)
 		}
 		var scoreReq gradingagentsvc.ScoreRequest
+		var contentItemID string
+		var rubricItemID string
+		var workflowGraph *gradingagentsvc.WorkflowGraph
+		var promptNodeID string
 		governancePrompt := strings.TrimSpace(body.Prompt)
 		if body.WorkflowGraph != nil {
 			compiled, compileErr := gradingagentsvc.CompileWorkflowGraph(body.WorkflowGraph, submissionText)
@@ -337,6 +410,10 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 				return
 			}
 			scoreReq = compiled.ScoreRequest
+			contentItemID = compiled.ContentItemID
+			rubricItemID = compiled.RubricItemID
+			workflowGraph = body.WorkflowGraph
+			promptNodeID = compiled.GradeSource
 			governancePrompt = scoreReq.InstructorPrompt
 			if compiled.ScoreRequest.ModelID != "" {
 				explicitModel = compiled.ScoreRequest.ModelID
@@ -362,10 +439,32 @@ func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI provider is not configured.")
 			return
 		}
-		rubric, _ := gradingagentsvc.ParseAssignmentRubric(assignRow)
-		scoreReq.AssignmentMarkdown = assignRow.Markdown
+		contentRow, contentErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, contentItemID)
+		if contentErr != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, contentErr.Error())
+			return
+		}
+		rubricRow, rubricErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, rubricItemID)
+		if rubricErr != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, rubricErr.Error())
+			return
+		}
+		rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
+		scoreReq.AssignmentMarkdown = contentRow.Markdown
 		scoreReq.Rubric = rubric
 		scoreReq.MaxPoints = gradingagentsvc.MaxPointsFromAssignment(assignRow)
+		if workflowGraph != nil && strings.TrimSpace(promptNodeID) != "" {
+			scoreReq.InstructorPrompt = gradingagentsvc.SubstituteWorkflowPromptVariables(
+				workflowGraph,
+				promptNodeID,
+				scoreReq.InstructorPrompt,
+				gradingagentsvc.PromptVariableContext{
+					SubmissionText:  submissionText,
+					ContentMarkdown: contentRow.Markdown,
+					Rubric:          rubric,
+				},
+			)
+		}
 		result, err := svc.Score(r.Context(), scoreReq)
 		if err != nil {
 			log.Printf("grading-agent dry-run: Score course=%s submission=%s err=%v", courseCode, submissionID, err)

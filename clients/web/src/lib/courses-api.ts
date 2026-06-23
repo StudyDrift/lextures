@@ -5818,7 +5818,7 @@ export type GraderWorkflowGraphApi = {
   version: number
   nodes: Array<{
     id: string
-    type: 'output' | 'grader' | 'assignmentContext' | 'submission'
+    type: 'output' | 'grader' | 'ai' | 'activity' | 'studentSubmission' | 'assignmentContext' | 'submission'
     position: { x: number; y: number }
     data: Record<string, unknown>
   }>
@@ -5863,6 +5863,31 @@ export type GraderAgentRunStatus = {
     suggestedPoints?: number
     error?: string
   }>
+}
+
+export type CourseGradingAgentSummary = {
+  id: string
+  itemId: string
+  assignmentTitle: string
+  assignmentArchived: boolean
+  status: 'draft' | 'accepted' | 'archived'
+  autoGradeNew: boolean
+  hasWorkflowGraph: boolean
+  updatedAt: string
+}
+
+export async function fetchCourseGradingAgents(
+  courseCode: string,
+): Promise<{ agents: CourseGradingAgentSummary[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grader-agents`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const agents = Array.isArray((raw as { agents?: unknown }).agents)
+    ? ((raw as { agents: CourseGradingAgentSummary[] }).agents ?? [])
+    : []
+  return { agents }
 }
 
 export async function fetchGraderAgentConfig(

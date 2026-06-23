@@ -57,6 +57,7 @@ describe('courseSettingsSectionFromPathname', () => {
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/dates')).toBe('general')
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/branding')).toBe('general')
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/grading')).toBe('grading')
+    expect(courseSettingsSectionFromPathname('/courses/C-1/settings/grading-agents')).toBe('grading-agents')
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/outcomes')).toBe('outcomes')
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/features')).toBe('features')
     expect(courseSettingsSectionFromPathname('/courses/C-1/settings/features-tools')).toBe(

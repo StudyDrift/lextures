@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAccessToken } from '../lib/auth'
 import { wsUrl } from '../lib/api'
+import { closeWebSocket } from '../lib/close-websocket'
 
 /** Increments when the server broadcasts structure_changed for a course (e.g. Canvas import). */
 export function useCourseStructureRevision(courseCode: string | undefined): number {
@@ -26,7 +27,7 @@ export function useCourseStructureRevision(courseCode: string | undefined): numb
       }
     }
     return () => {
-      ws.close()
+      closeWebSocket(ws)
     }
   }, [courseCode])
 

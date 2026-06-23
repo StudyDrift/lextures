@@ -1,0 +1,219 @@
+package gradingagent
+
+import (
+	"encoding/json"
+	"fmt"
+	"regexp"
+	"strings"
+
+	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
+)
+
+var promptVariablePattern = regexp.MustCompile(`\$([A-Za-z][A-Za-z0-9]*)\.([A-Za-z][A-Za-z0-9]*)`)
+
+// PromptVariableContext supplies runtime values for wired prompt variables.
+type PromptVariableContext struct {
+	SubmissionText    string
+	ContentMarkdown   string
+	Rubric            *assignmentrubric.RubricDefinition
+}
+
+func workflowNodeVariableName(label string) string {
+	return strings.ReplaceAll(label, " ", "")
+}
+
+func workflowNodeLabel(data map[string]any) string {
+	if data == nil {
+		return ""
+	}
+	if v, ok := data["label"].(string); ok {
+		return strings.TrimSpace(v)
+	}
+	return ""
+}
+
+func defaultNodeLabel(nodeType string) string {
+	switch nodeType {
+	case NodeTypeStudentSubmission, NodeTypeSubmission:
+		return "Student Submission"
+	case NodeTypeActivity, NodeTypeAssignmentCtx:
+		return "Activity"
+	case NodeTypeAI:
+		return "AI"
+	case NodeTypeGrader:
+		return "Grader (LLM)"
+	case NodeTypeOutput:
+		return "Student grade"
+	default:
+		return nodeType
+	}
+}
+
+func workflowNodeDisplayLabel(data map[string]any, nodeType string) string {
+	if label := workflowNodeLabel(data); label != "" {
+		return label
+	}
+	return defaultNodeLabel(nodeType)
+}
+
+func workflowOutputHandleToProperty(handle string) string {
+	switch handle {
+	case HandleSubmission:
+		return "Submission"
+	case HandleContent:
+		return "Content"
+	case HandleRubric:
+		return "Rubric"
+	case HandleAIOutput:
+		return "Output"
+	default:
+		return ""
+	}
+}
+
+func wiredInputTargetHandles(promptNodeType string) []string {
+	switch promptNodeType {
+	case NodeTypeAI:
+		return []string{HandleAIInput}
+	case NodeTypeGrader:
+		return []string{HandleSubmission, HandleContent, HandleRubric}
+	default:
+		return nil
+	}
+}
+
+func formatRubricVariableText(rubric *assignmentrubric.RubricDefinition) string {
+	if rubric == nil || len(rubric.Criteria) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	for _, c := range rubric.Criteria {
+		fmt.Fprintf(&b, "- %s (%s): allowed scores", c.Title, c.ID.String())
+		for i, lvl := range c.Levels {
+			if i == 0 {
+				b.WriteString(" ")
+			} else {
+				b.WriteString(", ")
+			}
+			fmt.Fprintf(&b, "%.2f", lvl.Points)
+		}
+		b.WriteString("\n")
+	}
+	raw, _ := json.Marshal(rubric)
+	b.Write(raw)
+	return strings.TrimSpace(b.String())
+}
+
+func propertyValue(handle string, ctx PromptVariableContext) string {
+	switch handle {
+	case HandleSubmission:
+		return strings.TrimSpace(ctx.SubmissionText)
+	case HandleContent:
+		return strings.TrimSpace(ctx.ContentMarkdown)
+	case HandleRubric:
+		return formatRubricVariableText(ctx.Rubric)
+	default:
+		return ""
+	}
+}
+
+func buildPromptVariableBindings(g *WorkflowGraph, promptNodeID string, ctx PromptVariableContext) map[string]map[string]string {
+	if g == nil || strings.TrimSpace(promptNodeID) == "" {
+		return nil
+	}
+	nodeByID := make(map[string]WorkflowNode, len(g.Nodes))
+	for _, n := range g.Nodes {
+		nodeByID[n.ID] = n
+	}
+	promptNode, ok := nodeByID[promptNodeID]
+	if !ok {
+		return nil
+	}
+	targetHandles := wiredInputTargetHandles(promptNode.Type)
+	if len(targetHandles) == 0 {
+		return nil
+	}
+	allowedTargets := make(map[string]struct{}, len(targetHandles))
+	for _, h := range targetHandles {
+		allowedTargets[h] = struct{}{}
+	}
+
+	type grouped struct {
+		node    WorkflowNode
+		handles map[string]struct{}
+	}
+	groupedBySource := make(map[string]*grouped)
+	for _, e := range g.Edges {
+		if e.Target != promptNodeID {
+			continue
+		}
+		if _, ok := allowedTargets[strings.TrimSpace(e.TargetHandle)]; !ok {
+			continue
+		}
+		src, ok := nodeByID[e.Source]
+		if !ok {
+			continue
+		}
+		handle := strings.TrimSpace(e.SourceHandle)
+		property := workflowOutputHandleToProperty(handle)
+		if property == "" {
+			continue
+		}
+		entry := groupedBySource[src.ID]
+		if entry == nil {
+			entry = &grouped{node: src, handles: make(map[string]struct{})}
+			groupedBySource[src.ID] = entry
+		}
+		entry.handles[handle] = struct{}{}
+	}
+
+	bindings := make(map[string]map[string]string)
+	for _, entry := range groupedBySource {
+		varName := workflowNodeVariableName(workflowNodeDisplayLabel(entry.node.Data, entry.node.Type))
+		if varName == "" {
+			continue
+		}
+		props := bindings[varName]
+		if props == nil {
+			props = make(map[string]string)
+			bindings[varName] = props
+		}
+		for handle := range entry.handles {
+			property := workflowOutputHandleToProperty(handle)
+			if property == "" {
+				continue
+			}
+			props[property] = propertyValue(handle, ctx)
+		}
+	}
+	return bindings
+}
+
+// SubstitutePromptVariables replaces `$NodeName.Property` tokens in a prompt.
+func SubstitutePromptVariables(prompt string, bindings map[string]map[string]string) string {
+	if prompt == "" || len(bindings) == 0 {
+		return prompt
+	}
+	return promptVariablePattern.ReplaceAllStringFunc(prompt, func(match string) string {
+		parts := promptVariablePattern.FindStringSubmatch(match)
+		if len(parts) != 3 {
+			return match
+		}
+		nodeName, propertyName := parts[1], parts[2]
+		nodeValues, ok := bindings[nodeName]
+		if !ok {
+			return match
+		}
+		value, ok := nodeValues[propertyName]
+		if !ok {
+			return match
+		}
+		return value
+	})
+}
+
+// SubstituteWorkflowPromptVariables resolves wired variables for one prompt node.
+func SubstituteWorkflowPromptVariables(g *WorkflowGraph, promptNodeID, prompt string, ctx PromptVariableContext) string {
+	bindings := buildPromptVariableBindings(g, promptNodeID, ctx)
+	return SubstitutePromptVariables(prompt, bindings)
+}

@@ -5,17 +5,53 @@ import (
 	"testing"
 )
 
-func TestValidateWorkflowGraph_defaultGraph(t *testing.T) {
+func sampleGraphWithGrader(prompt string, includeContent, includeRubric bool) WorkflowGraph {
+	nodes := []WorkflowNode{
+		{ID: "output", Type: NodeTypeOutput, Position: map[string]any{"x": 0, "y": 0}, Data: map[string]any{}},
+		{ID: "g1", Type: NodeTypeGrader, Position: map[string]any{"x": -320, "y": 0}, Data: map[string]any{
+			"prompt": prompt, "modelId": nil,
+		}},
+	}
+	edges := []WorkflowEdge{
+		{ID: "e1", Source: "g1", SourceHandle: HandleGrade, Target: "output", TargetHandle: HandleGrade},
+		{ID: "e2", Source: "g1", SourceHandle: HandleComments, Target: "output", TargetHandle: HandleComments},
+	}
+	if includeContent || includeRubric {
+		nodes = append(nodes, WorkflowNode{
+			ID: "act", Type: NodeTypeActivity, Position: map[string]any{"x": -640, "y": 80}, Data: map[string]any{},
+		})
+		if includeContent {
+			edges = append(edges, WorkflowEdge{ID: "e3", Source: "act", SourceHandle: HandleContent, Target: "g1", TargetHandle: HandleContent})
+		}
+		if includeRubric {
+			edges = append(edges, WorkflowEdge{ID: "e4", Source: "act", SourceHandle: HandleRubric, Target: "g1", TargetHandle: HandleRubric})
+		}
+	}
+	return WorkflowGraph{Version: WorkflowVersion, Nodes: nodes, Edges: edges}
+}
+
+func TestSynthesizeDefaultGraph_outputOnly(t *testing.T) {
 	g := SynthesizeDefaultGraph("Grade fairly", true, true)
-	g.Nodes[1].Data["prompt"] = "Grade fairly"
+	if len(g.Nodes) != 1 || g.Nodes[0].Type != NodeTypeOutput {
+		t.Fatalf("expected output-only graph, got %+v", g.Nodes)
+	}
+	if len(g.Edges) != 0 {
+		t.Fatalf("expected no edges, got %d", len(g.Edges))
+	}
+	if err := ValidateWorkflowGraph(&g); err == nil {
+		t.Fatal("expected validation failure without grade slot")
+	}
+}
+
+func TestValidateWorkflowGraph_wiredGraderGraph(t *testing.T) {
+	g := sampleGraphWithGrader("Grade fairly", true, true)
 	if err := ValidateWorkflowGraph(&g); err != nil {
-		t.Fatalf("expected valid default graph: %v", err)
+		t.Fatalf("expected valid wired graph: %v", err)
 	}
 }
 
 func TestValidateWorkflowGraph_rejectsCrossTypeConnection(t *testing.T) {
-	g := SynthesizeDefaultGraph("Grade fairly", true, true)
-	g.Nodes[1].Data["prompt"] = "Grade fairly"
+	g := sampleGraphWithGrader("Grade fairly", true, true)
 	g.Edges[1] = WorkflowEdge{ID: "e2", Source: "g1", SourceHandle: HandleGrade, Target: "output", TargetHandle: HandleComments}
 	err := ValidateWorkflowGraph(&g)
 	if err == nil {
@@ -28,9 +64,15 @@ func TestValidateWorkflowGraph_rejectsCrossTypeConnection(t *testing.T) {
 }
 
 func TestValidateWorkflowGraph_rejectsUnconnectedGrade(t *testing.T) {
-	g := SynthesizeDefaultGraph("Grade fairly", true, true)
-	g.Nodes[1].Data["prompt"] = "Grade fairly"
-	g.Edges = g.Edges[2:] // remove grade edge
+	g := sampleGraphWithGrader("Grade fairly", true, true)
+	filtered := make([]WorkflowEdge, 0, len(g.Edges))
+	for _, e := range g.Edges {
+		if e.TargetHandle == HandleGrade && e.Target == "output" {
+			continue
+		}
+		filtered = append(filtered, e)
+	}
+	g.Edges = filtered
 	err := ValidateWorkflowGraph(&g)
 	if err == nil {
 		t.Fatal("expected unconnected grade slot error")
@@ -42,8 +84,7 @@ func TestValidateWorkflowGraph_rejectsUnconnectedGrade(t *testing.T) {
 }
 
 func TestValidateWorkflowGraph_rejectsCycle(t *testing.T) {
-	g := SynthesizeDefaultGraph("Grade fairly", true, true)
-	g.Nodes[1].Data["prompt"] = "Grade fairly"
+	g := sampleGraphWithGrader("Grade fairly", true, true)
 	g.Edges = append(g.Edges, WorkflowEdge{ID: "cycle", Source: "output", Target: "g1", TargetHandle: HandleSubmission})
 	err := ValidateWorkflowGraph(&g)
 	if err == nil {
@@ -52,16 +93,35 @@ func TestValidateWorkflowGraph_rejectsCycle(t *testing.T) {
 }
 
 func TestValidateWorkflowGraph_rejectsEmptyPrompt(t *testing.T) {
-	g := SynthesizeDefaultGraph("", true, true)
+	g := sampleGraphWithGrader("", true, true)
 	err := ValidateWorkflowGraph(&g)
 	if err == nil {
 		t.Fatal("expected empty prompt error")
 	}
 }
 
+func TestCompileWorkflowGraph_activityAssignmentItemIDs(t *testing.T) {
+	g := sampleGraphWithGrader("Award full marks", true, true)
+	for i := range g.Nodes {
+		if g.Nodes[i].ID != "act" {
+			continue
+		}
+		g.Nodes[i].Data = map[string]any{"assignmentItemId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"}
+	}
+	compiled, err := CompileWorkflowGraph(&g, "Student essay text.")
+	if err != nil {
+		t.Fatalf("compile: %v", err)
+	}
+	if compiled.ContentItemID != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" {
+		t.Fatalf("content item id = %q", compiled.ContentItemID)
+	}
+	if compiled.RubricItemID != "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa" {
+		t.Fatalf("rubric item id = %q", compiled.RubricItemID)
+	}
+}
+
 func TestCompileWorkflowGraph(t *testing.T) {
-	g := SynthesizeDefaultGraph("Award full marks", true, false)
-	g.Nodes[1].Data["prompt"] = "Award full marks"
+	g := sampleGraphWithGrader("Award full marks", true, false)
 	compiled, err := CompileWorkflowGraph(&g, "Student essay text.")
 	if err != nil {
 		t.Fatalf("compile: %v", err)
@@ -81,11 +141,59 @@ func TestCompileWorkflowGraph(t *testing.T) {
 }
 
 func TestDeriveLegacyFields(t *testing.T) {
-	g := SynthesizeDefaultGraph("Test prompt", true, true)
-	g.Nodes[1].Data["prompt"] = "Test prompt"
+	g := sampleGraphWithGrader("Test prompt", true, true)
 	prompt, incContent, incRubric, _ := DeriveLegacyFields(&g)
 	if prompt != "Test prompt" || !incContent || !incRubric {
 		t.Fatalf("derive mismatch: %q %v %v", prompt, incContent, incRubric)
+	}
+}
+
+func sampleGraphWithAI(prompt string) WorkflowGraph {
+	return WorkflowGraph{
+		Version: WorkflowVersion,
+		Nodes: []WorkflowNode{
+			{ID: "output", Type: NodeTypeOutput, Position: map[string]any{"x": 0, "y": 0}, Data: map[string]any{}},
+			{ID: "ai1", Type: NodeTypeAI, Position: map[string]any{"x": -320, "y": 0}, Data: map[string]any{"prompt": prompt}},
+			{ID: "act", Type: NodeTypeActivity, Position: map[string]any{"x": -640, "y": 80}, Data: map[string]any{}},
+		},
+		Edges: []WorkflowEdge{
+			{ID: "e1", Source: "ai1", SourceHandle: HandleAIOutput, Target: "output", TargetHandle: HandleGrade},
+			{ID: "e2", Source: "act", SourceHandle: HandleContent, Target: "ai1", TargetHandle: HandleAIInput},
+			{ID: "e3", Source: "act", SourceHandle: HandleRubric, Target: "ai1", TargetHandle: HandleAIInput},
+		},
+	}
+}
+
+func TestDeriveLegacyFields_aiWorkflow(t *testing.T) {
+	g := sampleGraphWithAI("Grade like a TA")
+	prompt, incContent, incRubric, _ := DeriveLegacyFields(&g)
+	if prompt != "Grade like a TA" || !incContent || !incRubric {
+		t.Fatalf("derive mismatch: %q %v %v", prompt, incContent, incRubric)
+	}
+}
+
+func TestValidateWorkflowGraphForPersistence_allowsIncompleteDraft(t *testing.T) {
+	g := SynthesizeDefaultGraph("", false, false)
+	if err := ValidateWorkflowGraphForPersistence(&g); err != nil {
+		t.Fatalf("expected draft persistence to allow output-only graph: %v", err)
+	}
+	if err := ValidateWorkflowGraph(&g); err == nil {
+		t.Fatal("expected runnable validation to reject output-only graph")
+	}
+}
+
+func TestLoadWorkflowGraph_allowsIncompleteDraft(t *testing.T) {
+	g := sampleGraphWithAI("Work in progress")
+	raw, err := WorkflowGraphToJSON(&g)
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded, err := LoadWorkflowGraph(raw)
+	if err != nil {
+		t.Fatalf("load draft graph: %v", err)
+	}
+	if graderPrompt(loaded.Nodes[1]) != "Work in progress" {
+		t.Fatal("prompt not preserved on load")
 	}
 }
 
@@ -101,14 +209,13 @@ func TestEffectiveWorkflowGraph_synthesizes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if graderPrompt(g.Nodes[1]) != "Legacy prompt" {
-		t.Fatalf("expected legacy prompt in grader node, got %q", graderPrompt(g.Nodes[1]))
+	if len(g.Nodes) != 1 || g.Nodes[0].Type != NodeTypeOutput {
+		t.Fatalf("expected output-only synthesized graph, got %+v", g.Nodes)
 	}
 }
 
 func TestWorkflowGraph_roundTripJSON(t *testing.T) {
-	g := SynthesizeDefaultGraph("Round trip", true, true)
-	g.Nodes[1].Data["prompt"] = "Round trip"
+	g := sampleGraphWithGrader("Round trip", true, true)
 	raw, err := WorkflowGraphToJSON(&g)
 	if err != nil {
 		t.Fatal(err)
@@ -117,7 +224,7 @@ func TestWorkflowGraph_roundTripJSON(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if parsed.Nodes[1].Data["prompt"] != "Round trip" {
+	if graderPrompt(parsed.Nodes[1]) != "Round trip" {
 		t.Fatal("round trip failed")
 	}
 }
