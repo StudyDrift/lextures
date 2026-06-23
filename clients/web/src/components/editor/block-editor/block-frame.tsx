@@ -50,7 +50,7 @@ export function BlockFrame({
         {toolbar && inlineToolbar && (
           <div
             className={[
-              'sticky top-0 z-20 w-full overflow-hidden transition-all duration-150',
+              'sticky top-0 z-20 w-full overflow-hidden transition-[height,opacity,margin-bottom] duration-150',
               selected
                 ? 'mb-2 h-9 opacity-100'
                 : 'h-0 opacity-0 group-hover:mb-2 group-hover:h-9 group-hover:opacity-100 group-focus-within:mb-2 group-focus-within:h-9 group-focus-within:opacity-100',

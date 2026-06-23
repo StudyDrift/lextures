@@ -170,7 +170,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
       />
 
       {/* Modal Card */}
-      <div className="relative flex flex-col w-full max-w-2xl h-[580px] bg-slate-50 dark:bg-neutral-900 rounded-3xl border border-slate-200 dark:border-neutral-800 shadow-2xl overflow-hidden transition-all transform scale-100">
+      <div className="relative flex flex-col w-full max-w-2xl h-[580px] bg-slate-50 dark:bg-neutral-900 rounded-3xl border border-slate-200 dark:border-neutral-800 shadow-2xl overflow-hidden">
         
         {/* Header */}
         <div className="flex items-center justify-between shrink-0 px-6 py-4 bg-white dark:bg-neutral-950 border-b border-slate-100 dark:border-neutral-800/80">
@@ -407,7 +407,7 @@ export function FlashcardsModal({ open, notes, pageTitle, onClose }: FlashcardsM
               </div>
               <div className="w-full bg-slate-100 dark:bg-neutral-800 h-2 rounded-full overflow-hidden">
                 <div 
-                  className="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full transition-all duration-300"
+                  className="bg-indigo-600 dark:bg-indigo-500 h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300"
                   style={{ width: `${percentComplete}%` }}
                 />
               </div>

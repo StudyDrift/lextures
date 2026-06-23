@@ -5,7 +5,7 @@ import { needsAuthenticatedCourseImageSrc, resolveAuthorizedFetchPath } from '..
 type Props = ComponentPropsWithoutRef<'img'>
 
 /** Renders a hero image, fetching with auth when src is a course-files content URL. */
-export function CourseHeroImage({ src, ...props }: Props) {
+export function CourseHeroImage({ src, className, alt = '', ...props }: Props) {
   const [resolvedSrc, setResolvedSrc] = useState<string | undefined>(() =>
     src && !needsAuthenticatedCourseImageSrc(src) ? src : undefined,
   )
@@ -36,6 +36,12 @@ export function CourseHeroImage({ src, ...props }: Props) {
     }
   }, [src])
 
-  // eslint-disable-next-line jsx-a11y/alt-text -- alt is forwarded via props
-  return <img src={resolvedSrc} {...props} />
+  return (
+    <img
+      src={resolvedSrc}
+      alt={alt}
+      className={['lex-content-img', className].filter(Boolean).join(' ')}
+      {...props}
+    />
+  )
 }

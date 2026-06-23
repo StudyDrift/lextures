@@ -304,7 +304,7 @@ export default function LibraryCatalogPage() {
                   <img
                     src={book.coverUrl}
                     alt={`Cover of ${book.title}`}
-                    className="h-32 w-auto object-contain mb-2 self-start"
+                    className="lex-content-img h-32 w-auto object-contain mb-2 self-start"
                   />
                 )}
                 <p className="font-medium leading-snug">{book.title}</p>

@@ -173,7 +173,7 @@ export function RubricGradePicker({
           </div>
           <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-neutral-700">
             <div
-              className={`h-full rounded-full transition-all ${
+              className={`h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300 ${
                 allGraded ? 'bg-emerald-500' : 'bg-indigo-500'
               }`}
               style={{ width: `${rubric.criteria.length ? (gradedCount / rubric.criteria.length) * 100 : 0}%` }}

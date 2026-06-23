@@ -10,11 +10,12 @@ import {
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 import { EmptyState } from '../../components/ui/empty-state'
+import { IconSwap } from '../../components/ui/icon-swap'
 
 const iconGhostPublished =
-  'rounded-md p-2 text-indigo-600 transition hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'lex-icon-hit rounded-md text-indigo-600 transition-colors hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'rounded-md p-2 text-slate-400 transition hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
+  'lex-icon-hit rounded-md text-slate-400 transition-colors hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
 
 export default function MyPortfoliosPage() {
   const { ffEportfolio } = usePlatformFeatures()
@@ -205,11 +206,11 @@ export default function MyPortfoliosPage() {
                         aria-pressed={p.isPublic}
                         className={p.isPublic ? iconGhostPublished : iconGhostDraft}
                       >
-                        {p.isPublic ? (
-                          <Eye className="h-4 w-4" aria-hidden />
-                        ) : (
-                          <EyeOff className="h-4 w-4" aria-hidden />
-                        )}
+                        <IconSwap
+                          active={p.isPublic}
+                          activeIcon={Eye}
+                          inactiveIcon={EyeOff}
+                        />
                       </button>
                       <ChevronRight className="h-4 w-4 text-slate-400 dark:text-neutral-500" aria-hidden />
                     </div>

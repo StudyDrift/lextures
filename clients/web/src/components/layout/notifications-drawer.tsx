@@ -315,7 +315,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
           transitionProperty: 'opacity',
           transitionDuration: reducedMotion ? '0.01ms' : `${Math.round(NOTIF_DRAWER_MS * 0.85)}ms`,
         }}
-        className={`absolute inset-0 bg-slate-900/45 backdrop-blur-[1px] ${
+        className={`lex-btn-static absolute inset-0 bg-slate-900/45 backdrop-blur-[1px] ${
           entered ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={onClose}
@@ -362,7 +362,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+            className="lex-icon-hit inline-flex shrink-0 items-center justify-center rounded-lg text-slate-500 motion-safe:transition-colors hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
           >
             <X className="h-5 w-5" aria-hidden />
           </button>

@@ -42,7 +42,7 @@ function CourseCard({ course }: { course: PublicCatalogCourse }) {
         <img
           src={course.heroImageUrl}
           alt=""
-          className="h-40 w-full object-cover"
+          className="lex-content-img h-40 w-full object-cover"
           loading="lazy"
         />
       ) : (

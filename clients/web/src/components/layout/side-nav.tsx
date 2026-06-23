@@ -107,7 +107,7 @@ export function SideNav() {
         <SideNavPinnedCourses />
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <nav
-            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-all duration-300 ease-out ${
+            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
               showMainNav
                 ? 'z-10 translate-y-0 opacity-100'
                 : 'pointer-events-none z-0 translate-y-1 opacity-0'
@@ -118,7 +118,7 @@ export function SideNav() {
             <SideNavMainLinks />
           </nav>
           <nav
-            className={`sidenav-course-items absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-all duration-300 ease-out ${
+            className={`sidenav-course-items absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
               showCourseNav
                 ? 'z-10 translate-y-0 opacity-100'
                 : 'pointer-events-none z-0 translate-y-1 opacity-0'
@@ -129,7 +129,7 @@ export function SideNav() {
             {courseCode && <SideNavCourseLinks key={courseCode} courseCode={courseCode} />}
           </nav>
           <nav
-            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-all duration-300 ease-out ${
+            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
               showCourseSettingsNav
                 ? 'z-10 translate-y-0 opacity-100'
                 : 'pointer-events-none z-0 translate-y-1 opacity-0'
@@ -145,7 +145,7 @@ export function SideNav() {
             )}
           </nav>
           <nav
-            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-all duration-300 ease-out ${
+            className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
               showSettingsNav
                 ? 'z-10 translate-y-0 opacity-100'
                 : 'pointer-events-none z-0 translate-y-1 opacity-0'

@@ -44,6 +44,85 @@
   a[aria-disabled='true'] {
     cursor: not-allowed;
   }
+
+  /* Plan 22.1 — text wrapping (rules 10): balance headings, pretty body copy. */
+  .lms-scope :is(h1, h2, h3) {
+    text-wrap: balance;
+  }
+  .lms-scope p {
+    text-wrap: pretty;
+  }
+
+  /* Plan 22.1 — scale on press (rule 12): tactile feedback for interactive controls. */
+  .lms-scope button:not(:disabled):not(.lex-btn-static),
+  .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static) {
+    transition-property: transform;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+  .lms-scope button:not(:disabled):not(.lex-btn-static):active,
+  .lms-scope [role='button']:not([aria-disabled='true']):not(.lex-btn-static):active {
+    scale: 0.96;
+  }
+}
+
+/* Plan 22.1 — layered card elevation (rule 3). */
+:root {
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 12px rgb(15 23 42 / 0.06);
+  --shadow-card-hover: 0 1px 2px rgb(15 23 42 / 0.06), 0 6px 16px rgb(15 23 42 / 0.08);
+}
+.dark {
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.08), 0 2px 8px rgb(0 0 0 / 0.25);
+  --shadow-card-hover: 0 0 0 1px rgb(255 255 255 / 0.13), 0 4px 12px rgb(0 0 0 / 0.35);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+@utility shadow-card-hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Plan 22.1 — content image outlines (rule 11): pure black/white, never tinted. */
+@utility lex-content-img {
+  outline: 1px solid rgb(0 0 0 / 0.1);
+  outline-offset: -1px;
+}
+.dark .lex-content-img,
+.dark.lex-content-img {
+  outline-color: rgb(255 255 255 / 0.1);
+}
+
+/* Plan 22.1 — tabular numbers for live-updating numerics (rule 9). */
+@utility lex-num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Plan 22.1 — minimum 40×40px hit area via pseudo-element (rule 16). */
+@utility lex-icon-hit {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Plan 22.1 — subtle exit for dismissible banners (rule 6). */
+.lex-banner-exit {
+  opacity: 0;
+  transform: translate(-50%, 8px);
+  transition:
+    opacity 150ms ease-in,
+    transform 150ms ease-in;
 }
 
 /* Native pickers (datetime-local, date, time, color) follow color-scheme on the root. */

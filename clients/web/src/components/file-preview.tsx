@@ -190,7 +190,7 @@ function ImageViewer({ filePath, filename }: ImageViewerProps) {
             ref={imgRef}
             src={blobUrl}
             alt={filename}
-            className="max-h-[85vh] max-w-full select-none object-contain shadow-2xl"
+            className="lex-content-img max-h-[85vh] max-w-full select-none object-contain shadow-2xl"
             draggable={false}
           />
         </div>

@@ -1,11 +1,12 @@
 import { type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
-import { Check, ImageIcon, Loader2, Move, Save, Upload, X } from 'lucide-react'
+import { Check, ImageIcon, Move, Save, Upload, X } from 'lucide-react'
 import { LmsPage } from './lms-page'
 import { usePermissions } from '../../context/use-permissions'
 import { authorizedFetch } from '../../lib/api'
 import { readApiErrorMessage } from '../../lib/errors'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
+import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner'
 import { TimezoneSelector } from '../../components/timezone/timezone-selector'
 import { detectBrowserTimezone } from '../../lib/format'
 import {
@@ -1461,50 +1462,14 @@ export default function CourseSettings() {
         </div>
       )}
 
-      {section === 'general' && isDirty && (
-        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 duration-300">
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-850 dark:bg-neutral-900/90">
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">
-                {saveStatus === 'error' && saveMessage ? (
-                  <span className="text-rose-600 dark:text-rose-400 font-medium">{saveMessage}</span>
-                ) : (
-                  "You have modified this course's settings."
-                )}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={discardChanges}
-                disabled={saveStatus === 'saving'}
-                className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-850 dark:hover:text-neutral-200 transition"
-              >
-                Discard
-              </button>
-              <button
-                type="button"
-                onClick={() => void onSingleSaveChanges()}
-                disabled={saveStatus === 'saving'}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-60 transition active:scale-95"
-              >
-                {saveStatus === 'saving' ? (
-                  <>
-                    <Loader2 className="h-4 w-4 motion-safe:animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save changes
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <UnsavedChangesBanner
+        visible={section === 'general' && isDirty}
+        description="You have modified this course's settings."
+        saveStatus={saveStatus}
+        saveMessage={saveMessage}
+        onDiscard={discardChanges}
+        onSave={() => void onSingleSaveChanges()}
+      />
 
       {positionModalOpen && course?.heroImageUrl && (
         <div

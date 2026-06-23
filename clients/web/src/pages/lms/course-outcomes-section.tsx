@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { ConfirmDialog } from '../../components/confirm-dialog'
+import { UnsavedChangesBanner } from '../../components/ui/unsaved-changes-banner'
 import {
   ChevronDown,
   Link2,
   Loader2,
   Plus,
-  Save,
   Target,
   Trash2,
   TrendingUp,
@@ -506,50 +506,14 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
         onConfirm={() => void confirmDeleteOutcome()}
       />
 
-      {isDirty && (
-        <div className="fixed bottom-6 start-1/2 z-50 w-full max-w-2xl -translate-x-1/2 px-4 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-6 py-4 shadow-xl backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-900/90">
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold text-slate-900 dark:text-neutral-50">Unsaved changes</span>
-              <span className="text-xs text-slate-500 dark:text-neutral-400">
-                {saveStatus === 'error' && saveMessage ? (
-                  <span className="text-rose-600 dark:text-rose-400 font-medium">{saveMessage}</span>
-                ) : (
-                  "You have modified this course's learning outcomes."
-                )}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={discardChanges}
-                disabled={saveStatus === 'saving'}
-                className="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-850 dark:hover:text-neutral-200 transition"
-              >
-                Discard
-              </button>
-              <button
-                type="button"
-                onClick={() => void onSingleSaveChanges()}
-                disabled={saveStatus === 'saving'}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:cursor-not-allowed disabled:opacity-60 transition active:scale-95"
-              >
-                {saveStatus === 'saving' ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save changes
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <UnsavedChangesBanner
+        visible={isDirty}
+        description="You have modified this course's learning outcomes."
+        saveStatus={saveStatus}
+        saveMessage={saveMessage}
+        onDiscard={discardChanges}
+        onSave={() => void onSingleSaveChanges()}
+      />
     </div>
   )
 }
@@ -749,7 +713,7 @@ function OutcomeCard({
                 aria-label="Outcome progress"
               >
                 <div
-                  className="h-full rounded-full bg-indigo-600 transition-all dark:bg-indigo-500"
+                  className="h-full rounded-full bg-indigo-600 motion-safe:transition-[width] motion-safe:duration-300 dark:bg-indigo-500"
                   style={{ width: `${Math.min(100, Math.max(0, rollup))}%` }}
                 />
               </div>

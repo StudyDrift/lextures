@@ -1931,7 +1931,7 @@ function StaticTakeBody({
                 <img
                   src={q.typeConfig.imageUrl}
                   alt=""
-                  className="max-h-72 w-full object-contain"
+                  className="lex-content-img max-h-72 w-full object-contain"
                 />
                 {a.hotspot ? (
                   <span

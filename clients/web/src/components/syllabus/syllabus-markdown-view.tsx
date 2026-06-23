@@ -151,13 +151,13 @@ function createMarkdownComponents(
         <CourseFileMarkdownImage
           src={src}
           alt={alt}
-          className="max-h-[min(28rem,80vh)] w-auto max-w-full rounded-lg border border-slate-200 dark:border-neutral-700"
+          className="lex-content-img max-h-[min(28rem,80vh)] w-auto max-w-full rounded-lg"
         />
       ) : (
         <img
           src={src ?? undefined}
           alt={alt ?? ''}
-          className="max-h-[min(28rem,80vh)] w-auto max-w-full rounded-lg border border-slate-200 dark:border-neutral-700"
+          className="lex-content-img max-h-[min(28rem,80vh)] w-auto max-w-full rounded-lg"
           loading="lazy"
         />
       ),

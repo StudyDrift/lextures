@@ -32,7 +32,7 @@ function PathProgressCard({ path }: { path: PathProgress }) {
           aria-valuenow={path.percent}
           aria-label={label}
         >
-          <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${path.percent}%` }} />
+          <div className="h-full rounded-full bg-primary motion-safe:transition-[width] motion-safe:duration-300" style={{ width: `${path.percent}%` }} />
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{label}</p>
       </div>
