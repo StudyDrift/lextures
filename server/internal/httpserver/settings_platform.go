@@ -137,6 +137,7 @@ type platformSettingsJSON struct {
 	FFPublicAPI                     bool `json:"ffPublicApi"`
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
 	FFRevenueShare                  bool `json:"ffRevenueShare"`
+	FFTaxCollection                 bool `json:"ffTaxCollection"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
 	FFConditionalRelease            bool `json:"ffConditionalRelease"`
 	FFPeerReview                    bool `json:"ffPeerReview"`
@@ -337,6 +338,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFRevenueShare:                  merged.FFRevenueShare,
+			FFTaxCollection:                 merged.FFTaxCollection,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFConditionalRelease:            merged.FFConditionalRelease,
 			FFPeerReview:                    merged.FFPeerReview,
@@ -512,6 +514,7 @@ type putPlatformBody struct {
 	FFPublicAPI                     *bool `json:"ffPublicApi"`
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
 	FFRevenueShare                  *bool `json:"ffRevenueShare"`
+	FFTaxCollection                 *bool `json:"ffTaxCollection"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
 	FFConditionalRelease            *bool `json:"ffConditionalRelease"`
 	FFPeerReview                    *bool `json:"ffPeerReview"`
@@ -833,6 +836,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
 		setBool("ffrevenueshare", body.FFRevenueShare, func(v bool) { wr.FFRevenueShare = &v })
+		setBool("fftaxcollection", body.FFTaxCollection, func(v bool) { wr.FFTaxCollection = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
 		setBool("ffconditionalrelease", body.FFConditionalRelease, func(v bool) { wr.FFConditionalRelease = &v })
 		setBool("ffpeerreview", body.FFPeerReview, func(v bool) { wr.FFPeerReview = &v })
@@ -987,6 +991,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
 			FFRevenueShare:                  merged.FFRevenueShare,
+			FFTaxCollection:                 merged.FFTaxCollection,
 			FFLearningPaths:                 merged.FFLearningPaths,
 			FFConditionalRelease:            merged.FFConditionalRelease,
 			FFPeerReview:                    merged.FFPeerReview,

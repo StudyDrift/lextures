@@ -72,6 +72,7 @@ export default function App() {
             <Route path="/me/ce-transcript" element={<Pages.CeTranscript />} />
             <Route path="/me/billing" element={<Pages.BillingSettingsPage />} />
             <Route path="/me/creator/earnings" element={<Pages.CreatorEarningsPage />} />
+            <Route path="/admin/tax" element={<Pages.OrgTaxSettingsPage />} />
             <Route path="/checkout/success" element={<Pages.CheckoutSuccessPage />} />
             <Route path="/checkout/cancel" element={<Pages.CheckoutCancelPage />} />
             <Route path="/transcripts" element={<Pages.TranscriptsPage />} />

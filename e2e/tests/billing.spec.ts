@@ -22,6 +22,28 @@ test.describe('Billing — API auth', () => {
     })
     expect(res.status).toBe(401)
   })
+
+  test('POST /api/v1/checkout/quote returns 401 without auth', async () => {
+    const res = await fetch(`${apiBase}/api/v1/checkout/quote`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId: '00000000-0000-0000-0000-000000000001', address: { country: 'GB' } }),
+    })
+    expect(res.status).toBe(401)
+  })
+
+  test('POST /api/v1/checkout/tax-id returns 401 without auth', async () => {
+    const res = await fetch(`${apiBase}/api/v1/checkout/tax-id`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        courseId: '00000000-0000-0000-0000-000000000001',
+        address: { country: 'DE' },
+        taxId: 'DE123456789',
+      }),
+    })
+    expect(res.status).toBe(401)
+  })
 })
 
 test.describe('Billing — authenticated API', () => {
@@ -35,6 +57,36 @@ test.describe('Billing — authenticated API', () => {
     expect(res.status).toBe(200)
     const body = (await res.json()) as { entitlements: unknown[] }
     expect(Array.isArray(body.entitlements)).toBe(true)
+  })
+})
+
+test.describe('Tax — API', () => {
+  test('tax quote returns 404 when tax collection disabled', async ({ seededCourse }) => {
+    const featRes = await fetch(`${apiBase}/api/v1/platform/features`, {
+      headers: { Authorization: `Bearer ${seededCourse.studentToken}` },
+    })
+    if (!featRes.ok) {
+      test.skip(true, 'platform features unavailable')
+    }
+    const feats = (await featRes.json()) as { ffTaxCollection?: boolean; ffStripeBilling?: boolean }
+    if (!feats.ffStripeBilling) {
+      test.skip(true, 'ff_stripe_billing not enabled')
+    }
+    if (feats.ffTaxCollection) {
+      test.skip(true, 'ff_tax_collection enabled — cannot assert disabled path')
+    }
+    const res = await fetch(`${apiBase}/api/v1/checkout/quote`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${seededCourse.studentToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        courseId: seededCourse.courseId,
+        address: { country: 'GB' },
+      }),
+    })
+    expect(res.status).toBe(404)
   })
 })
 

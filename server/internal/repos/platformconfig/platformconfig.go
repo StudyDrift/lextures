@@ -124,6 +124,7 @@ type Row struct {
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
+	FFTaxCollection                 *bool
 	FFLearningPaths                 *bool
 	FFConditionalRelease            *bool
 	FFPeerReview                    *bool
@@ -276,6 +277,7 @@ type Write struct {
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
 	FFRevenueShare                  *bool
+	FFTaxCollection                 *bool
 	FFLearningPaths                 *bool
 	FFConditionalRelease            *bool
 	FFPeerReview                    *bool
@@ -439,6 +441,7 @@ SELECT
 	ff_bot_discord,
 	ff_calendar_feeds,
 	ff_revenue_share,
+	ff_tax_collection,
 	lrs_anonymize_actors,
 	ferpa_workflow_enabled,
 	dpa_portal_enabled,
@@ -582,6 +585,7 @@ WHERE id = 1
 		&r.FFBotDiscord,
 		&r.FFCalendarFeeds,
 		&r.FFRevenueShare,
+		&r.FFTaxCollection,
 		&r.LRSAnonymizeActors,
 		&r.FERPAWorkflowEnabled,
 		&r.DPAPortalEnabled,
@@ -773,6 +777,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_bot_discord,
 	ff_calendar_feeds,
 	ff_revenue_share,
+	ff_tax_collection,
 	mfa_enabled,
 	mfa_enforcement,
 	smtp_host,
@@ -921,6 +926,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_bot_discord = COALESCE(EXCLUDED.ff_bot_discord, settings.platform_app_settings.ff_bot_discord),
 	ff_calendar_feeds = COALESCE(EXCLUDED.ff_calendar_feeds, settings.platform_app_settings.ff_calendar_feeds),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
+	ff_tax_collection = COALESCE(EXCLUDED.ff_tax_collection, settings.platform_app_settings.ff_tax_collection),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
 	ferpa_workflow_enabled = COALESCE(EXCLUDED.ferpa_workflow_enabled, settings.platform_app_settings.ferpa_workflow_enabled),
 	dpa_portal_enabled = COALESCE(EXCLUDED.dpa_portal_enabled, settings.platform_app_settings.dpa_portal_enabled),
@@ -1062,6 +1068,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFBotDiscord,
 		w.FFCalendarFeeds,
 		w.FFRevenueShare,
+		w.FFTaxCollection,
 		w.MFAEnabled,
 		w.MFAEnforcement,
 		w.SMTPHost,

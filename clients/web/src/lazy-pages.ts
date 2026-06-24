@@ -129,6 +129,7 @@ export const PublicPortfolioPage = lazy(() => import('./pages/portfolio/public-p
 export const PublicPortfolioContentPage = lazy(() => import('./pages/portfolio/public-portfolio-content-page'))
 export const BillingSettingsPage = lazy(() => import('./pages/lms/billing-settings'))
 export const CreatorEarningsPage = lazy(() => import('./pages/lms/creator-earnings-page'))
+export const OrgTaxSettingsPage = lazy(() => import('./pages/lms/org-tax-settings-page'))
 export const CheckoutSuccessPage = lazy(() => import('./pages/checkout/success'))
 export const CheckoutCancelPage = lazy(() => import('./pages/checkout/cancel'))
 export const CliAuthPage = lazy(() => import('./pages/cli-auth'))

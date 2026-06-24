@@ -77,6 +77,7 @@ export type PlatformFeatures = {
   ffConsortiumSharing: boolean
   ffStripeBilling: boolean
   ffRevenueShare: boolean
+  ffTaxCollection: boolean
   ffLearningPaths: boolean
   ffConditionalRelease: boolean
   ffPeerReview: boolean
@@ -159,6 +160,7 @@ const defaultFeatures: PlatformFeatures = {
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffRevenueShare: false,
+  ffTaxCollection: false,
   ffLearningPaths: false,
   ffConditionalRelease: false,
   ffPeerReview: false,
@@ -246,6 +248,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffRevenueShare: false,
+  ffTaxCollection: false,
   ffLearningPaths: false,
   ffConditionalRelease: false,
   ffPeerReview: false,
@@ -334,6 +337,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffConsortiumSharing: data.ffConsortiumSharing === true,
           ffStripeBilling: data.ffStripeBilling === true,
           ffRevenueShare: data.ffRevenueShare === true,
+          ffTaxCollection: data.ffTaxCollection === true,
           ffLearningPaths: data.ffLearningPaths === true,
           ffConditionalRelease: data.ffConditionalRelease === true,
           ffPeerReview: data.ffPeerReview === true,
@@ -386,6 +390,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffConsortiumSharing: next.ffConsortiumSharing === true,
           ffStripeBilling: next.ffStripeBilling === true,
           ffRevenueShare: next.ffRevenueShare === true,
+          ffTaxCollection: next.ffTaxCollection === true,
           ffLearningPaths: next.ffLearningPaths === true,
           ffConditionalRelease: next.ffConditionalRelease === true,
           ffPeerReview: next.ffPeerReview === true,
