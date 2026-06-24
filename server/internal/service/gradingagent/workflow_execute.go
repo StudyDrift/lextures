@@ -853,8 +853,11 @@ func assembleOutputPreview(
 			} else if strings.TrimSpace(v.text) != "" {
 				if pts, err := strconv.ParseFloat(strings.Fields(v.text)[0], 64); err == nil {
 					preview.SuggestedPoints = pts
+					preview.Confidence = 0.5
+				} else if maxPoints > 0 {
+					preview.SuggestedPoints = maxPoints
+					preview.Confidence = 1
 				}
-				preview.Confidence = 0.5
 			}
 		case HandleComments:
 			if strings.TrimSpace(v.text) != "" {

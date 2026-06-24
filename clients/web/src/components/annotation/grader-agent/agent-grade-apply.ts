@@ -1,4 +1,4 @@
-import type { GraderAgentDryRunResult, RubricDefinition } from '../../../lib/courses-api'
+import type { GraderAgentDryRunResult, RubricDefinition, SubmissionGradeApi } from '../../../lib/courses-api'
 import { rubricScoresComplete } from '../../../lib/rubric-utils'
 import type { CanvasGradePushPayload } from '../../canvas/canvas-grade-sync'
 
@@ -50,4 +50,12 @@ export function buildAgentGradeApplyPayload(
       instructorComment,
     },
   }
+}
+
+export function canvasPayloadFromSubmissionGrade(grade: SubmissionGradeApi): CanvasGradePushPayload {
+  const instructorComment = grade.instructorComment?.trim() || null
+  if (grade.rubricScores && Object.keys(grade.rubricScores).length > 0) {
+    return { rubricScores: grade.rubricScores, instructorComment }
+  }
+  return { pointsEarned: grade.pointsEarned, instructorComment }
 }

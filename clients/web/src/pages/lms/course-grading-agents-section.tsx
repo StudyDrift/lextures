@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Search } from 'lucide-react'
 import {
   CreateGradingAgentModal,
   type CreateGradingAgentResult,
 } from '../../components/annotation/grader-agent/create-grading-agent-modal'
+import {
+  CreateGradingAgentFromTemplateModal,
+  type CreateGradingAgentFromTemplateResult,
+} from '../../components/annotation/grader-agent/create-grading-agent-from-template-modal'
+import { cloneGraderAgentTemplateToAssignments } from '../../components/annotation/grader-agent/clone-grader-agent-template'
 import { GraderAgentWorkflowModal } from '../../components/annotation/grader-agent/grader-agent-workflow-modal'
 import type {
   GraderAgentTemplateMode,
@@ -15,6 +20,7 @@ import {
   fetchCourseGradingAgents,
   fetchGraderAgentTemplate,
   fetchModuleAssignment,
+  postGraderAgentTemplate,
   type CourseGradingAgentSummary,
   type CourseGradingAgentTemplateSummary,
   type RubricDefinition,
@@ -39,6 +45,10 @@ type OpenTemplateState = {
   templateMode: GraderAgentTemplateMode
   seedWorkflow: GraderAgentWorkflowSeed | null
 }
+
+type AgentSortKey = 'assignmentTitle' | 'updatedAt'
+type TemplateSortKey = 'name' | 'updatedAt'
+type SortDir = 'ascending' | 'descending'
 
 function statusLabel(
   status: CourseGradingAgentSummary['status'],
@@ -72,11 +82,75 @@ export function CourseGradingAgentsSection({
   const [openingItemId, setOpeningItemId] = useState<string | null>(null)
   const [openAgent, setOpenAgent] = useState<OpenAgentState | null>(null)
   const [openTemplate, setOpenTemplate] = useState<OpenTemplateState | null>(null)
+  const [createFromTemplate, setCreateFromTemplate] = useState<CourseGradingAgentTemplateSummary | null>(null)
+  const [agentFilterQuery, setAgentFilterQuery] = useState('')
+  const [agentSortKey, setAgentSortKey] = useState<AgentSortKey>('assignmentTitle')
+  const [agentSortDir, setAgentSortDir] = useState<SortDir>('ascending')
+  const [templateSortKey, setTemplateSortKey] = useState<TemplateSortKey>('name')
+  const [templateSortDir, setTemplateSortDir] = useState<SortDir>('ascending')
 
   const existingAgentItemIds = useMemo(() => new Set(agents.map((agent) => agent.itemId)), [agents])
 
-  const reload = useCallback(async () => {
-    setLoading(true)
+  const sortedTemplates = useMemo(() => {
+    const copy = [...templates]
+    const dir = templateSortDir === 'ascending' ? 1 : -1
+    copy.sort((a, b) => {
+      if (templateSortKey === 'name') {
+        return a.name.localeCompare(b.name) * dir
+      }
+      return (Date.parse(a.updatedAt) - Date.parse(b.updatedAt)) * dir
+    })
+    return copy
+  }, [templates, templateSortDir, templateSortKey])
+
+  const filteredSortedAgents = useMemo(() => {
+    const q = agentFilterQuery.trim().toLowerCase()
+    const filtered = q
+      ? agents.filter((agent) => {
+          const title = agent.assignmentTitle.toLowerCase()
+          const status = statusLabel(agent.status, t).toLowerCase()
+          return title.includes(q) || status.includes(q)
+        })
+      : agents
+    const copy = [...filtered]
+    const dir = agentSortDir === 'ascending' ? 1 : -1
+    copy.sort((a, b) => {
+      if (agentSortKey === 'assignmentTitle') {
+        return a.assignmentTitle.localeCompare(b.assignmentTitle) * dir
+      }
+      return (Date.parse(a.updatedAt) - Date.parse(b.updatedAt)) * dir
+    })
+    return copy
+  }, [agentFilterQuery, agentSortDir, agentSortKey, agents, t])
+
+  const toggleAgentSort = (key: AgentSortKey) => {
+    if (agentSortKey === key) {
+      setAgentSortDir((dir) => (dir === 'ascending' ? 'descending' : 'ascending'))
+    } else {
+      setAgentSortKey(key)
+      setAgentSortDir('ascending')
+    }
+  }
+
+  const toggleTemplateSort = (key: TemplateSortKey) => {
+    if (templateSortKey === key) {
+      setTemplateSortDir((dir) => (dir === 'ascending' ? 'descending' : 'ascending'))
+    } else {
+      setTemplateSortKey(key)
+      setTemplateSortDir('ascending')
+    }
+  }
+
+  const agentSortAria = (key: AgentSortKey): 'ascending' | 'descending' | 'none' =>
+    agentSortKey === key ? agentSortDir : 'none'
+
+  const templateSortAria = (key: TemplateSortKey): 'ascending' | 'descending' | 'none' =>
+    templateSortKey === key ? templateSortDir : 'none'
+
+  const reload = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) {
+      setLoading(true)
+    }
     setLoadError(null)
     try {
       const [templatesRes, agentsRes] = await Promise.all([
@@ -87,10 +161,14 @@ export function CourseGradingAgentsSection({
       setAgents(agentsRes.agents)
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : t('gradingAgent.settings.error.load'))
-      setTemplates([])
-      setAgents([])
+      if (!opts?.silent) {
+        setTemplates([])
+        setAgents([])
+      }
     } finally {
-      setLoading(false)
+      if (!opts?.silent) {
+        setLoading(false)
+      }
     }
   }, [courseCode, t])
 
@@ -152,6 +230,53 @@ export function CourseGradingAgentsSection({
     onCreateModalOpenChange(false)
   }
 
+  const createAgentsFromTemplate = async (result: CreateGradingAgentFromTemplateResult) => {
+    if (!createFromTemplate) {
+      throw new Error(t('gradingAgent.settings.fromTemplate.error'))
+    }
+
+    const { template } = await fetchGraderAgentTemplate(courseCode, createFromTemplate.id)
+    const workflowGraph = template.workflowGraph
+    if (!workflowGraph) {
+      throw new Error(t('gradingAgent.settings.fromTemplate.error'))
+    }
+
+    if (result.name !== createFromTemplate.name) {
+      await postGraderAgentTemplate(courseCode, {
+        name: result.name,
+        prompt: template.prompt,
+        includeAssignmentContent: template.includeAssignmentContent,
+        includeRubric: template.includeRubric,
+        workflowGraph,
+      })
+    }
+
+    await cloneGraderAgentTemplateToAssignments(
+      courseCode,
+      createFromTemplate.id,
+      result.assignmentIds,
+      template,
+    )
+
+    setCreateFromTemplate(null)
+    await reload({ silent: true })
+
+    if (result.assignmentIds.length === 1) {
+      const assignmentId = result.assignmentIds[0]
+      if (!assignmentId) {
+        throw new Error(t('gradingAgent.settings.fromTemplate.error'))
+      }
+      const assignment = await fetchModuleAssignment(courseCode, assignmentId)
+      setOpenAgent({
+        itemId: assignmentId,
+        assignmentTitle: assignment.title?.trim() || 'Untitled assignment',
+        rubric: assignment.rubric ?? null,
+        maxPoints: assignment.pointsWorth ?? null,
+        seedWorkflow: null,
+      })
+    }
+  }
+
   if (loading) {
     return (
       <p className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-300">
@@ -182,21 +307,41 @@ export function CourseGradingAgentsSection({
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-800/50">
                   <th className="w-px whitespace-nowrap px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
-                    {t('gradingAgent.settings.table.template')}
+                    <button
+                      type="button"
+                      className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      onClick={() => toggleTemplateSort('name')}
+                      aria-sort={templateSortAria('name')}
+                    >
+                      {t('gradingAgent.settings.table.template')}
+                    </button>
                   </th>
                   <th className="w-52 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
-                    {t('gradingAgent.settings.table.updated')}
+                    <button
+                      type="button"
+                      className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      onClick={() => toggleTemplateSort('updatedAt')}
+                      aria-sort={templateSortAria('updatedAt')}
+                    >
+                      {t('gradingAgent.settings.table.updated')}
+                    </button>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {templates.map((template) => (
+                {sortedTemplates.map((template) => (
                   <tr
                     key={template.id}
                     className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
                   >
-                    <td className="w-px whitespace-nowrap px-4 py-3 text-start font-medium text-slate-900 dark:text-neutral-100">
-                      {template.name}
+                    <td className="w-px whitespace-nowrap px-4 py-3 text-start">
+                      <button
+                        type="button"
+                        onClick={() => setCreateFromTemplate(template)}
+                        className="text-start font-medium text-indigo-700 hover:underline dark:text-indigo-300"
+                      >
+                        {template.name}
+                      </button>
                     </td>
                     <td className="px-4 py-3 text-start text-slate-600 dark:text-neutral-300">
                       {formatAbsolute(template.updatedAt)}
@@ -216,12 +361,39 @@ export function CourseGradingAgentsSection({
         {agents.length === 0 ? (
           <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.settings.empty')}</p>
         ) : (
+          <div className="space-y-3">
+            <div className="relative max-w-md">
+              <Search
+                className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={agentFilterQuery}
+                onChange={(e) => setAgentFilterQuery(e.target.value)}
+                placeholder={t('gradingAgent.settings.table.filterPlaceholder')}
+                aria-label={t('gradingAgent.settings.table.filterPlaceholder')}
+                className="w-full rounded-xl border border-slate-200 bg-white py-2 ps-10 pe-3 text-sm text-slate-900 shadow-sm outline-none focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/50"
+              />
+            </div>
+            {filteredSortedAgents.length === 0 ? (
+              <p className="text-sm text-slate-500 dark:text-neutral-400">
+                {t('gradingAgent.settings.table.noMatch')}
+              </p>
+            ) : (
           <div className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/5 dark:border-neutral-700 dark:bg-neutral-900/40">
             <table className="w-full table-auto text-start text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/80 dark:border-neutral-700 dark:bg-neutral-800/50">
                   <th className="w-px whitespace-nowrap px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
-                    {t('gradingAgent.settings.table.assignment')}
+                    <button
+                      type="button"
+                      className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      onClick={() => toggleAgentSort('assignmentTitle')}
+                      aria-sort={agentSortAria('assignmentTitle')}
+                    >
+                      {t('gradingAgent.settings.table.assignment')}
+                    </button>
                   </th>
                   <th className="w-28 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
                     {t('gradingAgent.settings.table.status')}
@@ -230,12 +402,19 @@ export function CourseGradingAgentsSection({
                     {t('gradingAgent.settings.table.autoGrade')}
                   </th>
                   <th className="w-52 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
-                    {t('gradingAgent.settings.table.updated')}
+                    <button
+                      type="button"
+                      className="rounded px-1 font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                      onClick={() => toggleAgentSort('updatedAt')}
+                      aria-sort={agentSortAria('updatedAt')}
+                    >
+                      {t('gradingAgent.settings.table.updated')}
+                    </button>
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {agents.map((agent) => {
+                {filteredSortedAgents.map((agent) => {
                   const opening = openingItemId === agent.itemId
                   return (
                     <tr
@@ -278,6 +457,8 @@ export function CourseGradingAgentsSection({
               </tbody>
             </table>
           </div>
+            )}
+          </div>
         )}
       </section>
 
@@ -288,6 +469,15 @@ export function CourseGradingAgentsSection({
         existingAgentItemIds={existingAgentItemIds}
         onClose={() => onCreateModalOpenChange(false)}
         onContinue={openNewAgentEditor}
+      />
+
+      <CreateGradingAgentFromTemplateModal
+        open={createFromTemplate != null}
+        courseCode={courseCode}
+        template={createFromTemplate}
+        existingAgentItemIds={existingAgentItemIds}
+        onClose={() => setCreateFromTemplate(null)}
+        onCreate={createAgentsFromTemplate}
       />
 
       {openAgent ? (

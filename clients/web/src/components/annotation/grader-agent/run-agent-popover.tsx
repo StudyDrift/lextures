@@ -22,6 +22,7 @@ type RunAgentPopoverProps = {
   dryRunDisabled: boolean
   dryRunTooltip: string | null
   dryRunning: boolean
+  batchRunning: boolean
   runScope: RunScope
   setRunScope: (scope: RunScope) => void
   confirmOverwrite: boolean
@@ -40,6 +41,7 @@ export function RunAgentPopover({
   dryRunDisabled,
   dryRunTooltip,
   dryRunning,
+  batchRunning,
   runScope,
   setRunScope,
   confirmOverwrite,
@@ -194,8 +196,17 @@ export function RunAgentPopover({
               )}
             </Button>
           </ActionErrorTooltip>
-          <Button disabled={saving || disabled} onClick={() => void handleInnerRun()}>
-            {confirmOverwrite ? t('gradingAgent.run.confirm') : t('gradingAgent.run.execute')}
+          <Button disabled={saving || disabled || batchRunning} onClick={() => void handleInnerRun()}>
+            {batchRunning ? (
+              <>
+                <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+                <span>{t('gradingAgent.run.running')}</span>
+              </>
+            ) : confirmOverwrite ? (
+              t('gradingAgent.run.confirm')
+            ) : (
+              t('gradingAgent.run.execute')
+            )}
           </Button>
         </div>
       </div>

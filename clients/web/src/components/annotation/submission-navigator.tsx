@@ -1,4 +1,4 @@
-import { ChevronDown, CheckSquare } from 'lucide-react'
+import { CheckSquare, ChevronDown, Loader2 } from 'lucide-react'
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { ModuleAssignmentSubmissionApi } from '../../lib/courses-api'
 import {
@@ -12,10 +12,17 @@ type SubmissionStudentPickerProps = {
   submissions: ModuleAssignmentSubmissionApi[]
   index: number
   disabled?: boolean
+  syncingSubmissionIds?: ReadonlySet<string>
   onIndexChange: (i: number) => void
 }
 
-function SubmissionStatusBadge({ submission }: { submission: ModuleAssignmentSubmissionApi }) {
+function SubmissionStatusBadge({
+  submission,
+  syncing,
+}: {
+  submission: ModuleAssignmentSubmissionApi
+  syncing?: boolean
+}) {
   const hasSubmission = Boolean(submission.id)
   if (!hasSubmission) {
     return (
@@ -24,6 +31,13 @@ function SubmissionStatusBadge({ submission }: { submission: ModuleAssignmentSub
         title="No submission"
       >
         Missing
+      </span>
+    )
+  }
+  if (syncing) {
+    return (
+      <span title="Syncing to Canvas" className="inline-flex shrink-0">
+        <Loader2 className="h-3.5 w-3.5 motion-safe:animate-spin text-indigo-600 dark:text-indigo-400" aria-hidden />
       </span>
     )
   }
@@ -41,6 +55,7 @@ export function SubmissionStudentPicker({
   submissions,
   index,
   disabled,
+  syncingSubmissionIds,
   onIndexChange,
 }: SubmissionStudentPickerProps) {
   const [open, setOpen] = useState(false)
@@ -130,7 +145,12 @@ export function SubmissionStudentPicker({
         className="flex w-full min-w-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-start text-xs font-semibold text-slate-800 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
       >
         <span className="min-w-0 flex-1 truncate">{currentLabel}</span>
-        {current ? <SubmissionStatusBadge submission={current} /> : null}
+        {current ? (
+          <SubmissionStatusBadge
+            submission={current}
+            syncing={Boolean(current.id && syncingSubmissionIds?.has(current.id))}
+          />
+        ) : null}
         <ChevronDown
           className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${
             open ? 'rotate-180' : ''
@@ -225,7 +245,10 @@ export function SubmissionStudentPicker({
                       {i + 1}.
                     </span>
                     <span className="min-w-0 flex-1 truncate">{label}</span>
-                    <SubmissionStatusBadge submission={submission} />
+                    <SubmissionStatusBadge
+                      submission={submission}
+                      syncing={Boolean(submission.id && syncingSubmissionIds?.has(submission.id))}
+                    />
                   </button>
                 )
               })

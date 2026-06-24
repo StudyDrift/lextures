@@ -33,6 +33,8 @@ describe('DryRunDock', () => {
         consoleOpen
         logs={[{ message: 'Starting dry run…', level: 'info' }]}
         running={false}
+        batchRunning={false}
+        runProgress={null}
       />,
     )
     expect(screen.getByRole('toolbar')).toBeInTheDocument()
@@ -52,6 +54,8 @@ describe('DryRunDock', () => {
         consoleOpen
         logs={[{ message: 'Starting dry run…', level: 'info' }]}
         running={false}
+        batchRunning={false}
+        runProgress={null}
       />,
     )
     const separator = container.querySelector('[role="separator"]')
@@ -73,6 +77,8 @@ describe('DryRunDock', () => {
         consoleOpen
         logs={[{ message: 'Hidden after collapse', level: 'info' }]}
         running={false}
+        batchRunning={false}
+        runProgress={null}
       />,
     )
     fireEvent.click(screen.getByRole('button', { name: 'gradingAgent.dryRun.console.collapse' }))
@@ -81,5 +87,23 @@ describe('DryRunDock', () => {
     expect(screen.queryByRole('button', { name: 'gradingAgent.apply' })).not.toBeInTheDocument()
     expect(screen.getByRole('toolbar')).toHaveTextContent('Hidden after collapse')
     expect(screen.getByRole('toolbar')).toHaveTextContent('12 / 100')
+  })
+
+  it('shows the console dock while a batch run is in progress', () => {
+    render(
+      <DryRunDock
+        workflow={baseWorkflow}
+        rubric={null}
+        maxPoints={100}
+        submissionId="sub-1"
+        consoleOpen={false}
+        logs={[{ message: 'Starting run for 3 submission(s)…', level: 'info' }]}
+        running
+        batchRunning
+        runProgress={{ completed: 1, failed: 0, total: 3 }}
+      />,
+    )
+    expect(screen.getByRole('toolbar')).toHaveTextContent('gradingAgent.run.progress')
+    expect(screen.queryByText('gradingAgent.result.title')).not.toBeInTheDocument()
   })
 })

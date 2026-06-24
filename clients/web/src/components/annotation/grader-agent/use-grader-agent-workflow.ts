@@ -4,6 +4,7 @@ import {
   fetchCourseCanvasLink,
   fetchGraderAgentConfig,
   fetchGraderAgentRun,
+  fetchSubmissionGrade,
   postGraderAgentRun,
   postGraderAgentTemplate,
   putGraderAgentConfig,
@@ -18,7 +19,7 @@ import {
   type RubricDefinition,
 } from '../../../lib/courses-api'
 import { queueCanvasGradeSync } from '../../canvas/canvas-grade-sync'
-import { buildAgentGradeApplyPayload } from './agent-grade-apply'
+import { buildAgentGradeApplyPayload, canvasPayloadFromSubmissionGrade } from './agent-grade-apply'
 import { effectiveWorkflowGraph, synthesizeDefaultGraph } from './default-graph'
 import { isWorkflowRunnable, validateWorkflowGraph } from './validation'
 import type {
@@ -86,6 +87,7 @@ type UseGraderAgentWorkflowArgs = {
   seedWorkflow?: GraderAgentWorkflowSeed | null
   templateMode?: GraderAgentTemplateMode | null
   onApplied?: () => void
+  onSubmissionGraded?: (submissionId: string) => void
 }
 
 export function useGraderAgentWorkflow({
@@ -97,6 +99,7 @@ export function useGraderAgentWorkflow({
   seedWorkflow = null,
   templateMode = null,
   onApplied,
+  onSubmissionGraded,
 }: UseGraderAgentWorkflowArgs) {
   const { t } = useTranslation('common')
   const [savedTemplateId, setSavedTemplateId] = useState<string | null>(templateMode?.templateId ?? null)
@@ -104,10 +107,13 @@ export function useGraderAgentWorkflow({
   const [graph, setGraph] = useState<GraderWorkflowGraph>(() => synthesizeDefaultGraph('', false, false))
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [dryRunning, setDryRunning] = useState(false)
+  const [batchRunning, setBatchRunning] = useState(false)
   const [dryRunError, setDryRunError] = useState<string | null>(null)
   const [dryRunResult, setDryRunResult] = useState<GraderAgentDryRunResult | null>(null)
   const [hadDryRun, setHadDryRun] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [applyingSubmissionId, setApplyingSubmissionId] = useState<string | null>(null)
+  const [syncingSubmissionIds, setSyncingSubmissionIds] = useState<ReadonlySet<string>>(() => new Set())
   const [runScope, setRunScope] = useState<RunScope>('ungraded')
   const [runId, setRunId] = useState<string | null>(null)
   const [runProgress, setRunProgress] = useState<{ completed: number; failed: number; total: number } | null>(null)
@@ -120,6 +126,8 @@ export function useGraderAgentWorkflow({
   const [nodeDryRunDetails, setNodeDryRunDetails] = useState<Record<string, NodeDryRunDetail>>({})
   const [canvasLink, setCanvasLink] = useState<CourseCanvasLinkApi | null>(null)
   const canvasSyncAbortRef = useRef<(() => void) | null>(null)
+  const canvasSyncedSubmissionIdsRef = useRef<Set<string>>(new Set())
+  const lastRunProgressLogRef = useRef<string | null>(null)
 
   const { libraryRubrics, setLibraryRubricAvailability } = useRubricLibraryRubrics(graph)
   const validationOptions = useMemo(
@@ -133,7 +141,11 @@ export function useGraderAgentWorkflow({
   const runnable = isWorkflowRunnable(graph, validationOptions)
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setApplyingSubmissionId(null)
+      setSyncingSubmissionIds(new Set())
+      return
+    }
     setSavedTemplateId(templateMode?.templateId ?? null)
   }, [open, templateMode?.templateId])
 
@@ -227,27 +239,172 @@ export function useGraderAgentWorkflow({
     }
   }, [])
 
-  useEffect(() => {
-    if (!open || !runId) return
-    const timer = window.setInterval(() => {
-      void fetchGraderAgentRun(courseCode, itemId, runId)
-        .then((run) => {
-          setRunProgress({
+  const appendRunLog = useCallback((message: string, level: DryRunLogEntry['level'] = 'info') => {
+    setDryRunLogs((prev) => [...prev, { message, level }])
+  }, [])
+
+  const setBatchNodeExecutionRunning = useCallback(() => {
+    if (!graph) return
+    const states: Record<string, NodeExecutionStatus> = {}
+    for (const node of graph.nodes) {
+      if (node.type !== 'output') {
+        states[node.id] = 'running'
+      }
+    }
+    setNodeExecutionStates(states)
+  }, [graph])
+
+  const resetBatchNodeExecution = useCallback(() => {
+    setNodeExecutionStates({})
+  }, [])
+
+  const addSyncingSubmission = useCallback((id: string) => {
+    setSyncingSubmissionIds((prev) => {
+      if (prev.has(id)) return prev
+      const next = new Set(prev)
+      next.add(id)
+      return next
+    })
+  }, [])
+
+  const removeSyncingSubmission = useCallback((id: string) => {
+    setSyncingSubmissionIds((prev) => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }, [])
+
+  const finishAppliedSubmission = useCallback(
+    (id: string) => {
+      removeSyncingSubmission(id)
+      setApplyingSubmissionId((current) => (current === id ? null : current))
+      onSubmissionGraded?.(id)
+    },
+    [onSubmissionGraded, removeSyncingSubmission],
+  )
+
+  const syncAppliedResultToCanvas = useCallback(
+    async (submissionId: string) => {
+      if (!canvasLink?.linked || !canvasLink.gradeSyncEnabled) return
+      if (canvasSyncedSubmissionIdsRef.current.has(submissionId)) return
+      canvasSyncedSubmissionIdsRef.current.add(submissionId)
+      addSyncingSubmission(submissionId)
+      try {
+        const grade = await fetchSubmissionGrade(courseCode, itemId, submissionId)
+        const syncHandle = queueCanvasGradeSync({
+          courseCode,
+          itemId,
+          submissionId,
+          canvasLink,
+          gradePayload: canvasPayloadFromSubmissionGrade(grade),
+          onComplete: () => {
+            finishAppliedSubmission(submissionId)
+            onApplied?.()
+          },
+          onError: (message) => {
+            finishAppliedSubmission(submissionId)
+            appendRunLog(message, 'warn')
+          },
+        })
+        if (syncHandle) {
+          canvasSyncAbortRef.current = syncHandle.abort
+        } else {
+          finishAppliedSubmission(submissionId)
+        }
+      } catch (e) {
+        finishAppliedSubmission(submissionId)
+        appendRunLog(
+          e instanceof Error ? e.message : 'Could not load grade for Canvas sync.',
+          'warn',
+        )
+      }
+    },
+    [addSyncingSubmission, appendRunLog, canvasLink, courseCode, finishAppliedSubmission, itemId, onApplied],
+  )
+
+  const processRunStatus = useCallback(
+    async (run: GraderAgentRunStatus) => {
+      setRunProgress({
+        completed: run.completedCount,
+        failed: run.failedCount,
+        total: run.totalCount,
+      })
+      setRunResults(run.results)
+
+      const progressKey = `${run.completedCount}:${run.failedCount}:${run.totalCount}`
+      if (progressKey !== lastRunProgressLogRef.current) {
+        lastRunProgressLogRef.current = progressKey
+        appendRunLog(
+          t('gradingAgent.run.progress', {
             completed: run.completedCount,
             failed: run.failedCount,
             total: run.totalCount,
-          })
-          setRunResults(run.results)
-          setStatusMessage(`${run.completedCount} / ${run.totalCount} complete`)
-          if (run.status === 'done' || run.status === 'error') {
-            window.clearInterval(timer)
-            onApplied?.()
-          }
-        })
-        .catch(() => undefined)
+          }),
+        )
+      }
+
+      for (const result of run.results) {
+        if (result.status !== 'applied') continue
+        void syncAppliedResultToCanvas(result.submissionId)
+      }
+
+      setStatusMessage(`${run.completedCount} / ${run.totalCount} complete`)
+
+      if (run.status === 'done' || run.status === 'error') {
+        setBatchRunning(false)
+        resetBatchNodeExecution()
+        const appliedCount = run.results.filter((result) => result.status === 'applied').length
+        if (run.status === 'error') {
+          appendRunLog(t('gradingAgent.run.failed'), 'error')
+          setStatusMessage(t('gradingAgent.run.failed'))
+        } else {
+          appendRunLog(
+            t('gradingAgent.run.complete', {
+              applied: appliedCount,
+              failed: run.failedCount,
+            }),
+          )
+          setStatusMessage(t('gradingAgent.run.complete', { applied: appliedCount, failed: run.failedCount }))
+        }
+        onApplied?.()
+        return true
+      }
+      return false
+    },
+    [appendRunLog, onApplied, resetBatchNodeExecution, syncAppliedResultToCanvas, t],
+  )
+
+  useEffect(() => {
+    if (!open || !runId) return
+    let cancelled = false
+    let timer: number | undefined
+
+    const poll = async () => {
+      try {
+        const run = await fetchGraderAgentRun(courseCode, itemId, runId)
+        if (cancelled) return
+        const finished = await processRunStatus(run)
+        if (finished && timer !== undefined) {
+          window.clearInterval(timer)
+        }
+      } catch {
+        if (!cancelled) {
+          appendRunLog(t('gradingAgent.run.pollFailed'), 'warn')
+        }
+      }
+    }
+
+    void poll()
+    timer = window.setInterval(() => {
+      void poll()
     }, 1500)
-    return () => window.clearInterval(timer)
-  }, [open, runId, courseCode, itemId, onApplied])
+    return () => {
+      cancelled = true
+      if (timer !== undefined) window.clearInterval(timer)
+    }
+  }, [open, runId, courseCode, itemId, processRunStatus, appendRunLog, t])
 
   const updateGraph = useCallback((next: GraderWorkflowGraph) => {
     setGraph(next)
@@ -648,12 +805,13 @@ export function useGraderAgentWorkflow({
 
   const handleApply = async () => {
     if (!submissionId || !dryRunResult || dryRunResult.flagged || dryRunResult.held?.wouldHold) return
+    if (applyingSubmissionId === submissionId) return
     const built = buildAgentGradeApplyPayload(dryRunResult, rubric)
     if (!built.ok) {
       setDryRunError(built.error)
       return
     }
-    setSaving(true)
+    setApplyingSubmissionId(submissionId)
     setDryRunError(null)
     canvasSyncAbortRef.current?.()
     canvasSyncAbortRef.current = null
@@ -669,27 +827,31 @@ export function useGraderAgentWorkflow({
           canvasLink,
           gradePayload: built.canvasPayload,
           onComplete: () => {
+            finishAppliedSubmission(submissionId)
             setStatusMessage('Grade applied and synced to Canvas.')
             onApplied?.()
           },
           onError: (message) => {
+            finishAppliedSubmission(submissionId)
             setStatusMessage(message)
           },
         })
         if (syncHandle) {
           canvasSyncAbortRef.current = syncHandle.abort
+          addSyncingSubmission(submissionId)
           setStatusMessage('Grade applied. Syncing to Canvas…')
           startedCanvasSync = true
         }
       }
       if (!startedCanvasSync) {
+        finishAppliedSubmission(submissionId)
         setStatusMessage('Grade applied.')
       }
     } catch (e) {
+      setApplyingSubmissionId(null)
+      removeSyncingSubmission(submissionId)
       setDryRunError(e instanceof Error ? e.message : 'Could not apply grade.')
       setStatusMessage('')
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -792,12 +954,22 @@ export function useGraderAgentWorkflow({
         overwrite: runScope === 'all',
         authoredVia: 'canvas',
       })
+      canvasSyncedSubmissionIdsRef.current = new Set()
+      lastRunProgressLogRef.current = null
       setRunId(res.runId)
       setRunProgress({ completed: 0, failed: 0, total: res.totalCount })
       setConfirmOverwrite(false)
-      setStatusMessage('Run started.')
+      setBatchRunning(true)
+      setDryRunConsoleOpen(true)
+      resetDryRunVisualState()
+      setBatchNodeExecutionRunning()
+      appendRunLog(t('gradingAgent.run.starting', { total: res.totalCount }))
+      setStatusMessage(t('gradingAgent.run.starting', { total: res.totalCount }))
     } catch (e) {
-      setDryRunError(e instanceof Error ? e.message : 'Could not start run.')
+      setBatchRunning(false)
+      resetBatchNodeExecution()
+      setDryRunError(e instanceof Error ? e.message : t('gradingAgent.error.run'))
+      setStatusMessage('')
     } finally {
       setSaving(false)
     }
@@ -845,11 +1017,14 @@ export function useGraderAgentWorkflow({
     selectedNodeId,
     setSelectedNodeId,
     dryRunning,
+    batchRunning,
     dryRunError,
     dryRunResult,
     setDryRunResult,
     hadDryRun,
     saving,
+    applyingSubmissionId,
+    syncingSubmissionIds,
     runScope,
     setRunScope,
     runProgress,

@@ -19,6 +19,8 @@ type DryRunDockProps = {
   consoleOpen: boolean
   logs: DryRunLogEntry[]
   running: boolean
+  batchRunning: boolean
+  runProgress: { completed: number; failed: number; total: number } | null
 }
 
 type StatusBarSegmentProps = {
@@ -83,6 +85,8 @@ export function DryRunDock({
   consoleOpen,
   logs,
   running,
+  batchRunning,
+  runProgress,
 }: DryRunDockProps) {
   const { t } = useTranslation('common')
   const { dryRunResult } = workflow
@@ -94,20 +98,28 @@ export function DryRunDock({
     maxHeight: DOCK_MAX_HEIGHT,
   })
 
-  if (!consoleOpen && !dryRunResult) return null
+  const dockVisible = consoleOpen || Boolean(dryRunResult) || batchRunning
+  if (!dockVisible) return null
 
-  const showPreview = Boolean(dryRunResult)
-  const showConsolePanel = consoleOpen && consoleExpanded
+  const showPreview = Boolean(dryRunResult) && !batchRunning
+  const showConsole = consoleOpen || batchRunning
+  const showConsolePanel = showConsole && consoleExpanded
   const showPreviewPanel = showPreview && previewExpanded
   const showExpandedPanels = showConsolePanel || showPreviewPanel
   const bothPanelsVisible = showConsolePanel && showPreviewPanel
 
-  const consoleSummary = dryRunConsoleSummary(
-    logs,
-    running,
-    t('gradingAgent.dryRun.running'),
-    t('gradingAgent.dryRun.console.empty'),
-  )
+  const consoleSummary = batchRunning && runProgress
+    ? t('gradingAgent.run.progress', {
+        completed: runProgress.completed,
+        failed: runProgress.failed,
+        total: runProgress.total,
+      })
+    : dryRunConsoleSummary(
+        logs,
+        running,
+        t('gradingAgent.dryRun.running'),
+        t('gradingAgent.dryRun.console.empty'),
+      )
   const previewSummary = previewDockSummary(dryRunResult, maxPoints)
 
   return (
@@ -147,7 +159,7 @@ export function DryRunDock({
         aria-label={t('gradingAgent.dryRun.statusBar.label')}
         className="flex border-t border-slate-200 dark:border-neutral-700"
       >
-        {consoleOpen ? (
+        {showConsole ? (
           <StatusBarSegment
             tone="console"
             title={t('gradingAgent.dryRun.console.title')}

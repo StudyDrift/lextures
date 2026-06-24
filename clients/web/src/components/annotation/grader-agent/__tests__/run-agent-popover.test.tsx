@@ -14,6 +14,7 @@ const defaultProps = {
   dryRunDisabled: false,
   dryRunTooltip: null,
   dryRunning: false,
+  batchRunning: false,
   runScope: 'ungraded' as const,
   setRunScope: vi.fn(),
   confirmOverwrite: false,
