@@ -31,6 +31,16 @@ type DefaultTemplateSpec struct {
 	Graph                    WorkflowGraph
 }
 
+// IsDefaultTemplateName reports whether name matches a built-in template seeded for every course.
+func IsDefaultTemplateName(name string) bool {
+	for _, spec := range DefaultTemplates() {
+		if spec.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 // DefaultTemplates returns the built-in grading agent workflow templates.
 func DefaultTemplates() []DefaultTemplateSpec {
 	return []DefaultTemplateSpec{

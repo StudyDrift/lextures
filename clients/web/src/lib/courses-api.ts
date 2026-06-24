@@ -5966,6 +5966,7 @@ export type GraderAgentTemplateApi = {
 export type CourseGradingAgentTemplateSummary = {
   id: string
   name: string
+  isBuiltin?: boolean
   updatedAt: string
 }
 
@@ -6040,6 +6041,20 @@ export async function postGraderAgentTemplate(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as { template: GraderAgentTemplateApi }
+}
+
+export async function deleteGraderAgentTemplate(
+  courseCode: string,
+  templateId: string,
+): Promise<void> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/grader-agent-templates/${encodeURIComponent(templateId)}`,
+    { method: 'DELETE' },
+  )
+  if (!res.ok) {
+    const raw: unknown = await res.json().catch(() => ({}))
+    throw new Error(readApiErrorMessage(raw))
+  }
 }
 
 export async function postGraderAgentDryRun(
