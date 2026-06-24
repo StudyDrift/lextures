@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	calendarsvc "github.com/lextures/lextures/server/internal/service/calendar"
 )
 
 // handlePatchCourseStructureItem is PATCH /api/v1/courses/{course_code}/structure/items/{item_id}
@@ -170,6 +171,9 @@ func (d Deps) handlePatchCourseStructureItemDueAt() http.HandlerFunc {
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update due date.")
 			return
+		}
+		if d.calendarFeedsEnabled() {
+			calendarsvc.DefaultFeedCache.InvalidateCourse(cid.String())
 		}
 		w.WriteHeader(http.StatusNoContent)
 	}
