@@ -17,6 +17,7 @@ type Entry struct {
 	CourseID         *uuid.UUID
 	Feature          string
 	Model            string
+	Provider         string
 	PromptTokens     int
 	CompletionTokens int
 	TotalTokens      int
@@ -37,25 +38,35 @@ func Insert(ctx context.Context, pool *pgxpool.Pool, e Entry) error {
 	if model == "" {
 		model = "unknown"
 	}
+	provider := strings.TrimSpace(e.Provider)
+	if provider == "" {
+		provider = "openrouter"
+	}
 	total := e.TotalTokens
 	if total == 0 {
 		total = e.PromptTokens + e.CompletionTokens
 	}
 	_, err := pool.Exec(ctx, `
 INSERT INTO analytics.ai_usage_log
-  (user_id, course_id, feature, model, prompt_tokens, completion_tokens, total_tokens, cost_usd, succeeded)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-`, e.UserID, e.CourseID, feature, model, e.PromptTokens, e.CompletionTokens, total, e.CostUSD, e.Succeeded)
+  (user_id, course_id, feature, model, provider, prompt_tokens, completion_tokens, total_tokens, cost_usd, succeeded)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+`, e.UserID, e.CourseID, feature, model, provider, e.PromptTokens, e.CompletionTokens, total, e.CostUSD, e.Succeeded)
 	return err
 }
 
 // EntryFromUsage builds a log entry from an OpenRouter result.
 func EntryFromUsage(userID, courseID *uuid.UUID, feature, model string, usage openrouter.UsageInfo, succeeded bool) Entry {
+	return EntryFromProviderUsage(userID, courseID, feature, model, "openrouter", usage, succeeded)
+}
+
+// EntryFromProviderUsage builds a log entry with an explicit provider label.
+func EntryFromProviderUsage(userID, courseID *uuid.UUID, feature, model, provider string, usage openrouter.UsageInfo, succeeded bool) Entry {
 	return Entry{
 		UserID:           userID,
 		CourseID:         courseID,
 		Feature:          feature,
 		Model:            model,
+		Provider:         provider,
 		PromptTokens:     usage.PromptTokens,
 		CompletionTokens: usage.CompletionTokens,
 		TotalTokens:      usage.TotalTokens,

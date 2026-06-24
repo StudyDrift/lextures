@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
+
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/organization"
 	"github.com/lextures/lextures/server/internal/repos/systemprompts"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/repos/userai"
@@ -65,15 +68,20 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 		if !d.enforceAIGateway(w, r, userID, aigateway.FeatureRAGNotebook, model, contentKey) {
 			return
 		}
-		if d.openRouterClient() == nil {
+		if d.openRouterClient() == nil && d.aiProviderResolver() == nil {
 			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeAiNotConfigured, "AI features are not configured on this server.")
 			return
+		}
+		var orgID *uuid.UUID
+		if oid, err := organization.OrgIDForUser(r.Context(), d.Pool, userID); err == nil {
+			orgID = &oid
 		}
 		gwDec := aigateway.Decision{
 			UserIDHash:     aigateway.UserIDHash(d.aiGatewayConfig().HMACSecret, userID),
 			OptInConfirmed: true,
 		}
-		resp, err := notebookrag.Answer(r.Context(), d.Pool, d.openRouterClient(), userID, body.Question, docs)
+		resolver := d.aiProviderResolver()
+		resp, callMeta, err := notebookrag.Answer(r.Context(), d.Pool, resolver, orgID, userID, body.Question, docs)
 		if err != nil {
 			if notebookrag.IsValidationError(err) {
 				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
@@ -90,7 +98,8 @@ func (d Deps) handleNotebookQuery() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not complete notebook query.")
 			return
 		}
-		d.logAIInferenceAllowed(r, userID, aigateway.FeatureRAGNotebook, model, contentKey, gwDec)
+		d.logAIInferenceAllowedWithProvider(r, userID, aigateway.FeatureRAGNotebook, model, string(callMeta.Provider), contentKey, gwDec)
+		d.recordAIProviderUsage(r.Context(), AIUsageMeta{UserID: userID, Feature: aigateway.FeatureRAGNotebook, Model: model}, callMeta, true)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
 	}

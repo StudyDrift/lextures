@@ -284,6 +284,8 @@ type Config struct {
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.
 	AiDisclosureEnabled bool
+	// AiProviderAbstractionEnabled gates per-tenant AI provider selection and BYOK (plan 16.7). Defaults to false.
+	AiProviderAbstractionEnabled bool
 	// SecurityDisclosureModuleEnabled gates responsible-disclosure report triage APIs (plan 10.16).
 	SecurityDisclosureModuleEnabled bool
 	// BackupModuleEnabled gates backup/restore ops: backup status and restore drill APIs (plan 10.15).
@@ -664,6 +666,8 @@ func Load() Config {
 		TwilioFromNumber:                  firstNonEmptyTrimmed("TWILIO_FROM_NUMBER"),
 
 		EnableAPIDocs: boolEnv("ENABLE_API_DOCS"),
+
+		AiProviderAbstractionEnabled: boolEnv("AI_PROVIDER_ABSTRACTION_ENABLED"),
 	}
 }
 

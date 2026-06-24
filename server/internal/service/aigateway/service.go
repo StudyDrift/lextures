@@ -19,7 +19,12 @@ import (
 )
 
 const (
-	ProviderOpenRouter = "openrouter"
+	ProviderOpenRouter  = "openrouter"
+	ProviderAnthropic   = "anthropic"
+	ProviderOpenAI      = "openai"
+	ProviderAzureOpenAI = "azure_openai"
+	ProviderBedrock     = "bedrock"
+	ProviderVertex      = "vertex"
 	ReadPermission     = "compliance:ai:read:*"
 
 	FeatureAITutor            = "ai_tutor"

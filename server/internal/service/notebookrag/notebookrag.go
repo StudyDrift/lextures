@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lextures/lextures/server/internal/repos/userai"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
+	"github.com/lextures/lextures/server/internal/service/aiprovider"
 )
 
 const (
@@ -299,14 +299,19 @@ func normalizeMarkdownOutput(raw string) string {
 	return strings.TrimSpace(strings.Join(lines, "\n"))
 }
 
-// Answer runs validation, retrieval, and the OpenRouter call (used by HTTP handler).
-func Answer(ctx context.Context, pool *pgxpool.Pool, or *openrouter.Client, userID uuid.UUID, question string, notebooks []DocInput) (Response, error) {
+// Completer performs provider-agnostic chat completions (plan 16.7).
+type Completer interface {
+	Complete(ctx context.Context, orgID *uuid.UUID, modelOverride string, messages []aiprovider.Message, opts ...aiprovider.ChatOptions) (aiprovider.ChatResult, aiprovider.CallMeta, error)
+}
+
+// Answer runs validation, retrieval, and the AI provider call (used by HTTP handler).
+func Answer(ctx context.Context, pool *pgxpool.Pool, ai Completer, orgID *uuid.UUID, userID uuid.UUID, question string, notebooks []DocInput) (Response, aiprovider.CallMeta, error) {
 	if err := ValidateRequest(question, notebooks); err != nil {
-		return Response{}, err
+		return Response{}, aiprovider.CallMeta{}, err
 	}
 	model, err := userai.GetCourseSetupModelID(ctx, pool, userID)
 	if err != nil {
-		return Response{}, err
+		return Response{}, aiprovider.CallMeta{}, err
 	}
 	q := strings.TrimSpace(question)
 	chunks := retrieveChunks(q, notebooks)
@@ -322,22 +327,22 @@ func Answer(ctx context.Context, pool *pgxpool.Pool, or *openrouter.Client, user
 		context.WriteString(ch.text)
 	}
 	if strings.TrimSpace(context.String()) == "" {
-		return Response{AnswerMarkdown: emptyNotebooksMsg, Sources: nil}, nil
+		return Response{AnswerMarkdown: emptyNotebooksMsg, Sources: nil}, aiprovider.CallMeta{}, nil
 	}
 	userBody := fmt.Sprintf(
 		"Student question:\n---\n%s\n---\n\nRelevant notebook excerpts (only use these as evidence):%s",
 		q, context.String())
-	msgs := []openrouter.Message{
+	msgs := []aiprovider.Message{
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: userBody},
 	}
-	text, err := or.ChatCompletion(model, msgs)
+	text, meta, err := ai.Complete(ctx, orgID, model, msgs)
 	if err != nil {
-		return Response{}, &GenerationError{Message: err.Error()}
+		return Response{}, meta, &GenerationError{Message: err.Error()}
 	}
 	answer := normalizeMarkdownOutput(text.Text)
 	if answer == "" {
-		return Response{}, &GenerationError{Message: "The model returned an empty response."}
+		return Response{}, meta, &GenerationError{Message: "The model returned an empty response."}
 	}
 	sources := make([]Source, 0, len(chunks))
 	for i := range chunks {
@@ -348,5 +353,5 @@ func Answer(ctx context.Context, pool *pgxpool.Pool, or *openrouter.Client, user
 			Excerpt:     excerpt(ch.text),
 		})
 	}
-	return Response{AnswerMarkdown: answer, Sources: sources}, nil
+	return Response{AnswerMarkdown: answer, Sources: sources}, meta, nil
 }
