@@ -125,6 +125,7 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/dry-run/ws", d.handleGraderAgentDryRunWS())
 	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs", d.handlePostGraderAgentRun())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs/{run_id}", d.handleGetGraderAgentRun())
+	r.Patch("/api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/results/{result_id}", d.handlePatchGraderAgentResult())
 	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/regrade-request", d.handlePostGraderAgentRegradeRequest())
 	r.Post("/api/v1/courses/{course_code}/assignments/{item_id}/submissions/upload", d.handlePostAssignmentSubmissionUpload())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/submissions/{submission_id}/attachments/archive", d.handleGetSubmissionAttachmentsArchive())

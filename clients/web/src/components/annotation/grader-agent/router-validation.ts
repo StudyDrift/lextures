@@ -4,6 +4,7 @@ import {
   HANDLE_AI_OUTPUT,
   HANDLE_COMMENTS,
   HANDLE_ELSE,
+  HANDLE_FLAG,
   HANDLE_GRADE,
   HANDLE_REPORT,
   HANDLE_SCORE,
@@ -12,6 +13,9 @@ import {
   isAiNodeType,
   isCodeTestRunnerNodeType,
   isConditionalRouterNodeType,
+  isCriterionGraderNodeType,
+  isFlagForReviewNodeType,
+  isOriginalityNodeType,
   isStudentSubmissionNodeType,
   type ConditionalRouterConditionField,
 } from './types'
@@ -39,30 +43,38 @@ function routerHandleHasEdges(graph: GraderWorkflowGraph, routerId: string, hand
   return graph.edges.some((e) => e.source === routerId && (e.sourceHandle ?? '') === handle)
 }
 
-function branchReachesOutputGrade(graph: GraderWorkflowGraph, routerId: string, handle: string): boolean {
+function branchReachesTerminal(
+  graph: GraderWorkflowGraph,
+  routerId: string,
+  handle: string,
+  nodeById: Map<string, GraderWorkflowGraph['nodes'][number]>,
+): boolean {
   const outputNode = graph.nodes.find((n) => n.type === 'output')
-  if (!outputNode) return false
-  if (
-    graph.edges.some(
-      (e) =>
-        e.source === routerId &&
-        (e.sourceHandle ?? '') === handle &&
-        e.target === outputNode.id &&
-        (e.targetHandle ?? '') === HANDLE_GRADE,
-    )
-  ) {
-    return true
+  for (const e of graph.edges) {
+    if (e.source !== routerId || (e.sourceHandle ?? '') !== handle) continue
+    const tgt = nodeById.get(e.target)
+    if (!tgt) continue
+    if (isFlagForReviewNodeType(tgt.type)) return true
+    if (tgt.type === 'output' && outputNode && e.target === outputNode.id && (e.targetHandle ?? '') === HANDLE_GRADE) {
+      return true
+    }
   }
   const starts = graph.edges
     .filter((e) => e.source === routerId && (e.sourceHandle ?? '') === handle)
     .map((e) => e.target)
   const reachable = forwardReachable(graph, starts)
-  return graph.edges.some(
-    (e) =>
-      e.target === outputNode.id &&
-      (e.targetHandle ?? '') === HANDLE_GRADE &&
-      reachable.has(e.source),
-  )
+  for (const node of graph.nodes) {
+    if (isFlagForReviewNodeType(node.type) && reachable.has(node.id)) return true
+  }
+  if (outputNode) {
+    return graph.edges.some(
+      (e) =>
+        e.target === outputNode.id &&
+        (e.targetHandle ?? '') === HANDLE_GRADE &&
+        reachable.has(e.source),
+    )
+  }
+  return false
 }
 
 function routerInputSources(graph: GraderWorkflowGraph, routerId: string): string[] {
@@ -81,7 +93,13 @@ function walkUpstreamForGrade(
   visited.add(nodeId)
   const node = nodeById.get(nodeId)
   if (!node) return false
-  if (node.type === 'grader' || isAiNodeType(node.type) || isCodeTestRunnerNodeType(node.type)) {
+  if (
+    node.type === 'grader' ||
+    node.type === 'criterionGrader' ||
+    isAiNodeType(node.type) ||
+    isCodeTestRunnerNodeType(node.type) ||
+    isOriginalityNodeType(node.type)
+  ) {
     return true
   }
   if (isConditionalRouterNodeType(node.type)) {
@@ -110,7 +128,36 @@ function availableRouterFields(
     available.add('score')
     available.add('confidence')
   }
+  const originalityVisited = new Set<string>()
+  if (
+    routerInputSources(graph, routerId).some((src) =>
+      walkUpstreamForOriginality(graph, src, nodeById, originalityVisited),
+    )
+  ) {
+    available.add('originalityScore')
+  }
   return available
+}
+
+function walkUpstreamForOriginality(
+  graph: GraderWorkflowGraph,
+  nodeId: string,
+  nodeById: Map<string, GraderWorkflowGraph['nodes'][number]>,
+  visited: Set<string>,
+): boolean {
+  if (visited.has(nodeId)) return false
+  visited.add(nodeId)
+  const node = nodeById.get(nodeId)
+  if (!node) return false
+  if (isOriginalityNodeType(node.type)) return true
+  if (isConditionalRouterNodeType(node.type)) {
+    return routerInputSources(graph, nodeId).some((src) =>
+      walkUpstreamForOriginality(graph, src, nodeById, visited),
+    )
+  }
+  return graph.edges
+    .filter((e) => e.target === nodeId)
+    .some((e) => walkUpstreamForOriginality(graph, e.source, nodeById, visited))
 }
 
 export function validateRouterIssues(
@@ -136,7 +183,7 @@ export function validateRouterIssues(
           message: `Field "${field}" is not available on this node's input path.`,
         })
       }
-      if (routerFieldRequiresOriginality(field)) {
+      if (routerFieldRequiresOriginality(field) && !available.has('originalityScore')) {
         issues.push({
           field: `node:${node.id}.condition.field`,
           message: `Field "${field}" is not available on this node's input path.`,
@@ -145,10 +192,10 @@ export function validateRouterIssues(
     }
     for (const handle of [HANDLE_THEN, HANDLE_ELSE] as const) {
       if (!routerHandleHasEdges(graph, node.id, handle)) continue
-      if (!branchReachesOutputGrade(graph, node.id, handle)) {
+      if (!branchReachesTerminal(graph, node.id, handle, nodeById)) {
         issues.push({
           field: `node:${node.id}.${handle}`,
-          message: `The ${handle} branch must reach the Student Grade grade slot.`,
+          message: `The ${handle} branch must reach a terminal (Student Grade or Flag for Review).`,
         })
       }
     }
@@ -159,7 +206,12 @@ export function validateRouterIssues(
 export function routerInputSourceIsValid(sourceType: string, sourceHandle: string): boolean {
   if (isStudentSubmissionNodeType(sourceType) && sourceHandle === HANDLE_SUBMISSION) return true
   if (isAiNodeType(sourceType) && sourceHandle === HANDLE_AI_OUTPUT) return true
-  if (sourceType === 'grader' && (sourceHandle === HANDLE_GRADE || sourceHandle === HANDLE_COMMENTS)) return true
+  if (
+    (sourceType === 'grader' || isCriterionGraderNodeType(sourceType)) &&
+    (sourceHandle === HANDLE_GRADE || sourceHandle === HANDLE_COMMENTS)
+  ) {
+    return true
+  }
   if (
     isCodeTestRunnerNodeType(sourceType) &&
     (sourceHandle === HANDLE_GRADE || sourceHandle === HANDLE_REPORT || sourceHandle === HANDLE_SCORE)
@@ -168,6 +220,9 @@ export function routerInputSourceIsValid(sourceType: string, sourceHandle: strin
   }
   if (isConditionalRouterNodeType(sourceType) && (sourceHandle === HANDLE_THEN || sourceHandle === HANDLE_ELSE)) {
     return true
+  }
+  if (isOriginalityNodeType(sourceType)) {
+    return sourceHandle === HANDLE_SCORE || sourceHandle === HANDLE_REPORT || sourceHandle === HANDLE_FLAG
   }
   return false
 }

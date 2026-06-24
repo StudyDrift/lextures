@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { aiOutputFormatForNode, buildAiSystemPrompt } from '../ai-output-system-prompt'
+import { aiOutputFormatForNode, buildAiSystemPrompt, buildCriterionSystemPrompt } from '../ai-output-system-prompt'
 import type { GraderWorkflowGraph } from '../types'
 
 function graphWithRubricInput(): GraderWorkflowGraph {
@@ -33,5 +33,18 @@ describe('ai output system prompt', () => {
     }, 10)
     expect(prompt).toContain('a1b2c3d4-e5f6-7890-abcd-ef1234567890')
     expect(prompt).toContain('"total": 8')
+  })
+
+  it('builds single-criterion system prompt', () => {
+    const prompt = buildCriterionSystemPrompt({
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      title: 'Thesis',
+      levels: [
+        { label: 'Weak', points: 0 },
+        { label: 'Strong', points: 4 },
+      ],
+    })
+    expect(prompt).toContain('a1b2c3d4-e5f6-7890-abcd-ef1234567890')
+    expect(prompt).toContain('"score": 4')
   })
 })

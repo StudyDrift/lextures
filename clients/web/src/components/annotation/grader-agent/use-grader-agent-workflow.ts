@@ -13,6 +13,7 @@ import {
   type CourseCanvasLinkApi,
   type GraderAgentConfigApi,
   type GraderAgentDryRunResult,
+  type GraderAgentRunStatus,
   type GraderWorkflowGraphApi,
   type RubricDefinition,
 } from '../../../lib/courses-api'
@@ -20,8 +21,24 @@ import { queueCanvasGradeSync } from '../../canvas/canvas-grade-sync'
 import { buildAgentGradeApplyPayload } from './agent-grade-apply'
 import { effectiveWorkflowGraph, synthesizeDefaultGraph } from './default-graph'
 import { isWorkflowRunnable, validateWorkflowGraph } from './validation'
-import type { CodeTestRunnerNodeData, ConditionalRouterNodeData, GraderWorkflowGraph, PaletteNodeType, WorkflowValidationIssue } from './types'
-import { defaultCodeTestRunnerNodeData, defaultConditionalRouterNodeData } from './types'
+import type {
+  CodeTestRunnerNodeData,
+  ConditionalRouterNodeData,
+  CriterionGraderNodeData,
+  FlagForReviewNodeData,
+  HumanReviewGateNodeData,
+  OriginalityNodeData,
+  GraderWorkflowGraph,
+  PaletteNodeType,
+  WorkflowValidationIssue,
+} from './types'
+import {
+  defaultCodeTestRunnerNodeData,
+  defaultConditionalRouterNodeData,
+  defaultFlagForReviewNodeData,
+  defaultHumanReviewGateNodeData,
+  defaultOriginalityNodeData,
+} from './types'
 import { newWorkflowNodeId } from './workflow-node-id'
 import { patchWorkflowNodeLabel } from './workflow-node-label'
 
@@ -87,6 +104,7 @@ export function useGraderAgentWorkflow({
   const [runScope, setRunScope] = useState<RunScope>('ungraded')
   const [runId, setRunId] = useState<string | null>(null)
   const [runProgress, setRunProgress] = useState<{ completed: number; failed: number; total: number } | null>(null)
+  const [runResults, setRunResults] = useState<GraderAgentRunStatus['results']>([])
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [statusMessage, setStatusMessage] = useState('')
   const [nodeExecutionStates, setNodeExecutionStates] = useState<Record<string, NodeExecutionStatus>>({})
@@ -96,8 +114,11 @@ export function useGraderAgentWorkflow({
   const [canvasLink, setCanvasLink] = useState<CourseCanvasLinkApi | null>(null)
   const canvasSyncAbortRef = useRef<(() => void) | null>(null)
 
-  const validationIssues = useMemo(() => validateWorkflowGraph(graph), [graph])
-  const runnable = isWorkflowRunnable(graph)
+  const validationIssues = useMemo(
+    () => validateWorkflowGraph(graph, { rubric, assignmentItemId: itemId }),
+    [graph, rubric, itemId],
+  )
+  const runnable = isWorkflowRunnable(graph, { rubric, assignmentItemId: itemId })
 
   useEffect(() => {
     if (!open) return
@@ -204,6 +225,7 @@ export function useGraderAgentWorkflow({
             failed: run.failedCount,
             total: run.totalCount,
           })
+          setRunResults(run.results)
           setStatusMessage(`${run.completedCount} / ${run.totalCount} complete`)
           if (run.status === 'done' || run.status === 'error') {
             window.clearInterval(timer)
@@ -245,6 +267,19 @@ export function useGraderAgentWorkflow({
     [graph],
   )
 
+  const updateCriterionGraderNode = useCallback(
+    (nodeId: string, patch: Partial<CriterionGraderNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
   const addPaletteNode = useCallback(
     (type: PaletteNodeType, position?: { x: number; y: number }) => {
       if (!graph) return
@@ -257,7 +292,15 @@ export function useGraderAgentWorkflow({
               ? 'ctr'
               : type === 'conditionalRouter'
                 ? 'rtr'
-                : 'ai'
+                : type === 'flagForReview'
+                  ? 'flag'
+                  : type === 'humanReviewGate'
+                    ? 'gate'
+                    : type === 'originality'
+                      ? 'orig'
+                      : type === 'criterionGrader'
+                    ? 'cg'
+                    : 'ai'
       const id = newWorkflowNodeId(prefix)
       setSelectedNodeId(id)
       setGraph((current) => {
@@ -271,7 +314,15 @@ export function useGraderAgentWorkflow({
                 ? { x: -320, y: -40 + current.nodes.length * 40 }
                 : type === 'conditionalRouter'
                   ? { x: -320, y: 80 + current.nodes.length * 40 }
-              : { x: -320, y: 40 + current.nodes.length * 40 }
+                  : type === 'flagForReview'
+                    ? { x: 160, y: 80 + current.nodes.length * 40 }
+                    : type === 'humanReviewGate'
+                      ? { x: 0, y: 40 + current.nodes.length * 40 }
+                      : type === 'originality'
+                        ? { x: -160, y: 120 + current.nodes.length * 40 }
+                        : type === 'criterionGrader'
+                      ? { x: -320, y: 0 + current.nodes.length * 40 }
+                      : { x: -320, y: 40 + current.nodes.length * 40 }
         const data =
           type === 'activity'
             ? { assignmentItemId: itemId }
@@ -279,7 +330,15 @@ export function useGraderAgentWorkflow({
               ? defaultCodeTestRunnerNodeData()
               : type === 'conditionalRouter'
                 ? defaultConditionalRouterNodeData()
-              : {}
+                : type === 'flagForReview'
+                  ? defaultFlagForReviewNodeData()
+                  : type === 'humanReviewGate'
+                    ? defaultHumanReviewGateNodeData()
+                    : type === 'originality'
+                      ? defaultOriginalityNodeData()
+                      : type === 'criterionGrader'
+                    ? { prompt: '' }
+                    : {}
         return {
           ...current,
           nodes: [
@@ -322,6 +381,57 @@ export function useGraderAgentWorkflow({
     },
     [graph],
   )
+
+  const updateFlagForReviewNode = useCallback(
+    (nodeId: string, patch: Partial<FlagForReviewNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
+  const updateOriginalityNode = useCallback(
+    (nodeId: string, patch: Partial<OriginalityNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
+  const updateHumanReviewGateNode = useCallback(
+    (nodeId: string, patch: Partial<HumanReviewGateNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
+  const refreshRunResults = useCallback(async () => {
+    if (!runId) return
+    const run = await fetchGraderAgentRun(courseCode, itemId, runId)
+    setRunResults(run.results)
+    setRunProgress({
+      completed: run.completedCount,
+      failed: run.failedCount,
+      total: run.totalCount,
+    })
+    onApplied?.()
+  }, [courseCode, itemId, onApplied, runId])
 
   const updateActivityNode = useCallback(
     (nodeId: string, patch: { assignmentItemId?: string | null }) => {
@@ -468,7 +578,7 @@ export function useGraderAgentWorkflow({
   }
 
   const handleApply = async () => {
-    if (!submissionId || !dryRunResult) return
+    if (!submissionId || !dryRunResult || dryRunResult.flagged || dryRunResult.held?.wouldHold) return
     const built = buildAgentGradeApplyPayload(dryRunResult, rubric)
     if (!built.ok) {
       setDryRunError(built.error)
@@ -674,6 +784,7 @@ export function useGraderAgentWorkflow({
     runScope,
     setRunScope,
     runProgress,
+    runResults,
     confirmOverwrite,
     setConfirmOverwrite,
     statusMessage,
@@ -682,9 +793,14 @@ export function useGraderAgentWorkflow({
     updateGraph,
     updateGraderNode,
     updateAiNode,
+    updateCriterionGraderNode,
     updateActivityNode,
     updateCodeTestRunnerNode,
     updateConditionalRouterNode,
+    updateFlagForReviewNode,
+    updateHumanReviewGateNode,
+    updateOriginalityNode,
+    refreshRunResults,
     updateNodeLabel,
     addPaletteNode,
     removeNode,

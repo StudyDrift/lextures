@@ -5843,6 +5843,20 @@ export type GraderAgentConfigApi = {
   workflowGraph?: GraderWorkflowGraphApi
 }
 
+export type GraderAgentDryRunFlagResult = {
+  reason: string
+  queue: string
+  priority: string
+}
+
+export type GraderAgentDryRunHeldResult = {
+  wouldHold: boolean
+  mode: string
+  reason: string
+  queue: string
+  confidenceFloor?: number
+}
+
 export type GraderAgentDryRunResult = {
   suggestedPoints: number
   rubricScores?: Record<string, number>
@@ -5850,6 +5864,8 @@ export type GraderAgentDryRunResult = {
   confidence: number
   promptTokens?: number
   completionTokens?: number
+  flagged?: GraderAgentDryRunFlagResult
+  held?: GraderAgentDryRunHeldResult
 }
 
 export type GraderAgentRunStatus = {
@@ -5858,10 +5874,18 @@ export type GraderAgentRunStatus = {
   completedCount: number
   failedCount: number
   results: Array<{
+    id?: string
     submissionId: string
     status: string
     suggestedPoints?: number
+    comment?: string
+    confidence?: number
     error?: string
+    flagReason?: string
+    flagPriority?: string
+    heldReason?: string
+    heldAt?: string
+    heldQueue?: string
   }>
 }
 
@@ -6164,6 +6188,25 @@ export async function postGraderAgentRun(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as { runId: string; totalCount: number }
+}
+
+export async function patchGraderAgentResult(
+  courseCode: string,
+  itemId: string,
+  resultId: string,
+  body: { status: 'applied' | 'overridden' | 'skipped'; reason?: string },
+): Promise<{ id: string; submissionId: string; status: string }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/results/${encodeURIComponent(resultId)}`,
+    {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { id: string; submissionId: string; status: string }
 }
 
 export async function fetchGraderAgentRun(

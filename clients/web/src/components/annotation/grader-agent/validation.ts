@@ -1,7 +1,11 @@
 import { normalizeWorkflowGraph } from './default-graph'
+import { flagSinkSourceIsValid, graphHasFlagSink } from './flag-sink-validation'
+import { gateInputSourceIsValid } from './gate-validation'
 import { outputSlotSourceIsValid } from './workflow-output-slot'
 import { validateRouterIssues, routerInputSourceIsValid } from './router-validation'
 import { workflowPromptIsPresent } from './workflow-prompt'
+import { criterionGraderRubric } from './criterion-grader-rubric'
+import type { RubricDefinition } from '../../../lib/courses-api'
 import type { GraderWorkflowGraph, WorkflowValidationIssue } from './types'
 import {
   HANDLE_AI_INPUT,
@@ -14,12 +18,20 @@ import {
   HANDLE_SUBMISSION,
   HANDLE_THEN,
   HANDLE_ELSE,
+  HANDLE_REASON,
+  HANDLE_REPORT,
+  HANDLE_SCORE,
+  HANDLE_FLAG,
   WORKFLOW_VERSION,
+  isFlagForReviewNodeType,
+  isHumanReviewGateNodeType,
+  isOriginalityNodeType,
   codeTestRunnerHasConfig,
   isActivityNodeType,
   isAiNodeType,
   isCodeTestRunnerNodeType,
   isConditionalRouterNodeType,
+  isCriterionGraderNodeType,
   isStudentSubmissionNodeType,
 } from './types'
 
@@ -36,6 +48,9 @@ function aiInputSourceIsValid(
   }
   if (isAiNodeType(sourceType) && sourceHandle === HANDLE_AI_OUTPUT) return true
   if (isConditionalRouterNodeType(sourceType) && (sourceHandle === HANDLE_THEN || sourceHandle === HANDLE_ELSE)) {
+    return true
+  }
+  if (isOriginalityNodeType(sourceType) && (sourceHandle === HANDLE_SCORE || sourceHandle === HANDLE_REPORT)) {
     return true
   }
   return false
@@ -108,8 +123,16 @@ function hasCycle(adj: Map<string, string[]>, nodeIds: string[]): boolean {
   return false
 }
 
+export type ValidateWorkflowGraphOptions = {
+  rubric?: RubricDefinition | null
+  assignmentItemId?: string
+}
+
 /** Client-side validator mirroring server workflow rules. */
-export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefined): WorkflowValidationIssue[] {
+export function validateWorkflowGraph(
+  graph: GraderWorkflowGraph | null | undefined,
+  options: ValidateWorkflowGraphOptions = {},
+): WorkflowValidationIssue[] {
   const issues: WorkflowValidationIssue[] = []
   if (!graph) {
     issues.push({ field: 'workflowGraph', message: 'Workflow graph is required.' })
@@ -152,7 +175,8 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
       } else if (!outputSlotSourceIsValid(src.type, e.sourceHandle ?? '', slot)) {
         issues.push({
           field: `output.${slot}`,
-          message: 'Grade slot accepts Grader, AI, Code Test Runner, or Conditional Router branch outputs; comments slot accepts Grader comments or test reports.',
+          message:
+            'Grade slot accepts Grader, Criterion Grader, AI, Code Test Runner, Human Review Gate, or Conditional Router branch outputs; comments slot accepts Grader or Criterion Grader comments or test reports.',
         })
       } else if (outputSlots.has(slot) && slot === HANDLE_COMMENTS) {
         issues.push({ field: `output.${slot}`, message: 'Each output slot accepts at most one inbound edge.' })
@@ -160,7 +184,7 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
         outputSlots.add(slot)
       }
     }
-    if (tgt.type === 'grader') {
+    if (tgt.type === 'grader' || isCriterionGraderNodeType(tgt.type)) {
       const th = e.targetHandle ?? ''
       if (th === HANDLE_CONTENT) {
         if (!isActivityNodeType(src.type) || e.sourceHandle !== HANDLE_CONTENT) {
@@ -212,6 +236,54 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
         })
       }
     }
+    if (isFlagForReviewNodeType(tgt.type)) {
+      const th = e.targetHandle ?? ''
+      if (
+        th !== HANDLE_REASON &&
+        th !== HANDLE_COMMENTS &&
+        th !== HANDLE_REPORT &&
+        th !== HANDLE_GRADE &&
+        th !== HANDLE_FLAG
+      ) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'Flag for Review accepts reason, comments, report, grade, or flag inputs only.',
+        })
+      } else if (!flagSinkSourceIsValid(src.type, e.sourceHandle ?? '', th)) {
+        issues.push({
+          field: `node:${tgt.id}.${th}`,
+          message: 'Invalid source for this Flag for Review input slot.',
+        })
+      }
+    }
+    if (isOriginalityNodeType(tgt.type)) {
+      const th = e.targetHandle ?? ''
+      if (th !== HANDLE_SUBMISSION) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'Originality Check accepts a submission input only.',
+        })
+      } else if (!isStudentSubmissionNodeType(src.type)) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'Submission input must come from a Student Submission node.',
+        })
+      }
+    }
+    if (isHumanReviewGateNodeType(tgt.type)) {
+      const th = e.targetHandle ?? ''
+      if (th !== HANDLE_COMMENTS && th !== HANDLE_REPORT && th !== HANDLE_GRADE && th !== HANDLE_FLAG) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'Human Review Gate accepts grade (required), comments, report, or flag inputs only.',
+        })
+      } else if (!gateInputSourceIsValid(src.type, e.sourceHandle ?? '', th)) {
+        issues.push({
+          field: `node:${tgt.id}.${th}`,
+          message: 'Invalid source for this Human Review Gate input slot.',
+        })
+      }
+    }
     if (isConditionalRouterNodeType(src.type) && (e.sourceHandle ?? '') !== HANDLE_THEN && (e.sourceHandle ?? '') !== HANDLE_ELSE) {
       issues.push({ field: `node:${src.id}`, message: 'Conditional Router edges must originate from then or else outputs.' })
     }
@@ -223,7 +295,7 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
     adj.set(e.source, list)
   }
 
-  if (!outputSlots.has(HANDLE_GRADE)) {
+  if (!outputSlots.has(HANDLE_GRADE) && !graphHasFlagSink(nodes)) {
     issues.push({ field: 'output.grade', message: 'Connect the grade slot before running.' })
   }
 
@@ -243,13 +315,58 @@ export function validateWorkflowGraph(graph: GraderWorkflowGraph | null | undefi
     if (isCodeTestRunnerNodeType(n.type) && !codeTestRunnerHasConfig(n.data)) {
       issues.push({ field: `node:${n.id}.testCases`, message: 'Add at least one test case or select a test suite.' })
     }
+    if (isOriginalityNodeType(n.type)) {
+      const hasSubmissionInput = edges.some(
+        (edge) => edge.target === n.id && (edge.targetHandle ?? '') === HANDLE_SUBMISSION,
+      )
+      if (!hasSubmissionInput) {
+        issues.push({
+          field: `node:${n.id}.submission`,
+          message: 'Connect a submission input to the Originality Check.',
+        })
+      }
+    }
+    if (isHumanReviewGateNodeType(n.type)) {
+      const hasGradeInput = edges.some(
+        (edge) => edge.target === n.id && (edge.targetHandle ?? '') === HANDLE_GRADE,
+      )
+      if (!hasGradeInput) {
+        issues.push({
+          field: `node:${n.id}.grade`,
+          message: 'Connect a grade input to the Human Review Gate.',
+        })
+      }
+    }
+    if (isCriterionGraderNodeType(n.type)) {
+      if (!workflowPromptIsPresent(n.data)) {
+        issues.push({ field: `node:${n.id}.prompt`, message: 'Criterion Grader prompt is required.' })
+      }
+      const criterionId = typeof n.data.criterionId === 'string' ? n.data.criterionId.trim() : ''
+      if (!criterionId) {
+        issues.push({ field: `node:${n.id}.criterionId`, message: 'Select a rubric criterion.' })
+      } else {
+        const rubric = criterionGraderRubric(graph, n.id, options.rubric, options.assignmentItemId ?? '')
+        if (rubric?.criteria?.length) {
+          const known = rubric.criteria.some((criterion) => criterion.id === criterionId)
+          if (!known) {
+            issues.push({
+              field: `node:${n.id}.criterionId`,
+              message: 'Selected criterion is not in the wired rubric.',
+            })
+          }
+        }
+      }
+    }
   }
 
   return issues
 }
 
-export function isWorkflowRunnable(graph: GraderWorkflowGraph | null | undefined): boolean {
-  return validateWorkflowGraph(graph).length === 0
+export function isWorkflowRunnable(
+  graph: GraderWorkflowGraph | null | undefined,
+  options: ValidateWorkflowGraphOptions = {},
+): boolean {
+  return validateWorkflowGraph(graph, options).length === 0
 }
 
 export function connectionIsValid(
@@ -271,7 +388,7 @@ export function connectionIsValid(
     if (!outputSlotSourceIsValid(src.type, sh, th)) return false
     return !edges.some((e) => e.target === target && e.targetHandle === th)
   }
-  if (tgt.type === 'grader') {
+  if (tgt.type === 'grader' || isCriterionGraderNodeType(tgt.type)) {
     if (th === HANDLE_CONTENT) return isActivityNodeType(src.type) && sh === HANDLE_CONTENT
     if (th === HANDLE_RUBRIC) return isActivityNodeType(src.type) && sh === HANDLE_RUBRIC
     if (th === HANDLE_SUBMISSION) return isStudentSubmissionNodeType(src.type)
@@ -287,6 +404,27 @@ export function connectionIsValid(
   if (isConditionalRouterNodeType(tgt.type)) {
     if (th !== HANDLE_AI_INPUT) return false
     return routerInputSourceIsValid(src.type, sh)
+  }
+  if (isFlagForReviewNodeType(tgt.type)) {
+    if (
+      th !== HANDLE_REASON &&
+      th !== HANDLE_COMMENTS &&
+      th !== HANDLE_REPORT &&
+      th !== HANDLE_GRADE &&
+      th !== HANDLE_FLAG
+    ) {
+      return false
+    }
+    return flagSinkSourceIsValid(src.type, sh, th)
+  }
+  if (isOriginalityNodeType(tgt.type)) {
+    return th === HANDLE_SUBMISSION && isStudentSubmissionNodeType(src.type)
+  }
+  if (isHumanReviewGateNodeType(tgt.type)) {
+    if (th !== HANDLE_COMMENTS && th !== HANDLE_REPORT && th !== HANDLE_GRADE && th !== HANDLE_FLAG) {
+      return false
+    }
+    return gateInputSourceIsValid(src.type, sh, th)
   }
   return false
 }

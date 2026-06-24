@@ -107,6 +107,56 @@ func ParseAndClampModelOutput(raw string, rubric *assignmentrubric.RubricDefinit
 	return out, nil
 }
 
+type rawSingleCriterionGrade struct {
+	Score      float64 `json:"score"`
+	Rationale  string  `json:"rationale"`
+	Confidence float64 `json:"confidence"`
+}
+
+// ParseSingleCriterionOutput parses a single-criterion JSON response and clamps to allowed levels.
+func ParseSingleCriterionOutput(raw string, rubric *assignmentrubric.RubricDefinition, criterionID uuid.UUID) (GradeOutput, error) {
+	raw = strings.TrimSpace(raw)
+	raw = strings.TrimPrefix(raw, "```json")
+	raw = strings.TrimPrefix(raw, "```")
+	raw = strings.TrimSuffix(raw, "```")
+	raw = strings.TrimSpace(raw)
+
+	var parsed rawSingleCriterionGrade
+	if err := json.Unmarshal([]byte(raw), &parsed); err != nil {
+		return GradeOutput{}, fmt.Errorf("invalid model JSON: %w", err)
+	}
+	criterion, err := findRubricCriterion(rubric, criterionID)
+	if err != nil {
+		return GradeOutput{}, err
+	}
+	score := snapScoreToRubricLevel(parsed.Score, criterion.Levels)
+	out := GradeOutput{
+		TotalPoints:  score,
+		RubricScores: map[string]float64{criterionID.String(): score},
+		Comment:      strings.TrimSpace(parsed.Rationale),
+		Confidence:   parsed.Confidence,
+	}
+	if math.IsNaN(out.Confidence) || out.Confidence < 0 {
+		out.Confidence = 0
+	}
+	if out.Confidence > 1 {
+		out.Confidence = 1
+	}
+	return out, nil
+}
+
+func findRubricCriterion(rubric *assignmentrubric.RubricDefinition, criterionID uuid.UUID) (*assignmentrubric.RubricCriterion, error) {
+	if rubric == nil {
+		return nil, fmt.Errorf("rubric is required for criterion grading")
+	}
+	for i := range rubric.Criteria {
+		if rubric.Criteria[i].ID == criterionID {
+			return &rubric.Criteria[i], nil
+		}
+	}
+	return nil, fmt.Errorf("criterion %s is not in the wired rubric", criterionID.String())
+}
+
 func snapScoreToRubricLevel(score float64, levels []assignmentrubric.RubricLevel) float64 {
 	if len(levels) == 0 {
 		return score

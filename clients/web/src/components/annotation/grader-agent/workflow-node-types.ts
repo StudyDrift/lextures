@@ -1,6 +1,7 @@
 import {
   OutputNode,
   GraderNode,
+  CriterionGraderNode,
   AiNode,
   ActivityNode,
   StudentSubmissionNode,
@@ -8,11 +9,15 @@ import {
   AssignmentContextNode,
   CodeTestRunnerNode,
   ConditionalRouterNode,
+  FlagForReviewNode,
+  HumanReviewGateNode,
+  OriginalityNode,
 } from './workflow-nodes'
 
 export const graderAgentNodeTypes = {
   output: OutputNode,
   grader: GraderNode,
+  criterionGrader: CriterionGraderNode,
   ai: AiNode,
   activity: ActivityNode,
   studentSubmission: StudentSubmissionNode,
@@ -20,4 +25,7 @@ export const graderAgentNodeTypes = {
   assignmentContext: AssignmentContextNode,
   codeTestRunner: CodeTestRunnerNode,
   conditionalRouter: ConditionalRouterNode,
+  flagForReview: FlagForReviewNode,
+  humanReviewGate: HumanReviewGateNode,
+  originality: OriginalityNode,
 }

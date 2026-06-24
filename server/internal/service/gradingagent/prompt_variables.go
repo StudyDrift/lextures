@@ -42,10 +42,18 @@ func defaultNodeLabel(nodeType string) string {
 		return "AI"
 	case NodeTypeGrader:
 		return "Grader (LLM)"
+	case NodeTypeCriterionGrader:
+		return "Criterion Grader"
 	case NodeTypeCodeTestRunner:
 		return "Code Test Runner"
 	case NodeTypeConditionalRouter:
 		return "Conditional Router"
+	case NodeTypeFlagForReview:
+		return "Flag for Review"
+	case NodeTypeHumanReviewGate:
+		return "Human Review Gate"
+	case NodeTypeOriginality:
+		return "Originality Check"
 	case NodeTypeOutput:
 		return "Student grade"
 	default:
@@ -79,7 +87,7 @@ func wiredInputTargetHandles(promptNodeType string) []string {
 	switch promptNodeType {
 	case NodeTypeAI:
 		return []string{HandleAIInput}
-	case NodeTypeGrader:
+	case NodeTypeGrader, NodeTypeCriterionGrader:
 		return []string{HandleSubmission, HandleContent, HandleRubric}
 	default:
 		return nil

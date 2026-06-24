@@ -4,8 +4,12 @@ const PALETTE_NODE_TYPES: readonly PaletteNodeType[] = [
   'studentSubmission',
   'activity',
   'ai',
+  'criterionGrader',
   'codeTestRunner',
   'conditionalRouter',
+  'flagForReview',
+  'humanReviewGate',
+  'originality',
 ]
 
 /** In-memory drag payload — React Flow recommends this over dataTransfer for palette DnD. */

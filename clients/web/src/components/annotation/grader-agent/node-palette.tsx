@@ -15,7 +15,7 @@ function paletteItemClass(kind: PaletteNodeType): string {
   if (kind === 'studentSubmission') {
     return 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800'
   }
-  if (kind === 'ai') {
+  if (kind === 'ai' || kind === 'criterionGrader') {
     return 'border-indigo-200 text-indigo-900 hover:bg-indigo-50 dark:border-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-950/40'
   }
   if (kind === 'codeTestRunner') {
@@ -23,6 +23,15 @@ function paletteItemClass(kind: PaletteNodeType): string {
   }
   if (kind === 'conditionalRouter') {
     return 'border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  }
+  if (kind === 'flagForReview') {
+    return 'border-rose-200 text-rose-900 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-200 dark:hover:bg-rose-950/40'
+  }
+  if (kind === 'humanReviewGate') {
+    return 'border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800'
+  }
+  if (kind === 'originality') {
+    return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
   }
   return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
 }
@@ -124,6 +133,12 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
             disabled={disabled}
             onAddNode={onAddNode}
           />
+          <PaletteItem
+            type="criterionGrader"
+            label={t('gradingAgent.canvas.palette.criterionGrader')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
           {codeExecutionEnabled ? (
             <PaletteItem
               type="codeTestRunner"
@@ -142,6 +157,32 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
           <PaletteItem
             type="conditionalRouter"
             label={t('gradingAgent.canvas.palette.router')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+          <PaletteItem
+            type="humanReviewGate"
+            label={t('gradingAgent.canvas.palette.reviewGate')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+          <PaletteItem
+            type="originality"
+            label={t('gradingAgent.canvas.palette.originality')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+        </PaletteGroup>
+        <PaletteGroup title={t('gradingAgent.canvas.palette.groupOutput')}>
+          <div
+            className="rounded-lg border border-dashed border-emerald-200 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:text-emerald-200"
+            title={t('gradingAgent.canvas.palette.studentGradeFixedTooltip')}
+          >
+            {t('gradingAgent.canvas.palette.studentGrade')}
+          </div>
+          <PaletteItem
+            type="flagForReview"
+            label={t('gradingAgent.canvas.palette.flagForReview')}
             disabled={disabled}
             onAddNode={onAddNode}
           />

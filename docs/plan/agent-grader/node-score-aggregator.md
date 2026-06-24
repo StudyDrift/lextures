@@ -13,7 +13,7 @@
 | **Status (today)** | MISSING |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | AI / Grading team |
-| **Depends on** | 19.16, 19.17, [19.17.3 Criterion Grader](node-criterion-grader.md) |
+| **Depends on** | 19.16, 19.17, [19.17.3 Criterion Grader](../../completed/agent-grader/node-criterion-grader.md) |
 | **Unblocks** | Fan-out grading, blended human/AI/code scores |
 | **Owns shared change** | **Fan-in on processing inputs** (see [catalog](README.md)) |
 
@@ -21,7 +21,7 @@
 
 ## 1. Problem Statement
 
-The canvas is strictly one-grade-in, one-grade-out: the Student Grade `grade` slot accepts exactly one inbound edge. The moment an instructor splits grading across multiple [Criterion Graders](node-criterion-grader.md), blends an AI judgement with a [Code Test Runner](node-code-test-runner.md) result, or wants to apply an originality penalty, there is no node that can **combine** several scores into one total. This node consumes many `grade` inputs and folds them into a single grade via a chosen strategy — weighted sum, average, min, max, or rubric merge — and is the piece that makes fan-out actually usable.
+The canvas is strictly one-grade-in, one-grade-out: the Student Grade `grade` slot accepts exactly one inbound edge. The moment an instructor splits grading across multiple [Criterion Graders](../../completed/agent-grader/node-criterion-grader.md), blends an AI judgement with a [Code Test Runner](../../completed/agent-grader/node-code-test-runner.md) result, or wants to apply an originality penalty, there is no node that can **combine** several scores into one total. This node consumes many `grade` inputs and folds them into a single grade via a chosen strategy — weighted sum, average, min, max, or rubric merge — and is the piece that makes fan-out actually usable.
 
 ## 2. Goals
 
@@ -109,7 +109,7 @@ The fan-in changes only validation/execution, not persistence; the final grade i
 
 ## 11. AI / ML Considerations
 
-None — deterministic arithmetic. Its value to AI quality is indirect: enabling [Criterion Grader](node-criterion-grader.md) fan-out (better rationales) and confidence floors that route low-confidence items to the [Human Review Gate](node-human-review-gate.md).
+None — deterministic arithmetic. Its value to AI quality is indirect: enabling [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md) fan-out (better rationales) and confidence floors that route low-confidence items to the [Human Review Gate](../../completed/agent-grader/node-human-review-gate.md).
 
 ## 12. Integration Points
 
@@ -119,8 +119,8 @@ None — deterministic arithmetic. Its value to AI quality is indirect: enabling
 
 ## 13. Dependencies & Sequencing
 
-- **After**: 19.16, 19.17; build with [Criterion Grader](node-criterion-grader.md).
-- **Before**: makes [Code Test Runner](node-code-test-runner.md) blending and [Originality Check](node-originality-check.md) penalties usable.
+- **After**: 19.16, 19.17; build with [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md).
+- **Before**: makes [Code Test Runner](../../completed/agent-grader/node-code-test-runner.md) blending and [Originality Check](node-originality-check.md) penalties usable.
 - **Shared infra**: none new — but **owns the fan-in relaxation** other nodes rely on.
 
 ## 14. Risks & Mitigations
@@ -155,10 +155,10 @@ None — deterministic arithmetic. Its value to AI quality is indirect: enabling
 ## 18. Open Questions
 
 1. Should weights be percentages (auto-normalized) or raw multipliers? (Plan: raw multipliers with a normalize helper.)
-2. Should the aggregator expose its own `confidence` as a routable `score` output for the [Conditional Router](node-conditional-router.md)? (Leaning yes.)
+2. Should the aggregator expose its own `confidence` as a routable `score` output for the [Conditional Router](../../completed/agent-grader/node-conditional-router.md)? (Leaning yes.)
 
 ## 19. References
 
 - [workflow-nodes.tsx](../../../clients/web/src/components/annotation/grader-agent/workflow-nodes.tsx), [validation.ts](../../../clients/web/src/components/annotation/grader-agent/validation.ts).
 - Server: [workflow.go](../../../server/internal/service/gradingagent/workflow.go), [workflow_execute.go](../../../server/internal/service/gradingagent/workflow_execute.go), [scoring.go](../../../server/internal/service/gradingagent/scoring.go), [assignmentrubric](../../../server/internal/models/assignmentrubric).
-- Related: [node catalog](README.md), [Criterion Grader](node-criterion-grader.md), [Code Test Runner](node-code-test-runner.md), [Conditional Router](node-conditional-router.md).
+- Related: [node catalog](README.md), [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md), [Code Test Runner](../../completed/agent-grader/node-code-test-runner.md), [Conditional Router](../../completed/agent-grader/node-conditional-router.md).

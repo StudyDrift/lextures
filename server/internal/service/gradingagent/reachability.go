@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// validateRouterPathReachability ensures every wired router branch reaches the output grade slot.
+// validateRouterPathReachability ensures every wired router branch reaches a terminal sink.
 func validateRouterPathReachability(g *WorkflowGraph, nodeByID map[string]WorkflowNode) error {
 	outputID := ""
 	for _, n := range g.Nodes {
@@ -13,9 +13,6 @@ func validateRouterPathReachability(g *WorkflowGraph, nodeByID map[string]Workfl
 			outputID = n.ID
 			break
 		}
-	}
-	if outputID == "" {
-		return nil
 	}
 
 	for _, n := range g.Nodes {
@@ -26,18 +23,18 @@ func validateRouterPathReachability(g *WorkflowGraph, nodeByID map[string]Workfl
 			if !routerHandleHasEdges(g, n.ID, handle) {
 				continue
 			}
-			if !branchReachesOutputGrade(g, n.ID, handle, outputID) {
+			if !branchReachesTerminal(g, n.ID, handle, outputID, nodeByID) {
 				label := handle
 				return ValidationError{
 					Field:   "node:" + n.ID + "." + handle,
-					Message: fmt.Sprintf("The %s branch must reach the Student Grade grade slot.", label),
+					Message: fmt.Sprintf("The %s branch must reach a terminal (Student Grade or Flag for Review).", label),
 				}
 			}
 		}
 	}
 
-	if graphHasRouter(g) && !anyPathReachesOutputGrade(g, outputID) {
-		return ValidationError{Field: "output.grade", Message: "At least one executable path must reach the grade slot."}
+	if graphHasRouter(g) && !anyPathReachesTerminal(g, outputID, nodeByID) {
+		return ValidationError{Field: "workflowGraph.nodes", Message: "At least one executable path must reach a terminal."}
 	}
 	return nil
 }
@@ -60,10 +57,20 @@ func routerHandleHasEdges(g *WorkflowGraph, routerID, handle string) bool {
 	return false
 }
 
-func branchReachesOutputGrade(g *WorkflowGraph, routerID, handle, outputID string) bool {
+func branchReachesTerminal(g *WorkflowGraph, routerID, handle, outputID string, nodeByID map[string]WorkflowNode) bool {
 	for _, e := range g.Edges {
-		if e.Source == routerID && strings.TrimSpace(e.SourceHandle) == handle &&
-			e.Target == outputID && strings.TrimSpace(e.TargetHandle) == HandleGrade {
+		if e.Source != routerID || strings.TrimSpace(e.SourceHandle) != handle {
+			continue
+		}
+		tgt, ok := nodeByID[e.Target]
+		if !ok {
+			continue
+		}
+		if tgt.Type == NodeTypeFlagForReview {
+			return true
+		}
+		if tgt.Type == NodeTypeOutput && outputID != "" && e.Target == outputID &&
+			strings.TrimSpace(e.TargetHandle) == HandleGrade {
 			return true
 		}
 	}
@@ -77,18 +84,25 @@ func branchReachesOutputGrade(g *WorkflowGraph, routerID, handle, outputID strin
 		return false
 	}
 	reachable := forwardReachable(g, starts)
-	for _, e := range g.Edges {
-		if e.Target != outputID || strings.TrimSpace(e.TargetHandle) != HandleGrade {
-			continue
-		}
-		if reachable[e.Source] {
+	for id, node := range nodeByID {
+		if node.Type == NodeTypeFlagForReview && reachable[id] {
 			return true
+		}
+	}
+	if outputID != "" {
+		for _, e := range g.Edges {
+			if e.Target != outputID || strings.TrimSpace(e.TargetHandle) != HandleGrade {
+				continue
+			}
+			if reachable[e.Source] {
+				return true
+			}
 		}
 	}
 	return false
 }
 
-func anyPathReachesOutputGrade(g *WorkflowGraph, outputID string) bool {
+func anyPathReachesTerminal(g *WorkflowGraph, outputID string, nodeByID map[string]WorkflowNode) bool {
 	sources := make([]string, 0)
 	for _, n := range g.Nodes {
 		if isWorkflowSourceNode(n.Type) {
@@ -96,12 +110,19 @@ func anyPathReachesOutputGrade(g *WorkflowGraph, outputID string) bool {
 		}
 	}
 	reachable := forwardReachable(g, sources)
-	for _, e := range g.Edges {
-		if e.Target != outputID || strings.TrimSpace(e.TargetHandle) != HandleGrade {
-			continue
-		}
-		if reachable[e.Source] {
+	for id, node := range nodeByID {
+		if node.Type == NodeTypeFlagForReview && reachable[id] {
 			return true
+		}
+	}
+	if outputID != "" {
+		for _, e := range g.Edges {
+			if e.Target != outputID || strings.TrimSpace(e.TargetHandle) != HandleGrade {
+				continue
+			}
+			if reachable[e.Source] {
+				return true
+			}
 		}
 	}
 	return false
@@ -187,7 +208,44 @@ func upstreamProvidesGrade(g *WorkflowGraph, routerID string, nodeByID map[strin
 }
 
 func upstreamProvidesOriginality(g *WorkflowGraph, routerID string, nodeByID map[string]WorkflowNode) bool {
-	// Originality check node is not implemented yet; field stays unavailable unless added later.
+	inputSources := routerInputSources(g, routerID)
+	visited := make(map[string]bool)
+	for _, srcID := range inputSources {
+		if walkUpstreamForOriginality(g, srcID, nodeByID, visited) {
+			return true
+		}
+	}
+	return false
+}
+
+func walkUpstreamForOriginality(g *WorkflowGraph, nodeID string, nodeByID map[string]WorkflowNode, visited map[string]bool) bool {
+	if visited[nodeID] {
+		return false
+	}
+	visited[nodeID] = true
+	n, ok := nodeByID[nodeID]
+	if !ok {
+		return false
+	}
+	if n.Type == NodeTypeOriginality {
+		return true
+	}
+	if n.Type == NodeTypeConditionalRouter {
+		for _, srcID := range routerInputSources(g, nodeID) {
+			if walkUpstreamForOriginality(g, srcID, nodeByID, visited) {
+				return true
+			}
+		}
+		return false
+	}
+	for _, e := range g.Edges {
+		if e.Target != nodeID {
+			continue
+		}
+		if walkUpstreamForOriginality(g, e.Source, nodeByID, visited) {
+			return true
+		}
+	}
 	return false
 }
 
@@ -212,7 +270,7 @@ func walkUpstreamForGrade(g *WorkflowGraph, nodeID string, nodeByID map[string]W
 		return false
 	}
 	switch n.Type {
-	case NodeTypeGrader, NodeTypeAI, NodeTypeCodeTestRunner:
+	case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeCodeTestRunner:
 		return true
 	case NodeTypeConditionalRouter:
 		for _, srcID := range routerInputSources(g, nodeID) {
@@ -245,7 +303,7 @@ func routerInputSourceIsValid(sourceType, sourceHandle string) bool {
 	if isAINodeType(sourceType) && sourceHandle == HandleAIOutput {
 		return true
 	}
-	if sourceType == NodeTypeGrader {
+	if sourceType == NodeTypeGrader || sourceType == NodeTypeCriterionGrader {
 		return sourceHandle == HandleGrade || sourceHandle == HandleComments
 	}
 	if isCodeTestRunnerNodeType(sourceType) {
@@ -253,6 +311,9 @@ func routerInputSourceIsValid(sourceType, sourceHandle string) bool {
 	}
 	if isConditionalRouterNodeType(sourceType) {
 		return sourceHandle == HandleThen || sourceHandle == HandleElse
+	}
+	if isOriginalityNodeType(sourceType) {
+		return sourceHandle == HandleScore || sourceHandle == HandleReport || sourceHandle == HandleFlag
 	}
 	return false
 }

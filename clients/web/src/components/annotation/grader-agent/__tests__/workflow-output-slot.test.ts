@@ -7,6 +7,7 @@ describe('workflow output slot wiring', () => {
   it('accepts AI output into the grade slot', () => {
     expect(outputSlotSourceIsValid('ai', 'output', 'grade')).toBe(true)
     expect(outputSlotSourceIsValid('grader', 'grade', 'grade')).toBe(true)
+    expect(outputSlotSourceIsValid('criterionGrader', 'grade', 'grade')).toBe(true)
     expect(outputSlotSourceIsValid('ai', 'output', 'comments')).toBe(false)
   })
 

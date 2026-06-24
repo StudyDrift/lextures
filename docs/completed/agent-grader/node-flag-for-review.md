@@ -10,7 +10,7 @@
 | **Section** | AI-Specific Capabilities → Grading Agent Canvas |
 | **Severity** | MINOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | AI / Grading team |
 | **Depends on** | 19.16, 19.17, [19.17.5 Conditional Router](node-conditional-router.md) |

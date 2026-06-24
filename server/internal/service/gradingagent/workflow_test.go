@@ -214,6 +214,31 @@ func TestEffectiveWorkflowGraph_synthesizes(t *testing.T) {
 	}
 }
 
+func TestValidateWorkflowGraph_criterionGraderRequiresCriterion(t *testing.T) {
+	criterionID := "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+	g := WorkflowGraph{
+		Version: WorkflowVersion,
+		Nodes: []WorkflowNode{
+			{ID: "output", Type: NodeTypeOutput, Position: map[string]any{"x": 0, "y": 0}, Data: map[string]any{}},
+			{ID: "cg1", Type: NodeTypeCriterionGrader, Position: map[string]any{"x": -320, "y": 0}, Data: map[string]any{
+				"prompt": "Score thesis quality",
+			}},
+			{ID: "sub1", Type: NodeTypeStudentSubmission, Position: map[string]any{"x": -640, "y": 0}, Data: map[string]any{}},
+		},
+		Edges: []WorkflowEdge{
+			{ID: "e1", Source: "cg1", SourceHandle: HandleGrade, Target: "output", TargetHandle: HandleGrade},
+			{ID: "e2", Source: "sub1", SourceHandle: HandleSubmission, Target: "cg1", TargetHandle: HandleSubmission},
+		},
+	}
+	if err := ValidateWorkflowGraph(&g); err == nil {
+		t.Fatal("expected missing criterionId validation error")
+	}
+	g.Nodes[1].Data["criterionId"] = criterionID
+	if err := ValidateWorkflowGraph(&g); err != nil {
+		t.Fatalf("expected valid graph with criterionId: %v", err)
+	}
+}
+
 func TestWorkflowGraph_roundTripJSON(t *testing.T) {
 	g := sampleGraphWithGrader("Round trip", true, true)
 	raw, err := WorkflowGraphToJSON(&g)
