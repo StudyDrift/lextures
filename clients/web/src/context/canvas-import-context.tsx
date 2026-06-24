@@ -578,6 +578,7 @@ function CanvasImportOverlay({
   importComplete: boolean
 }) {
   const canDismissBackdrop = !busy || importComplete
+  const modalExpanded = panelProps.step !== 'credentials'
 
   if (presentation === 'fullscreen') {
     return (
@@ -596,7 +597,10 @@ function CanvasImportOverlay({
           ref={panelRef}
           role="dialog"
           aria-modal="true"
-          className="relative flex w-full max-w-lg flex-col"
+          className={[
+            'relative flex w-full flex-col motion-safe:transition-[max-width] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.2,0,0,1)]',
+            modalExpanded ? 'max-w-4xl' : 'max-w-md',
+          ].join(' ')}
         >
           <CanvasImportCoursesPanel {...panelProps} />
         </div>
@@ -717,7 +721,7 @@ export function CanvasImportHeaderWidget() {
           aria-modal="true"
           aria-label="Canvas import"
           data-testid="canvas-import-popover"
-          className="absolute end-0 top-full z-50 mt-1 flex w-[min(32rem,calc(100vw-2rem))] max-h-[min(85vh,720px)] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-black/40"
+          className="absolute end-0 top-full z-50 mt-1 flex w-[min(36rem,calc(100vw-2rem))] max-h-[min(85vh,720px)] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900 dark:shadow-black/40"
         >
           <CanvasImportCoursesPanel {...panelProps} compact className="max-h-[min(85vh,720px)]" />
         </div>

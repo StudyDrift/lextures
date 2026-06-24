@@ -234,6 +234,25 @@ html.dark {
   animation: canvas-import-status-in 0.12s ease-out forwards;
 }
 
+@keyframes canvas-import-select-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.reduced-motion) .canvas-import-select-in {
+    animation: canvas-import-select-in 0.3s cubic-bezier(0.2, 0, 0, 1) forwards;
+  }
+}
+
 .sidenav-course-items > * {
   animation: sidenav-item-in 0.28s cubic-bezier(0.33, 1, 0.68, 1) backwards;
 }
