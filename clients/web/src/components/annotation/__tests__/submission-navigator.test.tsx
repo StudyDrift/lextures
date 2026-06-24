@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import type { ModuleAssignmentSubmissionApi } from '../../../lib/courses-api'
-import { SubmissionNavigator } from '../submission-navigator'
+import { SubmissionNavigator, SubmissionStudentPicker } from '../submission-navigator'
 
 function submission(
   id: string,
@@ -18,6 +18,25 @@ function submission(
     isGraded,
   }
 }
+
+describe('SubmissionStudentPicker status badge', () => {
+  it('shows a spinner while syncing to Canvas', async () => {
+    const user = userEvent.setup()
+    const submissions = [submission('a', 'Alice', false)]
+
+    render(
+      <SubmissionStudentPicker
+        submissions={submissions}
+        index={0}
+        syncingSubmissionIds={new Set(['a'])}
+        onIndexChange={vi.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: /Alice/i }))
+    expect(screen.getAllByTitle('Syncing to Canvas')).toHaveLength(2)
+  })
+})
 
 describe('SubmissionNavigator student filter', () => {
   it('navigates filtered students with arrow keys and selects with Enter', async () => {

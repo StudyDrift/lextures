@@ -66,6 +66,7 @@ export function GraderAgentWorkflowModal({
     selectedSubmissionId,
     loading: submissionsLoading,
     loadError: submissionsLoadError,
+    markSubmissionGraded,
   } = useGraderAgentSubmissions({
     open,
     courseCode,
@@ -82,6 +83,7 @@ export function GraderAgentWorkflowModal({
     seedWorkflow,
     templateMode,
     onApplied,
+    onSubmissionGraded: markSubmissionGraded,
   })
 
   const {
@@ -90,8 +92,10 @@ export function GraderAgentWorkflowModal({
     dryRunError,
     dryRunLogs,
     dryRunConsoleOpen,
+    batchRunning,
     hadDryRun,
     saving,
+    syncingSubmissionIds,
     runnable,
     validationIssues,
     runScope,
@@ -188,6 +192,7 @@ export function GraderAgentWorkflowModal({
                 submissions={submissions}
                 index={submissionIndex}
                 disabled={submissionsLoading}
+                syncingSubmissionIds={syncingSubmissionIds}
                 onIndexChange={setSubmissionIndex}
               />
               {submissions.length > 0 ? (
@@ -240,6 +245,7 @@ export function GraderAgentWorkflowModal({
               dryRunDisabled={dryRunDisabled}
               dryRunTooltip={dryRunTooltip}
               dryRunning={dryRunning}
+              batchRunning={batchRunning}
               runScope={runScope}
               setRunScope={setRunScope}
               confirmOverwrite={confirmOverwrite}
@@ -373,7 +379,9 @@ export function GraderAgentWorkflowModal({
               submissionId={selectedSubmissionId}
               consoleOpen={dryRunConsoleOpen}
               logs={dryRunLogs}
-              running={dryRunning}
+              running={dryRunning || batchRunning}
+              batchRunning={batchRunning}
+              runProgress={runProgress}
             />
           </footer>
         ) : null}

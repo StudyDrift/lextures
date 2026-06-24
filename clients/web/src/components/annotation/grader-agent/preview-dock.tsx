@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- component file exports dock summary helper */
+import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { RubricGradePicker } from '../../grading/rubric-grade-picker'
 import type { GraderAgentDryRunResult, RubricDefinition } from '../../../lib/courses-api'
@@ -13,7 +14,15 @@ type PreviewDockProps = {
 
 export function PreviewDock({ workflow, rubric, maxPoints, submissionId }: PreviewDockProps) {
   const { t } = useTranslation('common')
-  const { dryRunResult, setDryRunResult, saving, dryRunning, handleApply, handleDryRun } = workflow
+  const {
+    dryRunResult,
+    setDryRunResult,
+    applyingSubmissionId,
+    dryRunning,
+    handleApply,
+    handleDryRun,
+  } = workflow
+  const applying = Boolean(submissionId && applyingSubmissionId === submissionId)
   if (!dryRunResult) return null
 
   if (dryRunResult.flagged) {
@@ -79,11 +88,18 @@ export function PreviewDock({ workflow, rubric, maxPoints, submissionId }: Previ
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          disabled={saving || !submissionId}
+          disabled={applying || !submissionId}
           onClick={() => void handleApply()}
-          className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
         >
-          {t('gradingAgent.apply')}
+          {applying ? (
+            <>
+              <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+              <span>{t('gradingAgent.applying')}</span>
+            </>
+          ) : (
+            t('gradingAgent.apply')
+          )}
         </button>
         <button
           type="button"

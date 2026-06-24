@@ -39,13 +39,13 @@ function currentQuarter(): string {
 function reportCardStatusBadgeClass(status: string | undefined): string {
   switch (status) {
     case 'released':
-      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200'
+      return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300'
     case 'approved':
-      return 'bg-sky-100 text-sky-900 dark:bg-sky-950/50 dark:text-sky-200'
+      return 'bg-sky-100 text-sky-900 dark:bg-sky-950/40 dark:text-sky-300'
     case 'submitted':
-      return 'bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'
+      return 'bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-300'
     default:
-      return 'bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-400'
+      return 'bg-slate-100 text-slate-600 dark:bg-neutral-800/60 dark:text-neutral-400'
   }
 }
 
@@ -277,10 +277,10 @@ export default function CourseReportCards() {
             placeholder="Q1-2026"
             aria-describedby="period-hint"
           />
-          <span id="period-hint" className="text-xs text-muted-foreground">
+          <span id="period-hint" className="text-xs text-slate-500 dark:text-neutral-400">
             e.g. Q1-2026, S1-2026
           </span>
-          <span className="ms-auto text-sm text-muted-foreground">
+          <span className="ms-auto text-sm text-slate-500 dark:text-neutral-400">
             {approvedCount} approved · {releasedCount} released of {roster.length} students
           </span>
         </div>
@@ -306,7 +306,7 @@ export default function CourseReportCards() {
         {commentBank.length > 0 && editingCardId && (
           <aside
             aria-label="Comment Bank"
-            className="rounded-lg border bg-card p-3 text-sm"
+            className="rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
           >
             <div className="mb-2 flex items-center gap-2">
               <strong className="text-slate-900 dark:text-neutral-100">Comment Bank</strong>
@@ -340,20 +340,22 @@ export default function CourseReportCards() {
           </aside>
         )}
 
-        {loading && <p className="text-sm text-muted-foreground">Loading report cards…</p>}
+        {loading && (
+          <p className="text-sm text-slate-500 dark:text-neutral-400">Loading report cards…</p>
+        )}
 
         {/* Student table */}
         {!loading && (
-          <div className="overflow-x-auto rounded-lg border bg-card">
+          <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
             <table className="w-full text-sm" role="grid" aria-label="Report cards">
               <thead>
-                <tr className="border-b text-start text-xs text-muted-foreground">
-                  <th scope="col" className="px-3 py-2 font-medium">Student</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Final %</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Letter</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Status</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Comment</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Actions</th>
+                <tr className="border-b border-slate-200 bg-slate-50 text-start text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-neutral-700 dark:bg-neutral-800/60 dark:text-neutral-400">
+                  <th scope="col" className="px-4 py-3">Student</th>
+                  <th scope="col" className="px-4 py-3">Final %</th>
+                  <th scope="col" className="px-4 py-3">Letter</th>
+                  <th scope="col" className="px-4 py-3">Status</th>
+                  <th scope="col" className="px-4 py-3">Comment</th>
+                  <th scope="col" className="px-4 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -365,23 +367,25 @@ export default function CourseReportCards() {
                   return (
                     <tr
                       key={student.userId}
-                      className="border-b last:border-0 hover:bg-muted/50"
+                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50/80 dark:border-neutral-800 dark:hover:bg-neutral-800/80"
                     >
-                      <td className="px-3 py-2 font-medium text-slate-900 dark:text-neutral-100">
+                      <td className="px-4 py-3 font-medium text-slate-900 dark:text-neutral-100">
                         {studentLabel(student)}
                       </td>
-                      <td className="px-3 py-2 tabular-nums">
+                      <td className="px-4 py-3 tabular-nums text-slate-600 dark:text-neutral-400">
                         {card?.finalGradePct != null ? `${card.finalGradePct.toFixed(1)}%` : '—'}
                       </td>
-                      <td className="px-3 py-2">{card?.letterGrade ?? '—'}</td>
-                      <td className="px-3 py-2">
+                      <td className="px-4 py-3 text-slate-600 dark:text-neutral-400">
+                        {card?.letterGrade ?? '—'}
+                      </td>
+                      <td className="px-4 py-3">
                         <span
                           className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${reportCardStatusBadgeClass(card?.status)}`}
                         >
                           {card?.status ?? 'not started'}
                         </span>
                       </td>
-                      <td className="max-w-xs px-3 py-2">
+                      <td className="max-w-xs px-4 py-3">
                         {isEditing && card ? (
                           <textarea
                             rows={3}
@@ -394,12 +398,14 @@ export default function CourseReportCards() {
                             autoFocus
                           />
                         ) : (
-                          <span className="line-clamp-2 text-xs text-muted-foreground">
-                            {card?.comment || <em className="text-muted-foreground/70">No comment</em>}
+                          <span className="line-clamp-2 text-xs text-slate-500 dark:text-neutral-400">
+                            {card?.comment || (
+                              <em className="text-slate-400 dark:text-neutral-500">No comment</em>
+                            )}
                           </span>
                         )}
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="px-4 py-3">
                         {card ? (
                           <div className="flex flex-wrap gap-1">
                             {isEditing ? (
@@ -472,7 +478,7 @@ export default function CourseReportCards() {
                             )}
                           </div>
                         ) : (
-                          <span className="text-xs text-muted-foreground">No card yet</span>
+                          <span className="text-xs text-slate-500 dark:text-neutral-400">No card yet</span>
                         )}
                       </td>
                     </tr>
@@ -480,7 +486,7 @@ export default function CourseReportCards() {
                 })}
                 {roster.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="py-6 text-center text-sm text-slate-500 dark:text-neutral-400">
                       No students enrolled.
                     </td>
                   </tr>
@@ -501,7 +507,7 @@ export default function CourseReportCards() {
             >
               {releasing ? 'Releasing…' : `Release ${approvedCount} Approved Card(s) to Parents`}
             </button>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-xs text-slate-500 dark:text-neutral-400">
               Parents will see released report cards in the parent portal.
             </span>
           </div>

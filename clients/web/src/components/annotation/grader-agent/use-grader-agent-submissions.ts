@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   fetchModuleAssignmentSubmissions,
   type ModuleAssignmentSubmissionApi,
@@ -71,6 +71,14 @@ export function useGraderAgentSubmissions({
   const selectedSubmission = submissions[index] ?? null
   const selectedSubmissionId = selectedSubmission?.id ?? null
 
+  const markSubmissionGraded = useCallback((submissionId: string) => {
+    setSubmissions((prev) =>
+      prev.map((submission) =>
+        submission.id === submissionId ? { ...submission, isGraded: true } : submission,
+      ),
+    )
+  }, [])
+
   return {
     submissions,
     index,
@@ -79,5 +87,6 @@ export function useGraderAgentSubmissions({
     selectedSubmissionId,
     loading,
     loadError,
+    markSubmissionGraded,
   }
 }

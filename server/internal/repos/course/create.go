@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/terms"
 )
 
@@ -108,6 +109,9 @@ ON CONFLICT (course_id, user_id, role) DO NOTHING
 		return nil, false, err
 	}
 	if err := SeedTeacherCourseGrants(ctx, tx, createdByUserID, courseID, courseCodeOut); err != nil {
+		return nil, false, err
+	}
+	if err := gradingagentrepo.SeedDefaultTemplates(ctx, tx, courseID, createdByUserID); err != nil {
 		return nil, false, err
 	}
 

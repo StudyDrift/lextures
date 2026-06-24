@@ -782,6 +782,9 @@ func findGradeSourceNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) str
 			if id := resolveGradeWireSource(g, nodeByID, src.ID); id != "" {
 				return id
 			}
+			if isConditionalRouterNodeType(src.Type) {
+				return src.ID
+			}
 		}
 	}
 	return ""
@@ -811,6 +814,14 @@ func CompileWorkflowGraph(g *WorkflowGraph, submissionText string) (CompiledWork
 			commentSource = e.Source
 		}
 		return CompiledWorkflow{GradeSource: gradeSourceID, CommentSource: commentSource}, nil
+	}
+	if isConditionalRouterNodeType(gradeSource.Type) {
+		return CompiledWorkflow{
+			GradeSource: gradeSourceID,
+			ScoreRequest: ScoreRequest{
+				SubmissionText: submissionText,
+			},
+		}, nil
 	}
 	prompt := graderPrompt(gradeSource)
 	includeContent, includeRubric := deriveIncludeFlags(g, gradeSourceID, nodeByID)
