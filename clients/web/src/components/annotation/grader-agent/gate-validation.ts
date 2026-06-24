@@ -13,6 +13,7 @@ import {
   isCriterionGraderNodeType,
   isHumanReviewGateNodeType,
   isOriginalityNodeType,
+  isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
 } from './types'
 
@@ -59,6 +60,9 @@ export function gateInputSourceIsValid(
       }
       if (isAiNodeType(sourceType) && sourceHandle === HANDLE_AI_OUTPUT) return true
       if (isConditionalRouterNodeType(sourceType) && (sourceHandle === HANDLE_THEN || sourceHandle === HANDLE_ELSE)) {
+        return true
+      }
+      if (sourceHandle === HANDLE_GRADE && isScoreAggregatorNodeType(sourceType)) {
         return true
       }
       return false

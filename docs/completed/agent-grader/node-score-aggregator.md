@@ -10,7 +10,7 @@
 | **Section** | AI-Specific Capabilities → Grading Agent Canvas |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETED |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | AI / Grading team |
 | **Depends on** | 19.16, 19.17, [19.17.3 Criterion Grader](../../completed/agent-grader/node-criterion-grader.md) |

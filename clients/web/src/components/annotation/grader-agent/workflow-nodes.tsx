@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { RenamableNodeHeader, RenamableNodeTitle } from './renamable-node-header'
 import type { NodeExecutionStatus } from './use-grader-agent-workflow'
-import type { ConditionalRouterCondition } from './types'
+import type { ConditionalRouterCondition, ReferenceMode } from './types'
 import { formatRouterConditionSentence } from './router-condition'
 import type { TFunction } from 'i18next'
 
@@ -264,6 +264,108 @@ export const ActivityNode = memo(function ActivityNode({ id, data, selected }: N
           label={t('gradingAgent.canvas.slots.rubric')}
           dotClass="bg-orange-500"
           handleClass="!bg-orange-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+function referenceModeBadgeLabel(mode: ReferenceMode | undefined, t: TFunction): string {
+  switch (mode) {
+    case 'answerKey':
+      return t('gradingAgent.canvas.nodes.reference.mode.answerKey')
+    case 'sourceText':
+      return t('gradingAgent.canvas.nodes.reference.mode.sourceText')
+    default:
+      return t('gradingAgent.canvas.nodes.reference.mode.modelAnswer')
+  }
+}
+
+function rubricSourceBadgeLabel(source: string | undefined, t: TFunction): string {
+  switch (source) {
+    case 'library':
+      return t('gradingAgent.canvas.nodes.rubric.mode.library')
+    case 'inline':
+      return t('gradingAgent.canvas.nodes.rubric.mode.inline')
+    default:
+      return t('gradingAgent.canvas.nodes.rubric.mode.assignment')
+  }
+}
+
+export const RubricNode = memo(function RubricNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const source = typeof nodeData.source === 'string' ? nodeData.source : 'assignment'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-orange-400/80 ring-2 ring-orange-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.rubric.title')}
+        dotClassName="bg-orange-500"
+        headerClassName="border-b border-orange-500/15 bg-orange-500/5 dark:border-orange-500/10 dark:bg-orange-500/10"
+        trailing={
+          <>
+            <span className="rounded-full bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
+              {rubricSourceBadgeLabel(source, t)}
+            </span>
+            <ExecutionBadge status={executionStatus} />
+          </>
+        }
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <OutputSlotRow
+          handleId="rubric"
+          label={t('gradingAgent.canvas.slots.rubric')}
+          dotClass="bg-orange-500"
+          handleClass="!bg-orange-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const ReferenceNode = memo(function ReferenceNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const mode = typeof nodeData.mode === 'string' ? (nodeData.mode as ReferenceMode) : 'modelAnswer'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-violet-400/80 ring-2 ring-violet-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.reference.title')}
+        dotClassName="bg-violet-500"
+        headerClassName="border-b border-violet-500/15 bg-violet-500/5 dark:border-violet-500/10 dark:bg-violet-500/10"
+        trailing={
+          <>
+            <span className="rounded-full bg-violet-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+              {referenceModeBadgeLabel(mode, t)}
+            </span>
+            <ExecutionBadge status={executionStatus} />
+          </>
+        }
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <OutputSlotRow
+          handleId="reference"
+          label={t('gradingAgent.canvas.slots.reference')}
+          dotClass="bg-violet-500"
+          handleClass="!bg-violet-500"
         />
       </div>
     </div>
@@ -631,6 +733,56 @@ export const ConditionalRouterNode = memo(function ConditionalRouterNode({ id, d
           label={t('gradingAgent.canvas.slots.else')}
           dotClass="bg-amber-500"
           handleClass="!bg-amber-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const ScoreAggregatorNode = memo(function ScoreAggregatorNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const mode = typeof nodeData.mode === 'string' && nodeData.mode.trim() ? nodeData.mode : 'sum'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-emerald-400/80 ring-2 ring-emerald-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.aggregator.title')}
+        dotClassName="bg-emerald-500"
+        headerClassName="border-b border-emerald-500/15 bg-emerald-500/5 dark:border-emerald-500/10 dark:bg-emerald-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <div className="flex flex-wrap gap-1.5 px-3 py-2">
+        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-800 dark:text-emerald-200">
+          {t(`gradingAgent.canvas.nodes.aggregator.mode.${mode}`, { defaultValue: mode })}
+        </span>
+      </div>
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.gradeFanIn')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <OutputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.grade')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <OutputSlotRow
+          handleId="comments"
+          label={t('gradingAgent.canvas.slots.comments')}
+          dotClass="bg-sky-500"
+          handleClass="!bg-sky-500"
         />
       </div>
     </div>

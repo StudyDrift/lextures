@@ -17,7 +17,7 @@ func WorkflowRequiresGraphExecution(g *WorkflowGraph) bool {
 		return false
 	}
 	for _, n := range g.Nodes {
-		if n.Type == NodeTypeConditionalRouter || n.Type == NodeTypeFlagForReview || n.Type == NodeTypeHumanReviewGate {
+		if n.Type == NodeTypeConditionalRouter || n.Type == NodeTypeFlagForReview || n.Type == NodeTypeHumanReviewGate || n.Type == NodeTypeScoreAggregator {
 			return true
 		}
 	}
@@ -88,7 +88,7 @@ func flagSinkInputSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) b
 		}
 	case HandleGrade:
 		if srcHandle == HandleGrade &&
-			(src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type) || isCodeTestRunnerNodeType(src.Type)) {
+			(src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type) || isCodeTestRunnerNodeType(src.Type) || isScoreAggregatorNodeType(src.Type)) {
 			return true
 		}
 		if srcHandle == HandleAIOutput && isAINodeType(src.Type) {

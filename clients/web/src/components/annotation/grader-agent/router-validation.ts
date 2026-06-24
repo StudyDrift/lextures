@@ -16,6 +16,7 @@ import {
   isCriterionGraderNodeType,
   isFlagForReviewNodeType,
   isOriginalityNodeType,
+  isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
   type ConditionalRouterConditionField,
 } from './types'
@@ -98,7 +99,8 @@ function walkUpstreamForGrade(
     node.type === 'criterionGrader' ||
     isAiNodeType(node.type) ||
     isCodeTestRunnerNodeType(node.type) ||
-    isOriginalityNodeType(node.type)
+    isOriginalityNodeType(node.type) ||
+    isScoreAggregatorNodeType(node.type)
   ) {
     return true
   }

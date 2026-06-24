@@ -209,3 +209,15 @@ func workflowUsesLLM(g *WorkflowGraph) bool {
 	}
 	return false
 }
+
+func workflowUsesCodeRunner(g *WorkflowGraph) bool {
+	if g == nil {
+		return false
+	}
+	for _, n := range g.Nodes {
+		if n.Type == NodeTypeCodeTestRunner {
+			return true
+		}
+	}
+	return false
+}

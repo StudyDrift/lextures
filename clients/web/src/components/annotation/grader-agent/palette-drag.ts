@@ -10,6 +10,9 @@ const PALETTE_NODE_TYPES: readonly PaletteNodeType[] = [
   'flagForReview',
   'humanReviewGate',
   'originality',
+  'reference',
+  'rubric',
+  'scoreAggregator',
 ]
 
 /** In-memory drag payload — React Flow recommends this over dataTransfer for palette DnD. */
