@@ -89,6 +89,10 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       originalityDetectionEnabled: true,
       originalityStubExternal: true,
       ffAiStudyBuddy: true,
+      ffWebhooks: true,
+      ffBotSlack: true,
+      ffBotDiscord: true,
+      ffBotTeams: true,
       updateMask: [
         'h5pEnabled',
         'scormIngestionEnabled',
@@ -141,6 +145,10 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'originalityDetectionEnabled',
         'originalityStubExternal',
         'ffAiStudyBuddy',
+        'ffWebhooks',
+        'ffBotSlack',
+        'ffBotDiscord',
+        'ffBotTeams',
       ],
     }),
   })

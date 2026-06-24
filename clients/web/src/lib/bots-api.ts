@@ -66,6 +66,15 @@ export async function disconnectBot(id: string): Promise<void> {
   }
 }
 
+export async function deleteBotMapping(connectionId: string, mappingId: string): Promise<void> {
+  const res = await authorizedFetch(`/api/v1/bots/${connectionId}/mappings/${mappingId}`, {
+    method: 'DELETE',
+  })
+  if (!res.ok) {
+    throw new Error(await readError(res, 'Failed to delete channel mapping.'))
+  }
+}
+
 export async function upsertBotMapping(
   connectionId: string,
   payload: {
