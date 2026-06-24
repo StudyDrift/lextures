@@ -16,7 +16,6 @@ import (
 )
 
 const maxSubmissionMarkdownBytes = 512 << 10
-const maxReferenceMarkdownBytes = 20_000
 
 var submissionMarkdownConverter = markitdown.New()
 
@@ -140,12 +139,4 @@ func (s *Service) loadSubmissionFileMarkdown(ctx context.Context, courseCode str
 		md = md[:maxSubmissionMarkdownBytes]
 	}
 	return md, nil
-}
-
-func truncateReferenceMarkdown(md string) string {
-	md = strings.TrimSpace(md)
-	if len(md) <= maxReferenceMarkdownBytes {
-		return md
-	}
-	return md[:maxReferenceMarkdownBytes] + "\n\n[Reference truncated at 20,000 characters.]"
 }
