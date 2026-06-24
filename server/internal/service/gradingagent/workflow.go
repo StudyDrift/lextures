@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+
+	"github.com/google/uuid"
 )
 
 const (
@@ -18,6 +20,10 @@ const (
 	NodeTypeStudentSubmission = "studentSubmission"
 	NodeTypeCodeTestRunner    = "codeTestRunner"
 	NodeTypeConditionalRouter = "conditionalRouter"
+	NodeTypeCriterionGrader   = "criterionGrader"
+	NodeTypeFlagForReview     = "flagForReview"
+	NodeTypeHumanReviewGate   = "humanReviewGate"
+	NodeTypeOriginality       = "originality"
 	NodeTypeAssignmentCtx     = "assignmentContext" // legacy
 	NodeTypeSubmission        = "submission"        // legacy
 	HandleGrade               = "grade"
@@ -32,6 +38,8 @@ const (
 	HandleAIOutput            = "output"
 	HandleThen                = "then"
 	HandleElse                = "else"
+	HandleReason              = "reason"
+	HandleFlag                = "flag"
 )
 
 // WorkflowGraph is the persisted React Flow graph for the grading agent canvas.
@@ -89,10 +97,14 @@ func isCodeTestRunnerNodeType(nodeType string) bool {
 	return nodeType == NodeTypeCodeTestRunner
 }
 
+func isCriterionGraderNodeType(nodeType string) bool {
+	return nodeType == NodeTypeCriterionGrader
+}
+
 func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool {
 	switch tgtHandle {
 	case HandleGrade:
-		if srcHandle == HandleGrade && src.Type == NodeTypeGrader {
+		if srcHandle == HandleGrade && (src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type)) {
 			return true
 		}
 		if srcHandle == HandleAIOutput && src.Type == NodeTypeAI {
@@ -104,8 +116,11 @@ func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool
 		if (srcHandle == HandleThen || srcHandle == HandleElse) && isConditionalRouterNodeType(src.Type) {
 			return true
 		}
+		if srcHandle == HandleGrade && isHumanReviewGateNodeType(src.Type) {
+			return true
+		}
 	case HandleComments:
-		if srcHandle == HandleComments && src.Type == NodeTypeGrader {
+		if srcHandle == HandleComments && (src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type)) {
 			return true
 		}
 		if srcHandle == HandleReport && isCodeTestRunnerNodeType(src.Type) {
@@ -126,6 +141,9 @@ func aiInputSourceIsValid(sourceType, sourceHandle string) bool {
 		return true
 	}
 	if isConditionalRouterNodeType(sourceType) && (sourceHandle == HandleThen || sourceHandle == HandleElse) {
+		return true
+	}
+	if isOriginalityNodeType(sourceType) && (sourceHandle == HandleScore || sourceHandle == HandleReport) {
 		return true
 	}
 	return false
@@ -192,7 +210,7 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		}
 		nodeByID[n.ID] = n
 		switch n.Type {
-		case NodeTypeOutput, NodeTypeGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeAssignmentCtx, NodeTypeSubmission:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -247,7 +265,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		switch n.Type {
 		case NodeTypeOutput:
 			outputCount++
-		case NodeTypeGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeAssignmentCtx, NodeTypeSubmission:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
 		}
@@ -283,7 +301,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		adj[e.Source] = append(adj[e.Source], e.Target)
 	}
 
-	if len(outputSlotEdges[HandleGrade]) == 0 {
+	if len(outputSlotEdges[HandleGrade]) == 0 && !graphHasFlagSink(g) {
 		return ValidationError{Field: "output.grade", Message: "Connect the grade slot before running."}
 	}
 
@@ -295,6 +313,14 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		if n.Type == NodeTypeGrader && !graderPromptPresent(n) {
 			return ValidationError{Field: "node:" + n.ID + ".prompt", Message: "Grader node prompt is required."}
 		}
+		if n.Type == NodeTypeCriterionGrader {
+			if !graderPromptPresent(n) {
+				return ValidationError{Field: "node:" + n.ID + ".prompt", Message: "Criterion Grader prompt is required."}
+			}
+			if _, err := criterionIDFromNode(n); err != nil {
+				return err
+			}
+		}
 		if n.Type == NodeTypeAI && !graderPromptPresent(n) {
 			return ValidationError{Field: "node:" + n.ID + ".prompt", Message: "AI node prompt is required."}
 		}
@@ -305,6 +331,12 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 			if _, err := routerConditionFromNode(n); err != nil {
 				return ValidationError{Field: "node:" + n.ID + ".condition", Message: err.Error()}
 			}
+		}
+		if n.Type == NodeTypeHumanReviewGate && !gateHasGradeInput(g, n.ID) {
+			return ValidationError{Field: "node:" + n.ID + ".grade", Message: "Connect a grade input to the Human Review Gate."}
+		}
+		if n.Type == NodeTypeOriginality && !originalityHasSubmissionInput(g, n.ID) {
+			return ValidationError{Field: "node:" + n.ID + ".submission", Message: "Connect a submission input to the Originality Check."}
 		}
 	}
 
@@ -328,9 +360,9 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 			return ValidationError{Field: "output", Message: "Output node edges must target grade or comments slots."}
 		}
 		if !outputSlotSourceIsValid(src, srcHandle, tgtHandle) {
-			return ValidationError{Field: "output." + tgtHandle, Message: "Grade slot accepts Grader, AI, Code Test Runner, or Conditional Router branch outputs; comments slot accepts Grader comments or test reports."}
+			return ValidationError{Field: "output." + tgtHandle, Message: "Grade slot accepts Grader, Criterion Grader, AI, Code Test Runner, or Conditional Router branch outputs; comments slot accepts Grader or Criterion Grader comments or test reports."}
 		}
-	case NodeTypeGrader:
+	case NodeTypeGrader, NodeTypeCriterionGrader:
 		switch tgtHandle {
 		case HandleContent:
 			if !isActivityNodeType(src.Type) || srcHandle != HandleContent {
@@ -349,7 +381,11 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 				return ValidationError{Field: "node:" + tgt.ID, Message: "Context input must come from an Activity node."}
 			}
 		default:
-			return ValidationError{Field: "node:" + tgt.ID, Message: "Grader node accepts submission, content, or rubric inputs only."}
+			msg := "Grader node accepts submission, content, or rubric inputs only."
+			if isCriterionGraderNodeType(tgt.Type) {
+				msg = "Criterion Grader accepts submission, content, or rubric inputs only."
+			}
+			return ValidationError{Field: "node:" + tgt.ID, Message: msg}
 		}
 	case NodeTypeAI:
 		if tgtHandle != HandleAIInput {
@@ -377,6 +413,28 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 		}
 		if isConditionalRouterNodeType(src.Type) && srcHandle != HandleThen && srcHandle != HandleElse {
 			return ValidationError{Field: "node:" + src.ID, Message: "Conditional Router edges must originate from then or else outputs."}
+		}
+	case NodeTypeFlagForReview:
+		if tgtHandle != HandleReason && tgtHandle != HandleComments && tgtHandle != HandleReport &&
+			tgtHandle != HandleGrade && tgtHandle != HandleFlag {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Flag for Review accepts reason, comments, report, grade, or flag inputs only."}
+		}
+		if !flagSinkInputSourceIsValid(src, srcHandle, tgtHandle) {
+			return ValidationError{Field: "node:" + tgt.ID + "." + tgtHandle, Message: "Invalid source for this Flag for Review input slot."}
+		}
+	case NodeTypeHumanReviewGate:
+		if tgtHandle != HandleComments && tgtHandle != HandleReport && tgtHandle != HandleGrade && tgtHandle != HandleFlag {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Human Review Gate accepts grade (required), comments, report, or flag inputs only."}
+		}
+		if !gateInputSourceIsValid(src, srcHandle, tgtHandle) {
+			return ValidationError{Field: "node:" + tgt.ID + "." + tgtHandle, Message: "Invalid source for this Human Review Gate input slot."}
+		}
+	case NodeTypeOriginality:
+		if tgtHandle != HandleSubmission {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Originality Check accepts a submission input only."}
+		}
+		if !originalityInputSourceIsValid(src, srcHandle, tgtHandle) {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
 		}
 	default:
 		return ValidationError{Field: "workflowGraph.edges", Message: "Invalid edge target."}
@@ -512,8 +570,10 @@ func findWorkflowPromptNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) 
 		if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleGrade {
 			continue
 		}
-		if src, ok := nodeByID[e.Source]; ok && gradeSourceNodeType(src.Type) {
-			return src.ID
+		if src, ok := nodeByID[e.Source]; ok {
+			if id := resolveGradeWireSource(g, nodeByID, src.ID); id != "" {
+				return id
+			}
 		}
 	}
 	for _, n := range g.Nodes {
@@ -525,7 +585,7 @@ func findWorkflowPromptNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) 
 }
 
 func gradeSourceNodeType(nodeType string) bool {
-	return nodeType == NodeTypeGrader || nodeType == NodeTypeAI || nodeType == NodeTypeCodeTestRunner
+	return nodeType == NodeTypeGrader || nodeType == NodeTypeCriterionGrader || nodeType == NodeTypeAI || nodeType == NodeTypeCodeTestRunner
 }
 
 func graderPrompt(n WorkflowNode) string {
@@ -549,6 +609,21 @@ func graderPromptPresent(n WorkflowNode) bool {
 		}
 	}
 	return false
+}
+
+func criterionIDFromNode(n WorkflowNode) (uuid.UUID, error) {
+	if n.Data == nil {
+		return uuid.Nil, ValidationError{Field: "node:" + n.ID + ".criterionId", Message: "Select a rubric criterion."}
+	}
+	raw, ok := n.Data["criterionId"].(string)
+	if !ok || strings.TrimSpace(raw) == "" {
+		return uuid.Nil, ValidationError{Field: "node:" + n.ID + ".criterionId", Message: "Select a rubric criterion."}
+	}
+	id, err := uuid.Parse(strings.TrimSpace(raw))
+	if err != nil {
+		return uuid.Nil, ValidationError{Field: "node:" + n.ID + ".criterionId", Message: "Criterion id must be a valid UUID."}
+	}
+	return id, nil
 }
 
 func graderModelID(n WorkflowNode) string {
@@ -634,8 +709,10 @@ func findGradeSourceNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) str
 		if !ok || tgt.Type != NodeTypeOutput || e.TargetHandle != HandleGrade {
 			continue
 		}
-		if src, ok := nodeByID[e.Source]; ok && gradeSourceNodeType(src.Type) {
-			return src.ID
+		if src, ok := nodeByID[e.Source]; ok {
+			if id := resolveGradeWireSource(g, nodeByID, src.ID); id != "" {
+				return id
+			}
 		}
 	}
 	return ""

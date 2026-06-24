@@ -19,6 +19,7 @@ import (
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	"github.com/lextures/lextures/server/internal/repos/originalityreports"
 	"github.com/lextures/lextures/server/internal/repos/notificationsinbox"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
@@ -50,6 +51,28 @@ func (d Deps) requireGraderAgentAccess(w http.ResponseWriter, r *http.Request) (
 		return "", uuid.Nil, false
 	}
 	return courseCode, viewer, true
+}
+
+func (d Deps) loadOriginalityReportsForGraderAgent(ctx context.Context, submissionID uuid.UUID) ([]gradingagentsvc.OriginalityReportRow, error) {
+	if d.Pool == nil {
+		return nil, nil
+	}
+	reports, err := originalityreports.ListBySubmission(ctx, d.Pool, submissionID)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]gradingagentsvc.OriginalityReportRow, 0, len(reports))
+	for _, r := range reports {
+		out = append(out, gradingagentsvc.OriginalityReportRow{
+			Provider:      r.Provider,
+			Status:        r.Status,
+			SimilarityPct: r.SimilarityPct,
+			AIProbability: r.AIProbability,
+			ReportURL:     r.ReportURL,
+			UpdatedAt:     r.UpdatedAt,
+		})
+	}
+	return out, nil
 }
 
 func (d Deps) gradingAgentService() *gradingagentsvc.Service {
@@ -660,6 +683,62 @@ type invalidScopeError string
 func errInvalidScope(msg string) error { return invalidScopeError(msg) }
 func (e invalidScopeError) Error() string { return string(e) }
 
+type patchGraderAgentResultBody struct {
+	Status string  `json:"status"`
+	Reason *string `json:"reason"`
+}
+
+func (d Deps) handlePatchGraderAgentResult() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
+			return
+		}
+		resultID, err := uuid.Parse(chi.URLParam(r, "result_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid result id.")
+			return
+		}
+		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
+		if err != nil || cfg == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+			return
+		}
+		var body patchGraderAgentResultBody
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		status := strings.TrimSpace(body.Status)
+		switch status {
+		case string(gradingagentrepo.ItemApplied), string(gradingagentrepo.ItemOverridden), string(gradingagentrepo.ItemSkipped):
+		default:
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Status must be applied, overridden, or skipped.")
+			return
+		}
+		updated, err := gradingagentrepo.UpdateResultStatus(r.Context(), d.Pool, resultID, gradingagentrepo.ItemStatus(status), body.Reason)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update result.")
+			return
+		}
+		if updated == nil || updated.ConfigID != cfg.ID {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Result not found.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"id":           updated.ID.String(),
+			"submissionId": updated.SubmissionID.String(),
+			"status":       string(updated.Status),
+		})
+	}
+}
+
 func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
@@ -694,14 +773,36 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 		resultJSON := make([]map[string]any, 0, len(results))
 		for _, res := range results {
 			entry := map[string]any{
+				"id":           res.ID.String(),
 				"submissionId": res.SubmissionID.String(),
 				"status":       string(res.Status),
 			}
 			if res.SuggestedPoints != nil {
 				entry["suggestedPoints"] = *res.SuggestedPoints
 			}
+			if res.Comment != nil {
+				entry["comment"] = *res.Comment
+			}
+			if res.Confidence != nil {
+				entry["confidence"] = *res.Confidence
+			}
 			if res.Error != nil {
 				entry["error"] = *res.Error
+			}
+			if res.FlagReason != nil {
+				entry["flagReason"] = *res.FlagReason
+			}
+			if res.FlagPriority != nil {
+				entry["flagPriority"] = *res.FlagPriority
+			}
+			if res.HeldReason != nil {
+				entry["heldReason"] = *res.HeldReason
+			}
+			if res.HeldAt != nil {
+				entry["heldAt"] = res.HeldAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+			}
+			if res.HeldQueue != nil {
+				entry["heldQueue"] = *res.HeldQueue
 			}
 			resultJSON = append(resultJSON, entry)
 		}

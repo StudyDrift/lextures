@@ -9,6 +9,8 @@ import { NodePalette } from './node-palette'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { DryRunDock } from './dry-run-dock'
 import { RunAgentPopover } from './run-agent-popover'
+import { HeldReviewQueuePanel } from './held-review-queue-panel'
+import { ReviewQueuePanel } from './review-queue-panel'
 import { SaveWorkflowMenu } from './save-workflow-menu'
 import { useGraderAgentSubmissions } from './use-grader-agent-submissions'
 import {
@@ -105,6 +107,8 @@ export function GraderAgentWorkflowModal({
     handleRun,
     handleToggleAutoGrade,
     addPaletteNode,
+    runResults,
+    refreshRunResults,
   } = workflow
 
   const accepted = config?.status === 'accepted'
@@ -321,6 +325,41 @@ export function GraderAgentWorkflowModal({
                 maxPoints={maxPoints}
                 selectedSubmission={selectedSubmission}
               />
+              {!isTemplateMode && runResults.length > 0 ? (
+                <div className="mt-4">
+                  <ReviewQueuePanel
+                    runResults={runResults}
+                    submissionLabelById={Object.fromEntries(
+                      submissions
+                        .filter((submission) => submission.id)
+                        .map((submission) => [
+                          submission.id as string,
+                          submission.submittedByDisplayName ??
+                            submission.blindLabel ??
+                            submission.id ??
+                            'submission',
+                        ]),
+                    )}
+                  />
+                  <HeldReviewQueuePanel
+                    courseCode={courseCode}
+                    itemId={itemId}
+                    runResults={runResults}
+                    onUpdated={() => void refreshRunResults()}
+                    submissionLabelById={Object.fromEntries(
+                      submissions
+                        .filter((submission) => submission.id)
+                        .map((submission) => [
+                          submission.id as string,
+                          submission.submittedByDisplayName ??
+                            submission.blindLabel ??
+                            submission.id ??
+                            'submission',
+                        ]),
+                    )}
+                  />
+                </div>
+              ) : null}
             </div>
           </aside>
         </div>

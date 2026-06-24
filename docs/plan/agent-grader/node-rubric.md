@@ -1,6 +1,6 @@
 # 19.17.1 — Rubric Node (Standalone Rubric Source)
 
-> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../auto-grader-agent.md)). See the [node catalog](README.md).
+> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../../completed/auto-grader-agent.md)). See the [node catalog](README.md).
 
 ## Metadata
 
@@ -14,7 +14,7 @@
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | AI / Grading team |
 | **Depends on** | 19.16 (grading agent), 19.17 (canvas) |
-| **Unblocks** | [19.17.3 Criterion Grader](node-criterion-grader.md), reusable rubric grading across activities |
+| **Unblocks** | [19.17.3 Criterion Grader](../../completed/agent-grader/node-criterion-grader.md), reusable rubric grading across activities |
 
 ---
 
@@ -117,7 +117,7 @@ Not AI-touching itself. It shapes downstream AI nodes: a wired rubric flips them
 ## 13. Dependencies & Sequencing
 
 - **After**: 19.16, 19.17.
-- **Before**: [19.17.3 Criterion Grader](node-criterion-grader.md) (which benefits from a shared rubric source).
+- **Before**: [19.17.3 Criterion Grader](../../completed/agent-grader/node-criterion-grader.md) (which benefits from a shared rubric source).
 - **Shared infra**: none new.
 
 ## 14. Risks & Mitigations
@@ -158,4 +158,4 @@ Not AI-touching itself. It shapes downstream AI nodes: a wired rubric flips them
 
 - [workflow-nodes.tsx](../../../clients/web/src/components/annotation/grader-agent/workflow-nodes.tsx), [types.ts](../../../clients/web/src/components/annotation/grader-agent/types.ts), [validation.ts](../../../clients/web/src/components/annotation/grader-agent/validation.ts), [ai-output-system-prompt.ts](../../../clients/web/src/components/annotation/grader-agent/ai-output-system-prompt.ts), [activity-node-data.ts](../../../clients/web/src/components/annotation/grader-agent/activity-node-data.ts).
 - Server: [workflow.go](../../../server/internal/service/gradingagent/workflow.go), [workflow_execute.go](../../../server/internal/service/gradingagent/workflow_execute.go), [assignmentrubricai/service.go](../../../server/internal/service/assignmentrubricai/service.go).
-- Related: [node catalog](README.md), [19.16 Auto-Grader Agent](../auto-grader-agent.md), [Criterion Grader](node-criterion-grader.md).
+- Related: [node catalog](README.md), [19.16 Auto-Grader Agent](../../completed/auto-grader-agent.md), [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md).

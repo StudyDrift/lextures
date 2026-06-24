@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
 )
 
@@ -25,6 +26,22 @@ type DryRunEvent struct {
 	Result          *DryRunPreview `json:"result,omitempty"`
 }
 
+// DryRunFlagPreview is the assembled flag-for-review preview from a flag sink.
+type DryRunFlagPreview struct {
+	Reason   string `json:"reason"`
+	Queue    string `json:"queue"`
+	Priority string `json:"priority"`
+}
+
+// DryRunHeldPreview is the hold decision from a Human Review Gate.
+type DryRunHeldPreview struct {
+	WouldHold       bool    `json:"wouldHold"`
+	Mode            string  `json:"mode"`
+	Reason          string  `json:"reason"`
+	Queue           string  `json:"queue"`
+	ConfidenceFloor float64 `json:"confidenceFloor,omitempty"`
+}
+
 // DryRunPreview is the assembled grade preview from the output node.
 type DryRunPreview struct {
 	SuggestedPoints  float64            `json:"suggestedPoints"`
@@ -33,6 +50,8 @@ type DryRunPreview struct {
 	Confidence       float64            `json:"confidence"`
 	PromptTokens     int                `json:"promptTokens,omitempty"`
 	CompletionTokens int                `json:"completionTokens,omitempty"`
+	Flagged          *DryRunFlagPreview `json:"flagged,omitempty"`
+	Held             *DryRunHeldPreview `json:"held,omitempty"`
 }
 
 // ActivitySource resolves assignment content and rubric for an activity node.
@@ -46,17 +65,19 @@ type DryRunRunner interface {
 
 // DryRunExecutionInput configures a step-by-step workflow dry run.
 type DryRunExecutionInput struct {
-	Graph            *WorkflowGraph
-	Submissions      []string
-	IsLate           bool
-	DefaultMarkdown  string
-	DefaultRubric    *assignmentrubric.RubricDefinition
-	MaxPoints        float64
-	ModelID          string
-	ResolveActivity  ActivitySource
-	Runner           DryRunRunner
-	CodeRunner       CodeTestRunner
-	Emit             func(DryRunEvent)
+	Graph                  *WorkflowGraph
+	Submissions            []string
+	SubmissionID           uuid.UUID
+	IsLate                 bool
+	DefaultMarkdown        string
+	DefaultRubric          *assignmentrubric.RubricDefinition
+	MaxPoints              float64
+	ModelID                string
+	ResolveActivity        ActivitySource
+	LoadOriginalityReports func(ctx context.Context, submissionID uuid.UUID) ([]OriginalityReportRow, error)
+	Runner                 DryRunRunner
+	CodeRunner             CodeTestRunner
+	Emit                   func(DryRunEvent)
 }
 
 type slotValue struct {
@@ -64,6 +85,7 @@ type slotValue struct {
 	grade  *GradeOutput
 	rubric *assignmentrubric.RubricDefinition
 	score  *float64
+	flag   *bool
 }
 
 type executionState struct {
@@ -140,7 +162,7 @@ func nodeHasActiveInput(g *WorkflowGraph, nodeID string, nodeByID map[string]Wor
 
 func nodeRunsWithoutWiredInput(nodeType string) bool {
 	switch nodeType {
-	case NodeTypeGrader, NodeTypeAI, NodeTypeCodeTestRunner:
+	case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeCodeTestRunner:
 		return true
 	default:
 		return false
@@ -173,6 +195,7 @@ func buildPredicateContext(in DryRunExecutionInput, input slotValue) PredicateEv
 	}
 	if input.score != nil {
 		ctx.InputScore = input.score
+		ctx.OriginalityScore = input.score
 	}
 	return ctx
 }
@@ -358,6 +381,62 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Suggested score %.2f (confidence %.0f%%).", label, grade.TotalPoints, grade.Confidence*100),
 			})
+		case NodeTypeCriterionGrader:
+			criterionID, cidErr := criterionIDFromNode(node)
+			if cidErr != nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, cidErr
+			}
+			req, buildErr := buildGraderScoreRequest(in, node, nodeByID, state)
+			if buildErr != nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, buildErr
+			}
+			criterion, critErr := findRubricCriterion(req.Rubric, criterionID)
+			if critErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, critErr.Error())})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, ValidationError{Field: "node:" + node.ID + ".criterionId", Message: critErr.Error()}
+			}
+			if in.Runner == nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
+			}
+			prompt := req.InstructorPrompt
+			systemPrompt := BuildCriterionSystemPrompt(criterion)
+			userMessage := BuildCriterionUserMessage(
+				prompt,
+				req.IncludeAssignmentContent,
+				req.IncludeRubric,
+				req.AssignmentMarkdown,
+				req.Rubric,
+				criterion,
+				req.SubmissionText,
+			)
+			out, pt, ct, runErr := in.Runner.RunPrompt(ctx, req.ModelID, systemPrompt, userMessage, "", true)
+			if runErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, runErr
+			}
+			grade, parseErr := ParseSingleCriterionOutput(out, req.Rubric, criterionID)
+			if parseErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(parseErr))})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, parseErr
+			}
+			totalPromptTokens += pt
+			totalCompletionTokens += ct
+			state.set(node.ID, HandleGrade, slotValue{grade: &grade})
+			state.set(node.ID, HandleComments, slotValue{text: grade.Comment})
+			compiledPrompt = prompt
+			compiledSystemPrompt = systemPrompt
+			compiledInput = userMessage
+			compiledOutput = out
+			emit(DryRunEvent{
+				Type: "log", Level: "info",
+				Message: fmt.Sprintf("[%s] Criterion %q: %.2f (confidence %.0f%%).", label, criterion.Title, grade.TotalPoints, grade.Confidence*100),
+			})
 		case NodeTypeCodeTestRunner:
 			if execErr := executeCodeTestRunnerNode(ctx, node, in.Graph, nodeByID, state, in.CodeRunner, emit, label); execErr != nil {
 				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
@@ -396,12 +475,60 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Condition %s → %s branch.", label, formatRouterConditionSentence(cond), branchLabel),
 			})
+		case NodeTypeOriginality:
+			if execErr := executeOriginalityNode(ctx, node, in, state, emit, label); execErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, execErr
+			}
+		case NodeTypeHumanReviewGate:
+			gradeVal, gradeErr := gatherGateGrade(in.Graph, node.ID, nodeByID, state)
+			if gradeErr != nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, gradeErr
+			}
+			flagTruthy := gatherGateFlagTruthy(in.Graph, node.ID, nodeByID, state)
+			mode := gateModeFromNode(node)
+			floor := gateConfidenceFloorFromNode(node)
+			queue := gateQueueFromNode(node)
+			wouldHold, holdReason := EvaluateHoldDecision(mode, floor, gradeVal, flagTruthy)
+			state.set(node.ID, HandleGrade, slotValue{grade: gradeVal})
+			preview.Held = &DryRunHeldPreview{
+				WouldHold:       wouldHold,
+				Mode:            string(mode),
+				Reason:          holdReason,
+				Queue:           queue,
+				ConfidenceFloor: floor,
+			}
+			emit(DryRunEvent{
+				Type: "log", Level: "info",
+				Message: fmt.Sprintf("Would hold for review (mode=%s, would-hold=%v)", mode, wouldHold),
+			})
+			if wouldHold && holdReason != "" {
+				emit(DryRunEvent{Type: "log", Level: "info", Message: holdReason})
+			}
+		case NodeTypeFlagForReview:
+			reason, queue, priority := assembleFlagForReview(in.Graph, node, nodeByID, state, in)
+			preview.Flagged = &DryRunFlagPreview{Reason: reason, Queue: queue, Priority: priority}
+			preview.PromptTokens = totalPromptTokens
+			preview.CompletionTokens = totalCompletionTokens
+			emit(DryRunEvent{Type: "log", Level: "info", Message: "── Flag for Review (dry run — not persisted) ──"})
+			emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Would flag for review: %s", truncateLog(reason, 400))})
+			emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Queue: %s · Priority: %s", queue, priority)})
+			emit(DryRunEvent{Type: "result", Result: &preview})
 		case NodeTypeOutput:
+			if preview.Flagged != nil {
+				emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("[%s] Skipped (flagged on another branch).", label)})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, NodeType: node.Type, Status: "skipped"})
+				continue
+			}
+			held := preview.Held
 			preview, err = assembleOutputPreview(in.Graph, nodeByID, state, in.MaxPoints)
 			if err != nil {
 				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, err
 			}
+			preview.Held = held
 			preview.PromptTokens = totalPromptTokens
 			preview.CompletionTokens = totalCompletionTokens
 			emit(DryRunEvent{Type: "log", Level: "info", Message: "── Student Grade (dry run — not persisted) ──"})
@@ -480,12 +607,45 @@ func gatherAIInput(g *WorkflowGraph, nodeID string, nodeByID map[string]Workflow
 			continue
 		}
 		handle := strings.TrimSpace(e.SourceHandle)
-		if v, ok := state.get(src.ID, handle); ok && strings.TrimSpace(v.text) != "" {
+		v, ok := state.get(src.ID, handle)
+		if !ok {
+			continue
+		}
+		if isOriginalityNodeType(src.Type) {
+			block := formatOriginalityTrustedAIBlock(src, handle, v)
+			if block != "" {
+				parts = append(parts, block)
+			}
+			continue
+		}
+		if strings.TrimSpace(v.text) != "" {
 			label := NodeDisplayLabel(src.Data, src.Type)
 			parts = append(parts, fmt.Sprintf("## %s\n%s", label, v.text))
 		}
 	}
 	return strings.Join(parts, "\n\n")
+}
+
+func formatOriginalityTrustedAIBlock(src WorkflowNode, handle string, v slotValue) string {
+	metric := originalityMetricFromNode(src)
+	switch handle {
+	case HandleScore:
+		if v.score != nil {
+			metricName := "similarity"
+			if metric == OriginalityMetricAILikelihood {
+				metricName = "AI-likelihood"
+			}
+			return fmt.Sprintf("## Integrity signal (trusted)\n%s: %.2f", metricName, *v.score)
+		}
+		if strings.TrimSpace(v.text) != "" {
+			return fmt.Sprintf("## Integrity signal (trusted)\n%s", strings.TrimSpace(v.text))
+		}
+	case HandleReport:
+		if strings.TrimSpace(v.text) != "" {
+			return fmt.Sprintf("## Integrity report (trusted)\n%s", strings.TrimSpace(v.text))
+		}
+	}
+	return ""
 }
 
 func buildPromptContext(

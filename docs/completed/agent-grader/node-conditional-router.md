@@ -1,6 +1,6 @@
 # 19.17.5 — Conditional Router Node (Rule-Based Branching)
 
-> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../../plan/auto-grader-agent.md)). See the [node catalog](../../plan/agent-grader/README.md).
+> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../auto-grader-agent.md)). See the [node catalog](../../plan/agent-grader/README.md).
 
 ## Metadata
 

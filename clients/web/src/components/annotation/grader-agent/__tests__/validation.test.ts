@@ -264,4 +264,66 @@ describe('grader agent workflow validation', () => {
     expect(isWorkflowRunnable(g)).toBe(false)
     expect(validateWorkflowGraph(g).some((i) => i.field === 'node:r1.condition.field')).toBe(true)
   })
+
+  it('accepts router with then branch to flag for review and else to grade', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'sub', type: 'studentSubmission', position: { x: -640, y: 0 }, data: {} },
+        {
+          id: 'r1',
+          type: 'conditionalRouter',
+          position: { x: -320, y: 0 },
+          data: { condition: { field: 'isEmpty', operator: 'isTrue', value: true } },
+        },
+        {
+          id: 'flag1',
+          type: 'flagForReview',
+          position: { x: 160, y: 0 },
+          data: { queue: 'default', priority: 'normal', reasonTemplate: 'Blank submission' },
+        },
+        { id: 'ai1', type: 'ai', position: { x: -160, y: 80 }, data: { prompt: 'Grade fairly' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'sub', sourceHandle: 'submission', target: 'r1', targetHandle: 'input' },
+        { id: 'e2', source: 'r1', sourceHandle: 'then', target: 'flag1', targetHandle: 'reason' },
+        { id: 'e3', source: 'r1', sourceHandle: 'else', target: 'ai1', targetHandle: 'input' },
+        { id: 'e4', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(isWorkflowRunnable(g)).toBe(true)
+  })
+
+  it('flags criterion grader with unknown criterion id', () => {
+    const rubric = {
+      criteria: [
+        {
+          id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+          title: 'Thesis',
+          description: '',
+          levels: [{ label: 'Strong', points: 4 }],
+        },
+      ],
+    }
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        {
+          id: 'cg1',
+          type: 'criterionGrader',
+          position: { x: -320, y: 0 },
+          data: { prompt: 'Score thesis', criterionId: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb' },
+        },
+        { id: 'sub1', type: 'studentSubmission', position: { x: -640, y: 0 }, data: {} },
+      ],
+      edges: [
+        { id: 'e1', source: 'cg1', sourceHandle: 'grade', target: 'output', targetHandle: 'grade' },
+        { id: 'e2', source: 'sub1', sourceHandle: 'submission', target: 'cg1', targetHandle: 'submission' },
+      ],
+    }
+    const issues = validateWorkflowGraph(g, { rubric, assignmentItemId: 'item-1' })
+    expect(issues.some((issue) => issue.field === 'node:cg1.criterionId')).toBe(true)
+  })
 })

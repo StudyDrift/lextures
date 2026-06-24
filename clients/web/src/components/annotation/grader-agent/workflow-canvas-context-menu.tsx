@@ -36,8 +36,18 @@ function defaultLabelForNodeType(type: string, t: TFunction): string {
       return t('gradingAgent.canvas.nodes.codeTests.title')
     case 'grader':
       return t('gradingAgent.canvas.nodes.grader.title')
+    case 'criterionGrader':
+      return t('gradingAgent.canvas.nodes.criterionGrader.title')
     case 'output':
       return t('gradingAgent.canvas.nodes.output.title')
+    case 'conditionalRouter':
+      return t('gradingAgent.canvas.nodes.router.title')
+    case 'flagForReview':
+      return t('gradingAgent.canvas.nodes.flagForReview.title')
+    case 'humanReviewGate':
+      return t('gradingAgent.canvas.nodes.reviewGate.title')
+    case 'originality':
+      return t('gradingAgent.canvas.nodes.originality.title')
     default:
       return type
   }

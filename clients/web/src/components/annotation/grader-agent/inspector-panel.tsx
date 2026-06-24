@@ -5,11 +5,27 @@ import { useTextModels } from '../../../hooks/use-text-models'
 import { activityAssignmentItemId } from './activity-node-data'
 import { AssignmentPicker } from './assignment-picker'
 import type { GraderAgentWorkflowState } from './use-grader-agent-workflow'
-import { isActivityNodeType, isAiNodeType, isCodeTestRunnerNodeType, isConditionalRouterNodeType, isStudentSubmissionNodeType } from './types'
+import { criterionGraderRubric } from './criterion-grader-rubric'
+import { CriterionGraderOutputFormat } from './criterion-grader-output-format'
+import {
+  isActivityNodeType,
+  isAiNodeType,
+  isCodeTestRunnerNodeType,
+  isConditionalRouterNodeType,
+  isCriterionGraderNodeType,
+  isFlagForReviewNodeType,
+  isHumanReviewGateNodeType,
+  isOriginalityNodeType,
+  isStudentSubmissionNodeType,
+} from './types'
 import { CodeTestRunnerInspector } from './code-test-runner-inspector'
 import { ConditionalRouterInspector } from './conditional-router-inspector'
+import { FlagForReviewInspector } from './flag-for-review-inspector'
+import { HumanReviewGateInspector } from './human-review-gate-inspector'
+import { OriginalityInspector } from './originality-inspector'
 import { AiNodeCompiledPrompt } from './ai-node-compiled-prompt'
 import { AiNodeOutputFormat } from './ai-node-output-format'
+import { usePlatformFeatures } from '../../../context/platform-features-context'
 import type { ModuleAssignmentSubmissionApi, RubricDefinition } from '../../../lib/courses-api'
 import { SubmissionInspectorSection } from './submission-inspector-section'
 import { WorkflowPromptEditor } from './workflow-prompt-editor'
@@ -40,21 +56,31 @@ export function InspectorPanel({
   selectedSubmission = null,
 }: InspectorPanelProps) {
   const { t } = useTranslation('common')
+  const { ffPlagiarismChecks } = usePlatformFeatures()
   const {
     graph,
     selectedNodeId,
     updateGraderNode,
     updateAiNode,
+    updateCriterionGraderNode,
     updateActivityNode,
     updateCodeTestRunnerNode,
     updateConditionalRouterNode,
+    updateFlagForReviewNode,
+    updateHumanReviewGateNode,
+    updateOriginalityNode,
     removeNode,
     nodeDryRunDetails,
     nodeExecutionStates,
   } = workflow
   const selectedNode = graph?.nodes.find((n) => n.id === selectedNodeId) ?? null
   const showActivityInspector = Boolean(selectedNode && isActivityNodeType(selectedNode.type))
-  const { models } = useTextModels(Boolean(graph && selectedNodeId && selectedNode?.type === 'grader'))
+  const usesTextModels = Boolean(
+    graph &&
+      selectedNodeId &&
+      (selectedNode?.type === 'grader' || isCriterionGraderNodeType(selectedNode?.type ?? '')),
+  )
+  const { models } = useTextModels(usesTextModels)
   const { assignments, loading: assignmentsLoading, error: assignmentsError } = useCourseAssignments(
     courseCode,
     showActivityInspector,
@@ -71,7 +97,11 @@ export function InspectorPanel({
       codeTestRunner: t('gradingAgent.canvas.nodes.codeTests.title'),
       conditionalRouter: t('gradingAgent.canvas.nodes.router.title'),
       grader: t('gradingAgent.canvas.nodes.grader.title'),
+      criterionGrader: t('gradingAgent.canvas.nodes.criterionGrader.title'),
       output: t('gradingAgent.canvas.nodes.output.title'),
+      flagForReview: t('gradingAgent.canvas.nodes.flagForReview.title'),
+      humanReviewGate: t('gradingAgent.canvas.nodes.reviewGate.title'),
+      originality: t('gradingAgent.canvas.nodes.originality.title'),
     }),
     [t],
   )
@@ -211,6 +241,101 @@ export function InspectorPanel({
     )
   }
 
+  if (isCriterionGraderNodeType(node.type)) {
+    const dryRunDetail = nodeDryRunDetails[node.id]
+    const showCompiledPrompt = nodeExecutionStates[node.id] === 'success' && dryRunDetail
+    const resolvedRubric = criterionGraderRubric(graph, node.id, rubric, itemId)
+    const criteria = resolvedRubric?.criteria ?? []
+    const criterionId = typeof node.data.criterionId === 'string' ? node.data.criterionId : ''
+    const rubricWired = graph.edges.some(
+      (edge) => edge.target === node.id && (edge.targetHandle ?? '') === 'rubric',
+    )
+    return (
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.criterionGrader.title')}
+        </p>
+        <p className="text-sm text-slate-700 dark:text-neutral-200">
+          {t('gradingAgent.canvas.inspector.criterionGraderHelp')}
+        </p>
+        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+          <span className="mb-1.5 block font-medium">{t('gradingAgent.canvas.inspector.criterion')}</span>
+          <select
+            value={criterionId}
+            onChange={(e) => updateCriterionGraderNode(node.id, { criterionId: e.target.value || undefined })}
+            className={fieldClass}
+            disabled={criteria.length === 0}
+            aria-label={t('gradingAgent.canvas.inspector.criterion')}
+          >
+            <option value="">
+              {criteria.length === 0
+                ? t('gradingAgent.canvas.inspector.criterionNoRubric')
+                : t('gradingAgent.canvas.inspector.criterionPlaceholder')}
+            </option>
+            {criteria.map((criterion) => (
+              <option key={criterion.id} value={criterion.id}>
+                {criterion.title}
+              </option>
+            ))}
+          </select>
+          {!rubricWired && criteria.length > 0 ? (
+            <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
+              {t('gradingAgent.canvas.inspector.criterionUsingAssignmentRubric')}
+            </p>
+          ) : null}
+          {criteria.length === 0 ? (
+            <p className="mt-1.5 text-xs text-amber-700 dark:text-amber-300">
+              {t('gradingAgent.canvas.inspector.criterionWireRubricHint')}
+            </p>
+          ) : null}
+        </label>
+        <CriterionGraderOutputFormat
+          graph={graph}
+          nodeId={node.id}
+          criterionId={criterionId}
+          rubric={rubric}
+          assignmentItemId={itemId}
+        />
+        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+          <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
+          <WorkflowPromptEditor
+            value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
+            onChange={(prompt) => updateCriterionGraderNode(node.id, { prompt })}
+            graph={graph}
+            promptNodeId={node.id}
+            defaults={variableDefaults}
+            className={fieldClass}
+            placeholder={t('gradingAgent.canvas.nodes.criterionGrader.emptyPrompt')}
+          />
+        </label>
+        <label className="block text-sm text-slate-700 dark:text-neutral-200">
+          <span className="mb-1.5 block font-medium">{t('gradingAgent.model.label')}</span>
+          <select
+            value={modelId}
+            onChange={(e) => updateCriterionGraderNode(node.id, { modelId: e.target.value || null })}
+            className={fieldClass}
+          >
+            <option value="">{t('gradingAgent.model.default')}</option>
+            {models.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.model.help')}</p>
+        </label>
+        {showCompiledPrompt ? <AiNodeCompiledPrompt detail={dryRunDetail} /> : null}
+        <button
+          type="button"
+          onClick={() => removeNode(node.id)}
+          className="text-sm font-medium text-rose-700 hover:underline dark:text-rose-300"
+        >
+          {t('gradingAgent.canvas.inspector.deleteNode')}
+        </button>
+      </div>
+    )
+  }
+
   if (isAiNodeType(node.type)) {
     const dryRunDetail = nodeDryRunDetails[node.id]
     const showCompiledPrompt = nodeExecutionStates[node.id] === 'success' && dryRunDetail
@@ -284,6 +409,58 @@ export function InspectorPanel({
         onChange={(patch) => updateConditionalRouterNode(node.id, patch)}
         onDelete={() => removeNode(node.id)}
       />
+    )
+  }
+
+  if (isOriginalityNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.originality.title')}
+        </p>
+        <OriginalityInspector
+          data={node.data}
+          aiLikelihoodAllowed={ffPlagiarismChecks}
+          onChange={(patch) => updateOriginalityNode(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          fieldClass={fieldClass}
+        />
+      </div>
+    )
+  }
+
+  if (isHumanReviewGateNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.reviewGate.title')}
+        </p>
+        <HumanReviewGateInspector
+          data={node.data}
+          onChange={(patch) => updateHumanReviewGateNode(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          fieldClass={fieldClass}
+        />
+      </div>
+    )
+  }
+
+  if (isFlagForReviewNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.flagForReview.title')}
+        </p>
+        <FlagForReviewInspector
+          nodeId={node.id}
+          data={node.data}
+          graph={graph}
+          defaults={variableDefaults}
+          onChange={(patch) => updateFlagForReviewNode(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          fieldClass={fieldClass}
+        />
+      </div>
     )
   }
 

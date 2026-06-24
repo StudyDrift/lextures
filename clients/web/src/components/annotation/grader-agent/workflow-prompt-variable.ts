@@ -4,8 +4,12 @@ import {
   HANDLE_AI_INPUT,
   HANDLE_AI_OUTPUT,
   HANDLE_CONTENT,
+  HANDLE_FLAG,
+  HANDLE_REPORT,
   HANDLE_RUBRIC,
+  HANDLE_SCORE,
   HANDLE_SUBMISSION,
+  isOriginalityNodeType,
   isActivityNodeType,
   isAiNodeType,
   isStudentSubmissionNodeType,
@@ -46,6 +50,10 @@ export type WorkflowNodeDefaultLabels = {
   codeTestRunner?: string
   conditionalRouter?: string
   grader: string
+  criterionGrader?: string
+  flagForReview?: string
+  humanReviewGate?: string
+  originality?: string
   output: string
 }
 
@@ -66,6 +74,12 @@ export function workflowOutputHandleToProperty(handle: string): string | null {
       return 'Rubric'
     case HANDLE_AI_OUTPUT:
       return 'Output'
+    case HANDLE_SCORE:
+      return 'Score'
+    case HANDLE_REPORT:
+      return 'Report'
+    case HANDLE_FLAG:
+      return 'Flag'
     default:
       return null
   }
@@ -78,13 +92,17 @@ function defaultLabelForNodeType(type: string, defaults: WorkflowNodeDefaultLabe
   if (type === 'codeTestRunner') return defaults.codeTestRunner ?? 'Code Test Runner'
   if (type === 'conditionalRouter') return defaults.conditionalRouter ?? 'Conditional Router'
   if (type === 'grader') return defaults.grader
+  if (type === 'criterionGrader') return defaults.criterionGrader ?? 'Criterion Grader'
   if (type === 'output') return defaults.output
+  if (isOriginalityNodeType(type)) return defaults.originality ?? 'Originality Check'
   return type
 }
 
 function wiredInputTargetHandles(promptNodeType: string): string[] {
   if (isAiNodeType(promptNodeType)) return [HANDLE_AI_INPUT]
-  if (promptNodeType === 'grader') return [HANDLE_SUBMISSION, HANDLE_CONTENT, HANDLE_RUBRIC]
+  if (promptNodeType === 'grader' || promptNodeType === 'criterionGrader') {
+    return [HANDLE_SUBMISSION, HANDLE_CONTENT, HANDLE_RUBRIC]
+  }
   return []
 }
 

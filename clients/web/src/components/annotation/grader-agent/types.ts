@@ -2,7 +2,18 @@
 
 export const WORKFLOW_VERSION = 1
 
-export type GraderNodeType = 'output' | 'grader' | 'ai' | 'studentSubmission' | 'activity' | 'codeTestRunner' | 'conditionalRouter'
+export type GraderNodeType =
+  | 'output'
+  | 'grader'
+  | 'criterionGrader'
+  | 'ai'
+  | 'studentSubmission'
+  | 'activity'
+  | 'codeTestRunner'
+  | 'conditionalRouter'
+  | 'flagForReview'
+  | 'humanReviewGate'
+  | 'originality'
 
 /** @deprecated Legacy persisted graphs may still use `submission`. */
 export type LegacyGraderNodeType = 'submission' | 'assignmentContext'
@@ -36,6 +47,12 @@ export type WorkflowValidationIssue = {
 export type GraderNodeData = {
   prompt?: string
   modelId?: string | null
+}
+
+export type CriterionGraderNodeData = {
+  prompt?: string
+  modelId?: string | null
+  criterionId?: string
 }
 
 export type AiNodeData = {
@@ -97,9 +114,40 @@ export type ConditionalRouterNodeData = {
   condition?: ConditionalRouterCondition
 }
 
+export type FlagForReviewPriority = 'low' | 'normal' | 'high'
+
+export type FlagForReviewNodeData = {
+  queue?: string
+  priority?: FlagForReviewPriority
+  reasonTemplate?: string
+}
+
+export type HumanReviewGateMode = 'always' | 'belowConfidence' | 'onFlag'
+
+export type HumanReviewGateNodeData = {
+  mode?: HumanReviewGateMode
+  confidenceFloor?: number
+  queue?: string
+}
+
+export type OriginalityMetric = 'similarity' | 'aiLikelihood'
+
+export type OriginalityNodeData = {
+  metric?: OriginalityMetric
+  flagThreshold?: number
+}
+
 export type PaletteNodeType = Extract<
   GraderNodeType,
-  'studentSubmission' | 'activity' | 'ai' | 'codeTestRunner' | 'conditionalRouter'
+  | 'studentSubmission'
+  | 'activity'
+  | 'ai'
+  | 'criterionGrader'
+  | 'codeTestRunner'
+  | 'conditionalRouter'
+  | 'flagForReview'
+  | 'humanReviewGate'
+  | 'originality'
 >
 
 export const HANDLE_SUBMISSION = 'submission'
@@ -113,6 +161,8 @@ export const HANDLE_REPORT = 'report'
 export const HANDLE_SCORE = 'score'
 export const HANDLE_THEN = 'then'
 export const HANDLE_ELSE = 'else'
+export const HANDLE_REASON = 'reason'
+export const HANDLE_FLAG = 'flag'
 /** @deprecated Legacy graphs wired assignment context through a single context handle. */
 export const HANDLE_CONTEXT = 'context'
 
@@ -132,12 +182,51 @@ export function isAiNodeType(type: string): boolean {
   return type === 'ai'
 }
 
+export function isCriterionGraderNodeType(type: string): boolean {
+  return type === 'criterionGrader'
+}
+
 export function isCodeTestRunnerNodeType(type: string): boolean {
   return type === 'codeTestRunner'
 }
 
 export function isConditionalRouterNodeType(type: string): boolean {
   return type === 'conditionalRouter'
+}
+
+export function isFlagForReviewNodeType(type: string): boolean {
+  return type === 'flagForReview'
+}
+
+export function isHumanReviewGateNodeType(type: string): boolean {
+  return type === 'humanReviewGate'
+}
+
+export function isOriginalityNodeType(type: string): boolean {
+  return type === 'originality'
+}
+
+export function defaultOriginalityNodeData(): OriginalityNodeData {
+  return {
+    metric: 'similarity',
+    flagThreshold: 0.4,
+  }
+}
+
+export function defaultHumanReviewGateNodeData(): HumanReviewGateNodeData {
+  return {
+    mode: 'belowConfidence',
+    confidenceFloor: 0.7,
+    queue: 'default',
+  }
+}
+
+export function defaultFlagForReviewNodeData(): FlagForReviewNodeData {
+  return {
+    queue: 'default',
+    priority: 'normal',
+    reasonTemplate: 'Needs human review',
+  }
 }
 
 export function defaultConditionalRouterNodeData(): ConditionalRouterNodeData {

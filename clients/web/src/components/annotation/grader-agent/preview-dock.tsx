@@ -16,6 +16,36 @@ export function PreviewDock({ workflow, rubric, maxPoints, submissionId }: Previ
   const { dryRunResult, setDryRunResult, saving, dryRunning, handleApply, handleDryRun } = workflow
   if (!dryRunResult) return null
 
+  if (dryRunResult.flagged) {
+    return (
+      <div className="h-full min-h-0 space-y-3 overflow-y-auto rounded-xl border border-rose-200 bg-rose-50/40 p-4 dark:border-rose-900/60 dark:bg-rose-950/20">
+        <p className="text-sm font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+          {t('gradingAgent.review.flagged.badge')}
+        </p>
+        <p className="text-sm text-slate-800 dark:text-neutral-100">{dryRunResult.flagged.reason}</p>
+        <dl className="grid grid-cols-2 gap-2 text-xs text-slate-600 dark:text-neutral-400">
+          <div>
+            <dt className="font-semibold uppercase tracking-wide">{t('gradingAgent.review.flagged.queue')}</dt>
+            <dd>{dryRunResult.flagged.queue}</dd>
+          </div>
+          <div>
+            <dt className="font-semibold uppercase tracking-wide">{t('gradingAgent.review.flagged.priority')}</dt>
+            <dd>{dryRunResult.flagged.priority}</dd>
+          </div>
+        </dl>
+        <p className="text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.review.flagged.dryRunHint')}</p>
+        <button
+          type="button"
+          disabled={dryRunning}
+          onClick={() => void handleDryRun()}
+          className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold dark:border-neutral-600"
+        >
+          {t('gradingAgent.rerun')}
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className="h-full min-h-0 space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 dark:border-neutral-600 dark:bg-neutral-900">
       <p className="text-2xl font-semibold tabular-nums text-slate-900 dark:text-neutral-50">
@@ -73,6 +103,9 @@ export function previewDockSummary(
   maxPoints: number | null,
 ): string {
   if (!dryRunResult) return ''
+  if (dryRunResult.flagged) {
+    return dryRunResult.flagged.reason
+  }
   return maxPoints != null
     ? `${dryRunResult.suggestedPoints} / ${maxPoints}`
     : String(dryRunResult.suggestedPoints)

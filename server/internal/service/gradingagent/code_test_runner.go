@@ -203,7 +203,7 @@ func workflowUsesLLM(g *WorkflowGraph) bool {
 	}
 	for _, n := range g.Nodes {
 		switch n.Type {
-		case NodeTypeGrader, NodeTypeAI:
+		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI:
 			return true
 		}
 	}

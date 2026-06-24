@@ -22,6 +22,7 @@ describe('palette drag store', () => {
 
   it('parsePaletteNodeType accepts all palette kinds', () => {
     expect(parsePaletteNodeType('conditionalRouter')).toBe('conditionalRouter')
+    expect(parsePaletteNodeType('criterionGrader')).toBe('criterionGrader')
     expect(parsePaletteNodeType('codeTestRunner')).toBe('codeTestRunner')
     expect(parsePaletteNodeType('unknown')).toBeNull()
   })

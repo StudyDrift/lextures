@@ -82,6 +82,7 @@ function flowNodeData(node: Node): Record<string, unknown> {
   const data = { ...((node.data ?? {}) as Record<string, unknown>) }
   if (node.type === 'output') delete data.gradeSlotUsesRubric
   delete data.executionStatus
+
   return data
 }
 

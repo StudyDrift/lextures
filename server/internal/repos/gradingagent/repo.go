@@ -37,6 +37,7 @@ const (
 	ItemSkipped    ItemStatus = "skipped"
 	ItemFailed     ItemStatus = "failed"
 	ItemOverridden ItemStatus = "overridden"
+	ItemFlagged    ItemStatus = "flagged"
 )
 
 type ConfigRow struct {
@@ -87,6 +88,11 @@ type ResultRow struct {
 	CompletionTokens *int
 	CostUSD          *float64
 	Error            *string
+	FlagReason       *string
+	FlagPriority     *string
+	HeldReason       *string
+	HeldAt           *time.Time
+	HeldQueue        *string
 	CreatedAt        time.Time
 }
 
@@ -303,6 +309,11 @@ type InsertResultInput struct {
 	CompletionTokens *int
 	CostUSD          *float64
 	Error            *string
+	FlagReason       *string
+	FlagPriority     *string
+	HeldReason       *string
+	HeldAt           *time.Time
+	HeldQueue        *string
 }
 
 func InsertResult(ctx context.Context, pool *pgxpool.Pool, in InsertResultInput) (*ResultRow, error) {
@@ -318,15 +329,19 @@ func InsertResult(ctx context.Context, pool *pgxpool.Pool, in InsertResultInput)
 	err := pool.QueryRow(ctx, `
 INSERT INTO assessment.grading_agent_results (
 	run_id, config_id, submission_id, is_dry_run, suggested_points, suggested_rubric,
-	comment, confidence, status, model_id, prompt_tokens, completion_tokens, cost_usd, error
-) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::assessment.grading_agent_item_status, $10, $11, $12, $13, $14)
+	comment, confidence, status, model_id, prompt_tokens, completion_tokens, cost_usd, error,
+	flag_reason, flag_priority, held_reason, held_at, held_queue
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::assessment.grading_agent_item_status, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
 RETURNING id, run_id, config_id, submission_id, is_dry_run, suggested_points, suggested_rubric,
-          comment, confidence, status::text, model_id, prompt_tokens, completion_tokens, cost_usd, error, created_at
+          comment, confidence, status::text, model_id, prompt_tokens, completion_tokens, cost_usd, error,
+          flag_reason, flag_priority, held_reason, held_at, held_queue, created_at
 `, in.RunID, in.ConfigID, in.SubmissionID, in.IsDryRun, in.SuggestedPoints, nullableJSON(rubricJSON),
 		in.Comment, in.Confidence, string(in.Status), in.ModelID, in.PromptTokens, in.CompletionTokens, in.CostUSD, in.Error,
+		in.FlagReason, in.FlagPriority, in.HeldReason, in.HeldAt, in.HeldQueue,
 	).Scan(
 		&r.ID, &r.RunID, &r.ConfigID, &r.SubmissionID, &r.IsDryRun, &r.SuggestedPoints, &r.SuggestedRubric,
-		&r.Comment, &r.Confidence, &status, &r.ModelID, &r.PromptTokens, &r.CompletionTokens, &r.CostUSD, &r.Error, &r.CreatedAt,
+		&r.Comment, &r.Confidence, &status, &r.ModelID, &r.PromptTokens, &r.CompletionTokens, &r.CostUSD, &r.Error,
+		&r.FlagReason, &r.FlagPriority, &r.HeldReason, &r.HeldAt, &r.HeldQueue, &r.CreatedAt,
 	)
 	if err != nil {
 		return nil, err
@@ -338,7 +353,8 @@ RETURNING id, run_id, config_id, submission_id, is_dry_run, suggested_points, su
 func ListResultsForRun(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) ([]ResultRow, error) {
 	rows, err := pool.Query(ctx, `
 SELECT id, run_id, config_id, submission_id, is_dry_run, suggested_points, suggested_rubric,
-       comment, confidence, status::text, model_id, prompt_tokens, completion_tokens, cost_usd, error, created_at
+       comment, confidence, status::text, model_id, prompt_tokens, completion_tokens, cost_usd, error,
+       flag_reason, flag_priority, held_reason, held_at, held_queue, created_at
 FROM assessment.grading_agent_results
 WHERE run_id = $1
 ORDER BY created_at ASC
@@ -353,7 +369,8 @@ ORDER BY created_at ASC
 		var status string
 		if err := rows.Scan(
 			&r.ID, &r.RunID, &r.ConfigID, &r.SubmissionID, &r.IsDryRun, &r.SuggestedPoints, &r.SuggestedRubric,
-			&r.Comment, &r.Confidence, &status, &r.ModelID, &r.PromptTokens, &r.CompletionTokens, &r.CostUSD, &r.Error, &r.CreatedAt,
+			&r.Comment, &r.Confidence, &status, &r.ModelID, &r.PromptTokens, &r.CompletionTokens, &r.CostUSD, &r.Error,
+			&r.FlagReason, &r.FlagPriority, &r.HeldReason, &r.HeldAt, &r.HeldQueue, &r.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -361,6 +378,35 @@ ORDER BY created_at ASC
 		out = append(out, r)
 	}
 	return out, rows.Err()
+}
+
+func UpdateResultStatus(ctx context.Context, pool *pgxpool.Pool, resultID uuid.UUID, status ItemStatus, reason *string) (*ResultRow, error) {
+	if pool == nil {
+		return nil, errors.New("nil pool")
+	}
+	var r ResultRow
+	var statusStr string
+	err := pool.QueryRow(ctx, `
+UPDATE assessment.grading_agent_results
+SET status = $2::assessment.grading_agent_item_status,
+    error = COALESCE($3, error)
+WHERE id = $1
+RETURNING id, run_id, config_id, submission_id, is_dry_run, suggested_points, suggested_rubric,
+          comment, confidence, status::text, model_id, prompt_tokens, completion_tokens, cost_usd, error,
+          flag_reason, flag_priority, held_reason, held_at, held_queue, created_at
+`, resultID, string(status), reason).Scan(
+		&r.ID, &r.RunID, &r.ConfigID, &r.SubmissionID, &r.IsDryRun, &r.SuggestedPoints, &r.SuggestedRubric,
+		&r.Comment, &r.Confidence, &statusStr, &r.ModelID, &r.PromptTokens, &r.CompletionTokens, &r.CostUSD, &r.Error,
+		&r.FlagReason, &r.FlagPriority, &r.HeldReason, &r.HeldAt, &r.HeldQueue, &r.CreatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	r.Status = ItemStatus(statusStr)
+	return &r, nil
 }
 
 func nullableJSON(b []byte) any {

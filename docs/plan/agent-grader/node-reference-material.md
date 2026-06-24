@@ -1,6 +1,6 @@
 # 19.17.2 — Reference Material Node (Model Answer / Answer Key / Source Texts)
 
-> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../auto-grader-agent.md)). See the [node catalog](README.md).
+> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../../completed/auto-grader-agent.md)). See the [node catalog](README.md).
 
 ## Metadata
 
@@ -118,7 +118,7 @@ No backfill.
 ## 13. Dependencies & Sequencing
 
 - **After**: 19.16, 19.17.
-- **Before**: nothing hard; complements [Criterion Grader](node-criterion-grader.md) and [Originality Check](node-originality-check.md) (source grounding).
+- **Before**: nothing hard; complements [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md) and [Originality Check](../../completed/agent-grader/node-originality-check.md) (source grounding).
 - **Shared infra**: file text extraction.
 
 ## 14. Risks & Mitigations
@@ -159,4 +159,4 @@ No backfill.
 
 - [workflow-nodes.tsx](../../../clients/web/src/components/annotation/grader-agent/workflow-nodes.tsx), [types.ts](../../../clients/web/src/components/annotation/grader-agent/types.ts), [validation.ts](../../../clients/web/src/components/annotation/grader-agent/validation.ts), [workflow-prompt-variable.ts](../../../clients/web/src/components/annotation/grader-agent/workflow-prompt-variable.ts), [ai-output-system-prompt.ts](../../../clients/web/src/components/annotation/grader-agent/ai-output-system-prompt.ts).
 - Server: [workflow.go](../../../server/internal/service/gradingagent/workflow.go), [workflow_execute.go](../../../server/internal/service/gradingagent/workflow_execute.go), [submission_markdown.go](../../../server/internal/service/gradingagent/submission_markdown.go).
-- Related: [node catalog](README.md), [Criterion Grader](node-criterion-grader.md), [Originality Check](node-originality-check.md).
+- Related: [node catalog](README.md), [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md), [Originality Check](../../completed/agent-grader/node-originality-check.md).

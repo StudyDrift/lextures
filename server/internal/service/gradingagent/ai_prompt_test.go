@@ -51,6 +51,24 @@ func TestBuildAISystemPrompt_includesCriterionIDs(t *testing.T) {
 	}
 }
 
+func TestBuildCriterionSystemPrompt_includesCriterion(t *testing.T) {
+	id := uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
+	prompt := BuildCriterionSystemPrompt(&assignmentrubric.RubricCriterion{
+		ID:    id,
+		Title: "Thesis",
+		Levels: []assignmentrubric.RubricLevel{
+			{Label: "Weak", Points: 0},
+			{Label: "Strong", Points: 4},
+		},
+	})
+	if !strings.Contains(prompt, id.String()) {
+		t.Fatalf("prompt missing criterion id: %q", prompt)
+	}
+	if !strings.Contains(prompt, `"score": 4`) {
+		t.Fatal("prompt missing score example")
+	}
+}
+
 func TestParseAIOutput_scoreJSON(t *testing.T) {
 	out, err := ParseAIOutput(`{"total":7.5,"comment":"Good","confidence":0.7}`, AIOutputFormatScore, nil, 10)
 	if err != nil {

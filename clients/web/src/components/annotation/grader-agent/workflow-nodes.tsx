@@ -6,6 +6,14 @@ import { RenamableNodeHeader, RenamableNodeTitle } from './renamable-node-header
 import type { NodeExecutionStatus } from './use-grader-agent-workflow'
 import type { ConditionalRouterCondition } from './types'
 import { formatRouterConditionSentence } from './router-condition'
+import type { TFunction } from 'i18next'
+
+function codeTestRuntimeDisplayLabel(runtime: string, t: TFunction): string {
+  if (runtime === 'javascript') {
+    return t('gradingAgent.canvas.inspector.codeTestsRuntimeJavaScript')
+  }
+  return t('gradingAgent.canvas.inspector.codeTestsRuntimePython')
+}
 
 function executionStatusClass(status: NodeExecutionStatus | undefined, selected: boolean): string {
   switch (status) {
@@ -115,6 +123,62 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
           handleClass="!bg-emerald-500"
         />
         <InputSlotRow
+          handleId="comments"
+          label={t('gradingAgent.canvas.slots.comments')}
+          dotClass="bg-sky-500"
+          handleClass="!bg-sky-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const CriterionGraderNode = memo(function CriterionGraderNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-indigo-400/80 ring-2 ring-indigo-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.criterionGrader.title')}
+        dotClassName="bg-indigo-500"
+        headerClassName="border-b border-indigo-500/15 bg-indigo-500/5 dark:border-indigo-500/10 dark:bg-indigo-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="submission"
+          label={t('gradingAgent.canvas.slots.submission')}
+          dotClass="bg-slate-400 dark:bg-neutral-300"
+          handleClass="!bg-slate-400 dark:!bg-neutral-300"
+        />
+        <InputSlotRow
+          handleId="content"
+          label={t('gradingAgent.canvas.slots.content')}
+          dotClass="bg-amber-500"
+          handleClass="!bg-amber-500"
+        />
+        <InputSlotRow
+          handleId="rubric"
+          label={t('gradingAgent.canvas.slots.rubric')}
+          dotClass="bg-orange-500"
+          handleClass="!bg-orange-500"
+        />
+        <OutputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.gradeRubric')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <OutputSlotRow
           handleId="comments"
           label={t('gradingAgent.canvas.slots.comments')}
           dotClass="bg-sky-500"
@@ -304,7 +368,9 @@ export const CodeTestRunnerNode = memo(function CodeTestRunnerNode({ id, data, s
         trailing={<ExecutionBadge status={executionStatus} />}
       />
       <p className="px-3 py-2 text-xs text-slate-600 dark:text-neutral-400">
-        {t('gradingAgent.canvas.nodes.codeTests.runtimeLabel', { runtime })}
+        {t('gradingAgent.canvas.nodes.codeTests.runtimeLabel', {
+          runtime: codeTestRuntimeDisplayLabel(runtime, t),
+        })}
       </p>
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
         <InputSlotRow
@@ -324,6 +390,195 @@ export const CodeTestRunnerNode = memo(function CodeTestRunnerNode({ id, data, s
           label={t('gradingAgent.canvas.slots.report')}
           dotClass="bg-sky-500"
           handleClass="!bg-sky-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const OriginalityNode = memo(function OriginalityNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const metric = typeof nodeData.metric === 'string' && nodeData.metric.trim() ? nodeData.metric : 'similarity'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-amber-400/80 ring-2 ring-amber-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.originality.title')}
+        dotClassName="bg-amber-500"
+        headerClassName="border-b border-amber-500/15 bg-amber-500/5 dark:border-amber-500/10 dark:bg-amber-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <div className="px-3 py-2">
+        <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+          {t(`gradingAgent.canvas.nodes.originality.metric.${metric}`, { defaultValue: metric })}
+        </span>
+      </div>
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="submission"
+          label={t('gradingAgent.canvas.slots.submission')}
+          dotClass="bg-slate-500"
+          handleClass="!bg-slate-500"
+        />
+        <OutputSlotRow
+          handleId="score"
+          label={t('gradingAgent.canvas.slots.score')}
+          dotClass="bg-amber-500"
+          handleClass="!bg-amber-500"
+        />
+        <OutputSlotRow
+          handleId="report"
+          label={t('gradingAgent.canvas.slots.report')}
+          dotClass="bg-cyan-500"
+          handleClass="!bg-cyan-500"
+        />
+        <OutputSlotRow
+          handleId="flag"
+          label={t('gradingAgent.canvas.slots.flag')}
+          dotClass="bg-rose-500"
+          handleClass="!bg-rose-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const HumanReviewGateNode = memo(function HumanReviewGateNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const mode = typeof nodeData.mode === 'string' && nodeData.mode.trim() ? nodeData.mode : 'belowConfidence'
+  const queue = typeof nodeData.queue === 'string' && nodeData.queue.trim() ? nodeData.queue : 'default'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-slate-400/80 ring-2 ring-slate-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.reviewGate.title')}
+        dotClassName="bg-slate-600"
+        headerClassName="border-b border-slate-500/15 bg-slate-500/5 dark:border-slate-500/10 dark:bg-slate-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <div className="flex flex-wrap gap-1.5 px-3 py-2">
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+          {t(`gradingAgent.canvas.nodes.reviewGate.mode.${mode}`, { defaultValue: mode })}
+        </span>
+        <span className="rounded-full bg-slate-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-300">
+          {t('gradingAgent.canvas.nodes.reviewGate.queueBadge', { queue })}
+        </span>
+      </div>
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.gradeRequired')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <InputSlotRow
+          handleId="comments"
+          label={t('gradingAgent.canvas.slots.comments')}
+          dotClass="bg-sky-500"
+          handleClass="!bg-sky-500"
+        />
+        <InputSlotRow
+          handleId="report"
+          label={t('gradingAgent.canvas.slots.report')}
+          dotClass="bg-cyan-500"
+          handleClass="!bg-cyan-500"
+        />
+        <InputSlotRow
+          handleId="flag"
+          label={t('gradingAgent.canvas.slots.flag')}
+          dotClass="bg-amber-500"
+          handleClass="!bg-amber-500"
+        />
+        <OutputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.grade')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+      </div>
+    </div>
+  )
+})
+
+export const FlagForReviewNode = memo(function FlagForReviewNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const queue = typeof nodeData.queue === 'string' && nodeData.queue.trim() ? nodeData.queue : 'default'
+  const priority =
+    typeof nodeData.priority === 'string' && nodeData.priority.trim() ? nodeData.priority : 'normal'
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-rose-400/80 ring-2 ring-rose-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.flagForReview.title')}
+        dotClassName="bg-rose-500"
+        headerClassName="border-b border-rose-500/15 bg-rose-500/5 dark:border-rose-500/10 dark:bg-rose-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <div className="flex flex-wrap gap-1.5 px-3 py-2">
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
+          {t('gradingAgent.canvas.nodes.flagForReview.queueBadge', { queue })}
+        </span>
+        <span className="rounded-full bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-700 dark:text-rose-300">
+          {t(`gradingAgent.canvas.nodes.flagForReview.priority.${priority}`, { defaultValue: priority })}
+        </span>
+      </div>
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="reason"
+          label={t('gradingAgent.canvas.slots.reason')}
+          dotClass="bg-rose-500"
+          handleClass="!bg-rose-500"
+        />
+        <InputSlotRow
+          handleId="comments"
+          label={t('gradingAgent.canvas.slots.comments')}
+          dotClass="bg-sky-500"
+          handleClass="!bg-sky-500"
+        />
+        <InputSlotRow
+          handleId="report"
+          label={t('gradingAgent.canvas.slots.report')}
+          dotClass="bg-cyan-500"
+          handleClass="!bg-cyan-500"
+        />
+        <InputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.gradeContext')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <InputSlotRow
+          handleId="flag"
+          label={t('gradingAgent.canvas.slots.flag')}
+          dotClass="bg-amber-500"
+          handleClass="!bg-amber-500"
         />
       </div>
     </div>

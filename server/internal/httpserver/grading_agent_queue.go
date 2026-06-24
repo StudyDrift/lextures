@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/lextures/lextures/server/internal/models/gradecomment"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
@@ -86,15 +87,120 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
 	maxPoints := gradingagentsvc.MaxPointsFromAssignment(assignRow)
 
+	if workflowGraph != nil && gradingagentsvc.WorkflowRequiresGraphExecution(workflowGraph) {
+		dryRunModelID, modelErr := d.resolveGraderAgentModelID(ctx, modelUser, compiled.ScoreRequest.ModelID, cfg.ModelID)
+		if modelErr != nil {
+			return d.failGradingAgentItem(ctx, msg, modelErr.Error())
+		}
+		if gradingagentsvc.WorkflowUsesLLM(workflowGraph) {
+			dec, _ := aigateway.Evaluate(ctx, d.Pool, d.aiGatewayConfig(), modelUser, nil, aigateway.FeatureGraderAgent, dryRunModelID, aigateway.ContentHash(gradingagentsvc.ContentHashInput(compiled.ScoreRequest.InstructorPrompt, submissionText)))
+			if !dec.Allowed {
+				return d.failGradingAgentItem(ctx, msg, "AI processing blocked")
+			}
+			if svc.Client == nil {
+				return d.failGradingAgentItem(ctx, msg, "AI provider not configured")
+			}
+		}
+		preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(ctx, gradingagentsvc.DryRunExecutionInput{
+			Graph:           workflowGraph,
+			Submissions:     submissions,
+			SubmissionID:    msg.SubmissionID,
+			DefaultMarkdown: contentRow.Markdown,
+			DefaultRubric:   rubric,
+			MaxPoints:       maxPoints,
+			ModelID:         dryRunModelID,
+			LoadOriginalityReports: d.loadOriginalityReportsForGraderAgent,
+			Runner:          svc,
+			CodeRunner:      codeexecution.New(),
+		})
+		if execErr != nil {
+			return d.failGradingAgentItem(ctx, msg, execErr.Error())
+		}
+		if preview.Flagged != nil {
+			reason := preview.Flagged.Reason
+			priority := preview.Flagged.Priority
+			_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
+				RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
+				Status: gradingagentrepo.ItemFlagged, FlagReason: &reason,
+				FlagPriority: &priority,
+			})
+			return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+		}
+		comment := preview.Comment
+		conf := preview.Confidence
+		pts := preview.SuggestedPoints
+		if preview.Held != nil && preview.Held.WouldHold {
+			heldReason := preview.Held.Reason
+			queue := preview.Held.Queue
+			now := time.Now()
+			_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
+				RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
+				SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
+				Status: gradingagentrepo.ItemSuggested, HeldReason: &heldReason,
+				HeldAt: &now, HeldQueue: &queue,
+			})
+			return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+		}
+		var rubricJSON []byte
+		if len(preview.RubricScores) > 0 {
+			rubricJSON, _ = json.Marshal(preview.RubricScores)
+		}
+		posting := "manual"
+		if strings.TrimSpace(assignRow.PostingPolicy) == "automatic" && cfg.PostPolicy == "auto_post" {
+			posting = "automatic"
+		}
+		_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
+			DisplayName: "Grading agent",
+			Body:        comment,
+			Source:      "lextures",
+		})
+		if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, flatComment, commentJSON, posting, true); err != nil {
+			return d.failGradingAgentItem(ctx, msg, "failed to write grade")
+		}
+		_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
+			RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
+			SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
+			Status: gradingagentrepo.ItemApplied,
+		})
+		return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+	}
+
 	if workflowGraph != nil && gradeSourceID != "" {
-		for _, n := range workflowGraph.Nodes {
-			if n.ID == gradeSourceID && n.Type == gradingagentsvc.NodeTypeCodeTestRunner {
+		var gradeSource *gradingagentsvc.WorkflowNode
+		for i := range workflowGraph.Nodes {
+			if workflowGraph.Nodes[i].ID == gradeSourceID {
+				gradeSource = &workflowGraph.Nodes[i]
+				break
+			}
+		}
+		if gradeSource != nil {
+			switch gradeSource.Type {
+			case gradingagentsvc.NodeTypeCodeTestRunner, gradingagentsvc.NodeTypeCriterionGrader, gradingagentsvc.NodeTypeAI:
+				dryRunModelID := compiled.ScoreRequest.ModelID
+				if gradeSource.Type != gradingagentsvc.NodeTypeCodeTestRunner {
+					var modelErr error
+					dryRunModelID, modelErr = d.resolveGraderAgentModelID(ctx, modelUser, dryRunModelID, cfg.ModelID)
+					if modelErr != nil {
+						return d.failGradingAgentItem(ctx, msg, modelErr.Error())
+					}
+					dec, _ := aigateway.Evaluate(ctx, d.Pool, d.aiGatewayConfig(), modelUser, nil, aigateway.FeatureGraderAgent, dryRunModelID, aigateway.ContentHash(gradingagentsvc.ContentHashInput(compiled.ScoreRequest.InstructorPrompt, submissionText)))
+					if !dec.Allowed {
+						return d.failGradingAgentItem(ctx, msg, "AI processing blocked")
+					}
+					if svc.Client == nil {
+						return d.failGradingAgentItem(ctx, msg, "AI provider not configured")
+					}
+				}
 				preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(ctx, gradingagentsvc.DryRunExecutionInput{
 					Graph:           workflowGraph,
 					Submissions:     submissions,
+					SubmissionID:    msg.SubmissionID,
 					DefaultMarkdown: contentRow.Markdown,
 					DefaultRubric:   rubric,
 					MaxPoints:       maxPoints,
+					ModelID:         dryRunModelID,
+					LoadOriginalityReports: d.loadOriginalityReportsForGraderAgent,
+					Runner:          svc,
 					CodeRunner:      codeexecution.New(),
 				})
 				if execErr != nil {
@@ -103,16 +209,21 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 				comment := preview.Comment
 				conf := preview.Confidence
 				pts := preview.SuggestedPoints
+				var rubricJSON []byte
+				if len(preview.RubricScores) > 0 {
+					rubricJSON, _ = json.Marshal(preview.RubricScores)
+				}
 				posting := "manual"
 				if strings.TrimSpace(assignRow.PostingPolicy) == "automatic" && cfg.PostPolicy == "auto_post" {
 					posting = "automatic"
 				}
+				gradedByAI := gradeSource.Type != gradingagentsvc.NodeTypeCodeTestRunner
 				_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
 					DisplayName: "Grading agent",
 					Body:        comment,
 					Source:      "lextures",
 				})
-				if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, nil, flatComment, commentJSON, posting, false); err != nil {
+				if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, flatComment, commentJSON, posting, gradedByAI); err != nil {
 					return d.failGradingAgentItem(ctx, msg, "failed to write grade")
 				}
 				_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
