@@ -45,6 +45,7 @@ import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-p
 import { StudyRemindersSettingsPanel } from '../../components/settings/study-reminders-settings-panel'
 import { AiProcessingSettingsPanel } from '../../components/settings/ai-processing-settings-panel'
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
+import { AiProviderSettingsPanel } from '../../components/settings/ai-provider-settings-panel'
 import { ArchivedCoursesPanel } from '../../components/settings/archived-courses-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
@@ -1924,6 +1925,7 @@ export default function Settings() {
             </p>
             <OrgBranding />
             <AiGovernancePanel />
+            <AiProviderSettingsPanel />
           </div>
         )}
 
