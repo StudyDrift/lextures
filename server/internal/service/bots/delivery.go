@@ -42,7 +42,7 @@ func DeliverWebhookJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Confi
 	}
 
 	// grade.released must not post to channels unless explicitly enabled (FERPA).
-	channelBlocked := ep.EventType == string(webhooks.EventGradeReleased) && !conn.Settings.GradeChannelEnabled
+	channelBlocked := gradeChannelBlocked(ep.EventType, conn.Settings.GradeChannelEnabled)
 
 	var courseID *uuid.UUID
 	if ep.CourseID != "" {
@@ -177,6 +177,10 @@ func strField(m map[string]any, key string) string {
 		return v
 	}
 	return ""
+}
+
+func gradeChannelBlocked(eventType string, gradeChannelEnabled bool) bool {
+	return eventType == string(webhooks.EventGradeReleased) && !gradeChannelEnabled
 }
 
 func recordMetric(platform botsrepo.Platform, eventType, status string) {

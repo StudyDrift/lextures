@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { BotChannelMappingsPanel } from '../../components/bot-channel-mappings-panel'
 import {
   disconnectBot,
   fetchBotConnections,
@@ -275,10 +276,13 @@ export default function IntegrationsAdminPage() {
               </div>
               <p className="mt-2 text-xs text-slate-600 dark:text-neutral-400">{BOT_BLURB[platform]}</p>
               {connected && conn ? (
-                <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
-                  Workspace: {conn.workspaceName || conn.workspaceId}
-                  {conn.mappings?.length ? ` · ${conn.mappings.length} channel mapping(s)` : null}
-                </p>
+                <>
+                  <p className="mt-2 text-xs text-slate-500 dark:text-neutral-500">
+                    Workspace: {conn.workspaceName || conn.workspaceId}
+                    {conn.mappings?.length ? ` · ${conn.mappings.length} channel mapping(s)` : null}
+                  </p>
+                  <BotChannelMappingsPanel connection={conn} onUpdated={() => void load()} />
+                </>
               ) : null}
               <div className="mt-4">
                 {connected && conn ? (
