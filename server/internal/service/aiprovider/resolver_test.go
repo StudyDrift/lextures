@@ -7,14 +7,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type stubCompleter struct {
-	provider Provider
-}
-
-func (s *stubCompleter) Complete(ctx context.Context, modelID string, messages []Message, opts ...ChatOptions) (ChatResult, error) {
-	return s.provider.Complete(ctx, modelID, messages, opts...)
-}
-
 func TestResolver_DryRun(t *testing.T) {
 	r := NewResolver(nil, nil, ResolverConfig{DryRun: true})
 	got, meta, err := r.Complete(context.Background(), nil, "", []Message{{Role: "user", Content: "ping"}})
