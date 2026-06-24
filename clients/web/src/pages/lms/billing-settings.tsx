@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useState } from 'react'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { fetchMyEntitlements, formatMoney, openBillingPortal, type Entitlement } from '../../lib/billing-api'
+import { invoiceDownloadUrl } from '../../lib/tax-api'
 import { authorizedFetch } from '../../lib/api'
 import { LmsPage } from './lms-page'
 
@@ -139,8 +140,10 @@ export default function BillingSettingsPage() {
                   <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
                     <th className="py-2 pr-4 font-medium">Type</th>
                     <th className="py-2 pr-4 font-medium">Amount</th>
+                    <th className="py-2 pr-4 font-medium">Tax</th>
                     <th className="py-2 pr-4 font-medium">Valid from</th>
-                    <th className="py-2 font-medium">Status</th>
+                    <th className="py-2 pr-4 font-medium">Status</th>
+                    <th className="py-2 font-medium">Invoice</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -148,8 +151,35 @@ export default function BillingSettingsPage() {
                     <tr key={e.id} className="border-b border-slate-100 dark:border-neutral-800">
                       <td className="py-3 pr-4">{entitlementLabel(e)}</td>
                       <td className="py-3 pr-4">{formatMoney(e.amountPaidCents, e.currency)}</td>
+                      <td className="py-3 pr-4">
+                        {e.taxAmountCents ? formatMoney(e.taxAmountCents, e.currency) : '—'}
+                      </td>
                       <td className="py-3 pr-4">{new Date(e.validFrom).toLocaleDateString()}</td>
-                      <td className="py-3 capitalize">{e.status}</td>
+                      <td className="py-3 pr-4 capitalize">{e.status}</td>
+                      <td className="py-3">
+                        {e.invoiceId ? (
+                          <a
+                            href={invoiceDownloadUrl(e.invoiceId)}
+                            className="text-sm font-medium text-indigo-600 hover:underline"
+                            onClick={async (ev) => {
+                              ev.preventDefault()
+                              const res = await authorizedFetch(`/api/v1/invoices/${e.invoiceId}`)
+                              if (!res.ok) return
+                              const blob = await res.blob()
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `invoice-${e.invoiceId}.pdf`
+                              a.click()
+                              URL.revokeObjectURL(url)
+                            }}
+                          >
+                            Download
+                          </a>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

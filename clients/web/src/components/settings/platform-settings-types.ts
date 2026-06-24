@@ -47,6 +47,7 @@ export type PlatformSettingsPayload = {
   ffConsortiumSharing: boolean
   ffStripeBilling: boolean
   ffRevenueShare: boolean
+  ffTaxCollection: boolean
   ffLearningPaths: boolean
   ffConditionalRelease: boolean
   ffPeerReview: boolean

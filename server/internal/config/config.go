@@ -436,6 +436,9 @@ type Config struct {
 	// FFRevenueShare enables creator revenue share, affiliate tracking, and Stripe Connect payouts (plan 15.8).
 	// Managed in Settings → Global platform (not process env).
 	FFRevenueShare bool
+	// FFTaxCollection enables Stripe Tax calculation, collection, and reporting (plan 15.13).
+	// Managed in Settings → Global platform (not process env).
+	FFTaxCollection bool
 
 	// StripeSecretKey is the Stripe API secret key (sk_live_… or sk_test_…).
 	StripeSecretKey string

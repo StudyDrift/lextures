@@ -132,6 +132,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Creator earnings ledger, affiliate referral links, and Stripe Connect payouts for course sales.',
   },
   {
+    key: 'ffTaxCollection',
+    label: 'Tax collection (Stripe Tax)',
+    description:
+      'Calculate and collect sales tax, VAT, and GST at checkout; issue tax-compliant invoices and jurisdiction reports.',
+  },
+  {
     key: 'ffCoCurricularTranscript',
     label: 'Co-curricular transcript (CLR)',
     description:

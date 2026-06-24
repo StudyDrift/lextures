@@ -6,6 +6,12 @@ export type Entitlement = {
   entitlementType: string
   courseId?: string
   amountPaidCents: number
+  subtotalCents?: number
+  taxAmountCents?: number
+  taxType?: string
+  taxJurisdiction?: string
+  reverseCharge?: boolean
+  invoiceId?: string
   currency: string
   validFrom: string
   validUntil?: string

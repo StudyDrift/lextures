@@ -63,14 +63,20 @@ func (d Deps) registerBillingRoutes(r chi.Router) {
 }
 
 type entitlementJSON struct {
-	ID              string  `json:"id"`
-	EntitlementType string  `json:"entitlementType"`
-	CourseID        *string `json:"courseId,omitempty"`
-	AmountPaidCents int     `json:"amountPaidCents"`
-	Currency        string  `json:"currency"`
-	ValidFrom       string  `json:"validFrom"`
-	ValidUntil      *string `json:"validUntil,omitempty"`
-	Status          string  `json:"status"`
+	ID              string   `json:"id"`
+	EntitlementType string   `json:"entitlementType"`
+	CourseID        *string  `json:"courseId,omitempty"`
+	AmountPaidCents int      `json:"amountPaidCents"`
+	SubtotalCents   int      `json:"subtotalCents,omitempty"`
+	TaxAmountCents  int      `json:"taxAmountCents,omitempty"`
+	TaxType         string   `json:"taxType,omitempty"`
+	TaxJurisdiction string   `json:"taxJurisdiction,omitempty"`
+	ReverseCharge   bool     `json:"reverseCharge,omitempty"`
+	InvoiceID       *string  `json:"invoiceId,omitempty"`
+	Currency        string   `json:"currency"`
+	ValidFrom       string   `json:"validFrom"`
+	ValidUntil      *string  `json:"validUntil,omitempty"`
+	Status          string   `json:"status"`
 }
 
 func entitlementToJSON(e repoBilling.Entitlement) entitlementJSON {
@@ -78,6 +84,11 @@ func entitlementToJSON(e repoBilling.Entitlement) entitlementJSON {
 		ID:              e.ID.String(),
 		EntitlementType: e.EntitlementType,
 		AmountPaidCents: e.AmountPaidCents,
+		SubtotalCents:   e.SubtotalCents,
+		TaxAmountCents:  e.TaxAmountCents,
+		TaxType:         e.TaxType,
+		TaxJurisdiction: e.TaxJurisdiction,
+		ReverseCharge:   e.ReverseCharge,
 		Currency:        e.Currency,
 		ValidFrom:       e.ValidFrom.UTC().Format(time.RFC3339),
 		Status:          e.Status,
@@ -85,6 +96,10 @@ func entitlementToJSON(e repoBilling.Entitlement) entitlementJSON {
 	if e.CourseID != nil {
 		s := e.CourseID.String()
 		out.CourseID = &s
+	}
+	if e.InvoiceID != nil {
+		s := e.InvoiceID.String()
+		out.InvoiceID = &s
 	}
 	if e.ValidUntil != nil {
 		s := e.ValidUntil.UTC().Format(time.RFC3339)
@@ -153,14 +168,15 @@ func (d Deps) handleBillingCheckout() http.HandlerFunc {
 			return
 		}
 		result, err := svcBilling.CreateCheckoutSession(r.Context(), d.Pool, cfg, svcBilling.CheckoutRequest{
-			UserID:        userID,
-			Email:         email,
-			CourseID:      courseID,
-			Plan:          body.Plan,
-			PromoCode:     body.PromoCode,
-			AffiliateCode: body.AffiliateCode,
-			SuccessURL:    successURL,
-			CancelURL:     cancelURL,
+			UserID:             userID,
+			Email:              email,
+			CourseID:           courseID,
+			Plan:               body.Plan,
+			PromoCode:          body.PromoCode,
+			AffiliateCode:      body.AffiliateCode,
+			SuccessURL:         successURL,
+			CancelURL:          cancelURL,
+			PlatformTaxEnabled: d.effectiveConfig().FFTaxCollection,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not start checkout.")
@@ -315,7 +331,8 @@ func (d Deps) handleStripeWebhook() http.HandlerFunc {
 		cfg := svcBilling.ConfigFrom(d.effectiveConfig())
 		sig := r.Header.Get("Stripe-Signature")
 		result, err := svcBilling.HandleWebhook(r.Context(), d.Pool, cfg, body, sig, svcBilling.WebhookOptions{
-			RevenueShareEnabled: d.effectiveConfig().FFRevenueShare,
+			RevenueShareEnabled:  d.effectiveConfig().FFRevenueShare,
+			TaxCollectionEnabled: d.effectiveConfig().FFTaxCollection,
 		})
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid webhook.")

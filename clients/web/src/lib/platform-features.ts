@@ -64,6 +64,7 @@ export type PlatformFeaturesSnapshot = {
   ffConsortiumSharing?: boolean
   ffStripeBilling?: boolean
   ffRevenueShare?: boolean
+  ffTaxCollection?: boolean
   ffLearningPaths?: boolean
   ffConditionalRelease?: boolean
   ffPeerReview?: boolean
@@ -145,6 +146,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffConsortiumSharing: false,
   ffStripeBilling: false,
   ffRevenueShare: false,
+  ffTaxCollection: false,
   ffLearningPaths: false,
   ffConditionalRelease: false,
   ffPeerReview: false,

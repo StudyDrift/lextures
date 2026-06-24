@@ -69,6 +69,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffConsortiumSharing: false,
     ffStripeBilling: false,
     ffRevenueShare: false,
+    ffTaxCollection: false,
     ffLearningPaths: false,
     ffConditionalRelease: false,
     ffPeerReview: false,

@@ -24,14 +24,15 @@ import (
 
 // CheckoutRequest is the learner checkout payload.
 type CheckoutRequest struct {
-	UserID        uuid.UUID
-	Email         string
-	CourseID      *uuid.UUID
-	Plan          string // monthly | annual
-	PromoCode     string
-	AffiliateCode string
-	SuccessURL    string
-	CancelURL     string
+	UserID              uuid.UUID
+	Email               string
+	CourseID            *uuid.UUID
+	Plan                string // monthly | annual
+	PromoCode           string
+	AffiliateCode       string
+	SuccessURL          string
+	CancelURL           string
+	PlatformTaxEnabled  bool
 }
 
 // CheckoutResult is a Stripe Checkout redirect.
@@ -66,6 +67,7 @@ func (c StripeConfig) IsConfigured() bool {
 
 // CreateCheckoutSession starts Stripe Checkout for a course purchase or subscription.
 func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, req CheckoutRequest) (*CheckoutResult, error) {
+	var orgID uuid.UUID
 	if !cfg.IsConfigured() {
 		return nil, errors.New("stripe not configured")
 	}
@@ -100,11 +102,13 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		if price.PriceCents <= 0 {
 			return nil, fmt.Errorf("course is free")
 		}
+		orgID = price.OrgID
 		currency := strings.ToLower(price.Currency)
 		if currency == "" {
 			currency = "usd"
 		}
 		params.Metadata["course_id"] = req.CourseID.String()
+		params.Metadata["org_id"] = orgID.String()
 		params.Metadata["entitlement_type"] = repoBilling.TypeCoursePurchase
 		if code := strings.TrimSpace(req.AffiliateCode); code != "" {
 			params.Metadata["affiliate_code"] = code
@@ -112,12 +116,17 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		params.PaymentIntentData = &stripe.CheckoutSessionPaymentIntentDataParams{
 			Metadata: params.Metadata,
 		}
+		taxCode := "txcd_99999999"
+		if taxEnabled, settings, _ := TaxEnabledForOrg(ctx, pool, orgID, req.PlatformTaxEnabled); taxEnabled && settings != nil {
+			taxCode = settings.DefaultTaxCategory
+		}
 		params.LineItems = []*stripe.CheckoutSessionLineItemParams{
 			{
 				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
 					Currency: stripe.String(currency),
 					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name: stripe.String(price.Title),
+						Name:    stripe.String(price.Title),
+						TaxCode: stripe.String(taxCode),
 					},
 					UnitAmount: stripe.Int64(int64(price.PriceCents)),
 				},
@@ -141,6 +150,14 @@ func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeCo
 		}
 	default:
 		return nil, fmt.Errorf("course_id or plan required")
+	}
+
+	if orgID != uuid.Nil {
+		if taxEnabled, _, _ := TaxEnabledForOrg(ctx, pool, orgID, req.PlatformTaxEnabled); taxEnabled {
+			params.AutomaticTax = &stripe.CheckoutSessionAutomaticTaxParams{
+				Enabled: stripe.Bool(true),
+			}
+		}
 	}
 
 	sess, err := checkoutsession.New(params)
@@ -179,6 +196,7 @@ type WebhookResult struct {
 // WebhookOptions configures optional post-payment side effects.
 type WebhookOptions struct {
 	RevenueShareEnabled bool
+	TaxCollectionEnabled bool
 }
 
 // HandleWebhook verifies and processes a Stripe webhook payload.
@@ -238,7 +256,7 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 		t := time.Now().UTC().AddDate(1, 0, 0)
 		validUntil = &t
 	}
-	_, created, err := repoBilling.CreateIdempotent(ctx, pool, repoBilling.CreateInput{
+	ent, created, err := repoBilling.CreateIdempotent(ctx, pool, repoBilling.CreateInput{
 		UserID:          userID,
 		EntitlementType: entType,
 		CourseID:        courseID,
@@ -249,6 +267,15 @@ func handleCheckoutCompleted(ctx context.Context, pool *pgxpool.Pool, event stri
 	})
 	if err != nil {
 		return nil, err
+	}
+	if created && opts.TaxCollectionEnabled {
+		orgID := orgIDFromMetadata(sess.Metadata)
+		if orgID != uuid.Nil {
+			_ = PersistCheckoutTax(ctx, pool, event.ID, &sess, orgID, opts.TaxCollectionEnabled)
+			if ent != nil {
+				_, _ = IssueTaxInvoice(ctx, pool, ent.ID, orgID)
+			}
+		}
 	}
 	if created {
 		RecordPayment(amount, entType)
@@ -343,12 +370,18 @@ func handleSubscriptionDeleted(ctx context.Context, pool *pgxpool.Pool, event st
 }
 
 func handleChargeRefunded(ctx context.Context, pool *pgxpool.Pool, event stripe.Event, opts WebhookOptions) (*WebhookResult, error) {
-	if !opts.RevenueShareEnabled {
-		return &WebhookResult{EventType: string(event.Type)}, nil
-	}
 	var ch stripe.Charge
 	if err := json.Unmarshal(event.Data.Raw, &ch); err != nil {
 		return nil, err
+	}
+	if opts.TaxCollectionEnabled {
+		rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
+		if cid, err := uuid.Parse(rawCourse); err == nil {
+			_, _ = repoBilling.ReverseEntitlementTaxByCourse(ctx, pool, cid)
+		}
+	}
+	if !opts.RevenueShareEnabled {
+		return &WebhookResult{EventType: string(event.Type)}, nil
 	}
 	rawCourse := strings.TrimSpace(ch.Metadata["course_id"])
 	if rawCourse == "" {
@@ -423,6 +456,18 @@ func ensureCustomer(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, u
 		return "", err
 	}
 	return cust.ID, nil
+}
+
+func orgIDFromMetadata(meta map[string]string) uuid.UUID {
+	raw := strings.TrimSpace(meta["org_id"])
+	if raw == "" {
+		return uuid.Nil
+	}
+	id, err := uuid.Parse(raw)
+	if err != nil {
+		return uuid.Nil
+	}
+	return id
 }
 
 // LookupUserEmail loads the user email for portal/checkout.

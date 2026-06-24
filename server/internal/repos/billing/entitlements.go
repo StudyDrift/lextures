@@ -30,6 +30,12 @@ type Entitlement struct {
 	StripeEventID   string
 	StripeInvoiceID *string
 	AmountPaidCents int
+	SubtotalCents   int
+	TaxAmountCents  int
+	TaxType         string
+	TaxJurisdiction string
+	ReverseCharge   bool
+	InvoiceID       *uuid.UUID
 	Currency        string
 	ValidFrom       time.Time
 	ValidUntil      *time.Time
@@ -103,7 +109,9 @@ func scanEntitlement(ctx context.Context, pool *pgxpool.Pool, query string, args
 func ListActiveByUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]Entitlement, error) {
 	rows, err := pool.Query(ctx, `
 SELECT id, user_id, entitlement_type, course_id, stripe_event_id, stripe_invoice_id,
-       amount_paid_cents, currency, valid_from, valid_until, status, created_at
+       amount_paid_cents, subtotal_cents, tax_amount_cents, tax_type,
+       COALESCE(tax_jurisdiction, ''), reverse_charge, invoice_id,
+       currency, valid_from, valid_until, status, created_at
 FROM billing.user_entitlements
 WHERE user_id = $1
   AND status = 'active'
@@ -120,7 +128,8 @@ ORDER BY created_at DESC
 		var courseID *uuid.UUID
 		if err := rows.Scan(
 			&e.ID, &e.UserID, &e.EntitlementType, &courseID, &e.StripeEventID, &e.StripeInvoiceID,
-			&e.AmountPaidCents, &e.Currency, &e.ValidFrom, &e.ValidUntil, &e.Status, &e.CreatedAt,
+			&e.AmountPaidCents, &e.SubtotalCents, &e.TaxAmountCents, &e.TaxType, &e.TaxJurisdiction,
+			&e.ReverseCharge, &e.InvoiceID, &e.Currency, &e.ValidFrom, &e.ValidUntil, &e.Status, &e.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
