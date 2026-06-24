@@ -139,7 +139,7 @@ func (d Deps) serveUserCalendarFeed(w http.ResponseWriter, r *http.Request, user
 		cacheKey = "user:" + userID.String()
 		courses, err := courserepo.ListForEnrolledUser(ctx, d.Pool, userID, nil)
 		if err != nil {
-			d.serveCalendarWithCacheFallback(w, cacheKey, "Failed to load courses.")
+			d.serveCalendarWithCacheFallback(w, cacheKey, "Failed to load courses.", courseID)
 			return
 		}
 		courseIDs = make([]uuid.UUID, 0, len(courses))
@@ -155,13 +155,14 @@ func (d Deps) serveUserCalendarFeed(w http.ResponseWriter, r *http.Request, user
 	if body, ok := calendarsvc.DefaultFeedCache.Get(cacheKey, now); ok {
 		w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
 		w.Header().Set("X-Cache", "hit")
+		calendarsvc.RecordFeedRequest(calendarFeedType(courseID), "hit")
 		_, _ = w.Write(body)
 		return
 	}
 
 	events, err := calendarsvc.LoadEventsForCourses(ctx, d.Pool, courseIDs, userID, rangeStart, rangeEnd)
 	if err != nil {
-		d.serveCalendarWithCacheFallback(w, cacheKey, "Failed to generate calendar feed.")
+		d.serveCalendarWithCacheFallback(w, cacheKey, "Failed to generate calendar feed.", courseID)
 		return
 	}
 
@@ -171,13 +172,22 @@ func (d Deps) serveUserCalendarFeed(w http.ResponseWriter, r *http.Request, user
 
 	w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
 	w.Header().Set("X-Cache", "miss")
+	calendarsvc.RecordFeedRequest(calendarFeedType(courseID), "miss")
 	_, _ = w.Write(body)
 }
 
-func (d Deps) serveCalendarWithCacheFallback(w http.ResponseWriter, cacheKey, errMsg string) {
+func calendarFeedType(courseID *uuid.UUID) string {
+	if courseID != nil {
+		return "course"
+	}
+	return "user"
+}
+
+func (d Deps) serveCalendarWithCacheFallback(w http.ResponseWriter, cacheKey, errMsg string, courseID *uuid.UUID) {
 	if body, ok := calendarsvc.DefaultFeedCache.GetStale(cacheKey); ok {
 		w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
 		w.Header().Set("X-Cache", "stale")
+		calendarsvc.RecordFeedRequest(calendarFeedType(courseID), "stale")
 		_, _ = w.Write(body)
 		return
 	}
