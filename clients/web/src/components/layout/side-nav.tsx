@@ -87,7 +87,7 @@ export function SideNav() {
           <SideNavTooltip content="Lextures">
             <NavLink
               to="/"
-              className={`flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-2xl p-1 outline-none ring-slate-400/30 transition hover:bg-white/50 focus-visible:ring-2 dark:ring-neutral-500/40 dark:hover:bg-white/5 ${
+              className={`flex min-h-0 min-w-0 flex-1 items-center gap-3 rounded-2xl p-1 outline-none ring-slate-400/30 transition-[background-color,color,border-color] hover:bg-white/50 focus-visible:ring-2 dark:ring-neutral-500/40 dark:hover:bg-white/5 ${
                 sideNavCollapsed ? 'justify-center pe-1' : 'pe-2'
               }`}
               end

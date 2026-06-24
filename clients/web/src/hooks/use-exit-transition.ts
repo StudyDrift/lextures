@@ -7,7 +7,7 @@ type ExitTransitionResult = {
   onTransitionEnd: (e: TransitionEvent) => void
 }
 
-/** Gates unmount behind a CSS exit transition (plan 22.1, rule 6). */
+/** Gates unmount behind a CSS exit transition-colors (plan 22.1, rule 6). */
 export function useExitTransition(visible: boolean, property = 'opacity'): ExitTransitionResult {
   const [rendered, setRendered] = useState(visible)
   const [exiting, setExiting] = useState(false)

@@ -189,7 +189,7 @@ export function AssignmentPicker({
                       onChange(assignment.id)
                       setOpen(false)
                     }}
-                    className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition ${
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-start text-xs transition-[background-color,color,border-color] ${
                       highlighted
                         ? 'bg-indigo-50 font-semibold text-indigo-900 dark:bg-indigo-950/50 dark:text-indigo-100'
                         : active

@@ -52,7 +52,7 @@ export function NotebookPageActionsMenu({
       <button
         type="button"
         onClick={onToggle}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
         aria-expanded={open}
         aria-haspopup="menu"
       >
@@ -72,7 +72,7 @@ export function NotebookPageActionsMenu({
                 closeAll()
                 onFlashcards()
               }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
             >
               <Sparkles className="h-4 w-4 text-indigo-500" aria-hidden />
               Create Flash Cards
@@ -91,7 +91,7 @@ export function NotebookPageActionsMenu({
                   aria-expanded={moveOpen}
                   aria-haspopup="menu"
                   onClick={() => setMoveOpen((v) => !v)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
                 >
                   <Folder className="h-4 w-4 text-amber-500 dark:text-amber-400" aria-hidden />
                   <span className="flex-1 text-start">Move to group</span>
@@ -119,7 +119,7 @@ export function NotebookPageActionsMenu({
                               closeAll()
                               onMoveToGroup(activePage.id, group.id)
                             }}
-                            className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition hover:bg-slate-50 disabled:cursor-default disabled:opacity-50 dark:hover:bg-neutral-800"
+                            className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-default disabled:opacity-50 dark:hover:bg-neutral-800"
                           >
                             <span className="font-medium text-slate-800 dark:text-neutral-100">
                               {group.title || 'Untitled group'}
@@ -143,7 +143,7 @@ export function NotebookPageActionsMenu({
                     closeAll()
                     onMoveToRoot(activePage.id)
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800"
                 >
                   Move to top level
                 </button>

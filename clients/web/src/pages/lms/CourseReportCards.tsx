@@ -18,13 +18,13 @@ const INPUT_CLASS =
   'rounded-lg border border-slate-200 bg-white px-2 py-1 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
 
 const BTN_PRIMARY =
-  'inline-flex items-center rounded-lg bg-indigo-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex items-center rounded-lg bg-indigo-600 px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50'
 
 const BTN_SECONDARY =
-  'inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
+  'inline-flex items-center rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
 
 const BTN_SUCCESS =
-  'inline-flex items-center rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex items-center rounded-lg bg-emerald-600 px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50'
 
 function studentLabel(s: RosterEntry): string {
   return s.displayName?.trim() || s.email
@@ -424,7 +424,7 @@ export default function CourseReportCards() {
                                   type="button"
                                   onClick={() => void handleAISuggest(student.userId, card.id)}
                                   disabled={!!isAILoading}
-                                  className="inline-flex items-center rounded-lg bg-violet-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="inline-flex items-center rounded-lg bg-violet-600 px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
                                   aria-label="Get AI comment suggestion"
                                 >
                                   {isAILoading ? 'AI…' : 'AI Suggest'}
@@ -463,7 +463,7 @@ export default function CourseReportCards() {
                                     href={`/api/v1/report-cards/${card.id}/pdf`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center rounded-lg bg-slate-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-slate-500 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+                                    className="inline-flex items-center rounded-lg bg-slate-600 px-2 py-1 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-slate-500 dark:bg-neutral-700 dark:hover:bg-neutral-600"
                                   >
                                     PDF
                                   </a>
@@ -497,7 +497,7 @@ export default function CourseReportCards() {
               type="button"
               onClick={() => void handleRelease()}
               disabled={releasing}
-              className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {releasing ? 'Releasing…' : `Release ${approvedCount} Approved Card(s) to Parents`}
             </button>

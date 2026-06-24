@@ -50,7 +50,7 @@ export function CourseCaptionPolicySection({ courseCode, course, onCourseUpdated
           }`}
         >
           <span
-            className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition ${
+            className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
               enabled ? 'translate-x-5' : 'translate-x-0.5'
             }`}
           />

@@ -88,7 +88,7 @@ export function AiReportsPanel() {
             key={p.id}
             type="button"
             onClick={() => setPreset(p.id)}
-            className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition ${
+            className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${
               preset === p.id
                 ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-500/50 dark:bg-indigo-950/60 dark:text-indigo-100'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200'

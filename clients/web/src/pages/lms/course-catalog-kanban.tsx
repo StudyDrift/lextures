@@ -183,7 +183,7 @@ function KanbanColumnDropZone({
     <div
       ref={setNodeRef}
       className={[
-        'flex min-h-[6rem] flex-col gap-2 rounded-lg transition',
+        'flex min-h-[6rem] flex-col gap-2 rounded-lg transition-colors',
         isOver ? 'bg-indigo-50/80 ring-1 ring-indigo-300/60 dark:bg-indigo-950/20 dark:ring-indigo-500/30' : '',
       ]
         .filter(Boolean)
@@ -230,7 +230,7 @@ function KanbanColumn({
         <button
           type="button"
           onClick={onToggleCollapsed}
-          className="flex h-full min-h-[12rem] flex-col items-center justify-start gap-3 rounded-xl border border-slate-200 bg-slate-100/90 px-1.5 py-3 text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 dark:border-neutral-700 dark:bg-neutral-800/90 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+          className="flex h-full min-h-[12rem] flex-col items-center justify-start gap-3 rounded-xl border border-slate-200 bg-slate-100/90 px-1.5 py-3 text-slate-600 transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-100 dark:border-neutral-700 dark:bg-neutral-800/90 dark:text-neutral-300 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
           aria-label={`Expand ${title} column (${courses.length} courses). ${hint}`}
           title={`${title} (${courses.length})`}
         >
@@ -299,7 +299,7 @@ function KanbanColumn({
             <button
               type="button"
               onClick={onToggleCollapsed}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-200/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-200/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100"
               aria-label={`Collapse ${title} column`}
               title={`Collapse ${title}`}
             >

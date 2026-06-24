@@ -72,7 +72,7 @@ export function CourseCatalogNicknameEditor({
         setError(null)
         setOpen(true)
       }}
-      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
       aria-label={`Edit nickname for ${course.title}`}
       title="Edit nickname"
     >

@@ -46,12 +46,12 @@ export function AddCourseItemMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span>Actions</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
@@ -70,7 +70,7 @@ export function AddCourseItemMenu({
               onAdd()
               setOpen(false)
             }}
-            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
           >
             <span className="font-semibold text-slate-950 dark:text-neutral-100">Add Module</span>
             <span className="text-xs text-slate-500 dark:text-neutral-400">Group course activities and items</span>
@@ -86,7 +86,7 @@ export function AddCourseItemMenu({
                   onCollapseExpandAllModules()
                   setOpen(false)
                 }}
-                className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
+                className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-neutral-700"
               >
                 <span className="font-semibold text-slate-950 dark:text-neutral-100">
                   {allModulesCollapsed ? 'Expand all modules' : 'Collapse all modules'}
@@ -105,7 +105,7 @@ export function AddCourseItemMenu({
             role="menuitemcheckbox"
             aria-checked={dragHandlesVisible}
             onClick={onToggleDragHandles}
-            className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
           >
             <span
               className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${

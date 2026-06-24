@@ -180,7 +180,7 @@ function HeaderSortMenuPortal({
 
 function menuButtonClass(active: boolean) {
   return [
-    'inline-flex w-full max-w-full items-center justify-between gap-1 rounded-md px-1 py-0.5 text-start font-[inherit] transition',
+    'inline-flex w-full max-w-full items-center justify-between gap-1 rounded-md px-1 py-0.5 text-start font-[inherit] transition-colors',
     active
       ? 'bg-indigo-100 text-indigo-950 ring-1 ring-indigo-300 dark:bg-indigo-950/80 dark:text-indigo-100 dark:ring-indigo-600'
       : 'text-inherit hover:bg-slate-200/80 dark:hover:bg-neutral-700/80',
@@ -1182,7 +1182,7 @@ export function GradebookGrid({
             Former students ({formerStudents.length})
           </span>
           <ChevronDown
-            className={`h-4 w-4 shrink-0 transition ${formerCollapsed ? '' : 'rotate-180'}`}
+            className={`h-4 w-4 shrink-0 transition-transform ${formerCollapsed ? '' : 'rotate-180'}`}
             aria-hidden
           />
         </button>
@@ -1345,7 +1345,7 @@ export function GradebookGrid({
                 : 'Show assignments as rows and students as columns'
             }
             className={[
-              'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition',
+              'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition-colors',
               transposed
                 ? 'border-indigo-300 bg-indigo-50 text-indigo-950 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-100'
                 : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80',
@@ -1374,7 +1374,7 @@ export function GradebookGrid({
                 : 'Color each score cell from cool (low) to warm (high) within its column'
             }
             className={[
-              'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition',
+              'inline-flex shrink-0 items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium shadow-sm transition-colors',
               colorScaleEnabled
                 ? 'border-indigo-300 bg-indigo-50 text-indigo-950 dark:border-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-100'
                 : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700/80',
@@ -1748,7 +1748,7 @@ export function GradebookGrid({
                         aria-selected={
                           inRect || showEditor || (isFocusCell && !editing && selectionRect == null)
                         }
-                        className={`relative ${pad} min-w-[5.5rem] border-s border-slate-100 text-end tabular-nums outline-none transition dark:border-neutral-700/80 ${cellSurface} ${fillExtSurface} ${droppedSurface}`}
+                        className={`relative ${pad} min-w-[5.5rem] border-s border-slate-100 text-end tabular-nums outline-none transition-colors dark:border-neutral-700/80 ${cellSurface} ${fillExtSurface} ${droppedSurface}`}
                         title={
                           cellDropped
                             ? 'This score is excluded from the course total by the group’s drop or replace policy.'

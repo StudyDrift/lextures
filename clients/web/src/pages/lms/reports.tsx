@@ -96,7 +96,7 @@ export default function Reports() {
               key={p}
               type="button"
               onClick={() => setPreset(p)}
-              className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition ${
+              className={`rounded-xl border px-3 py-2 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${
                 preset === p
                   ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-500/50 dark:bg-indigo-950/60 dark:text-indigo-100'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-200 hover:bg-indigo-50/60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40'
@@ -119,7 +119,7 @@ export default function Reports() {
               }
             }}
             aria-label="Export learning activity report as PDF"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
           >
             <Download className="h-4 w-4" aria-hidden />
             {exporting ? 'Generating…' : 'Export PDF'}

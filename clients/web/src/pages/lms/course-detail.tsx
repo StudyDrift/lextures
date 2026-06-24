@@ -679,7 +679,7 @@ export default function CourseDetail() {
                       >
                         <Link
                           to={hrefForRecommendationItem(courseCode, r)}
-                          className="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/30"
+                          className="block rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 dark:hover:bg-indigo-950/30"
                         >
                           <span className="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-300">
                             {surfaceLabel(r.surface)}
@@ -706,7 +706,7 @@ export default function CourseDetail() {
                     </p>
                     <Link
                       to={hrefForLastVisited(courseCode, lastVisited.kind, lastVisited.itemId)}
-                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                      className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                     >
                       Continue
                       <ArrowRight className="h-4 w-4" aria-hidden />

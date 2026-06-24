@@ -97,10 +97,10 @@ function QuestionTypeDropdown({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-800 transition hover:border-slate-300 hover:bg-slate-50"
+        className="inline-flex w-full items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50"
       >
         <span>{selectedLabel}</span>
-        <ChevronDown className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
+        <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
       </button>
       {open && (
         <div
@@ -119,7 +119,7 @@ function QuestionTypeDropdown({
                 onChange(opt.value)
                 setOpen(false)
               }}
-              className="flex w-full items-center justify-between px-2.5 py-2 text-start text-sm text-slate-800 transition hover:bg-slate-50"
+              className="flex w-full items-center justify-between px-2.5 py-2 text-start text-sm text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50"
             >
               <span>{opt.label}</span>
               {opt.value === value ? <Check className="h-4 w-4 text-indigo-600" aria-hidden /> : null}
@@ -173,10 +173,10 @@ function QuizEditorMoreMenu({
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
       >
         More
-        <ChevronDown className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
+        <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
       </button>
       {open && (
         <div
@@ -192,7 +192,7 @@ function QuizEditorMoreMenu({
               onEditIntro()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Pencil className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Edit
@@ -204,7 +204,7 @@ function QuizEditorMoreMenu({
               onGenerate()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Generate questions
@@ -216,7 +216,7 @@ function QuizEditorMoreMenu({
               onAnalytics()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <BarChart3 className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Analytics
@@ -233,7 +233,7 @@ function QuizEditorMoreMenu({
               onPreview()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
           >
             <Eye className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
             Preview
@@ -983,7 +983,7 @@ export default function CourseModuleQuizPage() {
               onChange={(e) => setDraftTitle(e.target.value)}
               disabled={saving}
               autoComplete="off"
-              className="w-full min-w-0 border-0 border-b border-transparent bg-transparent p-0 pb-0.5 text-2xl font-semibold tracking-tight text-slate-900 outline-none ring-0 transition placeholder:text-slate-400 focus:border-indigo-500 disabled:opacity-60 dark:border-transparent dark:text-neutral-100 dark:focus:border-indigo-400"
+              className="w-full min-w-0 border-0 border-b border-transparent bg-transparent p-0 pb-0.5 text-2xl font-semibold tracking-tight text-slate-900 outline-none ring-0 transition-[background-color,color,border-color] placeholder:text-slate-400 focus:border-indigo-500 disabled:opacity-60 dark:border-transparent dark:text-neutral-100 dark:focus:border-indigo-400"
               placeholder="Quiz title"
             />
           </h1>
@@ -998,7 +998,7 @@ export default function CourseModuleQuizPage() {
               type="button"
               onClick={cancelEditContent}
               disabled={saving}
-              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Cancel
             </button>
@@ -1006,7 +1006,7 @@ export default function CourseModuleQuizPage() {
               type="button"
               onClick={() => void saveContent()}
               disabled={saving || !canSaveContent}
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -1027,7 +1027,7 @@ export default function CourseModuleQuizPage() {
                   type="button"
                   onClick={openQuestionsEditor}
                   disabled={loading}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Edit questions
                 </button>
@@ -1122,7 +1122,7 @@ export default function CourseModuleQuizPage() {
                           ? 'Quiz saved for offline access'
                           : 'Save quiz intro for offline access'
                       }
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
                     >
                       {offlineStatus === 'saving' ? (
                         <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
@@ -1139,7 +1139,7 @@ export default function CourseModuleQuizPage() {
                     disabled={loading || !isOnline}
                     aria-disabled={!isOnline}
                     title={!isOnline ? 'Available when online' : undefined}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {!isOnline && <WifiOff className="h-4 w-4" aria-hidden />}
                     Start Quiz
@@ -1615,12 +1615,12 @@ export default function CourseModuleQuizPage() {
                           setQuestionsDraft(questions.map((q) => ({ ...q, choices: [...q.choices] })))
                         }
                       }}
-                      className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition disabled:opacity-50 ${
+                      className={`relative mt-0.5 h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
                         qeAdaptiveOn ? 'bg-indigo-500' : 'bg-slate-300'
                       }`}
                     >
                       <span
-                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-colors ${
                           qeAdaptiveOn ? 'start-5' : 'start-0.5'
                         }`}
                       />
@@ -1780,7 +1780,7 @@ export default function CourseModuleQuizPage() {
                         onClick={() =>
                           setQuestionsDraft((prev) => prev.filter((it) => it.id !== q.id))
                         }
-                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-rose-700 transition hover:bg-rose-50"
+                        className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden />
                         Remove
@@ -1853,12 +1853,12 @@ export default function CourseModuleQuizPage() {
                                   ),
                                 )
                               }
-                              className={`relative h-5 w-9 shrink-0 rounded-full transition ${
+                              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
                                 q.multipleAnswer ? 'bg-indigo-500' : 'bg-slate-300'
                               }`}
                             >
                               <span
-                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
+                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
                                   q.multipleAnswer ? 'start-4.5' : 'start-0.5'
                                 }`}
                               />
@@ -1877,12 +1877,12 @@ export default function CourseModuleQuizPage() {
                                   ),
                                 )
                               }
-                              className={`relative h-5 w-9 shrink-0 rounded-full transition ${
+                              className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
                                 q.answerWithImage ? 'bg-indigo-500' : 'bg-slate-300'
                               }`}
                             >
                               <span
-                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
+                                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
                                   q.answerWithImage ? 'start-4.5' : 'start-0.5'
                                 }`}
                               />
@@ -1913,7 +1913,7 @@ export default function CourseModuleQuizPage() {
                                     ),
                                   )
                                 }
-                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300"
+                                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-[background-color,color,border-color] hover:border-slate-300"
                               >
                                 <span
                                   className={`h-3 w-3 rounded-full ${
@@ -1971,7 +1971,7 @@ export default function CourseModuleQuizPage() {
                                 title={
                                   q.choices.length <= 1 ? 'At least one choice is required' : 'Delete option'
                                 }
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-700 focus-visible:opacity-100 enabled:group-hover:opacity-100 enabled:group-focus-within:opacity-100 disabled:invisible disabled:pointer-events-none"
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-700 focus-visible:opacity-100 enabled:group-hover:opacity-100 enabled:group-focus-within:opacity-100 disabled:invisible disabled:pointer-events-none"
                               >
                                 <Trash2 className="h-4 w-4" aria-hidden />
                               </button>
@@ -1987,7 +1987,7 @@ export default function CourseModuleQuizPage() {
                               ),
                             )
                           }
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-[background-color,color,border-color] hover:text-indigo-700"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
                           Add option
@@ -2067,7 +2067,7 @@ export default function CourseModuleQuizPage() {
                               }),
                             )
                           }
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-[background-color,color,border-color] hover:text-indigo-700"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
                           Add ordering item
@@ -2431,7 +2431,7 @@ export default function CourseModuleQuizPage() {
                               }),
                             )
                           }
-                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition hover:text-indigo-700"
+                          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 transition-[background-color,color,border-color] hover:text-indigo-700"
                         >
                           <Plus className="h-4 w-4" aria-hidden />
                           Add pair
@@ -2669,7 +2669,7 @@ export default function CourseModuleQuizPage() {
                     <button
                       type="button"
                       onClick={() => setQuestionsDraft((prev) => [...prev, makeQuestion()])}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50"
                     >
                       <Plus className="h-4 w-4" />
                       Add question
@@ -2680,7 +2680,7 @@ export default function CourseModuleQuizPage() {
                       onClick={openImportQuestions}
                       aria-expanded={importQuestionsOpen}
                       aria-haspopup="dialog"
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50"
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50"
                     >
                       <Plus className="h-4 w-4" />
                       Import Questions
@@ -2759,7 +2759,7 @@ export default function CourseModuleQuizPage() {
               type="button"
               onClick={() => void loadBankQuestionsForImport(importQuestionsQuery)}
               disabled={importQuestionsLoading}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-100 disabled:opacity-60"
             >
               {importQuestionsLoading ? 'Searching…' : 'Search'}
             </button>
@@ -2771,7 +2771,7 @@ export default function CourseModuleQuizPage() {
             {importRows.map((row) => (
               <div
                 key={row.id}
-                className={`flex items-start gap-3 rounded-lg border px-3 py-2 transition ${
+                className={`flex items-start gap-3 rounded-lg border px-3 py-2 transition-colors ${
                   selectedImportQuestionId === row.id
                     ? 'border-indigo-300 bg-indigo-50/40'
                     : 'border-slate-200 bg-white'

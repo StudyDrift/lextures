@@ -93,7 +93,7 @@ export default function MyPortfoliosPage() {
       actions={
         <button
           onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition"
+          className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition-[background-color,color,border-color]"
         >
           <Plus className="h-4 w-4" aria-hidden />
           New Portfolio
@@ -139,7 +139,7 @@ export default function MyPortfoliosPage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition disabled:opacity-50"
+                className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition-[background-color,color,border-color] disabled:opacity-50"
               >
                 {saving ? 'Creating…' : 'Create'}
               </button>
@@ -149,7 +149,7 @@ export default function MyPortfoliosPage() {
                   setShowAdd(false)
                   setFormError(null)
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-[background-color,color,border-color] dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
               >
                 Cancel
               </button>
@@ -180,7 +180,7 @@ export default function MyPortfoliosPage() {
               <li key={p.id} className="group">
                 <Link
                   to={`/portfolios/${p.id}`}
-                  className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm transition hover:border-slate-300/80 hover:bg-slate-100/60 dark:border-neutral-700/80 dark:bg-neutral-800/85 dark:hover:border-neutral-600/80 dark:hover:bg-neutral-800"
+                  className="block w-full rounded-2xl border border-slate-200/70 bg-slate-50/60 p-4 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-100/60 dark:border-neutral-700/80 dark:bg-neutral-800/85 dark:hover:border-neutral-600/80 dark:hover:bg-neutral-800"
                 >
                   <div className="flex items-center gap-3">
                     <div className="min-w-0 flex-1">

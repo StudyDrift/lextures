@@ -163,7 +163,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
             type="button"
             onClick={() => void onExport()}
             disabled={busy !== 'idle'}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Download className="h-4 w-4" aria-hidden />
             {busy === 'exporting' ? 'Preparing…' : 'Download JSON export'}
@@ -323,7 +323,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                 onChange={(e) => setCanvasBaseUrl(e.target.value)}
                 placeholder="https://yourschool.instructure.com"
                 autoComplete="off"
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
             </label>
             <label className="block">
@@ -337,7 +337,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                 onChange={(e) => setCanvasCourseId(e.target.value)}
                 placeholder="e.g. 1234567"
                 autoComplete="off"
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
             </label>
             <label className="block">
@@ -350,7 +350,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                 onChange={(e) => setCanvasToken(e.target.value)}
                 placeholder="Canvas API token"
                 autoComplete="off"
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-400 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100"
               />
             </label>
           </div>
@@ -410,7 +410,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                 !canvasToken.trim()
               }
               aria-busy={busy === 'importingCanvas'}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {busy === 'importingCanvas' ? (
                 <span
@@ -454,7 +454,7 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={busy !== 'idle'}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
             >
               <Upload className="h-4 w-4" aria-hidden />
               {busy === 'importing' ? 'Importing…' : 'Choose JSON file…'}

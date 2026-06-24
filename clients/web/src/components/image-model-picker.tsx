@@ -147,7 +147,7 @@ export function ImageModelPicker({
           )}
         </span>
         <ChevronDown
-          className={`mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition ${open ? 'rotate-180' : ''}`}
+          className={`mt-0.5 h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
@@ -179,7 +179,7 @@ export function ImageModelPicker({
                 aria-pressed={pillFree}
                 onClick={() => setPillFree((v) => !v)}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition ${
+                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-[background-color,color,border-color] ${
                   pillFree
                     ? 'border-indigo-300 bg-indigo-100 text-indigo-900'
                     : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -192,7 +192,7 @@ export function ImageModelPicker({
                 aria-pressed={pillPopularity}
                 onClick={() => setPillPopularity((v) => !v)}
                 onMouseDown={(e) => e.stopPropagation()}
-                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition ${
+                className={`rounded-full border px-2 py-0.5 text-xs font-medium transition-[background-color,color,border-color] ${
                   pillPopularity
                     ? 'border-indigo-300 bg-indigo-100 text-indigo-900'
                     : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
@@ -225,7 +225,7 @@ export function ImageModelPicker({
                       onChange(m.id)
                       setOpen(false)
                     }}
-                    className={`w-full px-2.5 py-2 text-start transition hover:bg-slate-50 ${
+                    className={`w-full px-2.5 py-2 text-start transition-[background-color,color,border-color] hover:bg-slate-50 ${
                       isSel ? 'bg-indigo-50/80' : ''
                     }`}
                   >

@@ -200,10 +200,10 @@ function GroupSetActionsMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-2 py-1.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:justify-start sm:px-3 sm:py-2"
       >
         <span>Actions</span>
-        <ChevronDown className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
+        <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
       </button>
 
       {open ? (
@@ -221,7 +221,7 @@ function GroupSetActionsMenu({
               onNewSet()
               setOpen(false)
             }}
-            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden />
             New set
@@ -236,7 +236,7 @@ function GroupSetActionsMenu({
                   onRenameSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Rename set
               </button>
@@ -248,7 +248,7 @@ function GroupSetActionsMenu({
                   onDeleteSet()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-950/40"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300 dark:hover:bg-rose-950/40"
               >
                 <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
                 Delete set
@@ -262,7 +262,7 @@ function GroupSetActionsMenu({
                   onNewGroup()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 <Plus className="h-4 w-4 shrink-0" aria-hidden />
                 New group
@@ -276,7 +276,7 @@ function GroupSetActionsMenu({
                   onAssignUnassigned()
                   setOpen(false)
                 }}
-                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 <Shuffle className="h-4 w-4 shrink-0" aria-hidden />
                 Assign unassigned students

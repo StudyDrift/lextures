@@ -96,7 +96,7 @@ export function SubmissionPreviewSidebar({
           role="tab"
           aria-selected={tab === 'grade'}
           onClick={() => setTab('grade')}
-          className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+          className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
             tab === 'grade'
               ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
               : 'text-slate-600 hover:bg-white/70 dark:text-neutral-400 dark:hover:bg-neutral-800/60'
@@ -114,7 +114,7 @@ export function SubmissionPreviewSidebar({
           role="tab"
           aria-selected={tab === 'files'}
           onClick={() => setTab('files')}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition ${
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
             tab === 'files'
               ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
               : 'text-slate-600 hover:bg-white/70 dark:text-neutral-400 dark:hover:bg-neutral-800/60'

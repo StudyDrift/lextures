@@ -50,7 +50,7 @@ export function SideNavPinnedCourses() {
               aria-label={title}
               aria-current={active ? 'page' : undefined}
               className={[
-                'group relative block overflow-hidden rounded-xl ring-1 ring-black/[0.06] transition hover:ring-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:ring-white/10 dark:hover:ring-indigo-400/40',
+                'group relative block overflow-hidden rounded-xl ring-1 ring-black/[0.06] transition-[background-color,color,border-color] hover:ring-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:ring-white/10 dark:hover:ring-indigo-400/40',
                 sideNavCollapsed ? 'h-9 w-9' : 'h-10 w-full',
                 active ? 'ring-2 ring-indigo-500 dark:ring-indigo-400' : '',
               ]
@@ -68,7 +68,7 @@ export function SideNavPinnedCourses() {
               />
               <span
                 className={[
-                  'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent opacity-0 transition group-hover:opacity-100',
+                  'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent opacity-0 transition-[opacity,background-color,color,border-color] group-hover:opacity-100',
                   active ? 'opacity-100' : '',
                 ]
                   .filter(Boolean)

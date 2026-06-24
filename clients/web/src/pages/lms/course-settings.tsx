@@ -999,7 +999,7 @@ export default function CourseSettings() {
                       }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition ${published ? 'translate-x-5' : 'translate-x-0.5'
+                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform ${published ? 'translate-x-5' : 'translate-x-0.5'
                         }`}
                     />
                   </button>
@@ -1127,7 +1127,7 @@ export default function CourseSettings() {
                       }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition ${scheduleMode === 'relative' ? 'translate-x-5' : 'translate-x-0.5'
+                      className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition-transform ${scheduleMode === 'relative' ? 'translate-x-5' : 'translate-x-0.5'
                         }`}
                     />
                   </button>
@@ -1215,12 +1215,12 @@ export default function CourseSettings() {
                   <button
                     type="button"
                     onClick={openImageModal}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
                   >
                     <ImageIcon className="h-4 w-4" aria-hidden />
                     Generate image
                   </button>
-                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100">
                     <Upload className="h-4 w-4" aria-hidden />
                     {heroUploadStatus === 'uploading' ? 'Uploading…' : 'Upload image'}
                     <input
@@ -1236,7 +1236,7 @@ export default function CourseSettings() {
                     onClick={openPositionModal}
                     disabled={!course.heroImageUrl}
                     title={!course.heroImageUrl ? 'Add a hero image first' : undefined}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-350 dark:hover:border-indigo-900 dark:hover:bg-indigo-950 dark:hover:text-indigo-100"
                   >
                     <Move className="h-4 w-4" aria-hidden />
                     Position image
@@ -1275,7 +1275,7 @@ export default function CourseSettings() {
                         type="button"
                         onClick={() => selectMarkdownPreset(meta.id)}
                         disabled={saveStatus === 'saving'}
-                        className={`relative flex flex-col rounded-xl border p-4 text-start transition ${selected
+                        className={`relative flex flex-col rounded-xl border p-4 text-start transition-[background-color,color,border-color] ${selected
                           ? 'border-indigo-500 bg-indigo-50/60 ring-2 ring-indigo-500/30 dark:border-indigo-500 dark:bg-indigo-950/30'
                           : 'border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50/80 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:border-indigo-850 dark:hover:bg-neutral-900/50'
                           } disabled:opacity-60`}
@@ -1672,7 +1672,7 @@ export default function CourseSettings() {
                       type="button"
                       onClick={() => void onSaveHeroImage()}
                       disabled={saveHeroStatus === 'saving'}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-sm transition-[background-color,color,border-color] hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <Save className="h-4 w-4" aria-hidden />
                       {saveHeroStatus === 'saving' ? 'Saving…' : 'Save image'}

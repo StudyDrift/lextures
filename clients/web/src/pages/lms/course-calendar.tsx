@@ -96,23 +96,23 @@ type CalendarAssignmentHoverOpen = {
 }
 
 const MONTH_CHIP_PALETTE = [
-  'block w-full truncate rounded-md bg-indigo-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-indigo-900 transition hover:bg-indigo-100 hover:ring-1 hover:ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-100 dark:hover:bg-indigo-900/60 dark:hover:ring-indigo-500/40',
-  'block w-full truncate rounded-md bg-violet-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-violet-900 transition hover:bg-violet-100 hover:ring-1 hover:ring-violet-200/80 dark:bg-violet-950/50 dark:text-violet-100 dark:hover:bg-violet-900/60 dark:hover:ring-violet-500/40',
-  'block w-full truncate rounded-md bg-emerald-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-emerald-900 transition hover:bg-emerald-100 hover:ring-1 hover:ring-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-500/40',
-  'block w-full truncate rounded-md bg-amber-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-amber-950 transition hover:bg-amber-100 hover:ring-1 hover:ring-amber-200/80 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-900/60 dark:hover:ring-amber-500/40',
-  'block w-full truncate rounded-md bg-rose-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-rose-900 transition hover:bg-rose-100 hover:ring-1 hover:ring-rose-200/80 dark:bg-rose-950/50 dark:text-rose-100 dark:hover:bg-rose-900/60 dark:hover:ring-rose-500/40',
-  'block w-full truncate rounded-md bg-sky-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-sky-900 transition hover:bg-sky-100 hover:ring-1 hover:ring-sky-200/80 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-900/60 dark:hover:ring-sky-500/40',
-  'block w-full truncate rounded-md bg-fuchsia-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-fuchsia-900 transition hover:bg-fuchsia-100 hover:ring-1 hover:ring-fuchsia-200/80 dark:bg-fuchsia-950/50 dark:text-fuchsia-100 dark:hover:bg-fuchsia-900/60 dark:hover:ring-fuchsia-500/40',
+  'block w-full truncate rounded-md bg-indigo-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-indigo-900 transition-[background-color,color,border-color] hover:bg-indigo-100 hover:ring-1 hover:ring-indigo-200/80 dark:bg-indigo-950/50 dark:text-indigo-100 dark:hover:bg-indigo-900/60 dark:hover:ring-indigo-500/40',
+  'block w-full truncate rounded-md bg-violet-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-violet-900 transition-[background-color,color,border-color] hover:bg-violet-100 hover:ring-1 hover:ring-violet-200/80 dark:bg-violet-950/50 dark:text-violet-100 dark:hover:bg-violet-900/60 dark:hover:ring-violet-500/40',
+  'block w-full truncate rounded-md bg-emerald-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-emerald-900 transition-[background-color,color,border-color] hover:bg-emerald-100 hover:ring-1 hover:ring-emerald-200/80 dark:bg-emerald-950/50 dark:text-emerald-100 dark:hover:bg-emerald-900/60 dark:hover:ring-emerald-500/40',
+  'block w-full truncate rounded-md bg-amber-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-amber-950 transition-[background-color,color,border-color] hover:bg-amber-100 hover:ring-1 hover:ring-amber-200/80 dark:bg-amber-950/50 dark:text-amber-100 dark:hover:bg-amber-900/60 dark:hover:ring-amber-500/40',
+  'block w-full truncate rounded-md bg-rose-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-rose-900 transition-[background-color,color,border-color] hover:bg-rose-100 hover:ring-1 hover:ring-rose-200/80 dark:bg-rose-950/50 dark:text-rose-100 dark:hover:bg-rose-900/60 dark:hover:ring-rose-500/40',
+  'block w-full truncate rounded-md bg-sky-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-sky-900 transition-[background-color,color,border-color] hover:bg-sky-100 hover:ring-1 hover:ring-sky-200/80 dark:bg-sky-950/50 dark:text-sky-100 dark:hover:bg-sky-900/60 dark:hover:ring-sky-500/40',
+  'block w-full truncate rounded-md bg-fuchsia-50/90 px-1 py-0.5 text-start text-[11px] font-semibold leading-tight text-fuchsia-900 transition-[background-color,color,border-color] hover:bg-fuchsia-100 hover:ring-1 hover:ring-fuchsia-200/80 dark:bg-fuchsia-950/50 dark:text-fuchsia-100 dark:hover:bg-fuchsia-900/60 dark:hover:ring-fuchsia-500/40',
 ] as const
 
 const WEEK_CARD_PALETTE = [
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-violet-200 hover:bg-violet-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-violet-500/50 dark:hover:bg-violet-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-emerald-500/50 dark:hover:bg-emerald-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-amber-200 hover:bg-amber-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-amber-500/50 dark:hover:bg-amber-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-rose-200 hover:bg-rose-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-sky-200 hover:bg-sky-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-sky-500/50 dark:hover:bg-sky-950/40',
-  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition hover:border-fuchsia-200 hover:bg-fuchsia-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-fuchsia-500/50 dark:hover:bg-fuchsia-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-violet-200 hover:bg-violet-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-violet-500/50 dark:hover:bg-violet-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-emerald-200 hover:bg-emerald-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-emerald-500/50 dark:hover:bg-emerald-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-amber-200 hover:bg-amber-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-amber-500/50 dark:hover:bg-amber-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-rose-200 hover:bg-rose-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-sky-200 hover:bg-sky-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-sky-500/50 dark:hover:bg-sky-950/40',
+  'group flex flex-col gap-0.5 rounded-xl border border-slate-200/90 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-fuchsia-200 hover:bg-fuchsia-50/40 dark:border-neutral-600 dark:bg-neutral-800/80 dark:hover:border-fuchsia-500/50 dark:hover:bg-fuchsia-950/40',
 ] as const
 
 function monthChipClassForAssignment(a: CourseCalendarAssignment, canDrag: boolean): string {
@@ -541,7 +541,7 @@ export function CourseCalendar({
             <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                 aria-label="Previous month"
                 onClick={() => setMonthAnchor((m) => addMonths(m, -1))}
               >
@@ -549,7 +549,7 @@ export function CourseCalendar({
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                 aria-label="Next month"
                 onClick={() => setMonthAnchor((m) => addMonths(m, 1))}
               >
@@ -636,7 +636,7 @@ export function CourseCalendar({
             <div className="flex shrink-0 items-center gap-1">
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                 aria-label="Previous week"
                 onClick={() => {
                   const n = new Date(weekCursor)
@@ -648,7 +648,7 @@ export function CourseCalendar({
               </button>
               <button
                 type="button"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                 aria-label="Next week"
                 onClick={() => {
                   const n = new Date(weekCursor)
@@ -710,7 +710,7 @@ function ViewTab({ active, onClick, icon, label }: ViewTabProps) {
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-[background-color,color,border-color] ${
         active
           ? 'bg-white text-indigo-800 shadow-sm ring-1 ring-slate-200/90 dark:bg-neutral-900 dark:text-indigo-300 dark:ring-neutral-600'
           : 'text-slate-600 hover:bg-white/70 hover:text-slate-950 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-100'

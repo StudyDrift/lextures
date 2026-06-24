@@ -66,12 +66,12 @@ export function CourseCatalogViewMenu({ value, onChange }: Props) {
         aria-controls={open ? menuId : undefined}
         aria-label={`View courses as ${activeOption.label}. Open menu to change catalog layout.`}
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800 sm:w-auto"
       >
         <ActiveIcon className="h-4 w-4 shrink-0" aria-hidden />
         <span>View</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
@@ -96,7 +96,7 @@ export function CourseCatalogViewMenu({ value, onChange }: Props) {
                   setOpen(false)
                 }}
                 className={[
-                  'flex w-full items-start gap-2.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700',
+                  'flex w-full items-start gap-2.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700',
                   value === option.id ? 'bg-indigo-50 dark:bg-neutral-800' : '',
                 ]
                   .filter(Boolean)

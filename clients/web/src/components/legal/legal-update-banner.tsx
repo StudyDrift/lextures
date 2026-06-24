@@ -70,7 +70,7 @@ export function LegalUpdateBanner() {
             type="button"
             onClick={() => void handleAcknowledge()}
             disabled={dismissing}
-            className="rounded-md bg-amber-800 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-amber-900 disabled:opacity-60 dark:bg-amber-700 dark:hover:bg-amber-600"
+            className="rounded-md bg-amber-800 px-3 py-1.5 text-sm font-medium text-white transition-[background-color,color,border-color] hover:bg-amber-900 disabled:opacity-60 dark:bg-amber-700 dark:hover:bg-amber-600"
           >
             I acknowledge
           </button>

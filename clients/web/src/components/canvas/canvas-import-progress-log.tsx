@@ -59,7 +59,7 @@ export function CanvasImportProgressLog({
         </span>
         <ChevronDown
           className={[
-            'h-4 w-4 shrink-0 text-slate-500 transition dark:text-neutral-400',
+            'h-4 w-4 shrink-0 text-slate-500 transition-colors dark:text-neutral-400',
             expanded ? 'rotate-180' : '',
           ].join(' ')}
           aria-hidden

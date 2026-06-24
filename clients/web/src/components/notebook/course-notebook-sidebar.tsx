@@ -125,7 +125,7 @@ function NotebookTreeRow({
   return (
     <li ref={setNodeRef} style={style} className="list-none">
       <div
-        className={`group flex items-center gap-0 rounded-lg pe-1 transition ${
+        className={`group flex items-center gap-0 rounded-lg pe-1 transition-[background-color,color,border-color] ${
           showDropHint
             ? 'bg-amber-50 ring-2 ring-amber-400/70 dark:bg-amber-950/40 dark:ring-amber-500/60'
             : isSelected
@@ -150,12 +150,12 @@ function NotebookTreeRow({
               e.stopPropagation()
               onToggleCollapse(page.id)
             }}
-            className="me-1 flex h-7 w-4 shrink-0 items-center justify-center rounded-md text-slate-400 transition hover:bg-white hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+            className="me-1 flex h-7 w-4 shrink-0 items-center justify-center rounded-md text-slate-400 transition-[background-color,color,border-color] hover:bg-white hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
             aria-label={collapsed ? `Expand ${page.title}` : `Collapse ${page.title}`}
             aria-expanded={!collapsed}
           >
             <ChevronRight
-              className={`h-3.5 w-3.5 transition ${collapsed ? '' : 'rotate-90'}`}
+              className={`h-3.5 w-3.5 transition-transform ${collapsed ? '' : 'rotate-90'}`}
               aria-hidden
             />
           </button>
@@ -202,7 +202,7 @@ function NotebookTreeRow({
             e.stopPropagation()
             onAddChild(page.id)
           }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition hover:bg-white hover:text-indigo-600 group-hover:opacity-100 dark:hover:bg-neutral-800 dark:hover:text-indigo-300"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-white hover:text-indigo-600 group-hover:opacity-100 dark:hover:bg-neutral-800 dark:hover:text-indigo-300"
           aria-label={`Add page under ${page.title}`}
           title="Add page"
         >
@@ -215,7 +215,7 @@ function NotebookTreeRow({
               e.stopPropagation()
               onAddChildGroup(page.id)
             }}
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition hover:bg-white hover:text-amber-600 group-hover:opacity-100 dark:hover:bg-neutral-800 dark:hover:text-amber-300"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-white hover:text-amber-600 group-hover:opacity-100 dark:hover:bg-neutral-800 dark:hover:text-amber-300"
             aria-label={`Add subgroup under ${page.title}`}
             title="Add subgroup"
           >
@@ -228,7 +228,7 @@ function NotebookTreeRow({
             e.stopPropagation()
             onDelete(page.id)
           }}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-600 group-hover:opacity-100 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
           aria-label={`Delete ${page.title}`}
           title="Delete"
         >
@@ -542,7 +542,7 @@ export function CourseNotebookSidebar({
         <button
           type="button"
           onClick={onAddRootPage}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium text-slate-600 transition hover:bg-white hover:text-indigo-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-indigo-200"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium text-slate-600 transition-[background-color,color,border-color] hover:bg-white hover:text-indigo-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-indigo-200"
         >
           <Plus className="h-4 w-4 shrink-0" aria-hidden />
           New page
@@ -550,7 +550,7 @@ export function CourseNotebookSidebar({
         <button
           type="button"
           onClick={onAddRootGroup}
-          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium text-slate-600 transition hover:bg-white hover:text-amber-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-amber-200"
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-start text-sm font-medium text-slate-600 transition-[background-color,color,border-color] hover:bg-white hover:text-amber-700 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-amber-200"
         >
           <Folder className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" aria-hidden />
           New group

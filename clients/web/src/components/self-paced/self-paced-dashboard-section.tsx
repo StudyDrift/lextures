@@ -93,7 +93,7 @@ export function SelfPacedDashboardSection() {
             <Link
               to={`/courses/${encodeURIComponent(row.courseCode)}/modules`}
               aria-label={`Resume ${row.title}`}
-              className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
+              className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition-[background-color,color,border-color] hover:bg-emerald-500"
             >
               {row.completed ? 'Review' : 'Resume'}
               <ArrowRight className="h-3.5 w-3.5" aria-hidden />

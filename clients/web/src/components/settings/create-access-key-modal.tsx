@@ -308,7 +308,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                         const checked = selectedScopes.includes(s.id)
                         return (
                           <li key={s.id}>
-                            <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 transition hover:border-indigo-200 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:border-indigo-800/60">
+                            <label className="flex cursor-pointer gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5 transition-[background-color,color,border-color] hover:border-indigo-200 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:border-indigo-800/60">
                               <input
                                 type="checkbox"
                                 checked={checked}
@@ -347,7 +347,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                   role="radio"
                   aria-checked={courseLimitMode === 'all'}
                   onClick={() => setCourseLimitMode('all')}
-                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition ${
+                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition-[background-color,color,border-color] ${
                     courseLimitMode === 'all'
                       ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40'
                       : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-600 dark:bg-neutral-900'
@@ -365,7 +365,7 @@ export function CreateAccessKeyModal({ open, scopes, onClose, onCreated }: Creat
                   role="radio"
                   aria-checked={courseLimitMode === 'specific'}
                   onClick={() => setCourseLimitMode('specific')}
-                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition ${
+                  className={`cursor-pointer rounded-xl border px-3 py-3 text-start transition-[background-color,color,border-color] ${
                     courseLimitMode === 'specific'
                       ? 'border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40'
                       : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-600 dark:bg-neutral-900'

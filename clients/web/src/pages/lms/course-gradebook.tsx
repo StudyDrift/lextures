@@ -237,7 +237,7 @@ function RubricGradeForm({
                     key={`${c.id}-${i}`}
                     type="button"
                     onClick={() => setLocal((prev) => ({ ...prev, [c.id]: lvl.points }))}
-                    className={`max-w-full rounded-md border px-2.5 py-1.5 text-start text-xs font-medium transition ${
+                    className={`max-w-full rounded-md border px-2.5 py-1.5 text-start text-xs font-medium transition-[background-color,color,border-color] ${
                       local[c.id] === lvl.points
                         ? 'border-indigo-500 bg-indigo-50 text-indigo-950 dark:border-indigo-400 dark:bg-indigo-950/60 dark:text-indigo-100'
                         : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700'
@@ -834,7 +834,7 @@ export default function CourseGradebook() {
                 <span className="sr-only">Toggle combined cross-list gradebook</span>
                 <span
                   aria-hidden
-                  className={`pointer-events-none inline-block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition ${
+                  className={`pointer-events-none inline-block h-6 w-6 translate-y-0.5 rounded-full bg-white shadow transition-transform ${
                     crossListMerge ? 'translate-x-5' : 'translate-x-1'
                   }`}
                 />

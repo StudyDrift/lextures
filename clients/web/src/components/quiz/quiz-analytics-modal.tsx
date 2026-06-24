@@ -77,7 +77,7 @@ export function QuizAnalyticsModal({ open, onClose, courseCode, itemId, quizTitl
               onClick={() => void load()}
               disabled={loading}
               aria-label="Refresh analytics"
-              className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+              className="rounded-lg p-1.5 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
             >
               <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} aria-hidden />
             </button>
@@ -85,7 +85,7 @@ export function QuizAnalyticsModal({ open, onClose, courseCode, itemId, quizTitl
               type="button"
               onClick={onClose}
               aria-label="Close analytics"
-              className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+              className="rounded-lg p-1.5 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
             >
               <X className="h-5 w-5" aria-hidden />
             </button>

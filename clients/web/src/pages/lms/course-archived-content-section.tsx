@@ -174,7 +174,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
             type="button"
             onClick={() => setFactoryResetConfirmOpen(true)}
             disabled={archiveCourseBusy || factoryResetBusy}
-            className="rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 shadow-sm transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-neutral-900/40 dark:text-amber-200 dark:hover:bg-amber-950/30"
+            className="rounded-xl border border-amber-200 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-neutral-900/40 dark:text-amber-200 dark:hover:bg-amber-950/30"
           >
             Factory Reset Course
           </button>
@@ -182,7 +182,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
             type="button"
             onClick={() => setDeleteCourseConfirmOpen(true)}
             disabled={archiveCourseBusy || factoryResetBusy}
-            className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/60 dark:bg-neutral-900/40 dark:text-rose-300 dark:hover:bg-rose-950/40"
+            className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition-[background-color,color,border-color] hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-900/60 dark:bg-neutral-900/40 dark:text-rose-300 dark:hover:bg-rose-950/40"
           >
             Delete Course
           </button>
@@ -232,7 +232,7 @@ export function CourseArchivedContentSection({ courseCode }: { courseCode: strin
                       type="button"
                       onClick={() => void onUnarchive(row)}
                       disabled={busyId === row.id}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
+                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
                     >
                       {busyId === row.id ? 'Restoring…' : 'Unarchive'}
                     </button>

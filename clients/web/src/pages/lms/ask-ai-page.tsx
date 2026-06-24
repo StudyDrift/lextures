@@ -228,7 +228,7 @@ export default function AskAiPage() {
                       ? 'e.g. What themes did I write about across my courses?'
                       : 'Save notes in your global or a course notebook first — then you can ask here.'
                   }
-                  className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/50 dark:disabled:bg-neutral-900 dark:disabled:text-neutral-500"
+                  className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-4 focus:ring-indigo-500/15 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/50 dark:disabled:bg-neutral-900 dark:disabled:text-neutral-500"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                       e.preventDefault()
@@ -241,7 +241,7 @@ export default function AskAiPage() {
                     type="button"
                     onClick={() => void submitAsk()}
                     disabled={!hasNotes || askLoading || !askText.trim()}
-                    className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                    className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 disabled:pointer-events-none disabled:opacity-50 dark:bg-indigo-500 dark:hover:bg-indigo-400"
                   >
                     {askLoading ? 'Thinking…' : 'Ask'}
                   </button>

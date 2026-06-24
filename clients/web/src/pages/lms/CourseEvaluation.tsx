@@ -42,7 +42,7 @@ function RatingQuestion({
         {ratings.map((r) => (
           <label
             key={r}
-            className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition ${
+            className={`flex cursor-pointer items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-[background-color,color,border-color] ${
               value === r
                 ? 'border-indigo-500 bg-indigo-50 font-semibold text-indigo-700 ring-2 ring-indigo-400/30 dark:border-indigo-400 dark:bg-indigo-950/40 dark:text-indigo-300'
                 : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300'
@@ -301,7 +301,7 @@ export default function CourseEvaluation() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            className="w-full rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition-[background-color,color,border-color] hover:bg-indigo-700 disabled:opacity-60 dark:bg-indigo-500 dark:hover:bg-indigo-600"
           >
             {submitting ? 'Submitting…' : 'Submit Evaluation'}
           </button>

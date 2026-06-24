@@ -270,14 +270,14 @@ export default function Calendar() {
                 <button
                   type="button"
                   onClick={showAllCourses}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-white dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-[background-color,color,border-color] hover:bg-white dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                 >
                   Show all
                 </button>
                 <button
                   type="button"
                   onClick={hideAllCourses}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition hover:bg-white dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-[background-color,color,border-color] hover:bg-white dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
                 >
                   Hide all
                 </button>
@@ -289,7 +289,7 @@ export default function Calendar() {
                   const err = structureErrors[c.id]
                   return (
                     <li key={c.id}>
-                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-2 transition hover:border-slate-200 hover:bg-slate-50/80 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/60">
+                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-2 transition-[background-color,color,border-color] hover:border-slate-200 hover:bg-slate-50/80 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/60">
                         <input
                           type="checkbox"
                           className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-indigo-500 dark:focus:ring-indigo-400"

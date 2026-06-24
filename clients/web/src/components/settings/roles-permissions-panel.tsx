@@ -297,7 +297,7 @@ export function RolesPermissionsPanel() {
               value={newPermStr}
               onChange={(e) => setNewPermStr(e.target.value)}
               placeholder="course:*:enrollments:create"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 font-mono text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
             />
           </div>
           <div className="min-w-0 flex-1">
@@ -309,13 +309,13 @@ export function RolesPermissionsPanel() {
               value={newPermDesc}
               onChange={(e) => setNewPermDesc(e.target.value)}
               placeholder="Create enrollments in any course"
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
             />
           </div>
           <button
             type="submit"
             disabled={creating}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-indigo-500"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-indigo-500"
           >
             <Plus className="h-4 w-4" aria-hidden />
             Add permission
@@ -343,13 +343,13 @@ export function RolesPermissionsPanel() {
               value={newRoleName}
               onChange={(e) => setNewRoleName(e.target.value)}
               placeholder="e.g. Department admin"
-              className="w-full min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+              className="w-full min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
             />
           </div>
           <button
             type="submit"
             disabled={creating || !newRoleName.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
           >
             <Plus className="h-4 w-4" aria-hidden />
             Add role
@@ -393,7 +393,7 @@ export function RolesPermissionsPanel() {
                   <button
                     type="button"
                     onClick={() => setRoleSettingsModal(role)}
-                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
+                    className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
                   >
                     <Settings className="h-3.5 w-3.5" aria-hidden />
                     Settings
@@ -419,7 +419,7 @@ export function RolesPermissionsPanel() {
                         <button
                           type="button"
                           onClick={() => setManageUsersModal({ roleId: role.id, roleName: role.name })}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
                         >
                           <Users className="h-3.5 w-3.5" aria-hidden />
                           Manage Users
@@ -428,7 +428,7 @@ export function RolesPermissionsPanel() {
                           type="button"
                           onClick={() => openAddModal(role.id)}
                           disabled={permissions.length === 0 || savingRolePerms}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-indigo-500/50 dark:hover:bg-indigo-950/50 dark:hover:text-indigo-200"
                         >
                           <Plus className="h-3.5 w-3.5" aria-hidden />
                           Add
@@ -605,7 +605,7 @@ function RoleSettingsModal({ role, onClose, onSaved }: RoleSettingsModalProps) {
                 id="role-settings-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
+                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
                 autoComplete="off"
                 disabled={saving}
               />
@@ -620,7 +620,7 @@ function RoleSettingsModal({ role, onClose, onSaved }: RoleSettingsModalProps) {
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 placeholder="What this role is for (shown only in Settings)."
-                className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+                className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
                 disabled={saving}
               />
             </div>
@@ -638,7 +638,7 @@ function RoleSettingsModal({ role, onClose, onSaved }: RoleSettingsModalProps) {
                 aria-labelledby="role-settings-scope-label"
                 value={scope}
                 onChange={(e) => setScope(e.target.value as RoleScope)}
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
+                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500"
                 disabled={saving}
               >
                 <option value="global">Global</option>
@@ -655,14 +655,14 @@ function RoleSettingsModal({ role, onClose, onSaved }: RoleSettingsModalProps) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim()}
-              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {saving ? 'Saving…' : 'Save'}
             </button>
@@ -795,7 +795,7 @@ function AddPermissionsModal({
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
             placeholder="Filter by permission or description…"
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
+            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-950 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-indigo-500"
             autoFocus
           />
         </div>
@@ -836,7 +836,7 @@ function AddPermissionsModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
           >
             Cancel
           </button>
@@ -844,7 +844,7 @@ function AddPermissionsModal({
             type="button"
             disabled={saving || selectedIds.size === 0}
             onClick={onConfirm}
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? 'Saving…' : `Add${selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
           </button>
@@ -1104,7 +1104,7 @@ function ManageUsersModal({ roleId, roleName, onClose }: ManageUsersModalProps) 
                       type="button"
                       onClick={() => void handleAdd(u.id)}
                       disabled={busyId === u.id}
-                      className="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-800 transition hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-500/40 dark:bg-indigo-950/50 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
+                      className="shrink-0 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-800 transition-[background-color,color,border-color] hover:bg-indigo-100 disabled:opacity-50 dark:border-indigo-500/40 dark:bg-indigo-950/50 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
                     >
                       {busyId === u.id ? '…' : 'Add'}
                     </button>
@@ -1119,7 +1119,7 @@ function ManageUsersModal({ roleId, roleName, onClose }: ManageUsersModalProps) 
           <button
             type="button"
             onClick={onClose}
-            className="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 sm:w-auto"
+            className="w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-500 sm:w-auto"
           >
             Done
           </button>

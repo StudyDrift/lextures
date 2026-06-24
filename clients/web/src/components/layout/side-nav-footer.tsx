@@ -107,7 +107,7 @@ export function SideNavFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
                   onClick={() => setOpen(false)}
                 >
                   <FileText className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
@@ -118,7 +118,7 @@ export function SideNavFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
                   onClick={() => setOpen(false)}
                 >
                   <Shield className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
@@ -129,7 +129,7 @@ export function SideNavFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
                   onClick={() => setOpen(false)}
                 >
                   <Globe className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden="true" />
@@ -141,7 +141,7 @@ export function SideNavFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   role="menuitem"
-                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
+                  className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 hover:text-slate-950 dark:text-neutral-300 dark:hover:bg-neutral-800/50 dark:hover:text-neutral-50"
                   onClick={() => setOpen(false)}
                 >
                   <Scale className="h-4 w-4 shrink-0 text-slate-400 dark:text-neutral-500" aria-hidden="true" />

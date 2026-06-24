@@ -1139,7 +1139,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={saveDisabled}
-                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+                  className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
                 >
                   {aiSaving ? 'Saving…' : 'Save'}
                 </button>
@@ -1211,7 +1211,7 @@ export default function Settings() {
                   <button
                     type="submit"
                     disabled={systemPromptsSaving || !systemPromptKey}
-                    className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+                    className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
                   >
                     {systemPromptsSaving ? 'Saving…' : 'Save'}
                   </button>
@@ -1259,7 +1259,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => setDensity('comfortable')}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       density === 'comfortable'
                         ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
                         : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1270,7 +1270,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => setDensity('compact')}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       density === 'compact'
                         ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
                         : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1284,7 +1284,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => void persistUiTheme('light')}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       uiTheme === 'light'
                         ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
                         : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1295,7 +1295,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => void persistUiTheme('dark')}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       uiTheme === 'dark'
                         ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
                         : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1330,7 +1330,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => void persistShowHelpPopover(true)}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       showHelpPopover
                         ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
                         : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1341,7 +1341,7 @@ export default function Settings() {
                   <button
                     type="button"
                     onClick={() => void persistShowHelpPopover(false)}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       !showHelpPopover
                         ? 'bg-white text-slate-900 shadow-sm dark:bg-neutral-600 dark:text-neutral-50 dark:shadow-md dark:ring-1 dark:ring-inset dark:ring-white/10'
                         : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1500,7 +1500,7 @@ export default function Settings() {
                     <button
                       type="submit"
                       disabled={cpBusy}
-                      className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-400 dark:hover:bg-neutral-800"
+                      className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-400 dark:hover:bg-neutral-800"
                     >
                       {cpBusy ? 'Updating…' : 'Update password'}
                     </button>
@@ -1591,7 +1591,7 @@ export default function Settings() {
                     form={accountFormId}
                     type="submit"
                     disabled={accountSaving}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-white dark:shadow-none"
                   >
                     <Save className="h-4 w-4" aria-hidden />
                     {accountSaving ? 'Saving…' : 'Save'}
@@ -1613,7 +1613,7 @@ export default function Settings() {
                         type="button"
                         onClick={() => void revokeAllOtherSessions()}
                         disabled={sessionsLoading || sessions.filter((s) => !s.isCurrent).length === 0}
-                        className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40"
+                        className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-rose-200 hover:bg-rose-50 hover:text-rose-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-rose-500/50 dark:hover:bg-rose-950/40"
                       >
                         Sign out everywhere else
                       </button>

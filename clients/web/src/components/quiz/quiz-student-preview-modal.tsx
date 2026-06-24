@@ -144,7 +144,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             choices.map((label, i) => (
               <label
                 key={`${q.id}-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition hover:border-slate-300"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300"
               >
                 <input
                   type="checkbox"
@@ -161,7 +161,7 @@ function StudentQuestionBlock({ q, index }: { q: QuizQuestion; index: number }) 
             choices.map((label, i) => (
               <label
                 key={`${q.id}-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition hover:border-slate-300"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300"
               >
                 <input
                   type="radio"
@@ -851,7 +851,7 @@ function AdaptivePreviewPanel({
             {current.choices.map((label, i) => (
               <label
                 key={`ad-c-${i}`}
-                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition hover:border-slate-300"
+                className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-2.5 text-sm text-slate-800 transition-[background-color,color,border-color] hover:border-slate-300"
               >
                 <input
                   type="radio"

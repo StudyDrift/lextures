@@ -946,7 +946,7 @@ function SelectionActionsMenu({
       >
         Actions
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>

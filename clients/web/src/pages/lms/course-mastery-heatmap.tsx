@@ -150,7 +150,7 @@ export default function CourseMasteryHeatmap() {
           onClick={() => void handleRefresh()}
           disabled={refreshing}
           aria-label="Refresh heatmap data"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
         >
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} aria-hidden />
           {refreshing ? 'Refreshing…' : 'Refresh'}
@@ -267,7 +267,7 @@ export default function CourseMasteryHeatmap() {
                             disabled={drillLoading}
                             aria-label={ariaLabel}
                             title={ariaLabel}
-                            className={`inline-flex h-8 w-14 items-center justify-center rounded-md text-xs font-semibold text-white transition hover:ring-2 hover:ring-offset-1 hover:ring-indigo-400 ${masteryColorClass(cell.assessed, cell.masteryScore)}`}
+                            className={`inline-flex h-8 w-14 items-center justify-center rounded-md text-xs font-semibold text-white transition-[background-color,color,border-color] hover:ring-2 hover:ring-offset-1 hover:ring-indigo-400 ${masteryColorClass(cell.assessed, cell.masteryScore)}`}
                           >
                             {cell.assessed && cell.masteryScore !== null
                               ? pct(cell.masteryScore)

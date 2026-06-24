@@ -41,7 +41,7 @@ export function FeatureHelpDock() {
           <button
             type="button"
             onClick={() => closeHelp()}
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+            className="rounded-lg p-2 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
             aria-label="Close"
           >
             <X className="h-5 w-5" aria-hidden />

@@ -249,7 +249,7 @@ export default function CourseDiagnosticPage() {
               type="button"
               disabled={submitting}
               onClick={() => void onStart()}
-              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-50"
+              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-50"
             >
               Start placement assessment
             </button>
@@ -257,7 +257,7 @@ export default function CourseDiagnosticPage() {
               type="button"
               disabled={submitting}
               onClick={() => void onSkip()}
-              className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="inline-flex rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
             >
               Skip — start from the beginning
             </button>
@@ -294,7 +294,7 @@ export default function CourseDiagnosticPage() {
                   <button
                     type="button"
                     onClick={() => setChoice(i)}
-                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-start text-sm transition ${
+                    className={`flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-start text-sm transition-[background-color,color,border-color] ${
                       selected
                         ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-950/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -319,7 +319,7 @@ export default function CourseDiagnosticPage() {
               type="button"
               disabled={submitting || choice == null}
               onClick={() => void onSubmitAnswer()}
-              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-50"
+              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-50"
             >
               Submit answer
             </button>
@@ -364,7 +364,7 @@ export default function CourseDiagnosticPage() {
           {continueHref && (
             <Link
               to={continueHref}
-              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+              className="inline-flex rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
             >
               Continue to your starting point
             </Link>

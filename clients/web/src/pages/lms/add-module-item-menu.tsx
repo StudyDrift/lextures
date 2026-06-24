@@ -84,13 +84,13 @@ export function AddModuleItemMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
+        className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span className="truncate sm:hidden">Add item</span>
         <span className="hidden truncate sm:inline">Add module item</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
@@ -106,7 +106,7 @@ export function AddModuleItemMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('heading')}
-            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
               <Heading className="h-4 w-4" aria-hidden />
@@ -120,7 +120,7 @@ export function AddModuleItemMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('content_page')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950 dark:text-indigo-300">
               <FileText className="h-4 w-4" aria-hidden />
@@ -134,7 +134,7 @@ export function AddModuleItemMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('assignment')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-amber-200/90 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-950 dark:text-amber-200">
               <ClipboardList className="h-4 w-4" aria-hidden />
@@ -148,7 +148,7 @@ export function AddModuleItemMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('quiz')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-emerald-200/90 bg-emerald-50 text-emerald-700 dark:border-emerald-500/35 dark:bg-emerald-950 dark:text-emerald-200">
               <CircleHelp className="h-4 w-4" aria-hidden />
@@ -168,7 +168,7 @@ export function AddModuleItemMenu({
                 onFindOpenResources()
                 setOpen(false)
               }}
-              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
             >
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-teal-200/90 bg-teal-50 text-teal-700 dark:border-teal-500/40 dark:bg-teal-950 dark:text-teal-200">
                 <BookOpen className="h-4 w-4" aria-hidden />
@@ -185,7 +185,7 @@ export function AddModuleItemMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('external_link')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-200/90 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-950 dark:text-violet-200">
               <ExternalLink className="h-4 w-4" aria-hidden />
@@ -202,7 +202,7 @@ export function AddModuleItemMenu({
               type="button"
               role="menuitem"
               onClick={() => pick('h5p')}
-              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
             >
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-teal-200/90 bg-teal-50 text-teal-800 dark:border-teal-500/40 dark:bg-teal-950 dark:text-teal-200">
                 <Puzzle className="h-4 w-4" aria-hidden />
@@ -220,7 +220,7 @@ export function AddModuleItemMenu({
               type="button"
               role="menuitem"
               onClick={() => pick('scorm')}
-              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
             >
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-200/90 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-950 dark:text-violet-200">
                 <BookCopy className="h-4 w-4" aria-hidden />
@@ -237,7 +237,7 @@ export function AddModuleItemMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('vibe_activity')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-rose-200/90 bg-rose-50 text-rose-700 dark:border-rose-500/40 dark:bg-rose-950 dark:text-rose-200">
               <Sparkles className="h-4 w-4" aria-hidden />
@@ -254,7 +254,7 @@ export function AddModuleItemMenu({
               type="button"
               role="menuitem"
               onClick={() => pick('library_resource')}
-              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
             >
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-cyan-200/90 bg-cyan-50 text-cyan-700 dark:border-cyan-500/40 dark:bg-cyan-950 dark:text-cyan-200">
                 <BookMarked className="h-4 w-4" aria-hidden />
@@ -272,7 +272,7 @@ export function AddModuleItemMenu({
               type="button"
               role="menuitem"
               onClick={() => pick('textbook_resource')}
-              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+              className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
             >
               <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-orange-200/90 bg-orange-50 text-orange-700 dark:border-orange-500/40 dark:bg-orange-950 dark:text-orange-200">
                 <BookCopy className="h-4 w-4" aria-hidden />
@@ -293,7 +293,7 @@ export function AddModuleItemMenu({
               if (!ltiToolsAvailable) return
               pick('lti_link')
             }}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-purple-200/90 bg-purple-50 text-purple-800 dark:border-purple-500/40 dark:bg-purple-950 dark:text-purple-200">
               <Plug className="h-4 w-4" aria-hidden />

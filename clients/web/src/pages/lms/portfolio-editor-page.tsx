@@ -55,6 +55,7 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { LmsPage } from './lms-page'
 import { ModuleNameModal } from './module-name-modal'
 import { EmptyState } from '../../components/ui/empty-state'
+import { IconSwap } from '../../components/ui/icon-swap'
 
 type PortfolioArtifactKind = 'heading' | 'content_page' | 'url'
 
@@ -90,11 +91,11 @@ function artifactTypeLabel(a: Artifact): string {
 }
 
 const iconGhostPublished =
-  'rounded-md p-2 text-indigo-600 transition hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'rounded-md p-2 text-indigo-600 transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'rounded-md p-2 text-slate-400 transition hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
+  'rounded-md p-2 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
 const iconGhost =
-  'rounded-md p-2 text-slate-500 transition hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
+  'rounded-md p-2 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
 
 function ArtifactTypeIcon({ type }: { type: ArtifactType }) {
   if (type === 'url') {
@@ -155,11 +156,12 @@ function ArtifactItemActions({
         aria-pressed={artifact.isPublic}
         className={artifact.isPublic ? iconGhostPublished : iconGhostDraft}
       >
-        {artifact.isPublic ? (
-          <Eye className="h-4 w-4" strokeWidth={2} aria-hidden />
-        ) : (
-          <EyeOff className="h-4 w-4" strokeWidth={2} aria-hidden />
-        )}
+        <IconSwap
+          active={artifact.isPublic}
+          activeIcon={Eye}
+          inactiveIcon={EyeOff}
+          iconClassName="h-4 w-4"
+        />
       </button>
       <div ref={rootRef} className="relative">
         <button
@@ -185,7 +187,7 @@ function ArtifactItemActions({
                 type="button"
                 role="menuitem"
                 onClick={() => { onEditTitle(); setMenuOpen(false) }}
-                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Edit title
               </button>
@@ -194,7 +196,7 @@ function ArtifactItemActions({
               type="button"
               role="menuitem"
               onClick={() => { onDelete(); setMenuOpen(false) }}
-              className="flex w-full items-center gap-2 border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
+              className="flex w-full items-center gap-2 border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
               <Trash2 className="h-4 w-4" aria-hidden /> Delete
             </button>
@@ -248,12 +250,12 @@ function AddArtifactMenu({
           if (disabled) return
           setOpen((o) => !o)
         }}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200/70 bg-white/90 px-2 py-1.5 text-xs font-medium text-slate-700 shadow-none transition-[background-color,color,border-color] hover:border-slate-300/80 hover:bg-slate-50/90 disabled:cursor-not-allowed disabled:opacity-60 sm:px-2.5 sm:text-sm dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800"
       >
         <Plus className="h-4 w-4 shrink-0" aria-hidden />
         <span className="truncate">Add artifact</span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>
@@ -269,7 +271,7 @@ function AddArtifactMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('heading')}
-            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
               <Heading className="h-4 w-4" aria-hidden />
@@ -283,7 +285,7 @@ function AddArtifactMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('content_page')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-indigo-200/80 bg-indigo-50 text-indigo-600 dark:border-indigo-500/35 dark:bg-indigo-950 dark:text-indigo-300">
               <FileText className="h-4 w-4" aria-hidden />
@@ -297,7 +299,7 @@ function AddArtifactMenu({
             type="button"
             role="menuitem"
             onClick={() => pick('url')}
-            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
+            className="flex w-full items-start gap-3 border-t border-slate-100 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:hover:bg-neutral-700"
           >
             <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-200/90 bg-sky-50 text-sky-700 dark:border-sky-500/40 dark:bg-sky-950 dark:text-sky-200">
               <ExternalLink className="h-4 w-4" aria-hidden />
@@ -315,7 +317,7 @@ function AddArtifactMenu({
                 role="menuitemcheckbox"
                 aria-checked={dragHandlesVisible}
                 onClick={onToggleDragHandles}
-                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-700"
+                className="flex w-full items-start gap-2 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-700"
               >
                 <span
                   className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
@@ -464,7 +466,7 @@ function SortableArtifactRow({
           {(!disabled || dragHandlesVisible || isDragging) && (
             <button
               type="button"
-              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition-[opacity,background-color,color,border-color] hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
                 gripAlwaysOn
                   ? 'opacity-100'
                   : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
@@ -591,14 +593,14 @@ function AddArtifactForm({
         <button
           type="submit"
           disabled={saving}
-          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition disabled:opacity-50"
+          className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 shadow-sm transition-[background-color,color,border-color] disabled:opacity-50"
         >
           {saving ? 'Adding…' : 'Add'}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-[background-color,color,border-color] dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
         >
           Cancel
         </button>
@@ -625,21 +627,19 @@ function PortfolioPublishButton({
       }
       aria-label={portfolio.isPublic ? 'Published' : 'Draft'}
       aria-pressed={portfolio.isPublic}
-      className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition ${
+      className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition-[background-color,color,border-color] ${
         portfolio.isPublic
           ? 'border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/40 dark:bg-indigo-950/30 dark:text-indigo-300 dark:hover:bg-indigo-900/40'
           : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800'
       }`}
     >
-      {portfolio.isPublic ? (
-        <>
-          <Eye className="h-4 w-4" aria-hidden /> Published
-        </>
-      ) : (
-        <>
-          <EyeOff className="h-4 w-4" aria-hidden /> Draft
-        </>
-      )}
+      <IconSwap
+        active={portfolio.isPublic}
+        activeIcon={Eye}
+        inactiveIcon={EyeOff}
+        iconClassName="h-4 w-4"
+      />
+      {portfolio.isPublic ? 'Published' : 'Draft'}
     </button>
   )
 }
@@ -968,7 +968,7 @@ export default function PortfolioEditorPage() {
               disabled={anyModalBusy}
               title="Rename portfolio"
               aria-label="Rename portfolio"
-              className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
+              className="rounded-lg p-1.5 text-muted-foreground transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-neutral-800"
             >
               <Pencil className="h-4 w-4" aria-hidden />
             </button>
@@ -1002,7 +1002,7 @@ export default function PortfolioEditorPage() {
                 </code>
                 <button
                   onClick={() => void copyLink()}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
                 >
                   {copied ? (
                     <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden />

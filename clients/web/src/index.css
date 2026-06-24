@@ -46,10 +46,12 @@
   }
 
   /* Plan 22.1 — text wrapping (rules 10): balance headings, pretty body copy. */
-  .lms-scope :is(h1, h2, h3) {
+  .lms-scope :is(h1, h2, h3),
+  .lex-auth-scene :is(h1, h2, h3) {
     text-wrap: balance;
   }
-  .lms-scope p {
+  .lms-scope :is(p, li, figcaption, blockquote),
+  .lex-auth-scene :is(p, li, figcaption, blockquote) {
     text-wrap: pretty;
   }
 
@@ -66,14 +68,20 @@
   }
 }
 
-/* Plan 22.1 — layered card elevation (rule 3). */
+/* Plan 22.1 — layered card elevation (rule 3): pure black/white rgba, never tinted neutrals. */
 :root {
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 4px 12px rgb(15 23 42 / 0.06);
-  --shadow-card-hover: 0 1px 2px rgb(15 23 42 / 0.06), 0 6px 16px rgb(15 23 42 / 0.08);
+  --shadow-card:
+    0 0 0 1px rgb(0 0 0 / 0.06),
+    0 1px 2px -1px rgb(0 0 0 / 0.06),
+    0 2px 4px 0 rgb(0 0 0 / 0.04);
+  --shadow-card-hover:
+    0 0 0 1px rgb(0 0 0 / 0.08),
+    0 1px 2px -1px rgb(0 0 0 / 0.08),
+    0 2px 4px 0 rgb(0 0 0 / 0.06);
 }
 .dark {
-  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.08), 0 2px 8px rgb(0 0 0 / 0.25);
-  --shadow-card-hover: 0 0 0 1px rgb(255 255 255 / 0.13), 0 4px 12px rgb(0 0 0 / 0.35);
+  --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.08);
+  --shadow-card-hover: 0 0 0 1px rgb(255 255 255 / 0.13);
 }
 
 @utility shadow-card {
@@ -82,6 +90,19 @@
 
 @utility shadow-card-hover {
   box-shadow: var(--shadow-card-hover);
+}
+
+@utility lex-surface {
+  box-shadow: var(--shadow-card);
+  transition-property: box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+@utility hover-shadow-card {
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
 /* Plan 22.1 — content image outlines (rule 11): pure black/white, never tinted. */

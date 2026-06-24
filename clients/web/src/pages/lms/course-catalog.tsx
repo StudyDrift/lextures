@@ -324,7 +324,7 @@ export default function CourseCatalogPage() {
               key={sec.id}
               type="button"
               onClick={() => setSelectedId(sec.id)}
-              className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:border-indigo-200 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800"
+              className="rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-[box-shadow,background-color,color,border-color] hover:border-indigo-200 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800"
             >
               <div className="flex items-start justify-between gap-2">
                 <p className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-neutral-400">

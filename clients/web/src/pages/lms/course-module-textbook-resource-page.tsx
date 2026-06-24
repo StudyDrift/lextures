@@ -225,7 +225,7 @@ export default function CourseModuleTextbookResourcePage() {
                     type="button"
                     onClick={() => void onOpen()}
                     aria-label={`Open ${data.metadata?.title || 'textbook'}${data.metadata?.chapter ? `, ${data.metadata.chapter}` : ''} in ${PROVIDER_LABELS[data.provider]}`}
-                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                    className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                   >
                     Open in {PROVIDER_LABELS[data.provider]}
                   </button>

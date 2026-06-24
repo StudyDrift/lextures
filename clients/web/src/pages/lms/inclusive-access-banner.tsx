@@ -80,7 +80,7 @@ export function InclusiveAccessBanner({ status, storageKey }: Props) {
               <button
                 type="button"
                 onClick={confirmKeep}
-                className="rounded-xl bg-amber-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-500"
+                className="rounded-xl bg-amber-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-amber-500"
               >
                 Keep included access
               </button>
@@ -88,7 +88,7 @@ export function InclusiveAccessBanner({ status, storageKey }: Props) {
                 <button
                   type="button"
                   onClick={() => setConfirmingOptOut(true)}
-                  className="rounded-xl border border-amber-400 bg-white px-3.5 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
+                  className="rounded-xl border border-amber-400 bg-white px-3.5 py-2 text-sm font-semibold text-amber-800 transition-[background-color,color,border-color] hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
                 >
                   Opt out…
                 </button>
@@ -106,14 +106,14 @@ export function InclusiveAccessBanner({ status, storageKey }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={confirmKeep}
-                  className="rounded-xl bg-rose-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500"
+                  className="rounded-xl bg-rose-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-rose-500"
                 >
                   Continue to opt-out form
                 </a>
                 <button
                   type="button"
                   onClick={() => setConfirmingOptOut(false)}
-                  className="rounded-xl border border-amber-400 bg-white px-3.5 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
+                  className="rounded-xl border border-amber-400 bg-white px-3.5 py-2 text-sm font-semibold text-amber-800 transition-[background-color,color,border-color] hover:bg-amber-100 dark:border-amber-500/50 dark:bg-amber-900/30 dark:text-amber-100"
                 >
                   Cancel
                 </button>
