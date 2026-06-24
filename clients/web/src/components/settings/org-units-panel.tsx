@@ -261,7 +261,7 @@ export function OrgUnitsPanel() {
               type="button"
               disabled={orgTypeSaving}
               onClick={() => void saveOrgType(t)}
-              className={`rounded-xl border px-4 py-2 text-sm font-medium transition disabled:opacity-50 ${
+              className={`rounded-xl border px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] disabled:opacity-50 ${
                 orgType === t
                   ? 'border-indigo-600 bg-indigo-600 text-white'
                   : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800'
@@ -282,7 +282,7 @@ export function OrgUnitsPanel() {
           type="button"
           onClick={() => void loadTree()}
           disabled={loading || !orgId}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} aria-hidden />
           Refresh
@@ -362,7 +362,7 @@ export function OrgUnitsPanel() {
             <button
               type="submit"
               disabled={creatingRoot || !rootName.trim() || !orgId}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Create
             </button>

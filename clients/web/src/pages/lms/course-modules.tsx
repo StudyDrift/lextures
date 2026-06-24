@@ -53,6 +53,7 @@ import {
 import { AddCourseItemMenu } from './add-course-item-menu'
 import { AddModuleItemMenu, type ModuleItemKind } from './add-module-item-menu'
 import { CourseModulesLoadingSkeleton } from '../../components/ui/lms-content-skeletons'
+import { IconSwap } from '../../components/ui/icon-swap'
 import { FeatureHelpTrigger } from '../../components/feature-help/feature-help-trigger'
 import { toast, toastWithUndo } from '../../lib/lms-toast'
 import { LmsPage } from './lms-page'
@@ -128,11 +129,11 @@ const MODULE_SORT_ID = 'sortable-modules'
 
 /** Quiet icon-only controls (no box borders) for module + item toolbars. */
 const iconGhost =
-  'rounded-md p-2.5 text-slate-500 transition hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
+  'rounded-md p-2.5 text-slate-500 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-400 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-200'
 const iconGhostPublished =
-  'rounded-md p-2.5 text-indigo-600 transition hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
+  'rounded-md p-2.5 text-indigo-600 transition-[background-color,color,border-color] hover:bg-indigo-50/90 hover:text-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-indigo-400 dark:hover:bg-indigo-950/45 dark:hover:text-indigo-300'
 const iconGhostDraft =
-  'rounded-md p-2.5 text-slate-400 transition hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
+  'rounded-md p-2.5 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-200/45 hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 sm:p-1.5 dark:text-neutral-500 dark:hover:bg-neutral-700/35 dark:hover:text-neutral-300'
 
 function findModuleIdForChildItem(
   childId: string,
@@ -786,11 +787,12 @@ function ModulePublishMenu({
           item.published ? iconGhostPublished : iconGhostDraft
         }`}
       >
-        {item.published ? (
-          <Eye className="h-4 w-4" strokeWidth={2} aria-hidden />
-        ) : (
-          <EyeOff className="h-4 w-4" strokeWidth={2} aria-hidden />
-        )}
+        <IconSwap
+          active={item.published}
+          activeIcon={Eye}
+          inactiveIcon={EyeOff}
+          iconClassName="h-4 w-4"
+        />
       </button>
       {menuOpen && (
         <div
@@ -808,7 +810,7 @@ function ModulePublishMenu({
                   onUnpublishModuleOnly()
                   setMenuOpen(false)
                 }}
-                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Unpublish Module Only
               </button>
@@ -819,7 +821,7 @@ function ModulePublishMenu({
                   onUnpublishAllItems()
                   setMenuOpen(false)
                 }}
-                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Unpublish All Items
               </button>
@@ -833,7 +835,7 @@ function ModulePublishMenu({
                   onPublishModuleOnly()
                   setMenuOpen(false)
                 }}
-                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Publish Module Only
               </button>
@@ -844,7 +846,7 @@ function ModulePublishMenu({
                   onPublishAllItems()
                   setMenuOpen(false)
                 }}
-                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+                className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
               >
                 Publish All Items
               </button>
@@ -899,11 +901,12 @@ function ModuleItemRowActions({
         aria-pressed={child.published}
         className={`flex shrink-0 items-center justify-center ${child.published ? iconGhostPublished : iconGhostDraft}`}
       >
-        {child.published ? (
-          <Eye className="h-4 w-4" strokeWidth={2} aria-hidden />
-        ) : (
-          <EyeOff className="h-4 w-4" strokeWidth={2} aria-hidden />
-        )}
+        <IconSwap
+          active={child.published}
+          activeIcon={Eye}
+          inactiveIcon={EyeOff}
+          iconClassName="h-4 w-4"
+        />
       </button>
       <div ref={rootRef} className="relative">
         <button
@@ -935,7 +938,7 @@ function ModuleItemRowActions({
                 onEditTitle()
                 setMenuOpen(false)
               }}
-              className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
+              className="flex w-full px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-700/80"
             >
               Edit title
             </button>
@@ -946,7 +949,7 @@ function ModuleItemRowActions({
                 onArchive()
                 setMenuOpen(false)
               }}
-              className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
+              className="flex w-full border-t border-slate-100 px-2.5 py-2 text-start text-sm font-medium text-rose-700 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-neutral-700 dark:text-rose-300 dark:hover:bg-rose-950/50"
             >
               Delete
             </button>
@@ -1001,7 +1004,7 @@ function SortableChildRow({
           {(!disabled || dragHandlesVisible || isDragging) && (
             <button
               type="button"
-              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+              className={`flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition-[opacity,background-color,color,border-color] hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
                 gripAlwaysOn
                   ? 'opacity-100'
                   : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'
@@ -1144,7 +1147,7 @@ function ModuleCardBody({
                 onClick={onToggleCollapsed}
                 aria-expanded={!collapsed}
                 aria-controls={moduleItemsRegionId}
-                className="w-full min-w-0 rounded-xl px-1 py-0.5 text-start transition hover:bg-slate-200/40 dark:hover:bg-neutral-700/50"
+                className="w-full min-w-0 rounded-xl px-1 py-0.5 text-start transition-[background-color,color,border-color] hover:bg-slate-200/40 dark:hover:bg-neutral-700/50"
               >
                 <span className="flex items-start gap-2">
                   <span
@@ -1547,7 +1550,7 @@ function SortableModuleCard({
           canEditModules ? (
             <button
               type="button"
-              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
+              className={`mt-0.5 flex h-11 w-11 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border-0 bg-transparent p-0 text-slate-400 shadow-none transition-[opacity,background-color,color,border-color] hover:text-slate-600 active:cursor-grabbing focus-visible:pointer-events-auto focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500 sm:h-9 sm:w-9 dark:text-neutral-500 dark:hover:text-neutral-300 ${
                 gripsPinned || isDragging
                   ? 'opacity-100'
                   : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto'

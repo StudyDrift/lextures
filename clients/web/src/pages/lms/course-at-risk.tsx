@@ -248,7 +248,7 @@ function AtRiskEmptyState({
       <button
         type="button"
         onClick={onRunReport}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
       >
         <RefreshCw className="h-4 w-4" aria-hidden />
         {atRiskI18n.emptyRunReportCta}
@@ -357,7 +357,7 @@ export default function CourseAtRiskPage() {
           onClick={() => setConfigOpen(true)}
           disabled={loading || reportRunning}
           aria-label={atRiskI18n.runScoring}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/60 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-200"
         >
           <RefreshCw className="h-4 w-4" aria-hidden />
           {atRiskI18n.runScoring}

@@ -1,5 +1,6 @@
 import { Pause, Play, RotateCcw, Volume2 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { IconSwap } from '../ui/icon-swap'
 import {
   fetchReadingPreferences,
   fetchMyAccommodationSummary,
@@ -107,7 +108,7 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
           setExpanded(true)
           tts.toggle()
         }}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
         aria-label={playing ? 'Pause read aloud' : 'Read aloud'}
         aria-pressed={playing}
       >
@@ -141,7 +142,7 @@ export function ReadAloudControls({ lang = 'en-US' }: ReadAloudControlsProps) {
               onClick={() => tts.toggle()}
               className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
             >
-              {playing ? <Pause className="h-4 w-4" aria-hidden /> : <Play className="h-4 w-4" aria-hidden />}
+              <IconSwap active={playing} activeIcon={Pause} inactiveIcon={Play} iconClassName="h-4 w-4" />
               {playing ? 'Pause' : 'Play'}
             </button>
             <button

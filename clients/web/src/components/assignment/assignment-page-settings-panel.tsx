@@ -90,7 +90,7 @@ function SettingsAccordion({ title, children }: { title: string; children: React
       <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2 text-[13px] font-medium text-slate-600 outline-none transition-colors hover:bg-slate-50/80 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800/30 dark:hover:text-neutral-200 [&::-webkit-details-marker]:hidden">
         <span>{title}</span>
         <ChevronDown
-          className="h-3.5 w-3.5 shrink-0 text-slate-400/80 transition duration-200 group-open:rotate-180 dark:text-neutral-500"
+          className="h-3.5 w-3.5 shrink-0 text-slate-400/80 transition-transform duration-200 group-open:rotate-180 dark:text-neutral-500"
           aria-hidden
         />
       </summary>
@@ -137,12 +137,12 @@ function ToggleRow({
         aria-checked={checked}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${
+        className={`relative mt-0.5 h-5 w-9 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
           checked ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-neutral-600'
         }`}
       >
         <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-colors ${
             checked ? 'start-4.5' : 'start-0.5'
           }`}
         />

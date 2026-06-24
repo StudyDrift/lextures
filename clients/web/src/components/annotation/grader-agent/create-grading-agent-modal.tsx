@@ -133,7 +133,7 @@ export function CreateGradingAgentModal({
           <legend className="sr-only">{t('gradingAgent.settings.create.sourceLegend')}</legend>
           <label
             htmlFor={sourceTemplateId}
-            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${
+            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${
               source === 'template'
                 ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30'
                 : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600'
@@ -163,7 +163,7 @@ export function CreateGradingAgentModal({
 
           <label
             htmlFor={sourceAssignmentId}
-            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${
+            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${
               source === 'assignment'
                 ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30'
                 : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600'
@@ -191,7 +191,7 @@ export function CreateGradingAgentModal({
 
           <label
             htmlFor={sourceAsTemplateId}
-            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition ${
+            className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-[background-color,color,border-color] ${
               source === 'asTemplate'
                 ? 'border-indigo-400 bg-indigo-50/70 dark:border-indigo-500 dark:bg-indigo-950/30'
                 : 'border-slate-200 hover:border-slate-300 dark:border-neutral-700 dark:hover:border-neutral-600'

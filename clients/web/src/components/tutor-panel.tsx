@@ -30,7 +30,7 @@ function AiTutorTrigger({ open, onToggle }: { open: boolean; onToggle: () => voi
       aria-expanded={open}
       aria-haspopup="dialog"
       onClick={onToggle}
-      className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
+      className={`relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 ${
         open
           ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300'
           : 'text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800'

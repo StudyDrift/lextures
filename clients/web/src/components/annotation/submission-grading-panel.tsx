@@ -621,7 +621,7 @@ export function SubmissionGradingPanel({
                 aria-selected={gradeMode === 'rubric'}
                 disabled={formDisabled}
                 onClick={() => setGradeMode('rubric')}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-50 ${
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] disabled:opacity-50 ${
                   gradeMode === 'rubric'
                     ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
                     : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100'
@@ -635,7 +635,7 @@ export function SubmissionGradingPanel({
                 aria-selected={gradeMode === 'points'}
                 disabled={formDisabled}
                 onClick={() => setGradeMode('points')}
-                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition disabled:opacity-50 ${
+                className={`flex-1 rounded-lg px-3 py-2 text-sm font-semibold transition-[background-color,color,border-color] disabled:opacity-50 ${
                   gradeMode === 'points'
                     ? 'bg-white text-indigo-700 shadow-sm dark:bg-neutral-800 dark:text-indigo-300'
                     : 'text-slate-600 hover:text-slate-900 dark:text-neutral-400 dark:hover:text-neutral-100'

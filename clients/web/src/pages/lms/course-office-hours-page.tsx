@@ -61,7 +61,7 @@ function SlotCard({ slot, window: win, isStaff, myUserId, onBook, onCancel }: Sl
   return (
     <div
       role="gridcell"
-      className={`rounded-xl border p-4 transition ${
+      className={`rounded-xl border p-4 transition-colors ${
         isMyBooking
           ? 'border-sky-300 bg-sky-50/60 dark:border-sky-700 dark:bg-sky-950/30'
           : slot.status === 'available'
@@ -295,7 +295,7 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
             <button
               type="button"
               onClick={() => setMode('recurring')}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                 mode === 'recurring'
                   ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
                   : 'border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-neutral-600 dark:text-neutral-300'
@@ -306,7 +306,7 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
             <button
               type="button"
               onClick={() => setMode('oneoff')}
-              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                 mode === 'oneoff'
                   ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
                   : 'border-neutral-300 text-neutral-600 hover:border-neutral-400 dark:border-neutral-600 dark:text-neutral-300'
@@ -418,7 +418,7 @@ function CreateWindowModal({ courseCode, onClose, onCreated }: CreateWindowModal
               }`}
             >
               <span
-                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition ${
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
                   isVirtual ? 'translate-x-4' : 'translate-x-0'
                 }`}
               />

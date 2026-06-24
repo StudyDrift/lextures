@@ -263,7 +263,7 @@ export default function Inbox() {
               setComposeOpen(true)
               setComposeError(null)
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
           >
             <Mail className="h-4 w-4 shrink-0" aria-hidden />
             Compose
@@ -304,7 +304,7 @@ export default function Inbox() {
                   setSelectedId(null)
                   setMobilePane('list')
                 }}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-start text-sm font-medium transition md:w-full ${
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-start text-sm font-medium transition-[background-color,color,border-color] md:w-full ${
                   folder === id
                     ? 'bg-indigo-50 text-indigo-800'
                     : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -361,7 +361,7 @@ export default function Inbox() {
                     return (
                       <li
                         key={m.id}
-                        className={`flex border-b border-slate-100 transition hover:bg-slate-50 ${
+                        className={`flex border-b border-slate-100 transition-[background-color,color,border-color] hover:bg-slate-50 ${
                           active ? 'bg-indigo-50/60' : ''
                         } ${!m.read ? 'bg-slate-50/90' : ''}`}
                       >

@@ -83,7 +83,7 @@ export function ReviewForm({
                 {[1, 2, 3, 4, 5].map((value) => (
                   <label
                     key={value}
-                    className={`flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-2 text-sm font-medium transition ${
+                    className={`flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-xl border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
                       rating === value
                         ? 'border-amber-500 bg-amber-50 text-amber-800 dark:border-amber-400 dark:bg-amber-950 dark:text-amber-200'
                         : 'border-slate-200 text-slate-600 hover:border-slate-300 dark:border-neutral-700 dark:text-neutral-300'

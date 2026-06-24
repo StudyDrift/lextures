@@ -73,7 +73,7 @@ export function SlotPicker({
                 if (canBook) onBook(slot)
                 else if (canCancel) onCancel(slot)
               }}
-              className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+              className={`flex items-center gap-2 rounded-xl border px-3 py-3 text-left text-sm transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                 isMine
                   ? 'border-sky-300 bg-sky-50 dark:border-sky-700 dark:bg-sky-950/30'
                   : slot.status === 'open'

@@ -298,7 +298,7 @@ export default function MfaLogin() {
                 type="button"
                 onClick={() => void startTotpEnrol()}
                 disabled={status === 'loading'}
-                className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-300 hover:bg-slate-50 disabled:opacity-60"
+                className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-slate-50 disabled:opacity-60"
               >
                 Use authenticator app (QR code)
               </button>
@@ -306,7 +306,7 @@ export default function MfaLogin() {
                 type="button"
                 onClick={() => void runPasskeyCeremony()}
                 disabled={webauthnBusy}
-                className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:opacity-60"
+                className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:opacity-60"
               >
                 {webauthnBusy ? 'Waiting for passkey…' : 'Register a passkey'}
               </button>
@@ -350,7 +350,7 @@ export default function MfaLogin() {
             <button
               type="submit"
               disabled={status === 'loading' || code.length !== 6}
-              className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {status === 'loading' ? 'Verifying…' : mfaFlow.mode === 'setup' ? 'Confirm enrolment' : 'Continue'}
             </button>
@@ -370,7 +370,7 @@ export default function MfaLogin() {
                 type="button"
                 onClick={() => void runPasskeyCeremony()}
                 disabled={webauthnBusy}
-                className="mb-4 flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-300 hover:bg-slate-50 disabled:opacity-60"
+                className="mb-4 flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-slate-50 disabled:opacity-60"
               >
                 {webauthnBusy ? 'Waiting for passkey…' : 'Use passkey'}
               </button>

@@ -889,7 +889,7 @@ export function MarkdownBodyEditor({
                     role="option"
                     id={`${slashListId}-opt-${idx}`}
                     aria-selected={idx === slashActiveIndex}
-                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition ${
+                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${
                       idx === slashActiveIndex
                         ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50'
                         : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'
@@ -944,7 +944,7 @@ export function MarkdownBodyEditor({
                     role="option"
                     id={`${listId}-opt-${idx}`}
                     aria-selected={idx === activeIndex}
-                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition ${
+                    className={`flex w-full flex-col items-start gap-0.5 px-3 py-2 text-start text-sm transition-[background-color,color,border-color] ${
                       idx === activeIndex
                         ? 'bg-indigo-50 text-indigo-950 dark:bg-indigo-950/50 dark:text-indigo-50'
                         : 'text-slate-800 hover:bg-slate-50 dark:text-neutral-100 dark:hover:bg-neutral-800'

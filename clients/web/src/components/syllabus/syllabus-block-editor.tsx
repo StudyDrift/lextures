@@ -199,7 +199,7 @@ function SyllabusDocumentPanel({
             <button
               type="button"
               onClick={copyMarkdown}
-              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
+              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
             >
               Copy as Markdown
             </button>
@@ -219,7 +219,7 @@ function SyllabusDocumentPanel({
             <button
               type="button"
               onClick={copyHtml}
-              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
+              className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline dark:text-neutral-300 dark:hover:text-indigo-400"
             >
               Copy as HTML
             </button>
@@ -241,7 +241,7 @@ function SyllabusDocumentPanel({
                 type="button"
                 onClick={pasteFromClipboard}
                 disabled={disabled}
-                className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition hover:text-indigo-600 hover:underline disabled:no-underline disabled:opacity-40 dark:text-neutral-300 dark:hover:text-indigo-400"
+                className="min-w-0 flex-1 text-start text-[13px] text-slate-600 underline-offset-2 transition-[background-color,color,border-color] hover:text-indigo-600 hover:underline disabled:no-underline disabled:opacity-40 dark:text-neutral-300 dark:hover:text-indigo-400"
               >
                 Paste from Clipboard
               </button>
@@ -383,7 +383,7 @@ function BlockInsertionRow({ onAdd, disabled }: { onAdd: () => void; disabled?: 
           type="button"
           disabled={disabled}
           onClick={onAdd}
-          className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-[#f0f0f0] text-slate-600 shadow-sm transition hover:border-slate-400 hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-50"
+          className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border border-slate-300 bg-[#f0f0f0] text-slate-600 shadow-sm transition-[background-color,color,border-color] hover:border-slate-400 hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:bg-neutral-700 dark:hover:text-neutral-50"
           aria-label="Add section"
         >
           <Plus className="h-5 w-5" strokeWidth={2} aria-hidden />
@@ -393,7 +393,7 @@ function BlockInsertionRow({ onAdd, disabled }: { onAdd: () => void; disabled?: 
         type="button"
         disabled={disabled}
         onClick={onAdd}
-        className="mt-4 w-full border-0 bg-transparent py-1 text-start text-[13px] text-slate-400 transition hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
+        className="mt-4 w-full border-0 bg-transparent py-1 text-start text-[13px] text-slate-400 transition-[background-color,color,border-color] hover:text-slate-600 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-500 dark:hover:text-neutral-300"
       >
         Type / to add a section
       </button>

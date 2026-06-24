@@ -33,7 +33,7 @@ export function AnnotationToolbar({
     <div
       role="toolbar"
       aria-label="Annotation tools"
-      className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 bg-white/90 p-2 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90"
+      className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-card dark:bg-neutral-900/90"
     >
       {tools.map((t) => (
         <button
@@ -43,7 +43,7 @@ export function AnnotationToolbar({
           aria-pressed={tool === t.id}
           aria-label={t.hint}
           onClick={() => onToolChange(t.id)}
-          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
+          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-[background-color,color,border-color] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
             tool === t.id
               ? 'bg-indigo-600 text-white'
               : 'bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700'

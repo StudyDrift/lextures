@@ -132,7 +132,7 @@ export default function ReviewSessionPage() {
             <div className="mt-3 whitespace-pre-wrap text-base text-slate-900 dark:text-neutral-50">{current.stem}</div>
             <button
               type="button"
-              className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition hover:bg-slate-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+              className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
               onClick={() => setRevealed((r) => !r)}
             >
               {revealed ? 'Hide answer' : 'Show answer (Space)'}
@@ -200,7 +200,7 @@ function GradeButton({
       type="button"
       onClick={onClick}
       aria-label={`${label}, keyboard shortcut ${shortcut}`}
-      className={`rounded-xl px-3 py-3 text-center text-sm font-semibold text-white shadow-sm transition ${color}`}
+      className={`rounded-xl px-3 py-3 text-center text-sm font-semibold text-white shadow-sm transition-colors ${color}`}
     >
       <span className="block">{label}</span>
       <span className="mt-1 block text-[10px] font-normal opacity-90">Key {shortcut}</span>

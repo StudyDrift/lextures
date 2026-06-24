@@ -990,7 +990,7 @@ export default function CourseEnrollments() {
                 role="tab"
                 aria-selected={mainTab === 'roster'}
                 onClick={() => setMainTab('roster')}
-                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition ${
+                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
                   mainTab === 'roster'
                     ? 'border border-b-0 border-slate-200 bg-white text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
                     : 'text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1003,7 +1003,7 @@ export default function CourseEnrollments() {
                 role="tab"
                 aria-selected={mainTab === 'groups'}
                 onClick={() => setMainTab('groups')}
-                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition ${
+                className={`rounded-t-lg px-4 py-2 text-sm font-semibold transition-[background-color,color,border-color] ${
                   mainTab === 'groups'
                     ? 'border border-b-0 border-slate-200 bg-white text-slate-900 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100'
                     : 'text-slate-500 hover:text-slate-800 dark:text-neutral-400 dark:hover:text-neutral-200'
@@ -1151,7 +1151,7 @@ export default function CourseEnrollments() {
                                 <button
                                   type="button"
                                   onClick={() => openSectionTransferModal(e)}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Change section for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <Shuffle className="h-4 w-4" aria-hidden />
@@ -1163,7 +1163,7 @@ export default function CourseEnrollments() {
                                 <button
                                   type="button"
                                   onClick={() => openGroupAssignModal(e)}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Assign groups for ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <UsersRound className="h-4 w-4" aria-hidden />
@@ -1181,7 +1181,7 @@ export default function CourseEnrollments() {
                                     setEditMessage(null)
                                     setDemoteStatus('idle')
                                   }}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100"
                                   aria-label={`Edit role for ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Pencil className="h-4 w-4" aria-hidden />
@@ -1193,7 +1193,7 @@ export default function CourseEnrollments() {
                                 <button
                                   type="button"
                                   onClick={() => openMessageModal(e)}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Send message to ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Mail className="h-4 w-4" aria-hidden />
@@ -1211,7 +1211,7 @@ export default function CourseEnrollments() {
                                     setStateChangeStatus('idle')
                                     setStateChangeMessage(null)
                                   }}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`Change enrollment status for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <ClipboardList className="h-4 w-4" aria-hidden />
@@ -1222,7 +1222,7 @@ export default function CourseEnrollments() {
                               <IconActionTooltip label="Gradebook">
                                 <Link
                                   to={`/courses/${encodeURIComponent(courseCode)}/gradebook?student=${encodeURIComponent(e.userId)}`}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`View gradebook for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <ClipboardList className="h-4 w-4" aria-hidden />
@@ -1233,7 +1233,7 @@ export default function CourseEnrollments() {
                               <IconActionTooltip label="Student report">
                                 <Link
                                   to={`/courses/${encodeURIComponent(courseCode)}/students/${encodeURIComponent(e.id)}/progress`}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-indigo-50 hover:text-indigo-800 group-hover:opacity-100 focus-visible:opacity-100 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-200"
                                   aria-label={`View report for ${e.displayName?.trim() || 'this student'}`}
                                 >
                                   <BarChart3 className="h-4 w-4" aria-hidden />
@@ -1246,7 +1246,7 @@ export default function CourseEnrollments() {
                                   type="button"
                                   onClick={() => setRemoveConfirmTarget(e)}
                                   disabled={removingId === e.id}
-                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                  className="inline-flex rounded-lg p-1.5 text-slate-400 opacity-0 transition-[opacity,background-color,color,border-color] hover:bg-rose-50 hover:text-rose-700 group-hover:opacity-100 focus-visible:opacity-100 disabled:cursor-not-allowed disabled:opacity-40"
                                   aria-label={`Remove ${e.role} enrollment for ${e.displayName?.trim() || 'this person'}`}
                                 >
                                   <Trash2 className="h-4 w-4" aria-hidden />

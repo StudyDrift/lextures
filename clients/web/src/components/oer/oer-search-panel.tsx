@@ -168,7 +168,7 @@ export function OERSearchPanel({ open, courseCode, moduleId, onClose, onImported
                 role="tab"
                 aria-selected={activeTab === tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-[background-color,color,border-color] ${
                   activeTab === tab.id
                     ? 'bg-indigo-600 text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-neutral-800 dark:text-neutral-200'

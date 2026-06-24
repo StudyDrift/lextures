@@ -971,7 +971,7 @@ export default function CourseFeedPage() {
                           className="group/replylink ms-14 mt-1 flex items-center gap-1.5 rounded-lg py-0.5 ps-1 pe-1.5 text-start text-xs font-medium text-indigo-600 hover:bg-indigo-50/80 dark:text-indigo-400 dark:hover:bg-indigo-950/40"
                           aria-expanded={expandedReplyRoots.has(m.id)}
                         >
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200/80 transition group-hover/replylink:bg-white group-hover/replylink:text-indigo-600 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700 dark:group-hover/replylink:bg-neutral-900 dark:group-hover/replylink:text-indigo-300">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-slate-500 ring-1 ring-slate-200/80 transition-colors group-hover/replylink:bg-white group-hover/replylink:text-indigo-600 dark:bg-neutral-800 dark:text-neutral-400 dark:ring-neutral-700 dark:group-hover/replylink:bg-neutral-900 dark:group-hover/replylink:text-indigo-300">
                             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
                           </span>
                           {expandedReplyRoots.has(m.id)

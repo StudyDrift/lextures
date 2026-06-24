@@ -85,7 +85,7 @@ export function NotificationsDrawerTrigger({
   return (
     <button
       type="button"
-      className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 dark:text-neutral-300 dark:hover:bg-neutral-800"
+      className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-600 transition-[background-color,color,border-color] hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/30 dark:text-neutral-300 dark:hover:bg-neutral-800"
       aria-label={badge > 0 ? `Notifications (${badge} unread)` : 'Notifications'}
       aria-expanded={open}
       aria-haspopup="dialog"
@@ -385,7 +385,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                 aria-label={label}
                 title={label}
                 onClick={() => setFilter(id)}
-                className={`relative flex flex-col items-center justify-center gap-1 py-2.5 transition ${
+                className={`relative flex flex-col items-center justify-center gap-1 py-2.5 transition-[background-color,color,border-color] ${
                   active
                     ? 'text-indigo-600 dark:text-indigo-400'
                     : 'text-slate-400 hover:bg-slate-50 hover:text-slate-700 dark:text-neutral-500 dark:hover:bg-neutral-800/60 dark:hover:text-neutral-200'
@@ -427,7 +427,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                         if (!n.isRead) void markAlertRead(n.id)
                         onClose()
                       }}
-                      className={`flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
+                      className={`flex gap-3 rounded-xl px-2 py-2.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800 ${n.isRead ? 'opacity-60' : ''}`}
                     >
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-neutral-800 dark:text-neutral-300">
                         <BellRing className="h-5 w-5" aria-hidden />
@@ -479,7 +479,7 @@ export function NotificationsDrawer({ open, onClose }: { open: boolean; onClose:
                       onClose()
                     }}
                     className={[
-                      'flex gap-3 rounded-xl px-2 py-2.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-800',
+                      'flex gap-3 rounded-xl px-2 py-2.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800',
                       unreadAlert ? '' : row.kind === 'alert' ? 'opacity-60' : '',
                     ].join(' ')}
                   >

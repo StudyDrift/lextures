@@ -734,7 +734,7 @@ export function ContentPageReader({
                   type="button"
                   disabled={busy}
                   onClick={() => void onHighlight()}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-amber-900 transition hover:bg-amber-50 disabled:opacity-50 dark:text-amber-100 dark:hover:bg-amber-950/50"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-amber-900 transition-[background-color,color,border-color] hover:bg-amber-50 disabled:opacity-50 dark:text-amber-100 dark:hover:bg-amber-950/50"
                 >
                   <Highlighter className="h-3.5 w-3.5" aria-hidden />
                   Highlight
@@ -743,7 +743,7 @@ export function ContentPageReader({
                   type="button"
                   disabled={busy}
                   onClick={openNoteModal}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-800 transition hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-200 dark:hover:bg-indigo-950/40"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-800 transition-[background-color,color,border-color] hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-200 dark:hover:bg-indigo-950/40"
                 >
                   <StickyNote className="h-3.5 w-3.5" aria-hidden />
                   Add note
@@ -755,7 +755,7 @@ export function ContentPageReader({
                   type="button"
                   disabled={busy}
                   onClick={openNoteFromHighlightToolbar}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-800 transition hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-200 dark:hover:bg-indigo-950/40"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-indigo-800 transition-[background-color,color,border-color] hover:bg-indigo-50 disabled:opacity-50 dark:text-indigo-200 dark:hover:bg-indigo-950/40"
                 >
                   <StickyNote className="h-3.5 w-3.5" aria-hidden />
                   Add note
@@ -764,7 +764,7 @@ export function ContentPageReader({
                   type="button"
                   disabled={busy}
                   onClick={() => void removeCurrentHighlight()}
-                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-800 transition hover:bg-rose-50 disabled:opacity-50 dark:text-rose-200 dark:hover:bg-rose-950/40"
+                  className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-rose-800 transition-[background-color,color,border-color] hover:bg-rose-50 disabled:opacity-50 dark:text-rose-200 dark:hover:bg-rose-950/40"
                   aria-label="Remove highlight"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden />

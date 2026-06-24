@@ -56,7 +56,7 @@ export function SaveWorkflowMenu({
           aria-expanded={open}
           aria-controls={open ? menuId : undefined}
           onClick={() => setOpen((o) => !o)}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
         >
           {saving ? (
             <>
@@ -66,7 +66,7 @@ export function SaveWorkflowMenu({
           ) : (
             <>
               {t('gradingAgent.save')}
-              <ChevronDown className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`} aria-hidden />
+              <ChevronDown className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden />
             </>
           )}
         </button>
@@ -84,7 +84,7 @@ export function SaveWorkflowMenu({
                 setOpen(false)
                 void onSave()
               }}
-              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               {t('gradingAgent.save.option')}
             </button>
@@ -95,7 +95,7 @@ export function SaveWorkflowMenu({
                 setOpen(false)
                 setTemplateDialogOpen(true)
               }}
-              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+              className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               {t('gradingAgent.save.asTemplate')}
             </button>
@@ -112,7 +112,7 @@ export function SaveWorkflowMenu({
                     setOpen(false)
                     void onAccept()
                   }}
-                  className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-indigo-700 transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
+                  className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-indigo-700 transition-[background-color,color,border-color] hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-indigo-300 dark:hover:bg-indigo-950/40"
                 >
                   {t('gradingAgent.accept')}
                 </button>

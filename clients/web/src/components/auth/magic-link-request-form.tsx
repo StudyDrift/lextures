@@ -72,7 +72,7 @@ export function MagicLinkRequestForm({ redirectTo, defaultEmail = '' }: Props) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none ring-indigo-500/20 transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2"
+          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 outline-none ring-indigo-500/20 transition-[background-color,color,border-color] placeholder:text-slate-400 focus:border-indigo-400 focus:ring-2"
           placeholder="you@school.edu"
         />
       </div>
@@ -84,7 +84,7 @@ export function MagicLinkRequestForm({ redirectTo, defaultEmail = '' }: Props) {
       <button
         type="submit"
         disabled={status === 'loading'}
-        className="flex w-full items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-800 shadow-sm transition hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex w-full items-center justify-center rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm font-semibold text-indigo-800 shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === 'loading' ? 'Sending link…' : 'Send magic link'}
       </button>

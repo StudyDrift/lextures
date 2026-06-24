@@ -90,7 +90,7 @@ export function WhatIfGradesPanel({
         <button
           type="button"
           aria-pressed={whatIfMode}
-          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,color,border-color] ${
             whatIfMode
               ? 'border-indigo-300 bg-indigo-50 text-indigo-900 dark:border-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-100'
               : 'border-slate-200 bg-white text-slate-800 hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800'

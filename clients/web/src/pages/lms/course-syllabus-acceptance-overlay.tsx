@@ -115,7 +115,7 @@ export function CourseSyllabusAcceptanceOverlay({ courseCode }: { courseCode: st
             type="button"
             onClick={() => void handleAcceptSyllabus()}
             disabled={accepting}
-            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+            className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {accepting ? 'Saving…' : 'I have read and accept the syllabus'}
           </button>

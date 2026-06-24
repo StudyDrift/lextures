@@ -50,7 +50,7 @@ export function GradingBacklogList({ items, showCourse = false, emptyMessage }: 
           <li key={itemKey}>
             <Link
               to={hrefForGradingItem(courseCode, item)}
-              className="flex items-start justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/60 px-3 py-2.5 text-sm transition hover:border-amber-200 hover:bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30 dark:hover:border-amber-800 dark:hover:bg-amber-950/50"
+              className="flex items-start justify-between gap-3 rounded-xl border border-amber-100 bg-amber-50/60 px-3 py-2.5 text-sm transition-[background-color,color,border-color] hover:border-amber-200 hover:bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/30 dark:hover:border-amber-800 dark:hover:bg-amber-950/50"
             >
               <span className="min-w-0">
                 {showCourse && item.courseTitle ? (

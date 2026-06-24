@@ -37,7 +37,7 @@ function priceParams(price: string): { priceMax?: number } {
 function CourseCard({ course }: { course: PublicCatalogCourse }) {
   const priceId = useId()
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900">
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-[box-shadow,background-color,color,border-color] hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900">
       {course.heroImageUrl ? (
         <img
           src={course.heroImageUrl}

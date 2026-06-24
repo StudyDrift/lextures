@@ -103,13 +103,13 @@ export function NotebookTasksCard({ courseTitles }: NotebookTasksCardProps) {
           return (
             <li
               key={task.id}
-              className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm dark:border-neutral-700 dark:bg-neutral-900"
+              className="flex items-start gap-3 rounded-xl bg-white px-3 py-3 shadow-card dark:bg-neutral-900"
             >
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => void onComplete(task)}
-                className="mt-0.5 shrink-0 rounded p-0.5 text-slate-400 transition hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-indigo-400"
+                className="mt-0.5 shrink-0 rounded p-0.5 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-indigo-600 disabled:opacity-50 dark:hover:bg-neutral-800 dark:hover:text-indigo-400"
                 aria-label={`Complete task: ${label}`}
               >
                 <Square className="h-4 w-4" aria-hidden />

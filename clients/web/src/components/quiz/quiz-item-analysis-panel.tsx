@@ -89,7 +89,7 @@ export function QuizItemAnalysisPanel({ courseCode, itemId }: Props) {
             onClick={() => void handleCompute()}
             disabled={computing || loading}
             aria-label="Recompute item statistics"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-[background-color,color,border-color] hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${computing ? 'animate-spin' : ''}`} aria-hidden />
             {computing ? 'Computing…' : 'Recompute'}
@@ -99,7 +99,7 @@ export function QuizItemAnalysisPanel({ courseCode, itemId }: Props) {
               type="button"
               onClick={handleExportCSV}
               aria-label="Export item analysis as CSV"
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300"
             >
               <Download className="h-3.5 w-3.5" aria-hidden />
               Export CSV

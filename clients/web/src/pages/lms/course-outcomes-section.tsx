@@ -299,7 +299,7 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
         <details className="group mt-4 border-t border-slate-100 pt-4 dark:border-neutral-800">
           <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-indigo-700 outline-none hover:text-indigo-600 dark:text-indigo-300 dark:hover:text-indigo-200 [&::-webkit-details-marker]:hidden">
             <ChevronDown
-              className="h-4 w-4 shrink-0 text-indigo-500 transition group-open:rotate-180 dark:text-indigo-400"
+              className="h-4 w-4 shrink-0 text-indigo-500 transition-transform group-open:rotate-180 dark:text-indigo-400"
               aria-hidden
             />
             How scores roll up into outcome progress
@@ -425,7 +425,7 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
                 <button
                   type="submit"
                   disabled={creating || !newTitle.trim()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Plus className="h-4 w-4" aria-hidden />
                   {creating ? 'Adding…' : 'Create outcome'}
@@ -434,13 +434,13 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
             </form>
           ) : (
             <details className="group rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 outline-none ring-indigo-500/0 transition hover:bg-slate-50/80 dark:text-neutral-100 dark:hover:bg-neutral-900/60 [&::-webkit-details-marker]:hidden">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-4 text-sm font-semibold text-slate-900 outline-none ring-indigo-500/0 transition-[background-color,color,border-color] hover:bg-slate-50/80 dark:text-neutral-100 dark:hover:bg-neutral-900/60 [&::-webkit-details-marker]:hidden">
                 <span className="inline-flex items-center gap-2">
                   <Plus className="h-4 w-4 text-indigo-600 dark:text-indigo-400" aria-hidden />
                   Add another outcome
                 </span>
                 <ChevronDown
-                  className="h-4 w-4 shrink-0 text-slate-400 transition group-open:rotate-180 dark:text-neutral-500"
+                  className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-180 dark:text-neutral-500"
                   aria-hidden
                 />
               </summary>
@@ -477,7 +477,7 @@ export function CourseOutcomesSection({ courseCode }: { courseCode: string }) {
                   <button
                     type="submit"
                     disabled={creating || !newTitle.trim()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <Plus className="h-4 w-4" aria-hidden />
                     {creating ? 'Adding…' : 'Create outcome'}

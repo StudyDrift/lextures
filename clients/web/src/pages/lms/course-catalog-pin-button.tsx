@@ -42,7 +42,7 @@ export function CourseCatalogPinButton({
       aria-pressed={pinned}
       title={pinned ? 'Unpin from sidebar' : 'Pin to sidebar'}
       className={[
-        'inline-flex h-8 w-8 items-center justify-center rounded-full transition focus:outline-none disabled:opacity-60',
+        'inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors focus:outline-none disabled:opacity-60',
         variant === 'overlay'
           ? [
               'backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-white/80',

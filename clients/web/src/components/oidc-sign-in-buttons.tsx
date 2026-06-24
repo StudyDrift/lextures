@@ -55,7 +55,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
     <div className="mb-6 space-y-2">
       {cleverOn && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#436CF6] bg-[#436CF6] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3a5fd9]"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#436CF6] bg-[#436CF6] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-[#3a5fd9]"
           href={p('/auth/clever/login')}
           aria-label="Sign in using your Clever account"
         >
@@ -64,7 +64,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
       )}
       {classlinkOn && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-slate-800"
           href={p('/auth/oidc/classlink/login')}
           aria-label="Sign in with ClassLink"
         >
@@ -73,7 +73,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
       )}
       {s.enabled && s.google && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50"
           href={p('/auth/oidc/google/login')}
           aria-label="Sign in with Google"
         >
@@ -83,7 +83,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
       )}
       {s.enabled && s.microsoft && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50"
           href={p('/auth/oidc/microsoft/login')}
           aria-label="Sign in with Microsoft"
         >
@@ -93,7 +93,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
       )}
       {s.enabled && s.apple && (
         <a
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-slate-800"
           href={p('/auth/oidc/apple/login')}
           aria-label="Sign in with Apple"
         >
@@ -104,7 +104,7 @@ export function OidcSignInButtons({ nextPath }: Props) {
         s.custom?.map((c) => (
           <a
             key={c.id}
-            className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-300 hover:bg-slate-50"
+            className="flex w-full items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-300 hover:bg-slate-50"
             href={p(`/auth/oidc/custom/login?configId=${encodeURIComponent(c.id)}`)}
             aria-label={`Sign in with ${c.displayName}`}
           >

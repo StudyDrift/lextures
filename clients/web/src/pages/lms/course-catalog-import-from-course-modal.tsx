@@ -289,7 +289,7 @@ function CourseCatalogImportFromCourseModalInner({
               type="button"
               onClick={() => void onSubmit()}
               disabled={!sourceCourseCode.trim() || !newTitle.trim()}
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Copy className="h-4 w-4 shrink-0" aria-hidden />
               Create course

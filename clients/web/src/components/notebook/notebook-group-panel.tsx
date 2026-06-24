@@ -39,7 +39,7 @@ export function NotebookGroupPanel({
               <button
                 type="button"
                 onClick={() => onAddPage(group.id)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
               >
                 <Plus className="h-4 w-4" aria-hidden />
                 Add page
@@ -47,7 +47,7 @@ export function NotebookGroupPanel({
               <button
                 type="button"
                 onClick={() => onAddGroup(group.id)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-200 dark:hover:bg-neutral-800"
               >
                 <Plus className="h-4 w-4" aria-hidden />
                 Add subgroup
@@ -68,7 +68,7 @@ export function NotebookGroupPanel({
                 <button
                   type="button"
                   onClick={() => onSelectPage(child.id)}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-sm text-slate-700 transition hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800/80"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-start text-sm text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-800/80"
                 >
                   {isNotebookGroup(child) ? (
                     <Folder className="h-4 w-4 shrink-0 text-amber-500 dark:text-amber-400" aria-hidden />

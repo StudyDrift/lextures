@@ -52,7 +52,7 @@ export function StartHereCard() {
         </p>
         <Link
           to={`/courses/${encodeURIComponent(goals.recommendedCourseCode)}`}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-emerald-500"
         >
           Open course
           <ArrowRight className="h-4 w-4" aria-hidden />

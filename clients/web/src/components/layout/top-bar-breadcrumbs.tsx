@@ -448,7 +448,7 @@ export function TopBarBreadcrumbs() {
               ) : (
                 <Link
                   to={c.to}
-                  className="truncate transition hover:text-indigo-600 dark:hover:text-indigo-400"
+                  className="truncate transition-[background-color,color,border-color] hover:text-indigo-600 dark:hover:text-indigo-400"
                 >
                   {c.label}
                 </Link>

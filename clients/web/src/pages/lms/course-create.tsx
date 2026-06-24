@@ -340,7 +340,7 @@ export default function CourseCreate() {
       actions={
         <Link
           to="/courses"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-950/40"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
           Back to courses
@@ -385,7 +385,7 @@ export default function CourseCreate() {
                   placeholder="Introduction to Biology"
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? formErrorId : undefined}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
                 />
               </div>
 
@@ -405,7 +405,7 @@ export default function CourseCreate() {
                   placeholder="Optional overview for the course catalog."
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? formErrorId : undefined}
-                  className="mt-1.5 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full resize-y rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
                 />
               </div>
 
@@ -418,7 +418,7 @@ export default function CourseCreate() {
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label
-                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
+                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
                       courseMode === 'traditional'
                         ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -440,7 +440,7 @@ export default function CourseCreate() {
                     </span>
                   </label>
                   <label
-                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
+                    className={`flex cursor-pointer flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
                       courseMode === 'competency_based'
                         ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                         : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -476,7 +476,7 @@ export default function CourseCreate() {
                     id="course-term"
                     value={selectedTermId}
                     onChange={(e) => setSelectedTermId(e.target.value)}
-                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                    className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
                     aria-label="Academic term for default schedule dates"
                   >
                     <option value="">No term — self-paced or ongoing</option>
@@ -504,7 +504,7 @@ export default function CourseCreate() {
                   id="course-grade-level"
                   value={selectedGradeLevel}
                   onChange={(e) => setSelectedGradeLevel(e.target.value)}
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-2 py-1.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
                   aria-label="Grade level"
                 >
                   <option value="">No grade level — higher ed or unspecified</option>
@@ -533,14 +533,14 @@ export default function CourseCreate() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" aria-hidden />
                 </button>
                 <Link
                   to="/courses"
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
                   Cancel
                 </Link>
@@ -558,7 +558,7 @@ export default function CourseCreate() {
                 <button
                   type="button"
                   onClick={() => setSelectedTemplateId(BLANK_TEMPLATE_ID)}
-                  className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
+                  className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
                     selectedTemplateId === BLANK_TEMPLATE_ID
                       ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                       : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -585,7 +585,7 @@ export default function CourseCreate() {
                       key={tmpl.id}
                       type="button"
                       onClick={() => setSelectedTemplateId(tmpl.id)}
-                      className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition ${
+                      className={`flex flex-col rounded-2xl border p-4 text-start shadow-sm transition-[background-color,color,border-color] ${
                         selected
                           ? 'border-indigo-400 bg-indigo-50/80 ring-2 ring-indigo-300/60 dark:border-indigo-500/70 dark:bg-indigo-950/30 dark:ring-indigo-500/40'
                           : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-neutral-600'
@@ -613,7 +613,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void continueFromSyllabusStep()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Continue
                   <ChevronRight className="h-4 w-4" aria-hidden />
@@ -622,7 +622,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
                   Back
                 </button>
@@ -648,7 +648,7 @@ export default function CourseCreate() {
                   onChange={(e) => setFirstModuleTitle(e.target.value)}
                   maxLength={500}
                   placeholder="e.g. Week 1: Introduction"
-                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
+                  className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm outline-none ring-indigo-500/0 transition-[background-color,color,border-color] focus:border-indigo-300 focus:ring-2 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100 dark:focus:border-indigo-500/60"
                 />
               </div>
               <div className="flex flex-wrap gap-3">
@@ -656,7 +656,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void finishTraditional(false)}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Sparkles className="h-4 w-4" aria-hidden />
                   {firstModuleTitle.trim() ? 'Create module & open course' : 'Open course'}
@@ -665,7 +665,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void finishTraditional(true)}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
                   Skip module
                 </button>
@@ -673,7 +673,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
                   Back
                 </button>
@@ -701,7 +701,7 @@ export default function CourseCreate() {
                       {competencies.length > 1 ? (
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2 py-1 text-xs font-semibold text-rose-800 transition hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-100 dark:hover:bg-rose-950/40"
+                          className="inline-flex items-center gap-1 rounded-lg border border-rose-200 px-2 py-1 text-xs font-semibold text-rose-800 transition-[background-color,color,border-color] hover:bg-rose-50 dark:border-rose-900/40 dark:text-rose-100 dark:hover:bg-rose-950/40"
                           onClick={() => setCompetencies((rows) => rows.filter((_, i) => i !== ci))}
                         >
                           <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -886,7 +886,7 @@ export default function CourseCreate() {
 
               <button
                 type="button"
-                className="inline-flex items-center gap-2 rounded-xl border border-dashed border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-800 transition hover:bg-indigo-50 dark:border-indigo-500/40 dark:text-indigo-100 dark:hover:bg-indigo-950/30"
+                className="inline-flex items-center gap-2 rounded-xl border border-dashed border-indigo-300 px-4 py-2 text-sm font-semibold text-indigo-800 transition-[background-color,color,border-color] hover:bg-indigo-50 dark:border-indigo-500/40 dark:text-indigo-100 dark:hover:bg-indigo-950/30"
                 onClick={() => setCompetencies((rows) => [...rows, emptyCompetency()])}
               >
                 <Plus className="h-4 w-4" aria-hidden />
@@ -898,7 +898,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={() => void finishCompetencyBased()}
-                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Sparkles className="h-4 w-4" aria-hidden />
                   Create competencies & open course
@@ -907,7 +907,7 @@ export default function CourseCreate() {
                   type="button"
                   disabled={submitting}
                   onClick={goBack}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
                   Back
                 </button>

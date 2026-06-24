@@ -52,7 +52,7 @@ export function QuizFocusTopBar({ model }: { model: QuizShellFocusMode }) {
             type="button"
             onClick={onToggleFlagForReview}
             aria-pressed={flaggedForCurrent}
-            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition sm:text-sm ${
+            className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold transition-[background-color,color,border-color] sm:text-sm ${
               flaggedForCurrent
                 ? 'border-amber-300 bg-amber-400/20 text-amber-50'
                 : 'border-white/25 bg-white/5 text-inherit hover:bg-white/10'

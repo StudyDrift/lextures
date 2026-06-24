@@ -67,7 +67,7 @@ function CollectionMethodCard({
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`flex min-w-0 flex-1 flex-col rounded-xl border p-4 text-start transition ${
+      className={`flex min-w-0 flex-1 flex-col rounded-xl border p-4 text-start transition-[background-color,color,border-color] ${
         selected
           ? 'border-indigo-500 bg-indigo-50/80 ring-2 ring-indigo-500/30 dark:border-indigo-400 dark:bg-indigo-950/40'
           : 'border-slate-200 bg-white hover:border-slate-300 dark:border-neutral-700 dark:bg-neutral-900/40 dark:hover:border-neutral-600'
@@ -465,7 +465,7 @@ export default function CourseAttendance() {
                     <button
                       type="button"
                       onClick={() => setActiveSessionId(s.id)}
-                      className={`flex w-full items-center justify-between gap-3 px-4 py-3.5 text-start transition hover:bg-slate-50 dark:hover:bg-neutral-900/60 ${
+                      className={`flex w-full items-center justify-between gap-3 px-4 py-3.5 text-start transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-900/60 ${
                         activeSessionId === s.id ? 'bg-indigo-50 dark:bg-indigo-950/30' : 'bg-white dark:bg-neutral-950'
                       }`}
                     >

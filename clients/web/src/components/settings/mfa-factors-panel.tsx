@@ -234,7 +234,7 @@ export function MfaFactorsPanel() {
       {totpQrUrl && (
         <form className="mt-6 space-y-3" onSubmit={confirmTotp}>
           <p className="text-sm text-slate-600">Scan the QR code, then enter the 6-digit code to confirm.</p>
-          <img src={totpQrUrl} alt="Authenticator QR" className="h-44 w-44 rounded-lg border border-slate-200" />
+          <img src={totpQrUrl} alt="Authenticator QR" className="lex-content-img h-44 w-44 rounded-lg" />
           <input
             inputMode="numeric"
             autoComplete="one-time-code"

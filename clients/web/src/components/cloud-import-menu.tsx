@@ -94,7 +94,7 @@ export function CloudImportMenu({
             <Download className="h-4 w-4" aria-hidden />
             Import
             <ChevronDown
-              className={`h-4 w-4 shrink-0 transition ${open ? 'rotate-180' : ''}`}
+              className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
               aria-hidden
             />
           </>
@@ -114,7 +114,7 @@ export function CloudImportMenu({
               role="menuitem"
               aria-haspopup="dialog"
               onClick={() => void handlePick(provider.provider, provider)}
-              className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition hover:bg-slate-50 dark:hover:bg-neutral-800"
+              className="flex w-full flex-col gap-0.5 px-2.5 py-2 text-start text-sm transition-[background-color,color,border-color] hover:bg-slate-50 dark:hover:bg-neutral-800"
             >
               <span className="font-medium text-slate-900 dark:text-neutral-100">
                 {CLOUD_PROVIDER_LABELS[provider.provider]}

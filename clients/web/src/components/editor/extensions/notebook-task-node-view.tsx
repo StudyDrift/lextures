@@ -134,7 +134,7 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
   return (
     <NodeViewWrapper
       as="div"
-      className="lex-notebook-task group my-2 flex items-start gap-2 rounded-lg border border-transparent px-1 py-1 transition hover:border-slate-200 dark:hover:border-neutral-700"
+      className="lex-notebook-task group my-2 flex items-start gap-2 rounded-lg border border-transparent px-1 py-1 transition-[background-color,color,border-color] hover:border-slate-200 dark:hover:border-neutral-700"
       data-type="notebook-task"
     >
       <div className="min-w-0 flex-1">
@@ -157,11 +157,11 @@ export function NotebookTaskNodeView(props: NodeViewProps) {
         ) : null}
       </div>
       {editable ? (
-        <div className="relative shrink-0 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100" ref={menuRef}>
+        <div className="relative shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100" ref={menuRef}>
           <button
             type="button"
             onClick={onOpenDueMenu}
-            className="inline-flex items-center rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
+            className="inline-flex items-center rounded-md p-1 text-slate-400 transition-[background-color,color,border-color] hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-neutral-800 dark:hover:text-neutral-300"
             aria-expanded={menuOpen}
             aria-haspopup="menu"
             aria-controls={menuId}

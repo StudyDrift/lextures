@@ -184,7 +184,7 @@ export function NotificationPreferencesPanel() {
                       }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
                           row.emailEnabled ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
@@ -207,7 +207,7 @@ export function NotificationPreferencesPanel() {
                       }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
                           row.pushEnabled ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />
@@ -230,7 +230,7 @@ export function NotificationPreferencesPanel() {
                       }`}
                     >
                       <span
-                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition ${
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
                           row.smsEnabled ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       />

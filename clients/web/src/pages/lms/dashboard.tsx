@@ -670,7 +670,7 @@ export default function Dashboard() {
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link
               to="/courses"
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
             >
               Browse courses
               <ArrowRight className="h-4 w-4" aria-hidden />
@@ -685,7 +685,7 @@ export default function Dashboard() {
             <div className="flex flex-wrap gap-3">
               <Link
                 to="/inbox"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
               >
                 <Inbox className="h-4 w-4 text-indigo-500" aria-hidden />
                 Inbox
@@ -697,7 +697,7 @@ export default function Dashboard() {
               </Link>
               <Link
                 to="/courses"
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
               >
                 <BookOpen className="h-4 w-4 text-indigo-500" aria-hidden />
                 All courses
@@ -705,7 +705,7 @@ export default function Dashboard() {
               {ffEportfolio ? (
                 <Link
                   to="/portfolios"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 >
                   <FolderOpen className="h-4 w-4 text-indigo-500" aria-hidden />
                   My Portfolio
@@ -714,7 +714,7 @@ export default function Dashboard() {
               {ffAdvisingIntegration ? (
                 <Link
                   to="/advising-notes"
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
                 >
                   <GraduationCap className="h-4 w-4 text-indigo-500" aria-hidden />
                   Advising notes
@@ -778,7 +778,7 @@ export default function Dashboard() {
                         rank: 0,
                       }).catch(() => {})
                     }}
-                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-500"
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-violet-500"
                   >
                     Go
                     <ArrowRight className="h-4 w-4" aria-hidden />
@@ -914,7 +914,7 @@ export default function Dashboard() {
                 </div>
                 <Link
                   to="/review"
-                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-600"
+                  className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-amber-600"
                 >
                   {reviewStats.dueToday > 0 ? 'Start review' : 'Open review'}
                   <ArrowRight className="h-4 w-4" aria-hidden />
@@ -983,7 +983,7 @@ export default function Dashboard() {
                     <li key={sec.id}>
                       <Link
                         to={href}
-                        className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 sm:flex-row sm:items-center sm:justify-between"
+                        className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-[background-color,color,border-color] hover:border-indigo-200 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:border-indigo-800 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
@@ -1028,7 +1028,7 @@ export default function Dashboard() {
                 </p>
                 <Link
                   to={hrefForLastVisited(continueTarget.courseCode, continueTarget.kind, continueTarget.itemId)}
-                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                 >
                   Continue
                   <ArrowRight className="h-4 w-4" aria-hidden />
@@ -1100,7 +1100,7 @@ export default function Dashboard() {
                             <li key={`${row.course.courseCode}-${it.id}`}>
                               <Link
                                 to={href}
-                                className="flex flex-col gap-1 rounded-xl border border-slate-100 px-3 py-3 transition hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-800 dark:hover:border-indigo-900/50 dark:hover:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between"
+                                className="flex flex-col gap-1 rounded-xl border border-slate-100 px-3 py-3 transition-[background-color,color,border-color] hover:border-indigo-200 hover:bg-indigo-50/40 dark:border-neutral-800 dark:hover:border-indigo-900/50 dark:hover:bg-indigo-950/20 sm:flex-row sm:items-center sm:justify-between"
                               >
                                 <div className="min-w-0">
                                   <p className="text-xs font-medium text-slate-500 dark:text-neutral-400">
@@ -1215,21 +1215,21 @@ export default function Dashboard() {
                           <div className="mt-4 flex flex-wrap gap-2">
                             <Link
                               to={`${base}/modules`}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                             >
                               <ClipboardList className="h-3.5 w-3.5" aria-hidden />
                               Modules
                             </Link>
                             <Link
                               to={`${base}/feed`}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                             >
                               <MessageCircle className="h-3.5 w-3.5" aria-hidden />
                               Feed
                             </Link>
                             <Link
                               to={`${base}/my-grades`}
-                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                             >
                               <Sparkles className="h-3.5 w-3.5" aria-hidden />
                               Grades
@@ -1368,13 +1368,13 @@ export default function Dashboard() {
                         <div className="mt-4 flex flex-wrap gap-2">
                           <Link
                             to={`${base}/gradebook`}
-                            className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+                            className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
                           >
                             Open gradebook
                           </Link>
                           <Link
                             to={`${base}/modules`}
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-[background-color,color,border-color] hover:bg-slate-50 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800"
                           >
                             Modules
                           </Link>
@@ -1401,7 +1401,7 @@ export default function Dashboard() {
                 type="button"
                 onClick={loadMoreCourses}
                 disabled={loadingMoreCourses}
-                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:border-neutral-600 dark:hover:bg-neutral-800"
               >
                 {loadingMoreCourses
                   ? 'Loading…'

@@ -456,7 +456,7 @@ export function CommandPaletteDialog() {
                     role="option"
                     aria-selected={selected}
                     ref={selected ? activeRowRef : undefined}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition ${selected
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition-[background-color,color,border-color] ${selected
                       ? 'bg-indigo-50 text-slate-900 dark:bg-indigo-950/70 dark:text-neutral-100'
                       : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800/80'
                       }`}
@@ -513,7 +513,7 @@ export function CommandPaletteDialog() {
                     role="option"
                     aria-selected={selected}
                     ref={selected ? activeRowRef : undefined}
-                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition ${selected
+                    className={`flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-start text-sm transition-[background-color,color,border-color] ${selected
                       ? 'bg-indigo-50 text-slate-900 dark:bg-indigo-950/70 dark:text-neutral-100'
                       : 'text-slate-700 hover:bg-slate-50 dark:text-neutral-300 dark:hover:bg-neutral-800/80'
                       }`}

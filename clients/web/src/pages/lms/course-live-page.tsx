@@ -86,7 +86,7 @@ function MeetingCard({ meeting, isStaff, onJoin, onCancel }: MeetingCardProps) {
 
   return (
     <div
-      className={`rounded-xl border p-4 transition ${
+      className={`rounded-xl border p-4 transition-colors ${
         isActive
           ? 'border-emerald-300 bg-emerald-50/60 dark:border-emerald-700 dark:bg-emerald-950/30'
           : 'border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-800/50'
@@ -116,7 +116,7 @@ function MeetingCard({ meeting, isStaff, onJoin, onCancel }: MeetingCardProps) {
               type="button"
               onClick={() => onJoin(meeting)}
               aria-label={`Join live session: ${meeting.title}`}
-              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+              className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                 isActive || isComingSoon
                   ? 'bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600'
                   : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-600'

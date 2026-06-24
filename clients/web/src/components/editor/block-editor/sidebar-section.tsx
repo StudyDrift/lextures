@@ -20,7 +20,7 @@ export function SidebarSection({ title, defaultOpen = true, children }: SidebarS
       >
         {title}
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-slate-500 transition dark:text-neutral-400 ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 text-slate-500 transition-transform dark:text-neutral-400 ${open ? 'rotate-180' : ''}`}
           aria-hidden
         />
       </button>

@@ -149,7 +149,7 @@ export function MarkdownImageUploadModal({ open, onClose, onUpload }: MarkdownIm
             if (busy) return
             void uploadFiles([...e.dataTransfer.files])
           }}
-          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition ${
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition-[background-color,color,border-color] ${
             dragOver
               ? 'border-indigo-400 bg-indigo-50/80 dark:border-indigo-500 dark:bg-indigo-950/30'
               : 'border-slate-200 bg-slate-50/70 hover:border-slate-300 hover:bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950/50 dark:hover:border-neutral-600 dark:hover:bg-neutral-950'

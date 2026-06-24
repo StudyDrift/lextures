@@ -179,7 +179,7 @@ export default function ConferenceBooking() {
                   role="option"
                   aria-selected={active}
                   onClick={() => setParams({ student: c.studentUserId })}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                     active
                       ? 'bg-indigo-600 text-white'
                       : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-100'

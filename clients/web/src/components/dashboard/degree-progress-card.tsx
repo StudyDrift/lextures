@@ -71,7 +71,7 @@ export function DegreeProgressCard() {
         </div>
       ) : null}
 
-      <div className="mt-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
+      <div className="mt-3 rounded-2xl bg-white p-5 shadow-card dark:bg-neutral-900">
         {hasAudit ? (
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div
@@ -146,7 +146,7 @@ export function DegreeProgressCard() {
             href={apptUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-500"
           >
             Schedule advising appointment
             <ExternalLink className="h-4 w-4" aria-hidden />

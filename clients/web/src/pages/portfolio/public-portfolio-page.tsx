@@ -105,7 +105,7 @@ export default function PublicPortfolioPage() {
               <article
                 key={a.id}
                 role="article"
-                className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
+                className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-[transform,box-shadow,background-color,color,border-color] hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
               >
                 <div className="flex min-w-0 items-center gap-3">
                   <span
@@ -131,7 +131,7 @@ export default function PublicPortfolioPage() {
               <article
                 key={a.id}
                 role="article"
-                className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
+                className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-[transform,box-shadow,background-color,color,border-color] hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900 dark:hover:border-neutral-700"
               >
                 <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-neutral-100">
                   <FileText className="h-4 w-4 text-indigo-500" aria-hidden />
