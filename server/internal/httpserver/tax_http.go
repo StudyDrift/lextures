@@ -3,6 +3,7 @@ package httpserver
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -405,21 +406,9 @@ func parseTaxReportPeriod(period string) (from, to time.Time, err error) {
 }
 
 func itoa(n int) string {
-	return strings.TrimSpace(strings.Replace(strings.Replace(
-		jsonStringInt(n), "\"", "", -1), " ", "", -1))
+	return strconv.Itoa(n)
 }
 
 func itoa64(n int64) string {
-	return strings.TrimSpace(strings.Replace(strings.Replace(
-		jsonStringInt64(n), "\"", "", -1), " ", "", -1))
-}
-
-func jsonStringInt(n int) string {
-	b, _ := json.Marshal(n)
-	return string(b)
-}
-
-func jsonStringInt64(n int64) string {
-	b, _ := json.Marshal(n)
-	return string(b)
+	return strconv.FormatInt(n, 10)
 }
