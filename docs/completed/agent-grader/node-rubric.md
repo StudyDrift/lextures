@@ -1,6 +1,6 @@
 # 19.17.1 — Rubric Node (Standalone Rubric Source)
 
-> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../../completed/auto-grader-agent.md)). See the [node catalog](README.md).
+> Completed implementation. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../../completed/auto-grader-agent.md)). See the [node catalog](../plan/agent-grader/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI-Specific Capabilities → Grading Agent Canvas |
 | **Severity** | MAJOR |
 | **Markets** | K12 / HE / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETED |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | AI / Grading team |
 | **Depends on** | 19.16 (grading agent), 19.17 (canvas) |

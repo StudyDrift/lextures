@@ -1,4 +1,5 @@
 import { normalizeWorkflowGraph } from './default-graph'
+import { aggregatorInputSourceIsValid, detectRubricMergeCriterionConflicts } from './aggregator-validation'
 import { flagSinkSourceIsValid, graphHasFlagSink } from './flag-sink-validation'
 import { gateInputSourceIsValid } from './gate-validation'
 import { outputSlotSourceIsValid } from './workflow-output-slot'
@@ -22,16 +23,22 @@ import {
   HANDLE_REPORT,
   HANDLE_SCORE,
   HANDLE_FLAG,
+  HANDLE_REFERENCE,
   WORKFLOW_VERSION,
   isFlagForReviewNodeType,
   isHumanReviewGateNodeType,
   isOriginalityNodeType,
+  isReferenceNodeType,
+  isRubricNodeType,
+  referenceHasSource,
+  rubricHasSource,
   codeTestRunnerHasConfig,
   isActivityNodeType,
   isAiNodeType,
   isCodeTestRunnerNodeType,
   isConditionalRouterNodeType,
   isCriterionGraderNodeType,
+  isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
 } from './types'
 
@@ -53,7 +60,21 @@ function aiInputSourceIsValid(
   if (isOriginalityNodeType(sourceType) && (sourceHandle === HANDLE_SCORE || sourceHandle === HANDLE_REPORT)) {
     return true
   }
+  if (isReferenceNodeType(sourceType) && sourceHandle === HANDLE_REFERENCE) {
+    return true
+  }
+  if (isRubricNodeType(sourceType) && sourceHandle === HANDLE_RUBRIC) {
+    return true
+  }
   return false
+}
+
+function rubricOutputSourceIsValid(sourceType: string, sourceHandle: string): boolean {
+  return isRubricNodeType(sourceType) && sourceHandle === HANDLE_RUBRIC
+}
+
+function referenceContentSourceIsValid(sourceType: string, sourceHandle: string): boolean {
+  return isReferenceNodeType(sourceType) && sourceHandle === HANDLE_REFERENCE
 }
 
 function aiInputEdgeExists(
@@ -126,6 +147,8 @@ function hasCycle(adj: Map<string, string[]>, nodeIds: string[]): boolean {
 export type ValidateWorkflowGraphOptions = {
   rubric?: RubricDefinition | null
   assignmentItemId?: string
+  /** itemId → has rubric; used to validate library-mode Rubric nodes. */
+  libraryRubrics?: Record<string, boolean>
 }
 
 /** Client-side validator mirroring server workflow rules. */
@@ -187,12 +210,25 @@ export function validateWorkflowGraph(
     if (tgt.type === 'grader' || isCriterionGraderNodeType(tgt.type)) {
       const th = e.targetHandle ?? ''
       if (th === HANDLE_CONTENT) {
-        if (!isActivityNodeType(src.type) || e.sourceHandle !== HANDLE_CONTENT) {
-          issues.push({ field: `node:${tgt.id}`, message: 'Content input must come from an Activity content output.' })
+        if (
+          !(isActivityNodeType(src.type) && e.sourceHandle === HANDLE_CONTENT) &&
+          !referenceContentSourceIsValid(src.type, e.sourceHandle ?? '')
+        ) {
+          issues.push({
+            field: `node:${tgt.id}`,
+            message: 'Content input must come from an Activity content output or Reference Material.',
+          })
         }
       } else if (th === HANDLE_RUBRIC) {
-        if (!isActivityNodeType(src.type) || e.sourceHandle !== HANDLE_RUBRIC) {
-          issues.push({ field: `node:${tgt.id}`, message: 'Rubric input must come from an Activity rubric output.' })
+        const sh = e.sourceHandle ?? ''
+        if (
+          !(isActivityNodeType(src.type) && sh === HANDLE_RUBRIC) &&
+          !rubricOutputSourceIsValid(src.type, sh)
+        ) {
+          issues.push({
+            field: `node:${tgt.id}`,
+            message: 'Rubric input must come from an Activity or Rubric rubric output.',
+          })
         }
       } else if (th === HANDLE_SUBMISSION) {
         if (!isStudentSubmissionNodeType(src.type)) {
@@ -211,7 +247,7 @@ export function validateWorkflowGraph(
       } else if (!aiInputSourceIsValid(src.type, e.sourceHandle ?? '')) {
         issues.push({
           field: `node:${tgt.id}`,
-          message: 'AI input must come from a submission, activity, or upstream AI output.',
+          message: 'AI input must come from a submission, activity, reference, or upstream AI output.',
         })
       }
     }
@@ -284,6 +320,20 @@ export function validateWorkflowGraph(
         })
       }
     }
+    if (isScoreAggregatorNodeType(tgt.type)) {
+      const th = e.targetHandle ?? ''
+      if (th !== HANDLE_GRADE) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'Score Aggregator accepts grade inputs only.',
+        })
+      } else if (!aggregatorInputSourceIsValid(src.type, e.sourceHandle ?? '')) {
+        issues.push({
+          field: `node:${tgt.id}.${th}`,
+          message: 'Invalid grade source for Score Aggregator.',
+        })
+      }
+    }
     if (isConditionalRouterNodeType(src.type) && (e.sourceHandle ?? '') !== HANDLE_THEN && (e.sourceHandle ?? '') !== HANDLE_ELSE) {
       issues.push({ field: `node:${src.id}`, message: 'Conditional Router edges must originate from then or else outputs.' })
     }
@@ -335,6 +385,77 @@ export function validateWorkflowGraph(
           field: `node:${n.id}.grade`,
           message: 'Connect a grade input to the Human Review Gate.',
         })
+      }
+    }
+    if (isReferenceNodeType(n.type) && !referenceHasSource(n.data)) {
+      issues.push({
+        field: `node:${n.id}.text`,
+        message: 'Add reference text or select a course file.',
+      })
+    }
+    if (isRubricNodeType(n.type)) {
+      const rubricOpts = {
+        assignmentHasRubric: Boolean(options.rubric?.criteria?.length),
+        libraryRubrics: options.libraryRubrics,
+      }
+      if (!rubricHasSource(n.data, rubricOpts)) {
+        const source = typeof n.data.source === 'string' ? n.data.source : 'assignment'
+        if (source === 'library') {
+          issues.push({
+            field: `node:${n.id}.rubricAssignmentItemId`,
+            message: 'Select an assignment that has a rubric.',
+          })
+        } else if (source === 'inline') {
+          issues.push({
+            field: `node:${n.id}.rubric`,
+            message: 'Add at least one rubric criterion.',
+          })
+        } else {
+          issues.push({
+            field: `node:${n.id}.source`,
+            message: 'This assignment has no rubric.',
+          })
+        }
+      }
+    }
+    if (isScoreAggregatorNodeType(n.type)) {
+      const hasGradeInput = edges.some(
+        (edge) => edge.target === n.id && (edge.targetHandle ?? '') === HANDLE_GRADE,
+      )
+      if (!hasGradeInput) {
+        issues.push({
+          field: `node:${n.id}.grade`,
+          message: 'Connect at least one grade input to the Score Aggregator.',
+        })
+      }
+      const mode = typeof n.data.mode === 'string' ? n.data.mode : 'sum'
+      if (mode === 'rubricMerge') {
+        const criterionIds = edges
+          .filter((edge) => edge.target === n.id && (edge.targetHandle ?? '') === HANDLE_GRADE)
+          .map((edge) => nodeById.get(edge.source))
+          .filter((src) => src && isCriterionGraderNodeType(src.type))
+          .map((src) => (typeof src!.data.criterionId === 'string' ? src!.data.criterionId.trim() : ''))
+        if (detectRubricMergeCriterionConflicts(criterionIds).length > 0) {
+          issues.push({
+            field: `node:${n.id}.mode`,
+            message: 'rubricMerge: each criterion may be scored only once across inputs.',
+          })
+        }
+      }
+      if (mode === 'weightedSum') {
+        const weights = n.data.weights
+        if (weights && typeof weights === 'object') {
+          let sum = 0
+          for (const value of Object.values(weights as Record<string, unknown>)) {
+            if (typeof value === 'number' && Number.isFinite(value)) sum += value
+          }
+          if (sum > 0 && Math.abs(sum - 1) > 0.01) {
+            issues.push({
+              field: `node:${n.id}.weights`,
+              message: 'Weighted sum weights do not total 1.0 — consider normalizing.',
+            })
+          }
+        }
       }
     }
     if (isCriterionGraderNodeType(n.type)) {
@@ -389,8 +510,12 @@ export function connectionIsValid(
     return !edges.some((e) => e.target === target && e.targetHandle === th)
   }
   if (tgt.type === 'grader' || isCriterionGraderNodeType(tgt.type)) {
-    if (th === HANDLE_CONTENT) return isActivityNodeType(src.type) && sh === HANDLE_CONTENT
-    if (th === HANDLE_RUBRIC) return isActivityNodeType(src.type) && sh === HANDLE_RUBRIC
+    if (th === HANDLE_CONTENT) {
+      return (isActivityNodeType(src.type) && sh === HANDLE_CONTENT) || referenceContentSourceIsValid(src.type, sh)
+    }
+    if (th === HANDLE_RUBRIC) {
+      return (isActivityNodeType(src.type) && sh === HANDLE_RUBRIC) || rubricOutputSourceIsValid(src.type, sh)
+    }
     if (th === HANDLE_SUBMISSION) return isStudentSubmissionNodeType(src.type)
     if (th === HANDLE_CONTEXT) return isActivityNodeType(src.type)
   }
@@ -425,6 +550,10 @@ export function connectionIsValid(
       return false
     }
     return gateInputSourceIsValid(src.type, sh, th)
+  }
+  if (isScoreAggregatorNodeType(tgt.type)) {
+    if (th !== HANDLE_GRADE) return false
+    return aggregatorInputSourceIsValid(src.type, sh)
   }
   return false
 }

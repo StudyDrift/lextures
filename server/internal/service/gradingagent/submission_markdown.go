@@ -89,6 +89,15 @@ func (s *Service) LoadSubmissionTextForSubmission(ctx context.Context, courseCod
 	return JoinSubmissions(submissions), nil
 }
 
+// LoadReferenceFileMarkdown extracts text from a course file for reference material nodes.
+func (s *Service) LoadReferenceFileMarkdown(ctx context.Context, courseCode string, fileID uuid.UUID) (string, error) {
+	row, err := coursefiles.GetForCourse(ctx, s.Pool, courseCode, fileID)
+	if err != nil || row == nil {
+		return "", fmt.Errorf("reference file not found")
+	}
+	return s.loadSubmissionFileMarkdown(ctx, courseCode, fileID, row.OriginalFilename, row.MimeType)
+}
+
 func (s *Service) loadSubmissionFileMarkdown(ctx context.Context, courseCode string, fileID uuid.UUID, filename, mimeType string) (string, error) {
 	row, err := coursefiles.GetForCourse(ctx, s.Pool, courseCode, fileID)
 	if err != nil || row == nil {

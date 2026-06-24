@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/lextures/lextures/server/internal/models/gradecomment"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
@@ -105,13 +107,17 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 			Graph:           workflowGraph,
 			Submissions:     submissions,
 			SubmissionID:    msg.SubmissionID,
+			CourseCode:      msg.CourseCode,
 			DefaultMarkdown: contentRow.Markdown,
 			DefaultRubric:   rubric,
 			MaxPoints:       maxPoints,
 			ModelID:         dryRunModelID,
 			LoadOriginalityReports: d.loadOriginalityReportsForGraderAgent,
-			Runner:          svc,
-			CodeRunner:      codeexecution.New(),
+			LoadReferenceFile: func(ctx context.Context, courseCode string, fileID uuid.UUID) (string, error) {
+				return svc.LoadReferenceFileMarkdown(ctx, courseCode, fileID)
+			},
+			Runner:     svc,
+			CodeRunner: codeexecution.New(),
 		})
 		if execErr != nil {
 			return d.failGradingAgentItem(ctx, msg, execErr.Error())
@@ -195,13 +201,17 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 					Graph:           workflowGraph,
 					Submissions:     submissions,
 					SubmissionID:    msg.SubmissionID,
+					CourseCode:      msg.CourseCode,
 					DefaultMarkdown: contentRow.Markdown,
 					DefaultRubric:   rubric,
 					MaxPoints:       maxPoints,
 					ModelID:         dryRunModelID,
 					LoadOriginalityReports: d.loadOriginalityReportsForGraderAgent,
-					Runner:          svc,
-					CodeRunner:      codeexecution.New(),
+					LoadReferenceFile: func(ctx context.Context, courseCode string, fileID uuid.UUID) (string, error) {
+						return svc.LoadReferenceFileMarkdown(ctx, courseCode, fileID)
+					},
+					Runner:     svc,
+					CodeRunner: codeexecution.New(),
 				})
 				if execErr != nil {
 					return d.failGradingAgentItem(ctx, msg, execErr.Error())

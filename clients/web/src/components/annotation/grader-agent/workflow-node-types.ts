@@ -12,6 +12,9 @@ import {
   FlagForReviewNode,
   HumanReviewGateNode,
   OriginalityNode,
+  ReferenceNode,
+  RubricNode,
+  ScoreAggregatorNode,
 } from './workflow-nodes'
 
 export const graderAgentNodeTypes = {
@@ -28,4 +31,7 @@ export const graderAgentNodeTypes = {
   flagForReview: FlagForReviewNode,
   humanReviewGate: HumanReviewGateNode,
   originality: OriginalityNode,
+  reference: ReferenceNode,
+  rubric: RubricNode,
+  scoreAggregator: ScoreAggregatorNode,
 }

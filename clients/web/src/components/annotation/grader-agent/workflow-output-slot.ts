@@ -9,6 +9,7 @@ import {
   isCodeTestRunnerNodeType,
   isConditionalRouterNodeType,
   isHumanReviewGateNodeType,
+  isScoreAggregatorNodeType,
 } from './types'
 
 /** Whether a source may wire into a Student Grade output slot. */
@@ -27,11 +28,15 @@ export function outputSlotSourceIsValid(
     if (sourceHandle === HANDLE_GRADE && isHumanReviewGateNodeType(sourceType)) {
       return true
     }
+    if (sourceHandle === HANDLE_GRADE && isScoreAggregatorNodeType(sourceType)) {
+      return true
+    }
     return false
   }
   if (targetHandle === HANDLE_COMMENTS) {
     if (sourceHandle === HANDLE_COMMENTS && (sourceType === 'grader' || sourceType === 'criterionGrader')) return true
     if (sourceHandle === HANDLE_REPORT && isCodeTestRunnerNodeType(sourceType)) return true
+    if (sourceHandle === HANDLE_COMMENTS && isScoreAggregatorNodeType(sourceType)) return true
     return false
   }
   return false

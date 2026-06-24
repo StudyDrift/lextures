@@ -28,6 +28,9 @@ import type {
   FlagForReviewNodeData,
   HumanReviewGateNodeData,
   OriginalityNodeData,
+  ReferenceNodeData,
+  RubricNodeData,
+  ScoreAggregatorNodeData,
   GraderWorkflowGraph,
   PaletteNodeType,
   WorkflowValidationIssue,
@@ -38,7 +41,11 @@ import {
   defaultFlagForReviewNodeData,
   defaultHumanReviewGateNodeData,
   defaultOriginalityNodeData,
+  defaultReferenceNodeData,
+  defaultRubricNodeData,
+  defaultScoreAggregatorNodeData,
 } from './types'
+import { useRubricLibraryRubrics } from './use-rubric-library-rubrics'
 import { newWorkflowNodeId } from './workflow-node-id'
 import { patchWorkflowNodeLabel } from './workflow-node-label'
 
@@ -114,11 +121,16 @@ export function useGraderAgentWorkflow({
   const [canvasLink, setCanvasLink] = useState<CourseCanvasLinkApi | null>(null)
   const canvasSyncAbortRef = useRef<(() => void) | null>(null)
 
-  const validationIssues = useMemo(
-    () => validateWorkflowGraph(graph, { rubric, assignmentItemId: itemId }),
-    [graph, rubric, itemId],
+  const { libraryRubrics, setLibraryRubricAvailability } = useRubricLibraryRubrics(graph)
+  const validationOptions = useMemo(
+    () => ({ rubric, assignmentItemId: itemId, libraryRubrics }),
+    [rubric, itemId, libraryRubrics],
   )
-  const runnable = isWorkflowRunnable(graph, { rubric, assignmentItemId: itemId })
+  const validationIssues = useMemo(
+    () => validateWorkflowGraph(graph, validationOptions),
+    [graph, validationOptions],
+  )
+  const runnable = isWorkflowRunnable(graph, validationOptions)
 
   useEffect(() => {
     if (!open) return
@@ -296,9 +308,15 @@ export function useGraderAgentWorkflow({
                   ? 'flag'
                   : type === 'humanReviewGate'
                     ? 'gate'
-                    : type === 'originality'
+                    : type === 'scoreAggregator'
+                      ? 'agg'
+                      : type === 'originality'
                       ? 'orig'
-                      : type === 'criterionGrader'
+                      : type === 'reference'
+                        ? 'ref'
+                        : type === 'rubric'
+                          ? 'rub'
+                          : type === 'criterionGrader'
                     ? 'cg'
                     : 'ai'
       const id = newWorkflowNodeId(prefix)
@@ -318,9 +336,15 @@ export function useGraderAgentWorkflow({
                     ? { x: 160, y: 80 + current.nodes.length * 40 }
                     : type === 'humanReviewGate'
                       ? { x: 0, y: 40 + current.nodes.length * 40 }
-                      : type === 'originality'
+                      : type === 'scoreAggregator'
+                        ? { x: 0, y: 0 + current.nodes.length * 40 }
+                        : type === 'originality'
                         ? { x: -160, y: 120 + current.nodes.length * 40 }
-                        : type === 'criterionGrader'
+                        : type === 'reference'
+                          ? { x: -640, y: 200 + current.nodes.length * 40 }
+                          : type === 'rubric'
+                            ? { x: -640, y: 280 + current.nodes.length * 40 }
+                            : type === 'criterionGrader'
                       ? { x: -320, y: 0 + current.nodes.length * 40 }
                       : { x: -320, y: 40 + current.nodes.length * 40 }
         const data =
@@ -334,9 +358,15 @@ export function useGraderAgentWorkflow({
                   ? defaultFlagForReviewNodeData()
                   : type === 'humanReviewGate'
                     ? defaultHumanReviewGateNodeData()
-                    : type === 'originality'
+                    : type === 'scoreAggregator'
+                      ? defaultScoreAggregatorNodeData()
+                      : type === 'originality'
                       ? defaultOriginalityNodeData()
-                      : type === 'criterionGrader'
+                      : type === 'reference'
+                        ? defaultReferenceNodeData()
+                        : type === 'rubric'
+                          ? defaultRubricNodeData()
+                          : type === 'criterionGrader'
                     ? { prompt: '' }
                     : {}
         return {
@@ -408,8 +438,47 @@ export function useGraderAgentWorkflow({
     [graph],
   )
 
+  const updateReferenceNode = useCallback(
+    (nodeId: string, patch: Partial<ReferenceNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
+  const updateRubricNode = useCallback(
+    (nodeId: string, patch: Partial<RubricNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
   const updateHumanReviewGateNode = useCallback(
     (nodeId: string, patch: Partial<HumanReviewGateNodeData>) => {
+      if (!graph) return
+      setGraph({
+        ...graph,
+        nodes: graph.nodes.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
+        ),
+      })
+    },
+    [graph],
+  )
+
+  const updateScoreAggregatorNode = useCallback(
+    (nodeId: string, patch: Partial<ScoreAggregatorNodeData>) => {
       if (!graph) return
       setGraph({
         ...graph,
@@ -799,7 +868,11 @@ export function useGraderAgentWorkflow({
     updateConditionalRouterNode,
     updateFlagForReviewNode,
     updateHumanReviewGateNode,
+    updateScoreAggregatorNode,
     updateOriginalityNode,
+    updateReferenceNode,
+    updateRubricNode,
+    setLibraryRubricAvailability,
     refreshRunResults,
     updateNodeLabel,
     addPaletteNode,

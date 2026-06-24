@@ -326,4 +326,187 @@ describe('grader agent workflow validation', () => {
     const issues = validateWorkflowGraph(g, { rubric, assignmentItemId: 'item-1' })
     expect(issues.some((issue) => issue.field === 'node:cg1.criterionId')).toBe(true)
   })
+
+  it('rejects reference wired to output grade slot', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'ref1', type: 'reference', position: { x: -640, y: 0 }, data: { text: 'Key' } },
+        { id: 'ai1', type: 'ai', position: { x: -320, y: 0 }, data: { prompt: 'Grade' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'ref1', sourceHandle: 'reference', target: 'output', targetHandle: 'grade' },
+        { id: 'e2', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(connectionIsValid(g, 'ref1', 'reference', 'output', 'grade')).toBe(false)
+  })
+
+  it('accepts reference wired to AI input', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'ref1', type: 'reference', position: { x: -640, y: 0 }, data: { text: 'Model answer body' } },
+        { id: 'ai1', type: 'ai', position: { x: -320, y: 0 }, data: { prompt: 'Grade using $ModelAnswer.Text' } },
+        { id: 'sub1', type: 'studentSubmission', position: { x: -640, y: 120 }, data: {} },
+      ],
+      edges: [
+        { id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+        { id: 'e2', source: 'ref1', sourceHandle: 'reference', target: 'ai1', targetHandle: 'input' },
+        { id: 'e3', source: 'sub1', sourceHandle: 'submission', target: 'ai1', targetHandle: 'input' },
+      ],
+    }
+    const gWithoutRefEdge: GraderWorkflowGraph = {
+      ...g,
+      edges: g.edges.filter((edge) => edge.id !== 'e2'),
+    }
+    expect(connectionIsValid(gWithoutRefEdge, 'ref1', 'reference', 'ai1', 'input')).toBe(true)
+    expect(isWorkflowRunnable(g)).toBe(true)
+  })
+
+  it('rejects rubric wired to output grade slot', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'rub1', type: 'rubric', position: { x: -640, y: 0 }, data: { source: 'assignment' } },
+        { id: 'ai1', type: 'ai', position: { x: -320, y: 0 }, data: { prompt: 'Grade' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'rub1', sourceHandle: 'rubric', target: 'output', targetHandle: 'grade' },
+        { id: 'e2', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(connectionIsValid(g, 'rub1', 'rubric', 'output', 'grade')).toBe(false)
+  })
+
+  it('accepts rubric wired to AI input', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        {
+          id: 'rub1',
+          type: 'rubric',
+          position: { x: -640, y: 0 },
+          data: {
+            source: 'inline',
+            rubric: {
+              criteria: [{ id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', title: 'Thesis', levels: [{ label: 'Good', points: 10 }] }],
+            },
+          },
+        },
+        { id: 'ai1', type: 'ai', position: { x: -320, y: 0 }, data: { prompt: 'Grade with rubric' } },
+        { id: 'sub1', type: 'studentSubmission', position: { x: -640, y: 120 }, data: {} },
+      ],
+      edges: [
+        { id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
+        { id: 'e2', source: 'rub1', sourceHandle: 'rubric', target: 'ai1', targetHandle: 'input' },
+        { id: 'e3', source: 'sub1', sourceHandle: 'submission', target: 'ai1', targetHandle: 'input' },
+      ],
+    }
+    const gWithoutRubricEdge: GraderWorkflowGraph = {
+      ...g,
+      edges: g.edges.filter((edge) => edge.id !== 'e2'),
+    }
+    expect(connectionIsValid(gWithoutRubricEdge, 'rub1', 'rubric', 'ai1', 'input')).toBe(true)
+    expect(isWorkflowRunnable(g, { rubric: { criteria: [] } })).toBe(true)
+  })
+
+  it('requires inline rubric criteria', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'rub1', type: 'rubric', position: { x: -640, y: 0 }, data: { source: 'inline', rubric: { criteria: [] } } },
+        { id: 'ai1', type: 'ai', position: { x: -320, y: 0 }, data: { prompt: 'Grade' } },
+      ],
+      edges: [{ id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' }],
+    }
+    expect(validateWorkflowGraph(g).some((issue) => issue.field === 'node:rub1.rubric')).toBe(true)
+  })
+
+  it('allows multiple grade edges into score aggregator', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'agg1', type: 'scoreAggregator', position: { x: -80, y: 0 }, data: {} },
+        { id: 'cg1', type: 'criterionGrader', position: { x: -320, y: -40 }, data: { prompt: 'A', criterionId: 'c1' } },
+        { id: 'cg2', type: 'criterionGrader', position: { x: -320, y: 40 }, data: { prompt: 'B', criterionId: 'c2' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'cg1', sourceHandle: 'grade', target: 'agg1', targetHandle: 'grade' },
+        { id: 'e2', source: 'cg2', sourceHandle: 'grade', target: 'agg1', targetHandle: 'grade' },
+        { id: 'e3', source: 'agg1', sourceHandle: 'grade', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(connectionIsValid(g, 'cg2', 'grade', 'agg1', 'grade')).toBe(true)
+    expect(isWorkflowRunnable(g, { rubric: { criteria: [{ id: 'c1', title: 'A', levels: [] }, { id: 'c2', title: 'B', levels: [] }] } })).toBe(true)
+  })
+
+  it('rejects second grade edge on output node', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'agg1', type: 'scoreAggregator', position: { x: -80, y: 0 }, data: {} },
+        { id: 'g1', type: 'grader', position: { x: -320, y: 0 }, data: { prompt: 'Grade' } },
+        { id: 'g2', type: 'grader', position: { x: -320, y: 80 }, data: { prompt: 'Grade 2' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'g1', sourceHandle: 'grade', target: 'output', targetHandle: 'grade' },
+        { id: 'e2', source: 'g2', sourceHandle: 'grade', target: 'agg1', targetHandle: 'grade' },
+      ],
+    }
+    expect(connectionIsValid(g, 'g2', 'grade', 'output', 'grade')).toBe(false)
+  })
+
+  it('rejects rubricMerge with duplicate criterion sources', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'agg1', type: 'scoreAggregator', position: { x: -80, y: 0 }, data: { mode: 'rubricMerge' } },
+        { id: 'cg1', type: 'criterionGrader', position: { x: -320, y: -40 }, data: { prompt: 'A', criterionId: 'same' } },
+        { id: 'cg2', type: 'criterionGrader', position: { x: -320, y: 40 }, data: { prompt: 'B', criterionId: 'same' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'cg1', sourceHandle: 'grade', target: 'agg1', targetHandle: 'grade' },
+        { id: 'e2', source: 'cg2', sourceHandle: 'grade', target: 'agg1', targetHandle: 'grade' },
+        { id: 'e3', source: 'agg1', sourceHandle: 'grade', target: 'output', targetHandle: 'grade' },
+      ],
+    }
+    expect(
+      validateWorkflowGraph(g).some((issue) => issue.field === 'node:agg1.mode' && issue.message.includes('rubricMerge')),
+    ).toBe(true)
+  })
+
+  it('rejects non-grade source wired to aggregator', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'agg1', type: 'scoreAggregator', position: { x: -80, y: 0 }, data: {} },
+        { id: 'orig1', type: 'originality', position: { x: -320, y: 0 }, data: {} },
+      ],
+      edges: [],
+    }
+    expect(connectionIsValid(g, 'orig1', 'score', 'agg1', 'grade')).toBe(false)
+  })
+
+  it('requires reference text or file', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'ref1', type: 'reference', position: { x: -640, y: 0 }, data: { mode: 'modelAnswer' } },
+        { id: 'ai1', type: 'ai', position: { x: -320, y: 0 }, data: { prompt: 'Grade' } },
+      ],
+      edges: [{ id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' }],
+    }
+    expect(validateWorkflowGraph(g).some((issue) => issue.field === 'node:ref1.text')).toBe(true)
+  })
 })

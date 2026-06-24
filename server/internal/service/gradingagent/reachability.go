@@ -149,7 +149,7 @@ func forwardReachable(g *WorkflowGraph, starts []string) map[string]bool {
 
 func isWorkflowSourceNode(nodeType string) bool {
 	switch nodeType {
-	case NodeTypeStudentSubmission, NodeTypeSubmission, NodeTypeActivity, NodeTypeAssignmentCtx:
+	case NodeTypeStudentSubmission, NodeTypeSubmission, NodeTypeActivity, NodeTypeAssignmentCtx, NodeTypeReference, NodeTypeRubric:
 		return true
 	default:
 		return false

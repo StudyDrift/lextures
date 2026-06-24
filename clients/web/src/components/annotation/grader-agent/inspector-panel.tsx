@@ -16,6 +16,9 @@ import {
   isFlagForReviewNodeType,
   isHumanReviewGateNodeType,
   isOriginalityNodeType,
+  isReferenceNodeType,
+  isRubricNodeType,
+  isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
 } from './types'
 import { CodeTestRunnerInspector } from './code-test-runner-inspector'
@@ -23,6 +26,9 @@ import { ConditionalRouterInspector } from './conditional-router-inspector'
 import { FlagForReviewInspector } from './flag-for-review-inspector'
 import { HumanReviewGateInspector } from './human-review-gate-inspector'
 import { OriginalityInspector } from './originality-inspector'
+import { ReferenceInspector } from './reference-inspector'
+import { RubricInspector } from './rubric-inspector'
+import { ScoreAggregatorInspector } from './score-aggregator-inspector'
 import { AiNodeCompiledPrompt } from './ai-node-compiled-prompt'
 import { AiNodeOutputFormat } from './ai-node-output-format'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
@@ -68,7 +74,11 @@ export function InspectorPanel({
     updateConditionalRouterNode,
     updateFlagForReviewNode,
     updateHumanReviewGateNode,
+    updateScoreAggregatorNode,
     updateOriginalityNode,
+    updateReferenceNode,
+    updateRubricNode,
+    setLibraryRubricAvailability,
     removeNode,
     nodeDryRunDetails,
     nodeExecutionStates,
@@ -102,6 +112,9 @@ export function InspectorPanel({
       flagForReview: t('gradingAgent.canvas.nodes.flagForReview.title'),
       humanReviewGate: t('gradingAgent.canvas.nodes.reviewGate.title'),
       originality: t('gradingAgent.canvas.nodes.originality.title'),
+      reference: t('gradingAgent.canvas.nodes.reference.title'),
+      rubric: t('gradingAgent.canvas.nodes.rubric.title'),
+      scoreAggregator: t('gradingAgent.canvas.nodes.aggregator.title'),
     }),
     [t],
   )
@@ -412,6 +425,44 @@ export function InspectorPanel({
     )
   }
 
+  if (isReferenceNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.reference.title')}
+        </p>
+        <ReferenceInspector
+          courseCode={courseCode}
+          data={node.data}
+          onChange={(patch) => updateReferenceNode(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          fieldClass={fieldClass}
+        />
+      </div>
+    )
+  }
+
+  if (isRubricNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.rubric.title')}
+        </p>
+        <RubricInspector
+          courseCode={courseCode}
+          assignmentTitle={assignmentTitle}
+          assignmentHasRubric={Boolean(rubric?.criteria?.length)}
+          maxPoints={maxPoints}
+          data={node.data}
+          onChange={(patch) => updateRubricNode(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          onLibraryRubricResolved={setLibraryRubricAvailability}
+          fieldClass={fieldClass}
+        />
+      </div>
+    )
+  }
+
   if (isOriginalityNodeType(node.type)) {
     return (
       <div className="space-y-2">
@@ -422,6 +473,24 @@ export function InspectorPanel({
           data={node.data}
           aiLikelihoodAllowed={ffPlagiarismChecks}
           onChange={(patch) => updateOriginalityNode(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          fieldClass={fieldClass}
+        />
+      </div>
+    )
+  }
+
+  if (isScoreAggregatorNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.aggregator.title')}
+        </p>
+        <ScoreAggregatorInspector
+          nodeId={node.id}
+          graph={graph}
+          data={node.data}
+          onChange={(patch) => updateScoreAggregatorNode(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
         />

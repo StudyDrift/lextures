@@ -167,11 +167,15 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			Graph:           first.WorkflowGraph,
 			Submissions:     submissions,
 			SubmissionID:    submissionID,
+			CourseCode:      courseCode,
 			DefaultMarkdown: contentRow.Markdown,
 			DefaultRubric:   rubric,
 			MaxPoints:       maxPoints,
 			ModelID:         modelID,
 			LoadOriginalityReports: d.loadOriginalityReportsForGraderAgent,
+			LoadReferenceFile: func(ctx context.Context, code string, fileID uuid.UUID) (string, error) {
+				return svc.LoadReferenceFileMarkdown(ctx, code, fileID)
+			},
 			ResolveActivity: func(overrideItemID string) (string, *assignmentrubric.RubricDefinition, error) {
 				row, rowErr := d.assignmentRowForActivitySource(runCtx, *cid, itemID, assignRow, overrideItemID)
 				if rowErr != nil {

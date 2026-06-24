@@ -75,6 +75,8 @@ type DryRunExecutionInput struct {
 	ModelID                string
 	ResolveActivity        ActivitySource
 	LoadOriginalityReports func(ctx context.Context, submissionID uuid.UUID) ([]OriginalityReportRow, error)
+	LoadReferenceFile      func(ctx context.Context, courseCode string, fileID uuid.UUID) (string, error)
+	CourseCode             string
 	Runner                 DryRunRunner
 	CodeRunner             CodeTestRunner
 	Emit                   func(DryRunEvent)
@@ -259,7 +261,7 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 	if in.Runner == nil && workflowUsesLLM(in.Graph) {
 		return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
 	}
-	if !workflowUsesLLM(in.Graph) && in.CodeRunner == nil {
+	if !workflowUsesLLM(in.Graph) && workflowUsesCodeRunner(in.Graph) && in.CodeRunner == nil {
 		return DryRunPreview{}, fmt.Errorf("code execution service is not configured")
 	}
 	emit := in.Emit
@@ -321,6 +323,30 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Loaded assignment content (%d chars) and rubric.", label, len(markdown)),
 			})
+		case NodeTypeRubric:
+			rubric, loadErr := in.LoadRubricDefinition(node)
+			if loadErr != nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, loadErr
+			}
+			state.set(node.ID, HandleRubric, slotValue{text: formatRubricVariableText(rubric), rubric: rubric})
+			emit(DryRunEvent{
+				Type: "log", Level: "info",
+				Message: fmt.Sprintf("[%s] Loaded %d criteria.", label, len(rubric.Criteria)),
+			})
+		case NodeTypeReference:
+			text, truncated, loadErr := in.LoadReferenceText(ctx, node)
+			if loadErr != nil {
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, loadErr
+			}
+			state.set(node.ID, HandleReference, slotValue{text: text})
+			modeLabel := referenceTrustedLabel(referenceModeFromNode(node))
+			logMsg := fmt.Sprintf("[%s] Loaded %d chars of reference.", modeLabel, len(text))
+			if truncated {
+				logMsg += " (truncated)"
+			}
+			emit(DryRunEvent{Type: "log", Level: "info", Message: logMsg})
 		case NodeTypeAI:
 			prompt := graderPrompt(node)
 			inputText := gatherAIInput(in.Graph, node.ID, nodeByID, state)
@@ -481,6 +507,12 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, execErr
 			}
+		case NodeTypeScoreAggregator:
+			if execErr := executeScoreAggregatorNode(in.Graph, node, nodeByID, state, in.MaxPoints, in.DefaultRubric, emit, label); execErr != nil {
+				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, execErr.Error())})
+				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, execErr
+			}
 		case NodeTypeHumanReviewGate:
 			gradeVal, gradeErr := gatherGateGrade(in.Graph, node.ID, nodeByID, state)
 			if gradeErr != nil {
@@ -618,6 +650,13 @@ func gatherAIInput(g *WorkflowGraph, nodeID string, nodeByID map[string]Workflow
 			}
 			continue
 		}
+		if isReferenceNodeType(src.Type) {
+			block := formatReferenceTrustedAIBlock(src, v.text)
+			if block != "" {
+				parts = append(parts, block)
+			}
+			continue
+		}
 		if strings.TrimSpace(v.text) != "" {
 			label := NodeDisplayLabel(src.Data, src.Type)
 			parts = append(parts, fmt.Sprintf("## %s\n%s", label, v.text))
@@ -661,6 +700,7 @@ func buildPromptContext(
 		Submissions:     defaultSubmissions,
 		ContentMarkdown: defaultMarkdown,
 		Rubric:          defaultRubric,
+		ReferenceTexts:  make(map[string]string),
 	}
 	for _, e := range g.Edges {
 		if e.Target != nodeID {
@@ -688,6 +728,10 @@ func buildPromptContext(
 				ctx.Rubric = v.rubric
 			} else if v.text != "" && ctx.Rubric == nil {
 				ctx.ContentMarkdown = strings.TrimSpace(ctx.ContentMarkdown + "\n" + v.text)
+			}
+		case HandleReference:
+			if v.text != "" {
+				ctx.ReferenceTexts[src.ID] = v.text
 			}
 		}
 		_ = src
@@ -752,11 +796,7 @@ func buildGraderScoreRequest(
 	}
 
 	prompt := graderPrompt(node)
-	promptCtx := PromptVariableContext{
-		Submissions:     in.Submissions,
-		ContentMarkdown: contentMarkdown,
-		Rubric:          rubric,
-	}
+	promptCtx := buildPromptContext(in.Graph, node.ID, nodeByID, state, in.Submissions, contentMarkdown, rubric)
 	prompt = SubstituteWorkflowPromptVariables(in.Graph, node.ID, prompt, promptCtx)
 	modelID := graderModelID(node)
 	if modelID == "" {

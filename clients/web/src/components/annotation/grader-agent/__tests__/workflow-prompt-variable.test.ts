@@ -47,6 +47,7 @@ describe('workflow prompt variables', () => {
     expect(workflowOutputHandleToProperty('content')).toBe('Content')
     expect(workflowOutputHandleToProperty('rubric')).toBe('Rubric')
     expect(workflowOutputHandleToProperty('output')).toBe('Output')
+    expect(workflowOutputHandleToProperty('reference')).toBe('Text')
   })
 
   it('lists wired input nodes and their properties', () => {

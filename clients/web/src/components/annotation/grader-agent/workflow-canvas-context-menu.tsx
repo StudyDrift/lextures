@@ -48,6 +48,12 @@ function defaultLabelForNodeType(type: string, t: TFunction): string {
       return t('gradingAgent.canvas.nodes.reviewGate.title')
     case 'originality':
       return t('gradingAgent.canvas.nodes.originality.title')
+    case 'reference':
+      return t('gradingAgent.canvas.nodes.reference.title')
+    case 'rubric':
+      return t('gradingAgent.canvas.nodes.rubric.title')
+    case 'scoreAggregator':
+      return t('gradingAgent.canvas.nodes.aggregator.title')
     default:
       return type
   }

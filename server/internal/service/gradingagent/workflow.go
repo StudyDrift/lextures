@@ -24,6 +24,9 @@ const (
 	NodeTypeFlagForReview     = "flagForReview"
 	NodeTypeHumanReviewGate   = "humanReviewGate"
 	NodeTypeOriginality       = "originality"
+	NodeTypeReference         = "reference"
+	NodeTypeRubric            = "rubric"
+	NodeTypeScoreAggregator   = "scoreAggregator"
 	NodeTypeAssignmentCtx     = "assignmentContext" // legacy
 	NodeTypeSubmission        = "submission"        // legacy
 	HandleGrade               = "grade"
@@ -40,6 +43,7 @@ const (
 	HandleElse                = "else"
 	HandleReason              = "reason"
 	HandleFlag                = "flag"
+	HandleReference           = "reference"
 )
 
 // WorkflowGraph is the persisted React Flow graph for the grading agent canvas.
@@ -119,7 +123,13 @@ func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool
 		if srcHandle == HandleGrade && isHumanReviewGateNodeType(src.Type) {
 			return true
 		}
+		if srcHandle == HandleGrade && isScoreAggregatorNodeType(src.Type) {
+			return true
+		}
 	case HandleComments:
+		if srcHandle == HandleComments && isScoreAggregatorNodeType(src.Type) {
+			return true
+		}
 		if srcHandle == HandleComments && (src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type)) {
 			return true
 		}
@@ -144,6 +154,12 @@ func aiInputSourceIsValid(sourceType, sourceHandle string) bool {
 		return true
 	}
 	if isOriginalityNodeType(sourceType) && (sourceHandle == HandleScore || sourceHandle == HandleReport) {
+		return true
+	}
+	if isReferenceNodeType(sourceType) && sourceHandle == HandleReference {
+		return true
+	}
+	if isRubricNodeType(sourceType) && sourceHandle == HandleRubric {
 		return true
 	}
 	return false
@@ -210,7 +226,7 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		}
 		nodeByID[n.ID] = n
 		switch n.Type {
-		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeAssignmentCtx, NodeTypeSubmission:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -265,7 +281,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		switch n.Type {
 		case NodeTypeOutput:
 			outputCount++
-		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeAssignmentCtx, NodeTypeSubmission:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
 		}
@@ -338,6 +354,22 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		if n.Type == NodeTypeOriginality && !originalityHasSubmissionInput(g, n.ID) {
 			return ValidationError{Field: "node:" + n.ID + ".submission", Message: "Connect a submission input to the Originality Check."}
 		}
+		if n.Type == NodeTypeReference && !referenceHasSource(n) {
+			return ValidationError{Field: "node:" + n.ID + ".text", Message: "Add reference text or select a course file."}
+		}
+		if n.Type == NodeTypeRubric && !rubricHasSource(n) {
+			return ValidationError{Field: "node:" + n.ID + ".source", Message: "Configure a rubric source for this node."}
+		}
+		if n.Type == NodeTypeScoreAggregator {
+			if !aggregatorHasGradeInput(g, n.ID) {
+				return ValidationError{Field: "node:" + n.ID + ".grade", Message: "Connect at least one grade input to the Score Aggregator."}
+			}
+			if aggregatorModeFromNode(n) == AggregatorModeRubricMerge {
+				if dupes := DetectRubricMergeCriterionConflicts(wiredAggregatorSourceCriterionIDs(g, n.ID, nodeByID)); len(dupes) > 0 {
+					return ValidationError{Field: "node:" + n.ID + ".mode", Message: "rubricMerge: each criterion may be scored only once across inputs."}
+				}
+			}
+		}
 	}
 
 	if err := validateRouterFieldAvailability(g, nodeByID); err != nil {
@@ -365,13 +397,15 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 	case NodeTypeGrader, NodeTypeCriterionGrader:
 		switch tgtHandle {
 		case HandleContent:
-			if !isActivityNodeType(src.Type) || srcHandle != HandleContent {
-				return ValidationError{Field: "node:" + tgt.ID, Message: "Content input must come from an Activity content output."}
+			if (isActivityNodeType(src.Type) && srcHandle == HandleContent) || referenceContentSourceIsValid(src, srcHandle) {
+				break
 			}
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Content input must come from an Activity content output or Reference Material."}
 		case HandleRubric:
-			if !isActivityNodeType(src.Type) || srcHandle != HandleRubric {
-				return ValidationError{Field: "node:" + tgt.ID, Message: "Rubric input must come from an Activity rubric output."}
+			if (isActivityNodeType(src.Type) && srcHandle == HandleRubric) || rubricOutputSourceIsValid(src, srcHandle) {
+				break
 			}
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Rubric input must come from an Activity or Rubric rubric output."}
 		case HandleSubmission:
 			if !isStudentSubmissionNodeType(src.Type) {
 				return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
@@ -392,7 +426,7 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 			return ValidationError{Field: "node:" + tgt.ID, Message: "AI node edges must target the input slot."}
 		}
 		if !aiInputSourceIsValid(src.Type, srcHandle) {
-			return ValidationError{Field: "node:" + tgt.ID, Message: "AI input must come from a submission, activity, or upstream AI output."}
+			return ValidationError{Field: "node:" + tgt.ID, Message: "AI input must come from a submission, activity, reference, or upstream AI output."}
 		}
 		if isAINodeType(src.Type) && srcHandle != HandleAIOutput {
 			return ValidationError{Field: "node:" + src.ID, Message: "AI node edges must originate from the output slot."}
@@ -435,6 +469,13 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 		}
 		if !originalityInputSourceIsValid(src, srcHandle, tgtHandle) {
 			return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
+		}
+	case NodeTypeScoreAggregator:
+		if tgtHandle != HandleGrade {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Score Aggregator accepts grade inputs only."}
+		}
+		if !aggregatorInputSourceIsValid(src, srcHandle) {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Invalid grade source for Score Aggregator."}
 		}
 	default:
 		return ValidationError{Field: "workflowGraph.edges", Message: "Invalid edge target."}
@@ -491,14 +532,18 @@ func deriveIncludeFlags(g *WorkflowGraph, promptNodeID string, nodeByID map[stri
 				continue
 			}
 			src, ok := nodeByID[e.Source]
-			if !ok || !isActivityNodeType(src.Type) {
+			if !ok {
 				continue
 			}
 			switch strings.TrimSpace(e.SourceHandle) {
 			case HandleContent:
-				includeContent = true
+				if isActivityNodeType(src.Type) {
+					includeContent = true
+				}
 			case HandleRubric:
-				includeRubric = true
+				if isActivityNodeType(src.Type) || isRubricNodeType(src.Type) {
+					includeRubric = true
+				}
 			}
 		}
 		return includeContent, includeRubric
@@ -513,7 +558,7 @@ func deriveIncludeFlags(g *WorkflowGraph, promptNodeID string, nodeByID map[stri
 				includeContent = true
 			}
 		case HandleRubric:
-			if src, ok := nodeByID[e.Source]; ok && isActivityNodeType(src.Type) {
+			if src, ok := nodeByID[e.Source]; ok && (isActivityNodeType(src.Type) || isRubricNodeType(src.Type)) {
 				includeRubric = true
 			}
 		case HandleContext:
@@ -585,7 +630,7 @@ func findWorkflowPromptNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) 
 }
 
 func gradeSourceNodeType(nodeType string) bool {
-	return nodeType == NodeTypeGrader || nodeType == NodeTypeCriterionGrader || nodeType == NodeTypeAI || nodeType == NodeTypeCodeTestRunner
+	return nodeType == NodeTypeGrader || nodeType == NodeTypeCriterionGrader || nodeType == NodeTypeAI || nodeType == NodeTypeCodeTestRunner || nodeType == NodeTypeScoreAggregator
 }
 
 func graderPrompt(n WorkflowNode) string {
@@ -668,17 +713,26 @@ func resolveWiredActivityItemIDs(g *WorkflowGraph, promptNodeID string, nodeByID
 			continue
 		}
 		src, ok := nodeByID[e.Source]
-		if !ok || !isActivityNodeType(src.Type) {
+		if !ok {
 			continue
 		}
 		targetHandle := strings.TrimSpace(e.TargetHandle)
 		sourceHandle := strings.TrimSpace(e.SourceHandle)
 		switch targetHandle {
 		case HandleContent:
-			contentItemID = activityAssignmentItemID(src)
+			if isActivityNodeType(src.Type) {
+				contentItemID = activityAssignmentItemID(src)
+			}
 		case HandleRubric:
-			rubricItemID = activityAssignmentItemID(src)
+			if isActivityNodeType(src.Type) {
+				rubricItemID = activityAssignmentItemID(src)
+			} else if isRubricNodeType(src.Type) {
+				rubricItemID = rubricWiredAssignmentItemID(src)
+			}
 		case HandleContext:
+			if !isActivityNodeType(src.Type) {
+				continue
+			}
 			if src.Type == NodeTypeAssignmentCtx {
 				continue
 			}
@@ -694,13 +748,28 @@ func resolveWiredActivityItemIDs(g *WorkflowGraph, promptNodeID string, nodeByID
 			}
 			switch sourceHandle {
 			case HandleContent:
-				contentItemID = activityAssignmentItemID(src)
+				if isActivityNodeType(src.Type) {
+					contentItemID = activityAssignmentItemID(src)
+				}
 			case HandleRubric:
-				rubricItemID = activityAssignmentItemID(src)
+				if isActivityNodeType(src.Type) {
+					rubricItemID = activityAssignmentItemID(src)
+				} else if isRubricNodeType(src.Type) {
+					rubricItemID = rubricWiredAssignmentItemID(src)
+				}
 			}
 		}
 	}
 	return contentItemID, rubricItemID
+}
+
+func rubricWiredAssignmentItemID(n WorkflowNode) string {
+	switch rubricSourceFromNode(n) {
+	case RubricSourceLibrary:
+		return rubricLibraryAssignmentItemID(n)
+	default:
+		return ""
+	}
 }
 
 func findGradeSourceNode(g *WorkflowGraph, nodeByID map[string]WorkflowNode) string {
@@ -732,7 +801,7 @@ func CompileWorkflowGraph(g *WorkflowGraph, submissionText string) (CompiledWork
 		return CompiledWorkflow{}, ValidationError{Field: "output.grade", Message: "Connect the grade slot before running."}
 	}
 	gradeSource := nodeByID[gradeSourceID]
-	if isCodeTestRunnerNodeType(gradeSource.Type) {
+	if isCodeTestRunnerNodeType(gradeSource.Type) || isScoreAggregatorNodeType(gradeSource.Type) {
 		commentSource := ""
 		for _, e := range g.Edges {
 			tgt, ok := nodeByID[e.Target]

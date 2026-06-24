@@ -12,7 +12,7 @@ type NodePaletteProps = {
 }
 
 function paletteItemClass(kind: PaletteNodeType): string {
-  if (kind === 'studentSubmission') {
+  if (kind === 'studentSubmission' || kind === 'reference') {
     return 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800'
   }
   if (kind === 'ai' || kind === 'criterionGrader') {
@@ -32,6 +32,9 @@ function paletteItemClass(kind: PaletteNodeType): string {
   }
   if (kind === 'originality') {
     return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
+  }
+  if (kind === 'scoreAggregator') {
+    return 'border-emerald-200 text-emerald-900 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-200 dark:hover:bg-emerald-950/40'
   }
   return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
 }
@@ -125,6 +128,18 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
             disabled={disabled}
             onAddNode={onAddNode}
           />
+          <PaletteItem
+            type="reference"
+            label={t('gradingAgent.canvas.palette.reference')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+          <PaletteItem
+            type="rubric"
+            label={t('gradingAgent.canvas.palette.rubric')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
         </PaletteGroup>
         <PaletteGroup title={t('gradingAgent.canvas.palette.groupProcessing')}>
           <PaletteItem
@@ -157,6 +172,12 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
           <PaletteItem
             type="conditionalRouter"
             label={t('gradingAgent.canvas.palette.router')}
+            disabled={disabled}
+            onAddNode={onAddNode}
+          />
+          <PaletteItem
+            type="scoreAggregator"
+            label={t('gradingAgent.canvas.palette.aggregator')}
             disabled={disabled}
             onAddNode={onAddNode}
           />

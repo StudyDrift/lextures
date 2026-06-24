@@ -14,6 +14,7 @@ import {
   isCriterionGraderNodeType,
   isFlagForReviewNodeType,
   isOriginalityNodeType,
+  isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
 } from './types'
 
@@ -55,7 +56,10 @@ export function flagSinkSourceIsValid(
     case HANDLE_GRADE:
       if (
         sourceHandle === HANDLE_GRADE &&
-        (sourceType === 'grader' || isCriterionGraderNodeType(sourceType) || isCodeTestRunnerNodeType(sourceType))
+        (sourceType === 'grader' ||
+          isCriterionGraderNodeType(sourceType) ||
+          isCodeTestRunnerNodeType(sourceType) ||
+          isScoreAggregatorNodeType(sourceType))
       ) {
         return true
       }

@@ -14,6 +14,9 @@ export type GraderNodeType =
   | 'flagForReview'
   | 'humanReviewGate'
   | 'originality'
+  | 'reference'
+  | 'rubric'
+  | 'scoreAggregator'
 
 /** @deprecated Legacy persisted graphs may still use `submission`. */
 export type LegacyGraderNodeType = 'submission' | 'assignmentContext'
@@ -137,10 +140,49 @@ export type OriginalityNodeData = {
   flagThreshold?: number
 }
 
+export type ReferenceMode = 'modelAnswer' | 'answerKey' | 'sourceText'
+
+export type ReferenceNodeData = {
+  mode?: ReferenceMode
+  text?: string
+  resourceId?: string
+  label?: string
+}
+
+export type RubricSourceMode = 'assignment' | 'library' | 'inline'
+
+export type RubricNodeData = {
+  source?: RubricSourceMode
+  rubricAssignmentItemId?: string
+  rubric?: import('../../../lib/courses-api').RubricDefinition
+}
+
+export type ScoreAggregatorMode =
+  | 'sum'
+  | 'weightedSum'
+  | 'average'
+  | 'min'
+  | 'max'
+  | 'rubricMerge'
+
+export type ScoreAggregatorConfidenceMode = 'min' | 'mean' | 'weighted'
+
+export type ScoreAggregatorOnMissing = 'treatAsZero' | 'skipAndRenormalize' | 'failItem'
+
+export type ScoreAggregatorNodeData = {
+  mode?: ScoreAggregatorMode
+  weights?: Record<string, number>
+  confidence?: ScoreAggregatorConfidenceMode
+  onMissing?: ScoreAggregatorOnMissing
+  mergeComments?: boolean
+}
+
 export type PaletteNodeType = Extract<
   GraderNodeType,
   | 'studentSubmission'
   | 'activity'
+  | 'reference'
+  | 'rubric'
   | 'ai'
   | 'criterionGrader'
   | 'codeTestRunner'
@@ -148,6 +190,7 @@ export type PaletteNodeType = Extract<
   | 'flagForReview'
   | 'humanReviewGate'
   | 'originality'
+  | 'scoreAggregator'
 >
 
 export const HANDLE_SUBMISSION = 'submission'
@@ -163,11 +206,18 @@ export const HANDLE_THEN = 'then'
 export const HANDLE_ELSE = 'else'
 export const HANDLE_REASON = 'reason'
 export const HANDLE_FLAG = 'flag'
+export const HANDLE_REFERENCE = 'reference'
 /** @deprecated Legacy graphs wired assignment context through a single context handle. */
 export const HANDLE_CONTEXT = 'context'
 
 export function isSourceOnlyNodeType(type: string): boolean {
-  return type === 'studentSubmission' || type === 'submission' || type === 'activity'
+  return (
+    type === 'studentSubmission' ||
+    type === 'submission' ||
+    type === 'activity' ||
+    type === 'reference' ||
+    type === 'rubric'
+  )
 }
 
 export function isActivityNodeType(type: string): boolean {
@@ -204,6 +254,67 @@ export function isHumanReviewGateNodeType(type: string): boolean {
 
 export function isOriginalityNodeType(type: string): boolean {
   return type === 'originality'
+}
+
+export function isReferenceNodeType(type: string): boolean {
+  return type === 'reference'
+}
+
+export function isRubricNodeType(type: string): boolean {
+  return type === 'rubric'
+}
+
+export function isScoreAggregatorNodeType(type: string): boolean {
+  return type === 'scoreAggregator'
+}
+
+export function defaultScoreAggregatorNodeData(): ScoreAggregatorNodeData {
+  return {
+    mode: 'sum',
+    confidence: 'min',
+    onMissing: 'treatAsZero',
+    mergeComments: true,
+    weights: {},
+  }
+}
+
+export function defaultReferenceNodeData(): ReferenceNodeData {
+  return {
+    mode: 'modelAnswer',
+    text: '',
+  }
+}
+
+export function referenceHasSource(data: Record<string, unknown>): boolean {
+  const text = typeof data.text === 'string' ? data.text.trim() : ''
+  const resourceId = typeof data.resourceId === 'string' ? data.resourceId.trim() : ''
+  return text.length > 0 || resourceId.length > 0
+}
+
+export function defaultRubricNodeData(): RubricNodeData {
+  return { source: 'assignment' }
+}
+
+export function rubricHasSource(
+  data: Record<string, unknown>,
+  options?: { assignmentHasRubric?: boolean; libraryRubrics?: Record<string, boolean> },
+): boolean {
+  const source = typeof data.source === 'string' ? data.source : 'assignment'
+  if (source === 'assignment') {
+    return options?.assignmentHasRubric !== false
+  }
+  if (source === 'library') {
+    const itemId = typeof data.rubricAssignmentItemId === 'string' ? data.rubricAssignmentItemId.trim() : ''
+    if (!itemId) return false
+    if (options?.libraryRubrics && itemId in options.libraryRubrics) {
+      return options.libraryRubrics[itemId]
+    }
+    return true
+  }
+  const rubric = data.rubric
+  if (!rubric || typeof rubric !== 'object') return false
+  const criteria = (rubric as { criteria?: unknown }).criteria
+  return Array.isArray(criteria) && criteria.length > 0
 }
 
 export function defaultOriginalityNodeData(): OriginalityNodeData {

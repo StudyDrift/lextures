@@ -5,11 +5,14 @@ import {
   HANDLE_AI_OUTPUT,
   HANDLE_CONTENT,
   HANDLE_FLAG,
+  HANDLE_REFERENCE,
   HANDLE_REPORT,
   HANDLE_RUBRIC,
   HANDLE_SCORE,
   HANDLE_SUBMISSION,
   isOriginalityNodeType,
+  isReferenceNodeType,
+  isRubricNodeType,
   isActivityNodeType,
   isAiNodeType,
   isStudentSubmissionNodeType,
@@ -54,6 +57,9 @@ export type WorkflowNodeDefaultLabels = {
   flagForReview?: string
   humanReviewGate?: string
   originality?: string
+  reference?: string
+  rubric?: string
+  scoreAggregator?: string
   output: string
 }
 
@@ -80,6 +86,8 @@ export function workflowOutputHandleToProperty(handle: string): string | null {
       return 'Report'
     case HANDLE_FLAG:
       return 'Flag'
+    case HANDLE_REFERENCE:
+      return 'Text'
     default:
       return null
   }
@@ -95,6 +103,8 @@ function defaultLabelForNodeType(type: string, defaults: WorkflowNodeDefaultLabe
   if (type === 'criterionGrader') return defaults.criterionGrader ?? 'Criterion Grader'
   if (type === 'output') return defaults.output
   if (isOriginalityNodeType(type)) return defaults.originality ?? 'Originality Check'
+  if (isReferenceNodeType(type)) return defaults.reference ?? 'Reference Material'
+  if (isRubricNodeType(type)) return defaults.rubric ?? 'Rubric'
   return type
 }
 

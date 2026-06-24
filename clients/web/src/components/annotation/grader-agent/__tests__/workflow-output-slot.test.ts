@@ -9,6 +9,8 @@ describe('workflow output slot wiring', () => {
     expect(outputSlotSourceIsValid('grader', 'grade', 'grade')).toBe(true)
     expect(outputSlotSourceIsValid('criterionGrader', 'grade', 'grade')).toBe(true)
     expect(outputSlotSourceIsValid('ai', 'output', 'comments')).toBe(false)
+    expect(outputSlotSourceIsValid('scoreAggregator', 'grade', 'grade')).toBe(true)
+    expect(outputSlotSourceIsValid('scoreAggregator', 'comments', 'comments')).toBe(true)
   })
 
   it('allows connecting AI output to Student Grade grade input', () => {

@@ -16,6 +16,7 @@ type PromptVariableContext struct {
 	Submissions     []string
 	ContentMarkdown string
 	Rubric          *assignmentrubric.RubricDefinition
+	ReferenceTexts  map[string]string
 }
 
 func workflowNodeVariableName(label string) string {
@@ -54,6 +55,12 @@ func defaultNodeLabel(nodeType string) string {
 		return "Human Review Gate"
 	case NodeTypeOriginality:
 		return "Originality Check"
+	case NodeTypeReference:
+		return "Reference Material"
+	case NodeTypeRubric:
+		return "Rubric"
+	case NodeTypeScoreAggregator:
+		return "Score Aggregator"
 	case NodeTypeOutput:
 		return "Student grade"
 	default:
@@ -78,6 +85,8 @@ func workflowOutputHandleToProperty(handle string) string {
 		return "Rubric"
 	case HandleAIOutput:
 		return "Output"
+	case HandleReference:
+		return "Text"
 	default:
 		return ""
 	}
@@ -193,6 +202,12 @@ func buildPromptVariableBindings(g *WorkflowGraph, promptNodeID string, ctx Prom
 		for handle := range entry.handles {
 			property := workflowOutputHandleToProperty(handle)
 			if property == "" {
+				continue
+			}
+			if handle == HandleReference {
+				if ctx.ReferenceTexts != nil {
+					props[property] = ctx.ReferenceTexts[entry.node.ID]
+				}
 				continue
 			}
 			props[property] = propertyValue(handle, ctx)
