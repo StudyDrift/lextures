@@ -974,11 +974,54 @@ func (d Deps) handleListGraderAgentTemplates() http.HandlerFunc {
 			templates = append(templates, map[string]any{
 				"id":        row.ID.String(),
 				"name":      row.Name,
+				"isBuiltin": gradingagentsvc.IsDefaultTemplateName(row.Name),
 				"updatedAt": row.UpdatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
 			})
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"templates": templates})
+	}
+}
+
+func (d Deps) handleDeleteGraderAgentTemplate() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		templateID, err := uuid.Parse(chi.URLParam(r, "template_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid template id.")
+			return
+		}
+		cid, found, err := d.courseIDFromCode(r.Context(), courseCode)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+			return
+		}
+		if !found {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		tmpl, err := gradingagentrepo.GetTemplateByCourseAndID(r.Context(), d.Pool, cid, templateID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Template not found.")
+			return
+		}
+		if gradingagentsvc.IsDefaultTemplateName(tmpl.Name) {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Built-in templates cannot be deleted.")
+			return
+		}
+		deleted, err := gradingagentrepo.DeleteTemplate(r.Context(), d.Pool, cid, templateID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete template.")
+			return
+		}
+		if !deleted {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Template not found.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

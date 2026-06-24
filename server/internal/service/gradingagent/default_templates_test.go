@@ -5,6 +5,18 @@ import (
 	"testing"
 )
 
+func TestIsDefaultTemplateName(t *testing.T) {
+	if !IsDefaultTemplateName(DefaultTemplateNameParticipation) {
+		t.Fatal("expected Participation to be a default template")
+	}
+	if !IsDefaultTemplateName(DefaultTemplateNameAIGrader) {
+		t.Fatal("expected AI Grader to be a default template")
+	}
+	if IsDefaultTemplateName("My custom template") {
+		t.Fatal("expected custom name to not be default")
+	}
+}
+
 func TestDefaultTemplates_validate(t *testing.T) {
 	for _, spec := range DefaultTemplates() {
 		if err := ValidateWorkflowGraph(&spec.Graph); err != nil {

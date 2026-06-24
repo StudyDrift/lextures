@@ -39,6 +39,7 @@ func TestGraderAgent_TemplateDisabledReturns404(t *testing.T) {
 		{http.MethodPost, "/api/v1/courses/demo/grader-agent-templates", d.handlePostGraderAgentTemplate()},
 		{http.MethodGet, "/api/v1/courses/demo/grader-agent-templates/00000000-0000-0000-0000-000000000001", d.handleGetGraderAgentTemplate()},
 		{http.MethodPut, "/api/v1/courses/demo/grader-agent-templates/00000000-0000-0000-0000-000000000001", d.handlePutGraderAgentTemplate()},
+		{http.MethodDelete, "/api/v1/courses/demo/grader-agent-templates/00000000-0000-0000-0000-000000000001", d.handleDeleteGraderAgentTemplate()},
 	}
 	for _, tc := range tests {
 		req := httptest.NewRequest(tc.method, tc.path, nil)

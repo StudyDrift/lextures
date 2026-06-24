@@ -120,6 +120,20 @@ RETURNING id, course_id, name, prompt, include_assignment_content, include_rubri
 	return &r, nil
 }
 
+func DeleteTemplate(ctx context.Context, pool *pgxpool.Pool, courseID, templateID uuid.UUID) (bool, error) {
+	if pool == nil {
+		return false, errors.New("nil pool")
+	}
+	ct, err := pool.Exec(ctx, `
+DELETE FROM assessment.grading_agent_templates
+WHERE course_id = $1 AND id = $2
+`, courseID, templateID)
+	if err != nil {
+		return false, err
+	}
+	return ct.RowsAffected() > 0, nil
+}
+
 func CreateTemplate(ctx context.Context, pool *pgxpool.Pool, in CreateTemplateInput) (*TemplateRow, error) {
 	if pool == nil {
 		return nil, errors.New("nil pool")
