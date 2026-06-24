@@ -2,10 +2,6 @@ package gradingagent
 
 import "strings"
 
-func isFlagForReviewNodeType(nodeType string) bool {
-	return nodeType == NodeTypeFlagForReview
-}
-
 func graphHasFlagSink(g *WorkflowGraph) bool {
 	for _, n := range g.Nodes {
 		if n.Type == NodeTypeFlagForReview {

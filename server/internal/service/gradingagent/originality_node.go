@@ -173,18 +173,6 @@ func originalityHasSubmissionInput(g *WorkflowGraph, nodeID string) bool {
 	return false
 }
 
-func originalityOutputSourceIsValid(src WorkflowNode, srcHandle string) bool {
-	if !isOriginalityNodeType(src.Type) {
-		return false
-	}
-	switch srcHandle {
-	case HandleScore, HandleReport, HandleFlag:
-		return true
-	default:
-		return false
-	}
-}
-
 func loadOriginalityRows(ctx context.Context, in DryRunExecutionInput) ([]OriginalityReportRow, error) {
 	if in.LoadOriginalityReports == nil || in.SubmissionID == uuid.Nil {
 		return nil, nil

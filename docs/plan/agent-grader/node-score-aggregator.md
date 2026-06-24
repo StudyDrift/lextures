@@ -1,6 +1,6 @@
 # 19.17.4 — Score Aggregator Node (Combine Multiple Scores)
 
-> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../auto-grader-agent.md)). See the [node catalog](README.md).
+> Implementation plan. Source: [docs/MISSING_FEATURES.md](../../MISSING_FEATURES.md) §19. Extends the grading-agent canvas ([19.17](../../completed/auto-grader-agent.md)). See the [node catalog](README.md).
 
 ## Metadata
 
@@ -120,7 +120,7 @@ None — deterministic arithmetic. Its value to AI quality is indirect: enabling
 ## 13. Dependencies & Sequencing
 
 - **After**: 19.16, 19.17; build with [Criterion Grader](../../completed/agent-grader/node-criterion-grader.md).
-- **Before**: makes [Code Test Runner](../../completed/agent-grader/node-code-test-runner.md) blending and [Originality Check](node-originality-check.md) penalties usable.
+- **Before**: makes [Code Test Runner](../../completed/agent-grader/node-code-test-runner.md) blending and [Originality Check](../../completed/agent-grader/node-originality-check.md) penalties usable.
 - **Shared infra**: none new — but **owns the fan-in relaxation** other nodes rely on.
 
 ## 14. Risks & Mitigations

@@ -1,7 +1,7 @@
 # Grader Agent — Node Catalog & Expansion Plans
 
 > Plans for new nodes on the **grading agent workflow canvas** (plan 19.17), which sits inside the
-> [Auto-Grader Agent](../auto-grader-agent.md) (19.16). Each node is its own plan file and follows
+> [Auto-Grader Agent](../../completed/auto-grader-agent.md) (19.16). Each node is its own plan file and follows
 > [`_TEMPLATE.md`](../_TEMPLATE.md).
 
 ## What exists today

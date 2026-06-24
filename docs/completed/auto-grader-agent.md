@@ -1,6 +1,6 @@
 # 19.16 — Auto-Grader Agent (Instructor-Authored Grading Agent in SpeedGrader)
 
-> Implementation plan. Source: [docs/MISSING_FEATURES.md](../MISSING_FEATURES.md) §19. Extends [19.3 — AI-Assisted Grading](19-ai-capabilities/19.3-ai-assisted-grading.md).
+> Implementation plan. Source: [docs/MISSING_FEATURES.md](../MISSING_FEATURES.md) §19. Extends [19.3 — AI-Assisted Grading](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | AI-Specific Capabilities |
 | **Severity** | MAJOR |
 | **Markets** | K12, HE, SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | L (1–2 mo) |
 | **Owner (proposed)** | AI / Grading team |
 | **Depends on** | 19.3 (AI-assisted grading primitives), 19.11 (PII redaction), 19.10 (model governance), 19.14 (cost controls) |
@@ -22,7 +22,7 @@
 
 Lextures can generate rubrics ([assignmentrubricai](../../server/internal/service/assignmentrubricai/service.go)) and the SpeedGrader workbench ([assignment-annotation-workbench.tsx](../../clients/web/src/components/annotation/assignment-annotation-workbench.tsx)) lets instructors grade one submission at a time, but instructors still author every score and comment by hand. There is no way for an instructor to express *how* they want a submission graded ("award full marks for a working thesis, deduct for missing citations…") and have that judgement applied consistently across a roster. This plan adds an **instructor-authored grading agent**: the instructor writes a natural-language grading prompt, optionally grounds it in the assignment content and rubric, **dry-runs** it against the open submission to tune it, then **accepts** the agent and runs it across the current student, all ungraded submissions, or the whole assignment — with an opt-in toggle to auto-grade new submissions as they arrive.
 
-Where [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) provides a system-default AI grader behind a mandatory approval queue, this feature gives the instructor a *configurable, reusable* agent driven by their own prompt, launched from within SpeedGrader where they already work. The two share the same scoring service, governance gate, and audit flags.
+Where [19.3](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md) provides a system-default AI grader behind a mandatory approval queue, this feature gives the instructor a *configurable, reusable* agent driven by their own prompt, launched from within SpeedGrader where they already work. The two share the same scoring service, governance gate, and audit flags.
 
 ## 2. Goals
 
@@ -34,7 +34,7 @@ Where [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) provides a system-d
 
 ## 3. Non-Goals
 
-- Replacing the [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) approval queue or the [§3.4 moderated grading](../completed/03-submissions-grading-integrity/) reconciliation workflow — this agent participates as one (configurable) grader, not a replacement.
+- Replacing the [19.3](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md) approval queue or the [§3.4 moderated grading](03-submissions-grading-integrity/) reconciliation workflow — this agent participates as one (configurable) grader, not a replacement.
 - Grading code-execution submissions (§2.4) or handwritten/scanned work (§19.7) — text and extractable file submissions only in v1.
 - Cross-assignment or cross-course agents — an agent config is scoped to a single assignment in v1 (reuse/import is a fast-follow, see §18).
 - Fully autonomous *posting* of grades to students with no human gate by default — auto-grade writes provisional grades; auto-posting is a separately gated org policy (§6 Privacy, §15).
@@ -74,7 +74,7 @@ Where [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) provides a system-d
 - **Scalability** — Batch and auto-grade jobs run on the shared queue, partitioned per course; a single `all` run on a 1 000-student roster MUST not starve other tenants (per-course concurrency cap).
 - **Reliability** — Per-submission failures are isolated: a failed item is marked `failed` and skipped, the run continues, and the instructor is notified with a retry option. Live runs are idempotent per `(run_id, submission_id)`.
 - **Observability** — Metrics `grader_agent_dryruns_total`, `grader_agent_runs_total{scope,status}`, `grader_agent_items_total{status}`, `grader_agent_latency_ms`, `grader_agent_override_rate`, `grader_agent_autograde_enabled_assignments`; per-call tokens/cost in `ai_usage_log`.
-- **Maintainability** — New backend service `server/internal/service/gradingagent/`; HTTP handlers in `server/internal/httpserver/grading_agent_http.go`; background consumer in `server/internal/background/grading_agent_consumer.go`. Scoring core shared with [19.3 aigrading](19-ai-capabilities/19.3-ai-assisted-grading.md).
+- **Maintainability** — New backend service `server/internal/service/gradingagent/`; HTTP handlers in `server/internal/httpserver/grading_agent_http.go`; background consumer in `server/internal/background/grading_agent_consumer.go`. Scoring core shared with [19.3 aigrading](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md).
 - **Internationalization** — Agent comments generated in the instructor's configured language; all UI strings externalised.
 - **Backward compatibility** — Manual SpeedGrader grading unchanged; the agent is strictly additive and opt-in per assignment.
 
@@ -92,10 +92,10 @@ Where [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) provides a system-d
 
 ## 8. Data Model
 
-Migration `server/migrations/287_grading_agent.sql` (next free number after `286_canvas_grade_sync_enabled.sql`). Schema-qualified per repo convention.
+Shipped as migration `server/migrations/290_grading_agent.sql` (the planning-time number `287` was superseded), with follow-on migrations `291_grader_agent_model.sql`, `311_grading_agent_workflow.sql`, `312_grading_agent_templates.sql`, `314_grading_agent_flagged.sql`, and `315_grading_agent_held.sql`. Schema-qualified per repo convention. The block below is the original planning schema; consult the migrations for the as-built tables.
 
 ```sql
--- 287_grading_agent.sql
+-- 290_grading_agent.sql (planning schema; see migration for as-built)
 CREATE TYPE assessment.grading_agent_status AS ENUM ('draft', 'accepted', 'archived');
 CREATE TYPE assessment.grading_agent_run_scope AS ENUM ('current', 'ungraded', 'all', 'auto');
 CREATE TYPE assessment.grading_agent_item_status AS ENUM ('suggested', 'applied', 'skipped', 'failed', 'overridden');
@@ -160,7 +160,7 @@ CREATE INDEX idx_grading_agent_results_config ON assessment.grading_agent_result
 ```
 
 - **Backfill**: none — all new tables.
-- **`graded_by_ai`**: reuse / add the same audit flag the [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) plan introduces on the grade row so the gradebook can distinguish AI-assisted grades regardless of which feature produced them.
+- **`graded_by_ai`**: reuse / add the same audit flag the [19.3](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md) plan introduces on the grade row so the gradebook can distinguish AI-assisted grades regardless of which feature produced them.
 
 ## 9. API Surface
 
@@ -231,7 +231,7 @@ GET    /api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs/{ru
 - **Submission listing** — `fetchModuleAssignmentSubmissions(courseCode, itemId, { graded })` ([courses-api.ts](../../clients/web/src/lib/courses-api.ts)) to enumerate `ungraded` / `all` scopes.
 - **Background queue** — new consumer in `server/internal/background/` following the canvas-submission-sync consumer pattern; auto-grade hooks the new-submission event.
 - **Feature flag** — platform module flag via [platformconfig/features.go](../../server/internal/repos/platformconfig/features.go) (same mechanism as the GDPR module flag).
-- **Cross-plan** — [19.3](19-ai-capabilities/19.3-ai-assisted-grading.md) (shared scoring + `graded_by_ai`), §3.4 moderated grading, §19.11 PII, §19.10 governance, §19.13 eval, §19.14 cost.
+- **Cross-plan** — [19.3](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md) (shared scoring + `graded_by_ai`), §3.4 moderated grading, §19.11 PII, §19.10 governance, §19.13 eval, §19.14 cost.
 
 ## 13. Dependencies & Sequencing
 
@@ -255,7 +255,7 @@ GET    /api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs/{ru
 ## 15. Rollout Plan
 
 - **Feature flag**: `grader_agent_enabled` (platform module flag, default `false`); auto-post sub-policy `grader_agent_auto_post_allowed` (default `false`, org admin opt-in).
-- **Sequencing**: migration `287` → backend service + handlers (behind flag) → background consumer → SpeedGrader UI → flip flag for pilot.
+- **Sequencing**: migration `290` → backend service + handlers (behind flag) → background consumer → SpeedGrader UI → flip flag for pilot.
 - **Phase 1**: HE instructors only, dry-run + `current`/`ungraded` scopes, no auto-grade; eval-harness baseline.
 - **Phase 2**: enable `all` scope and **auto-grade (unposted)**; K-12 pilot with updated AI-consent notices.
 - **Phase 3**: GA after override-rate, injection-suite, and bias-audit thresholds met; auto-post remains org-opt-in.
@@ -295,4 +295,4 @@ GET    /api/v1/courses/{course_code}/assignments/{item_id}/grader-agent/runs/{ru
 - Existing files: [aigateway/service.go](../../server/internal/service/aigateway/service.go), [openrouter/openrouter.go](../../server/internal/service/openrouter/openrouter.go), [assignmentrubricai/service.go](../../server/internal/service/assignmentrubricai/service.go), [assignment_submission_grade_http.go](../../server/internal/httpserver/assignment_submission_grade_http.go), [submission-grading-panel.tsx](../../clients/web/src/components/annotation/submission-grading-panel.tsx), [assignment-annotation-workbench.tsx](../../clients/web/src/components/annotation/assignment-annotation-workbench.tsx), [courses-api.ts](../../clients/web/src/lib/courses-api.ts), [aiusage/aiusage.go](../../server/internal/repos/aiusage/aiusage.go), [platformconfig/features.go](../../server/internal/repos/platformconfig/features.go), [migration 281_ai_usage_logs.sql](../../server/migrations/281_ai_usage_logs.sql).
 - GDPR Article 22 — automated decision-making and meaningful human oversight.
 - OWASP LLM Top 10 — LLM01 Prompt Injection.
-- Related plans: [19.3 — AI-Assisted Grading](19-ai-capabilities/19.3-ai-assisted-grading.md), [19.4 — Misconception Detection](19-ai-capabilities/19.4-ai-misconception-detection.md), [19.10 — Model Governance](19-ai-capabilities/19.10-model-governance.md), [19.11 — PII Redaction Proxy](19-ai-capabilities/19.11-pii-redaction-proxy.md), [19.13 — Eval Harness](19-ai-capabilities/19.13-eval-harness.md), [19.14 — Cost & Usage Controls](19-ai-capabilities/19.14-cost-usage-controls.md).
+- Related plans: [19.3 — AI-Assisted Grading](../plan/19-ai-capabilities/19.3-ai-assisted-grading.md), [19.4 — Misconception Detection](../plan/19-ai-capabilities/19.4-ai-misconception-detection.md), [19.10 — Model Governance](../plan/19-ai-capabilities/19.10-model-governance.md), [19.11 — PII Redaction Proxy](../plan/19-ai-capabilities/19.11-pii-redaction-proxy.md), [19.13 — Eval Harness](../plan/19-ai-capabilities/19.13-eval-harness.md), [19.14 — Cost & Usage Controls](../plan/19-ai-capabilities/19.14-cost-usage-controls.md).

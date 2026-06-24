@@ -6,15 +6,6 @@ func isHumanReviewGateNodeType(nodeType string) bool {
 	return nodeType == NodeTypeHumanReviewGate
 }
 
-func graphHasReviewGate(g *WorkflowGraph) bool {
-	for _, n := range g.Nodes {
-		if n.Type == NodeTypeHumanReviewGate {
-			return true
-		}
-	}
-	return false
-}
-
 func gateInputSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool {
 	if flagSinkInputSourceIsValid(src, srcHandle, tgtHandle) {
 		return true
