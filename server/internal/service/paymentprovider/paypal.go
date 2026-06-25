@@ -82,7 +82,7 @@ func (p *PayPalProvider) CreateCheckoutSession(ctx context.Context, req Checkout
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("paymentprovider: paypal create order: %s", strings.TrimSpace(string(respBody)))
@@ -149,7 +149,7 @@ func (p *PayPalProvider) IssueRefund(ctx context.Context, providerTxnID string, 
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("paymentprovider: paypal refund: %s", strings.TrimSpace(string(respBody)))
@@ -186,7 +186,7 @@ func (p *PayPalProvider) GetTransaction(ctx context.Context, providerTxnID strin
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("paymentprovider: paypal get order: %s", strings.TrimSpace(string(respBody)))
@@ -283,7 +283,7 @@ func (p *PayPalProvider) verifyWebhookSignature(ctx context.Context, body []byte
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	respBody, _ := io.ReadAll(resp.Body)
 	var parsed struct {
 		VerificationStatus string `json:"verification_status"`
@@ -312,7 +312,7 @@ func (p *PayPalProvider) ensureAccessToken(ctx context.Context) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		return "", fmt.Errorf("paymentprovider: paypal oauth: %s", strings.TrimSpace(string(respBody)))
