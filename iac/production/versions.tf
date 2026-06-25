@@ -15,5 +15,9 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.80"
     }
+    statuspage = {
+      source  = "winebarrel/statuspage"
+      version = "~> 1.0"
+    }
   }
 }

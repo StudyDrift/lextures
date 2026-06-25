@@ -16,3 +16,7 @@ eks_node_instance_types = ["t3.large"]
 tags = {
   Owner = "platform"
 }
+
+# Statuspage.io (plan 17.13). Leave page_id empty until the page is created and imported.
+# statuspage_page_id = ""
+# statuspage_api_key = ""  # set via TF_VAR_statuspage_api_key or secrets manager
