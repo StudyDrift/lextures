@@ -23,7 +23,7 @@ func TestEvaluateHoldDecision_belowConfidence(t *testing.T) {
 }
 
 func TestEvaluateAgentConfidenceFloorHold(t *testing.T) {
-	var floor float64 = 0.8
+	floor := 0.8
 	wouldHold, reason := EvaluateAgentConfidenceFloorHold(&floor, 0.62)
 	if !wouldHold || reason != "Confidence 0.62 < floor 0.80" {
 		t.Fatalf("below floor: wouldHold=%v reason=%q", wouldHold, reason)

@@ -25,7 +25,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 func (d Deps) graderAgentEnabled() bool {
@@ -1267,11 +1266,3 @@ WHERE c.course_code = $1 AND ce.status = 'active'
 	}
 }
 
-func openrouterUsageFromScore(result gradingagentsvc.ScoreResult) openrouter.UsageInfo {
-	return openrouter.UsageInfo{
-		PromptTokens:     result.PromptTokens,
-		CompletionTokens: result.CompletionTokens,
-		TotalTokens:      result.PromptTokens + result.CompletionTokens,
-		CostUSD:          result.CostUSD,
-	}
-}
