@@ -1,4 +1,23 @@
-import { useRef, type DragEvent, type KeyboardEvent, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type DragEvent, type KeyboardEvent, type ReactNode } from 'react'
+import {
+  BookOpen,
+  ClipboardList,
+  Code2,
+  FileText,
+  Flag,
+  GitBranch,
+  GraduationCap,
+  GripVertical,
+  ListChecks,
+  Lock,
+  Search,
+  ShieldCheck,
+  Sigma,
+  Sparkles,
+  Target,
+  UserCheck,
+  type LucideIcon,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { beginPaletteDrag } from './palette-drag'
 import type { PaletteNodeType } from './types'
@@ -11,53 +30,139 @@ type NodePaletteProps = {
   onAddNode: (type: PaletteNodeType) => void
 }
 
-function paletteItemClass(kind: PaletteNodeType): string {
-  if (kind === 'studentSubmission' || kind === 'reference') {
-    return 'border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-200 dark:hover:bg-neutral-800'
-  }
-  if (kind === 'ai' || kind === 'criterionGrader') {
-    return 'border-indigo-200 text-indigo-900 hover:bg-indigo-50 dark:border-indigo-900 dark:text-indigo-200 dark:hover:bg-indigo-950/40'
-  }
-  if (kind === 'codeTestRunner') {
-    return 'border-cyan-200 text-cyan-900 hover:bg-cyan-50 dark:border-cyan-900 dark:text-cyan-200 dark:hover:bg-cyan-950/40'
-  }
-  if (kind === 'conditionalRouter') {
-    return 'border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800'
-  }
-  if (kind === 'flagForReview') {
-    return 'border-rose-200 text-rose-900 hover:bg-rose-50 dark:border-rose-900 dark:text-rose-200 dark:hover:bg-rose-950/40'
-  }
-  if (kind === 'humanReviewGate') {
-    return 'border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800'
-  }
-  if (kind === 'originality') {
-    return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
-  }
-  if (kind === 'scoreAggregator') {
-    return 'border-emerald-200 text-emerald-900 hover:bg-emerald-50 dark:border-emerald-900 dark:text-emerald-200 dark:hover:bg-emerald-950/40'
-  }
-  return 'border-amber-200 text-amber-900 hover:bg-amber-50 dark:border-amber-900 dark:text-amber-200 dark:hover:bg-amber-950/40'
+type PaletteItemConfig = {
+  type: PaletteNodeType
+  labelKey: string
+  descriptionKey: string
+  icon: LucideIcon
+  iconClass: string
+}
+
+const PALETTE_SURFACE_CLASS =
+  'rounded-xl bg-white shadow-sm ring-1 ring-black/[0.05] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08),0_1px_2px_-1px_rgba(0,0,0,0.08),0_2px_4px_0_rgba(0,0,0,0.04)] motion-safe:transition-[box-shadow,transform] motion-safe:active:scale-[0.98] dark:bg-neutral-900 dark:ring-white/10 dark:hover:ring-white/[0.13]'
+
+const INPUT_ITEMS: PaletteItemConfig[] = [
+  {
+    type: 'studentSubmission',
+    labelKey: 'gradingAgent.canvas.palette.studentSubmission',
+    descriptionKey: 'gradingAgent.canvas.palette.description.studentSubmission',
+    icon: FileText,
+    iconClass: 'bg-slate-500/10 text-slate-600 dark:bg-neutral-500/15 dark:text-neutral-300',
+  },
+  {
+    type: 'activity',
+    labelKey: 'gradingAgent.canvas.palette.activity',
+    descriptionKey: 'gradingAgent.canvas.palette.description.activity',
+    icon: ClipboardList,
+    iconClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  },
+  {
+    type: 'reference',
+    labelKey: 'gradingAgent.canvas.palette.reference',
+    descriptionKey: 'gradingAgent.canvas.palette.description.reference',
+    icon: BookOpen,
+    iconClass: 'bg-violet-500/10 text-violet-700 dark:text-violet-300',
+  },
+  {
+    type: 'rubric',
+    labelKey: 'gradingAgent.canvas.palette.rubric',
+    descriptionKey: 'gradingAgent.canvas.palette.description.rubric',
+    icon: ListChecks,
+    iconClass: 'bg-orange-500/10 text-orange-700 dark:text-orange-300',
+  },
+]
+
+const PROCESSING_ITEMS: PaletteItemConfig[] = [
+  {
+    type: 'ai',
+    labelKey: 'gradingAgent.canvas.palette.ai',
+    descriptionKey: 'gradingAgent.canvas.palette.description.ai',
+    icon: Sparkles,
+    iconClass: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+  },
+  {
+    type: 'criterionGrader',
+    labelKey: 'gradingAgent.canvas.palette.criterionGrader',
+    descriptionKey: 'gradingAgent.canvas.palette.description.criterionGrader',
+    icon: Target,
+    iconClass: 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300',
+  },
+  {
+    type: 'codeTestRunner',
+    labelKey: 'gradingAgent.canvas.palette.codeTests',
+    descriptionKey: 'gradingAgent.canvas.palette.description.codeTests',
+    icon: Code2,
+    iconClass: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-300',
+  },
+  {
+    type: 'conditionalRouter',
+    labelKey: 'gradingAgent.canvas.palette.router',
+    descriptionKey: 'gradingAgent.canvas.palette.description.router',
+    icon: GitBranch,
+    iconClass: 'bg-slate-500/10 text-slate-600 dark:text-neutral-300',
+  },
+  {
+    type: 'scoreAggregator',
+    labelKey: 'gradingAgent.canvas.palette.aggregator',
+    descriptionKey: 'gradingAgent.canvas.palette.description.aggregator',
+    icon: Sigma,
+    iconClass: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300',
+  },
+  {
+    type: 'humanReviewGate',
+    labelKey: 'gradingAgent.canvas.palette.reviewGate',
+    descriptionKey: 'gradingAgent.canvas.palette.description.reviewGate',
+    icon: UserCheck,
+    iconClass: 'bg-slate-500/10 text-slate-600 dark:text-neutral-300',
+  },
+  {
+    type: 'originality',
+    labelKey: 'gradingAgent.canvas.palette.originality',
+    descriptionKey: 'gradingAgent.canvas.palette.description.originality',
+    icon: ShieldCheck,
+    iconClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  },
+]
+
+const OUTPUT_ITEMS: PaletteItemConfig[] = [
+  {
+    type: 'flagForReview',
+    labelKey: 'gradingAgent.canvas.palette.flagForReview',
+    descriptionKey: 'gradingAgent.canvas.palette.description.flagForReview',
+    icon: Flag,
+    iconClass: 'bg-rose-500/10 text-rose-700 dark:text-rose-300',
+  },
+]
+
+function normalizeSearch(value: string): string {
+  return value.trim().toLowerCase()
 }
 
 function PaletteGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="space-y-2">
-      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
+    <section className="space-y-1.5">
+      <h3 className="px-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-neutral-500">
         {title}
-      </p>
-      <div className="flex flex-col gap-2">{children}</div>
-    </div>
+      </h3>
+      <div className="flex flex-col gap-1.5">{children}</div>
+    </section>
   )
 }
 
 function PaletteItem({
   type,
   label,
+  description,
+  icon: Icon,
+  iconClass,
   disabled,
   onAddNode,
 }: {
   type: PaletteNodeType
   label: string
+  description: string
+  icon: LucideIcon
+  iconClass: string
   disabled?: boolean
   onAddNode: (type: PaletteNodeType) => void
 }) {
@@ -86,6 +191,7 @@ function PaletteItem({
       tabIndex={disabled ? -1 : 0}
       draggable={!disabled}
       aria-disabled={disabled}
+      aria-label={label}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={() => {
@@ -99,116 +205,277 @@ function PaletteItem({
           onAddNode(type)
         }
       }}
-      className={`cursor-grab rounded-lg border px-3 py-2 text-start text-sm font-medium active:cursor-grabbing aria-disabled:cursor-not-allowed aria-disabled:opacity-50 ${paletteItemClass(type)}`}
+      className={`group relative flex min-h-10 cursor-grab items-start gap-2.5 px-2.5 py-2.5 active:cursor-grabbing aria-disabled:cursor-not-allowed aria-disabled:opacity-50 ${PALETTE_SURFACE_CLASS}`}
     >
-      {label}
+      <span
+        className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+        aria-hidden
+      >
+        <Icon className="size-4" strokeWidth={2} />
+      </span>
+      <span className="min-w-0 flex-1 pt-0.5">
+        <span className="text-pretty text-sm font-medium leading-snug text-slate-800 dark:text-neutral-100">
+          {label}
+        </span>
+        <span className="mt-0.5 block text-pretty text-xs leading-snug text-slate-500 dark:text-neutral-400">
+          {description}
+        </span>
+      </span>
+      <GripVertical
+        className="mt-1 size-4 shrink-0 text-slate-300 opacity-0 motion-safe:transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100 dark:text-neutral-600"
+        aria-hidden
+      />
     </div>
   )
 }
 
+function PaletteFixedItem({
+  label,
+  description,
+  badge,
+  icon: Icon,
+  iconClass,
+}: {
+  label: string
+  description: string
+  badge: string
+  icon: LucideIcon
+  iconClass: string
+}) {
+  return (
+    <div
+      className="flex min-h-10 items-start gap-2.5 rounded-xl bg-slate-50 px-2.5 py-2.5 ring-1 ring-black/[0.04] dark:bg-neutral-900/60 dark:ring-white/[0.06]"
+      title={description}
+    >
+      <span
+        className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+        aria-hidden
+      >
+        <Icon className="size-4" strokeWidth={2} />
+      </span>
+      <span className="min-w-0 flex-1 pt-0.5">
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span className="text-pretty text-sm font-medium leading-snug text-slate-700 dark:text-neutral-200">
+            {label}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600 dark:bg-neutral-800 dark:text-neutral-400">
+            <Lock className="size-2.5" aria-hidden />
+            {badge}
+          </span>
+        </span>
+        <span className="mt-0.5 block text-pretty text-xs leading-snug text-slate-500 dark:text-neutral-400">
+          {description}
+        </span>
+      </span>
+    </div>
+  )
+}
+
+function PaletteUnavailableItem({
+  label,
+  description,
+  badge,
+  tooltip,
+  icon: Icon,
+  iconClass,
+}: {
+  label: string
+  description: string
+  badge: string
+  tooltip: string
+  icon: LucideIcon
+  iconClass: string
+}) {
+  return (
+    <div
+      className="flex min-h-10 items-start gap-2.5 rounded-xl bg-slate-50/80 px-2.5 py-2.5 opacity-70 ring-1 ring-black/[0.04] dark:bg-neutral-900/40 dark:ring-white/[0.06]"
+      title={tooltip}
+    >
+      <span
+        className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+        aria-hidden
+      >
+        <Icon className="size-4" strokeWidth={2} />
+      </span>
+      <span className="min-w-0 flex-1 pt-0.5">
+        <span className="flex flex-wrap items-center gap-1.5">
+          <span className="text-pretty text-sm font-medium leading-snug text-slate-600 dark:text-neutral-400">
+            {label}
+          </span>
+          <span className="rounded-full bg-slate-200/80 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-neutral-800 dark:text-neutral-500">
+            {badge}
+          </span>
+        </span>
+        <span className="mt-0.5 block text-pretty text-xs leading-snug text-slate-500 dark:text-neutral-500">
+          {description}
+        </span>
+      </span>
+    </div>
+  )
+}
+
+function itemMatchesQuery(
+  label: string,
+  description: string,
+  query: string,
+): boolean {
+  if (!query) return true
+  const haystack = `${label} ${description}`.toLowerCase()
+  return haystack.includes(query)
+}
+
 export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode }: NodePaletteProps) {
   const { t } = useTranslation('common')
+  const [query, setQuery] = useState('')
+  const normalizedQuery = normalizeSearch(query)
+
+  const filterItems = (items: PaletteItemConfig[]) =>
+    items.filter((item) =>
+      itemMatchesQuery(t(item.labelKey), t(item.descriptionKey), normalizedQuery),
+    )
+
+  const inputItems = useMemo(() => filterItems(INPUT_ITEMS), [normalizedQuery, t])
+  const processingItems = useMemo(
+    () =>
+      filterItems(PROCESSING_ITEMS).filter(
+        (item) => item.type !== 'codeTestRunner' || codeExecutionEnabled,
+      ),
+    [codeExecutionEnabled, normalizedQuery, t],
+  )
+
+  const outputItems = useMemo(() => filterItems(OUTPUT_ITEMS), [normalizedQuery, t])
+
+  const showStudentGrade =
+    !normalizedQuery ||
+    itemMatchesQuery(
+      t('gradingAgent.canvas.palette.studentGrade'),
+      t('gradingAgent.canvas.palette.description.studentGrade'),
+      normalizedQuery,
+    )
+
+  const showCodeTestsUnavailable =
+    !codeExecutionEnabled &&
+    itemMatchesQuery(
+      t('gradingAgent.canvas.palette.codeTests'),
+      t('gradingAgent.canvas.palette.description.codeTests'),
+      normalizedQuery,
+    )
+
+  const hasVisibleItems =
+    inputItems.length > 0 ||
+    processingItems.length > 0 ||
+    outputItems.length > 0 ||
+    showStudentGrade ||
+    showCodeTestsUnavailable
 
   return (
-    <>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-        {t('gradingAgent.canvas.palette.title')}
-      </p>
-      <div className={`flex flex-col gap-4${disabled ? ' pointer-events-none opacity-50' : ''}`}>
-        <PaletteGroup title={t('gradingAgent.canvas.palette.groupInput')}>
-          <PaletteItem
-            type="studentSubmission"
-            label={t('gradingAgent.canvas.palette.studentSubmission')}
-            disabled={disabled}
-            onAddNode={onAddNode}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="shrink-0 space-y-2 pb-3">
+        <div>
+          <h2 className="text-balance text-sm font-semibold text-slate-900 dark:text-neutral-50">
+            {t('gradingAgent.canvas.palette.title')}
+          </h2>
+          <p className="mt-1 text-pretty text-xs leading-relaxed text-slate-500 dark:text-neutral-400">
+            {t('gradingAgent.canvas.palette.hint')}
+          </p>
+        </div>
+        <label className="relative block">
+          <span className="sr-only">{t('gradingAgent.canvas.palette.searchLabel')}</span>
+          <Search
+            className="pointer-events-none absolute start-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400 dark:text-neutral-500"
+            aria-hidden
           />
-          <PaletteItem
-            type="activity"
-            label={t('gradingAgent.canvas.palette.activity')}
-            disabled={disabled}
-            onAddNode={onAddNode}
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t('gradingAgent.canvas.palette.searchPlaceholder')}
+            className="w-full rounded-lg bg-slate-50 py-2 ps-8 pe-3 text-sm text-slate-900 shadow-sm ring-1 ring-black/[0.05] outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500/30 dark:bg-neutral-900 dark:text-neutral-100 dark:ring-white/10 dark:placeholder:text-neutral-500 dark:focus:ring-indigo-400/25"
           />
-          <PaletteItem
-            type="reference"
-            label={t('gradingAgent.canvas.palette.reference')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-          <PaletteItem
-            type="rubric"
-            label={t('gradingAgent.canvas.palette.rubric')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-        </PaletteGroup>
-        <PaletteGroup title={t('gradingAgent.canvas.palette.groupProcessing')}>
-          <PaletteItem
-            type="ai"
-            label={t('gradingAgent.canvas.palette.ai')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-          <PaletteItem
-            type="criterionGrader"
-            label={t('gradingAgent.canvas.palette.criterionGrader')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-          {codeExecutionEnabled ? (
-            <PaletteItem
-              type="codeTestRunner"
-              label={t('gradingAgent.canvas.palette.codeTests')}
-              disabled={disabled}
-              onAddNode={onAddNode}
-            />
-          ) : (
-            <div
-              className="rounded-lg border border-dashed border-slate-200 px-3 py-2 text-sm text-slate-400 dark:border-neutral-700 dark:text-neutral-500"
-              title={t('gradingAgent.canvas.palette.codeTestsDisabledTooltip')}
-            >
-              {t('gradingAgent.canvas.palette.codeTests')}
-            </div>
-          )}
-          <PaletteItem
-            type="conditionalRouter"
-            label={t('gradingAgent.canvas.palette.router')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-          <PaletteItem
-            type="scoreAggregator"
-            label={t('gradingAgent.canvas.palette.aggregator')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-          <PaletteItem
-            type="humanReviewGate"
-            label={t('gradingAgent.canvas.palette.reviewGate')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-          <PaletteItem
-            type="originality"
-            label={t('gradingAgent.canvas.palette.originality')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-        </PaletteGroup>
-        <PaletteGroup title={t('gradingAgent.canvas.palette.groupOutput')}>
-          <div
-            className="rounded-lg border border-dashed border-emerald-200 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:text-emerald-200"
-            title={t('gradingAgent.canvas.palette.studentGradeFixedTooltip')}
-          >
-            {t('gradingAgent.canvas.palette.studentGrade')}
-          </div>
-          <PaletteItem
-            type="flagForReview"
-            label={t('gradingAgent.canvas.palette.flagForReview')}
-            disabled={disabled}
-            onAddNode={onAddNode}
-          />
-        </PaletteGroup>
+        </label>
       </div>
-    </>
+
+      <div
+        className={`min-h-0 flex-1 overflow-y-auto overscroll-contain pe-0.5${disabled ? ' pointer-events-none opacity-50' : ''}`}
+      >
+        {hasVisibleItems ? (
+          <div className="flex flex-col gap-4 pb-1">
+            {inputItems.length > 0 ? (
+              <PaletteGroup title={t('gradingAgent.canvas.palette.groupInput')}>
+                {inputItems.map((item) => (
+                  <PaletteItem
+                    key={item.type}
+                    type={item.type}
+                    label={t(item.labelKey)}
+                    description={t(item.descriptionKey)}
+                    icon={item.icon}
+                    iconClass={item.iconClass}
+                    disabled={disabled}
+                    onAddNode={onAddNode}
+                  />
+                ))}
+              </PaletteGroup>
+            ) : null}
+
+            {processingItems.length > 0 || showCodeTestsUnavailable ? (
+              <PaletteGroup title={t('gradingAgent.canvas.palette.groupProcessing')}>
+                {processingItems.map((item) => (
+                  <PaletteItem
+                    key={item.type}
+                    type={item.type}
+                    label={t(item.labelKey)}
+                    description={t(item.descriptionKey)}
+                    icon={item.icon}
+                    iconClass={item.iconClass}
+                    disabled={disabled}
+                    onAddNode={onAddNode}
+                  />
+                ))}
+                {showCodeTestsUnavailable ? (
+                  <PaletteUnavailableItem
+                    label={t('gradingAgent.canvas.palette.codeTests')}
+                    description={t('gradingAgent.canvas.palette.description.codeTests')}
+                    badge={t('gradingAgent.canvas.palette.unavailable')}
+                    tooltip={t('gradingAgent.canvas.palette.codeTestsDisabledTooltip')}
+                    icon={Code2}
+                    iconClass="bg-cyan-500/10 text-cyan-600 dark:text-cyan-400"
+                  />
+                ) : null}
+              </PaletteGroup>
+            ) : null}
+
+            {outputItems.length > 0 || showStudentGrade ? (
+              <PaletteGroup title={t('gradingAgent.canvas.palette.groupOutput')}>
+                {showStudentGrade ? (
+                  <PaletteFixedItem
+                    label={t('gradingAgent.canvas.palette.studentGrade')}
+                    description={t('gradingAgent.canvas.palette.description.studentGrade')}
+                    badge={t('gradingAgent.canvas.palette.onCanvas')}
+                    icon={GraduationCap}
+                    iconClass="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                  />
+                ) : null}
+                {outputItems.map((item) => (
+                  <PaletteItem
+                    key={item.type}
+                    type={item.type}
+                    label={t(item.labelKey)}
+                    description={t(item.descriptionKey)}
+                    icon={item.icon}
+                    iconClass={item.iconClass}
+                    disabled={disabled}
+                    onAddNode={onAddNode}
+                  />
+                ))}
+              </PaletteGroup>
+            ) : null}
+          </div>
+        ) : (
+          <p className="px-0.5 py-6 text-center text-pretty text-sm text-slate-500 dark:text-neutral-400">
+            {t('gradingAgent.canvas.palette.searchEmpty')}
+          </p>
+        )}
+      </div>
+    </div>
   )
 }

@@ -384,7 +384,7 @@ export function GraderAgentWorkflowModal({
         ) : null}
 
         <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-          <aside className="w-full shrink-0 border-b border-slate-200 p-3 lg:w-48 lg:border-b-0 lg:border-e dark:border-neutral-700">
+          <aside className="flex min-h-0 w-full shrink-0 flex-col border-b border-slate-200 px-3 py-3 lg:w-60 lg:border-b-0 lg:border-e lg:px-3.5 dark:border-neutral-700">
             <NodePalette codeExecutionEnabled={codeExecutionEnabled} onAddNode={addPaletteNode} />
           </aside>
           <main className="min-h-0 flex-1 p-3">
