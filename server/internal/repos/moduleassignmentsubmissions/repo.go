@@ -158,7 +158,7 @@ func ListForAssignment(ctx context.Context, pool *pgxpool.Pool, courseID, module
 		gradedClause = "AND g.student_user_id IS NULL"
 	}
 	rows, err := pool.Query(ctx, `
-SELECT s.id, s.course_id, s.module_item_id, s.submitted_by, s.attachment_file_id, s.submitted_at, s.updated_at,
+SELECT s.id, s.course_id, s.module_item_id, s.submitted_by, s.attachment_file_id, s.body_text, s.submitted_at, s.updated_at,
        s.resubmission_requested, s.revision_due_at, s.revision_feedback, s.version_number
 FROM course.module_assignment_submissions s
 LEFT JOIN course.course_grades g ON g.module_item_id = s.module_item_id AND g.student_user_id = s.submitted_by
