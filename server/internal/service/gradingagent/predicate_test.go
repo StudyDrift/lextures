@@ -129,21 +129,21 @@ func sampleGraphWithRouterEmptyShortCircuit() WorkflowGraph {
 	}
 }
 
-func TestExecuteWorkflowDryRun_routerSkipsAIBranchOnEmpty(t *testing.T) {
+func TestExecuteWorkflow_routerSkipsAIBranchOnEmpty(t *testing.T) {
 	g := sampleGraphWithRouterEmptyShortCircuit()
 	if err := ValidateWorkflowGraph(&g); err != nil {
 		t.Fatalf("graph should validate: %v", err)
 	}
 	var aiComplete string
 	var skipped []string
-	preview, err := ExecuteWorkflowDryRun(t.Context(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(t.Context(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{""},
 		MaxPoints:   10,
 		ModelID:     "test/model",
 		Runner:      stubDryRunRunner{},
 		CodeRunner:  nil,
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			if ev.Type == "node_complete" && ev.NodeID == "ai1" {
 				aiComplete = ev.Status
 			}

@@ -27,7 +27,7 @@ func TestDefaultTemplates_validate(t *testing.T) {
 
 func TestParticipationWorkflowGraph_emptySubmissionScoresZero(t *testing.T) {
 	g := ParticipationWorkflowGraph()
-	preview, err := ExecuteWorkflowDryRun(t.Context(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(t.Context(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{""},
 		MaxPoints:   10,
@@ -42,7 +42,7 @@ func TestParticipationWorkflowGraph_emptySubmissionScoresZero(t *testing.T) {
 
 func TestParticipationWorkflowGraph_nonEmptySubmissionScoresMax(t *testing.T) {
 	g := ParticipationWorkflowGraph()
-	preview, err := ExecuteWorkflowDryRun(t.Context(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(t.Context(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{"I completed the reading."},
 		MaxPoints:   10,

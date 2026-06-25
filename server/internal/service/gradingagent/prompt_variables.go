@@ -35,9 +35,9 @@ func workflowNodeLabel(data map[string]any) string {
 
 func defaultNodeLabel(nodeType string) string {
 	switch nodeType {
-	case NodeTypeStudentSubmission, NodeTypeSubmission:
+	case NodeTypeStudentSubmission:
 		return "Student Submission"
-	case NodeTypeActivity, NodeTypeAssignmentCtx:
+	case NodeTypeActivity:
 		return "Activity"
 	case NodeTypeAI:
 		return "AI"

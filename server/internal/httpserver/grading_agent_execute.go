@@ -93,7 +93,7 @@ func (d Deps) executeGradingAgentWorkflowPreview(
 		}
 	}
 
-	preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(ctx, gradingagentsvc.DryRunExecutionInput{
+	preview, execErr := gradingagentsvc.ExecuteWorkflow(ctx, gradingagentsvc.ExecutionInput{
 		Graph:           in.WorkflowGraph,
 		Submissions:     in.Submissions,
 		InputModality:   in.ContentModality,

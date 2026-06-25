@@ -86,11 +86,11 @@ type CompiledWorkflow struct {
 }
 
 func isActivityNodeType(nodeType string) bool {
-	return nodeType == NodeTypeActivity || nodeType == NodeTypeAssignmentCtx
+	return nodeType == NodeTypeActivity
 }
 
 func isStudentSubmissionNodeType(nodeType string) bool {
-	return nodeType == NodeTypeStudentSubmission || nodeType == NodeTypeSubmission
+	return nodeType == NodeTypeStudentSubmission
 }
 
 func isAINodeType(nodeType string) bool {
@@ -174,7 +174,8 @@ func UnmarshalWorkflowGraph(raw json.RawMessage) (*WorkflowGraph, error) {
 	if err := json.Unmarshal(raw, &g); err != nil {
 		return nil, ValidationError{Field: "workflowGraph", Message: "Invalid workflow graph JSON."}
 	}
-	return &g, nil
+	normalized, _ := NormalizeWorkflowGraph(&g)
+	return &normalized, nil
 }
 
 // ParseWorkflowGraph unmarshals and validates raw JSON into a WorkflowGraph.
@@ -226,7 +227,7 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		}
 		nodeByID[n.ID] = n
 		switch n.Type {
-		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -281,7 +282,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		switch n.Type {
 		case NodeTypeOutput:
 			outputCount++
-		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeAssignmentCtx, NodeTypeSubmission:
+		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
 		}
@@ -409,10 +410,6 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 		case HandleSubmission:
 			if !isStudentSubmissionNodeType(src.Type) {
 				return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
-			}
-		case HandleContext:
-			if !isActivityNodeType(src.Type) {
-				return ValidationError{Field: "node:" + tgt.ID, Message: "Context input must come from an Activity node."}
 			}
 		default:
 			msg := "Grader node accepts submission, content, or rubric inputs only."
@@ -560,16 +557,6 @@ func deriveIncludeFlags(g *WorkflowGraph, promptNodeID string, nodeByID map[stri
 		case HandleRubric:
 			if src, ok := nodeByID[e.Source]; ok && (isActivityNodeType(src.Type) || isRubricNodeType(src.Type)) {
 				includeRubric = true
-			}
-		case HandleContext:
-			if ctx, ok := nodeByID[e.Source]; ok && isActivityNodeType(ctx.Type) {
-				if ctx.Type == NodeTypeAssignmentCtx {
-					includeContent = boolData(ctx, "includeContent")
-					includeRubric = boolData(ctx, "includeRubric")
-				} else {
-					includeContent = true
-					includeRubric = true
-				}
 			}
 		}
 	}
@@ -728,19 +715,6 @@ func resolveWiredActivityItemIDs(g *WorkflowGraph, promptNodeID string, nodeByID
 				rubricItemID = activityAssignmentItemID(src)
 			} else if isRubricNodeType(src.Type) {
 				rubricItemID = rubricWiredAssignmentItemID(src)
-			}
-		case HandleContext:
-			if !isActivityNodeType(src.Type) {
-				continue
-			}
-			if src.Type == NodeTypeAssignmentCtx {
-				continue
-			}
-			if contentItemID == "" {
-				contentItemID = activityAssignmentItemID(src)
-			}
-			if rubricItemID == "" {
-				rubricItemID = activityAssignmentItemID(src)
 			}
 		case HandleAIInput:
 			if !isAINodeType(promptNode.Type) {
