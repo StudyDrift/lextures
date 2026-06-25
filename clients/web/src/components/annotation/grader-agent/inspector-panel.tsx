@@ -198,6 +198,7 @@ export function InspectorPanel({
             defaults={variableDefaults}
             className={fieldClass}
             placeholder={t('gradingAgent.prompt.placeholder')}
+            expandTitle={t('gradingAgent.prompt.label')}
           />
         </label>
         <label className="block text-sm text-slate-700 dark:text-neutral-200">
@@ -330,6 +331,7 @@ export function InspectorPanel({
             defaults={variableDefaults}
             className={fieldClass}
             placeholder={t('gradingAgent.canvas.nodes.criterionGrader.emptyPrompt')}
+            expandTitle={t('gradingAgent.prompt.label')}
           />
         </label>
         <label className="block text-sm text-slate-700 dark:text-neutral-200">
@@ -380,6 +382,7 @@ export function InspectorPanel({
             defaults={variableDefaults}
             className={fieldClass}
             placeholder={t('gradingAgent.prompt.placeholder')}
+            expandTitle={t('gradingAgent.prompt.label')}
           />
         </label>
         {showCompiledPrompt ? <AiNodeCompiledPrompt detail={dryRunDetail} /> : null}
