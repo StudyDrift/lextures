@@ -15,6 +15,7 @@ import {
   ReferenceNode,
   RubricNode,
   ScoreAggregatorNode,
+  SetScoreNode,
 } from './workflow-nodes'
 
 export const graderAgentNodeTypes = {
@@ -34,4 +35,5 @@ export const graderAgentNodeTypes = {
   reference: ReferenceNode,
   rubric: RubricNode,
   scoreAggregator: ScoreAggregatorNode,
+  setScore: SetScoreNode,
 }

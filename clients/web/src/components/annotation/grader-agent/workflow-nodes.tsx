@@ -739,6 +739,52 @@ export const ConditionalRouterNode = memo(function ConditionalRouterNode({ id, d
   )
 })
 
+export const SetScoreNode = memo(function SetScoreNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const score = typeof nodeData.score === 'number' ? nodeData.score : 0
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-teal-400/80 ring-2 ring-teal-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.setScore.title')}
+        dotClassName="bg-teal-500"
+        headerClassName="border-b border-teal-500/15 bg-teal-500/5 dark:border-teal-500/10 dark:bg-teal-500/10"
+        trailing={
+          <>
+            <span className="rounded-full bg-teal-500/15 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-teal-800 dark:text-teal-200">
+              {score}
+            </span>
+            <ExecutionBadge status={executionStatus} />
+          </>
+        }
+      />
+      <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+        <InputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.grade')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+        <OutputSlotRow
+          handleId="grade"
+          label={t('gradingAgent.canvas.slots.gradeScore')}
+          dotClass="bg-emerald-500"
+          handleClass="!bg-emerald-500"
+        />
+      </div>
+    </div>
+  )
+})
+
 export const ScoreAggregatorNode = memo(function ScoreAggregatorNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>

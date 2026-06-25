@@ -166,7 +166,7 @@ func nodeHasActiveInput(g *WorkflowGraph, nodeID string, nodeByID map[string]Wor
 
 func nodeRunsWithoutWiredInput(nodeType string) bool {
 	switch nodeType {
-	case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeCodeTestRunner:
+	case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeCodeTestRunner, NodeTypeSetScore:
 		return true
 	default:
 		return false
@@ -517,6 +517,17 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, execErr
 			}
+		case NodeTypeSetScore:
+			if execErr := executeSetScoreNode(node, state); execErr != nil {
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, execErr.Error())})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				return DryRunPreview{}, execErr
+			}
+			score, _ := setScoreValueFromNode(node)
+			emit(ExecutionEvent{
+				Type: "log", Level: "info",
+				Message: fmt.Sprintf("[%s] Score set to %.4g.", label, score),
+			})
 		case NodeTypeScoreAggregator:
 			if execErr := executeScoreAggregatorNode(in.Graph, node, nodeByID, state, in.MaxPoints, in.DefaultRubric, emit, label); execErr != nil {
 				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, execErr.Error())})

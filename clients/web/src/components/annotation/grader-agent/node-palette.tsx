@@ -8,6 +8,7 @@ import {
   GitBranch,
   GraduationCap,
   GripVertical,
+  Hash,
   ListChecks,
   Lock,
   Search,
@@ -121,6 +122,13 @@ const PROCESSING_ITEMS: PaletteItemConfig[] = [
     descriptionKey: 'gradingAgent.canvas.palette.description.originality',
     icon: ShieldCheck,
     iconClass: 'bg-amber-500/10 text-amber-700 dark:text-amber-300',
+  },
+  {
+    type: 'setScore',
+    labelKey: 'gradingAgent.canvas.palette.setScore',
+    descriptionKey: 'gradingAgent.canvas.palette.description.setScore',
+    icon: Hash,
+    iconClass: 'bg-teal-500/10 text-teal-700 dark:text-teal-300',
   },
 ]
 

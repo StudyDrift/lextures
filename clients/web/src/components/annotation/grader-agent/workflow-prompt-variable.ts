@@ -60,6 +60,7 @@ export type WorkflowNodeDefaultLabels = {
   reference?: string
   rubric?: string
   scoreAggregator?: string
+  setScore?: string
   output: string
 }
 

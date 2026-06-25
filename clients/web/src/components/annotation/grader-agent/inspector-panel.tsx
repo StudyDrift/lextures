@@ -19,6 +19,7 @@ import {
   isReferenceNodeType,
   isRubricNodeType,
   isScoreAggregatorNodeType,
+  isSetScoreNodeType,
   isStudentSubmissionNodeType,
 } from './types'
 import { CodeTestRunnerInspector } from './code-test-runner-inspector'
@@ -29,6 +30,7 @@ import { OriginalityInspector } from './originality-inspector'
 import { ReferenceInspector } from './reference-inspector'
 import { RubricInspector } from './rubric-inspector'
 import { ScoreAggregatorInspector } from './score-aggregator-inspector'
+import { SetScoreInspector } from './set-score-inspector'
 import { AiNodeCompiledPrompt } from './ai-node-compiled-prompt'
 import { AiNodeOutputFormat } from './ai-node-output-format'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
@@ -109,6 +111,7 @@ export function InspectorPanel({
       reference: t('gradingAgent.canvas.nodes.reference.title'),
       rubric: t('gradingAgent.canvas.nodes.rubric.title'),
       scoreAggregator: t('gradingAgent.canvas.nodes.aggregator.title'),
+      setScore: t('gradingAgent.canvas.nodes.setScore.title'),
     }),
     [t],
   )
@@ -533,6 +536,22 @@ export function InspectorPanel({
           data={node.data}
           graph={graph}
           defaults={variableDefaults}
+          onChange={(patch) => updateNodeData(node.id, patch)}
+          onDelete={() => removeNode(node.id)}
+          fieldClass={fieldClass}
+        />
+      </div>
+    )
+  }
+
+  if (isSetScoreNodeType(node.type)) {
+    return (
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-slate-800 dark:text-neutral-100">
+          {nodeTitle('gradingAgent.canvas.nodes.setScore.title')}
+        </p>
+        <SetScoreInspector
+          data={node.data}
           onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
