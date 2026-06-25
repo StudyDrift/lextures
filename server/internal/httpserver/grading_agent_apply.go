@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"strings"
 	"time"
 
@@ -125,4 +126,46 @@ func (d Deps) finishGradingAgentSuccess(
 		return err
 	}
 	return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+}
+
+func (d Deps) persistGradingAgentPreview(
+	ctx context.Context,
+	msg gradingagentqueue.QueueMessage,
+	cfg *gradingagentrepo.ConfigRow,
+	assignRow *coursemoduleassignments.CourseItemAssignmentRow,
+	subRow *moduleassignmentsubmissions.SubmissionRow,
+	run *gradingagentrepo.RunRow,
+	preview gradingAgentPreviewResult,
+) error {
+	if preview.Flagged != nil {
+		reason := preview.Flagged.Reason
+		priority := preview.Flagged.Priority
+		_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
+			RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
+			Status: gradingagentrepo.ItemFlagged, FlagReason: &reason,
+			FlagPriority: &priority,
+		})
+		return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+	}
+
+	var rubricJSON []byte
+	if len(preview.RubricScores) > 0 {
+		rubricJSON, _ = json.Marshal(preview.RubricScores)
+	}
+	successIn := gradingAgentSuccessInput{
+		Points: preview.Points, Comment: preview.Comment, Confidence: preview.Confidence,
+		RubricJSON: rubricJSON, ModelID: preview.ModelID, PromptTokens: preview.PromptTokens,
+		CompletionTokens: preview.CompletionTokens, CostUSD: preview.CostUSD, GradedByAI: preview.GradedByAI,
+	}
+
+	gateHold := &gradingAgentGateHoldInput{}
+	if preview.Held != nil {
+		gateHold.WouldHold = preview.Held.WouldHold
+		gateHold.Reason = preview.Held.Reason
+		gateHold.Queue = preview.Held.Queue
+	}
+	if hold, heldReason, queue := gradingAgentHoldDecision(cfg, preview.Confidence, gateHold); hold {
+		return d.insertHeldGradingAgentResult(ctx, msg, cfg, successIn, heldReason, queue)
+	}
+	return d.finishGradingAgentSuccess(ctx, msg, cfg, assignRow, subRow, run, successIn)
 }

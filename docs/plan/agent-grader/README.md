@@ -43,8 +43,10 @@ A node is wired into **five** layers; every plan in this folder specifies all fi
 4. **Execution** — the topological walker
    [`workflow_execute.go`](../../../server/internal/service/gradingagent/workflow_execute.go)
    (`ExecuteWorkflowDryRun`) produces a `slotValue{ text, grade, rubric, score }` per `nodeID:handle`. Live
-   batch/auto runs reuse the same compiler via
-   [`grading_agent_consumer.go`](../../../server/internal/background/grading_agent_consumer.go).
+   batch runs use the same engine via
+   [`grading_agent_queue.go`](../../../server/internal/httpserver/grading_agent_queue.go)
+   (`executeGradingAgentPreview` → `persistGradingAgentPreview`; see
+   [GA-S1](../../completed/grading-agent/simplify-1-unify-grade-write-paths.md)).
 5. **Inspector & i18n** — the right-hand editor
    [`inspector-panel.tsx`](../../../clients/web/src/components/annotation/grader-agent/inspector-panel.tsx)
    renders per-node settings; all strings live under `gradingAgent.canvas.*` in

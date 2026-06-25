@@ -39,7 +39,7 @@
 
 | ID | Plan | One-liner |
 |---|---|---|
-| GA-S1 | [Unify the three duplicated grade-write paths in the consumer](simplify-1-unify-grade-write-paths.md) | `HandleGradingAgentQueueMessage` has three overlapping branches that all end in "execute + write grade". |
+| GA-S1 | [Unify the three duplicated grade-write paths in the consumer](../../completed/grading-agent/simplify-1-unify-grade-write-paths.md) | **Done** — single execute + persist path in the queue consumer. |
 | GA-S2 | [Remove the dead HTTP dry-run path; rename the execution engine](simplify-2-remove-dead-dry-run-and-rename-engine.md) | `POST /dry-run` + `Service.Score` legacy path is unused by the client and mis-handles complex graphs. |
 | GA-S3 | [Collapse the duplicated per-node update callbacks](simplify-3-generic-node-data-updater.md) | ~12 near-identical `updateXNode` callbacks in the hook can be one generic updater. |
 | GA-S4 | [Retire legacy node-type aliases & palette ternaries](simplify-4-legacy-node-type-aliases.md) | `submission`/`assignmentContext`/`grader` legacy types and giant nested ternaries add accidental complexity. |
