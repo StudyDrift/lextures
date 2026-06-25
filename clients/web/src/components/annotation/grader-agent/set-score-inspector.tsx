@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import type { SetScoreNodeData } from './types'
-import { workflowNodeDisplayLabel } from './workflow-node-label'
 
 type SetScoreInspectorProps = {
   data: Record<string, unknown>
