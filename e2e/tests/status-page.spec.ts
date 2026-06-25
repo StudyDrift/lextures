@@ -4,7 +4,9 @@
 import { test, expect } from '../fixtures/test.js'
 
 test.describe('Status page incident banner', () => {
-  test('shows incident banner when status summary reports an active incident', async ({ page }) => {
+  test('shows incident banner when status summary reports an active incident', async ({
+    authedPage: page,
+  }) => {
     await page.route('**/api/v1/status-summary', async (route) => {
       await route.fulfill({
         status: 200,
@@ -25,9 +27,10 @@ test.describe('Status page incident banner', () => {
       })
     })
 
-    await page.goto('/dashboard')
-    await expect(page.getByRole('alert')).toContainText(/Elevated API latency/i)
-    await expect(page.getByRole('link', { name: /view system status/i })).toHaveAttribute(
+    await page.goto('/')
+    const banner = page.getByRole('alert').filter({ hasText: /Elevated API latency/i })
+    await expect(banner).toBeVisible({ timeout: 15_000 })
+    await expect(banner.getByRole('link', { name: /view system status/i })).toHaveAttribute(
       'href',
       'https://status.lextures.io',
     )
