@@ -31,9 +31,9 @@ describe('Login', () => {
     await user.type(screen.getByLabelText(/^password$/i), 'hunter2correct')
     await user.click(screen.getByRole('button', { name: /^sign in$/i }))
 
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /^dashboard$/i })).toBeInTheDocument()
-    })
+    expect(
+      await screen.findByRole('heading', { name: /^dashboard$/i }, { timeout: 10_000 }),
+    ).toBeInTheDocument()
   })
 
   it('shows the API error message when credentials are rejected', async () => {

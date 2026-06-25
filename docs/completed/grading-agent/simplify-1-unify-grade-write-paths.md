@@ -1,6 +1,6 @@
 # GA-S1 — Unify the three duplicated grade-write paths in the consumer
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,11 +10,19 @@
 | **Section** | Grading Agent — Over-complexity / Simplification |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 / SL (internal maintainability) |
-| **Status (today)** | THIN |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | — |
-| **Unblocks** | [GA-M3](missing-3-suggest-only-batch-and-bulk-review.md), [GA-M4](missing-4-confidence-auto-hold-threshold.md), [GA-M6](missing-6-cancel-running-batch.md), [GA-B2](bug-2-requeue-double-grading.md) |
+| **Unblocks** | [GA-M6](missing-6-cancel-running-batch.md) (suggest-only/confidence floor/idempotency now single-path) |
+
+## Implementation summary (2026-06-25)
+
+- **Queue handler** — `HandleGradingAgentQueueMessage` reduced to setup + one `executeGradingAgentPreview` call + `persistGradingAgentPreview` (~120 lines).
+- **Execute** — `grading_agent_execute.go`: compiled graphs always run through `ExecuteWorkflowDryRun`; legacy configs with no compilable graph fall back to `Service.Score` / `ScoreWithVision`. Model resolution and AI-gateway checks live once per branch.
+- **Persist** — `persistGradingAgentPreview` in `grading_agent_apply.go`: flagged, gate-held, agent-floor-held, suggest-only, and applied outcomes share one path (closes Path B's missing held/flagged handling).
+- **Tests** — `grading_agent_execute_test.go`, `grading_agent_apply_test.go` cover routing helpers, preview mapping, and hold composition.
+- **Docs** — agent-grader README execution layer updated to reference the unified consumer path.
 
 ## 1. Problem Statement
 
