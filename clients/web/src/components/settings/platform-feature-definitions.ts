@@ -269,6 +269,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Grade image-only or scanned submissions using a vision-capable grader model.',
   },
   {
+    key: 'graderAgentRunFiltersEnabled',
+    label: 'Grader agent run filters',
+    description: 'Target batch runs to a section, project group, or explicit submission selection.',
+  },
+  {
     key: 'codeExecutionEnabled',
     label: 'Code execution',
     description: 'Sandboxed code execution for quiz code questions and the grader agent Code Test Runner node.',

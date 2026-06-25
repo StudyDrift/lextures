@@ -52,6 +52,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
       graderAgentSuggestModeEnabled: true,
       graderAgentTextEntryGradingEnabled: true,
       graderAgentVisionGradingEnabled: false,
+      graderAgentRunFiltersEnabled: true,
       altTextEnforcementEnabled: true,
       ffAltTextEnforcement: true,
       speechToTextEnabled: true,

@@ -56,6 +56,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.GraderAgentSuggestModeEnabled = mergeBool(db.GraderAgentSuggestModeEnabled, false)
 	out.GraderAgentTextEntryGradingEnabled = mergeBool(db.GraderAgentTextEntryGradingEnabled, true)
 	out.GraderAgentVisionGradingEnabled = mergeBool(db.GraderAgentVisionGradingEnabled, false)
+	out.GraderAgentRunFiltersEnabled = mergeBool(db.GraderAgentRunFiltersEnabled, false)
 	out.CodeExecutionEnabled = mergeBool(db.CodeExecutionEnabled, false)
 	out.AltTextEnforcementEnabled = mergeBool(db.AltTextEnforcementEnabled, false)
 	out.FFAltTextEnforcement = mergeBool(db.FFAltTextEnforcement, false)

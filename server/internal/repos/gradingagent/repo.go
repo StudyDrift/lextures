@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -72,12 +73,98 @@ type RunRow struct {
 	Mode           RunMode
 	InitiatedBy    *uuid.UUID
 	AuthoredVia    *string
+	Filter         []byte
 	TotalCount     int
 	CompletedCount int
 	FailedCount    int
 	Status         string
 	CreatedAt      time.Time
 	FinishedAt     *time.Time
+}
+
+// RunFilter is the persisted / request filter for section, group, or explicit submissions (GA-M5).
+type RunFilter struct {
+	SectionID     *uuid.UUID
+	GroupID       *uuid.UUID
+	SubmissionIDs []uuid.UUID
+}
+
+func (f *RunFilter) IsEmpty() bool {
+	if f == nil {
+		return true
+	}
+	return f.SectionID == nil && f.GroupID == nil && len(f.SubmissionIDs) == 0
+}
+
+func ParseRunFilterJSON(raw []byte) (*RunFilter, error) {
+	if len(raw) == 0 {
+		return nil, nil
+	}
+	var payload struct {
+		SectionID     *string  `json:"sectionId"`
+		GroupID       *string  `json:"groupId"`
+		SubmissionIDs []string `json:"submissionIds"`
+	}
+	if err := json.Unmarshal(raw, &payload); err != nil {
+		return nil, err
+	}
+	out := &RunFilter{}
+	if payload.SectionID != nil {
+		s := strings.TrimSpace(*payload.SectionID)
+		if s != "" {
+			id, err := uuid.Parse(s)
+			if err != nil {
+				return nil, err
+			}
+			out.SectionID = &id
+		}
+	}
+	if payload.GroupID != nil {
+		s := strings.TrimSpace(*payload.GroupID)
+		if s != "" {
+			id, err := uuid.Parse(s)
+			if err != nil {
+				return nil, err
+			}
+			out.GroupID = &id
+		}
+	}
+	for _, sid := range payload.SubmissionIDs {
+		s := strings.TrimSpace(sid)
+		if s == "" {
+			continue
+		}
+		id, err := uuid.Parse(s)
+		if err != nil {
+			return nil, err
+		}
+		out.SubmissionIDs = append(out.SubmissionIDs, id)
+	}
+	if out.IsEmpty() {
+		return nil, nil
+	}
+	return out, nil
+}
+
+func (f *RunFilter) ToJSON() ([]byte, error) {
+	if f == nil || f.IsEmpty() {
+		return nil, nil
+	}
+	payload := map[string]any{}
+	if f.SectionID != nil {
+		payload["sectionId"] = f.SectionID.String()
+	}
+	if f.GroupID != nil {
+		payload["groupId"] = f.GroupID.String()
+	}
+	if len(f.SubmissionIDs) > 0 {
+		ids := make([]string, 0, len(f.SubmissionIDs))
+		for _, id := range f.SubmissionIDs {
+			ids = append(ids, id.String())
+		}
+		payload["submissionIds"] = ids
+	}
+	return json.Marshal(payload)
 }
 
 type ResultRow struct {
@@ -249,7 +336,7 @@ RETURNING id, course_id, module_item_id, status::text, prompt,
 	return &r, nil
 }
 
-func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scope RunScope, mode RunMode, initiatedBy *uuid.UUID, authoredVia *string, total int) (*RunRow, error) {
+func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scope RunScope, mode RunMode, initiatedBy *uuid.UUID, authoredVia *string, total int, filterJSON []byte) (*RunRow, error) {
 	if pool == nil {
 		return nil, errors.New("nil pool")
 	}
@@ -260,11 +347,11 @@ func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scop
 	var scopeStr string
 	var modeStr string
 	err := pool.QueryRow(ctx, `
-INSERT INTO assessment.grading_agent_runs (config_id, scope, mode, initiated_by, authored_via, total_count, status)
-VALUES ($1, $2::assessment.grading_agent_run_scope, $3, $4, $5, $6, 'queued')
-RETURNING id, config_id, scope::text, mode, initiated_by, authored_via, total_count, completed_count, failed_count, status, created_at, finished_at
-`, configID, string(scope), string(mode), initiatedBy, authoredVia, total).Scan(
-		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
+INSERT INTO assessment.grading_agent_runs (config_id, scope, mode, initiated_by, authored_via, total_count, filter, status)
+VALUES ($1, $2::assessment.grading_agent_run_scope, $3, $4, $5, $6, $7, 'queued')
+RETURNING id, config_id, scope::text, mode, initiated_by, authored_via, filter, total_count, completed_count, failed_count, status, created_at, finished_at
+`, configID, string(scope), string(mode), initiatedBy, authoredVia, total, filterJSON).Scan(
+		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
 		&r.Status, &r.CreatedAt, &r.FinishedAt,
 	)
 	if err != nil {
@@ -283,10 +370,10 @@ func GetRun(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (*RunRow, 
 	var scopeStr string
 	var modeStr string
 	err := pool.QueryRow(ctx, `
-SELECT id, config_id, scope::text, mode, initiated_by, authored_via, total_count, completed_count, failed_count, status, created_at, finished_at
+SELECT id, config_id, scope::text, mode, initiated_by, authored_via, filter, total_count, completed_count, failed_count, status, created_at, finished_at
 FROM assessment.grading_agent_runs WHERE id = $1
 `, runID).Scan(
-		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
+		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
 		&r.Status, &r.CreatedAt, &r.FinishedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -481,7 +568,7 @@ func ListRunsByConfig(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUI
 		limit = 50
 	}
 	rows, err := pool.Query(ctx, `
-SELECT r.id, r.config_id, r.scope::text, r.mode, r.initiated_by, r.authored_via, r.total_count, r.completed_count,
+SELECT r.id, r.config_id, r.scope::text, r.mode, r.initiated_by, r.authored_via, r.filter, r.total_count, r.completed_count,
        r.failed_count, r.status, r.created_at, r.finished_at,
        (SELECT SUM(res.cost_usd) FROM assessment.grading_agent_results res WHERE res.run_id = r.id) AS cost_usd,
        (SELECT res.model_id FROM assessment.grading_agent_results res
@@ -502,7 +589,7 @@ LIMIT $2
 		var scopeStr string
 		var modeStr string
 		if err := rows.Scan(
-			&summary.ID, &summary.ConfigID, &scopeStr, &modeStr, &summary.InitiatedBy, &summary.AuthoredVia,
+			&summary.ID, &summary.ConfigID, &scopeStr, &modeStr, &summary.InitiatedBy, &summary.AuthoredVia, &summary.Filter,
 			&summary.TotalCount, &summary.CompletedCount, &summary.FailedCount, &summary.Status,
 			&summary.CreatedAt, &summary.FinishedAt, &summary.CostUSD, &summary.ModelID,
 		); err != nil {

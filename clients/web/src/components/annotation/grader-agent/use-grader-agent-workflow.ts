@@ -23,6 +23,11 @@ import {
 import { queueCanvasGradeSync } from '../../canvas/canvas-grade-sync'
 import { buildAgentGradeApplyPayload, canvasPayloadFromSubmissionGrade } from './agent-grade-apply'
 import { effectiveWorkflowGraph, synthesizeDefaultGraph } from './default-graph'
+import {
+  defaultRunAgentFilterState,
+  runFilterFromState,
+  type RunAgentFilterState,
+} from './run-agent-filter-picker'
 import { isWorkflowRunnable, validateWorkflowGraph } from './validation'
 import type {
   CodeTestRunnerNodeData,
@@ -127,7 +132,7 @@ export function useGraderAgentWorkflow({
   onSubmissionGraded,
 }: UseGraderAgentWorkflowArgs) {
   const { t } = useTranslation('common')
-  const { graderAgentSuggestModeEnabled } = usePlatformFeatures()
+  const { graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled } = usePlatformFeatures()
   const [savedTemplateId, setSavedTemplateId] = useState<string | null>(templateMode?.templateId ?? null)
   const [config, setConfig] = useState<GraderAgentConfigApi | null>(null)
   const [graph, setGraph] = useState<GraderWorkflowGraph>(() => synthesizeDefaultGraph('', false, false))
@@ -149,6 +154,7 @@ export function useGraderAgentWorkflow({
   const [runProgress, setRunProgress] = useState<{ completed: number; failed: number; total: number } | null>(null)
   const [runResults, setRunResults] = useState<GraderAgentRunStatus['results']>([])
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
+  const [runFilterState, setRunFilterState] = useState<RunAgentFilterState>(defaultRunAgentFilterState)
   const [statusMessage, setStatusMessage] = useState('')
   const [nodeExecutionStates, setNodeExecutionStates] = useState<Record<string, NodeExecutionStatus>>({})
   const [dryRunLogs, setDryRunLogs] = useState<DryRunLogEntry[]>([])
@@ -178,6 +184,12 @@ export function useGraderAgentWorkflow({
     }
     setSavedTemplateId(templateMode?.templateId ?? null)
   }, [open, templateMode?.templateId])
+
+  useEffect(() => {
+    if (!open) {
+      setRunFilterState(defaultRunAgentFilterState)
+    }
+  }, [open])
 
   useEffect(() => {
     setRunMode(graderAgentSuggestModeEnabled ? 'suggest' : 'apply')
@@ -990,12 +1002,14 @@ export function useGraderAgentWorkflow({
         )
       }
       const effectiveMode: GraderAgentRunMode = graderAgentSuggestModeEnabled ? runMode : 'apply'
+      const runFilter = graderAgentRunFiltersEnabled ? runFilterFromState(runFilterState) : undefined
       const res = await postGraderAgentRun(courseCode, itemId, {
         scope: runScope,
         mode: effectiveMode,
         submissionId: runScope === 'current' ? submissionId ?? undefined : undefined,
         overwrite: runScope === 'all',
         authoredVia: 'canvas',
+        filter: runFilter,
       })
       setLastRunMode(res.mode ?? effectiveMode)
       canvasSyncedSubmissionIdsRef.current = new Set()
@@ -1008,7 +1022,7 @@ export function useGraderAgentWorkflow({
       resetDryRunVisualState()
       setBatchNodeExecutionRunning()
       appendRunLog(t('gradingAgent.run.starting', { total: res.totalCount }))
-      setStatusMessage(t('gradingAgent.run.starting', { total: res.totalCount }))
+      setStatusMessage(res.targetSummary ?? t('gradingAgent.run.starting', { total: res.totalCount }))
     } catch (e) {
       setBatchRunning(false)
       resetBatchNodeExecution()
@@ -1100,6 +1114,8 @@ export function useGraderAgentWorkflow({
     runResults,
     confirmOverwrite,
     setConfirmOverwrite,
+    runFilterState,
+    setRunFilterState,
     statusMessage,
     validationIssues,
     runnable,

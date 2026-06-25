@@ -6204,12 +6204,47 @@ export async function streamGraderAgentDryRun(
 
 export type GraderAgentRunMode = 'suggest' | 'apply'
 
+export type GraderAgentRunFilter = {
+  sectionId?: string
+  groupId?: string
+  submissionIds?: string[]
+}
+
 export type GraderAgentBulkReviewAction = 'approve' | 'approve_all' | 'reject'
 
 export type GraderAgentBulkReviewOutcome = {
   resultId: string
   status: string
   error?: string
+}
+
+export async function fetchGraderAgentRunTarget(
+  courseCode: string,
+  itemId: string,
+  params: {
+    scope: 'current' | 'ungraded' | 'all'
+    submissionId?: string
+    overwrite?: boolean
+    filter?: GraderAgentRunFilter
+  },
+): Promise<{ count: number; targetSummary: string }> {
+  const qs = new URLSearchParams()
+  qs.set('scope', params.scope)
+  if (params.submissionId) qs.set('submissionId', params.submissionId)
+  if (params.overwrite) qs.set('overwrite', 'true')
+  if (params.filter?.sectionId) qs.set('sectionId', params.filter.sectionId)
+  if (params.filter?.groupId) qs.set('groupId', params.filter.groupId)
+  if (params.filter?.submissionIds?.length) qs.set('submissionIds', params.filter.submissionIds.join(','))
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/run-target?${qs.toString()}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { count?: number; targetSummary?: string }
+  return {
+    count: typeof o.count === 'number' ? o.count : 0,
+    targetSummary: typeof o.targetSummary === 'string' ? o.targetSummary : '',
+  }
 }
 
 export async function postGraderAgentRun(
@@ -6221,8 +6256,9 @@ export async function postGraderAgentRun(
     submissionId?: string
     overwrite?: boolean
     authoredVia?: 'canvas' | 'form'
+    filter?: GraderAgentRunFilter
   },
-): Promise<{ runId: string; totalCount: number; mode?: GraderAgentRunMode }> {
+): Promise<{ runId: string; totalCount: number; mode?: GraderAgentRunMode; targetSummary?: string }> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs`,
     {
@@ -6233,7 +6269,7 @@ export async function postGraderAgentRun(
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as { runId: string; totalCount: number; mode?: GraderAgentRunMode }
+  return raw as { runId: string; totalCount: number; mode?: GraderAgentRunMode; targetSummary?: string }
 }
 
 export async function postGraderAgentReviewBulk(

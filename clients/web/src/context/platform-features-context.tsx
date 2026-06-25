@@ -32,6 +32,7 @@ export type PlatformFeatures = {
   graderAgentSuggestModeEnabled?: boolean
   graderAgentTextEntryGradingEnabled?: boolean
   graderAgentVisionGradingEnabled?: boolean
+  graderAgentRunFiltersEnabled?: boolean
   codeExecutionEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
@@ -119,6 +120,7 @@ const defaultFeatures: PlatformFeatures = {
   graderAgentSuggestModeEnabled: false,
   graderAgentTextEntryGradingEnabled: true,
   graderAgentVisionGradingEnabled: false,
+  graderAgentRunFiltersEnabled: false,
   codeExecutionEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
@@ -301,6 +303,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           graderAgentSuggestModeEnabled: data.graderAgentSuggestModeEnabled === true,
           graderAgentTextEntryGradingEnabled: data.graderAgentTextEntryGradingEnabled !== false,
           graderAgentVisionGradingEnabled: data.graderAgentVisionGradingEnabled === true,
+          graderAgentRunFiltersEnabled: data.graderAgentRunFiltersEnabled === true,
           codeExecutionEnabled: data.codeExecutionEnabled === true,
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,
