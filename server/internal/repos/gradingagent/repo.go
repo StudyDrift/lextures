@@ -74,6 +74,7 @@ type RunRow struct {
 	InitiatedBy    *uuid.UUID
 	AuthoredVia    *string
 	Filter         []byte
+	BudgetUSD      *float64
 	TotalCount     int
 	CompletedCount int
 	FailedCount    int
@@ -194,11 +195,13 @@ type ResultRow struct {
 	CreatedAt        time.Time
 }
 
-// RunSummary aggregates a batch run with optional cost totals for run history (GA-M1).
+// RunSummary aggregates a batch run with optional cost totals for run history (GA-M1 / GA-M7).
 type RunSummary struct {
 	RunRow
-	CostUSD *float64
-	ModelID *string
+	CostUSD          *float64
+	PromptTokens     *int
+	CompletionTokens *int
+	ModelID          *string
 }
 
 // ReviewQueueItem is a deduped held or flagged result for the persistent review inbox (GA-M1).
@@ -336,7 +339,7 @@ RETURNING id, course_id, module_item_id, status::text, prompt,
 	return &r, nil
 }
 
-func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scope RunScope, mode RunMode, initiatedBy *uuid.UUID, authoredVia *string, total int, filterJSON []byte) (*RunRow, error) {
+func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scope RunScope, mode RunMode, initiatedBy *uuid.UUID, authoredVia *string, total int, filterJSON []byte, budgetUSD *float64) (*RunRow, error) {
 	if pool == nil {
 		return nil, errors.New("nil pool")
 	}
@@ -347,11 +350,11 @@ func CreateRun(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID, scop
 	var scopeStr string
 	var modeStr string
 	err := pool.QueryRow(ctx, `
-INSERT INTO assessment.grading_agent_runs (config_id, scope, mode, initiated_by, authored_via, total_count, filter, status)
-VALUES ($1, $2::assessment.grading_agent_run_scope, $3, $4, $5, $6, $7, 'queued')
-RETURNING id, config_id, scope::text, mode, initiated_by, authored_via, filter, total_count, completed_count, failed_count, status, created_at, finished_at
-`, configID, string(scope), string(mode), initiatedBy, authoredVia, total, filterJSON).Scan(
-		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
+INSERT INTO assessment.grading_agent_runs (config_id, scope, mode, initiated_by, authored_via, total_count, filter, budget_usd, status)
+VALUES ($1, $2::assessment.grading_agent_run_scope, $3, $4, $5, $6, $7, $8, 'queued')
+RETURNING id, config_id, scope::text, mode, initiated_by, authored_via, filter, budget_usd, total_count, completed_count, failed_count, status, created_at, finished_at
+`, configID, string(scope), string(mode), initiatedBy, authoredVia, total, filterJSON, budgetUSD).Scan(
+		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.BudgetUSD, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
 		&r.Status, &r.CreatedAt, &r.FinishedAt,
 	)
 	if err != nil {
@@ -370,10 +373,10 @@ func GetRun(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (*RunRow, 
 	var scopeStr string
 	var modeStr string
 	err := pool.QueryRow(ctx, `
-SELECT id, config_id, scope::text, mode, initiated_by, authored_via, filter, total_count, completed_count, failed_count, status, created_at, finished_at
+SELECT id, config_id, scope::text, mode, initiated_by, authored_via, filter, budget_usd, total_count, completed_count, failed_count, status, created_at, finished_at
 FROM assessment.grading_agent_runs WHERE id = $1
 `, runID).Scan(
-		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
+		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.BudgetUSD, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
 		&r.Status, &r.CreatedAt, &r.FinishedAt,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -400,8 +403,15 @@ UPDATE assessment.grading_agent_runs
 SET failed_count = failed_count + 1,
     completed_count = LEAST(completed_count + 1, total_count),
     last_progress_at = NOW(),
-    status = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN 'done' ELSE status END,
-    finished_at = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN NOW() ELSE finished_at END
+    status = CASE
+        WHEN completed_count + 1 >= total_count AND status = 'running' THEN 'done'
+        WHEN completed_count + 1 >= total_count AND status = 'budget_exceeded' THEN 'budget_exceeded'
+        ELSE status
+    END,
+    finished_at = CASE
+        WHEN completed_count + 1 >= total_count AND status IN ('running', 'budget_exceeded') THEN NOW()
+        ELSE finished_at
+    END
 WHERE id = $1 AND completed_count < total_count
 `, runID)
 		return err
@@ -410,11 +420,89 @@ WHERE id = $1 AND completed_count < total_count
 UPDATE assessment.grading_agent_runs
 SET completed_count = LEAST(completed_count + 1, total_count),
     last_progress_at = NOW(),
-    status = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN 'done' ELSE status END,
-    finished_at = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN NOW() ELSE finished_at END
+    status = CASE
+        WHEN completed_count + 1 >= total_count AND status = 'running' THEN 'done'
+        WHEN completed_count + 1 >= total_count AND status = 'budget_exceeded' THEN 'budget_exceeded'
+        ELSE status
+    END,
+    finished_at = CASE
+        WHEN completed_count + 1 >= total_count AND status IN ('running', 'budget_exceeded') THEN NOW()
+        ELSE finished_at
+    END
 WHERE id = $1 AND completed_count < total_count
 `, runID)
 	return err
+}
+
+// MarkRunBudgetExceeded marks a running batch as budget-limited; remaining items are skipped without LLM calls.
+func MarkRunBudgetExceeded(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) error {
+	if pool == nil {
+		return errors.New("nil pool")
+	}
+	_, err := pool.Exec(ctx, `
+UPDATE assessment.grading_agent_runs
+SET status = 'budget_exceeded', last_progress_at = NOW()
+WHERE id = $1 AND status = 'running'
+`, runID)
+	return err
+}
+
+func SumRunCostUSD(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (float64, error) {
+	if pool == nil {
+		return 0, errors.New("nil pool")
+	}
+	var spent *float64
+	err := pool.QueryRow(ctx, `
+SELECT SUM(cost_usd)::float8
+FROM assessment.grading_agent_results
+WHERE run_id = $1 AND is_dry_run = false
+`, runID).Scan(&spent)
+	if err != nil {
+		return 0, err
+	}
+	if spent == nil {
+		return 0, nil
+	}
+	return *spent, nil
+}
+
+func SumRunUsage(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (RunUsageTotals, error) {
+	if pool == nil {
+		return RunUsageTotals{}, errors.New("nil pool")
+	}
+	var totals RunUsageTotals
+	err := pool.QueryRow(ctx, `
+SELECT COALESCE(SUM(prompt_tokens), 0)::int,
+       COALESCE(SUM(completion_tokens), 0)::int,
+       COALESCE(SUM(cost_usd), 0)::float8
+FROM assessment.grading_agent_results
+WHERE run_id = $1 AND is_dry_run = false
+`, runID).Scan(&totals.PromptTokens, &totals.CompletionTokens, &totals.CostUSD)
+	if err != nil {
+		return RunUsageTotals{}, err
+	}
+	return totals, nil
+}
+
+func GetLatestDryRunSample(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID) (*DryRunCostSample, error) {
+	if pool == nil {
+		return nil, errors.New("nil pool")
+	}
+	var sample DryRunCostSample
+	err := pool.QueryRow(ctx, `
+SELECT prompt_tokens, completion_tokens, cost_usd, model_id
+FROM assessment.grading_agent_results
+WHERE config_id = $1 AND is_dry_run = true
+ORDER BY created_at DESC
+LIMIT 1
+`, configID).Scan(&sample.PromptTokens, &sample.CompletionTokens, &sample.CostUSD, &sample.ModelID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &sample, nil
 }
 
 // ResultExistsForRun returns true if a non-dry-run result already exists for the
@@ -568,11 +656,13 @@ func ListRunsByConfig(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUI
 		limit = 50
 	}
 	rows, err := pool.Query(ctx, `
-SELECT r.id, r.config_id, r.scope::text, r.mode, r.initiated_by, r.authored_via, r.filter, r.total_count, r.completed_count,
+SELECT r.id, r.config_id, r.scope::text, r.mode, r.initiated_by, r.authored_via, r.filter, r.budget_usd, r.total_count, r.completed_count,
        r.failed_count, r.status, r.created_at, r.finished_at,
-       (SELECT SUM(res.cost_usd) FROM assessment.grading_agent_results res WHERE res.run_id = r.id) AS cost_usd,
+       (SELECT SUM(res.cost_usd) FROM assessment.grading_agent_results res WHERE res.run_id = r.id AND res.is_dry_run = false) AS cost_usd,
+       (SELECT SUM(res.prompt_tokens)::int FROM assessment.grading_agent_results res WHERE res.run_id = r.id AND res.is_dry_run = false) AS prompt_tokens,
+       (SELECT SUM(res.completion_tokens)::int FROM assessment.grading_agent_results res WHERE res.run_id = r.id AND res.is_dry_run = false) AS completion_tokens,
        (SELECT res.model_id FROM assessment.grading_agent_results res
-        WHERE res.run_id = r.id AND res.model_id IS NOT NULL
+        WHERE res.run_id = r.id AND res.model_id IS NOT NULL AND res.is_dry_run = false
         ORDER BY res.created_at ASC LIMIT 1) AS model_id
 FROM assessment.grading_agent_runs r
 WHERE r.config_id = $1
@@ -589,9 +679,9 @@ LIMIT $2
 		var scopeStr string
 		var modeStr string
 		if err := rows.Scan(
-			&summary.ID, &summary.ConfigID, &scopeStr, &modeStr, &summary.InitiatedBy, &summary.AuthoredVia, &summary.Filter,
+			&summary.ID, &summary.ConfigID, &scopeStr, &modeStr, &summary.InitiatedBy, &summary.AuthoredVia, &summary.Filter, &summary.BudgetUSD,
 			&summary.TotalCount, &summary.CompletedCount, &summary.FailedCount, &summary.Status,
-			&summary.CreatedAt, &summary.FinishedAt, &summary.CostUSD, &summary.ModelID,
+			&summary.CreatedAt, &summary.FinishedAt, &summary.CostUSD, &summary.PromptTokens, &summary.CompletionTokens, &summary.ModelID,
 		); err != nil {
 			return nil, err
 		}

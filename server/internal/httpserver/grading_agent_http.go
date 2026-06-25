@@ -47,6 +47,10 @@ func (d Deps) graderAgentRunFiltersEnabled() bool {
 	return d.effectiveConfig().GraderAgentRunFiltersEnabled
 }
 
+func (d Deps) graderAgentCostEstimateEnabled() bool {
+	return d.effectiveConfig().GraderAgentCostEstimateEnabled
+}
+
 func (d Deps) requireGraderAgentReviewInboxAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {
 	if !d.graderAgentReviewInboxEnabled() {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent review inbox is not enabled.")
@@ -431,6 +435,7 @@ type postGraderAgentRunBody struct {
 	Overwrite    bool                       `json:"overwrite"`
 	AuthoredVia  *string                    `json:"authoredVia"`
 	Filter       *graderAgentRunFilterBody  `json:"filter"`
+	BudgetUSD    *float64                   `json:"budgetUsd"`
 }
 
 func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
@@ -512,7 +517,12 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 				runMode = gradingagentrepo.RunModeSuggest
 			}
 		}
-		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, runMode, &initiatedBy, authoredVia, len(submissions), filterJSON)
+		var budgetUSD *float64
+		if d.graderAgentCostEstimateEnabled() && body.BudgetUSD != nil && *body.BudgetUSD > 0 {
+			v := *body.BudgetUSD
+			budgetUSD = &v
+		}
+		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, runMode, &initiatedBy, authoredVia, len(submissions), filterJSON, budgetUSD)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start run.")
 			return
@@ -718,6 +728,11 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load run.")
 			return
 		}
+		usage, usageErr := gradingagentrepo.SumRunUsage(r.Context(), d.Pool, runID)
+		if usageErr != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load run usage.")
+			return
+		}
 		resultJSON := make([]map[string]any, 0, len(results))
 		for _, res := range results {
 			entry := map[string]any{
@@ -758,14 +773,21 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 			resultJSON = append(resultJSON, entry)
 		}
 		_ = courseCode
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]any{
+		resp := map[string]any{
 			"status":         run.Status,
 			"totalCount":     run.TotalCount,
 			"completedCount": run.CompletedCount,
 			"failedCount":    run.FailedCount,
 			"results":        resultJSON,
-		})
+		}
+		if run.BudgetUSD != nil {
+			resp["budgetUsd"] = *run.BudgetUSD
+		}
+		for k, v := range runUsageToJSON(usage) {
+			resp[k] = v
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(resp)
 	}
 }
 
@@ -925,6 +947,15 @@ func (d Deps) handleListGraderAgentRuns() http.HandlerFunc {
 			}
 			if run.CostUSD != nil {
 				entry["costUsd"] = *run.CostUSD
+			}
+			if run.PromptTokens != nil && *run.PromptTokens > 0 {
+				entry["promptTokens"] = *run.PromptTokens
+			}
+			if run.CompletionTokens != nil && *run.CompletionTokens > 0 {
+				entry["completionTokens"] = *run.CompletionTokens
+			}
+			if run.BudgetUSD != nil {
+				entry["budgetUsd"] = *run.BudgetUSD
 			}
 			if filterJSON := runFilterToJSONFromBytes(run.Filter); filterJSON != nil {
 				entry["filter"] = filterJSON

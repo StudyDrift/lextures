@@ -37,6 +37,11 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if already, _ := gradingagentrepo.ResultExistsForRun(ctx, d.Pool, msg.RunID, msg.SubmissionID); already {
 		return nil
 	}
+	if over, budgetErr := d.gradingAgentRunOverBudget(ctx, run); budgetErr != nil {
+		return budgetErr
+	} else if over {
+		return d.skipGradingAgentBudgetExceeded(ctx, msg, cfg.ID)
+	}
 	if run.Scope == gradingagentrepo.RunScopeUngraded {
 		cell, cellErr := coursegrades.GetCell(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID)
 		if cellErr == nil && cell != nil && cell.PointsEarned != nil {
@@ -122,6 +127,7 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if err := d.persistGradingAgentPreview(ctx, msg, cfg, assignRow, subRow, run, preview); err != nil {
 		return d.failGradingAgentItem(ctx, msg, "failed to write grade", nil)
 	}
+	d.recordGradingAgentQueueUsage(ctx, modelUser, msg.CourseCode, msg.CourseID, preview, true)
 	return nil
 }
 

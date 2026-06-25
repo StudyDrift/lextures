@@ -19,6 +19,7 @@ export type PlatformFeaturesSnapshot = {
   graderAgentTextEntryGradingEnabled?: boolean
   graderAgentVisionGradingEnabled?: boolean
   graderAgentRunFiltersEnabled?: boolean
+  graderAgentCostEstimateEnabled?: boolean
   codeExecutionEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean

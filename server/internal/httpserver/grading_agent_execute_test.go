@@ -49,7 +49,7 @@ func TestGradingAgentPreviewFromDryRun_preservesHeldAndFlagged(t *testing.T) {
 			Reason:    "Human review gate (below confidence)",
 			Queue:     "instructor",
 		},
-	}, true)
+	}, true, "model-x")
 	if preview.Held == nil || !preview.Held.WouldHold {
 		t.Fatal("expected held preview")
 	}
@@ -59,7 +59,7 @@ func TestGradingAgentPreviewFromDryRun_preservesHeldAndFlagged(t *testing.T) {
 
 	flagged := gradingAgentPreviewFromDryRun(gradingagentsvc.DryRunPreview{
 		Flagged: &gradingagentsvc.DryRunFlagPreview{Reason: "Blank submission", Priority: "high"},
-	}, false)
+	}, false, "")
 	if flagged.Flagged == nil || flagged.Flagged.Reason != "Blank submission" {
 		t.Fatal("expected flagged preview")
 	}

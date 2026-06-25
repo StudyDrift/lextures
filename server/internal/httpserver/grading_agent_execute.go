@@ -114,7 +114,7 @@ func (d Deps) executeGradingAgentWorkflowPreview(
 		return gradingAgentPreviewResult{}, execErr
 	}
 
-	return gradingAgentPreviewFromDryRun(preview, gradingagentsvc.WorkflowUsesLLM(in.WorkflowGraph)), nil
+	return gradingAgentPreviewFromDryRun(preview, gradingagentsvc.WorkflowUsesLLM(in.WorkflowGraph), modelID), nil
 }
 
 func (d Deps) executeGradingAgentLegacyScore(
@@ -183,15 +183,37 @@ func (d Deps) buildLegacyGradingAgentScoreRequest(in gradingAgentExecuteInput, m
 	return scoreReq
 }
 
-func gradingAgentPreviewFromDryRun(preview gradingagentsvc.DryRunPreview, gradedByAI bool) gradingAgentPreviewResult {
+func gradingAgentPreviewFromDryRun(preview gradingagentsvc.DryRunPreview, gradedByAI bool, modelID string) gradingAgentPreviewResult {
+	var model *string
+	if modelID != "" {
+		model = &modelID
+	}
+	var pt, ct *int
+	if preview.PromptTokens > 0 {
+		ptVal := preview.PromptTokens
+		pt = &ptVal
+	}
+	if preview.CompletionTokens > 0 {
+		ctVal := preview.CompletionTokens
+		ct = &ctVal
+	}
+	var cost *float64
+	if preview.CostUSD > 0 {
+		costVal := preview.CostUSD
+		cost = &costVal
+	}
 	return gradingAgentPreviewResult{
-		Points:       preview.SuggestedPoints,
-		Comment:      preview.Comment,
-		Confidence:   preview.Confidence,
-		RubricScores: preview.RubricScores,
-		Flagged:      preview.Flagged,
-		Held:         preview.Held,
-		GradedByAI:   gradedByAI,
+		Points:           preview.SuggestedPoints,
+		Comment:          preview.Comment,
+		Confidence:       preview.Confidence,
+		RubricScores:     preview.RubricScores,
+		Flagged:          preview.Flagged,
+		Held:             preview.Held,
+		ModelID:          model,
+		PromptTokens:     pt,
+		CompletionTokens: ct,
+		CostUSD:          cost,
+		GradedByAI:       gradedByAI,
 	}
 }
 

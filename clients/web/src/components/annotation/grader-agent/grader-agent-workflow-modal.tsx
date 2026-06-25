@@ -54,7 +54,7 @@ export function GraderAgentWorkflowModal({
 }: GraderAgentWorkflowModalProps) {
   const { t } = useTranslation('common')
   const isTemplateMode = templateMode != null
-  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled } =
+  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled } =
     usePlatformFeatures()
   const titleId = useId()
   const statusId = useId()
@@ -108,6 +108,11 @@ export function GraderAgentWorkflowModal({
     setConfirmOverwrite,
     runFilterState,
     setRunFilterState,
+    runCostEstimate,
+    runCostEstimateLoading,
+    budgetUsd,
+    setBudgetUsd,
+    graderAgentCostEstimateEnabled,
     runProgress,
     statusMessage,
     handleDryRun,
@@ -340,6 +345,12 @@ export function GraderAgentWorkflowModal({
               submissions={submissions}
               filterState={runFilterState}
               setFilterState={setRunFilterState}
+              costEstimateEnabled={graderAgentCostEstimateEnabled === true}
+              runCostEstimate={runCostEstimate}
+              runCostEstimateLoading={runCostEstimateLoading}
+              budgetUsd={budgetUsd}
+              setBudgetUsd={setBudgetUsd}
+              onRequestDryRunEstimate={handleDryRun}
             />
           )}
           {!isTemplateMode && !accepted ? (

@@ -217,6 +217,7 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 				PromptTokens:     preview.PromptTokens,
 				CompletionTokens: preview.CompletionTokens,
 				TotalTokens:      preview.PromptTokens + preview.CompletionTokens,
+				CostUSD:          preview.CostUSD,
 			}, true)
 			d.logAIInferenceAllowed(r, viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText), aigateway.Decision{Allowed: true, OptInConfirmed: true})
 		}
@@ -241,11 +242,16 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			pt := preview.PromptTokens
 			ct := preview.CompletionTokens
 			pts := preview.SuggestedPoints
+			var costPtr *float64
+			if preview.CostUSD > 0 {
+				cost := preview.CostUSD
+				costPtr = &cost
+			}
 			_, _ = gradingagentrepo.InsertResult(runCtx, d.Pool, gradingagentrepo.InsertResultInput{
 				ConfigID: configID, SubmissionID: submissionID, IsDryRun: true,
 				SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
 				Status: gradingagentrepo.ItemSuggested, ModelID: &modelID,
-				PromptTokens: &pt, CompletionTokens: &ct,
+				PromptTokens: &pt, CompletionTokens: &ct, CostUSD: costPtr,
 			})
 		}
 
