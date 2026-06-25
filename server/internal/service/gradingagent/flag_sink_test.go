@@ -55,16 +55,16 @@ func TestValidateWorkflowGraph_flagOnlyWithoutGradeSlot(t *testing.T) {
 	}
 }
 
-func TestExecuteWorkflowDryRun_flagBlankSubmission(t *testing.T) {
+func TestExecuteWorkflow_flagBlankSubmission(t *testing.T) {
 	g := sampleGraphRouterFlagElseGrade()
 	var logs []string
-	preview, err := ExecuteWorkflowDryRun(context.Background(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(context.Background(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{""},
 		MaxPoints:   10,
 		ModelID:     "test/model",
 		Runner:      stubDryRunRunner{},
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			if ev.Type == "log" {
 				logs = append(logs, ev.Message)
 			}

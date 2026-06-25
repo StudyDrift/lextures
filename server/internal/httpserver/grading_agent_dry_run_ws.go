@@ -65,7 +65,7 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 
 		var first graderAgentDryRunWSFirstMessage
 		if err := json.Unmarshal(payload, &first); err != nil || strings.TrimSpace(first.AuthToken) == "" {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Invalid first message. Send authToken, submissionId, and workflowGraph."})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "Invalid first message. Send authToken, submissionId, and workflowGraph."})
 			return
 		}
 		u, err := d.JWTSigner.Verify(r.Context(), first.AuthToken)
@@ -82,22 +82,22 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 
 		submissionID, err := uuid.Parse(strings.TrimSpace(first.SubmissionID))
 		if err != nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Invalid submission id."})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "Invalid submission id."})
 			return
 		}
 		if first.WorkflowGraph == nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Workflow graph is required."})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "Workflow graph is required."})
 			return
 		}
 
 		cid, assignRow, loadErr := d.loadAssignmentForSubmissionsByIDs(r.Context(), courseCode, itemID)
 		if loadErr != nil || assignRow == nil || cid == nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Assignment not found."})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "Assignment not found."})
 			return
 		}
 		subRow, err := moduleassignmentsubmissions.GetByIDForCourse(r.Context(), d.Pool, *cid, submissionID)
 		if err != nil || subRow == nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Submission not found."})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "Submission not found."})
 			return
 		}
 		svc := d.gradingAgentService()
@@ -106,15 +106,15 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			VisionEnabled:    d.graderAgentVisionGradingEnabled(),
 		})
 		if err != nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: dryRunSubmissionLoadMessage(err)})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: dryRunSubmissionLoadMessage(err)})
 			return
 		}
 		if content.FailureReason != "" {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: content.FailureReason})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: content.FailureReason})
 			return
 		}
 		if content.Modality == gradingagentsvc.ModalityVision {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Dry run for vision submissions requires a workflow with extractable text or a simplified graph."})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "Dry run for vision submissions requires a workflow with extractable text or a simplified graph."})
 			return
 		}
 		submissions := content.Markdowns
@@ -126,7 +126,7 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			if ve, ok := compileErr.(gradingagentsvc.ValidationError); ok {
 				msg = ve.Message
 			}
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: msg})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: msg})
 			return
 		}
 
@@ -138,44 +138,44 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			var modelErr error
 			modelID, modelErr = d.resolveGraderAgentModelID(r.Context(), viewer, explicitModel, nil)
 			if modelErr != nil {
-				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: gradingagentsvc.UserFacingScoreError(modelErr)})
+				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: gradingagentsvc.UserFacingScoreError(modelErr)})
 				return
 			}
 			governancePrompt = compiled.ScoreRequest.InstructorPrompt
 			if blockMsg, blocked := d.evaluateAIGatewayBlock(r.Context(), viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText)); blocked {
-				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: blockMsg})
+				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: blockMsg})
 				return
 			}
 			if d.openRouterClient() == nil || strings.TrimSpace(d.effectiveConfig().OpenRouterAPIKey) == "" {
-				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "AI provider is not configured."})
+				_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: "AI provider is not configured."})
 				return
 			}
 		}
 
 		contentRow, contentErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, compiled.ContentItemID)
 		if contentErr != nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: contentErr.Error()})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: contentErr.Error()})
 			return
 		}
 		rubricRow, rubricErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, compiled.RubricItemID)
 		if rubricErr != nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: rubricErr.Error()})
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.ExecutionEvent{Type: "error", Message: rubricErr.Error()})
 			return
 		}
 		rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
 		maxPoints := gradingagentsvc.MaxPointsFromAssignment(assignRow)
 
 		runCtx := r.Context()
-		emit := func(ev gradingagentsvc.DryRunEvent) {
+		emit := func(ev gradingagentsvc.ExecutionEvent) {
 			_ = wsWriteJSON(runCtx, conn, ev)
 		}
-		emit(gradingagentsvc.DryRunEvent{Type: "log", Level: "info", Message: "Starting dry run…"})
-		emit(gradingagentsvc.DryRunEvent{
+		emit(gradingagentsvc.ExecutionEvent{Type: "log", Level: "info", Message: "Starting dry run…"})
+		emit(gradingagentsvc.ExecutionEvent{
 			Type: "log", Level: "info",
 			Message: fmt.Sprintf("Submission input modality: %s.", content.Modality.ModalityLogLabel()),
 		})
 
-		preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(runCtx, gradingagentsvc.DryRunExecutionInput{
+		preview, execErr := gradingagentsvc.ExecuteWorkflow(runCtx, gradingagentsvc.ExecutionInput{
 			Graph:           first.WorkflowGraph,
 			Submissions:     submissions,
 			InputModality:   content.Modality,
@@ -206,7 +206,7 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			if ve, ok := execErr.(gradingagentsvc.ValidationError); ok {
 				msg = ve.Message
 			}
-			emit(gradingagentsvc.DryRunEvent{Type: "error", Message: msg})
+			emit(gradingagentsvc.ExecutionEvent{Type: "error", Message: msg})
 			return
 		}
 
@@ -255,7 +255,7 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			})
 		}
 
-		emit(gradingagentsvc.DryRunEvent{Type: "complete"})
+		emit(gradingagentsvc.ExecutionEvent{Type: "complete"})
 	}
 }
 

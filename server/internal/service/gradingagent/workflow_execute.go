@@ -10,8 +10,8 @@ import (
 	"github.com/lextures/lextures/server/internal/models/assignmentrubric"
 )
 
-// DryRunEvent is streamed to the client while a workflow dry run executes.
-type DryRunEvent struct {
+// ExecutionEvent is streamed while a workflow executes (dry-run WS or live batch grading).
+type ExecutionEvent struct {
 	Type            string         `json:"type"`
 	NodeID          string         `json:"nodeId,omitempty"`
 	NodeType        string         `json:"nodeType,omitempty"`
@@ -64,8 +64,8 @@ type DryRunRunner interface {
 	RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, jsonMode bool) (text string, promptTokens, completionTokens int, costUSD float64, err error)
 }
 
-// DryRunExecutionInput configures a step-by-step workflow dry run.
-type DryRunExecutionInput struct {
+// ExecutionInput configures a step-by-step workflow execution (dry-run or live).
+type ExecutionInput struct {
 	Graph                  *WorkflowGraph
 	Submissions            []string
 	InputModality          InputModality
@@ -81,7 +81,7 @@ type DryRunExecutionInput struct {
 	CourseCode             string
 	Runner                 DryRunRunner
 	CodeRunner             CodeTestRunner
-	Emit                   func(DryRunEvent)
+	Emit                   func(ExecutionEvent)
 }
 
 type slotValue struct {
@@ -189,7 +189,7 @@ func gatherRouterInput(g *WorkflowGraph, routerID string, nodeByID map[string]Wo
 	return slotValue{}, false
 }
 
-func buildPredicateContext(in DryRunExecutionInput, input slotValue) PredicateEvalContext {
+func buildPredicateContext(in ExecutionInput, input slotValue) PredicateEvalContext {
 	ctx := PredicateEvalContext{
 		SubmissionText: JoinSubmissions(in.Submissions),
 		IsLate:         in.IsLate,
@@ -255,8 +255,8 @@ func TopologicalNodeOrder(g *WorkflowGraph) ([]string, error) {
 	return order, nil
 }
 
-// ExecuteWorkflowDryRun walks the graph node by node and streams dry-run events.
-func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRunPreview, error) {
+// ExecuteWorkflow walks the graph node by node, streaming execution events when Emit is set.
+func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, error) {
 	if err := ValidateWorkflowGraph(in.Graph); err != nil {
 		return DryRunPreview{}, err
 	}
@@ -268,7 +268,7 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 	}
 	emit := in.Emit
 	if emit == nil {
-		emit = func(DryRunEvent) {}
+		emit = func(ExecutionEvent) {}
 	}
 
 	nodeByID := make(map[string]WorkflowNode, len(in.Graph.Nodes))
@@ -293,16 +293,16 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 		label := NodeDisplayLabel(node.Data, node.Type)
 
 		if !nodeHasActiveInput(in.Graph, node.ID, nodeByID, state) {
-			emit(DryRunEvent{Type: "node_start", NodeID: node.ID, NodeType: node.Type, NodeLabel: label})
-			emit(DryRunEvent{
+			emit(ExecutionEvent{Type: "node_start", NodeID: node.ID, NodeType: node.Type, NodeLabel: label})
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Skipped (inactive branch).", label),
 			})
-			emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, NodeType: node.Type, Status: "skipped"})
+			emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, NodeType: node.Type, Status: "skipped"})
 			continue
 		}
 
-		emit(DryRunEvent{Type: "node_start", NodeID: node.ID, NodeType: node.Type, NodeLabel: label})
+		emit(ExecutionEvent{Type: "node_start", NodeID: node.ID, NodeType: node.Type, NodeLabel: label})
 
 		var compiledPrompt, compiledSystemPrompt, compiledInput, compiledOutput string
 		switch node.Type {
@@ -313,7 +313,7 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			if modality == "unreadable" || modality == "" {
 				modality = "file"
 			}
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Input modality: %s; loaded %d part(s) (%d characters).", label, modality, len(in.Submissions), len(text)),
 			})
@@ -321,30 +321,30 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			itemID := activityAssignmentItemID(node)
 			markdown, rubric, loadErr := in.resolveActivity(itemID)
 			if loadErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, loadErr
 			}
 			state.set(node.ID, HandleContent, slotValue{text: markdown})
 			state.set(node.ID, HandleRubric, slotValue{text: formatRubricVariableText(rubric), rubric: rubric})
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Loaded assignment content (%d chars) and rubric.", label, len(markdown)),
 			})
 		case NodeTypeRubric:
 			rubric, loadErr := in.LoadRubricDefinition(node)
 			if loadErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, loadErr
 			}
 			state.set(node.ID, HandleRubric, slotValue{text: formatRubricVariableText(rubric), rubric: rubric})
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Loaded %d criteria.", label, len(rubric.Criteria)),
 			})
 		case NodeTypeReference:
 			text, truncated, loadErr := in.LoadReferenceText(ctx, node)
 			if loadErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, loadErr
 			}
 			state.set(node.ID, HandleReference, slotValue{text: text})
@@ -353,7 +353,7 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			if truncated {
 				logMsg += " (truncated)"
 			}
-			emit(DryRunEvent{Type: "log", Level: "info", Message: logMsg})
+			emit(ExecutionEvent{Type: "log", Level: "info", Message: logMsg})
 		case NodeTypeAI:
 			prompt := graderPrompt(node)
 			inputText := gatherAIInput(in.Graph, node.ID, nodeByID, state)
@@ -363,19 +363,19 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			rubricForOutput := resolveAIRubric(in.Graph, node.ID, nodeByID, state, in.DefaultRubric)
 			systemPrompt := BuildAISystemPrompt(outputFormat, rubricForOutput, in.MaxPoints)
 			if in.Runner == nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
 			}
 			out, pt, ct, cost, runErr := in.Runner.RunPrompt(ctx, in.ModelID, systemPrompt, prompt, inputText, true)
 			if runErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, runErr
 			}
 			grade, parseErr := ParseAIOutput(out, outputFormat, rubricForOutput, in.MaxPoints)
 			if parseErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(parseErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(parseErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, parseErr
 			}
 			totalPromptTokens += pt
@@ -386,24 +386,24 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			compiledSystemPrompt = systemPrompt
 			compiledInput = inputText
 			compiledOutput = out
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] AI output: %s", label, truncateLog(out, 240)),
 			})
 		case NodeTypeGrader:
 			req, buildErr := buildGraderScoreRequest(in, node, nodeByID, state)
 			if buildErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, buildErr
 			}
 			if in.Runner == nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
 			}
 			result, scoreErr := in.Runner.Score(ctx, req)
 			if scoreErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(scoreErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(scoreErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, scoreErr
 			}
 			totalPromptTokens += result.PromptTokens
@@ -412,29 +412,29 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			grade := result.Output
 			state.set(node.ID, HandleGrade, slotValue{grade: &grade})
 			state.set(node.ID, HandleComments, slotValue{text: grade.Comment})
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Suggested score %.2f (confidence %.0f%%).", label, grade.TotalPoints, grade.Confidence*100),
 			})
 		case NodeTypeCriterionGrader:
 			criterionID, cidErr := criterionIDFromNode(node)
 			if cidErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, cidErr
 			}
 			req, buildErr := buildGraderScoreRequest(in, node, nodeByID, state)
 			if buildErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, buildErr
 			}
 			criterion, critErr := findRubricCriterion(req.Rubric, criterionID)
 			if critErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, critErr.Error())})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, critErr.Error())})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, ValidationError{Field: "node:" + node.ID + ".criterionId", Message: critErr.Error()}
 			}
 			if in.Runner == nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
 			}
 			prompt := req.InstructorPrompt
@@ -450,14 +450,14 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			)
 			out, pt, ct, cost, runErr := in.Runner.RunPrompt(ctx, req.ModelID, systemPrompt, userMessage, "", true)
 			if runErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, runErr
 			}
 			grade, parseErr := ParseSingleCriterionOutput(out, req.Rubric, criterionID)
 			if parseErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(parseErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(parseErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, parseErr
 			}
 			totalPromptTokens += pt
@@ -469,32 +469,32 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			compiledSystemPrompt = systemPrompt
 			compiledInput = userMessage
 			compiledOutput = out
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Criterion %q: %.2f (confidence %.0f%%).", label, criterion.Title, grade.TotalPoints, grade.Confidence*100),
 			})
 		case NodeTypeCodeTestRunner:
 			if execErr := executeCodeTestRunnerNode(ctx, node, in.Graph, nodeByID, state, in.CodeRunner, emit, label); execErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, execErr
 			}
 		case NodeTypeConditionalRouter:
 			cond, condErr := routerConditionFromNode(node)
 			if condErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, ValidationError{Field: "node:" + node.ID + ".condition", Message: condErr.Error()}
 			}
 			inputVal, hasInput := gatherRouterInput(in.Graph, node.ID, nodeByID, state)
 			if !hasInput {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, ValidationError{Field: "node:" + node.ID, Message: "Router input is required."}
 			}
 			predCtx := buildPredicateContext(in, inputVal)
 			result, evalErr := EvaluateRouterCondition(cond, predCtx)
 			if evalErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, evalErr.Error())})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, evalErr.Error())})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, evalErr
 			}
 			takenHandle := HandleElse
@@ -507,26 +507,26 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			}
 			state.set(node.ID, takenHandle, inputVal)
 			state.deactivateRouterBranch(in.Graph, node.ID, untakenHandle)
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Condition %s → %s branch.", label, formatRouterConditionSentence(cond), branchLabel),
 			})
 		case NodeTypeOriginality:
 			if execErr := executeOriginalityNode(ctx, node, in, state, emit, label); execErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(execErr))})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, execErr
 			}
 		case NodeTypeScoreAggregator:
 			if execErr := executeScoreAggregatorNode(in.Graph, node, nodeByID, state, in.MaxPoints, in.DefaultRubric, emit, label); execErr != nil {
-				emit(DryRunEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, execErr.Error())})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, execErr.Error())})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, execErr
 			}
 		case NodeTypeHumanReviewGate:
 			gradeVal, gradeErr := gatherGateGrade(in.Graph, node.ID, nodeByID, state)
 			if gradeErr != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, gradeErr
 			}
 			flagTruthy := gatherGateFlagTruthy(in.Graph, node.ID, nodeByID, state)
@@ -542,12 +542,12 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 				Queue:           queue,
 				ConfidenceFloor: floor,
 			}
-			emit(DryRunEvent{
+			emit(ExecutionEvent{
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("Would hold for review (mode=%s, would-hold=%v)", mode, wouldHold),
 			})
 			if wouldHold && holdReason != "" {
-				emit(DryRunEvent{Type: "log", Level: "info", Message: holdReason})
+				emit(ExecutionEvent{Type: "log", Level: "info", Message: holdReason})
 			}
 		case NodeTypeFlagForReview:
 			reason, queue, priority := assembleFlagForReview(in.Graph, node, nodeByID, state, in)
@@ -555,42 +555,42 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 			preview.PromptTokens = totalPromptTokens
 			preview.CompletionTokens = totalCompletionTokens
 			preview.CostUSD = totalCostUSD
-			emit(DryRunEvent{Type: "log", Level: "info", Message: "── Flag for Review (dry run — not persisted) ──"})
-			emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Would flag for review: %s", truncateLog(reason, 400))})
-			emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Queue: %s · Priority: %s", queue, priority)})
-			emit(DryRunEvent{Type: "result", Result: &preview})
+			emit(ExecutionEvent{Type: "log", Level: "info", Message: "── Flag for Review (dry run — not persisted) ──"})
+			emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Would flag for review: %s", truncateLog(reason, 400))})
+			emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Queue: %s · Priority: %s", queue, priority)})
+			emit(ExecutionEvent{Type: "result", Result: &preview})
 		case NodeTypeOutput:
 			if preview.Flagged != nil {
-				emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("[%s] Skipped (flagged on another branch).", label)})
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, NodeType: node.Type, Status: "skipped"})
+				emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("[%s] Skipped (flagged on another branch).", label)})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, NodeType: node.Type, Status: "skipped"})
 				continue
 			}
 			held := preview.Held
 			preview, err = assembleOutputPreview(in.Graph, nodeByID, state, in.MaxPoints)
 			if err != nil {
-				emit(DryRunEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
+				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, err
 			}
 			preview.Held = held
 			preview.PromptTokens = totalPromptTokens
 			preview.CompletionTokens = totalCompletionTokens
 			preview.CostUSD = totalCostUSD
-			emit(DryRunEvent{Type: "log", Level: "info", Message: "── Student Grade (dry run — not persisted) ──"})
-			emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Score: %.2f", preview.SuggestedPoints)})
+			emit(ExecutionEvent{Type: "log", Level: "info", Message: "── Student Grade (dry run — not persisted) ──"})
+			emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Score: %.2f", preview.SuggestedPoints)})
 			if len(preview.RubricScores) > 0 {
-				emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Rubric: %d criteria scored.", len(preview.RubricScores))})
+				emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Rubric: %d criteria scored.", len(preview.RubricScores))})
 			}
 			if strings.TrimSpace(preview.Comment) != "" {
-				emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Comment: %s", truncateLog(preview.Comment, 400))})
+				emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Comment: %s", truncateLog(preview.Comment, 400))})
 			} else {
-				emit(DryRunEvent{Type: "log", Level: "info", Message: "Comment: (none)"})
+				emit(ExecutionEvent{Type: "log", Level: "info", Message: "Comment: (none)"})
 			}
-			emit(DryRunEvent{Type: "result", Result: &preview})
+			emit(ExecutionEvent{Type: "result", Result: &preview})
 		default:
-			emit(DryRunEvent{Type: "log", Level: "warn", Message: fmt.Sprintf("[%s] Skipped unsupported node type %q.", label, node.Type)})
+			emit(ExecutionEvent{Type: "log", Level: "warn", Message: fmt.Sprintf("[%s] Skipped unsupported node type %q.", label, node.Type)})
 		}
 
-		emit(DryRunEvent{
+		emit(ExecutionEvent{
 			Type:                 "node_complete",
 			NodeID:               node.ID,
 			NodeType:             node.Type,
@@ -605,7 +605,7 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 	return preview, nil
 }
 
-func (in DryRunExecutionInput) resolveActivity(itemID string) (string, *assignmentrubric.RubricDefinition, error) {
+func (in ExecutionInput) resolveActivity(itemID string) (string, *assignmentrubric.RubricDefinition, error) {
 	if in.ResolveActivity != nil {
 		return in.ResolveActivity(itemID)
 	}
@@ -752,7 +752,7 @@ func buildPromptContext(
 }
 
 func buildGraderScoreRequest(
-	in DryRunExecutionInput,
+	in ExecutionInput,
 	node WorkflowNode,
 	nodeByID map[string]WorkflowNode,
 	state *executionState,

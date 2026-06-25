@@ -32,16 +32,16 @@ func TestValidateWorkflowGraph_aiGateOutput(t *testing.T) {
 	}
 }
 
-func TestExecuteWorkflowDryRun_gateHoldsLowConfidence(t *testing.T) {
+func TestExecuteWorkflow_gateHoldsLowConfidence(t *testing.T) {
 	g := sampleGraphAIGateOutput()
 	var logs []string
-	preview, err := ExecuteWorkflowDryRun(context.Background(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(context.Background(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{"short answer"},
 		MaxPoints:   10,
 		ModelID:     "test/model",
 		Runner: lowConfidenceDryRunRunner{},
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			if ev.Type == "log" {
 				logs = append(logs, ev.Message)
 			}

@@ -1,6 +1,6 @@
 # GA-S2 — Remove the dead HTTP dry-run path; rename the execution engine
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Grading Agent — Over-complexity / Simplification |
 | **Severity** | MINOR |
 | **Markets** | internal maintainability |
-| **Status (today)** | THIN |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | — |
@@ -128,7 +128,15 @@ The "DryRun" name actively misleads readers into thinking the consumer only prev
 ## 19. References
 
 - `server/internal/httpserver/grading_agent_http.go` (`handlePostGraderAgentDryRun`).
-- `server/internal/httpserver/grading_agent_dry_run_ws.go` (`ExecuteWorkflowDryRun` call).
-- `server/internal/service/gradingagent/workflow_execute.go` (engine + `DryRun*` types).
-- `clients/web/src/lib/courses-api.ts` (`postGraderAgentDryRun`, `streamGraderAgentDryRun`).
+- `server/internal/httpserver/grading_agent_dry_run_ws.go` (`ExecuteWorkflow` call).
+- `server/internal/service/gradingagent/workflow_execute.go` (engine + `Execution*` types).
+- `clients/web/src/lib/courses-api.ts` (`streamGraderAgentDryRun`).
 - Related: [GA-S1](simplify-1-unify-grade-write-paths.md), [GA-B4](bug-4-post-dry-run-mispreviews-graphs.md).
+
+## 20. Implementation notes
+
+- The dead `POST …/grader-agent/dry-run` route, handler, and `postGraderAgentDryRun` client function were already removed prior to this change (via GA-S1 / GA-B4 work). Confirmed by grep: no live code references remain.
+- Renamed the shared workflow engine: `ExecuteWorkflowDryRun` → `ExecuteWorkflow`, `DryRunExecutionInput` → `ExecutionInput`, `DryRunEvent` → `ExecutionEvent` across `workflow_execute.go` and all call sites (WS dry run, queue consumer execute path, node helpers, tests).
+- `Service.Score` is retained for legacy configs without a compilable workflow graph (`executeGradingAgentLegacyScore` in `grading_agent_execute.go`).
+- WS dry-run wire protocol unchanged; only internal Go symbol names updated.
+- OpenAPI never documented the removed POST route; no spec change required.
