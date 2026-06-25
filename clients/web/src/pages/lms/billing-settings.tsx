@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { ExternalLink, Loader2 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
-import { fetchMyEntitlements, formatMoney, openBillingPortal, type Entitlement } from '../../lib/billing-api'
+import { fetchMyEntitlements, fetchMyTransactions, formatMoney, openBillingPortal, type Entitlement, type Transaction } from '../../lib/billing-api'
 import { invoiceDownloadUrl } from '../../lib/tax-api'
 import { authorizedFetch } from '../../lib/api'
 import { LmsPage } from './lms-page'
@@ -23,8 +23,9 @@ function entitlementLabel(e: Entitlement): string {
 
 export default function BillingSettingsPage() {
   const titleId = useId()
-  const { ffStripeBilling, loading: featuresLoading } = usePlatformFeatures()
+  const { ffStripeBilling, ffPaymentsEnabled, loading: featuresLoading } = usePlatformFeatures()
   const [entitlements, setEntitlements] = useState<Entitlement[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [me, setMe] = useState<MeProfile | null>(null)
   const [loading, setLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -34,11 +35,13 @@ export default function BillingSettingsPage() {
     setLoading(true)
     setError(null)
     try {
-      const [items, meRes] = await Promise.all([
+      const [items, txItems, meRes] = await Promise.all([
         fetchMyEntitlements(),
+        ffPaymentsEnabled ? fetchMyTransactions() : Promise.resolve([]),
         authorizedFetch('/api/v1/me'),
       ])
       setEntitlements(items)
+      setTransactions(txItems)
       if (meRes.ok) {
         setMe((await meRes.json()) as MeProfile)
       }
@@ -47,12 +50,12 @@ export default function BillingSettingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [ffPaymentsEnabled])
 
   useEffect(() => {
-    if (featuresLoading || !ffStripeBilling) return
+    if (featuresLoading || (!ffStripeBilling && !ffPaymentsEnabled)) return
     void load()
-  }, [featuresLoading, ffStripeBilling, load])
+  }, [featuresLoading, ffStripeBilling, ffPaymentsEnabled, load])
 
   const activeSubscription = entitlements.find((e) => e.entitlementType.startsWith('subscription'))
 
@@ -73,7 +76,7 @@ export default function BillingSettingsPage() {
     return <p>Loading…</p>
   }
 
-  if (!ffStripeBilling) {
+  if (!ffStripeBilling && !ffPaymentsEnabled) {
     return (
       <LmsPage title="Billing">
         <p role="alert">Billing is not enabled for this institution.</p>
@@ -131,6 +134,29 @@ export default function BillingSettingsPage() {
           <h2 className="text-lg font-medium text-slate-900 dark:text-neutral-100">Purchase history</h2>
           {loading ? (
             <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">Loading…</p>
+          ) : transactions.length > 0 ? (
+            <div className="mt-4 overflow-x-auto">
+              <table className="min-w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
+                    <th className="py-2 pr-4 font-medium">Provider</th>
+                    <th className="py-2 pr-4 font-medium">Amount</th>
+                    <th className="py-2 pr-4 font-medium">Date</th>
+                    <th className="py-2 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.map((tx) => (
+                    <tr key={tx.id} className="border-b border-slate-100 dark:border-neutral-800">
+                      <td className="py-3 pr-4 capitalize">{tx.provider}</td>
+                      <td className="py-3 pr-4">{formatMoney(tx.amountCents, tx.currency)}</td>
+                      <td className="py-3 pr-4">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                      <td className="py-3 capitalize">{tx.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           ) : entitlements.length === 0 ? (
             <p className="mt-4 text-sm text-slate-600 dark:text-neutral-400">No purchases yet.</p>
           ) : (

@@ -11,6 +11,23 @@ test.describe('Billing — API auth', () => {
     expect(res.status).toBe(401)
   })
 
+  test('GET /api/v1/me/transactions returns 401 without auth', async () => {
+    const res = await fetch(`${apiBase}/api/v1/me/transactions`)
+    expect(res.status).toBe(401)
+  })
+
+  test('POST /api/v1/checkout returns 401 without auth', async () => {
+    const res = await fetch(`${apiBase}/api/v1/checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        successUrl: 'http://localhost:5173/checkout/success',
+        cancelUrl: 'http://localhost:5173/checkout/cancel',
+      }),
+    })
+    expect(res.status).toBe(401)
+  })
+
   test('POST /api/v1/billing/checkout returns 401 without auth', async () => {
     const res = await fetch(`${apiBase}/api/v1/billing/checkout`, {
       method: 'POST',

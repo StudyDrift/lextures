@@ -13,13 +13,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stripe/stripe-go/v81"
 	billingportal "github.com/stripe/stripe-go/v81/billingportal/session"
-	checkoutsession "github.com/stripe/stripe-go/v81/checkout/session"
 	"github.com/stripe/stripe-go/v81/customer"
 	"github.com/stripe/stripe-go/v81/webhook"
 
 	"github.com/lextures/lextures/server/internal/config"
 	repoBilling "github.com/lextures/lextures/server/internal/repos/billing"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	"github.com/lextures/lextures/server/internal/service/paymentprovider"
 )
 
 // CheckoutRequest is the learner checkout payload.
@@ -67,104 +67,44 @@ func (c StripeConfig) IsConfigured() bool {
 
 // CreateCheckoutSession starts Stripe Checkout for a course purchase or subscription.
 func CreateCheckoutSession(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, req CheckoutRequest) (*CheckoutResult, error) {
-	var orgID uuid.UUID
 	if !cfg.IsConfigured() {
 		return nil, errors.New("stripe not configured")
 	}
-	stripe.Key = cfg.SecretKey
-
-	customerID, err := ensureCustomer(ctx, pool, cfg, req.UserID, req.Email)
-	if err != nil {
-		return nil, err
-	}
-
-	params := &stripe.CheckoutSessionParams{
-		Customer:            stripe.String(customerID),
-		Mode:                stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL:          stripe.String(req.SuccessURL),
-		CancelURL:           stripe.String(req.CancelURL),
-		AllowPromotionCodes: stripe.Bool(true),
-		Metadata: map[string]string{
-			"user_id": req.UserID.String(),
-		},
-	}
-
-	plan := strings.TrimSpace(req.Plan)
-	switch {
-	case req.CourseID != nil:
+	taxCode := "txcd_99999999"
+	if req.CourseID != nil {
 		price, err := repoBilling.CoursePriceByID(ctx, pool, *req.CourseID)
 		if err != nil {
 			return nil, err
 		}
-		if price == nil {
-			return nil, fmt.Errorf("course not found")
-		}
-		if price.PriceCents <= 0 {
-			return nil, fmt.Errorf("course is free")
-		}
-		orgID = price.OrgID
-		currency := strings.ToLower(price.Currency)
-		if currency == "" {
-			currency = "usd"
-		}
-		params.Metadata["course_id"] = req.CourseID.String()
-		params.Metadata["org_id"] = orgID.String()
-		params.Metadata["entitlement_type"] = repoBilling.TypeCoursePurchase
-		if code := strings.TrimSpace(req.AffiliateCode); code != "" {
-			params.Metadata["affiliate_code"] = code
-		}
-		params.PaymentIntentData = &stripe.CheckoutSessionPaymentIntentDataParams{
-			Metadata: params.Metadata,
-		}
-		taxCode := "txcd_99999999"
-		if taxEnabled, settings, _ := TaxEnabledForOrg(ctx, pool, orgID, req.PlatformTaxEnabled); taxEnabled && settings != nil {
-			taxCode = settings.DefaultTaxCategory
-		}
-		params.LineItems = []*stripe.CheckoutSessionLineItemParams{
-			{
-				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-					Currency: stripe.String(currency),
-					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-						Name:    stripe.String(price.Title),
-						TaxCode: stripe.String(taxCode),
-					},
-					UnitAmount: stripe.Int64(int64(price.PriceCents)),
-				},
-				Quantity: stripe.Int64(1),
-			},
-		}
-	case plan == "monthly" || plan == "annual":
-		params.Mode = stripe.String(string(stripe.CheckoutSessionModeSubscription))
-		priceID := cfg.MonthlyPriceID
-		entType := repoBilling.TypeSubscriptionMonthly
-		if plan == "annual" {
-			priceID = cfg.AnnualPriceID
-			entType = repoBilling.TypeSubscriptionAnnual
-		}
-		if priceID == "" {
-			return nil, fmt.Errorf("subscription price not configured")
-		}
-		params.Metadata["entitlement_type"] = entType
-		params.LineItems = []*stripe.CheckoutSessionLineItemParams{
-			{Price: stripe.String(priceID), Quantity: stripe.Int64(1)},
-		}
-	default:
-		return nil, fmt.Errorf("course_id or plan required")
-	}
-
-	if orgID != uuid.Nil {
-		if taxEnabled, _, _ := TaxEnabledForOrg(ctx, pool, orgID, req.PlatformTaxEnabled); taxEnabled {
-			params.AutomaticTax = &stripe.CheckoutSessionAutomaticTaxParams{
-				Enabled: stripe.Bool(true),
+		if price != nil {
+			if taxEnabled, settings, _ := TaxEnabledForOrg(ctx, pool, price.OrgID, req.PlatformTaxEnabled); taxEnabled && settings != nil {
+				taxCode = settings.DefaultTaxCategory
 			}
 		}
 	}
-
-	sess, err := checkoutsession.New(params)
+	pcfg := paymentprovider.Config{
+		StripeSecretKey:      cfg.SecretKey,
+		StripeWebhookSecret:  cfg.WebhookSecret,
+		StripeMonthlyPriceID: cfg.MonthlyPriceID,
+		StripeAnnualPriceID:  cfg.AnnualPriceID,
+		PublicWebOrigin:      cfg.PublicWebOrigin,
+	}
+	result, err := paymentprovider.StartCheckout(ctx, pool, pcfg, paymentprovider.StartCheckoutRequest{
+		UserID:             req.UserID,
+		Email:              req.Email,
+		CourseID:           req.CourseID,
+		Plan:               req.Plan,
+		PromoCode:          req.PromoCode,
+		AffiliateCode:      req.AffiliateCode,
+		SuccessURL:         req.SuccessURL,
+		CancelURL:          req.CancelURL,
+		PlatformTaxEnabled: req.PlatformTaxEnabled,
+		TaxCode:            taxCode,
+	})
 	if err != nil {
 		return nil, err
 	}
-	return &CheckoutResult{SessionID: sess.ID, CheckoutURL: sess.URL}, nil
+	return &CheckoutResult{SessionID: result.SessionID, CheckoutURL: result.CheckoutURL}, nil
 }
 
 // CreatePortalSession returns a Stripe Customer Portal URL.
@@ -208,6 +148,11 @@ func HandleWebhook(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, bo
 	if err != nil {
 		return nil, err
 	}
+	return HandleWebhookEvent(ctx, pool, event, opts)
+}
+
+// HandleWebhookEvent processes a verified Stripe event (sync or queued worker).
+func HandleWebhookEvent(ctx context.Context, pool *pgxpool.Pool, event stripe.Event, opts WebhookOptions) (*WebhookResult, error) {
 	switch event.Type {
 	case "checkout.session.completed":
 		return handleCheckoutCompleted(ctx, pool, event, opts)
@@ -435,6 +380,11 @@ SELECT id FROM "user".users WHERE stripe_customer_id = $1
 }
 
 func ensureCustomer(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, userID uuid.UUID, email string) (string, error) {
+	return EnsureStripeCustomer(ctx, pool, cfg, userID, email)
+}
+
+// EnsureStripeCustomer returns or creates the Stripe customer id for a user.
+func EnsureStripeCustomer(ctx context.Context, pool *pgxpool.Pool, cfg StripeConfig, userID uuid.UUID, email string) (string, error) {
 	existing, err := repoBilling.StripeCustomerID(ctx, pool, userID)
 	if err != nil {
 		return "", err

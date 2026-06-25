@@ -84,6 +84,7 @@ export type PlatformFeatures = {
   ffCeuTracking: boolean
   ffConsortiumSharing: boolean
   ffStripeBilling: boolean
+  ffPaymentsEnabled: boolean
   ffRevenueShare: boolean
   ffTaxCollection: boolean
   ffLearningPaths: boolean
@@ -175,6 +176,7 @@ const defaultFeatures: PlatformFeatures = {
   ffCeuTracking: false,
   ffConsortiumSharing: false,
   ffStripeBilling: false,
+  ffPaymentsEnabled: false,
   ffRevenueShare: false,
   ffTaxCollection: false,
   ffLearningPaths: false,
@@ -265,6 +267,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffCeuTracking: false,
   ffConsortiumSharing: false,
   ffStripeBilling: false,
+  ffPaymentsEnabled: false,
   ffRevenueShare: false,
   ffTaxCollection: false,
   ffLearningPaths: false,
@@ -362,6 +365,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCeuTracking: data.ffCeuTracking === true,
           ffConsortiumSharing: data.ffConsortiumSharing === true,
           ffStripeBilling: data.ffStripeBilling === true,
+          ffPaymentsEnabled: data.ffPaymentsEnabled === true,
           ffRevenueShare: data.ffRevenueShare === true,
           ffTaxCollection: data.ffTaxCollection === true,
           ffLearningPaths: data.ffLearningPaths === true,
@@ -416,6 +420,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffCeuTracking: next.ffCeuTracking === true,
           ffConsortiumSharing: next.ffConsortiumSharing === true,
           ffStripeBilling: next.ffStripeBilling === true,
+          ffPaymentsEnabled: next.ffPaymentsEnabled === true,
           ffRevenueShare: next.ffRevenueShare === true,
           ffTaxCollection: next.ffTaxCollection === true,
           ffLearningPaths: next.ffLearningPaths === true,

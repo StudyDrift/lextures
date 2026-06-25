@@ -452,6 +452,9 @@ type Config struct {
 	// FFStripeBilling enables Stripe checkout, subscriptions, and entitlement gating (plan 15.3).
 	// Managed in Settings → Global platform (not process env).
 	FFStripeBilling bool
+	// FFPaymentsEnabled enables multi-provider payment abstraction (Stripe + PayPal) (plan 16.8).
+	// Managed in Settings → Global platform (not process env).
+	FFPaymentsEnabled bool
 	// FFRevenueShare enables creator revenue share, affiliate tracking, and Stripe Connect payouts (plan 15.8).
 	// Managed in Settings → Global platform (not process env).
 	FFRevenueShare bool
@@ -467,6 +470,15 @@ type Config struct {
 	StripeMonthlyPriceID string
 	// StripeAnnualPriceID is the Stripe Price id for annual platform subscription.
 	StripeAnnualPriceID string
+
+	// PayPalClientID is the PayPal REST app client id (plan 16.8).
+	PayPalClientID string
+	// PayPalClientSecret is the PayPal REST app secret (plan 16.8).
+	PayPalClientSecret string
+	// PayPalWebhookID verifies inbound PayPal webhooks (plan 16.8).
+	PayPalWebhookID string
+	// PayPalSandbox selects PayPal sandbox API hosts when true.
+	PayPalSandbox bool
 
 	// Adaptive-learning platform gates (managed in Settings → Global platform; combined with
 	// the per-course flag at the callsite). Previously env-only service flags.
@@ -665,6 +677,11 @@ func Load() Config {
 		StripeWebhookSecret:  strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
 		StripeMonthlyPriceID: strings.TrimSpace(os.Getenv("STRIPE_MONTHLY_PRICE_ID")),
 		StripeAnnualPriceID:  strings.TrimSpace(os.Getenv("STRIPE_ANNUAL_PRICE_ID")),
+
+		PayPalClientID:     strings.TrimSpace(os.Getenv("PAYPAL_CLIENT_ID")),
+		PayPalClientSecret: strings.TrimSpace(os.Getenv("PAYPAL_CLIENT_SECRET")),
+		PayPalWebhookID:    strings.TrimSpace(os.Getenv("PAYPAL_WEBHOOK_ID")),
+		PayPalSandbox:      boolEnv("PAYPAL_SANDBOX"),
 
 		AppEnv:              appEnv(),
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),

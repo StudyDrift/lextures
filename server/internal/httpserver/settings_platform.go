@@ -144,6 +144,7 @@ type platformSettingsJSON struct {
 	FFPublicCatalog                 bool `json:"ffPublicCatalog"`
 	FFPublicAPI                     bool `json:"ffPublicApi"`
 	FFStripeBilling                 bool `json:"ffStripeBilling"`
+	FFPaymentsEnabled               bool `json:"ffPaymentsEnabled"`
 	FFRevenueShare                  bool `json:"ffRevenueShare"`
 	FFTaxCollection                 bool `json:"ffTaxCollection"`
 	FFLearningPaths                 bool `json:"ffLearningPaths"`
@@ -353,6 +354,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                 merged.FFPublicCatalog,
 			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
+			FFPaymentsEnabled:               merged.FFPaymentsEnabled,
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFTaxCollection:                 merged.FFTaxCollection,
 			FFLearningPaths:                 merged.FFLearningPaths,
@@ -537,6 +539,7 @@ type putPlatformBody struct {
 	FFPublicCatalog                 *bool `json:"ffPublicCatalog"`
 	FFPublicAPI                     *bool `json:"ffPublicApi"`
 	FFStripeBilling                 *bool `json:"ffStripeBilling"`
+	FFPaymentsEnabled               *bool `json:"ffPaymentsEnabled"`
 	FFRevenueShare                  *bool `json:"ffRevenueShare"`
 	FFTaxCollection                 *bool `json:"ffTaxCollection"`
 	FFLearningPaths                 *bool `json:"ffLearningPaths"`
@@ -867,6 +870,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffpubliccatalog", body.FFPublicCatalog, func(v bool) { wr.FFPublicCatalog = &v })
 		setBool("ffpublicapi", body.FFPublicAPI, func(v bool) { wr.FFPublicAPI = &v })
 		setBool("ffstripebilling", body.FFStripeBilling, func(v bool) { wr.FFStripeBilling = &v })
+		setBool("ffpaymentsenabled", body.FFPaymentsEnabled, func(v bool) { wr.FFPaymentsEnabled = &v })
 		setBool("ffrevenueshare", body.FFRevenueShare, func(v bool) { wr.FFRevenueShare = &v })
 		setBool("fftaxcollection", body.FFTaxCollection, func(v bool) { wr.FFTaxCollection = &v })
 		setBool("fflearningpaths", body.FFLearningPaths, func(v bool) { wr.FFLearningPaths = &v })
@@ -1030,6 +1034,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFPublicCatalog:                 merged.FFPublicCatalog,
 			FFPublicAPI:                     merged.FFPublicAPI,
 			FFStripeBilling:                 merged.FFStripeBilling,
+			FFPaymentsEnabled:               merged.FFPaymentsEnabled,
 			FFRevenueShare:                  merged.FFRevenueShare,
 			FFTaxCollection:                 merged.FFTaxCollection,
 			FFLearningPaths:                 merged.FFLearningPaths,

@@ -78,6 +78,9 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 		now := time.Now().UTC()
 		sweepEmailJobs(context.Background(), pool, cfg, now)
 	})
+	go runEvery(ctx, 15*time.Second, func() {
+		sweepPaymentWebhookJobs(context.Background(), pool, cfg, time.Now().UTC())
+	})
 	go runEvery(ctx, time.Minute, func() {
 		sweepDailyDigests(context.Background(), pool, cfg, time.Now().UTC())
 	})
