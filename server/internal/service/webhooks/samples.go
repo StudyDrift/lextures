@@ -30,6 +30,15 @@ func SampleDataForEvent(eventType webhooks.EventType) map[string]any {
 			"submissionId": uuid.New().String(),
 			"submittedBy":  uuid.New().String(),
 		}
+	case webhooks.EventQuizCompleted:
+		return map[string]any{
+			"courseId":      uuid.New().String(),
+			"moduleItemId":  uuid.New().String(),
+			"attemptId":     uuid.New().String(),
+			"studentUserId": uuid.New().String(),
+			"pointsEarned":  8.0,
+			"scorePercent":  80.0,
+		}
 	default:
 		return map[string]any{"message": "test event"}
 	}

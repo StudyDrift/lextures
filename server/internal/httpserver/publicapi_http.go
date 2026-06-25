@@ -2,6 +2,8 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -81,12 +83,18 @@ func (d Deps) servePublicAPI(w http.ResponseWriter, r *http.Request, rt publicap
 		return d.publicAPIListCourses(w, r, userID, tok), userID
 	case rt.PathPattern == "/api/v1/courses" && rt.Subpath == "" && id != "":
 		return d.publicAPIGetCourse(w, r, userID, id, tok), userID
+	case rt.Subpath == "/enrollments" && r.Method == http.MethodPost:
+		return d.publicAPIPostEnrollment(w, r, userID, id, tok), userID
 	case rt.Subpath == "/enrollments":
 		return d.publicAPIListEnrollments(w, r, userID, id, tok), userID
+	case rt.Subpath == "/announcements":
+		return d.publicAPIPostAnnouncement(w, r, userID, id, tok), userID
 	case rt.PathPattern == "/api/v1/users":
 		return d.publicAPIGetUser(w, r, userID, id, tok), userID
 	case rt.PathPattern == "/api/v1/assignments":
 		return d.publicAPIListAssignments(w, r, userID, tok), userID
+	case rt.PathPattern == "/api/v1/grades" && r.Method == http.MethodPost:
+		return d.publicAPIPostGrade(w, r, userID, tok), userID
 	case rt.PathPattern == "/api/v1/grades":
 		return d.publicAPIListGrades(w, r, userID, tok), userID
 	case rt.PathPattern == "/api/v1/graphql":
@@ -187,11 +195,17 @@ func (d Deps) publicAPIListEnrollments(w http.ResponseWriter, r *http.Request, u
 		publicapi.WriteBadRequest(w, r.URL.Path, err.Error())
 		return http.StatusBadRequest
 	}
+	since, err := publicapi.ParseSinceTime(r.URL.Query())
+	if err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid since timestamp; use RFC3339.")
+		return http.StatusBadRequest
+	}
 	items, err := publicapi.ListEnrollments(r.Context(), d.Pool, userID, cid)
 	if err != nil {
 		publicapi.WriteInternal(w, r.URL.Path)
 		return http.StatusInternalServerError
 	}
+	items = publicapi.FilterBySince(items, since, func(e publicapi.EnrollmentResource) *time.Time { return e.UpdatedAt })
 	slice, total := publicapi.SlicePage(items, page.Offset, page.Limit)
 	data := publicapi.ToAnySlice(slice)
 	resp := publicapi.BuildCollectionResponse(data, total, page.Offset, page.Limit, r.URL.Path, r.URL.Query())
@@ -226,6 +240,11 @@ func (d Deps) publicAPIListAssignments(w http.ResponseWriter, r *http.Request, u
 		publicapi.WriteBadRequest(w, r.URL.Path, err.Error())
 		return http.StatusBadRequest
 	}
+	since, err := publicapi.ParseSinceTime(r.URL.Query())
+	if err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid since timestamp; use RFC3339.")
+		return http.StatusBadRequest
+	}
 	var allowed []uuid.UUID
 	if tok != nil {
 		allowed = tok.CourseIDs
@@ -235,6 +254,7 @@ func (d Deps) publicAPIListAssignments(w http.ResponseWriter, r *http.Request, u
 		publicapi.WriteInternal(w, r.URL.Path)
 		return http.StatusInternalServerError
 	}
+	items = publicapi.FilterBySince(items, since, func(a publicapi.AssignmentResource) *time.Time { return a.UpdatedAt })
 	slice, total := publicapi.SlicePage(items, page.Offset, page.Limit)
 	data := publicapi.ToAnySlice(slice)
 	resp := publicapi.BuildCollectionResponse(data, total, page.Offset, page.Limit, r.URL.Path, r.URL.Query())
@@ -249,6 +269,11 @@ func (d Deps) publicAPIListGrades(w http.ResponseWriter, r *http.Request, userID
 		publicapi.WriteBadRequest(w, r.URL.Path, err.Error())
 		return http.StatusBadRequest
 	}
+	since, err := publicapi.ParseSinceTime(r.URL.Query())
+	if err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid since timestamp; use RFC3339.")
+		return http.StatusBadRequest
+	}
 	var allowed []uuid.UUID
 	if tok != nil {
 		allowed = tok.CourseIDs
@@ -258,12 +283,108 @@ func (d Deps) publicAPIListGrades(w http.ResponseWriter, r *http.Request, userID
 		publicapi.WriteInternal(w, r.URL.Path)
 		return http.StatusInternalServerError
 	}
+	items = publicapi.FilterBySince(items, since, func(g publicapi.GradeResource) *time.Time { return g.UpdatedAt })
 	slice, total := publicapi.SlicePage(items, page.Offset, page.Limit)
 	data := publicapi.ToAnySlice(slice)
 	resp := publicapi.BuildCollectionResponse(data, total, page.Offset, page.Limit, r.URL.Path, r.URL.Query())
 	publicapi.SetLinkHeader(w, resp.Links)
 	writeJSON(w, http.StatusOK, resp)
 	return http.StatusOK
+}
+
+func (d Deps) publicAPIPostEnrollment(w http.ResponseWriter, r *http.Request, userID uuid.UUID, id string, tok *auth.APITokenAuth) int {
+	cid, err := uuid.Parse(id)
+	if err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid course id.")
+		return http.StatusBadRequest
+	}
+	if tok != nil && len(tok.CourseIDs) > 0 && !auth.AccessKeyAllowsCourse(r.Context(), cid) {
+		publicapi.WriteNotFound(w, r.URL.Path)
+		return http.StatusNotFound
+	}
+	var in publicapi.EnrollUserInput
+	if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid JSON body.")
+		return http.StatusBadRequest
+	}
+	out, err := publicapi.EnrollUser(r.Context(), d.Pool, userID, cid, in)
+	if err != nil {
+		switch err.Error() {
+		case "forbidden":
+			publicapi.WriteForbidden(w, r.URL.Path, "You do not have access to this course.")
+			return http.StatusForbidden
+		case "user not found":
+			publicapi.WriteNotFound(w, r.URL.Path)
+			return http.StatusNotFound
+		default:
+			if strings.Contains(err.Error(), "required") || strings.Contains(err.Error(), "invalid") {
+				publicapi.WriteBadRequest(w, r.URL.Path, err.Error())
+				return http.StatusBadRequest
+			}
+			publicapi.WriteInternal(w, r.URL.Path)
+			return http.StatusInternalServerError
+		}
+	}
+	writeJSON(w, http.StatusCreated, out)
+	return http.StatusCreated
+}
+
+func (d Deps) publicAPIPostAnnouncement(w http.ResponseWriter, r *http.Request, userID uuid.UUID, id string, tok *auth.APITokenAuth) int {
+	cid, err := uuid.Parse(id)
+	if err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid course id.")
+		return http.StatusBadRequest
+	}
+	if tok != nil && len(tok.CourseIDs) > 0 && !auth.AccessKeyAllowsCourse(r.Context(), cid) {
+		publicapi.WriteNotFound(w, r.URL.Path)
+		return http.StatusNotFound
+	}
+	var in publicapi.CreateAnnouncementInput
+	if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid JSON body.")
+		return http.StatusBadRequest
+	}
+	messageID, err := publicapi.CreateAnnouncement(r.Context(), d.Pool, userID, cid, in)
+	if err != nil {
+		if strings.Contains(err.Error(), "required") {
+			publicapi.WriteBadRequest(w, r.URL.Path, err.Error())
+			return http.StatusBadRequest
+		}
+		publicapi.WriteInternal(w, r.URL.Path)
+		return http.StatusInternalServerError
+	}
+	writeJSON(w, http.StatusCreated, map[string]string{"id": messageID})
+	return http.StatusCreated
+}
+
+func (d Deps) publicAPIPostGrade(w http.ResponseWriter, r *http.Request, userID uuid.UUID, tok *auth.APITokenAuth) int {
+	var in publicapi.PostGradeInput
+	if err := json.NewDecoder(io.LimitReader(r.Body, 1<<20)).Decode(&in); err != nil {
+		publicapi.WriteBadRequest(w, r.URL.Path, "Invalid JSON body.")
+		return http.StatusBadRequest
+	}
+	if tok != nil && len(tok.CourseIDs) > 0 {
+		cid, err := uuid.Parse(strings.TrimSpace(in.CourseID))
+		if err != nil || !auth.AccessKeyAllowsCourse(r.Context(), cid) {
+			publicapi.WriteForbidden(w, r.URL.Path, "Token cannot write grades for this course.")
+			return http.StatusForbidden
+		}
+	}
+	out, err := publicapi.PostGrade(r.Context(), d.Pool, userID, in)
+	if err != nil {
+		if strings.Contains(err.Error(), "invalid") {
+			publicapi.WriteBadRequest(w, r.URL.Path, err.Error())
+			return http.StatusBadRequest
+		}
+		if err.Error() == "forbidden" {
+			publicapi.WriteForbidden(w, r.URL.Path, "You do not have access to this course.")
+			return http.StatusForbidden
+		}
+		publicapi.WriteInternal(w, r.URL.Path)
+		return http.StatusInternalServerError
+	}
+	writeJSON(w, http.StatusCreated, out)
+	return http.StatusCreated
 }
 
 func (d Deps) logPublicAPIRequest(r *http.Request, userID uuid.UUID, start time.Time, status int) {

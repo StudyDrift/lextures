@@ -134,6 +134,7 @@ type platformSettingsJSON struct {
 	FFBookstoreIntegration          bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   bool `json:"ffTranscripts"`
 	FFWebhooks                      bool `json:"ffWebhooks"`
+	FFZapierConnector               bool `json:"ffZapierConnector"`
 	FFAdvisingIntegration           bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake           bool `json:"ffAccessibilityIntake"`
@@ -342,6 +343,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
 			FFWebhooks:                      merged.FFWebhooks,
+			FFZapierConnector:               merged.FFZapierConnector,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,
@@ -525,6 +527,7 @@ type putPlatformBody struct {
 	FFBookstoreIntegration          *bool `json:"ffBookstoreIntegration"`
 	FFTranscripts                   *bool `json:"ffTranscripts"`
 	FFWebhooks                      *bool `json:"ffWebhooks"`
+	FFZapierConnector               *bool `json:"ffZapierConnector"`
 	FFAdvisingIntegration           *bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent               *bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake           *bool `json:"ffAccessibilityIntake"`
@@ -854,6 +857,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffbookstoreintegration", body.FFBookstoreIntegration, func(v bool) { wr.FFBookstoreIntegration = &v })
 		setBool("fftranscripts", body.FFTranscripts, func(v bool) { wr.FFTranscripts = &v })
 		setBool("ffwebhooks", body.FFWebhooks, func(v bool) { wr.FFWebhooks = &v })
+		setBool("ffzapierconnector", body.FFZapierConnector, func(v bool) { wr.FFZapierConnector = &v })
 		setBool("ffadvisingintegration", body.FFAdvisingIntegration, func(v bool) { wr.FFAdvisingIntegration = &v })
 		setBool("ffresearchconsent", body.FFResearchConsent, func(v bool) { wr.FFResearchConsent = &v })
 		setBool("ffaccessibilityintake", body.FFAccessibilityIntake, func(v bool) { wr.FFAccessibilityIntake = &v })
@@ -1016,6 +1020,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFBookstoreIntegration:          merged.FFBookstoreIntegration,
 			FFTranscripts:                   merged.FFTranscripts,
 			FFWebhooks:                      merged.FFWebhooks,
+			FFZapierConnector:               merged.FFZapierConnector,
 			FFAdvisingIntegration:           merged.FFAdvisingIntegration,
 			FFResearchConsent:               merged.FFResearchConsent,
 			FFAccessibilityIntake:           merged.FFAccessibilityIntake,

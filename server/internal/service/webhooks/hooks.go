@@ -131,6 +131,22 @@ func EmitAnnouncementCreated(pool *pgxpool.Pool, cfg config.Config, orgID uuid.U
 	EmitAsync(pool, cfg, orgID, webhooks.EventAnnouncementCreated, data)
 }
 
+// QuizCompletedData is the quiz.completed event payload.
+type QuizCompletedData struct {
+	CourseID      string  `json:"courseId"`
+	CourseCode    string  `json:"courseCode,omitempty"`
+	ModuleItemID  string  `json:"moduleItemId"`
+	AttemptID     string  `json:"attemptId"`
+	StudentUserID string  `json:"studentUserId"`
+	PointsEarned  float64 `json:"pointsEarned"`
+	ScorePercent  float64 `json:"scorePercent"`
+}
+
+// EmitQuizCompleted notifies subscribers when a learner submits a quiz.
+func EmitQuizCompleted(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data QuizCompletedData) {
+	EmitAsync(pool, cfg, orgID, webhooks.EventQuizCompleted, data)
+}
+
 // PurgeRetention deletes delivery log entries older than 90 days.
 func PurgeRetention(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, now time.Time) {
 	if !cfg.FFWebhooks || pool == nil {

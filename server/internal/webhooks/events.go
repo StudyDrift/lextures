@@ -25,6 +25,7 @@ const (
 	EventGradeReleased       EventType = "grade.released"
 	EventGradeCurveApplied   EventType = "grade.curve.applied"
 	EventAnnouncementCreated EventType = "announcement.created"
+	EventQuizCompleted       EventType = "quiz.completed"
 )
 
 // AllEventTypes returns the supported event type strings sorted.
@@ -38,6 +39,7 @@ func AllEventTypes() []string {
 		EventGradeReleased,
 		EventGradeCurveApplied,
 		EventAnnouncementCreated,
+		EventQuizCompleted,
 	}
 	out := make([]string, 0, len(types))
 	for _, t := range types {
@@ -124,5 +126,6 @@ func EventGroups() []EventGroup {
 		{Domain: "Enrollments", Types: []string{string(EventEnrollmentCreated)}},
 		{Domain: "Assignments", Types: []string{string(EventAssignmentSubmitted), string(EventAssignmentCreated), string(EventAssignmentDueSoon)}},
 		{Domain: "Announcements", Types: []string{string(EventAnnouncementCreated)}},
+		{Domain: "Quizzes", Types: []string{string(EventQuizCompleted)}},
 	}
 }

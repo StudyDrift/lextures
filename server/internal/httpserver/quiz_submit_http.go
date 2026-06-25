@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/gamification"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	"github.com/lextures/lextures/server/internal/service/quizattemptgrading"
+	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
 )
 
 func (d Deps) registerQuizSubmitRoutes(r chi.Router) {
@@ -190,6 +191,7 @@ func (d Deps) handleQuizSubmit() http.HandlerFunc {
 		}
 
 		learningevents.EmitQuizGradedAsync(d.Pool, d.effectiveConfig(), body.AttemptID)
+		webhooksvc.EmitQuizCompletedEvent(ctx, d.Pool, d.effectiveConfig(), *cid, courseCode, itemID, body.AttemptID, viewer, float64(earned), float64(score))
 		if score >= 60 && cid != nil {
 			gamification.EmitQuizPassed(d.Pool, d.effectiveConfig(), viewer, *cid, body.AttemptID)
 		}

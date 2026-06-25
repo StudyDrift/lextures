@@ -1,0 +1,43 @@
+{
+  "name": "Lextures",
+  "label": "Lextures LMS",
+  "description": "Connect Lextures courses, enrollments, grades, and announcements to Make.com scenarios.",
+  "version": "1.0.0",
+  "baseUrl": "{{connection.apiBaseUrl}}",
+  "log": {
+    "sanitize": ["request.headers.authorization"]
+  },
+  "connection": {
+    "label": "Lextures API Token",
+    "type": "apiKey",
+    "parameters": [
+      {
+        "name": "apiBaseUrl",
+        "type": "text",
+        "label": "API Base URL",
+        "required": true,
+        "default": "https://app.lextures.com"
+      },
+      {
+        "name": "accessToken",
+        "type": "password",
+        "label": "Personal Access Token",
+        "required": true
+      }
+    ],
+    "communication": {
+      "url": "/api/v1/me",
+      "method": "GET",
+      "headers": {
+        "Authorization": "Bearer {{connection.accessToken}}",
+        "Accept": "application/json"
+      },
+      "response": {
+        "valid": "{{statusCode >= 200 && statusCode < 300}}",
+        "error": {
+          "message": "Could not connect to Lextures (HTTP {{statusCode}})."
+        }
+      }
+    }
+  }
+}

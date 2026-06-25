@@ -187,12 +187,18 @@ func (d Deps) handleDeleteMyOIDCIdentity() http.HandlerFunc {
 	}
 }
 
-// handleGetMe is GET /api/v1/me — returns the authenticated user's id, email, and display name.
+// handleGetMe is GET /api/v1/me — returns the authenticated user's id, email, display name, and org.
 func (d Deps) handleGetMe() http.HandlerFunc {
+	type orgInfo struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+		Slug string `json:"slug,omitempty"`
+	}
 	type resp struct {
-		ID          string  `json:"id"`
-		Email       string  `json:"email"`
-		DisplayName *string `json:"displayName"`
+		ID          string   `json:"id"`
+		Email       string   `json:"email"`
+		DisplayName *string  `json:"displayName"`
+		Org         *orgInfo `json:"org,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
@@ -204,8 +210,18 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "User not found.")
 			return
 		}
+		out := resp{ID: row.ID, Email: row.Email, DisplayName: row.DisplayName}
+		orgID, err := organization.OrgIDForUser(r.Context(), d.Pool, userID)
+		if err == nil && orgID != uuid.Nil {
+			var name, slug string
+			if err := d.Pool.QueryRow(r.Context(), `
+SELECT name, slug FROM tenant.organizations WHERE id = $1
+`, orgID).Scan(&name, &slug); err == nil {
+				out.Org = &orgInfo{ID: orgID.String(), Name: name, Slug: slug}
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(resp{ID: row.ID, Email: row.Email, DisplayName: row.DisplayName})
+		_ = json.NewEncoder(w).Encode(out)
 	}
 }
 

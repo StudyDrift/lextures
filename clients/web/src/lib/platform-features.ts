@@ -48,6 +48,7 @@ export type PlatformFeaturesSnapshot = {
   ffContentFilterIntegration?: boolean
   ffSisIntegration?: boolean
   ffWebhooks?: boolean
+  ffZapierConnector?: boolean
   ffCatalogIntegration?: boolean
   ffEnrollmentStateMachine?: boolean
   ffIncompleteGradeWorkflow?: boolean
@@ -130,6 +131,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
   ffWebhooks: false,
+  ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
   ffIncompleteGradeWorkflow: false,

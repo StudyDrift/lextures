@@ -22,9 +22,12 @@ var Routes = []Route{
 	{Method: http.MethodGet, PathPattern: "/api/v1/courses", Scope: "courses:read"},
 	{Method: http.MethodGet, PathPattern: "/api/v1/courses", Scope: "courses:read", UUIDSegment: 1},
 	{Method: http.MethodGet, PathPattern: "/api/v1/courses", Scope: "enrollments:read", UUIDSegment: 1, Subpath: "/enrollments"},
+	{Method: http.MethodPost, PathPattern: "/api/v1/courses", Scope: "enrollments:write", UUIDSegment: 1, Subpath: "/enrollments"},
+	{Method: http.MethodPost, PathPattern: "/api/v1/courses", Scope: "courses:write", UUIDSegment: 1, Subpath: "/announcements"},
 	{Method: http.MethodGet, PathPattern: "/api/v1/users", Scope: "users:read", UUIDSegment: 1},
 	{Method: http.MethodGet, PathPattern: "/api/v1/assignments", Scope: "assignments:read"},
 	{Method: http.MethodGet, PathPattern: "/api/v1/grades", Scope: "grades:read"},
+	{Method: http.MethodPost, PathPattern: "/api/v1/grades", Scope: "grades:write"},
 	{Method: http.MethodGet, PathPattern: "/api/v1/graphql", Scope: "graphql:read"},
 }
 

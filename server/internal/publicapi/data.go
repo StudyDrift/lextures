@@ -86,10 +86,11 @@ func ListEnrollments(ctx context.Context, pool *pgxpool.Pool, userID, courseID u
 	out := make([]EnrollmentResource, 0, len(rows))
 	for _, r := range rows {
 		out = append(out, EnrollmentResource{
-			ID:     r.ID.String(),
-			UserID: r.UserID.String(),
-			Role:   r.Role,
-			State:  r.State,
+			ID:        r.ID.String(),
+			UserID:    r.UserID.String(),
+			Role:      r.Role,
+			State:     r.State,
+			UpdatedAt: r.StateChangedAt,
 		})
 	}
 	return out, nil
@@ -126,7 +127,7 @@ func ListAssignments(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, 
 	for _, c := range courses {
 		cid, _ := uuid.Parse(c.ID)
 		rows, err := pool.Query(ctx, `
-SELECT csi.id, csi.title, ma.due_at
+SELECT csi.id, csi.title, ma.due_at, csi.updated_at
 FROM course.course_structure_items csi
 INNER JOIN course.module_assignments ma ON ma.structure_item_id = csi.id
 WHERE csi.course_id = $1 AND csi.item_type = 'assignment' AND csi.published = true
@@ -138,16 +139,17 @@ ORDER BY csi.sort_order
 		for rows.Next() {
 			var id uuid.UUID
 			var title string
-			var dueAt *time.Time
-			if err := rows.Scan(&id, &title, &dueAt); err != nil {
+			var dueAt, updatedAt *time.Time
+			if err := rows.Scan(&id, &title, &dueAt, &updatedAt); err != nil {
 				rows.Close()
 				return nil, err
 			}
 			out = append(out, AssignmentResource{
-				ID:       id.String(),
-				CourseID: c.ID,
-				Title:    title,
-				DueAt:    dueAt,
+				ID:        id.String(),
+				CourseID:  c.ID,
+				Title:     title,
+				DueAt:     dueAt,
+				UpdatedAt: updatedAt,
 			})
 		}
 		rows.Close()
@@ -171,7 +173,7 @@ func ListGrades(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, allow
 	for _, c := range courses {
 		cid, _ := uuid.Parse(c.ID)
 		rows, err := pool.Query(ctx, `
-SELECT student_user_id, module_item_id, points_earned::text
+SELECT student_user_id, module_item_id, points_earned::text, updated_at
 FROM course.course_grades
 WHERE course_id = $1 AND posted_at IS NOT NULL
 `, cid)
@@ -181,15 +183,18 @@ WHERE course_id = $1 AND posted_at IS NOT NULL
 		for rows.Next() {
 			var studentID, itemID uuid.UUID
 			var pts string
-			if err := rows.Scan(&studentID, &itemID, &pts); err != nil {
+			var updatedAt time.Time
+			if err := rows.Scan(&studentID, &itemID, &pts, &updatedAt); err != nil {
 				rows.Close()
 				return nil, err
 			}
+			t := updatedAt.UTC()
 			out = append(out, GradeResource{
 				CourseID:      c.ID,
 				StudentUserID: studentID.String(),
 				ModuleItemID:  itemID.String(),
 				PointsEarned:  pts,
+				UpdatedAt:     &t,
 			})
 		}
 		rows.Close()

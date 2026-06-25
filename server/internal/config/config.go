@@ -363,6 +363,9 @@ type Config struct {
 	// FFWebhooks enables outbound webhook subscriptions and delivery (plan 16.3).
 	// Managed in Settings → Global platform (not process env).
 	FFWebhooks bool
+	// FFZapierConnector enables Zapier/Make REST-hook webhook subscriptions (plan 16.10).
+	// Managed in Settings → Global platform (not process env).
+	FFZapierConnector bool
 	// FFAdvisingIntegration enables advising appointment links, degree progress, and advisor notes (plan 14.14).
 	// Managed in Settings → Global platform (not process env).
 	FFAdvisingIntegration bool

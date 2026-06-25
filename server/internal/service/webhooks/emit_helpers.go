@@ -158,3 +158,23 @@ func EmitAnnouncementCreatedEvent(ctx context.Context, pool *pgxpool.Pool, cfg c
 	}
 	EmitAnnouncementCreated(pool, cfg, orgID, data)
 }
+
+// EmitQuizCompletedEvent emits quiz.completed after a quiz submission.
+func EmitQuizCompletedEvent(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, courseCode string, moduleItemID, attemptID, studentUserID uuid.UUID, pointsEarned, scorePercent float64) {
+	if !cfg.FFWebhooks || pool == nil {
+		return
+	}
+	var orgID uuid.UUID
+	if err := pool.QueryRow(ctx, `SELECT org_id FROM course.courses WHERE id = $1`, courseID).Scan(&orgID); err != nil {
+		return
+	}
+	EmitQuizCompleted(pool, cfg, orgID, QuizCompletedData{
+		CourseID:      courseID.String(),
+		CourseCode:    courseCode,
+		ModuleItemID:  moduleItemID.String(),
+		AttemptID:     attemptID.String(),
+		StudentUserID: studentUserID.String(),
+		PointsEarned:  pointsEarned,
+		ScorePercent:  scorePercent,
+	})
+}
