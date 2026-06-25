@@ -54,7 +54,7 @@ export function GraderAgentWorkflowModal({
 }: GraderAgentWorkflowModalProps) {
   const { t } = useTranslation('common')
   const isTemplateMode = templateMode != null
-  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled } =
+  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled } =
     usePlatformFeatures()
   const titleId = useId()
   const statusId = useId()
@@ -106,6 +106,8 @@ export function GraderAgentWorkflowModal({
     setRunMode,
     confirmOverwrite,
     setConfirmOverwrite,
+    runFilterState,
+    setRunFilterState,
     runProgress,
     statusMessage,
     handleDryRun,
@@ -331,6 +333,13 @@ export function GraderAgentWorkflowModal({
               onTogglePostPolicy={handleTogglePostPolicy}
               onSetConfidenceFloor={handleSetConfidenceFloor}
               onRun={handleRun}
+              runFiltersEnabled={graderAgentRunFiltersEnabled === true}
+              courseCode={courseCode}
+              itemId={itemId}
+              currentSubmissionId={selectedSubmissionId}
+              submissions={submissions}
+              filterState={runFilterState}
+              setFilterState={setRunFilterState}
             />
           )}
           {!isTemplateMode && !accepted ? (

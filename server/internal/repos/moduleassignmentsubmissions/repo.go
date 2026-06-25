@@ -3,6 +3,7 @@ package moduleassignmentsubmissions
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -44,6 +45,14 @@ const (
 	GradedFilterGraded   GradedFilter = "graded"
 	GradedFilterUngraded GradedFilter = "ungraded"
 )
+
+// ListFilter optionally restricts submissions by section, group, or explicit ids (GA-M5).
+type ListFilter struct {
+	SectionID           *uuid.UUID
+	GroupID             *uuid.UUID
+	SubmissionIDs       []uuid.UUID
+	VisibleSectionIDs   []uuid.UUID
+}
 
 func scanSubmission(scanner interface{ Scan(...any) error }) (*SubmissionRow, error) {
 	var s SubmissionRow
@@ -150,21 +159,70 @@ WHERE s.course_id = $1 AND s.module_item_id = $2 AND g.student_user_id IS NULL
 }
 
 func ListForAssignment(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID uuid.UUID, filter GradedFilter) ([]SubmissionRow, error) {
+	return ListForAssignmentFiltered(ctx, pool, courseID, moduleItemID, filter, ListFilter{})
+}
+
+func ListForAssignmentFiltered(
+	ctx context.Context,
+	pool *pgxpool.Pool,
+	courseID, moduleItemID uuid.UUID,
+	gradedFilter GradedFilter,
+	listFilter ListFilter,
+) ([]SubmissionRow, error) {
 	var gradedClause string
-	switch filter {
+	switch gradedFilter {
 	case GradedFilterGraded:
 		gradedClause = "AND g.student_user_id IS NOT NULL"
 	case GradedFilterUngraded:
 		gradedClause = "AND g.student_user_id IS NULL"
 	}
+	filterClause := ""
+	args := []any{courseID, moduleItemID}
+	argN := 3
+	if listFilter.SectionID != nil {
+		filterClause += `
+AND EXISTS (
+  SELECT 1 FROM course.course_enrollments ce
+  WHERE ce.course_id = s.course_id AND ce.user_id = s.submitted_by AND ce.active
+    AND ce.section_id = $` + fmt.Sprintf("%d", argN) + `
+)`
+		args = append(args, *listFilter.SectionID)
+		argN++
+	}
+	if listFilter.GroupID != nil {
+		filterClause += `
+AND EXISTS (
+  SELECT 1
+  FROM course.enrollment_group_memberships egm
+  INNER JOIN course.course_enrollments ce ON ce.id = egm.enrollment_id AND ce.active
+  WHERE egm.group_id = $` + fmt.Sprintf("%d", argN) + ` AND ce.user_id = s.submitted_by
+)`
+		args = append(args, *listFilter.GroupID)
+		argN++
+	}
+	if len(listFilter.SubmissionIDs) > 0 {
+		filterClause += ` AND s.id = ANY($` + fmt.Sprintf("%d", argN) + `::uuid[])`
+		args = append(args, listFilter.SubmissionIDs)
+		argN++
+	}
+	if len(listFilter.VisibleSectionIDs) > 0 {
+		filterClause += `
+AND EXISTS (
+  SELECT 1 FROM course.course_enrollments ce
+  WHERE ce.course_id = s.course_id AND ce.user_id = s.submitted_by AND ce.active
+    AND ce.section_id = ANY($` + fmt.Sprintf("%d", argN) + `::uuid[])
+)`
+		args = append(args, listFilter.VisibleSectionIDs)
+		argN++
+	}
 	rows, err := pool.Query(ctx, `
-SELECT s.id, s.course_id, s.module_item_id, s.submitted_by, s.attachment_file_id, s.submitted_at, s.updated_at,
+SELECT s.id, s.course_id, s.module_item_id, s.submitted_by, s.attachment_file_id, s.body_text, s.submitted_at, s.updated_at,
        s.resubmission_requested, s.revision_due_at, s.revision_feedback, s.version_number
 FROM course.module_assignment_submissions s
 LEFT JOIN course.course_grades g ON g.module_item_id = s.module_item_id AND g.student_user_id = s.submitted_by
-WHERE s.course_id = $1 AND s.module_item_id = $2 `+gradedClause+`
+WHERE s.course_id = $1 AND s.module_item_id = $2 `+gradedClause+filterClause+`
 ORDER BY s.submitted_at ASC, s.id ASC
-`, courseID, moduleItemID)
+`, args...)
 	if err != nil {
 		return nil, err
 	}

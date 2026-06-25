@@ -130,7 +130,7 @@ func (d Deps) maybeEnqueueAutoGrade(r *http.Request, courseCode string, courseID
 	if err != nil || cfg == nil || cfg.Status != gradingagentrepo.StatusAccepted || !cfg.AutoGradeNew {
 		return
 	}
-	run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, gradingagentrepo.RunScopeAuto, gradingagentrepo.RunModeApply, nil, nil, 1)
+	run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, gradingagentrepo.RunScopeAuto, gradingagentrepo.RunModeApply, nil, nil, 1, nil)
 	if err != nil || run == nil {
 		return
 	}

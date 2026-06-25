@@ -92,6 +92,7 @@ type platformSettingsJSON struct {
 	GraderAgentSuggestModeEnabled      bool `json:"graderAgentSuggestModeEnabled"`
 	GraderAgentTextEntryGradingEnabled bool `json:"graderAgentTextEntryGradingEnabled"`
 	GraderAgentVisionGradingEnabled    bool `json:"graderAgentVisionGradingEnabled"`
+	GraderAgentRunFiltersEnabled       bool `json:"graderAgentRunFiltersEnabled"`
 	CodeExecutionEnabled            bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled       bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            bool `json:"ffAltTextEnforcement"`
@@ -297,6 +298,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			GraderAgentSuggestModeEnabled:      merged.GraderAgentSuggestModeEnabled,
 			GraderAgentTextEntryGradingEnabled: merged.GraderAgentTextEntryGradingEnabled,
 			GraderAgentVisionGradingEnabled:    merged.GraderAgentVisionGradingEnabled,
+			GraderAgentRunFiltersEnabled:       merged.GraderAgentRunFiltersEnabled,
 			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
@@ -472,6 +474,7 @@ type putPlatformBody struct {
 	GraderAgentSuggestModeEnabled      *bool `json:"graderAgentSuggestModeEnabled"`
 	GraderAgentTextEntryGradingEnabled *bool `json:"graderAgentTextEntryGradingEnabled"`
 	GraderAgentVisionGradingEnabled    *bool `json:"graderAgentVisionGradingEnabled"`
+	GraderAgentRunFiltersEnabled       *bool `json:"graderAgentRunFiltersEnabled"`
 	CodeExecutionEnabled            *bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled       *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            *bool `json:"ffAltTextEnforcement"`
@@ -795,6 +798,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("graderagentsuggestmodeenabled", body.GraderAgentSuggestModeEnabled, func(v bool) { wr.GraderAgentSuggestModeEnabled = &v })
 		setBool("graderagenttextentrygradingenabled", body.GraderAgentTextEntryGradingEnabled, func(v bool) { wr.GraderAgentTextEntryGradingEnabled = &v })
 		setBool("graderagentvisiongradingenabled", body.GraderAgentVisionGradingEnabled, func(v bool) { wr.GraderAgentVisionGradingEnabled = &v })
+		setBool("graderagentrunfiltersenabled", body.GraderAgentRunFiltersEnabled, func(v bool) { wr.GraderAgentRunFiltersEnabled = &v })
 		setBool("codeexecutionenabled", body.CodeExecutionEnabled, func(v bool) { wr.CodeExecutionEnabled = &v })
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
@@ -962,6 +966,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			GraderAgentSuggestModeEnabled:      merged.GraderAgentSuggestModeEnabled,
 			GraderAgentTextEntryGradingEnabled: merged.GraderAgentTextEntryGradingEnabled,
 			GraderAgentVisionGradingEnabled:    merged.GraderAgentVisionGradingEnabled,
+			GraderAgentRunFiltersEnabled:       merged.GraderAgentRunFiltersEnabled,
 			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
