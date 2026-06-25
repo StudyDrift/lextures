@@ -17,6 +17,7 @@ export type GraderNodeType =
   | 'reference'
   | 'rubric'
   | 'scoreAggregator'
+  | 'setScore'
 
 /** @deprecated Legacy persisted graphs may still use `submission`. */
 export type LegacyGraderNodeType = 'submission' | 'assignmentContext'
@@ -191,6 +192,7 @@ export type PaletteNodeType = Extract<
   | 'humanReviewGate'
   | 'originality'
   | 'scoreAggregator'
+  | 'setScore'
 >
 
 export const HANDLE_SUBMISSION = 'submission'
@@ -265,6 +267,19 @@ export function isRubricNodeType(type: string): boolean {
 
 export function isScoreAggregatorNodeType(type: string): boolean {
   return type === 'scoreAggregator'
+}
+
+export function isSetScoreNodeType(type: string): boolean {
+  return type === 'setScore'
+}
+
+export type SetScoreNodeData = {
+  score?: number
+  comment?: string
+}
+
+export function defaultSetScoreNodeData(): SetScoreNodeData {
+  return { score: 0 }
 }
 
 export function defaultScoreAggregatorNodeData(): ScoreAggregatorNodeData {

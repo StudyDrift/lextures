@@ -8,6 +8,7 @@ import {
   defaultReferenceNodeData,
   defaultRubricNodeData,
   defaultScoreAggregatorNodeData,
+  defaultSetScoreNodeData,
 } from './types'
 
 export type NodeDescriptorContext = {
@@ -81,6 +82,11 @@ export const NODE_DESCRIPTORS: Record<PaletteNodeType, NodeDescriptor> = {
     idPrefix: 'ai',
     fallbackPosition: (nodeCount) => ({ x: -320, y: 40 + nodeCount * 40 }),
     defaultData: () => ({}),
+  },
+  setScore: {
+    idPrefix: 'ss',
+    fallbackPosition: (nodeCount) => ({ x: 0, y: 80 + nodeCount * 40 }),
+    defaultData: () => defaultSetScoreNodeData(),
   },
 }
 

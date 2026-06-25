@@ -27,6 +27,7 @@ const (
 	NodeTypeReference         = "reference"
 	NodeTypeRubric            = "rubric"
 	NodeTypeScoreAggregator   = "scoreAggregator"
+	NodeTypeSetScore          = "setScore"
 	NodeTypeAssignmentCtx     = "assignmentContext" // legacy
 	NodeTypeSubmission        = "submission"        // legacy
 	HandleGrade               = "grade"
@@ -124,6 +125,9 @@ func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool
 			return true
 		}
 		if srcHandle == HandleGrade && isScoreAggregatorNodeType(src.Type) {
+			return true
+		}
+		if srcHandle == HandleGrade && isSetScoreNodeType(src.Type) {
 			return true
 		}
 	case HandleComments:
@@ -227,7 +231,7 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		}
 		nodeByID[n.ID] = n
 		switch n.Type {
-		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator:
+		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -282,7 +286,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		switch n.Type {
 		case NodeTypeOutput:
 			outputCount++
-		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator:
+		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
 		}
@@ -473,6 +477,13 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 		}
 		if !aggregatorInputSourceIsValid(src, srcHandle) {
 			return ValidationError{Field: "node:" + tgt.ID, Message: "Invalid grade source for Score Aggregator."}
+		}
+	case NodeTypeSetScore:
+		if tgtHandle != HandleGrade {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Set Score accepts a grade input only."}
+		}
+		if !setScoreInputSourceIsValid(src, srcHandle) {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Set Score input must come from a Conditional Router branch or a grade output."}
 		}
 	default:
 		return ValidationError{Field: "workflowGraph.edges", Message: "Invalid edge target."}
