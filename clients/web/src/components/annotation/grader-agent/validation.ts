@@ -13,7 +13,6 @@ import {
   HANDLE_AI_OUTPUT,
   HANDLE_COMMENTS,
   HANDLE_CONTENT,
-  HANDLE_CONTEXT,
   HANDLE_GRADE,
   HANDLE_RUBRIC,
   HANDLE_SUBMISSION,
@@ -233,10 +232,6 @@ export function validateWorkflowGraph(
       } else if (th === HANDLE_SUBMISSION) {
         if (!isStudentSubmissionNodeType(src.type)) {
           issues.push({ field: `node:${tgt.id}`, message: 'Submission input must come from a Student Submission node.' })
-        }
-      } else if (th === HANDLE_CONTEXT) {
-        if (!isActivityNodeType(src.type)) {
-          issues.push({ field: `node:${tgt.id}`, message: 'Context input must come from an Activity node.' })
         }
       }
     }
@@ -517,7 +512,6 @@ export function connectionIsValid(
       return (isActivityNodeType(src.type) && sh === HANDLE_RUBRIC) || rubricOutputSourceIsValid(src.type, sh)
     }
     if (th === HANDLE_SUBMISSION) return isStudentSubmissionNodeType(src.type)
-    if (th === HANDLE_CONTEXT) return isActivityNodeType(src.type)
   }
   if (isAiNodeType(tgt.type)) {
     if (th !== HANDLE_AI_INPUT) return false

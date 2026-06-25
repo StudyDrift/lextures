@@ -42,7 +42,7 @@
 | GA-S1 | [Unify the three duplicated grade-write paths in the consumer](../../completed/grading-agent/simplify-1-unify-grade-write-paths.md) | **Done** — single execute + persist path in the queue consumer. |
 | GA-S2 | [Remove the dead HTTP dry-run path; rename the execution engine](../../completed/grading-agent/simplify-2-remove-dead-dry-run-and-rename-engine.md) | **Done** — POST dry-run removed; engine renamed to `ExecuteWorkflow`. |
 | GA-S3 | [Collapse the duplicated per-node update callbacks](simplify-3-generic-node-data-updater.md) | ~12 near-identical `updateXNode` callbacks in the hook can be one generic updater. |
-| GA-S4 | [Retire legacy node-type aliases & palette ternaries](simplify-4-legacy-node-type-aliases.md) | `submission`/`assignmentContext`/`grader` legacy types and giant nested ternaries add accidental complexity. |
+| GA-S4 | [Retire legacy node-type aliases & palette ternaries](../completed/grading-agent/simplify-4-legacy-node-type-aliases.md) | `submission`/`assignmentContext`/`grader` legacy types and giant nested ternaries add accidental complexity. |
 
 ### Bugs
 

@@ -45,19 +45,10 @@ import type {
   PaletteNodeType,
   WorkflowValidationIssue,
 } from './types'
-import {
-  defaultCodeTestRunnerNodeData,
-  defaultConditionalRouterNodeData,
-  defaultFlagForReviewNodeData,
-  defaultHumanReviewGateNodeData,
-  defaultOriginalityNodeData,
-  defaultReferenceNodeData,
-  defaultRubricNodeData,
-  defaultScoreAggregatorNodeData,
-} from './types'
 import { useRubricLibraryRubrics } from './use-rubric-library-rubrics'
 import { newWorkflowNodeId } from './workflow-node-id'
 import { patchWorkflowNodeLabel } from './workflow-node-label'
+import { paletteNodeDefaults } from './node-descriptors'
 
 export type RunScope = 'current' | 'ungraded' | 'all'
 
@@ -576,80 +567,14 @@ export function useGraderAgentWorkflow({
   const addPaletteNode = useCallback(
     (type: PaletteNodeType, position?: { x: number; y: number }) => {
       if (!graph) return
-      const prefix =
-        type === 'studentSubmission'
-          ? 'sub'
-          : type === 'activity'
-            ? 'act'
-            : type === 'codeTestRunner'
-              ? 'ctr'
-              : type === 'conditionalRouter'
-                ? 'rtr'
-                : type === 'flagForReview'
-                  ? 'flag'
-                  : type === 'humanReviewGate'
-                    ? 'gate'
-                    : type === 'scoreAggregator'
-                      ? 'agg'
-                      : type === 'originality'
-                      ? 'orig'
-                      : type === 'reference'
-                        ? 'ref'
-                        : type === 'rubric'
-                          ? 'rub'
-                          : type === 'criterionGrader'
-                    ? 'cg'
-                    : 'ai'
-      const id = newWorkflowNodeId(prefix)
+      const descriptor = paletteNodeDefaults(type, {
+        itemId,
+        nodeCount: graph.nodes.length,
+      })
+      const id = newWorkflowNodeId(descriptor.idPrefix)
       setSelectedNodeId(id)
       setGraph((current) => {
         if (!current) return current
-        const fallback =
-          type === 'studentSubmission'
-            ? { x: -640, y: -80 + current.nodes.length * 40 }
-            : type === 'activity'
-              ? { x: -640, y: 120 + current.nodes.length * 40 }
-              : type === 'codeTestRunner'
-                ? { x: -320, y: -40 + current.nodes.length * 40 }
-                : type === 'conditionalRouter'
-                  ? { x: -320, y: 80 + current.nodes.length * 40 }
-                  : type === 'flagForReview'
-                    ? { x: 160, y: 80 + current.nodes.length * 40 }
-                    : type === 'humanReviewGate'
-                      ? { x: 0, y: 40 + current.nodes.length * 40 }
-                      : type === 'scoreAggregator'
-                        ? { x: 0, y: 0 + current.nodes.length * 40 }
-                        : type === 'originality'
-                        ? { x: -160, y: 120 + current.nodes.length * 40 }
-                        : type === 'reference'
-                          ? { x: -640, y: 200 + current.nodes.length * 40 }
-                          : type === 'rubric'
-                            ? { x: -640, y: 280 + current.nodes.length * 40 }
-                            : type === 'criterionGrader'
-                      ? { x: -320, y: 0 + current.nodes.length * 40 }
-                      : { x: -320, y: 40 + current.nodes.length * 40 }
-        const data =
-          type === 'activity'
-            ? { assignmentItemId: itemId }
-            : type === 'codeTestRunner'
-              ? defaultCodeTestRunnerNodeData()
-              : type === 'conditionalRouter'
-                ? defaultConditionalRouterNodeData()
-                : type === 'flagForReview'
-                  ? defaultFlagForReviewNodeData()
-                  : type === 'humanReviewGate'
-                    ? defaultHumanReviewGateNodeData()
-                    : type === 'scoreAggregator'
-                      ? defaultScoreAggregatorNodeData()
-                      : type === 'originality'
-                      ? defaultOriginalityNodeData()
-                      : type === 'reference'
-                        ? defaultReferenceNodeData()
-                        : type === 'rubric'
-                          ? defaultRubricNodeData()
-                          : type === 'criterionGrader'
-                    ? { prompt: '' }
-                    : {}
         return {
           ...current,
           nodes: [
@@ -657,8 +582,8 @@ export function useGraderAgentWorkflow({
             {
               id,
               type,
-              position: position ?? fallback,
-              data,
+              position: position ?? descriptor.position,
+              data: descriptor.data,
             },
           ],
         }

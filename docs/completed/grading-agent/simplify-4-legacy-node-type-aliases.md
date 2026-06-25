@@ -10,11 +10,19 @@
 | **Section** | Grading Agent — Over-complexity / Simplification |
 | **Severity** | MINOR |
 | **Markets** | internal maintainability |
-| **Status (today)** | THIN |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | — |
 | **Unblocks** | cleaner node additions |
+
+## Implementation summary (2026-06-25)
+
+- **Load-time normalizer** — `workflow_normalize.go` / `workflow-normalize.ts` rewrite `submission→studentSubmission`, `assignmentContext→activity`, and expand legacy `context` handles into explicit content/rubric edges (preserving include-flag semantics). Invoked from `UnmarshalWorkflowGraph` and client `normalizeWorkflowGraph`.
+- **Alias removal** — `isActivityNodeType`, `isStudentSubmissionNodeType`, `deriveIncludeFlags`, `validateEdgeTypes`, and client validation no longer branch on legacy types/handles after normalization.
+- **Node registry** — `NODE_DESCRIPTORS` + `paletteNodeDefaults` replace the ~90-line `addPaletteNode` ternary pyramid; snapshot-tested in `node-descriptors.test.ts`.
+- **Migration** — `329_grading_agent_normalize_legacy_nodes.sql` documents lazy persistence (canonical graphs saved on next config/template write).
+- **Tests** — Go golden compile test for assignmentContext include flags; client normalizer and descriptor snapshot tests.
 
 ## 1. Problem Statement
 

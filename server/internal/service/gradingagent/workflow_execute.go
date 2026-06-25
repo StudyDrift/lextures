@@ -306,7 +306,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 
 		var compiledPrompt, compiledSystemPrompt, compiledInput, compiledOutput string
 		switch node.Type {
-		case NodeTypeStudentSubmission, NodeTypeSubmission:
+		case NodeTypeStudentSubmission:
 			text := JoinSubmissions(in.Submissions)
 			state.set(node.ID, HandleSubmission, slotValue{text: text})
 			modality := in.InputModality.ModalityLogLabel()
@@ -317,7 +317,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 				Type: "log", Level: "info",
 				Message: fmt.Sprintf("[%s] Input modality: %s; loaded %d part(s) (%d characters).", label, modality, len(in.Submissions), len(text)),
 			})
-		case NodeTypeActivity, NodeTypeAssignmentCtx:
+		case NodeTypeActivity:
 			itemID := activityAssignmentItemID(node)
 			markdown, rubric, loadErr := in.resolveActivity(itemID)
 			if loadErr != nil {
@@ -793,16 +793,6 @@ func buildGraderScoreRequest(
 			includeRubric = true
 			if v.rubric != nil {
 				rubric = v.rubric
-			}
-		case HandleContext:
-			if isActivityNodeType(src.Type) {
-				if src.Type == NodeTypeAssignmentCtx {
-					includeContent = boolData(src, "includeContent")
-					includeRubric = boolData(src, "includeRubric")
-				} else {
-					includeContent = true
-					includeRubric = true
-				}
 			}
 		}
 	}

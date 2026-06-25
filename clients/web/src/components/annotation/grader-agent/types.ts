@@ -213,7 +213,6 @@ export const HANDLE_CONTEXT = 'context'
 export function isSourceOnlyNodeType(type: string): boolean {
   return (
     type === 'studentSubmission' ||
-    type === 'submission' ||
     type === 'activity' ||
     type === 'reference' ||
     type === 'rubric'
@@ -221,11 +220,11 @@ export function isSourceOnlyNodeType(type: string): boolean {
 }
 
 export function isActivityNodeType(type: string): boolean {
-  return type === 'activity' || type === 'assignmentContext'
+  return type === 'activity'
 }
 
 export function isStudentSubmissionNodeType(type: string): boolean {
-  return type === 'studentSubmission' || type === 'submission'
+  return type === 'studentSubmission'
 }
 
 export function isAiNodeType(type: string): boolean {
