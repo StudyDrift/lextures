@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChevronUp } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../../ui/button'
 import type { RubricDefinition } from '../../../lib/courses-api'
 import { DryRunConsole, dryRunConsoleSummary } from './dry-run-console'
 import { PreviewDock, previewDockSummary } from './preview-dock'
@@ -20,6 +21,9 @@ type DryRunDockProps = {
   logs: DryRunLogEntry[]
   running: boolean
   batchRunning: boolean
+  cancelRunEnabled?: boolean
+  cancellingRun?: boolean
+  onCancelRun?: () => void | Promise<void>
   runProgress: { completed: number; failed: number; total: number } | null
 }
 
@@ -86,6 +90,9 @@ export function DryRunDock({
   logs,
   running,
   batchRunning,
+  cancelRunEnabled = false,
+  cancellingRun = false,
+  onCancelRun,
   runProgress,
 }: DryRunDockProps) {
   const { t } = useTranslation('common')
@@ -159,6 +166,19 @@ export function DryRunDock({
         aria-label={t('gradingAgent.dryRun.statusBar.label')}
         className="flex border-t border-slate-200 dark:border-neutral-700"
       >
+        {batchRunning && cancelRunEnabled ? (
+          <div className="flex shrink-0 items-center border-e border-slate-200 px-3 py-2 dark:border-neutral-700">
+            <Button
+              variant="secondary"
+              disabled={cancellingRun}
+              onClick={() => void onCancelRun?.()}
+            >
+              {cancellingRun
+                ? t('gradingAgent.run.cancel.cancelling')
+                : t('gradingAgent.run.cancel.button')}
+            </Button>
+          </div>
+        ) : null}
         {showConsole ? (
           <StatusBarSegment
             tone="console"

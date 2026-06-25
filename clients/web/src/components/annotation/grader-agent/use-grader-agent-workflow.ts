@@ -6,6 +6,7 @@ import {
   fetchGraderAgentConfig,
   fetchGraderAgentRun,
   fetchSubmissionGrade,
+  postGraderAgentCancelRun,
   postGraderAgentRun,
   postGraderAgentTemplate,
   putGraderAgentConfig,
@@ -110,13 +111,15 @@ export function useGraderAgentWorkflow({
   onSubmissionGraded,
 }: UseGraderAgentWorkflowArgs) {
   const { t } = useTranslation('common')
-  const { graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled } = usePlatformFeatures()
+  const { graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCancelRunEnabled } =
+    usePlatformFeatures()
   const [savedTemplateId, setSavedTemplateId] = useState<string | null>(templateMode?.templateId ?? null)
   const [config, setConfig] = useState<GraderAgentConfigApi | null>(null)
   const [graph, setGraph] = useState<GraderWorkflowGraph>(() => synthesizeDefaultGraph('', false, false))
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [dryRunning, setDryRunning] = useState(false)
   const [batchRunning, setBatchRunning] = useState(false)
+  const [cancellingRun, setCancellingRun] = useState(false)
   const [dryRunError, setDryRunError] = useState<string | null>(null)
   const [dryRunResult, setDryRunResult] = useState<GraderAgentDryRunResult | null>(null)
   const [hadDryRun, setHadDryRun] = useState(false)
@@ -378,10 +381,27 @@ export function useGraderAgentWorkflow({
 
       if (run.status === 'done' || run.status === 'error' || run.status === 'failed' || run.status === 'cancelled') {
         setBatchRunning(false)
+        setCancellingRun(false)
         resetBatchNodeExecution()
         const appliedCount = run.results.filter((result) => result.status === 'applied').length
         const suggestedCount = run.results.filter((result) => result.status === 'suggested').length
-        if (run.status === 'error' || run.status === 'failed' || run.status === 'cancelled') {
+        const skippedCount = run.results.filter((result) => result.status === 'skipped').length
+        if (run.status === 'cancelled') {
+          appendRunLog(
+            t('gradingAgent.run.cancel.complete', {
+              applied: appliedCount,
+              suggested: suggestedCount,
+              skipped: skippedCount,
+            }),
+          )
+          setStatusMessage(
+            t('gradingAgent.run.cancel.complete', {
+              applied: appliedCount,
+              suggested: suggestedCount,
+              skipped: skippedCount,
+            }),
+          )
+        } else if (run.status === 'error' || run.status === 'failed') {
           appendRunLog(t('gradingAgent.run.failed'), 'error')
           setStatusMessage(t('gradingAgent.run.failed'))
         } else if (lastRunMode === 'suggest') {
@@ -748,6 +768,20 @@ export function useGraderAgentWorkflow({
     }
   }
 
+  const handleCancelRun = async () => {
+    if (!runId || cancellingRun || !graderAgentCancelRunEnabled) return
+    setCancellingRun(true)
+    setDryRunError(null)
+    try {
+      await postGraderAgentCancelRun(courseCode, itemId, runId)
+      appendRunLog(t('gradingAgent.run.cancel.requested'))
+      setStatusMessage(t('gradingAgent.run.cancel.cancelling'))
+    } catch (e) {
+      setCancellingRun(false)
+      setDryRunError(e instanceof Error ? e.message : t('gradingAgent.run.cancel.failed'))
+    }
+  }
+
   const handleRun = async () => {
     if (runScope === 'all' && !confirmOverwrite) {
       setConfirmOverwrite(true)
@@ -865,6 +899,8 @@ export function useGraderAgentWorkflow({
     setSelectedNodeId,
     dryRunning,
     batchRunning,
+    cancellingRun,
+    cancelRunEnabled: graderAgentCancelRunEnabled === true,
     dryRunError,
     dryRunResult,
     setDryRunResult,
@@ -899,6 +935,7 @@ export function useGraderAgentWorkflow({
     handleSaveAsTemplate,
     handleAccept,
     handleRun,
+    handleCancelRun,
     handleToggleAutoGrade,
     handleTogglePostPolicy,
     handleSetConfidenceFloor,

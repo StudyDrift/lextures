@@ -274,6 +274,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Target batch runs to a section, project group, or explicit submission selection.',
   },
   {
+    key: 'graderAgentCancelRunEnabled',
+    label: 'Grader agent cancel run',
+    description: 'Allow instructors to cancel in-progress grading-agent batch runs.',
+  },
+  {
     key: 'codeExecutionEnabled',
     label: 'Code execution',
     description: 'Sandboxed code execution for quiz code questions and the grader agent Code Test Runner node.',

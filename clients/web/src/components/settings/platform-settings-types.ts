@@ -36,6 +36,7 @@ export type PlatformSettingsPayload = {
   graderAgentTextEntryGradingEnabled: boolean
   graderAgentVisionGradingEnabled: boolean
   graderAgentRunFiltersEnabled: boolean
+  graderAgentCancelRunEnabled: boolean
   codeExecutionEnabled: boolean
   speechToTextEnabled: boolean
   accommodationsEngineEnabled: boolean

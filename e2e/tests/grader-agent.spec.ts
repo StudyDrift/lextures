@@ -23,6 +23,14 @@ test.describe('Grader Agent API', () => {
     )
     expect(res.status).toBe(401)
   })
+
+  test('grader-agent run cancel without auth returns 401', async () => {
+    const res = await fetch(
+      `${API_BASE}/api/v1/courses/E2E-TEST/assignments/00000000-0000-0000-0000-000000000001/grader-agent/runs/00000000-0000-0000-0000-000000000002/cancel`,
+      { method: 'POST' },
+    )
+    expect(res.status).toBe(401)
+  })
 })
 
 test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async ({
@@ -164,6 +172,7 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
         graderAgentSuggestModeEnabled: true,
         graderAgentTextEntryGradingEnabled: true,
         graderAgentRunFiltersEnabled: true,
+        graderAgentCancelRunEnabled: true,
       }),
     })
   })
