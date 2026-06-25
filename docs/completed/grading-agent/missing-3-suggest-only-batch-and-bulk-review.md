@@ -1,6 +1,6 @@
 # GA-M3 — Suggest-only batch + bulk review/apply + posting control
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,11 +10,20 @@
 | **Section** | Grading Agent — Missing Features |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | [GA-M1](missing-1-persistent-review-queue.md) |
 | **Unblocks** | trust-driven adoption |
+
+## Implementation summary (2026-06-24)
+
+- **Migration** `324_grading_agent_run_mode.sql` — `grading_agent_runs.mode` (`suggest`|`apply`, backfilled to `apply`), platform flag `grader_agent_suggest_mode_enabled`.
+- **Consumer** — `finishGradingAgentSuccess` in `grading_agent_apply.go` skips grade writes when `run.mode = suggest`; records held suggestions with `held_at`.
+- **Posting** — `gradingAgentCellPosting` respects agent `postPolicy` (`draft`/`auto_post`) on apply and bulk approve; config GET/PUT exposes `postPolicy`.
+- **API** — `POST …/runs` accepts `mode`; `POST …/review/bulk` supports `approve`, `approve_all`, `reject` with `resultIds`, `minConfidence`, and per-item overrides.
+- **UI** — Run popover mode toggle + posting notes; held queue bulk toolbar (select-all, threshold approve, approve/reject selected, approve all); i18n `gradingAgent.run.mode.*`, `gradingAgent.review.bulk.*`.
+- **Flag** — `graderAgentSuggestModeEnabled` (Settings → Global platform). When off, runs default to `apply` (backward compatible).
 
 ## 1. Problem Statement
 
@@ -24,7 +33,7 @@ non-flagged item calls `coursegrades.UpsertCellWithFlags(...)` as it is processe
 is no first-class **suggest-only** batch mode and no **bulk review/apply** of suggestions. New adopters
 almost universally want to start in suggest-only mode (AI drafts, instructor spot-checks and approves
 in bulk) before trusting auto-apply. Additionally, applied grades are always written with
-`posting = "manual"` because the auto-post branch is unreachable (see [GA-B3](bug-3-auto-post-dead-code.md)),
+`posting = "manual"` because the auto-post branch is unreachable (see [GA-B3](../../plan/grading-agent/bug-3-auto-post-dead-code.md)),
 so there is no coherent control over whether students see AI grades.
 
 ## 2. Goals
@@ -50,7 +59,7 @@ so there is no coherent control over whether students see AI grades.
 - **FR-2.** In `suggest` mode the consumer MUST record results as `suggested` (held) and MUST NOT call `UpsertCellWithFlags`.
 - **FR-3.** The review queue ([GA-M1](missing-1-persistent-review-queue.md)) MUST support bulk **approve all**, **approve ≥ confidence X**, **approve selected**, **reject selected**, and **edit + approve** for a single item.
 - **FR-4.** Approving a suggestion MUST write the grade and mark the result `applied` (or `overridden` if edited).
-- **FR-5.** The agent config MUST carry a posting choice (`draft` vs `auto_post`) that is **persisted and read** at write time — fixing the dead `post_policy` path ([GA-B3](bug-3-auto-post-dead-code.md)).
+- **FR-5.** The agent config MUST carry a posting choice (`draft` vs `auto_post`) that is **persisted and read** at write time — fixing the dead `post_policy` path ([GA-B3](../../plan/grading-agent/bug-3-auto-post-dead-code.md)).
 - **FR-6.** Bulk apply MUST be transactional per batch chunk and idempotent (re-approving an applied item is a no-op).
 
 ## 6. Non-Functional Requirements
@@ -76,7 +85,7 @@ so there is no coherent control over whether students see AI grades.
 
 - `grading_agent_runs`: add `mode TEXT NOT NULL DEFAULT 'suggest'` (`suggest`|`apply`).
 - `grading_agent_configs`: make `post_policy` writable (already exists; `'unposted'` default → allow `'auto_post'`).
-- Migration: `server/migrations/NNN_grading_agent_run_mode.sql`.
+- Migration: `server/migrations/324_grading_agent_run_mode.sql`.
 - Backfill: existing runs are historical; default `apply` for backfilled rows to preserve meaning, `suggest` for new.
 
 ## 9. API Surface
@@ -105,7 +114,7 @@ so there is no coherent control over whether students see AI grades.
 ## 13. Dependencies & Sequencing
 
 - Requires [GA-M1](missing-1-persistent-review-queue.md) (the durable queue) to host suggestions and bulk actions.
-- Pairs with [GA-B3](bug-3-auto-post-dead-code.md) (posting) and [GA-M4](missing-4-confidence-auto-hold-threshold.md) (confidence).
+- Pairs with [GA-B3](../../plan/grading-agent/bug-3-auto-post-dead-code.md) (posting) and [GA-M4](../../plan/grading-agent/missing-4-confidence-auto-hold-threshold.md) (confidence).
 
 ## 14. Risks & Mitigations
 
@@ -117,7 +126,7 @@ so there is no coherent control over whether students see AI grades.
 
 ## 15. Rollout Plan
 
-- Flag: `graderAgentSuggestMode`.
+- Flag: `graderAgentSuggestModeEnabled`.
 - Sequence: migration → consumer mode branch + posting write → run/config API → review bulk UI → flip flag (default suggest for new agents).
 - Pilot: a course onboarding the agent for the first time.
 - Rollback: flag off → revert to immediate apply.
@@ -145,4 +154,4 @@ so there is no coherent control over whether students see AI grades.
 - `server/internal/httpserver/grading_agent_queue.go` (`UpsertCellWithFlags`, `posting` derivation).
 - `server/internal/repos/gradingagent/repo.go` (`UpsertConfig`, `CreateRun`).
 - `clients/web/src/components/annotation/grader-agent/run-agent-popover.tsx`, `held-review-queue-panel.tsx`.
-- Related: [GA-M1](missing-1-persistent-review-queue.md), [GA-M4](missing-4-confidence-auto-hold-threshold.md), [GA-B3](bug-3-auto-post-dead-code.md).
+- Related: [GA-M1](missing-1-persistent-review-queue.md), [GA-M4](../../plan/grading-agent/missing-4-confidence-auto-hold-threshold.md), [GA-B3](../../plan/grading-agent/bug-3-auto-post-dead-code.md).

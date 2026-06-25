@@ -1,6 +1,6 @@
 # GA-M4 — Agent-level confidence auto-hold threshold
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,11 +10,19 @@
 | **Section** | Grading Agent — Missing Features |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 / SL |
-| **Status (today)** | THIN |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | [GA-M1](missing-1-persistent-review-queue.md) |
 | **Unblocks** | confident auto-apply |
+
+## Implementation summary (2026-06-24)
+
+- **Repo** — `ConfigRow.ConfidenceFloor` and `UpsertConfigInput.ConfidenceFloor` wired through `GetConfigByItem` / `UpsertConfig` (no migration; column existed in `290_grading_agent.sql`).
+- **Hold logic** — `EvaluateAgentConfidenceFloorHold` and `ComposeHoldDecisions` in `gate_hold.go`; `gradingAgentHoldDecision` in `grading_agent_apply.go` applies agent floor in `finishGradingAgentSuccess` and composes with Human Review Gate holds in `grading_agent_queue.go`.
+- **API** — `GET/PUT …/grader-agent` expose `confidenceFloor` (0–1, nullable); PUT preserves existing floor when the key is omitted.
+- **UI** — `AgentConfidenceFloorSettings` in inspector (no node selected) and run popover; i18n `gradingAgent.settings.confidenceFloor.*` (en/es/fr).
+- **Tests** — unit tests for floor boundary, null/zero no-op, and gate+floor composition in `gate_hold_test.go`.
 
 ## 1. Problem Statement
 

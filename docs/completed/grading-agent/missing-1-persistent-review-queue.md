@@ -1,6 +1,6 @@
 # GA-M1 — Persistent, actionable review queue & run history
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,11 +10,11 @@
 | **Section** | Grading Agent — Missing Features |
 | **Severity** | BLOCKER |
 | **Markets** | HE / K12 / SL |
-| **Status (today)** | PARTIAL |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | — |
-| **Unblocks** | [GA-M3](missing-3-suggest-only-batch-and-bulk-review.md), [GA-M6](missing-6-cancel-running-batch.md), [GA-M7](missing-7-cost-estimate-and-budget.md) |
+| **Unblocks** | [GA-M3](../../plan/grading-agent/missing-3-suggest-only-batch-and-bulk-review.md), [GA-M6](../../plan/grading-agent/missing-6-cancel-running-batch.md), [GA-M7](../../plan/grading-agent/missing-7-cost-estimate-and-budget.md) |
 
 ---
 
@@ -39,7 +39,7 @@ story — the main reason an instructor trusts the agent — effectively unusabl
 ## 3. Non-Goals
 
 - Cross-tenant or admin-wide review dashboards (course scope is enough for v1).
-- Changing how held/flagged decisions are *made* (that is the gate/flag node config; see [GA-M4](missing-4-confidence-auto-hold-threshold.md)).
+- Changing how held/flagged decisions are *made* (that is the gate/flag node config; see [GA-M4](../../plan/grading-agent/missing-4-confidence-auto-hold-threshold.md)).
 - A new notification channel beyond the existing inbox.
 
 ## 4. Personas & User Stories
@@ -88,7 +88,7 @@ story — the main reason an instructor trusts the agent — effectively unusabl
   - `CREATE INDEX ON assessment.grading_agent_runs (config_id, created_at DESC);`
   - `CREATE INDEX ON assessment.grading_agent_results (config_id, status) WHERE is_dry_run = false;`
 - Optional column on results: `resolved_at TIMESTAMPTZ`, `resolved_by UUID` to record who cleared a held/flagged item (else infer from status transition).
-- Migration: `server/migrations/NNN_grading_agent_review_indexes.sql` (next free number).
+- Migration: `server/migrations/322_grading_agent_review_indexes.sql`.
 - Backfill: none (indexes only); resolved_* nullable.
 
 ## 9. API Surface
@@ -109,7 +109,7 @@ story — the main reason an instructor trusts the agent — effectively unusabl
 
 ## 11. AI / ML Considerations
 
-- None new. Re-grading from the queue may re-invoke the agent (see [GA-M3](missing-3-suggest-only-batch-and-bulk-review.md)); cost is attributed to the re-run.
+- None new. Re-grading from the queue may re-invoke the agent (see [GA-M3](../../plan/grading-agent/missing-3-suggest-only-batch-and-bulk-review.md)); cost is attributed to the re-run.
 
 ## 12. Integration Points
 
@@ -120,7 +120,7 @@ story — the main reason an instructor trusts the agent — effectively unusabl
 
 ## 13. Dependencies & Sequencing
 
-- Must ship before [GA-M6](missing-6-cancel-running-batch.md) and [GA-M7](missing-7-cost-estimate-and-budget.md) so cancel/cost have a run-history home.
+- Must ship before [GA-M6](../../plan/grading-agent/missing-6-cancel-running-batch.md) and [GA-M7](../../plan/grading-agent/missing-7-cost-estimate-and-budget.md) so cancel/cost have a run-history home.
 - Shared infra: none beyond Postgres.
 
 ## 14. Risks & Mitigations
@@ -165,4 +165,4 @@ story — the main reason an instructor trusts the agent — effectively unusabl
 - `clients/web/src/components/annotation/grader-agent/{review-queue-panel,held-review-queue-panel}.tsx`.
 - `server/internal/httpserver/grading_agent_http.go` (`handleGetGraderAgentRun`, `handlePatchGraderAgentResult`).
 - `server/internal/repos/gradingagent/repo.go`.
-- Related: [GA-M3](missing-3-suggest-only-batch-and-bulk-review.md), [GA-M4](missing-4-confidence-auto-hold-threshold.md).
+- Related: [GA-M3](../../plan/grading-agent/missing-3-suggest-only-batch-and-bulk-review.md), [GA-M4](../../plan/grading-agent/missing-4-confidence-auto-hold-threshold.md).

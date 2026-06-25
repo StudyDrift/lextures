@@ -100,7 +100,7 @@ that most need batch grading.
 
 ## 13. Dependencies & Sequencing
 
-- Independent; pairs naturally with [GA-M1](missing-1-persistent-review-queue.md) (review queue can also filter by section).
+- Independent; pairs naturally with [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) (review queue can also filter by section).
 
 ## 14. Risks & Mitigations
 

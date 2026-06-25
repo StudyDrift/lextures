@@ -28,6 +28,10 @@ export type PlatformFeatures = {
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
   graderAgentEnabled?: boolean
+  graderAgentReviewInboxEnabled?: boolean
+  graderAgentSuggestModeEnabled?: boolean
+  graderAgentTextEntryGradingEnabled?: boolean
+  graderAgentVisionGradingEnabled?: boolean
   codeExecutionEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean
@@ -111,6 +115,10 @@ const defaultFeatures: PlatformFeatures = {
   equationEditorEnabled: false,
   readingLevelEnabled: false,
   graderAgentEnabled: false,
+  graderAgentReviewInboxEnabled: false,
+  graderAgentSuggestModeEnabled: false,
+  graderAgentTextEntryGradingEnabled: true,
+  graderAgentVisionGradingEnabled: false,
   codeExecutionEnabled: false,
   altTextEnforcementEnabled: false,
   ffAltTextEnforcement: false,
@@ -199,6 +207,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     equationEditorEnabled: false,
     readingLevelEnabled: false,
   graderAgentEnabled: false,
+  graderAgentReviewInboxEnabled: false,
     codeExecutionEnabled: false,
     altTextEnforcementEnabled: false,
     ffAltTextEnforcement: false,
@@ -288,6 +297,10 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           equationEditorEnabled: data.equationEditorEnabled === true,
           readingLevelEnabled: data.readingLevelEnabled === true,
           graderAgentEnabled: data.graderAgentEnabled === true,
+          graderAgentReviewInboxEnabled: data.graderAgentReviewInboxEnabled === true,
+          graderAgentSuggestModeEnabled: data.graderAgentSuggestModeEnabled === true,
+          graderAgentTextEntryGradingEnabled: data.graderAgentTextEntryGradingEnabled !== false,
+          graderAgentVisionGradingEnabled: data.graderAgentVisionGradingEnabled === true,
           codeExecutionEnabled: data.codeExecutionEnabled === true,
           altTextEnforcementEnabled: data.altTextEnforcementEnabled === true,
           ffAltTextEnforcement: data.ffAltTextEnforcement === true,

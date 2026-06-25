@@ -234,6 +234,14 @@ type Config struct {
 	ReadingLevelEnabled bool
 	// GraderAgentEnabled enables the instructor-authored grading agent in SpeedGrader (plan 19.16).
 	GraderAgentEnabled bool
+	// GraderAgentReviewInboxEnabled enables the persistent review inbox and run history (GA-M1).
+	GraderAgentReviewInboxEnabled bool
+	// GraderAgentSuggestModeEnabled enables suggest-only runs and bulk review actions (GA-M3).
+	GraderAgentSuggestModeEnabled bool
+	// GraderAgentTextEntryGradingEnabled grades typed online text-entry submissions (GA-M2).
+	GraderAgentTextEntryGradingEnabled bool
+	// GraderAgentVisionGradingEnabled grades image/scanned submissions via vision models (GA-M2).
+	GraderAgentVisionGradingEnabled bool
 	// CodeExecutionEnabled enables sandboxed code execution for quiz and grader agent nodes (plan 2.4 / 19.17.7).
 	CodeExecutionEnabled bool
 	// AltTextEnforcementEnabled gates alt-text prompts, AI suggestions, and coverage reporting (plan 12.5).

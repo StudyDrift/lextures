@@ -3,6 +3,7 @@ package moduleassignmentsubmissions
 import (
 	"context"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,12 +18,23 @@ type SubmissionRow struct {
 	ModuleItemID          uuid.UUID
 	SubmittedBy           uuid.UUID
 	AttachmentFileID      *uuid.UUID
+	BodyText              string
 	SubmittedAt           time.Time
 	UpdatedAt             time.Time
 	ResubmissionRequested bool
 	RevisionDueAt         *time.Time
 	RevisionFeedback      *string
 	VersionNumber         int32
+}
+
+// HasBodyText reports whether the submission has non-empty typed text-entry content.
+func HasBodyText(row SubmissionRow) bool {
+	return strings.TrimSpace(row.BodyText) != ""
+}
+
+// HasFileAttachment reports whether the submission references a stored file.
+func HasFileAttachment(row SubmissionRow) bool {
+	return row.AttachmentFileID != nil
 }
 
 type GradedFilter string
@@ -36,7 +48,7 @@ const (
 func scanSubmission(scanner interface{ Scan(...any) error }) (*SubmissionRow, error) {
 	var s SubmissionRow
 	err := scanner.Scan(
-		&s.ID, &s.CourseID, &s.ModuleItemID, &s.SubmittedBy, &s.AttachmentFileID, &s.SubmittedAt, &s.UpdatedAt,
+		&s.ID, &s.CourseID, &s.ModuleItemID, &s.SubmittedBy, &s.AttachmentFileID, &s.BodyText, &s.SubmittedAt, &s.UpdatedAt,
 		&s.ResubmissionRequested, &s.RevisionDueAt, &s.RevisionFeedback, &s.VersionNumber,
 	)
 	if err != nil {
@@ -47,7 +59,7 @@ func scanSubmission(scanner interface{ Scan(...any) error }) (*SubmissionRow, er
 
 func GetForCourseItemUser(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID, submittedBy uuid.UUID) (*SubmissionRow, error) {
 	s, err := scanSubmission(pool.QueryRow(ctx, `
-SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
        resubmission_requested, revision_due_at, revision_feedback, version_number
 FROM course.module_assignment_submissions
 WHERE course_id = $1 AND module_item_id = $2 AND submitted_by = $3
@@ -60,7 +72,7 @@ WHERE course_id = $1 AND module_item_id = $2 AND submitted_by = $3
 
 func GetByID(ctx context.Context, pool *pgxpool.Pool, submissionID uuid.UUID) (*SubmissionRow, error) {
 	s, err := scanSubmission(pool.QueryRow(ctx, `
-SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
        resubmission_requested, revision_due_at, revision_feedback, version_number
 FROM course.module_assignment_submissions
 WHERE id = $1
@@ -73,7 +85,7 @@ WHERE id = $1
 
 func GetByIDForCourse(ctx context.Context, pool *pgxpool.Pool, courseID, submissionID uuid.UUID) (*SubmissionRow, error) {
 	s, err := scanSubmission(pool.QueryRow(ctx, `
-SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
        resubmission_requested, revision_due_at, revision_feedback, version_number
 FROM course.module_assignment_submissions
 WHERE course_id = $1 AND id = $2
@@ -174,9 +186,21 @@ INSERT INTO course.module_assignment_submissions (course_id, module_item_id, sub
 VALUES ($1, $2, $3, $4)
 ON CONFLICT (module_item_id, submitted_by) DO UPDATE
 SET attachment_file_id = EXCLUDED.attachment_file_id, updated_at = NOW()
-RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
           resubmission_requested, revision_due_at, revision_feedback, version_number
 `, courseID, moduleItemID, submittedBy, attachmentFileID))
+}
+
+// UpsertBodyText records or updates typed text-entry content for a submission.
+func UpsertBodyText(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID, submittedBy uuid.UUID, bodyText string) (*SubmissionRow, error) {
+	return scanSubmission(pool.QueryRow(ctx, `
+INSERT INTO course.module_assignment_submissions (course_id, module_item_id, submitted_by, body_text)
+VALUES ($1, $2, $3, $4)
+ON CONFLICT (module_item_id, submitted_by) DO UPDATE
+SET body_text = EXCLUDED.body_text, updated_at = NOW()
+RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
+          resubmission_requested, revision_due_at, revision_feedback, version_number
+`, courseID, moduleItemID, submittedBy, bodyText))
 }
 
 // UpsertImportedInTransaction records or updates a Canvas-imported submission row inside an import tx.
@@ -209,7 +233,7 @@ func ResubmitVersionedInTransaction(ctx context.Context, tx pgx.Tx, now time.Tim
 		return nil, errors.New("db tx is nil")
 	}
 	cur, err := scanSubmission(tx.QueryRow(ctx, `
-SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
        resubmission_requested, revision_due_at, revision_feedback, version_number
 FROM course.module_assignment_submissions
 WHERE course_id = $1 AND id = $2
@@ -239,7 +263,7 @@ UPDATE course.module_assignment_submissions
 SET attachment_file_id = $1, submitted_at = $2, updated_at = $2, version_number = $3,
     resubmission_requested = false, revision_due_at = NULL, revision_feedback = NULL
 WHERE id = $4
-RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
           resubmission_requested, revision_due_at, revision_feedback, version_number
 `, newAttachmentFileID, now, nextV, cur.ID))
 }
@@ -259,7 +283,7 @@ func setRevisionRequestExec(ctx context.Context, q queryRower, courseID, submiss
 UPDATE course.module_assignment_submissions
 SET resubmission_requested = true, revision_due_at = $1, revision_feedback = $2, updated_at = NOW()
 WHERE course_id = $3 AND id = $4
-RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, submitted_at, updated_at,
+RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
           resubmission_requested, revision_due_at, revision_feedback, version_number
 `, revisionDueAt, revisionFeedback, courseID, submissionID))
 	if errors.Is(err, pgx.ErrNoRows) {

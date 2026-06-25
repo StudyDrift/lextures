@@ -27,6 +27,10 @@ type platformFeaturesJSON struct {
 	EquationEditorEnabled       bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled         bool `json:"readingLevelEnabled"`
 	GraderAgentEnabled          bool `json:"graderAgentEnabled"`
+	GraderAgentReviewInboxEnabled bool `json:"graderAgentReviewInboxEnabled"`
+	GraderAgentSuggestModeEnabled       bool `json:"graderAgentSuggestModeEnabled"`
+	GraderAgentTextEntryGradingEnabled  bool `json:"graderAgentTextEntryGradingEnabled"`
+	GraderAgentVisionGradingEnabled     bool `json:"graderAgentVisionGradingEnabled"`
 	CodeExecutionEnabled        bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled   bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement        bool `json:"ffAltTextEnforcement"`
@@ -130,7 +134,11 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		EquationEditorEnabled:       cfg.EquationEditorEnabled,
 		ReadingLevelEnabled:         cfg.ReadingLevelEnabled,
 		GraderAgentEnabled:          cfg.GraderAgentEnabled,
-		CodeExecutionEnabled:        cfg.CodeExecutionEnabled,
+		GraderAgentReviewInboxEnabled: cfg.GraderAgentReviewInboxEnabled,
+		GraderAgentSuggestModeEnabled:      cfg.GraderAgentSuggestModeEnabled,
+		GraderAgentTextEntryGradingEnabled: cfg.GraderAgentTextEntryGradingEnabled,
+		GraderAgentVisionGradingEnabled:    cfg.GraderAgentVisionGradingEnabled,
+		CodeExecutionEnabled:               cfg.CodeExecutionEnabled,
 		AltTextEnforcementEnabled:   cfg.AltTextEnforcementEnabled,
 		FFAltTextEnforcement:        cfg.FFAltTextEnforcement,
 		SpeechToTextEnabled:         cfg.SpeechToTextEnabled,

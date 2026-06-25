@@ -195,17 +195,22 @@ func newMemoryBus(concurrency int) *memoryBus {
 	}
 }
 
-func (m *memoryBus) Publish(_ context.Context, msg QueueMessage) error {
+func (m *memoryBus) Publish(ctx context.Context, msg QueueMessage) error {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	if m.closed {
+		m.mu.Unlock()
 		return fmt.Errorf("memory queue closed")
 	}
+	closeCh := m.closeCh
+	m.mu.Unlock()
+	// Block until there is space, the queue is closed, or the caller cancels.
 	select {
 	case m.ch <- msg:
 		return nil
-	default:
-		return fmt.Errorf("memory queue full")
+	case <-closeCh:
+		return fmt.Errorf("memory queue closed")
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
 

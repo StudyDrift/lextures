@@ -1,6 +1,6 @@
 # GA-M2 — Grade non-file (online text-entry) & image/scanned submissions
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,7 +10,7 @@
 | **Section** | Grading Agent — Missing Features |
 | **Severity** | BLOCKER |
 | **Markets** | HE / K12 |
-| **Status (today)** | MISSING |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | M (2–4w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | — |
@@ -53,7 +53,7 @@ work cannot adopt the agent.
 - **FR-1.** The agent MUST grade submissions whose content is online text-entry (no file) by sourcing the submission body text.
 - **FR-2.** `gradableSubmissionsForAgent` MUST include text-entry submissions, not only `AttachmentFileID != nil`.
 - **FR-3.** When a file yields empty text and the platform has a vision-capable grader model configured, the system SHOULD send the image/PDF pages to the vision path instead of failing.
-- **FR-4.** When neither text nor vision can read a submission, the system MUST record a per-submission `failed` result with a human-readable reason (surfaced in the review queue, [GA-M1](missing-1-persistent-review-queue.md)) rather than excluding it from the run.
+- **FR-4.** When neither text nor vision can read a submission, the system MUST record a per-submission `failed` result with a human-readable reason (surfaced in the review queue, [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md)) rather than excluding it from the run.
 - **FR-5.** The Student Submission node MUST advertise which input modalities a given submission provides (text / file / image) in the dry-run log.
 - **FR-6.** Vision usage MUST pass through the same AI-gateway opt-in / PII / cost accounting as text grading.
 
@@ -109,7 +109,7 @@ work cannot adopt the agent.
 
 ## 13. Dependencies & Sequencing
 
-- Best sequenced with [GA-M1](missing-1-persistent-review-queue.md) so per-submission failures are reviewable.
+- Best sequenced with [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) so per-submission failures are reviewable.
 - Vision requires a configured vision model (ties to existing AI provider settings).
 
 ## 14. Risks & Mitigations
@@ -151,4 +151,4 @@ work cannot adopt the agent.
 - `server/internal/service/gradingagent/submission_markdown.go` (`LoadSubmissionMarkdownsForSubmission`).
 - `server/internal/httpserver/grading_agent_http.go` (`gradableSubmissionsForAgent`, `resolveGraderAgentSubmissions`).
 - `server/internal/service/gradingagent/service.go` (`Score`, PII redaction).
-- Related: [GA-M1](missing-1-persistent-review-queue.md), [GA-M4](missing-4-confidence-auto-hold-threshold.md), [GA-M7](missing-7-cost-estimate-and-budget.md).
+- Related: [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md), [GA-M4](missing-4-confidence-auto-hold-threshold.md), [GA-M7](missing-7-cost-estimate-and-budget.md).

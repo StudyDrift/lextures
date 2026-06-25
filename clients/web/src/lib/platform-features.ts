@@ -14,6 +14,10 @@ export type PlatformFeaturesSnapshot = {
   equationEditorEnabled: boolean
   readingLevelEnabled: boolean
   graderAgentEnabled?: boolean
+  graderAgentReviewInboxEnabled?: boolean
+  graderAgentSuggestModeEnabled?: boolean
+  graderAgentTextEntryGradingEnabled?: boolean
+  graderAgentVisionGradingEnabled?: boolean
   codeExecutionEnabled?: boolean
   altTextEnforcementEnabled: boolean
   ffAltTextEnforcement: boolean

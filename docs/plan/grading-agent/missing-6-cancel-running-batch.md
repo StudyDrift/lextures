@@ -13,7 +13,7 @@
 | **Status (today)** | MISSING |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment / Grading squad |
-| **Depends on** | [GA-M1](missing-1-persistent-review-queue.md) |
+| **Depends on** | [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) |
 | **Unblocks** | safe large-class runs |
 
 ## 1. Problem Statement
@@ -82,7 +82,7 @@ this makes large runs feel dangerous.
 ## 10. UI / UX
 
 - Run popover / dry-run dock: a **Cancel run** button while `batchRunning`; becomes "Cancelling…" then shows the summary.
-- Run history ([GA-M1](missing-1-persistent-review-queue.md)) shows `cancelled` runs distinctly.
+- Run history ([GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md)) shows `cancelled` runs distinctly.
 - Copy/i18n under `gradingAgent.run.cancel.*`.
 
 ## 11. AI / ML Considerations
@@ -98,7 +98,7 @@ this makes large runs feel dangerous.
 
 ## 13. Dependencies & Sequencing
 
-- Pairs with [GA-M1](missing-1-persistent-review-queue.md) (run history) and [GA-B1](bug-1-queue-overflow-and-stuck-runs.md) (terminal states). Should land alongside the stuck-run fix so `cancelled` and stuck-detection share status handling.
+- Pairs with [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) (run history) and [GA-B1](bug-1-queue-overflow-and-stuck-runs.md) (terminal states). Should land alongside the stuck-run fix so `cancelled` and stuck-detection share status handling.
 
 ## 14. Risks & Mitigations
 
@@ -136,4 +136,4 @@ this makes large runs feel dangerous.
 - `server/internal/httpserver/grading_agent_queue.go` (`HandleGradingAgentQueueMessage`).
 - `server/internal/repos/gradingagent/repo.go` (`MarkRunRunning`, `IncrementRunProgress`).
 - `clients/web/src/components/annotation/grader-agent/use-grader-agent-workflow.ts` (`batchRunning`, polling).
-- Related: [GA-M1](missing-1-persistent-review-queue.md), [GA-B1](bug-1-queue-overflow-and-stuck-runs.md).
+- Related: [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md), [GA-B1](bug-1-queue-overflow-and-stuck-runs.md).

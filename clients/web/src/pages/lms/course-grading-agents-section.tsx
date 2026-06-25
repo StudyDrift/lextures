@@ -28,6 +28,7 @@ import {
   type RubricDefinition,
 } from '../../lib/courses-api'
 import { formatAbsolute } from '../../lib/format-datetime'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 
 type CourseGradingAgentsSectionProps = {
   courseCode: string
@@ -77,6 +78,7 @@ export function CourseGradingAgentsSection({
   onCreateModalOpenChange,
 }: CourseGradingAgentsSectionProps) {
   const { t } = useTranslation('common')
+  const { graderAgentReviewInboxEnabled } = usePlatformFeatures()
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [templates, setTemplates] = useState<CourseGradingAgentTemplateSummary[]>([])
@@ -459,19 +461,32 @@ export function CourseGradingAgentsSection({
                       className="border-b border-slate-100 last:border-0 dark:border-neutral-800"
                     >
                       <td className="w-px whitespace-nowrap px-4 py-3 text-start">
-                        <button
-                          type="button"
-                          disabled={opening}
-                          onClick={() => void openAgentEditor(agent)}
-                          className="text-start font-medium text-indigo-700 hover:underline disabled:opacity-60 dark:text-indigo-300"
-                        >
-                          {agent.assignmentTitle}
-                          {agent.assignmentArchived ? (
-                            <span className="ms-2 text-xs font-normal text-slate-500 dark:text-neutral-400">
-                              {t('gradingAgent.settings.archivedAssignment')}
-                            </span>
+                        <div className="space-y-1">
+                          <button
+                            type="button"
+                            disabled={opening}
+                            onClick={() => void openAgentEditor(agent)}
+                            className="text-start font-medium text-indigo-700 hover:underline disabled:opacity-60 dark:text-indigo-300"
+                          >
+                            {agent.assignmentTitle}
+                            {agent.assignmentArchived ? (
+                              <span className="ms-2 text-xs font-normal text-slate-500 dark:text-neutral-400">
+                                {t('gradingAgent.settings.archivedAssignment')}
+                              </span>
+                            ) : null}
+                          </button>
+                          {graderAgentReviewInboxEnabled && (agent.reviewCount ?? 0) > 0 ? (
+                            <button
+                              type="button"
+                              disabled={opening}
+                              onClick={() => void openAgentEditor(agent)}
+                              className="block text-xs font-semibold text-amber-700 hover:underline disabled:opacity-60 dark:text-amber-300"
+                              aria-live="polite"
+                            >
+                              {t('gradingAgent.review.inbox.reviewLink', { count: agent.reviewCount ?? 0 })}
+                            </button>
                           ) : null}
-                        </button>
+                        </div>
                       </td>
                       <td className="px-4 py-3 text-start">
                         <span

@@ -7,6 +7,7 @@ type AssignmentPageActionsMenuProps = {
   onEdit: () => void
   showGradingAgent?: boolean
   onGradingAgent?: () => void
+  reviewCount?: number
 }
 
 export function AssignmentPageActionsMenu({
@@ -14,6 +15,7 @@ export function AssignmentPageActionsMenu({
   onEdit,
   showGradingAgent = false,
   onGradingAgent,
+  reviewCount = 0,
 }: AssignmentPageActionsMenuProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -80,7 +82,17 @@ export function AssignmentPageActionsMenu({
               className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
             >
               <Sparkles className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
-              {t('gradingAgent.button')}
+              <span className="flex flex-1 items-center justify-between gap-2">
+                <span>{t('gradingAgent.button')}</span>
+                {reviewCount > 0 ? (
+                  <span
+                    className="rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white"
+                    aria-live="polite"
+                  >
+                    {t('gradingAgent.review.inbox.countShort', { count: reviewCount })}
+                  </span>
+                ) : null}
+              </span>
             </button>
           ) : null}
         </div>

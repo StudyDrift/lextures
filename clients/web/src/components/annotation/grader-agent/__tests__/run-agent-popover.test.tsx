@@ -21,9 +21,15 @@ const defaultProps = {
   setConfirmOverwrite: vi.fn(),
   runProgress: null,
   autoGradeNew: true,
+  postPolicy: 'draft' as const,
+  suggestModeEnabled: true,
+  runMode: 'suggest' as const,
+  setRunMode: vi.fn(),
   saving: false,
   onDryRun: vi.fn(),
   onToggleAutoGrade: vi.fn(),
+  onTogglePostPolicy: vi.fn(),
+  onSetConfidenceFloor: vi.fn(),
   onRun: vi.fn(),
 }
 

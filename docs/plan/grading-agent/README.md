@@ -27,10 +27,10 @@
 
 | ID | Plan | Severity | One-liner |
 |---|---|---|---|
-| GA-M1 | [Persistent, actionable review queue & run history](missing-1-persistent-review-queue.md) | BLOCKER | Held/flagged items vanish when the modal closes; flagged queue has no actions; no run history. |
-| GA-M2 | [Grade non-file (online text-entry) & image/scanned submissions](missing-2-non-file-submission-grading.md) | BLOCKER | Only file attachments with extractable text are gradable; text-box and scanned work are silently skipped. |
-| GA-M3 | [Suggest-only batch + bulk review/apply + posting control](missing-3-suggest-only-batch-and-bulk-review.md) | MAJOR | Batch runs auto-write grades; no "AI suggests, human approves in bulk" mode. |
-| GA-M4 | [Agent-level confidence auto-hold threshold](missing-4-confidence-auto-hold-threshold.md) | MAJOR | "Hold anything below X% confidence" requires hand-building a gate graph; the `confidence_floor` column is unused. |
+| GA-M1 | [Persistent, actionable review queue & run history](../../completed/grading-agent/missing-1-persistent-review-queue.md) | BLOCKER | **COMPLETE** — Persistent review inbox, flagged actions, run history, and review counts. |
+| GA-M2 | [Grade non-file (online text-entry) & image/scanned submissions](../../completed/grading-agent/missing-2-non-file-submission-grading.md) | BLOCKER | **COMPLETE** — Text-entry body grading, vision path for scanned/image submissions, per-submission failure reasons. |
+| GA-M3 | [Suggest-only batch + bulk review/apply + posting control](../../completed/grading-agent/missing-3-suggest-only-batch-and-bulk-review.md) | MAJOR | **COMPLETE** — Suggest-only runs, bulk approve/reject, and posting control. |
+| GA-M4 | [Agent-level confidence auto-hold threshold](../../completed/grading-agent/missing-4-confidence-auto-hold-threshold.md) | MAJOR | **COMPLETE** — Per-agent confidence floor wired end-to-end; composes with Human Review Gate. |
 | GA-M5 | [Section / group / student-scoped runs](missing-5-section-scoped-runs.md) | MAJOR | Scope is only current/ungraded/all — a TA cannot grade just their section. |
 | GA-M6 | [Cancel / stop a running batch](missing-6-cancel-running-batch.md) | MAJOR | Once a batch starts it cannot be stopped; a mistake burns the whole class of AI calls. |
 | GA-M7 | [Pre-run cost & scope estimate + run cost summary](missing-7-cost-estimate-and-budget.md) | MAJOR | No cost/size preview before running and no aggregate cost after; instructors fear runaway spend. |

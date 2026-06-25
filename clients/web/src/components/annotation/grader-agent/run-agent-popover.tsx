@@ -3,9 +3,12 @@ import { Check, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { Button } from '../../ui/button'
+import type { GraderAgentRunMode } from '../../../lib/courses-api'
+import { AgentConfidenceFloorSettings } from './agent-confidence-floor-settings'
 import type { RunScope } from './use-grader-agent-workflow'
 
 const RUN_SCOPES = ['current', 'ungraded', 'all'] as const satisfies readonly RunScope[]
+const RUN_MODES = ['suggest', 'apply'] as const satisfies readonly GraderAgentRunMode[]
 
 const pressScale =
   'motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out motion-safe:active:scale-[0.96]'
@@ -29,9 +32,16 @@ type RunAgentPopoverProps = {
   setConfirmOverwrite: (value: boolean) => void
   runProgress: RunProgress | null
   autoGradeNew: boolean
+  postPolicy: 'draft' | 'auto_post'
+  confidenceFloor?: number | null
+  suggestModeEnabled: boolean
+  runMode: GraderAgentRunMode
+  setRunMode: (mode: GraderAgentRunMode) => void
   saving: boolean
   onDryRun: () => void | Promise<void>
   onToggleAutoGrade: (enabled: boolean) => void
+  onTogglePostPolicy: (autoPost: boolean) => void
+  onSetConfidenceFloor: (floor: number | null) => void | Promise<void>
   onRun: () => void | Promise<void>
 }
 
@@ -48,9 +58,16 @@ export function RunAgentPopover({
   setConfirmOverwrite,
   runProgress,
   autoGradeNew,
+  postPolicy,
+  confidenceFloor,
+  suggestModeEnabled,
+  runMode,
+  setRunMode,
   saving,
   onDryRun,
   onToggleAutoGrade,
+  onTogglePostPolicy,
+  onSetConfidenceFloor,
   onRun,
 }: RunAgentPopoverProps) {
   const { t } = useTranslation('common')
@@ -160,6 +177,55 @@ export function RunAgentPopover({
             })}
           </div>
         </fieldset>
+        {suggestModeEnabled ? (
+          <fieldset className="mt-3">
+            <legend className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+              {t('gradingAgent.run.modeLabel')}
+            </legend>
+            <div
+              role="radiogroup"
+              aria-label={t('gradingAgent.run.modeLabel')}
+              className="overflow-hidden rounded-xl bg-slate-50 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:ring-white/10"
+            >
+              {RUN_MODES.map((mode, index) => {
+                const selected = runMode === mode
+                return (
+                  <label
+                    key={mode}
+                    className={`flex min-h-10 cursor-pointer items-center gap-3 px-3 py-2.5 text-sm transition-colors ${
+                      index > 0 ? 'border-t border-slate-200/80 dark:border-neutral-700/80' : ''
+                    } ${
+                      selected
+                        ? 'bg-white text-indigo-900 dark:bg-neutral-900 dark:text-indigo-100'
+                        : 'text-slate-700 hover:bg-white/70 dark:text-neutral-300 dark:hover:bg-neutral-900/50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="grader-agent-run-mode"
+                      value={mode}
+                      checked={selected}
+                      onChange={() => setRunMode(mode)}
+                      className="sr-only"
+                    />
+                    <span className="min-w-0 flex-1 leading-snug">{t(`gradingAgent.run.mode.${mode}`)}</span>
+                    <Check
+                      className={`h-4 w-4 shrink-0 text-indigo-600 motion-safe:transition-[opacity,transform,filter] motion-safe:duration-150 dark:text-indigo-400 ${
+                        selected ? 'scale-100 opacity-100 blur-0' : 'scale-[0.25] opacity-0 blur-[4px]'
+                      }`}
+                      aria-hidden
+                    />
+                  </label>
+                )
+              })}
+            </div>
+            <p className="mt-2 text-xs text-slate-500 dark:text-neutral-400">
+              {runMode === 'suggest'
+                ? t('gradingAgent.run.mode.suggestNote')
+                : t('gradingAgent.run.mode.applyNote')}
+            </p>
+          </fieldset>
+        ) : null}
         {confirmOverwrite ? (
           <p className="mt-3 text-sm text-amber-800 dark:text-amber-200">
             {t('gradingAgent.run.overwriteWarning')}
@@ -183,6 +249,31 @@ export function RunAgentPopover({
           />
           {t('gradingAgent.autoGradeNew')}
         </label>
+        <label className="mt-1 flex min-h-10 cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-neutral-200">
+          <input
+            type="checkbox"
+            className="size-4"
+            checked={postPolicy === 'auto_post'}
+            onChange={(e) => void onTogglePostPolicy(e.target.checked)}
+          />
+          {t('gradingAgent.posting.autoPost')}
+        </label>
+        <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+          {postPolicy === 'auto_post'
+            ? t('gradingAgent.posting.autoPostNote')
+            : t('gradingAgent.posting.draftNote')}
+        </p>
+        <div className="mt-3 border-t border-slate-200/80 pt-3 dark:border-neutral-700/80">
+          <p className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">
+            {t('gradingAgent.settings.confidenceFloor.title')}
+          </p>
+          <AgentConfidenceFloorSettings
+            compact
+            disabled={saving}
+            confidenceFloor={confidenceFloor}
+            onChange={(floor) => void onSetConfidenceFloor(floor)}
+          />
+        </div>
         <div className="mt-4 flex justify-end gap-2">
           <ActionErrorTooltip message={dryRunTooltip}>
             <Button variant="secondary" disabled={dryRunDisabled} onClick={() => void onDryRun()}>

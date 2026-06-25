@@ -32,7 +32,8 @@ import { ScoreAggregatorInspector } from './score-aggregator-inspector'
 import { AiNodeCompiledPrompt } from './ai-node-compiled-prompt'
 import { AiNodeOutputFormat } from './ai-node-output-format'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
-import type { ModuleAssignmentSubmissionApi, RubricDefinition } from '../../../lib/courses-api'
+import type { GraderAgentConfigApi, ModuleAssignmentSubmissionApi, RubricDefinition } from '../../../lib/courses-api'
+import { AgentConfidenceFloorSettings } from './agent-confidence-floor-settings'
 import { SubmissionInspectorSection } from './submission-inspector-section'
 import { WorkflowPromptEditor } from './workflow-prompt-editor'
 import { workflowNodeDisplayLabel } from './workflow-node-label'
@@ -41,6 +42,8 @@ import type { WorkflowNodeDefaultLabels } from './workflow-prompt-variable'
 
 type InspectorPanelProps = {
   workflow: GraderAgentWorkflowState
+  config?: GraderAgentConfigApi | null
+  onSetConfidenceFloor?: (floor: number | null) => void | Promise<void>
   courseCode: string
   itemId: string
   assignmentTitle?: string
@@ -54,6 +57,8 @@ const fieldClass =
 
 export function InspectorPanel({
   workflow,
+  config = null,
+  onSetConfidenceFloor,
   courseCode,
   itemId,
   assignmentTitle,
@@ -132,7 +137,21 @@ export function InspectorPanel({
 
   if (!graph || !selectedNodeId) {
     return (
-      <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.empty')}</p>
+      <div className="space-y-4 text-sm text-slate-700 dark:text-neutral-200">
+        <p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.empty')}</p>
+        {onSetConfidenceFloor ? (
+          <section className="space-y-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              {t('gradingAgent.settings.confidenceFloor.title')}
+            </p>
+            <AgentConfidenceFloorSettings
+              confidenceFloor={config?.confidenceFloor}
+              disabled={workflow.saving}
+              onChange={(floor) => void onSetConfidenceFloor(floor)}
+            />
+          </section>
+        ) : null}
+      </div>
     )
   }
   const node = graph.nodes.find((n) => n.id === selectedNodeId)

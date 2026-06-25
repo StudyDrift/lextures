@@ -157,6 +157,9 @@ func (d Deps) submissionToJSON(
 	if s.VersionNumber > 0 {
 		out["versionNumber"] = s.VersionNumber
 	}
+	if strings.TrimSpace(s.BodyText) != "" {
+		out["bodyText"] = s.BodyText
+	}
 	if redactPII {
 		out["blindLabel"] = gradingredaction.BlindStudentLabel(blindRank)
 	} else {

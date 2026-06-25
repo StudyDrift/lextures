@@ -4,11 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 
-	"github.com/lextures/lextures/server/internal/models/gradecomment"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
 	"github.com/lextures/lextures/server/internal/repos/coursegrades"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
@@ -26,19 +24,24 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	}
 	cfg, err := gradingagentrepo.GetConfigByItem(ctx, d.Pool, msg.ItemID)
 	if err != nil || cfg == nil {
-		return d.failGradingAgentItem(ctx, msg, "config not found")
+		return d.failGradingAgentItem(ctx, msg, "config not found", nil)
 	}
 	assignRow, err := coursemoduleassignments.GetForCourseItem(ctx, d.Pool, msg.CourseID, msg.ItemID)
 	if err != nil || assignRow == nil {
-		return d.failGradingAgentItem(ctx, msg, "assignment not found")
+		return d.failGradingAgentItem(ctx, msg, "assignment not found", nil)
 	}
 	subRow, err := moduleassignmentsubmissions.GetByIDForCourse(ctx, d.Pool, msg.CourseID, msg.SubmissionID)
 	if err != nil || subRow == nil {
-		return d.failGradingAgentItem(ctx, msg, "submission not found")
+		return d.failGradingAgentItem(ctx, msg, "submission not found", nil)
 	}
 	run, err := gradingagentrepo.GetRun(ctx, d.Pool, msg.RunID)
 	if err != nil || run == nil {
-		return d.failGradingAgentItem(ctx, msg, "run not found")
+		return d.failGradingAgentItem(ctx, msg, "run not found", nil)
+	}
+	// Idempotency guard: if a result already exists for this (run, submission) pair the
+	// message was already fully processed on a prior delivery. Ack without re-grading.
+	if already, _ := gradingagentrepo.ResultExistsForRun(ctx, d.Pool, msg.RunID, msg.SubmissionID); already {
+		return nil
 	}
 	if run.Scope == gradingagentrepo.RunScopeUngraded {
 		cell, cellErr := coursegrades.GetCell(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID)
@@ -51,14 +54,21 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 		}
 	}
 	svc := d.gradingAgentService()
-	if subRow.AttachmentFileID == nil {
-		return d.failGradingAgentItem(ctx, msg, "submission has no file attachment")
-	}
-	submissions, err := svc.LoadSubmissionMarkdownsForSubmission(ctx, msg.CourseCode, subRow)
+	content, err := svc.ResolveSubmissionContent(ctx, msg.CourseCode, subRow, gradingagentsvc.ResolveSubmissionContentOptions{
+		TextEntryEnabled: d.graderAgentTextEntryGradingEnabled(),
+		VisionEnabled:    d.graderAgentVisionGradingEnabled(),
+	})
 	if err != nil {
-		return d.failGradingAgentItem(ctx, msg, err.Error())
+		return d.failGradingAgentItem(ctx, msg, err.Error(), nil)
 	}
-	submissionText := gradingagentsvc.JoinSubmissions(submissions)
+	if content.FailureReason != "" {
+		modality := string(content.Modality)
+		return d.failGradingAgentItem(ctx, msg, content.FailureReason, &modality)
+	}
+	submissions := content.Markdowns
+	submissionText := content.Text
+	useVision := content.Modality == gradingagentsvc.ModalityVision
+	visionImages := content.ImageDataURLs
 	modelUser := cfg.CreatedBy
 	if run.InitiatedBy != nil {
 		modelUser = *run.InitiatedBy
@@ -80,32 +90,38 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	}
 	contentRow, contentErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, contentItemID)
 	if contentErr != nil {
-		return d.failGradingAgentItem(ctx, msg, contentErr.Error())
+		return d.failGradingAgentItem(ctx, msg, contentErr.Error(), nil)
 	}
 	rubricRow, rubricErr := d.assignmentRowForActivitySource(ctx, msg.CourseID, msg.ItemID, assignRow, rubricItemID)
 	if rubricErr != nil {
-		return d.failGradingAgentItem(ctx, msg, rubricErr.Error())
+		return d.failGradingAgentItem(ctx, msg, rubricErr.Error(), nil)
 	}
 	rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
 	maxPoints := gradingagentsvc.MaxPointsFromAssignment(assignRow)
 
+	if useVision && workflowGraph != nil && gradingagentsvc.WorkflowRequiresGraphExecution(workflowGraph) {
+		reason := gradingagentsvc.FailureVisionWorkflowUnsupported
+		modality := string(gradingagentsvc.ModalityUnreadable)
+		return d.failGradingAgentItem(ctx, msg, reason, &modality)
+	}
 	if workflowGraph != nil && gradingagentsvc.WorkflowRequiresGraphExecution(workflowGraph) {
 		dryRunModelID, modelErr := d.resolveGraderAgentModelID(ctx, modelUser, compiled.ScoreRequest.ModelID, cfg.ModelID)
 		if modelErr != nil {
-			return d.failGradingAgentItem(ctx, msg, modelErr.Error())
+			return d.failGradingAgentItem(ctx, msg, modelErr.Error(), nil)
 		}
 		if gradingagentsvc.WorkflowUsesLLM(workflowGraph) {
 			dec, _ := aigateway.Evaluate(ctx, d.Pool, d.aiGatewayConfig(), modelUser, nil, aigateway.FeatureGraderAgent, dryRunModelID, aigateway.ContentHash(gradingagentsvc.ContentHashInput(compiled.ScoreRequest.InstructorPrompt, submissionText)))
 			if !dec.Allowed {
-				return d.failGradingAgentItem(ctx, msg, "AI processing blocked")
+				return d.failGradingAgentItem(ctx, msg, "AI processing blocked", nil)
 			}
 			if svc.Client == nil {
-				return d.failGradingAgentItem(ctx, msg, "AI provider not configured")
+				return d.failGradingAgentItem(ctx, msg, "AI provider not configured", nil)
 			}
 		}
 		preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(ctx, gradingagentsvc.DryRunExecutionInput{
 			Graph:           workflowGraph,
 			Submissions:     submissions,
+			InputModality:   content.Modality,
 			SubmissionID:    msg.SubmissionID,
 			CourseCode:      msg.CourseCode,
 			DefaultMarkdown: contentRow.Markdown,
@@ -120,7 +136,7 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 			CodeRunner: codeexecution.New(),
 		})
 		if execErr != nil {
-			return d.failGradingAgentItem(ctx, msg, execErr.Error())
+			return d.failGradingAgentItem(ctx, msg, execErr.Error(), nil)
 		}
 		if preview.Flagged != nil {
 			reason := preview.Flagged.Reason
@@ -135,40 +151,30 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 		comment := preview.Comment
 		conf := preview.Confidence
 		pts := preview.SuggestedPoints
-		if preview.Held != nil && preview.Held.WouldHold {
-			heldReason := preview.Held.Reason
-			queue := preview.Held.Queue
-			now := time.Now()
-			_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
-				RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
-				SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
-				Status: gradingagentrepo.ItemSuggested, HeldReason: &heldReason,
-				HeldAt: &now, HeldQueue: &queue,
-			})
-			return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+		gateHold := &gradingAgentGateHoldInput{}
+		if preview.Held != nil {
+			gateHold.WouldHold = preview.Held.WouldHold
+			gateHold.Reason = preview.Held.Reason
+			gateHold.Queue = preview.Held.Queue
+		}
+		if hold, heldReason, queue := gradingAgentHoldDecision(cfg, conf, gateHold); hold {
+			if err := d.insertHeldGradingAgentResult(ctx, msg, cfg, gradingAgentSuccessInput{
+				Points: pts, Comment: comment, Confidence: conf,
+			}, heldReason, queue); err != nil {
+				return d.failGradingAgentItem(ctx, msg, "failed to record held grade", nil)
+			}
+			return nil
 		}
 		var rubricJSON []byte
 		if len(preview.RubricScores) > 0 {
 			rubricJSON, _ = json.Marshal(preview.RubricScores)
 		}
-		posting := "manual"
-		if strings.TrimSpace(assignRow.PostingPolicy) == "automatic" && cfg.PostPolicy == "auto_post" {
-			posting = "automatic"
+		if err := d.finishGradingAgentSuccess(ctx, msg, cfg, assignRow, subRow, run, gradingAgentSuccessInput{
+			Points: pts, Comment: comment, Confidence: conf, RubricJSON: rubricJSON, GradedByAI: true,
+		}); err != nil {
+			return d.failGradingAgentItem(ctx, msg, "failed to write grade", nil)
 		}
-		_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
-			DisplayName: "Grading agent",
-			Body:        comment,
-			Source:      "lextures",
-		})
-		if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, flatComment, commentJSON, posting, true); err != nil {
-			return d.failGradingAgentItem(ctx, msg, "failed to write grade")
-		}
-		_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
-			RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
-			SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
-			Status: gradingagentrepo.ItemApplied,
-		})
-		return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+		return nil
 	}
 
 	if workflowGraph != nil && gradeSourceID != "" {
@@ -187,19 +193,20 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 					var modelErr error
 					dryRunModelID, modelErr = d.resolveGraderAgentModelID(ctx, modelUser, dryRunModelID, cfg.ModelID)
 					if modelErr != nil {
-						return d.failGradingAgentItem(ctx, msg, modelErr.Error())
+						return d.failGradingAgentItem(ctx, msg, modelErr.Error(), nil)
 					}
 					dec, _ := aigateway.Evaluate(ctx, d.Pool, d.aiGatewayConfig(), modelUser, nil, aigateway.FeatureGraderAgent, dryRunModelID, aigateway.ContentHash(gradingagentsvc.ContentHashInput(compiled.ScoreRequest.InstructorPrompt, submissionText)))
 					if !dec.Allowed {
-						return d.failGradingAgentItem(ctx, msg, "AI processing blocked")
+						return d.failGradingAgentItem(ctx, msg, "AI processing blocked", nil)
 					}
 					if svc.Client == nil {
-						return d.failGradingAgentItem(ctx, msg, "AI provider not configured")
+						return d.failGradingAgentItem(ctx, msg, "AI provider not configured", nil)
 					}
 				}
 				preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(ctx, gradingagentsvc.DryRunExecutionInput{
 					Graph:           workflowGraph,
 					Submissions:     submissions,
+					InputModality:   content.Modality,
 					SubmissionID:    msg.SubmissionID,
 					CourseCode:      msg.CourseCode,
 					DefaultMarkdown: contentRow.Markdown,
@@ -214,7 +221,7 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 					CodeRunner: codeexecution.New(),
 				})
 				if execErr != nil {
-					return d.failGradingAgentItem(ctx, msg, execErr.Error())
+					return d.failGradingAgentItem(ctx, msg, execErr.Error(), nil)
 				}
 				comment := preview.Comment
 				conf := preview.Confidence
@@ -223,39 +230,27 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 				if len(preview.RubricScores) > 0 {
 					rubricJSON, _ = json.Marshal(preview.RubricScores)
 				}
-				posting := "manual"
-				if strings.TrimSpace(assignRow.PostingPolicy) == "automatic" && cfg.PostPolicy == "auto_post" {
-					posting = "automatic"
-				}
 				gradedByAI := gradeSource.Type != gradingagentsvc.NodeTypeCodeTestRunner
-				_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
-					DisplayName: "Grading agent",
-					Body:        comment,
-					Source:      "lextures",
-				})
-				if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, flatComment, commentJSON, posting, gradedByAI); err != nil {
-					return d.failGradingAgentItem(ctx, msg, "failed to write grade")
+				if err := d.finishGradingAgentSuccess(ctx, msg, cfg, assignRow, subRow, run, gradingAgentSuccessInput{
+					Points: pts, Comment: comment, Confidence: conf, RubricJSON: rubricJSON, GradedByAI: gradedByAI,
+				}); err != nil {
+					return d.failGradingAgentItem(ctx, msg, "failed to write grade", nil)
 				}
-				_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
-					RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
-					SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
-					Status: gradingagentrepo.ItemApplied,
-				})
-				return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+				return nil
 			}
 		}
 	}
 
 	modelID, modelErr := d.resolveGraderAgentModelID(ctx, modelUser, "", cfg.ModelID)
 	if modelErr != nil {
-		return d.failGradingAgentItem(ctx, msg, modelErr.Error())
+		return d.failGradingAgentItem(ctx, msg, modelErr.Error(), nil)
 	}
 	dec, _ := aigateway.Evaluate(ctx, d.Pool, d.aiGatewayConfig(), modelUser, nil, aigateway.FeatureGraderAgent, modelID, aigateway.ContentHash(gradingagentsvc.ContentHashInput(cfg.Prompt, submissionText)))
 	if !dec.Allowed {
-		return d.failGradingAgentItem(ctx, msg, "AI processing blocked")
+		return d.failGradingAgentItem(ctx, msg, "AI processing blocked", nil)
 	}
 	if svc.Client == nil {
-		return d.failGradingAgentItem(ctx, msg, "AI provider not configured")
+		return d.failGradingAgentItem(ctx, msg, "AI provider not configured", nil)
 	}
 	scoreReq := gradingagentsvc.ScoreRequest{
 		InstructorPrompt:         cfg.Prompt,
@@ -283,9 +278,14 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 			},
 		)
 	}
-	result, err := svc.Score(ctx, scoreReq)
+	var result gradingagentsvc.ScoreResult
+	if useVision {
+		result, err = svc.ScoreWithVision(ctx, scoreReq, visionImages)
+	} else {
+		result, err = svc.Score(ctx, scoreReq)
+	}
 	if err != nil {
-		return d.failGradingAgentItem(ctx, msg, err.Error())
+		return d.failGradingAgentItem(ctx, msg, err.Error(), nil)
 	}
 	comment := result.Output.Comment
 	conf := result.Output.Confidence
@@ -298,32 +298,19 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if len(result.Output.RubricScores) > 0 {
 		rubricJSON, _ = json.Marshal(result.Output.RubricScores)
 	}
-	posting := "manual"
-	if strings.TrimSpace(assignRow.PostingPolicy) == "automatic" && cfg.PostPolicy == "auto_post" {
-		posting = "automatic"
+	if err := d.finishGradingAgentSuccess(ctx, msg, cfg, assignRow, subRow, run, gradingAgentSuccessInput{
+		Points: pts, Comment: comment, Confidence: conf, RubricJSON: rubricJSON,
+		ModelID: &model, PromptTokens: &pt, CompletionTokens: &ct, CostUSD: &cost, GradedByAI: true,
+	}); err != nil {
+		return d.failGradingAgentItem(ctx, msg, "failed to write grade", nil)
 	}
-	gradedByAI := true
-	_, commentJSON, flatComment, _ := gradecomment.Append(nil, gradecomment.Comment{
-		DisplayName: "Grading agent",
-		Body:        comment,
-		Source:      "lextures",
-	})
-	if err := coursegrades.UpsertCellWithFlags(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID, pts, rubricJSON, flatComment, commentJSON, posting, gradedByAI); err != nil {
-		return d.failGradingAgentItem(ctx, msg, "failed to write grade")
-	}
-	_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
-		RunID: &msg.RunID, ConfigID: cfg.ID, SubmissionID: msg.SubmissionID,
-		SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
-		Status: gradingagentrepo.ItemApplied, ModelID: &model,
-		PromptTokens: &pt, CompletionTokens: &ct, CostUSD: &cost,
-	})
-	return gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, false)
+	return nil
 }
 
-func (d Deps) failGradingAgentItem(ctx context.Context, msg gradingagentqueue.QueueMessage, reason string) error {
+func (d Deps) failGradingAgentItem(ctx context.Context, msg gradingagentqueue.QueueMessage, reason string, modality *string) error {
 	_, _ = gradingagentrepo.InsertResult(ctx, d.Pool, gradingagentrepo.InsertResultInput{
 		RunID: &msg.RunID, ConfigID: msg.ConfigID, SubmissionID: msg.SubmissionID,
-		Status: gradingagentrepo.ItemFailed, Error: &reason,
+		Status: gradingagentrepo.ItemFailed, Error: &reason, InputModality: modality,
 	})
 	_ = gradingagentrepo.IncrementRunProgress(ctx, d.Pool, msg.RunID, true)
 	return nil

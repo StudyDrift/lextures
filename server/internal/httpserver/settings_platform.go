@@ -88,6 +88,10 @@ type platformSettingsJSON struct {
 	EquationEditorEnabled           bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             bool `json:"readingLevelEnabled"`
 	GraderAgentEnabled              bool `json:"graderAgentEnabled"`
+	GraderAgentReviewInboxEnabled   bool `json:"graderAgentReviewInboxEnabled"`
+	GraderAgentSuggestModeEnabled      bool `json:"graderAgentSuggestModeEnabled"`
+	GraderAgentTextEntryGradingEnabled bool `json:"graderAgentTextEntryGradingEnabled"`
+	GraderAgentVisionGradingEnabled    bool `json:"graderAgentVisionGradingEnabled"`
 	CodeExecutionEnabled            bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled       bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            bool `json:"ffAltTextEnforcement"`
@@ -289,6 +293,10 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
 			GraderAgentEnabled:              merged.GraderAgentEnabled,
+			GraderAgentReviewInboxEnabled:   merged.GraderAgentReviewInboxEnabled,
+			GraderAgentSuggestModeEnabled:      merged.GraderAgentSuggestModeEnabled,
+			GraderAgentTextEntryGradingEnabled: merged.GraderAgentTextEntryGradingEnabled,
+			GraderAgentVisionGradingEnabled:    merged.GraderAgentVisionGradingEnabled,
 			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,
@@ -460,6 +468,10 @@ type putPlatformBody struct {
 	EquationEditorEnabled           *bool `json:"equationEditorEnabled"`
 	ReadingLevelEnabled             *bool `json:"readingLevelEnabled"`
 	GraderAgentEnabled              *bool `json:"graderAgentEnabled"`
+	GraderAgentReviewInboxEnabled   *bool `json:"graderAgentReviewInboxEnabled"`
+	GraderAgentSuggestModeEnabled      *bool `json:"graderAgentSuggestModeEnabled"`
+	GraderAgentTextEntryGradingEnabled *bool `json:"graderAgentTextEntryGradingEnabled"`
+	GraderAgentVisionGradingEnabled    *bool `json:"graderAgentVisionGradingEnabled"`
 	CodeExecutionEnabled            *bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled       *bool `json:"altTextEnforcementEnabled"`
 	FFAltTextEnforcement            *bool `json:"ffAltTextEnforcement"`
@@ -779,6 +791,10 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("equationeditorenabled", body.EquationEditorEnabled, func(v bool) { wr.EquationEditorEnabled = &v })
 		setBool("readinglevelenabled", body.ReadingLevelEnabled, func(v bool) { wr.ReadingLevelEnabled = &v })
 		setBool("graderagentenabled", body.GraderAgentEnabled, func(v bool) { wr.GraderAgentEnabled = &v })
+		setBool("graderagentreviewinboxenabled", body.GraderAgentReviewInboxEnabled, func(v bool) { wr.GraderAgentReviewInboxEnabled = &v })
+		setBool("graderagentsuggestmodeenabled", body.GraderAgentSuggestModeEnabled, func(v bool) { wr.GraderAgentSuggestModeEnabled = &v })
+		setBool("graderagenttextentrygradingenabled", body.GraderAgentTextEntryGradingEnabled, func(v bool) { wr.GraderAgentTextEntryGradingEnabled = &v })
+		setBool("graderagentvisiongradingenabled", body.GraderAgentVisionGradingEnabled, func(v bool) { wr.GraderAgentVisionGradingEnabled = &v })
 		setBool("codeexecutionenabled", body.CodeExecutionEnabled, func(v bool) { wr.CodeExecutionEnabled = &v })
 		setBool("alttextenforcementenabled", body.AltTextEnforcementEnabled, func(v bool) { wr.AltTextEnforcementEnabled = &v })
 		setBool("ffalttextenforcement", body.FFAltTextEnforcement, func(v bool) { wr.FFAltTextEnforcement = &v })
@@ -942,6 +958,10 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			EquationEditorEnabled:           merged.EquationEditorEnabled,
 			ReadingLevelEnabled:             merged.ReadingLevelEnabled,
 			GraderAgentEnabled:              merged.GraderAgentEnabled,
+			GraderAgentReviewInboxEnabled:   merged.GraderAgentReviewInboxEnabled,
+			GraderAgentSuggestModeEnabled:      merged.GraderAgentSuggestModeEnabled,
+			GraderAgentTextEntryGradingEnabled: merged.GraderAgentTextEntryGradingEnabled,
+			GraderAgentVisionGradingEnabled:    merged.GraderAgentVisionGradingEnabled,
 			CodeExecutionEnabled:            merged.CodeExecutionEnabled,
 			AltTextEnforcementEnabled:       merged.AltTextEnforcementEnabled,
 			FFAltTextEnforcement:            merged.FFAltTextEnforcement,

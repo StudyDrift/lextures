@@ -13,7 +13,7 @@
 | **Status (today)** | THIN |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment / Grading squad |
-| **Depends on** | [GA-M1](missing-1-persistent-review-queue.md) |
+| **Depends on** | [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) |
 | **Unblocks** | confident large-class runs |
 
 ## 1. Problem Statement
@@ -83,7 +83,7 @@ A single dry run already produces real token counts, so a per-submission estimat
 ## 10. UI / UX
 
 - Run popover: a cost line under the scope picker; "Dry run for an estimate" CTA when none exists.
-- Run summary + history ([GA-M1](missing-1-persistent-review-queue.md)): actual cost and tokens.
+- Run summary + history ([GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md)): actual cost and tokens.
 - Optional budget cap input with helper text.
 - Copy/i18n under `gradingAgent.run.cost.*`.
 
@@ -101,7 +101,7 @@ A single dry run already produces real token counts, so a per-submission estimat
 
 ## 13. Dependencies & Sequencing
 
-- Needs [GA-M1](missing-1-persistent-review-queue.md) for the run-history home and [GA-M6](missing-6-cancel-running-batch.md) for the budget stop mechanism.
+- Needs [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) for the run-history home and [GA-M6](missing-6-cancel-running-batch.md) for the budget stop mechanism.
 
 ## 14. Risks & Mitigations
 
@@ -138,4 +138,4 @@ A single dry run already produces real token counts, so a per-submission estimat
 - `server/internal/repos/gradingagent/repo.go` (`ResultRow.CostUSD/PromptTokens/CompletionTokens`).
 - `server/internal/httpserver/grading_agent_http.go` (`recordAIUsage`, `openrouterUsageFromScore`).
 - `clients/web/src/components/annotation/grader-agent/run-agent-popover.tsx`.
-- Related: [GA-M1](missing-1-persistent-review-queue.md), [GA-M6](missing-6-cancel-running-batch.md); per-tenant BYOK (plan 16.7).
+- Related: [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md), [GA-M6](missing-6-cancel-running-batch.md); per-tenant BYOK (plan 16.7).
