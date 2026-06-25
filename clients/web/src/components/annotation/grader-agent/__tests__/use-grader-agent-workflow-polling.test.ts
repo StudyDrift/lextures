@@ -26,6 +26,7 @@ vi.mock('../../../../context/platform-features-context', () => ({
 vi.mock('../../../../lib/courses-api', () => ({
   fetchGraderAgentConfig: vi.fn(),
   fetchGraderAgentRun: vi.fn(),
+  postGraderAgentCancelRun: vi.fn(),
   fetchCourseCanvasLink: vi.fn(),
   postGraderAgentRun: vi.fn(),
   putGraderAgentConfig: vi.fn(),

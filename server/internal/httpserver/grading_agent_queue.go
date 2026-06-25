@@ -37,6 +37,13 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if already, _ := gradingagentrepo.ResultExistsForRun(ctx, d.Pool, msg.RunID, msg.SubmissionID); already {
 		return nil
 	}
+	runStatus, statusErr := d.gradingAgentRunStatus(ctx, msg.RunID)
+	if statusErr != nil {
+		return statusErr
+	}
+	if runStatus == gradingagentrepo.RunStatusCancelled {
+		return d.skipGradingAgentItemForCancel(ctx, msg)
+	}
 	if run.Scope == gradingagentrepo.RunScopeUngraded {
 		cell, cellErr := coursegrades.GetCell(ctx, d.Pool, msg.CourseID, subRow.SubmittedBy, msg.ItemID)
 		if cellErr == nil && cell != nil && cell.PointsEarned != nil {

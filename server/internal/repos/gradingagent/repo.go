@@ -66,6 +66,14 @@ type ConfigRow struct {
 	UpdatedAt                time.Time
 }
 
+const (
+	RunStatusQueued    = "queued"
+	RunStatusRunning   = "running"
+	RunStatusDone      = "done"
+	RunStatusFailed    = "failed"
+	RunStatusCancelled = "cancelled"
+)
+
 type RunRow struct {
 	ID             uuid.UUID
 	ConfigID       uuid.UUID
@@ -80,6 +88,8 @@ type RunRow struct {
 	Status         string
 	CreatedAt      time.Time
 	FinishedAt     *time.Time
+	CancelledAt    *time.Time
+	CancelledBy    *uuid.UUID
 }
 
 // RunFilter is the persisted / request filter for section, group, or explicit submissions (GA-M5).
@@ -370,11 +380,12 @@ func GetRun(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (*RunRow, 
 	var scopeStr string
 	var modeStr string
 	err := pool.QueryRow(ctx, `
-SELECT id, config_id, scope::text, mode, initiated_by, authored_via, filter, total_count, completed_count, failed_count, status, created_at, finished_at
+SELECT id, config_id, scope::text, mode, initiated_by, authored_via, filter, total_count, completed_count, failed_count, status, created_at, finished_at,
+       cancelled_at, cancelled_by
 FROM assessment.grading_agent_runs WHERE id = $1
 `, runID).Scan(
 		&r.ID, &r.ConfigID, &scopeStr, &modeStr, &r.InitiatedBy, &r.AuthoredVia, &r.Filter, &r.TotalCount, &r.CompletedCount, &r.FailedCount,
-		&r.Status, &r.CreatedAt, &r.FinishedAt,
+		&r.Status, &r.CreatedAt, &r.FinishedAt, &r.CancelledAt, &r.CancelledBy,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
@@ -401,7 +412,7 @@ SET failed_count = failed_count + 1,
     completed_count = LEAST(completed_count + 1, total_count),
     last_progress_at = NOW(),
     status = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN 'done' ELSE status END,
-    finished_at = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN NOW() ELSE finished_at END
+    finished_at = CASE WHEN completed_count + 1 >= total_count AND status IN ('running', 'cancelled') THEN NOW() ELSE finished_at END
 WHERE id = $1 AND completed_count < total_count
 `, runID)
 		return err
@@ -411,10 +422,40 @@ UPDATE assessment.grading_agent_runs
 SET completed_count = LEAST(completed_count + 1, total_count),
     last_progress_at = NOW(),
     status = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN 'done' ELSE status END,
-    finished_at = CASE WHEN completed_count + 1 >= total_count AND status = 'running' THEN NOW() ELSE finished_at END
+    finished_at = CASE WHEN completed_count + 1 >= total_count AND status IN ('running', 'cancelled') THEN NOW() ELSE finished_at END
 WHERE id = $1 AND completed_count < total_count
 `, runID)
 	return err
+}
+
+// GetRunStatus returns the current status string for a run (cheap indexed read).
+func GetRunStatus(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) (string, error) {
+	if pool == nil {
+		return "", errors.New("nil pool")
+	}
+	var status string
+	err := pool.QueryRow(ctx, `SELECT status FROM assessment.grading_agent_runs WHERE id = $1`, runID).Scan(&status)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", nil
+	}
+	return status, err
+}
+
+// CancelRun marks a queued or running run as cancelled. Returns true when the run was
+// transitioned; false when already terminal or not found (idempotent no-op).
+func CancelRun(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID, cancelledBy uuid.UUID) (bool, error) {
+	if pool == nil {
+		return false, errors.New("nil pool")
+	}
+	tag, err := pool.Exec(ctx, `
+UPDATE assessment.grading_agent_runs
+SET status = 'cancelled', cancelled_at = NOW(), cancelled_by = $2, last_progress_at = NOW()
+WHERE id = $1 AND status IN ('queued', 'running')
+`, runID, cancelledBy)
+	if err != nil {
+		return false, err
+	}
+	return tag.RowsAffected() > 0, nil
 }
 
 // ResultExistsForRun returns true if a non-dry-run result already exists for the
@@ -450,7 +491,7 @@ func MarkRunFailed(ctx context.Context, pool *pgxpool.Pool, runID uuid.UUID) err
 	_, err := pool.Exec(ctx, `
 UPDATE assessment.grading_agent_runs
 SET status = 'failed', finished_at = NOW()
-WHERE id = $1 AND status NOT IN ('done', 'failed')
+WHERE id = $1 AND status NOT IN ('done', 'failed', 'cancelled')
 `, runID)
 	return err
 }
@@ -569,7 +610,7 @@ func ListRunsByConfig(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUI
 	}
 	rows, err := pool.Query(ctx, `
 SELECT r.id, r.config_id, r.scope::text, r.mode, r.initiated_by, r.authored_via, r.filter, r.total_count, r.completed_count,
-       r.failed_count, r.status, r.created_at, r.finished_at,
+       r.failed_count, r.status, r.created_at, r.finished_at, r.cancelled_at, r.cancelled_by,
        (SELECT SUM(res.cost_usd) FROM assessment.grading_agent_results res WHERE res.run_id = r.id) AS cost_usd,
        (SELECT res.model_id FROM assessment.grading_agent_results res
         WHERE res.run_id = r.id AND res.model_id IS NOT NULL
@@ -591,7 +632,8 @@ LIMIT $2
 		if err := rows.Scan(
 			&summary.ID, &summary.ConfigID, &scopeStr, &modeStr, &summary.InitiatedBy, &summary.AuthoredVia, &summary.Filter,
 			&summary.TotalCount, &summary.CompletedCount, &summary.FailedCount, &summary.Status,
-			&summary.CreatedAt, &summary.FinishedAt, &summary.CostUSD, &summary.ModelID,
+			&summary.CreatedAt, &summary.FinishedAt, &summary.CancelledAt, &summary.CancelledBy,
+			&summary.CostUSD, &summary.ModelID,
 		); err != nil {
 			return nil, err
 		}

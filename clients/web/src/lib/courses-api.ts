@@ -5877,6 +5877,8 @@ export type GraderAgentRunStatus = {
   totalCount: number
   completedCount: number
   failedCount: number
+  cancelledAt?: string
+  cancelledBy?: string
   results: Array<{
     id?: string
     submissionId: string
@@ -5929,6 +5931,8 @@ export type GraderAgentRunHistoryEntry = {
   initiatedBy?: string
   createdAt: string
   finishedAt?: string
+  cancelledAt?: string
+  cancelledBy?: string
 }
 
 export type CourseGradingAgentSummary = {
@@ -6332,6 +6336,20 @@ export async function fetchGraderAgentRun(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as GraderAgentRunStatus
+}
+
+export async function postGraderAgentCancelRun(
+  courseCode: string,
+  itemId: string,
+  runId: string,
+): Promise<{ status: string }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs/${encodeURIComponent(runId)}/cancel`,
+    { method: 'POST' },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { status: string }
 }
 
 export async function fetchGraderAgentRuns(

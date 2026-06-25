@@ -30,6 +30,9 @@ type RunAgentPopoverProps = {
   dryRunTooltip: string | null
   dryRunning: boolean
   batchRunning: boolean
+  cancelRunEnabled?: boolean
+  cancellingRun?: boolean
+  onCancelRun?: () => void | Promise<void>
   runScope: RunScope
   setRunScope: (scope: RunScope) => void
   confirmOverwrite: boolean
@@ -63,6 +66,9 @@ export function RunAgentPopover({
   dryRunTooltip,
   dryRunning,
   batchRunning,
+  cancelRunEnabled = false,
+  cancellingRun = false,
+  onCancelRun,
   runScope,
   setRunScope,
   confirmOverwrite,
@@ -318,6 +324,22 @@ export function RunAgentPopover({
               )}
             </Button>
           </ActionErrorTooltip>
+          {batchRunning && cancelRunEnabled ? (
+            <Button
+              variant="secondary"
+              disabled={cancellingRun}
+              onClick={() => void onCancelRun?.()}
+            >
+              {cancellingRun ? (
+                <>
+                  <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+                  <span>{t('gradingAgent.run.cancel.cancelling')}</span>
+                </>
+              ) : (
+                t('gradingAgent.run.cancel.button')
+              )}
+            </Button>
+          ) : null}
           <Button disabled={saving || disabled || batchRunning} onClick={() => void handleInnerRun()}>
             {batchRunning ? (
               <>
