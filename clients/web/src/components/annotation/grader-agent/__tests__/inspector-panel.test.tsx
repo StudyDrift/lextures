@@ -34,9 +34,7 @@ function workflowStub(overrides: Partial<GraderAgentWorkflowState> = {}): Grader
   return {
     graph,
     selectedNodeId: null,
-    updateGraderNode: vi.fn(),
-    updateAiNode: vi.fn(),
-    updateActivityNode: vi.fn(),
+    updateNodeData: vi.fn(),
     removeNode: vi.fn(),
     nodeDryRunDetails: {},
     nodeExecutionStates: {},
