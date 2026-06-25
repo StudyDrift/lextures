@@ -1,0 +1,29 @@
+{
+  "name": "watchNewEnrollment",
+  "label": "Watch New Enrollments",
+  "type": "instant",
+  "description": "Triggers when a student is enrolled (REST hook via Lextures webhooks).",
+  "communication": {
+    "url": "/api/v1/webhooks",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer {{connection.accessToken}}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "label": "Make: New Enrollment",
+      "endpointUrl": "{{webhook.url}}",
+      "eventTypes": ["enrollment.created"],
+      "settings": { "source": "make" }
+    },
+    "response": {
+      "valid": "{{statusCode >= 200 && statusCode < 300}}"
+    }
+  },
+  "interface": [
+    { "name": "enrollmentId", "type": "text", "label": "Enrollment ID" },
+    { "name": "studentUserId", "type": "text", "label": "Student user ID" },
+    { "name": "courseId", "type": "text", "label": "Course ID" },
+    { "name": "role", "type": "text", "label": "Role" }
+  ]
+}

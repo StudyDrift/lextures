@@ -1,0 +1,13 @@
+{
+  "name": "lextures-make",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lextures Make.com custom app bundle (plan 16.10)",
+  "scripts": {
+    "validate": "node scripts/validate.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

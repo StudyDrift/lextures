@@ -2,6 +2,7 @@ package webhooksrepo
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -22,6 +23,7 @@ type Subscription struct {
 	PausedAt       *time.Time
 	TLSSkipVerify  bool
 	CreatedBy      *uuid.UUID
+	Settings       json.RawMessage
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 }
@@ -53,6 +55,7 @@ type CreateInput struct {
 	EventTypes     []string
 	TLSSkipVerify  bool
 	CreatedBy      *uuid.UUID
+	Settings       json.RawMessage
 }
 
 // UpdateInput holds mutable subscription fields.
@@ -70,7 +73,7 @@ type UpdateInput struct {
 func ListByOrg(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) ([]Subscription, error) {
 	rows, err := pool.Query(ctx, `
 SELECT id, org_id, label, endpoint_url, signing_key_enc, event_types, active, paused_at,
-       tls_skip_verify, created_by, created_at, updated_at
+       tls_skip_verify, created_by, settings, created_at, updated_at
 FROM integrations.webhook_subscriptions
 WHERE org_id = $1
 ORDER BY created_at DESC
@@ -83,7 +86,7 @@ ORDER BY created_at DESC
 	for rows.Next() {
 		var s Subscription
 		if err := rows.Scan(&s.ID, &s.OrgID, &s.Label, &s.EndpointURL, &s.SigningKeyEnc, &s.EventTypes,
-			&s.Active, &s.PausedAt, &s.TLSSkipVerify, &s.CreatedBy, &s.CreatedAt, &s.UpdatedAt); err != nil {
+			&s.Active, &s.PausedAt, &s.TLSSkipVerify, &s.CreatedBy, &s.Settings, &s.CreatedAt, &s.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, s)
@@ -95,7 +98,7 @@ ORDER BY created_at DESC
 func GetByID(ctx context.Context, pool *pgxpool.Pool, orgID, id uuid.UUID) (*Subscription, error) {
 	row := pool.QueryRow(ctx, `
 SELECT id, org_id, label, endpoint_url, signing_key_enc, event_types, active, paused_at,
-       tls_skip_verify, created_by, created_at, updated_at
+       tls_skip_verify, created_by, settings, created_at, updated_at
 FROM integrations.webhook_subscriptions
 WHERE id = $1 AND org_id = $2
 `, id, orgID)
@@ -106,7 +109,7 @@ WHERE id = $1 AND org_id = $2
 func GetByIDAnyOrg(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*Subscription, error) {
 	row := pool.QueryRow(ctx, `
 SELECT id, org_id, label, endpoint_url, signing_key_enc, event_types, active, paused_at,
-       tls_skip_verify, created_by, created_at, updated_at
+       tls_skip_verify, created_by, settings, created_at, updated_at
 FROM integrations.webhook_subscriptions
 WHERE id = $1
 `, id)
@@ -116,7 +119,7 @@ WHERE id = $1
 func scanSubscription(row pgx.Row) (*Subscription, error) {
 	var s Subscription
 	err := row.Scan(&s.ID, &s.OrgID, &s.Label, &s.EndpointURL, &s.SigningKeyEnc, &s.EventTypes,
-		&s.Active, &s.PausedAt, &s.TLSSkipVerify, &s.CreatedBy, &s.CreatedAt, &s.UpdatedAt)
+		&s.Active, &s.PausedAt, &s.TLSSkipVerify, &s.CreatedBy, &s.Settings, &s.CreatedAt, &s.UpdatedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -130,11 +133,11 @@ func scanSubscription(row pgx.Row) (*Subscription, error) {
 func Create(ctx context.Context, pool *pgxpool.Pool, in CreateInput) (*Subscription, error) {
 	row := pool.QueryRow(ctx, `
 INSERT INTO integrations.webhook_subscriptions (
-    org_id, label, endpoint_url, signing_key_enc, event_types, tls_skip_verify, created_by
-) VALUES ($1, $2, $3, $4, $5, $6, $7)
+    org_id, label, endpoint_url, signing_key_enc, event_types, tls_skip_verify, created_by, settings
+) VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8, '{}'::jsonb))
 RETURNING id, org_id, label, endpoint_url, signing_key_enc, event_types, active, paused_at,
-          tls_skip_verify, created_by, created_at, updated_at
-`, in.OrgID, in.Label, in.EndpointURL, in.SigningKeyEnc, in.EventTypes, in.TLSSkipVerify, in.CreatedBy)
+          tls_skip_verify, created_by, settings, created_at, updated_at
+`, in.OrgID, in.Label, in.EndpointURL, in.SigningKeyEnc, in.EventTypes, in.TLSSkipVerify, in.CreatedBy, in.Settings)
 	return scanSubscription(row)
 }
 
@@ -184,7 +187,7 @@ SET label = $3, endpoint_url = $4, signing_key_enc = $5, event_types = $6,
     active = $7, paused_at = $8, tls_skip_verify = $9, updated_at = now()
 WHERE id = $1 AND org_id = $2
 RETURNING id, org_id, label, endpoint_url, signing_key_enc, event_types, active, paused_at,
-          tls_skip_verify, created_by, created_at, updated_at
+          tls_skip_verify, created_by, settings, created_at, updated_at
 `, id, orgID, label, endpoint, keyEnc, eventTypes, active, pausedAt, tlsSkip)
 	return scanSubscription(row)
 }
@@ -214,7 +217,7 @@ WHERE id = $1
 func ListActiveForEvent(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, eventType string) ([]Subscription, error) {
 	rows, err := pool.Query(ctx, `
 SELECT id, org_id, label, endpoint_url, signing_key_enc, event_types, active, paused_at,
-       tls_skip_verify, created_by, created_at, updated_at
+       tls_skip_verify, created_by, settings, created_at, updated_at
 FROM integrations.webhook_subscriptions
 WHERE org_id = $1 AND active = true AND paused_at IS NULL AND $2 = ANY(event_types)
 `, orgID, eventType)
@@ -226,7 +229,7 @@ WHERE org_id = $1 AND active = true AND paused_at IS NULL AND $2 = ANY(event_typ
 	for rows.Next() {
 		var s Subscription
 		if err := rows.Scan(&s.ID, &s.OrgID, &s.Label, &s.EndpointURL, &s.SigningKeyEnc, &s.EventTypes,
-			&s.Active, &s.PausedAt, &s.TLSSkipVerify, &s.CreatedBy, &s.CreatedAt, &s.UpdatedAt); err != nil {
+			&s.Active, &s.PausedAt, &s.TLSSkipVerify, &s.CreatedBy, &s.Settings, &s.CreatedAt, &s.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, s)

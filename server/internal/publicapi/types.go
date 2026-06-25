@@ -23,24 +23,27 @@ type UserResource struct {
 
 // EnrollmentResource is the public API projection of an enrollment.
 type EnrollmentResource struct {
-	ID     string `json:"id"`
-	UserID string `json:"userId"`
-	Role   string `json:"role"`
-	State  string `json:"state"`
+	ID        string     `json:"id"`
+	UserID    string     `json:"userId"`
+	Role      string     `json:"role"`
+	State     string     `json:"state"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
 // AssignmentResource is the public API projection of an assignment.
 type AssignmentResource struct {
-	ID       string     `json:"id"`
-	CourseID string     `json:"courseId"`
-	Title    string     `json:"title"`
-	DueAt    *time.Time `json:"dueAt,omitempty"`
+	ID        string     `json:"id"`
+	CourseID  string     `json:"courseId"`
+	Title     string     `json:"title"`
+	DueAt     *time.Time `json:"dueAt,omitempty"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
 // GradeResource is the public API projection of a posted grade cell.
 type GradeResource struct {
-	CourseID       string `json:"courseId"`
-	StudentUserID  string `json:"studentUserId"`
-	ModuleItemID   string `json:"moduleItemId"`
-	PointsEarned   string `json:"pointsEarned"`
+	CourseID      string     `json:"courseId"`
+	StudentUserID string     `json:"studentUserId"`
+	ModuleItemID  string     `json:"moduleItemId"`
+	PointsEarned  string     `json:"pointsEarned"`
+	UpdatedAt     *time.Time `json:"updatedAt,omitempty"`
 }

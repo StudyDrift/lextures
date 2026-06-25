@@ -114,6 +114,11 @@ func deliverJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, job 
 			return fmt.Errorf("missing delivery payload")
 		}
 	}
+	payload, err = AdaptPayloadForSubscription(ctx, pool, payload, sub.Settings)
+	if err != nil {
+		return err
+	}
+	source := ConnectorSource(sub.Settings)
 
 	// Bot connections register as webhook subscribers; deliver via platform APIs (plan 16.6).
 	if conn, cerr := botsrepo.ConnectionForSubscription(ctx, pool, job.SubscriptionID); cerr == nil && conn != nil {
@@ -161,7 +166,7 @@ func deliverJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, job 
 	}
 	client := outboundClient(sub.TLSSkipVerify)
 	start := time.Now()
-	status, snippet, derr := postWebhook(ctx, client, sub.EndpointURL, payload, signingKey)
+	status, snippet, derr := postWebhook(ctx, client, sub.EndpointURL, payload, signingKey, source)
 	latencyMS := int(time.Since(start).Milliseconds())
 	if derr == nil && status >= 200 && status < 300 {
 		return webhooksrepo.MarkDelivered(ctx, pool, job.ID, now, status, latencyMS, snippet)
@@ -190,7 +195,7 @@ func deliverJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, job 
 	return fmt.Errorf("%s", msg)
 }
 
-func postWebhook(ctx context.Context, client *http.Client, endpoint string, body, signingKey []byte) (int, string, error) {
+func postWebhook(ctx context.Context, client *http.Client, endpoint string, body, signingKey []byte, source string) (int, string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, strings.TrimSpace(endpoint), bytes.NewReader(body))
 	if err != nil {
 		return 0, "", err
@@ -198,6 +203,9 @@ func postWebhook(ctx context.Context, client *http.Client, endpoint string, body
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "Lextures-Webhooks/1.0")
 	req.Header.Set(webhooks.SignatureHeaderName(), webhooks.SignPayload(body, signingKey))
+	if src := strings.TrimSpace(source); src != "" {
+		req.Header.Set("X-Lextures-Source", src)
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, "", err

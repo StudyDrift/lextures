@@ -1,0 +1,32 @@
+{
+  "name": "enrollUser",
+  "label": "Enroll User",
+  "type": "action",
+  "description": "Enrolls an existing user in a course by email.",
+  "parameters": [
+    { "name": "courseId", "type": "text", "label": "Course ID", "required": true },
+    { "name": "email", "type": "email", "label": "User email", "required": true },
+    { "name": "courseRole", "type": "text", "label": "Course role", "required": false, "default": "student" }
+  ],
+  "communication": {
+    "url": "/api/v1/courses/{{parameters.courseId}}/enrollments",
+    "method": "POST",
+    "headers": {
+      "Authorization": "Bearer {{connection.accessToken}}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "email": "{{parameters.email}}",
+      "courseRole": "{{parameters.courseRole}}"
+    },
+    "response": {
+      "valid": "{{statusCode >= 200 && statusCode < 300}}"
+    }
+  },
+  "interface": [
+    { "name": "id", "type": "text", "label": "Enrollment ID" },
+    { "name": "userId", "type": "text", "label": "User ID" },
+    { "name": "role", "type": "text", "label": "Role" },
+    { "name": "state", "type": "text", "label": "State" }
+  ]
+}

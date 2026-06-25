@@ -116,6 +116,33 @@ jobs:
       - name: go build
         run: go build -o /dev/null main.go
 
+  integrations:
+    name: Integrations (Zapier / Make)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        integration: [zapier, make]
+    defaults:
+      run:
+        working-directory: integrations/${{ matrix.integration }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        if: matrix.integration == 'zapier'
+        run: npm ci
+
+      - name: npm test
+        run: npm test
+
+      - name: Validate connector definition
+        run: npm run validate
+
   clients:
     name: Client (${{ matrix.client }})
     runs-on: ubuntu-latest

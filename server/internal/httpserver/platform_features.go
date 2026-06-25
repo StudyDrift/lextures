@@ -78,6 +78,7 @@ type platformFeaturesJSON struct {
 	FFEportfolio                bool `json:"ffEportfolio"`
 	FFTranscripts               bool `json:"ffTranscripts"`
 	FFWebhooks                  bool `json:"ffWebhooks"`
+	FFZapierConnector           bool `json:"ffZapierConnector"`
 	FFAdvisingIntegration       bool `json:"ffAdvisingIntegration"`
 	FFResearchConsent           bool `json:"ffResearchConsent"`
 	FFAccessibilityIntake       bool `json:"ffAccessibilityIntake"`
@@ -188,6 +189,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFEportfolio:                cfg.FFEportfolio,
 		FFTranscripts:               cfg.FFTranscripts,
 		FFWebhooks:                  cfg.FFWebhooks,
+		FFZapierConnector:           cfg.FFZapierConnector,
 		FFAdvisingIntegration:       cfg.FFAdvisingIntegration,
 		FFResearchConsent:           cfg.FFResearchConsent,
 		FFAccessibilityIntake:       cfg.FFAccessibilityIntake,

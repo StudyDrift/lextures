@@ -49,6 +49,14 @@ type webhookDeliveryJSON struct {
 	Test           bool       `json:"test,omitempty"`
 }
 
+func (d Deps) zapierConnectorFeatureOff(w http.ResponseWriter) bool {
+	if !d.effectiveConfig().FFZapierConnector {
+		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Zapier/Make connector webhooks are not enabled.")
+		return true
+	}
+	return false
+}
+
 func (d Deps) webhooksFeatureOff(w http.ResponseWriter) bool {
 	if !d.effectiveConfig().FFWebhooks {
 		apierr.WriteJSON(w, http.StatusNotImplemented, apierr.CodeNotImplemented, "Outbound webhooks are not enabled.")
@@ -227,14 +235,31 @@ func (d Deps) handleCreateWebhook() http.HandlerFunc {
 
 func (d Deps) createWebhook(w http.ResponseWriter, r *http.Request, orgID uuid.UUID) {
 	var body struct {
-		Label         string   `json:"label"`
-		EndpointURL   string   `json:"endpointUrl"`
-		EventTypes    []string `json:"eventTypes"`
-		TLSSkipVerify *bool    `json:"tlsSkipVerify"`
+		Label         string          `json:"label"`
+		EndpointURL   string          `json:"endpointUrl"`
+		EventTypes    []string        `json:"eventTypes"`
+		TLSSkipVerify *bool           `json:"tlsSkipVerify"`
+		Settings      json.RawMessage `json:"settings"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 		return
+	}
+	settings := body.Settings
+	if len(settings) == 0 {
+		settings = json.RawMessage(`{}`)
+	}
+	var settingsObj webhooksvc.SubscriptionSettings
+	_ = json.Unmarshal(settings, &settingsObj)
+	source := strings.ToLower(strings.TrimSpace(settingsObj.Source))
+	if source == "zapier" || source == "make" {
+		if d.zapierConnectorFeatureOff(w) {
+			return
+		}
+		if tok, ok := auth.APITokenFromContext(r.Context()); ok && tok != nil {
+			settingsObj.IncludePII = scopeAllowed(tok.Scopes, "pii:read")
+			settings, _ = json.Marshal(settingsObj)
+		}
 	}
 	label := strings.TrimSpace(body.Label)
 	if label == "" {
@@ -280,7 +305,7 @@ func (d Deps) createWebhook(w http.ResponseWriter, r *http.Request, orgID uuid.U
 	}
 	sub, err := webhooksrepo.Create(r.Context(), d.Pool, webhooksrepo.CreateInput{
 		OrgID: orgID, Label: label, EndpointURL: endpoint, SigningKeyEnc: keyEnc,
-		EventTypes: eventTypes, TLSSkipVerify: tlsSkip, CreatedBy: createdBy,
+		EventTypes: eventTypes, TLSSkipVerify: tlsSkip, CreatedBy: createdBy, Settings: settings,
 	})
 	if err != nil {
 		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to create webhook subscription.")
