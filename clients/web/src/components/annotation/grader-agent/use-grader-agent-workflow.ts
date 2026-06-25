@@ -5,6 +5,7 @@ import {
   fetchCourseCanvasLink,
   fetchGraderAgentConfig,
   fetchGraderAgentRun,
+  fetchGraderAgentRunEstimate,
   fetchSubmissionGrade,
   postGraderAgentCancelRun,
   postGraderAgentRun,
@@ -16,6 +17,7 @@ import {
   type CourseCanvasLinkApi,
   type GraderAgentConfigApi,
   type GraderAgentDryRunResult,
+  type GraderAgentRunCostEstimate,
   type GraderAgentRunMode,
   type GraderAgentRunStatus,
   type GraderWorkflowGraphApi,
@@ -111,7 +113,7 @@ export function useGraderAgentWorkflow({
   onSubmissionGraded,
 }: UseGraderAgentWorkflowArgs) {
   const { t } = useTranslation('common')
-  const { graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCancelRunEnabled } =
+  const { graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled, graderAgentCancelRunEnabled } =
     usePlatformFeatures()
   const [savedTemplateId, setSavedTemplateId] = useState<string | null>(templateMode?.templateId ?? null)
   const [config, setConfig] = useState<GraderAgentConfigApi | null>(null)
@@ -136,6 +138,9 @@ export function useGraderAgentWorkflow({
   const [runResults, setRunResults] = useState<GraderAgentRunStatus['results']>([])
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
   const [runFilterState, setRunFilterState] = useState<RunAgentFilterState>(defaultRunAgentFilterState)
+  const [runCostEstimate, setRunCostEstimate] = useState<GraderAgentRunCostEstimate | null>(null)
+  const [runCostEstimateLoading, setRunCostEstimateLoading] = useState(false)
+  const [budgetUsd, setBudgetUsd] = useState<number | null>(null)
   const [statusMessage, setStatusMessage] = useState('')
   const [nodeExecutionStates, setNodeExecutionStates] = useState<Record<string, NodeExecutionStatus>>({})
   const [dryRunLogs, setDryRunLogs] = useState<DryRunLogEntry[]>([])
@@ -175,6 +180,45 @@ export function useGraderAgentWorkflow({
   useEffect(() => {
     setRunMode(graderAgentSuggestModeEnabled ? 'suggest' : 'apply')
   }, [graderAgentSuggestModeEnabled])
+
+  useEffect(() => {
+    if (!open || !graderAgentCostEstimateEnabled) {
+      setRunCostEstimate(null)
+      setRunCostEstimateLoading(false)
+      return
+    }
+    let cancelled = false
+    setRunCostEstimateLoading(true)
+    const runFilter = graderAgentRunFiltersEnabled ? runFilterFromState(runFilterState) : undefined
+    void fetchGraderAgentRunEstimate(courseCode, itemId, {
+      scope: runScope,
+      submissionId: runScope === 'current' ? submissionId ?? undefined : undefined,
+      overwrite: runScope === 'all' && confirmOverwrite,
+      filter: runFilter,
+    })
+      .then((estimate) => {
+        if (!cancelled) setRunCostEstimate(estimate)
+      })
+      .catch(() => {
+        if (!cancelled) setRunCostEstimate(null)
+      })
+      .finally(() => {
+        if (!cancelled) setRunCostEstimateLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [
+    open,
+    graderAgentCostEstimateEnabled,
+    graderAgentRunFiltersEnabled,
+    courseCode,
+    itemId,
+    runScope,
+    submissionId,
+    confirmOverwrite,
+    runFilterState,
+  ])
 
   const loadConfig = useCallback(async () => {
     if (templateMode) {
@@ -379,12 +423,16 @@ export function useGraderAgentWorkflow({
 
       setStatusMessage(`${run.completedCount} / ${run.totalCount} complete`)
 
-      if (run.status === 'done' || run.status === 'error' || run.status === 'failed' || run.status === 'cancelled') {
+      if (run.status === 'done' || run.status === 'error' || run.status === 'failed' || run.status === 'cancelled' || run.status === 'budget_exceeded') {
         setBatchRunning(false)
         setCancellingRun(false)
         resetBatchNodeExecution()
         const appliedCount = run.results.filter((result) => result.status === 'applied').length
         const suggestedCount = run.results.filter((result) => result.status === 'suggested').length
+        const costNote =
+          run.costUsd != null && run.costUsd > 0
+            ? t('gradingAgent.run.cost.actualSummary', { cost: run.costUsd.toFixed(4) })
+            : null
         const skippedCount = run.results.filter((result) => result.status === 'skipped').length
         if (run.status === 'cancelled') {
           appendRunLog(
@@ -395,15 +443,24 @@ export function useGraderAgentWorkflow({
             }),
           )
           setStatusMessage(
-            t('gradingAgent.run.cancel.complete', {
-              applied: appliedCount,
-              suggested: suggestedCount,
-              skipped: skippedCount,
-            }),
+            costNote
+              ? `${t('gradingAgent.run.cancel.complete', { applied: appliedCount, suggested: suggestedCount, skipped: skippedCount })} ${costNote}`
+              : t('gradingAgent.run.cancel.complete', {
+                  applied: appliedCount,
+                  suggested: suggestedCount,
+                  skipped: skippedCount,
+                }),
           )
         } else if (run.status === 'error' || run.status === 'failed') {
           appendRunLog(t('gradingAgent.run.failed'), 'error')
           setStatusMessage(t('gradingAgent.run.failed'))
+        } else if (run.status === 'budget_exceeded') {
+          appendRunLog(t('gradingAgent.run.cost.budgetExceeded'), 'warn')
+          setStatusMessage(
+            costNote
+              ? `${t('gradingAgent.run.cost.budgetExceeded')} ${costNote}`
+              : t('gradingAgent.run.cost.budgetExceeded'),
+          )
         } else if (lastRunMode === 'suggest') {
           appendRunLog(
             t('gradingAgent.run.completeSuggest', {
@@ -412,7 +469,9 @@ export function useGraderAgentWorkflow({
             }),
           )
           setStatusMessage(
-            t('gradingAgent.run.completeSuggest', { suggested: suggestedCount, failed: run.failedCount }),
+            costNote
+              ? `${t('gradingAgent.run.completeSuggest', { suggested: suggestedCount, failed: run.failedCount })} ${costNote}`
+              : t('gradingAgent.run.completeSuggest', { suggested: suggestedCount, failed: run.failedCount }),
           )
         } else {
           appendRunLog(
@@ -421,7 +480,11 @@ export function useGraderAgentWorkflow({
               failed: run.failedCount,
             }),
           )
-          setStatusMessage(t('gradingAgent.run.complete', { applied: appliedCount, failed: run.failedCount }))
+          setStatusMessage(
+            costNote
+              ? `${t('gradingAgent.run.complete', { applied: appliedCount, failed: run.failedCount })} ${costNote}`
+              : t('gradingAgent.run.complete', { applied: appliedCount, failed: run.failedCount }),
+          )
         }
         return true
       }
@@ -810,6 +873,7 @@ export function useGraderAgentWorkflow({
         overwrite: runScope === 'all',
         authoredVia: 'canvas',
         filter: runFilter,
+        budgetUsd: graderAgentCostEstimateEnabled && budgetUsd != null ? budgetUsd : undefined,
       })
       setLastRunMode(res.mode ?? effectiveMode)
       canvasSyncedSubmissionIdsRef.current = new Set()
@@ -918,6 +982,11 @@ export function useGraderAgentWorkflow({
     setConfirmOverwrite,
     runFilterState,
     setRunFilterState,
+    runCostEstimate,
+    runCostEstimateLoading,
+    budgetUsd,
+    setBudgetUsd,
+    graderAgentCostEstimateEnabled,
     statusMessage,
     validationIssues,
     runnable,

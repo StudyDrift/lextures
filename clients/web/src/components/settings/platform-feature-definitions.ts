@@ -274,6 +274,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Target batch runs to a section, project group, or explicit submission selection.',
   },
   {
+    key: 'graderAgentCostEstimateEnabled',
+    label: 'Grader agent cost estimate',
+    description: 'Show approximate batch cost before running and optional per-run budget caps.',
+  },
+  {
     key: 'graderAgentCancelRunEnabled',
     label: 'Grader agent cancel run',
     description: 'Allow instructors to cancel in-progress grading-agent batch runs.',

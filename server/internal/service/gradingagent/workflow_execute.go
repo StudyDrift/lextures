@@ -50,6 +50,7 @@ type DryRunPreview struct {
 	Confidence       float64            `json:"confidence"`
 	PromptTokens     int                `json:"promptTokens,omitempty"`
 	CompletionTokens int                `json:"completionTokens,omitempty"`
+	CostUSD          float64            `json:"costUsd,omitempty"`
 	Flagged          *DryRunFlagPreview `json:"flagged,omitempty"`
 	Held             *DryRunHeldPreview `json:"held,omitempty"`
 }
@@ -60,7 +61,7 @@ type ActivitySource func(assignmentItemID string) (markdown string, rubric *assi
 // DryRunRunner executes LLM calls during a workflow dry run.
 type DryRunRunner interface {
 	Score(ctx context.Context, req ScoreRequest) (ScoreResult, error)
-	RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, jsonMode bool) (text string, promptTokens, completionTokens int, err error)
+	RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, jsonMode bool) (text string, promptTokens, completionTokens int, costUSD float64, err error)
 }
 
 // ExecutionInput configures a step-by-step workflow execution (dry-run or live).
@@ -282,6 +283,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 	state := newExecutionState(in.Graph)
 	var preview DryRunPreview
 	var totalPromptTokens, totalCompletionTokens int
+	var totalCostUSD float64
 
 	for _, nodeID := range order {
 		node, ok := nodeByID[nodeID]
@@ -364,7 +366,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
 				return DryRunPreview{}, fmt.Errorf("dry run runner not configured")
 			}
-			out, pt, ct, runErr := in.Runner.RunPrompt(ctx, in.ModelID, systemPrompt, prompt, inputText, true)
+			out, pt, ct, cost, runErr := in.Runner.RunPrompt(ctx, in.ModelID, systemPrompt, prompt, inputText, true)
 			if runErr != nil {
 				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
 				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
@@ -378,6 +380,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 			}
 			totalPromptTokens += pt
 			totalCompletionTokens += ct
+			totalCostUSD += cost
 			state.set(node.ID, HandleAIOutput, slotValue{text: out, grade: &grade})
 			compiledPrompt = prompt
 			compiledSystemPrompt = systemPrompt
@@ -405,6 +408,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 			}
 			totalPromptTokens += result.PromptTokens
 			totalCompletionTokens += result.CompletionTokens
+			totalCostUSD += result.CostUSD
 			grade := result.Output
 			state.set(node.ID, HandleGrade, slotValue{grade: &grade})
 			state.set(node.ID, HandleComments, slotValue{text: grade.Comment})
@@ -444,7 +448,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 				criterion,
 				req.SubmissionText,
 			)
-			out, pt, ct, runErr := in.Runner.RunPrompt(ctx, req.ModelID, systemPrompt, userMessage, "", true)
+			out, pt, ct, cost, runErr := in.Runner.RunPrompt(ctx, req.ModelID, systemPrompt, userMessage, "", true)
 			if runErr != nil {
 				emit(ExecutionEvent{Type: "log", Level: "error", Message: fmt.Sprintf("[%s] %s", label, UserFacingScoreError(runErr))})
 				emit(ExecutionEvent{Type: "node_complete", NodeID: node.ID, Status: "error"})
@@ -458,6 +462,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 			}
 			totalPromptTokens += pt
 			totalCompletionTokens += ct
+			totalCostUSD += cost
 			state.set(node.ID, HandleGrade, slotValue{grade: &grade})
 			state.set(node.ID, HandleComments, slotValue{text: grade.Comment})
 			compiledPrompt = prompt
@@ -549,6 +554,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 			preview.Flagged = &DryRunFlagPreview{Reason: reason, Queue: queue, Priority: priority}
 			preview.PromptTokens = totalPromptTokens
 			preview.CompletionTokens = totalCompletionTokens
+			preview.CostUSD = totalCostUSD
 			emit(ExecutionEvent{Type: "log", Level: "info", Message: "── Flag for Review (dry run — not persisted) ──"})
 			emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Would flag for review: %s", truncateLog(reason, 400))})
 			emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Queue: %s · Priority: %s", queue, priority)})
@@ -568,6 +574,7 @@ func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, err
 			preview.Held = held
 			preview.PromptTokens = totalPromptTokens
 			preview.CompletionTokens = totalCompletionTokens
+			preview.CostUSD = totalCostUSD
 			emit(ExecutionEvent{Type: "log", Level: "info", Message: "── Student Grade (dry run — not persisted) ──"})
 			emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("Score: %.2f", preview.SuggestedPoints)})
 			if len(preview.RubricScores) > 0 {

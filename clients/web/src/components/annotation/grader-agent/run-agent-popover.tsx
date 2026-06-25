@@ -3,7 +3,7 @@ import { Check, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { Button } from '../../ui/button'
-import type { GraderAgentRunMode, ModuleAssignmentSubmissionApi } from '../../../lib/courses-api'
+import type { GraderAgentRunMode, GraderAgentRunCostEstimate, ModuleAssignmentSubmissionApi } from '../../../lib/courses-api'
 import { AgentConfidenceFloorSettings } from './agent-confidence-floor-settings'
 import {
   RunAgentFilterPicker,
@@ -57,6 +57,16 @@ type RunAgentPopoverProps = {
   submissions?: ModuleAssignmentSubmissionApi[]
   filterState?: RunAgentFilterState
   setFilterState?: (next: RunAgentFilterState | ((prev: RunAgentFilterState) => RunAgentFilterState)) => void
+  costEstimateEnabled?: boolean
+  runCostEstimate?: GraderAgentRunCostEstimate | null
+  runCostEstimateLoading?: boolean
+  budgetUsd?: number | null
+  setBudgetUsd?: (value: number | null) => void
+  onRequestDryRunEstimate?: () => void | Promise<void>
+}
+
+function formatUsd(value: number, locale: string): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency: 'USD', maximumFractionDigits: 4 }).format(value)
 }
 
 export function RunAgentPopover({
@@ -93,12 +103,20 @@ export function RunAgentPopover({
   submissions = [],
   filterState,
   setFilterState,
+  costEstimateEnabled = false,
+  runCostEstimate = null,
+  runCostEstimateLoading = false,
+  budgetUsd = null,
+  setBudgetUsd,
+  onRequestDryRunEstimate,
 }: RunAgentPopoverProps) {
-  const { t } = useTranslation('common')
+  const { t, i18n } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   const buttonId = useId()
   const panelId = useId()
+
+  const costEstimateId = useId()
 
   useEffect(() => {
     if (!open) {
@@ -139,6 +157,7 @@ export function RunAgentPopover({
           aria-haspopup="dialog"
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
+          aria-describedby={costEstimateEnabled && open ? costEstimateId : undefined}
           onClick={() => setOpen((prev) => !prev)}
           className={`rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 ${pressScale}`}
         >
@@ -262,6 +281,79 @@ export function RunAgentPopover({
                 : t('gradingAgent.run.mode.applyNote')}
             </p>
           </fieldset>
+        ) : null}
+        {costEstimateEnabled ? (
+          <div id={costEstimateId} className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:text-neutral-300 dark:ring-white/10">
+            {runCostEstimateLoading ? (
+              <p>{t('gradingAgent.run.cost.loading')}</p>
+            ) : runCostEstimate && runCostEstimate.submissionCount > 0 ? (
+              <>
+                <p>
+                  {t('gradingAgent.run.cost.submissions', { count: runCostEstimate.submissionCount })}
+                </p>
+                {runCostEstimate.hasSample ? (
+                  runCostEstimate.estimatedCostMinUsd != null && runCostEstimate.estimatedCostMaxUsd != null ? (
+                    <p className="mt-1">
+                      {t('gradingAgent.run.cost.approximateRange', {
+                        min: formatUsd(runCostEstimate.estimatedCostMinUsd, i18n.language),
+                        max: formatUsd(runCostEstimate.estimatedCostMaxUsd, i18n.language),
+                      })}
+                    </p>
+                  ) : runCostEstimate.tokensOnly ? (
+                    <p className="mt-1">
+                      {t('gradingAgent.run.cost.approximateTokens', {
+                        prompt: runCostEstimate.estimatedPromptTokens ?? 0,
+                        completion: runCostEstimate.estimatedCompletionTokens ?? 0,
+                      })}
+                    </p>
+                  ) : null
+                ) : (
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <p>{t('gradingAgent.run.cost.noSample')}</p>
+                    {onRequestDryRunEstimate ? (
+                      <button
+                        type="button"
+                        className="font-medium text-indigo-700 underline-offset-2 hover:underline dark:text-indigo-300"
+                        onClick={() => void onRequestDryRunEstimate()}
+                      >
+                        {t('gradingAgent.run.cost.dryRunCta')}
+                      </button>
+                    ) : null}
+                  </div>
+                )}
+                <p className="mt-1 text-slate-500 dark:text-neutral-400">{t('gradingAgent.run.cost.disclaimer')}</p>
+              </>
+            ) : (
+              <p>{t('gradingAgent.run.cost.noTarget')}</p>
+            )}
+          </div>
+        ) : null}
+        {costEstimateEnabled && setBudgetUsd ? (
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-slate-500 dark:text-neutral-400" htmlFor={`${panelId}-budget`}>
+              {t('gradingAgent.run.cost.budgetLabel')}
+            </label>
+            <input
+              id={`${panelId}-budget`}
+              type="number"
+              min={0}
+              step="0.01"
+              inputMode="decimal"
+              value={budgetUsd ?? ''}
+              onChange={(e) => {
+                const raw = e.target.value.trim()
+                if (raw === '') {
+                  setBudgetUsd(null)
+                  return
+                }
+                const parsed = Number(raw)
+                setBudgetUsd(Number.isFinite(parsed) && parsed > 0 ? parsed : null)
+              }}
+              placeholder={t('gradingAgent.run.cost.budgetPlaceholder')}
+              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
+            />
+            <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.run.cost.budgetHelp')}</p>
+          </div>
         ) : null}
         {confirmOverwrite ? (
           <p className="mt-3 text-sm text-amber-800 dark:text-amber-200">

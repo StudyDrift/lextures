@@ -50,13 +50,13 @@ type Service struct {
 }
 
 // RunPrompt executes an AI workflow node prompt with a fixed system prompt and optional JSON mode.
-func (s *Service) RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, jsonMode bool) (string, int, int, error) {
+func (s *Service) RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, jsonMode bool) (string, int, int, float64, error) {
 	if s.Client == nil {
-		return "", 0, 0, fmt.Errorf("AI provider not configured")
+		return "", 0, 0, 0, fmt.Errorf("AI provider not configured")
 	}
 	model := strings.TrimSpace(modelID)
 	if model == "" {
-		return "", 0, 0, fmt.Errorf("grader agent model not configured")
+		return "", 0, 0, 0, fmt.Errorf("grader agent model not configured")
 	}
 	systemPrompt = strings.TrimSpace(systemPrompt)
 	prompt = strings.TrimSpace(prompt)
@@ -82,13 +82,13 @@ func (s *Service) RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, 
 		chat, err = s.Client.ChatCompletion(model, messages)
 	}
 	if err != nil {
-		return "", 0, 0, err
+		return "", 0, 0, 0, err
 	}
 	text := strings.TrimSpace(chat.Text)
 	if text == "" {
-		return "", chat.Usage.PromptTokens, chat.Usage.CompletionTokens, fmt.Errorf("openrouter: empty model response")
+		return "", chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, fmt.Errorf("openrouter: empty model response")
 	}
-	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, nil
+	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, nil
 }
 
 // ScoreWithVision grades a submission from image/PDF pages using a vision-capable model.

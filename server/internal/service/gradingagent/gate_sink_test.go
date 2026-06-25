@@ -79,6 +79,6 @@ func (lowConfidenceDryRunRunner) Score(context.Context, ScoreRequest) (ScoreResu
 	return ScoreResult{Output: GradeOutput{TotalPoints: 8, Confidence: 0.5, Comment: "ok"}}, nil
 }
 
-func (lowConfidenceDryRunRunner) RunPrompt(context.Context, string, string, string, string, bool) (string, int, int, error) {
-	return `{"total":8,"confidence":0.5,"comment":"ok"}`, 1, 1, nil
+func (lowConfidenceDryRunRunner) RunPrompt(context.Context, string, string, string, string, bool) (string, int, int, float64, error) {
+	return `{"total":8,"confidence":0.5,"comment":"ok"}`, 1, 1, 0, nil
 }

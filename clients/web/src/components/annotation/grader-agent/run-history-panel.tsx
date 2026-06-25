@@ -59,6 +59,14 @@ export function RunHistoryPanel({ runs, loading = false }: RunHistoryPanelProps)
                 {t('gradingAgent.review.history.cost', { cost: run.costUsd.toFixed(4) })}
               </p>
             ) : null}
+            {run.promptTokens != null || run.completionTokens != null ? (
+              <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
+                {t('gradingAgent.review.history.tokens', {
+                  prompt: run.promptTokens ?? 0,
+                  completion: run.completionTokens ?? 0,
+                })}
+              </p>
+            ) : null}
             <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
               {formatAbsolute(run.createdAt)}
             </p>

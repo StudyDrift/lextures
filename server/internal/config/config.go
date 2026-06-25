@@ -244,6 +244,8 @@ type Config struct {
 	GraderAgentVisionGradingEnabled bool
 	// GraderAgentRunFiltersEnabled allows section/group/selection filters on batch runs (GA-M5).
 	GraderAgentRunFiltersEnabled bool
+	// GraderAgentCostEstimateEnabled shows pre-run cost estimates and optional per-run budgets (GA-M7).
+	GraderAgentCostEstimateEnabled bool
 	// GraderAgentCancelRunEnabled allows cancelling in-progress batch runs (GA-M6).
 	GraderAgentCancelRunEnabled bool
 	// CodeExecutionEnabled enables sandboxed code execution for quiz and grader agent nodes (plan 2.4 / 19.17.7).

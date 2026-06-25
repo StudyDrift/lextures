@@ -14,8 +14,8 @@ func (s stubDryRunRunner) Score(_ context.Context, _ ScoreRequest) (ScoreResult,
 	return s.scoreOut, nil
 }
 
-func (s stubDryRunRunner) RunPrompt(_ context.Context, _, _, _, _ string, _ bool) (string, int, int, error) {
-	return `{"total":8,"comment":"AI says 8/10","confidence":0.8,"rubric":{}}`, 10, 5, nil
+func (s stubDryRunRunner) RunPrompt(_ context.Context, _, _, _, _ string, _ bool) (string, int, int, float64, error) {
+	return `{"total":8,"comment":"AI says 8/10","confidence":0.8,"rubric":{}}`, 10, 5, 0, nil
 }
 
 func TestTopologicalNodeOrder_respectsDependencies(t *testing.T) {

@@ -5868,8 +5868,20 @@ export type GraderAgentDryRunResult = {
   confidence: number
   promptTokens?: number
   completionTokens?: number
+  costUsd?: number
   flagged?: GraderAgentDryRunFlagResult
   held?: GraderAgentDryRunHeldResult
+}
+
+export type GraderAgentRunCostEstimate = {
+  submissionCount: number
+  hasSample: boolean
+  targetSummary: string
+  estimatedPromptTokens?: number
+  estimatedCompletionTokens?: number
+  estimatedCostMinUsd?: number
+  estimatedCostMaxUsd?: number
+  tokensOnly?: boolean
 }
 
 export type GraderAgentRunStatus = {
@@ -5877,6 +5889,10 @@ export type GraderAgentRunStatus = {
   totalCount: number
   completedCount: number
   failedCount: number
+  costUsd?: number
+  promptTokens?: number
+  completionTokens?: number
+  budgetUsd?: number
   cancelledAt?: string
   cancelledBy?: string
   results: Array<{
@@ -5928,6 +5944,9 @@ export type GraderAgentRunHistoryEntry = {
   failedCount: number
   model?: string
   costUsd?: number
+  promptTokens?: number
+  completionTokens?: number
+  budgetUsd?: number
   initiatedBy?: string
   createdAt: string
   finishedAt?: string
@@ -6222,6 +6241,31 @@ export type GraderAgentBulkReviewOutcome = {
   error?: string
 }
 
+export async function fetchGraderAgentRunEstimate(
+  courseCode: string,
+  itemId: string,
+  params: {
+    scope: 'current' | 'ungraded' | 'all'
+    submissionId?: string
+    overwrite?: boolean
+    filter?: GraderAgentRunFilter
+  },
+): Promise<GraderAgentRunCostEstimate> {
+  const qs = new URLSearchParams()
+  qs.set('scope', params.scope)
+  if (params.submissionId) qs.set('submissionId', params.submissionId)
+  if (params.overwrite) qs.set('overwrite', 'true')
+  if (params.filter?.sectionId) qs.set('sectionId', params.filter.sectionId)
+  if (params.filter?.groupId) qs.set('groupId', params.filter.groupId)
+  if (params.filter?.submissionIds?.length) qs.set('submissionIds', params.filter.submissionIds.join(','))
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/run-estimate?${qs.toString()}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as GraderAgentRunCostEstimate
+}
+
 export async function fetchGraderAgentRunTarget(
   courseCode: string,
   itemId: string,
@@ -6261,6 +6305,7 @@ export async function postGraderAgentRun(
     overwrite?: boolean
     authoredVia?: 'canvas' | 'form'
     filter?: GraderAgentRunFilter
+    budgetUsd?: number
   },
 ): Promise<{ runId: string; totalCount: number; mode?: GraderAgentRunMode; targetSummary?: string }> {
   const res = await authorizedFetch(

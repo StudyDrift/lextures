@@ -32,6 +32,7 @@ type platformFeaturesJSON struct {
 	GraderAgentTextEntryGradingEnabled  bool `json:"graderAgentTextEntryGradingEnabled"`
 	GraderAgentVisionGradingEnabled     bool `json:"graderAgentVisionGradingEnabled"`
 	GraderAgentRunFiltersEnabled        bool `json:"graderAgentRunFiltersEnabled"`
+	GraderAgentCostEstimateEnabled      bool `json:"graderAgentCostEstimateEnabled"`
 	GraderAgentCancelRunEnabled         bool `json:"graderAgentCancelRunEnabled"`
 	CodeExecutionEnabled        bool `json:"codeExecutionEnabled"`
 	AltTextEnforcementEnabled   bool `json:"altTextEnforcementEnabled"`
@@ -141,6 +142,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		GraderAgentTextEntryGradingEnabled: cfg.GraderAgentTextEntryGradingEnabled,
 		GraderAgentVisionGradingEnabled:    cfg.GraderAgentVisionGradingEnabled,
 		GraderAgentRunFiltersEnabled:       cfg.GraderAgentRunFiltersEnabled,
+		GraderAgentCostEstimateEnabled:       cfg.GraderAgentCostEstimateEnabled,
 		GraderAgentCancelRunEnabled:        cfg.GraderAgentCancelRunEnabled,
 		CodeExecutionEnabled:               cfg.CodeExecutionEnabled,
 		AltTextEnforcementEnabled:   cfg.AltTextEnforcementEnabled,
