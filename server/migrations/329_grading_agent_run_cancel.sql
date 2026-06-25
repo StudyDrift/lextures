@@ -2,7 +2,7 @@
 
 ALTER TABLE assessment.grading_agent_runs
     ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ,
-    ADD COLUMN IF NOT EXISTS cancelled_by UUID REFERENCES auth.users (id);
+    ADD COLUMN IF NOT EXISTS cancelled_by UUID REFERENCES "user".users (id);
 
 COMMENT ON COLUMN assessment.grading_agent_runs.cancelled_at IS
     'When the run was cancelled by an instructor (GA-M6).';
