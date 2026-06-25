@@ -51,6 +51,19 @@ func WriteJSON(w http.ResponseWriter, status int, code, message string) {
 	_ = json.NewEncoder(w).Encode(body(code, message))
 }
 
+// WriteJSONWithErr writes a JSON error body and records server-side failures for access logging.
+func WriteJSONWithErr(w http.ResponseWriter, r *http.Request, status int, code, message string, err error) {
+	if status >= http.StatusInternalServerError && r != nil {
+		RecordServerError(r, message, err)
+	}
+	WriteJSON(w, status, code, message)
+}
+
+// WriteInternal writes a 500 INTERNAL response and records err for access logging.
+func WriteInternal(w http.ResponseWriter, r *http.Request, message string, err error) {
+	WriteJSONWithErr(w, r, http.StatusInternalServerError, CodeInternal, message, err)
+}
+
 func body(code, message string) Body {
 	var b Body
 	b.Error.Code = code

@@ -64,12 +64,12 @@ func (d Deps) loadAssignmentForSubmissions(
 	itemID uuid.UUID,
 ) (*uuid.UUID, *coursemoduleassignments.CourseItemAssignmentRow, bool) {
 	if d.Pool == nil {
-		apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Database unavailable.")
+		apierr.WriteJSONWithErr(w, r, http.StatusServiceUnavailable, apierr.CodeInternal, "Database unavailable.", nil)
 		return nil, nil, false
 	}
 	cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
 	if err != nil {
-		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+		apierr.WriteInternal(w, r, "Failed to load course.", err)
 		return nil, nil, false
 	}
 	if cid == nil {
@@ -78,7 +78,7 @@ func (d Deps) loadAssignmentForSubmissions(
 	}
 	row, err := coursemoduleassignments.GetForCourseItem(r.Context(), d.Pool, *cid, itemID)
 	if err != nil {
-		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load assignment.")
+		apierr.WriteInternal(w, r, "Failed to load assignment.", err)
 		return nil, nil, false
 	}
 	if row == nil {
@@ -280,7 +280,7 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 		}
 		has, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":gradebook:view")
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			apierr.WriteInternal(w, r, "Failed to verify permissions.", err)
 			return
 		}
 		if !has {
@@ -299,14 +299,14 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 		filter := parseSubmissionGradedFilter(r.URL.Query().Get("graded"))
 		students, err := enrollment.ListStudentUsersForCourseCode(r.Context(), d.Pool, courseCode, nil)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course roster.")
+			apierr.WriteInternal(w, r, "Failed to load course roster.", err)
 			return
 		}
 		rows, err := moduleassignmentsubmissions.ListForAssignment(
 			r.Context(), d.Pool, *cid, itemID, moduleassignmentsubmissions.GradedFilterAll,
 		)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submissions.")
+			apierr.WriteInternal(w, r, "Failed to load submissions.", err)
 			return
 		}
 		roster := buildAssignmentRosterEntries(students, rows)
@@ -325,7 +325,7 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 			}
 			displayNames, err = user.DisplayLabelsByIDs(r.Context(), d.Pool, userIDs)
 			if err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submitter names.")
+				apierr.WriteInternal(w, r, "Failed to load submitter names.", err)
 				return
 			}
 			for _, entry := range roster {
@@ -343,14 +343,14 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 			WHERE course_id = $1 AND module_item_id = $2
 		`, *cid, itemID)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grades.")
+			apierr.WriteInternal(w, r, "Failed to load grades.", err)
 			return
 		}
 		defer gradeRows.Close()
 		for gradeRows.Next() {
 			var sID uuid.UUID
 			if err := gradeRows.Scan(&sID); err != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to scan grades.")
+				apierr.WriteInternal(w, r, "Failed to scan grades.", err)
 				return
 			}
 			gradedMap[sID] = true
@@ -419,7 +419,7 @@ func (d Deps) handleGetMyAssignmentSubmission() http.HandlerFunc {
 		}
 		row, err := moduleassignmentsubmissions.GetForCourseItemUser(r.Context(), d.Pool, *cid, itemID, viewer)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submission.")
+			apierr.WriteInternal(w, r, "Failed to load submission.", err)
 			return
 		}
 		if row == nil {
@@ -440,7 +440,7 @@ func (d Deps) handleGetMyAssignmentSubmission() http.HandlerFunc {
 			)
 		`, *cid, viewer, itemID).Scan(&exists)
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to check grading status.")
+			apierr.WriteInternal(w, r, "Failed to check grading status.", err)
 			return
 		}
 		payload["isGraded"] = exists
