@@ -1,6 +1,7 @@
 package webhooksvc
 
 import (
+	"context"
 	"encoding/json"
 	"testing"
 )
@@ -42,7 +43,7 @@ func TestAdaptPayloadForSubscription_NoPII(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	out, err := AdaptPayloadForSubscription(nil, nil, payload, json.RawMessage(`{"includePII":false}`))
+	out, err := AdaptPayloadForSubscription(context.Background(), nil, payload, json.RawMessage(`{"includePII":false}`))
 	if err != nil {
 		t.Fatal(err)
 	}
