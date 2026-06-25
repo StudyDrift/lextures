@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useId, useRef } from 'react'
-import { Loader2 } from 'lucide-react'
+import { GripVertical, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { GraderAgentReviewQueueItem, RubricDefinition } from '../../../lib/courses-api'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
@@ -20,6 +20,11 @@ import {
   type GraderAgentTemplateMode,
   type GraderAgentWorkflowSeed,
 } from './use-grader-agent-workflow'
+import { useHorizontalPanelResize } from './use-horizontal-panel-resize'
+
+const INSPECTOR_DEFAULT_WIDTH = 288
+const INSPECTOR_MIN_WIDTH = 240
+const INSPECTOR_MAX_WIDTH = 480
 
 const CanvasView = lazy(() =>
   import('./canvas-view').then((m) => ({ default: m.CanvasView })),
@@ -53,6 +58,11 @@ export function GraderAgentWorkflowModal({
   onApplied,
 }: GraderAgentWorkflowModalProps) {
   const { t } = useTranslation('common')
+  const { width: inspectorWidth, resizeHandleProps } = useHorizontalPanelResize({
+    defaultWidth: INSPECTOR_DEFAULT_WIDTH,
+    minWidth: INSPECTOR_MIN_WIDTH,
+    maxWidth: INSPECTOR_MAX_WIDTH,
+  })
   const isTemplateMode = templateMode != null
   const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled } =
     usePlatformFeatures()
@@ -417,7 +427,23 @@ export function GraderAgentWorkflowModal({
               <CanvasView workflow={workflow} />
             </Suspense>
           </main>
-          <aside className="flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 p-3 lg:w-72 lg:border-t-0 lg:border-s dark:border-neutral-700">
+          <aside
+            className="relative flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 p-3 pl-4 lg:w-[var(--inspector-width)] lg:shrink-0 lg:border-t-0 lg:border-s dark:border-neutral-700"
+            style={{ ['--inspector-width' as string]: `${inspectorWidth}px` }}
+          >
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              aria-label={t('gradingAgent.canvas.inspector.resize')}
+              tabIndex={0}
+              className="group absolute inset-y-0 left-0 z-10 hidden w-3 -translate-x-1/2 cursor-ew-resize touch-none items-center justify-center rounded-sm border border-slate-200 bg-slate-100 shadow-sm transition-colors hover:border-indigo-300 hover:bg-indigo-50 active:bg-indigo-100 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/60 dark:active:bg-indigo-950 lg:flex"
+              {...resizeHandleProps}
+            >
+              <GripVertical
+                className="h-4 w-4 text-slate-400 transition-colors group-hover:text-indigo-500 dark:text-neutral-500 dark:group-hover:text-indigo-400"
+                aria-hidden
+              />
+            </div>
             <p className="mb-2 shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-500">
               {t('gradingAgent.canvas.inspector.title')}
             </p>

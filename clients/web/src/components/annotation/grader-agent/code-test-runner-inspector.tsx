@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { InspectorExpandableTextarea } from './inspector-expandable-textarea'
 import type { CodeTestRunnerMappingType, CodeTestRunnerNodeData, CodeTestRunnerTestCase } from './types'
 
 const fieldClass =
@@ -182,20 +183,22 @@ export function CodeTestRunnerInspector({
                 </div>
                 <label className="block">
                   <span className="mb-1 block text-xs">{t('gradingAgent.canvas.inspector.codeTestsInput')}</span>
-                  <textarea
+                  <InspectorExpandableTextarea
                     value={testCase.input}
-                    onChange={(e) => updateTestCase(index, { input: e.target.value })}
+                    onChange={(value) => updateTestCase(index, { input: value })}
                     rows={2}
                     className={fieldClass}
+                    expandTitle={t('gradingAgent.canvas.inspector.codeTestsInput')}
                   />
                 </label>
                 <label className="block">
                   <span className="mb-1 block text-xs">{t('gradingAgent.canvas.inspector.codeTestsExpected')}</span>
-                  <textarea
+                  <InspectorExpandableTextarea
                     value={testCase.expectedOutput}
-                    onChange={(e) => updateTestCase(index, { expectedOutput: e.target.value })}
+                    onChange={(value) => updateTestCase(index, { expectedOutput: value })}
                     rows={2}
                     className={fieldClass}
+                    expandTitle={t('gradingAgent.canvas.inspector.codeTestsExpected')}
                   />
                 </label>
               </div>

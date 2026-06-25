@@ -73,6 +73,7 @@ export function FlagForReviewInspector({
           defaults={defaults}
           className={fieldClass}
           placeholder={t('gradingAgent.canvas.inspector.flagForReviewReasonPlaceholder')}
+          expandTitle={t('gradingAgent.canvas.inspector.flagForReviewReasonTemplate')}
         />
       </label>
       <button

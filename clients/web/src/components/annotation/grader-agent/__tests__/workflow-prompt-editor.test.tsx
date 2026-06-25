@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { describe, expect, it } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { GraderWorkflowGraph } from '../types'
 import { WorkflowPromptEditor } from '../workflow-prompt-editor'
@@ -30,7 +30,13 @@ function sampleGraph(): GraderWorkflowGraph {
   }
 }
 
-function PromptEditorHarness({ initialValue = '' }: { initialValue?: string }) {
+function PromptEditorHarness({
+  initialValue = '',
+  expandTitle,
+}: {
+  initialValue?: string
+  expandTitle?: string
+}) {
   const [value, setValue] = useState(initialValue)
   return (
     <WorkflowPromptEditor
@@ -39,6 +45,7 @@ function PromptEditorHarness({ initialValue = '' }: { initialValue?: string }) {
       graph={sampleGraph()}
       promptNodeId="ai1"
       defaults={defaults}
+      expandTitle={expandTitle}
     />
   )
 }
@@ -100,5 +107,50 @@ describe('WorkflowPromptEditor', () => {
     expect(textarea).toHaveValue('$StudentSubmission.')
     expect(screen.getByRole('listbox')).toBeInTheDocument()
     expect(screen.getByText('Submissions')).toBeInTheDocument()
+  })
+
+  it('opens an expanded editor modal from the inline expand button', async () => {
+    const user = userEvent.setup()
+    render(<PromptEditorHarness expandTitle="How should submissions be graded?" />)
+
+    await user.click(screen.getByRole('button', { name: 'Expand editor' }))
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'How should submissions be graded?' })).toBeInTheDocument()
+    expect(screen.getAllByRole('textbox')).toHaveLength(2)
+  })
+
+  it('supports variable picker inside the expanded editor modal', async () => {
+    const user = userEvent.setup()
+    render(<PromptEditorHarness expandTitle="Prompt" />)
+
+    await user.click(screen.getByRole('button', { name: 'Expand editor' }))
+    const dialog = screen.getByRole('dialog')
+    const expandedTextarea = within(dialog).getByRole('textbox')
+
+    await user.type(expandedTextarea, '$Act')
+    expect(within(dialog).getByRole('listbox')).toBeInTheDocument()
+    await user.keyboard('{Enter}')
+
+    expect(expandedTextarea).toHaveValue('$Activity.')
+    expect(within(dialog).getByRole('listbox')).toBeInTheDocument()
+    await user.keyboard('{Enter}')
+
+    expect(expandedTextarea).toHaveValue('$Activity.Content')
+    expect(within(dialog).queryByRole('listbox')).not.toBeInTheDocument()
+  })
+
+  it('discards expanded modal edits when cancel is clicked', async () => {
+    const user = userEvent.setup()
+    render(<PromptEditorHarness initialValue="Original prompt" expandTitle="Prompt" />)
+
+    await user.click(screen.getByRole('button', { name: 'Expand editor' }))
+    const [, expandedTextarea] = screen.getAllByRole('textbox')
+    await user.clear(expandedTextarea)
+    await user.type(expandedTextarea, 'Discarded prompt')
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(screen.getByRole('textbox')).toHaveValue('Original prompt')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })

@@ -169,6 +169,23 @@ describe('GraderAgentWorkflowModal', () => {
     expect(screen.getByRole('menuitem', { name: 'gradingAgent.accept' })).toBeInTheDocument()
   })
 
+  it('renders a draggable inspector resize handle on large screens', () => {
+    render(
+      <GraderAgentWorkflowModal
+        open
+        onClose={() => undefined}
+        courseCode="demo"
+        itemId="00000000-0000-0000-0000-000000000001"
+        submissionId="00000000-0000-0000-0000-000000000002"
+        rubric={null}
+        maxPoints={100}
+      />,
+    )
+    const separator = screen.getByRole('separator', { name: 'gradingAgent.canvas.inspector.resize' })
+    expect(separator).toHaveAttribute('aria-orientation', 'vertical')
+    expect(separator).toHaveClass('cursor-ew-resize')
+  })
+
   it('shows grouped palette nodes while the agent is editable', () => {
     render(
       <GraderAgentWorkflowModal

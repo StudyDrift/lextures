@@ -1,4 +1,19 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react'
+import { useTranslation } from 'react-i18next'
+import {
+  EXPANDABLE_TEXTAREA_FIELD_CLASSES,
+  InspectorTextareaExpandButton,
+  InspectorTextareaExpandModal,
+} from './inspector-textarea-expand-modal'
 import type { GraderWorkflowGraph } from './types'
 import {
   filterPromptVariableNodes,
@@ -10,6 +25,10 @@ import {
   type WorkflowNodeDefaultLabels,
   workflowPromptVariableNodes,
 } from './workflow-prompt-variable'
+import {
+  resolveTextareaPickerPosition,
+  type TextareaPickerPosition,
+} from './workflow-prompt-caret-position'
 
 type WorkflowPromptEditorProps = {
   value: string
@@ -19,8 +38,12 @@ type WorkflowPromptEditorProps = {
   defaults: WorkflowNodeDefaultLabels
   disabled?: boolean
   rows?: number
+  expandedRows?: number
   className?: string
   placeholder?: string
+  expandTitle?: string
+  autoFocus?: boolean
+  fillHeight?: boolean
 }
 
 type PickerRow =
@@ -35,14 +58,23 @@ export function WorkflowPromptEditor({
   defaults,
   disabled = false,
   rows = 6,
+  expandedRows = 20,
   className,
   placeholder,
+  expandTitle,
+  autoFocus = false,
+  fillHeight = false,
 }: WorkflowPromptEditorProps) {
+  const { t } = useTranslation('common')
+  const [expanded, setExpanded] = useState(false)
+  const [expandedDraft, setExpandedDraft] = useState(value)
   const listId = useId()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [caret, setCaret] = useState(value.length)
   const [activeIndex, setActiveIndex] = useState(0)
   const [suppressedStart, setSuppressedStart] = useState<number | null>(null)
+  const [pickerPosition, setPickerPosition] = useState<TextareaPickerPosition | null>(null)
+  const expandable = Boolean(expandTitle) && !disabled
 
   const variableNodes = useMemo(
     () => workflowPromptVariableNodes(graph, promptNodeId, defaults),
@@ -95,9 +127,43 @@ export function WorkflowPromptEditor({
     setActiveIndex((index) => Math.min(index, rowsForPicker.length - 1))
   }, [rowsForPicker.length])
 
+  useEffect(() => {
+    if (!autoFocus || !textareaRef.current) return
+    textareaRef.current.focus()
+  }, [autoFocus])
+
   const syncCaret = useCallback((element: HTMLTextAreaElement) => {
     setCaret(element.selectionStart ?? value.length)
   }, [value.length])
+
+  const syncPickerPosition = useCallback(() => {
+    const textarea = textareaRef.current
+    if (!textarea || !listOpen) {
+      setPickerPosition(null)
+      return
+    }
+    const caretIndex = textarea.selectionStart ?? caret
+    setPickerPosition(resolveTextareaPickerPosition(textarea, caretIndex))
+  }, [caret, listOpen])
+
+  useLayoutEffect(() => {
+    syncPickerPosition()
+  }, [syncPickerPosition, value, rows])
+
+  useEffect(() => {
+    if (!listOpen) return
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const onScroll = () => syncPickerPosition()
+    textarea.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+
+    return () => {
+      textarea.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+    }
+  }, [listOpen, syncPickerPosition])
 
   const applyPick = useCallback(
     (row: PickerRow) => {
@@ -150,8 +216,16 @@ export function WorkflowPromptEditor({
     [activeIndex, applyPick, listOpen, rowsForPicker, variableState],
   )
 
-  return (
-    <div className="relative">
+  const textareaClassName = [
+    className,
+    expandable ? EXPANDABLE_TEXTAREA_FIELD_CLASSES : '',
+    fillHeight ? 'h-full min-h-0 w-full flex-1 resize-none' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const editor = (
+    <div className={fillHeight ? 'relative flex min-h-0 flex-1 flex-col' : 'relative'}>
       <textarea
         ref={textareaRef}
         value={value}
@@ -171,18 +245,32 @@ export function WorkflowPromptEditor({
         onKeyDown={onKeyDown}
         rows={rows}
         disabled={disabled}
-        className={className}
+        className={textareaClassName}
         placeholder={placeholder}
         aria-autocomplete="list"
         aria-expanded={listOpen}
         aria-controls={listOpen ? listId : undefined}
         aria-activedescendant={listOpen ? `${listId}-opt-${activeIndex}` : undefined}
       />
-      {listOpen ? (
+      {expandable ? (
+        <InspectorTextareaExpandButton
+          label={t('gradingAgent.canvas.inspector.expandTextarea')}
+          onClick={() => {
+            setExpandedDraft(value)
+            setExpanded(true)
+          }}
+        />
+      ) : null}
+      {listOpen && pickerPosition ? (
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
+          style={{
+            top: pickerPosition.top,
+            left: pickerPosition.left,
+            maxWidth: pickerPosition.maxWidth,
+          }}
+          className="absolute z-20 min-w-48 max-h-48 overflow-auto rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-lg dark:border-neutral-600 dark:bg-neutral-900"
         >
           {rowsForPicker.map((row, index) => {
             const selected = index === activeIndex
@@ -221,5 +309,34 @@ export function WorkflowPromptEditor({
         </ul>
       ) : null}
     </div>
+  )
+
+  return (
+    <>
+      {editor}
+      {expanded && expandTitle ? (
+        <InspectorTextareaExpandModal
+          title={expandTitle}
+          onDone={() => {
+            onChange(expandedDraft)
+            setExpanded(false)
+          }}
+          onCancel={() => setExpanded(false)}
+        >
+          <WorkflowPromptEditor
+            value={expandedDraft}
+            onChange={setExpandedDraft}
+            graph={graph}
+            promptNodeId={promptNodeId}
+            defaults={defaults}
+            rows={expandedRows}
+            className={className}
+            placeholder={placeholder}
+            autoFocus
+            fillHeight
+          />
+        </InspectorTextareaExpandModal>
+      ) : null}
+    </>
   )
 }

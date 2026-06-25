@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { listCourseFiles, type FileItem } from '../../../lib/course-files-api'
+import { InspectorExpandableTextarea } from './inspector-expandable-textarea'
 import type { ReferenceMode, ReferenceNodeData } from './types'
 
 const MODES: ReferenceMode[] = ['modelAnswer', 'answerKey', 'sourceText']
@@ -83,12 +84,13 @@ export function ReferenceInspector({
         <span className="mb-1.5 block font-medium text-slate-800 dark:text-neutral-100">
           {t('gradingAgent.canvas.inspector.referenceText')}
         </span>
-        <textarea
+        <InspectorExpandableTextarea
           value={text}
-          onChange={(e) => onChange({ text: e.target.value })}
+          onChange={(value) => onChange({ text: value })}
           rows={8}
           className={`${fieldClass} min-h-[10rem] resize-y font-mono text-xs leading-relaxed`}
           placeholder={t('gradingAgent.canvas.inspector.referenceTextPlaceholder')}
+          expandTitle={t('gradingAgent.canvas.inspector.referenceText')}
         />
         <p
           className={`mt-1 text-xs ${truncated ? 'text-amber-700 dark:text-amber-300' : 'text-slate-500 dark:text-neutral-400'}`}
