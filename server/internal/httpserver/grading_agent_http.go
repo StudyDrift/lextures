@@ -14,6 +14,7 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/gradingagentqueue"
+	"github.com/lextures/lextures/server/internal/gradingredaction"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	gradingagentrepo "github.com/lextures/lextures/server/internal/repos/gradingagent"
@@ -24,12 +25,30 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
-	aigateway "github.com/lextures/lextures/server/internal/service/aigateway"
-	"github.com/lextures/lextures/server/internal/service/openrouter"
 )
 
 func (d Deps) graderAgentEnabled() bool {
 	return d.effectiveConfig().GraderAgentEnabled
+}
+
+func (d Deps) graderAgentReviewInboxEnabled() bool {
+	return d.effectiveConfig().GraderAgentReviewInboxEnabled
+}
+
+func (d Deps) graderAgentTextEntryGradingEnabled() bool {
+	return d.effectiveConfig().GraderAgentTextEntryGradingEnabled
+}
+
+func (d Deps) graderAgentVisionGradingEnabled() bool {
+	return d.effectiveConfig().GraderAgentVisionGradingEnabled
+}
+
+func (d Deps) requireGraderAgentReviewInboxAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {
+	if !d.graderAgentReviewInboxEnabled() {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent review inbox is not enabled.")
+		return "", uuid.Nil, false
+	}
+	return d.requireGraderAgentAccess(w, r)
 }
 
 func (d Deps) requireGraderAgentAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {
@@ -112,6 +131,10 @@ func graderAgentConfigToJSON(row *gradingagentrepo.ConfigRow) map[string]any {
 	if row == nil {
 		return nil
 	}
+	postPolicy := row.PostPolicy
+	if postPolicy == "" || postPolicy == "unposted" {
+		postPolicy = "draft"
+	}
 	out := map[string]any{
 		"id":                       row.ID.String(),
 		"prompt":                   row.Prompt,
@@ -119,6 +142,7 @@ func graderAgentConfigToJSON(row *gradingagentrepo.ConfigRow) map[string]any {
 		"includeRubric":            row.IncludeRubric,
 		"status":                   string(row.Status),
 		"autoGradeNew":             row.AutoGradeNew,
+		"postPolicy":               postPolicy,
 		"updatedAt":                row.UpdatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
 	}
 	if row.ModelID != nil {
@@ -188,9 +212,19 @@ func (d Deps) handleListCourseGradingAgents() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grading agents.")
 			return
 		}
+		reviewCounts := map[uuid.UUID]int{}
+		if d.graderAgentReviewInboxEnabled() {
+			configIDs := make([]uuid.UUID, 0, len(rows))
+			for _, row := range rows {
+				configIDs = append(configIDs, row.ID)
+			}
+			if counts, countErr := gradingagentrepo.CountReviewQueueByConfigs(r.Context(), d.Pool, configIDs); countErr == nil {
+				reviewCounts = counts
+			}
+		}
 		agents := make([]map[string]any, 0, len(rows))
 		for _, row := range rows {
-			agents = append(agents, map[string]any{
+			entry := map[string]any{
 				"id":                 row.ID.String(),
 				"itemId":             row.ModuleItemID.String(),
 				"assignmentTitle":    row.AssignmentTitle,
@@ -199,7 +233,11 @@ func (d Deps) handleListCourseGradingAgents() http.HandlerFunc {
 				"autoGradeNew":       row.AutoGradeNew,
 				"hasWorkflowGraph":   row.HasWorkflowGraph,
 				"updatedAt":          row.UpdatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
-			})
+			}
+			if d.graderAgentReviewInboxEnabled() {
+				entry["reviewCount"] = reviewCounts[row.ID]
+			}
+			agents = append(agents, entry)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"agents": agents})
@@ -241,6 +279,8 @@ type putGraderAgentConfigBody struct {
 	IncludeRubric            bool                             `json:"includeRubric"`
 	Status                   string                           `json:"status"`
 	AutoGradeNew             *bool                            `json:"autoGradeNew"`
+	PostPolicy               string                           `json:"postPolicy"`
+	ConfidenceFloor          *float64                         `json:"confidenceFloor"`
 	ModelID                  *string                          `json:"modelId"`
 	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
 }
@@ -270,6 +310,9 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
 			return
 		}
+		var payloadKeys map[string]json.RawMessage
+		_ = json.Unmarshal(payload, &payloadKeys)
+		_, confidenceFloorInBody := payloadKeys["confidenceFloor"]
 		prompt := strings.TrimSpace(body.Prompt)
 		includeContent := body.IncludeAssignmentContent
 		includeRubric := body.IncludeRubric
@@ -318,6 +361,32 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 		if body.AutoGradeNew != nil {
 			autoGrade = *body.AutoGradeNew
 		}
+		postPolicy := "draft"
+		if strings.TrimSpace(body.PostPolicy) == "auto_post" {
+			postPolicy = "auto_post"
+		}
+		var confidenceFloor *float64
+		if confidenceFloorInBody {
+			if body.ConfidenceFloor != nil {
+				floor := *body.ConfidenceFloor
+				if floor < 0 || floor > 1 {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "confidenceFloor must be between 0 and 1.")
+					return
+				}
+				if floor > 0 {
+					confidenceFloor = &floor
+				}
+			}
+		} else {
+			existing, loadErr := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
+			if loadErr != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load grader agent.")
+				return
+			}
+			if existing != nil {
+				confidenceFloor = existing.ConfidenceFloor
+			}
+		}
 		explicitModel := ""
 		if body.ModelID != nil {
 			explicitModel = strings.TrimSpace(*body.ModelID)
@@ -338,6 +407,8 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 			ModelID:                  &modelID,
 			WorkflowGraph:            workflowGraphBytes,
 			AutoGradeNew:             autoGrade,
+			PostPolicy:               postPolicy,
+			ConfidenceFloor:          confidenceFloor,
 			CreatedBy:                viewer,
 		})
 		if err != nil {
@@ -349,204 +420,9 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 	}
 }
 
-type dryRunGraderAgentBody struct {
-	Prompt                   string                           `json:"prompt"`
-	IncludeAssignmentContent bool                             `json:"includeAssignmentContent"`
-	IncludeRubric            bool                             `json:"includeRubric"`
-	SubmissionID             string                           `json:"submissionId"`
-	ModelID                  *string                          `json:"modelId"`
-	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
-}
-
-func (d Deps) handlePostGraderAgentDryRun() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		courseCode, viewer, ok := d.requireGraderAgentAccess(w, r)
-		if !ok {
-			return
-		}
-		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
-			return
-		}
-		cid, assignRow, ok := d.loadAssignmentForSubmissions(w, r, courseCode, itemID)
-		if !ok || assignRow == nil || cid == nil {
-			return
-		}
-		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")
-			return
-		}
-		var body dryRunGraderAgentBody
-		if err := json.Unmarshal(payload, &body); err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
-			return
-		}
-		submissionID, err := uuid.Parse(strings.TrimSpace(body.SubmissionID))
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid submission id.")
-			return
-		}
-		subRow, err := moduleassignmentsubmissions.GetByIDForCourse(r.Context(), d.Pool, *cid, submissionID)
-		if err != nil || subRow == nil {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Submission not found.")
-			return
-		}
-		if subRow.AttachmentFileID == nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "This submission has no readable text attachment. Upload a text file to grade with the agent.")
-			return
-		}
-		svc := d.gradingAgentService()
-		submissions, err := svc.LoadSubmissionMarkdownsForSubmission(r.Context(), courseCode, subRow)
-		if err != nil {
-			log.Printf("grading-agent dry-run: LoadSubmissionMarkdowns course=%s submission=%s file=%s err=%v",
-				courseCode, submissionID, subRow.AttachmentFileID, err)
-			msg := "Could not read submission content."
-			switch {
-			case strings.Contains(err.Error(), "empty submission text"):
-				msg = "Submission file is empty. Use a text-based file the agent can read."
-			case strings.Contains(err.Error(), "no submission text"):
-				msg = "This submission has no readable text attachment."
-			case strings.Contains(err.Error(), "read submission file"):
-				msg = "Submission file could not be loaded. Re-upload the file or check storage configuration."
-			case strings.Contains(err.Error(), "submission file not found"):
-				msg = "Submission attachment record is missing from the course files table."
-			}
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, msg)
-			return
-		}
-		submissionText := gradingagentsvc.JoinSubmissions(submissions)
-		explicitModel := ""
-		if body.ModelID != nil {
-			explicitModel = strings.TrimSpace(*body.ModelID)
-		}
-		var scoreReq gradingagentsvc.ScoreRequest
-		var contentItemID string
-		var rubricItemID string
-		var workflowGraph *gradingagentsvc.WorkflowGraph
-		var promptNodeID string
-		governancePrompt := strings.TrimSpace(body.Prompt)
-		if body.WorkflowGraph != nil {
-			compiled, compileErr := gradingagentsvc.CompileWorkflowGraph(body.WorkflowGraph, submissionText)
-			if compileErr != nil {
-				writeGraderAgentValidationError(w, compileErr)
-				return
-			}
-			scoreReq = compiled.ScoreRequest
-			contentItemID = compiled.ContentItemID
-			rubricItemID = compiled.RubricItemID
-			workflowGraph = body.WorkflowGraph
-			promptNodeID = compiled.GradeSource
-			governancePrompt = scoreReq.InstructorPrompt
-			if compiled.ScoreRequest.ModelID != "" {
-				explicitModel = compiled.ScoreRequest.ModelID
-			}
-		} else {
-			scoreReq = gradingagentsvc.ScoreRequest{
-				InstructorPrompt:         strings.TrimSpace(body.Prompt),
-				IncludeAssignmentContent: body.IncludeAssignmentContent,
-				IncludeRubric:            body.IncludeRubric,
-				SubmissionText:           submissionText,
-			}
-		}
-		modelID, modelErr := d.resolveGraderAgentModelID(r.Context(), viewer, explicitModel, nil)
-		if modelErr != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, gradingagentsvc.UserFacingScoreError(modelErr))
-			return
-		}
-		scoreReq.ModelID = modelID
-		if !d.enforceAIGateway(w, r, viewer, aigateway.FeatureGraderAgent, modelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText)) {
-			return
-		}
-		if d.openRouterClient() == nil || strings.TrimSpace(d.effectiveConfig().OpenRouterAPIKey) == "" {
-			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "AI provider is not configured.")
-			return
-		}
-		contentRow, contentErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, contentItemID)
-		if contentErr != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, contentErr.Error())
-			return
-		}
-		rubricRow, rubricErr := d.assignmentRowForActivitySource(r.Context(), *cid, itemID, assignRow, rubricItemID)
-		if rubricErr != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, rubricErr.Error())
-			return
-		}
-		rubric, _ := gradingagentsvc.ParseAssignmentRubric(rubricRow)
-		scoreReq.AssignmentMarkdown = contentRow.Markdown
-		scoreReq.Rubric = rubric
-		scoreReq.MaxPoints = gradingagentsvc.MaxPointsFromAssignment(assignRow)
-		if workflowGraph != nil && strings.TrimSpace(promptNodeID) != "" {
-			scoreReq.InstructorPrompt = gradingagentsvc.SubstituteWorkflowPromptVariables(
-				workflowGraph,
-				promptNodeID,
-				scoreReq.InstructorPrompt,
-				gradingagentsvc.PromptVariableContext{
-					Submissions:     submissions,
-					ContentMarkdown: contentRow.Markdown,
-					Rubric:          rubric,
-				},
-			)
-		}
-		result, err := svc.Score(r.Context(), scoreReq)
-		if err != nil {
-			log.Printf("grading-agent dry-run: Score course=%s submission=%s err=%v", courseCode, submissionID, err)
-			apierr.WriteJSON(w, http.StatusBadGateway, apierr.CodeAiGenerationFailed, gradingagentsvc.UserFacingScoreError(err))
-			return
-		}
-		d.recordAIUsage(r.Context(), AIUsageMeta{
-			UserID: viewer, CourseCode: courseCode, Feature: aigateway.FeatureGraderAgent, Model: result.ModelID,
-		}, openrouterUsageFromScore(result), true)
-		d.logAIInferenceAllowed(r, viewer, aigateway.FeatureGraderAgent, result.ModelID, gradingagentsvc.ContentHashInput(governancePrompt, submissionText), aigateway.Decision{Allowed: true, OptInConfirmed: true})
-
-		cfg, _ := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
-		var configID uuid.UUID
-		savePrompt := governancePrompt
-		saveIncludeContent := scoreReq.IncludeAssignmentContent
-		saveIncludeRubric := scoreReq.IncludeRubric
-		if cfg != nil {
-			configID = cfg.ID
-		} else {
-			saved, saveErr := gradingagentrepo.UpsertConfig(r.Context(), d.Pool, gradingagentrepo.UpsertConfigInput{
-				CourseID: *cid, ModuleItemID: itemID, Status: gradingagentrepo.StatusDraft,
-				Prompt: savePrompt, IncludeAssignmentContent: saveIncludeContent,
-				IncludeRubric: saveIncludeRubric, CreatedBy: viewer,
-			})
-			if saveErr == nil && saved != nil {
-				configID = saved.ID
-			}
-		}
-		if configID != uuid.Nil {
-			comment := result.Output.Comment
-			conf := result.Output.Confidence
-			pt := result.PromptTokens
-			ct := result.CompletionTokens
-			cost := result.CostUSD
-			model := result.ModelID
-			pts := result.Output.TotalPoints
-			_, _ = gradingagentrepo.InsertResult(r.Context(), d.Pool, gradingagentrepo.InsertResultInput{
-				ConfigID: configID, SubmissionID: submissionID, IsDryRun: true,
-				SuggestedPoints: &pts, Comment: &comment, Confidence: &conf,
-				Status: gradingagentrepo.ItemSuggested, ModelID: &model,
-				PromptTokens: &pt, CompletionTokens: &ct, CostUSD: &cost,
-			})
-		}
-
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(map[string]any{
-			"suggestedPoints":  result.Output.TotalPoints,
-			"rubricScores":     result.Output.RubricScores,
-			"comment":          result.Output.Comment,
-			"confidence":       result.Output.Confidence,
-			"promptTokens":     result.PromptTokens,
-			"completionTokens": result.CompletionTokens,
-		})
-	}
-}
-
 type postGraderAgentRunBody struct {
 	Scope        string  `json:"scope"`
+	Mode         string  `json:"mode"`
 	SubmissionID string  `json:"submissionId"`
 	Overwrite    bool    `json:"overwrite"`
 	AuthoredVia  *string `json:"authoredVia"`
@@ -583,13 +459,13 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 			return
 		}
 		scope := gradingagentrepo.RunScope(strings.ToLower(strings.TrimSpace(body.Scope)))
-		submissions, runScope, err := d.resolveGraderAgentSubmissions(r.Context(), *cid, itemID, scope, body.SubmissionID, body.Overwrite)
+		submissions, runScope, err := d.resolveGraderAgentSubmissions(r.Context(), *cid, itemID, scope, body.SubmissionID, body.Overwrite, d.graderAgentTextEntryGradingEnabled())
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
 		}
 		if len(submissions) == 0 {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "No submissions with readable file attachments matched this scope.")
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "No gradable submissions matched this scope.")
 			return
 		}
 		initiatedBy := viewer
@@ -600,7 +476,16 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 				authoredVia = &v
 			}
 		}
-		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, &initiatedBy, authoredVia, len(submissions))
+		runMode := gradingagentrepo.RunModeApply
+		if d.graderAgentSuggestModeEnabled() {
+			switch strings.ToLower(strings.TrimSpace(body.Mode)) {
+			case "apply":
+				runMode = gradingagentrepo.RunModeApply
+			default:
+				runMode = gradingagentrepo.RunModeSuggest
+			}
+		}
+		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, runMode, &initiatedBy, authoredVia, len(submissions))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start run.")
 			return
@@ -610,21 +495,28 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 			return
 		}
 		_ = gradingagentrepo.MarkRunRunning(r.Context(), d.Pool, run.ID)
+		queued := 0
 		for _, sub := range submissions {
 			msg := gradingagentqueue.QueueMessage{
 				RunID: run.ID, ConfigID: cfg.ID, SubmissionID: sub.ID,
 				CourseID: *cid, ItemID: itemID, CourseCode: courseCode,
 			}
 			if pubErr := d.GradingAgentQueue.Publish(r.Context(), msg); pubErr != nil {
-				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to enqueue run.")
+				log.Printf("grading_agent: enqueue failed after %d/%d items for run %s: %v", queued, len(submissions), run.ID, pubErr)
+				_ = gradingagentrepo.MarkRunFailed(context.Background(), d.Pool, run.ID)
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal,
+					fmt.Sprintf("Enqueue failed after %d of %d items.", queued, len(submissions)))
 				return
 			}
+			queued++
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusAccepted)
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"runId":      run.ID.String(),
-			"totalCount": run.TotalCount,
+			"runId":       run.ID.String(),
+			"totalCount":  run.TotalCount,
+			"queuedCount": queued,
+			"mode":        string(run.Mode),
 		})
 	}
 }
@@ -635,6 +527,7 @@ func (d Deps) resolveGraderAgentSubmissions(
 	scope gradingagentrepo.RunScope,
 	submissionID string,
 	overwrite bool,
+	textEntryEnabled bool,
 ) ([]moduleassignmentsubmissions.SubmissionRow, gradingagentrepo.RunScope, error) {
 	switch scope {
 	case gradingagentrepo.RunScopeCurrent:
@@ -646,32 +539,32 @@ func (d Deps) resolveGraderAgentSubmissions(
 		if err != nil || sub == nil {
 			return nil, scope, errInvalidScope("submission not found")
 		}
-		if sub.AttachmentFileID == nil {
-			return nil, scope, errInvalidScope("submission has no file attachment")
+		if !gradingagentsvc.SubmissionAttemptableForAgent(*sub, textEntryEnabled) {
+			return nil, scope, errInvalidScope("submission has no gradable content")
 		}
 		return []moduleassignmentsubmissions.SubmissionRow{*sub}, scope, nil
 	case gradingagentrepo.RunScopeUngraded:
 		rows, err := moduleassignmentsubmissions.ListForAssignment(ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterUngraded)
-		return gradableSubmissionsForAgent(rows), scope, err
+		return gradableSubmissionsForAgent(rows, textEntryEnabled), scope, err
 	case gradingagentrepo.RunScopeAll:
 		if !overwrite {
 			return nil, scope, errInvalidScope("overwrite confirmation required for all scope")
 		}
 		rows, err := moduleassignmentsubmissions.ListForAssignment(ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterAll)
-		return gradableSubmissionsForAgent(rows), scope, err
+		return gradableSubmissionsForAgent(rows, textEntryEnabled), scope, err
 	default:
 		return nil, scope, errInvalidScope("invalid scope")
 	}
 }
 
-// gradableSubmissionsForAgent keeps only assignment submissions that have a stored file to read.
-func gradableSubmissionsForAgent(rows []moduleassignmentsubmissions.SubmissionRow) []moduleassignmentsubmissions.SubmissionRow {
+// gradableSubmissionsForAgent keeps submissions with file attachments and/or typed text-entry body.
+func gradableSubmissionsForAgent(rows []moduleassignmentsubmissions.SubmissionRow, textEntryEnabled bool) []moduleassignmentsubmissions.SubmissionRow {
 	if len(rows) == 0 {
 		return rows
 	}
 	out := make([]moduleassignmentsubmissions.SubmissionRow, 0, len(rows))
 	for _, row := range rows {
-		if row.AttachmentFileID != nil {
+		if gradingagentsvc.SubmissionAttemptableForAgent(row, textEntryEnabled) {
 			out = append(out, row)
 		}
 	}
@@ -690,7 +583,7 @@ type patchGraderAgentResultBody struct {
 
 func (d Deps) handlePatchGraderAgentResult() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, _, ok := d.requireGraderAgentAccess(w, r)
+		_, viewer, ok := d.requireGraderAgentAccess(w, r)
 		if !ok {
 			return
 		}
@@ -721,7 +614,7 @@ func (d Deps) handlePatchGraderAgentResult() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Status must be applied, overridden, or skipped.")
 			return
 		}
-		updated, err := gradingagentrepo.UpdateResultStatus(r.Context(), d.Pool, resultID, gradingagentrepo.ItemStatus(status), body.Reason)
+		updated, err := gradingagentrepo.UpdateResultStatus(r.Context(), d.Pool, resultID, gradingagentrepo.ItemStatus(status), body.Reason, &viewer)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update result.")
 			return
@@ -789,6 +682,9 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 			if res.Error != nil {
 				entry["error"] = *res.Error
 			}
+			if res.InputModality != nil {
+				entry["inputModality"] = *res.InputModality
+			}
 			if res.FlagReason != nil {
 				entry["flagReason"] = *res.FlagReason
 			}
@@ -814,6 +710,225 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 			"completedCount": run.CompletedCount,
 			"failedCount":    run.FailedCount,
 			"results":        resultJSON,
+		})
+	}
+}
+
+func graderAgentReviewQueueItemToJSON(item gradingagentrepo.ReviewQueueItem, label string) map[string]any {
+	entry := map[string]any{
+		"id":             item.ID.String(),
+		"submissionId":   item.SubmissionID.String(),
+		"submissionLabel": label,
+		"status":         string(item.Status),
+		"createdAt":      item.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+	}
+	if item.RunID != nil {
+		entry["runId"] = item.RunID.String()
+	}
+	if item.RunCreatedAt != nil {
+		entry["runCreatedAt"] = item.RunCreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+	}
+	if item.SuggestedPoints != nil {
+		entry["suggestedPoints"] = *item.SuggestedPoints
+	}
+	if item.Comment != nil {
+		entry["comment"] = *item.Comment
+	}
+	if item.Confidence != nil {
+		entry["confidence"] = *item.Confidence
+	}
+	if item.FlagReason != nil {
+		entry["flagReason"] = *item.FlagReason
+	}
+	if item.FlagPriority != nil {
+		entry["flagPriority"] = *item.FlagPriority
+	}
+	if item.HeldReason != nil {
+		entry["heldReason"] = *item.HeldReason
+	}
+	if item.HeldAt != nil {
+		entry["heldAt"] = item.HeldAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+	}
+	if item.HeldQueue != nil {
+		entry["heldQueue"] = *item.HeldQueue
+	}
+	return entry
+}
+
+func (d Deps) submissionLabelsForGraderAgentReview(
+	ctx context.Context,
+	courseID, itemID uuid.UUID,
+	assignRow *coursemoduleassignments.CourseItemAssignmentRow,
+	submissionIDs []uuid.UUID,
+) (map[uuid.UUID]string, error) {
+	labels := make(map[uuid.UUID]string, len(submissionIDs))
+	if len(submissionIDs) == 0 || d.Pool == nil || assignRow == nil {
+		return labels, nil
+	}
+	rows, err := moduleassignmentsubmissions.ListForAssignment(ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterAll)
+	if err != nil {
+		return nil, err
+	}
+	subByID := make(map[uuid.UUID]moduleassignmentsubmissions.SubmissionRow, len(rows))
+	for _, row := range rows {
+		subByID[row.ID] = row
+	}
+	cfg := d.effectiveConfig()
+	redact := gradingredaction.ShouldRedactSubmissionPiiForStaff(
+		cfg.BlindGradingEnabled,
+		assignRow.BlindGrading,
+		assignRow.IdentitiesRevealedAt != nil,
+	)
+	userIDs := make([]uuid.UUID, 0, len(submissionIDs))
+	for _, sid := range submissionIDs {
+		if sub, ok := subByID[sid]; ok {
+			userIDs = append(userIDs, sub.SubmittedBy)
+		}
+	}
+	displayNames := map[uuid.UUID]string{}
+	if !redact && len(userIDs) > 0 {
+		displayNames, err = user.DisplayLabelsByIDs(ctx, d.Pool, userIDs)
+		if err != nil {
+			return nil, err
+		}
+	}
+	blindRanks := map[uuid.UUID]int{}
+	if redact {
+		rosterIDs := make([]uuid.UUID, 0, len(rows))
+		seen := map[uuid.UUID]struct{}{}
+		for _, row := range rows {
+			if _, ok := seen[row.SubmittedBy]; ok {
+				continue
+			}
+			seen[row.SubmittedBy] = struct{}{}
+			rosterIDs = append(rosterIDs, row.SubmittedBy)
+		}
+		blindRanks = gradingredaction.SubmissionRankByID(rosterIDs)
+	}
+	for _, sid := range submissionIDs {
+		sub, ok := subByID[sid]
+		if !ok {
+			labels[sid] = sid.String()[:8]
+			continue
+		}
+		if redact {
+			labels[sid] = gradingredaction.BlindStudentLabel(blindRanks[sub.SubmittedBy])
+			continue
+		}
+		label := strings.TrimSpace(displayNames[sub.SubmittedBy])
+		if label == "" {
+			label = sub.SubmittedBy.String()[:8]
+		}
+		labels[sid] = label
+	}
+	return labels, nil
+}
+
+func (d Deps) handleListGraderAgentRuns() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		_, _, ok := d.requireGraderAgentReviewInboxAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
+			return
+		}
+		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
+		if err != nil || cfg == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+			return
+		}
+		runs, err := gradingagentrepo.ListRunsByConfig(r.Context(), d.Pool, cfg.ID, 50)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load runs.")
+			return
+		}
+		runJSON := make([]map[string]any, 0, len(runs))
+		for _, run := range runs {
+			entry := map[string]any{
+				"id":             run.ID.String(),
+				"scope":          string(run.Scope),
+				"mode":           string(run.Mode),
+				"status":         run.Status,
+				"totalCount":     run.TotalCount,
+				"completedCount": run.CompletedCount,
+				"failedCount":    run.FailedCount,
+				"createdAt":      run.CreatedAt.UTC().Format("2006-01-02T15:04:05.000000Z"),
+			}
+			if run.InitiatedBy != nil {
+				entry["initiatedBy"] = run.InitiatedBy.String()
+			}
+			if run.FinishedAt != nil {
+				entry["finishedAt"] = run.FinishedAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+			}
+			if run.ModelID != nil {
+				entry["model"] = *run.ModelID
+			} else if cfg.ModelID != nil {
+				entry["model"] = *cfg.ModelID
+			}
+			if run.CostUSD != nil {
+				entry["costUsd"] = *run.CostUSD
+			}
+			runJSON = append(runJSON, entry)
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"runs": runJSON})
+	}
+}
+
+func (d Deps) handleGetGraderAgentReviewQueue() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentReviewInboxAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
+			return
+		}
+		cid, assignRow, ok := d.loadAssignmentForSubmissions(w, r, courseCode, itemID)
+		if !ok || assignRow == nil {
+			return
+		}
+		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
+		if err != nil || cfg == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+			return
+		}
+		held, flagged, err := gradingagentrepo.ListReviewQueueByConfig(r.Context(), d.Pool, cfg.ID, 100)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load review queue.")
+			return
+		}
+		submissionIDs := make([]uuid.UUID, 0, len(held)+len(flagged))
+		for _, item := range held {
+			submissionIDs = append(submissionIDs, item.SubmissionID)
+		}
+		for _, item := range flagged {
+			submissionIDs = append(submissionIDs, item.SubmissionID)
+		}
+		labels, err := d.submissionLabelsForGraderAgentReview(r.Context(), *cid, itemID, assignRow, submissionIDs)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to resolve submission labels.")
+			return
+		}
+		heldJSON := make([]map[string]any, 0, len(held))
+		for _, item := range held {
+			heldJSON = append(heldJSON, graderAgentReviewQueueItemToJSON(item, labels[item.SubmissionID]))
+		}
+		flaggedJSON := make([]map[string]any, 0, len(flagged))
+		for _, item := range flagged {
+			flaggedJSON = append(flaggedJSON, graderAgentReviewQueueItemToJSON(item, labels[item.SubmissionID]))
+		}
+		totalCount, _ := gradingagentrepo.CountReviewQueueByConfig(r.Context(), d.Pool, cfg.ID)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"held":       heldJSON,
+			"flagged":    flaggedJSON,
+			"totalCount": totalCount,
 		})
 	}
 }
@@ -1151,11 +1266,3 @@ WHERE c.course_code = $1 AND ce.status = 'active'
 	}
 }
 
-func openrouterUsageFromScore(result gradingagentsvc.ScoreResult) openrouter.UsageInfo {
-	return openrouter.UsageInfo{
-		PromptTokens:     result.PromptTokens,
-		CompletionTokens: result.CompletionTokens,
-		TotalTokens:      result.PromptTokens + result.CompletionTokens,
-		CostUSD:          result.CostUSD,
-	}
-}

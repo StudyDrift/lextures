@@ -65,7 +65,11 @@ type Row struct {
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
 	GraderAgentEnabled              *bool
-	CodeExecutionEnabled            *bool
+	GraderAgentReviewInboxEnabled   *bool
+	GraderAgentSuggestModeEnabled        *bool
+	GraderAgentTextEntryGradingEnabled   *bool
+	GraderAgentVisionGradingEnabled      *bool
+	CodeExecutionEnabled                 *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
 	SpeechToTextEnabled             *bool
@@ -218,7 +222,11 @@ type Write struct {
 	EquationEditorEnabled           *bool
 	ReadingLevelEnabled             *bool
 	GraderAgentEnabled              *bool
-	CodeExecutionEnabled            *bool
+	GraderAgentReviewInboxEnabled   *bool
+	GraderAgentSuggestModeEnabled        *bool
+	GraderAgentTextEntryGradingEnabled   *bool
+	GraderAgentVisionGradingEnabled      *bool
+	CodeExecutionEnabled                 *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
 	SpeechToTextEnabled             *bool
@@ -369,6 +377,10 @@ SELECT
 	equation_editor_enabled,
 	reading_level_enabled,
 	grader_agent_enabled,
+	grader_agent_review_inbox_enabled,
+	grader_agent_suggest_mode_enabled,
+	grader_agent_text_entry_grading_enabled,
+	grader_agent_vision_grading_enabled,
 	code_execution_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
@@ -513,6 +525,10 @@ WHERE id = 1
 		&r.EquationEditorEnabled,
 		&r.ReadingLevelEnabled,
 		&r.GraderAgentEnabled,
+		&r.GraderAgentReviewInboxEnabled,
+		&r.GraderAgentSuggestModeEnabled,
+		&r.GraderAgentTextEntryGradingEnabled,
+		&r.GraderAgentVisionGradingEnabled,
 		&r.CodeExecutionEnabled,
 		&r.AltTextEnforcementEnabled,
 		&r.FFAltTextEnforcement,
@@ -708,6 +724,10 @@ INSERT INTO settings.platform_app_settings (
 	equation_editor_enabled,
 	reading_level_enabled,
 	grader_agent_enabled,
+	grader_agent_review_inbox_enabled,
+	grader_agent_suggest_mode_enabled,
+	grader_agent_text_entry_grading_enabled,
+	grader_agent_vision_grading_enabled,
 	code_execution_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
@@ -806,7 +826,7 @@ INSERT INTO settings.platform_app_settings (
 	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18,
 	$19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39, $40,
 	$41, $42, $43, $44, $45, $46, $47, $48, $49, $50, $51, $52, $53, $54, $55, $56, $57, $58, $59, $60, $61, $62, $63, $64, $65, $66, $67, $68, $69, $70, $71, $72, $73, $74, $75, $76, $77, $78, $79, $80, $81, $82, $83, $84, $85, $86, $87, $88, $89, $90, $91, $92, $93, $94, $95,
-	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116,
+	$96, $97, $98, $99, $100, $101, $102, $103, $104, $105, $106, $107, $108, $109, $110, $111, $112, $113, $114, $115, $116, $117, $118, $119,
 	NOW()
 )
 ON CONFLICT (id) DO UPDATE SET
@@ -857,6 +877,10 @@ ON CONFLICT (id) DO UPDATE SET
 	equation_editor_enabled = COALESCE(EXCLUDED.equation_editor_enabled, settings.platform_app_settings.equation_editor_enabled),
 	reading_level_enabled = COALESCE(EXCLUDED.reading_level_enabled, settings.platform_app_settings.reading_level_enabled),
 	grader_agent_enabled = COALESCE(EXCLUDED.grader_agent_enabled, settings.platform_app_settings.grader_agent_enabled),
+	grader_agent_review_inbox_enabled = COALESCE(EXCLUDED.grader_agent_review_inbox_enabled, settings.platform_app_settings.grader_agent_review_inbox_enabled),
+	grader_agent_suggest_mode_enabled = COALESCE(EXCLUDED.grader_agent_suggest_mode_enabled, settings.platform_app_settings.grader_agent_suggest_mode_enabled),
+	grader_agent_text_entry_grading_enabled = COALESCE(EXCLUDED.grader_agent_text_entry_grading_enabled, settings.platform_app_settings.grader_agent_text_entry_grading_enabled),
+	grader_agent_vision_grading_enabled = COALESCE(EXCLUDED.grader_agent_vision_grading_enabled, settings.platform_app_settings.grader_agent_vision_grading_enabled),
 	code_execution_enabled = COALESCE(EXCLUDED.code_execution_enabled, settings.platform_app_settings.code_execution_enabled),
 	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
 	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
@@ -999,6 +1023,10 @@ ON CONFLICT (id) DO UPDATE SET
 		w.EquationEditorEnabled,
 		w.ReadingLevelEnabled,
 		w.GraderAgentEnabled,
+		w.GraderAgentReviewInboxEnabled,
+		w.GraderAgentSuggestModeEnabled,
+		w.GraderAgentTextEntryGradingEnabled,
+		w.GraderAgentVisionGradingEnabled,
 		w.CodeExecutionEnabled,
 		w.AltTextEnforcementEnabled,
 		w.FFAltTextEnforcement,

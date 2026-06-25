@@ -18,6 +18,7 @@ import {
   postRequestAssignmentRevision,
   postSubmissionAnnotation,
   revealModuleAssignmentIdentities,
+  submitModuleAssignmentText,
   uploadModuleAssignmentSubmissionFile,
   type ModuleAssignmentSubmissionApi,
   type OriginalityReportApi,
@@ -148,6 +149,7 @@ export function AssignmentAnnotationWorkbench({
   const [revDueLocal, setRevDueLocal] = useState('')
   const [revFeedback, setRevFeedback] = useState('')
   const [revisionBusy, setRevisionBusy] = useState(false)
+  const [draftText, setDraftText] = useState('')
   const [deadlineNow, setDeadlineNow] = useState(() => Date.now())
   const [selectedAttachmentId, setSelectedAttachmentId] = useState<string | null>(null)
   const [downloadAllBusy, setDownloadAllBusy] = useState(false)
@@ -252,6 +254,7 @@ export function AssignmentAnnotationWorkbench({
   const displayPreviewType = displayFilePath
     ? detectPreviewType(displayMimeType, displayFilename)
     : 'none'
+  const displayBodyText = current?.bodyText?.trim() ?? ''
   const readOnlyDocument =
     readOnly || (mode === 'staff' && resubmissionWorkflowEnabled && !viewIsLatest)
 
@@ -531,6 +534,22 @@ export function AssignmentAnnotationWorkbench({
     }
   }
 
+  async function onSubmitStudentText() {
+    if (mode !== 'student' || !submissionAllowsText) return
+    const text = draftText.trim()
+    if (!text) return
+    setBusy(true)
+    try {
+      await submitModuleAssignmentText(courseCode, itemId, text)
+      setDraftText('')
+      await reloadMine()
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Submit failed.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
   async function onUploadStudentFile(file: File | null) {
     if (!file || mode !== 'student') return
     if (
@@ -776,6 +795,10 @@ export function AssignmentAnnotationWorkbench({
           className="h-full min-h-[40vh]"
         />
       )
+    ) : displayBodyText ? (
+      <div className="h-full min-h-[40vh] overflow-y-auto rounded-lg border border-slate-200 bg-white px-4 py-4 text-sm text-slate-800 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100">
+        <p className="whitespace-pre-wrap">{displayBodyText}</p>
+      </div>
     ) : displayAttachmentFileId ? (
       <div className="flex h-full min-h-48 items-center justify-center rounded-lg border border-dashed border-amber-200 bg-amber-50 px-4 py-6 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
         <p>This submission references a file that could not be loaded. Try downloading from the panel on the right, or re-import submissions from Canvas.</p>
@@ -795,6 +818,28 @@ export function AssignmentAnnotationWorkbench({
           ) : (
             <p>No submission from this student yet.</p>
           )
+        ) : submissionAllowsText && mode === 'student' ? (
+          <div className="w-full max-w-xl space-y-3 text-start">
+            <label className="block text-sm font-medium text-slate-700 dark:text-neutral-200">
+              Your response
+            </label>
+            <textarea
+              value={draftText}
+              onChange={(e) => setDraftText(e.target.value)}
+              rows={8}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-50"
+              placeholder="Type your answer here…"
+              disabled={busy}
+            />
+            <button
+              type="button"
+              onClick={() => void onSubmitStudentText()}
+              disabled={busy || draftText.trim() === ''}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {busy ? 'Submitting…' : 'Submit text'}
+            </button>
+          </div>
         ) : submissionAllowsFile ? (
           <p>Upload a file to submit this assignment.</p>
         ) : (

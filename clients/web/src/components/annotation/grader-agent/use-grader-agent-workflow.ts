@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePlatformFeatures } from '../../../context/platform-features-context'
 import {
   fetchCourseCanvasLink,
   fetchGraderAgentConfig,
@@ -14,6 +15,7 @@ import {
   type CourseCanvasLinkApi,
   type GraderAgentConfigApi,
   type GraderAgentDryRunResult,
+  type GraderAgentRunMode,
   type GraderAgentRunStatus,
   type GraderWorkflowGraphApi,
   type RubricDefinition,
@@ -51,6 +53,29 @@ import { newWorkflowNodeId } from './workflow-node-id'
 import { patchWorkflowNodeLabel } from './workflow-node-label'
 
 export type RunScope = 'current' | 'ungraded' | 'all'
+
+function graderAgentConfigPutPayload(
+  config: GraderAgentConfigApi | null | undefined,
+  graph: GraderWorkflowGraphApi,
+  overrides: {
+    status?: GraderAgentConfigApi['status']
+    autoGradeNew?: boolean
+    postPolicy?: 'draft' | 'auto_post'
+    confidenceFloor?: number | null
+  } = {},
+) {
+  const floor = overrides.confidenceFloor !== undefined ? overrides.confidenceFloor : config?.confidenceFloor
+  return {
+    prompt: config?.prompt ?? '',
+    includeAssignmentContent: config?.includeAssignmentContent ?? false,
+    includeRubric: config?.includeRubric ?? false,
+    status: overrides.status ?? config?.status ?? 'draft',
+    autoGradeNew: overrides.autoGradeNew ?? config?.autoGradeNew ?? false,
+    postPolicy: overrides.postPolicy ?? config?.postPolicy ?? 'draft',
+    confidenceFloor: typeof floor === 'number' && floor > 0 ? floor : null,
+    workflowGraph: graph,
+  }
+}
 
 export type NodeExecutionStatus = 'idle' | 'running' | 'success' | 'error' | 'skipped'
 
@@ -102,6 +127,7 @@ export function useGraderAgentWorkflow({
   onSubmissionGraded,
 }: UseGraderAgentWorkflowArgs) {
   const { t } = useTranslation('common')
+  const { graderAgentSuggestModeEnabled } = usePlatformFeatures()
   const [savedTemplateId, setSavedTemplateId] = useState<string | null>(templateMode?.templateId ?? null)
   const [config, setConfig] = useState<GraderAgentConfigApi | null>(null)
   const [graph, setGraph] = useState<GraderWorkflowGraph>(() => synthesizeDefaultGraph('', false, false))
@@ -115,6 +141,10 @@ export function useGraderAgentWorkflow({
   const [applyingSubmissionId, setApplyingSubmissionId] = useState<string | null>(null)
   const [syncingSubmissionIds, setSyncingSubmissionIds] = useState<ReadonlySet<string>>(() => new Set())
   const [runScope, setRunScope] = useState<RunScope>('ungraded')
+  const [runMode, setRunMode] = useState<GraderAgentRunMode>(
+    graderAgentSuggestModeEnabled ? 'suggest' : 'apply',
+  )
+  const [lastRunMode, setLastRunMode] = useState<GraderAgentRunMode>('apply')
   const [runId, setRunId] = useState<string | null>(null)
   const [runProgress, setRunProgress] = useState<{ completed: number; failed: number; total: number } | null>(null)
   const [runResults, setRunResults] = useState<GraderAgentRunStatus['results']>([])
@@ -148,6 +178,10 @@ export function useGraderAgentWorkflow({
     }
     setSavedTemplateId(templateMode?.templateId ?? null)
   }, [open, templateMode?.templateId])
+
+  useEffect(() => {
+    setRunMode(graderAgentSuggestModeEnabled ? 'suggest' : 'apply')
+  }, [graderAgentSuggestModeEnabled])
 
   const loadConfig = useCallback(async () => {
     if (templateMode) {
@@ -352,13 +386,24 @@ export function useGraderAgentWorkflow({
 
       setStatusMessage(`${run.completedCount} / ${run.totalCount} complete`)
 
-      if (run.status === 'done' || run.status === 'error') {
+      if (run.status === 'done' || run.status === 'error' || run.status === 'failed' || run.status === 'cancelled') {
         setBatchRunning(false)
         resetBatchNodeExecution()
         const appliedCount = run.results.filter((result) => result.status === 'applied').length
-        if (run.status === 'error') {
+        const suggestedCount = run.results.filter((result) => result.status === 'suggested').length
+        if (run.status === 'error' || run.status === 'failed' || run.status === 'cancelled') {
           appendRunLog(t('gradingAgent.run.failed'), 'error')
           setStatusMessage(t('gradingAgent.run.failed'))
+        } else if (lastRunMode === 'suggest') {
+          appendRunLog(
+            t('gradingAgent.run.completeSuggest', {
+              suggested: suggestedCount,
+              failed: run.failedCount,
+            }),
+          )
+          setStatusMessage(
+            t('gradingAgent.run.completeSuggest', { suggested: suggestedCount, failed: run.failedCount }),
+          )
         } else {
           appendRunLog(
             t('gradingAgent.run.complete', {
@@ -368,27 +413,32 @@ export function useGraderAgentWorkflow({
           )
           setStatusMessage(t('gradingAgent.run.complete', { applied: appliedCount, failed: run.failedCount }))
         }
-        onApplied?.()
         return true
       }
       return false
     },
-    [appendRunLog, onApplied, resetBatchNodeExecution, syncAppliedResultToCanvas, t],
+    [appendRunLog, lastRunMode, resetBatchNodeExecution, syncAppliedResultToCanvas, t],
   )
 
   useEffect(() => {
     if (!open || !runId) return
     let cancelled = false
+    let finalized = false
     let timer: number | undefined
+
+    const finalize = () => {
+      if (finalized) return
+      finalized = true
+      if (timer !== undefined) window.clearInterval(timer)
+      onApplied?.()
+    }
 
     const poll = async () => {
       try {
         const run = await fetchGraderAgentRun(courseCode, itemId, runId)
         if (cancelled) return
         const finished = await processRunStatus(run)
-        if (finished && timer !== undefined) {
-          window.clearInterval(timer)
-        }
+        if (finished) finalize()
       } catch {
         if (!cancelled) {
           appendRunLog(t('gradingAgent.run.pollFailed'), 'warn')
@@ -404,7 +454,7 @@ export function useGraderAgentWorkflow({
       cancelled = true
       if (timer !== undefined) window.clearInterval(timer)
     }
-  }, [open, runId, courseCode, itemId, processRunStatus, appendRunLog, t])
+  }, [open, runId, courseCode, itemId, processRunStatus, appendRunLog, t, onApplied])
 
   const updateGraph = useCallback((next: GraderWorkflowGraph) => {
     setGraph(next)
@@ -879,14 +929,11 @@ export function useGraderAgentWorkflow({
         return
       }
       const status = config?.status === 'accepted' ? 'accepted' : config?.status === 'archived' ? 'archived' : 'draft'
-      const res = await putGraderAgentConfig(courseCode, itemId, {
-        prompt: config?.prompt ?? '',
-        includeAssignmentContent: config?.includeAssignmentContent ?? false,
-        includeRubric: config?.includeRubric ?? false,
-        status,
-        autoGradeNew: config?.autoGradeNew ?? false,
-        workflowGraph: graph as GraderWorkflowGraphApi,
-      })
+      const res = await putGraderAgentConfig(
+        courseCode,
+        itemId,
+        graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { status }),
+      )
       setConfig(res.config)
       const savedGraph = effectiveWorkflowGraph(
         res.config.workflowGraph as GraderWorkflowGraph | undefined,
@@ -908,14 +955,11 @@ export function useGraderAgentWorkflow({
     if (!graph || !runnable) return
     setSaving(true)
     try {
-      const res = await putGraderAgentConfig(courseCode, itemId, {
-        prompt: config?.prompt ?? '',
-        includeAssignmentContent: config?.includeAssignmentContent ?? false,
-        includeRubric: config?.includeRubric ?? false,
-        status: 'accepted',
-        autoGradeNew: config?.autoGradeNew ?? false,
-        workflowGraph: graph as GraderWorkflowGraphApi,
-      })
+      const res = await putGraderAgentConfig(
+        courseCode,
+        itemId,
+        graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { status: 'accepted' }),
+      )
       setConfig(res.config)
       setHadDryRun(true)
       setStatusMessage('Agent accepted.')
@@ -939,21 +983,21 @@ export function useGraderAgentWorkflow({
     setDryRunError(null)
     try {
       if (graph && config?.status !== 'accepted') {
-        await putGraderAgentConfig(courseCode, itemId, {
-          prompt: config?.prompt ?? '',
-          includeAssignmentContent: config?.includeAssignmentContent ?? false,
-          includeRubric: config?.includeRubric ?? false,
-          status: config?.status ?? 'draft',
-          autoGradeNew: config?.autoGradeNew ?? false,
-          workflowGraph: graph as GraderWorkflowGraphApi,
-        })
+        await putGraderAgentConfig(
+          courseCode,
+          itemId,
+          graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi),
+        )
       }
+      const effectiveMode: GraderAgentRunMode = graderAgentSuggestModeEnabled ? runMode : 'apply'
       const res = await postGraderAgentRun(courseCode, itemId, {
         scope: runScope,
+        mode: effectiveMode,
         submissionId: runScope === 'current' ? submissionId ?? undefined : undefined,
         overwrite: runScope === 'all',
         authoredVia: 'canvas',
       })
+      setLastRunMode(res.mode ?? effectiveMode)
       canvasSyncedSubmissionIdsRef.current = new Set()
       lastRunProgressLogRef.current = null
       setRunId(res.runId)
@@ -977,14 +1021,37 @@ export function useGraderAgentWorkflow({
 
   const handleToggleAutoGrade = async (enabled: boolean) => {
     if (!config || config.status !== 'accepted' || !graph) return
-    const res = await putGraderAgentConfig(courseCode, itemId, {
-      prompt: config.prompt,
-      includeAssignmentContent: config.includeAssignmentContent,
-      includeRubric: config.includeRubric,
-      status: 'accepted',
-      autoGradeNew: enabled,
-      workflowGraph: graph as GraderWorkflowGraphApi,
-    })
+    const res = await putGraderAgentConfig(
+      courseCode,
+      itemId,
+      graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, {
+        status: 'accepted',
+        autoGradeNew: enabled,
+      }),
+    )
+    setConfig(res.config)
+  }
+
+  const handleTogglePostPolicy = async (autoPost: boolean) => {
+    if (!config || config.status !== 'accepted' || !graph) return
+    const res = await putGraderAgentConfig(
+      courseCode,
+      itemId,
+      graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, {
+        status: 'accepted',
+        postPolicy: autoPost ? 'auto_post' : 'draft',
+      }),
+    )
+    setConfig(res.config)
+  }
+
+  const handleSetConfidenceFloor = async (floor: number | null) => {
+    if (!config || !graph) return
+    const res = await putGraderAgentConfig(
+      courseCode,
+      itemId,
+      graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { confidenceFloor: floor }),
+    )
     setConfig(res.config)
   }
 
@@ -1027,6 +1094,8 @@ export function useGraderAgentWorkflow({
     syncingSubmissionIds,
     runScope,
     setRunScope,
+    runMode,
+    setRunMode,
     runProgress,
     runResults,
     confirmOverwrite,
@@ -1060,6 +1129,8 @@ export function useGraderAgentWorkflow({
     handleAccept,
     handleRun,
     handleToggleAutoGrade,
+    handleTogglePostPolicy,
+    handleSetConfidenceFloor,
     nodeExecutionStates,
     dryRunLogs,
     dryRunConsoleOpen,

@@ -87,7 +87,7 @@ Two coupled defects make large batch runs unreliable, especially on deployments 
 ## 10. UI / UX
 
 - Run popover/dock shows a terminal error state for failed runs and stops the 1.5 s poll loop.
-- Run history ([GA-M1](missing-1-persistent-review-queue.md)) shows failed runs distinctly.
+- Run history ([GA-M1](../../../completed/grading-agent/missing-1-persistent-review-queue.md)) shows failed runs distinctly.
 - Copy/i18n under `gradingAgent.run.failed*`.
 
 ## 11. AI / ML Considerations

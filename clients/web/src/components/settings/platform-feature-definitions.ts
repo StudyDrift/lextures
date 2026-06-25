@@ -249,6 +249,26 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Instructor-authored AI grading agent in SpeedGrader with dry-run and batch runs.',
   },
   {
+    key: 'graderAgentReviewInboxEnabled',
+    label: 'Grader agent review inbox',
+    description: 'Persistent held/flagged review queue and run history across grading-agent sessions.',
+  },
+  {
+    key: 'graderAgentSuggestModeEnabled',
+    label: 'Grader agent suggest mode',
+    description: 'Suggest-only batch runs, bulk approve/reject, and posting control for AI grades.',
+  },
+  {
+    key: 'graderAgentTextEntryGradingEnabled',
+    label: 'Grader agent text-entry grading',
+    description: 'Grade typed online text submissions without a file attachment.',
+  },
+  {
+    key: 'graderAgentVisionGradingEnabled',
+    label: 'Grader agent vision grading',
+    description: 'Grade image-only or scanned submissions using a vision-capable grader model.',
+  },
+  {
     key: 'codeExecutionEnabled',
     label: 'Code execution',
     description: 'Sandboxed code execution for quiz code questions and the grader agent Code Test Runner node.',

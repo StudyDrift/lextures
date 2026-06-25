@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useId, useRef } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { RubricDefinition } from '../../../lib/courses-api'
+import type { GraderAgentReviewQueueItem, RubricDefinition } from '../../../lib/courses-api'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
 import { SubmissionStudentPicker } from '../submission-navigator'
 import { InspectorPanel } from './inspector-panel'
@@ -9,8 +9,9 @@ import { NodePalette } from './node-palette'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { DryRunDock } from './dry-run-dock'
 import { RunAgentPopover } from './run-agent-popover'
-import { HeldReviewQueuePanel } from './held-review-queue-panel'
-import { ReviewQueuePanel } from './review-queue-panel'
+import { ReviewInboxPanel } from './review-inbox-panel'
+import { RunHistoryPanel } from './run-history-panel'
+import { useGraderAgentReviewQueue } from './use-grader-agent-review-queue'
 import { SaveWorkflowMenu } from './save-workflow-menu'
 import { useGraderAgentSubmissions } from './use-grader-agent-submissions'
 import {
@@ -53,7 +54,8 @@ export function GraderAgentWorkflowModal({
 }: GraderAgentWorkflowModalProps) {
   const { t } = useTranslation('common')
   const isTemplateMode = templateMode != null
-  const { codeExecutionEnabled } = usePlatformFeatures()
+  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled } =
+    usePlatformFeatures()
   const titleId = useId()
   const statusId = useId()
   const modalRef = useRef<HTMLDivElement>(null)
@@ -100,6 +102,8 @@ export function GraderAgentWorkflowModal({
     validationIssues,
     runScope,
     setRunScope,
+    runMode,
+    setRunMode,
     confirmOverwrite,
     setConfirmOverwrite,
     runProgress,
@@ -110,10 +114,74 @@ export function GraderAgentWorkflowModal({
     handleAccept,
     handleRun,
     handleToggleAutoGrade,
+    handleTogglePostPolicy,
+    handleSetConfidenceFloor,
     addPaletteNode,
     runResults,
     refreshRunResults,
   } = workflow
+
+  const reviewInbox = useGraderAgentReviewQueue({
+    enabled: open && !isTemplateMode && graderAgentReviewInboxEnabled === true,
+    courseCode,
+    itemId,
+  })
+
+  const submissionLabelById = Object.fromEntries(
+    submissions
+      .filter((submission) => submission.id)
+      .map((submission) => [
+        submission.id as string,
+        submission.submittedByDisplayName ??
+          submission.blindLabel ??
+          submission.id ??
+          'submission',
+      ]),
+  )
+
+  const liveReviewItems: GraderAgentReviewQueueItem[] = runResults
+    .filter((result) => result.id && (result.status === 'suggested' || result.status === 'flagged'))
+    .map((result) => ({
+      id: result.id as string,
+      submissionId: result.submissionId,
+      submissionLabel: submissionLabelById[result.submissionId],
+      status: result.status,
+      suggestedPoints: result.suggestedPoints,
+      comment: result.comment,
+      confidence: result.confidence,
+      flagReason: result.flagReason,
+      flagPriority: result.flagPriority,
+      heldReason: result.heldReason,
+      heldAt: result.heldAt,
+      heldQueue: result.heldQueue,
+    }))
+
+  const reviewHeld = graderAgentReviewInboxEnabled ? reviewInbox.held : liveReviewItems.filter((i) => i.status === 'suggested')
+  const reviewFlagged = graderAgentReviewInboxEnabled ? reviewInbox.flagged : liveReviewItems.filter((i) => i.status === 'flagged')
+  const showReviewInbox =
+    graderAgentReviewInboxEnabled ||
+    reviewHeld.length > 0 ||
+    reviewFlagged.length > 0
+
+  const handleReviewUpdated = () => {
+    if (graderAgentReviewInboxEnabled) {
+      void reviewInbox.refresh()
+    } else {
+      void refreshRunResults()
+    }
+    onApplied?.()
+  }
+
+  const handleOpenSubmission = (targetSubmissionId: string) => {
+    const idx = submissions.findIndex((submission) => submission.id === targetSubmissionId)
+    if (idx >= 0) setSubmissionIndex(idx)
+  }
+
+  useEffect(() => {
+    if (!batchRunning && graderAgentReviewInboxEnabled) {
+      void reviewInbox.refresh()
+    }
+  }, [batchRunning, graderAgentReviewInboxEnabled, reviewInbox.refresh])
 
   const accepted = config?.status === 'accepted'
   const validationMsg = primaryValidationMessage(validationIssues)
@@ -252,9 +320,16 @@ export function GraderAgentWorkflowModal({
               setConfirmOverwrite={setConfirmOverwrite}
               runProgress={runProgress}
               autoGradeNew={Boolean(config?.autoGradeNew)}
+              postPolicy={config?.postPolicy ?? 'draft'}
+              confidenceFloor={config?.confidenceFloor}
+              suggestModeEnabled={graderAgentSuggestModeEnabled === true}
+              runMode={runMode}
+              setRunMode={setRunMode}
               saving={saving}
               onDryRun={handleDryRun}
               onToggleAutoGrade={handleToggleAutoGrade}
+              onTogglePostPolicy={handleTogglePostPolicy}
+              onSetConfidenceFloor={handleSetConfidenceFloor}
               onRun={handleRun}
             />
           )}
@@ -324,6 +399,8 @@ export function GraderAgentWorkflowModal({
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <InspectorPanel
                 workflow={workflow}
+                config={config}
+                onSetConfidenceFloor={handleSetConfidenceFloor}
                 courseCode={courseCode}
                 itemId={itemId}
                 assignmentTitle={assignmentTitle}
@@ -331,40 +408,23 @@ export function GraderAgentWorkflowModal({
                 maxPoints={maxPoints}
                 selectedSubmission={selectedSubmission}
               />
-              {!isTemplateMode && runResults.length > 0 ? (
-                <div className="mt-4">
-                  <ReviewQueuePanel
-                    runResults={runResults}
-                    submissionLabelById={Object.fromEntries(
-                      submissions
-                        .filter((submission) => submission.id)
-                        .map((submission) => [
-                          submission.id as string,
-                          submission.submittedByDisplayName ??
-                            submission.blindLabel ??
-                            submission.id ??
-                            'submission',
-                        ]),
-                    )}
-                  />
-                  <HeldReviewQueuePanel
+              {!isTemplateMode && showReviewInbox ? (
+                <>
+                  <ReviewInboxPanel
                     courseCode={courseCode}
                     itemId={itemId}
-                    runResults={runResults}
-                    onUpdated={() => void refreshRunResults()}
-                    submissionLabelById={Object.fromEntries(
-                      submissions
-                        .filter((submission) => submission.id)
-                        .map((submission) => [
-                          submission.id as string,
-                          submission.submittedByDisplayName ??
-                            submission.blindLabel ??
-                            submission.id ??
-                            'submission',
-                        ]),
-                    )}
+                    held={reviewHeld}
+                    flagged={reviewFlagged}
+                    suggestModeEnabled={graderAgentSuggestModeEnabled === true}
+                    loading={graderAgentReviewInboxEnabled ? reviewInbox.loading : false}
+                    error={graderAgentReviewInboxEnabled ? reviewInbox.error : null}
+                    onUpdated={handleReviewUpdated}
+                    onOpenSubmission={handleOpenSubmission}
                   />
-                </div>
+                  {graderAgentReviewInboxEnabled ? (
+                    <RunHistoryPanel runs={reviewInbox.runs} loading={reviewInbox.loading} />
+                  ) : null}
+                </>
               ) : null}
             </div>
           </aside>

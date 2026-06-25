@@ -91,6 +91,60 @@ func (s *Service) RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, 
 	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, nil
 }
 
+// ScoreWithVision grades a submission from image/PDF pages using a vision-capable model.
+func (s *Service) ScoreWithVision(ctx context.Context, req ScoreRequest, imageDataURLs []string) (ScoreResult, error) {
+	if s.Client == nil {
+		return ScoreResult{}, fmt.Errorf("AI provider not configured")
+	}
+	model := strings.TrimSpace(req.ModelID)
+	if model == "" {
+		return ScoreResult{}, fmt.Errorf("grader agent model not configured")
+	}
+	if len(imageDataURLs) == 0 {
+		return ScoreResult{}, fmt.Errorf("no submission images available")
+	}
+	messages := BuildMessages(
+		req.InstructorPrompt,
+		req.IncludeAssignmentContent,
+		req.IncludeRubric,
+		req.AssignmentMarkdown,
+		req.Rubric,
+		"[Submission provided as attached image(s) or scanned document page(s). Read and grade the visual content.]",
+		req.MaxPoints,
+	)
+	systemPrompt := ""
+	userText := ""
+	if len(messages) >= 1 {
+		systemPrompt = messages[0].Content
+	}
+	if len(messages) >= 2 {
+		userText = messages[1].Content
+	}
+	chat, err := s.Client.VisionCompletionMulti(model, systemPrompt, userText, imageDataURLs, true)
+	if err != nil {
+		if strings.Contains(err.Error(), "response_format") || strings.Contains(err.Error(), "status 400") {
+			chat, err = s.Client.VisionCompletionMulti(model, systemPrompt, userText, imageDataURLs, false)
+		}
+		if err != nil {
+			return ScoreResult{}, err
+		}
+	}
+	if strings.TrimSpace(chat.Text) == "" {
+		return ScoreResult{}, fmt.Errorf("openrouter: empty model response")
+	}
+	out, err := ParseAndClampModelOutput(chat.Text, req.Rubric, req.MaxPoints)
+	if err != nil {
+		return ScoreResult{}, err
+	}
+	return ScoreResult{
+		Output:           out,
+		ModelID:          model,
+		PromptTokens:     chat.Usage.PromptTokens,
+		CompletionTokens: chat.Usage.CompletionTokens,
+		CostUSD:          chat.Usage.CostUSD,
+	}, nil
+}
+
 // Score runs the grading agent against one submission.
 func (s *Service) Score(ctx context.Context, req ScoreRequest) (ScoreResult, error) {
 	if s.Client == nil {

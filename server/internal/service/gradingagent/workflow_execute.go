@@ -67,6 +67,7 @@ type DryRunRunner interface {
 type DryRunExecutionInput struct {
 	Graph                  *WorkflowGraph
 	Submissions            []string
+	InputModality          InputModality
 	SubmissionID           uuid.UUID
 	IsLate                 bool
 	DefaultMarkdown        string
@@ -306,9 +307,13 @@ func ExecuteWorkflowDryRun(ctx context.Context, in DryRunExecutionInput) (DryRun
 		case NodeTypeStudentSubmission, NodeTypeSubmission:
 			text := JoinSubmissions(in.Submissions)
 			state.set(node.ID, HandleSubmission, slotValue{text: text})
+			modality := in.InputModality.ModalityLogLabel()
+			if modality == "unreadable" || modality == "" {
+				modality = "file"
+			}
 			emit(DryRunEvent{
 				Type: "log", Level: "info",
-				Message: fmt.Sprintf("[%s] Loaded %d submission(s) (%d characters).", label, len(in.Submissions), len(text)),
+				Message: fmt.Sprintf("[%s] Input modality: %s; loaded %d part(s) (%d characters).", label, modality, len(in.Submissions), len(text)),
 			})
 		case NodeTypeActivity, NodeTypeAssignmentCtx:
 			itemID := activityAssignmentItemID(node)

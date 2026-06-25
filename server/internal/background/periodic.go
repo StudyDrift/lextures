@@ -97,6 +97,9 @@ func StartWithStorage(ctx context.Context, pool *pgxpool.Pool, cfg config.Config
 			}
 		})
 	}
+	go runEvery(ctx, time.Minute, func() {
+		sweepStuckGradingRuns(context.Background(), pool)
+	})
 	go runEvery(ctx, time.Hour, func() {
 		n, err := SweepStalledTusUploads(context.Background(), pool, time.Now().UTC())
 		if err != nil {

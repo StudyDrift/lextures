@@ -5631,6 +5631,8 @@ export type ModuleAssignmentSubmissionApi = {
   attachmentContentPath?: string | null
   attachmentMimeType?: string | null
   attachmentFilename?: string | null
+  /** Typed online text-entry body (GA-M2). */
+  bodyText?: string | null
   /** Plan 3.13 */
   resubmissionRequested?: boolean
   revisionDueAt?: string | null
@@ -5838,6 +5840,8 @@ export type GraderAgentConfigApi = {
   includeRubric: boolean
   status: 'draft' | 'accepted' | 'archived'
   autoGradeNew?: boolean
+  postPolicy?: 'draft' | 'auto_post'
+  confidenceFloor?: number | null
   modelId?: string
   updatedAt?: string
   workflowGraph?: GraderWorkflowGraphApi
@@ -5889,6 +5893,44 @@ export type GraderAgentRunStatus = {
   }>
 }
 
+export type GraderAgentReviewQueueItem = {
+  id: string
+  submissionId: string
+  submissionLabel?: string
+  status: string
+  suggestedPoints?: number
+  comment?: string
+  confidence?: number
+  flagReason?: string
+  flagPriority?: string
+  heldReason?: string
+  heldAt?: string
+  heldQueue?: string
+  runId?: string
+  runCreatedAt?: string
+  createdAt?: string
+}
+
+export type GraderAgentReviewQueueResponse = {
+  held: GraderAgentReviewQueueItem[]
+  flagged: GraderAgentReviewQueueItem[]
+  totalCount: number
+}
+
+export type GraderAgentRunHistoryEntry = {
+  id: string
+  scope: 'current' | 'ungraded' | 'all' | 'auto'
+  status: string
+  totalCount: number
+  completedCount: number
+  failedCount: number
+  model?: string
+  costUsd?: number
+  initiatedBy?: string
+  createdAt: string
+  finishedAt?: string
+}
+
 export type CourseGradingAgentSummary = {
   id: string
   itemId: string
@@ -5898,6 +5940,7 @@ export type CourseGradingAgentSummary = {
   autoGradeNew: boolean
   hasWorkflowGraph: boolean
   updatedAt: string
+  reviewCount?: number
 }
 
 export async function fetchCourseGradingAgents(
@@ -5935,6 +5978,8 @@ export async function putGraderAgentConfig(
     includeRubric: boolean
     status: 'draft' | 'accepted' | 'archived'
     autoGradeNew?: boolean
+    postPolicy?: 'draft' | 'auto_post'
+    confidenceFloor?: number | null
     modelId?: string
     workflowGraph?: GraderWorkflowGraphApi
   },
@@ -6057,31 +6102,6 @@ export async function deleteGraderAgentTemplate(
   }
 }
 
-export async function postGraderAgentDryRun(
-  courseCode: string,
-  itemId: string,
-  body: {
-    prompt?: string
-    includeAssignmentContent?: boolean
-    includeRubric?: boolean
-    submissionId: string
-    modelId?: string
-    workflowGraph?: GraderWorkflowGraphApi
-  },
-): Promise<GraderAgentDryRunResult> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/dry-run`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    },
-  )
-  const raw = await parseJson(res)
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as GraderAgentDryRunResult
-}
-
 export type GraderAgentDryRunEvent = {
   type: 'log' | 'node_start' | 'node_complete' | 'result' | 'error' | 'complete'
   nodeId?: string
@@ -6182,16 +6202,27 @@ export async function streamGraderAgentDryRun(
   })
 }
 
+export type GraderAgentRunMode = 'suggest' | 'apply'
+
+export type GraderAgentBulkReviewAction = 'approve' | 'approve_all' | 'reject'
+
+export type GraderAgentBulkReviewOutcome = {
+  resultId: string
+  status: string
+  error?: string
+}
+
 export async function postGraderAgentRun(
   courseCode: string,
   itemId: string,
   body: {
     scope: 'current' | 'ungraded' | 'all'
+    mode?: GraderAgentRunMode
     submissionId?: string
     overwrite?: boolean
     authoredVia?: 'canvas' | 'form'
   },
-): Promise<{ runId: string; totalCount: number }> {
+): Promise<{ runId: string; totalCount: number; mode?: GraderAgentRunMode }> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs`,
     {
@@ -6202,7 +6233,37 @@ export async function postGraderAgentRun(
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw as { runId: string; totalCount: number }
+  return raw as { runId: string; totalCount: number; mode?: GraderAgentRunMode }
+}
+
+export async function postGraderAgentReviewBulk(
+  courseCode: string,
+  itemId: string,
+  body: {
+    action: GraderAgentBulkReviewAction
+    resultIds?: string[]
+    minConfidence?: number
+    items?: Array<{
+      resultId: string
+      pointsEarned?: number
+      comment?: string | null
+    }>
+  },
+): Promise<{ outcomes: GraderAgentBulkReviewOutcome[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/review/bulk`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const outcomes = Array.isArray((raw as { outcomes?: unknown }).outcomes)
+    ? ((raw as { outcomes: GraderAgentBulkReviewOutcome[] }).outcomes ?? [])
+    : []
+  return { outcomes }
 }
 
 export async function patchGraderAgentResult(
@@ -6235,6 +6296,38 @@ export async function fetchGraderAgentRun(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as GraderAgentRunStatus
+}
+
+export async function fetchGraderAgentRuns(
+  courseCode: string,
+  itemId: string,
+): Promise<{ runs: GraderAgentRunHistoryEntry[] }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/runs`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const runs = Array.isArray((raw as { runs?: unknown }).runs)
+    ? ((raw as { runs: GraderAgentRunHistoryEntry[] }).runs ?? [])
+    : []
+  return { runs }
+}
+
+export async function fetchGraderAgentReviewQueue(
+  courseCode: string,
+  itemId: string,
+): Promise<GraderAgentReviewQueueResponse> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent/review-queue`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const body = raw as GraderAgentReviewQueueResponse
+  return {
+    held: Array.isArray(body.held) ? body.held : [],
+    flagged: Array.isArray(body.flagged) ? body.flagged : [],
+    totalCount: typeof body.totalCount === 'number' ? body.totalCount : 0,
+  }
 }
 
 export async function postGraderAgentRegradeRequest(
@@ -6516,6 +6609,25 @@ export async function uploadModuleAssignmentSubmissionFile(
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/upload`,
     { method: 'POST', body: fd },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { submission: ModuleAssignmentSubmissionApi }
+}
+
+/** Submit typed text for an assignment that allows online text entry (GA-M2). */
+export async function submitModuleAssignmentText(
+  courseCode: string,
+  itemId: string,
+  text: string,
+): Promise<{ submission: ModuleAssignmentSubmissionApi }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/submissions/text`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    },
   )
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))

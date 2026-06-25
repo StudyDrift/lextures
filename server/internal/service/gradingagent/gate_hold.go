@@ -75,3 +75,33 @@ func EvaluateHoldDecision(mode HumanReviewGateMode, floor float64, grade *GradeO
 		return false, ""
 	}
 }
+
+// EvaluateAgentConfidenceFloorHold reports whether an agent-level confidence floor should hold a grade.
+// A nil or non-positive floor is a no-op (preserves legacy behavior).
+func EvaluateAgentConfidenceFloorHold(floor *float64, confidence float64) (wouldHold bool, reason string) {
+	if floor == nil || *floor <= 0 {
+		return false, ""
+	}
+	if confidence < *floor {
+		return true, fmt.Sprintf("Confidence %.2f < floor %.2f", confidence, *floor)
+	}
+	return false, ""
+}
+
+// ComposeHoldDecisions merges gate and agent-level hold outcomes; either hold wins with combined reasons.
+func ComposeHoldDecisions(hold1 bool, reason1 string, hold2 bool, reason2 string) (wouldHold bool, reason string) {
+	if !hold1 && !hold2 {
+		return false, ""
+	}
+	var parts []string
+	if hold1 && strings.TrimSpace(reason1) != "" {
+		parts = append(parts, strings.TrimSpace(reason1))
+	}
+	if hold2 && strings.TrimSpace(reason2) != "" {
+		parts = append(parts, strings.TrimSpace(reason2))
+	}
+	if len(parts) == 0 {
+		return true, "Held for human review"
+	}
+	return true, strings.Join(parts, "; ")
+}

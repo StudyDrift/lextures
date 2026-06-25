@@ -12,6 +12,7 @@ import {
   courseGradebookViewPermission,
   fetchCourseEnrollmentsList,
   fetchCourseGradingSettings,
+  fetchGraderAgentReviewQueue,
   fetchModuleAssignment,
   fetchModuleAssignmentSubmissions,
   fetchReaderMarkups,
@@ -159,7 +160,7 @@ export default function CourseModuleAssignmentPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
-  const { graderAgentEnabled } = usePlatformFeatures()
+  const { graderAgentEnabled, graderAgentReviewInboxEnabled } = usePlatformFeatures()
 
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -235,6 +236,7 @@ export default function CourseModuleAssignmentPage() {
   const [viewerCanRevealIdentities, setViewerCanRevealIdentities] = useState(false)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
   const [gradingAgentOpen, setGradingAgentOpen] = useState(false)
+  const [graderReviewCount, setGraderReviewCount] = useState(0)
   const [submissionCount, setSubmissionCount] = useState<number | null>(null)
   const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
 
@@ -409,6 +411,25 @@ export default function CourseModuleAssignmentPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!courseCode || !itemId || !graderAgentEnabled || !graderAgentReviewInboxEnabled || !canEdit) {
+      setGraderReviewCount(0)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const queue = await fetchGraderAgentReviewQueue(courseCode, itemId)
+        if (!cancelled) setGraderReviewCount(queue.totalCount)
+      } catch {
+        if (!cancelled) setGraderReviewCount(0)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [canEdit, courseCode, graderAgentEnabled, graderAgentReviewInboxEnabled, itemId, gradingAgentOpen])
 
   useCoursePageTitle(!loading && title ? title : null)
 
@@ -707,6 +728,7 @@ export default function CourseModuleAssignmentPage() {
                 onEdit={beginEdit}
                 showGradingAgent={graderAgentEnabled}
                 onGradingAgent={() => setGradingAgentOpen(true)}
+                reviewCount={graderAgentReviewInboxEnabled ? graderReviewCount : 0}
               />
             ) : null}
             {showPreviewSubmissionsAction ? (
@@ -987,6 +1009,13 @@ export default function CourseModuleAssignmentPage() {
       <GraderAgentWorkflowModal
         open={gradingAgentOpen}
         onClose={() => setGradingAgentOpen(false)}
+        onApplied={() => {
+          if (graderAgentReviewInboxEnabled && courseCode && itemId) {
+            void fetchGraderAgentReviewQueue(courseCode, itemId)
+              .then((queue) => setGraderReviewCount(queue.totalCount))
+              .catch(() => setGraderReviewCount(0))
+          }
+        }}
         courseCode={courseCode}
         itemId={itemId}
         assignmentTitle={title}

@@ -169,6 +169,15 @@ func (c *Client) ChatCompletion(model string, messages []Message, opts ...ChatOp
 
 // VisionCompletion sends a vision-capable chat request with one image URL.
 func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string) (ChatResult, error) {
+	urls := []string{imageURL}
+	if strings.TrimSpace(imageURL) == "" {
+		urls = nil
+	}
+	return c.VisionCompletionMulti(model, systemPrompt, userText, urls, false)
+}
+
+// VisionCompletionMulti sends a vision request with zero or more image/data URLs.
+func (c *Client) VisionCompletionMulti(model, systemPrompt, userText string, imageURLs []string, jsonMode bool) (ChatResult, error) {
 	if c == nil {
 		return ChatResult{}, fmt.Errorf("openrouter: nil client")
 	}
@@ -179,20 +188,23 @@ func (c *Client) VisionCompletion(model, systemPrompt, userText, imageURL string
 	if base == "" {
 		base = DefaultBaseURL
 	}
+	userParts := []ContentPart{{Type: "text", Text: userText}}
+	for _, imageURL := range imageURLs {
+		if u := strings.TrimSpace(imageURL); u != "" {
+			userParts = append(userParts, ContentPart{Type: "image_url", ImageURL: &ContentPartImage{URL: u}})
+		}
+	}
 	messages := []VisionMessage{
 		{Role: "system", Content: []ContentPart{{Type: "text", Text: systemPrompt}}},
-		{
-			Role: "user",
-			Content: []ContentPart{
-				{Type: "text", Text: userText},
-				{Type: "image_url", ImageURL: &ContentPartImage{URL: imageURL}},
-			},
-		},
+		{Role: "user", Content: userParts},
 	}
 	body := map[string]any{
 		"model":    model,
 		"messages": messages,
 		"stream":   false,
+	}
+	if jsonMode {
+		body["response_format"] = map[string]string{"type": "json_object"}
 	}
 	buf, err := json.Marshal(body)
 	if err != nil {

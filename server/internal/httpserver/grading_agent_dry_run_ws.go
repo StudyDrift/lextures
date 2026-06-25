@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -99,18 +100,25 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Submission not found."})
 			return
 		}
-		if subRow.AttachmentFileID == nil {
-			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "This submission has no readable text attachment."})
-			return
-		}
-
 		svc := d.gradingAgentService()
-		submissions, err := svc.LoadSubmissionMarkdownsForSubmission(r.Context(), courseCode, subRow)
+		content, err := svc.ResolveSubmissionContent(r.Context(), courseCode, subRow, gradingagentsvc.ResolveSubmissionContentOptions{
+			TextEntryEnabled: d.graderAgentTextEntryGradingEnabled(),
+			VisionEnabled:    d.graderAgentVisionGradingEnabled(),
+		})
 		if err != nil {
 			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: dryRunSubmissionLoadMessage(err)})
 			return
 		}
-		submissionText := gradingagentsvc.JoinSubmissions(submissions)
+		if content.FailureReason != "" {
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: content.FailureReason})
+			return
+		}
+		if content.Modality == gradingagentsvc.ModalityVision {
+			_ = wsWriteJSON(r.Context(), conn, gradingagentsvc.DryRunEvent{Type: "error", Message: "Dry run for vision submissions requires a workflow with extractable text or a simplified graph."})
+			return
+		}
+		submissions := content.Markdowns
+		submissionText := content.Text
 
 		compiled, compileErr := gradingagentsvc.CompileWorkflowGraph(first.WorkflowGraph, submissionText)
 		if compileErr != nil {
@@ -162,10 +170,15 @@ func (d Deps) handleGraderAgentDryRunWS() http.HandlerFunc {
 			_ = wsWriteJSON(runCtx, conn, ev)
 		}
 		emit(gradingagentsvc.DryRunEvent{Type: "log", Level: "info", Message: "Starting dry run…"})
+		emit(gradingagentsvc.DryRunEvent{
+			Type: "log", Level: "info",
+			Message: fmt.Sprintf("Submission input modality: %s.", content.Modality.ModalityLogLabel()),
+		})
 
 		preview, execErr := gradingagentsvc.ExecuteWorkflowDryRun(runCtx, gradingagentsvc.DryRunExecutionInput{
 			Graph:           first.WorkflowGraph,
 			Submissions:     submissions,
+			InputModality:   content.Modality,
 			SubmissionID:    submissionID,
 			CourseCode:      courseCode,
 			DefaultMarkdown: contentRow.Markdown,
