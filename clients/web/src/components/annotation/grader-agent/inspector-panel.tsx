@@ -71,18 +71,7 @@ export function InspectorPanel({
   const {
     graph,
     selectedNodeId,
-    updateGraderNode,
-    updateAiNode,
-    updateCriterionGraderNode,
-    updateActivityNode,
-    updateCodeTestRunnerNode,
-    updateConditionalRouterNode,
-    updateFlagForReviewNode,
-    updateHumanReviewGateNode,
-    updateScoreAggregatorNode,
-    updateOriginalityNode,
-    updateReferenceNode,
-    updateRubricNode,
+    updateNodeData,
     setLibraryRubricAvailability,
     removeNode,
     nodeDryRunDetails,
@@ -200,7 +189,7 @@ export function InspectorPanel({
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
             value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
-            onChange={(prompt) => updateGraderNode(node.id, { prompt })}
+            onChange={(prompt) => updateNodeData(node.id, { prompt })}
             graph={graph}
             promptNodeId={node.id}
             defaults={variableDefaults}
@@ -212,7 +201,7 @@ export function InspectorPanel({
           <span className="mb-1.5 block font-medium">{t('gradingAgent.model.label')}</span>
           <select
             value={modelId}
-            onChange={(e) => updateGraderNode(node.id, { modelId: e.target.value || null })}
+            onChange={(e) => updateNodeData(node.id, { modelId: e.target.value || null })}
             className={fieldClass}
           >
             <option value="">{t('gradingAgent.model.default')}</option>
@@ -253,7 +242,7 @@ export function InspectorPanel({
             filterPlaceholder={t('gradingAgent.canvas.inspector.activityAssignmentFilter')}
             emptyLabel={t('gradingAgent.canvas.inspector.activityAssignmentEmpty')}
             noMatchLabel={t('gradingAgent.canvas.inspector.activityAssignmentNoMatch')}
-            onChange={(assignmentId) => updateActivityNode(node.id, { assignmentItemId: assignmentId })}
+            onChange={(assignmentId) => updateNodeData(node.id, { assignmentItemId: assignmentId })}
           />
           <p className="mt-1.5 text-xs text-slate-500 dark:text-neutral-400">
             {t('gradingAgent.canvas.inspector.activityAssignmentHelp')}
@@ -294,7 +283,7 @@ export function InspectorPanel({
           <span className="mb-1.5 block font-medium">{t('gradingAgent.canvas.inspector.criterion')}</span>
           <select
             value={criterionId}
-            onChange={(e) => updateCriterionGraderNode(node.id, { criterionId: e.target.value || undefined })}
+            onChange={(e) => updateNodeData(node.id, { criterionId: e.target.value || undefined })}
             className={fieldClass}
             disabled={criteria.length === 0}
             aria-label={t('gradingAgent.canvas.inspector.criterion')}
@@ -332,7 +321,7 @@ export function InspectorPanel({
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
             value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
-            onChange={(prompt) => updateCriterionGraderNode(node.id, { prompt })}
+            onChange={(prompt) => updateNodeData(node.id, { prompt })}
             graph={graph}
             promptNodeId={node.id}
             defaults={variableDefaults}
@@ -344,7 +333,7 @@ export function InspectorPanel({
           <span className="mb-1.5 block font-medium">{t('gradingAgent.model.label')}</span>
           <select
             value={modelId}
-            onChange={(e) => updateCriterionGraderNode(node.id, { modelId: e.target.value || null })}
+            onChange={(e) => updateNodeData(node.id, { modelId: e.target.value || null })}
             className={fieldClass}
           >
             <option value="">{t('gradingAgent.model.default')}</option>
@@ -382,7 +371,7 @@ export function InspectorPanel({
           <span className="mb-1.5 block font-medium">{t('gradingAgent.prompt.label')}</span>
           <WorkflowPromptEditor
             value={typeof node.data.prompt === 'string' ? node.data.prompt : ''}
-            onChange={(prompt) => updateAiNode(node.id, { prompt })}
+            onChange={(prompt) => updateNodeData(node.id, { prompt })}
             graph={graph}
             promptNodeId={node.id}
             defaults={variableDefaults}
@@ -425,7 +414,7 @@ export function InspectorPanel({
         data={node.data}
         maxPoints={maxPoints}
         title={nodeTitle('gradingAgent.canvas.nodes.codeTests.title')}
-        onChange={(patch) => updateCodeTestRunnerNode(node.id, patch)}
+        onChange={(patch) => updateNodeData(node.id, patch)}
         onDelete={() => removeNode(node.id)}
       />
     )
@@ -438,7 +427,7 @@ export function InspectorPanel({
         graph={graph}
         data={node.data}
         title={nodeTitle('gradingAgent.canvas.nodes.router.title')}
-        onChange={(patch) => updateConditionalRouterNode(node.id, patch)}
+        onChange={(patch) => updateNodeData(node.id, patch)}
         onDelete={() => removeNode(node.id)}
       />
     )
@@ -453,7 +442,7 @@ export function InspectorPanel({
         <ReferenceInspector
           courseCode={courseCode}
           data={node.data}
-          onChange={(patch) => updateReferenceNode(node.id, patch)}
+          onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
         />
@@ -473,7 +462,7 @@ export function InspectorPanel({
           assignmentHasRubric={Boolean(rubric?.criteria?.length)}
           maxPoints={maxPoints}
           data={node.data}
-          onChange={(patch) => updateRubricNode(node.id, patch)}
+          onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           onLibraryRubricResolved={setLibraryRubricAvailability}
           fieldClass={fieldClass}
@@ -491,7 +480,7 @@ export function InspectorPanel({
         <OriginalityInspector
           data={node.data}
           aiLikelihoodAllowed={ffPlagiarismChecks}
-          onChange={(patch) => updateOriginalityNode(node.id, patch)}
+          onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
         />
@@ -509,7 +498,7 @@ export function InspectorPanel({
           nodeId={node.id}
           graph={graph}
           data={node.data}
-          onChange={(patch) => updateScoreAggregatorNode(node.id, patch)}
+          onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
         />
@@ -525,7 +514,7 @@ export function InspectorPanel({
         </p>
         <HumanReviewGateInspector
           data={node.data}
-          onChange={(patch) => updateHumanReviewGateNode(node.id, patch)}
+          onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
         />
@@ -544,7 +533,7 @@ export function InspectorPanel({
           data={node.data}
           graph={graph}
           defaults={variableDefaults}
-          onChange={(patch) => updateFlagForReviewNode(node.id, patch)}
+          onChange={(patch) => updateNodeData(node.id, patch)}
           onDelete={() => removeNode(node.id)}
           fieldClass={fieldClass}
         />

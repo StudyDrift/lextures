@@ -29,20 +29,7 @@ import {
   type RunAgentFilterState,
 } from './run-agent-filter-picker'
 import { isWorkflowRunnable, validateWorkflowGraph } from './validation'
-import type {
-  CodeTestRunnerNodeData,
-  ConditionalRouterNodeData,
-  CriterionGraderNodeData,
-  FlagForReviewNodeData,
-  HumanReviewGateNodeData,
-  OriginalityNodeData,
-  ReferenceNodeData,
-  RubricNodeData,
-  ScoreAggregatorNodeData,
-  GraderWorkflowGraph,
-  PaletteNodeType,
-  WorkflowValidationIssue,
-} from './types'
+import type { GraderWorkflowGraph, PaletteNodeType, WorkflowValidationIssue } from './types'
 import {
   defaultCodeTestRunnerNodeData,
   defaultConditionalRouterNodeData,
@@ -472,44 +459,17 @@ export function useGraderAgentWorkflow({
     setGraph(next)
   }, [])
 
-  const updateGraderNode = useCallback(
-    (nodeId: string, patch: { prompt?: string; modelId?: string | null }) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
+  const updateNodeData = useCallback(<T extends object>(nodeId: string, patch: Partial<T>) => {
+    setGraph((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        nodes: prev.nodes.map((n) =>
           n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
         ),
-      })
-    },
-    [graph],
-  )
-
-  const updateAiNode = useCallback(
-    (nodeId: string, patch: { prompt?: string }) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateCriterionGraderNode = useCallback(
-    (nodeId: string, patch: Partial<CriterionGraderNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
+      }
+    })
+  }, [])
 
   const addPaletteNode = useCallback(
     (type: PaletteNodeType, position?: { x: number; y: number }) => {
@@ -605,110 +565,6 @@ export function useGraderAgentWorkflow({
     [graph, itemId],
   )
 
-  const updateCodeTestRunnerNode = useCallback(
-    (nodeId: string, patch: Partial<CodeTestRunnerNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateConditionalRouterNode = useCallback(
-    (nodeId: string, patch: Partial<ConditionalRouterNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateFlagForReviewNode = useCallback(
-    (nodeId: string, patch: Partial<FlagForReviewNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateOriginalityNode = useCallback(
-    (nodeId: string, patch: Partial<OriginalityNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateReferenceNode = useCallback(
-    (nodeId: string, patch: Partial<ReferenceNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateRubricNode = useCallback(
-    (nodeId: string, patch: Partial<RubricNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateHumanReviewGateNode = useCallback(
-    (nodeId: string, patch: Partial<HumanReviewGateNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateScoreAggregatorNode = useCallback(
-    (nodeId: string, patch: Partial<ScoreAggregatorNodeData>) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
   const refreshRunResults = useCallback(async () => {
     if (!runId) return
     const run = await fetchGraderAgentRun(courseCode, itemId, runId)
@@ -721,55 +577,40 @@ export function useGraderAgentWorkflow({
     onApplied?.()
   }, [courseCode, itemId, onApplied, runId])
 
-  const updateActivityNode = useCallback(
-    (nodeId: string, patch: { assignmentItemId?: string | null }) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
-          n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n,
-        ),
-      })
-    },
-    [graph],
-  )
-
-  const updateNodeLabel = useCallback(
-    (nodeId: string, label: string | null) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.map((n) =>
+  const updateNodeLabel = useCallback((nodeId: string, label: string | null) => {
+    setGraph((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        nodes: prev.nodes.map((n) =>
           n.id === nodeId ? { ...n, data: patchWorkflowNodeLabel(n.data, label) } : n,
         ),
-      })
-    },
-    [graph],
-  )
+      }
+    })
+  }, [])
 
-  const removeNode = useCallback(
-    (nodeId: string) => {
-      if (!graph || nodeId === 'output') return
-      setGraph({
-        ...graph,
-        nodes: graph.nodes.filter((n) => n.id !== nodeId),
-        edges: graph.edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
-      })
-      if (selectedNodeId === nodeId) setSelectedNodeId(null)
-    },
-    [graph, selectedNodeId],
-  )
+  const removeNode = useCallback((nodeId: string) => {
+    if (nodeId === 'output') return
+    setGraph((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        nodes: prev.nodes.filter((n) => n.id !== nodeId),
+        edges: prev.edges.filter((e) => e.source !== nodeId && e.target !== nodeId),
+      }
+    })
+    setSelectedNodeId((current) => (current === nodeId ? null : current))
+  }, [])
 
-  const removeEdge = useCallback(
-    (edgeId: string) => {
-      if (!graph) return
-      setGraph({
-        ...graph,
-        edges: graph.edges.filter((e) => e.id !== edgeId),
-      })
-    },
-    [graph],
-  )
+  const removeEdge = useCallback((edgeId: string) => {
+    setGraph((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        edges: prev.edges.filter((e) => e.id !== edgeId),
+      }
+    })
+  }, [])
 
   const resetDryRunVisualState = useCallback(() => {
     setNodeExecutionStates({})
@@ -1120,18 +961,7 @@ export function useGraderAgentWorkflow({
     validationIssues,
     runnable,
     updateGraph,
-    updateGraderNode,
-    updateAiNode,
-    updateCriterionGraderNode,
-    updateActivityNode,
-    updateCodeTestRunnerNode,
-    updateConditionalRouterNode,
-    updateFlagForReviewNode,
-    updateHumanReviewGateNode,
-    updateScoreAggregatorNode,
-    updateOriginalityNode,
-    updateReferenceNode,
-    updateRubricNode,
+    updateNodeData,
     setLibraryRubricAvailability,
     refreshRunResults,
     updateNodeLabel,
