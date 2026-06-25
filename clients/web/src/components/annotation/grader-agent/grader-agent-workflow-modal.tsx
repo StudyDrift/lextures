@@ -112,7 +112,6 @@ export function GraderAgentWorkflowModal({
     runCostEstimateLoading,
     budgetUsd,
     setBudgetUsd,
-    graderAgentCostEstimateEnabled,
     runProgress,
     statusMessage,
     handleDryRun,

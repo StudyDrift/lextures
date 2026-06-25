@@ -276,7 +276,6 @@ export function RunAgentPopover({
             </p>
           </fieldset>
         ) : null}
-        ) : null}
         {costEstimateEnabled ? (
           <div id={costEstimateId} className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-black/5 dark:bg-neutral-800/60 dark:text-neutral-300 dark:ring-white/10">
             {runCostEstimateLoading ? (
