@@ -3,8 +3,12 @@ import { Check, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { Button } from '../../ui/button'
-import type { GraderAgentRunMode } from '../../../lib/courses-api'
+import type { GraderAgentRunMode, ModuleAssignmentSubmissionApi } from '../../../lib/courses-api'
 import { AgentConfidenceFloorSettings } from './agent-confidence-floor-settings'
+import {
+  RunAgentFilterPicker,
+  type RunAgentFilterState,
+} from './run-agent-filter-picker'
 import type { RunScope } from './use-grader-agent-workflow'
 
 const RUN_SCOPES = ['current', 'ungraded', 'all'] as const satisfies readonly RunScope[]
@@ -43,6 +47,13 @@ type RunAgentPopoverProps = {
   onTogglePostPolicy: (autoPost: boolean) => void
   onSetConfidenceFloor: (floor: number | null) => void | Promise<void>
   onRun: () => void | Promise<void>
+  runFiltersEnabled?: boolean
+  courseCode?: string
+  itemId?: string
+  currentSubmissionId?: string | null
+  submissions?: ModuleAssignmentSubmissionApi[]
+  filterState?: RunAgentFilterState
+  setFilterState?: (next: RunAgentFilterState | ((prev: RunAgentFilterState) => RunAgentFilterState)) => void
 }
 
 export function RunAgentPopover({
@@ -69,6 +80,13 @@ export function RunAgentPopover({
   onTogglePostPolicy,
   onSetConfidenceFloor,
   onRun,
+  runFiltersEnabled = false,
+  courseCode = '',
+  itemId = '',
+  currentSubmissionId = null,
+  submissions = [],
+  filterState,
+  setFilterState,
 }: RunAgentPopoverProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -177,6 +195,19 @@ export function RunAgentPopover({
             })}
           </div>
         </fieldset>
+        {runFiltersEnabled && filterState && setFilterState ? (
+          <RunAgentFilterPicker
+            enabled={runFiltersEnabled}
+            courseCode={courseCode}
+            itemId={itemId}
+            runScope={runScope}
+            confirmOverwrite={confirmOverwrite}
+            filterState={filterState}
+            setFilterState={setFilterState}
+            submissions={submissions}
+            currentSubmissionId={currentSubmissionId}
+          />
+        ) : null}
         {suggestModeEnabled ? (
           <fieldset className="mt-3">
             <legend className="mb-2 text-xs font-medium text-slate-500 dark:text-neutral-400">

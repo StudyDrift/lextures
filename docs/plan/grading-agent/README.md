@@ -31,7 +31,7 @@
 | GA-M2 | [Grade non-file (online text-entry) & image/scanned submissions](../../completed/grading-agent/missing-2-non-file-submission-grading.md) | BLOCKER | **COMPLETE** — Text-entry body grading, vision path for scanned/image submissions, per-submission failure reasons. |
 | GA-M3 | [Suggest-only batch + bulk review/apply + posting control](../../completed/grading-agent/missing-3-suggest-only-batch-and-bulk-review.md) | MAJOR | **COMPLETE** — Suggest-only runs, bulk approve/reject, and posting control. |
 | GA-M4 | [Agent-level confidence auto-hold threshold](../../completed/grading-agent/missing-4-confidence-auto-hold-threshold.md) | MAJOR | **COMPLETE** — Per-agent confidence floor wired end-to-end; composes with Human Review Gate. |
-| GA-M5 | [Section / group / student-scoped runs](missing-5-section-scoped-runs.md) | MAJOR | Scope is only current/ungraded/all — a TA cannot grade just their section. |
+| GA-M5 | [Section / group / student-scoped runs](../../completed/grading-agent/missing-5-section-scoped-runs.md) | MAJOR | **COMPLETE** — Section, group, and explicit submission filters on batch runs with server-side visibility enforcement. |
 | GA-M6 | [Cancel / stop a running batch](missing-6-cancel-running-batch.md) | MAJOR | Once a batch starts it cannot be stopped; a mistake burns the whole class of AI calls. |
 | GA-M7 | [Pre-run cost & scope estimate + run cost summary](missing-7-cost-estimate-and-budget.md) | MAJOR | No cost/size preview before running and no aggregate cost after; instructors fear runaway spend. |
 

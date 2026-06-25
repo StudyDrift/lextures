@@ -43,6 +43,10 @@ func (d Deps) graderAgentVisionGradingEnabled() bool {
 	return d.effectiveConfig().GraderAgentVisionGradingEnabled
 }
 
+func (d Deps) graderAgentRunFiltersEnabled() bool {
+	return d.effectiveConfig().GraderAgentRunFiltersEnabled
+}
+
 func (d Deps) requireGraderAgentReviewInboxAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {
 	if !d.graderAgentReviewInboxEnabled() {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent review inbox is not enabled.")
@@ -421,11 +425,12 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 }
 
 type postGraderAgentRunBody struct {
-	Scope        string  `json:"scope"`
-	Mode         string  `json:"mode"`
-	SubmissionID string  `json:"submissionId"`
-	Overwrite    bool    `json:"overwrite"`
-	AuthoredVia  *string `json:"authoredVia"`
+	Scope        string                     `json:"scope"`
+	Mode         string                     `json:"mode"`
+	SubmissionID string                     `json:"submissionId"`
+	Overwrite    bool                       `json:"overwrite"`
+	AuthoredVia  *string                    `json:"authoredVia"`
+	Filter       *graderAgentRunFilterBody  `json:"filter"`
 }
 
 func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
@@ -459,7 +464,27 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 			return
 		}
 		scope := gradingagentrepo.RunScope(strings.ToLower(strings.TrimSpace(body.Scope)))
-		submissions, runScope, err := d.resolveGraderAgentSubmissions(r.Context(), *cid, itemID, scope, body.SubmissionID, body.Overwrite, d.graderAgentTextEntryGradingEnabled())
+		var runFilter *gradingagentrepo.RunFilter
+		var filterMeta *graderAgentRunFilterContext
+		if d.graderAgentRunFiltersEnabled() && body.Filter != nil {
+			parsed, parseErr := parseGraderAgentRunFilterBody(body.Filter)
+			if parseErr != nil {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, parseErr.Error())
+				return
+			}
+			if parsed != nil && !parsed.IsEmpty() {
+				meta, valErr := d.validateGraderAgentRunFilter(r.Context(), *cid, itemID, courseCode, viewer, parsed)
+				if valErr != nil {
+					apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, valErr.Error())
+					return
+				}
+				runFilter = parsed
+				filterMeta = meta
+			}
+		}
+		submissions, runScope, err := d.resolveGraderAgentSubmissions(
+			r.Context(), courseCode, *cid, itemID, viewer, scope, body.SubmissionID, body.Overwrite, runFilter, d.graderAgentTextEntryGradingEnabled(),
+		)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return
@@ -468,6 +493,8 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "No gradable submissions matched this scope.")
 			return
 		}
+		targetSummary := formatGraderAgentRunTargetSummary(runScope, filterMeta, len(submissions))
+		filterJSON, _ := runFilter.ToJSON()
 		initiatedBy := viewer
 		var authoredVia *string
 		if body.AuthoredVia != nil {
@@ -485,7 +512,7 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 				runMode = gradingagentrepo.RunModeSuggest
 			}
 		}
-		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, runMode, &initiatedBy, authoredVia, len(submissions))
+		run, err := gradingagentrepo.CreateRun(r.Context(), d.Pool, cfg.ID, runScope, runMode, &initiatedBy, authoredVia, len(submissions), filterJSON)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to start run.")
 			return
@@ -513,22 +540,34 @@ func (d Deps) handlePostGraderAgentRun() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusAccepted)
 		_ = json.NewEncoder(w).Encode(map[string]any{
-			"runId":       run.ID.String(),
-			"totalCount":  run.TotalCount,
-			"queuedCount": queued,
-			"mode":        string(run.Mode),
+			"runId":         run.ID.String(),
+			"totalCount":    run.TotalCount,
+			"queuedCount":   queued,
+			"mode":          string(run.Mode),
+			"targetSummary": targetSummary,
 		})
 	}
 }
 
 func (d Deps) resolveGraderAgentSubmissions(
 	ctx context.Context,
+	courseCode string,
 	courseID, itemID uuid.UUID,
+	viewer uuid.UUID,
 	scope gradingagentrepo.RunScope,
 	submissionID string,
 	overwrite bool,
+	runFilter *gradingagentrepo.RunFilter,
 	textEntryEnabled bool,
 ) ([]moduleassignmentsubmissions.SubmissionRow, gradingagentrepo.RunScope, error) {
+	listFilter := graderAgentListFilterFromRunFilter(runFilter)
+	visibleSections, err := d.graderAgentVisibleSectionIDs(ctx, courseID, courseCode, viewer)
+	if err != nil {
+		return nil, scope, err
+	}
+	if len(visibleSections) > 0 {
+		listFilter.VisibleSectionIDs = visibleSections
+	}
 	switch scope {
 	case gradingagentrepo.RunScopeCurrent:
 		sid, err := uuid.Parse(strings.TrimSpace(submissionID))
@@ -542,15 +581,31 @@ func (d Deps) resolveGraderAgentSubmissions(
 		if !gradingagentsvc.SubmissionAttemptableForAgent(*sub, textEntryEnabled) {
 			return nil, scope, errInvalidScope("submission has no gradable content")
 		}
+		if len(visibleSections) > 0 {
+			rows, listErr := moduleassignmentsubmissions.ListForAssignmentFiltered(
+				ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterAll,
+				moduleassignmentsubmissions.ListFilter{
+					SubmissionIDs:     []uuid.UUID{sid},
+					VisibleSectionIDs: visibleSections,
+				},
+			)
+			if listErr != nil || len(rows) == 0 {
+				return nil, scope, errInvalidScope("submission not found")
+			}
+		}
 		return []moduleassignmentsubmissions.SubmissionRow{*sub}, scope, nil
 	case gradingagentrepo.RunScopeUngraded:
-		rows, err := moduleassignmentsubmissions.ListForAssignment(ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterUngraded)
+		rows, err := moduleassignmentsubmissions.ListForAssignmentFiltered(
+			ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterUngraded, listFilter,
+		)
 		return gradableSubmissionsForAgent(rows, textEntryEnabled), scope, err
 	case gradingagentrepo.RunScopeAll:
 		if !overwrite {
 			return nil, scope, errInvalidScope("overwrite confirmation required for all scope")
 		}
-		rows, err := moduleassignmentsubmissions.ListForAssignment(ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterAll)
+		rows, err := moduleassignmentsubmissions.ListForAssignmentFiltered(
+			ctx, d.Pool, courseID, itemID, moduleassignmentsubmissions.GradedFilterAll, listFilter,
+		)
 		return gradableSubmissionsForAgent(rows, textEntryEnabled), scope, err
 	default:
 		return nil, scope, errInvalidScope("invalid scope")
@@ -870,6 +925,9 @@ func (d Deps) handleListGraderAgentRuns() http.HandlerFunc {
 			}
 			if run.CostUSD != nil {
 				entry["costUsd"] = *run.CostUSD
+			}
+			if filterJSON := runFilterToJSONFromBytes(run.Filter); filterJSON != nil {
+				entry["filter"] = filterJSON
 			}
 			runJSON = append(runJSON, entry)
 		}
