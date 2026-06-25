@@ -44,9 +44,9 @@ func sampleGraphWithCodeTestRunner() WorkflowGraph {
 	}
 }
 
-func TestExecuteWorkflowDryRun_codeTestRunner(t *testing.T) {
+func TestExecuteWorkflow_codeTestRunner(t *testing.T) {
 	g := sampleGraphWithCodeTestRunner()
-	preview, err := ExecuteWorkflowDryRun(context.Background(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(context.Background(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{"print(4)"},
 		MaxPoints:   10,
@@ -54,7 +54,7 @@ func TestExecuteWorkflowDryRun_codeTestRunner(t *testing.T) {
 			{TestCaseID: "t1", Passed: true, Status: codeexecution.StatusPass, ExpectedOutput: "4", ActualOutput: "4"},
 			{TestCaseID: "t2", Passed: false, Status: codeexecution.StatusFail, ExpectedOutput: "4", ActualOutput: "2"},
 		}}},
-		Emit: func(DryRunEvent) {},
+		Emit: func(ExecutionEvent) {},
 	})
 	if err != nil {
 		t.Fatal(err)

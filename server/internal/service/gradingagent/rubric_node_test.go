@@ -54,17 +54,17 @@ func TestValidateWorkflowGraph_requiresInlineRubricCriteria(t *testing.T) {
 	}
 }
 
-func TestExecuteWorkflowDryRun_inlineRubricInAIInput(t *testing.T) {
+func TestExecuteWorkflow_inlineRubricInAIInput(t *testing.T) {
 	g := sampleGraphWithRubricAI()
 	criterionID := uuid.MustParse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 	var compiledSystemPrompt string
-	_, err := ExecuteWorkflowDryRun(t.Context(), DryRunExecutionInput{
+	_, err := ExecuteWorkflow(t.Context(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{"Student essay"},
 		MaxPoints:   100,
 		ModelID:     "test/model",
 		Runner:      stubDryRunRunner{},
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			if ev.Type == "node_complete" && ev.NodeID == "ai1" {
 				compiledSystemPrompt = ev.CompiledSystemPrompt
 			}
@@ -92,7 +92,7 @@ func TestLoadRubricDefinition_inlineMode(t *testing.T) {
 			},
 		},
 	}
-	in := DryRunExecutionInput{}
+	in := ExecutionInput{}
 	rubric, err := in.LoadRubricDefinition(node)
 	if err != nil {
 		t.Fatal(err)
@@ -123,7 +123,7 @@ func TestResolveActivity_libraryRubricMode(t *testing.T) {
 			"rubricAssignmentItemId": libraryID.String(),
 		},
 	}
-	in := DryRunExecutionInput{
+	in := ExecutionInput{
 		ResolveActivity: func(itemID string) (string, *assignmentrubric.RubricDefinition, error) {
 			if itemID != libraryID.String() {
 				t.Fatalf("itemID = %q", itemID)
