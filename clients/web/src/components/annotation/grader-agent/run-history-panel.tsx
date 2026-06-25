@@ -39,7 +39,7 @@ export function RunHistoryPanel({ runs, loading = false }: RunHistoryPanelProps)
                 {t(`gradingAgent.review.history.scope.${run.scope}`, { defaultValue: run.scope })}
               </span>
               <span className="text-xs uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-                {run.status}
+                {t(`gradingAgent.review.history.status.${run.status}`, { defaultValue: run.status })}
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-600 dark:text-neutral-400">

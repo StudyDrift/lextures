@@ -95,6 +95,9 @@ export function GraderAgentWorkflowModal({
     dryRunLogs,
     dryRunConsoleOpen,
     batchRunning,
+    cancellingRun,
+    cancelRunEnabled,
+    handleCancelRun,
     hadDryRun,
     saving,
     syncingSubmissionIds,
@@ -320,6 +323,9 @@ export function GraderAgentWorkflowModal({
               dryRunTooltip={dryRunTooltip}
               dryRunning={dryRunning}
               batchRunning={batchRunning}
+              cancelRunEnabled={cancelRunEnabled}
+              cancellingRun={cancellingRun}
+              onCancelRun={handleCancelRun}
               runScope={runScope}
               setRunScope={setRunScope}
               confirmOverwrite={confirmOverwrite}
@@ -460,6 +466,9 @@ export function GraderAgentWorkflowModal({
               logs={dryRunLogs}
               running={dryRunning || batchRunning}
               batchRunning={batchRunning}
+              cancelRunEnabled={cancelRunEnabled}
+              cancellingRun={cancellingRun}
+              onCancelRun={handleCancelRun}
               runProgress={runProgress}
             />
           </footer>

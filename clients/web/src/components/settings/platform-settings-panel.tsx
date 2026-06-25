@@ -59,6 +59,7 @@ function emptyForm(): PlatformSettingsPayload {
     graderAgentVisionGradingEnabled: false,
     graderAgentRunFiltersEnabled: false,
     graderAgentCostEstimateEnabled: false,
+    graderAgentCancelRunEnabled: false,
     codeExecutionEnabled: false,
     speechToTextEnabled: false,
     accommodationsEngineEnabled: false,

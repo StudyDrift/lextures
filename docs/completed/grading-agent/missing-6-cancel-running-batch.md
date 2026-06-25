@@ -10,7 +10,7 @@
 | **Section** | Grading Agent — Missing Features |
 | **Severity** | MAJOR |
 | **Markets** | HE / K12 / SL |
-| **Status (today)** | MISSING |
+| **Status (today)** | DONE |
 | **Estimated effort** | S (1w) |
 | **Owner (proposed)** | Assessment / Grading squad |
 | **Depends on** | [GA-M1](../../completed/grading-agent/missing-1-persistent-review-queue.md) |

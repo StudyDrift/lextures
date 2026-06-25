@@ -51,6 +51,10 @@ func (d Deps) graderAgentCostEstimateEnabled() bool {
 	return d.effectiveConfig().GraderAgentCostEstimateEnabled
 }
 
+func (d Deps) graderAgentCancelRunEnabled() bool {
+	return d.effectiveConfig().GraderAgentCancelRunEnabled
+}
+
 func (d Deps) requireGraderAgentReviewInboxAccess(w http.ResponseWriter, r *http.Request) (courseCode string, viewer uuid.UUID, ok bool) {
 	if !d.graderAgentReviewInboxEnabled() {
 		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent review inbox is not enabled.")
@@ -786,8 +790,65 @@ func (d Deps) handleGetGraderAgentRun() http.HandlerFunc {
 		for k, v := range runUsageToJSON(usage) {
 			resp[k] = v
 		}
+		if run.CancelledAt != nil {
+			resp["cancelledAt"] = run.CancelledAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+		}
+		if run.CancelledBy != nil {
+			resp["cancelledBy"] = run.CancelledBy.String()
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(resp)
+	}
+}
+
+func (d Deps) handlePostGraderAgentCancelRun() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !d.graderAgentCancelRunEnabled() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent run cancel is not enabled.")
+			return
+		}
+		_, viewer, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
+			return
+		}
+		runID, err := uuid.Parse(chi.URLParam(r, "run_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid run id.")
+			return
+		}
+		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
+		if err != nil || cfg == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent not found.")
+			return
+		}
+		run, err := gradingagentrepo.GetRun(r.Context(), d.Pool, runID)
+		if err != nil || run == nil || run.ConfigID != cfg.ID {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Run not found.")
+			return
+		}
+		switch run.Status {
+		case gradingagentrepo.RunStatusQueued, gradingagentrepo.RunStatusRunning:
+		default:
+			apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Run cannot be cancelled.")
+			return
+		}
+		cancelled, err := gradingagentrepo.CancelRun(r.Context(), d.Pool, runID, viewer)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to cancel run.")
+			return
+		}
+		if !cancelled {
+			apierr.WriteJSON(w, http.StatusConflict, apierr.CodeConflict, "Run cannot be cancelled.")
+			return
+		}
+		gradingAgentRunStatusCacheInvalidate(runID)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"status": gradingagentrepo.RunStatusCancelled})
 	}
 }
 
@@ -939,6 +1000,12 @@ func (d Deps) handleListGraderAgentRuns() http.HandlerFunc {
 			}
 			if run.FinishedAt != nil {
 				entry["finishedAt"] = run.FinishedAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+			}
+			if run.CancelledAt != nil {
+				entry["cancelledAt"] = run.CancelledAt.UTC().Format("2006-01-02T15:04:05.000000Z")
+			}
+			if run.CancelledBy != nil {
+				entry["cancelledBy"] = run.CancelledBy.String()
 			}
 			if run.ModelID != nil {
 				entry["model"] = *run.ModelID

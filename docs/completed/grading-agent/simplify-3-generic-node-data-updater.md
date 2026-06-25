@@ -1,6 +1,6 @@
 # GA-S3 — Collapse the duplicated per-node update callbacks
 
-> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](README.md).
+> Implementation plan. Source: grading-agent audit (2026-06-24). See [README](../../plan/grading-agent/README.md).
 
 ## Metadata
 
@@ -10,11 +10,18 @@
 | **Section** | Grading Agent — Over-complexity / Simplification |
 | **Severity** | MINOR |
 | **Markets** | internal maintainability |
-| **Status (today)** | THIN |
+| **Status (today)** | COMPLETE |
 | **Estimated effort** | XS (≤1d) |
 | **Owner (proposed)** | Web / Grading squad |
 | **Depends on** | — |
 | **Unblocks** | faster node-config work |
+
+## Implementation summary (2026-06-25)
+
+- **Generic updater** — `updateNodeData<T>(nodeId, patch)` in `use-grader-agent-workflow.ts` uses `setGraph(prev => …)` with stable empty-deps `useCallback`.
+- **Removed duplication** — twelve per-node `updateXNode` callbacks deleted; `inspector-panel.tsx` calls `updateNodeData` directly.
+- **Functional graph helpers** — `updateNodeLabel`, `removeNode`, and `removeEdge` also use functional updates (including clearing selection on node removal).
+- **Tests** — `use-grader-agent-workflow-graph-mutations.test.ts` covers patch merge, node removal, and edge removal; existing inspector tests updated.
 
 ## 1. Problem Statement
 
@@ -91,7 +98,7 @@ duplication and a steady tax on adding nodes.
 
 ## 13. Dependencies & Sequencing
 
-- Independent; low risk. Good warm-up before [GA-S4](simplify-4-legacy-node-type-aliases.md).
+- Independent; low risk. Good warm-up before [GA-S4](../../plan/grading-agent/simplify-4-legacy-node-type-aliases.md).
 
 ## 14. Risks & Mitigations
 
@@ -117,8 +124,9 @@ duplication and a steady tax on adding nodes.
 ## 18. Open Questions
 
 1. Keep typed wrappers for every node or only those whose inspectors want a narrowed signature?
+   - **Resolved:** no per-node wrappers; inspectors call `updateNodeData` directly.
 
 ## 19. References
 
 - `clients/web/src/components/annotation/grader-agent/use-grader-agent-workflow.ts` (lines defining `updateGraderNode` … `updateScoreAggregatorNode`).
-- Related: [GA-S4](simplify-4-legacy-node-type-aliases.md).
+- Related: [GA-S4](../../plan/grading-agent/simplify-4-legacy-node-type-aliases.md).

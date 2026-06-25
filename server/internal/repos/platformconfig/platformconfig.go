@@ -71,6 +71,7 @@ type Row struct {
 	GraderAgentVisionGradingEnabled      *bool
 	GraderAgentRunFiltersEnabled         *bool
 	GraderAgentCostEstimateEnabled       *bool
+	GraderAgentCancelRunEnabled          *bool
 	CodeExecutionEnabled                 *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
@@ -230,6 +231,7 @@ type Write struct {
 	GraderAgentVisionGradingEnabled      *bool
 	GraderAgentRunFiltersEnabled         *bool
 	GraderAgentCostEstimateEnabled       *bool
+	GraderAgentCancelRunEnabled          *bool
 	CodeExecutionEnabled                 *bool
 	AltTextEnforcementEnabled       *bool
 	FFAltTextEnforcement            *bool
@@ -387,6 +389,7 @@ SELECT
 	grader_agent_vision_grading_enabled,
 	grader_agent_run_filters_enabled,
 	grader_agent_cost_estimate_enabled,
+	grader_agent_cancel_run_enabled,
 	code_execution_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
@@ -537,6 +540,7 @@ WHERE id = 1
 		&r.GraderAgentVisionGradingEnabled,
 		&r.GraderAgentRunFiltersEnabled,
 		&r.GraderAgentCostEstimateEnabled,
+		&r.GraderAgentCancelRunEnabled,
 		&r.CodeExecutionEnabled,
 		&r.AltTextEnforcementEnabled,
 		&r.FFAltTextEnforcement,
@@ -738,6 +742,7 @@ INSERT INTO settings.platform_app_settings (
 	grader_agent_vision_grading_enabled,
 	grader_agent_run_filters_enabled,
 	grader_agent_cost_estimate_enabled,
+	grader_agent_cancel_run_enabled,
 	code_execution_enabled,
 	alt_text_enforcement_enabled,
 	ff_alt_text_enforcement,
@@ -893,6 +898,7 @@ ON CONFLICT (id) DO UPDATE SET
 	grader_agent_vision_grading_enabled = COALESCE(EXCLUDED.grader_agent_vision_grading_enabled, settings.platform_app_settings.grader_agent_vision_grading_enabled),
 	grader_agent_run_filters_enabled = COALESCE(EXCLUDED.grader_agent_run_filters_enabled, settings.platform_app_settings.grader_agent_run_filters_enabled),
 	grader_agent_cost_estimate_enabled = COALESCE(EXCLUDED.grader_agent_cost_estimate_enabled, settings.platform_app_settings.grader_agent_cost_estimate_enabled),
+	grader_agent_cancel_run_enabled = COALESCE(EXCLUDED.grader_agent_cancel_run_enabled, settings.platform_app_settings.grader_agent_cancel_run_enabled),
 	code_execution_enabled = COALESCE(EXCLUDED.code_execution_enabled, settings.platform_app_settings.code_execution_enabled),
 	alt_text_enforcement_enabled = COALESCE(EXCLUDED.alt_text_enforcement_enabled, settings.platform_app_settings.alt_text_enforcement_enabled),
 	ff_alt_text_enforcement = COALESCE(EXCLUDED.ff_alt_text_enforcement, settings.platform_app_settings.ff_alt_text_enforcement),
@@ -1041,6 +1047,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.GraderAgentVisionGradingEnabled,
 		w.GraderAgentRunFiltersEnabled,
 		w.GraderAgentCostEstimateEnabled,
+		w.GraderAgentCancelRunEnabled,
 		w.CodeExecutionEnabled,
 		w.AltTextEnforcementEnabled,
 		w.FFAltTextEnforcement,

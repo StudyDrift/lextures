@@ -37,6 +37,13 @@ func (d Deps) HandleGradingAgentQueueMessage(ctx context.Context, msg gradingage
 	if already, _ := gradingagentrepo.ResultExistsForRun(ctx, d.Pool, msg.RunID, msg.SubmissionID); already {
 		return nil
 	}
+	runStatus, statusErr := d.gradingAgentRunStatus(ctx, msg.RunID)
+	if statusErr != nil {
+		return statusErr
+	}
+	if runStatus == gradingagentrepo.RunStatusCancelled {
+		return d.skipGradingAgentItemForCancel(ctx, msg)
+	}
 	if over, budgetErr := d.gradingAgentRunOverBudget(ctx, run); budgetErr != nil {
 		return budgetErr
 	} else if over {

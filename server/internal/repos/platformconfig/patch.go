@@ -106,6 +106,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("grader_agent_vision_grading_enabled", w.GraderAgentVisionGradingEnabled)
 	addBool("grader_agent_run_filters_enabled", w.GraderAgentRunFiltersEnabled)
 	addBool("grader_agent_cost_estimate_enabled", w.GraderAgentCostEstimateEnabled)
+	addBool("grader_agent_cancel_run_enabled", w.GraderAgentCancelRunEnabled)
 	addBool("code_execution_enabled", w.CodeExecutionEnabled)
 	addBool("alt_text_enforcement_enabled", w.AltTextEnforcementEnabled)
 	addBool("ff_alt_text_enforcement", w.FFAltTextEnforcement)

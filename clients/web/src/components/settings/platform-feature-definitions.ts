@@ -279,6 +279,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Show approximate batch cost before running and optional per-run budget caps.',
   },
   {
+    key: 'graderAgentCancelRunEnabled',
+    label: 'Grader agent cancel run',
+    description: 'Allow instructors to cancel in-progress grading-agent batch runs.',
+  },
+  {
     key: 'codeExecutionEnabled',
     label: 'Code execution',
     description: 'Sandboxed code execution for quiz code questions and the grader agent Code Test Runner node.',
