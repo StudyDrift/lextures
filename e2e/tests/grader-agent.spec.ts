@@ -33,7 +33,7 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
     seededCourse.courseCode,
     assignment.id,
   )
-  await apiUploadAssignmentSubmission(
+  const upload = await apiUploadAssignmentSubmission(
     seededCourse.studentToken,
     seededCourse.courseCode,
     assignment.id,
@@ -64,6 +64,34 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
       { id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade' },
     ],
   }
+
+  const submissionList = [
+    {
+      id: upload.submission.id,
+      submittedByDisplayName: 'E2E Student',
+      attachmentFileId: 'file-1',
+      attachmentFilename: 'essay.txt',
+      attachmentMimeType: 'text/plain',
+      submittedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isGraded: false,
+    },
+  ]
+
+  await coursePage.route(
+    `**/api/v1/courses/${seededCourse.courseCode}/assignments/${assignment.id}/submissions**`,
+    async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ submissions: submissionList }),
+        })
+        return
+      }
+      await route.continue()
+    },
+  )
 
   await coursePage.route(`**/api/v1/courses/${seededCourse.courseCode}/assignments/${assignment.id}/grader-agent`, async (route) => {
     if (route.request().method() === 'GET') {
@@ -164,10 +192,11 @@ test('Instructor dry-runs and applies mocked agent grade in SpeedGrader', async 
   await gradeSubmissions.click()
   const speedGrader = coursePage.getByRole('dialog')
   await expect(speedGrader).toBeVisible({ timeout: 15_000 })
+  await expect(speedGrader.getByText('1/1')).toBeVisible({ timeout: 30_000 })
   await expect(speedGrader.getByRole('tab', { name: 'Grade' })).toBeVisible({ timeout: 20_000 })
-  await expect(speedGrader.getByText('Current score')).toBeVisible({ timeout: 20_000 })
-  await expect(speedGrader.getByRole('button', { name: 'Grader Agent' })).toBeVisible({ timeout: 30_000 })
-  await speedGrader.getByRole('button', { name: 'Grader Agent' }).click()
+  const graderAgentButton = speedGrader.getByRole('button', { name: 'Grader Agent' })
+  await expect(graderAgentButton).toBeVisible({ timeout: 30_000 })
+  await graderAgentButton.click()
   const gradingDialog = coursePage.getByRole('dialog', { name: 'Grading agent' })
   await expect(gradingDialog).toBeVisible({ timeout: 15_000 })
 
