@@ -97,6 +97,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFPublicCatalog = mergeBool(db.FFPublicCatalog, false)
 	out.FFPublicAPI = mergeBool(db.FFPublicAPI, false)
 	out.FFStripeBilling = mergeBool(db.FFStripeBilling, false)
+	out.FFPaymentsEnabled = mergeBool(db.FFPaymentsEnabled, false)
 	out.FFRevenueShare = mergeBool(db.FFRevenueShare, false)
 	out.FFTaxCollection = mergeBool(db.FFTaxCollection, false)
 	out.FFLearningPaths = mergeBool(db.FFLearningPaths, false)

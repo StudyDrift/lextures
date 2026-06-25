@@ -15,6 +15,8 @@ import (
 	"github.com/lextures/lextures/server/internal/notificationevents"
 	svcBilling "github.com/lextures/lextures/server/internal/service/billing"
 	"github.com/lextures/lextures/server/internal/service/notifications"
+	"github.com/lextures/lextures/server/internal/service/paymentprovider"
+	repoPayments "github.com/lextures/lextures/server/internal/repos/payments"
 )
 
 const billingCheckoutRateLimitPerMinute = 10
@@ -30,11 +32,7 @@ type billingRateEntry struct {
 }
 
 func (d Deps) billingFeatureOff(w http.ResponseWriter) bool {
-	if !d.effectiveConfig().FFStripeBilling {
-		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Billing is not enabled.")
-		return true
-	}
-	return false
+	return d.paymentsFeatureOff(w)
 }
 
 func (d Deps) checkBillingCheckoutRateLimit(userID uuid.UUID) bool {
@@ -315,7 +313,7 @@ func (d Deps) handleStripeWebhook() http.HandlerFunc {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			return
 		}
-		if !d.effectiveConfig().FFStripeBilling {
+		if !d.effectiveConfig().FFStripeBilling && !d.effectiveConfig().FFPaymentsEnabled {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Not found.")
 			return
 		}
@@ -328,9 +326,37 @@ func (d Deps) handleStripeWebhook() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid body.")
 			return
 		}
-		cfg := svcBilling.ConfigFrom(d.effectiveConfig())
+		cfg := paymentprovider.ConfigFrom(d.effectiveConfig())
+		factory := paymentprovider.Factory{}
+		provider, err := factory.Build(paymentprovider.ProviderStripe, cfg)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusServiceUnavailable, apierr.CodeInternal, "Stripe not configured.")
+			return
+		}
+		event, err := provider.VerifyWebhook(body, r.Header)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid webhook.")
+			return
+		}
+		headers := map[string]string{}
+		for k := range r.Header {
+			headers[k] = r.Header.Get(k)
+		}
+		if d.effectiveConfig().FFPaymentsEnabled {
+			_, _, err = repoPayments.EnqueueWebhook(r.Context(), d.Pool, repoPayments.ProviderStripe, event.ID, body, headers)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not enqueue webhook.")
+				return
+			}
+			if event.Type == "invoice.payment_failed" {
+				d.notifyPaymentFailed(r, body)
+			}
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		stripeCfg := svcBilling.ConfigFrom(d.effectiveConfig())
 		sig := r.Header.Get("Stripe-Signature")
-		result, err := svcBilling.HandleWebhook(r.Context(), d.Pool, cfg, body, sig, svcBilling.WebhookOptions{
+		result, err := svcBilling.HandleWebhook(r.Context(), d.Pool, stripeCfg, body, sig, svcBilling.WebhookOptions{
 			RevenueShareEnabled:  d.effectiveConfig().FFRevenueShare,
 			TaxCollectionEnabled: d.effectiveConfig().FFTaxCollection,
 		})

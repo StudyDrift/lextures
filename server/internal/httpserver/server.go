@@ -171,6 +171,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerResearchConsentRoutes(r)
 	d.registerConsortiumRoutes(r)
 	d.registerBillingRoutes(r)
+	d.registerPaymentsRoutes(r)
 	d.registerTaxRoutes(r)
 	d.registerRevenueShareRoutes(r)
 	d.registerLearningPathRoutes(r)

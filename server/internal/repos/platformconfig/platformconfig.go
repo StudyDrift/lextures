@@ -131,6 +131,7 @@ type Row struct {
 	FFPublicCatalog                 *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
+	FFPaymentsEnabled               *bool
 	FFRevenueShare                  *bool
 	FFTaxCollection                 *bool
 	FFLearningPaths                 *bool
@@ -292,6 +293,7 @@ type Write struct {
 	FFPublicCatalog                 *bool
 	FFPublicAPI                     *bool
 	FFStripeBilling                 *bool
+	FFPaymentsEnabled               *bool
 	FFRevenueShare                  *bool
 	FFTaxCollection                 *bool
 	FFLearningPaths                 *bool
@@ -450,6 +452,7 @@ SELECT
 	ff_public_catalog,
 	ff_public_api,
 	ff_stripe_billing,
+	ff_payments_enabled,
 	ff_learning_paths,
 	ff_conditional_release,
 	ff_peer_review,
@@ -602,6 +605,7 @@ WHERE id = 1
 		&r.FFPublicCatalog,
 		&r.FFPublicAPI,
 		&r.FFStripeBilling,
+		&r.FFPaymentsEnabled,
 		&r.FFLearningPaths,
 		&r.FFConditionalRelease,
 		&r.FFPeerReview,
@@ -802,6 +806,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_ceu_tracking,
 	ff_consortium_sharing,
 	ff_stripe_billing,
+	ff_payments_enabled,
 	ff_learning_paths,
 	ff_conditional_release,
 	ff_peer_review,
@@ -959,6 +964,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_ceu_tracking = COALESCE(EXCLUDED.ff_ceu_tracking, settings.platform_app_settings.ff_ceu_tracking),
 	ff_consortium_sharing = COALESCE(EXCLUDED.ff_consortium_sharing, settings.platform_app_settings.ff_consortium_sharing),
 	ff_stripe_billing = COALESCE(EXCLUDED.ff_stripe_billing, settings.platform_app_settings.ff_stripe_billing),
+	ff_payments_enabled = COALESCE(EXCLUDED.ff_payments_enabled, settings.platform_app_settings.ff_payments_enabled),
 	ff_learning_paths = COALESCE(EXCLUDED.ff_learning_paths, settings.platform_app_settings.ff_learning_paths),
 	ff_conditional_release = COALESCE(EXCLUDED.ff_conditional_release, settings.platform_app_settings.ff_conditional_release),
 	ff_peer_review = COALESCE(EXCLUDED.ff_peer_review, settings.platform_app_settings.ff_peer_review),
@@ -1109,6 +1115,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFCEUTracking,
 		w.FFConsortiumSharing,
 		w.FFStripeBilling,
+		w.FFPaymentsEnabled,
 		w.FFLearningPaths,
 		w.FFConditionalRelease,
 		w.FFPeerReview,

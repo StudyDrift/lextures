@@ -18,9 +18,23 @@ export type Entitlement = {
   status: string
 }
 
+export type Transaction = {
+  id: string
+  courseId?: string
+  provider: string
+  providerTxnId: string
+  amountCents: number
+  currency: string
+  status: string
+  subscriptionId?: string
+  createdAt: string
+}
+
 export type CheckoutPayload = {
   courseId?: string
   plan?: 'monthly' | 'annual'
+  provider?: 'stripe' | 'paypal'
+  country?: string
   promoCode?: string
   affiliateCode?: string
   successUrl: string
@@ -39,8 +53,20 @@ export async function fetchMyEntitlements(): Promise<Entitlement[]> {
   return data.entitlements ?? []
 }
 
+export async function fetchMyTransactions(): Promise<Transaction[]> {
+  const res = await authorizedFetch('/api/v1/me/transactions')
+  if (res.status === 404) {
+    return []
+  }
+  if (!res.ok) {
+    throw new Error('Could not load purchase history.')
+  }
+  const data = (await res.json()) as { transactions?: Transaction[] }
+  return data.transactions ?? []
+}
+
 export async function startCheckout(payload: CheckoutPayload): Promise<string> {
-  const res = await authorizedFetch('/api/v1/billing/checkout', {
+  const res = await authorizedFetch('/api/v1/checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

@@ -131,6 +131,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Stripe Checkout for course purchases and subscriptions, entitlement gating, and learner billing portal.',
   },
   {
+    key: 'ffPaymentsEnabled',
+    label: 'Payment provider abstraction',
+    description:
+      'Multi-provider checkout (Stripe + PayPal), transaction history, async webhooks, and admin refunds (plan 16.8).',
+  },
+  {
     key: 'ffRevenueShare',
     label: 'Creator revenue share & affiliates',
     description:

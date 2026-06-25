@@ -88,6 +88,7 @@ type platformFeaturesJSON struct {
 	FFPublicCatalog             bool `json:"ffPublicCatalog"`
 	FFPublicAPI                 bool `json:"ffPublicApi"`
 	FFStripeBilling             bool `json:"ffStripeBilling"`
+	FFPaymentsEnabled           bool `json:"ffPaymentsEnabled"`
 	FFRevenueShare              bool `json:"ffRevenueShare"`
 	FFTaxCollection             bool `json:"ffTaxCollection"`
 	FFLearningPaths             bool `json:"ffLearningPaths"`
@@ -199,6 +200,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFPublicCatalog:             cfg.FFPublicCatalog,
 		FFPublicAPI:                 cfg.FFPublicAPI,
 		FFStripeBilling:             cfg.FFStripeBilling,
+		FFPaymentsEnabled:           cfg.FFPaymentsEnabled,
 		FFRevenueShare:              cfg.FFRevenueShare,
 		FFTaxCollection:             cfg.FFTaxCollection,
 		FFLearningPaths:             cfg.FFLearningPaths,
