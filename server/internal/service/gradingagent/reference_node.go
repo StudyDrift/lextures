@@ -97,7 +97,7 @@ func truncateReferenceText(text string) (string, bool) {
 }
 
 // LoadReferenceText resolves inline text or extracts text from a course file.
-func (in DryRunExecutionInput) LoadReferenceText(ctx context.Context, node WorkflowNode) (string, bool, error) {
+func (in ExecutionInput) LoadReferenceText(ctx context.Context, node WorkflowNode) (string, bool, error) {
 	if resourceID, ok := referenceResourceID(node); ok {
 		if in.LoadReferenceFile == nil {
 			return "", false, fmt.Errorf("reference file loader not configured")

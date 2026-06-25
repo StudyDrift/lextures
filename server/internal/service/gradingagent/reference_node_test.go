@@ -54,17 +54,17 @@ func TestFormatReferenceTrustedAIBlock_labelsByMode(t *testing.T) {
 	}
 }
 
-func TestExecuteWorkflowDryRun_referenceInAIInput(t *testing.T) {
+func TestExecuteWorkflow_referenceInAIInput(t *testing.T) {
 	g := sampleGraphWithReferenceAI()
 	var compiledInput string
 	var compiledPrompt string
-	_, err := ExecuteWorkflowDryRun(t.Context(), DryRunExecutionInput{
+	_, err := ExecuteWorkflow(t.Context(), ExecutionInput{
 		Graph:       &g,
 		Submissions: []string{"Student essay"},
 		MaxPoints:   100,
 		ModelID:     "test/model",
 		Runner:      stubDryRunRunner{},
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			if ev.Type == "node_complete" && ev.NodeID == "ai1" {
 				compiledInput = ev.CompiledInput
 				compiledPrompt = ev.CompiledPrompt

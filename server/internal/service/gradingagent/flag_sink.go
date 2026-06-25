@@ -147,7 +147,7 @@ func assembleFlagForReview(
 	node WorkflowNode,
 	nodeByID map[string]WorkflowNode,
 	state *executionState,
-	in DryRunExecutionInput,
+	in ExecutionInput,
 ) (reason, queue, priority string) {
 	queue = flagQueueFromNode(node)
 	priority = flagPriorityFromNode(node)

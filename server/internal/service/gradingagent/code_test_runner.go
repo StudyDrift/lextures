@@ -115,7 +115,7 @@ func executeCodeTestRunnerNode(
 	nodeByID map[string]WorkflowNode,
 	state *executionState,
 	runner CodeTestRunner,
-	emit func(DryRunEvent),
+	emit func(ExecutionEvent),
 	label string,
 ) error {
 	if runner == nil {
@@ -134,7 +134,7 @@ func executeCodeTestRunnerNode(
 		return ValidationError{Field: "node:" + node.ID + ".testSuiteId", Message: "Test suite not found. Add inline test cases until suite lookup is available."}
 	}
 
-	emit(DryRunEvent{Type: "log", Level: "info", Message: fmt.Sprintf("[%s] Running %d test(s)…", label, len(tests))})
+	emit(ExecutionEvent{Type: "log", Level: "info", Message: fmt.Sprintf("[%s] Running %d test(s)…", label, len(tests))})
 	resp, runErr := runner.RunTests(ctx, codeexecution.RunRequest{
 		Runtime: cfg.Runtime,
 		Code:    submissionText,
@@ -148,7 +148,7 @@ func executeCodeTestRunnerNode(
 		if r.Passed {
 			statusLabel = "pass"
 		}
-		emit(DryRunEvent{
+		emit(ExecutionEvent{
 			Type: "log", Level: "info",
 			Message: fmt.Sprintf("[%s] Test %d/%d: %s", label, i+1, len(resp.Results), statusLabel),
 		})
@@ -166,7 +166,7 @@ func executeCodeTestRunnerNode(
 	state.set(node.ID, HandleReport, slotValue{text: report})
 	state.set(node.ID, HandleScore, slotValue{text: fmt.Sprintf("%.4f", passRate)})
 
-	emit(DryRunEvent{
+	emit(ExecutionEvent{
 		Type: "log", Level: "info",
 		Message: fmt.Sprintf("[%s] Test score %.2f (pass rate %.0f%%).", label, grade.TotalPoints, passRate*100),
 	})
