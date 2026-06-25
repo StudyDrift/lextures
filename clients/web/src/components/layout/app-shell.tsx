@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { CommandPaletteProvider } from '../command-palette/command-palette-provider'
 import { KeyboardShortcutsProvider } from '../keyboard-shortcuts/keyboard-shortcuts-provider'
@@ -22,8 +22,11 @@ import { TopBar } from './top-bar'
 import { UiThemeSync } from './ui-theme-sync'
 import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
-import { IncidentStatusBanner } from '../incident-status-banner'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
+
+const IncidentStatusBanner = lazy(() =>
+  import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
+)
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
 import { useFocusOnRoute } from '../../lib/a11y'
@@ -63,7 +66,9 @@ function AppShellLayout() {
             <TopBar />
           )}
           <OfflineBanner />
-          <IncidentStatusBanner />
+          <Suspense fallback={null}>
+            <IncidentStatusBanner />
+          </Suspense>
           <LegalUpdateBanner />
           <main
             id="main-content"

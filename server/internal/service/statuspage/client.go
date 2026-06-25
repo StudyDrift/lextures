@@ -118,7 +118,7 @@ func (c *Client) fetchUpstreamSummary(ctx context.Context) (upstreamSummary, err
 	if err != nil {
 		return upstreamSummary{}, err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	body, err := io.ReadAll(io.LimitReader(res.Body, 1<<20))
 	if err != nil {
 		return upstreamSummary{}, err
@@ -160,7 +160,7 @@ func (c *Client) UpdateComponentStatus(ctx context.Context, componentID, status 
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		body, _ := io.ReadAll(io.LimitReader(res.Body, 4096))
 		return fmt.Errorf("statuspage component update: status %d: %s", res.StatusCode, strings.TrimSpace(string(body)))
