@@ -202,12 +202,12 @@ func runFilterToJSONFromBytes(raw []byte) map[string]any {
 
 func (d Deps) handleGetGraderAgentRunTarget() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.graderAgentRunFiltersEnabled() {
-			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent run filters are not enabled.")
-			return
-		}
 		courseCode, viewer, ok := d.requireGraderAgentAccess(w, r)
 		if !ok {
+			return
+		}
+		if !d.graderAgentRunFiltersEnabled() {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grader agent run filters are not enabled.")
 			return
 		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))

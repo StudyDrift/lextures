@@ -213,7 +213,6 @@ AND EXISTS (
     AND ce.section_id = ANY($` + fmt.Sprintf("%d", argN) + `::uuid[])
 )`
 		args = append(args, listFilter.VisibleSectionIDs)
-		argN++
 	}
 	rows, err := pool.Query(ctx, `
 SELECT s.id, s.course_id, s.module_item_id, s.submitted_by, s.attachment_file_id, s.body_text, s.submitted_at, s.updated_at,

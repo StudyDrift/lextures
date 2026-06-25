@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- component file exports run filter state helpers */
 import { useEffect, useId, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
