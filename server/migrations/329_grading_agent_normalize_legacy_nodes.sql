@@ -1,0 +1,4 @@
+-- GA-S4: Legacy grading agent workflow graph node types (submission, assignmentContext,
+-- context handle, grader without comments output) are normalized at load time via
+-- gradingagent.NormalizeWorkflowGraph. Graphs are persisted in canonical form on the
+-- next config or template save.

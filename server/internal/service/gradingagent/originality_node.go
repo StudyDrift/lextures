@@ -173,7 +173,7 @@ func originalityHasSubmissionInput(g *WorkflowGraph, nodeID string) bool {
 	return false
 }
 
-func loadOriginalityRows(ctx context.Context, in DryRunExecutionInput) ([]OriginalityReportRow, error) {
+func loadOriginalityRows(ctx context.Context, in ExecutionInput) ([]OriginalityReportRow, error) {
 	if in.LoadOriginalityReports == nil || in.SubmissionID == uuid.Nil {
 		return nil, nil
 	}
@@ -183,9 +183,9 @@ func loadOriginalityRows(ctx context.Context, in DryRunExecutionInput) ([]Origin
 func executeOriginalityNode(
 	ctx context.Context,
 	node WorkflowNode,
-	in DryRunExecutionInput,
+	in ExecutionInput,
 	state *executionState,
-	emit func(DryRunEvent),
+	emit func(ExecutionEvent),
 	label string,
 ) error {
 	rows, err := loadOriginalityRows(ctx, in)
@@ -210,12 +210,12 @@ func executeOriginalityNode(
 	state.set(node.ID, HandleReport, slotValue{text: signal.Report})
 
 	if signal.Present && signal.Score != nil {
-		emit(DryRunEvent{
+		emit(ExecutionEvent{
 			Type: "log", Level: "info",
 			Message: fmt.Sprintf("[%s] %s %.2f (flag=%v)", label, signal.Metric, *signal.Score, signal.Flag),
 		})
 	} else {
-		emit(DryRunEvent{
+		emit(ExecutionEvent{
 			Type: "log", Level: "info",
 			Message: fmt.Sprintf("[%s] No stored originality report available.", label),
 		})

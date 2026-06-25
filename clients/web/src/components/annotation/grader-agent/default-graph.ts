@@ -1,13 +1,15 @@
 import type { GraderWorkflowGraph } from './types'
 import { WORKFLOW_VERSION } from './types'
+import { normalizeLegacyWorkflowGraph } from './workflow-normalize'
 
 /** Coerces API graphs where Go nil slices deserialize as null. */
 export function normalizeWorkflowGraph(graph: GraderWorkflowGraph): GraderWorkflowGraph {
-  return {
+  const coerced: GraderWorkflowGraph = {
     version: graph.version,
     nodes: Array.isArray(graph.nodes) ? graph.nodes : [],
     edges: Array.isArray(graph.edges) ? graph.edges : [],
   }
+  return normalizeLegacyWorkflowGraph(coerced).graph
 }
 
 /** Builds the canonical empty canvas: fixed output node only. */

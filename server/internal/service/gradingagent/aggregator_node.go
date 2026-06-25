@@ -187,7 +187,7 @@ func executeScoreAggregatorNode(
 	state *executionState,
 	maxPoints float64,
 	rubric *assignmentrubric.RubricDefinition,
-	emit func(DryRunEvent),
+	emit func(ExecutionEvent),
 	label string,
 ) error {
 	inputs, err := gatherAggregatorInputs(g, node, nodeByID, state)
@@ -202,12 +202,12 @@ func executeScoreAggregatorNode(
 	if combineErr != nil {
 		return combineErr
 	}
-	emit(DryRunEvent{
+	emit(ExecutionEvent{
 		Type: "log", Level: "info",
 		Message: fmt.Sprintf("[%s] Aggregating %d input(s) via %s:", label, len(inputs), cfg.Mode),
 	})
 	for _, line := range logs {
-		emit(DryRunEvent{Type: "log", Level: "info", Message: line})
+		emit(ExecutionEvent{Type: "log", Level: "info", Message: line})
 	}
 	state.set(node.ID, HandleGrade, slotValue{grade: &grade})
 	if cfg.MergeComments && strings.TrimSpace(grade.Comment) != "" {

@@ -33,17 +33,17 @@ func TestTopologicalNodeOrder_respectsDependencies(t *testing.T) {
 	}
 }
 
-func TestExecuteWorkflowDryRun_emitsCompiledPromptForAINode(t *testing.T) {
+func TestExecuteWorkflow_emitsCompiledPromptForAINode(t *testing.T) {
 	g := sampleGraphWithAI("Summarize $Activity.Content")
-	var completeEvent DryRunEvent
-	_, err := ExecuteWorkflowDryRun(context.Background(), DryRunExecutionInput{
+	var completeEvent ExecutionEvent
+	_, err := ExecuteWorkflow(context.Background(), ExecutionInput{
 		Graph:          &g,
 		Submissions:     []string{"Essay body"},
 		MaxPoints:       100,
 		ModelID:         "test/model",
 		DefaultMarkdown: "Assignment instructions",
 		Runner:         stubDryRunRunner{},
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			if ev.Type == "node_complete" && ev.NodeID == "ai1" {
 				completeEvent = ev
 			}
@@ -63,11 +63,11 @@ func TestExecuteWorkflowDryRun_emitsCompiledPromptForAINode(t *testing.T) {
 	}
 }
 
-func TestExecuteWorkflowDryRun_logsOutputWithoutPersisting(t *testing.T) {
+func TestExecuteWorkflow_logsOutputWithoutPersisting(t *testing.T) {
 	g := sampleGraphWithGrader("Grade fairly", false, false)
 	var logs []string
 	var nodeStarts []string
-	preview, err := ExecuteWorkflowDryRun(context.Background(), DryRunExecutionInput{
+	preview, err := ExecuteWorkflow(context.Background(), ExecutionInput{
 		Graph:          &g,
 		Submissions: []string{"Essay body"},
 		MaxPoints:   100,
@@ -83,7 +83,7 @@ func TestExecuteWorkflowDryRun_logsOutputWithoutPersisting(t *testing.T) {
 				ModelID: "test/model",
 			},
 		},
-		Emit: func(ev DryRunEvent) {
+		Emit: func(ev ExecutionEvent) {
 			switch ev.Type {
 			case "log":
 				logs = append(logs, ev.Message)

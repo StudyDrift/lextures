@@ -85,7 +85,7 @@ func parseInlineRubric(n WorkflowNode) (*assignmentrubric.RubricDefinition, erro
 }
 
 // LoadRubricDefinition resolves rubric data for a Rubric node.
-func (in DryRunExecutionInput) LoadRubricDefinition(node WorkflowNode) (*assignmentrubric.RubricDefinition, error) {
+func (in ExecutionInput) LoadRubricDefinition(node WorkflowNode) (*assignmentrubric.RubricDefinition, error) {
 	switch rubricSourceFromNode(node) {
 	case RubricSourceInline:
 		rubric, err := parseInlineRubric(node)
