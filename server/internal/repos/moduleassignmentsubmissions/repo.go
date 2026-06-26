@@ -261,7 +261,3 @@ RETURNING id
 `, courseID, moduleItemID, submittedBy, attachmentFileID, submittedAt).Scan(&id)
 	return id, err
 }
-
-type queryRower interface {
-	QueryRow(context.Context, string, ...any) pgx.Row
-}
