@@ -108,3 +108,17 @@ output "backup_writer_policy_arn" {
   description = "IAM policy for backup cron / WAL-G (write-only to backup bucket)."
   value       = aws_iam_policy.backup_writer.arn
 }
+
+output "bastion_instance_id" {
+  description = "EC2 instance ID for emergency DB access via SSM Session Manager (null when disabled)."
+  value       = try(aws_instance.bastion[0].id, null)
+}
+
+output "bastion_ssm_connect_command" {
+  description = "AWS CLI command to open an SSM shell on the bastion."
+  value = local.enable_bastion ? format(
+    "aws ssm start-session --target %s --region %s",
+    aws_instance.bastion[0].id,
+    var.aws_region,
+  ) : null
+}

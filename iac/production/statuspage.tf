@@ -39,12 +39,12 @@ resource "statuspage_page" "lextures" {
 
 locals {
   statuspage_components = {
-    api            = "API"
-    web_app        = "Web App"
-    database       = "Database"
-    job_queue      = "Job Queue"
-    ai_services    = "AI Services"
-    media_storage  = "Media/File Storage"
+    api           = "API"
+    web_app       = "Web App"
+    database      = "Database"
+    job_queue     = "Job Queue"
+    ai_services   = "AI Services"
+    media_storage = "Media/File Storage"
   }
 }
 
