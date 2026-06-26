@@ -156,6 +156,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_transcripts", w.FFTranscripts)
 	addBool("ff_webhooks", w.FFWebhooks)
 	addBool("ff_zapier_connector", w.FFZapierConnector)
+	addBool("ff_marketplace_enabled", w.FFMarketplace)
 	addBool("ff_advising_integration", w.FFAdvisingIntegration)
 	addBool("ff_research_consent", w.FFResearchConsent)
 	addBool("ff_accessibility_intake", w.FFAccessibilityIntake)

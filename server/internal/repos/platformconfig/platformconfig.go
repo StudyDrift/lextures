@@ -122,6 +122,7 @@ type Row struct {
 	FFTranscripts                   *bool
 	FFWebhooks                      *bool
 	FFZapierConnector               *bool
+	FFMarketplace                   *bool
 	FFAdvisingIntegration           *bool
 	FFResearchConsent               *bool
 	FFAccessibilityIntake           *bool
@@ -284,6 +285,7 @@ type Write struct {
 	FFTranscripts                   *bool
 	FFWebhooks                      *bool
 	FFZapierConnector               *bool
+	FFMarketplace                   *bool
 	FFAdvisingIntegration           *bool
 	FFResearchConsent               *bool
 	FFAccessibilityIntake           *bool
@@ -443,6 +445,7 @@ SELECT
 	ff_transcripts,
 	ff_webhooks,
 	ff_zapier_connector,
+	ff_marketplace_enabled,
 	ff_advising_integration,
 	ff_research_consent,
 	ff_accessibility_intake,
@@ -596,6 +599,7 @@ WHERE id = 1
 		&r.FFTranscripts,
 		&r.FFWebhooks,
 		&r.FFZapierConnector,
+		&r.FFMarketplace,
 		&r.FFAdvisingIntegration,
 		&r.FFResearchConsent,
 		&r.FFAccessibilityIntake,
@@ -800,6 +804,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_transcripts,
 	ff_webhooks,
 	ff_zapier_connector,
+	ff_marketplace_enabled,
 	ff_advising_integration,
 	ff_research_consent,
 	ff_accessibility_intake,
@@ -958,6 +963,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_transcripts = COALESCE(EXCLUDED.ff_transcripts, settings.platform_app_settings.ff_transcripts),
 	ff_webhooks = COALESCE(EXCLUDED.ff_webhooks, settings.platform_app_settings.ff_webhooks),
 	ff_zapier_connector = COALESCE(EXCLUDED.ff_zapier_connector, settings.platform_app_settings.ff_zapier_connector),
+	ff_marketplace_enabled = COALESCE(EXCLUDED.ff_marketplace_enabled, settings.platform_app_settings.ff_marketplace_enabled),
 	ff_advising_integration = COALESCE(EXCLUDED.ff_advising_integration, settings.platform_app_settings.ff_advising_integration),
 	ff_research_consent = COALESCE(EXCLUDED.ff_research_consent, settings.platform_app_settings.ff_research_consent),
 	ff_accessibility_intake = COALESCE(EXCLUDED.ff_accessibility_intake, settings.platform_app_settings.ff_accessibility_intake),
@@ -1109,6 +1115,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFTranscripts,
 		w.FFWebhooks,
 		w.FFZapierConnector,
+		w.FFMarketplace,
 		w.FFAdvisingIntegration,
 		w.FFResearchConsent,
 		w.FFAccessibilityIntake,
