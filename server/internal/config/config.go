@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/lextures/lextures/server/internal/redisclient"
 )
 
 const (
@@ -14,6 +16,9 @@ const (
 	JWTSecretMinLen = 32
 
 	insecureJWTFallback = "dev-secret-do-not-use-in-production"
+
+	// defaultShutdownTimeoutSecs is the graceful-shutdown drain window (plan 17.2 FR-8).
+	defaultShutdownTimeoutSecs = 30
 )
 
 var defaultCanvasAllowedHostSuffixes = []string{"instructure.com"}
@@ -508,6 +513,26 @@ type Config struct {
 	// PIIRedactFields adds extra structured log field names to the redaction registry (REDACT_FIELDS).
 	PIIRedactFields []string
 
+	// RedisURL is the shared Redis connection string for cross-instance state
+	// (JWT blocklist, rate limits, caches) — plan 17.2. Use rediss:// for the
+	// TLS-only managed Redis in production. Empty disables Redis (single instance).
+	RedisURL string
+	// RedisPoolMin is the minimum idle Redis connections per instance (default 5).
+	RedisPoolMin int
+	// RedisPoolMax is the maximum Redis connections per instance (default 20).
+	RedisPoolMax int
+
+	// DBPoolMaxConns caps pgx pool connections per instance for multi-instance
+	// deployments (instances × DBPoolMaxConns must stay under Postgres
+	// max_connections) — plan 17.2 FR-7. 0 keeps the pgx default.
+	DBPoolMaxConns int
+	// DBPoolMinConns is the minimum warm pgx pool connections per instance. 0 keeps the pgx default.
+	DBPoolMinConns int
+
+	// ShutdownTimeoutSecs is the graceful-shutdown drain window on SIGTERM
+	// (plan 17.2 FR-8 / AC-4). Defaults to 30 seconds.
+	ShutdownTimeoutSecs int
+
 	// RabbitMQURL is the AMQP connection URL for background job queues (Canvas import, etc.).
 	RabbitMQURL string
 	// CanvasImportQueueName is the RabbitMQ queue for Canvas LMS imports (default canvas.course.import).
@@ -705,6 +730,13 @@ func Load() Config {
 		DisablePIIRedaction: boolEnv("DISABLE_PII_REDACTION"),
 		PIIRedactFields:     commaSeparatedEnv("REDACT_FIELDS"),
 
+		RedisURL:            firstNonEmptyTrimmed("REDIS_URL"),
+		RedisPoolMin:        intEnvDefault("REDIS_POOL_MIN", redisclient.DefaultPoolMin),
+		RedisPoolMax:        intEnvDefault("REDIS_POOL_MAX", redisclient.DefaultPoolMax),
+		DBPoolMaxConns:      intEnvDefault("DB_POOL_MAX_CONNS", 0),
+		DBPoolMinConns:      intEnvDefault("DB_POOL_MIN_CONNS", 0),
+		ShutdownTimeoutSecs: intEnvDefault("SHUTDOWN_TIMEOUT_SECS", defaultShutdownTimeoutSecs),
+
 		RabbitMQURL:                       firstNonEmptyTrimmed("RABBITMQ_URL"),
 		CanvasImportQueueName:             stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
 		CanvasImportConcurrency:           canvasImportConcurrency(),
@@ -825,6 +857,20 @@ func runMigrations() bool {
 	default:
 		return true
 	}
+}
+
+// intEnvDefault parses a non-negative integer env var, returning def when unset,
+// empty, or invalid.
+func intEnvDefault(key string, def int) int {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return def
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 0 {
+		return def
+	}
+	return n
 }
 
 func boolEnv(key string) bool {

@@ -59,12 +59,24 @@ type LTIEmbedTicket struct {
 	ItemID   string
 }
 
+// Blocklist is the cross-instance JWT revocation store (plan 17.2 FR-4). A
+// revoked access token's `jti` claim is recorded with a TTL equal to the token's
+// remaining lifetime so the entry self-expires. Backed by Redis in production
+// (session:jti:{jti}); any node enforces revocation by checking IsRevoked.
+type Blocklist interface {
+	// IsRevoked reports whether the given jti has been revoked.
+	IsRevoked(ctx context.Context, jti string) (bool, error)
+	// Revoke records jti as revoked for ttl. ttl <= 0 is a no-op.
+	Revoke(ctx context.Context, jti string, ttl time.Duration) error
+}
+
 // JWTSigner signs and verifies legacy-compatible HS256 JWTs.
 type JWTSigner struct {
-	secret []byte
-	ttl    time.Duration
-	now    func() time.Time
-	pool   *pgxpool.Pool // optional; when set, login JWTs embed and validate jwt_session_version
+	secret    []byte
+	ttl       time.Duration
+	now       func() time.Time
+	pool      *pgxpool.Pool // optional; when set, login JWTs embed and validate jwt_session_version
+	blocklist Blocklist     // optional; when set, login JWTs are checked against the Redis revocation blocklist
 }
 
 // NewJWTSigner returns a signer with the configured access-token TTL (15 minutes; plan 4.8).
@@ -81,6 +93,36 @@ func NewJWTSignerWithPool(secret string, pool *pgxpool.Pool) *JWTSigner {
 	j := NewJWTSigner(secret)
 	j.pool = pool
 	return j
+}
+
+// WithBlocklist attaches a cross-instance revocation blocklist (plan 17.2 FR-4)
+// and returns the same signer for chaining. When set, Verify rejects tokens
+// whose jti has been revoked, and RevokeToken records revocations.
+func (s *JWTSigner) WithBlocklist(b Blocklist) *JWTSigner {
+	s.blocklist = b
+	return s
+}
+
+// RevokeToken adds the access token's jti to the blocklist with a TTL equal to
+// the token's remaining lifetime (plan 17.2 FR-4). The token need not still be
+// valid against the DB; only its signature, jti, and exp are required. It is a
+// no-op when no blocklist is configured or the token carries no jti.
+func (s *JWTSigner) RevokeToken(ctx context.Context, token string) error {
+	if s.blocklist == nil {
+		return nil
+	}
+	var claims loginClaims
+	if err := s.verify(token, &claims); err != nil {
+		return err
+	}
+	if strings.TrimSpace(claims.JTI) == "" {
+		return nil
+	}
+	ttl := time.Unix(claims.Expires, 0).Sub(s.now())
+	if ttl <= 0 {
+		return nil // already expired; nothing to revoke
+	}
+	return s.blocklist.Revoke(ctx, claims.JTI, ttl)
 }
 
 // Sign creates a login JWT containing sub, email, org_id, org_slug, exp, optional session version (revocation), and optional refresh-token session id (rti).
@@ -142,6 +184,14 @@ func (s *JWTSigner) Verify(ctx context.Context, token string) (AuthUser, error) 
 	}
 	if isExpired(claims.Expires, s.now()) {
 		return AuthUser{}, ErrExpiredToken
+	}
+	if s.blocklist != nil && strings.TrimSpace(claims.JTI) != "" {
+		// Fail-open on transient Redis errors: the DB-backed session checks below
+		// remain the hard revocation guarantee, so an unavailable blocklist must
+		// not take down authentication for every node (plan 17.2 §6 Reliability).
+		if revoked, err := s.blocklist.IsRevoked(ctx, claims.JTI); err == nil && revoked {
+			return AuthUser{}, ErrInvalidToken
+		}
 	}
 	if s.pool != nil {
 		uid, err := uuid.Parse(claims.Subject)

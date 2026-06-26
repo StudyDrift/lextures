@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"github.com/lextures/lextures/server/internal/auth"
+	"github.com/lextures/lextures/server/internal/auth/jwtblocklist"
 	"github.com/lextures/lextures/server/internal/background"
 	"github.com/lextures/lextures/server/internal/canvasimportevents"
 	"github.com/lextures/lextures/server/internal/canvasimportqueue"
@@ -33,6 +34,7 @@ import (
 	"github.com/lextures/lextures/server/internal/migrate"
 	"github.com/lextures/lextures/server/internal/notifevents"
 	"github.com/lextures/lextures/server/internal/platformstate"
+	"github.com/lextures/lextures/server/internal/redisclient"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
@@ -60,6 +62,23 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		return fmt.Errorf("app: database: %w", err)
 	}
 	defer pool.Close()
+
+	// Shared Redis powers cross-instance state (JWT blocklist, rate limits,
+	// caches) so the app tier can scale horizontally (plan 17.2). Unset REDIS_URL
+	// keeps single-instance behaviour (redisClient is nil).
+	redisClient, err := redisclient.New(ctx, redisclient.Config{
+		URL:     cfg.RedisURL,
+		PoolMin: cfg.RedisPoolMin,
+		PoolMax: cfg.RedisPoolMax,
+	})
+	if err != nil {
+		return fmt.Errorf("app: redis: %w", err)
+	}
+	if redisClient != nil {
+		defer func() { _ = redisClient.Close() }()
+		slog.Info("redis connected", "pool_min", cfg.RedisPoolMin, "pool_max", cfg.RedisPoolMax)
+	}
+	jwtBlocklist := jwtblocklist.New(redisClient)
 	if cfg.RunMigrations {
 		if err := migrate.RunWithFS(ctx, fsys, cfg.DatabaseURL); err != nil {
 			return err
@@ -140,9 +159,14 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 	defer func() { _ = gradingAgentQueue.Close() }()
 
+	jwtSigner := auth.NewJWTSignerWithPool(cfg.JWTSecret, pool)
+	if jwtBlocklist != nil {
+		jwtSigner = jwtSigner.WithBlocklist(jwtBlocklist)
+	}
 	deps := httpserver.Deps{
 		Pool:                      pool,
-		JWTSigner:                 auth.NewJWTSignerWithPool(cfg.JWTSecret, pool),
+		Redis:                     redisClient,
+		JWTSigner:                 jwtSigner,
 		Config:                    cfg,
 		Platform:                  platformstate.New(merged),
 		OIDC:                      oidcauth.NewService(merged),
@@ -176,7 +200,14 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	go func() { errCh <- srv.ListenAndServe() }()
 	select {
 	case <-ctx.Done():
-		shctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		// Drain in-flight requests on SIGTERM before exiting so rolling restarts
+		// behind the load balancer do not drop requests (plan 17.2 FR-8 / AC-4).
+		drain := time.Duration(cfg.ShutdownTimeoutSecs) * time.Second
+		if drain <= 0 {
+			drain = 30 * time.Second
+		}
+		slog.Info("http server shutting down", "drain", drain.String())
+		shctx, cancel := context.WithTimeout(context.Background(), drain)
 		defer cancel()
 		_ = srv.Shutdown(shctx)
 		<-errCh

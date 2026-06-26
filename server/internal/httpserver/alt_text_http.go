@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"strings"
@@ -53,7 +54,18 @@ func (d Deps) registerAltTextRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/accessibility", d.handleGetCourseAccessibility())
 }
 
-func (d Deps) checkAltTextRateLimit(userID uuid.UUID) bool {
+// checkAltTextRateLimit enforces the per-user hourly cap. When a shared Redis is
+// configured the counter lives in Redis (rate:* namespace) so the limit holds
+// across all app instances (plan 17.2 FR-3 / AC-3); otherwise it falls back to
+// the per-process counter for single-instance / Redis-down operation.
+func (d Deps) checkAltTextRateLimit(ctx context.Context, userID uuid.UUID) bool {
+	if d.Redis != nil {
+		key := "rate:alttext:" + userID.String()
+		if n, err := d.Redis.IncrWindow(ctx, key, time.Hour); err == nil {
+			return n <= int64(altTextRateLimitPerH)
+		}
+		// Redis error: fall through to the in-process limiter rather than fail closed.
+	}
 	altTextRateMu.Lock()
 	defer altTextRateMu.Unlock()
 	now := time.Now()
@@ -103,7 +115,7 @@ func (d Deps) handlePostAltTextSuggest() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to suggest alt text.")
 			return
 		}
-		if !d.checkAltTextRateLimit(userID) {
+		if !d.checkAltTextRateLimit(r.Context(), userID) {
 			apierr.WriteJSON(w, http.StatusTooManyRequests, apierr.CodeRateLimited, "Alt-text suggestion rate limit exceeded.")
 			return
 		}
