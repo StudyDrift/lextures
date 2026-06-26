@@ -7,7 +7,12 @@ import { validateRouterIssues, routerInputSourceIsValid } from './router-validat
 import { workflowPromptIsPresent } from './workflow-prompt'
 import { criterionGraderRubric } from './criterion-grader-rubric'
 import type { RubricDefinition } from '../../../lib/courses-api'
-import type { GraderWorkflowGraph, WorkflowValidationIssue } from './types'
+import type { GradingAgentItemKind, GraderWorkflowGraph, WorkflowValidationIssue } from './types'
+import {
+  isQuizGradeHandle,
+  isQuizQuestionHandle,
+  type QuizQuestionSlot,
+} from './quiz-question-slots'
 import {
   HANDLE_AI_INPUT,
   HANDLE_AI_OUTPUT,
@@ -39,6 +44,7 @@ import {
   isCriterionGraderNodeType,
   isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
+  isQuizResponsesNodeType,
 } from './types'
 
 const MAX_NODES = 50
@@ -49,6 +55,7 @@ function aiInputSourceIsValid(
   sourceHandle: string,
 ): boolean {
   if (isStudentSubmissionNodeType(sourceType) && sourceHandle === HANDLE_SUBMISSION) return true
+  if (isQuizResponsesNodeType(sourceType) && isQuizQuestionHandle(sourceHandle)) return true
   if (isActivityNodeType(sourceType) && (sourceHandle === HANDLE_CONTENT || sourceHandle === HANDLE_RUBRIC)) {
     return true
   }
@@ -146,6 +153,8 @@ function hasCycle(adj: Map<string, string[]>, nodeIds: string[]): boolean {
 export type ValidateWorkflowGraphOptions = {
   rubric?: RubricDefinition | null
   assignmentItemId?: string
+  itemKind?: GradingAgentItemKind
+  quizQuestionSlots?: QuizQuestionSlot[]
   /** itemId → has rubric; used to validate library-mode Rubric nodes. */
   libraryRubrics?: Record<string, boolean>
 }
@@ -192,7 +201,8 @@ export function validateWorkflowGraph(
     }
     if (tgt.type === 'output') {
       const slot = e.targetHandle ?? ''
-      if (slot !== HANDLE_GRADE && slot !== HANDLE_COMMENTS) {
+      const quizGradeSlot = isQuizGradeHandle(slot)
+      if (slot !== HANDLE_GRADE && slot !== HANDLE_COMMENTS && !quizGradeSlot) {
         issues.push({ field: 'output', message: 'Output node edges must target grade or comments slots.' })
       } else if (!outputSlotSourceIsValid(src.type, e.sourceHandle ?? '', slot)) {
         issues.push({
@@ -200,7 +210,7 @@ export function validateWorkflowGraph(
           message:
             'Grade slot accepts Grader, Criterion Grader, AI, Code Test Runner, Human Review Gate, or Conditional Router branch outputs; comments slot accepts Grader or Criterion Grader comments or test reports.',
         })
-      } else if (outputSlots.has(slot) && slot === HANDLE_COMMENTS) {
+      } else if (outputSlots.has(slot) && (slot === HANDLE_COMMENTS || isQuizGradeHandle(slot))) {
         issues.push({ field: `output.${slot}`, message: 'Each output slot accepts at most one inbound edge.' })
       } else {
         outputSlots.add(slot)
@@ -230,8 +240,17 @@ export function validateWorkflowGraph(
           })
         }
       } else if (th === HANDLE_SUBMISSION) {
-        if (!isStudentSubmissionNodeType(src.type)) {
-          issues.push({ field: `node:${tgt.id}`, message: 'Submission input must come from a Student Submission node.' })
+        const submissionSourceHandle = e.sourceHandle ?? ''
+        if (!isStudentSubmissionNodeType(src.type) && !isQuizResponsesNodeType(src.type)) {
+          issues.push({
+            field: `node:${tgt.id}`,
+            message: 'Submission input must come from a Student Submission or Quiz Responses node.',
+          })
+        } else if (isQuizResponsesNodeType(src.type) && !isQuizQuestionHandle(submissionSourceHandle)) {
+          issues.push({
+            field: `node:${tgt.id}`,
+            message: 'Quiz Responses edges must target a question output.',
+          })
         }
       }
     }
@@ -249,8 +268,17 @@ export function validateWorkflowGraph(
     if (isCodeTestRunnerNodeType(tgt.type)) {
       const th = e.targetHandle ?? ''
       if (th === HANDLE_SUBMISSION) {
-        if (!isStudentSubmissionNodeType(src.type)) {
-          issues.push({ field: `node:${tgt.id}`, message: 'Submission input must come from a Student Submission node.' })
+        const submissionSourceHandle = e.sourceHandle ?? ''
+        if (!isStudentSubmissionNodeType(src.type) && !isQuizResponsesNodeType(src.type)) {
+          issues.push({
+            field: `node:${tgt.id}`,
+            message: 'Submission input must come from a Student Submission or Quiz Responses node.',
+          })
+        } else if (isQuizResponsesNodeType(src.type) && !isQuizQuestionHandle(submissionSourceHandle)) {
+          issues.push({
+            field: `node:${tgt.id}`,
+            message: 'Quiz Responses edges must target a question output.',
+          })
         }
       } else {
         issues.push({ field: `node:${tgt.id}`, message: 'Code Test Runner accepts a submission input only.' })
@@ -294,10 +322,15 @@ export function validateWorkflowGraph(
           field: `node:${tgt.id}`,
           message: 'Originality Check accepts a submission input only.',
         })
-      } else if (!isStudentSubmissionNodeType(src.type)) {
+      } else if (!isStudentSubmissionNodeType(src.type) && !isQuizResponsesNodeType(src.type)) {
         issues.push({
           field: `node:${tgt.id}`,
-          message: 'Submission input must come from a Student Submission node.',
+          message: 'Submission input must come from a Student Submission or Quiz Responses node.',
+        })
+      } else if (isQuizResponsesNodeType(src.type) && !isQuizQuestionHandle(e.sourceHandle ?? '')) {
+        issues.push({
+          field: `node:${tgt.id}`,
+          message: 'Quiz Responses edges must target a question output.',
         })
       }
     }
@@ -340,7 +373,25 @@ export function validateWorkflowGraph(
     adj.set(e.source, list)
   }
 
-  if (!outputSlots.has(HANDLE_GRADE) && !graphHasFlagSink(nodes)) {
+  const isQuizMode = options.itemKind === 'quiz'
+  const manualQuizSlots = (options.quizQuestionSlots ?? []).filter((slot) => slot.needsManualGrading)
+  if (isQuizMode) {
+    if (manualQuizSlots.length === 0) {
+      issues.push({
+        field: 'workflowGraph.quiz',
+        message: 'Add at least one manually graded question to this quiz.',
+      })
+    }
+    for (const slot of manualQuizSlots) {
+      const handle = `grade-${slot.index}`
+      if (!outputSlots.has(handle) && !graphHasFlagSink(nodes)) {
+        issues.push({
+          field: `output.${handle}`,
+          message: `Connect a grade for question ${slot.index + 1} before running.`,
+        })
+      }
+    }
+  } else if (!outputSlots.has(HANDLE_GRADE) && !graphHasFlagSink(nodes)) {
     issues.push({ field: 'output.grade', message: 'Connect the grade slot before running.' })
   }
 
@@ -500,9 +551,12 @@ export function connectionIsValid(
   const sh = sourceHandle ?? ''
   const th = targetHandle ?? ''
   if (tgt.type === 'output') {
-    if (th !== HANDLE_GRADE && th !== HANDLE_COMMENTS) return false
+    if (th !== HANDLE_GRADE && th !== HANDLE_COMMENTS && !isQuizGradeHandle(th)) return false
     if (!outputSlotSourceIsValid(src.type, sh, th)) return false
-    return !edges.some((e) => e.target === target && e.targetHandle === th)
+    if (th === HANDLE_COMMENTS || isQuizGradeHandle(th)) {
+      return !edges.some((e) => e.target === target && e.targetHandle === th)
+    }
+    return true
   }
   if (tgt.type === 'grader' || isCriterionGraderNodeType(tgt.type)) {
     if (th === HANDLE_CONTENT) {
@@ -511,14 +565,19 @@ export function connectionIsValid(
     if (th === HANDLE_RUBRIC) {
       return (isActivityNodeType(src.type) && sh === HANDLE_RUBRIC) || rubricOutputSourceIsValid(src.type, sh)
     }
-    if (th === HANDLE_SUBMISSION) return isStudentSubmissionNodeType(src.type)
+    if (th === HANDLE_SUBMISSION) {
+      return isStudentSubmissionNodeType(src.type) || (isQuizResponsesNodeType(src.type) && isQuizQuestionHandle(sh))
+    }
   }
   if (isAiNodeType(tgt.type)) {
     if (th !== HANDLE_AI_INPUT) return false
     return aiInputAllowsEdge(edges, nodeById, source, sh, target)
   }
   if (isCodeTestRunnerNodeType(tgt.type)) {
-    return th === HANDLE_SUBMISSION && isStudentSubmissionNodeType(src.type)
+    return (
+      th === HANDLE_SUBMISSION &&
+      (isStudentSubmissionNodeType(src.type) || (isQuizResponsesNodeType(src.type) && isQuizQuestionHandle(sh)))
+    )
   }
   if (isConditionalRouterNodeType(tgt.type)) {
     if (th !== HANDLE_AI_INPUT) return false
@@ -537,7 +596,10 @@ export function connectionIsValid(
     return flagSinkSourceIsValid(src.type, sh, th)
   }
   if (isOriginalityNodeType(tgt.type)) {
-    return th === HANDLE_SUBMISSION && isStudentSubmissionNodeType(src.type)
+    return (
+      th === HANDLE_SUBMISSION &&
+      (isStudentSubmissionNodeType(src.type) || (isQuizResponsesNodeType(src.type) && isQuizQuestionHandle(sh)))
+    )
   }
   if (isHumanReviewGateNodeType(tgt.type)) {
     if (th !== HANDLE_COMMENTS && th !== HANDLE_REPORT && th !== HANDLE_GRADE && th !== HANDLE_FLAG) {

@@ -17,17 +17,19 @@ import {
   Sparkles,
   Target,
   UserCheck,
+  ListOrdered,
   type LucideIcon,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { beginPaletteDrag } from './palette-drag'
-import type { PaletteNodeType } from './types'
+import type { GradingAgentItemKind, PaletteNodeType } from './types'
 
 export const GRADER_AGENT_DRAG_MIME = 'text/plain'
 
 type NodePaletteProps = {
   disabled?: boolean
   codeExecutionEnabled?: boolean
+  itemKind?: GradingAgentItemKind
   onAddNode: (type: PaletteNodeType) => void
 }
 
@@ -332,7 +334,12 @@ function itemMatchesQuery(
   return haystack.includes(query)
 }
 
-export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode }: NodePaletteProps) {
+export function NodePalette({
+  disabled,
+  codeExecutionEnabled = false,
+  itemKind = 'assignment',
+  onAddNode,
+}: NodePaletteProps) {
   const { t } = useTranslation('common')
   const [query, setQuery] = useState('')
   const normalizedQuery = normalizeSearch(query)
@@ -342,7 +349,13 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
       itemMatchesQuery(t(item.labelKey), t(item.descriptionKey), normalizedQuery),
     )
 
-  const inputItems = useMemo(() => filterItems(INPUT_ITEMS), [normalizedQuery, t])
+  const inputItems = useMemo(() => {
+    const filtered = filterItems(INPUT_ITEMS)
+    if (itemKind === 'quiz') {
+      return filtered.filter((item) => item.type !== 'studentSubmission')
+    }
+    return filtered.filter((item) => item.type !== 'quizResponses')
+  }, [itemKind, normalizedQuery, t])
   const processingItems = useMemo(
     () =>
       filterItems(PROCESSING_ITEMS).filter(
@@ -361,6 +374,15 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
       normalizedQuery,
     )
 
+  const showQuizResponses =
+    itemKind === 'quiz' &&
+    (!normalizedQuery ||
+      itemMatchesQuery(
+        t('gradingAgent.canvas.palette.quizResponses'),
+        t('gradingAgent.canvas.palette.description.quizResponses'),
+        normalizedQuery,
+      ))
+
   const showCodeTestsUnavailable =
     !codeExecutionEnabled &&
     itemMatchesQuery(
@@ -374,6 +396,7 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
     processingItems.length > 0 ||
     outputItems.length > 0 ||
     showStudentGrade ||
+    showQuizResponses ||
     showCodeTestsUnavailable
 
   return (
@@ -408,8 +431,17 @@ export function NodePalette({ disabled, codeExecutionEnabled = false, onAddNode 
       >
         {hasVisibleItems ? (
           <div className="flex flex-col gap-4 pb-1">
-            {inputItems.length > 0 ? (
+            {inputItems.length > 0 || showQuizResponses ? (
               <PaletteGroup title={t('gradingAgent.canvas.palette.groupInput')}>
+                {showQuizResponses ? (
+                  <PaletteFixedItem
+                    label={t('gradingAgent.canvas.palette.quizResponses')}
+                    description={t('gradingAgent.canvas.palette.description.quizResponses')}
+                    badge={t('gradingAgent.canvas.palette.onCanvas')}
+                    icon={ListOrdered}
+                    iconClass="bg-violet-500/10 text-violet-700 dark:text-violet-300"
+                  />
+                ) : null}
                 {inputItems.map((item) => (
                   <PaletteItem
                     key={item.type}

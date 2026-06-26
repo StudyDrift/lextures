@@ -161,7 +161,7 @@ func isOriginalityNodeType(nodeType string) bool {
 }
 
 func originalityInputSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool {
-	return isStudentSubmissionNodeType(src.Type) && srcHandle == HandleSubmission && tgtHandle == HandleSubmission
+	return tgtHandle == HandleSubmission && quizSubmissionSourceValid(src, srcHandle)
 }
 
 func originalityHasSubmissionInput(g *WorkflowGraph, nodeID string) bool {

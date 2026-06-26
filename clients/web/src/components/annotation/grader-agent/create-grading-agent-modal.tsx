@@ -2,13 +2,16 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useCourseAssignments } from '../../../hooks/use-course-assignments'
-import type { CourseGradingAgentTemplateSummary } from '../../../lib/courses-api'
+import { useCourseQuizzes } from '../../../hooks/use-course-quizzes'
+import type { CourseGradingAgentTemplateSummary, GradingAgentItemKind } from '../../../lib/courses-api'
 import { AssignmentPicker } from './assignment-picker'
+import { QuizPicker } from './quiz-picker'
 
 export type CreateGradingAgentSource = 'template' | 'assignment' | 'asTemplate'
 
 export type CreateGradingAgentResult = {
   source: CreateGradingAgentSource
+  itemKind: GradingAgentItemKind
   assignmentId?: string
   templateId?: string
   templateName?: string
@@ -38,26 +41,41 @@ export function CreateGradingAgentModal({
   const sourceAsTemplateId = useId()
   const templateSelectId = useId()
   const templateNameInputId = useId()
+  const itemKindAssignmentId = useId()
+  const itemKindQuizId = useId()
   const [source, setSource] = useState<CreateGradingAgentSource>('assignment')
+  const [itemKind, setItemKind] = useState<GradingAgentItemKind>('assignment')
   const [templateId, setTemplateId] = useState('')
   const [templateName, setTemplateName] = useState('')
   const [assignmentId, setAssignmentId] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const { assignments, loading: assignmentsLoading } = useCourseAssignments(courseCode, open)
+  const { assignments, loading: assignmentsLoading } = useCourseAssignments(
+    courseCode,
+    open && itemKind === 'assignment',
+  )
+  const { quizzes, loading: quizzesLoading } = useCourseQuizzes(courseCode, open && itemKind === 'quiz')
 
   const availableAssignments = useMemo(
     () => assignments.filter((assignment) => !existingAgentItemIds.has(assignment.id)),
     [assignments, existingAgentItemIds],
   )
+  const availableQuizzes = useMemo(
+    () => quizzes.filter((quiz) => !existingAgentItemIds.has(quiz.id)),
+    [quizzes, existingAgentItemIds],
+  )
+
+  const availableItems = itemKind === 'quiz' ? availableQuizzes : availableAssignments
+  const itemsLoading = itemKind === 'quiz' ? quizzesLoading : assignmentsLoading
 
   const hasTemplates = templates.length > 0
-  const hasAssignments = availableAssignments.length > 0
+  const hasItems = availableItems.length > 0
 
   useEffect(() => {
     if (!open) return
     setSource('assignment')
+    setItemKind('assignment')
     setTemplateId(templates[0]?.id ?? '')
     setTemplateName('')
     setAssignmentId('')
@@ -66,10 +84,10 @@ export function CreateGradingAgentModal({
   }, [open, hasTemplates, templates])
 
   useEffect(() => {
-    if (!open || assignmentsLoading) return
-    if (assignmentId && availableAssignments.some((a) => a.id === assignmentId)) return
-    setAssignmentId(availableAssignments[0]?.id ?? '')
-  }, [open, assignmentsLoading, assignmentId, availableAssignments])
+    if (!open || itemsLoading) return
+    if (assignmentId && availableItems.some((item) => item.id === assignmentId)) return
+    setAssignmentId(availableItems[0]?.id ?? '')
+  }, [open, itemsLoading, assignmentId, availableItems])
 
   useEffect(() => {
     if (!open) return
@@ -86,7 +104,7 @@ export function CreateGradingAgentModal({
     !submitting &&
     (source === 'asTemplate'
       ? templateName.trim() !== ''
-      : hasAssignments &&
+      : hasItems &&
         assignmentId !== '' &&
         (source === 'assignment' || (hasTemplates && templateId !== '')))
 
@@ -97,6 +115,7 @@ export function CreateGradingAgentModal({
     try {
       await onContinue({
         source,
+        itemKind,
         assignmentId: source === 'asTemplate' ? undefined : assignmentId,
         templateId: source === 'template' ? templateId : undefined,
         templateName: source === 'asTemplate' ? templateName.trim() : undefined,
@@ -261,32 +280,99 @@ export function CreateGradingAgentModal({
             />
           </div>
         ) : (
-        <div className="mt-4">
-          <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400">
-            {t('gradingAgent.settings.create.assignmentLabel')}
-          </label>
-          {assignmentsLoading ? (
-            <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-neutral-400">
-              <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
-              {t('gradingAgent.settings.create.loadingAssignments')}
-            </p>
-          ) : !hasAssignments ? (
-            <p className="text-sm text-slate-500 dark:text-neutral-400">
-              {t('gradingAgent.settings.create.noAssignments')}
-            </p>
-          ) : (
-            <AssignmentPicker
-              assignments={availableAssignments}
-              value={assignmentId}
-              disabled={submitting}
-              loading={assignmentsLoading}
-              filterPlaceholder={t('gradingAgent.canvas.inspector.activityAssignmentFilter')}
-              emptyLabel={t('gradingAgent.canvas.inspector.activityAssignmentEmpty')}
-              noMatchLabel={t('gradingAgent.canvas.inspector.activityAssignmentNoMatch')}
-              onChange={setAssignmentId}
-            />
-          )}
-        </div>
+          <>
+            <fieldset className="mt-4">
+              <legend className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                {t('gradingAgent.settings.create.itemKindLegend')}
+              </legend>
+              <div className="flex gap-2">
+                <label
+                  htmlFor={itemKindAssignmentId}
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,border-color] ${
+                    itemKind === 'assignment'
+                      ? 'border-indigo-400 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-100'
+                      : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-neutral-700 dark:text-neutral-200'
+                  }`}
+                >
+                  <input
+                    id={itemKindAssignmentId}
+                    type="radio"
+                    name="create-grading-agent-item-kind"
+                    value="assignment"
+                    checked={itemKind === 'assignment'}
+                    disabled={submitting}
+                    onChange={() => setItemKind('assignment')}
+                    className="sr-only"
+                  />
+                  {t('gradingAgent.settings.create.itemKindAssignment')}
+                </label>
+                <label
+                  htmlFor={itemKindQuizId}
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-[background-color,border-color] ${
+                    itemKind === 'quiz'
+                      ? 'border-indigo-400 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/30 dark:text-indigo-100'
+                      : 'border-slate-200 text-slate-700 hover:border-slate-300 dark:border-neutral-700 dark:text-neutral-200'
+                  }`}
+                >
+                  <input
+                    id={itemKindQuizId}
+                    type="radio"
+                    name="create-grading-agent-item-kind"
+                    value="quiz"
+                    checked={itemKind === 'quiz'}
+                    disabled={submitting}
+                    onChange={() => setItemKind('quiz')}
+                    className="sr-only"
+                  />
+                  {t('gradingAgent.settings.create.itemKindQuiz')}
+                </label>
+              </div>
+            </fieldset>
+
+            <div className="mt-4">
+              <label className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-neutral-400">
+                {itemKind === 'quiz'
+                  ? t('gradingAgent.settings.create.quizLabel')
+                  : t('gradingAgent.settings.create.assignmentLabel')}
+              </label>
+              {itemsLoading ? (
+                <p className="flex items-center gap-2 text-sm text-slate-500 dark:text-neutral-400">
+                  <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden />
+                  {itemKind === 'quiz'
+                    ? t('gradingAgent.settings.create.loadingQuizzes')
+                    : t('gradingAgent.settings.create.loadingAssignments')}
+                </p>
+              ) : !hasItems ? (
+                <p className="text-sm text-slate-500 dark:text-neutral-400">
+                  {itemKind === 'quiz'
+                    ? t('gradingAgent.settings.create.noQuizzes')
+                    : t('gradingAgent.settings.create.noAssignments')}
+                </p>
+              ) : itemKind === 'quiz' ? (
+                <QuizPicker
+                  quizzes={availableQuizzes}
+                  value={assignmentId}
+                  disabled={submitting}
+                  searchPlaceholder={t('gradingAgent.settings.create.quizSearchPlaceholder')}
+                  emptyLabel={t('gradingAgent.settings.create.noQuizzes')}
+                  noMatchLabel={t('gradingAgent.settings.create.quizNoMatch')}
+                  moduleFallbackLabel={t('gradingAgent.settings.create.quizModuleUnknown')}
+                  onChange={setAssignmentId}
+                />
+              ) : (
+                <AssignmentPicker
+                  assignments={availableAssignments}
+                  value={assignmentId}
+                  disabled={submitting}
+                  loading={assignmentsLoading}
+                  filterPlaceholder={t('gradingAgent.canvas.inspector.activityAssignmentFilter')}
+                  emptyLabel={t('gradingAgent.canvas.inspector.activityAssignmentEmpty')}
+                  noMatchLabel={t('gradingAgent.canvas.inspector.activityAssignmentNoMatch')}
+                  onChange={setAssignmentId}
+                />
+              )}
+            </div>
+          </>
         )}
 
         {error ? (

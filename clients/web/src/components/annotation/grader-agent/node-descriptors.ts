@@ -28,6 +28,11 @@ export const NODE_DESCRIPTORS: Record<PaletteNodeType, NodeDescriptor> = {
     fallbackPosition: (nodeCount) => ({ x: -640, y: -80 + nodeCount * 40 }),
     defaultData: () => ({}),
   },
+  quizResponses: {
+    idPrefix: 'quiz',
+    fallbackPosition: () => ({ x: -420, y: 0 }),
+    defaultData: () => ({}),
+  },
   activity: {
     idPrefix: 'act',
     fallbackPosition: (nodeCount) => ({ x: -640, y: 120 + nodeCount * 40 }),

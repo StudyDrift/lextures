@@ -15,8 +15,10 @@ import (
 
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/canvassubmissionsyncqueue"
+	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
 	"github.com/lextures/lextures/server/internal/repos/canvasimportjobs"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
@@ -148,8 +150,10 @@ func (d Deps) handlePostQuizAttemptSyncCanvas() http.HandlerFunc {
 	}
 }
 
-// executeQuizGradeSyncToCanvas pushes a quiz attempt's gradebook score to the linked Canvas course.
-// Canvas quizzes are backed by an assignment, so the grade is posted to that assignment's submission.
+// executeQuizGradeSyncToCanvas pushes a quiz attempt's scores to the linked Canvas course.
+// Canvas quizzes require per-question scores on the quiz submission API (especially for manually
+// graded questions); posting only assignment posted_grade returns success but leaves Canvas
+// SpeedGrader unchanged when workflow_state is still pending_review.
 func (d Deps) executeQuizGradeSyncToCanvas(ctx context.Context, in submissionSyncCanvasInput) (map[string]any, error) {
 	if d.Pool == nil {
 		return nil, errors.New("server misconfiguration")
@@ -185,10 +189,11 @@ func (d Deps) executeQuizGradeSyncToCanvas(ctx context.Context, in submissionSyn
 
 	var itemTitle string
 	var storedCanvasAssignID *int64
+	var storedCanvasQuizID *int64
 	if err := d.Pool.QueryRow(ctx, `
-		SELECT title, canvas_assignment_id FROM course.course_structure_items
+		SELECT title, canvas_assignment_id, canvas_quiz_id FROM course.course_structure_items
 		WHERE id = $1 AND course_id = $2 AND kind = 'quiz' AND archived = false`,
-		in.ItemID, *cid).Scan(&itemTitle, &storedCanvasAssignID); err != nil {
+		in.ItemID, *cid).Scan(&itemTitle, &storedCanvasAssignID, &storedCanvasQuizID); err != nil {
 		return nil, errors.New("Quiz not found.")
 	}
 
@@ -197,7 +202,6 @@ func (d Deps) executeQuizGradeSyncToCanvas(ctx context.Context, in submissionSyn
 		return nil, errors.New("Failed to load student.")
 	}
 
-	// Quizzes have no rubric in Lextures; resolve the gradebook points for this student/quiz.
 	pushGrade, gradeErr := resolveLexturesGradeForCanvasPush(
 		ctx, d.Pool, *cid, attempt.StudentUserID, in.ItemID, nil, in.PointsEarned, nil, nil,
 	)
@@ -206,8 +210,46 @@ func (d Deps) executeQuizGradeSyncToCanvas(ctx context.Context, in submissionSyn
 	}
 
 	client := canvasHTTPClient()
-	// Prefer the Canvas assignment id captured at import time; fall back to title matching only for
-	// items imported before ids were persisted (titles are not unique, so this is best-effort).
+	canvasUserID, err := canvasFindCanvasUserIDForEmail(ctx, client, canvasBase, token, canvasCourseID, student.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	quizRow, err := coursemodulequizzes.GetForCourseItem(ctx, d.Pool, *cid, in.ItemID)
+	if err != nil {
+		return nil, errors.New("Failed to load quiz.")
+	}
+	responses, err := quizattempts.ListResponses(ctx, d.Pool, in.SubmissionID)
+	if err != nil {
+		return nil, errors.New("Failed to load quiz responses.")
+	}
+	quizQuestions := []coursemodulequiz.QuizQuestion{}
+	if quizRow != nil {
+		quizQuestions = quizRow.Questions
+	}
+	questionScores := canvasQuizQuestionScoresFromResponses(responses, quizQuestions)
+
+	if storedCanvasQuizID != nil && *storedCanvasQuizID > 0 && len(questionScores) > 0 {
+		quizSubmissionID, canvasAttempt, findErr := canvasFindQuizSubmissionForUserAndAttempt(
+			ctx, client, canvasBase, token, canvasCourseID, *storedCanvasQuizID, canvasUserID, attempt.AttemptNumber,
+		)
+		if findErr != nil {
+			return nil, findErr
+		}
+		payload := map[string]any{
+			"quiz_submissions": []map[string]any{
+				{
+					"attempt":   canvasAttempt,
+					"questions": questionScores,
+				},
+			},
+		}
+		path := fmt.Sprintf("courses/%d/quizzes/%d/submissions/%d", canvasCourseID, *storedCanvasQuizID, quizSubmissionID)
+		if _, err := canvasPutJSON(ctx, client, canvasBase, token, path, payload); err != nil {
+			return nil, err
+		}
+	}
+
 	var canvasAssignID int64
 	if storedCanvasAssignID != nil && *storedCanvasAssignID > 0 {
 		canvasAssignID = *storedCanvasAssignID
@@ -216,10 +258,6 @@ func (d Deps) executeQuizGradeSyncToCanvas(ctx context.Context, in submissionSyn
 		if err != nil {
 			return nil, err
 		}
-	}
-	canvasUserID, err := canvasFindCanvasUserIDForEmail(ctx, client, canvasBase, token, canvasCourseID, student.Email)
-	if err != nil {
-		return nil, err
 	}
 	canvasAssign, err := canvasFetchAssignmentForGradePush(ctx, client, canvasBase, token, canvasCourseID, canvasAssignID)
 	if err != nil {
@@ -243,4 +281,78 @@ func (d Deps) executeQuizGradeSyncToCanvas(ctx context.Context, in submissionSyn
 		"syncedToCanvas": true,
 	}
 	return out, nil
+}
+
+// canvasQuizQuestionScoresFromResponses maps graded Lextures responses to Canvas quiz question ids.
+func canvasQuizQuestionScoresFromResponses(
+	responses []quizattempts.ResponseRow,
+	quizQuestions []coursemodulequiz.QuizQuestion,
+) map[string]map[string]any {
+	indexToCanvasID := make(map[int32]int64, len(quizQuestions))
+	for i, q := range quizQuestions {
+		if cid, ok := canvasQuestionIDFromLocalID(q.ID); ok {
+			indexToCanvasID[int32(i)] = cid
+		}
+	}
+	out := make(map[string]map[string]any)
+	for _, resp := range responses {
+		canvasQID, ok := canvasQuestionIDFromLocalID(resp.QuestionID)
+		if !ok {
+			if id, ok2 := indexToCanvasID[resp.QuestionIndex]; ok2 {
+				canvasQID = id
+				ok = true
+			}
+		}
+		if !ok {
+			continue
+		}
+		out[strconv.FormatInt(canvasQID, 10)] = map[string]any{"score": resp.PointsAwarded}
+	}
+	return out
+}
+
+func canvasFindQuizSubmissionForUserAndAttempt(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID, canvasQuizID, canvasUserID int64,
+	attemptNumber int32,
+) (quizSubmissionID int64, canvasAttempt int32, err error) {
+	subs, err := canvasGetQuizSubmissionsPaginated(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizID, nil)
+	if err != nil {
+		return 0, 0, err
+	}
+	var matches []map[string]any
+	for _, sub := range subs {
+		if canvasCanvasUserIDFromMap(sub) != canvasUserID {
+			continue
+		}
+		if int64At(sub, "id") <= 0 {
+			continue
+		}
+		matches = append(matches, sub)
+	}
+	if len(matches) == 0 {
+		return 0, 0, fmt.Errorf("could not find a Canvas quiz submission for this student")
+	}
+	if attemptNumber > 0 {
+		for _, sub := range matches {
+			att := int32(int64At(sub, "attempt"))
+			if att < 1 {
+				att = 1
+			}
+			if att == attemptNumber {
+				return int64At(sub, "id"), att, nil
+			}
+		}
+	}
+	best := matches[0]
+	for _, sub := range matches[1:] {
+		best = pickPreferredQuizSubmissionForUser(best, sub)
+	}
+	att := int32(int64At(best, "attempt"))
+	if att < 1 {
+		att = 1
+	}
+	return int64At(best, "id"), att, nil
 }

@@ -223,6 +223,7 @@ type ReviewQueueItem struct {
 type CourseConfigSummary struct {
 	ID               uuid.UUID
 	ModuleItemID     uuid.UUID
+	ItemKind         string
 	AssignmentTitle  string
 	AssignmentArchived bool
 	Status           Status
@@ -236,7 +237,7 @@ func ListConfigsByCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.
 		return nil, errors.New("nil pool")
 	}
 	rows, err := pool.Query(ctx, `
-SELECT g.id, g.module_item_id, csi.title, csi.archived, g.status::text, g.auto_grade_new,
+SELECT g.id, g.module_item_id, csi.kind, csi.title, csi.archived, g.status::text, g.auto_grade_new,
        (g.workflow_graph IS NOT NULL) AS has_workflow_graph, g.updated_at
 FROM assessment.grading_agent_configs g
 INNER JOIN course.course_structure_items csi ON csi.id = g.module_item_id
@@ -252,7 +253,7 @@ ORDER BY csi.title ASC
 		var row CourseConfigSummary
 		var status string
 		if err := rows.Scan(
-			&row.ID, &row.ModuleItemID, &row.AssignmentTitle, &row.AssignmentArchived, &status,
+			&row.ID, &row.ModuleItemID, &row.ItemKind, &row.AssignmentTitle, &row.AssignmentArchived, &status,
 			&row.AutoGradeNew, &row.HasWorkflowGraph, &row.UpdatedAt,
 		); err != nil {
 			return nil, err

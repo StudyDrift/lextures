@@ -195,11 +195,11 @@ export function QuizSpeedGraderBranch({
         return
       }
 
-      await putQuizAttemptGrading(courseCode, itemId, grading.attemptId, { questions })
+      const saved = await putQuizAttemptGrading(courseCode, itemId, grading.attemptId, { questions })
       handleGradeSaved()
       await Promise.all([reloadRoster(), loadGrading(attemptId)])
 
-      const startedCanvasSync = startCanvasSync(grading.attemptId)
+      const startedCanvasSync = startCanvasSync(grading.attemptId, saved.pointsEarned)
       if (startedCanvasSync) {
         setSavedMessage('Scores saved. Syncing to Canvas…')
         setSavedFlash(true)
@@ -215,7 +215,7 @@ export function QuizSpeedGraderBranch({
     }
   }
 
-  function startCanvasSync(attemptId: string): boolean {
+  function startCanvasSync(attemptId: string, pointsEarned?: number): boolean {
     if (!canvasLink) return false
     canvasSyncAbortRef.current?.()
     const handle = queueCanvasQuizGradeSync({
@@ -223,6 +223,7 @@ export function QuizSpeedGraderBranch({
       itemId,
       attemptId,
       canvasLink,
+      pointsEarned,
       onComplete: () => {
         setCanvasSyncPending(false)
         setSavedMessage('Scores saved and synced to Canvas.')

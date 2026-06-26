@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useId, useRef } from 'react'
 import { GripVertical, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { GraderAgentReviewQueueItem, RubricDefinition } from '../../../lib/courses-api'
+import type { GraderAgentReviewQueueItem, QuizQuestion, RubricDefinition } from '../../../lib/courses-api'
 import { usePlatformFeatures } from '../../../context/platform-features-context'
 import { SubmissionStudentPicker } from '../submission-navigator'
 import { InspectorPanel } from './inspector-panel'
@@ -20,6 +20,8 @@ import {
   type GraderAgentTemplateMode,
   type GraderAgentWorkflowSeed,
 } from './use-grader-agent-workflow'
+import type { GradingAgentItemKind } from './types'
+import type { QuizQuestionSlot } from './quiz-question-slots'
 import { useHorizontalPanelResize } from './use-horizontal-panel-resize'
 
 const INSPECTOR_DEFAULT_WIDTH = 288
@@ -35,10 +37,13 @@ type GraderAgentWorkflowModalProps = {
   onClose: () => void
   courseCode: string
   itemId: string
+  itemKind?: GradingAgentItemKind
   assignmentTitle?: string
   submissionId: string | null
   rubric: RubricDefinition | null
   maxPoints: number | null
+  quizQuestionSlots?: QuizQuestionSlot[]
+  quizQuestions?: QuizQuestion[]
   seedWorkflow?: GraderAgentWorkflowSeed | null
   templateMode?: GraderAgentTemplateMode | null
   onApplied?: () => void
@@ -49,10 +54,13 @@ export function GraderAgentWorkflowModal({
   onClose,
   courseCode,
   itemId,
+  itemKind = 'assignment',
   assignmentTitle,
   submissionId,
   rubric,
   maxPoints,
+  quizQuestionSlots = [],
+  quizQuestions = [],
   seedWorkflow = null,
   templateMode = null,
   onApplied,
@@ -84,12 +92,14 @@ export function GraderAgentWorkflowModal({
     courseCode,
     itemId,
     initialSubmissionId: submissionId,
-    enabled: !isTemplateMode,
+    enabled: !isTemplateMode && itemKind === 'assignment',
   })
   const workflow = useGraderAgentWorkflow({
     open,
     courseCode,
     itemId,
+    itemKind,
+    quizQuestionSlots,
     submissionId: selectedSubmissionId,
     rubric,
     seedWorkflow,
@@ -420,7 +430,11 @@ export function GraderAgentWorkflowModal({
 
         <div className="relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
           <aside className="flex min-h-0 w-full shrink-0 flex-col border-b border-slate-200 px-3 py-3 lg:w-60 lg:border-b-0 lg:border-e lg:px-3.5 dark:border-neutral-700">
-            <NodePalette codeExecutionEnabled={codeExecutionEnabled} onAddNode={addPaletteNode} />
+            <NodePalette
+              codeExecutionEnabled={codeExecutionEnabled}
+              itemKind={itemKind}
+              onAddNode={addPaletteNode}
+            />
           </aside>
           <main className="relative z-0 min-h-0 flex-1 overflow-hidden p-3">
             <div className="h-full min-h-0">
@@ -460,6 +474,8 @@ export function GraderAgentWorkflowModal({
                 rubric={rubric}
                 maxPoints={maxPoints}
                 selectedSubmission={selectedSubmission}
+                quizQuestionSlots={quizQuestionSlots}
+                quizQuestions={quizQuestions}
               />
               {!isTemplateMode && showReviewInbox ? (
                 <>

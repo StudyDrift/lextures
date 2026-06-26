@@ -182,6 +182,20 @@ func TestValidateWorkflowGraphForPersistence_allowsIncompleteDraft(t *testing.T)
 	}
 }
 
+func TestValidateWorkflowGraphForPersistence_allowsQuizResponsesNode(t *testing.T) {
+	g := WorkflowGraph{
+		Version: WorkflowVersion,
+		Nodes: []WorkflowNode{
+			{ID: "quizResponses", Type: NodeTypeQuizResponses, Position: map[string]any{"x": -420, "y": 0}, Data: map[string]any{}},
+			{ID: "output", Type: NodeTypeOutput, Position: map[string]any{"x": 0, "y": 0}, Data: map[string]any{}},
+		},
+		Edges: []WorkflowEdge{},
+	}
+	if err := ValidateWorkflowGraphForPersistence(&g); err != nil {
+		t.Fatalf("expected quiz draft graph to persist: %v", err)
+	}
+}
+
 func TestLoadWorkflowGraph_allowsIncompleteDraft(t *testing.T) {
 	g := sampleGraphWithAI("Work in progress")
 	raw, err := WorkflowGraphToJSON(&g)

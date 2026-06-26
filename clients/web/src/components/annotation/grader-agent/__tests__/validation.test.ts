@@ -447,21 +447,49 @@ describe('grader agent workflow validation', () => {
     expect(isWorkflowRunnable(g, { rubric: { criteria: [{ id: 'c1', title: 'A', levels: [] }, { id: 'c2', title: 'B', levels: [] }] } })).toBe(true)
   })
 
-  it('rejects second grade edge on output node', () => {
+  it('allows fan-in grade edges on output node (e.g. conditional router branches)', () => {
     const g: GraderWorkflowGraph = {
       version: WORKFLOW_VERSION,
       nodes: [
         { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
-        { id: 'agg1', type: 'scoreAggregator', position: { x: -80, y: 0 }, data: {} },
+        { id: 'router', type: 'conditionalRouter', position: { x: -80, y: 0 }, data: {} },
         { id: 'g1', type: 'grader', position: { x: -320, y: 0 }, data: { prompt: 'Grade' } },
-        { id: 'g2', type: 'grader', position: { x: -320, y: 80 }, data: { prompt: 'Grade 2' } },
       ],
       edges: [
-        { id: 'e1', source: 'g1', sourceHandle: 'grade', target: 'output', targetHandle: 'grade' },
-        { id: 'e2', source: 'g2', sourceHandle: 'grade', target: 'agg1', targetHandle: 'grade' },
+        { id: 'e1', source: 'router', sourceHandle: 'then', target: 'output', targetHandle: 'grade' },
       ],
     }
-    expect(connectionIsValid(g, 'g2', 'grade', 'output', 'grade')).toBe(false)
+    expect(connectionIsValid(g, 'router', 'else', 'output', 'grade')).toBe(true)
+  })
+
+  it('allows quiz question outputs to wire into conditional router input', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'quiz', type: 'quizResponses', position: { x: -320, y: 0 }, data: {} },
+        { id: 'router', type: 'conditionalRouter', position: { x: -80, y: 0 }, data: {} },
+        { id: 'output', type: 'output', position: { x: 160, y: 0 }, data: {} },
+      ],
+      edges: [],
+    }
+    expect(connectionIsValid(g, 'quiz', 'question-0', 'router', 'input')).toBe(true)
+    expect(connectionIsValid(g, 'quiz', 'question-4', 'router', 'input')).toBe(true)
+    expect(connectionIsValid(g, 'quiz', 'submission', 'router', 'input')).toBe(false)
+  })
+
+  it('rejects second edge on the same quiz question grade slot', () => {
+    const g: GraderWorkflowGraph = {
+      version: WORKFLOW_VERSION,
+      nodes: [
+        { id: 'output', type: 'output', position: { x: 0, y: 0 }, data: {} },
+        { id: 'ai1', type: 'ai', position: { x: -160, y: 0 }, data: { prompt: 'Grade Q1' } },
+        { id: 'ai2', type: 'ai', position: { x: -160, y: 80 }, data: { prompt: 'Grade Q1 again' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'ai1', sourceHandle: 'output', target: 'output', targetHandle: 'grade-0' },
+      ],
+    }
+    expect(connectionIsValid(g, 'ai2', 'output', 'output', 'grade-0')).toBe(false)
   })
 
   it('rejects rubricMerge with duplicate criterion sources', () => {

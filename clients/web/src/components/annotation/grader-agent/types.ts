@@ -2,12 +2,15 @@
 
 export const WORKFLOW_VERSION = 1
 
+export type GradingAgentItemKind = 'assignment' | 'quiz'
+
 export type GraderNodeType =
   | 'output'
   | 'grader'
   | 'criterionGrader'
   | 'ai'
   | 'studentSubmission'
+  | 'quizResponses'
   | 'activity'
   | 'codeTestRunner'
   | 'conditionalRouter'
@@ -181,6 +184,7 @@ export type ScoreAggregatorNodeData = {
 export type PaletteNodeType = Extract<
   GraderNodeType,
   | 'studentSubmission'
+  | 'quizResponses'
   | 'activity'
   | 'reference'
   | 'rubric'
@@ -215,6 +219,7 @@ export const HANDLE_CONTEXT = 'context'
 export function isSourceOnlyNodeType(type: string): boolean {
   return (
     type === 'studentSubmission' ||
+    type === 'quizResponses' ||
     type === 'activity' ||
     type === 'reference' ||
     type === 'rubric'
@@ -227,6 +232,10 @@ export function isActivityNodeType(type: string): boolean {
 
 export function isStudentSubmissionNodeType(type: string): boolean {
   return type === 'studentSubmission'
+}
+
+export function isQuizResponsesNodeType(type: string): boolean {
+  return type === 'quizResponses'
 }
 
 export function isAiNodeType(type: string): boolean {

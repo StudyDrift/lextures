@@ -582,6 +582,56 @@ func canvasBestRatingIDForPoints(crit map[string]any, points float64) string {
 	return bestID
 }
 
+func canvasPutJSON(
+	ctx context.Context,
+	client *http.Client,
+	base, accessToken, path string,
+	payload any,
+) (map[string]any, error) {
+	raw, err := json.Marshal(payload)
+	if err != nil {
+		return nil, errors.New("Failed to encode Canvas request.")
+	}
+	u := fmt.Sprintf("%s/api/v1/%s", strings.TrimRight(base, "/"), strings.TrimLeft(path, "/"))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPut, u, strings.NewReader(string(raw)))
+	if err != nil {
+		return nil, errors.New("Failed to build Canvas request.")
+	}
+	req.Header.Set("Authorization", "Bearer "+strings.TrimSpace(accessToken))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, errors.New("Could not reach Canvas (network error). Check the base URL and try again.")
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	if resp.StatusCode == http.StatusUnauthorized {
+		return nil, errors.New("Canvas rejected the access token (401). Create a token with permission to update grades and try again.")
+	}
+	if resp.StatusCode == http.StatusForbidden {
+		return nil, errors.New("Canvas rejected the grade update (403). Your token may lack permission to manage grades in this course.")
+	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		msg := strings.TrimSpace(string(body))
+		if msg == "" {
+			return nil, fmt.Errorf("Canvas API error HTTP %d", resp.StatusCode)
+		}
+		return nil, fmt.Errorf("Canvas API error HTTP %d: %s", resp.StatusCode, msg)
+	}
+	if len(body) == 0 {
+		return map[string]any{}, nil
+	}
+	var out any
+	if err := json.Unmarshal(body, &out); err != nil {
+		return nil, errors.New("Canvas returned invalid JSON.")
+	}
+	m, ok := out.(map[string]any)
+	if !ok {
+		return map[string]any{}, nil
+	}
+	return m, nil
+}
+
 func canvasPutForm(
 	ctx context.Context,
 	client *http.Client,
