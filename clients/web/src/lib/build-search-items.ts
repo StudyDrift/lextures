@@ -133,6 +133,7 @@ export function buildGlobalSearchItems(
       hint: 'global notebook cross course personal notes',
     },
     { title: 'Calendar', subtitle: 'Your schedule', path: '/calendar', hint: 'calendar schedule' },
+    { title: 'Todos', subtitle: 'Student week board and grading list', path: '/todos', hint: 'todos tasks kanban grading backlog' },
     { title: 'Inbox', subtitle: 'Messages', path: '/inbox', hint: 'inbox messages mail' },
     {
       title: 'Account',

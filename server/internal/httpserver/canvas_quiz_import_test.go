@@ -238,7 +238,7 @@ func TestCanvasParseSubmissionDataMap_stringAnswer(t *testing.T) {
 }
 
 func TestCanvasMergeSubmissionAnswers_questionRowUsesQuizQuestionID(t *testing.T) {
-	merged := canvasMergeSubmissionAnswers(nil, nil, []map[string]any{
+	merged := canvasMergeSubmissionAnswers(nil, []map[string]any{
 		{
 			"id":     float64(42),
 			"answer": "Sprint retrospective notes",
@@ -291,7 +291,7 @@ func TestCanvasParseSubmissionDataSlice_gradedEssayUsesText(t *testing.T) {
 }
 
 func TestCanvasMergeSubmissionAnswers_eventsFallback(t *testing.T) {
-	merged := canvasMergeSubmissionAnswers(nil, nil, nil, []map[string]any{
+	merged := canvasMergeSubmissionAnswers(nil, nil, []map[string]any{
 		{
 			"event_type": "question_answered",
 			"event_data": map[string]any{
@@ -306,6 +306,76 @@ func TestCanvasMergeSubmissionAnswers_eventsFallback(t *testing.T) {
 	}
 	if canvasAnswerAsString(ans.Answer) != "Captured from quiz log auditing" {
 		t.Fatalf("unexpected answer: %+v", ans.Answer)
+	}
+}
+
+func TestCanvasAnswerTextToMarkdown(t *testing.T) {
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{name: "plain text passes through", in: "  10  ", want: "10"},
+		{name: "empty stays empty", in: "   ", want: ""},
+		{name: "html converts to markdown", in: "<p>Hello <strong>world</strong></p>", want: "Hello **world**"},
+		{name: "html list converts", in: "<ul><li>a</li><li>b</li></ul>", want: "- a\n- b"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := canvasAnswerTextToMarkdown(tc.in); got != tc.want {
+				t.Fatalf("canvasAnswerTextToMarkdown(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestCanvasResponseJSONForAnswer_essayHTMLBecomesMarkdown(t *testing.T) {
+	q := coursemodulequiz.QuizQuestion{ID: "canvas-42", QuestionType: "essay", Points: 5}
+	got := canvasResponseJSONForAnswer(q, "<p>Reflection on the <em>sprint</em></p>", nil)
+	var decoded struct {
+		TextAnswer string `json:"textAnswer"`
+	}
+	if err := json.Unmarshal(got, &decoded); err != nil {
+		t.Fatalf("unmarshal response json: %v", err)
+	}
+	if decoded.TextAnswer != "Reflection on the _sprint_" {
+		t.Fatalf("unexpected markdown answer: %q", decoded.TextAnswer)
+	}
+}
+
+func TestCanvasMergeSubmissionAnswers_assignmentSubmissionHistory(t *testing.T) {
+	// Canvas only exposes other learners' quiz answers to graders through the assignment
+	// submission's submission_history[].submission_data. The quiz-submission detail/list blobs
+	// come back empty for a grader token, so the assignment submission must populate answers.
+	detail := map[string]any{"workflow_state": "complete"}
+	assignmentSubmission := map[string]any{
+		"user_id": float64(7),
+		"submission_history": []any{
+			map[string]any{
+				"submission_data": []any{
+					map[string]any{
+						"question_id": float64(101),
+						"text":        "10",
+						"correct":     false,
+						"points":      float64(0),
+					},
+				},
+			},
+		},
+	}
+	merged := canvasMergeSubmissionAnswers([]map[string]any{detail, assignmentSubmission}, nil, nil)
+	ans, ok := merged[101]
+	if !ok {
+		t.Fatalf("expected answer keyed by question 101, got %+v", merged)
+	}
+	if canvasAnswerAsString(ans.Answer) != "10" {
+		t.Fatalf("unexpected answer value: %+v", ans.Answer)
+	}
+	if ans.Correct == nil || *ans.Correct {
+		t.Fatalf("expected correct=false from grader submission_data, got %+v", ans.Correct)
+	}
+	if ans.Points == nil || *ans.Points != 0 {
+		t.Fatalf("expected 0 points, got %+v", ans.Points)
 	}
 }
 
@@ -350,6 +420,50 @@ func TestCanvasGradeImportedShortAnswerPendingReview(t *testing.T) {
 	}
 	if pts != 0 || max != 3 {
 		t.Fatalf("points earned=%v max=%v", pts, max)
+	}
+}
+
+func TestCanvasGradeImportedNumericWithoutAnswerKeyIsUngraded(t *testing.T) {
+	// A reflection/survey numeric question with no defined correct answer (Canvas range 0–0
+	// imports as an empty type config). Canvas reports it "incorrect", but it must surface as
+	// ungraded, not wrong.
+	q := coursemodulequiz.QuizQuestion{
+		ID:           "canvas-1",
+		QuestionType: "numeric",
+		Points:       12,
+		TypeConfig:   json.RawMessage(`{}`),
+	}
+	wrong := false
+	zero := 0.0
+	answer := canvasQuizSubmissionAnswer{
+		CanvasQuestionID: 1,
+		Answer:           "10",
+		Correct:          &wrong,
+		Points:           &zero,
+	}
+	_, isCorrect, pts, max := canvasGradeImportedQuestion(q, answer, nil, nil)
+	if isCorrect != nil {
+		t.Fatalf("expected nil is_correct for keyless numeric question, got %v", *isCorrect)
+	}
+	if pts != 0 || max != 12 {
+		t.Fatalf("points earned=%v max=%v", pts, max)
+	}
+}
+
+func TestCanvasGradeImportedNumericWithAnswerKeyMarksWrong(t *testing.T) {
+	q := coursemodulequiz.QuizQuestion{
+		ID:           "canvas-2",
+		QuestionType: "numeric",
+		Points:       4,
+		TypeConfig:   json.RawMessage(`{"correct":5,"toleranceAbs":0}`),
+	}
+	answer := canvasQuizSubmissionAnswer{CanvasQuestionID: 2, Answer: float64(10)}
+	_, isCorrect, pts, _ := canvasGradeImportedQuestion(q, answer, nil, nil)
+	if isCorrect == nil || *isCorrect {
+		t.Fatalf("expected incorrect for keyed numeric question, got %v", isCorrect)
+	}
+	if pts != 0 {
+		t.Fatalf("expected 0 points, got %v", pts)
 	}
 }
 

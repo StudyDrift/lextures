@@ -149,6 +149,7 @@ export default function App() {
               <Route index element={<Pages.CourseDetail />} />
             </Route>
             <Route path="/calendar" element={<Pages.Calendar />} />
+            <Route path="/todos" element={<Pages.TodosPage />} />
             <Route path="/admin/accommodations" element={<Pages.AdminAccommodationsPage />} />
             <Route path="/admin/accommodations/audit" element={<Pages.AccommodationAuditPage />} />
             <Route path="/admin/ccr/achievements" element={<Pages.AdminCCRAchievementsPage />} />

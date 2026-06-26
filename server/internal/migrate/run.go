@@ -66,6 +66,9 @@ func runLocked(ctx context.Context, conn *pgx.Conn, fsys fs.FS, dir string) erro
 	if err := repairMigration308RenumberCollision(ctx, conn, fsys, dir); err != nil {
 		return err
 	}
+	if err := repairMigration334RenumberCollision(ctx, conn, fsys, dir); err != nil {
+		return err
+	}
 	if err := repairDemoMigrationChecksums(ctx, conn, fsys, dir); err != nil {
 		return err
 	}

@@ -1,18 +1,22 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { X } from 'lucide-react'
+import { Check, CircleHelp, X } from 'lucide-react'
 import { formatDateTime } from '../../lib/format'
 import {
+  fetchCourseCanvasLink,
   fetchQuizAttemptGrading,
   fetchQuizAttemptsList,
   putQuizAttemptGrading,
+  type CourseCanvasLinkApi,
   type QuizAttemptGradingPayload,
   type QuizGradingQuestion,
 } from '../../lib/courses-api'
+import { queueCanvasQuizGradeSync } from '../canvas/canvas-grade-sync'
 import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionNavigator } from '../annotation/submission-navigator'
 import { useSpeedGraderHotkeys } from '../annotation/speed-grader-shortcuts'
 import type { GradedFilter } from '../annotation/submission-navigator-utils'
 import { QuizResponseDisplay } from './quiz-response-display'
+import { formatQuizResponseText } from './quiz-response-format'
 import { MathPlainText } from '../math/math-plain-text'
 import {
   defaultQuizSubmissionIndex,
@@ -54,7 +58,11 @@ export function QuizSpeedGraderBranch({
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [savedMessage, setSavedMessage] = useState('Saved')
   const [scoreInputs, setScoreInputs] = useState<Record<number, string>>({})
+  const [canvasLink, setCanvasLink] = useState<CourseCanvasLinkApi | null>(null)
+  const [canvasSyncPending, setCanvasSyncPending] = useState(false)
+  const canvasSyncAbortRef = useRef<(() => void) | null>(null)
 
   const submissions = useMemo(
     () => filterQuizSubmissions(allSubmissions, gradedFilter),
@@ -122,6 +130,29 @@ export function QuizSpeedGraderBranch({
   }, [presentation, modalOpen, reloadRoster])
 
   useEffect(() => {
+    let cancelled = false
+    void (async () => {
+      try {
+        const link = await fetchCourseCanvasLink(courseCode)
+        if (!cancelled) setCanvasLink(link)
+      } catch {
+        if (!cancelled) setCanvasLink({ linked: false, gradeSyncEnabled: false })
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [courseCode])
+
+  useEffect(
+    () => () => {
+      canvasSyncAbortRef.current?.()
+      canvasSyncAbortRef.current = null
+    },
+    [],
+  )
+
+  useEffect(() => {
     if ((presentation === 'modal' && !modalOpen) || !attemptId) {
       setGrading(null)
       return
@@ -165,15 +196,51 @@ export function QuizSpeedGraderBranch({
       }
 
       await putQuizAttemptGrading(courseCode, itemId, grading.attemptId, { questions })
-      setSavedFlash(true)
-      window.setTimeout(() => setSavedFlash(false), 2000)
       handleGradeSaved()
       await Promise.all([reloadRoster(), loadGrading(attemptId)])
+
+      const startedCanvasSync = startCanvasSync(grading.attemptId)
+      if (startedCanvasSync) {
+        setSavedMessage('Scores saved. Syncing to Canvas…')
+        setSavedFlash(true)
+      } else {
+        setSavedMessage('Saved')
+        setSavedFlash(true)
+        window.setTimeout(() => setSavedFlash(false), 2000)
+      }
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : 'Could not save scores.')
     } finally {
       setSaving(false)
     }
+  }
+
+  function startCanvasSync(attemptId: string): boolean {
+    if (!canvasLink) return false
+    canvasSyncAbortRef.current?.()
+    const handle = queueCanvasQuizGradeSync({
+      courseCode,
+      itemId,
+      attemptId,
+      canvasLink,
+      onComplete: () => {
+        setCanvasSyncPending(false)
+        setSavedMessage('Scores saved and synced to Canvas.')
+        setSavedFlash(true)
+        window.setTimeout(() => setSavedFlash(false), 2500)
+      },
+      onError: (message) => {
+        setCanvasSyncPending(false)
+        setSaveError(message)
+        setSavedFlash(false)
+      },
+    })
+    if (handle) {
+      canvasSyncAbortRef.current = handle.abort
+      setCanvasSyncPending(true)
+      return true
+    }
+    return false
   }
 
   const modalTitleId = useId()
@@ -268,15 +335,15 @@ export function QuizSpeedGraderBranch({
           </p>
         ) : null}
         {savedFlash ? (
-          <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Saved</p>
+          <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">{savedMessage}</p>
         ) : null}
         <button
           type="button"
-          disabled={saving || !grading || grading.questions.length === 0}
+          disabled={saving || canvasSyncPending || !grading || grading.questions.length === 0}
           onClick={() => void saveScores()}
           className="w-full rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
         >
-          {saving ? 'Saving…' : 'Save scores'}
+          {saving ? 'Saving…' : canvasSyncPending ? 'Syncing to Canvas…' : 'Save scores'}
         </button>
         <p className="text-xs text-slate-500 dark:text-neutral-400">
           Enter points per question, then save. Partial credit is supported.
@@ -378,12 +445,67 @@ export function QuizSpeedGraderBranch({
   )
 }
 
-function questionStatusLabel(question: QuizGradingQuestion): string {
-  if (question.needsGrading) return ' · Needs grading'
+function questionPointsLabel(question: QuizGradingQuestion): string {
+  if (question.needsGrading) return ''
   if (question.pointsAwarded != null && Number.isFinite(question.pointsAwarded)) {
     return ` · ${question.pointsAwarded}/${question.maxPoints} pts`
   }
   return ''
+}
+
+type QuestionStatus = 'needs-grading' | 'unanswered' | 'correct' | 'incorrect' | 'none'
+
+// Question types that are auto-graded against a correct-answer key. Only these can be shown as
+// correct/incorrect — subjective or keyless questions are never "wrong", just graded or ungraded.
+const OBJECTIVE_QUESTION_TYPES = new Set(['multiple_choice', 'true_false', 'numeric'])
+
+function questionStatus(question: QuizGradingQuestion, answered: boolean): QuestionStatus {
+  if (question.needsGrading) return 'needs-grading'
+  if (!answered) return 'unanswered'
+  if (OBJECTIVE_QUESTION_TYPES.has(question.questionType)) {
+    if (question.isCorrect === true) return 'correct'
+    if (question.isCorrect === false) return 'incorrect'
+  }
+  return 'none'
+}
+
+function QuestionStatusBadge({ status }: { status: QuestionStatus }) {
+  if (status === 'none') return null
+  const config: Record<
+    Exclude<QuestionStatus, 'none'>,
+    { label: string; className: string; icon: typeof Check | null }
+  > = {
+    correct: {
+      label: 'Correct',
+      icon: Check,
+      className:
+        'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300',
+    },
+    incorrect: {
+      label: 'Wrong answer',
+      icon: X,
+      className: 'bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300',
+    },
+    'needs-grading': {
+      label: 'Needs grading',
+      icon: CircleHelp,
+      className: 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300',
+    },
+    unanswered: {
+      label: 'Not answered',
+      icon: null,
+      className: 'bg-slate-200 text-slate-700 dark:bg-neutral-800 dark:text-neutral-300',
+    },
+  }
+  const { label, className, icon: Icon } = config[status]
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${className}`}
+    >
+      {Icon ? <Icon className="h-3.5 w-3.5" aria-hidden /> : null}
+      {label}
+    </span>
+  )
 }
 
 function QuizQuestionGradeCard({
@@ -395,20 +517,29 @@ function QuizQuestionGradeCard({
   scoreInput: string
   onScoreChange: (value: string) => void
 }) {
-  return (
-    <article
-      className={`rounded-xl border p-4 ${
-        question.needsGrading
-          ? 'border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20'
+  const answered =
+    formatQuizResponseText(question.responseJson, question.questionType, question.choices ?? null) !==
+    ''
+  const status = questionStatus(question, answered)
+  const cardBorder =
+    status === 'needs-grading'
+      ? 'border-amber-200 bg-amber-50/50 dark:border-amber-900/50 dark:bg-amber-950/20'
+      : status === 'incorrect'
+        ? 'border-rose-200 bg-rose-50/40 dark:border-rose-900/50 dark:bg-rose-950/20'
+        : status === 'correct'
+          ? 'border-emerald-200 bg-emerald-50/40 dark:border-emerald-900/50 dark:bg-emerald-950/20'
           : 'border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-900'
-      }`}
-    >
+  return (
+    <article className={`rounded-xl border p-4 ${cardBorder}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
-            Question {question.questionIndex + 1}
-            {questionStatusLabel(question)}
-          </p>
+          <div className="mb-1 flex flex-wrap items-center gap-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-neutral-400">
+              Question {question.questionIndex + 1}
+              {questionPointsLabel(question)}
+            </p>
+            <QuestionStatusBadge status={status} />
+          </div>
           {question.promptSnapshot ? (
             <div className="mt-1 text-sm font-medium text-slate-900 dark:text-neutral-100">
               <MathPlainText text={question.promptSnapshot} />

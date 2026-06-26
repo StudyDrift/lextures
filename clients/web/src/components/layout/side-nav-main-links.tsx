@@ -14,6 +14,7 @@ import {
   Inbox,
   LayoutDashboard,
   Library,
+  ListTodo,
   Route,
   RotateCcw,
   Settings,
@@ -90,6 +91,9 @@ export function SideNavMainLinks() {
       <SideNavLink to="/calendar" icon={<Calendar className="h-5 w-5" />}>
         Calendar
       </SideNavLink>
+      <SideNavLink to="/todos" icon={<ListTodo className="h-5 w-5" />}>
+        Todos
+      </SideNavLink>
 
       <SideNavSectionLabel first>Learning</SideNavSectionLabel>
       {ragNotebookEnabled ? (
@@ -122,7 +126,7 @@ export function SideNavMainLinks() {
       ) : null}
 
       <SideNavSectionLabel>Notes & portfolio</SideNavSectionLabel>
-      <SideNavLink to="/notebooks" icon={<BookMarked className="h-5 w-5" />}>
+      <SideNavLink to="/notebooks" end icon={<BookMarked className="h-5 w-5" />}>
         My Notebooks
       </SideNavLink>
       <SideNavLink to="/notebooks/global" icon={<BookMarked className="h-5 w-5" />}>

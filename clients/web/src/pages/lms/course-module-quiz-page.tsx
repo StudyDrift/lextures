@@ -16,6 +16,7 @@ import {
   defaultQuizAdvancedSettings,
   fetchCourse,
   courseGradebookViewPermission,
+  fetchCourseEnrollmentsList,
   fetchCourseGradingSettings,
   fetchCourseStructure,
   fetchModuleQuiz,
@@ -342,6 +343,7 @@ export default function CourseModuleQuizPage() {
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
   const [gradingOpen, setGradingOpen] = useState(false)
   const [ungradedAttemptCount, setUngradedAttemptCount] = useState<number | null>(null)
+  const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
   const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
@@ -470,12 +472,16 @@ export default function CourseModuleQuizPage() {
   useEffect(() => {
     if (!canGradeQuiz || !courseCode || !itemId) {
       setUngradedAttemptCount(null)
+      setEnrolledStudentCount(null)
       return
     }
     let cancelled = false
     void (async () => {
       try {
-        const data = await fetchQuizAttemptsList(courseCode, itemId)
+        const [data, enrollments] = await Promise.all([
+          fetchQuizAttemptsList(courseCode, itemId),
+          fetchCourseEnrollmentsList(courseCode),
+        ])
         if (cancelled) return
         const byStudent = new Map<string, (typeof data.attempts)[number]>()
         for (const attempt of data.attempts) {
@@ -488,8 +494,16 @@ export default function CourseModuleQuizPage() {
         setUngradedAttemptCount(
           [...byStudent.values()].filter((attempt) => Boolean(attempt.needsManualGrading)).length,
         )
+        const students = new Set<string>()
+        for (const row of enrollments) {
+          if (row.role.trim().toLowerCase() === 'student') students.add(row.userId)
+        }
+        setEnrolledStudentCount(students.size)
       } catch {
-        if (!cancelled) setUngradedAttemptCount(null)
+        if (!cancelled) {
+          setUngradedAttemptCount(null)
+          setEnrolledStudentCount(null)
+        }
       }
     })()
     return () => {
@@ -1064,10 +1078,14 @@ export default function CourseModuleQuizPage() {
                 type="button"
                 onClick={() => setGradingOpen(true)}
                 disabled={loading}
-                className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-50 dark:hover:bg-amber-950/60"
+                className={
+                  ungradedAttemptCount != null && ungradedAttemptCount === 0
+                    ? 'inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-900 shadow-sm transition-[background-color,color,border-color] hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-50 dark:hover:bg-emerald-950/60'
+                    : 'inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-50 dark:hover:bg-amber-950/60'
+                }
               >
-                {ungradedAttemptCount != null && ungradedAttemptCount > 0
-                  ? `Grade submissions (${ungradedAttemptCount} ungraded)`
+                {ungradedAttemptCount != null && enrolledStudentCount != null
+                  ? `Grade submissions (${ungradedAttemptCount}/${enrolledStudentCount} ungraded)`
                   : 'Grade submissions'}
               </button>
             ) : null}

@@ -417,9 +417,9 @@ func canvasMergeAnswersFromQuizEvents(events []map[string]any) map[int64]canvasQ
 	return out
 }
 
-func canvasMergeSubmissionAnswers(detail, listItem map[string]any, questionRows []map[string]any, eventRows []map[string]any) map[int64]canvasQuizSubmissionAnswer {
+func canvasMergeSubmissionAnswers(sources []map[string]any, questionRows []map[string]any, eventRows []map[string]any) map[int64]canvasQuizSubmissionAnswer {
 	out := make(map[int64]canvasQuizSubmissionAnswer)
-	for _, src := range []map[string]any{detail, listItem} {
+	for _, src := range sources {
 		if src == nil {
 			continue
 		}
@@ -623,7 +623,7 @@ func canvasResponseJSONForAnswer(q coursemodulequiz.QuizQuestion, answer any, ch
 			return b
 		}
 	case "short_answer", "essay":
-		if text := canvasAnswerAsString(answer); text != "" {
+		if text := canvasAnswerTextToMarkdown(canvasAnswerAsString(answer)); text != "" {
 			b, _ := json.Marshal(map[string]any{"textAnswer": text})
 			return b
 		}
@@ -633,12 +633,12 @@ func canvasResponseJSONForAnswer(q coursemodulequiz.QuizQuestion, answer any, ch
 			b, _ := json.Marshal(map[string]any{"blanks": v})
 			return b
 		case string:
-			if strings.TrimSpace(v) != "" {
-				b, _ := json.Marshal(map[string]any{"textAnswer": strings.TrimSpace(v)})
+			if text := canvasAnswerTextToMarkdown(v); text != "" {
+				b, _ := json.Marshal(map[string]any{"textAnswer": text})
 				return b
 			}
 		default:
-			if text := canvasAnswerAsString(answer); text != "" {
+			if text := canvasAnswerTextToMarkdown(canvasAnswerAsString(answer)); text != "" {
 				b, _ := json.Marshal(map[string]any{"textAnswer": text})
 				return b
 			}
@@ -672,6 +672,22 @@ func canvasAnswerAsChoiceIndex(answer any, choiceCount int) (uint, bool) {
 		}
 	}
 	return 0, false
+}
+
+// canvasAnswerTextToMarkdown converts a Canvas free-text answer to Markdown. Canvas stores essay
+// and other rich answers as HTML, so when the value contains markup we run it through the same
+// HTML→Markdown converter used elsewhere in the importer; plain-text answers pass through trimmed.
+func canvasAnswerTextToMarkdown(s string) string {
+	s = strings.TrimSpace(s)
+	if s == "" {
+		return ""
+	}
+	if htmlAnyTagRe.MatchString(s) {
+		if mdText := markdownFromHTML(s); mdText != "" {
+			return mdText
+		}
+	}
+	return s
 }
 
 func canvasAnswerAsString(answer any) string {
@@ -719,14 +735,38 @@ func canvasGradeImportedQuestion(
 	}
 	responseJSON = canvasResponseJSONForAnswer(q, answer.Answer, choiceByAnswerID)
 
+	clampPoints := func(p float64) float64 {
+		if p < 0 {
+			return 0
+		}
+		if p > maxPoints {
+			return maxPoints
+		}
+		return p
+	}
+
+	// Subjective question types are never auto-scored as correct/incorrect on import. Canvas can
+	// emit a default 0/undefined score before an instructor reviews them; import any existing
+	// Canvas points but leave correctness unset so they surface as "needs grading", not "wrong".
+	if quizattemptgrading.IsManualGradingQuestionType(q.QuestionType) {
+		if answer.Points != nil {
+			pointsAwarded = clampPoints(*answer.Points)
+		}
+		return responseJSON, nil, pointsAwarded, maxPoints
+	}
+
+	// Objective questions can only be graded when the imported question has a correct-answer key.
+	// Reflection/survey items (e.g. a numeric question with no defined answer) have none, so
+	// Canvas's "incorrect" flag is meaningless — leave them ungraded instead of marking them wrong.
+	if !canvasQuestionHasAnswerKey(q, correctIDs) {
+		if answer.Points != nil {
+			pointsAwarded = clampPoints(*answer.Points)
+		}
+		return responseJSON, nil, pointsAwarded, maxPoints
+	}
+
 	if answer.Points != nil {
-		pointsAwarded = *answer.Points
-		if pointsAwarded < 0 {
-			pointsAwarded = 0
-		}
-		if pointsAwarded > maxPoints {
-			pointsAwarded = maxPoints
-		}
+		pointsAwarded = clampPoints(*answer.Points)
 		if answer.Correct != nil {
 			isCorrect = answer.Correct
 		} else if maxPoints > 0 {
@@ -737,10 +777,6 @@ func canvasGradeImportedQuestion(
 	}
 
 	if answer.Correct != nil {
-		// Canvas may send correct=false before an instructor reviews manual items.
-		if quizattemptgrading.IsManualGradingQuestionType(q.QuestionType) {
-			return responseJSON, nil, 0, maxPoints
-		}
 		isCorrect = answer.Correct
 		if *answer.Correct {
 			pointsAwarded = maxPoints
@@ -785,6 +821,34 @@ func canvasGradeImportedQuestion(
 	}
 
 	return responseJSON, isCorrect, pointsAwarded, maxPoints
+}
+
+// canvasQuestionHasAnswerKey reports whether an imported objective question carries a
+// correct-answer key that the importer can grade against. Without one (e.g. a numeric reflection
+// question with no defined answer), Canvas's correctness flag is meaningless and the response is
+// left ungraded rather than marked wrong.
+func canvasQuestionHasAnswerKey(q coursemodulequiz.QuizQuestion, correctIDs map[int64]struct{}) bool {
+	switch q.QuestionType {
+	case "multiple_choice", "true_false":
+		return q.CorrectChoiceIndex != nil || len(correctIDs) > 0
+	case "numeric":
+		return canvasNumericConfigHasCorrect(q.TypeConfig)
+	default:
+		return false
+	}
+}
+
+func canvasNumericConfigHasCorrect(typeConfig json.RawMessage) bool {
+	if len(typeConfig) == 0 {
+		return false
+	}
+	var cfg struct {
+		Correct *float64 `json:"correct"`
+	}
+	if json.Unmarshal(typeConfig, &cfg) != nil {
+		return false
+	}
+	return cfg.Correct != nil
 }
 
 func canvasAnswerSetsEqual(selected, correct map[int64]struct{}) bool {
@@ -963,6 +1027,53 @@ func canvasFetchQuizAnswerMetadataParallel(
 	return out, nil
 }
 
+// canvasFetchQuizAssignmentSubmissionsByUser loads the assignment-submission view of each quiz,
+// keyed by Canvas assignment id then Canvas user id. Canvas only exposes other learners' quiz
+// answers to graders through the assignment submission's submission_history[].submission_data
+// (the same source Canvas SpeedGrader reads); the quiz-submission detail and
+// quiz_submissions/{id}/questions endpoints return answers only for the requesting user.
+func canvasFetchQuizAssignmentSubmissionsByUser(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID int64,
+	assignmentIDs []int64,
+) map[int64]map[int64]map[string]any {
+	out := make(map[int64]map[int64]map[string]any, len(assignmentIDs))
+	if len(assignmentIDs) == 0 {
+		return out
+	}
+	q := url.Values{}
+	q.Add("include[]", "submission_history")
+	q.Add("include[]", "user")
+
+	var mu sync.Mutex
+	g, gctx := canvasImportParallelGroup(ctx, len(assignmentIDs))
+	for _, aid := range assignmentIDs {
+		aid := aid
+		g.Go(func() error {
+			subs, err := canvasGetArrayPaginated(gctx, client, canvasBase, accessToken,
+				fmt.Sprintf("courses/%d/assignments/%d/submissions", canvasCourseID, aid), q)
+			if err != nil {
+				log.Printf("canvas-import: assignment %d submissions fetch failed: %v", aid, err)
+				return nil
+			}
+			byUser := make(map[int64]map[string]any, len(subs))
+			for _, s := range subs {
+				if uid := canvasCanvasUserIDFromMap(s); uid > 0 {
+					byUser[uid] = s
+				}
+			}
+			mu.Lock()
+			out[aid] = byUser
+			mu.Unlock()
+			return nil
+		})
+	}
+	_ = g.Wait()
+	return out
+}
+
 func canvasFetchQuizAttemptPayloadsParallel(
 	ctx context.Context,
 	client *http.Client,
@@ -1049,6 +1160,16 @@ func canvasImportQuizAttempts(
 		return err
 	}
 
+	// Canvas exposes other learners' quiz answers to graders via the assignment submission's
+	// submission_history[].submission_data, so prefetch those keyed by assignment + user.
+	assignmentIDs := make([]int64, 0, len(canvasQuizToAssignmentID))
+	for _, aid := range canvasQuizToAssignmentID {
+		if aid > 0 {
+			assignmentIDs = append(assignmentIDs, aid)
+		}
+	}
+	assignmentSubsByUser := canvasFetchQuizAssignmentSubmissionsByUser(ctx, client, canvasBase, accessToken, canvasCourseID, assignmentIDs)
+
 	for canvasQID, itemID := range canvasQuizToItem {
 		questions := canvasQuizToQuestions[canvasQID]
 		if len(questions) == 0 {
@@ -1062,6 +1183,7 @@ func canvasImportQuizAttempts(
 		choiceMaps := meta.choiceMaps
 		correctAnswerIDs := meta.correctAnswerIDs
 		subs := quizSubsByQuiz[canvasQID]
+		assignmentSubsForUser := assignmentSubsByUser[canvasQuizToAssignmentID[canvasQID]]
 
 		payloads, err := canvasFetchQuizAttemptPayloadsParallel(ctx, client, canvasBase, accessToken, canvasCourseID, canvasQID, subs, canvasUserToLocal)
 		if err != nil {
@@ -1094,7 +1216,12 @@ func canvasImportQuizAttempts(
 				attemptNum = 1
 			}
 
-			answers := canvasMergeSubmissionAnswers(payload.detail, raw, payload.questionRows, payload.eventRows)
+			// The assignment submission is listed last so its grader-visible submission_data
+			// takes precedence over the (usually empty-for-graders) quiz-submission blobs.
+			answers := canvasMergeSubmissionAnswers(
+				[]map[string]any{payload.detail, raw, assignmentSubsForUser[canvasUserID]},
+				payload.questionRows, payload.eventRows,
+			)
 			score, hasScore := canvasQuizSubmissionScore(raw)
 			if len(answers) == 0 && !hasScore {
 				if !canvasQuizSubmissionImportable(raw) {

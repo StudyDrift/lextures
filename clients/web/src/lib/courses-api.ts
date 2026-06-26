@@ -6663,12 +6663,26 @@ export async function syncSubmissionToCanvas(
     throw new Error('Server did not return a sync job id.')
   }
 
+  const grade = await awaitCanvasSyncJob(queued, authToken, signal)
+  return grade ?? { submissionId, syncedToCanvas: true }
+}
+
+/** Waits for a queued Canvas sync job to finish over its WebSocket. Resolves with the synced grade
+ * (when the server returns one) or undefined on a plain completion. */
+function awaitCanvasSyncJob(
+  queued: CanvasSubmissionSyncQueuedResponse,
+  authToken: string,
+  signal?: AbortSignal,
+): Promise<SubmissionGradeApi | undefined> {
+  if (!queued.jobId?.trim()) {
+    return Promise.reject(new Error('Server did not return a sync job id.'))
+  }
   const url = canvasSubmissionSyncWebSocketUrl(queued.jobId)
   if (!url) {
-    throw new Error('Sign in to sync grades to Canvas.')
+    return Promise.reject(new Error('Sign in to sync grades to Canvas.'))
   }
 
-  return new Promise<SubmissionGradeApi>((resolve, reject) => {
+  return new Promise<SubmissionGradeApi | undefined>((resolve, reject) => {
     const ws = new WebSocket(url)
     let settled = false
     let aborted = false
@@ -6711,11 +6725,7 @@ export async function syncSubmissionToCanvas(
         if (!settled) {
           settled = true
           ws.close()
-          if (o.grade && typeof o.grade === 'object') {
-            resolve(o.grade)
-          } else {
-            resolve({ submissionId, syncedToCanvas: true })
-          }
+          resolve(o.grade && typeof o.grade === 'object' ? o.grade : undefined)
         }
         return
       }
@@ -6735,6 +6745,57 @@ export async function syncSubmissionToCanvas(
       }
     }
   })
+}
+
+/** Queues a Canvas grade push for one quiz attempt and waits for completion over a job WebSocket. */
+export async function syncQuizAttemptToCanvas(
+  courseCode: string,
+  itemId: string,
+  attemptId: string,
+  body: {
+    canvasBaseUrl?: string
+    accessToken: string
+    pointsEarned?: number
+  },
+  options?: { signal?: AbortSignal },
+): Promise<void> {
+  const authToken = getAccessToken()
+  if (!authToken) {
+    throw new Error('Sign in to sync grades to Canvas.')
+  }
+
+  const signal = options?.signal
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/attempts/${encodeURIComponent(attemptId)}/sync-canvas`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal,
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+
+  await awaitCanvasSyncJob(raw as CanvasSubmissionSyncQueuedResponse, authToken, signal)
+}
+
+/** Queues a quiz attempt Canvas grade push and invokes callbacks when the background job finishes. */
+export function queueQuizGradeSyncToCanvas(
+  courseCode: string,
+  itemId: string,
+  attemptId: string,
+  body: { canvasBaseUrl?: string; accessToken: string; pointsEarned?: number },
+  handlers: { onComplete?: () => void; onError?: (message: string) => void },
+): { abort: () => void } {
+  const controller = new AbortController()
+  void syncQuizAttemptToCanvas(courseCode, itemId, attemptId, body, { signal: controller.signal })
+    .then(() => handlers.onComplete?.())
+    .catch((e) => {
+      if (controller.signal.aborted) return
+      handlers.onError?.(e instanceof Error ? e.message : 'Could not sync to Canvas.')
+    })
+  return { abort: () => controller.abort() }
 }
 
 /** Queues a Canvas grade push and invokes callbacks when the background job finishes. */

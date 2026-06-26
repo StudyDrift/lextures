@@ -9,6 +9,7 @@ import {
   type CourseStructureItem,
 } from '../../lib/courses-api'
 import { CalendarActionsMenu } from './calendar-actions-menu'
+import { CalendarCoursesViewMenu } from './calendar-courses-view-menu'
 import { CourseCalendar, type CourseCalendarAssignment } from './course-calendar'
 import { LmsPage } from './lms-page'
 
@@ -232,9 +233,23 @@ export default function Calendar() {
   return (
     <LmsPage
       title="Calendar"
-      description="Month, week, and to-do views across your courses. Toggle courses on the left to show or hide their due dates."
+      description="Month, week, and to-do views across your courses. Use View to choose which courses appear on the calendar."
       fillHeight
-      actions={<CalendarActionsMenu scope="global" />}
+      actions={
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          {eligibleCourses.length > 0 ? (
+            <CalendarCoursesViewMenu
+              courses={eligibleCourses}
+              disabledCourseIds={disabledCourseIds}
+              structureErrors={structureErrors}
+              onCourseEnabledChange={setCourseEnabled}
+              onShowAll={showAllCourses}
+              onHideAll={hideAllCourses}
+            />
+          ) : null}
+          <CalendarActionsMenu scope="global" />
+        </div>
+      }
     >
       {coursesError && (
         <p className="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/50 dark:text-rose-200">
@@ -253,83 +268,21 @@ export default function Calendar() {
         </p>
       )}
       {eligibleCourses.length > 0 ? (
-        <div className="mt-4 flex min-h-0 flex-1 flex-col gap-5 lg:mt-6 lg:flex-row lg:gap-6">
-          <aside className="shrink-0 lg:sticky lg:top-4 lg:max-h-[min(28rem,calc(100vh-8rem))] lg:w-72 lg:self-start">
-            <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-sm dark:border-neutral-700 dark:bg-neutral-900/90">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-sm font-semibold tracking-tight text-slate-900 dark:text-neutral-100">
-                    Courses
-                  </h2>
-                  <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
-                    Show due dates from selected courses on the calendar.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={showAllCourses}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-[background-color,color,border-color] hover:bg-white dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-                >
-                  Show all
-                </button>
-                <button
-                  type="button"
-                  onClick={hideAllCourses}
-                  className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700 transition-[background-color,color,border-color] hover:bg-white dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:bg-neutral-700"
-                >
-                  Hide all
-                </button>
-              </div>
-              <ul className="mt-4 max-h-64 space-y-2 overflow-y-auto overscroll-contain pe-0.5 lg:max-h-[min(22rem,calc(100vh-12rem))]">
-                {eligibleCourses.map((c) => {
-                  const enabled = !disabledCourseIds.has(c.id)
-                  const label = c.title.trim() || c.courseCode
-                  const err = structureErrors[c.id]
-                  return (
-                    <li key={c.id}>
-                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-transparent px-2 py-2 transition-[background-color,color,border-color] hover:border-slate-200 hover:bg-slate-50/80 dark:hover:border-neutral-600 dark:hover:bg-neutral-800/60">
-                        <input
-                          type="checkbox"
-                          className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 dark:border-neutral-600 dark:bg-neutral-900 dark:text-indigo-500 dark:focus:ring-indigo-400"
-                          checked={enabled}
-                          onChange={(e) => setCourseEnabled(c.id, e.target.checked)}
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-medium text-slate-900 dark:text-neutral-100">
-                            {label}
-                          </span>
-                          <span className="mt-0.5 block text-xs text-slate-500 dark:text-neutral-400">
-                            {c.courseCode}
-                          </span>
-                          {enabled && err ? (
-                            <span className="mt-1 block text-xs text-rose-600 dark:text-rose-400">{err}</span>
-                          ) : null}
-                        </span>
-                      </label>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          </aside>
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            {enabledCourses.length === 0 ? (
-              <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-950/40 dark:text-neutral-300">
-                Turn on at least one course to load its schedule.
-              </p>
-            ) : structuresLoading && !hasAnyLoadedStructure ? (
-              <p className="text-sm text-slate-500 dark:text-neutral-400">Loading calendars…</p>
-            ) : (
-              <CourseCalendar
-                courseCode={representativeCourseCode}
-                assignments={mergedAssignments}
-                canRescheduleDueByDrag={false}
-                initialDateKey={dateKey}
-              />
-            )}
-          </div>
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          {enabledCourses.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-8 text-center text-sm text-slate-600 dark:border-neutral-700 dark:bg-neutral-950/40 dark:text-neutral-300">
+              Turn on at least one course to load its schedule.
+            </p>
+          ) : structuresLoading && !hasAnyLoadedStructure ? (
+            <p className="text-sm text-slate-500 dark:text-neutral-400">Loading calendars…</p>
+          ) : (
+            <CourseCalendar
+              courseCode={representativeCourseCode}
+              assignments={mergedAssignments}
+              canRescheduleDueByDrag={false}
+              initialDateKey={dateKey}
+            />
+          )}
         </div>
       ) : null}
     </LmsPage>
