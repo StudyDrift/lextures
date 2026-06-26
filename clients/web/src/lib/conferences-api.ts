@@ -57,11 +57,6 @@ export function formatConferenceSlotTime(slot: ConferenceSlot): string {
   return formatDateTime(slot.startAt)
 }
 
-export function getConferenceSlotIcalUrl(slotId: string): string {
-  const base = import.meta.env.VITE_API_URL ?? ''
-  return `${base.replace(/\/$/, '')}/api/v1/conference-slots/${slotId}/ical`
-}
-
 export async function createConferenceAvailability(
   teacherId: string,
   input: CreateAvailabilityInput,

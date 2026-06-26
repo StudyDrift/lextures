@@ -11,7 +11,6 @@ import {
   isCodeTestRunnerNodeType,
   isConditionalRouterNodeType,
   isCriterionGraderNodeType,
-  isHumanReviewGateNodeType,
   isOriginalityNodeType,
   isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
@@ -74,8 +73,4 @@ export function gateInputSourceIsValid(
     default:
       return false
   }
-}
-
-export function graphHasReviewGate(nodes: { type: string }[]): boolean {
-  return nodes.some((node) => isHumanReviewGateNodeType(node.type))
 }

@@ -60,17 +60,6 @@ func Insert(ctx context.Context, pool *pgxpool.Pool, p InsertParams) (uuid.UUID,
 	return id, ts, err
 }
 
-// InsertTx writes a new audit event within an existing transaction (AC-6: same-tx atomicity).
-func InsertTx(ctx context.Context, tx pgx.Tx, p InsertParams) (uuid.UUID, time.Time, error) {
-	var id uuid.UUID
-	var ts time.Time
-	err := tx.QueryRow(ctx, insertSQL,
-		p.OrgID, p.EventType, p.ActorID, p.ActorIP, p.UserAgent,
-		p.TargetType, p.TargetID, nullBytes(p.BeforeValue), nullBytes(p.AfterValue), p.ChainHash,
-	).Scan(&id, &ts)
-	return id, ts, err
-}
-
 // Query holds optional filter parameters for List.
 type Query struct {
 	OrgID     *uuid.UUID

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -19,15 +18,8 @@ type mockStorage struct {
 	presignErr error
 }
 
-func (m *mockStorage) PutObject(_ context.Context, _ string, _ io.Reader, _ int64, _ string) error {
-	return nil
-}
 func (m *mockStorage) GetPresignedURL(_ context.Context, _ string, _ time.Duration) (string, error) {
 	return m.presignURL, m.presignErr
-}
-func (m *mockStorage) DeleteObject(_ context.Context, _ string) error { return nil }
-func (m *mockStorage) ListObjects(_ context.Context, _ string) ([]string, error) {
-	return nil, nil
 }
 
 func TestHandleCourseFileContent_NilStorage_Unauthorized(t *testing.T) {

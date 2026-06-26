@@ -23,17 +23,3 @@ func (m *CredentialsMetrics) IncVerifications() {
 func (m *CredentialsMetrics) IncShares() {
 	m.shares.Add(1)
 }
-
-func (m *CredentialsMetrics) Snapshot() map[string]uint64 {
-	return map[string]uint64{
-		"credentials_issued_total":        m.issued.Load(),
-		"credential_verifications_total":  m.verifications.Load(),
-		"credential_shares_total":         m.shares.Load(),
-	}
-}
-
-func (m *CredentialsMetrics) Reset() {
-	m.issued.Store(0)
-	m.verifications.Store(0)
-	m.shares.Store(0)
-}

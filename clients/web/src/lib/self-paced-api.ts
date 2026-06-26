@@ -58,32 +58,11 @@ export function formatProgressLabel(percent: number): string {
   return `${percent.toLocaleString()}% complete`
 }
 
-export async function selfEnroll(courseCode: string): Promise<SelfEnrollResult> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/self-enroll`,
-    { method: 'POST' },
-  )
-  if (!res.ok) throw new Error(`self-enroll failed: ${res.status}`)
-  return (await res.json()) as SelfEnrollResult
-}
-
 export async function fetchMyProgress(courseCode: string): Promise<SelfPacedProgress> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/my-progress`,
   )
   if (!res.ok) throw new Error(`progress failed: ${res.status}`)
-  return (await res.json()) as SelfPacedProgress
-}
-
-export async function completeItem(
-  courseCode: string,
-  itemId: string,
-): Promise<SelfPacedProgress> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/complete`,
-    { method: 'POST' },
-  )
-  if (!res.ok) throw new Error(`complete failed: ${res.status}`)
   return (await res.json()) as SelfPacedProgress
 }
 

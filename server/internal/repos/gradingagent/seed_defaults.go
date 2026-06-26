@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	gradingagentsvc "github.com/lextures/lextures/server/internal/service/gradingagent"
 )
 
@@ -58,9 +57,4 @@ RETURNING id
 		}
 	}
 	return nil
-}
-
-// SeedDefaultTemplatesPool is a convenience wrapper for callers outside a transaction.
-func SeedDefaultTemplatesPool(ctx context.Context, pool *pgxpool.Pool, courseID, createdBy uuid.UUID) error {
-	return SeedDefaultTemplates(ctx, pool, courseID, createdBy)
 }

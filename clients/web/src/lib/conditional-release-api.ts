@@ -96,51 +96,6 @@ export async function putModuleRequirements(
   return parseJson(res)
 }
 
-export async function putItemCompletionRule(
-  courseCode: string,
-  itemId: string,
-  body: { ruleType: ItemCompletionRuleType; threshold?: number | null },
-): Promise<ItemCompletionRule> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/completion-rule`,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
-  )
-  return parseJson(res)
-}
-
-export async function deleteItemCompletionRule(courseCode: string, itemId: string): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/items/${encodeURIComponent(itemId)}/completion-rule`,
-    { method: 'DELETE' },
-  )
-  await parseJson(res)
-}
-
-export async function fetchRequirementsReport(
-  courseCode: string,
-): Promise<{ rows: RequirementsReportRow[] }> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/requirements/report`,
-  )
-  return parseJson(res)
-}
-
-export async function postModuleUnlockOverride(
-  courseCode: string,
-  moduleId: string,
-  enrollmentId: string,
-): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/structure/modules/${encodeURIComponent(moduleId)}/unlock-override`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enrollmentId }),
-    },
-  )
-  await parseJson(res)
-}
-
 export function itemLockState(
   progress: ModulesProgressSnapshot | null,
   itemId: string,

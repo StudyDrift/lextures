@@ -39,29 +39,14 @@ var allowedRouterFields = map[string]struct{}{
 }
 
 var allowedRouterOperators = map[string]struct{}{
-	"<":           {},
-	"<=":          {},
-	"==":          {},
-	">=":          {},
-	">":           {},
-	"isTrue":      {},
-	"contains":    {},
+	"<":            {},
+	"<=":           {},
+	"==":           {},
+	">=":           {},
+	">":            {},
+	"isTrue":       {},
+	"contains":     {},
 	"matchesRegex": {},
-}
-
-// RouterFieldRequiresUpstreamGrade reports whether a field needs a grade upstream on the input path.
-func RouterFieldRequiresUpstreamGrade(field string) bool {
-	switch field {
-	case "score", "confidence":
-		return true
-	default:
-		return false
-	}
-}
-
-// RouterFieldRequiresOriginality reports whether a field needs an originality check upstream.
-func RouterFieldRequiresOriginality(field string) bool {
-	return field == "originalityScore"
 }
 
 func parseRouterCondition(data map[string]any) (RouterCondition, error) {

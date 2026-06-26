@@ -6,13 +6,6 @@ export const PERM_RBAC_MANAGE = 'global:app:rbac:manage' as const
 
 /** Caller should see the parent dashboard and "Family" nav entry (replaces getAccountType() === 'parent'). */
 export const PERM_PARENT_DASHBOARD = 'app:user:account-parent-dashboard' as const
-
-/** Caller holds a staff-equivalent enrollment in the current course. */
-export const PERM_COURSE_ROLE_STAFF = 'course:*:enrollments:role-staff' as const
-
-/** Caller holds a student-equivalent enrollment in the current course. */
-export const PERM_COURSE_ROLE_STUDENT = 'course:*:enrollments:role-student' as const
-
 /** Create new courses (Courses page + POST /api/v1/courses). */
 export const PERM_COURSE_CREATE = 'global:app:course:create' as const
 
@@ -44,13 +37,6 @@ export { courseItemCreatePermission as permCourseItemCreate } from './courses-ap
 
 /** Re-export: quiz / module items editor (`course:<courseCode>:items:create`), merged into `/me/permissions` via course grants. */
 export { courseItemsCreatePermission as permCourseItemsCreate } from './courses-api'
-
-/** Re-export: view course gradebook (`course:<courseCode>:gradebook:view`). */
-export { courseGradebookViewPermission as permCourseGradebookView } from './courses-api'
-
-/** Re-export: view course enrollments / roster (`course:<courseCode>:enrollments:read`). */
-export { courseEnrollmentsReadPermission as permCourseEnrollmentsRead } from './courses-api'
-
 export type Permission = {
   id: string
   permissionString: string

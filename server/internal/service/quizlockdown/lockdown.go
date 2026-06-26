@@ -15,37 +15,6 @@ type QuizRowLockdown struct {
 	LockdownMode string
 }
 
-// EffectiveLockdownMode picks the enforced mode from the course feature flag and quiz row.
-func EffectiveLockdownMode(courseLockdownEnabled bool, row *QuizRowLockdown) string {
-	if !courseLockdownEnabled {
-		return LockdownStandard
-	}
-	if row == nil {
-		return LockdownStandard
-	}
-	switch row.LockdownMode {
-	case LockdownOneAtATime, LockdownKiosk:
-		return row.LockdownMode
-	default:
-		return LockdownStandard
-	}
-}
-
-// ServerEnforcesForwardLockdown is true when the API must keep strict delivery semantics.
-func ServerEnforcesForwardLockdown(mode string) bool {
-	return mode == LockdownOneAtATime || mode == LockdownKiosk
-}
-
-// HintsDisabled is true in any non-standard lockdown.
-func HintsDisabled(mode string) bool {
-	return mode != LockdownStandard
-}
-
-// BackNavigationAllowed is true in standard mode only.
-func BackNavigationAllowed(mode string) bool {
-	return mode == LockdownStandard
-}
-
 // ParseLockdownModeSetting returns a known mode token, or false when invalid.
 func ParseLockdownModeSetting(raw string) (string, bool) {
 	t := strings.TrimSpace(raw)

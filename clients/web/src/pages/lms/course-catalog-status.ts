@@ -1,10 +1,8 @@
 import type { CoursePublic } from '../../lib/courses-api'
-import type { CourseCatalogView, KanbanColumnId } from '../../lib/course-catalog-types'
-import { isKanbanColumnId, KANBAN_COLUMN_IDS } from '../../lib/course-catalog-types'
+import type { KanbanColumnId } from '../../lib/course-catalog-types'
+import { isKanbanColumnId } from '../../lib/course-catalog-types'
 
-export type { CourseCatalogView, KanbanColumnId }
-export { KANBAN_COLUMN_IDS, isKanbanColumnId }
-
+export type { KanbanColumnId }
 export type CourseCatalogStatusLabel = 'Draft' | 'Upcoming' | 'Active' | 'Ended'
 
 export function resolveKanbanColumn(course: CoursePublic): KanbanColumnId {

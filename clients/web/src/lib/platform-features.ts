@@ -188,10 +188,6 @@ export function resetPlatformFeaturesSnapshot(): void {
   loaded = false
 }
 
-export function platformFeaturesLoaded(): boolean {
-  return loaded
-}
-
 export function getPlatformFeatures(): PlatformFeaturesSnapshot {
   return snapshot
 }
@@ -244,24 +240,12 @@ export function accommodationsEngineFeatureEnabled(): boolean {
   return loaded && snapshot.accommodationsEngineEnabled
 }
 
-export function ffAccommodationsEngineEnabled(): boolean {
-  return loaded && snapshot.ffAccommodationsEngine
-}
-
 export function readAloudFeatureEnabled(): boolean {
   return loaded && snapshot.readAloudEnabled && snapshot.ffReadAloud
 }
 
 export function translationMemoryFeatureEnabled(): boolean {
   return loaded && snapshot.translationMemoryEnabled
-}
-
-export function engagementTrackingFeatureEnabled(): boolean {
-  return loaded && snapshot.engagementTrackingEnabled
-}
-
-export function selfReflectionFeatureEnabled(): boolean {
-  return loaded && snapshot.selfReflectionEnabled
 }
 
 export function outcomesReportFeatureEnabled(): boolean {
@@ -280,36 +264,12 @@ export function libraryFeatureEnabled(): boolean {
   return loaded && snapshot.ffLibrary === true
 }
 
-export function broadcastsFeatureEnabled(): boolean {
-  return loaded && snapshot.ffBroadcasts === true
-}
-
-export function readingPreferencesFeatureEnabled(): boolean {
-  return loaded && snapshot.ffReadingPreferences === true
-}
-
-export function uiModeFeatureEnabled(): boolean {
-  return loaded && snapshot.ffUiMode === true
-}
-
-export function catalogFeatureEnabled(): boolean {
-  return loaded && snapshot.ffCatalogIntegration === true
-}
-
 export function enrollmentStateMachineFeatureEnabled(): boolean {
   return loaded && snapshot.ffEnrollmentStateMachine === true
 }
 
 export function finalGradeSubmissionFeatureEnabled(): boolean {
   return loaded && snapshot.ffGradeSubmission === true
-}
-
-export function academicCalendarFeatureEnabled(): boolean {
-  return loaded && snapshot.ffAcademicCalendar === true
-}
-
-export function plagiarismChecksFeatureEnabled(): boolean {
-  return loaded && snapshot.ffPlagiarismChecks === true
 }
 
 export function heLibraryIntegrationEnabled(): boolean {
@@ -324,25 +284,12 @@ export function transcriptsFeatureEnabled(): boolean {
   return loaded && snapshot.ffTranscripts === true
 }
 
-export function advisingIntegrationEnabled(): boolean {
-  return loaded && snapshot.ffAdvisingIntegration === true
-}
-
 export function eportfolioFeatureEnabled(): boolean {
   return loaded && snapshot.ffEportfolio === true
 }
 
 export function incompleteGradeWorkflowFeatureEnabled(): boolean {
   return loaded && snapshot.ffIncompleteGradeWorkflow === true
-}
-
-/** Notebook RAG + flashcards when platform AI is on, OpenRouter is configured, and tenant policy allows it. */
-export function ragNotebookAiEnabled(s?: PlatformFeaturesSnapshot): boolean {
-  const snap = s ?? snapshot
-  if (!s && !loaded) {
-    return false
-  }
-  return snap.ragNotebookEnabled === true
 }
 
 /** True when GET/PATCH /api/v1/me/reading-preferences is available (matches server readingPreferencesEnabled). */

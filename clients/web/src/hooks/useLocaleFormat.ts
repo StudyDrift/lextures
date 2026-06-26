@@ -19,8 +19,6 @@ function formattersForProfile(profile: {
   })
 }
 
-export { useLocaleFormatContext } from '../context/locale-format-context'
-
 /** Locale formatters plus optional course-aware deadline display (plan 11.3 + 11.4). */
 export function useLocaleFormat(courseTimezone?: string | null) {
   const ctx = useContext(LocaleFormatContext)

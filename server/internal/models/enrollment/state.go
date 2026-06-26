@@ -41,11 +41,6 @@ func ParseState(raw string) (State, error) {
 	}
 }
 
-// FormerStates are terminal/non-active roster states shown in gradebook "Former Students".
-func FormerStates() []State {
-	return []State{StateDropped, StateWithdrawn, StateNoCredit}
-}
-
 // IsFormer returns true when the student belongs in the gradebook former-students section.
 func (s State) IsFormer() bool {
 	switch s {

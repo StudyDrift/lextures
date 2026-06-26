@@ -21,19 +21,19 @@ type CommentBankEntry struct {
 
 // ReportCard is one row from report_card.report_cards.
 type ReportCard struct {
-	ID             uuid.UUID
-	StudentID      uuid.UUID
-	CourseID       uuid.UUID
-	GradingPeriod  string
-	FinalGradePct  *float64
-	LetterGrade    *string
-	Comment        *string
-	Status         string
-	PDFURL         *string
-	GeneratedAt    *time.Time
-	ReleasedAt     *time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID            uuid.UUID
+	StudentID     uuid.UUID
+	CourseID      uuid.UUID
+	GradingPeriod string
+	FinalGradePct *float64
+	LetterGrade   *string
+	Comment       *string
+	Status        string
+	PDFURL        *string
+	GeneratedAt   *time.Time
+	ReleasedAt    *time.Time
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 // UpsertCommentBankEntry creates or updates a comment bank entry (keyed on org+category+text).
@@ -100,22 +100,6 @@ WHERE id = $1 AND org_id = $2 AND active`, entryID, orgID)
 		return false, err
 	}
 	return tag.RowsAffected() > 0, nil
-}
-
-// UpsertReportCard inserts or updates a report card row.
-func UpsertReportCard(ctx context.Context, pool *pgxpool.Pool, studentID, courseID uuid.UUID, period string, finalPct *float64, letterGrade, comment *string) (*ReportCard, error) {
-	row := pool.QueryRow(ctx, `
-INSERT INTO report_card.report_cards (student_id, course_id, grading_period, final_grade_pct, letter_grade, comment)
-VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (student_id, course_id, grading_period) DO UPDATE SET
-    final_grade_pct = EXCLUDED.final_grade_pct,
-    letter_grade    = EXCLUDED.letter_grade,
-    comment         = EXCLUDED.comment,
-    updated_at      = now()
-RETURNING id, student_id, course_id, grading_period, final_grade_pct, letter_grade, comment,
-          status, pdf_url, generated_at, released_at, created_at, updated_at`,
-		studentID, courseID, period, finalPct, letterGrade, comment)
-	return scanReportCard(row)
 }
 
 // PatchReportCard updates comment and/or status for an existing card.

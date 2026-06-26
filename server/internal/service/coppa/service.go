@@ -170,24 +170,6 @@ SELECT ai_features_enabled
 	return &s, nil
 }
 
-// IsCoppaMinorBlocked returns true when the user is a coppa_minor whose consent is not approved,
-// and false for non-minor or approved accounts. An error is returned only for real DB failures.
-func IsCoppaMinorBlocked(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (bool, error) {
-	var isMinor bool
-	var status string
-	err := pool.QueryRow(ctx, `
-SELECT coppa_minor, coppa_consent_status
-  FROM "user".users
- WHERE id = $1`, userID).Scan(&isMinor, &status)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
-	}
-	return isMinor && ConsentStatus(status) != ConsentStatusApproved, nil
-}
-
 // InitiateEmailConsent creates a pending consent record and returns a raw token to be emailed to the parent.
 // The raw token is never stored — only its SHA-256 hash persists in the DB (16 CFR §312.7).
 func InitiateEmailConsent(ctx context.Context, pool *pgxpool.Pool, orgID, studentID uuid.UUID, parentEmail string) (*ConsentToken, error) {

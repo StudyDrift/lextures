@@ -87,17 +87,17 @@ type SyncError struct {
 
 // SyncSummary holds itemized counts for a sync run.
 type SyncSummary struct {
-	UsersCreated       int `json:"users_created"`
-	UsersUpdated       int `json:"users_updated"`
-	EnrollmentsCreated int `json:"enrollments_created"`
-	EnrollmentsUpdated int `json:"enrollments_updated"`
-	CoursesCreated     int `json:"courses_created"`
-	CoursesUpdated     int `json:"courses_updated"`
-	Deactivated          int `json:"deactivated"`
-	Skipped              int `json:"skipped"`
-	Errored              int `json:"errored"`
-	DemographicsCreated  int `json:"demographics_created"`
-	DemographicsUpdated  int `json:"demographics_updated"`
+	UsersCreated        int `json:"users_created"`
+	UsersUpdated        int `json:"users_updated"`
+	EnrollmentsCreated  int `json:"enrollments_created"`
+	EnrollmentsUpdated  int `json:"enrollments_updated"`
+	CoursesCreated      int `json:"courses_created"`
+	CoursesUpdated      int `json:"courses_updated"`
+	Deactivated         int `json:"deactivated"`
+	Skipped             int `json:"skipped"`
+	Errored             int `json:"errored"`
+	DemographicsCreated int `json:"demographics_created"`
+	DemographicsUpdated int `json:"demographics_updated"`
 }
 
 // ListConnections returns all SIS connections for an org.
@@ -244,22 +244,6 @@ WHERE c.org_id = $1
 ORDER BY l.started_at DESC
 LIMIT $2 OFFSET $3
 `, orgID, limit, offset)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	return scanSyncLogs(rows)
-}
-
-// ListSyncLogsForConnection returns sync logs for a specific connection.
-func ListSyncLogsForConnection(ctx context.Context, pool *pgxpool.Pool, connectionID uuid.UUID, limit int) ([]SyncLog, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, connection_id, started_at, finished_at, status, summary, errors
-FROM sis.sis_sync_logs
-WHERE connection_id = $1
-ORDER BY started_at DESC
-LIMIT $2
-`, connectionID, limit)
 	if err != nil {
 		return nil, err
 	}

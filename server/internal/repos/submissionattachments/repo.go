@@ -38,29 +38,6 @@ ORDER BY sa.sort_order ASC, sa.created_at ASC, sa.id ASC
 	return out, rows.Err()
 }
 
-func ListForSubmissionInTransaction(ctx context.Context, tx pgx.Tx, submissionID uuid.UUID) ([]AttachmentRow, error) {
-	rows, err := tx.Query(ctx, `
-SELECT sa.file_id, sa.sort_order, cf.original_filename, cf.mime_type
-FROM course.submission_attachments sa
-INNER JOIN course.course_files cf ON cf.id = sa.file_id
-WHERE sa.submission_id = $1
-ORDER BY sa.sort_order ASC, sa.created_at ASC, sa.id ASC
-`, submissionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	out := make([]AttachmentRow, 0)
-	for rows.Next() {
-		var row AttachmentRow
-		if err := rows.Scan(&row.FileID, &row.SortOrder, &row.OriginalFilename, &row.MimeType); err != nil {
-			return nil, err
-		}
-		out = append(out, row)
-	}
-	return out, rows.Err()
-}
-
 func ReplaceForSubmission(ctx context.Context, pool *pgxpool.Pool, submissionID uuid.UUID, fileIDs []uuid.UUID) error {
 	tx, err := pool.Begin(ctx)
 	if err != nil {

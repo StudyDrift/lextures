@@ -74,15 +74,3 @@ ON CONFLICT (provider, query_hash) DO UPDATE SET
 `, provider, queryHash, resultsJSON, fetchedAt, expiresAt)
 	return err
 }
-
-// DeleteExpired removes cache rows past their expiry (optional housekeeping).
-func DeleteExpired(ctx context.Context, pool *pgxpool.Pool, before time.Time) (int64, error) {
-	if pool == nil {
-		return 0, errors.New("db pool is nil")
-	}
-	tag, err := pool.Exec(ctx, `DELETE FROM content.oer_search_cache WHERE expires_at < $1`, before)
-	if err != nil {
-		return 0, err
-	}
-	return tag.RowsAffected(), nil
-}

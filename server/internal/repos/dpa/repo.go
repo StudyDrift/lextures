@@ -35,15 +35,15 @@ type DPAAcceptance struct {
 
 // DataInventoryItem is one row from compliance.data_inventory.
 type DataInventoryItem struct {
-	ID                       uuid.UUID
-	ElementName              string
-	Category                 string
-	Purpose                  string
-	LegalBasis               string
-	RetentionDays            *int
-	SharedWithSubProcessors  bool
-	SubProcessorNames        []string
-	UpdatedAt                time.Time
+	ID                      uuid.UUID
+	ElementName             string
+	Category                string
+	Purpose                 string
+	LegalBasis              string
+	RetentionDays           *int
+	SharedWithSubProcessors bool
+	SubProcessorNames       []string
+	UpdatedAt               time.Time
 }
 
 // GetCurrentVersion returns the most recently effective DPA version.
@@ -63,28 +63,6 @@ SELECT id, version_str, template_url, effective_at, notes, created_at
 		return nil, err
 	}
 	return &v, nil
-}
-
-// ListVersions returns all DPA versions ordered by effective_at descending.
-func ListVersions(ctx context.Context, pool *pgxpool.Pool) ([]DPAVersion, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, version_str, template_url, effective_at, notes, created_at
-  FROM compliance.dpa_versions
- ORDER BY effective_at DESC
-`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []DPAVersion
-	for rows.Next() {
-		var v DPAVersion
-		if err := rows.Scan(&v.ID, &v.VersionStr, &v.TemplateURL, &v.EffectiveAt, &v.Notes, &v.CreatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, v)
-	}
-	return out, rows.Err()
 }
 
 // InsertAcceptance records a DPA acceptance. Returns the row ID.

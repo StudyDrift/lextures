@@ -56,47 +56,6 @@ export type TaxReportRow = {
   subtotalCents: number
 }
 
-export async function fetchTaxQuote(payload: {
-  courseId: string
-  address: TaxAddress
-  taxId?: string
-  taxIdType?: string
-}): Promise<TaxQuote> {
-  const res = await authorizedFetch('/api/v1/checkout/quote', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      courseId: payload.courseId,
-      address: payload.address,
-      taxId: payload.taxId,
-      taxIdType: payload.taxIdType,
-    }),
-  })
-  if (!res.ok) {
-    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
-    throw new Error(readApiErrorMessage(raw) || 'Could not compute tax.')
-  }
-  return (await res.json()) as TaxQuote
-}
-
-export async function validateTaxID(payload: {
-  courseId: string
-  address: TaxAddress
-  taxId: string
-  taxIdType?: string
-}): Promise<TaxIDValidation> {
-  const res = await authorizedFetch('/api/v1/checkout/tax-id', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) {
-    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
-    throw new Error(readApiErrorMessage(raw) || 'Could not validate tax ID.')
-  }
-  return (await res.json()) as TaxIDValidation
-}
-
 export async function fetchOrgTaxSettings(orgId: string): Promise<OrgTaxSettings> {
   const res = await authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/tax/settings`)
   if (!res.ok) {

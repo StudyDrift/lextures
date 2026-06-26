@@ -293,26 +293,3 @@ func CourseTitle(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (s
 	err := pool.QueryRow(ctx, `SELECT COALESCE(title, course_code) FROM course.courses WHERE id = $1`, courseID).Scan(&title)
 	return title, err
 }
-
-// ListCEUCoursesForUser returns course IDs where the user has CE config enabled enrollments.
-func ListCEUCoursesForUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := pool.Query(ctx, `
-SELECT DISTINCT cfg.course_id
-FROM seattime.ceu_configurations cfg
-JOIN course.course_enrollments e ON e.course_id = cfg.course_id
-WHERE e.user_id = $1 AND e.active = true AND cfg.enabled = true
-`, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
-}

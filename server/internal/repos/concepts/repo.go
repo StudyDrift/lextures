@@ -55,25 +55,3 @@ WHERE slug = $1
 	}
 	return &r, nil
 }
-
-func ListConceptsForCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]ConceptRow, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, course_id, slug, name, description, bloom_level::text, parent_concept_id, difficulty_tier, (decay_lambda)::float8, created_at, updated_at
-FROM course.concepts
-WHERE course_id = $1
-ORDER BY name ASC
-`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	out := make([]ConceptRow, 0)
-	for rows.Next() {
-		var r ConceptRow
-		if err := rows.Scan(&r.ID, &r.CourseID, &r.Slug, &r.Name, &r.Description, &r.BloomLevel, &r.ParentConceptID, &r.DifficultyTier, &r.DecayLambda, &r.CreatedAt, &r.UpdatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, r)
-	}
-	return out, rows.Err()
-}

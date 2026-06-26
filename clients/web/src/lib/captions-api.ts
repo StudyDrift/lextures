@@ -33,58 +33,6 @@ export type CaptionCoverageRow = {
   reviewed_at?: string
 }
 
-export async function listCaptions(objectId: string): Promise<CaptionRecord[]> {
-  return apiJson<CaptionRecord[]>(`/api/v1/files/${encodeURIComponent(objectId)}/captions`)
-}
-
-export function captionVttUrl(objectId: string, captionId: string): string {
-  return `/api/v1/files/${encodeURIComponent(objectId)}/captions/${encodeURIComponent(captionId)}/vtt`
-}
-
-export async function patchCaptionVtt(
-  objectId: string,
-  captionId: string,
-  vttContent: string,
-): Promise<CaptionRecord> {
-  return apiJson<CaptionRecord>(
-    `/api/v1/files/${encodeURIComponent(objectId)}/captions/${encodeURIComponent(captionId)}`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ vtt_content: vttContent }),
-    },
-  )
-}
-
-export async function updateCaptionTranscript(
-  objectId: string,
-  captionId: string,
-  transcriptText: string,
-): Promise<CaptionRecord> {
-  return apiJson<CaptionRecord>(
-    `/api/v1/files/${encodeURIComponent(objectId)}/captions/${encodeURIComponent(captionId)}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcript_text: transcriptText }),
-    },
-  )
-}
-
-export async function importCaptionFile(objectId: string, file: File): Promise<CaptionRecord> {
-  const form = new FormData()
-  form.append('file', file)
-  const res = await authorizedFetch(
-    `/api/v1/files/${encodeURIComponent(objectId)}/captions/import`,
-    { method: 'POST', body: form },
-  )
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(text || `Import failed (${res.status})`)
-  }
-  return (await res.json()) as CaptionRecord
-}
-
 export async function fetchCaptionCompliance(): Promise<{ rows: CaptionCoverageRow[] }> {
   return apiJson<{ rows: CaptionCoverageRow[] }>('/api/v1/admin/captions/compliance')
 }
@@ -99,5 +47,3 @@ export async function patchCourseCaptionPolicy(
     body: JSON.stringify({ requireCaptions }),
   })
 }
-
-export { videoCaptionsFeatureEnabled as isVideoCaptionsEnabled } from './platform-features.js'

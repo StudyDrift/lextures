@@ -191,24 +191,6 @@ RETURNING id, course_id, template_id, opens_at, closes_at, enrolled_count, respo
 	return &w, nil
 }
 
-// GetWindowByID returns a window by its ID.
-func GetWindowByID(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*Window, error) {
-	var w Window
-	err := pool.QueryRow(ctx, `
-SELECT id, course_id, template_id, opens_at, closes_at, enrolled_count, response_count, created_at
-FROM course.evaluation_windows
-WHERE id = $1
-`, id).Scan(&w.ID, &w.CourseID, &w.TemplateID, &w.OpensAt, &w.ClosesAt,
-		&w.EnrolledCount, &w.ResponseCount, &w.CreatedAt)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, ErrWindowNotFound
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &w, nil
-}
-
 // GetActiveWindowByCourseID returns the open window for a course at the given time, or nil.
 func GetActiveWindowByCourseID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, now time.Time) (*Window, error) {
 	var w Window
@@ -343,10 +325,10 @@ UPDATE course.evaluation_windows SET response_count = response_count + 1 WHERE i
 
 // AggregateResults holds aggregate data for a closed evaluation window.
 type AggregateResults struct {
-	WindowID      uuid.UUID
-	ResponseCount int
+	WindowID       uuid.UUID
+	ResponseCount  int
 	MeetsThreshold bool
-	Questions     []QuestionResult
+	Questions      []QuestionResult
 }
 
 // QuestionResult holds aggregate data for one question.

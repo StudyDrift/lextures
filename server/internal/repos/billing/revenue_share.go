@@ -83,19 +83,6 @@ FROM billing.creator_revenue_configs WHERE user_id = $1
 	return cfg, err
 }
 
-// UpsertRevenueConfig stores admin overrides for a creator.
-func UpsertRevenueConfig(ctx context.Context, pool *pgxpool.Pool, cfg RevenueConfig) error {
-	_, err := pool.Exec(ctx, `
-INSERT INTO billing.creator_revenue_configs (user_id, platform_fee_pct, affiliate_fee_pct, updated_at)
-VALUES ($1, $2, $3, NOW())
-ON CONFLICT (user_id) DO UPDATE SET
-    platform_fee_pct = EXCLUDED.platform_fee_pct,
-    affiliate_fee_pct = EXCLUDED.affiliate_fee_pct,
-    updated_at = NOW()
-`, cfg.UserID, cfg.PlatformFeePct, cfg.AffiliateFeePct)
-	return err
-}
-
 // CourseCreatorID returns the user who created the course.
 func CourseCreatorID(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (uuid.UUID, error) {
 	var id uuid.UUID
@@ -379,11 +366,11 @@ UPDATE "user".users SET stripe_connect_id = $2 WHERE id = $1
 
 // PendingPayoutsByUser sums pending earnings per payee with Connect accounts.
 type PendingPayout struct {
-	UserID       uuid.UUID
-	AmountCents  int
-	Currency     string
-	ConnectID    string
-	LedgerIDs    []uuid.UUID
+	UserID      uuid.UUID
+	AmountCents int
+	Currency    string
+	ConnectID   string
+	LedgerIDs   []uuid.UUID
 }
 
 // ListPendingPayouts returns users with pending earnings above minCents.

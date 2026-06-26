@@ -45,18 +45,18 @@ type App struct {
 
 // Installation is a per-org app installation.
 type Installation struct {
-	ID                 uuid.UUID
-	AppID              uuid.UUID
-	OrgID              uuid.UUID
-	AppName            string
-	AppSlug            string
-	AppLogoURL         *string
-	AccessTokenPrefix  string
-	GrantedScopes      []string
-	InstalledBy        *uuid.UUID
-	InstalledAt        time.Time
-	RevokedAt          *time.Time
-	LastUsedAt         *time.Time
+	ID                uuid.UUID
+	AppID             uuid.UUID
+	OrgID             uuid.UUID
+	AppName           string
+	AppSlug           string
+	AppLogoURL        *string
+	AccessTokenPrefix string
+	GrantedScopes     []string
+	InstalledBy       *uuid.UUID
+	InstalledAt       time.Time
+	RevokedAt         *time.Time
+	LastUsedAt        *time.Time
 }
 
 // GenerateClientSecret returns a new mcs_ client secret, its SHA-256 hex hash and 8-char prefix.
@@ -102,13 +102,13 @@ func HashToken(token string) string {
 
 // CreateAppParams is the input for CreateApp.
 type CreateAppParams struct {
-	DeveloperUserID uuid.UUID
-	Name            string
-	Slug            string
-	Description     string
-	LogoURL         *string
-	RedirectURIs    []string
-	RequestedScopes []string
+	DeveloperUserID    uuid.UUID
+	Name               string
+	Slug               string
+	Description        string
+	LogoURL            *string
+	RedirectURIs       []string
+	RequestedScopes    []string
 	ClientSecretHash   string
 	ClientSecretPrefix string
 }
@@ -186,15 +186,6 @@ func GetAppBySlug(ctx context.Context, pool *pgxpool.Pool, slug string) (*App, e
 // GetAppByClientID returns any app by OAuth client_id (used during consent/token exchange).
 func GetAppByClientID(ctx context.Context, pool *pgxpool.Pool, clientID string) (*App, error) {
 	a, err := getApp(ctx, pool, `client_id = $1`, clientID)
-	if errors.Is(err, ErrNotFound) {
-		return nil, nil
-	}
-	return a, err
-}
-
-// GetAppByID returns an app by primary key.
-func GetAppByID(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*App, error) {
-	a, err := getApp(ctx, pool, `id = $1`, id)
 	if errors.Is(err, ErrNotFound) {
 		return nil, nil
 	}
@@ -423,15 +414,6 @@ func RotateTokens(ctx context.Context, pool *pgxpool.Pool, installationID uuid.U
 		WHERE id = $1 AND revoked_at IS NULL
 	`, installationID, newAccessHash, newAccessPrefix, newRefreshHash, newRefreshPrefix)
 	return err
-}
-
-// TouchLastUsed updates the last_used_at timestamp for an installation.
-func TouchLastUsed(ctx context.Context, pool *pgxpool.Pool, installationID uuid.UUID) {
-	_, _ = pool.Exec(ctx, `
-		UPDATE marketplace.installations
-		SET last_used_at = now()
-		WHERE id = $1
-	`, installationID)
 }
 
 func isUniqueViolation(err error) bool {

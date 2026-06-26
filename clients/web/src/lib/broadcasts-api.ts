@@ -77,10 +77,3 @@ export async function acknowledgeBroadcast(broadcastId: string): Promise<void> {
     { method: 'POST' },
   )
 }
-
-export async function listMyBroadcasts(): Promise<Broadcast[]> {
-  const res = await authorizedFetch('/api/v1/me/broadcasts')
-  if (!res.ok) return []
-  const data = (await res.json()) as { broadcasts: Broadcast[] }
-  return data.broadcasts ?? []
-}

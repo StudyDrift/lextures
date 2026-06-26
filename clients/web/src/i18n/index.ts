@@ -17,8 +17,6 @@ import frCommon from '../../public/locales/fr/common.json'
 import frCompliance from '../../public/locales/fr/compliance.json'
 
 export const I18N_NAMESPACES = ['common', 'auth', 'compliance'] as const
-export type I18nNamespace = (typeof I18N_NAMESPACES)[number]
-
 const bundledResources = {
   en: { common: enCommon, auth: enAuth, compliance: enCompliance },
   es: { common: esCommon, auth: esAuth, compliance: esCompliance },

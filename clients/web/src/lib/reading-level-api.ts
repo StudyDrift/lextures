@@ -85,29 +85,6 @@ export async function simplifyItemContent(
   }
 }
 
-export async function patchEnrollmentReadingLevel(
-  courseCode: string,
-  enrollmentId: string,
-  readingLevelOverride: number | null,
-): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments/${encodeURIComponent(enrollmentId)}/reading-level`,
-    {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ readingLevelOverride }),
-    },
-  )
-  if (!res.ok) {
-    const raw = await res.json().catch(() => ({}))
-    throw new Error(
-      typeof raw === 'object' && raw && 'error' in raw
-        ? String((raw as { error?: { message?: string } }).error?.message)
-        : 'Failed to update reading accommodation',
-    )
-  }
-}
-
 export function formatFkglLabel(fkgl: number | undefined): string {
   if (fkgl == null || Number.isNaN(fkgl)) return '—'
   return `Grade ${fkgl.toFixed(1)}`

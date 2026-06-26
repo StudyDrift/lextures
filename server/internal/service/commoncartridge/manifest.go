@@ -2,10 +2,7 @@
 package commoncartridge
 
 import (
-	"io/fs"
-	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/beevik/etree"
@@ -42,46 +39,6 @@ func QtiXMLPathsFromManifest(manifestXML string, extractRoot string) ([]string, 
 		out = append(out, p)
 	}
 	return out, nil
-}
-
-// DiscoverXMLFiles walks a directory tree, skipping __MACOSX and dotfiles; sorted unique paths.
-func DiscoverXMLFiles(root string) ([]string, error) {
-	var out []string
-	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		name := d.Name()
-		if d.IsDir() {
-			if name == "__MACOSX" || strings.HasPrefix(name, ".") {
-				return filepath.SkipDir
-			}
-			return nil
-		}
-		if strings.HasPrefix(name, ".") {
-			return nil
-		}
-		if !strings.EqualFold(filepath.Ext(path), ".xml") {
-			return nil
-		}
-		out = append(out, path)
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	sort.Strings(out)
-	// dedupe
-	w := 0
-	var prev string
-	for _, p := range out {
-		if w == 0 || p != prev {
-			out[w] = p
-			w++
-			prev = p
-		}
-	}
-	return out[:w], nil
 }
 
 func elLocalName(tag string) string {
@@ -121,13 +78,4 @@ func walkElements(e *etree.Element) []*etree.Element {
 	}
 	walk(e)
 	return out
-}
-
-// ReadManifestFile is a small helper for local cc imports (optional; keeps parity with Rust when reading from disk).
-func ReadManifestFile(extractRoot string) (string, error) {
-	b, err := os.ReadFile(filepath.Join(extractRoot, "imsmanifest.xml"))
-	if err != nil {
-		return "", err
-	}
-	return string(b), nil
 }

@@ -22,16 +22,6 @@ type AccessLogEntry struct {
 	CreatedAt     time.Time
 }
 
-// LogCrossRegionAccess inserts a cross-region access attempt event.
-func LogCrossRegionAccess(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, orgRegion, requestedFrom, requestPath string, actorID *uuid.UUID) error {
-	_, err := pool.Exec(ctx, `
-INSERT INTO compliance.data_residency_access_log
-  (org_id, org_region, requested_from, event_type, request_path, actor_id)
-VALUES ($1, $2, $3, 'cross_region_access_blocked', $4, $5)
-`, orgID, orgRegion, requestedFrom, nullStr(requestPath), actorID)
-	return err
-}
-
 // ListAccessLog returns recent access log entries, newest first (up to limit).
 func ListAccessLog(ctx context.Context, pool *pgxpool.Pool, limit, offset int32) ([]AccessLogEntry, error) {
 	if limit <= 0 || limit > 500 {
@@ -85,11 +75,4 @@ func scanEntries(rows pgx.Rows) ([]AccessLogEntry, error) {
 		out = append(out, e)
 	}
 	return out, rows.Err()
-}
-
-func nullStr(s string) *string {
-	if s == "" {
-		return nil
-	}
-	return &s
 }

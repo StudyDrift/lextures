@@ -13,19 +13,19 @@ import (
 
 // Subscription is an org webhook endpoint registration.
 type Subscription struct {
-	ID             uuid.UUID
-	OrgID          uuid.UUID
-	Label          string
-	EndpointURL    string
-	SigningKeyEnc  string
-	EventTypes     []string
-	Active         bool
-	PausedAt       *time.Time
-	TLSSkipVerify  bool
-	CreatedBy      *uuid.UUID
-	Settings       json.RawMessage
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID            uuid.UUID
+	OrgID         uuid.UUID
+	Label         string
+	EndpointURL   string
+	SigningKeyEnc string
+	EventTypes    []string
+	Active        bool
+	PausedAt      *time.Time
+	TLSSkipVerify bool
+	CreatedBy     *uuid.UUID
+	Settings      json.RawMessage
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 // Delivery is one webhook delivery attempt record.
@@ -48,14 +48,14 @@ type Delivery struct {
 
 // CreateInput holds fields for a new subscription.
 type CreateInput struct {
-	OrgID          uuid.UUID
-	Label          string
-	EndpointURL    string
-	SigningKeyEnc  string
-	EventTypes     []string
-	TLSSkipVerify  bool
-	CreatedBy      *uuid.UUID
-	Settings       json.RawMessage
+	OrgID         uuid.UUID
+	Label         string
+	EndpointURL   string
+	SigningKeyEnc string
+	EventTypes    []string
+	TLSSkipVerify bool
+	CreatedBy     *uuid.UUID
+	Settings      json.RawMessage
 }
 
 // UpdateInput holds mutable subscription fields.
@@ -358,21 +358,6 @@ SET status = $2, attempt_count = $3, next_retry_at = $4, last_http_status = $5,
 WHERE id = $1
 `, deliveryID, status, attempts, next, httpStatus, truncate(errMsg, 1024))
 	return err
-}
-
-// CountRecentFailures counts consecutive dead-lettered or failed deliveries for subscription.
-func CountRecentFailures(ctx context.Context, pool *pgxpool.Pool, subscriptionID uuid.UUID) (int, error) {
-	var n int
-	err := pool.QueryRow(ctx, `
-SELECT COUNT(*)::int FROM (
-    SELECT status FROM integrations.webhook_deliveries
-    WHERE subscription_id = $1
-    ORDER BY created_at DESC
-    LIMIT 6
-) recent
-WHERE status IN ('failed', 'dead_lettered')
-`, subscriptionID).Scan(&n)
-	return n, err
 }
 
 // PurgeOldDeliveries removes delivery log entries older than retention.

@@ -2,27 +2,6 @@ package oersearch
 
 import "strings"
 
-// LicenseLabel returns a human-readable CC license name from SPDX.
-func LicenseLabel(spdx string) string {
-	switch strings.ToUpper(strings.TrimSpace(spdx)) {
-	case "CC-BY-4.0", "CC-BY-3.0", "CC-BY-2.0":
-		return "CC BY"
-	case "CC-BY-SA-4.0", "CC-BY-SA-3.0":
-		return "CC BY-SA"
-	case "CC-BY-NC-4.0", "CC-BY-NC-3.0":
-		return "CC BY-NC"
-	case "CC-BY-ND-4.0", "CC-BY-ND-3.0":
-		return "CC BY-ND"
-	case "CC0-1.0", "CC0":
-		return "CC0"
-	default:
-		if spdx == "" {
-			return "Open license"
-		}
-		return spdx
-	}
-}
-
 // MatchesLicenseFilter returns true when result license satisfies the filter.
 // filter "CC-BY" excludes NC, ND, and SA-only licenses.
 func MatchesLicenseFilter(spdx, filter string) bool {

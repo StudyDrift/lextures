@@ -33,13 +33,6 @@ SELECT EXISTS (
 	return found, err
 }
 
-// UpsertModuleRequirement sets completion mode and unlock date for a module.
-func UpsertModuleRequirement(
-	ctx context.Context, pool *pgxpool.Pool, moduleID uuid.UUID, mode conditionalrelease.CompletionMode, unlockAt *time.Time,
-) error {
-	return upsertModuleRequirementExec(ctx, pool, moduleID, mode, unlockAt)
-}
-
 // UpsertModuleRequirementTx is the transactional variant of UpsertModuleRequirement.
 func UpsertModuleRequirementTx(
 	ctx context.Context, tx pgx.Tx, moduleID uuid.UUID, mode conditionalrelease.CompletionMode, unlockAt *time.Time,
@@ -61,12 +54,6 @@ ON CONFLICT (module_id) DO UPDATE SET
     unlock_at = EXCLUDED.unlock_at,
     updated_at = NOW()
 `, moduleID, mode, unlockAt)
-	return err
-}
-
-// DeleteModuleRequirement removes module requirements and prerequisites for a module.
-func DeleteModuleRequirement(ctx context.Context, pool *pgxpool.Pool, moduleID uuid.UUID) error {
-	_, err := pool.Exec(ctx, `DELETE FROM course.module_requirements WHERE module_id = $1`, moduleID)
 	return err
 }
 
@@ -393,18 +380,6 @@ WHERE enrollment_id = $1
 	return out, rows.Err()
 }
 
-// HasUnlockOverride reports whether an instructor override exists for a module/enrollment.
-func HasUnlockOverride(ctx context.Context, pool *pgxpool.Pool, enrollmentID, moduleID uuid.UUID) (bool, error) {
-	var found bool
-	err := pool.QueryRow(ctx, `
-SELECT EXISTS (
-    SELECT 1 FROM course.module_unlock_overrides
-    WHERE enrollment_id = $1 AND module_id = $2
-)
-`, enrollmentID, moduleID).Scan(&found)
-	return found, err
-}
-
 // ListUnlockOverridesForEnrollment returns overridden module ids.
 func ListUnlockOverridesForEnrollment(ctx context.Context, pool *pgxpool.Pool, enrollmentID uuid.UUID) (map[uuid.UUID]bool, error) {
 	rows, err := pool.Query(ctx, `
@@ -435,26 +410,4 @@ ON CONFLICT (enrollment_id, module_id) DO UPDATE SET
     granted_at = NOW()
 `, enrollmentID, moduleID, grantedBy)
 	return err
-}
-
-// ModuleForItem resolves the owning module id for a structure item.
-func ModuleForItem(ctx context.Context, pool *pgxpool.Pool, itemID uuid.UUID) (*uuid.UUID, error) {
-	var moduleID uuid.UUID
-	err := pool.QueryRow(ctx, `
-WITH RECURSIVE ancestors AS (
-    SELECT id, parent_id, kind FROM course.course_structure_items WHERE id = $1
-    UNION ALL
-    SELECT p.id, p.parent_id, p.kind
-    FROM course.course_structure_items p
-    INNER JOIN ancestors a ON p.id = a.parent_id
-)
-SELECT id FROM ancestors WHERE kind = 'module' LIMIT 1
-`, itemID).Scan(&moduleID)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &moduleID, nil
 }

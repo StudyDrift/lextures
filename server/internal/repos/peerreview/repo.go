@@ -351,29 +351,6 @@ RETURNING id, allocation_id, score, rubric_scores_json, comments, submitted_at
 	return &r, err
 }
 
-func ListReviewsForSubmission(ctx context.Context, pool *pgxpool.Pool, configID, submissionID uuid.UUID) ([]ReviewRow, error) {
-	rows, err := pool.Query(ctx, `
-SELECT pr.id, pr.allocation_id, pr.score, pr.rubric_scores_json, pr.comments, pr.submitted_at
-FROM course.peer_reviews pr
-JOIN course.peer_review_allocations a ON a.id = pr.allocation_id
-WHERE a.config_id = $1 AND a.target_submission_id = $2
-ORDER BY pr.submitted_at ASC
-`, configID, submissionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	out := make([]ReviewRow, 0)
-	for rows.Next() {
-		var r ReviewRow
-		if err := rows.Scan(&r.ID, &r.AllocationID, &r.Score, &r.RubricScoresJSON, &r.Comments, &r.SubmittedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, r)
-	}
-	return out, rows.Err()
-}
-
 func ListReviewsForConfig(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID) ([]ReviewRow, error) {
 	rows, err := pool.Query(ctx, `
 SELECT pr.id, pr.allocation_id, pr.score, pr.rubric_scores_json, pr.comments, pr.submitted_at
@@ -441,43 +418,6 @@ type TeamEvalSummaryRow struct {
 	Comments          []string
 }
 
-func ListTeamEvaluationsForGroup(ctx context.Context, pool *pgxpool.Pool, groupID uuid.UUID) ([]TeamEvalSummaryRow, error) {
-	rows, err := pool.Query(ctx, `
-SELECT ratee_enrollment_id,
-       (SELECT user_id FROM course.course_enrollments WHERE id = ratee_enrollment_id),
-       AVG(contribution_score::float8),
-       COUNT(*)::int,
-       ARRAY_AGG(comment) FILTER (WHERE comment IS NOT NULL AND comment <> '')
-FROM course.team_peer_evaluations
-WHERE group_id = $1
-GROUP BY ratee_enrollment_id
-`, groupID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	out := make([]TeamEvalSummaryRow, 0)
-	for rows.Next() {
-		var r TeamEvalSummaryRow
-		var comments []string
-		if err := rows.Scan(&r.RateeEnrollmentID, &r.RateeUserID, &r.AvgScore, &r.EvalCount, &comments); err != nil {
-			return nil, err
-		}
-		r.Comments = comments
-		out = append(out, r)
-	}
-	return out, rows.Err()
-}
-
-func UpsertHelpfulness(ctx context.Context, pool *pgxpool.Pool, peerReviewID, raterEnrollmentID uuid.UUID, rating int) error {
-	_, err := pool.Exec(ctx, `
-INSERT INTO course.peer_review_helpfulness (peer_review_id, rater_enrollment_id, rating)
-VALUES ($1, $2, $3)
-ON CONFLICT (peer_review_id, rater_enrollment_id) DO UPDATE SET rating = EXCLUDED.rating
-`, peerReviewID, raterEnrollmentID, rating)
-	return err
-}
-
 func GetEnrollmentIDForUser(ctx context.Context, pool *pgxpool.Pool, courseID, userID uuid.UUID) (*uuid.UUID, error) {
 	var id uuid.UUID
 	err := pool.QueryRow(ctx, `
@@ -494,14 +434,4 @@ LIMIT 1
 		return nil, err
 	}
 	return &id, nil
-}
-
-func MarkExpiredAllocations(ctx context.Context, pool *pgxpool.Pool, configID uuid.UUID) error {
-	_, err := pool.Exec(ctx, `
-UPDATE course.peer_review_allocations
-SET status = 'expired'
-WHERE config_id = $1 AND status IN ('assigned', 'in_progress')
-  AND NOT EXISTS (SELECT 1 FROM course.peer_reviews pr WHERE pr.allocation_id = peer_review_allocations.id)
-`, configID)
-	return err
 }

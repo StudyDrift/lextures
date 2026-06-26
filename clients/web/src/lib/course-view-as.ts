@@ -26,11 +26,6 @@ export function setCourseViewAs(courseCode: string, view: 'teacher' | 'student')
   window.dispatchEvent(new Event('studydrift-course-view-as'))
 }
 
-export function clearCourseViewAs(courseCode: string) {
-  localStorage.removeItem(courseViewStorageKey(courseCode))
-  window.dispatchEvent(new Event('studydrift-course-view-as'))
-}
-
 /** Fired when the signed-in user’s enrollments for a course change (e.g. self-enroll as student). */
 export const COURSE_VIEWER_ENROLLMENTS_CHANGED = 'studydrift-course-viewer-enrollments-changed'
 

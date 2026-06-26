@@ -24,21 +24,21 @@ const (
 
 // AlertRow is one at-risk alert with student display fields for API responses.
 type AlertRow struct {
-	ID             uuid.UUID
-	EnrollmentID   uuid.UUID
-	UserID         uuid.UUID
-	DisplayName    *string
-	TriggeredDate  time.Time
-	Score          float32
-	Status         AlertStatus
-	TopFactor      string
-	SnoozeUntil    *time.Time
-	Notes          *string
-	UpdatedAt      time.Time
-	ResolvedAt     *time.Time
-	MissingPct     *float32
-	QuizAvg        *float32
-	DaysInactive   *int
+	ID            uuid.UUID
+	EnrollmentID  uuid.UUID
+	UserID        uuid.UUID
+	DisplayName   *string
+	TriggeredDate time.Time
+	Score         float32
+	Status        AlertStatus
+	TopFactor     string
+	SnoozeUntil   *time.Time
+	Notes         *string
+	UpdatedAt     time.Time
+	ResolvedAt    *time.Time
+	MissingPct    *float32
+	QuizAvg       *float32
+	DaysInactive  *int
 }
 
 // CreateAlert inserts a new alert if none exists for enrollment+date (idempotent).
@@ -293,24 +293,6 @@ func dateArg(t *time.Time) any {
 		return nil
 	}
 	return t.Format("2006-01-02")
-}
-
-// DeleteByUser removes at-risk data for all enrollments of a user (GDPR erasure, plan 9.2 AC-6).
-func DeleteByUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) error {
-	_, err := pool.Exec(ctx, `
-DELETE FROM analytics.at_risk_scores s
-USING course.course_enrollments ce
-WHERE s.enrollment_id = ce.id AND ce.user_id = $1
-`, userID)
-	if err != nil {
-		return err
-	}
-	_, err = pool.Exec(ctx, `
-DELETE FROM analytics.at_risk_alerts a
-USING course.course_enrollments ce
-WHERE a.enrollment_id = ce.id AND ce.user_id = $1
-`, userID)
-	return err
 }
 
 // ListInstructorUserIDs returns distinct instructor/teacher user IDs for a course.

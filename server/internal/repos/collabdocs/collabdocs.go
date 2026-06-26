@@ -164,15 +164,6 @@ func GetAllUpdates(ctx context.Context, pool *pgxpool.Pool, docID uuid.UUID) ([]
 	return out, rows.Err()
 }
 
-// AddSnapshot persists a document snapshot for edit history.
-func AddSnapshot(ctx context.Context, pool *pgxpool.Pool, docID, authorID uuid.UUID, snapshot []byte) error {
-	_, err := pool.Exec(ctx,
-		`INSERT INTO collab.collab_doc_snapshots (doc_id, author_id, snapshot) VALUES ($1, $2, $3)`,
-		docID, authorID, snapshot,
-	)
-	return err
-}
-
 // ListSnapshots returns snapshot metadata for a document (most recent first, no binary blob).
 func ListSnapshots(ctx context.Context, pool *pgxpool.Pool, docID uuid.UUID) ([]Snapshot, error) {
 	rows, err := pool.Query(ctx,

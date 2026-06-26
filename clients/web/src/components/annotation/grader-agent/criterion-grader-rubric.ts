@@ -55,12 +55,3 @@ export function criterionGraderRubric(
 
   return defaultRubric ?? null
 }
-
-export function criterionTitle(
-  rubric: RubricDefinition | null | undefined,
-  criterionId: string | undefined,
-): string | null {
-  const id = typeof criterionId === 'string' ? criterionId.trim() : ''
-  if (!id || !rubric?.criteria?.length) return null
-  return rubric.criteria.find((criterion) => criterion.id === id)?.title ?? null
-}

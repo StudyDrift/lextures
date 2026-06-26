@@ -1,9 +1,6 @@
 import type { InboxNotification } from '../context/inbox-notifications-context'
 import {
-  loadNotificationToastedIds,
-  NOTIFICATION_TOASTED_IDS_KEY,
   pickNotificationsToToast,
-  rememberNotificationToastedIds,
 } from './notification-toast'
 
 /** Returns canvas import notifications that were not in the previous inbox snapshot. */
@@ -14,12 +11,6 @@ export function newCanvasImportNotifications(
   const prevIds = new Set(prev.map((n) => n.id))
   return incoming.filter((n) => !prevIds.has(n.id) && n.eventType === 'canvas_course_imported')
 }
-
-/** @deprecated Use NOTIFICATION_TOASTED_IDS_KEY */
-export const CANVAS_IMPORT_TOASTED_IDS_KEY = NOTIFICATION_TOASTED_IDS_KEY
-
-export const loadCanvasImportToastedIds = loadNotificationToastedIds
-export const rememberCanvasImportToastedIds = rememberNotificationToastedIds
 
 export function pickCanvasImportNotificationsToToast(
   prev: readonly InboxNotification[],

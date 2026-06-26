@@ -12,12 +12,12 @@ var markdownImageRE = regexp.MustCompile(`!\[([^\]]*)\]\(([^)\s]+)(?:\s+"([^"]*)
 
 // ImageRef is one image occurrence in markdown content.
 type ImageRef struct {
-	Alt        string
-	Src        string
-	Title      string
-	Decorative bool
+	Alt         string
+	Src         string
+	Title       string
+	Decorative  bool
 	HasValidAlt bool
-	Line       int
+	Line        int
 }
 
 // ScanMarkdown finds markdown images and classifies alt-text status.
@@ -68,6 +68,3 @@ func Summarize(images []ImageRef) Coverage {
 	}
 	return Coverage{WithAlt: with, Total: total}
 }
-
-// DecorativeTitleMarker is stored in markdown title for decorative images.
-func DecorativeTitleMarker() string { return decorativeTitleMarker }

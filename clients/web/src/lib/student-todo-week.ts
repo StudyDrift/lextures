@@ -100,11 +100,6 @@ export function formatWeekRangeShort(range: Pick<StudentTodoWeekRange, 'start' |
   return `${startLabel} – ${endLabel}`
 }
 
-export function weekOffsetSummaryLabel(offset: number, now = new Date()): string {
-  const range = weekRangeForOffset(offset, now)
-  return `${formatWeekOffsetLabel(offset)} (${formatWeekRangeShort(range)})`
-}
-
 export function formatWeekOffsetsSpan(offsets: readonly number[], now = new Date()): string {
   const normalized = normalizeWeekOffsets(offsets)
   if (normalized.length === 1) {

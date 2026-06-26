@@ -91,13 +91,6 @@ export async function getMeetingJoinInfo(meetingId: string): Promise<MeetingJoin
   return raw
 }
 
-export async function getMeetingAttendance(meetingId: string): Promise<AttendanceRecord[]> {
-  const res = await authorizedFetch(`/api/v1/meetings/${encodeURIComponent(meetingId)}/attendance`)
-  const raw = await res.json() as { attendance?: AttendanceRecord[] }
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw.attendance ?? []
-}
-
 export function getMeetingIcalUrl(meetingId: string): string {
   return `/api/v1/meetings/${encodeURIComponent(meetingId)}/ical`
 }

@@ -38,9 +38,3 @@ func NormalizeLocale(raw string) (string, error) {
 	}
 	return out, nil
 }
-
-// ValidLocale returns true when raw is a valid BCP 47 tag (empty is invalid).
-func ValidLocale(raw string) bool {
-	_, err := NormalizeLocale(raw)
-	return err == nil
-}

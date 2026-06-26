@@ -12,24 +12,24 @@ import (
 
 // Endpoint is an external LRS target (credentials omitted in list responses).
 type Endpoint struct {
-	ID          uuid.UUID
-	OrgID       uuid.UUID
-	Label       string
-	EndpointURL string
-	AuthType    string
-	Username    *string
-	Enabled     bool
-	HasPassword bool
+	ID             uuid.UUID
+	OrgID          uuid.UUID
+	Label          string
+	EndpointURL    string
+	AuthType       string
+	Username       *string
+	Enabled        bool
+	HasPassword    bool
 	HasOAuthSecret bool
 	OAuthClientID  *string
 	OAuthTokenURL  *string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 }
 
 type endpointSecrets struct {
-	PasswordCiphertext       []byte
-	OAuthClientSecretCipher  []byte
+	PasswordCiphertext      []byte
+	OAuthClientSecretCipher []byte
 }
 
 // ListByOrg returns endpoints for an organization (no secrets).
@@ -95,16 +95,16 @@ ORDER BY created_at
 }
 
 type CreateInput struct {
-	OrgID       uuid.UUID
-	Label       string
-	EndpointURL string
-	AuthType    string
-	Username    string
-	Password    []byte // plaintext; encrypted before store
+	OrgID             uuid.UUID
+	Label             string
+	EndpointURL       string
+	AuthType          string
+	Username          string
+	Password          []byte // plaintext; encrypted before store
 	OAuthClientID     string
 	OAuthClientSecret []byte
 	OAuthTokenURL     string
-	Enabled     bool
+	Enabled           bool
 }
 
 // Create inserts a new LRS endpoint.
@@ -136,15 +136,15 @@ RETURNING id
 }
 
 type UpdateInput struct {
-	Label       *string
-	EndpointURL *string
-	AuthType    *string
-	Username    *string
-	Password    []byte // nil = unchanged; empty = clear
+	Label             *string
+	EndpointURL       *string
+	AuthType          *string
+	Username          *string
+	Password          []byte // nil = unchanged; empty = clear
 	OAuthClientID     *string
 	OAuthClientSecret []byte
 	OAuthTokenURL     *string
-	Enabled     *bool
+	Enabled           *bool
 }
 
 // Update patches an endpoint; returns not found when missing.
@@ -219,18 +219,6 @@ FROM analytics.lrs_endpoints WHERE id = $1
 		return nil, nil, err
 	}
 	return &e, &sec, nil
-}
-
-// DecryptPassword returns the basic-auth password for forwarding.
-func DecryptPassword(sec endpointSecrets, key []byte) (string, error) {
-	if len(sec.PasswordCiphertext) == 0 || len(key) != 32 {
-		return "", nil
-	}
-	plain, err := appsecrets.Decrypt(sec.PasswordCiphertext, key)
-	if err != nil {
-		return "", err
-	}
-	return string(plain), nil
 }
 
 // GetForForward loads one enabled endpoint with secrets.

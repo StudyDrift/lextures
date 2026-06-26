@@ -102,38 +102,10 @@ export async function postPeerReviewSubmit(
   if (!res.ok) throw new Error(await res.text())
 }
 
-export async function fetchPeerReviewReceived(
-  courseCode: string,
-  itemId: string,
-): Promise<PeerReviewReceived[]> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${enc(courseCode)}/assignments/${enc(itemId)}/peer-review/received`,
-  )
-  if (!res.ok) throw new Error(await res.text())
-  const raw = (await res.json()) as { reviews?: PeerReviewReceived[] }
-  return raw.reviews ?? []
-}
-
 export async function fetchPeerReviewSummary(courseCode: string, itemId: string): Promise<PeerReviewSummary> {
   const res = await authorizedFetch(
     `/api/v1/courses/${enc(courseCode)}/assignments/${enc(itemId)}/peer-review/summary`,
   )
   if (!res.ok) throw new Error(await res.text())
   return (await res.json()) as PeerReviewSummary
-}
-
-export async function postTeamPeerEval(
-  courseCode: string,
-  groupId: string,
-  body: { rateeEnrollmentId: string; contributionScore: number; comment?: string },
-): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${enc(courseCode)}/groups/${enc(groupId)}/team-eval`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    },
-  )
-  if (!res.ok) throw new Error(await res.text())
 }

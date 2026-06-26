@@ -20,12 +20,6 @@ const LEIPermission = "compliance:records:read:*"
 // AdminPermission gates FERPA admin actions (approve/deny requests, read disclosure log).
 const AdminPermission = "compliance:ferpa:admin:*"
 
-// CheckLEI returns true when the given accessor holds a records:read permission
-// that satisfies LEI for the student's org.
-func CheckLEI(ctx context.Context, pool *pgxpool.Pool, accessorID uuid.UUID) (bool, error) {
-	return rbac.UserHasPermission(ctx, pool, accessorID, LEIPermission)
-}
-
 // CheckAdmin returns true when the given user holds the compliance:ferpa:admin permission.
 func CheckAdmin(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (bool, error) {
 	return rbac.UserHasPermission(ctx, pool, userID, AdminPermission)

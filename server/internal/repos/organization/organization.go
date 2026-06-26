@@ -376,14 +376,3 @@ func scanOrgRows(rows pgx.Rows) ([]Row, error) {
 	}
 	return out, rows.Err()
 }
-
-// OrgStatusForUserTx returns organization status for a user within a transaction.
-func OrgStatusForUserTx(ctx context.Context, tx pgx.Tx, userID uuid.UUID) (status string, err error) {
-	err = tx.QueryRow(ctx, `
-SELECT o.status
-FROM "user".users u
-INNER JOIN tenant.organizations o ON o.id = u.org_id
-WHERE u.id = $1
-`, userID).Scan(&status)
-	return status, err
-}

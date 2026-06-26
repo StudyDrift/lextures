@@ -1,5 +1,4 @@
 import { authorizedFetch } from './api'
-import { altTextEnforcementFeatureEnabled } from './platform-features'
 
 export type CourseAccessibilityInfo = {
   altTextCoverage: {
@@ -21,10 +20,6 @@ export type CourseAccessibilityInfo = {
 export type AltTextSuggestion = {
   suggestion: string
   confidence: number
-}
-
-export function isAltTextEnforcementEnabled(): boolean {
-  return altTextEnforcementFeatureEnabled()
 }
 
 export async function fetchCourseAccessibility(

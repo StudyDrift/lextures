@@ -325,39 +325,3 @@ ON CONFLICT (structure_item_id, target_type, target_id) WHERE target_type <> 'ev
 `, sectionID, structureItemID, dueAt, availableFrom, availableUntil)
 	return err
 }
-
-// ListOverridesForSection returns all assignment overrides for a section keyed by structure_item_id.
-func ListOverridesForSection(ctx context.Context, pool *pgxpool.Pool, sectionID uuid.UUID) (map[uuid.UUID]Override, error) {
-	rows, err := pool.Query(ctx, `
-SELECT structure_item_id, due_at, available_from, available_until
-FROM course.assignment_overrides
-WHERE target_type = 'section' AND target_id = $1
-`, sectionID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	out := make(map[uuid.UUID]Override)
-	for rows.Next() {
-		var itemID uuid.UUID
-		var due, af, au sql.NullTime
-		if err := rows.Scan(&itemID, &due, &af, &au); err != nil {
-			return nil, err
-		}
-		var o Override
-		if due.Valid {
-			t := due.Time
-			o.DueAt = &t
-		}
-		if af.Valid {
-			t := af.Time
-			o.AvailableFrom = &t
-		}
-		if au.Valid {
-			t := au.Time
-			o.AvailableUntil = &t
-		}
-		out[itemID] = o
-	}
-	return out, rows.Err()
-}

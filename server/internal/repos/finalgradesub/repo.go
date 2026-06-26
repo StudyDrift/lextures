@@ -24,30 +24,6 @@ type Submission struct {
 	SISAckAt         *time.Time
 }
 
-// Create inserts a single submission row and returns the created record.
-func Create(ctx context.Context, pool *pgxpool.Pool, s Submission) (*Submission, error) {
-	var out Submission
-	err := pool.QueryRow(ctx, `
-INSERT INTO course.final_grade_submissions
-    (course_id, enrollment_id, submitted_by, computed_grade, final_grade,
-     override_reason, submission_method)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, course_id, enrollment_id, submitted_by, computed_grade,
-          final_grade, override_reason, submission_method, submitted_at, sis_ack_at
-`,
-		s.CourseID, s.EnrollmentID, s.SubmittedBy, s.ComputedGrade, s.FinalGrade,
-		s.OverrideReason, s.SubmissionMethod,
-	).Scan(
-		&out.ID, &out.CourseID, &out.EnrollmentID, &out.SubmittedBy,
-		&out.ComputedGrade, &out.FinalGrade, &out.OverrideReason,
-		&out.SubmissionMethod, &out.SubmittedAt, &out.SISAckAt,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // BulkCreate inserts multiple submission rows within a single transaction.
 func BulkCreate(ctx context.Context, pool *pgxpool.Pool, rows []Submission) error {
 	tx, err := pool.BeginTx(ctx, pgx.TxOptions{})
@@ -103,13 +79,13 @@ ORDER BY enrollment_id, submitted_at DESC
 
 // CourseSubmissionStatus summarises whether a course has submitted final grades.
 type CourseSubmissionStatus struct {
-	CourseID      uuid.UUID
-	CourseCode    string
-	CourseTitle   string
-	InstructorID  *uuid.UUID
+	CourseID       uuid.UUID
+	CourseCode     string
+	CourseTitle    string
+	InstructorID   *uuid.UUID
 	InstructorName string
-	SubmittedAt   *time.Time
-	TotalStudents int
+	SubmittedAt    *time.Time
+	TotalStudents  int
 	SubmittedCount int
 }
 
