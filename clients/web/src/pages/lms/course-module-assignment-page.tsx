@@ -237,7 +237,7 @@ export default function CourseModuleAssignmentPage() {
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
   const [gradingAgentOpen, setGradingAgentOpen] = useState(false)
   const [graderReviewCount, setGraderReviewCount] = useState(0)
-  const [submissionCount, setSubmissionCount] = useState<number | null>(null)
+  const [ungradedSubmissionCount, setUngradedSubmissionCount] = useState<number | null>(null)
   const [enrolledStudentCount, setEnrolledStudentCount] = useState<number | null>(null)
 
   const [editing, setEditing] = useState(false)
@@ -461,13 +461,15 @@ export default function CourseModuleAssignmentPage() {
   const showAssignmentActionsMenu = Boolean(!loading && !loadError && !editing && canEdit)
 
   const gradeSubmissionsLabel =
-    submissionCount != null && enrolledStudentCount != null
-      ? `Grade submissions ${submissionCount}/${enrolledStudentCount}`
+    ungradedSubmissionCount != null && enrolledStudentCount != null
+      ? `Grade submissions ${ungradedSubmissionCount}/${enrolledStudentCount} ungraded`
       : 'Grade submissions'
+  const allSubmissionsGraded =
+    ungradedSubmissionCount != null && ungradedSubmissionCount === 0
 
   useEffect(() => {
     if (!showPreviewSubmissionsAction || !courseCode || !itemId) {
-      setSubmissionCount(null)
+      setUngradedSubmissionCount(null)
       setEnrolledStudentCount(null)
       return
     }
@@ -479,12 +481,13 @@ export default function CourseModuleAssignmentPage() {
           fetchCourseEnrollmentsList(courseCode),
         ])
         if (!cancelled) {
-          setSubmissionCount(submissions.filter((submission) => Boolean(submission.id)).length)
+          const present = submissions.filter((submission) => Boolean(submission.id))
+          setUngradedSubmissionCount(present.filter((submission) => !submission.isGraded).length)
           setEnrolledStudentCount(countEnrolledStudents(enrollments))
         }
       } catch {
         if (!cancelled) {
-          setSubmissionCount(null)
+          setUngradedSubmissionCount(null)
           setEnrolledStudentCount(null)
         }
       }
@@ -735,7 +738,11 @@ export default function CourseModuleAssignmentPage() {
               <button
                 type="button"
                 onClick={openSubmissionPreview}
-                className="inline-flex h-10 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 text-sm font-semibold text-indigo-900 shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-100 dark:hover:bg-indigo-950"
+                className={
+                  allSubmissionsGraded
+                    ? 'inline-flex h-10 items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-900 shadow-sm transition-[background-color,color,border-color] hover:bg-emerald-100 dark:border-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-100 dark:hover:bg-emerald-950'
+                    : 'inline-flex h-10 items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 text-sm font-semibold text-indigo-900 shadow-sm transition-[background-color,color,border-color] hover:bg-indigo-100 dark:border-indigo-900 dark:bg-indigo-950/60 dark:text-indigo-100 dark:hover:bg-indigo-950'
+                }
               >
                 <Eye className="h-4 w-4" aria-hidden />
                 {gradeSubmissionsLabel}

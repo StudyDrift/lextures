@@ -317,10 +317,11 @@ func (d Deps) executeSubmissionSyncToCanvas(ctx context.Context, in submissionSy
 	}
 
 	var itemTitle string
+	var storedCanvasAssignID *int64
 	if err := d.Pool.QueryRow(ctx, `
-		SELECT title FROM course.course_structure_items
+		SELECT title, canvas_assignment_id FROM course.course_structure_items
 		WHERE id = $1 AND course_id = $2 AND kind = 'assignment' AND archived = false`,
-		in.ItemID, *cid).Scan(&itemTitle); err != nil {
+		in.ItemID, *cid).Scan(&itemTitle, &storedCanvasAssignID); err != nil {
 		return nil, errors.New("Assignment not found.")
 	}
 
@@ -338,9 +339,16 @@ func (d Deps) executeSubmissionSyncToCanvas(ctx context.Context, in submissionSy
 	}
 
 	client := canvasHTTPClient()
-	canvasAssignID, err := canvasFindAssignmentIDByTitle(ctx, client, canvasBase, token, canvasCourseID, itemTitle)
-	if err != nil {
-		return nil, err
+	// Prefer the Canvas assignment id captured at import time; fall back to title matching only for
+	// items imported before ids were persisted (titles are not unique, so this is best-effort).
+	var canvasAssignID int64
+	if storedCanvasAssignID != nil && *storedCanvasAssignID > 0 {
+		canvasAssignID = *storedCanvasAssignID
+	} else {
+		canvasAssignID, err = canvasFindAssignmentIDByTitle(ctx, client, canvasBase, token, canvasCourseID, itemTitle)
+		if err != nil {
+			return nil, err
+		}
 	}
 	canvasUserID, err := canvasFindCanvasUserIDForEmail(ctx, client, canvasBase, token, canvasCourseID, student.Email)
 	if err != nil {

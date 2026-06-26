@@ -1,6 +1,7 @@
 import { lazy, type ComponentType } from "react"
 
 export const Calendar = lazy(() => import('./pages/lms/calendar'))
+export const TodosPage = lazy(() => import('./pages/lms/todos-page'))
 export const CourseCalendarPage = lazy(() => import('./pages/lms/course-calendar-page'))
 export const CourseEnrollments = lazy(() => import('./pages/lms/course-enrollments'))
 export const CourseFeedPage = lazy(() => import('./pages/lms/course-feed-page'))

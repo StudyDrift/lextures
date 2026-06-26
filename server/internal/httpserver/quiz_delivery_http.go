@@ -28,6 +28,7 @@ func (d Deps) registerQuizDeliveryRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/focus-loss-events", d.handleQuizFocusLossEventsGet())
 	d.registerQuizSubmitRoutes(r)
 	d.registerQuizGradingRoutes(r)
+	d.registerQuizGradeSyncRoutes(r)
 }
 
 func (d Deps) ffAccommodationsAuditEnabled() bool {

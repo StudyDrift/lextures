@@ -439,6 +439,9 @@ func (d Deps) runCanvasImport(
 					var rubricJSON []byte
 					if cid := int64At(it, "content_id"); cid > 0 {
 						canvasAssignToItem[cid] = itemID
+						if _, moduleErr = moduleTx.Exec(ctx, `UPDATE course.course_structure_items SET canvas_assignment_id = $1 WHERE id = $2`, cid, itemID); moduleErr != nil {
+							return moduleFailed("Failed to save Canvas assignment id.")
+						}
 						var obj map[string]any
 						if moduleItemCache != nil {
 							obj = moduleItemCache.assignments[cid]
@@ -469,6 +472,7 @@ func (d Deps) runCanvasImport(
 					var dueAt, availFrom, availUntil *time.Time
 					if cid := int64At(it, "content_id"); cid > 0 {
 						canvasQuizToItem[cid] = itemID
+						var canvasAssignmentID *int64
 						if moduleItemCache != nil {
 							if obj := moduleItemCache.quizzes[cid]; obj != nil {
 								markdown = markdownFromHTML(strAt(obj, "description", ""))
@@ -478,10 +482,14 @@ func (d Deps) runCanvasImport(
 								availUntil = canvasTimeAt(obj, "lock_at")
 								if aid := int64At(obj, "assignment_id"); aid > 0 {
 									canvasQuizToAssignmentID[cid] = aid
+									canvasAssignmentID = &aid
 								}
 							}
 							questions = moduleItemCache.quizQuestions[cid]
 							canvasQuizToQuestions[cid] = questions
+						}
+						if _, moduleErr = moduleTx.Exec(ctx, `UPDATE course.course_structure_items SET canvas_quiz_id = $1, canvas_assignment_id = $2 WHERE id = $3`, cid, canvasAssignmentID, itemID); moduleErr != nil {
+							return moduleFailed("Failed to save Canvas quiz id.")
 						}
 					}
 					qJSON, mj := json.Marshal(questions)

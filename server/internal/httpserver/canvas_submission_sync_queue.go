@@ -136,7 +136,7 @@ func (d Deps) HandleCanvasSubmissionSyncQueueMessage(ctx context.Context, msg ca
 
 	d.CanvasSubmissionSyncJobs.MarkProcessing(msg.JobID)
 
-	result, syncErr := d.executeSubmissionSyncToCanvas(ctx, submissionSyncCanvasInput{
+	in := submissionSyncCanvasInput{
 		CourseCode:        msg.CourseCode,
 		ItemID:            msg.ItemID,
 		SubmissionID:      msg.SubmissionID,
@@ -145,7 +145,16 @@ func (d Deps) HandleCanvasSubmissionSyncQueueMessage(ctx context.Context, msg ca
 		PointsEarned:      msg.PointsEarned,
 		RubricScores:      msg.RubricScores,
 		InstructorComment: msg.InstructorComment,
-	})
+	}
+	var (
+		result  map[string]any
+		syncErr error
+	)
+	if msg.ItemKind == "quiz" {
+		result, syncErr = d.executeQuizGradeSyncToCanvas(ctx, in)
+	} else {
+		result, syncErr = d.executeSubmissionSyncToCanvas(ctx, in)
+	}
 	if syncErr != nil {
 		d.CanvasSubmissionSyncJobs.MarkFailed(msg.JobID, syncErr.Error())
 		if d.CanvasSubmissionSyncHub != nil {

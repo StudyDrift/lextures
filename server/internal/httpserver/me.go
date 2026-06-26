@@ -255,6 +255,7 @@ func (d Deps) registerMeRoutes(r chi.Router) {
 	r.Post("/api/v1/me/notebooks/query", d.handleNotebookQuery())
 	r.Post("/api/v1/me/notebooks/flashcards", d.handleGenerateNotebookFlashcards())
 	d.registerNotebookTaskRoutes(r)
+	d.registerStudentTodoRoutes(r)
 	d.registerStudentNotebookRoutes(r)
 	r.Post("/api/v1/stt/transcribe", d.handlePostSTTTranscribe())
 	d.registerTTSRoutes(r)

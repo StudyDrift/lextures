@@ -362,6 +362,73 @@ SELECT EXISTS (
 	return tx.Commit(ctx)
 }
 
+// repairMigration334RenumberCollision fixes dev/demo DBs that applied
+// quiz_manual_grading_is_correct_backfill as v334 before main's 334_marketplace.sql
+// landed and the backfill was renumbered to 335.
+func repairMigration334RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
+	if !migrateRepairChecksumsEnabled() {
+		return nil
+	}
+	var v334Desc string
+	err := c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 334`,
+	).Scan(&v334Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v334 renumber: %w", err)
+	}
+	if v334Desc != "quiz_manual_grading_is_correct_backfill" {
+		return nil
+	}
+	var marketplaceExists bool
+	err = c.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'marketplace')`,
+	).Scan(&marketplaceExists)
+	if err != nil {
+		return fmt.Errorf("migrate repair v334 renumber: %w", err)
+	}
+	if marketplaceExists {
+		return nil
+	}
+
+	marketplaceBody, err := fs.ReadFile(fsys, dir+"/334_marketplace.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v334 renumber: read marketplace: %w", err)
+	}
+	if _, err := c.Exec(ctx, string(marketplaceBody)); err != nil {
+		return fmt.Errorf("migrate repair v334 renumber: apply marketplace: %w", err)
+	}
+
+	marketplaceSum := sqlxChecksum(marketplaceBody)
+	backfillBody, err := fs.ReadFile(fsys, dir+"/335_quiz_manual_grading_is_correct_backfill.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v334 renumber: read backfill: %w", err)
+	}
+	backfillSum := sqlxChecksum(backfillBody)
+
+	tx, err := c.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 334`,
+		"marketplace", marketplaceSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v334 renumber: update v334: %w", err)
+	}
+	if _, err := tx.Exec(ctx,
+		`INSERT INTO `+sqlxMigrationsTable+` (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, 0)`,
+		int64(335), "quiz_manual_grading_is_correct_backfill", backfillSum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v334 renumber: insert v335: %w", err)
+	}
+	return tx.Commit(ctx)
+}
+
 // repairDemoMigrationChecksums updates _sqlx_migrations when a listed version's stored
 // checksum does not match the embedded file. Only runs when MIGRATE_REPAIR_CHECKSUMS
 // is enabled.
