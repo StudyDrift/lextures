@@ -272,6 +272,14 @@ func (d Deps) handleAuthLogout() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Something went wrong.")
 			return
 		}
+		// Revoke the presented access token's jti on the shared blocklist so the
+		// short-lived bearer cannot be replayed on any instance before it expires
+		// (plan 17.2 FR-4 / AC-2). No-op when no Redis blocklist is configured.
+		if d.JWTSigner != nil {
+			if tok, ok := auth.BearerToken(r.Header); ok {
+				_ = d.JWTSigner.RevokeToken(r.Context(), tok)
+			}
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(map[string]any{"ok": true})
 	}

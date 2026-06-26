@@ -1,0 +1,79 @@
+# Multi-instance API stack for horizontal-scaling testing (plan 17.2).
+#
+# Runs N stateless API replicas behind a Caddy reverse proxy, sharing one Postgres
+# and one Redis, so the integration suite can prove cross-instance behaviour:
+#   - JWT revocation propagates across instances (AC-2)
+#   - rate-limit counters are shared via Redis (AC-3)
+#   - zero-downtime rolling restart / LB failover (AC-1, AC-4)
+#
+# Usage (from repo root):
+#   docker compose -f docker-compose.scale.yml up --build --scale api=2 -d
+#   curl -fsS http://localhost:8088/health/ready
+#   # roll one instance:  docker compose -f docker-compose.scale.yml restart api
+#
+# The `api` service intentionally publishes NO host port so it can scale freely;
+# all traffic enters through the `proxy` (Caddy) on host port 8088.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: studydrift
+      POSTGRES_PASSWORD: studydrift
+      POSTGRES_DB: studydrift
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studydrift -d studydrift"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgres://studydrift:studydrift@postgres:5432/studydrift?sslmode=disable
+      JWT_SECRET: scale-test-secret-at-least-32-characters-long
+      RUN_MIGRATIONS: "true"
+      PORT: "8080"
+      COURSE_FILES_ROOT: /tmp/course-files
+      REDIS_URL: redis://redis:6379
+      # Cap per-instance pool so instances × pool stays under Postgres max_connections (FR-7).
+      DB_POOL_MAX_CONNS: "20"
+      DB_POOL_MIN_CONNS: "2"
+      SHUTDOWN_TIMEOUT_SECS: "30"
+    # No host port: enables `--scale api=N`. Caddy reaches replicas via Docker DNS.
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "/usr/bin/curl", "-fsS", "http://127.0.0.1:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
+    # SIGTERM triggers the 30s graceful drain; give Docker room before SIGKILL.
+    stop_grace_period: 35s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  proxy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    volumes:
+      - ./deploy/caddy/Caddyfile.scale:/etc/caddy/Caddyfile:ro
+    ports:
+      - "8088:8080"
+    depends_on:
+      - api

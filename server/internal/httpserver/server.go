@@ -24,6 +24,7 @@ import (
 	"github.com/lextures/lextures/server/internal/notifevents"
 	"github.com/lextures/lextures/server/internal/openapi"
 	"github.com/lextures/lextures/server/internal/platformstate"
+	"github.com/lextures/lextures/server/internal/redisclient"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/service/cleverauth"
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
@@ -86,6 +87,9 @@ type Deps struct {
 	Bots *botsservice.Service
 	// StatusPageClient overrides the default Statuspage.io client (tests). When nil, built from Config.
 	StatusPageClient *statuspageservice.Client
+	// Redis is the shared Redis client for cross-instance state (plan 17.2). When
+	// nil, the server runs single-instance and the readiness probe skips Redis.
+	Redis *redisclient.Client
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -113,7 +117,7 @@ func NewHandler(d Deps) http.Handler {
 	r.Use(d.publicAPIMiddleware)
 	ready := d.Ready
 	if ready == nil {
-		ready = defaultReady(d.Pool)
+		ready = defaultReady(d.Pool, d.Redis)
 	}
 	r.Get("/api/openapi.json", openapi.ServeOpenAPI)
 	r.Get("/api/docs", openapi.ServeDocs)
@@ -230,14 +234,26 @@ func NewHandler(d Deps) http.Handler {
 	return r
 }
 
-func defaultReady(p *pgxpool.Pool) ReadyChecker {
+// defaultReady builds a readiness probe that verifies the database and, when
+// configured, the shared Redis instance (plan 17.2 FR-1: GET /health/ready feeds
+// the load balancer, which must include Redis connectivity). Redis is only
+// checked when present so single-instance deployments stay healthy without it.
+func defaultReady(p *pgxpool.Pool, rc *redisclient.Client) ReadyChecker {
 	if p == nil {
 		return func() error { return errNoDBPool }
 	}
 	return func() error {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
-		return p.Ping(ctx)
+		if err := p.Ping(ctx); err != nil {
+			return err
+		}
+		if rc != nil {
+			if err := rc.Ping(ctx); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 }
 

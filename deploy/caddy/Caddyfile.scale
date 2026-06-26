@@ -1,0 +1,27 @@
+# Caddy reverse proxy for local multi-instance API testing (plan 17.2 FR-6 / AC-6).
+#
+# `dynamic a api 8080` resolves ALL replica A-records from Docker's embedded DNS
+# on each request, so `docker compose --scale api=N` is load-balanced round-robin
+# without restarting Caddy. /health/ready (plan 17.8) gates each upstream so an
+# unhealthy or draining instance is removed from rotation.
+
+{
+	admin off
+	auto_https off
+}
+
+:8080 {
+	reverse_proxy {
+		dynamic a {
+			name api
+			port 8080
+			refresh 2s
+		}
+		lb_policy round_robin
+		health_uri /health/ready
+		health_interval 5s
+		health_timeout 2s
+		# Don't fail in-flight requests when an instance drains; retry on the next upstream.
+		lb_try_duration 5s
+	}
+}

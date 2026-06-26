@@ -39,6 +39,17 @@ services:
       retries: 8
       start_period: 30s
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # noeviction keeps the JWT blocklist / rate-limit counters from being dropped under memory pressure.
+    command: ["redis-server", "--save", "", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   server:
     image: ${LEXTURES_SERVER_IMAGE:?LEXTURES_SERVER_IMAGE is required}
     restart: unless-stopped
@@ -51,12 +62,19 @@ services:
       PORT: "8080"
       COURSE_FILES_ROOT: /mnt/lextures-db/course-files
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-studydrift}:${RABBITMQ_PASSWORD:-studydrift}@rabbitmq:5672/
+      # Shared Redis for the JWT blocklist, rate limits, and caches (plan 17.2). In
+      # production REDIS_URL points at managed Redis over TLS (rediss://...).
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      # Drain in-flight requests on SIGTERM during rolling restarts (plan 17.2 FR-8).
+      SHUTDOWN_TIMEOUT_SECS: "30"
     volumes:
       - /mnt/lextures-db/course-files:/mnt/lextures-db/course-files
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       # Image runs as USER nobody; use absolute path for curl.
