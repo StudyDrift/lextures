@@ -10,7 +10,7 @@ import {
   type QuizAttemptGradingPayload,
   type QuizGradingQuestion,
 } from '../../lib/courses-api'
-import { queueCanvasQuizGradeSync } from '../canvas/canvas-grade-sync'
+import { queueCanvasQuizGradeSync } from '../canvas/canvas-quiz-grade-sync'
 import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionNavigator } from '../annotation/submission-navigator'
 import { useSpeedGraderHotkeys } from '../annotation/speed-grader-shortcuts'
