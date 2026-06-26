@@ -186,6 +186,7 @@ type QuizStartResponse struct {
 type QuizAttemptsListResponse struct{ Attempts []QuizAttemptSummary `json:"attempts"`; PolicyScorePercent *float64 `json:"policyScorePercent,omitempty"`; RetakePolicy string `json:"retakePolicy"` }
 type QuizAttemptSummary struct {
 	ID                 uuid.UUID  `json:"id"`
+	StudentUserID      *uuid.UUID `json:"studentUserId,omitempty"`
 	AttemptNumber      int32      `json:"attemptNumber"`
 	SubmittedAt        time.Time  `json:"submittedAt"`
 	ScorePercent       *float32   `json:"scorePercent,omitempty"`
@@ -219,4 +220,32 @@ type QuizResultsQuestionResult struct {
 }
 type QuizResultsResponse struct {
 	AttemptID uuid.UUID `json:"attemptId"`; AttemptNumber int32 `json:"attemptNumber"`; StartedAt time.Time `json:"startedAt"`; AcademicIntegrityFlag bool `json:"academicIntegrityFlag"`; SubmittedAt *time.Time `json:"submittedAt,omitempty"`; Status string `json:"status"`; IsAdaptive bool `json:"isAdaptive"`; ExtendedTimeActive bool `json:"extendedTimeActive"`; Score *QuizResultsScoreSummary `json:"score,omitempty"`; Questions []QuizResultsQuestionResult `json:"questions,omitempty"`
+}
+type QuizGradingQuestion struct {
+	QuestionIndex  int32           `json:"questionIndex"`
+	QuestionID     *string         `json:"questionId,omitempty"`
+	QuestionType   string          `json:"questionType"`
+	PromptSnapshot *string         `json:"promptSnapshot,omitempty"`
+	Choices        []string        `json:"choices,omitempty"`
+	ResponseJSON   json.RawMessage `json:"responseJson"`
+	IsCorrect      *bool           `json:"isCorrect,omitempty"`
+	PointsAwarded  *float64        `json:"pointsAwarded,omitempty"`
+	MaxPoints      float64         `json:"maxPoints"`
+	NeedsGrading   bool            `json:"needsGrading"`
+}
+type QuizAttemptGradingResponse struct {
+	AttemptID          uuid.UUID                `json:"attemptId"`
+	StudentUserID      uuid.UUID                `json:"studentUserId"`
+	StudentName        string                   `json:"studentName"`
+	AttemptNumber      int32                    `json:"attemptNumber"`
+	SubmittedAt        *time.Time               `json:"submittedAt,omitempty"`
+	NeedsManualGrading bool                     `json:"needsManualGrading"`
+	Score              *QuizResultsScoreSummary `json:"score,omitempty"`
+	Questions          []QuizGradingQuestion    `json:"questions"`
+}
+type QuizAttemptGradingSaveResponse struct {
+	PointsEarned       float64 `json:"pointsEarned"`
+	PointsPossible     float64 `json:"pointsPossible"`
+	ScorePercent       float32 `json:"scorePercent"`
+	NeedsManualGrading bool    `json:"needsManualGrading"`
 }

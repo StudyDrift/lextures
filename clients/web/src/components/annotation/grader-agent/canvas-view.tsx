@@ -311,7 +311,7 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
 
   return (
     <div
-      className="h-full min-h-[320px] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950"
+      className="h-full min-h-0 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-neutral-700 dark:bg-neutral-950"
       onDragEnter={onDragOver}
       onDragOver={onDragOver}
       onDrop={onDrop}

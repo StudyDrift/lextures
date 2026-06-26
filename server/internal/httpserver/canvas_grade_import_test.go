@@ -60,6 +60,17 @@ func TestCanvasQuizSubmissionIsGradedForImport_complete(t *testing.T) {
 	}
 }
 
+func TestCanvasSyncedGradeHasImportableFeedback_commentsOnlyUngraded(t *testing.T) {
+	comment := "TA Lee: Please revise."
+	synced := canvasSyncedGrade{comment: &comment, commentsJSON: []byte(`[{"body":"Please revise."}]`)}
+	if !canvasSyncedGradeHasImportableFeedback(synced, false) {
+		t.Fatal("expected comment-only ungraded submission to import feedback")
+	}
+	if canvasSyncedGradeHasImportableFeedback(canvasSyncedGrade{}, false) {
+		t.Fatal("expected empty ungraded submission to skip import")
+	}
+}
+
 func TestCanvasImportUngradedSubmissionsStillImportable(t *testing.T) {
 	// Regression: grade import must not skip submission body import for workflow_state=submitted.
 	raw := map[string]any{

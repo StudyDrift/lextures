@@ -224,6 +224,135 @@ func TestCanvasParseSubmissionDataMap(t *testing.T) {
 	}
 }
 
+func TestCanvasParseSubmissionDataMap_stringAnswer(t *testing.T) {
+	raw := map[string]any{
+		"42": "My contributions this sprint have been: shipping the API.",
+	}
+	answers := canvasParseSubmissionData(raw)
+	if len(answers) != 1 || answers[0].CanvasQuestionID != 42 {
+		t.Fatalf("unexpected: %+v", answers)
+	}
+	if got := canvasAnswerAsString(answers[0].Answer); got == "" {
+		t.Fatalf("expected text answer, got %+v", answers[0].Answer)
+	}
+}
+
+func TestCanvasMergeSubmissionAnswers_questionRowUsesQuizQuestionID(t *testing.T) {
+	merged := canvasMergeSubmissionAnswers(nil, nil, []map[string]any{
+		{
+			"id":     float64(42),
+			"answer": "Sprint retrospective notes",
+		},
+	}, nil)
+	ans, ok := merged[42]
+	if !ok {
+		t.Fatalf("expected answer keyed by quiz question id 42, got %+v", merged)
+	}
+	if canvasAnswerAsString(ans.Answer) != "Sprint retrospective notes" {
+		t.Fatalf("unexpected answer: %+v", ans.Answer)
+	}
+}
+
+func TestCanvasParseSubmissionDataMap_questionPrefixKeys(t *testing.T) {
+	raw := map[string]any{
+		"question_42": "My contributions this sprint have been: shipping the API.",
+		"question_7":  map[string]any{"answer": float64(55), "correct": "true"},
+		"question_42_marked": true,
+	}
+	answers := canvasParseSubmissionData(raw)
+	byID := make(map[int64]canvasQuizSubmissionAnswer, len(answers))
+	for _, a := range answers {
+		byID[a.CanvasQuestionID] = a
+	}
+	if got := canvasAnswerAsString(byID[42].Answer); got == "" {
+		t.Fatalf("expected essay text for question 42, got %+v", byID[42])
+	}
+	if byID[7].Answer == nil {
+		t.Fatalf("expected MC answer for question 7, got %+v", byID[7])
+	}
+}
+
+func TestCanvasParseSubmissionDataSlice_gradedEssayUsesText(t *testing.T) {
+	raw := []any{
+		map[string]any{
+			"question_id": float64(9),
+			"text":        "<p>Student essay response</p>",
+			"correct":     "undefined",
+			"points":      float64(0),
+		},
+	}
+	answers := canvasParseSubmissionData(raw)
+	if len(answers) != 1 || answers[0].CanvasQuestionID != 9 {
+		t.Fatalf("unexpected: %+v", answers)
+	}
+	if canvasAnswerAsString(answers[0].Answer) == "" {
+		t.Fatalf("expected essay text, got %+v", answers[0].Answer)
+	}
+}
+
+func TestCanvasMergeSubmissionAnswers_eventsFallback(t *testing.T) {
+	merged := canvasMergeSubmissionAnswers(nil, nil, nil, []map[string]any{
+		{
+			"event_type": "question_answered",
+			"event_data": map[string]any{
+				"question_id": float64(15),
+				"answer":      "Captured from quiz log auditing",
+			},
+		},
+	})
+	ans, ok := merged[15]
+	if !ok {
+		t.Fatalf("expected event-backed answer, got %+v", merged)
+	}
+	if canvasAnswerAsString(ans.Answer) != "Captured from quiz log auditing" {
+		t.Fatalf("unexpected answer: %+v", ans.Answer)
+	}
+}
+
+func TestCanvasResponseJSONForAnswer_fromMergedHashSubmission(t *testing.T) {
+	q := coursemodulequiz.QuizQuestion{
+		ID:           "canvas-42",
+		QuestionType: "essay",
+		Points:       5,
+	}
+	raw := map[string]any{
+		"question_42": "<p>Reflection on the sprint</p>",
+	}
+	answers := canvasParseSubmissionData(raw)
+	if len(answers) != 1 {
+		t.Fatalf("unexpected answers: %+v", answers)
+	}
+	responseJSON := canvasResponseJSONForAnswer(q, answers[0].Answer, nil)
+	var payload map[string]any
+	if err := json.Unmarshal(responseJSON, &payload); err != nil {
+		t.Fatal(err)
+	}
+	if canvasAnswerAsString(payload["textAnswer"]) == "" {
+		t.Fatalf("expected textAnswer in response json, got %+v", payload)
+	}
+}
+
+func TestCanvasGradeImportedShortAnswerPendingReview(t *testing.T) {
+	q := coursemodulequiz.QuizQuestion{
+		ID:           "canvas-9",
+		QuestionType:   "short_answer",
+		Points:         3,
+	}
+	wrong := false
+	answer := canvasQuizSubmissionAnswer{
+		CanvasQuestionID: 9,
+		Answer:           "student text",
+		Correct:          &wrong,
+	}
+	_, isCorrect, pts, max := canvasGradeImportedQuestion(q, answer, nil, nil)
+	if isCorrect != nil {
+		t.Fatalf("expected nil is_correct before manual grading, got %v", isCorrect)
+	}
+	if pts != 0 || max != 3 {
+		t.Fatalf("points earned=%v max=%v", pts, max)
+	}
+}
+
 func TestCanvasGradeImportedMultipleChoice(t *testing.T) {
 	correct := uint(1)
 	q := coursemodulequiz.QuizQuestion{

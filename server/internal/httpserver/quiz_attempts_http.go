@@ -87,6 +87,8 @@ func (d Deps) handleQuizAttemptsList() http.HandlerFunc {
 			if canViewAll {
 				name := ar.StudentDisplayName
 				summary.StudentName = &name
+				sid := ar.StudentUserID
+				summary.StudentUserID = &sid
 				summary.NeedsManualGrading = ar.NeedsManualGrading
 			}
 			attempts = append(attempts, summary)

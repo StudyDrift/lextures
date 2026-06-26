@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/lextures/lextures/server/internal/models/coursemodulequiz"
+	"github.com/lextures/lextures/server/internal/service/quizattemptgrading"
 )
 
 type canvasQuizSubmissionAnswer struct {
@@ -121,9 +123,14 @@ func canvasGetQuizSubmissionDetail(
 	client *http.Client,
 	canvasBase, accessToken string,
 	canvasCourseID, canvasQuizID, quizSubmissionID int64,
+	attempt int32,
 ) (map[string]any, error) {
 	path := fmt.Sprintf("courses/%d/quizzes/%d/submissions/%d", canvasCourseID, canvasQuizID, quizSubmissionID)
-	raw, err := canvasGetObject(ctx, client, canvasBase, accessToken, path, nil)
+	q := url.Values{}
+	if attempt > 0 {
+		q.Set("attempt", strconv.Itoa(int(attempt)))
+	}
+	raw, err := canvasGetObject(ctx, client, canvasBase, accessToken, path, q)
 	if err != nil {
 		return nil, err
 	}
@@ -135,9 +142,15 @@ func canvasGetQuizSubmissionQuestions(
 	client *http.Client,
 	canvasBase, accessToken string,
 	quizSubmissionID int64,
+	attempt int32,
 ) ([]map[string]any, error) {
 	path := fmt.Sprintf("quiz_submissions/%d/questions", quizSubmissionID)
-	v, err := canvasGetJSON(ctx, client, canvasBase, accessToken, path, nil)
+	q := url.Values{}
+	q.Add("include[]", "quiz_question")
+	if attempt > 0 {
+		q.Set("quiz_submission_attempt", strconv.Itoa(int(attempt)))
+	}
+	v, err := canvasGetJSON(ctx, client, canvasBase, accessToken, path, q)
 	if err != nil {
 		return nil, err
 	}
@@ -167,6 +180,72 @@ func canvasGetQuizSubmissionQuestions(
 	}
 }
 
+func canvasGetQuizSubmissionEvents(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	canvasCourseID, canvasQuizID, quizSubmissionID int64,
+	attempt int32,
+) ([]map[string]any, error) {
+	path := fmt.Sprintf("courses/%d/quizzes/%d/submissions/%d/events", canvasCourseID, canvasQuizID, quizSubmissionID)
+	q := url.Values{}
+	if attempt > 0 {
+		q.Set("attempt", strconv.Itoa(int(attempt)))
+	}
+	v, err := canvasGetJSON(ctx, client, canvasBase, accessToken, path, q)
+	if err != nil {
+		return nil, err
+	}
+	switch t := v.(type) {
+	case map[string]any:
+		raw, ok := t["quiz_submission_events"].([]any)
+		if !ok {
+			return nil, nil
+		}
+		out := make([]map[string]any, 0, len(raw))
+		for _, it := range raw {
+			if m, ok := it.(map[string]any); ok && m != nil {
+				out = append(out, m)
+			}
+		}
+		return out, nil
+	case []any:
+		out := make([]map[string]any, 0, len(t))
+		for _, it := range t {
+			if m, ok := it.(map[string]any); ok && m != nil {
+				out = append(out, m)
+			}
+		}
+		return out, nil
+	default:
+		return nil, nil
+	}
+}
+
+func canvasCanvasQuestionIDFromSubmissionDataKey(key string) (int64, bool) {
+	key = strings.TrimSpace(key)
+	if key == "" {
+		return 0, false
+	}
+	switch key {
+	case "attempt", "cnt", "validation_token":
+		return 0, false
+	}
+	if strings.HasPrefix(key, "_question_") {
+		return 0, false
+	}
+	if strings.HasPrefix(key, "question_") {
+		rest := strings.TrimPrefix(key, "question_")
+		if idx := strings.Index(rest, "_"); idx >= 0 {
+			rest = rest[:idx]
+		}
+		qid, err := strconv.ParseInt(rest, 10, 64)
+		return qid, err == nil && qid > 0
+	}
+	qid, err := strconv.ParseInt(key, 10, 64)
+	return qid, err == nil && qid > 0
+}
+
 func canvasParseSubmissionData(raw any) []canvasQuizSubmissionAnswer {
 	switch t := raw.(type) {
 	case []any:
@@ -190,19 +269,35 @@ func canvasParseSubmissionData(raw any) []canvasQuizSubmissionAnswer {
 func canvasParseSubmissionDataMap(items map[string]any) []canvasQuizSubmissionAnswer {
 	out := make([]canvasQuizSubmissionAnswer, 0, len(items))
 	for key, value := range items {
-		qid, err := strconv.ParseInt(strings.TrimSpace(key), 10, 64)
-		if err != nil || qid <= 0 {
+		qid, ok := canvasCanvasQuestionIDFromSubmissionDataKey(key)
+		if !ok || qid <= 0 {
 			continue
 		}
-		entry, ok := value.(map[string]any)
-		if !ok || entry == nil {
-			continue
+		switch v := value.(type) {
+		case map[string]any:
+			if v == nil {
+				continue
+			}
+			entry := cloneStringKeyMap(v)
+			if entry["question_id"] == nil {
+				entry["question_id"] = float64(qid)
+			}
+			out = append(out, canvasParseSubmissionDataEntry(entry)...)
+		case string:
+			if text := strings.TrimSpace(v); text != "" {
+				out = append(out, canvasQuizSubmissionAnswer{
+					CanvasQuestionID: qid,
+					Answer:           text,
+				})
+			}
+		default:
+			if text := canvasAnswerAsString(v); text != "" {
+				out = append(out, canvasQuizSubmissionAnswer{
+					CanvasQuestionID: qid,
+					Answer:           text,
+				})
+			}
 		}
-		entry = cloneStringKeyMap(entry)
-		if entry["question_id"] == nil {
-			entry["question_id"] = float64(qid)
-		}
-		out = append(out, canvasParseSubmissionDataEntry(entry)...)
 	}
 	return out
 }
@@ -254,18 +349,11 @@ func canvasParseSubmissionDataEntry(m map[string]any) []canvasQuizSubmissionAnsw
 		case "false", "0":
 			b := false
 			correct = &b
+		case "undefined":
+			// Canvas uses "undefined" for manual-grading items before review.
 		}
 	}
-	answer := m["answer"]
-	if answer == nil {
-		answer = m["answer_id"]
-	}
-	if answer == nil {
-		answer = m["answers"]
-	}
-	if answer == nil {
-		answer = m["text"]
-	}
+	answer := canvasAnswerValueFromMap(m)
 	return []canvasQuizSubmissionAnswer{{
 		CanvasQuestionID: qid,
 		Answer:           answer,
@@ -274,32 +362,125 @@ func canvasParseSubmissionDataEntry(m map[string]any) []canvasQuizSubmissionAnsw
 	}}
 }
 
-func canvasMergeSubmissionAnswers(detail, listItem map[string]any, questionRows []map[string]any) map[int64]canvasQuizSubmissionAnswer {
+func canvasAnswerValueFromMap(m map[string]any) any {
+	if m == nil {
+		return nil
+	}
+	for _, key := range []string{"text", "answer", "answer_id", "answers", "student_answer", "student_answers"} {
+		v := m[key]
+		if v == nil {
+			continue
+		}
+		if s, ok := v.(string); ok && strings.TrimSpace(s) == "" {
+			continue
+		}
+		return v
+	}
+	return nil
+}
+
+func canvasQuizQuestionIDFromRow(row map[string]any) int64 {
+	// QuizSubmissionQuestion.id is the Canvas quiz question id (per Canvas API).
+	if qid := int64At(row, "id"); qid > 0 {
+		return qid
+	}
+	return int64At(row, "question_id")
+}
+
+func canvasAnswerFromQuestionRow(row map[string]any) any {
+	return canvasAnswerValueFromMap(row)
+}
+
+func canvasMergeAnswersFromQuizEvents(events []map[string]any) map[int64]canvasQuizSubmissionAnswer {
+	out := make(map[int64]canvasQuizSubmissionAnswer)
+	for _, ev := range events {
+		if strings.TrimSpace(strAt(ev, "event_type", "")) != "question_answered" {
+			continue
+		}
+		data, ok := ev["event_data"].(map[string]any)
+		if !ok || data == nil {
+			continue
+		}
+		qid := int64At(data, "question_id")
+		if qid <= 0 {
+			continue
+		}
+		answer := canvasAnswerValueFromMap(data)
+		if answer == nil {
+			continue
+		}
+		out[qid] = canvasMergeQuizSubmissionAnswer(out[qid], canvasQuizSubmissionAnswer{
+			CanvasQuestionID: qid,
+			Answer:           answer,
+		})
+	}
+	return out
+}
+
+func canvasMergeSubmissionAnswers(detail, listItem map[string]any, questionRows []map[string]any, eventRows []map[string]any) map[int64]canvasQuizSubmissionAnswer {
 	out := make(map[int64]canvasQuizSubmissionAnswer)
 	for _, src := range []map[string]any{detail, listItem} {
 		if src == nil {
 			continue
 		}
-		for _, a := range canvasParseSubmissionData(src["submission_data"]) {
-			out[a.CanvasQuestionID] = canvasMergeQuizSubmissionAnswer(out[a.CanvasQuestionID], a)
+		for _, sd := range canvasCollectSubmissionDataBlobs(src) {
+			for _, a := range canvasParseSubmissionData(sd) {
+				out[a.CanvasQuestionID] = canvasMergeQuizSubmissionAnswer(out[a.CanvasQuestionID], a)
+			}
 		}
 	}
+	for qid, ans := range canvasMergeAnswersFromQuizEvents(eventRows) {
+		out[qid] = canvasMergeQuizSubmissionAnswer(out[qid], ans)
+	}
 	for _, row := range questionRows {
-		qid := int64At(row, "id")
+		qid := canvasQuizQuestionIDFromRow(row)
 		if qid <= 0 {
 			continue
 		}
 		prev := out[qid]
 		if prev.Answer == nil {
-			prev.Answer = row["answer"]
+			prev.Answer = canvasAnswerFromQuestionRow(row)
 		}
 		if prev.Points == nil {
 			if v, ok := coerceCanvasJSONNumber(row["points"]); ok {
 				prev.Points = &v
+			} else if v, ok := coerceCanvasJSONNumber(row["points_possible"]); ok {
+				prev.Points = &v
+			}
+		}
+		if prev.Correct == nil {
+			switch c := row["correct"].(type) {
+			case bool:
+				prev.Correct = &c
+			case string:
+				switch strings.ToLower(strings.TrimSpace(c)) {
+				case "true", "1":
+					b := true
+					prev.Correct = &b
+				case "false", "0":
+					b := false
+					prev.Correct = &b
+				}
 			}
 		}
 		prev.CanvasQuestionID = qid
 		out[qid] = prev
+	}
+	return out
+}
+
+func canvasCollectSubmissionDataBlobs(src map[string]any) []any {
+	if src == nil {
+		return nil
+	}
+	out := make([]any, 0, 4)
+	if sd := src["submission_data"]; sd != nil {
+		out = append(out, sd)
+	}
+	for _, hist := range arrAt(src, "submission_history") {
+		if sd := hist["submission_data"]; sd != nil {
+			out = append(out, sd)
+		}
 	}
 	return out
 }
@@ -346,7 +527,7 @@ func canvasSupplementQuestionsFromSubmissionRows(
 	}
 	out := append([]coursemodulequiz.QuizQuestion(nil), questions...)
 	for _, row := range rows {
-		qid := int64At(row, "id")
+		qid := canvasQuizQuestionIDFromRow(row)
 		if qid <= 0 {
 			continue
 		}
@@ -556,6 +737,10 @@ func canvasGradeImportedQuestion(
 	}
 
 	if answer.Correct != nil {
+		// Canvas may send correct=false before an instructor reviews manual items.
+		if quizattemptgrading.IsManualGradingQuestionType(q.QuestionType) {
+			return responseJSON, nil, 0, maxPoints
+		}
 		isCorrect = answer.Correct
 		if *answer.Correct {
 			pointsAwarded = maxPoints
@@ -736,6 +921,7 @@ type canvasQuizAttemptPayload struct {
 	raw          map[string]any
 	detail       map[string]any
 	questionRows []map[string]any
+	eventRows    []map[string]any
 }
 
 func canvasFetchQuizAnswerMetadataParallel(
@@ -810,17 +996,27 @@ func canvasFetchQuizAttemptPayloadsParallel(
 		i, raw := i, raw
 		g.Go(func() error {
 			submissionID := int64At(raw, "id")
-			detail, err := canvasGetQuizSubmissionDetail(gctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizID, submissionID)
-			if err != nil {
-				log.Printf("canvas-import: quiz submission %d detail fetch failed (quiz %d): %v", submissionID, canvasQuizID, err)
-				detail = raw
+			attempt := int32(int64At(raw, "attempt"))
+			if attempt < 1 {
+				attempt = 1
 			}
-			questionRows, err := canvasGetQuizSubmissionQuestions(gctx, client, canvasBase, accessToken, submissionID)
+			// Fetch per-question answers first while Canvas may still expose hash submission_data.
+			questionRows, err := canvasGetQuizSubmissionQuestions(gctx, client, canvasBase, accessToken, submissionID, attempt)
 			if err != nil {
 				log.Printf("canvas-import: quiz submission %d questions fetch failed (quiz %d): %v", submissionID, canvasQuizID, err)
 				questionRows = nil
 			}
-			out[i] = canvasQuizAttemptPayload{raw: raw, detail: detail, questionRows: questionRows}
+			detail, err := canvasGetQuizSubmissionDetail(gctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizID, submissionID, attempt)
+			if err != nil {
+				log.Printf("canvas-import: quiz submission %d detail fetch failed (quiz %d): %v", submissionID, canvasQuizID, err)
+				detail = raw
+			}
+			eventRows, err := canvasGetQuizSubmissionEvents(gctx, client, canvasBase, accessToken, canvasCourseID, canvasQuizID, submissionID, attempt)
+			if err != nil {
+				log.Printf("canvas-import: quiz submission %d events fetch failed (quiz %d): %v", submissionID, canvasQuizID, err)
+				eventRows = nil
+			}
+			out[i] = canvasQuizAttemptPayload{raw: raw, detail: detail, questionRows: questionRows, eventRows: eventRows}
 			return nil
 		})
 	}
@@ -898,7 +1094,7 @@ func canvasImportQuizAttempts(
 				attemptNum = 1
 			}
 
-			answers := canvasMergeSubmissionAnswers(payload.detail, raw, payload.questionRows)
+			answers := canvasMergeSubmissionAnswers(payload.detail, raw, payload.questionRows, payload.eventRows)
 			score, hasScore := canvasQuizSubmissionScore(raw)
 			if len(answers) == 0 && !hasScore {
 				if !canvasQuizSubmissionImportable(raw) {

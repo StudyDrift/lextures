@@ -162,6 +162,11 @@ func TestCanvasGradeFromSubmissionPayload_commentOnlyNoScore(t *testing.T) {
 				"comment":    "Please revise the intro.",
 				"created_at": "2024-01-02T00:00:00Z",
 			},
+			map[string]any{
+				"author_id":  float64(42),
+				"comment":    "Thanks, working on it.",
+				"created_at": "2024-01-03T00:00:00Z",
+			},
 		},
 	}
 	got, err := canvasGradeFromSubmissionPayload(sub, nil, nil)
@@ -171,8 +176,11 @@ func TestCanvasGradeFromSubmissionPayload_commentOnlyNoScore(t *testing.T) {
 	if got.hasNumericScore {
 		t.Fatal("did not expect numeric score")
 	}
-	if got.comment != nil {
-		t.Fatalf("submitted attempt with feedback only should stay ungraded, comment=%q", *got.comment)
+	if got.comment == nil || *got.comment != "User 1: Please revise the intro.\n\nStudent: Thanks, working on it." {
+		t.Fatalf("comment=%v", got.comment)
+	}
+	if len(got.commentsJSON) == 0 {
+		t.Fatal("expected structured comments JSON")
 	}
 }
 
