@@ -111,6 +111,12 @@ variable "course_files_bucket_force_destroy" {
   default     = false
 }
 
+variable "enable_bastion" {
+  description = "Provision an SSM-managed bastion for emergency Postgres access. Defaults to true in production."
+  type        = bool
+  default     = null
+}
+
 variable "tags" {
   description = "Additional tags applied to all taggable resources."
   type        = map(string)

@@ -568,3 +568,119 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report
           retention-days: 7
+
+  iac-changes:
+    name: Detect IaC changes
+    runs-on: ubuntu-latest
+    outputs:
+      iac: ${{ steps.filter.outputs.iac }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            iac:
+              - 'iac/**'
+              - 'Makefile'
+
+  iac-terraform:
+    name: IaC (Terraform fmt + validate)
+    needs: iac-changes
+    if: needs.iac-changes.outputs.iac == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+          terraform_wrapper: false
+
+      - name: Terraform fmt and validate
+        run: make iac-check
+
+  iac-terraform-plan:
+    name: IaC (Terraform plan comment)
+    needs: iac-changes
+    if: needs.iac-changes.outputs.iac == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      TF_IN_AUTOMATION: true
+      TF_INPUT: "false"
+      TF_TOKEN: ${{ secrets.TF_TOKEN }}
+      TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN }}
+      TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Skip when TF_TOKEN is not configured
+        id: gate
+        run: |
+          if [ -z "${TF_TOKEN:-}" ] || [ -z "${TF_CLOUD_ORGANIZATION:-}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping terraform plan (set TF_TOKEN and TF_CLOUD_ORGANIZATION to enable PR plan comments)."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: hashicorp/setup-terraform@v3
+        if: steps.gate.outputs.skip != 'true'
+        with:
+          terraform_version: 1.9.0
+          terraform_wrapper: false
+
+      - name: Terraform init (production)
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: iac/production
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if terraform init -input=false; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Terraform plan (production)
+        id: plan
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: iac/production
+        run: |
+          set -euo pipefail
+          terraform plan -no-color -input=false -out=tfplan 2>&1 | tee plan.txt
+          {
+            echo "plan<<EOF"
+            tail -c 60000 plan.txt
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment plan on PR
+        if: steps.gate.outputs.skip != 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const plan = `${{ steps.plan.outputs.plan }}`;
+            const body = [
+              '## Terraform plan (`iac/production`)',
+              '',
+              '<details><summary>Plan output</summary>',
+              '',
+              '```',
+              plan,
+              '```',
+              '',
+              '</details>',
+            ].join('\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });

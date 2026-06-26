@@ -31,5 +31,7 @@ module "aws" {
 
   course_files_bucket_force_destroy = var.course_files_bucket_force_destroy
 
+  enable_bastion = var.enable_bastion
+
   tags = var.tags
 }

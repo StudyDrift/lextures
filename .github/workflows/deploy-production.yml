@@ -1,0 +1,114 @@
+# Deploy Production: apply iac/production Terraform (AWS stack).
+#
+# Manual only — no push trigger. Requires GitHub Environment approval
+# (configure "production" and/or "staging" environments with required reviewers).
+#
+# Required repository secrets:
+#   TF_TOKEN              — HCP Terraform / Terraform Cloud API token
+#   TF_CLOUD_ORGANIZATION — HCP Terraform organization name
+#
+# Optional (when not using HCP Terraform remote runs):
+#   AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY — or OIDC role (extend this workflow)
+#
+# Configure HCP Terraform workspace `lextures-production-aws` (uncomment cloud block in
+# iac/production/versions.tf) or copy backend.tf.example for S3 remote state.
+
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Terraform workspace target
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+
+concurrency:
+  group: deploy-production-${{ github.event.inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  TF_IN_AUTOMATION: true
+  TF_INPUT: "false"
+  TF_TOKEN: ${{ secrets.TF_TOKEN }}
+  TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN }}
+  TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    name: Terraform apply (${{ github.event.inputs.environment }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.0
+          terraform_wrapper: false
+
+      - name: Terraform init
+        working-directory: iac/production
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if terraform init -input=false; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              exit 1
+            fi
+            echo "terraform init failed (attempt ${attempt}/4); retrying in 30s..."
+            sleep 30
+          done
+
+      - name: Select workspace
+        working-directory: iac/production
+        run: |
+          set -euo pipefail
+          if terraform workspace list | grep -q "^\* ${WORKSPACE}$\| ${WORKSPACE}$"; then
+            terraform workspace select "${WORKSPACE}"
+          else
+            terraform workspace new "${WORKSPACE}"
+          fi
+        env:
+          WORKSPACE: ${{ github.event.inputs.environment }}
+
+      - name: Terraform apply
+        working-directory: iac/production
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if terraform apply -auto-approve -input=false; then
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              exit 1
+            fi
+            echo "terraform apply failed (attempt ${attempt}/4); retrying in 45s..."
+            sleep 45
+          done
+
+      - name: Terraform outputs summary
+        working-directory: iac/production
+        run: |
+          {
+            echo "## Production Terraform outputs"
+            echo ""
+            echo "| Output | Value |"
+            echo "| --- | --- |"
+            echo "| EKS cluster | \`$(terraform output -raw eks_cluster_name 2>/dev/null || echo n/a)\` |"
+            echo "| Postgres endpoint | \`$(terraform output -raw postgres_endpoint 2>/dev/null || echo n/a)\` |"
+            echo "| Database secret ARN | \`$(terraform output -raw database_url_secret_arn 2>/dev/null || echo n/a)\` |"
+            echo "| Course files bucket | \`$(terraform output -raw course_files_bucket_name 2>/dev/null || echo n/a)\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

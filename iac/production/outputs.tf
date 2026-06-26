@@ -74,3 +74,13 @@ output "kubectl_config_command" {
     module.aws[0].eks_cluster_name,
   ) : null
 }
+
+output "bastion_instance_id" {
+  description = "Bastion EC2 instance ID for emergency DB access (SSM)."
+  value       = try(module.aws[0].bastion_instance_id, null)
+}
+
+output "bastion_ssm_connect_command" {
+  description = "Connect to the bastion via AWS Systems Manager Session Manager."
+  value       = try(module.aws[0].bastion_ssm_connect_command, null)
+}

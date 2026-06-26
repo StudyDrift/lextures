@@ -43,10 +43,10 @@ resource "random_password" "rabbitmq" {
 resource "aws_mq_broker" "rabbitmq" {
   broker_name = "${local.name_prefix}-rabbitmq"
 
-  engine_type        = "RabbitMQ"
-  engine_version     = "3.13"
-  host_instance_type = local.is_production ? "mq.m5.large" : "mq.t3.micro"
-  deployment_mode    = local.is_production ? "CLUSTER_MULTI_AZ" : "SINGLE_INSTANCE"
+  engine_type                = "RabbitMQ"
+  engine_version             = "3.13"
+  host_instance_type         = local.is_production ? "mq.m5.large" : "mq.t3.micro"
+  deployment_mode            = local.is_production ? "CLUSTER_MULTI_AZ" : "SINGLE_INSTANCE"
   auto_minor_version_upgrade = true
 
   subnet_ids = local.is_production ? module.vpc.private_subnets : [module.vpc.private_subnets[0]]

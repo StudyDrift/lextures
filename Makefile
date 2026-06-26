@@ -1,4 +1,4 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www iac-check server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -80,6 +80,10 @@ e2e-teardown:
 # Requires API + web client already running (e.g. `make dev`).
 lighthouse-dashboard-dark:
 	cd e2e && npm run lighthouse:dashboard:dark
+
+# Terraform fmt + validate for iac/demo and iac/production (no cloud credentials).
+iac-check:
+	bash iac/scripts/terraform-check.sh
 
 cli:
 ifneq ($(filter lint,$(MAKECMDGOALS)),)
