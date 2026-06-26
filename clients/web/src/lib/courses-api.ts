@@ -42,6 +42,8 @@ import {
   quizAttemptStartResponseSchema,
   quizHintRevealResponseSchema,
   quizWorkedExampleResponseSchema,
+  quizAttemptGradingPayloadSchema,
+  quizAttemptGradingSavePayloadSchema,
   quizAttemptsListPayloadSchema,
   quizCodeRunResponseSchema,
   quizCurrentQuestionPayloadSchema,
@@ -3430,6 +3432,7 @@ export async function postQuizStart(
 
 export type QuizAttemptSummaryApi = {
   id: string
+  studentUserId?: string
   attemptNumber: number
   submittedAt: string
   scorePercent?: number | null
@@ -3437,6 +3440,34 @@ export type QuizAttemptSummaryApi = {
   pointsPossible: number
   studentName?: string
   needsManualGrading?: boolean
+}
+
+export type QuizGradingQuestion = {
+  questionIndex: number
+  questionId?: string | null
+  questionType: string
+  promptSnapshot?: string | null
+  choices?: string[]
+  responseJson: unknown
+  isCorrect?: boolean | null
+  pointsAwarded?: number | null
+  maxPoints: number
+  needsGrading: boolean
+}
+
+export type QuizAttemptGradingPayload = {
+  attemptId: string
+  studentUserId: string
+  studentName: string
+  attemptNumber: number
+  submittedAt?: string | null
+  needsManualGrading: boolean
+  score?: {
+    pointsEarned: number
+    pointsPossible: number
+    scorePercent: number
+  } | null
+  questions: QuizGradingQuestion[]
 }
 
 export type QuizAttemptsListPayload = {
@@ -3460,6 +3491,43 @@ export async function fetchQuizAttemptsList(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return parseApiResponse('fetchQuizAttemptsList', quizAttemptsListPayloadSchema, raw)
+}
+
+export async function fetchQuizAttemptGrading(
+  courseCode: string,
+  itemId: string,
+  attemptId: string,
+): Promise<QuizAttemptGradingPayload> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/attempts/${encodeURIComponent(attemptId)}/grading`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('fetchQuizAttemptGrading', quizAttemptGradingPayloadSchema, raw)
+}
+
+export async function putQuizAttemptGrading(
+  courseCode: string,
+  itemId: string,
+  attemptId: string,
+  body: { questions: Array<{ questionIndex: number; pointsAwarded: number }> },
+): Promise<{
+  pointsEarned: number
+  pointsPossible: number
+  scorePercent: number
+  needsManualGrading: boolean
+}> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/quizzes/${encodeURIComponent(itemId)}/attempts/${encodeURIComponent(attemptId)}/grading`,
+    {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseApiResponse('putQuizAttemptGrading', quizAttemptGradingSavePayloadSchema, raw)
 }
 
 export async function putEnrollmentQuizOverride(

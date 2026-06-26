@@ -707,36 +707,31 @@ func canvasGradeFromSubmissionPayload(
 	out.excused = boolAt(sub, "excused", false)
 	if out.excused {
 		out.hasNumericScore = true
-		return out, nil
 	}
 
 	gradedForImport := canvasSubmissionIsGradedForImport(sub)
-	if !gradedForImport {
-		return out, nil
-	}
-
-	rubricScores, rubricTotal, hasRubric := canvasMapRubricAssessmentScores(sub, lexturesRubric)
-	if hasRubric {
-		out.points = rubricTotal
-		out.hasNumericScore = true
-		if len(rubricScores) > 0 {
-			raw, err := json.Marshal(rubricScores)
-			if err != nil {
-				return out, err
+	if gradedForImport && !out.excused {
+		rubricScores, rubricTotal, hasRubric := canvasMapRubricAssessmentScores(sub, lexturesRubric)
+		if hasRubric {
+			out.points = rubricTotal
+			out.hasNumericScore = true
+			if len(rubricScores) > 0 {
+				raw, err := json.Marshal(rubricScores)
+				if err != nil {
+					return out, err
+				}
+				out.rubricJSON = raw
 			}
-			out.rubricJSON = raw
 		}
-	}
 
-	if exc, score, hasScore := canvasSubmissionEffectiveScore(sub); hasScore {
-		if exc {
-			out.excused = true
-			out.hasNumericScore = true
-			return out, nil
-		}
-		if !out.hasNumericScore {
-			out.points = score
-			out.hasNumericScore = true
+		if exc, score, hasScore := canvasSubmissionEffectiveScore(sub); hasScore {
+			if exc {
+				out.excused = true
+				out.hasNumericScore = true
+			} else if !out.hasNumericScore {
+				out.points = score
+				out.hasNumericScore = true
+			}
 		}
 	}
 

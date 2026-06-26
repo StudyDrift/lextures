@@ -855,7 +855,7 @@ export default function CourseDetail() {
                         </div>
                       ) : (
                         <p className="mt-2 text-sm text-slate-600 dark:text-neutral-400">
-                          No ungraded assignment submissions right now.
+                          No ungraded submissions right now.
                           {gradebookEmptyCells != null && gradebookEmptyCells > 0
                             ? ` ${gradebookEmptyCells} empty grade cell${gradebookEmptyCells === 1 ? '' : 's'} remain in the gradebook.`
                             : ''}

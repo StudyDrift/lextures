@@ -21,3 +21,16 @@ func TestResponseNeedsManualGrading_multipleChoiceIgnored(t *testing.T) {
 		t.Fatal("auto-graded multiple choice should not need manual grading")
 	}
 }
+
+func TestResponseNeedsManualGrading_shortAnswerUngraded(t *testing.T) {
+	if !ResponseNeedsManualGrading("short_answer", nil, 0, 3) {
+		t.Fatal("short_answer with no correctness should need manual grading")
+	}
+}
+
+func TestCorrectnessFromManualPoints_partialCredit(t *testing.T) {
+	c := CorrectnessFromManualPoints(2, 5)
+	if c == nil || *c {
+		t.Fatalf("partial credit should mark incorrect, got %v", c)
+	}
+}

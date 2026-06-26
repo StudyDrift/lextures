@@ -18,7 +18,7 @@ function hrefForGradingItem(courseCode: string, item: Pick<GradingBacklogItem, '
   const code = encodeURIComponent(courseCode)
   const id = encodeURIComponent(item.itemId)
   if (item.itemType === 'quiz') {
-    return `/courses/${code}/gradebook?item=${id}`
+    return `/courses/${code}/modules/quiz/${id}?preview=submissions`
   }
   return `/courses/${code}/modules/assignment/${id}?preview=submissions`
 }

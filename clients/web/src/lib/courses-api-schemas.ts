@@ -569,6 +569,7 @@ export const quizAttemptStartResponseSchema = z.object({
 
 export const quizAttemptSummaryApiSchema = z.object({
   id: z.string(),
+  studentUserId: z.string().optional(),
   attemptNumber: z.number(),
   submittedAt: z.string(),
   scorePercent: z.number().nullable().optional(),
@@ -576,6 +577,44 @@ export const quizAttemptSummaryApiSchema = z.object({
   pointsPossible: z.number(),
   studentName: z.string().optional(),
   needsManualGrading: z.boolean().optional(),
+})
+
+export const quizGradingQuestionSchema = z.object({
+  questionIndex: z.number(),
+  questionId: z.string().nullable().optional(),
+  questionType: z.string(),
+  promptSnapshot: z.string().nullable().optional(),
+  choices: z.array(z.string()).optional(),
+  responseJson: z.unknown(),
+  isCorrect: z.boolean().nullable().optional(),
+  pointsAwarded: z.number().nullable().optional(),
+  maxPoints: z.number(),
+  needsGrading: z.boolean(),
+})
+
+export const quizAttemptGradingPayloadSchema = z.object({
+  attemptId: z.string(),
+  studentUserId: z.string(),
+  studentName: z.string(),
+  attemptNumber: z.number(),
+  submittedAt: z.string().nullable().optional(),
+  needsManualGrading: z.boolean(),
+  score: z
+    .object({
+      pointsEarned: z.number(),
+      pointsPossible: z.number(),
+      scorePercent: z.number(),
+    })
+    .nullable()
+    .optional(),
+  questions: z.array(quizGradingQuestionSchema),
+})
+
+export const quizAttemptGradingSavePayloadSchema = z.object({
+  pointsEarned: z.number(),
+  pointsPossible: z.number(),
+  scorePercent: z.number(),
+  needsManualGrading: z.boolean(),
 })
 
 export const quizAttemptsListPayloadSchema = z.object({

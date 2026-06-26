@@ -130,7 +130,7 @@ export function DryRunDock({
   const previewSummary = previewDockSummary(dryRunResult, maxPoints)
 
   return (
-    <div className="flex flex-col">
+    <div className="relative z-10 flex flex-col bg-white dark:bg-neutral-950">
       {showExpandedPanels ? (
         <>
           <div

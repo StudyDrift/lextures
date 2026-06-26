@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { formatDateTime } from '../../lib/format'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Check, CheckCircle, ChevronDown, Download, Eye, Loader2, BarChart3, Pencil, Plus, Sparkles, Trash2, WifiOff, X } from 'lucide-react'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
 import { useOnlineStatus } from '../../hooks/use-online-status'
@@ -19,6 +19,7 @@ import {
   fetchCourseGradingSettings,
   fetchCourseStructure,
   fetchModuleQuiz,
+  fetchQuizAttemptsList,
   fetchQuizFocusLossEvents,
   fetchReaderMarkups,
   generateModuleQuizQuestions,
@@ -62,6 +63,7 @@ import {
 import { recordLastVisitedModuleItem } from '../../lib/last-visited-module-item'
 import { LmsPage } from './lms-page'
 import { QuizAnalyticsModal } from '../../components/quiz/quiz-analytics-modal'
+import { AssignmentAnnotationWorkbench } from '../../components/annotation/assignment-annotation-workbench'
 
 import { ProctoringPreExamChecklist } from '../../components/quiz/proctoring-pre-exam-checklist'
 import { fetchQuizProctoringConfig, type ProctoringConfig } from '../../lib/courses-api'
@@ -247,10 +249,14 @@ function QuizEditorMoreMenu({
 export default function CourseModuleQuizPage() {
   const { courseCode, itemId } = useParams<{ courseCode: string; itemId: string }>()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { allows, loading: permLoading } = usePermissions()
   const canEdit = Boolean(courseCode && itemId && !permLoading && allows(permCourseItemCreate(courseCode)))
   const canEditQuizItems = Boolean(
     courseCode && itemId && !permLoading && allows(permCourseItemsCreate(courseCode)),
+  )
+  const canGradeQuiz = Boolean(
+    courseCode && itemId && !permLoading && allows(courseGradebookViewPermission(courseCode)),
   )
   const [title, setTitle] = useState('')
   const [markdown, setMarkdown] = useState('')
@@ -334,6 +340,8 @@ export default function CourseModuleQuizPage() {
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [analyticsOpen, setAnalyticsOpen] = useState(false)
+  const [gradingOpen, setGradingOpen] = useState(false)
+  const [ungradedAttemptCount, setUngradedAttemptCount] = useState<number | null>(null)
   const [studentQuizBanner, setStudentQuizBanner] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [proctoringConfig, setProctoringConfig] = useState<ProctoringConfig | null | undefined>(undefined)
   const [proctoringChecklistOpen, setProctoringChecklistOpen] = useState(false)
@@ -458,6 +466,44 @@ export default function CourseModuleQuizPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (!canGradeQuiz || !courseCode || !itemId) {
+      setUngradedAttemptCount(null)
+      return
+    }
+    let cancelled = false
+    void (async () => {
+      try {
+        const data = await fetchQuizAttemptsList(courseCode, itemId)
+        if (cancelled) return
+        const byStudent = new Map<string, (typeof data.attempts)[number]>()
+        for (const attempt of data.attempts) {
+          const sid = attempt.studentUserId?.trim() || attempt.id
+          const prev = byStudent.get(sid)
+          if (!prev || attempt.attemptNumber >= prev.attemptNumber) {
+            byStudent.set(sid, attempt)
+          }
+        }
+        setUngradedAttemptCount(
+          [...byStudent.values()].filter((attempt) => Boolean(attempt.needsManualGrading)).length,
+        )
+      } catch {
+        if (!cancelled) setUngradedAttemptCount(null)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [canGradeQuiz, courseCode, itemId, gradingOpen])
+
+  useEffect(() => {
+    if (!canGradeQuiz || loading || loadError) return
+    const preview = searchParams.get('preview')
+    if (preview === 'grading' || preview === 'submissions') {
+      setGradingOpen(true)
+    }
+  }, [canGradeQuiz, loading, loadError, searchParams])
 
   useCoursePageTitle(!loading && title ? title : null)
 
@@ -1011,8 +1057,20 @@ export default function CourseModuleQuizPage() {
               {saving ? 'Saving…' : 'Save'}
             </button>
           </div>
-        ) : canEdit ? (
+        ) : canEdit || canGradeQuiz ? (
           <div className="flex flex-wrap items-center justify-end gap-2">
+            {canGradeQuiz ? (
+              <button
+                type="button"
+                onClick={() => setGradingOpen(true)}
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-950 shadow-sm transition-[background-color,color,border-color] hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-50 dark:hover:bg-amber-950/60"
+              >
+                {ungradedAttemptCount != null && ungradedAttemptCount > 0
+                  ? `Grade submissions (${ungradedAttemptCount} ungraded)`
+                  : 'Grade submissions'}
+              </button>
+            ) : null}
             {canEditQuizItems ? (
               <>
                 <FeatureHelpTrigger topic="quiz-authoring" />
@@ -1544,6 +1602,20 @@ export default function CourseModuleQuizPage() {
         advanced={quizAdvanced}
         oneQuestionAtATime={oneQuestionAtATime}
       />
+
+      {canGradeQuiz && courseCode && itemId ? (
+        <AssignmentAnnotationWorkbench
+          courseCode={courseCode}
+          itemId={itemId}
+          itemKind="quiz"
+          assignmentTitle={title || 'Quiz'}
+          mode="staff"
+          submissionAllowsFile={false}
+          presentation="modal"
+          modalOpen={gradingOpen}
+          onModalClose={() => setGradingOpen(false)}
+        />
+      ) : null}
 
       {proctoringConfig && proctoringChecklistOpen && (
         <ProctoringPreExamChecklist

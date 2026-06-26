@@ -51,6 +51,7 @@ import {
 import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
 import type { RubricDefinition } from '../../lib/courses-api'
+import { QuizSpeedGraderBranch } from '../quiz/quiz-speed-grader-branch'
 
 function submissionContentPath(contentPath?: string | null): string | null {
   const trimmed = contentPath?.trim()
@@ -60,6 +61,8 @@ function submissionContentPath(contentPath?: string | null): string | null {
 export type AssignmentAnnotationWorkbenchProps = {
   courseCode: string
   itemId: string
+  /** `quiz` opens quiz attempt SpeedGrader; default is assignment submissions. */
+  itemKind?: 'assignment' | 'quiz'
   /** Assignment title (in-app message / banners). */
   assignmentTitle?: string
   /** `staff` uses roster navigation; `student` loads only the viewer’s submission. */
@@ -97,7 +100,25 @@ export type AssignmentAnnotationWorkbenchProps = {
   initialStudentUserId?: string | null
 }
 
-export function AssignmentAnnotationWorkbench({
+export function AssignmentAnnotationWorkbench(props: AssignmentAnnotationWorkbenchProps) {
+  if (props.itemKind === 'quiz') {
+    return (
+      <QuizSpeedGraderBranch
+        courseCode={props.courseCode}
+        itemId={props.itemId}
+        quizTitle={props.assignmentTitle}
+        presentation={props.presentation}
+        modalOpen={props.modalOpen}
+        onModalClose={props.onModalClose}
+        initialStudentUserId={props.initialStudentUserId}
+      />
+    )
+  }
+
+  return <AssignmentAnnotationWorkbenchInner {...props} />
+}
+
+function AssignmentAnnotationWorkbenchInner({
   courseCode,
   itemId,
   mode,

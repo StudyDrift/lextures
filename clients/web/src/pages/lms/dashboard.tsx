@@ -1347,7 +1347,7 @@ export default function Dashboard() {
                           </div>
                         ) : (
                           <p className="mt-4 text-sm text-slate-500 dark:text-neutral-400">
-                            No ungraded assignment submissions right now.
+                            No ungraded submissions right now.
                           </p>
                         )}
                         <dl className="mt-4 space-y-3 text-sm">

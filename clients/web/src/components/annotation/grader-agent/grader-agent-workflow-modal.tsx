@@ -418,14 +418,16 @@ export function GraderAgentWorkflowModal({
           </p>
         ) : null}
 
-        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div className="relative z-0 flex min-h-0 flex-1 flex-col overflow-hidden lg:flex-row">
           <aside className="flex min-h-0 w-full shrink-0 flex-col border-b border-slate-200 px-3 py-3 lg:w-60 lg:border-b-0 lg:border-e lg:px-3.5 dark:border-neutral-700">
             <NodePalette codeExecutionEnabled={codeExecutionEnabled} onAddNode={addPaletteNode} />
           </aside>
-          <main className="min-h-0 flex-1 p-3">
-            <Suspense fallback={<div className="h-full motion-safe:animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />}>
-              <CanvasView workflow={workflow} />
-            </Suspense>
+          <main className="relative z-0 min-h-0 flex-1 overflow-hidden p-3">
+            <div className="h-full min-h-0">
+              <Suspense fallback={<div className="h-full motion-safe:animate-pulse rounded-xl bg-slate-100 dark:bg-neutral-800" />}>
+                <CanvasView workflow={workflow} />
+              </Suspense>
+            </div>
           </main>
           <aside
             className="relative flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 p-3 pl-4 lg:w-[var(--inspector-width)] lg:shrink-0 lg:border-t-0 lg:border-s dark:border-neutral-700"
@@ -482,7 +484,7 @@ export function GraderAgentWorkflowModal({
         </div>
 
         {!isTemplateMode ? (
-          <footer className="shrink-0 border-t border-slate-200 dark:border-neutral-700">
+          <footer className="relative z-10 shrink-0 border-t border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950">
             <DryRunDock
               workflow={workflow}
               rubric={rubric}
