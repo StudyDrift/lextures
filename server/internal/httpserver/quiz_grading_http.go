@@ -24,8 +24,8 @@ func (d Deps) registerQuizGradingRoutes(r chi.Router) {
 	r.Put("/api/v1/courses/{course_code}/quizzes/{item_id}/attempts/{attempt_id}/grading", d.handleQuizAttemptGradingPut())
 }
 
-func (d Deps) requireQuizGrader(w http.ResponseWriter, r *http.Request, courseCode string) (viewer uuid.UUID, ok bool) {
-	courseCode, viewer, ok = d.requireCourseAccess(w, r)
+func (d Deps) requireQuizGrader(w http.ResponseWriter, r *http.Request) (viewer uuid.UUID, ok bool) {
+	courseCode, viewer, ok := d.requireCourseAccess(w, r)
 	if !ok {
 		return uuid.Nil, false
 	}
@@ -49,7 +49,7 @@ func (d Deps) handleQuizAttemptGradingGet() http.HandlerFunc {
 			return
 		}
 		courseCode := chi.URLParam(r, "course_code")
-		if _, ok := d.requireQuizGrader(w, r, courseCode); !ok {
+		if _, ok := d.requireQuizGrader(w, r); !ok {
 			return
 		}
 		itemID, attemptID, attempt, quizRow, cid, ok := d.loadQuizAttemptForGrading(w, r, courseCode)
@@ -124,7 +124,7 @@ func (d Deps) handleQuizAttemptGradingPut() http.HandlerFunc {
 			return
 		}
 		courseCode := chi.URLParam(r, "course_code")
-		if _, ok := d.requireQuizGrader(w, r, courseCode); !ok {
+		if _, ok := d.requireQuizGrader(w, r); !ok {
 			return
 		}
 		itemID, attemptID, attempt, quizRow, cid, ok := d.loadQuizAttemptForGrading(w, r, courseCode)
