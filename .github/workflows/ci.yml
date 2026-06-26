@@ -614,15 +614,25 @@ jobs:
       TF_TOKEN: ${{ secrets.TF_TOKEN }}
       TF_TOKEN_app_terraform_io: ${{ secrets.TF_TOKEN }}
       TF_CLOUD_ORGANIZATION: ${{ secrets.TF_CLOUD_ORGANIZATION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: us-east-1
+      TF_VAR_statuspage_api_key: ${{ secrets.STATUSPAGE_API_KEY != '' && secrets.STATUSPAGE_API_KEY || 'plan-only-unused' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Skip when TF_TOKEN is not configured
+      - name: Skip when plan prerequisites are not configured
         id: gate
         run: |
-          if [ -z "${TF_TOKEN:-}" ] || [ -z "${TF_CLOUD_ORGANIZATION:-}" ]; then
+          missing=()
+          if [ -z "${TF_TOKEN:-}" ]; then missing+=("TF_TOKEN"); fi
+          if [ -z "${TF_CLOUD_ORGANIZATION:-}" ]; then missing+=("TF_CLOUD_ORGANIZATION"); fi
+          if [ -z "${AWS_ACCESS_KEY_ID:-}" ] || [ -z "${AWS_SECRET_ACCESS_KEY:-}" ]; then
+            missing+=("AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY")
+          fi
+          if [ "${#missing[@]}" -gt 0 ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
-            echo "Skipping terraform plan (set TF_TOKEN and TF_CLOUD_ORGANIZATION to enable PR plan comments)."
+            echo "Skipping terraform plan (missing: ${missing[*]})."
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
