@@ -1,0 +1,21 @@
+# Example Alertmanager receiver for Statuspage component automation (plan 17.13).
+# Point this receiver at the Lextures API internal webhook after 17.7 Alertmanager is deployed.
+
+receivers:
+  - name: statuspage-webhook
+    webhook_configs:
+      - url: https://api.lextures.io/api/v1/internal/ops/alertmanager-webhook
+        http_config:
+          authorization:
+            type: Bearer
+            credentials: ${ALERTMANAGER_WEBHOOK_SECRET}
+        send_resolved: true
+
+route:
+  routes:
+    - matchers:
+        - statuspage_component=~".+"
+      receiver: statuspage-webhook
+      group_wait: 5m
+      group_interval: 5m
+      repeat_interval: 30m

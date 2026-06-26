@@ -526,6 +526,21 @@ type Config struct {
 	TwilioAuthToken string
 	// TwilioFromNumber is the Twilio sender phone number (E.164).
 	TwilioFromNumber string
+
+	// StatusPageEnabled gates the public status summary proxy and Alertmanager webhook (plan 17.13).
+	StatusPageEnabled bool
+	// StatusPageURL is the public status page URL shown in the incident banner.
+	StatusPageURL string
+	// StatuspageAPIKey is the Statuspage.io API key (stored in secrets manager in production).
+	StatuspageAPIKey string
+	// StatuspagePageID is the Statuspage.io page identifier.
+	StatuspagePageID string
+	// StatuspageComponentMapJSON maps logical component keys to Statuspage component IDs.
+	StatuspageComponentMapJSON string
+	// AlertmanagerWebhookSecret authenticates Alertmanager webhook posts.
+	AlertmanagerWebhookSecret string
+	// StatusPageSummaryCacheSecs is the in-memory cache TTL for the summary proxy.
+	StatusPageSummaryCacheSecs int
 }
 
 // Load reads configuration from the environment.
@@ -702,6 +717,14 @@ func Load() Config {
 		EnableAPIDocs: boolEnv("ENABLE_API_DOCS"),
 
 		AiProviderAbstractionEnabled: boolEnv("AI_PROVIDER_ABSTRACTION_ENABLED"),
+
+		StatusPageEnabled:            boolEnv("STATUS_PAGE_ENABLED"),
+		StatusPageURL:                stringDefault(firstNonEmptyTrimmed("STATUS_PAGE_URL"), "https://status.lextures.io"),
+		StatuspageAPIKey:             firstNonEmptyTrimmed("STATUSPAGE_API_KEY"),
+		StatuspagePageID:             firstNonEmptyTrimmed("STATUSPAGE_PAGE_ID"),
+		StatuspageComponentMapJSON:   statuspageComponentMapJSON(),
+		AlertmanagerWebhookSecret:    firstNonEmptyTrimmed("ALERTMANAGER_WEBHOOK_SECRET"),
+		StatusPageSummaryCacheSecs:   statusPageSummaryCacheSecs(),
 	}
 }
 
@@ -996,6 +1019,33 @@ func commaSeparatedEnv(key string) []string {
 		}
 	}
 	return out
+}
+
+func statusPageSummaryCacheSecs() int {
+	raw := strings.TrimSpace(os.Getenv("STATUS_PAGE_SUMMARY_CACHE_SECS"))
+	if raw == "" {
+		return 60
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n < 1 {
+		return 60
+	}
+	return n
+}
+
+func statuspageComponentMapJSON() string {
+	if raw := strings.TrimSpace(os.Getenv("STATUSPAGE_COMPONENT_MAP_JSON")); raw != "" {
+		return raw
+	}
+	path := strings.TrimSpace(os.Getenv("STATUSPAGE_COMPONENT_MAP_PATH"))
+	if path == "" {
+		path = "config/statuspage-components.json"
+	}
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return string(b)
 }
 
 func storageUseSSL() bool {

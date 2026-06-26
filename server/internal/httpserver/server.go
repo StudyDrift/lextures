@@ -33,6 +33,7 @@ import (
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
+	statuspageservice "github.com/lextures/lextures/server/internal/service/statuspage"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
@@ -83,6 +84,8 @@ type Deps struct {
 	Integrations *integrationsservice.Service
 	// Bots powers Slack/Teams/Discord classroom bots (plan 16.6). When nil, endpoints return 501.
 	Bots *botsservice.Service
+	// StatusPageClient overrides the default Statuspage.io client (tests). When nil, built from Config.
+	StatusPageClient *statuspageservice.Client
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -219,6 +222,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAIDisclosureRoutes(r)
 	d.registerAIProviderSettingsRoutes(r)
 	d.registerBackupOpsRoutes(r)
+	d.registerStatusRoutes(r)
 	d.registerPIIRedactionRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)
