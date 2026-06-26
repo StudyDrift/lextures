@@ -88,6 +88,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFTranscripts = mergeBool(db.FFTranscripts, false)
 	out.FFWebhooks = mergeBool(db.FFWebhooks, false)
 	out.FFZapierConnector = mergeBool(db.FFZapierConnector, false)
+	out.FFMarketplace = mergeBool(db.FFMarketplace, false)
 	out.FFAdvisingIntegration = mergeBool(db.FFAdvisingIntegration, false)
 	out.FFResearchConsent = mergeBool(db.FFResearchConsent, false)
 	out.FFAccessibilityIntake = mergeBool(db.FFAccessibilityIntake, false)
