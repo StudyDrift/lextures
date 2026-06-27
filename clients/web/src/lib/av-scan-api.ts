@@ -33,10 +33,6 @@ export interface QuarantineItem {
   uploaded_at: string
 }
 
-export async function fetchFileScanStatus(objectId: string): Promise<FileScanStatus> {
-  return apiJson<FileScanStatus>(`/api/v1/files/${encodeURIComponent(objectId)}/scan-status`)
-}
-
 export async function fetchQuarantineList(): Promise<QuarantineItem[]> {
   const res = await apiJson<{ items: QuarantineItem[] }>('/api/v1/admin/quarantine')
   return res.items ?? []

@@ -186,26 +186,6 @@ ORDER BY requested_at ASC
 	return scanPasses(rows)
 }
 
-// ListSectionPassLog returns all pass events for a section, most-recent first.
-func ListSectionPassLog(ctx context.Context, pool *pgxpool.Pool, sectionID uuid.UUID, limit int) ([]HallPass, error) {
-	if limit <= 0 || limit > 500 {
-		limit = 100
-	}
-	rows, err := pool.Query(ctx, `
-SELECT id, student_id, section_id, destination, estimated_mins, status,
-       requested_at, approved_at, returned_at, approved_by
-FROM classroom.hall_passes
-WHERE section_id = $1
-ORDER BY requested_at DESC
-LIMIT $2
-`, sectionID, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	return scanPasses(rows)
-}
-
 func scanPasses(rows pgx.Rows) ([]HallPass, error) {
 	var out []HallPass
 	for rows.Next() {

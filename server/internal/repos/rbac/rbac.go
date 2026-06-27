@@ -110,16 +110,3 @@ WHERE prm.provider = $1 AND lower(prm.external_role) = lower($2)
 	}
 	return res.AppRoleName, AssignUserRoleByNameTx(ctx, tx, userID, res.AppRoleName)
 }
-
-// AccountTypeFromProvisioningMap returns the account_type for the given provider+externalRole mapping.
-// Returns "standard" when no mapping exists.
-func AccountTypeFromProvisioningMap(ctx context.Context, pool *pgxpool.Pool, provider, externalRole string) (string, error) {
-	res, err := LookupProvisioningRole(ctx, pool, provider, externalRole)
-	if err != nil {
-		return "standard", err
-	}
-	if res != nil {
-		return res.AccountType, nil
-	}
-	return "standard", nil
-}

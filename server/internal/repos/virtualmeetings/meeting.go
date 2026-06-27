@@ -122,15 +122,6 @@ func ListByCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) (
 	return out, rows.Err()
 }
 
-// UpdateStatus sets a meeting's status.
-func UpdateStatus(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID, status string) error {
-	_, err := pool.Exec(ctx,
-		`UPDATE course.virtual_meetings SET status = $1 WHERE id = $2`,
-		status, id,
-	)
-	return err
-}
-
 // Update patches title, scheduled times, and URLs.
 func Update(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID,
 	title string,
@@ -195,28 +186,4 @@ func ListAttendance(ctx context.Context, pool *pgxpool.Pool, meetingID uuid.UUID
 		out = append(out, a)
 	}
 	return out, rows.Err()
-}
-
-// EnrolledStudentIDs returns the user IDs of all active student-equivalent enrollees in the course.
-func EnrolledStudentIDs(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := pool.Query(ctx, `
-		SELECT ce.user_id
-		FROM course.course_enrollments ce
-		INNER JOIN course.enrollment_roles er ON er.role_key = ce.role AND er.is_student_equivalent = true
-		WHERE ce.course_id = $1 AND ce.active = true
-	`, courseID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
 }

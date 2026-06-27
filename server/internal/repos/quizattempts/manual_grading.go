@@ -46,30 +46,6 @@ type querier interface {
 	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
 }
 
-// UpdateResponseManualGrade sets points and correctness for one response row.
-func UpdateResponseManualGrade(
-	ctx context.Context,
-	tx pgx.Tx,
-	attemptID uuid.UUID,
-	questionIndex int32,
-	pointsAwarded, maxPoints float64,
-) error {
-	isCorrect := quizattemptgrading.CorrectnessFromManualPoints(pointsAwarded, maxPoints)
-	tag, err := tx.Exec(ctx, `
-UPDATE course.quiz_responses
-SET points_awarded = $3,
-    is_correct = $4
-WHERE attempt_id = $1 AND question_index = $2
-`, attemptID, questionIndex, pointsAwarded, isCorrect)
-	if err != nil {
-		return err
-	}
-	if tag.RowsAffected() == 0 {
-		return pgx.ErrNoRows
-	}
-	return nil
-}
-
 // UpsertResponseManualGrade sets or creates a response row so instructors can override any quiz question score.
 func UpsertResponseManualGrade(
 	ctx context.Context,

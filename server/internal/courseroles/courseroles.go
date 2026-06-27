@@ -99,29 +99,6 @@ func RoleMatrixPermissions(courseCode, role string) []string {
 	}
 }
 
-// ReplaceManagedStaffGrants removes managed course grants for the user in the course, then inserts
-// the matrix for role. Safe for tx or pool.
-func ReplaceManagedStaffGrants(ctx context.Context, exec pgx.Tx, userID, courseID uuid.UUID, courseCode, role string) error {
-	managed := ConcreteManagedPermissions(courseCode)
-	_, err := exec.Exec(ctx, `
-DELETE FROM course.user_course_grants
- WHERE user_id = $1 AND course_id = $2 AND permission_string = ANY($3::text[])
-`, userID, courseID, managed)
-	if err != nil {
-		return err
-	}
-	for _, perm := range RoleMatrixPermissions(courseCode, role) {
-		if _, err := exec.Exec(ctx, `
-INSERT INTO course.user_course_grants (user_id, course_id, permission_string)
-VALUES ($1, $2, $3)
-ON CONFLICT (user_id, course_id, permission_string) DO NOTHING
-`, userID, courseID, perm); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // RefreshManagedGrantsForCourseUser rebuilds managed grants from all active enrollment roles for the user.
 func RefreshManagedGrantsForCourseUser(ctx context.Context, exec pgx.Tx, userID, courseID uuid.UUID, courseCode string) error {
 	rows, err := exec.Query(ctx, `

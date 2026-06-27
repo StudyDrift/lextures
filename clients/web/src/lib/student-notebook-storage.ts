@@ -7,9 +7,6 @@ import {
 } from './course-notebook-tree'
 import { markTaskCheckedInMarkdown } from './notebook-task-markdown'
 import { decodeJwtSub } from './jwt-payload'
-
-export type { CourseNotebookPage, NotebookPageKind } from './course-notebook-tree'
-
 export const STUDENT_NOTEBOOKS_CHANGED = 'lextures-student-notebooks-changed'
 
 /**
@@ -33,14 +30,6 @@ export function hrefForStudentNotebook(courseCode: string): string {
 export function hrefForNotebookPage(courseCode: string, pageId: string): string {
   const base = hrefForStudentNotebook(courseCode)
   return `${base}?page=${encodeURIComponent(pageId)}`
-}
-
-/** Activate a notebook page (e.g. from dashboard deep link). */
-export function setActiveNotebookPage(courseCode: string, pageId: string): boolean {
-  const data = loadCourseNotebook(courseCode)
-  if (!data.pages.some((p) => p.id === pageId)) return false
-  saveCourseNotebookStore(courseCode, { ...data, activePageId: pageId })
-  return true
 }
 
 /** Mark a notebook task checked in local markdown (dashboard completion). */

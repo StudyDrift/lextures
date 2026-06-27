@@ -62,30 +62,6 @@ SELECT state_privacy_jurisdiction FROM tenant.organizations WHERE id = $1
 	return *j, nil
 }
 
-// SetOrgJurisdiction updates or clears the state_privacy_jurisdiction for an org.
-// Pass an empty string to clear.
-func SetOrgJurisdiction(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, jurisdiction string) error {
-	var j *string
-	if jurisdiction != "" {
-		j = &jurisdiction
-	}
-	_, err := pool.Exec(ctx, `
-UPDATE tenant.organizations SET state_privacy_jurisdiction = $2 WHERE id = $1
-`, orgID, j)
-	return err
-}
-
-// InsertDisclosureEvent appends a disclosure event for a student.
-func InsertDisclosureEvent(ctx context.Context, pool *pgxpool.Pool, orgID, studentID uuid.UUID, accessor, purpose string, dataElements []string) (uuid.UUID, error) {
-	var id uuid.UUID
-	err := pool.QueryRow(ctx, `
-INSERT INTO compliance.state_disclosure_events (org_id, student_id, accessor, purpose, data_elements)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id
-`, orgID, studentID, accessor, purpose, dataElements).Scan(&id)
-	return id, err
-}
-
 // ListDisclosureEvents returns events for a student within a school year window.
 // schoolYearStart filters to events on or after that timestamp.
 func ListDisclosureEvents(ctx context.Context, pool *pgxpool.Pool, studentID uuid.UUID, schoolYearStart time.Time) ([]DisclosureEvent, error) {
@@ -151,18 +127,6 @@ SELECT id, org_id, student_id, requester_id, requester_email, status, response_n
 `, studentID)
 }
 
-// ListPendingDeletionRequests returns all pending/in_progress deletion requests for admin review.
-func ListPendingDeletionRequests(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) ([]DeletionRequest, error) {
-	return queryDeletionRequests(ctx, pool, `
-SELECT id, org_id, student_id, requester_id, requester_email, status, response_notes,
-       submitted_at, due_at, completed_at, actioned_by
-  FROM compliance.state_deletion_requests
- WHERE org_id = $1
-   AND status IN ('pending','in_progress')
- ORDER BY due_at ASC
-`, orgID)
-}
-
 // UpdateDeletionRequestStatus transitions a request to a new status.
 func UpdateDeletionRequestStatus(ctx context.Context, pool *pgxpool.Pool, id, actionedBy uuid.UUID, status string, notes *string) error {
 	var completedAt *time.Time
@@ -192,17 +156,6 @@ SELECT COUNT(*) FROM compliance.state_deletion_requests
 	return n, err
 }
 
-// UpsertAnnualNoticeJob records that an annual notice batch was sent for an org/jurisdiction/year.
-func UpsertAnnualNoticeJob(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, jurisdiction string, year int) error {
-	_, err := pool.Exec(ctx, `
-INSERT INTO compliance.annual_notice_jobs (org_id, jurisdiction, year, sent_at)
-VALUES ($1, $2, $3, NOW())
-ON CONFLICT (org_id, jurisdiction, year)
-DO UPDATE SET sent_at = NOW()
-`, orgID, jurisdiction, year)
-	return err
-}
-
 // GetAnnualNoticeJob returns the job record for an org/jurisdiction/year, or nil.
 func GetAnnualNoticeJob(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, jurisdiction string, year int) (*AnnualNoticeJob, error) {
 	var j AnnualNoticeJob
@@ -218,28 +171,6 @@ SELECT id, org_id, jurisdiction, year, sent_at
 		return nil, err
 	}
 	return &j, nil
-}
-
-// ListOrgsWithJurisdiction returns org IDs tagged with the given jurisdiction.
-func ListOrgsWithJurisdiction(ctx context.Context, pool *pgxpool.Pool, jurisdiction string) ([]uuid.UUID, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id FROM tenant.organizations
- WHERE state_privacy_jurisdiction = $1
-   AND status = 'active'
-`, jurisdiction)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		out = append(out, id)
-	}
-	return out, rows.Err()
 }
 
 func scanDeletionRequest(row pgx.Row) (*DeletionRequest, error) {

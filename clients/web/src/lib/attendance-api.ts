@@ -71,61 +71,6 @@ export type AttendanceCodesResponse = {
   codes: AttendanceCode[]
 }
 
-export async function fetchSectionAttendance(
-  sectionId: string,
-  date: string,
-): Promise<SectionAttendanceResponse> {
-  const res = await authorizedFetch(
-    `/api/v1/sections/${encodeURIComponent(sectionId)}/attendance/${encodeURIComponent(date)}`,
-  )
-  if (!res.ok) {
-    throw new Error(`Failed to load attendance (${res.status})`)
-  }
-  return (await res.json()) as SectionAttendanceResponse
-}
-
-export async function saveSectionAttendance(
-  sectionId: string,
-  date: string,
-  records: UpsertRecord[],
-): Promise<BatchSaveResponse> {
-  const res = await authorizedFetch(
-    `/api/v1/sections/${encodeURIComponent(sectionId)}/attendance/${encodeURIComponent(date)}`,
-    {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ records }),
-    },
-  )
-  if (!res.ok) {
-    const body = (await res.json().catch(() => ({ error: {} }))) as {
-      error?: { message?: string }
-    }
-    throw new Error(body.error?.message ?? `Failed to save attendance (${res.status})`)
-  }
-  return (await res.json()) as BatchSaveResponse
-}
-
-export async function fetchStudentAttendance(studentId: string): Promise<{ records: AttendanceRecord[] }> {
-  const res = await authorizedFetch(`/api/v1/students/${encodeURIComponent(studentId)}/attendance`)
-  if (!res.ok) {
-    throw new Error(`Failed to load student attendance (${res.status})`)
-  }
-  return (await res.json()) as { records: AttendanceRecord[] }
-}
-
-export async function fetchParentStudentAttendance(
-  studentId: string,
-): Promise<{ records: AttendanceRecord[] }> {
-  const res = await authorizedFetch(
-    `/api/v1/parent/students/${encodeURIComponent(studentId)}/attendance`,
-  )
-  if (!res.ok) {
-    throw new Error(`Failed to load attendance (${res.status})`)
-  }
-  return (await res.json()) as { records: AttendanceRecord[] }
-}
-
 export async function fetchAttendanceDashboard(
   unitId: string,
   date?: string,
@@ -138,59 +83,6 @@ export async function fetchAttendanceDashboard(
     throw new Error(`Failed to load dashboard (${res.status})`)
   }
   return (await res.json()) as AttendanceDashboardResponse
-}
-
-export async function fetchAttendanceCodes(orgId: string): Promise<AttendanceCodesResponse> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/attendance/codes`,
-  )
-  if (!res.ok) {
-    throw new Error(`Failed to load attendance codes (${res.status})`)
-  }
-  return (await res.json()) as AttendanceCodesResponse
-}
-
-export async function createAttendanceCode(
-  orgId: string,
-  payload: { code: string; label: string; stateCode?: string; category: string },
-): Promise<AttendanceCode> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/attendance/codes`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  )
-  if (!res.ok) {
-    throw new Error(`Failed to create code (${res.status})`)
-  }
-  return (await res.json()) as AttendanceCode
-}
-
-export async function seedDefaultAttendanceCodes(orgId: string): Promise<AttendanceCodesResponse> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/attendance/codes`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ seedDefaults: true }),
-    },
-  )
-  if (!res.ok) {
-    throw new Error(`Failed to seed default codes (${res.status})`)
-  }
-  return (await res.json()) as AttendanceCodesResponse
-}
-
-export async function deleteAttendanceCode(orgId: string, codeId: string): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/attendance/codes/${encodeURIComponent(codeId)}`,
-    { method: 'DELETE' },
-  )
-  if (!res.ok && res.status !== 204) {
-    throw new Error(`Failed to delete code (${res.status})`)
-  }
 }
 
 export async function exportAttendance(

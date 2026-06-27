@@ -169,17 +169,6 @@ WHERE id = $1 AND org_id = $2
 	return scanConnection(row)
 }
 
-// GetConnectionByID loads a connection without org scope (delivery worker).
-func GetConnectionByID(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*Connection, error) {
-	row := pool.QueryRow(ctx, `
-SELECT id, org_id, platform, workspace_id, workspace_name, bot_token_enc, signing_secret_enc,
-       webhook_subscription_id, settings, connected_by, created_at, updated_at
-FROM integrations.bot_connections
-WHERE id = $1
-`, id)
-	return scanConnection(row)
-}
-
 // ConnectionForSubscription finds the bot connection tied to a webhook subscription.
 func ConnectionForSubscription(ctx context.Context, pool *pgxpool.Pool, subID uuid.UUID) (*Connection, error) {
 	row := pool.QueryRow(ctx, `

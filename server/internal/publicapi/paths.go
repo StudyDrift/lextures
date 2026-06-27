@@ -7,11 +7,11 @@ import (
 
 // Route describes a public API endpoint.
 type Route struct {
-	Method       string
-	PathPattern  string // literal path prefix or exact path
-	Scope        string // empty = public (no auth)
-	UUIDSegment  int    // 1-based index of {id} UUID segment, 0 = none
-	Subpath      string // suffix after UUID, e.g. "/enrollments"
+	Method      string
+	PathPattern string // literal path prefix or exact path
+	Scope       string // empty = public (no auth)
+	UUIDSegment int    // 1-based index of {id} UUID segment, 0 = none
+	Subpath     string // suffix after UUID, e.g. "/enrollments"
 }
 
 // Routes is the public API surface (plan 16.1 §9).
@@ -75,12 +75,6 @@ func Match(method, path string) (matched Route, id string, ok bool) {
 		return rt, rest, true
 	}
 	return Route{}, "", false
-}
-
-// IsPublicAPIPath reports whether the path could be served by the public API layer.
-func IsPublicAPIPath(method, path string) bool {
-	_, _, ok := Match(method, path)
-	return ok
 }
 
 func isUUID(s string) bool {

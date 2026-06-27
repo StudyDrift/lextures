@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- context module exports provider + hooks */
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
 
 export type BlockEditorContextValue = {
   selectedId: string | null
@@ -40,16 +40,4 @@ export function useBlockEditor(): BlockEditorContextValue {
     throw new Error('useBlockEditor must be used within BlockEditorProvider')
   }
   return ctx
-}
-
-/** Optional hook for presentational components that may render outside the provider. */
-export function useBlockEditorOptional(): BlockEditorContextValue | null {
-  return useContext(BlockEditorContext)
-}
-
-export function useSelectBlock(blockId: string) {
-  const { setSelectedId } = useBlockEditor()
-  return useCallback(() => {
-    setSelectedId(blockId)
-  }, [blockId, setSelectedId])
 }

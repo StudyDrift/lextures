@@ -3,8 +3,6 @@ import { ChevronDown, Loader2 } from 'lucide-react'
 import { formatContextTokens, formatUsdPerMillion } from '../lib/ai-model-display'
 import { applyPillFiltersAndSort, type ImageModelOption } from './image-model-picker-utils'
 
-export type { ImageModelOption } from './image-model-picker-utils'
-
 function MetaLine({ m }: { m: ImageModelOption }) {
   const ctx = formatContextTokens(m.contextLength ?? null)
   const inn = formatUsdPerMillion(m.inputPricePerMillionUsd ?? null)

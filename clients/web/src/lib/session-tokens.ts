@@ -58,7 +58,3 @@ export function applyAuthTokenResponse(data: {
     setRefreshToken(data.refresh_token)
   }
 }
-
-export function hasRefreshToken(): boolean {
-  return !!getRefreshToken()
-}

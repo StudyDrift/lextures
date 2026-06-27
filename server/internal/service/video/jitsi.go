@@ -20,8 +20,6 @@ type JitsiProvider struct {
 	AppSecret string // Jitsi app_secret for HMAC-SHA256 signing (empty = unsigned)
 }
 
-func (j *JitsiProvider) Name() string { return "jitsi" }
-
 // CreateMeeting generates a Jitsi meeting URL (with optional JWT token).
 func (j *JitsiProvider) CreateMeeting(_ context.Context, p MeetingParams) (*MeetingURLs, error) {
 	roomName := jitsiRoomName(p.CourseCode, p.MeetingID)

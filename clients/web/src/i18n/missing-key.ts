@@ -21,13 +21,6 @@ export function recordMissingTranslationKey(labels: MissingKeyLabels): void {
   }
 }
 
-/** Test helper — total missing-key events recorded in this session. */
-export function getMissingKeyCount(): number {
-  let total = 0
-  for (const n of missingKeyCounts.values()) total += n
-  return total
-}
-
 /** Test helper — reset counters between tests. */
 export function resetMissingKeyMetrics(): void {
   missingKeyCounts.clear()

@@ -4,7 +4,6 @@ package aigateway
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -25,41 +24,41 @@ const (
 	ProviderAzureOpenAI = "azure_openai"
 	ProviderBedrock     = "bedrock"
 	ProviderVertex      = "vertex"
-	ReadPermission     = "compliance:ai:read:*"
+	ReadPermission      = "compliance:ai:read:*"
 
-	FeatureAITutor            = "ai_tutor"
-	FeatureRAGNotebook        = "rag_notebook"
-	FeatureSyllabusGeneration = "syllabus_generation"
-	FeatureTranslation                 = "translation"
-	FeatureQuizGeneration              = "quiz_generation"
-	FeatureReadingLevelSimplification  = "reading_level_simplification"
-	FeatureContentTranslation          = "content_translation"
-	FeatureAltTextSuggestion           = "alt_text_suggestion"
-	FeatureVibeGeneration              = "vibe_generation"
-	FeatureGraderAgent                 = "grader_agent"
-	FeatureAIStudyBuddy                = "ai_study_buddy"
+	FeatureAITutor                    = "ai_tutor"
+	FeatureRAGNotebook                = "rag_notebook"
+	FeatureSyllabusGeneration         = "syllabus_generation"
+	FeatureTranslation                = "translation"
+	FeatureQuizGeneration             = "quiz_generation"
+	FeatureReadingLevelSimplification = "reading_level_simplification"
+	FeatureContentTranslation         = "content_translation"
+	FeatureAltTextSuggestion          = "alt_text_suggestion"
+	FeatureVibeGeneration             = "vibe_generation"
+	FeatureGraderAgent                = "grader_agent"
+	FeatureAIStudyBuddy               = "ai_study_buddy"
 )
 
 // BlockReason explains why a call was blocked.
 type BlockReason string
 
 const (
-	BlockNone              BlockReason = ""
-	BlockOptOut            BlockReason = "opt_out"
-	BlockCoppaAI           BlockReason = "coppa_ai"
-	BlockGDPRConsent       BlockReason = "gdpr_consent"
-	BlockTenantFeature     BlockReason = "tenant_feature"
-	BlockTenantModel       BlockReason = "tenant_model"
-	BlockServiceError      BlockReason = "service_error"
+	BlockNone          BlockReason = ""
+	BlockOptOut        BlockReason = "opt_out"
+	BlockCoppaAI       BlockReason = "coppa_ai"
+	BlockGDPRConsent   BlockReason = "gdpr_consent"
+	BlockTenantFeature BlockReason = "tenant_feature"
+	BlockTenantModel   BlockReason = "tenant_model"
+	BlockServiceError  BlockReason = "service_error"
 )
 
 // Decision is the outcome of an AI gateway check.
 type Decision struct {
-	Allowed          bool
-	Reason           BlockReason
-	UserIDHash       string
-	OptInConfirmed   bool
-	LogBlocked       bool
+	Allowed        bool
+	Reason         BlockReason
+	UserIDHash     string
+	OptInConfirmed bool
+	LogBlocked     bool
 }
 
 // Config holds runtime flags for gateway evaluation.
@@ -229,28 +228,6 @@ func LogInference(ctx context.Context, pool *pgxpool.Pool, orgID *uuid.UUID, dec
 		OptInConfirmed: dec.OptInConfirmed,
 		Blocked:        blocked,
 	})
-}
-
-// SummaryForDSAR returns a JSON-friendly slice for DSAR archives (AC-5).
-func SummaryForDSAR(ctx context.Context, pool *pgxpool.Pool, secret string, userID uuid.UUID) ([]map[string]any, error) {
-	hash := pkgai.UserIDHash(secret, userID)
-	rows, err := repo.ListLogsByUserHash(ctx, pool, hash, 1000)
-	if err != nil {
-		return nil, fmt.Errorf("aigateway: dsar summary: %w", err)
-	}
-	out := make([]map[string]any, 0, len(rows))
-	for _, r := range rows {
-		out = append(out, map[string]any{
-			"feature":         r.FeatureName,
-			"modelId":         r.ModelID,
-			"provider":        r.Provider,
-			"contentHash":     r.ContentHash,
-			"optInConfirmed":  r.OptInConfirmed,
-			"blocked":         r.Blocked,
-			"timestamp":       r.Timestamp.UTC().Format(time.RFC3339),
-		})
-	}
-	return out, nil
 }
 
 // BlockMessage returns a user-facing error string for HTTP responses.

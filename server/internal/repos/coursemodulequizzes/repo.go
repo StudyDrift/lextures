@@ -18,11 +18,11 @@ import (
 // CourseItemQuizRow is the joined structure + module_quizzes row (Rust `CourseItemQuizRow`).
 type CourseItemQuizRow struct {
 	StructureItemID uuid.UUID
-	Title             string
-	Markdown          string
-	DueAt             *time.Time
-	Questions         []coursemodulequiz.QuizQuestion
-	UpdatedAt         time.Time
+	Title           string
+	Markdown        string
+	DueAt           *time.Time
+	Questions       []coursemodulequiz.QuizQuestion
+	UpdatedAt       time.Time
 
 	AvailableFrom               *time.Time
 	AvailableUntil              *time.Time
@@ -32,7 +32,7 @@ type CourseItemQuizRow struct {
 	PassingScorePercent         *int32
 	PointsWorth                 *int32
 	LateSubmissionPolicy        string
-	LatePenaltyPercent           *int32
+	LatePenaltyPercent          *int32
 	TimeLimitMinutes            *int32
 	TimerPauseWhenTabHidden     bool
 	PerQuestionTimeLimitSeconds *int32
@@ -62,17 +62,6 @@ type CourseItemQuizRow struct {
 
 // QuizRow is an alias kept for callers that only need question JSON from a quiz item.
 type QuizRow = CourseItemQuizRow
-
-func InsertEmptyForItem(ctx context.Context, tx pgx.Tx, structureItemID uuid.UUID) error {
-	if tx == nil {
-		return errors.New("db tx is nil")
-	}
-	_, err := tx.Exec(ctx, `
-INSERT INTO course.module_quizzes (structure_item_id, markdown, updated_at)
-VALUES ($1, '', NOW())
-`, structureItemID)
-	return err
-}
 
 // GetForCourseItem loads the quiz module item for a course (full settings + questions).
 func GetForCourseItem(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) (*CourseItemQuizRow, error) {
@@ -155,22 +144,4 @@ WHERE c.id = $1 AND c.course_id = $2 AND c.kind = 'quiz'
 		_ = json.Unmarshal(adaptiveSourceJSON, &r.AdaptiveSourceItemIDs)
 	}
 	return &r, nil
-}
-
-func UpdateMarkdown(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, markdown string) (*time.Time, error) {
-	var updated time.Time
-	err := pool.QueryRow(ctx, `
-UPDATE course.module_quizzes q
-SET markdown = $3, updated_at = NOW()
-FROM course.course_structure_items c
-WHERE q.structure_item_id = c.id AND c.course_id = $1 AND c.id = $2 AND c.kind = 'quiz'
-RETURNING q.updated_at
-`, courseID, itemID, markdown).Scan(&updated)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &updated, nil
 }

@@ -30,7 +30,6 @@ import {
   type QuizQuestion,
   type RubricDefinition,
 } from '../../lib/courses-api'
-import { computeQuizQuestionSlots } from '../../components/annotation/grader-agent/quiz-question-slots'
 import type { QuizQuestionSlot } from '../../components/annotation/grader-agent/quiz-question-slots'
 import { formatAbsolute } from '../../lib/format-datetime'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -196,6 +195,9 @@ export function CourseGradingAgentsSection({
       const itemKind = agent.itemKind ?? 'assignment'
       if (itemKind === 'quiz') {
         const quiz = await fetchModuleQuiz(courseCode, agent.itemId)
+        const { computeQuizQuestionSlots } = await import(
+          '../../components/annotation/grader-agent/quiz-question-slots'
+        )
         setOpenAgent({
           itemId: agent.itemId,
           itemKind: 'quiz',
@@ -253,6 +255,9 @@ export function CourseGradingAgentsSection({
 
     if (result.itemKind === 'quiz') {
       const quiz = await fetchModuleQuiz(courseCode, result.assignmentId)
+      const { computeQuizQuestionSlots } = await import(
+        '../../components/annotation/grader-agent/quiz-question-slots'
+      )
       setOpenAgent({
         itemId: result.assignmentId,
         itemKind: 'quiz',

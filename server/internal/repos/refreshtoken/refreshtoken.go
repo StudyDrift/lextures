@@ -26,18 +26,13 @@ type Row struct {
 
 // SessionRow is an active refresh token row for session management UI (plan 4.9).
 type SessionRow struct {
-	ID                uuid.UUID
-	CreatedAt         time.Time
-	LastRefreshedAt  *time.Time
-	UserAgent         *string
-	AuthMethod        *string
-	LocationCity      *string
-	LocationCountry   *string
-}
-
-// Insert creates a row for a SHA-256 token hash (32 bytes).
-func Insert(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, tokenHash []byte, expiresAt time.Time, userAgent string, ip net.IP, authMethod *string, locCity, locCountry *string) (uuid.UUID, error) {
-	return insert(ctx, pool, userID, tokenHash, expiresAt, userAgent, ip, authMethod, locCity, locCountry, nil)
+	ID              uuid.UUID
+	CreatedAt       time.Time
+	LastRefreshedAt *time.Time
+	UserAgent       *string
+	AuthMethod      *string
+	LocationCity    *string
+	LocationCountry *string
 }
 
 // InsertTx is Insert within an existing transaction.

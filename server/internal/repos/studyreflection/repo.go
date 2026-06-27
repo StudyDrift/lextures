@@ -120,25 +120,6 @@ DELETE FROM analytics.reflection_journal WHERE id = $1 AND user_id = $2
 	return tag.RowsAffected() > 0, nil
 }
 
-// LatestCoachingTip returns the most recent tip for the user.
-func LatestCoachingTip(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*CoachingTip, error) {
-	var tip CoachingTip
-	err := pool.QueryRow(ctx, `
-SELECT id, user_id, tip_text, week_of, delivered_at, rating
-FROM analytics.coaching_tips
-WHERE user_id = $1
-ORDER BY week_of DESC
-LIMIT 1
-`, userID).Scan(&tip.ID, &tip.UserID, &tip.TipText, &tip.WeekOf, &tip.DeliveredAt, &tip.Rating)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &tip, nil
-}
-
 // ListCoachingTips returns tip history for a user.
 func ListCoachingTips(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, limit int) ([]CoachingTip, error) {
 	if limit <= 0 {

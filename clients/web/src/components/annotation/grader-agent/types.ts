@@ -50,22 +50,6 @@ export type WorkflowValidationIssue = {
   field: string
   message: string
 }
-
-export type GraderNodeData = {
-  prompt?: string
-  modelId?: string | null
-}
-
-export type CriterionGraderNodeData = {
-  prompt?: string
-  modelId?: string | null
-  criterionId?: string
-}
-
-export type AiNodeData = {
-  prompt?: string
-}
-
 export type CodeTestRunnerMappingType = 'linear' | 'allOrNothing' | 'weighted'
 
 export type CodeTestRunnerTestCase = {
@@ -215,16 +199,6 @@ export const HANDLE_FLAG = 'flag'
 export const HANDLE_REFERENCE = 'reference'
 /** @deprecated Legacy graphs wired assignment context through a single context handle. */
 export const HANDLE_CONTEXT = 'context'
-
-export function isSourceOnlyNodeType(type: string): boolean {
-  return (
-    type === 'studentSubmission' ||
-    type === 'quizResponses' ||
-    type === 'activity' ||
-    type === 'reference' ||
-    type === 'rubric'
-  )
-}
 
 export function isActivityNodeType(type: string): boolean {
   return type === 'activity'

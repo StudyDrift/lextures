@@ -1,11 +1,12 @@
-import { useEffect, useId, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useId, useMemo, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useCourseAssignments } from '../../../hooks/use-course-assignments'
 import { useCourseQuizzes } from '../../../hooks/use-course-quizzes'
 import type { CourseGradingAgentTemplateSummary, GradingAgentItemKind } from '../../../lib/courses-api'
 import { AssignmentPicker } from './assignment-picker'
-import { QuizPicker } from './quiz-picker'
+
+const QuizPicker = lazy(() => import('./quiz-picker').then((m) => ({ default: m.QuizPicker })))
 
 export type CreateGradingAgentSource = 'template' | 'assignment' | 'asTemplate'
 
@@ -349,16 +350,18 @@ export function CreateGradingAgentModal({
                     : t('gradingAgent.settings.create.noAssignments')}
                 </p>
               ) : itemKind === 'quiz' ? (
-                <QuizPicker
-                  quizzes={availableQuizzes}
-                  value={assignmentId}
-                  disabled={submitting}
-                  searchPlaceholder={t('gradingAgent.settings.create.quizSearchPlaceholder')}
-                  emptyLabel={t('gradingAgent.settings.create.noQuizzes')}
-                  noMatchLabel={t('gradingAgent.settings.create.quizNoMatch')}
-                  moduleFallbackLabel={t('gradingAgent.settings.create.quizModuleUnknown')}
-                  onChange={setAssignmentId}
-                />
+                <Suspense fallback={<p className="text-sm text-slate-500 dark:text-neutral-400">{t('gradingAgent.settings.create.loadingQuizzes')}</p>}>
+                  <QuizPicker
+                    quizzes={availableQuizzes}
+                    value={assignmentId}
+                    disabled={submitting}
+                    searchPlaceholder={t('gradingAgent.settings.create.quizSearchPlaceholder')}
+                    emptyLabel={t('gradingAgent.settings.create.noQuizzes')}
+                    noMatchLabel={t('gradingAgent.settings.create.quizNoMatch')}
+                    moduleFallbackLabel={t('gradingAgent.settings.create.quizModuleUnknown')}
+                    onChange={setAssignmentId}
+                  />
+                </Suspense>
               ) : (
                 <AssignmentPicker
                   assignments={availableAssignments}

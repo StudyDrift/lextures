@@ -1,13 +1,5 @@
 import type { ConditionalRouterCondition, ConditionalRouterConditionField } from './types'
 
-const INTRINSIC_FIELDS = new Set<ConditionalRouterConditionField>([
-  'submissionLength',
-  'wordCount',
-  'isEmpty',
-  'isLate',
-  'submissionText',
-  'matchesRegex',
-])
 
 export function routerFieldRequiresUpstreamGrade(field: ConditionalRouterConditionField): boolean {
   return field === 'score' || field === 'confidence'
@@ -15,10 +7,6 @@ export function routerFieldRequiresUpstreamGrade(field: ConditionalRouterConditi
 
 export function routerFieldRequiresOriginality(field: ConditionalRouterConditionField): boolean {
   return field === 'originalityScore'
-}
-
-export function isIntrinsicRouterField(field: ConditionalRouterConditionField): boolean {
-  return INTRINSIC_FIELDS.has(field)
 }
 
 export function formatRouterConditionSentence(condition: ConditionalRouterCondition): string {

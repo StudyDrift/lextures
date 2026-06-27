@@ -64,42 +64,12 @@ export async function fetchCollabDoc(courseCode: string, docId: string): Promise
   return res.json() as Promise<CollabDoc>
 }
 
-export async function patchCollabDoc(
-  courseCode: string,
-  docId: string,
-  title: string,
-): Promise<CollabDoc> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/collab-docs/${encodeURIComponent(docId)}`,
-    {
-      method: 'PATCH',
-      headers: await authHeaders(),
-      body: JSON.stringify({ title }),
-    },
-  )
-  if (!res.ok) throw new Error(`patchCollabDoc failed (${res.status})`)
-  return res.json() as Promise<CollabDoc>
-}
-
 export async function deleteCollabDoc(courseCode: string, docId: string): Promise<void> {
   const res = await fetch(
     `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/collab-docs/${encodeURIComponent(docId)}`,
     { method: 'DELETE', headers: await authHeaders() },
   )
   if (!res.ok) throw new Error(`deleteCollabDoc failed (${res.status})`)
-}
-
-export async function fetchCollabDocSnapshots(
-  courseCode: string,
-  docId: string,
-): Promise<CollabDocSnapshot[]> {
-  const res = await fetch(
-    `${apiBase}/api/v1/courses/${encodeURIComponent(courseCode)}/collab-docs/${encodeURIComponent(docId)}/snapshots`,
-    { headers: await authHeaders() },
-  )
-  if (!res.ok) throw new Error(`fetchCollabDocSnapshots failed (${res.status})`)
-  const body = (await res.json()) as { snapshots: CollabDocSnapshot[] }
-  return body.snapshots ?? []
 }
 
 /** Base WebSocket server URL; y-websocket appends `/{roomname}` (use roomname `ws`). */

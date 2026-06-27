@@ -3,11 +3,9 @@ package backup
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -15,8 +13,8 @@ import (
 type Tier string
 
 const (
-	TierPostgres        Tier = "postgres"
-	TierObjectStorage   Tier = "object_storage"
+	TierPostgres      Tier = "postgres"
+	TierObjectStorage Tier = "object_storage"
 )
 
 // TierStatus is one row from compliance.backup_tier_status.
@@ -127,25 +125,4 @@ SELECT id, drill_date, backup_timestamp, restore_start, restore_end,
 		out = append(out, d)
 	}
 	return out, rows.Err()
-}
-
-// GetRestoreDrill returns a drill by ID or nil if not found.
-func GetRestoreDrill(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*RestoreDrill, error) {
-	var d RestoreDrill
-	err := pool.QueryRow(ctx, `
-SELECT id, drill_date, backup_timestamp, restore_start, restore_end,
-       rpo_achieved_minutes, rto_achieved_minutes, pass, smoke_test_output, conducted_by, notes, created_at
-  FROM compliance.restore_drills
- WHERE id = $1
-`, id).Scan(
-		&d.ID, &d.DrillDate, &d.BackupTimestamp, &d.RestoreStart, &d.RestoreEnd,
-		&d.RPOAchievedMinutes, &d.RTOAchievedMinutes, &d.Pass, &d.SmokeTestOutput, &d.ConductedBy, &d.Notes, &d.CreatedAt,
-	)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &d, nil
 }

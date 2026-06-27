@@ -1,7 +1,6 @@
 package publicapi
 
 import (
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -34,14 +33,4 @@ func FilterBySince[T any](items []T, since *time.Time, ts func(T) *time.Time) []
 		}
 	}
 	return out
-}
-
-// WriteMethod reports whether a route supports mutation via the public API layer.
-func WriteMethod(method string) bool {
-	switch strings.ToUpper(strings.TrimSpace(method)) {
-	case http.MethodPost, http.MethodPut, http.MethodPatch:
-		return true
-	default:
-		return false
-	}
 }

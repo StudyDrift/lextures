@@ -36,15 +36,6 @@ func SyncEdgeCount(ctx context.Context, pool *pgxpool.Pool) {
 	edgeCount.Store(n)
 }
 
-// ApproximateEdgeCount returns the last synced count, or nil if never synced.
-func ApproximateEdgeCount() *int64 {
-	v := edgeCount.Load()
-	if v < 0 {
-		return nil
-	}
-	return &v
-}
-
 // SlugifyName mirrors `slugify_name` in Rust.
 func SlugifyName(name string) string {
 	s := strings.TrimSpace(strings.ToLower(name))

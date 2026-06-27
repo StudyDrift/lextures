@@ -110,12 +110,6 @@ func writeError(err error, code int) {
 	}
 }
 
-// ExitWithError writes err and exits with code. Use exit code 2 for API errors.
-func ExitWithError(err error, code int) {
-	writeError(err, code)
-	os.Exit(code)
-}
-
 // commandNeedsAuth returns false for any command annotated with SkipAuthAnnotation,
 // including all descendants (checked by walking the parent chain).
 func commandNeedsAuth(cmd *cobra.Command) bool {

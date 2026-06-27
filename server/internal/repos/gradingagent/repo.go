@@ -221,15 +221,15 @@ type ReviewQueueItem struct {
 }
 
 type CourseConfigSummary struct {
-	ID               uuid.UUID
-	ModuleItemID     uuid.UUID
-	ItemKind         string
-	AssignmentTitle  string
+	ID                 uuid.UUID
+	ModuleItemID       uuid.UUID
+	ItemKind           string
+	AssignmentTitle    string
 	AssignmentArchived bool
-	Status           Status
-	AutoGradeNew     bool
-	HasWorkflowGraph bool
-	UpdatedAt        time.Time
+	Status             Status
+	AutoGradeNew       bool
+	HasWorkflowGraph   bool
+	UpdatedAt          time.Time
 }
 
 func ListConfigsByCourse(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID) ([]CourseConfigSummary, error) {
@@ -872,33 +872,6 @@ GROUP BY config_id
 		out[configID] = count
 	}
 	return out, rows.Err()
-}
-
-func GetResultByID(ctx context.Context, pool *pgxpool.Pool, resultID uuid.UUID) (*ResultRow, error) {
-	if pool == nil {
-		return nil, errors.New("nil pool")
-	}
-	var r ResultRow
-	var status string
-	err := pool.QueryRow(ctx, `
-SELECT id, run_id, config_id, submission_id, is_dry_run, suggested_points, suggested_rubric,
-       comment, confidence, status::text, model_id, prompt_tokens, completion_tokens, cost_usd, error,
-       flag_reason, flag_priority, held_reason, held_at, held_queue, resolved_at, resolved_by, created_at
-FROM assessment.grading_agent_results
-WHERE id = $1
-`, resultID).Scan(
-		&r.ID, &r.RunID, &r.ConfigID, &r.SubmissionID, &r.IsDryRun, &r.SuggestedPoints, &r.SuggestedRubric,
-		&r.Comment, &r.Confidence, &status, &r.ModelID, &r.PromptTokens, &r.CompletionTokens, &r.CostUSD, &r.Error,
-		&r.FlagReason, &r.FlagPriority, &r.HeldReason, &r.HeldAt, &r.HeldQueue, &r.ResolvedAt, &r.ResolvedBy, &r.CreatedAt,
-	)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	r.Status = ItemStatus(status)
-	return &r, nil
 }
 
 func UpdateResultStatus(ctx context.Context, pool *pgxpool.Pool, resultID uuid.UUID, status ItemStatus, reason *string, resolvedBy *uuid.UUID) (*ResultRow, error) {

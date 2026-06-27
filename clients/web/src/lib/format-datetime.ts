@@ -87,36 +87,3 @@ export function formatRelativeCompact(iso: string | Date, nowMs: number = Date.n
     ...(sameYear ? {} : { year: 'numeric' }),
   })
 }
-
-export function formatRange(fromIso: string, toIso: string): string {
-  const a = toDate(fromIso)
-  const b = toDate(toIso)
-  if (!a || !b) return '—'
-  const f = getActiveLocaleFormatters()
-  const sameDay =
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  if (sameDay) {
-    return `${formatAbsoluteShort(a)} — ${f.dateTimeFormat({ hour: 'numeric', minute: '2-digit' }).format(b)}`
-  }
-  return `${formatAbsoluteShort(a)} — ${formatAbsoluteShort(b)}`
-}
-
-/** Primary label + ISO tooltip title (alternate form). */
-export function dateTimeDisplayPair(
-  iso: string | Date,
-  mode: 'list' | 'compact' | 'absoluteShort',
-  now?: Date,
-): { primary: string; title: string } {
-  const d = toDate(iso)
-  if (!d) return { primary: '—', title: '—' }
-  const full = formatAbsolute(d)
-  const primary =
-    mode === 'list'
-      ? formatRelative(d, now)
-      : mode === 'compact'
-        ? formatRelativeCompact(d, now?.getTime())
-        : formatAbsoluteShort(d)
-  return { primary, title: full }
-}

@@ -23,10 +23,10 @@ const (
 
 // Registration status values.
 const (
-	RegRegistered  = "registered"
-	RegWaitlisted  = "waitlisted"
-	RegAuditing    = "auditing"
-	RegWithdrawn   = "withdrawn"
+	RegRegistered = "registered"
+	RegWaitlisted = "waitlisted"
+	RegAuditing   = "auditing"
+	RegWithdrawn  = "withdrawn"
 )
 
 // SyncStatus values.
@@ -47,7 +47,7 @@ type MeetingPattern struct {
 
 // Prerequisite describes one prerequisite course.
 type Prerequisite struct {
-	Code string `json:"code"`
+	Code  string `json:"code"`
 	Title string `json:"title,omitempty"`
 }
 
@@ -93,14 +93,14 @@ type Registration struct {
 
 // ListFilter filters catalog browse queries.
 type ListFilter struct {
-	TermID      *uuid.UUID
-	Department  *string
-	Days        *string
-	MinCredits  *float64
-	MaxCredits  *float64
-	Query       *string
-	Cursor      *uuid.UUID
-	Limit       int
+	TermID     *uuid.UUID
+	Department *string
+	Days       *string
+	MinCredits *float64
+	MaxCredits *float64
+	Query      *string
+	Cursor     *uuid.UUID
+	Limit      int
 }
 
 // SyncLog is a catalog sync audit record.
@@ -144,10 +144,10 @@ type UpsertSectionInput struct {
 
 // ScheduleEntry combines section + registration for dashboard display.
 type ScheduleEntry struct {
-	Section        Section
-	Registration   Registration
-	CourseCode     *string
-	CourseTitle    *string
+	Section      Section
+	Registration Registration
+	CourseCode   *string
+	CourseTitle  *string
 }
 
 func scanSection(row pgx.Row) (*Section, error) {
@@ -337,22 +337,6 @@ func LinkLMSShell(ctx context.Context, pool *pgxpool.Pool, sectionID, courseID u
 	_, err := pool.Exec(ctx, `
 UPDATE catalog.catalog_sections SET lms_course_id = $2, updated_at = NOW() WHERE id = $1
 `, sectionID, courseID)
-	return err
-}
-
-// UpsertRegistration inserts or updates a student registration record.
-func UpsertRegistration(ctx context.Context, pool *pgxpool.Pool, orgID, userID, sectionID uuid.UUID, status string, prereq []PrereqStatus) error {
-	prereqJSON, _ := json.Marshal(prereq)
-	now := time.Now().UTC()
-	_, err := pool.Exec(ctx, `
-INSERT INTO catalog.student_registrations (org_id, user_id, catalog_section_id, status, prereq_status, synced_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, $6)
-ON CONFLICT (user_id, catalog_section_id) DO UPDATE SET
-	status = EXCLUDED.status,
-	prereq_status = EXCLUDED.prereq_status,
-	synced_at = EXCLUDED.synced_at,
-	updated_at = EXCLUDED.updated_at
-`, orgID, userID, sectionID, status, prereqJSON, now)
 	return err
 }
 

@@ -13,7 +13,7 @@ import (
 
 // OptOutState holds the current CCPA opt-out flags for a user.
 type OptOutState struct {
-	DoNotSell       bool
+	DoNotSell        bool
 	LimitSensitivePI bool
 }
 
@@ -127,32 +127,6 @@ UPDATE compliance.ccpa_requests
  WHERE id = $1
 `, id, status, responsePayload, completedAt, actionedBy)
 	return err
-}
-
-// CountOverdueRequests returns the number of pending/in-progress requests past their 45-day deadline.
-func CountOverdueRequests(ctx context.Context, pool *pgxpool.Pool) (int, error) {
-	var n int
-	err := pool.QueryRow(ctx, `
-SELECT COUNT(*) FROM compliance.ccpa_requests
- WHERE status IN ('pending','verified','in_progress')
-   AND due_at < NOW()
-`).Scan(&n)
-	return n, err
-}
-
-// ListRequestsDueSoon returns requests whose due_at is within the given horizon.
-func ListRequestsDueSoon(ctx context.Context, pool *pgxpool.Pool, horizon time.Duration) ([]CCPARequest, error) {
-	cutoff := time.Now().UTC().Add(horizon)
-	return queryRequests(ctx, pool, `
-SELECT id, user_id, requester_email, request_type, status,
-       verification_token_hash, response_payload,
-       requested_at, due_at, completed_at, extended, actioned_by
-  FROM compliance.ccpa_requests
- WHERE status IN ('pending','verified','in_progress')
-   AND due_at <= $1
-   AND due_at > NOW()
- ORDER BY due_at ASC
-`, cutoff)
 }
 
 func scanRequest(row pgx.Row) (*CCPARequest, error) {

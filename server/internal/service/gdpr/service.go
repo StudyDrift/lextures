@@ -10,9 +10,10 @@ import (
 	"fmt"
 	"time"
 
+	"os"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"os"
 
 	pkgai "github.com/lextures/lextures/server/internal/aidisclosure"
 	repoaidisclosure "github.com/lextures/lextures/server/internal/repos/aidisclosure"
@@ -47,11 +48,6 @@ func CheckAdmin(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (bool
 	return rbac.UserHasPermission(ctx, pool, userID, AdminPermission)
 }
 
-// CheckDPO returns true when the user holds the compliance:gdpr:dpo permission.
-func CheckDPO(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (bool, error) {
-	return rbac.UserHasPermission(ctx, pool, userID, DPOPermission)
-}
-
 // GrantConsent records a new consent grant for the given user and purpose.
 // ipHash should be a SHA-256 of the request IP (or nil when unavailable).
 func GrantConsent(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, purpose, lawfulBasis, version string, ipHash *string) (uuid.UUID, error) {
@@ -74,12 +70,6 @@ func WithdrawConsent(ctx context.Context, pool *pgxpool.Pool, id, userID uuid.UU
 // ListConsents returns all consent records for the user.
 func ListConsents(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([]repo.ConsentRecord, error) {
 	return repo.ListConsents(ctx, pool, userID)
-}
-
-// IsAIConsentActive returns true when the user has an active (non-withdrawn) ai_processing consent.
-// When false, AI feature routes must return HTTP 403 before assembling any prompt (AC-3).
-func IsAIConsentActive(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (bool, error) {
-	return repo.HasActiveConsent(ctx, pool, userID, PurposeAIProcessing)
 }
 
 // SubmitDSAR creates a new DSAR for the authenticated user.
@@ -166,16 +156,6 @@ func RejectDSAR(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID, 
 	return repo.UpdateDSARStatus(ctx, pool, id, adminID, "rejected", nil, nil, &reason)
 }
 
-// CountOverdueDSARs returns how many DSARs are past their 30-day deadline.
-func CountOverdueDSARs(ctx context.Context, pool *pgxpool.Pool) (int, error) {
-	return repo.CountOverdueDSARs(ctx, pool)
-}
-
-// ListDSARsDueSoon returns requests expiring within DSARDeadlineWarning (5 days).
-func ListDSARsDueSoon(ctx context.Context, pool *pgxpool.Pool) ([]repo.DSARRequest, error) {
-	return repo.ListDSARsDueSoon(ctx, pool, DSARDeadlineWarning)
-}
-
 // AddRoPAEntry inserts a Record of Processing Activity.
 func AddRoPAEntry(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, activityName, purpose, lawfulBasis, retentionPeriod string, dataCategories, dataSubjects, subProcessors []string) (uuid.UUID, error) {
 	return repo.InsertRoPAEntry(ctx, pool, orgID, activityName, purpose, lawfulBasis, retentionPeriod, dataCategories, dataSubjects, subProcessors)
@@ -200,13 +180,13 @@ func DeleteRoPAEntry(ctx context.Context, pool *pgxpool.Pool, id, orgID uuid.UUI
 
 // DPATemplateData is the pre-populated fields for a Data Processing Agreement (Art. 28).
 type DPATemplateData struct {
-	ControllerName     string   `json:"controllerName"`
-	ProcessorName      string   `json:"processorName"`
-	PrivacyPolicyURL   string   `json:"privacyPolicyUrl"`
-	SubProcessors      []string `json:"subProcessors"`
-	ProcessingPurposes []string `json:"processingPurposes"`
+	ControllerName      string   `json:"controllerName"`
+	ProcessorName       string   `json:"processorName"`
+	PrivacyPolicyURL    string   `json:"privacyPolicyUrl"`
+	SubProcessors       []string `json:"subProcessors"`
+	ProcessingPurposes  []string `json:"processingPurposes"`
 	TechnicalSafeguards []string `json:"technicalSafeguards"`
-	GeneratedAt        string   `json:"generatedAt"`
+	GeneratedAt         string   `json:"generatedAt"`
 }
 
 // GenerateDPATemplate returns a pre-populated DPA template for an institutional admin.
@@ -268,21 +248,21 @@ SELECT email, display_name, first_name, last_name, timezone, created_at
 	}
 
 	type archiveDoc struct {
-		UserID            string           `json:"userId"`
-		Profile           profileRow       `json:"profile"`
-		Consents          []consentSummary `json:"consents"`
-		AIInferenceLog    []map[string]any `json:"aiInferenceLog,omitempty"`
-		ExportedAt        string           `json:"exportedAt"`
+		UserID         string           `json:"userId"`
+		Profile        profileRow       `json:"profile"`
+		Consents       []consentSummary `json:"consents"`
+		AIInferenceLog []map[string]any `json:"aiInferenceLog,omitempty"`
+		ExportedAt     string           `json:"exportedAt"`
 	}
 
 	cs := make([]consentSummary, 0, len(consents))
 	for _, c := range consents {
 		cs = append(cs, consentSummary{
-			ID:      c.ID.String(),
-			Purpose: c.Purpose,
-			Basis:   c.LawfulBasis,
-			Version: c.ConsentVersion,
-			Granted: c.GrantedAt.UTC().Format(time.RFC3339),
+			ID:        c.ID.String(),
+			Purpose:   c.Purpose,
+			Basis:     c.LawfulBasis,
+			Version:   c.ConsentVersion,
+			Granted:   c.GrantedAt.UTC().Format(time.RFC3339),
 			Withdrawn: optRFC3339(c.WithdrawnAt),
 		})
 	}

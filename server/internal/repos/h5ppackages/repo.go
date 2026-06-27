@@ -106,13 +106,6 @@ func MarkExtractFailed(ctx context.Context, pool *pgxpool.Pool, packageID uuid.U
 	return err
 }
 
-// LinkStructureItem associates a package with a structure item after insert.
-func LinkStructureItem(ctx context.Context, pool *pgxpool.Pool, packageID, itemID uuid.UUID) error {
-	_, err := pool.Exec(ctx, `
-		UPDATE content.h5p_packages SET structure_item_id = $2 WHERE id = $1`, packageID, itemID)
-	return err
-}
-
 func scanPackage(row pgx.Row) (*Package, error) {
 	var p Package
 	err := row.Scan(

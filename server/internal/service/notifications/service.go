@@ -111,25 +111,6 @@ func defaultSubject(eventType string) string {
 	}
 }
 
-// NotifyMeetingReminder emails enrolled students about an upcoming live session.
-func (s *Service) NotifyMeetingReminder(ctx context.Context, studentIDs []uuid.UUID, courseName, meetingTitle, courseCode string, orgID *uuid.UUID) {
-	if !s.enabled() {
-		return
-	}
-	link := fmt.Sprintf("%s/courses/%s/live", s.publicWebOrigin(), courseCode)
-	vars := map[string]string{
-		"courseName":   courseName,
-		"meetingTitle": meetingTitle,
-		"link":         link,
-		"digestLine":   fmt.Sprintf("Live session \"%s\" starting soon in %s", meetingTitle, courseName),
-	}
-	for _, sid := range studentIDs {
-		if err := s.EnqueueEmail(ctx, sid, EventMeetingReminder, "meeting_reminder", vars, orgID); err != nil {
-			slog.Warn("notifications.meeting_reminder", "err", err, "user_id", sid)
-		}
-	}
-}
-
 // NotifyGradePosted emails students when grades are released.
 func (s *Service) NotifyGradePosted(ctx context.Context, studentUserID uuid.UUID, courseName, assignmentName, courseCode string, orgID *uuid.UUID) {
 	if !s.enabled() {
@@ -183,30 +164,6 @@ func (s *Service) NotifyDiscussionReply(ctx context.Context, recipientIDs []uuid
 			slog.Warn("notifications.discussion_reply", "err", err, "user_id", rid)
 		}
 	}
-}
-
-// EnqueuePasswordReset queues password reset email via the notification pipeline.
-func (s *Service) EnqueuePasswordReset(ctx context.Context, userID uuid.UUID, email, resetURL string, orgID *uuid.UUID) error {
-	if s.Pool == nil {
-		return nil
-	}
-	vars := map[string]string{
-		"resetUrl": resetURL,
-		"subject":  "Reset your StudyDrift password",
-	}
-	// Password reset always sends when SMTP configured, even if feature flag off — use direct path when disabled.
-	if !s.enabled() {
-		return nil
-	}
-	pref, err := notificationprefs.Get(ctx, s.Pool, userID, EventPasswordReset)
-	if err != nil {
-		return err
-	}
-	if !pref.EmailEnabled {
-		return nil
-	}
-	_, err = emailjobs.Enqueue(ctx, s.Pool, userID, EventPasswordReset, vars["subject"], "password_reset", vars)
-	return err
 }
 
 // NotifyIncompleteGranted emails a student when an Incomplete is granted.

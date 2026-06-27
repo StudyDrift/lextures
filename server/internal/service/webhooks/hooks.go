@@ -23,11 +23,11 @@ type GradePostedData struct {
 
 // EnrollmentCreatedData is the enrollment.created event payload.
 type EnrollmentCreatedData struct {
-	CourseID     string `json:"courseId"`
-	CourseCode   string `json:"courseCode,omitempty"`
-	EnrollmentID string `json:"enrollmentId"`
+	CourseID      string `json:"courseId"`
+	CourseCode    string `json:"courseCode,omitempty"`
+	EnrollmentID  string `json:"enrollmentId"`
 	StudentUserID string `json:"studentUserId"`
-	Role         string `json:"role"`
+	Role          string `json:"role"`
 }
 
 // AssignmentSubmittedData is the assignment.submitted event payload.
@@ -56,12 +56,12 @@ func EmitAssignmentSubmitted(pool *pgxpool.Pool, cfg config.Config, orgID uuid.U
 
 // AssignmentCreatedData is the assignment.created event payload.
 type AssignmentCreatedData struct {
-	CourseID     string `json:"courseId"`
-	CourseCode   string `json:"courseCode,omitempty"`
+	CourseID        string `json:"courseId"`
+	CourseCode      string `json:"courseCode,omitempty"`
 	StructureItemID string `json:"structureItemId"`
-	Title        string `json:"title"`
-	DueAt        string `json:"dueAt,omitempty"`
-	URL          string `json:"url,omitempty"`
+	Title           string `json:"title"`
+	DueAt           string `json:"dueAt,omitempty"`
+	URL             string `json:"url,omitempty"`
 }
 
 // AssignmentDueSoonData is the assignment.due_soon event payload.
@@ -106,11 +106,6 @@ type AnnouncementCreatedData struct {
 	URL        string `json:"url,omitempty"`
 }
 
-// EmitAssignmentCreated notifies subscribers when an assignment is created.
-func EmitAssignmentCreated(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data AssignmentCreatedData) {
-	EmitAsync(pool, cfg, orgID, webhooks.EventAssignmentCreated, data)
-}
-
 // EmitAssignmentDueSoon notifies subscribers before an assignment is due.
 func EmitAssignmentDueSoon(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data AssignmentDueSoonData) {
 	EmitAsync(pool, cfg, orgID, webhooks.EventAssignmentDueSoon, data)
@@ -119,16 +114,6 @@ func EmitAssignmentDueSoon(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUI
 // EmitGradeReleased notifies subscribers when a grade is released to a student.
 func EmitGradeReleased(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data GradeReleasedData) {
 	EmitAsync(pool, cfg, orgID, webhooks.EventGradeReleased, data)
-}
-
-// EmitGradeCurveApplied notifies subscribers when an instructor applies a grade curve (plan 3.17).
-func EmitGradeCurveApplied(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data GradeCurveAppliedData) {
-	EmitAsync(pool, cfg, orgID, webhooks.EventGradeCurveApplied, data)
-}
-
-// EmitAnnouncementCreated notifies subscribers when an announcement is posted.
-func EmitAnnouncementCreated(pool *pgxpool.Pool, cfg config.Config, orgID uuid.UUID, data AnnouncementCreatedData) {
-	EmitAsync(pool, cfg, orgID, webhooks.EventAnnouncementCreated, data)
 }
 
 // QuizCompletedData is the quiz.completed event payload.

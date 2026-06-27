@@ -76,11 +76,3 @@ export function applyReadingPreferences(prefs: ReadingPreferences): void {
     localStorage.setItem('lextures.uiMode', mode === 'standard' ? '' : mode)
   } catch { /* ignore */ }
 }
-
-export function clearReadingPreferences(): void {
-  const root = document.documentElement
-  root.style.removeProperty('--reading-font-family')
-  root.style.removeProperty('--reading-letter-spacing')
-  root.style.removeProperty('--reading-word-spacing')
-  root.style.removeProperty('--reading-line-height')
-}

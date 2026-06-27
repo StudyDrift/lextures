@@ -20,15 +20,3 @@ func (m *CCRMetrics) IncGenerated() {
 func (m *CCRMetrics) IncVerifications() {
 	m.verifications.Add(1)
 }
-
-func (m *CCRMetrics) Snapshot() map[string]uint64 {
-	return map[string]uint64{
-		"ccr_generated_total":     m.generated.Load(),
-		"ccr_verifications_total": m.verifications.Load(),
-	}
-}
-
-func (m *CCRMetrics) Reset() {
-	m.generated.Store(0)
-	m.verifications.Store(0)
-}

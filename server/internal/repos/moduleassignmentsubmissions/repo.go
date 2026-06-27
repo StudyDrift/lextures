@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/lextures/lextures/server/internal/repos/submissionversions"
 )
 
 type SubmissionRow struct {
@@ -33,11 +32,6 @@ func HasBodyText(row SubmissionRow) bool {
 	return strings.TrimSpace(row.BodyText) != ""
 }
 
-// HasFileAttachment reports whether the submission references a stored file.
-func HasFileAttachment(row SubmissionRow) bool {
-	return row.AttachmentFileID != nil
-}
-
 type GradedFilter string
 
 const (
@@ -48,10 +42,10 @@ const (
 
 // ListFilter optionally restricts submissions by section, group, or explicit ids (GA-M5).
 type ListFilter struct {
-	SectionID           *uuid.UUID
-	GroupID             *uuid.UUID
-	SubmissionIDs       []uuid.UUID
-	VisibleSectionIDs   []uuid.UUID
+	SectionID         *uuid.UUID
+	GroupID           *uuid.UUID
+	SubmissionIDs     []uuid.UUID
+	VisibleSectionIDs []uuid.UUID
 }
 
 func scanSubmission(scanner interface{ Scan(...any) error }) (*SubmissionRow, error) {
@@ -139,23 +133,6 @@ ORDER BY MIN(s.submitted_at) ASC, si.title ASC
 		out = append(out, row)
 	}
 	return out, rows.Err()
-}
-
-func CountUngradedForAssignment(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID uuid.UUID) (int64, error) {
-	var n *int64
-	err := pool.QueryRow(ctx, `
-SELECT COUNT(*)::bigint
-FROM course.module_assignment_submissions s
-LEFT JOIN course.course_grades g ON g.module_item_id = s.module_item_id AND g.student_user_id = s.submitted_by
-WHERE s.course_id = $1 AND s.module_item_id = $2 AND g.student_user_id IS NULL
-`, courseID, moduleItemID).Scan(&n)
-	if err != nil {
-		return 0, err
-	}
-	if n == nil {
-		return 0, nil
-	}
-	return *n, nil
 }
 
 func ListForAssignment(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID uuid.UUID, filter GradedFilter) ([]SubmissionRow, error) {
@@ -283,68 +260,4 @@ ON CONFLICT (module_item_id, submitted_by) DO UPDATE SET
 RETURNING id
 `, courseID, moduleItemID, submittedBy, attachmentFileID, submittedAt).Scan(&id)
 	return id, err
-}
-
-func ResubmitVersionedInTransaction(ctx context.Context, tx pgx.Tx, now time.Time, courseID, submissionID, newAttachmentFileID uuid.UUID) (*SubmissionRow, error) {
-	if tx == nil {
-		return nil, errors.New("db tx is nil")
-	}
-	cur, err := scanSubmission(tx.QueryRow(ctx, `
-SELECT id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
-       resubmission_requested, revision_due_at, revision_feedback, version_number
-FROM course.module_assignment_submissions
-WHERE course_id = $1 AND id = $2
-FOR UPDATE
-`, courseID, submissionID))
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	if !cur.ResubmissionRequested {
-		return nil, nil
-	}
-	if cur.RevisionDueAt != nil && cur.RevisionDueAt.Before(now) {
-		return nil, nil
-	}
-	if cur.VersionNumber >= 10 {
-		return nil, nil
-	}
-	if _, err := submissionversions.InsertArchived(ctx, tx, cur.CourseID, cur.ModuleItemID, cur.SubmittedBy, cur.VersionNumber, cur.AttachmentFileID, cur.SubmittedAt); err != nil {
-		return nil, err
-	}
-	nextV := cur.VersionNumber + 1
-	return scanSubmission(tx.QueryRow(ctx, `
-UPDATE course.module_assignment_submissions
-SET attachment_file_id = $1, submitted_at = $2, updated_at = $2, version_number = $3,
-    resubmission_requested = false, revision_due_at = NULL, revision_feedback = NULL
-WHERE id = $4
-RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
-          resubmission_requested, revision_due_at, revision_feedback, version_number
-`, newAttachmentFileID, now, nextV, cur.ID))
-}
-
-func SetRevisionRequest(ctx context.Context, pool *pgxpool.Pool, courseID, submissionID uuid.UUID, revisionDueAt *time.Time, revisionFeedback *string) (*SubmissionRow, error) {
-	return setRevisionRequestExec(ctx, pool, courseID, submissionID, revisionDueAt, revisionFeedback)
-}
-
-func SetRevisionRequestInTransaction(ctx context.Context, tx pgx.Tx, courseID, submissionID uuid.UUID, revisionDueAt *time.Time, revisionFeedback *string) (*SubmissionRow, error) {
-	return setRevisionRequestExec(ctx, tx, courseID, submissionID, revisionDueAt, revisionFeedback)
-}
-
-type queryRower interface{ QueryRow(context.Context, string, ...any) pgx.Row }
-
-func setRevisionRequestExec(ctx context.Context, q queryRower, courseID, submissionID uuid.UUID, revisionDueAt *time.Time, revisionFeedback *string) (*SubmissionRow, error) {
-	s, err := scanSubmission(q.QueryRow(ctx, `
-UPDATE course.module_assignment_submissions
-SET resubmission_requested = true, revision_due_at = $1, revision_feedback = $2, updated_at = NOW()
-WHERE course_id = $3 AND id = $4
-RETURNING id, course_id, module_item_id, submitted_by, attachment_file_id, body_text, submitted_at, updated_at,
-          resubmission_requested, revision_due_at, revision_feedback, version_number
-`, revisionDueAt, revisionFeedback, courseID, submissionID))
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	return s, err
 }

@@ -232,25 +232,3 @@ LIMIT 1
 	}
 	return &id, nil
 }
-
-// ListByEnrollment returns all progress rows for an enrollment.
-func ListByEnrollment(ctx context.Context, pool *pgxpool.Pool, enrollmentID uuid.UUID) ([]ItemProgress, error) {
-	rows, err := pool.Query(ctx, `
-SELECT item_id, status, last_visited_at, completed_at
-FROM course.learner_item_progress
-WHERE enrollment_id = $1
-`, enrollmentID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []ItemProgress
-	for rows.Next() {
-		var p ItemProgress
-		if err := rows.Scan(&p.ItemID, &p.Status, &p.LastVisitedAt, &p.CompletedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, p)
-	}
-	return out, rows.Err()
-}

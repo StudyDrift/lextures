@@ -18,11 +18,6 @@ import (
 
 var botMessagesTotal atomic.Uint64
 
-// BotMessagesTotal returns the delivery counter (for observability hooks).
-func BotMessagesTotal() uint64 {
-	return botMessagesTotal.Load()
-}
-
 // DeliverWebhookJob delivers one webhook envelope to platform channels via bot APIs.
 func DeliverWebhookJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, svc *Service, subID uuid.UUID, eventType string, payload []byte) (int, string, time.Duration, error) {
 	conn, err := botsrepo.ConnectionForSubscription(ctx, pool, subID)

@@ -30,30 +30,6 @@ type Grant struct {
 	ExpiresAt *time.Time
 }
 
-func ListByOrg(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) ([]Grant, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, org_id, user_id, org_unit_id, role, granted_by, granted_at, expires_at
-FROM "user".org_role_grants
-WHERE org_id = $1
-ORDER BY granted_at DESC
-`, orgID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []Grant
-	for rows.Next() {
-		var g Grant
-		var role string
-		if err := rows.Scan(&g.ID, &g.OrgID, &g.UserID, &g.OrgUnitID, &role, &g.GrantedBy, &g.GrantedAt, &g.ExpiresAt); err != nil {
-			return nil, err
-		}
-		g.Role = Role(role)
-		out = append(out, g)
-	}
-	return out, rows.Err()
-}
-
 func Create(ctx context.Context, pool *pgxpool.Pool, orgID, userID uuid.UUID, orgUnitID *uuid.UUID, role Role, grantedBy *uuid.UUID, expiresAt *time.Time) (*Grant, error) {
 	var g Grant
 	var roleStr string
@@ -133,4 +109,3 @@ WHERE g.id = d.id
 	}
 	return tag.RowsAffected(), nil
 }
-

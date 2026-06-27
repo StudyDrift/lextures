@@ -12,7 +12,6 @@ import (
 	"github.com/lextures/lextures/server/internal/config"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/learnergoals"
-	learnerprogress "github.com/lextures/lextures/server/internal/repos/learnerprogress"
 	studybuddyrepo "github.com/lextures/lextures/server/internal/repos/studybuddy"
 	"github.com/lextures/lextures/server/internal/service/aitutor"
 	"github.com/lextures/lextures/server/internal/service/notebookrag"
@@ -46,8 +45,8 @@ type MemorySummary struct {
 
 // Citation is a source link returned with assistant messages.
 type Citation struct {
-	ItemID string `json:"itemId"`
-	Title  string `json:"title"`
+	ItemID  string `json:"itemId"`
+	Title   string `json:"title"`
 	Excerpt string `json:"excerpt"`
 }
 
@@ -280,23 +279,6 @@ func SummarizeSession(turns []studybuddyrepo.Message) string {
 		summary = summary[:497] + "…"
 	}
 	return summary
-}
-
-// TouchRecentModules updates memory with recently visited module titles (best-effort).
-func (s *Service) TouchRecentModules(ctx context.Context, userID, courseID uuid.UUID) {
-	eid, err := enrollment.GetStudentEnrollmentID(ctx, s.Pool, courseID, userID)
-	if err != nil || eid == nil {
-		return
-	}
-	itemID, err := learnerprogress.LastVisitedItem(ctx, s.Pool, *eid)
-	if err != nil || itemID == nil {
-		return
-	}
-	modID, err := learnerprogress.ModuleForItem(ctx, s.Pool, courseID, *itemID)
-	if err != nil || modID == nil {
-		return
-	}
-	_, _ = s.RefreshMemory(ctx, userID, courseID)
 }
 
 func slug(s string) string {

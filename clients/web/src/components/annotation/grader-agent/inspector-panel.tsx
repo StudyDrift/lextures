@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCourseAssignments } from '../../../hooks/use-course-assignments'
 import { useTextModels } from '../../../hooks/use-text-models'
@@ -23,8 +23,11 @@ import {
   isStudentSubmissionNodeType,
   isQuizResponsesNodeType,
 } from './types'
-import { QuizResponsesInspector } from './quiz-responses-inspector'
 import type { QuizQuestion } from '../../../lib/courses-api'
+
+const QuizResponsesInspector = lazy(() =>
+  import('./quiz-responses-inspector').then((m) => ({ default: m.QuizResponsesInspector })),
+)
 import type { QuizQuestionSlot } from './quiz-question-slots'
 import { CodeTestRunnerInspector } from './code-test-runner-inspector'
 import { ConditionalRouterInspector } from './conditional-router-inspector'
@@ -427,7 +430,9 @@ export function InspectorPanel({
       <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
         <p className="font-medium">{nodeTitle('gradingAgent.canvas.nodes.quizResponses.title')}</p>
         <p>{t('gradingAgent.canvas.inspector.quizResponses.help')}</p>
-        <QuizResponsesInspector slots={quizQuestionSlots} questions={quizQuestions} />
+        <Suspense fallback={<p className="text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.quizResponses.empty')}</p>}>
+          <QuizResponsesInspector slots={quizQuestionSlots} questions={quizQuestions} />
+        </Suspense>
       </div>
     )
   }

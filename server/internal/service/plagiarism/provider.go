@@ -4,7 +4,6 @@ package plagiarism
 import (
 	"context"
 	"fmt"
-	"io"
 	"math"
 	"regexp"
 	"strconv"
@@ -129,17 +128,4 @@ func parseScorePercent(raw string) *float64 {
 	}
 	f := float64(n)
 	return &f
-}
-
-// ReadTextFromReader loads up to maxBytes of UTF-8 text from r.
-func ReadTextFromReader(r io.Reader, maxBytes int64) (string, error) {
-	if maxBytes <= 0 {
-		maxBytes = 512 << 10
-	}
-	limited := io.LimitReader(r, maxBytes)
-	b, err := io.ReadAll(limited)
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(b)), nil
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext } from 'react'
+import { createContext } from 'react'
 
 export type KeyboardShortcutsContextValue = {
   openSheet: () => void
@@ -6,11 +6,3 @@ export type KeyboardShortcutsContextValue = {
 }
 
 export const KeyboardShortcutsContext = createContext<KeyboardShortcutsContextValue | null>(null)
-
-export function useKeyboardShortcutsSheet(): KeyboardShortcutsContextValue {
-  const ctx = useContext(KeyboardShortcutsContext)
-  if (!ctx) {
-    throw new Error('useKeyboardShortcutsSheet must be used within KeyboardShortcutsProvider')
-  }
-  return ctx
-}

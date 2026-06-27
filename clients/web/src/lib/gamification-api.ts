@@ -43,15 +43,6 @@ export async function fetchGamificationProfile(): Promise<GamificationProfile> {
   return raw as GamificationProfile
 }
 
-export async function fetchMyBadges(): Promise<GamificationBadge[]> {
-  const res = await authorizedFetch('/api/v1/me/badges')
-  const raw: unknown = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    throw new Error('Could not load badges.')
-  }
-  return (raw as { badges: GamificationBadge[] }).badges ?? []
-}
-
 export async function fetchCourseLeaderboard(courseCode: string): Promise<CourseLeaderboard> {
   const res = await authorizedFetch(`/api/v1/courses/${encodeURIComponent(courseCode)}/leaderboard`)
   const raw: unknown = await res.json().catch(() => ({}))
