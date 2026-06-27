@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { InspectorPanel } from '../inspector-panel'
 import type { GraderAgentWorkflowState } from '../use-grader-agent-workflow'
 import { WORKFLOW_VERSION } from '../types'
@@ -54,7 +54,7 @@ describe('InspectorPanel', () => {
     expect(screen.getByText('gradingAgent.canvas.inspector.empty')).toBeInTheDocument()
   })
 
-  it('renders quiz question previews for a selected quiz responses node', () => {
+  it('renders quiz question previews for a selected quiz responses node', async () => {
     render(
       <InspectorPanel
         workflow={workflowStub({
@@ -99,7 +99,9 @@ describe('InspectorPanel', () => {
       />,
     )
     expect(screen.getByText('gradingAgent.canvas.inspector.quizResponses.help')).toBeInTheDocument()
-    expect(screen.getByText('What is 2+2?')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText('What is 2+2?')).toBeInTheDocument()
+    })
     expect(screen.getByText('3')).toBeInTheDocument()
     expect(screen.getByText('4')).toBeInTheDocument()
   })
