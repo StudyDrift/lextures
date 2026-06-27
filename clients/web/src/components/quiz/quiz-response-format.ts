@@ -55,6 +55,33 @@ function formatCanvasAnswerValue(value: unknown): string {
   return ''
 }
 
+export type QuizResponseFile = {
+  fileId: string
+  filename: string
+  mimeType: string
+  contentPath: string
+}
+
+/** Imported quiz answers (e.g. Canvas file uploads) carry a `files` array of stored course files. */
+export function extractQuizResponseFiles(responseJson: unknown): QuizResponseFile[] {
+  const data = asRecord(responseJson)
+  if (!data || !Array.isArray(data.files)) return []
+  const out: QuizResponseFile[] = []
+  for (const raw of data.files) {
+    const row = asRecord(raw)
+    if (!row) continue
+    const contentPath = typeof row.contentPath === 'string' ? row.contentPath.trim() : ''
+    if (!contentPath) continue
+    out.push({
+      fileId: typeof row.fileId === 'string' ? row.fileId : '',
+      filename: typeof row.filename === 'string' && row.filename.trim() ? row.filename.trim() : 'file',
+      mimeType: typeof row.mimeType === 'string' ? row.mimeType : '',
+      contentPath,
+    })
+  }
+  return out
+}
+
 export function formatQuizResponseText(
   responseJson: unknown,
   questionType: string,

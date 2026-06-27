@@ -746,7 +746,7 @@ func canvasImportAllCanvasGrades(
 	if err := canvasImportQuizGrades(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasUserToLocal, quizSubsByQuiz); err != nil {
 		return err
 	}
-	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasQuizToAssignmentID, canvasUserToLocal, quizSubsByQuiz); err != nil {
+	if err := canvasImportQuizAttempts(ctx, tx, client, canvasBase, accessToken, canvasCourseID, courseID, canvasQuizToItem, canvasQuizToQuestions, canvasQuizToAssignmentID, canvasUserToLocal, quizSubsByQuiz, submissionDeps); err != nil {
 		return err
 	}
 	return nil

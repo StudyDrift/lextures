@@ -25,6 +25,63 @@ type canvasQuizSubmissionAnswer struct {
 	Answer           any
 	Points           *float64
 	Correct          *bool
+	AttachmentIDs    []int64
+}
+
+// canvasAttachmentIDsFromMap collects Canvas attachment ids from a submission-data entry,
+// question row, or quiz event payload. Canvas exposes file-upload answers as attachment_ids
+// (and sometimes an inline attachments array), so we accept ids, id strings, and file objects.
+func canvasAttachmentIDsFromMap(m map[string]any) []int64 {
+	if m == nil {
+		return nil
+	}
+	var out []int64
+	seen := make(map[int64]struct{})
+	add := func(id int64) {
+		if id <= 0 {
+			return
+		}
+		if _, ok := seen[id]; ok {
+			return
+		}
+		seen[id] = struct{}{}
+		out = append(out, id)
+	}
+	for _, key := range []string{"attachment_ids", "attachment_id", "attachments"} {
+		switch v := m[key].(type) {
+		case []any:
+			for _, it := range v {
+				switch iv := it.(type) {
+				case map[string]any:
+					add(int64At(iv, "id"))
+				default:
+					add(canvasAttachmentIDFromAny(iv))
+				}
+			}
+		case map[string]any:
+			add(int64At(v, "id"))
+		default:
+			add(canvasAttachmentIDFromAny(v))
+		}
+	}
+	return out
+}
+
+func canvasAttachmentIDFromAny(v any) int64 {
+	switch t := v.(type) {
+	case float64:
+		return int64(t)
+	case int64:
+		return t
+	case string:
+		n, err := strconv.ParseInt(strings.TrimSpace(t), 10, 64)
+		if err != nil {
+			return 0
+		}
+		return n
+	default:
+		return 0
+	}
 }
 
 func canvasQuizSubmissionImportable(m map[string]any) bool {
@@ -359,6 +416,7 @@ func canvasParseSubmissionDataEntry(m map[string]any) []canvasQuizSubmissionAnsw
 		Answer:           answer,
 		Points:           pts,
 		Correct:          correct,
+		AttachmentIDs:    canvasAttachmentIDsFromMap(m),
 	}}
 }
 
@@ -406,12 +464,14 @@ func canvasMergeAnswersFromQuizEvents(events []map[string]any) map[int64]canvasQ
 			continue
 		}
 		answer := canvasAnswerValueFromMap(data)
-		if answer == nil {
+		attachmentIDs := canvasAttachmentIDsFromMap(data)
+		if answer == nil && len(attachmentIDs) == 0 {
 			continue
 		}
 		out[qid] = canvasMergeQuizSubmissionAnswer(out[qid], canvasQuizSubmissionAnswer{
 			CanvasQuestionID: qid,
 			Answer:           answer,
+			AttachmentIDs:    attachmentIDs,
 		})
 	}
 	return out
@@ -440,6 +500,9 @@ func canvasMergeSubmissionAnswers(sources []map[string]any, questionRows []map[s
 		prev := out[qid]
 		if prev.Answer == nil {
 			prev.Answer = canvasAnswerFromQuestionRow(row)
+		}
+		if len(prev.AttachmentIDs) == 0 {
+			prev.AttachmentIDs = canvasAttachmentIDsFromMap(row)
 		}
 		if prev.Points == nil {
 			if v, ok := coerceCanvasJSONNumber(row["points"]); ok {
@@ -497,6 +560,9 @@ func canvasMergeQuizSubmissionAnswer(existing, incoming canvasQuizSubmissionAnsw
 		}
 		if incoming.Correct != nil {
 			existing.Correct = incoming.Correct
+		}
+		if len(incoming.AttachmentIDs) > 0 {
+			existing.AttachmentIDs = incoming.AttachmentIDs
 		}
 	}
 	return existing
@@ -941,9 +1007,94 @@ RETURNING id
 	return attemptID, err
 }
 
+// canvasImportedQuizFile is the per-file reference stored in a quiz response's response_json so
+// the grading UI can render images inline and link other uploads. ContentPath points at the
+// course-file content endpoint where the downloaded blob is served.
+type canvasImportedQuizFile struct {
+	FileID      uuid.UUID `json:"fileId"`
+	Filename    string    `json:"filename"`
+	MimeType    string    `json:"mimeType"`
+	ContentPath string    `json:"contentPath"`
+}
+
+func canvasGetFile(
+	ctx context.Context,
+	client *http.Client,
+	canvasBase, accessToken string,
+	fileID int64,
+) (map[string]any, error) {
+	return canvasGetObject(ctx, client, canvasBase, accessToken, fmt.Sprintf("files/%d", fileID), nil)
+}
+
+// canvasImportQuizResponseAttachments downloads each Canvas file-upload attachment into the course
+// file store and returns references for embedding in the response JSON. Individual failures are
+// logged and skipped so one bad attachment never aborts the whole import.
+func canvasImportQuizResponseAttachments(
+	ctx context.Context,
+	tx pgx.Tx,
+	client *http.Client,
+	canvasBase, accessToken string,
+	deps *canvasAssignmentSubmissionImportDeps,
+	courseID uuid.UUID,
+	attachmentIDs []int64,
+) []canvasImportedQuizFile {
+	if deps == nil || len(attachmentIDs) == 0 {
+		return nil
+	}
+	out := make([]canvasImportedQuizFile, 0, len(attachmentIDs))
+	for _, attID := range attachmentIDs {
+		if attID <= 0 {
+			continue
+		}
+		fileObj, err := canvasGetFile(ctx, client, canvasBase, accessToken, attID)
+		if err != nil || fileObj == nil {
+			log.Printf("canvas-import: quiz response attachment %d metadata fetch failed: %v", attID, err)
+			continue
+		}
+		fileID, err := canvasStreamAndStoreSubmissionAttachment(ctx, tx, client, accessToken, *deps, courseID, fileObj)
+		if err != nil {
+			log.Printf("canvas-import: quiz response attachment %d download failed: %v", attID, err)
+			continue
+		}
+		if fileID == nil {
+			continue
+		}
+		out = append(out, canvasImportedQuizFile{
+			FileID:      *fileID,
+			Filename:    canvasSubmissionAttachmentFilename(fileObj),
+			MimeType:    canvasSubmissionAttachmentMimeType(fileObj, ""),
+			ContentPath: fmt.Sprintf("/api/v1/courses/%s/course-files/%s/content", deps.CourseCode, fileID.String()),
+		})
+	}
+	return out
+}
+
+func canvasInjectFilesIntoResponseJSON(responseJSON json.RawMessage, files []canvasImportedQuizFile) json.RawMessage {
+	if len(files) == 0 {
+		return responseJSON
+	}
+	obj := map[string]any{}
+	if len(responseJSON) > 0 {
+		_ = json.Unmarshal(responseJSON, &obj)
+	}
+	if obj == nil {
+		obj = map[string]any{}
+	}
+	obj["files"] = files
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return responseJSON
+	}
+	return b
+}
+
 func canvasReplaceImportedQuizResponses(
 	ctx context.Context,
 	tx pgx.Tx,
+	client *http.Client,
+	canvasBase, accessToken string,
+	deps *canvasAssignmentSubmissionImportDeps,
+	courseID uuid.UUID,
 	attemptID uuid.UUID,
 	questions []coursemodulequiz.QuizQuestion,
 	answers map[int64]canvasQuizSubmissionAnswer,
@@ -963,6 +1114,9 @@ func canvasReplaceImportedQuizResponses(
 		responseJSON, isCorrect, pointsAwarded, maxPoints := canvasGradeImportedQuestion(
 			q, answer, choiceMaps[canvasQID], correctAnswerIDs[canvasQID],
 		)
+		if files := canvasImportQuizResponseAttachments(ctx, tx, client, canvasBase, accessToken, deps, courseID, answer.AttachmentIDs); len(files) > 0 {
+			responseJSON = canvasInjectFilesIntoResponseJSON(responseJSON, files)
+		}
 		_, err := tx.Exec(ctx, `
 INSERT INTO course.quiz_responses (
   attempt_id, question_index, question_id, question_type, prompt_snapshot,
@@ -1153,6 +1307,7 @@ func canvasImportQuizAttempts(
 	canvasQuizToAssignmentID map[int64]int64,
 	canvasUserToLocal map[int64]uuid.UUID,
 	quizSubsByQuiz map[int64][]map[string]any,
+	submissionDeps *canvasAssignmentSubmissionImportDeps,
 ) error {
 	quizIDs := canvasQuizIDsFromMap(canvasQuizToItem)
 	answerMetaByQuiz, err := canvasFetchQuizAnswerMetadataParallel(ctx, client, canvasBase, accessToken, canvasCourseID, quizIDs)
@@ -1260,7 +1415,7 @@ func canvasImportQuizAttempts(
 			if err != nil {
 				return fmt.Errorf("save quiz attempt canvas submission %d: %w", submissionID, err)
 			}
-			if err := canvasReplaceImportedQuizResponses(ctx, tx, attemptID, questions, answers, choiceMaps, correctAnswerIDs); err != nil {
+			if err := canvasReplaceImportedQuizResponses(ctx, tx, client, canvasBase, accessToken, submissionDeps, courseID, attemptID, questions, answers, choiceMaps, correctAnswerIDs); err != nil {
 				return fmt.Errorf("save quiz responses canvas submission %d: %w", submissionID, err)
 			}
 		}

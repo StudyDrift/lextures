@@ -125,6 +125,10 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	defer func() { _ = smsNotificationQueue.Close() }()
 
 	background.StartWithStorage(ctx, pool, merged, storage, smsNotificationQueue)
+	// Generic durable background job queue (plan 17.3). No-op unless
+	// BACKGROUND_JOBS_ENABLED; safe to start on every instance — workers claim
+	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
+	background.StartJobQueueWorker(ctx, pool, merged)
 
 	ltiRT := lti.NewFromConfig(merged)
 	brandingResolver := orgbranding.NewResolver(pool, merged.BrandingMultitenantHostSuffix, webHostFromOrigin(merged.PublicWebOrigin))

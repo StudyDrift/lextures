@@ -329,6 +329,23 @@ func canvasQuestionToQuizQuestion(q map[string]any) (coursemodulequiz.QuizQuesti
 			SrsEligible:        false,
 		}, true
 
+	case "file_upload_question":
+		return coursemodulequiz.QuizQuestion{
+			ID:                 fmt.Sprintf("canvas-%d", id),
+			Prompt:             prompt,
+			QuestionType:       "file_upload",
+			Choices:            nil,
+			ChoiceIDs:          nil,
+			TypeConfig:         blankTC,
+			CorrectChoiceIndex: nil,
+			MultipleAnswer:     false,
+			AnswerWithImage:    false,
+			Required:           true,
+			Points:             canvasPointsPossibleI32(q),
+			EstimatedMinutes:   5,
+			SrsEligible:        false,
+		}, true
+
 	case "numerical_question":
 		tc := canvasNumericTypeConfig(answers)
 		return coursemodulequiz.QuizQuestion{
