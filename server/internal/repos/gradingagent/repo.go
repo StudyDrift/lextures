@@ -308,6 +308,20 @@ type UpsertConfigInput struct {
 	CreatedBy                uuid.UUID
 }
 
+func DeleteConfig(ctx context.Context, pool *pgxpool.Pool, courseID, moduleItemID uuid.UUID) (bool, error) {
+	if pool == nil {
+		return false, errors.New("nil pool")
+	}
+	ct, err := pool.Exec(ctx, `
+DELETE FROM assessment.grading_agent_configs
+WHERE course_id = $1 AND module_item_id = $2
+`, courseID, moduleItemID)
+	if err != nil {
+		return false, err
+	}
+	return ct.RowsAffected() > 0, nil
+}
+
 func UpsertConfig(ctx context.Context, pool *pgxpool.Pool, in UpsertConfigInput) (*ConfigRow, error) {
 	if pool == nil {
 		return nil, errors.New("nil pool")

@@ -10,11 +10,22 @@ import (
 
 func TestGraderAgent_DisabledReturns404(t *testing.T) {
 	d := Deps{Config: config.Config{GraderAgentEnabled: false}}
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/courses/demo/assignments/00000000-0000-0000-0000-000000000001/grader-agent", nil)
-	rec := httptest.NewRecorder()
-	d.handleGetGraderAgentConfig()(rec, req)
-	if rec.Code != http.StatusNotFound {
-		t.Fatalf("status=%d want 404", rec.Code)
+	tests := []struct {
+		method string
+		path   string
+		run    func(http.ResponseWriter, *http.Request)
+	}{
+		{http.MethodGet, "/api/v1/courses/demo/assignments/00000000-0000-0000-0000-000000000001/grader-agent", d.handleGetGraderAgentConfig()},
+		{http.MethodDelete, "/api/v1/courses/demo/assignments/00000000-0000-0000-0000-000000000001/grader-agent", d.handleDeleteGraderAgentConfig()},
+		{http.MethodDelete, "/api/v1/courses/demo/quizzes/00000000-0000-0000-0000-000000000001/grader-agent", d.handleDeleteGraderAgentConfig()},
+	}
+	for _, tc := range tests {
+		req := httptest.NewRequest(tc.method, tc.path, nil)
+		rec := httptest.NewRecorder()
+		tc.run(rec, req)
+		if rec.Code != http.StatusNotFound {
+			t.Fatalf("%s %s status=%d want 404", tc.method, tc.path, rec.Code)
+		}
 	}
 }
 

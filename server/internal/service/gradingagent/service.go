@@ -91,6 +91,41 @@ func (s *Service) RunPrompt(ctx context.Context, modelID, systemPrompt, prompt, 
 	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, nil
 }
 
+// RunBuilderPrompt runs a single structured-JSON generation with a bounded output
+// length. Used by the AI workflow builder, where a slow/large model could otherwise
+// run past the client timeout. Honors the same JSON-mode fallback as RunPrompt.
+func (s *Service) RunBuilderPrompt(ctx context.Context, modelID, systemPrompt, prompt, input string, maxTokens int) (string, int, int, float64, error) {
+	if s.Client == nil {
+		return "", 0, 0, 0, fmt.Errorf("AI provider not configured")
+	}
+	model := strings.TrimSpace(modelID)
+	if model == "" {
+		return "", 0, 0, 0, fmt.Errorf("grader agent model not configured")
+	}
+	messages := make([]openrouter.Message, 0, 3)
+	if s := strings.TrimSpace(systemPrompt); s != "" {
+		messages = append(messages, openrouter.Message{Role: "system", Content: s})
+	}
+	if p := strings.TrimSpace(prompt); p != "" {
+		messages = append(messages, openrouter.Message{Role: "user", Content: p})
+	}
+	if i := strings.TrimSpace(input); i != "" {
+		messages = append(messages, openrouter.Message{Role: "user", Content: i})
+	}
+	chat, err := s.Client.ChatCompletion(model, messages, openrouter.ChatOptions{JSONMode: true, MaxTokens: maxTokens})
+	if err != nil && (strings.Contains(err.Error(), "response_format") || strings.Contains(err.Error(), "status 400")) {
+		chat, err = s.Client.ChatCompletion(model, messages, openrouter.ChatOptions{MaxTokens: maxTokens})
+	}
+	if err != nil {
+		return "", 0, 0, 0, err
+	}
+	text := strings.TrimSpace(chat.Text)
+	if text == "" {
+		return "", chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, fmt.Errorf("openrouter: empty model response")
+	}
+	return text, chat.Usage.PromptTokens, chat.Usage.CompletionTokens, chat.Usage.CostUSD, nil
+}
+
 // ScoreWithVision grades a submission from image/PDF pages using a vision-capable model.
 func (s *Service) ScoreWithVision(ctx context.Context, req ScoreRequest, imageDataURLs []string) (ScoreResult, error) {
 	if s.Client == nil {
@@ -249,4 +284,3 @@ func (s *Service) readSubmissionBlob(ctx context.Context, courseCode string, row
 	}
 	return b, nil
 }
-

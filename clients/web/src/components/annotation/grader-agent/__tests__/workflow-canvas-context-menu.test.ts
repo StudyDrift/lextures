@@ -30,12 +30,23 @@ const graph: GraderWorkflowGraph = {
 
 describe('workflow canvas context menu', () => {
   it('builds editable node menu items and omits delete for output', () => {
-    expect(buildNodeContextMenuItems('ai1', false, t).map((item) => item.kind)).toEqual([
+    expect(buildNodeContextMenuItems('ai1', 'ai', false, t).map((item) => item.kind)).toEqual([
       'rename',
       'deleteNode',
     ])
-    expect(buildNodeContextMenuItems('output', false, t).map((item) => item.kind)).toEqual(['rename'])
-    expect(buildNodeContextMenuItems('ai1', true, t)).toEqual([])
+    expect(buildNodeContextMenuItems('output', 'output', false, t).map((item) => item.kind)).toEqual([
+      'rename',
+    ])
+    expect(buildNodeContextMenuItems('ai1', 'ai', true, t)).toEqual([])
+  })
+
+  it('adds open/ungroup actions for group nodes', () => {
+    expect(buildNodeContextMenuItems('grp1', 'group', false, t).map((item) => item.kind)).toEqual([
+      'openGroup',
+      'rename',
+      'ungroup',
+      'deleteNode',
+    ])
   })
 
   it('builds edge menu items with source and target labels', () => {

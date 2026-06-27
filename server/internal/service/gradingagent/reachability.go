@@ -70,7 +70,7 @@ func branchReachesTerminal(g *WorkflowGraph, routerID, handle, outputID string, 
 			return true
 		}
 		if tgt.Type == NodeTypeOutput && outputID != "" && e.Target == outputID &&
-			strings.TrimSpace(e.TargetHandle) == HandleGrade {
+			isGradeTerminalHandle(e.TargetHandle) {
 			return true
 		}
 	}
@@ -91,7 +91,7 @@ func branchReachesTerminal(g *WorkflowGraph, routerID, handle, outputID string, 
 	}
 	if outputID != "" {
 		for _, e := range g.Edges {
-			if e.Target != outputID || strings.TrimSpace(e.TargetHandle) != HandleGrade {
+			if e.Target != outputID || !isGradeTerminalHandle(e.TargetHandle) {
 				continue
 			}
 			if reachable[e.Source] {
@@ -100,6 +100,13 @@ func branchReachesTerminal(g *WorkflowGraph, routerID, handle, outputID string, 
 		}
 	}
 	return false
+}
+
+// isGradeTerminalHandle reports whether an output-node target handle is a grade
+// terminal — the assignment grade slot or any quiz grade-N slot.
+func isGradeTerminalHandle(handle string) bool {
+	h := strings.TrimSpace(handle)
+	return h == HandleGrade || isQuizGradeHandle(h)
 }
 
 func anyPathReachesTerminal(g *WorkflowGraph, outputID string, nodeByID map[string]WorkflowNode) bool {
@@ -117,7 +124,7 @@ func anyPathReachesTerminal(g *WorkflowGraph, outputID string, nodeByID map[stri
 	}
 	if outputID != "" {
 		for _, e := range g.Edges {
-			if e.Target != outputID || strings.TrimSpace(e.TargetHandle) != HandleGrade {
+			if e.Target != outputID || !isGradeTerminalHandle(e.TargetHandle) {
 				continue
 			}
 			if reachable[e.Source] {

@@ -919,3 +919,68 @@ export const ScoreAggregatorNode = memo(function ScoreAggregatorNode({ id, data,
     </div>
   )
 })
+
+type GroupPortView = { id: string; label?: string }
+
+export const GroupNode = memo(function GroupNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const inputs = Array.isArray(nodeData.inputs) ? (nodeData.inputs as GroupPortView[]) : []
+  const outputs = Array.isArray(nodeData.outputs) ? (nodeData.outputs as GroupPortView[]) : []
+  const subgraph = nodeData.subgraph as { nodes?: unknown[] } | undefined
+  const memberCount = Array.isArray(subgraph?.nodes) ? subgraph!.nodes!.length : 0
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-fuchsia-400/80 ring-2 ring-fuchsia-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div className={`w-[244px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}>
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.group.title')}
+        dotClassName="bg-fuchsia-500"
+        headerClassName="border-b border-fuchsia-500/15 bg-fuchsia-500/5 dark:border-fuchsia-500/10 dark:bg-fuchsia-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      <div className="px-3 py-1.5 text-[11px] text-fuchsia-700/80 dark:text-fuchsia-300/80">
+        {t('gradingAgent.canvas.nodes.group.subtitle', { count: memberCount })}
+      </div>
+      <div className="grid grid-cols-2">
+        <div className="divide-y divide-slate-100 border-e border-slate-100 dark:divide-neutral-800 dark:border-neutral-800">
+          {inputs.length === 0 ? (
+            <div className="px-3 py-2.5 text-[11px] text-slate-400">{t('gradingAgent.canvas.nodes.group.noInputs')}</div>
+          ) : (
+            inputs.map((port) => (
+              <InputSlotRow
+                key={port.id}
+                handleId={port.id}
+                label={port.label ?? t('gradingAgent.canvas.nodes.group.input')}
+                dotClass="bg-fuchsia-500"
+                handleClass="!bg-fuchsia-500"
+              />
+            ))
+          )}
+        </div>
+        <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+          {outputs.length === 0 ? (
+            <div className="px-3 py-2.5 text-end text-[11px] text-slate-400">{t('gradingAgent.canvas.nodes.group.noOutputs')}</div>
+          ) : (
+            outputs.map((port) => (
+              <OutputSlotRow
+                key={port.id}
+                handleId={port.id}
+                label={port.label ?? t('gradingAgent.canvas.nodes.group.output')}
+                dotClass="bg-fuchsia-500"
+                handleClass="!bg-fuchsia-500"
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+})

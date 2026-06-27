@@ -264,6 +264,18 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		nodeByID[n.ID] = n
 		switch n.Type {
 		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeQuizResponses, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
+		case NodeTypeGroup:
+			gd, err := parseGroupData(n)
+			if err != nil {
+				return err
+			}
+			if err := validateGroupStructure(n.ID, gd); err != nil {
+				return err
+			}
+			sub := gd.Subgraph
+			if err := ValidateWorkflowGraphForPersistence(&sub); err != nil {
+				return err
+			}
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -279,8 +291,12 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		if !ok {
 			return ValidationError{Field: "workflowGraph.edges", Message: "Edge references unknown target node."}
 		}
-		if err := validateEdgeTypes(src, tgt, e); err != nil {
-			return err
+		// Edges at a group boundary are typed by the group's ports, not node handles;
+		// they are validated structurally when the group is flattened.
+		if !isGroupNodeType(src.Type) && !isGroupNodeType(tgt.Type) {
+			if err := validateEdgeTypes(src, tgt, e); err != nil {
+				return err
+			}
 		}
 		adj[e.Source] = append(adj[e.Source], e.Target)
 	}
@@ -291,9 +307,17 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 }
 
 // ValidateWorkflowGraph checks size caps, node types, edge typing, acyclicity, and required slots.
+// Group nodes are flattened first so runnable validation runs on the fully-expanded graph.
 func ValidateWorkflowGraph(g *WorkflowGraph) error {
 	if g == nil {
 		return ValidationError{Field: "workflowGraph", Message: "Workflow graph is required."}
+	}
+	if graphContainsGroup(g) {
+		flat, err := FlattenWorkflowGraph(g)
+		if err != nil {
+			return err
+		}
+		return ValidateWorkflowGraph(&flat)
 	}
 	if g.Version != WorkflowVersion {
 		return ValidationError{Field: "workflowGraph.version", Message: "Unsupported workflow graph version."}
@@ -320,7 +344,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 			outputCount++
 		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeQuizResponses, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
 		default:
-			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
+			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
 	}
 	if outputCount != 1 {

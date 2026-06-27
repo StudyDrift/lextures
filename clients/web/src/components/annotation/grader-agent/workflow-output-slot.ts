@@ -47,6 +47,9 @@ export function outputSlotSourceIsValid(
     if (sourceHandle === HANDLE_GRADE && isScoreAggregatorNodeType(sourceType)) {
       return true
     }
+    if (sourceHandle === HANDLE_GRADE && isSetScoreNodeType(sourceType)) {
+      return true
+    }
     return false
   }
   if (targetHandle === HANDLE_COMMENTS) {

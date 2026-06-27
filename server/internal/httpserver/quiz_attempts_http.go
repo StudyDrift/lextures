@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursemodulequizzes"
 	"github.com/lextures/lextures/server/internal/repos/quizattempts"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 )
 
 // handleQuizAttemptsList is GET /api/v1/courses/{course_code}/quizzes/{item_id}/attempts.
@@ -45,11 +46,17 @@ func (d Deps) handleQuizAttemptsList() http.HandlerFunc {
 			return
 		}
 
-		canViewAll, err := courseroles.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":gradebook:view")
+		canGradebook, err := courseroles.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":gradebook:view")
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
 			return
 		}
+		canConfigureAgent, cfgErr := rbac.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":item:create")
+		if cfgErr != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
+			return
+		}
+		canViewAll := canGradebook || canConfigureAgent
 
 		var filterStudent *uuid.UUID
 		userIDParam := strings.TrimSpace(r.URL.Query().Get("userId"))

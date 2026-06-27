@@ -12,7 +12,7 @@ export type WorkflowCanvasContextMenuState =
   | null
 
 export type WorkflowCanvasContextMenuItem = {
-  kind: 'rename' | 'deleteNode' | 'selectSource' | 'selectTarget' | 'deleteEdge'
+  kind: 'rename' | 'deleteNode' | 'selectSource' | 'selectTarget' | 'deleteEdge' | 'openGroup' | 'ungroup'
   label: string
   destructive?: boolean
 }
@@ -54,6 +54,8 @@ function defaultLabelForNodeType(type: string, t: TFunction): string {
       return t('gradingAgent.canvas.nodes.rubric.title')
     case 'scoreAggregator':
       return t('gradingAgent.canvas.nodes.aggregator.title')
+    case 'group':
+      return t('gradingAgent.canvas.nodes.group.title')
     default:
       return type
   }
@@ -67,13 +69,19 @@ export function nodeDisplayLabel(graph: GraderWorkflowGraph, nodeId: string, t: 
 
 export function buildNodeContextMenuItems(
   nodeId: string,
+  nodeType: string,
   readOnly: boolean,
   t: TFunction,
 ): WorkflowCanvasContextMenuItem[] {
   if (readOnly) return []
-  const items: WorkflowCanvasContextMenuItem[] = [
-    { kind: 'rename', label: t('gradingAgent.canvas.contextMenu.rename') },
-  ]
+  const items: WorkflowCanvasContextMenuItem[] = []
+  if (nodeType === 'group') {
+    items.push({ kind: 'openGroup', label: t('gradingAgent.canvas.contextMenu.openGroup') })
+  }
+  items.push({ kind: 'rename', label: t('gradingAgent.canvas.contextMenu.rename') })
+  if (nodeType === 'group') {
+    items.push({ kind: 'ungroup', label: t('gradingAgent.canvas.contextMenu.ungroup') })
+  }
   if (nodeId !== 'output') {
     items.push({
       kind: 'deleteNode',
@@ -133,7 +141,12 @@ export function WorkflowCanvasContextMenu({
 
   const items =
     menu.kind === 'node'
-      ? buildNodeContextMenuItems(menu.nodeId, readOnly, t)
+      ? buildNodeContextMenuItems(
+          menu.nodeId,
+          graph.nodes.find((n) => n.id === menu.nodeId)?.type ?? '',
+          readOnly,
+          t,
+        )
       : buildEdgeContextMenuItems(graph, menu.sourceId, menu.targetId, readOnly, t)
 
   useEffect(() => {

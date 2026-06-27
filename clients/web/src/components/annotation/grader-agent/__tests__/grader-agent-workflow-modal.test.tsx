@@ -11,7 +11,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('../../../../lib/courses-api', () => ({
   fetchGraderAgentConfig: vi.fn().mockResolvedValue({ config: null }),
   fetchGraderAgentRun: vi.fn(),
-  fetchModuleAssignmentSubmissions: vi.fn().mockResolvedValue([
+  fetchGraderAgentSubmissions: vi.fn().mockResolvedValue([
     {
       id: '00000000-0000-0000-0000-000000000002',
       submittedByDisplayName: 'Ada Lovelace',

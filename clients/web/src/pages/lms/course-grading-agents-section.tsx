@@ -22,6 +22,7 @@ import {
   fetchGraderAgentTemplate,
   fetchModuleAssignment,
   fetchModuleQuiz,
+  deleteGraderAgentConfig,
   deleteGraderAgentTemplate,
   postGraderAgentTemplate,
   type CourseGradingAgentSummary,
@@ -96,6 +97,8 @@ export function CourseGradingAgentsSection({
   const [createFromTemplate, setCreateFromTemplate] = useState<CourseGradingAgentTemplateSummary | null>(null)
   const [deleteTemplateTarget, setDeleteTemplateTarget] = useState<CourseGradingAgentTemplateSummary | null>(null)
   const [deletingTemplate, setDeletingTemplate] = useState(false)
+  const [deleteAgentTarget, setDeleteAgentTarget] = useState<CourseGradingAgentSummary | null>(null)
+  const [deletingAgent, setDeletingAgent] = useState(false)
   const [agentFilterQuery, setAgentFilterQuery] = useState('')
   const [agentSortKey, setAgentSortKey] = useState<AgentSortKey>('assignmentTitle')
   const [agentSortDir, setAgentSortDir] = useState<SortDir>('ascending')
@@ -352,6 +355,28 @@ export function CourseGradingAgentsSection({
     }
   }
 
+  const confirmDeleteAgent = async () => {
+    if (!deleteAgentTarget) return
+    setDeletingAgent(true)
+    setLoadError(null)
+    try {
+      await deleteGraderAgentConfig(
+        courseCode,
+        deleteAgentTarget.itemId,
+        deleteAgentTarget.itemKind ?? 'assignment',
+      )
+      if (openAgent?.itemId === deleteAgentTarget.itemId) {
+        setOpenAgent(null)
+      }
+      setDeleteAgentTarget(null)
+      await reload({ silent: true })
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : t('gradingAgent.settings.deleteAgent.error'))
+    } finally {
+      setDeletingAgent(false)
+    }
+  }
+
   if (loading) {
     return (
       <p className="flex items-center gap-2 text-sm text-slate-600 dark:text-neutral-300">
@@ -501,6 +526,9 @@ export function CourseGradingAgentsSection({
                       {t('gradingAgent.settings.table.updated')}
                     </button>
                   </th>
+                  <th className="w-12 px-4 py-3 text-end font-semibold text-slate-900 dark:text-neutral-100">
+                    <span className="sr-only">{t('gradingAgent.settings.table.actions')}</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -559,6 +587,18 @@ export function CourseGradingAgentsSection({
                       <td className="px-4 py-3 text-start text-slate-600 dark:text-neutral-300">
                         {formatAbsolute(agent.updatedAt)}
                       </td>
+                      <td className="px-4 py-3 text-end">
+                        <button
+                          type="button"
+                          onClick={() => setDeleteAgentTarget(agent)}
+                          className="inline-flex rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-700 dark:hover:bg-rose-950/40 dark:hover:text-rose-300"
+                          aria-label={t('gradingAgent.settings.deleteAgent.buttonAria', {
+                            name: agent.assignmentTitle,
+                          })}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden />
+                        </button>
+                      </td>
                     </tr>
                   )
                 })}
@@ -586,6 +626,29 @@ export function CourseGradingAgentsSection({
         existingAgentItemIds={existingAgentItemIds}
         onClose={() => setCreateFromTemplate(null)}
         onCreate={createAgentsFromTemplate}
+      />
+
+      <ConfirmDialog
+        open={deleteAgentTarget != null}
+        title={t('gradingAgent.settings.deleteAgent.title')}
+        description={
+          deleteAgentTarget ? (
+            <>
+              {t('gradingAgent.settings.deleteAgent.description')}
+              <p className="mt-2 font-medium text-slate-900 dark:text-neutral-100">
+                {deleteAgentTarget.assignmentTitle}
+              </p>
+            </>
+          ) : null
+        }
+        confirmLabel={t('gradingAgent.settings.deleteAgent.confirm')}
+        cancelLabel={t('gradingAgent.settings.deleteAgent.cancel')}
+        variant="danger"
+        busy={deletingAgent}
+        onConfirm={() => void confirmDeleteAgent()}
+        onClose={() => {
+          if (!deletingAgent) setDeleteAgentTarget(null)
+        }}
       />
 
       <ConfirmDialog

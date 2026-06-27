@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
-  fetchModuleAssignmentSubmissions,
+  fetchGraderAgentSubmissions,
+  type GradingAgentItemKind,
   type ModuleAssignmentSubmissionApi,
 } from '../../../lib/courses-api'
 import {
@@ -12,6 +13,7 @@ type UseGraderAgentSubmissionsArgs = {
   open: boolean
   courseCode: string
   itemId: string
+  itemKind?: GradingAgentItemKind
   initialSubmissionId: string | null
   enabled?: boolean
 }
@@ -20,6 +22,7 @@ export function useGraderAgentSubmissions({
   open,
   courseCode,
   itemId,
+  itemKind = 'assignment',
   initialSubmissionId,
   enabled = true,
 }: UseGraderAgentSubmissionsArgs) {
@@ -41,7 +44,7 @@ export function useGraderAgentSubmissions({
     setLoading(true)
     setLoadError(null)
 
-    void fetchModuleAssignmentSubmissions(courseCode, itemId, { graded: 'all' })
+    void fetchGraderAgentSubmissions(courseCode, itemId, itemKind, { graded: 'all' })
       .then((list) => {
         if (cancelled) return
         const sorted = sortSubmissionsByStudentLabel(list)
@@ -66,7 +69,7 @@ export function useGraderAgentSubmissions({
     return () => {
       cancelled = true
     }
-  }, [open, enabled, courseCode, itemId, initialSubmissionId])
+  }, [open, enabled, courseCode, itemId, itemKind, initialSubmissionId])
 
   const selectedSubmission = submissions[index] ?? null
   const selectedSubmissionId = selectedSubmission?.id ?? null
