@@ -122,6 +122,13 @@ type Config struct {
 	// EmailNotificationsEnabled gates event-driven transactional email (plan 6.2).
 	EmailNotificationsEnabled bool
 
+	// BackgroundJobsEnabled gates the generic Postgres-backed background job
+	// queue worker (plan 17.3, rollout flag background_jobs_enabled).
+	BackgroundJobsEnabled bool
+	// BackgroundJobsConcurrency is the number of jobs processed in parallel per
+	// app instance (default 4 when unset).
+	BackgroundJobsConcurrency int
+
 	// PushNotificationsEnabled gates Web Push (VAPID) notifications (plan 6.3).
 	PushNotificationsEnabled bool
 	// SmsNotificationsEnabled gates SMS notification enqueueing (Twilio delivery).
@@ -742,6 +749,8 @@ func Load() Config {
 		CanvasImportConcurrency:           canvasImportConcurrency(),
 		CanvasSubmissionSyncQueueName:     stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
 		CanvasSubmissionSyncConcurrency:   canvasSubmissionSyncConcurrency(),
+		BackgroundJobsEnabled:             boolEnv("BACKGROUND_JOBS_ENABLED"),
+		BackgroundJobsConcurrency:         intEnvDefault("BACKGROUND_JOBS_CONCURRENCY", 4),
 		SmsNotificationsEnabled:           boolEnv("SMS_NOTIFICATIONS_ENABLED"),
 		SmsNotificationQueueName:          stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
 		SmsNotificationConcurrency:        smsNotificationConcurrency(),
