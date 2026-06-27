@@ -128,6 +128,6 @@ test('Bots: admin integrations page renders classroom bot grid', async ({ page }
 
 test('Bots: account settings shows messaging apps panel', async ({ authedPage: page }) => {
   await page.goto('/settings/account')
-  await expect(page.getByText('Messaging apps')).toBeVisible({ timeout: 8000 })
+  await expect(page.getByRole('heading', { name: 'Messaging apps' })).toBeVisible({ timeout: 8000 })
   await expect(page.getByText(/lextures upcoming/i)).toBeVisible()
 })
