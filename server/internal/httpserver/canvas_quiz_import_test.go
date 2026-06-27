@@ -253,6 +253,77 @@ func TestCanvasMergeSubmissionAnswers_questionRowUsesQuizQuestionID(t *testing.T
 	}
 }
 
+func TestCanvasQuestionToQuizQuestion_FileUpload(t *testing.T) {
+	q := map[string]any{
+		"id":              float64(501),
+		"question_type":   "file_upload_question",
+		"question_text":   "<p>List the tasks that you have been assigned:</p>",
+		"points_possible": float64(10),
+	}
+	qq, ok := canvasQuestionToQuizQuestion(q)
+	if !ok {
+		t.Fatalf("expected file upload question to convert")
+	}
+	if qq.QuestionType != "file_upload" {
+		t.Fatalf("expected file_upload type, got %q", qq.QuestionType)
+	}
+	if qq.Points != 10 {
+		t.Fatalf("expected 10 points, got %d", qq.Points)
+	}
+}
+
+func TestCanvasAttachmentIDsFromMap(t *testing.T) {
+	got := canvasAttachmentIDsFromMap(map[string]any{
+		"attachment_ids": []any{float64(11), "12", float64(11)},
+	})
+	if len(got) != 2 || got[0] != 11 || got[1] != 12 {
+		t.Fatalf("expected [11 12] deduped, got %v", got)
+	}
+	objs := canvasAttachmentIDsFromMap(map[string]any{
+		"attachments": []any{map[string]any{"id": float64(99)}},
+	})
+	if len(objs) != 1 || objs[0] != 99 {
+		t.Fatalf("expected [99] from attachment objects, got %v", objs)
+	}
+	if ids := canvasAttachmentIDsFromMap(map[string]any{"text": "no files"}); len(ids) != 0 {
+		t.Fatalf("expected no attachment ids, got %v", ids)
+	}
+}
+
+func TestCanvasParseSubmissionData_fileUploadAttachments(t *testing.T) {
+	raw := []any{
+		map[string]any{
+			"question_id":    float64(501),
+			"attachment_ids": []any{float64(11), float64(12)},
+		},
+	}
+	answers := canvasParseSubmissionData(raw)
+	if len(answers) != 1 || answers[0].CanvasQuestionID != 501 {
+		t.Fatalf("unexpected: %+v", answers)
+	}
+	if len(answers[0].AttachmentIDs) != 2 {
+		t.Fatalf("expected 2 attachment ids, got %v", answers[0].AttachmentIDs)
+	}
+}
+
+func TestCanvasInjectFilesIntoResponseJSON(t *testing.T) {
+	base := json.RawMessage(`{"textAnswer":"see files"}`)
+	out := canvasInjectFilesIntoResponseJSON(base, []canvasImportedQuizFile{
+		{Filename: "image.png", MimeType: "image/png", ContentPath: "/c/1"},
+	})
+	var parsed map[string]any
+	if err := json.Unmarshal(out, &parsed); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if parsed["textAnswer"] != "see files" {
+		t.Fatalf("expected textAnswer preserved, got %v", parsed["textAnswer"])
+	}
+	files, ok := parsed["files"].([]any)
+	if !ok || len(files) != 1 {
+		t.Fatalf("expected 1 file, got %v", parsed["files"])
+	}
+}
+
 func TestCanvasParseSubmissionDataMap_questionPrefixKeys(t *testing.T) {
 	raw := map[string]any{
 		"question_42": "My contributions this sprint have been: shipping the API.",
