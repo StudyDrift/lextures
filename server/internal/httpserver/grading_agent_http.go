@@ -297,6 +297,34 @@ type putGraderAgentConfigBody struct {
 	WorkflowGraph            *gradingagentsvc.WorkflowGraph `json:"workflowGraph"`
 }
 
+func (d Deps) handleDeleteGraderAgentConfig() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		courseCode, _, ok := d.requireGraderAgentAccess(w, r)
+		if !ok {
+			return
+		}
+		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
+			return
+		}
+		item, ok := d.loadGradingAgentModuleItem(w, r, courseCode, itemID)
+		if !ok || item == nil {
+			return
+		}
+		deleted, err := gradingagentrepo.DeleteConfig(r.Context(), d.Pool, item.CourseID, itemID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to delete grading agent.")
+			return
+		}
+		if !deleted {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Grading agent not found.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
 func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		courseCode, viewer, ok := d.requireGraderAgentAccess(w, r)

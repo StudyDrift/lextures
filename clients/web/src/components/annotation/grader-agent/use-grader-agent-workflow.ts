@@ -8,6 +8,7 @@ import {
   fetchGraderAgentRunEstimate,
   fetchSubmissionGrade,
   postGraderAgentCancelRun,
+  postGraderAgentAIBuild,
   postGraderAgentRun,
   postGraderAgentTemplate,
   putGraderAgentConfig,
@@ -25,7 +26,13 @@ import {
 } from '../../../lib/courses-api'
 import { queueCanvasGradeSync } from '../../canvas/canvas-grade-sync'
 import { buildAgentGradeApplyPayload, canvasPayloadFromSubmissionGrade } from './agent-grade-apply'
-import { effectiveWorkflowGraph, synthesizeDefaultGraph } from './default-graph'
+import { effectiveWorkflowGraph, normalizeWorkflowGraph, synthesizeDefaultGraph } from './default-graph'
+import {
+  createGroupFromSelection,
+  groupNodeData,
+  ungroupNode,
+  type GraderGroupNodeData,
+} from './group-utils'
 import {
   defaultRunAgentFilterState,
   runFilterFromState,
@@ -45,6 +52,55 @@ import { patchWorkflowNodeLabel } from './workflow-node-label'
 import { paletteNodeDefaults } from './node-descriptors'
 
 export type RunScope = 'current' | 'ungraded' | 'all'
+
+/** One level of drill-in navigation into a group's subgraph. */
+export type GroupNavEntry = {
+  parentGraph: GraderWorkflowGraph
+  groupId: string
+  label: string
+}
+
+/** Writes an edited subgraph back into its group node, pruning ports (and parent
+ *  edges) that reference internal nodes which no longer exist. */
+function writeSubgraphBack(
+  parent: GraderWorkflowGraph,
+  groupId: string,
+  subgraph: GraderWorkflowGraph,
+): GraderWorkflowGraph {
+  const internalIds = new Set(subgraph.nodes.map((n) => n.id))
+  let prunedPortIds = new Set<string>()
+  const nodes = parent.nodes.map((n) => {
+    if (n.id !== groupId || n.type !== 'group') return n
+    const gd = groupNodeData(n)
+    const inputs = gd.inputs.filter((p) => internalIds.has(p.nodeId))
+    const outputs = gd.outputs.filter((p) => internalIds.has(p.nodeId))
+    prunedPortIds = new Set(
+      [...gd.inputs, ...gd.outputs]
+        .filter((p) => !internalIds.has(p.nodeId))
+        .map((p) => p.id),
+    )
+    const data: GraderGroupNodeData = { ...gd, subgraph, inputs, outputs }
+    return { ...n, data: data as unknown as Record<string, unknown> }
+  })
+  const edges =
+    prunedPortIds.size === 0
+      ? parent.edges
+      : parent.edges.filter((e) => {
+          if (e.source === groupId && e.sourceHandle && prunedPortIds.has(e.sourceHandle)) return false
+          if (e.target === groupId && e.targetHandle && prunedPortIds.has(e.targetHandle)) return false
+          return true
+        })
+  return { ...parent, nodes, edges }
+}
+
+/** Folds the active (deepest) graph back through the nav stack to the root graph. */
+function foldNavToRoot(active: GraderWorkflowGraph, navStack: GroupNavEntry[]): GraderWorkflowGraph {
+  let current = active
+  for (let i = navStack.length - 1; i >= 0; i--) {
+    current = writeSubgraphBack(navStack[i].parentGraph, navStack[i].groupId, current)
+  }
+  return current
+}
 
 function graderAgentConfigPutPayload(
   config: GraderAgentConfigApi | null | undefined,
@@ -128,6 +184,12 @@ export function useGraderAgentWorkflow({
   const [savedTemplateId, setSavedTemplateId] = useState<string | null>(templateMode?.templateId ?? null)
   const [config, setConfig] = useState<GraderAgentConfigApi | null>(null)
   const [graph, setGraph] = useState<GraderWorkflowGraph>(() => synthesizeDefaultGraph('', false, false))
+  const graphRef = useRef(graph)
+  graphRef.current = graph
+  // Drill-in navigation: each entry captures the parent graph + the group entered.
+  // `graph` is always the currently-edited level; the root is folded back for
+  // validation and persistence so groups are transparent to the rest of the engine.
+  const [navStack, setNavStack] = useState<GroupNavEntry[]>([])
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [dryRunning, setDryRunning] = useState(false)
   const [batchRunning, setBatchRunning] = useState(false)
@@ -136,6 +198,7 @@ export function useGraderAgentWorkflow({
   const [dryRunResult, setDryRunResult] = useState<GraderAgentDryRunResult | null>(null)
   const [hadDryRun, setHadDryRun] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [aiBuilding, setAiBuilding] = useState(false)
   const [applyingSubmissionId, setApplyingSubmissionId] = useState<string | null>(null)
   const [syncingSubmissionIds, setSyncingSubmissionIds] = useState<ReadonlySet<string>>(() => new Set())
   const [runScope, setRunScope] = useState<RunScope>('ungraded')
@@ -172,11 +235,17 @@ export function useGraderAgentWorkflow({
     }),
     [rubric, itemId, itemKind, quizQuestionSlots, libraryRubrics],
   )
-  const validationIssues = useMemo(
-    () => validateWorkflowGraph(graph, validationOptions),
-    [graph, validationOptions],
+  // The folded root graph is the source of truth for validation and persistence,
+  // regardless of how deep the user has drilled into groups.
+  const rootGraph = useMemo(
+    () => (navStack.length === 0 ? graph : foldNavToRoot(graph, navStack)),
+    [graph, navStack],
   )
-  const runnable = isWorkflowRunnable(graph, validationOptions)
+  const validationIssues = useMemo(
+    () => validateWorkflowGraph(rootGraph, validationOptions),
+    [rootGraph, validationOptions],
+  )
+  const runnable = isWorkflowRunnable(rootGraph, validationOptions)
 
   useEffect(() => {
     if (!open) {
@@ -248,10 +317,12 @@ export function useGraderAgentWorkflow({
           itemKind,
         )
         setGraph(g)
+        setNavStack([])
         setSelectedNodeId(null)
       } else {
         const g = effectiveWorkflowGraph(null, '', false, false, itemKind)
         setGraph(g)
+        setNavStack([])
         setSelectedNodeId(null)
       }
       return
@@ -592,6 +663,100 @@ export function useGraderAgentWorkflow({
     [graph, itemId],
   )
 
+  const handleAIBuild = useCallback(
+    async (instruction: string): Promise<boolean> => {
+      const trimmed = instruction.trim()
+      if (!trimmed || aiBuilding) return false
+      setAiBuilding(true)
+      setDryRunError(null)
+      setStatusMessage(t('gradingAgent.aiBuilder.generating'))
+      try {
+        const quizSlots =
+          itemKind === 'quiz'
+            ? quizQuestionSlots.map((s) => ({
+                index: s.index,
+                label: s.label,
+                questionType: s.questionType,
+                maxPoints: s.maxPoints,
+              }))
+            : undefined
+        const result = await postGraderAgentAIBuild(
+          courseCode,
+          itemId,
+          {
+            instruction: trimmed,
+            currentGraph: rootGraph as GraderWorkflowGraphApi,
+            quizSlots,
+          },
+          itemKind,
+        )
+        setGraph(normalizeWorkflowGraph(result.workflowGraph as GraderWorkflowGraph))
+        setNavStack([])
+        setSelectedNodeId(null)
+        setDryRunResult(null)
+        setHadDryRun(false)
+        setStatusMessage(result.summary || t('gradingAgent.aiBuilder.success'))
+        return true
+      } catch (e) {
+        setDryRunError(e instanceof Error ? e.message : t('gradingAgent.aiBuilder.error'))
+        setStatusMessage('')
+        return false
+      } finally {
+        setAiBuilding(false)
+      }
+    },
+    [aiBuilding, courseCode, itemId, itemKind, graph, quizQuestionSlots, t],
+  )
+
+  const enterGroup = useCallback(
+    (groupId: string) => {
+      const node = graph.nodes.find((n) => n.id === groupId && n.type === 'group')
+      if (!node) return
+      const gd = groupNodeData(node)
+      setNavStack((prev) => [...prev, { parentGraph: graph, groupId, label: gd.label ?? 'Group' }])
+      setGraph(gd.subgraph)
+      setSelectedNodeId(null)
+    },
+    [graph],
+  )
+
+  const exitToDepth = useCallback(
+    (depth: number) => {
+      if (depth >= navStack.length) return
+      let current = graphRef.current
+      for (let i = navStack.length - 1; i >= depth; i--) {
+        current = writeSubgraphBack(navStack[i].parentGraph, navStack[i].groupId, current)
+      }
+      setGraph(current)
+      setNavStack(navStack.slice(0, depth))
+      setSelectedNodeId(null)
+    },
+    [navStack],
+  )
+
+  const exitGroup = useCallback(() => {
+    exitToDepth(Math.max(0, navStack.length - 1))
+  }, [exitToDepth, navStack.length])
+
+  const groupSelection = useCallback(
+    (nodeIds: string[], label?: string): boolean => {
+      const result = createGroupFromSelection(graph, nodeIds, label)
+      if (!result) return false
+      setGraph(result.graph)
+      setSelectedNodeId(result.groupId)
+      return true
+    },
+    [graph],
+  )
+
+  const ungroup = useCallback(
+    (groupId: string) => {
+      setGraph(ungroupNode(graph, groupId))
+      setSelectedNodeId(null)
+    },
+    [graph],
+  )
+
   const refreshRunResults = useCallback(async () => {
     if (!runId) return
     const run = await fetchGraderAgentRun(courseCode, itemId, runId)
@@ -680,7 +845,7 @@ export function useGraderAgentWorkflow({
         courseCode,
         itemId,
         {
-          workflowGraph: graph as GraderWorkflowGraphApi,
+          workflowGraph: rootGraph as GraderWorkflowGraphApi,
           submissionId,
         },
         (event) => {
@@ -797,7 +962,7 @@ export function useGraderAgentWorkflow({
           prompt: '',
           includeAssignmentContent: false,
           includeRubric: false,
-          workflowGraph: graph as GraderWorkflowGraphApi,
+          workflowGraph: rootGraph as GraderWorkflowGraphApi,
         }
         if (savedTemplateId) {
           await putGraderAgentTemplate(courseCode, savedTemplateId, body)
@@ -812,7 +977,7 @@ export function useGraderAgentWorkflow({
       const res = await putGraderAgentConfig(
         courseCode,
         itemId,
-        graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { status }),
+        graderAgentConfigPutPayload(config, rootGraph as GraderWorkflowGraphApi, { status }),
         itemKind,
       )
       setConfig(res.config)
@@ -824,6 +989,7 @@ export function useGraderAgentWorkflow({
         itemKind,
       )
       setGraph(savedGraph)
+      setNavStack([])
       setStatusMessage(t('gradingAgent.save.saved'))
     } catch (e) {
       setDryRunError(e instanceof Error ? e.message : t('gradingAgent.error.save'))
@@ -840,7 +1006,7 @@ export function useGraderAgentWorkflow({
       const res = await putGraderAgentConfig(
         courseCode,
         itemId,
-        graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { status: 'accepted' }),
+        graderAgentConfigPutPayload(config, rootGraph as GraderWorkflowGraphApi, { status: 'accepted' }),
         itemKind,
       )
       setConfig(res.config)
@@ -883,7 +1049,7 @@ export function useGraderAgentWorkflow({
         await putGraderAgentConfig(
           courseCode,
           itemId,
-          graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi),
+          graderAgentConfigPutPayload(config, rootGraph as GraderWorkflowGraphApi),
           itemKind,
         )
       }
@@ -925,7 +1091,7 @@ export function useGraderAgentWorkflow({
     const res = await putGraderAgentConfig(
       courseCode,
       itemId,
-      graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, {
+      graderAgentConfigPutPayload(config, rootGraph as GraderWorkflowGraphApi, {
         status: 'accepted',
         autoGradeNew: enabled,
       }),
@@ -939,7 +1105,7 @@ export function useGraderAgentWorkflow({
     const res = await putGraderAgentConfig(
       courseCode,
       itemId,
-      graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, {
+      graderAgentConfigPutPayload(config, rootGraph as GraderWorkflowGraphApi, {
         status: 'accepted',
         postPolicy: autoPost ? 'auto_post' : 'draft',
       }),
@@ -953,7 +1119,7 @@ export function useGraderAgentWorkflow({
     const res = await putGraderAgentConfig(
       courseCode,
       itemId,
-      graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { confidenceFloor: floor }),
+      graderAgentConfigPutPayload(config, rootGraph as GraderWorkflowGraphApi, { confidenceFloor: floor }),
       itemKind,
     )
     setConfig(res.config)
@@ -970,7 +1136,7 @@ export function useGraderAgentWorkflow({
         prompt: config?.prompt ?? '',
         includeAssignmentContent: config?.includeAssignmentContent ?? false,
         includeRubric: config?.includeRubric ?? false,
-        workflowGraph: graph as GraderWorkflowGraphApi,
+        workflowGraph: rootGraph as GraderWorkflowGraphApi,
       })
       setStatusMessage(t('gradingAgent.save.templateSaved'))
     } catch (e) {
@@ -996,6 +1162,8 @@ export function useGraderAgentWorkflow({
     setDryRunResult,
     hadDryRun,
     saving,
+    aiBuilding,
+    handleAIBuild,
     applyingSubmissionId,
     syncingSubmissionIds,
     runScope,
@@ -1022,6 +1190,12 @@ export function useGraderAgentWorkflow({
     refreshRunResults,
     updateNodeLabel,
     addPaletteNode,
+    navStack,
+    enterGroup,
+    exitGroup,
+    exitToDepth,
+    groupSelection,
+    ungroup,
     removeNode,
     removeEdge,
     handleDryRun,

@@ -14,11 +14,11 @@ type CodeTestRunner interface {
 }
 
 type codeTestRunnerConfig struct {
-	Runtime        string
-	TestSuiteID    string
-	TestCases      []codeexecution.TestCase
-	Mapping        PassRateMapping
-	Policy         PassRatePolicy
+	Runtime     string
+	TestSuiteID string
+	TestCases   []codeexecution.TestCase
+	Mapping     PassRateMapping
+	Policy      PassRatePolicy
 }
 
 func parseCodeTestRunnerNodeData(data map[string]any) (codeTestRunnerConfig, error) {
@@ -205,6 +205,10 @@ func workflowUsesLLM(g *WorkflowGraph) bool {
 		switch n.Type {
 		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI:
 			return true
+		case NodeTypeGroup:
+			if sub, err := groupSubgraph(n); err == nil && workflowUsesLLM(sub) {
+				return true
+			}
 		}
 	}
 	return false
@@ -217,6 +221,11 @@ func workflowUsesCodeRunner(g *WorkflowGraph) bool {
 	for _, n := range g.Nodes {
 		if n.Type == NodeTypeCodeTestRunner {
 			return true
+		}
+		if n.Type == NodeTypeGroup {
+			if sub, err := groupSubgraph(n); err == nil && workflowUsesCodeRunner(sub) {
+				return true
+			}
 		}
 	}
 	return false

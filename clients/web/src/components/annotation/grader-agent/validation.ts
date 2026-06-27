@@ -1,4 +1,5 @@
 import { normalizeWorkflowGraph } from './default-graph'
+import { flattenWorkflowGraph, graphContainsGroup } from './group-utils'
 import { aggregatorInputSourceIsValid, detectRubricMergeCriterionConflicts } from './aggregator-validation'
 import { flagSinkSourceIsValid, graphHasFlagSink } from './flag-sink-validation'
 import { gateInputSourceIsValid } from './gate-validation'
@@ -168,6 +169,10 @@ export function validateWorkflowGraph(
   if (!graph) {
     issues.push({ field: 'workflowGraph', message: 'Workflow graph is required.' })
     return issues
+  }
+  // Groups are reusable subgraphs; validate the fully-expanded graph (mirrors the server).
+  if (graphContainsGroup(graph)) {
+    return validateWorkflowGraph(flattenWorkflowGraph(graph), options)
   }
   const { version, nodes, edges } = normalizeWorkflowGraph(graph)
   if (version !== WORKFLOW_VERSION) {

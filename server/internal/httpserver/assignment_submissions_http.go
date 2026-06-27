@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/submissionattachments"
 	"github.com/lextures/lextures/server/internal/repos/user"
 )
@@ -31,7 +32,15 @@ func submissionAttachmentContentPath(courseCode string, fileID uuid.UUID) string
 }
 
 func (d Deps) viewerCanViewAssignmentSubmissions(ctx context.Context, courseCode string, viewer uuid.UUID) (bool, error) {
-	return courseroles.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":gradebook:view")
+	canGradebook, err := courseroles.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":gradebook:view")
+	if err != nil {
+		return false, err
+	}
+	if canGradebook {
+		return true, nil
+	}
+	// Course designers can configure grading agents but may lack gradebook:view.
+	return rbac.UserHasPermission(ctx, d.Pool, viewer, "course:"+courseCode+":item:create")
 }
 
 func loadAssignmentForSubmissionsByIDs(
@@ -278,7 +287,7 @@ func (d Deps) handleListAssignmentSubmissions() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		has, err := courseroles.UserHasPermission(r.Context(), d.Pool, viewer, "course:"+courseCode+":gradebook:view")
+		has, err := d.viewerCanViewAssignmentSubmissions(r.Context(), courseCode, viewer)
 		if err != nil {
 			apierr.WriteInternal(w, r, "Failed to verify permissions.", err)
 			return

@@ -21,6 +21,7 @@ export type GraderNodeType =
   | 'rubric'
   | 'scoreAggregator'
   | 'setScore'
+  | 'group'
 
 /** @deprecated Legacy persisted graphs may still use `submission`. */
 export type LegacyGraderNodeType = 'submission' | 'assignmentContext'

@@ -5,6 +5,7 @@ import type { GraderAgentReviewQueueItem, QuizQuestion, RubricDefinition } from 
 import { usePlatformFeatures } from '../../../context/platform-features-context'
 import { SubmissionStudentPicker } from '../submission-navigator'
 import { InspectorPanel } from './inspector-panel'
+import { AiBuildPanel } from './ai-build-panel'
 import { NodePalette } from './node-palette'
 import { ActionErrorTooltip } from '../../ui/action-error-tooltip'
 import { DryRunDock } from './dry-run-dock'
@@ -72,7 +73,7 @@ export function GraderAgentWorkflowModal({
     maxWidth: INSPECTOR_MAX_WIDTH,
   })
   const isTemplateMode = templateMode != null
-  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled } =
+  const { codeExecutionEnabled, graderAgentReviewInboxEnabled, graderAgentSuggestModeEnabled, graderAgentRunFiltersEnabled, graderAgentCostEstimateEnabled, openRouterConfigured } =
     usePlatformFeatures()
   const titleId = useId()
   const statusId = useId()
@@ -91,8 +92,9 @@ export function GraderAgentWorkflowModal({
     open,
     courseCode,
     itemId,
+    itemKind,
     initialSubmissionId: submissionId,
-    enabled: !isTemplateMode && itemKind === 'assignment',
+    enabled: !isTemplateMode && (itemKind === 'assignment' || itemKind === 'quiz'),
   })
   const workflow = useGraderAgentWorkflow({
     open,
@@ -146,6 +148,8 @@ export function GraderAgentWorkflowModal({
     handleTogglePostPolicy,
     handleSetConfidenceFloor,
     addPaletteNode,
+    aiBuilding,
+    handleAIBuild,
     runResults,
     refreshRunResults,
   } = workflow
@@ -442,6 +446,9 @@ export function GraderAgentWorkflowModal({
                 <CanvasView workflow={workflow} />
               </Suspense>
             </div>
+            {openRouterConfigured ? (
+              <AiBuildPanel building={aiBuilding} onBuild={handleAIBuild} />
+            ) : null}
           </main>
           <aside
             className="relative flex min-h-0 w-full shrink-0 flex-col border-t border-slate-200 p-3 pl-4 lg:w-[var(--inspector-width)] lg:shrink-0 lg:border-t-0 lg:border-s dark:border-neutral-700"

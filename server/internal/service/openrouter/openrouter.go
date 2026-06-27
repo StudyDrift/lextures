@@ -96,6 +96,22 @@ func usageFromPayload(u usagePayload) UsageInfo {
 type ChatOptions struct {
 	// JSONMode requests structured JSON output when the model supports it.
 	JSONMode bool
+	// MaxTokens caps the completion length when > 0, bounding generation time.
+	MaxTokens int
+}
+
+// WithTimeout returns a shallow copy of the client using a different HTTP timeout.
+// Used for longer single-shot generations (e.g. workflow building) without
+// changing the shared client used elsewhere.
+func (c *Client) WithTimeout(d time.Duration) *Client {
+	if c == nil {
+		return nil
+	}
+	return &Client{
+		HTTP:    &http.Client{Timeout: d},
+		apiKey:  c.apiKey,
+		baseURL: c.baseURL,
+	}
 }
 
 // ChatCompletion sends a non-streaming chat request and returns the assistant text, if any.
@@ -121,6 +137,9 @@ func (c *Client) ChatCompletion(model string, messages []Message, opts ...ChatOp
 	}
 	if opt.JSONMode {
 		body["response_format"] = map[string]string{"type": "json_object"}
+	}
+	if opt.MaxTokens > 0 {
+		body["max_tokens"] = opt.MaxTokens
 	}
 	buf, err := json.Marshal(body)
 	if err != nil {

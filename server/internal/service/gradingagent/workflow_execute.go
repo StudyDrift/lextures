@@ -12,18 +12,18 @@ import (
 
 // ExecutionEvent is streamed while a workflow executes (dry-run WS or live batch grading).
 type ExecutionEvent struct {
-	Type            string         `json:"type"`
-	NodeID          string         `json:"nodeId,omitempty"`
-	NodeType        string         `json:"nodeType,omitempty"`
-	NodeLabel       string         `json:"nodeLabel,omitempty"`
-	Status          string         `json:"status,omitempty"`
-	Message         string         `json:"message,omitempty"`
-	Level           string         `json:"level,omitempty"`
+	Type                 string         `json:"type"`
+	NodeID               string         `json:"nodeId,omitempty"`
+	NodeType             string         `json:"nodeType,omitempty"`
+	NodeLabel            string         `json:"nodeLabel,omitempty"`
+	Status               string         `json:"status,omitempty"`
+	Message              string         `json:"message,omitempty"`
+	Level                string         `json:"level,omitempty"`
 	CompiledPrompt       string         `json:"compiledPrompt,omitempty"`
 	CompiledSystemPrompt string         `json:"compiledSystemPrompt,omitempty"`
 	CompiledInput        string         `json:"compiledInput,omitempty"`
 	CompiledOutput       string         `json:"compiledOutput,omitempty"`
-	Result          *DryRunPreview `json:"result,omitempty"`
+	Result               *DryRunPreview `json:"result,omitempty"`
 }
 
 // DryRunFlagPreview is the assembled flag-for-review preview from a flag sink.
@@ -257,6 +257,13 @@ func TopologicalNodeOrder(g *WorkflowGraph) ([]string, error) {
 
 // ExecuteWorkflow walks the graph node by node, streaming execution events when Emit is set.
 func ExecuteWorkflow(ctx context.Context, in ExecutionInput) (DryRunPreview, error) {
+	if graphContainsGroup(in.Graph) {
+		flat, err := FlattenWorkflowGraph(in.Graph)
+		if err != nil {
+			return DryRunPreview{}, err
+		}
+		in.Graph = &flat
+	}
 	if err := ValidateWorkflowGraph(in.Graph); err != nil {
 		return DryRunPreview{}, err
 	}

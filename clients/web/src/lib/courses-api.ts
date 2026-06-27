@@ -6052,6 +6052,44 @@ export function graderAgentItemPath(
   return suffix ? `${base}/${suffix.replace(/^\//, '')}` : base
 }
 
+function quizAttemptsToGraderAgentSubmissions(
+  attempts: QuizAttemptSummaryApi[],
+): ModuleAssignmentSubmissionApi[] {
+  const byStudent = new Map<string, QuizAttemptSummaryApi>()
+  for (const attempt of attempts) {
+    const studentUserId = attempt.studentUserId?.trim() || attempt.id
+    const existing = byStudent.get(studentUserId)
+    if (!existing || attempt.attemptNumber >= existing.attemptNumber) {
+      byStudent.set(studentUserId, attempt)
+    }
+  }
+  return [...byStudent.values()].map((attempt) => ({
+    id: attempt.id,
+    submittedBy: attempt.studentUserId,
+    submittedByDisplayName: attempt.studentName,
+    submittedAt: attempt.submittedAt,
+    attachmentFileId: null,
+    isGraded: !attempt.needsManualGrading,
+  }))
+}
+
+/** Submissions for the grader-agent editor (assignments or quiz attempts). */
+export async function fetchGraderAgentSubmissions(
+  courseCode: string,
+  itemId: string,
+  itemKind: GradingAgentItemKind = 'assignment',
+  opts?: { graded?: 'all' | 'graded' | 'ungraded' },
+): Promise<ModuleAssignmentSubmissionApi[]> {
+  if (itemKind === 'quiz') {
+    const { attempts } = await fetchQuizAttemptsList(courseCode, itemId)
+    const submissions = quizAttemptsToGraderAgentSubmissions(attempts)
+    if (!opts?.graded || opts.graded === 'all') return submissions
+    if (opts.graded === 'graded') return submissions.filter((s) => s.isGraded)
+    return submissions.filter((s) => s.id && !s.isGraded)
+  }
+  return fetchModuleAssignmentSubmissions(courseCode, itemId, opts)
+}
+
 export async function fetchCourseGradingAgents(
   courseCode: string,
 ): Promise<{ agents: CourseGradingAgentSummary[] }> {
@@ -6102,6 +6140,49 @@ export async function putGraderAgentConfig(
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as { config: GraderAgentConfigApi }
+}
+
+export async function deleteGraderAgentConfig(
+  courseCode: string,
+  itemId: string,
+  itemKind: GradingAgentItemKind = 'assignment',
+): Promise<void> {
+  const res = await authorizedFetch(graderAgentItemPath(courseCode, itemId, itemKind), {
+    method: 'DELETE',
+  })
+  if (!res.ok) {
+    const raw: unknown = await res.json().catch(() => ({}))
+    throw new Error(readApiErrorMessage(raw))
+  }
+}
+
+export type GraderAgentAIBuildQuizSlot = {
+  index: number
+  label: string
+  questionType: string
+  maxPoints: number
+}
+
+/** Generates or modifies a grader-agent workflow graph from a plain-English instruction. */
+export async function postGraderAgentAIBuild(
+  courseCode: string,
+  itemId: string,
+  body: {
+    instruction: string
+    currentGraph?: GraderWorkflowGraphApi
+    quizSlots?: GraderAgentAIBuildQuizSlot[]
+    maxPoints?: number
+  },
+  itemKind: GradingAgentItemKind = 'assignment',
+): Promise<{ workflowGraph: GraderWorkflowGraphApi; summary: string }> {
+  const res = await authorizedFetch(graderAgentItemPath(courseCode, itemId, itemKind, 'ai-build'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return raw as { workflowGraph: GraderWorkflowGraphApi; summary: string }
 }
 
 export type GraderAgentTemplateApi = {
