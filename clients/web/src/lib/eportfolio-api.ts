@@ -134,13 +134,6 @@ export async function patchPortfolio(pid: string, payload: PatchPortfolioPayload
   return jsonOrThrow<Portfolio>(res)
 }
 
-export async function deletePortfolio(pid: string): Promise<void> {
-  const res = await authorizedFetch(`/api/v1/me/portfolios/${encodeURIComponent(pid)}`, {
-    method: 'DELETE',
-  })
-  if (!res.ok && res.status !== 204) throw new Error(`Failed to delete (${res.status})`)
-}
-
 export type CreateArtifactPayload = {
   artifactType: ArtifactType
   title: string
@@ -195,27 +188,6 @@ export type EvaluatePayload = {
   scores?: Record<string, number>
   totalScore?: number | null
   feedback?: string
-}
-
-export async function evaluateArtifact(pid: string, aid: string, payload: EvaluatePayload): Promise<Evaluation> {
-  const res = await authorizedFetch(
-    `/api/v1/portfolios/${encodeURIComponent(pid)}/artifacts/${encodeURIComponent(aid)}/evaluate`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  )
-  return jsonOrThrow<Evaluation>(res)
-}
-
-export async function getPortfolioOutcomesReport(
-  programId: string,
-): Promise<{ cohortSize: number; outcomes: OutcomeCoverage[] }> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/programs/${encodeURIComponent(programId)}/portfolio-outcomes-report`,
-  )
-  return jsonOrThrow<{ cohortSize: number; outcomes: OutcomeCoverage[] }>(res)
 }
 
 /** Public, unauthenticated read of a shared portfolio. Returns null when not found. */

@@ -101,17 +101,6 @@ export function setAffiliateRefCookie(code: string): void {
   document.cookie = `${AFFILIATE_REF_COOKIE}=${encodeURIComponent(code)}; path=/; max-age=${maxAge}; SameSite=Lax`
 }
 
-export function getAffiliateRefCookie(): string | null {
-  const prefix = `${AFFILIATE_REF_COOKIE}=`
-  for (const part of document.cookie.split(';')) {
-    const trimmed = part.trim()
-    if (trimmed.startsWith(prefix)) {
-      return decodeURIComponent(trimmed.slice(prefix.length))
-    }
-  }
-  return null
-}
-
 export async function trackAffiliateClick(code: string): Promise<void> {
   try {
     await fetch(`/api/v1/affiliate/track-click?code=${encodeURIComponent(code)}`, { method: 'POST' })

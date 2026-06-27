@@ -1,15 +1,3 @@
-/** Supported display locales in account settings (BCP 47). */
-export const LOCALE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'en', label: 'English' },
-  { value: 'en-US', label: 'English (United States)' },
-  { value: 'de', label: 'Deutsch' },
-  { value: 'de-DE', label: 'Deutsch (Deutschland)' },
-  { value: 'fr', label: 'Français' },
-  { value: 'fr-CA', label: 'Français (Canada)' },
-  { value: 'es', label: 'Español' },
-  { value: 'ar', label: 'العربية' },
-]
-
 /** Common IANA time zones for the account picker. */
 export const TIMEZONE_OPTIONS: { value: string; label: string }[] = [
   { value: 'UTC', label: 'UTC' },

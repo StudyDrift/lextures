@@ -49,20 +49,6 @@ export async function fetchPublicCourseReviews(
   return (await res.json()) as ReviewsListResponse
 }
 
-export async function fetchCourseReviews(
-  courseCode: string,
-  cursor?: string,
-): Promise<ReviewsListResponse> {
-  const params = new URLSearchParams()
-  if (cursor) params.set('cursor', cursor)
-  const qs = params.toString()
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/reviews${qs ? `?${qs}` : ''}`,
-  )
-  if (!res.ok) throw new Error('Failed to load reviews.')
-  return (await res.json()) as ReviewsListResponse
-}
-
 export async function fetchReviewEligibility(courseCode: string): Promise<ReviewEligibility> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/reviews/eligibility`,
@@ -85,30 +71,6 @@ export async function submitCourseReview(
     throw new Error(data?.message ?? 'Failed to submit review.')
   }
   return (await res.json()) as CourseReview
-}
-
-export async function flagCourseReview(courseCode: string, reviewId: string): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/reviews/${encodeURIComponent(reviewId)}/flag`,
-    { method: 'POST' },
-  )
-  if (!res.ok) throw new Error('Failed to flag review.')
-}
-
-export async function respondToCourseReview(
-  courseCode: string,
-  reviewId: string,
-  response: string,
-): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/reviews/${encodeURIComponent(reviewId)}/response`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ response }),
-    },
-  )
-  if (!res.ok) throw new Error('Failed to post response.')
 }
 
 export async function fetchFlaggedReviews(): Promise<CourseReview[]> {

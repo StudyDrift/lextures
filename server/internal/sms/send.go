@@ -16,13 +16,6 @@ import (
 
 const maxSMSBodyLen = 1600
 
-// Configured reports whether Twilio credentials are present for live delivery.
-func Configured(cfg config.Config) bool {
-	return strings.TrimSpace(cfg.TwilioAccountSID) != "" &&
-		strings.TrimSpace(cfg.TwilioAuthToken) != "" &&
-		strings.TrimSpace(cfg.TwilioFromNumber) != ""
-}
-
 // BuildMessage composes a concise SMS body from notification fields.
 func BuildMessage(title, body, actionURL string) string {
 	title = strings.TrimSpace(title)

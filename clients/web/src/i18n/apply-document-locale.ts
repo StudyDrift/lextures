@@ -1,6 +1,6 @@
 import { isRTL } from './rtl-locales'
 import { resolveResourceLanguage } from './supported-locales'
-import { LOCALE_STORAGE_KEY, RTL_ENABLED_STORAGE_KEY, writeStoredLocaleTag } from './locale-storage'
+import { RTL_ENABLED_STORAGE_KEY, writeStoredLocaleTag } from './locale-storage'
 
 export type DocumentLocaleState = {
   locale: string
@@ -33,5 +33,3 @@ export function applyDocumentLocale(tag: string, rtlEnabled = false): DocumentLo
   root.setAttribute('data-locale', state.locale)
   return state
 }
-
-export { LOCALE_STORAGE_KEY, RTL_ENABLED_STORAGE_KEY }

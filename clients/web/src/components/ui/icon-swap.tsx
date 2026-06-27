@@ -1,5 +1,4 @@
 import type { LucideIcon } from 'lucide-react'
-import type { ReactNode } from 'react'
 
 type IconSwapProps = {
   active: boolean
@@ -44,33 +43,3 @@ export function IconSwap({
   )
 }
 
-type IconSwapSlotProps = {
-  active: boolean
-  activeSlot: ReactNode
-  inactiveSlot: ReactNode
-  className?: string
-}
-
-/** Slot-based variant when icons are not Lucide components. */
-export function IconSwapSlots({ active, activeSlot, inactiveSlot, className = '' }: IconSwapSlotProps) {
-  return (
-    <span className={`relative inline-flex items-center justify-center ${className}`}>
-      <span
-        aria-hidden
-        className={`absolute inset-0 flex items-center justify-center ${swapTransition} ${
-          active ? activeState : inactiveState
-        }`}
-      >
-        {activeSlot}
-      </span>
-      <span
-        aria-hidden
-        className={`flex items-center justify-center ${swapTransition} ${
-          active ? inactiveState : activeState
-        }`}
-      >
-        {inactiveSlot}
-      </span>
-    </span>
-  )
-}

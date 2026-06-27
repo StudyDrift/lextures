@@ -2,7 +2,6 @@
 package canvasimportevents
 
 import (
-	"encoding/json"
 	"sync"
 
 	"github.com/google/uuid"
@@ -66,9 +65,4 @@ func (h *Hub) Subscribe(jobID uuid.UUID) (<-chan Message, func()) {
 		}
 		h.mu.Unlock()
 	}
-}
-
-// MarshalProgress returns a progress message JSON string.
-func MarshalProgress(text string) ([]byte, error) {
-	return json.Marshal(Message{Type: "progress", Message: text})
 }

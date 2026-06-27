@@ -46,36 +46,6 @@ func ApplySuppression(count int, value float64) (suppressed bool, out *float64) 
 	return false, &v
 }
 
-// SchoolStudentIDs returns distinct student user IDs enrolled in courses under the school subtree.
-func SchoolStudentIDs(ctx context.Context, pool *pgxpool.Pool, schoolID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := pool.Query(ctx, `
-WITH RECURSIVE subtree AS (
-    SELECT id FROM tenant.org_units WHERE id = $1
-    UNION ALL
-    SELECT ou.id FROM tenant.org_units ou
-    INNER JOIN subtree s ON ou.parent_id = s.id
-)
-SELECT DISTINCT ce.user_id
-FROM course.course_enrollments ce
-INNER JOIN course.courses c ON c.id = ce.course_id
-WHERE ce.role = 'student'
-  AND c.org_unit_id IN (SELECT id FROM subtree)
-`, schoolID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
-}
-
 // Title1AggregateReport builds the school-level Title I aggregate report.
 func Title1AggregateReport(ctx context.Context, pool *pgxpool.Pool, schoolID uuid.UUID) (*Title1Report, error) {
 	var total int

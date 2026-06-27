@@ -53,17 +53,3 @@ export async function patchEnrollmentState(
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as PatchEnrollmentStateResult
 }
-
-export async function fetchEnrollmentStateHistory(
-  courseCode: string,
-  enrollmentId: string,
-): Promise<EnrollmentStateHistoryEntry[]> {
-  if (!enrollmentStateMachineFeatureEnabled()) return []
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/enrollments/${encodeURIComponent(enrollmentId)}/state/history`,
-  )
-  const raw: unknown = await res.json().catch(() => ({}))
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  const data = raw as { history?: EnrollmentStateHistoryEntry[] }
-  return data.history ?? []
-}

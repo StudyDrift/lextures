@@ -26,14 +26,6 @@ func SetCourseIsBlueprint(ctx context.Context, pool *pgxpool.Pool, courseID uuid
 	return err
 }
 
-// SetBlueprintParent sets blueprint_parent_id on a child course.
-func SetBlueprintParent(ctx context.Context, pool *pgxpool.Pool, childID, blueprintID uuid.UUID) error {
-	_, err := pool.Exec(ctx, `
-		UPDATE course.courses SET blueprint_parent_id = $2, updated_at = NOW() WHERE id = $1
-	`, childID, blueprintID)
-	return err
-}
-
 // ClearBlueprintParent clears blueprint_parent_id on a child course.
 func ClearBlueprintParent(ctx context.Context, pool *pgxpool.Pool, childID uuid.UUID) error {
 	_, err := pool.Exec(ctx, `

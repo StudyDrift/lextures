@@ -74,20 +74,3 @@ export async function saveAdminAdvisingConfig(payload: Partial<AdvisingConfig>):
   }
   return (await res.json()) as AdvisingConfig
 }
-
-export async function createAdvisorNote(studentId: string, content: string): Promise<AdvisingNote> {
-  const res = await authorizedFetch(`/api/v1/advisor/students/${studentId}/notes`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
-  })
-  if (!res.ok) {
-    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
-    throw new Error(readApiErrorMessage(raw) || 'Could not create advising note.')
-  }
-  const data = (await res.json()) as { note?: AdvisingNote }
-  if (!data.note) {
-    throw new Error('Unexpected response from server.')
-  }
-  return data.note
-}

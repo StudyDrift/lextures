@@ -61,15 +61,6 @@ export async function patchReportCard(
   return (await res.json()) as ReportCard
 }
 
-export async function generateReportCardPDF(cardId: string): Promise<Blob> {
-  const res = await authorizedFetch(
-    `/api/v1/report-cards/${encodeURIComponent(cardId)}/generate-pdf`,
-    { method: 'POST' },
-  )
-  if (!res.ok) throw new Error(`Failed to generate PDF: ${res.status}`)
-  return res.blob()
-}
-
 export async function releaseReportCards(
   courseCode: string,
   period: string,

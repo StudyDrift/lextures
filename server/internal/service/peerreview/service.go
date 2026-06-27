@@ -4,7 +4,6 @@ package peerreview
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"sort"
 
@@ -294,27 +293,8 @@ func detectOutlierReviewers(allocs []prrepo.AllocationRow, reviewByAlloc map[uui
 	return out
 }
 
-// PeerAggregateForSubmission returns the aggregated peer score for one submission.
-func (s Service) PeerAggregateForSubmission(ctx context.Context, cfg *prrepo.ConfigRow, submissionID uuid.UUID) (*float64, error) {
-	reviews, err := prrepo.ListReviewsForSubmission(ctx, s.Pool, cfg.ID, submissionID)
-	if err != nil {
-		return nil, err
-	}
-	scores := make([]float64, 0, len(reviews))
-	for _, r := range reviews {
-		if r.Score != nil {
-			scores = append(scores, *r.Score)
-		}
-	}
-	return AggregateScores(scores, cfg.Aggregation), nil
-}
-
 func (s Service) UpsertConfig(ctx context.Context, in prrepo.UpsertConfigInput) (*prrepo.ConfigRow, error) {
 	return prrepo.UpsertConfig(ctx, s.Pool, in)
-}
-
-func (s Service) GetConfig(ctx context.Context, courseID, assignmentID uuid.UUID) (*prrepo.ConfigRow, error) {
-	return prrepo.GetConfigByAssignment(ctx, s.Pool, courseID, assignmentID)
 }
 
 func (s Service) SubmitReview(ctx context.Context, allocationID uuid.UUID, score *float64, rubricScores map[string]float64, comments *string) (*prrepo.ReviewRow, error) {
@@ -322,11 +302,4 @@ func (s Service) SubmitReview(ctx context.Context, allocationID uuid.UUID, score
 		return nil, err
 	}
 	return prrepo.UpsertReview(ctx, s.Pool, allocationID, score, rubricScores, comments)
-}
-
-func (s Service) Health(ctx context.Context) (string, error) {
-	if ctx == nil {
-		return "", fmt.Errorf("context is nil")
-	}
-	return "peerreview:ok", nil
 }

@@ -2,7 +2,6 @@ package webhooksvc
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -89,31 +88,6 @@ func EmitAssignmentSubmittedEvent(ctx context.Context, pool *pgxpool.Pool, cfg c
 	})
 }
 
-// EmitAssignmentCreatedEvent emits assignment.created for bot notifications.
-func EmitAssignmentCreatedEvent(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, structureItemID uuid.UUID, title string, dueAt *time.Time) {
-	if !cfg.FFWebhooks || pool == nil {
-		return
-	}
-	var orgID uuid.UUID
-	var courseCode string
-	if err := pool.QueryRow(ctx, `SELECT org_id, course_code FROM course.courses WHERE id = $1`, courseID).Scan(&orgID, &courseCode); err != nil {
-		return
-	}
-	data := AssignmentCreatedData{
-		CourseID:        courseID.String(),
-		CourseCode:      courseCode,
-		StructureItemID: structureItemID.String(),
-		Title:           title,
-	}
-	if dueAt != nil {
-		data.DueAt = dueAt.UTC().Format(time.RFC3339)
-	}
-	if cfg.PublicWebOrigin != "" {
-		data.URL = cfg.PublicWebOrigin + "/courses/" + courseID.String()
-	}
-	EmitAssignmentCreated(pool, cfg, orgID, data)
-}
-
 // EmitGradeReleasedEvent emits grade.released (DM-only by default for bots).
 func EmitGradeReleasedEvent(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID, moduleItemID, studentUserID uuid.UUID, points float64) {
 	if !cfg.FFWebhooks || pool == nil {
@@ -135,28 +109,6 @@ func EmitGradeReleasedEvent(ctx context.Context, pool *pgxpool.Pool, cfg config.
 		data.URL = cfg.PublicWebOrigin + "/courses/" + courseID.String()
 	}
 	EmitGradeReleased(pool, cfg, orgID, data)
-}
-
-// EmitAnnouncementCreatedEvent emits announcement.created.
-func EmitAnnouncementCreatedEvent(ctx context.Context, pool *pgxpool.Pool, cfg config.Config, courseID uuid.UUID, title, body string) {
-	if !cfg.FFWebhooks || pool == nil {
-		return
-	}
-	var orgID uuid.UUID
-	var courseCode string
-	if err := pool.QueryRow(ctx, `SELECT org_id, course_code FROM course.courses WHERE id = $1`, courseID).Scan(&orgID, &courseCode); err != nil {
-		return
-	}
-	data := AnnouncementCreatedData{
-		CourseID:   courseID.String(),
-		CourseCode: courseCode,
-		Title:      title,
-		Body:       body,
-	}
-	if cfg.PublicWebOrigin != "" {
-		data.URL = cfg.PublicWebOrigin + "/courses/" + courseID.String()
-	}
-	EmitAnnouncementCreated(pool, cfg, orgID, data)
 }
 
 // EmitQuizCompletedEvent emits quiz.completed after a quiz submission.

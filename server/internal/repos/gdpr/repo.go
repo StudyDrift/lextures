@@ -189,32 +189,6 @@ UPDATE compliance.dsar_requests
 	return err
 }
 
-// CountOverdueDSARs returns the number of pending requests past their due_at.
-func CountOverdueDSARs(ctx context.Context, pool *pgxpool.Pool) (int, error) {
-	var n int
-	err := pool.QueryRow(ctx, `
-SELECT COUNT(*) FROM compliance.dsar_requests
- WHERE status IN ('pending','in_progress')
-   AND due_at < NOW()
-`).Scan(&n)
-	return n, err
-}
-
-// ListDSARsDueSoon returns pending requests whose due_at is within the given horizon.
-func ListDSARsDueSoon(ctx context.Context, pool *pgxpool.Pool, horizon time.Duration) ([]DSARRequest, error) {
-	cutoff := time.Now().UTC().Add(horizon)
-	return queryDSARs(ctx, pool, `
-SELECT id, org_id, user_id, request_type, status,
-       archive_url, archive_expires_at, rejection_reason,
-       requested_at, due_at, completed_at, actioned_by
-  FROM compliance.dsar_requests
- WHERE status IN ('pending','in_progress')
-   AND due_at <= $1
-   AND due_at > NOW()
- ORDER BY due_at ASC
-`, cutoff)
-}
-
 // RoPAEntry is one row from compliance.ropa_entries.
 type RoPAEntry struct {
 	ID              uuid.UUID

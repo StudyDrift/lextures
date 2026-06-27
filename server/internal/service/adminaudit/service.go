@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	repo "github.com/lextures/lextures/server/internal/repos/adminaudit"
@@ -21,22 +20,22 @@ const ReadPermission = "compliance:audit:read:*"
 
 // Valid event types (FR-1).
 const (
-	EventRoleGrant           = "role_grant"
-	EventRoleRevoke          = "role_revoke"
-	EventGradeOverride       = "grade_override"
-	EventGradeBulkImport     = "grade_bulk_import"
-	EventDataExport          = "data_export"
-	EventEnrollmentCreate    = "enrollment_create"
-	EventEnrollmentDelete    = "enrollment_delete"
-	EventCoursePublish       = "course_publish"
-	EventCourseDelete        = "course_delete"
-	EventAIConfigChange      = "ai_config_change"
+	EventRoleGrant            = "role_grant"
+	EventRoleRevoke           = "role_revoke"
+	EventGradeOverride        = "grade_override"
+	EventGradeBulkImport      = "grade_bulk_import"
+	EventDataExport           = "data_export"
+	EventEnrollmentCreate     = "enrollment_create"
+	EventEnrollmentDelete     = "enrollment_delete"
+	EventCoursePublish        = "course_publish"
+	EventCourseDelete         = "course_delete"
+	EventAIConfigChange       = "ai_config_change"
 	EventSecurityConfigChange = "security_config_change"
-	EventUserImpersonation   = "user_impersonation"
-	EventPasswordResetAdmin  = "password_reset_admin"
-	EventContentDelete       = "content_delete"
-	EventIncompleteGranted   = "incomplete_granted"
-	EventIncompleteResolved  = "incomplete_resolved"
+	EventUserImpersonation    = "user_impersonation"
+	EventPasswordResetAdmin   = "password_reset_admin"
+	EventContentDelete        = "content_delete"
+	EventIncompleteGranted    = "incomplete_granted"
+	EventIncompleteResolved   = "incomplete_resolved"
 )
 
 var ErrNotFound = errors.New("adminaudit: event not found")
@@ -75,26 +74,6 @@ func Record(ctx context.Context, pool *pgxpool.Pool, p RecordParams) (uuid.UUID,
 	})
 	if err != nil {
 		return uuid.UUID{}, fmt.Errorf("adminaudit: record: %w", err)
-	}
-	return id, nil
-}
-
-// RecordTx writes an audit event within an existing transaction (AC-6: same-tx atomicity).
-// If the write fails the caller's transaction is rolled back, preventing unlogged admin actions.
-func RecordTx(ctx context.Context, tx pgx.Tx, p RecordParams) (uuid.UUID, error) {
-	id, _, err := repo.InsertTx(ctx, tx, repo.InsertParams{
-		OrgID:       p.OrgID,
-		EventType:   p.EventType,
-		ActorID:     p.ActorID,
-		ActorIP:     p.ActorIP,
-		UserAgent:   p.UserAgent,
-		TargetType:  p.TargetType,
-		TargetID:    p.TargetID,
-		BeforeValue: p.BeforeValue,
-		AfterValue:  p.AfterValue,
-	})
-	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("adminaudit: record tx: %w", err)
 	}
 	return id, nil
 }

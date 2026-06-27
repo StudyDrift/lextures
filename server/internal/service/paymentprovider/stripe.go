@@ -2,7 +2,6 @@ package paymentprovider
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -220,13 +219,4 @@ func copyMetadata(in map[string]string) map[string]string {
 		out[k] = v
 	}
 	return out
-}
-
-// ParseStripeEvent unmarshals a stored stripe.Event from webhook job payload.
-func ParseStripeEvent(raw []byte) (stripe.Event, error) {
-	var event stripe.Event
-	if err := json.Unmarshal(raw, &event); err != nil {
-		return stripe.Event{}, err
-	}
-	return event, nil
 }

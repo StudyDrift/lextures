@@ -22,10 +22,6 @@ export function writeStoredLocaleTag(tag: string): void {
   }
 }
 
-export function readStoredLocale(): string {
-  return readStoredLocaleTag() ?? DEFAULT_LOCALE
-}
-
 export function detectBrowserLocale(): SupportedLocale {
   if (typeof navigator === 'undefined') return DEFAULT_LOCALE
   const langs = navigator.languages?.length ? navigator.languages : [navigator.language]

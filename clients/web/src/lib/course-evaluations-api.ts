@@ -167,27 +167,6 @@ export async function deleteEvaluationTemplate(templateId: string): Promise<void
   }
 }
 
-export async function createEvaluationWindow(
-  courseCode: string,
-  templateId: string,
-  opensAt: string,
-  closesAt: string,
-): Promise<EvaluationWindow> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/courses/${encodeURIComponent(courseCode)}/evaluation-windows`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ templateId, opensAt, closesAt }),
-    },
-  )
-  if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as { error?: { message?: string } }
-    throw new Error(err.error?.message ?? `Failed to create evaluation window (${res.status})`)
-  }
-  return (await res.json()) as EvaluationWindow
-}
-
 export async function fetchAdminEvaluationReport(closedOnly?: boolean): Promise<AdminReportRow[]> {
   const params = closedOnly ? '?closed_only=true' : ''
   const res = await authorizedFetch(`/api/v1/admin/evaluations/report${params}`)

@@ -32,15 +32,6 @@ export async function fetchStudyBuddyPrompts(courseCode: string): Promise<StudyB
   return data.prompts ?? []
 }
 
-export async function fetchStudyBuddyMemory(courseCode: string): Promise<StudyBuddyMemory | null> {
-  const res = await authorizedFetch(
-    `${API_BASE}/courses/${encodeURIComponent(courseCode)}/study-buddy/memory`,
-  )
-  if (res.status === 404) return null
-  if (!res.ok) throw new Error(`Failed to load study buddy memory: ${res.status}`)
-  return res.json() as Promise<StudyBuddyMemory>
-}
-
 export async function fetchAiProcessingOptOut(): Promise<boolean> {
   const res = await authorizedFetch('/api/v1/settings/ai-opt-out')
   if (res.status === 404) return false

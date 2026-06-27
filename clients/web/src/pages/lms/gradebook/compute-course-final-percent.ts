@@ -520,11 +520,3 @@ export function recordWhatIfSession(): void {
     // ignore storage errors
   }
 }
-
-export function hasWhatIfSession(): boolean {
-  try {
-    return sessionStorage.getItem('whatif_sessions') === '1'
-  } catch {
-    return false
-  }
-}

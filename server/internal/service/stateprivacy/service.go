@@ -12,8 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	repo "github.com/lextures/lextures/server/internal/repos/stateprivacy"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
+	repo "github.com/lextures/lextures/server/internal/repos/stateprivacy"
 )
 
 // AdminPermission gates state-privacy admin actions (approve/deny requests, set jurisdiction).
@@ -34,9 +34,9 @@ const (
 )
 
 var (
-	ErrNotFound         = errors.New("stateprivacy: record not found")
-	ErrAlreadyExists    = errors.New("stateprivacy: active request already exists")
-	ErrForbidden        = errors.New("stateprivacy: forbidden")
+	ErrNotFound            = errors.New("stateprivacy: record not found")
+	ErrAlreadyExists       = errors.New("stateprivacy: active request already exists")
+	ErrForbidden           = errors.New("stateprivacy: forbidden")
 	ErrInvalidJurisdiction = errors.New("stateprivacy: invalid jurisdiction; must be CA, NY, or IL")
 )
 
@@ -52,24 +52,6 @@ func GetOrgJurisdiction(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID
 		return "", fmt.Errorf("stateprivacy: get jurisdiction: %w", err)
 	}
 	return j, nil
-}
-
-// SetOrgJurisdiction sets or clears the state jurisdiction for a tenant.
-func SetOrgJurisdiction(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, jurisdiction string) error {
-	if jurisdiction != "" && jurisdiction != JurisdictionCA && jurisdiction != JurisdictionNY && jurisdiction != JurisdictionIL {
-		return ErrInvalidJurisdiction
-	}
-	return repo.SetOrgJurisdiction(ctx, pool, orgID, jurisdiction)
-}
-
-// LogDisclosureEvent records a sub-processor or school-official access to student data.
-// Called automatically by AI proxy and LMS integrations when the org has a state jurisdiction set.
-func LogDisclosureEvent(ctx context.Context, pool *pgxpool.Pool, orgID, studentID uuid.UUID, accessor, purpose string, dataElements []string) (uuid.UUID, error) {
-	id, err := repo.InsertDisclosureEvent(ctx, pool, orgID, studentID, accessor, purpose, dataElements)
-	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("stateprivacy: log disclosure: %w", err)
-	}
-	return id, nil
 }
 
 // GetParentDisclosure returns disclosure events for a student for the current and prior school year.
@@ -143,11 +125,6 @@ func DenyDeletionRequest(ctx context.Context, pool *pgxpool.Pool, id, adminID uu
 	return repo.UpdateDeletionRequestStatus(ctx, pool, id, adminID, "denied", &reason)
 }
 
-// RecordAnnualNoticeSent marks the annual notice batch as sent for a given org/year.
-func RecordAnnualNoticeSent(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, jurisdiction string, year int) error {
-	return repo.UpsertAnnualNoticeJob(ctx, pool, orgID, jurisdiction, year)
-}
-
 // GetAnnualNoticeStatus returns whether the annual notice was sent for an org/year.
 func GetAnnualNoticeStatus(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID, jurisdiction string, year int) (sent bool, sentAt *time.Time, err error) {
 	j, err := repo.GetAnnualNoticeJob(ctx, pool, orgID, jurisdiction, year)
@@ -195,12 +172,12 @@ func ComplianceChecklist(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUI
 
 // ChecklistItem represents one compliance obligation and its completion status.
 type ChecklistItem struct {
-	ID          string `json:"id"`
+	ID           string `json:"id"`
 	Jurisdiction string `json:"jurisdiction"`
-	Obligation  string `json:"obligation"`
-	Statute     string `json:"statute"`
-	Status      string `json:"status"` // "met" | "outstanding" | "not_applicable"
-	GuidanceURL string `json:"guidanceUrl,omitempty"`
+	Obligation   string `json:"obligation"`
+	Statute      string `json:"statute"`
+	Status       string `json:"status"` // "met" | "outstanding" | "not_applicable"
+	GuidanceURL  string `json:"guidanceUrl,omitempty"`
 }
 
 // DPAAddendum returns the state-specific DPA addendum content for a given state.
@@ -219,12 +196,12 @@ func DPAAddendum(jurisdiction string) (*DPAContent, error) {
 
 // DPAContent holds the state-specific DPA addendum exhibit content.
 type DPAContent struct {
-	Jurisdiction string          `json:"jurisdiction"`
-	StatuteName  string          `json:"statuteName"`
-	StatuteCite  string          `json:"statuteCite"`
-	Prohibitions []string        `json:"prohibitions"`
-	ParentRights []string        `json:"parentRights"`
-	Exhibits     []DPAExhibit    `json:"exhibits"`
+	Jurisdiction string       `json:"jurisdiction"`
+	StatuteName  string       `json:"statuteName"`
+	StatuteCite  string       `json:"statuteCite"`
+	Prohibitions []string     `json:"prohibitions"`
+	ParentRights []string     `json:"parentRights"`
+	Exhibits     []DPAExhibit `json:"exhibits"`
 }
 
 // DPAExhibit is one named exhibit within a state DPA addendum.

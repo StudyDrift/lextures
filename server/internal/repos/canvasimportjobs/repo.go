@@ -89,18 +89,6 @@ func Insert(
 	return id, err
 }
 
-// LatestCompletedForCourse returns the most recent successful Canvas import for a course, if any.
-func LatestCompletedForCourse(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*Job, error) {
-	return scanJob(pool.QueryRow(ctx, `
-		SELECT id, user_id, course_code, status, mode, canvas_base_url, canvas_course_id,
-		       include, last_progress, error_message, course_title, attempts, max_attempts,
-		       created_at, started_at, completed_at
-		FROM jobs.canvas_import_jobs
-		WHERE course_code = $1 AND status = 'completed'
-		ORDER BY completed_at DESC NULLS LAST, created_at DESC
-		LIMIT 1`, strings.TrimSpace(courseCode)))
-}
-
 // LatestLinkedForCourse returns the newest Canvas import job for a course (any status).
 // Used to detect Canvas-linked courses even when the latest import is still running or failed.
 func LatestLinkedForCourse(ctx context.Context, pool *pgxpool.Pool, courseCode string) (*Job, error) {

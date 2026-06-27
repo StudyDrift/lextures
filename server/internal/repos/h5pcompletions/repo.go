@@ -12,11 +12,11 @@ import (
 
 // Row is a per-user completion record.
 type Row struct {
-	UserID     uuid.UUID
-	Status     string
-	ScoreRaw   *float64
-	ScoreMax   *float64
-	UpdatedAt  time.Time
+	UserID    uuid.UUID
+	Status    string
+	ScoreRaw  *float64
+	ScoreMax  *float64
+	UpdatedAt time.Time
 }
 
 // UpsertFromStatement updates completion from an xAPI-derived status.
@@ -112,15 +112,6 @@ func labelForStatus(status string) string {
 	default:
 		return ""
 	}
-}
-
-// DeleteByUser removes all H5P completion/xAPI rows for a user (GDPR erasure).
-func DeleteByUser(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (int64, error) {
-	tag, err := pool.Exec(ctx, `DELETE FROM content.h5p_completions WHERE user_id = $1`, userID)
-	if err != nil {
-		return 0, err
-	}
-	return tag.RowsAffected(), nil
 }
 
 // CountRecentStatements counts statements in the last minute (rate limit).

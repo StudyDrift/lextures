@@ -56,16 +56,6 @@ func SetLimitSensitivePI(ctx context.Context, pool *pgxpool.Pool, userID uuid.UU
 	return repo.SetLimitSensitivePI(ctx, pool, userID, value)
 }
 
-// IsDoNotSellActive returns true when the user has opted out of sale/sharing.
-// Used for ad-tech/analytics gating (AC-4).
-func IsDoNotSellActive(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (bool, error) {
-	s, err := repo.GetOptOut(ctx, pool, userID)
-	if err != nil {
-		return false, fmt.Errorf("ccpa: check do-not-sell: %w", err)
-	}
-	return s.DoNotSell, nil
-}
-
 // SubmitRequest creates a new CCPA rights request for the authenticated user.
 // Returns ErrAlreadyExists when a pending/in-progress request of the same type exists.
 func SubmitRequest(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, requesterEmail, requestType string) (uuid.UUID, error) {
@@ -128,47 +118,37 @@ func DenyRequest(ctx context.Context, pool *pgxpool.Pool, id, adminID uuid.UUID,
 	return repo.UpdateRequestStatus(ctx, pool, id, adminID, "denied", &reason)
 }
 
-// CountOverdueRequests returns how many requests are past their 45-day deadline.
-func CountOverdueRequests(ctx context.Context, pool *pgxpool.Pool) (int, error) {
-	return repo.CountOverdueRequests(ctx, pool)
-}
-
-// ListRequestsDueSoon returns requests expiring within RequestDeadlineWarning (5 days).
-func ListRequestsDueSoon(ctx context.Context, pool *pgxpool.Pool) ([]repo.CCPARequest, error) {
-	return repo.ListRequestsDueSoon(ctx, pool, RequestDeadlineWarning)
-}
-
 // PICategories returns the categories of personal information Lextures collects,
 // as required by CPRA § 1798.100(a) for the privacy notice.
 func PICategories() []PICategory {
 	return []PICategory{
 		{
-			Category:    "Identifiers",
-			Examples:    []string{"name", "email address", "account ID"},
-			Purpose:     "Account creation, authentication, and service delivery",
+			Category:     "Identifiers",
+			Examples:     []string{"name", "email address", "account ID"},
+			Purpose:      "Account creation, authentication, and service delivery",
 			ThirdParties: []string{"AWS (infrastructure)", "SendGrid (email delivery)"},
 		},
 		{
-			Category:    "Internet or other electronic network activity",
-			Examples:    []string{"browsing history within the platform", "search queries", "page views"},
-			Purpose:     "Adaptive learning, platform analytics",
+			Category:     "Internet or other electronic network activity",
+			Examples:     []string{"browsing history within the platform", "search queries", "page views"},
+			Purpose:      "Adaptive learning, platform analytics",
 			ThirdParties: []string{"AWS (infrastructure)"},
 		},
 		{
-			Category:    "Geolocation data",
-			Examples:    []string{"IP-derived country/region"},
-			Purpose:     "Fraud prevention, compliance (FERPA, COPPA)"},
+			Category: "Geolocation data",
+			Examples: []string{"IP-derived country/region"},
+			Purpose:  "Fraud prevention, compliance (FERPA, COPPA)"},
 		{
-			Category:    "Inferences drawn from personal information",
-			Examples:    []string{"learning style", "knowledge gaps", "at-risk indicators"},
-			Purpose:     "AI-assisted tutoring and adaptive recommendations",
+			Category:     "Inferences drawn from personal information",
+			Examples:     []string{"learning style", "knowledge gaps", "at-risk indicators"},
+			Purpose:      "AI-assisted tutoring and adaptive recommendations",
 			ThirdParties: []string{"OpenRouter (AI model routing)"},
-			Sensitive:   true,
+			Sensitive:    true,
 		},
 		{
-			Category:    "Education records",
-			Examples:    []string{"grades", "course enrollment", "assignment submissions"},
-			Purpose:     "Course delivery, gradebook, LMS functionality",
+			Category:     "Education records",
+			Examples:     []string{"grades", "course enrollment", "assignment submissions"},
+			Purpose:      "Course delivery, gradebook, LMS functionality",
 			ThirdParties: []string{"AWS (infrastructure)"},
 		},
 	}

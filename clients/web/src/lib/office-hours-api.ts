@@ -97,13 +97,6 @@ export async function cancelBooking(slotId: string): Promise<AppointmentSlot> {
   return raw
 }
 
-export async function listMyAppointments(): Promise<AppointmentSlot[]> {
-  const res = await authorizedFetch('/api/v1/me/appointments')
-  const raw = await res.json() as { appointments?: AppointmentSlot[] }
-  if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  return raw.appointments ?? []
-}
-
 export function getSlotIcalUrl(slotId: string): string {
   return `/api/v1/slots/${encodeURIComponent(slotId)}/ical`
 }

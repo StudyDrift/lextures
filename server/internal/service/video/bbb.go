@@ -17,8 +17,6 @@ type BBBProvider struct {
 	Secret  string // BBB shared secret
 }
 
-func (b *BBBProvider) Name() string { return "bbb" }
-
 // CreateMeeting calls the BBB "create" API and returns join URLs.
 func (b *BBBProvider) CreateMeeting(ctx context.Context, p MeetingParams) (*MeetingURLs, error) {
 	meetingID := "lex-" + p.MeetingID.String()

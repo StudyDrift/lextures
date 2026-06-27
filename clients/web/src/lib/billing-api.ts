@@ -65,23 +65,6 @@ export async function fetchMyTransactions(): Promise<Transaction[]> {
   return data.transactions ?? []
 }
 
-export async function startCheckout(payload: CheckoutPayload): Promise<string> {
-  const res = await authorizedFetch('/api/v1/checkout', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
-  if (!res.ok) {
-    const raw = (await res.json().catch(() => ({}))) as Record<string, unknown>
-    throw new Error(readApiErrorMessage(raw) || 'Could not start checkout.')
-  }
-  const data = (await res.json()) as { checkoutUrl?: string }
-  if (!data.checkoutUrl) {
-    throw new Error('Unexpected response from server.')
-  }
-  return data.checkoutUrl
-}
-
 export async function openBillingPortal(returnUrl?: string): Promise<string> {
   const q = returnUrl ? `?return_url=${encodeURIComponent(returnUrl)}` : ''
   const res = await authorizedFetch(`/api/v1/billing/portal${q}`)

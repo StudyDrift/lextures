@@ -146,8 +146,3 @@ export function buildCommandPaletteGoToItems(
 
   return out
 }
-
-/** True when the query should surface go-to rows (uuid or calendar-like date). */
-export function queryTriggersGoToItems(query: string): boolean {
-  return Boolean(extractUuidFromQuery(query) || parseCalendarDateFromQuery(query))
-}

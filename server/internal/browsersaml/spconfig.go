@@ -6,7 +6,6 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/pem"
 	"encoding/xml"
 	"fmt"
 	"net/url"
@@ -91,11 +90,11 @@ func ServiceProvider(cfg config.Config, idpMeta *samllib.EntityDescriptor) (*sam
 	acsURL, _ := url.Parse(base + "/auth/saml/acs")
 	sloURL, _ := url.Parse(base + "/auth/saml/slo")
 	sp := samllib.ServiceProvider{
-		EntityID:      cfg.SAMLSPEntityID,
-		MetadataURL:     *mdURL,
-		AcsURL:          *acsURL,
-		SloURL:          *sloURL,
-		IDPMetadata:     idpMeta,
+		EntityID:          cfg.SAMLSPEntityID,
+		MetadataURL:       *mdURL,
+		AcsURL:            *acsURL,
+		SloURL:            *sloURL,
+		IDPMetadata:       idpMeta,
 		AuthnNameIDFormat: samllib.EmailAddressNameIDFormat,
 		AllowIDPInitiated: true,
 	}
@@ -136,24 +135,4 @@ func SPMetadataXML(cfg config.Config) ([]byte, string, error) {
 		return nil, "", err
 	}
 	return out, "application/samlmetadata+xml; charset=utf-8", nil
-}
-
-// LoadRSAPrivateKeyFromPEM loads PKCS#1 or PKCS#8 RSA key (helper for tests).
-func LoadRSAPrivateKeyFromPEM(pemStr string) (*rsa.PrivateKey, error) {
-	b, _ := pem.Decode([]byte(pemStr))
-	if b == nil {
-		return nil, fmt.Errorf("no PEM block")
-	}
-	if k, err := x509.ParsePKCS1PrivateKey(b.Bytes); err == nil {
-		return k, nil
-	}
-	key, err := x509.ParsePKCS8PrivateKey(b.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	rk, ok := key.(*rsa.PrivateKey)
-	if !ok {
-		return nil, fmt.Errorf("not RSA")
-	}
-	return rk, nil
 }

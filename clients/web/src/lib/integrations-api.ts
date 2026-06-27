@@ -62,11 +62,3 @@ export async function disconnectIntegration(id: string): Promise<void> {
     throw new Error(await readError(res, 'Failed to disconnect integration.'))
   }
 }
-
-export async function fetchSyncStatus(id: string): Promise<SyncStatus> {
-  const res = await authorizedFetch(`/api/v1/integrations/${id}/sync-status`)
-  if (!res.ok) {
-    throw new Error(await readError(res, 'Failed to load sync status.'))
-  }
-  return (await res.json()) as SyncStatus
-}

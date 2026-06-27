@@ -15,8 +15,3 @@ func RecordTransaction(provider ProviderName, status, currency string) {
 	_ = status
 	_ = currency
 }
-
-// TransactionsTotal returns the process-local transaction counter.
-func TransactionsTotal() uint64 {
-	return transactionsTotal.Load()
-}

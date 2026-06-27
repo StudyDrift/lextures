@@ -11,8 +11,3 @@ func RecordReminderSent(channel string) {
 	atomic.AddInt64(&studyRemindersSentTotal, 1)
 	_ = channel
 }
-
-// RemindersSentTotal returns the total reminders sent (for tests/metrics).
-func RemindersSentTotal() int64 {
-	return atomic.LoadInt64(&studyRemindersSentTotal)
-}

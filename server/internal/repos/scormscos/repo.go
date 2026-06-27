@@ -68,20 +68,3 @@ func LoadByID(ctx context.Context, pool *pgxpool.Pool, scoID uuid.UUID) (*SCO, e
 	}
 	return &s, nil
 }
-
-// PrimaryForPackage returns the first SCO for single-SCO packages.
-func PrimaryForPackage(ctx context.Context, pool *pgxpool.Pool, packageID uuid.UUID) (*SCO, error) {
-	var s SCO
-	err := pool.QueryRow(ctx, `
-		SELECT id, package_id, identifier, title, launch_href, sequencing_json, mastery_score
-		FROM content.scorm_scos WHERE package_id = $1 ORDER BY title LIMIT 1`, packageID).Scan(
-		&s.ID, &s.PackageID, &s.Identifier, &s.Title, &s.LaunchHref, &s.SequencingJSON, &s.MasteryScore,
-	)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &s, nil
-}

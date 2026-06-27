@@ -66,22 +66,6 @@ export async function listBehaviorCategories(orgId: string): Promise<{ categorie
   return (await res.json()) as { categories: BehaviorCategory[] }
 }
 
-export async function createBehaviorCategory(
-  orgId: string,
-  payload: { name: string; type: 'positive' | 'negative'; color?: string },
-): Promise<BehaviorCategory> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/behavior/categories`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    },
-  )
-  if (!res.ok) throw new Error(`Failed to create category (${res.status})`)
-  return (await res.json()) as BehaviorCategory
-}
-
 export async function seedDefaultBehaviorCategories(
   orgId: string,
 ): Promise<{ categories: BehaviorCategory[] }> {
@@ -95,14 +79,6 @@ export async function seedDefaultBehaviorCategories(
   )
   if (!res.ok) throw new Error(`Failed to seed categories (${res.status})`)
   return (await res.json()) as { categories: BehaviorCategory[] }
-}
-
-export async function deleteBehaviorCategory(orgId: string, categoryId: string): Promise<void> {
-  const res = await authorizedFetch(
-    `/api/v1/admin/orgs/${encodeURIComponent(orgId)}/behavior/categories/${encodeURIComponent(categoryId)}`,
-    { method: 'DELETE' },
-  )
-  if (!res.ok && res.status !== 204) throw new Error(`Failed to delete category (${res.status})`)
 }
 
 export async function awardPBISPoints(
@@ -143,24 +119,6 @@ export async function fileBehaviorReferral(payload: {
     throw new Error(body.error?.message ?? `Failed to file referral (${res.status})`)
   }
   return (await res.json()) as BehaviorReferral
-}
-
-export async function fetchStudentBehavior(studentId: string): Promise<StudentBehaviorResponse> {
-  const res = await authorizedFetch(
-    `/api/v1/students/${encodeURIComponent(studentId)}/behavior`,
-  )
-  if (!res.ok) throw new Error(`Failed to load student behavior (${res.status})`)
-  return (await res.json()) as StudentBehaviorResponse
-}
-
-export async function fetchParentStudentBehavior(
-  studentId: string,
-): Promise<StudentBehaviorResponse> {
-  const res = await authorizedFetch(
-    `/api/v1/parent/students/${encodeURIComponent(studentId)}/behavior`,
-  )
-  if (!res.ok) throw new Error(`Failed to load behavior (${res.status})`)
-  return (await res.json()) as StudentBehaviorResponse
 }
 
 export async function fetchBehaviorDashboard(

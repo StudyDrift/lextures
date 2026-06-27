@@ -320,9 +320,3 @@ LIMIT $4
 	}
 	return out, rows.Err()
 }
-
-// PurgeExpiredSessions removes expired session rows (maintenance hook).
-func PurgeExpiredSessions(ctx context.Context, pool *pgxpool.Pool) error {
-	_, err := pool.Exec(ctx, `DELETE FROM studybuddy.sessions WHERE expires_at < NOW()`)
-	return err
-}

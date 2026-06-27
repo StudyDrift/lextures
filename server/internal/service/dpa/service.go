@@ -48,32 +48,11 @@ func GetCurrentVersion(ctx context.Context, pool *pgxpool.Pool) (*repo.DPAVersio
 	return v, nil
 }
 
-// ListVersions returns all DPA versions ordered by effective_at descending.
-func ListVersions(ctx context.Context, pool *pgxpool.Pool) ([]repo.DPAVersion, error) {
-	return repo.ListVersions(ctx, pool)
-}
-
 // AcceptDPA records a DPA acceptance for the given org and version.
 // Returns the acceptance row ID. Idempotent for the same org+version pair.
 func AcceptDPA(ctx context.Context, pool *pgxpool.Pool, orgID, dpaVersionID, acceptedBy uuid.UUID, remoteAddr string) (uuid.UUID, error) {
 	ip := parseIP(remoteAddr)
 	return repo.InsertAcceptance(ctx, pool, orgID, dpaVersionID, acceptedBy, ip)
-}
-
-// HasSignedCurrentVersion reports whether the org has accepted the current DPA version.
-func HasSignedCurrentVersion(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) (bool, error) {
-	v, err := repo.GetCurrentVersion(ctx, pool)
-	if err != nil {
-		return false, err
-	}
-	if v == nil {
-		return false, nil
-	}
-	a, err := repo.GetAcceptanceByOrgVersion(ctx, pool, orgID, v.ID)
-	if err != nil {
-		return false, err
-	}
-	return a != nil, nil
 }
 
 // GetOrgAcceptance returns the acceptance for a given org+version, or nil.
@@ -142,14 +121,14 @@ func buildCSVBytes(items []repo.DataInventoryItem) ([]byte, error) {
 
 // NDPATemplateData is the pre-populated fields for the SDPC National DPA document.
 type NDPATemplateData struct {
-	VendorName          string    `json:"vendorName"`
-	VendorAddress       string    `json:"vendorAddress"`
-	DPAVersionStr       string    `json:"dpaVersionStr"`
-	EffectiveAt         string    `json:"effectiveAt"`
-	TemplateURL         string    `json:"templateUrl"`
-	SubProcessors       []string  `json:"subProcessors"`
+	VendorName           string   `json:"vendorName"`
+	VendorAddress        string   `json:"vendorAddress"`
+	DPAVersionStr        string   `json:"dpaVersionStr"`
+	EffectiveAt          string   `json:"effectiveAt"`
+	TemplateURL          string   `json:"templateUrl"`
+	SubProcessors        []string `json:"subProcessors"`
 	DataInventorySummary []string `json:"dataInventorySummary"`
-	GeneratedAt         string    `json:"generatedAt"`
+	GeneratedAt          string   `json:"generatedAt"`
 }
 
 // GenerateNDPATemplate returns a pre-populated NDPA template data structure for a district admin.

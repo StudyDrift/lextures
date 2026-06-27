@@ -263,44 +263,6 @@ func (e Emitter) QuizAttemptGraded(ctx context.Context, orgID uuid.UUID, courseI
 	})
 }
 
-// AssignmentSubmitted emits submitted verb.
-func (e Emitter) AssignmentSubmitted(ctx context.Context, orgID uuid.UUID, courseID uuid.UUID, courseCode, email, displayName, itemID, title string) {
-	base := e.baseIRI()
-	e.emit(ctx, emitParams{
-		ActorEmail:    email,
-		ActorName:     displayName,
-		VerbID:        xapi.VerbSubmitted,
-		ObjectID:      base + "/courses/" + courseCode + "/assignments/" + itemID,
-		ObjectType:    "Activity",
-		ObjectTitle:   title,
-		CourseID:      &courseID,
-		CourseCode:    courseCode,
-		CaliperType:   "AssignableEvent",
-		CaliperAction: caliper.ActionSubmitted,
-		OrgID:         orgID,
-	})
-}
-
-// GradeReceived emits GradeEvent.Graded / received verb.
-func (e Emitter) GradeReceived(ctx context.Context, orgID uuid.UUID, courseID uuid.UUID, courseCode, email, displayName, itemID, title string, scorePercent float64) {
-	base := e.baseIRI()
-	scaled := scorePercent / 100.0
-	e.emit(ctx, emitParams{
-		ActorEmail:    email,
-		ActorName:     displayName,
-		VerbID:        xapi.VerbReceived,
-		ObjectID:      base + "/courses/" + courseCode + "/grades/" + itemID,
-		ObjectType:    "Activity",
-		ObjectTitle:   title,
-		CourseID:      &courseID,
-		CourseCode:    courseCode,
-		CaliperType:   "GradeEvent",
-		CaliperAction: caliper.ActionGraded,
-		Score:         &scaled,
-		OrgID:         orgID,
-	})
-}
-
 // StoreExternalStatement stores a received xAPI statement (e.g. H5P) in the internal LRS.
 func (e Emitter) StoreExternalStatement(ctx context.Context, orgID uuid.UUID, courseID *uuid.UUID, actorEmail, actorName string, verbID, objectID, objectTitle string, rawStatement json.RawMessage) error {
 	if !e.enabled() || e.Pool == nil {

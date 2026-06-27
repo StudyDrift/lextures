@@ -17,17 +17,6 @@ type CourseItemContentRow struct {
 	UpdatedAt time.Time
 }
 
-func InsertEmptyForItem(ctx context.Context, tx pgx.Tx, structureItemID uuid.UUID) error {
-	if tx == nil {
-		return errors.New("db tx is nil")
-	}
-	_, err := tx.Exec(ctx, `
-INSERT INTO course.module_content_pages (structure_item_id, markdown, updated_at)
-VALUES ($1, '', NOW())
-`, structureItemID)
-	return err
-}
-
 func GetForCourseItem(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID) (*CourseItemContentRow, error) {
 	if pool == nil {
 		return nil, errors.New("db pool is nil")
@@ -91,43 +80,4 @@ WHERE id = $1 AND course_id = $3 AND kind = 'content_page' AND parent_id IS NOT 
 		return nil, err
 	}
 	return GetForCourseItem(ctx, pool, courseID, itemID)
-}
-
-func UpdateMarkdown(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, markdown string) (*time.Time, error) {
-	if pool == nil {
-		return nil, errors.New("db pool is nil")
-	}
-	var updated time.Time
-	err := pool.QueryRow(ctx, `
-UPDATE course.module_content_pages m
-SET markdown = $3, updated_at = NOW()
-FROM course.course_structure_items c
-WHERE m.structure_item_id = c.id
-  AND c.id = $1
-  AND c.course_id = $2
-  AND c.kind = 'content_page'
-RETURNING m.updated_at
-`, itemID, courseID, markdown).Scan(&updated)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return &updated, nil
-}
-
-func UpsertImportBody(ctx context.Context, pool *pgxpool.Pool, courseID, itemID uuid.UUID, markdown string) error {
-	if pool == nil {
-		return errors.New("db pool is nil")
-	}
-	_, err := pool.Exec(ctx, `
-INSERT INTO course.module_content_pages (structure_item_id, markdown, updated_at)
-SELECT c.id, $3, NOW()
-FROM course.course_structure_items c
-WHERE c.id = $1 AND c.course_id = $2 AND c.kind = 'content_page'
-ON CONFLICT (structure_item_id) DO UPDATE
-SET markdown = EXCLUDED.markdown, updated_at = NOW()
-`, itemID, courseID, markdown)
-	return err
 }

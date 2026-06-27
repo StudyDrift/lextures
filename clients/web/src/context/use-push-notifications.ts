@@ -1,8 +1,5 @@
 import { useContext } from 'react'
 import { InboxNotificationsContext } from './inbox-notifications-context'
-
-export type { InboxNotification } from './inbox-notifications-context'
-
 const noopAsync = async () => {}
 
 export function useInboxNotifications() {

@@ -107,28 +107,6 @@ RETURNING id, org_id, code, name, grade_level, created_at`, orgID, code, name, g
 
 // ─── Standards ────────────────────────────────────────────────────────────────
 
-// ListStandardsForDomain returns all standards belonging to a domain.
-func ListStandardsForDomain(ctx context.Context, pool *pgxpool.Pool, domainID uuid.UUID) ([]Standard, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, domain_id, code, description, created_at
-FROM sbg.standards
-WHERE domain_id = $1
-ORDER BY code`, domainID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []Standard
-	for rows.Next() {
-		var s Standard
-		if err := rows.Scan(&s.ID, &s.DomainID, &s.Code, &s.Description, &s.CreatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, s)
-	}
-	return out, rows.Err()
-}
-
 // ListStandardsForOrg returns all standards for all domains of an org, joined with domain info.
 // Returns (standards, domainByStandardID) — simple flat list used by course views.
 func ListStandardsForOrg(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) ([]Standard, error) {
@@ -169,9 +147,9 @@ RETURNING id, domain_id, code, description, created_at`, domainID, code, descrip
 
 // CSVImportResult summarises a CSV standards import.
 type CSVImportResult struct {
-	DomainsCreated   int
+	DomainsCreated    int
 	StandardsImported int
-	Errors           []string
+	Errors            []string
 }
 
 // ImportStandardsCSV reads a CSV (code, description, domain_code, domain_name, grade_level) and
@@ -306,26 +284,6 @@ RETURNING id, org_id, label, value, color, created_at`, orgID, e.Label, e.Value,
 	return out, tx.Commit(ctx)
 }
 
-// SeedDefaultMasteryScale inserts the default 4-level scale if no scale exists for the org.
-func SeedDefaultMasteryScale(ctx context.Context, pool *pgxpool.Pool, orgID uuid.UUID) ([]MasteryScale, error) {
-	existing, err := ListMasteryScales(ctx, pool, orgID)
-	if err != nil {
-		return nil, err
-	}
-	if len(existing) > 0 {
-		return existing, nil
-	}
-	defaults := []MasteryScaleEntry{
-		{Label: "Exceeds Standard", Value: 4, Color: stringPtr("#22c55e")},
-		{Label: "Meets Standard", Value: 3, Color: stringPtr("#3b82f6")},
-		{Label: "Approaching Standard", Value: 2, Color: stringPtr("#f59e0b")},
-		{Label: "Below Standard", Value: 1, Color: stringPtr("#ef4444")},
-	}
-	return ReplaceMasteryScale(ctx, pool, orgID, defaults)
-}
-
-func stringPtr(s string) *string { return &s }
-
 // ─── Mastery Scores ───────────────────────────────────────────────────────────
 
 // RecordMasteryScore inserts a new mastery score evidence record.
@@ -345,20 +303,6 @@ SELECT id, student_id, standard_id, course_id, grading_period, score_value, asse
 FROM sbg.mastery_scores
 WHERE student_id = $1 AND course_id = $2 AND grading_period = $3
 ORDER BY standard_id, assessed_at`, studentID, courseID, period)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	return scanMasteryScoreRows(rows)
-}
-
-// ListMasteryScoresForCoursePeriod returns all evidence records for a course+period (all students).
-func ListMasteryScoresForCoursePeriod(ctx context.Context, pool *pgxpool.Pool, courseID uuid.UUID, period string) ([]MasteryScore, error) {
-	rows, err := pool.Query(ctx, `
-SELECT id, student_id, standard_id, course_id, grading_period, score_value, assessed_by, source, source_id, assessed_at
-FROM sbg.mastery_scores
-WHERE course_id = $1 AND grading_period = $2
-ORDER BY student_id, standard_id, assessed_at`, courseID, period)
 	if err != nil {
 		return nil, err
 	}
@@ -386,20 +330,6 @@ ORDER BY student_id, standard_id, assessed_at DESC`, courseID, period)
 		out = append(out, c)
 	}
 	return out, rows.Err()
-}
-
-// GetStandardByID returns a single standard or nil if not found.
-func GetStandardByID(ctx context.Context, pool *pgxpool.Pool, standardID uuid.UUID) (*Standard, error) {
-	row := pool.QueryRow(ctx, `
-SELECT id, domain_id, code, description, created_at FROM sbg.standards WHERE id = $1`, standardID)
-	var s Standard
-	if err := row.Scan(&s.ID, &s.DomainID, &s.Code, &s.Description, &s.CreatedAt); err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return &s, nil
 }
 
 // GetDomainOrgID returns the org_id for the domain that owns a standard.

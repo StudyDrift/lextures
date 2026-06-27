@@ -14,16 +14,16 @@ import (
 
 // InferenceLogEntry is one row from compliance.ai_inference_log.
 type InferenceLogEntry struct {
-	ID              uuid.UUID
-	OrgID           *uuid.UUID
-	UserIDHash      string
-	FeatureName     string
-	ModelID         string
-	Provider        string
-	ContentHash     string
-	OptInConfirmed  bool
-	Blocked         bool
-	Timestamp       time.Time
+	ID             uuid.UUID
+	OrgID          *uuid.UUID
+	UserIDHash     string
+	FeatureName    string
+	ModelID        string
+	Provider       string
+	ContentHash    string
+	OptInConfirmed bool
+	Blocked        bool
+	Timestamp      time.Time
 }
 
 // TenantConfig is compliance.tenant_ai_config.
@@ -203,18 +203,6 @@ ON CONFLICT (org_id) DO UPDATE SET
   updated_by       = EXCLUDED.updated_by
 `, orgID, raw, allowed, updatedBy)
 	return err
-}
-
-// HasFeatureAck returns true when the user acknowledged first-use disclosure for a feature.
-func HasFeatureAck(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, featureKey string) (bool, error) {
-	var exists bool
-	err := pool.QueryRow(ctx, `
-SELECT EXISTS (
-  SELECT 1 FROM settings.user_ai_feature_acknowledgements
-   WHERE user_id = $1 AND feature_key = $2
-)
-`, userID, featureKey).Scan(&exists)
-	return exists, err
 }
 
 // ListFeatureAcks returns all acknowledged feature keys for a user.

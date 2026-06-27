@@ -8,9 +8,6 @@ export type MarkdownThemePresetId =
   | 'contrast'
   | 'night'
   | 'accent'
-
-export type MarkdownThemePresetOrCustom = MarkdownThemePresetId | 'custom'
-
 export type ArticleWidth = 'narrow' | 'comfortable' | 'wide' | 'full'
 
 export type MarkdownThemeCustom = {

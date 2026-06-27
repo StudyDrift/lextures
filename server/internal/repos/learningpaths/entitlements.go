@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	EntitlementTypePathBundle    = "path_bundle"
+	EntitlementTypePathBundle     = "path_bundle"
 	EntitlementTypeCoursePurchase = "course_purchase"
-	EntitlementStatusActive      = "active"
+	EntitlementStatusActive       = "active"
 )
 
 // HasPathEntitlement returns true when the user may enroll in a paid path.
@@ -29,14 +29,4 @@ SELECT EXISTS (
 // PathRequiresPayment is true when bundle_price_cents is set and positive.
 func PathRequiresPayment(p *Path) bool {
 	return p != nil && p.BundlePriceCents != nil && *p.BundlePriceCents > 0
-}
-
-// GrantPathEntitlement inserts an active path entitlement (used by billing webhooks and tests).
-func GrantPathEntitlement(ctx context.Context, pool *pgxpool.Pool, userID, pathID uuid.UUID, amountCents int, stripeEventID string) error {
-	_, err := pool.Exec(ctx, `
-INSERT INTO billing.user_entitlements (user_id, entitlement_type, path_id, amount_paid_cents, stripe_event_id)
-VALUES ($1, $2, $3, $4, NULLIF($5, ''))
-ON CONFLICT (stripe_event_id) DO NOTHING
-`, userID, EntitlementTypePathBundle, pathID, amountCents, stripeEventID)
-	return err
 }

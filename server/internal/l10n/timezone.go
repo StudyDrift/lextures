@@ -20,9 +20,3 @@ func NormalizeTimezone(raw string) (string, error) {
 	}
 	return s, nil
 }
-
-// ValidTimezone returns true when raw is a known IANA zone (empty is invalid).
-func ValidTimezone(raw string) bool {
-	_, err := NormalizeTimezone(raw)
-	return err == nil
-}

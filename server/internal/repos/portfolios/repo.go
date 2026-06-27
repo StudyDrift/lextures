@@ -427,28 +427,6 @@ RETURNING `+evaluationCols,
 		artifactID, reviewerID, in.RubricJSON, scores, in.TotalScore, in.Feedback))
 }
 
-// ListEvaluationsForArtifact returns all reviewer evaluations of an artifact.
-func ListEvaluationsForArtifact(ctx context.Context, pool *pgxpool.Pool, artifactID uuid.UUID) ([]Evaluation, error) {
-	rows, err := pool.Query(ctx, `
-SELECT `+evaluationCols+`
-FROM portfolio.portfolio_artifact_evaluations
-WHERE artifact_id = $1
-ORDER BY updated_at DESC`, artifactID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []Evaluation
-	for rows.Next() {
-		e, err := scanEvaluation(rows)
-		if err != nil {
-			return nil, err
-		}
-		out = append(out, *e)
-	}
-	return out, rows.Err()
-}
-
 // ListEvaluationsForPortfolio returns evaluations across all artifacts of a portfolio,
 // keyed for the owner's view.
 func ListEvaluationsForPortfolio(ctx context.Context, pool *pgxpool.Pool, portfolioID uuid.UUID) ([]Evaluation, error) {

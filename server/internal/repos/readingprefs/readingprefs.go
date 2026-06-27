@@ -18,20 +18,20 @@ const defaultSTTLanguage = "en-US"
 
 // Row holds a user's reading preferences.
 type Row struct {
-	FontFace               string    `json:"fontFace"`
-	LetterSpacing          string    `json:"letterSpacing"`
-	WordSpacing            string    `json:"wordSpacing"`
-	LineHeight             string    `json:"lineHeight"`
-	RulerEnabled           bool      `json:"rulerEnabled"`
-	RulerColor             string    `json:"rulerColor"`
-	TTSEnabled             bool      `json:"ttsEnabled"`
-	TTSSpeed               float64   `json:"ttsSpeed"`
-	TTSVoiceName           *string   `json:"ttsVoiceName,omitempty"`
-	STTEnabled             bool      `json:"sttEnabled"`
-	STTLanguage            string    `json:"sttLanguage"`
-	DyslexiaDisplayEnabled bool      `json:"dyslexiaDisplayEnabled"`
-	HighContrastEnabled    bool      `json:"highContrastEnabled"`
-	ReducedMotionEnabled   bool      `json:"reducedMotionEnabled"`
+	FontFace               string  `json:"fontFace"`
+	LetterSpacing          string  `json:"letterSpacing"`
+	WordSpacing            string  `json:"wordSpacing"`
+	LineHeight             string  `json:"lineHeight"`
+	RulerEnabled           bool    `json:"rulerEnabled"`
+	RulerColor             string  `json:"rulerColor"`
+	TTSEnabled             bool    `json:"ttsEnabled"`
+	TTSSpeed               float64 `json:"ttsSpeed"`
+	TTSVoiceName           *string `json:"ttsVoiceName,omitempty"`
+	STTEnabled             bool    `json:"sttEnabled"`
+	STTLanguage            string  `json:"sttLanguage"`
+	DyslexiaDisplayEnabled bool    `json:"dyslexiaDisplayEnabled"`
+	HighContrastEnabled    bool    `json:"highContrastEnabled"`
+	ReducedMotionEnabled   bool    `json:"reducedMotionEnabled"`
 	// UIModeOverride stores the admin-set override; nil means derive from grade_level (plan 13.11).
 	UIModeOverride *string   `json:"uiModeOverride,omitempty"`
 	UpdatedAt      time.Time `json:"updatedAt"`
@@ -283,15 +283,4 @@ func MergeAccommodationOverrides(row *Row, eff acsvc.Effective) (*Row, Accommoda
 		overrides.STTEnabled = true
 	}
 	return &out, overrides
-}
-
-// EffectiveForCourse loads prefs and merges course-scoped accommodations.
-func EffectiveForCourse(ctx context.Context, pool *pgxpool.Pool, userID, courseID uuid.UUID) (*Row, AccommodationOverrides, error) {
-	row, err := Get(ctx, pool, userID)
-	if err != nil {
-		return nil, AccommodationOverrides{}, err
-	}
-	eff := acsvc.ResolveEffectiveOrDefault(ctx, pool, userID, courseID)
-	merged, overrides := MergeAccommodationOverrides(row, eff)
-	return merged, overrides, nil
 }

@@ -92,12 +92,6 @@ export async function fetchMyPaths(): Promise<PathProgress[]> {
   return data.paths ?? []
 }
 
-export async function fetchPathProgress(pathId: string): Promise<PathProgress> {
-  const res = await authorizedFetch(`/api/v1/me/paths/${encodeURIComponent(pathId)}/progress`)
-  if (!res.ok) throw new Error('Failed to load path progress')
-  return (await res.json()) as PathProgress
-}
-
 export async function enrollInPath(pathId: string): Promise<{ enrollmentId: string; progress: PathProgress }> {
   const res = await authorizedFetch(`/api/v1/paths/${encodeURIComponent(pathId)}/enroll`, {
     method: 'POST',

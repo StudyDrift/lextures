@@ -5,7 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,13 +20,13 @@ const (
 )
 
 var (
-	ErrSessionNotFound      = errors.New("attendance session not found")
-	ErrSessionClosed        = errors.New("attendance session is closed")
-	ErrSelfReportClosed     = errors.New("self-report window is closed")
-	ErrAlreadySubmitted     = errors.New("attendance already submitted")
-	ErrInvalidStatus        = errors.New("invalid attendance status")
-	ErrInvalidCollection    = errors.New("invalid collection method")
-	ErrSectionNotInCourse   = errors.New("section not in course")
+	ErrSessionNotFound    = errors.New("attendance session not found")
+	ErrSessionClosed      = errors.New("attendance session is closed")
+	ErrSelfReportClosed   = errors.New("self-report window is closed")
+	ErrAlreadySubmitted   = errors.New("attendance already submitted")
+	ErrInvalidStatus      = errors.New("invalid attendance status")
+	ErrInvalidCollection  = errors.New("invalid collection method")
+	ErrSectionNotInCourse = errors.New("section not in course")
 )
 
 // Session is one attendance event for a course.
@@ -599,38 +598,6 @@ SELECT EXISTS(SELECT 1 FROM course.course_sections WHERE id = $1 AND course_id =
 	return ok, err
 }
 
-// PatchSession updates title or window times on an open session.
-func PatchSession(ctx context.Context, pool *pgxpool.Pool, courseID, sessionID uuid.UUID, title *string, opensAt, closesAt *time.Time) (*Session, error) {
-	sess, err := GetSession(ctx, pool, courseID, sessionID)
-	if err != nil {
-		return nil, err
-	}
-	if sess.Status != StatusOpen {
-		return nil, ErrSessionClosed
-	}
-	newTitle := sess.Title
-	if title != nil && strings.TrimSpace(*title) != "" {
-		newTitle = strings.TrimSpace(*title)
-	}
-	newOpens := sess.OpensAt
-	if opensAt != nil {
-		newOpens = opensAt
-	}
-	newCloses := sess.ClosesAt
-	if closesAt != nil {
-		newCloses = closesAt
-	}
-	_, err = pool.Exec(ctx, `
-UPDATE course.attendance_sessions
-SET title = $3, opens_at = $4, closes_at = $5, updated_at = now()
-WHERE course_id = $1 AND id = $2
-`, courseID, sessionID, newTitle, newOpens, newCloses)
-	if err != nil {
-		return nil, err
-	}
-	return GetSession(ctx, pool, courseID, sessionID)
-}
-
 // AttendanceEnabledForCourseCode returns whether attendance is enabled by course code.
 func AttendanceEnabledForCourseCode(ctx context.Context, pool *pgxpool.Pool, courseCode string) (bool, error) {
 	var ok bool
@@ -656,23 +623,6 @@ type SessionSummary struct {
 	Absent  int
 	Tardy   int
 	Total   int
-}
-
-// SummarizeRecords counts statuses.
-func SummarizeRecords(records []RecordRow) SessionSummary {
-	var s SessionSummary
-	s.Total = len(records)
-	for _, r := range records {
-		switch r.Status {
-		case "present", "excused":
-			s.Present++
-		case "absent", "not_recorded":
-			s.Absent++
-		case "tardy":
-			s.Tardy++
-		}
-	}
-	return s
 }
 
 // FormatSessionDate returns YYYY-MM-DD.

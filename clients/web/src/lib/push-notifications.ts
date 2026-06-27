@@ -59,19 +59,6 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
   }
 }
 
-export async function unsubscribeFromPush(subscriptionId: string): Promise<void> {
-  const reg = await navigator.serviceWorker?.getRegistration(SW_PATH)
-  if (reg) {
-    const sub = await reg.pushManager.getSubscription()
-    if (sub) await sub.unsubscribe()
-  }
-  try {
-    await authorizedFetch(`/api/v1/me/push-subscriptions/${subscriptionId}`, { method: 'DELETE' })
-  } catch {
-    /* ignore */
-  }
-}
-
 async function savePushSubscription(sub: PushSubscription): Promise<string | null> {
   const json = sub.toJSON()
   const keys = json.keys as { p256dh?: string; auth?: string } | undefined

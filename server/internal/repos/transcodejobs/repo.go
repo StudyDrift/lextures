@@ -59,17 +59,6 @@ func Load(ctx context.Context, pool *pgxpool.Pool, id uuid.UUID) (*Job, error) {
 		WHERE id = $1`, id))
 }
 
-// LoadBySourceKey fetches the most recent job for a given source key.
-func LoadBySourceKey(ctx context.Context, pool *pgxpool.Pool, sourceKey string) (*Job, error) {
-	return scanJob(pool.QueryRow(ctx, `
-		SELECT id, source_key, output_prefix, master_playlist, dash_manifest, poster_key,
-		       status, attempts, error, created_at, started_at, completed_at, storage_object_id
-		FROM storage.transcode_jobs
-		WHERE source_key = $1
-		ORDER BY created_at DESC
-		LIMIT 1`, sourceKey))
-}
-
 // LoadByObjectID fetches the most recent job for a given storage object ID.
 func LoadByObjectID(ctx context.Context, pool *pgxpool.Pool, objectID uuid.UUID) (*Job, error) {
 	return scanJob(pool.QueryRow(ctx, `

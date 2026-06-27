@@ -3,8 +3,6 @@
 package sbgaggregation
 
 import (
-	"sort"
-
 	"github.com/google/uuid"
 	"github.com/lextures/lextures/server/internal/repos/sbgreport"
 )
@@ -131,11 +129,4 @@ func ParseMethod(s string) Method {
 	default:
 		return MostRecent
 	}
-}
-
-// SortedMethods returns the available method names for documentation / UI.
-func SortedMethods() []string {
-	methods := []string{string(MostRecent), string(Highest), string(Mode), string(Trend)}
-	sort.Strings(methods)
-	return methods
 }

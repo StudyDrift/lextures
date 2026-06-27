@@ -71,15 +71,6 @@ export async function listLibraryBooks(orgId: string, filter?: LibraryBooksFilte
   return data.books ?? []
 }
 
-export async function getLibraryBook(orgId: string, bookId: string): Promise<LibraryBook | null> {
-  const res = await authorizedFetch(
-    `/api/v1/orgs/${encodeURIComponent(orgId)}/library/${encodeURIComponent(bookId)}`,
-  )
-  if (!res.ok) return null
-  const data = (await res.json()) as { book: LibraryBook }
-  return data.book
-}
-
 export async function createLibraryBook(orgId: string, payload: CreateBookPayload): Promise<LibraryBook> {
   const res = await authorizedFetch(`/api/v1/orgs/${encodeURIComponent(orgId)}/library`, {
     method: 'POST',

@@ -86,14 +86,6 @@ func New(ctx context.Context, cfg Config) (*Client, error) {
 	return &Client{rdb: rdb}, nil
 }
 
-// Wrap adapts an existing go-redis client (used by tests with miniredis).
-func Wrap(rdb *redis.Client) *Client {
-	if rdb == nil {
-		return nil
-	}
-	return &Client{rdb: rdb}
-}
-
 // Redis exposes the underlying client for packages that need raw commands.
 func (c *Client) Redis() *redis.Client {
 	if c == nil {

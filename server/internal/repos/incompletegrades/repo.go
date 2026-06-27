@@ -42,13 +42,13 @@ type Record struct {
 // ReportRow extends Record with student/course context for the registrar report.
 type ReportRow struct {
 	Record
-	StudentUserID   uuid.UUID
-	StudentName     string
-	CourseID        uuid.UUID
-	CourseCode      string
-	CourseTitle     string
-	TermID          *uuid.UUID
-	InstructorIDs   []uuid.UUID
+	StudentUserID     uuid.UUID
+	StudentName       string
+	CourseID          uuid.UUID
+	CourseCode        string
+	CourseTitle       string
+	TermID            *uuid.UUID
+	InstructorIDs     []uuid.UUID
 	OutstandingTitles []string
 }
 
@@ -488,20 +488,4 @@ WHERE status = 'open' AND extension_deadline < $1
 		return 0, err
 	}
 	return tag.RowsAffected(), nil
-}
-
-// StudentHasOpenExtension returns true when the student has an open incomplete with a future deadline.
-func StudentHasOpenExtension(ctx context.Context, pool *pgxpool.Pool, courseID, studentUserID uuid.UUID, today time.Time) (bool, error) {
-	today = time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, time.UTC)
-	var ok bool
-	err := pool.QueryRow(ctx, `
-SELECT EXISTS (
-    SELECT 1
-    FROM course.incomplete_grade_records igr
-    INNER JOIN course.course_enrollments ce ON ce.id = igr.enrollment_id
-    WHERE ce.course_id = $1 AND ce.user_id = $2 AND ce.role = 'student'
-      AND igr.status = 'open' AND igr.extension_deadline >= $3
-)
-`, courseID, studentUserID, today).Scan(&ok)
-	return ok, err
 }

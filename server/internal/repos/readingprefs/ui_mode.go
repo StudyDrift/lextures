@@ -2,22 +2,20 @@ package readingprefs
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // UI mode constants (plan 13.11).
 const (
-	UIModeK2        = "k2"
+	UIModeK2         = "k2"
 	UIModeElementary = "elementary"
 	UIModeStandard   = "standard"
 )
 
 var validUIMode = map[string]bool{
-	UIModeK2:        true,
+	UIModeK2:         true,
 	UIModeElementary: true,
 	UIModeStandard:   true,
 }
@@ -61,19 +59,4 @@ ON CONFLICT (user_id) DO UPDATE
         updated_at       = now()
 `, studentID, mode)
 	return err
-}
-
-// GetUIModeOverride returns the stored override for a user, or nil if none.
-func GetUIModeOverride(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) (*string, error) {
-	var override *string
-	err := pool.QueryRow(ctx, `
-SELECT ui_mode_override FROM settings.user_reading_preferences WHERE user_id = $1
-`, userID).Scan(&override)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, err
-	}
-	return override, nil
 }

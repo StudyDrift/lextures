@@ -3,7 +3,6 @@ package catalogsync
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -211,18 +210,4 @@ func shellTitle(s *repoCatalog.Section, termName string) string {
 		return strings.Join(parts, " ")
 	}
 	return s.Title
-}
-
-// SeedDemoRegistration inserts a demo registration for e2e when user has no schedule data.
-func SeedDemoRegistration(ctx context.Context, pool *pgxpool.Pool, orgID, userID uuid.UUID) error {
-	sections, err := repoCatalog.ListSections(ctx, pool, orgID, repoCatalog.ListFilter{Limit: 1})
-	if err != nil || len(sections) == 0 {
-		return fmt.Errorf("no catalog sections to seed")
-	}
-	sec := sections[0]
-	prereq := make([]repoCatalog.PrereqStatus, 0, len(sec.Prerequisites))
-	for _, p := range sec.Prerequisites {
-		prereq = append(prereq, repoCatalog.PrereqStatus{Code: p.Code, Status: "met"})
-	}
-	return repoCatalog.UpsertRegistration(ctx, pool, orgID, userID, sec.ID, repoCatalog.RegRegistered, prereq)
 }

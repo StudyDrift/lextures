@@ -3,10 +3,6 @@ export type CourseAssignmentOption = {
   title: string
 }
 
-export type ActivityNodeData = {
-  assignmentItemId?: string | null
-}
-
 /** Effective assignment for an activity node; falls back to the assignment the agent was opened on. */
 export function activityAssignmentItemId(
   data: Record<string, unknown> | undefined,

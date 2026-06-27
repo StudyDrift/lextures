@@ -138,8 +138,3 @@ ON CONFLICT (provider) DO UPDATE SET
 `, provider, enabled, clientID, apiKey, appKey)
 	return err
 }
-
-// SetEnabled updates the enabled flag for a provider, upserting if needed.
-func SetEnabled(ctx context.Context, pool *pgxpool.Pool, provider string, enabled bool) error {
-	return Update(ctx, pool, provider, ProviderUpdate{Enabled: &enabled})
-}

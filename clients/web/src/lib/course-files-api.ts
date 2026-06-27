@@ -244,10 +244,6 @@ export function getFileContentUrl(courseCode: string, itemId: string): string {
   return `/api/v1/courses/${encodeURIComponent(courseCode)}/files/items/${encodeURIComponent(itemId)}/content`
 }
 
-export function getFilePreviewUrl(courseCode: string, itemId: string): string {
-  return `/api/v1/courses/${encodeURIComponent(courseCode)}/files/items/${encodeURIComponent(itemId)}/preview`
-}
-
 /** Builds the server HTML preview URL from a file content URL. */
 export function fileContentUrlToPreviewUrl(contentUrl: string): string | null {
   const suffix = '/content'
