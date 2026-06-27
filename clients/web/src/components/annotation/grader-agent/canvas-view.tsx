@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent, MouseEvent as ReactMouseEvent } from 'react'
 import {
   ReactFlow,
@@ -49,22 +49,25 @@ type CanvasViewProps = {
 
 function graphToFlow(
   graph: GraderWorkflowGraph,
-  selectedNodeId: string | null,
   readOnly: boolean,
-  nodeExecutionStates: Record<string, string>,
+  quizQuestionSlots: import('./quiz-question-slots').QuizQuestionSlot[] | undefined,
 ): { nodes: Node[]; edges: Edge[] } {
   const gradeSlotUsesRubric = workflowHasAttachedRubric(graph)
+  const quizSlots = quizQuestionSlots ?? []
   return {
     nodes: graph.nodes.map((n) => ({
       id: n.id,
       type: n.type,
       position: n.position,
       data: {
-        ...(n.type === 'output' ? { ...n.data, gradeSlotUsesRubric } : n.data),
-        executionStatus: nodeExecutionStates[n.id] ?? 'idle',
+        ...(n.type === 'output' || n.type === 'quizResponses'
+          ? { ...n.data, quizQuestionSlots: quizSlots }
+          : n.data),
+        ...(n.type === 'output' ? { gradeSlotUsesRubric } : {}),
+        executionStatus: 'idle',
       },
-      selected: n.id === selectedNodeId,
-      deletable: n.type !== 'output',
+      selected: false,
+      deletable: n.type !== 'output' && n.type !== 'quizResponses',
       selectable: true,
       draggable: !readOnly,
     })),
@@ -76,6 +79,29 @@ function graphToFlow(
       targetHandle: e.targetHandle,
     })),
   }
+}
+
+function applyNodePresentation(
+  nodes: Node[],
+  selectedNodeId: string | null,
+  nodeExecutionStates: Record<string, string>,
+  quizQuestionSlots: import('./quiz-question-slots').QuizQuestionSlot[] | undefined,
+  gradeSlotUsesRubric: boolean,
+): Node[] {
+  const quizSlots = quizQuestionSlots ?? []
+  return nodes.map((node) => {
+    const isQuizSlotNode = node.type === 'output' || node.type === 'quizResponses'
+    return {
+      ...node,
+      selected: node.id === selectedNodeId,
+      data: {
+        ...(node.data ?? {}),
+        ...(isQuizSlotNode ? { quizQuestionSlots: quizSlots } : {}),
+        ...(node.type === 'output' ? { gradeSlotUsesRubric } : {}),
+        executionStatus: nodeExecutionStates[node.id] ?? 'idle',
+      },
+    }
+  })
 }
 
 function flowNodeData(node: Node): Record<string, unknown> {
@@ -132,6 +158,7 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
     removeNode,
     removeEdge,
     nodeExecutionStates,
+    quizQuestionSlots,
   } = workflow
   const [nodes, setNodes] = useNodesState<Node>([])
   const [edges, setEdges] = useEdgesState<Edge>([])
@@ -139,19 +166,49 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
   const [renameRequestNodeId, setRenameRequestNodeId] = useState<string | null>(null)
   const nodesRef = useRef(nodes)
   const edgesRef = useRef(edges)
+  const isDraggingNodeRef = useRef(false)
 
   graphRef.current = graph
   nodesRef.current = nodes
   edgesRef.current = edges
 
+  const graphStructureKey = useMemo(() => {
+    if (!graph) return ''
+    return JSON.stringify({
+      version: graph.version,
+      nodes: graph.nodes.map((node) => ({
+        id: node.id,
+        type: node.type,
+        position: node.position,
+        data: node.data,
+      })),
+      edges: graph.edges,
+    })
+  }, [graph])
+
+  const gradeSlotUsesRubric = graph ? workflowHasAttachedRubric(graph) : false
+
   useEffect(() => {
     if (!graph) return
-    const flow = graphToFlow(graph, selectedNodeId, readOnly, nodeExecutionStates)
+    const flow = graphToFlow(graph, readOnly, quizQuestionSlots)
     nodesRef.current = flow.nodes
     edgesRef.current = flow.edges
     setNodes(flow.nodes)
     setEdges(flow.edges)
-  }, [graph, readOnly, selectedNodeId, nodeExecutionStates, setNodes, setEdges])
+  }, [graph, graphStructureKey, readOnly, quizQuestionSlots, setNodes, setEdges])
+
+  useEffect(() => {
+    if (isDraggingNodeRef.current) return
+    setNodes((current) =>
+      applyNodePresentation(
+        current,
+        selectedNodeId,
+        nodeExecutionStates,
+        quizQuestionSlots,
+        gradeSlotUsesRubric,
+      ),
+    )
+  }, [gradeSlotUsesRubric, nodeExecutionStates, quizQuestionSlots, selectedNodeId, setNodes])
 
   useEffect(() => {
     if (!graph || didFitView.current) return
@@ -175,6 +232,20 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
       const actionable = changes.filter((change) => change.type !== 'replace')
       if (actionable.length === 0) return
 
+      if (
+        actionable.some(
+          (change) => change.type === 'position' && 'dragging' in change && change.dragging === false,
+        )
+      ) {
+        isDraggingNodeRef.current = false
+      } else if (
+        actionable.some(
+          (change) => change.type === 'position' && 'dragging' in change && change.dragging === true,
+        )
+      ) {
+        isDraggingNodeRef.current = true
+      }
+
       const currentNodes = nodesRef.current
       const nextNodes = applyNodeChanges(actionable, currentNodes)
       nodesRef.current = nextNodes
@@ -183,6 +254,7 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
       if (!readOnly) {
         const persistable = actionable.filter(shouldPersistNodeChange)
         if (persistable.length > 0) {
+          isDraggingNodeRef.current = false
           persistGraph(applyNodeChanges(persistable, currentNodes), edgesRef.current)
         }
       }
@@ -341,6 +413,13 @@ function CanvasFlow({ workflow, readOnly = false }: CanvasViewProps) {
           }}
           onNodeContextMenu={onNodeContextMenu}
           onEdgeContextMenu={onEdgeContextMenu}
+          nodesDraggable={!readOnly}
+          nodesConnectable={!readOnly}
+          elementsSelectable={!readOnly}
+          panOnDrag={[1, 2]}
+          panActivationKeyCode="Space"
+          panOnScroll
+          selectionOnDrag={false}
           nodesFocusable
           edgesFocusable
           proOptions={{ hideAttribution: true }}

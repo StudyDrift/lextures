@@ -7,6 +7,11 @@ import type { NodeExecutionStatus } from './use-grader-agent-workflow'
 import type { ConditionalRouterCondition, ReferenceMode } from './types'
 import { formatRouterConditionSentence } from './router-condition'
 import type { TFunction } from 'i18next'
+import {
+  quizGradeHandle,
+  quizQuestionHandle,
+  type QuizQuestionSlot,
+} from './quiz-question-slots'
 
 function codeTestRuntimeDisplayLabel(runtime: string, t: TFunction): string {
   if (runtime === 'javascript') {
@@ -89,6 +94,12 @@ function OutputSlotRow({
   )
 }
 
+function quizSlotBadgeLabel(slot: QuizQuestionSlot, t: TFunction): string | null {
+  if (slot.isPoolSlot) return t('gradingAgent.canvas.nodes.quizResponses.poolBadge')
+  if (slot.isShuffled) return t('gradingAgent.canvas.nodes.quizResponses.shuffledBadge')
+  return null
+}
+
 export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeProps) {
   const { t } = useTranslation('common')
   const nodeData = (data ?? {}) as Record<string, unknown>
@@ -97,6 +108,10 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
   const gradeSlotLabel = gradeSlotUsesRubric
     ? t('gradingAgent.canvas.slots.gradeRubric')
     : t('gradingAgent.canvas.slots.gradeScore')
+  const quizSlots = Array.isArray(nodeData.quizQuestionSlots)
+    ? (nodeData.quizQuestionSlots as QuizQuestionSlot[])
+    : []
+  const isQuizMode = quizSlots.length > 0
   const statusClass =
     executionStatus && executionStatus !== 'idle'
       ? executionStatusClass(executionStatus, selected)
@@ -105,7 +120,7 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
         : 'border-slate-200 dark:border-neutral-700'
   return (
     <div
-      className={`w-[216px] overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}
+      className={`${isQuizMode ? 'w-[240px]' : 'w-[216px]'} overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}
     >
       <RenamableNodeHeader
         nodeId={id}
@@ -116,12 +131,27 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
         trailing={<ExecutionBadge status={executionStatus} />}
       />
       <div className="divide-y divide-slate-100 dark:divide-neutral-800">
-        <InputSlotRow
-          handleId="grade"
-          label={gradeSlotLabel}
-          dotClass="bg-emerald-500"
-          handleClass="!bg-emerald-500"
-        />
+        {isQuizMode ? (
+          quizSlots.map((slot) => (
+            <InputSlotRow
+              key={quizGradeHandle(slot.index)}
+              handleId={quizGradeHandle(slot.index)}
+              label={t('gradingAgent.canvas.slots.quizQuestionScore', {
+                index: slot.index + 1,
+                max: slot.maxPoints,
+              })}
+              dotClass="bg-emerald-500"
+              handleClass="!bg-emerald-500"
+            />
+          ))
+        ) : (
+          <InputSlotRow
+            handleId="grade"
+            label={gradeSlotLabel}
+            dotClass="bg-emerald-500"
+            handleClass="!bg-emerald-500"
+          />
+        )}
         <InputSlotRow
           handleId="comments"
           label={t('gradingAgent.canvas.slots.comments')}
@@ -129,6 +159,61 @@ export const OutputNode = memo(function OutputNode({ id, data, selected }: NodeP
           handleClass="!bg-sky-500"
         />
       </div>
+    </div>
+  )
+})
+
+export const QuizResponsesNode = memo(function QuizResponsesNode({ id, data, selected }: NodeProps) {
+  const { t } = useTranslation('common')
+  const nodeData = (data ?? {}) as Record<string, unknown>
+  const executionStatus = nodeData.executionStatus as NodeExecutionStatus | undefined
+  const quizSlots = Array.isArray(nodeData.quizQuestionSlots)
+    ? (nodeData.quizQuestionSlots as QuizQuestionSlot[])
+    : []
+  const statusClass =
+    executionStatus && executionStatus !== 'idle'
+      ? executionStatusClass(executionStatus, selected)
+      : selected
+        ? 'border-violet-400/80 ring-2 ring-violet-500/20'
+        : 'border-slate-200 dark:border-neutral-700'
+  return (
+    <div
+      className={`${quizSlots.length > 4 ? 'w-[260px]' : 'w-[240px]'} overflow-hidden rounded-xl border bg-white shadow-sm dark:bg-neutral-900 ${statusClass}`}
+    >
+      <RenamableNodeHeader
+        nodeId={id}
+        data={nodeData}
+        defaultLabel={t('gradingAgent.canvas.nodes.quizResponses.title')}
+        dotClassName="bg-violet-500"
+        headerClassName="border-b border-violet-500/15 bg-violet-500/5 dark:border-violet-500/10 dark:bg-violet-500/10"
+        trailing={<ExecutionBadge status={executionStatus} />}
+      />
+      {quizSlots.length === 0 ? (
+        <p className="px-3 py-2 text-xs text-slate-500 dark:text-neutral-400">
+          {t('gradingAgent.canvas.nodes.quizResponses.empty')}
+        </p>
+      ) : (
+        <div className="divide-y divide-slate-100 dark:divide-neutral-800">
+          {quizSlots.map((slot) => {
+            const badge = quizSlotBadgeLabel(slot, t)
+            return (
+              <div key={quizQuestionHandle(slot.index)} className="relative px-3 py-2.5">
+                <OutputSlotRow
+                  handleId={quizQuestionHandle(slot.index)}
+                  label={slot.label}
+                  dotClass="bg-violet-500"
+                  handleClass="!bg-violet-500"
+                />
+                {badge ? (
+                  <span className="mt-1 block text-end text-[10px] font-medium uppercase tracking-wide text-violet-600 dark:text-violet-300">
+                    {badge}
+                  </span>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 })

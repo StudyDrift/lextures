@@ -6022,9 +6022,12 @@ export type GraderAgentRunHistoryEntry = {
   cancelledBy?: string
 }
 
+export type GradingAgentItemKind = 'assignment' | 'quiz'
+
 export type CourseGradingAgentSummary = {
   id: string
   itemId: string
+  itemKind?: GradingAgentItemKind
   assignmentTitle: string
   assignmentArchived: boolean
   status: 'draft' | 'accepted' | 'archived'
@@ -6032,6 +6035,21 @@ export type CourseGradingAgentSummary = {
   hasWorkflowGraph: boolean
   updatedAt: string
   reviewCount?: number
+}
+
+function graderAgentItemCollection(itemKind: GradingAgentItemKind = 'assignment'): string {
+  return itemKind === 'quiz' ? 'quizzes' : 'assignments'
+}
+
+export function graderAgentItemPath(
+  courseCode: string,
+  itemId: string,
+  itemKind: GradingAgentItemKind = 'assignment',
+  suffix = '',
+): string {
+  const collection = graderAgentItemCollection(itemKind)
+  const base = `/api/v1/courses/${encodeURIComponent(courseCode)}/${collection}/${encodeURIComponent(itemId)}/grader-agent`
+  return suffix ? `${base}/${suffix.replace(/^\//, '')}` : base
 }
 
 export async function fetchCourseGradingAgents(
@@ -6051,10 +6069,9 @@ export async function fetchCourseGradingAgents(
 export async function fetchGraderAgentConfig(
   courseCode: string,
   itemId: string,
+  itemKind: GradingAgentItemKind = 'assignment',
 ): Promise<{ config: GraderAgentConfigApi | null }> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent`,
-  )
+  const res = await authorizedFetch(graderAgentItemPath(courseCode, itemId, itemKind))
   const raw = await parseJson(res)
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
   return raw as { config: GraderAgentConfigApi | null }
@@ -6074,10 +6091,9 @@ export async function putGraderAgentConfig(
     modelId?: string
     workflowGraph?: GraderWorkflowGraphApi
   },
+  itemKind: GradingAgentItemKind = 'assignment',
 ): Promise<{ config: GraderAgentConfigApi }> {
-  const res = await authorizedFetch(
-    `/api/v1/courses/${encodeURIComponent(courseCode)}/assignments/${encodeURIComponent(itemId)}/grader-agent`,
-    {
+  const res = await authorizedFetch(graderAgentItemPath(courseCode, itemId, itemKind), {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

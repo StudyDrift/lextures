@@ -239,6 +239,7 @@ func (d Deps) handleListCourseGradingAgents() http.HandlerFunc {
 			entry := map[string]any{
 				"id":                 row.ID.String(),
 				"itemId":             row.ModuleItemID.String(),
+				"itemKind":           row.ItemKind,
 				"assignmentTitle":    row.AssignmentTitle,
 				"assignmentArchived": row.AssignmentArchived,
 				"status":             string(row.Status),
@@ -264,11 +265,10 @@ func (d Deps) handleGetGraderAgentConfig() http.HandlerFunc {
 		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
 			return
 		}
-		_, assignRow, ok := d.loadAssignmentForSubmissions(w, r, courseCode, itemID)
-		if !ok || assignRow == nil {
+		if _, ok := d.loadGradingAgentModuleItem(w, r, courseCode, itemID); !ok {
 			return
 		}
 		cfg, err := gradingagentrepo.GetConfigByItem(r.Context(), d.Pool, itemID)
@@ -305,13 +305,14 @@ func (d Deps) handlePutGraderAgentConfig() http.HandlerFunc {
 		}
 		itemID, err := uuid.Parse(chi.URLParam(r, "item_id"))
 		if err != nil {
-			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid assignment id.")
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid item id.")
 			return
 		}
-		cid, assignRow, ok := d.loadAssignmentForSubmissions(w, r, courseCode, itemID)
-		if !ok || assignRow == nil || cid == nil {
+		item, ok := d.loadGradingAgentModuleItem(w, r, courseCode, itemID)
+		if !ok || item == nil {
 			return
 		}
+		cid := &item.CourseID
 		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")

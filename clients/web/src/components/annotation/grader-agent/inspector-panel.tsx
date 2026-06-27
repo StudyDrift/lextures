@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { lazy, Suspense, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useCourseAssignments } from '../../../hooks/use-course-assignments'
 import { useTextModels } from '../../../hooks/use-text-models'
@@ -21,7 +21,14 @@ import {
   isScoreAggregatorNodeType,
   isSetScoreNodeType,
   isStudentSubmissionNodeType,
+  isQuizResponsesNodeType,
 } from './types'
+import type { QuizQuestion } from '../../../lib/courses-api'
+
+const QuizResponsesInspector = lazy(() =>
+  import('./quiz-responses-inspector').then((m) => ({ default: m.QuizResponsesInspector })),
+)
+import type { QuizQuestionSlot } from './quiz-question-slots'
 import { CodeTestRunnerInspector } from './code-test-runner-inspector'
 import { ConditionalRouterInspector } from './conditional-router-inspector'
 import { FlagForReviewInspector } from './flag-for-review-inspector'
@@ -52,6 +59,8 @@ type InspectorPanelProps = {
   rubric?: RubricDefinition | null
   maxPoints?: number | null
   selectedSubmission?: ModuleAssignmentSubmissionApi | null
+  quizQuestionSlots?: QuizQuestionSlot[]
+  quizQuestions?: QuizQuestion[]
 }
 
 const fieldClass =
@@ -67,6 +76,8 @@ export function InspectorPanel({
   rubric,
   maxPoints,
   selectedSubmission = null,
+  quizQuestionSlots = [],
+  quizQuestions = [],
 }: InspectorPanelProps) {
   const { t } = useTranslation('common')
   const { ffPlagiarismChecks } = usePlatformFeatures()
@@ -410,6 +421,18 @@ export function InspectorPanel({
         >
           {t('gradingAgent.canvas.inspector.deleteNode')}
         </button>
+      </div>
+    )
+  }
+
+  if (isQuizResponsesNodeType(node.type)) {
+    return (
+      <div className="space-y-3 text-sm text-slate-700 dark:text-neutral-200">
+        <p className="font-medium">{nodeTitle('gradingAgent.canvas.nodes.quizResponses.title')}</p>
+        <p>{t('gradingAgent.canvas.inspector.quizResponses.help')}</p>
+        <Suspense fallback={<p className="text-xs text-slate-500 dark:text-neutral-400">{t('gradingAgent.canvas.inspector.quizResponses.empty')}</p>}>
+          <QuizResponsesInspector slots={quizQuestionSlots} questions={quizQuestions} />
+        </Suspense>
       </div>
     )
   }

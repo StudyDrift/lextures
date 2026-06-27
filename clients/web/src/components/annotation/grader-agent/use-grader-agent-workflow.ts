@@ -32,7 +32,13 @@ import {
   type RunAgentFilterState,
 } from './run-agent-filter-picker'
 import { isWorkflowRunnable, validateWorkflowGraph } from './validation'
-import type { GraderWorkflowGraph, PaletteNodeType, WorkflowValidationIssue } from './types'
+import type {
+  GradingAgentItemKind,
+  GraderWorkflowGraph,
+  PaletteNodeType,
+  WorkflowValidationIssue,
+} from './types'
+import type { QuizQuestionSlot } from './quiz-question-slots'
 import { useRubricLibraryRubrics } from './use-rubric-library-rubrics'
 import { newWorkflowNodeId } from './workflow-node-id'
 import { patchWorkflowNodeLabel } from './workflow-node-label'
@@ -93,6 +99,8 @@ type UseGraderAgentWorkflowArgs = {
   open: boolean
   courseCode: string
   itemId: string
+  itemKind?: GradingAgentItemKind
+  quizQuestionSlots?: QuizQuestionSlot[]
   submissionId: string | null
   rubric?: RubricDefinition | null
   seedWorkflow?: GraderAgentWorkflowSeed | null
@@ -105,6 +113,8 @@ export function useGraderAgentWorkflow({
   open,
   courseCode,
   itemId,
+  itemKind = 'assignment',
+  quizQuestionSlots = [],
   submissionId,
   rubric = null,
   seedWorkflow = null,
@@ -153,8 +163,14 @@ export function useGraderAgentWorkflow({
 
   const { libraryRubrics, setLibraryRubricAvailability } = useRubricLibraryRubrics(graph)
   const validationOptions = useMemo(
-    () => ({ rubric, assignmentItemId: itemId, libraryRubrics }),
-    [rubric, itemId, libraryRubrics],
+    () => ({
+      rubric,
+      assignmentItemId: itemId,
+      itemKind,
+      quizQuestionSlots,
+      libraryRubrics,
+    }),
+    [rubric, itemId, itemKind, quizQuestionSlots, libraryRubrics],
   )
   const validationIssues = useMemo(
     () => validateWorkflowGraph(graph, validationOptions),
@@ -229,17 +245,18 @@ export function useGraderAgentWorkflow({
           seedWorkflow.prompt,
           seedWorkflow.includeAssignmentContent,
           seedWorkflow.includeRubric,
+          itemKind,
         )
         setGraph(g)
         setSelectedNodeId(null)
       } else {
-        const g = effectiveWorkflowGraph(null, '', false, false)
+        const g = effectiveWorkflowGraph(null, '', false, false, itemKind)
         setGraph(g)
         setSelectedNodeId(null)
       }
       return
     }
-    const res = await fetchGraderAgentConfig(courseCode, itemId)
+    const res = await fetchGraderAgentConfig(courseCode, itemId, itemKind)
     const c = res.config
     setConfig(c)
     if (c) {
@@ -248,6 +265,7 @@ export function useGraderAgentWorkflow({
         c.prompt,
         c.includeAssignmentContent,
         c.includeRubric,
+        itemKind,
       )
       setGraph(g)
       setSelectedNodeId(null)
@@ -258,15 +276,16 @@ export function useGraderAgentWorkflow({
         seedWorkflow.prompt,
         seedWorkflow.includeAssignmentContent,
         seedWorkflow.includeRubric,
+        itemKind,
       )
       setGraph(g)
       setSelectedNodeId(null)
     } else {
-      const g = effectiveWorkflowGraph(null, '', false, false)
+      const g = effectiveWorkflowGraph(null, '', false, false, itemKind)
       setGraph(g)
       setSelectedNodeId(null)
     }
-  }, [courseCode, itemId, seedWorkflow, templateMode])
+  }, [courseCode, itemId, itemKind, seedWorkflow, templateMode])
 
   useEffect(() => {
     if (!open) return
@@ -794,6 +813,7 @@ export function useGraderAgentWorkflow({
         courseCode,
         itemId,
         graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { status }),
+        itemKind,
       )
       setConfig(res.config)
       const savedGraph = effectiveWorkflowGraph(
@@ -801,6 +821,7 @@ export function useGraderAgentWorkflow({
         res.config.prompt,
         res.config.includeAssignmentContent,
         res.config.includeRubric,
+        itemKind,
       )
       setGraph(savedGraph)
       setStatusMessage(t('gradingAgent.save.saved'))
@@ -820,6 +841,7 @@ export function useGraderAgentWorkflow({
         courseCode,
         itemId,
         graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { status: 'accepted' }),
+        itemKind,
       )
       setConfig(res.config)
       setHadDryRun(true)
@@ -862,6 +884,7 @@ export function useGraderAgentWorkflow({
           courseCode,
           itemId,
           graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi),
+          itemKind,
         )
       }
       const effectiveMode: GraderAgentRunMode = graderAgentSuggestModeEnabled ? runMode : 'apply'
@@ -906,6 +929,7 @@ export function useGraderAgentWorkflow({
         status: 'accepted',
         autoGradeNew: enabled,
       }),
+      itemKind,
     )
     setConfig(res.config)
   }
@@ -919,6 +943,7 @@ export function useGraderAgentWorkflow({
         status: 'accepted',
         postPolicy: autoPost ? 'auto_post' : 'draft',
       }),
+      itemKind,
     )
     setConfig(res.config)
   }
@@ -929,6 +954,7 @@ export function useGraderAgentWorkflow({
       courseCode,
       itemId,
       graderAgentConfigPutPayload(config, graph as GraderWorkflowGraphApi, { confidenceFloor: floor }),
+      itemKind,
     )
     setConfig(res.config)
   }
@@ -1012,6 +1038,8 @@ export function useGraderAgentWorkflow({
     dryRunLogs,
     dryRunConsoleOpen,
     nodeDryRunDetails,
+    itemKind,
+    quizQuestionSlots,
   }
 }
 

@@ -10,7 +10,9 @@ import {
   isConditionalRouterNodeType,
   isHumanReviewGateNodeType,
   isScoreAggregatorNodeType,
+  isSetScoreNodeType,
 } from './types'
+import { isQuizGradeHandle } from './quiz-question-slots'
 
 /** Whether a source may wire into a Student Grade output slot. */
 export function outputSlotSourceIsValid(
@@ -18,6 +20,20 @@ export function outputSlotSourceIsValid(
   sourceHandle: string,
   targetHandle: string,
 ): boolean {
+  if (isQuizGradeHandle(targetHandle)) {
+    if (sourceHandle === HANDLE_GRADE && (sourceType === 'grader' || sourceType === 'criterionGrader')) {
+      return true
+    }
+    if (sourceHandle === HANDLE_AI_OUTPUT && isAiNodeType(sourceType)) return true
+    if (sourceHandle === HANDLE_GRADE && isCodeTestRunnerNodeType(sourceType)) return true
+    if ((sourceHandle === HANDLE_THEN || sourceHandle === HANDLE_ELSE) && isConditionalRouterNodeType(sourceType)) {
+      return true
+    }
+    if (sourceHandle === HANDLE_GRADE && isHumanReviewGateNodeType(sourceType)) return true
+    if (sourceHandle === HANDLE_GRADE && isScoreAggregatorNodeType(sourceType)) return true
+    if (sourceHandle === HANDLE_GRADE && isSetScoreNodeType(sourceType)) return true
+    return false
+  }
   if (targetHandle === HANDLE_GRADE) {
     if (sourceHandle === HANDLE_GRADE && (sourceType === 'grader' || sourceType === 'criterionGrader')) return true
     if (sourceHandle === HANDLE_AI_OUTPUT && isAiNodeType(sourceType)) return true

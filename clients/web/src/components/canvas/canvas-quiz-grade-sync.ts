@@ -7,6 +7,7 @@ type QueueCanvasQuizGradeSyncOptions = {
   itemId: string
   attemptId: string
   canvasLink: CourseCanvasLinkApi
+  /** Attempt total after save; avoids pushing a stale gradebook cell to Canvas. */
   pointsEarned?: number
   accessToken?: string
   onComplete?: () => void

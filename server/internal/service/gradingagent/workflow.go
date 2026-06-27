@@ -18,6 +18,7 @@ const (
 	NodeTypeAI                = "ai"
 	NodeTypeActivity          = "activity"
 	NodeTypeStudentSubmission = "studentSubmission"
+	NodeTypeQuizResponses     = "quizResponses"
 	NodeTypeCodeTestRunner    = "codeTestRunner"
 	NodeTypeConditionalRouter = "conditionalRouter"
 	NodeTypeCriterionGrader   = "criterionGrader"
@@ -94,6 +95,10 @@ func isStudentSubmissionNodeType(nodeType string) bool {
 	return nodeType == NodeTypeStudentSubmission
 }
 
+func isQuizResponsesNodeType(nodeType string) bool {
+	return nodeType == NodeTypeQuizResponses
+}
+
 func isAINodeType(nodeType string) bool {
 	return nodeType == NodeTypeAI
 }
@@ -107,6 +112,30 @@ func isCriterionGraderNodeType(nodeType string) bool {
 }
 
 func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool {
+	if isQuizGradeHandle(tgtHandle) {
+		if srcHandle == HandleGrade && (src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type)) {
+			return true
+		}
+		if srcHandle == HandleAIOutput && src.Type == NodeTypeAI {
+			return true
+		}
+		if srcHandle == HandleGrade && isCodeTestRunnerNodeType(src.Type) {
+			return true
+		}
+		if (srcHandle == HandleThen || srcHandle == HandleElse) && isConditionalRouterNodeType(src.Type) {
+			return true
+		}
+		if srcHandle == HandleGrade && isHumanReviewGateNodeType(src.Type) {
+			return true
+		}
+		if srcHandle == HandleGrade && isScoreAggregatorNodeType(src.Type) {
+			return true
+		}
+		if srcHandle == HandleGrade && isSetScoreNodeType(src.Type) {
+			return true
+		}
+		return false
+	}
 	switch tgtHandle {
 	case HandleGrade:
 		if srcHandle == HandleGrade && (src.Type == NodeTypeGrader || isCriterionGraderNodeType(src.Type)) {
@@ -146,6 +175,9 @@ func outputSlotSourceIsValid(src WorkflowNode, srcHandle, tgtHandle string) bool
 
 func aiInputSourceIsValid(sourceType, sourceHandle string) bool {
 	if isStudentSubmissionNodeType(sourceType) && sourceHandle == HandleSubmission {
+		return true
+	}
+	if isQuizResponsesNodeType(sourceType) && isQuizQuestionHandle(sourceHandle) {
 		return true
 	}
 	if isActivityNodeType(sourceType) && (sourceHandle == HandleContent || sourceHandle == HandleRubric) {
@@ -231,7 +263,7 @@ func ValidateWorkflowGraphForPersistence(g *WorkflowGraph) error {
 		}
 		nodeByID[n.ID] = n
 		switch n.Type {
-		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
+		case NodeTypeOutput, NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeQuizResponses, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type."}
 		}
@@ -286,7 +318,7 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		switch n.Type {
 		case NodeTypeOutput:
 			outputCount++
-		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
+		case NodeTypeGrader, NodeTypeCriterionGrader, NodeTypeAI, NodeTypeActivity, NodeTypeStudentSubmission, NodeTypeQuizResponses, NodeTypeCodeTestRunner, NodeTypeConditionalRouter, NodeTypeFlagForReview, NodeTypeHumanReviewGate, NodeTypeOriginality, NodeTypeReference, NodeTypeRubric, NodeTypeScoreAggregator, NodeTypeSetScore:
 		default:
 			return ValidationError{Field: "node:" + n.ID, Message: "Unknown node type." }
 		}
@@ -311,10 +343,10 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		}
 		if tgt.Type == NodeTypeOutput {
 			slot := strings.TrimSpace(e.TargetHandle)
-			if slot != HandleGrade && slot != HandleComments {
+			if slot != HandleGrade && slot != HandleComments && !isQuizGradeHandle(slot) {
 				return ValidationError{Field: "output", Message: "Output node edges must target grade or comments slots."}
 			}
-			if len(outputSlotEdges[slot]) > 0 && slot == HandleComments {
+			if len(outputSlotEdges[slot]) > 0 && (slot == HandleComments || isQuizGradeHandle(slot)) {
 				return ValidationError{Field: "output." + slot, Message: "Each output slot accepts at most one inbound edge."}
 			}
 			outputSlotEdges[slot] = append(outputSlotEdges[slot], e.ID)
@@ -322,7 +354,18 @@ func ValidateWorkflowGraph(g *WorkflowGraph) error {
 		adj[e.Source] = append(adj[e.Source], e.Target)
 	}
 
-	if len(outputSlotEdges[HandleGrade]) == 0 && !graphHasFlagSink(g) {
+	if graphIsQuizMode(g) {
+		hasQuizGrade := false
+		for slot, edges := range outputSlotEdges {
+			if isQuizGradeHandle(slot) && len(edges) > 0 {
+				hasQuizGrade = true
+				break
+			}
+		}
+		if !hasQuizGrade && !graphHasFlagSink(g) {
+			return ValidationError{Field: "output.grade", Message: "Connect at least one question grade slot before running."}
+		}
+	} else if len(outputSlotEdges[HandleGrade]) == 0 && !graphHasFlagSink(g) {
 		return ValidationError{Field: "output.grade", Message: "Connect the grade slot before running."}
 	}
 
@@ -393,7 +436,7 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 
 	switch tgt.Type {
 	case NodeTypeOutput:
-		if tgtHandle != HandleGrade && tgtHandle != HandleComments {
+		if tgtHandle != HandleGrade && tgtHandle != HandleComments && !isQuizGradeHandle(tgtHandle) {
 			return ValidationError{Field: "output", Message: "Output node edges must target grade or comments slots."}
 		}
 		if !outputSlotSourceIsValid(src, srcHandle, tgtHandle) {
@@ -412,8 +455,8 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 			}
 			return ValidationError{Field: "node:" + tgt.ID, Message: "Rubric input must come from an Activity or Rubric rubric output."}
 		case HandleSubmission:
-			if !isStudentSubmissionNodeType(src.Type) {
-				return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
+			if !quizSubmissionSourceValid(src, srcHandle) {
+				return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission or Quiz Responses node."}
 			}
 		default:
 			msg := "Grader node accepts submission, content, or rubric inputs only."
@@ -436,8 +479,8 @@ func validateEdgeTypes(src, tgt WorkflowNode, e WorkflowEdge) error {
 		if tgtHandle != HandleSubmission {
 			return ValidationError{Field: "node:" + tgt.ID, Message: "Code Test Runner accepts a submission input only."}
 		}
-		if !isStudentSubmissionNodeType(src.Type) {
-			return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission node."}
+		if !quizSubmissionSourceValid(src, srcHandle) {
+			return ValidationError{Field: "node:" + tgt.ID, Message: "Submission input must come from a Student Submission or Quiz Responses node."}
 		}
 	case NodeTypeConditionalRouter:
 		if tgtHandle != HandleAIInput {

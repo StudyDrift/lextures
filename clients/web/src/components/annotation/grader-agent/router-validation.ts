@@ -16,10 +16,12 @@ import {
   isCriterionGraderNodeType,
   isFlagForReviewNodeType,
   isOriginalityNodeType,
+  isQuizResponsesNodeType,
   isScoreAggregatorNodeType,
   isStudentSubmissionNodeType,
   type ConditionalRouterConditionField,
 } from './types'
+import { isQuizQuestionHandle } from './quiz-question-slots'
 import { routerFieldRequiresOriginality, routerFieldRequiresUpstreamGrade } from './router-condition'
 
 function forwardReachable(graph: GraderWorkflowGraph, starts: string[]): Set<string> {
@@ -207,6 +209,7 @@ export function validateRouterIssues(
 
 export function routerInputSourceIsValid(sourceType: string, sourceHandle: string): boolean {
   if (isStudentSubmissionNodeType(sourceType) && sourceHandle === HANDLE_SUBMISSION) return true
+  if (isQuizResponsesNodeType(sourceType) && isQuizQuestionHandle(sourceHandle)) return true
   if (isAiNodeType(sourceType) && sourceHandle === HANDLE_AI_OUTPUT) return true
   if (
     (sourceType === 'grader' || isCriterionGraderNodeType(sourceType)) &&

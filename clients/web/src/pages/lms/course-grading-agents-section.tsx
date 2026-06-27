@@ -21,12 +21,16 @@ import {
   fetchCourseGradingAgents,
   fetchGraderAgentTemplate,
   fetchModuleAssignment,
+  fetchModuleQuiz,
   deleteGraderAgentTemplate,
   postGraderAgentTemplate,
   type CourseGradingAgentSummary,
   type CourseGradingAgentTemplateSummary,
+  type GradingAgentItemKind,
+  type QuizQuestion,
   type RubricDefinition,
 } from '../../lib/courses-api'
+import type { QuizQuestionSlot } from '../../components/annotation/grader-agent/quiz-question-slots'
 import { formatAbsolute } from '../../lib/format-datetime'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
@@ -38,9 +42,12 @@ type CourseGradingAgentsSectionProps = {
 
 type OpenAgentState = {
   itemId: string
+  itemKind: GradingAgentItemKind
   assignmentTitle: string
   rubric: RubricDefinition | null
   maxPoints: number | null
+  quizQuestionSlots: QuizQuestionSlot[]
+  quizQuestions: QuizQuestion[]
   seedWorkflow: GraderAgentWorkflowSeed | null
 }
 
@@ -185,14 +192,35 @@ export function CourseGradingAgentsSection({
   const openAgentEditor = async (agent: CourseGradingAgentSummary) => {
     setOpeningItemId(agent.itemId)
     try {
-      const assignment = await fetchModuleAssignment(courseCode, agent.itemId)
-      setOpenAgent({
-        itemId: agent.itemId,
-        assignmentTitle: agent.assignmentTitle,
-        rubric: assignment.rubric ?? null,
-        maxPoints: assignment.pointsWorth ?? null,
-        seedWorkflow: null,
-      })
+      const itemKind = agent.itemKind ?? 'assignment'
+      if (itemKind === 'quiz') {
+        const quiz = await fetchModuleQuiz(courseCode, agent.itemId)
+        const { computeQuizQuestionSlots } = await import(
+          '../../components/annotation/grader-agent/quiz-question-slots'
+        )
+        setOpenAgent({
+          itemId: agent.itemId,
+          itemKind: 'quiz',
+          assignmentTitle: agent.assignmentTitle,
+          rubric: null,
+          maxPoints: quiz.pointsWorth ?? null,
+          quizQuestionSlots: computeQuizQuestionSlots(quiz),
+          quizQuestions: quiz.questions ?? [],
+          seedWorkflow: null,
+        })
+      } else {
+        const assignment = await fetchModuleAssignment(courseCode, agent.itemId)
+        setOpenAgent({
+          itemId: agent.itemId,
+          itemKind: 'assignment',
+          assignmentTitle: agent.assignmentTitle,
+          rubric: assignment.rubric ?? null,
+          maxPoints: assignment.pointsWorth ?? null,
+          quizQuestionSlots: [],
+          quizQuestions: [],
+          seedWorkflow: null,
+        })
+      }
     } catch (e) {
       setLoadError(e instanceof Error ? e.message : t('gradingAgent.settings.error.open'))
     } finally {
@@ -225,14 +253,34 @@ export function CourseGradingAgentsSection({
       }
     }
 
-    const assignment = await fetchModuleAssignment(courseCode, result.assignmentId)
-    setOpenAgent({
-      itemId: result.assignmentId,
-      assignmentTitle: assignment.title?.trim() || 'Untitled assignment',
-      rubric: assignment.rubric ?? null,
-      maxPoints: assignment.pointsWorth ?? null,
-      seedWorkflow,
-    })
+    if (result.itemKind === 'quiz') {
+      const quiz = await fetchModuleQuiz(courseCode, result.assignmentId)
+      const { computeQuizQuestionSlots } = await import(
+        '../../components/annotation/grader-agent/quiz-question-slots'
+      )
+      setOpenAgent({
+        itemId: result.assignmentId,
+        itemKind: 'quiz',
+        assignmentTitle: quiz.title?.trim() || 'Untitled quiz',
+        rubric: null,
+        maxPoints: quiz.pointsWorth ?? null,
+        quizQuestionSlots: computeQuizQuestionSlots(quiz),
+        quizQuestions: quiz.questions ?? [],
+        seedWorkflow,
+      })
+    } else {
+      const assignment = await fetchModuleAssignment(courseCode, result.assignmentId)
+      setOpenAgent({
+        itemId: result.assignmentId,
+        itemKind: 'assignment',
+        assignmentTitle: assignment.title?.trim() || 'Untitled assignment',
+        rubric: assignment.rubric ?? null,
+        maxPoints: assignment.pointsWorth ?? null,
+        quizQuestionSlots: [],
+        quizQuestions: [],
+        seedWorkflow,
+      })
+    }
     onCreateModalOpenChange(false)
   }
 
@@ -275,9 +323,12 @@ export function CourseGradingAgentsSection({
       const assignment = await fetchModuleAssignment(courseCode, assignmentId)
       setOpenAgent({
         itemId: assignmentId,
+        itemKind: 'assignment',
         assignmentTitle: assignment.title?.trim() || 'Untitled assignment',
         rubric: assignment.rubric ?? null,
         maxPoints: assignment.pointsWorth ?? null,
+        quizQuestionSlots: [],
+        quizQuestions: [],
         seedWorkflow: null,
       })
     }
@@ -431,7 +482,7 @@ export function CourseGradingAgentsSection({
                       onClick={() => toggleAgentSort('assignmentTitle')}
                       aria-sort={agentSortAria('assignmentTitle')}
                     >
-                      {t('gradingAgent.settings.table.assignment')}
+                      {t('gradingAgent.settings.table.activity')}
                     </button>
                   </th>
                   <th className="w-28 px-4 py-3 text-start font-semibold text-slate-900 dark:text-neutral-100">
@@ -469,6 +520,11 @@ export function CourseGradingAgentsSection({
                             className="text-start font-medium text-indigo-700 hover:underline disabled:opacity-60 dark:text-indigo-300"
                           >
                             {agent.assignmentTitle}
+                            {agent.itemKind === 'quiz' ? (
+                              <span className="ms-2 text-xs font-normal text-violet-600 dark:text-violet-300">
+                                {t('gradingAgent.settings.quizBadge')}
+                              </span>
+                            ) : null}
                             {agent.assignmentArchived ? (
                               <span className="ms-2 text-xs font-normal text-slate-500 dark:text-neutral-400">
                                 {t('gradingAgent.settings.archivedAssignment')}
@@ -564,10 +620,13 @@ export function CourseGradingAgentsSection({
           }}
           courseCode={courseCode}
           itemId={openAgent.itemId}
+          itemKind={openAgent.itemKind}
           assignmentTitle={openAgent.assignmentTitle}
           submissionId={null}
           rubric={openAgent.rubric}
           maxPoints={openAgent.maxPoints}
+          quizQuestionSlots={openAgent.quizQuestionSlots}
+          quizQuestions={openAgent.quizQuestions}
           seedWorkflow={openAgent.seedWorkflow}
         />
       ) : null}

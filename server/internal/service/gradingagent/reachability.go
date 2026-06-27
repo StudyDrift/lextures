@@ -300,6 +300,9 @@ func routerInputSourceIsValid(sourceType, sourceHandle string) bool {
 	if isStudentSubmissionNodeType(sourceType) && sourceHandle == HandleSubmission {
 		return true
 	}
+	if isQuizResponsesNodeType(sourceType) && isQuizQuestionHandle(sourceHandle) {
+		return true
+	}
 	if isAINodeType(sourceType) && sourceHandle == HandleAIOutput {
 		return true
 	}
