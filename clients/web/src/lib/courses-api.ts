@@ -153,6 +153,8 @@ export type CoursePublic = {
   attendanceEnabled?: boolean
   /** Whiteboard canvas tool for teachers (default off). */
   whiteboardEnabled?: boolean
+  /** District-formatted report cards with comment banks and PDF release (default off). */
+  reportCardsEnabled?: boolean
   /** When true, saved grades are pushed back to the linked Canvas course (default off). */
   canvasGradeSyncEnabled?: boolean
   /** Plan 12.4 — block publishing video content without ready captions. */
@@ -800,6 +802,7 @@ export async function patchCourseFeatures(
     filesEnabled?: boolean
     attendanceEnabled?: boolean
     whiteboardEnabled?: boolean
+    reportCardsEnabled?: boolean
   },
 ): Promise<CoursePublic> {
   const res = await authorizedFetch(
@@ -828,6 +831,7 @@ export async function patchCourseFeatures(
         ...(body.filesEnabled !== undefined ? { filesEnabled: body.filesEnabled } : {}),
         ...(body.attendanceEnabled !== undefined ? { attendanceEnabled: body.attendanceEnabled } : {}),
         ...(body.whiteboardEnabled !== undefined ? { whiteboardEnabled: body.whiteboardEnabled } : {}),
+        ...(body.reportCardsEnabled !== undefined ? { reportCardsEnabled: body.reportCardsEnabled } : {}),
         ...(body.sectionsEnabled !== undefined ? { sectionsEnabled: body.sectionsEnabled } : {}),
       }),
     },

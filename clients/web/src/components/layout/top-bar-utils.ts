@@ -28,11 +28,34 @@ export function parseAccountProfile(raw: unknown): TopBarAccountProfile | null {
   }
 }
 
-export function profileName(profile: TopBarAccountProfile | null): string {
-  if (!profile) return 'Profile'
+export function nameFieldsFromProfile(profile: {
+  firstName?: string | null
+  lastName?: string | null
+  displayName?: string | null
+}): { firstName: string; lastName: string } {
   const first = profile.firstName?.trim() ?? ''
   const last = profile.lastName?.trim() ?? ''
-  const combined = [first, last].filter(Boolean).join(' ').trim()
+  if (first || last) {
+    return { firstName: first, lastName: last }
+  }
+  const display = profile.displayName?.trim() ?? ''
+  if (!display) {
+    return { firstName: '', lastName: '' }
+  }
+  const parts = display.split(/\s+/).filter(Boolean)
+  if (parts.length === 0) {
+    return { firstName: '', lastName: '' }
+  }
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: '' }
+  }
+  return { firstName: parts[0], lastName: parts.slice(1).join(' ') }
+}
+
+export function profileName(profile: TopBarAccountProfile | null): string {
+  if (!profile) return 'Profile'
+  const { firstName, lastName } = nameFieldsFromProfile(profile)
+  const combined = [firstName, lastName].filter(Boolean).join(' ').trim()
   if (combined) return combined
   const display = profile.displayName?.trim() ?? ''
   if (display) return display

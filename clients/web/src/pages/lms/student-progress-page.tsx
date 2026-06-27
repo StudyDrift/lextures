@@ -1,12 +1,20 @@
-import { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
+import { ChevronDown, Mail, Send, X } from 'lucide-react'
 import { EnrollmentAvatar } from '../../components/enrollment/enrollment-avatar'
 import { useCoursePageTitle } from '../../context/course-document-title-context'
+import { usePermission } from '../../context/use-permissions'
 import { LmsPage } from './lms-page'
-import { fetchCourse } from '../../lib/courses-api'
+import {
+  courseEnrollmentsUpdatePermission,
+  courseGradebookViewPermission,
+  fetchCourse,
+  sendEnrollmentMessage,
+} from '../../lib/courses-api'
 import { formatTimeAgoFromIso } from '../../lib/format-time-ago'
 import { formatAbsolute } from '../../lib/format-datetime'
 import { formatDate } from '../../lib/format'
+import { toast } from '../../lib/lms-toast'
 import {
   createStudentProgressNote,
   deleteStudentProgressNote,
@@ -22,6 +30,78 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import { studentProgressI18n } from '../../lib/student-progress'
 
 type TabId = 'overview' | 'activity' | 'assignments' | 'quizzes' | 'notes'
+
+const LMS_MODAL_OVERLAY_CLASS =
+  'fixed inset-0 z-50 flex items-end justify-center p-4 backdrop-blur-md bg-slate-900/30 dark:bg-black/40 sm:items-center'
+
+function StudentProgressActionsMenu({
+  disabled,
+  onMessageStudent,
+}: {
+  disabled: boolean
+  onMessageStudent: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const menuId = useId()
+
+  useEffect(() => {
+    if (!open) return
+    function onDoc(e: MouseEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        disabled={disabled}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={open ? menuId : undefined}
+        onClick={() => setOpen((o) => !o)}
+        className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-slate-800 shadow-sm transition-[background-color,color,border-color] hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800"
+      >
+        More
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+          aria-hidden
+        />
+      </button>
+      {open && (
+        <div
+          id={menuId}
+          role="menu"
+          aria-label="Student progress actions"
+          className="absolute end-0 z-50 mt-1 min-w-[12rem] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10 dark:border-neutral-600 dark:bg-neutral-900"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              onMessageStudent()
+              setOpen(false)
+            }}
+            className="flex w-full items-center gap-2 px-2.5 py-2 text-start text-sm font-medium text-slate-800 transition-[background-color,color,border-color] hover:bg-slate-50 dark:text-neutral-200 dark:hover:bg-neutral-800"
+          >
+            <Mail className="h-4 w-4 shrink-0 text-slate-500 dark:text-neutral-400" aria-hidden />
+            Message Student
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
 
 function statusBadgeClass(status: string): string {
   switch (status) {
@@ -208,6 +288,13 @@ function QuizScoreChart({
 export default function StudentProgressPage() {
   const { courseCode, enrollmentId } = useParams<{ courseCode: string; enrollmentId: string }>()
   const { studentProgressEnabled, loading: featuresLoading } = usePlatformFeatures()
+  const canUpdateEnrollments = usePermission(
+    courseCode ? courseEnrollmentsUpdatePermission(courseCode) : 'global:app:noop:noop',
+  )
+  const canViewGradebook = usePermission(
+    courseCode ? courseGradebookViewPermission(courseCode) : 'global:app:noop:noop',
+  )
+  const canMessageStudent = canUpdateEnrollments || canViewGradebook
   const tabsId = useId()
   const [tab, setTab] = useState<TabId>('overview')
   const [loadState, setLoadState] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
@@ -220,8 +307,14 @@ export default function StudentProgressPage() {
   const [noteDraft, setNoteDraft] = useState('')
   const [editingNote, setEditingNote] = useState<StudentProgressNote | null>(null)
   const [noteBusy, setNoteBusy] = useState(false)
+  const [messageOpen, setMessageOpen] = useState(false)
+  const [messageSubject, setMessageSubject] = useState('')
+  const [messageBody, setMessageBody] = useState('')
+  const [messageStatus, setMessageStatus] = useState<'idle' | 'loading' | 'error'>('idle')
+  const [messageError, setMessageError] = useState<string | null>(null)
 
   const isSelf = viewerEnrollmentId != null && enrollmentId === viewerEnrollmentId
+  const showProgressActions = !isSelf && canMessageStudent
 
   const load = useCallback(async () => {
     if (!courseCode || !enrollmentId) return
@@ -270,6 +363,33 @@ export default function StudentProgressPage() {
       void loadActivity(true)
     }
   }, [tab, activity.length, loadState, loadActivity])
+
+  const closeMessageModal = useCallback(() => {
+    setMessageOpen(false)
+    setMessageSubject('')
+    setMessageBody('')
+    setMessageStatus('idle')
+    setMessageError(null)
+  }, [])
+
+  const openMessageModal = useCallback(() => {
+    setMessageOpen(true)
+    setMessageSubject('')
+    setMessageBody('')
+    setMessageStatus('idle')
+    setMessageError(null)
+  }, [])
+
+  useEffect(() => {
+    if (!messageOpen) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== 'Escape') return
+      e.preventDefault()
+      closeMessageModal()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [messageOpen, closeMessageModal])
 
   const tabs = useMemo(() => {
     const base: { id: TabId; label: string }[] = [
@@ -342,9 +462,42 @@ export default function StudentProgressPage() {
     }
   }
 
+  async function onSubmitStudentMessage(ev: FormEvent) {
+    ev.preventDefault()
+    if (!courseCode || !enrollmentId || !data) return
+    const body = messageBody.trim()
+    if (!body) {
+      setMessageError('Enter a message.')
+      setMessageStatus('error')
+      return
+    }
+    setMessageStatus('loading')
+    setMessageError(null)
+    try {
+      await sendEnrollmentMessage(courseCode, enrollmentId, {
+        subject: messageSubject.trim(),
+        body,
+      })
+      const name = data.summary.studentDisplayName?.trim() || 'this student'
+      toast.success('Message sent', { description: `Delivered to ${name}'s inbox.` })
+      closeMessageModal()
+    } catch (e: unknown) {
+      setMessageStatus('error')
+      setMessageError(e instanceof Error ? e.message : 'Could not send message.')
+    }
+  }
+
   return (
     <LmsPage
       title={pageTitle}
+      actions={
+        showProgressActions ? (
+          <StudentProgressActionsMenu
+            disabled={loadState !== 'ok'}
+            onMessageStudent={openMessageModal}
+          />
+        ) : undefined
+      }
       titleContent={
         data ? (
           <div className="flex items-center gap-3">
@@ -504,14 +657,17 @@ export default function StudentProgressPage() {
               {tab === 'activity' && (
                 <ul className="divide-y divide-slate-100 dark:divide-neutral-800">
                   {activity.map((ev, i) => (
-                    <li key={`${ev.occurredAt}-${i}`} className="flex gap-3 py-3 text-sm">
+                    <li
+                      key={`${ev.occurredAt}-${i}`}
+                      className="grid grid-cols-1 gap-1 py-3 text-sm sm:grid-cols-[minmax(11rem,13rem)_minmax(0,1fr)] sm:items-start sm:gap-x-4"
+                    >
                       <time
-                        className="shrink-0 text-xs text-slate-500 dark:text-neutral-500"
+                        className="shrink-0 text-xs tabular-nums text-slate-500 sm:text-end dark:text-neutral-500"
                         dateTime={ev.occurredAt}
                       >
                         {formatAbsolute(new Date(ev.occurredAt))}
                       </time>
-                      <div>
+                      <div className="min-w-0">
                         <p className="font-medium text-slate-900 dark:text-neutral-100">{ev.label}</p>
                         {ev.detail ? (
                           <p className="text-slate-600 dark:text-neutral-400">{ev.detail}</p>
@@ -691,6 +847,92 @@ export default function StudentProgressPage() {
           </div>
         </>
       )}
+
+      {messageOpen && data ? (
+        <div
+          className={LMS_MODAL_OVERLAY_CLASS}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="student-progress-message-title"
+          onClick={(ev) => {
+            if (ev.target === ev.currentTarget) closeMessageModal()
+          }}
+        >
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-neutral-700 dark:bg-neutral-900">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-neutral-700">
+              <h3
+                id="student-progress-message-title"
+                className="text-sm font-semibold text-slate-900 dark:text-neutral-100"
+              >
+                Send message
+              </h3>
+              <button
+                type="button"
+                onClick={() => closeMessageModal()}
+                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-neutral-400 dark:hover:bg-neutral-800"
+                aria-label="Close"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form
+              onSubmit={(ev) => void onSubmitStudentMessage(ev)}
+              className="space-y-3 px-4 py-4 text-sm text-slate-700 dark:text-neutral-300"
+            >
+              <p className="text-slate-600 dark:text-neutral-400">
+                To{' '}
+                <span className="font-medium text-slate-900 dark:text-neutral-100">
+                  {data.summary.studentDisplayName?.trim() || '—'}
+                </span>
+              </p>
+              {messageError ? (
+                <p className="text-sm text-rose-700 dark:text-rose-300" role="alert">
+                  {messageError}
+                </p>
+              ) : null}
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Subject</span>
+                <input
+                  value={messageSubject}
+                  onChange={(ev) => setMessageSubject(ev.target.value)}
+                  className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  placeholder="Optional subject"
+                  disabled={messageStatus === 'loading'}
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-medium text-slate-600 dark:text-neutral-400">Message</span>
+                <textarea
+                  value={messageBody}
+                  onChange={(ev) => setMessageBody(ev.target.value)}
+                  rows={6}
+                  className="mt-1 w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-500/20 dark:border-neutral-600 dark:bg-neutral-950 dark:text-neutral-100"
+                  placeholder="Write your message…"
+                  disabled={messageStatus === 'loading'}
+                  required
+                />
+              </label>
+              <div className="flex justify-end gap-2 border-t border-slate-200 pt-3 dark:border-neutral-700">
+                <button
+                  type="button"
+                  onClick={() => closeMessageModal()}
+                  className="rounded-xl px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={messageStatus === 'loading' || !messageBody.trim()}
+                  className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Send className="h-4 w-4" aria-hidden />
+                  {messageStatus === 'loading' ? 'Sending…' : 'Send'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </LmsPage>
   )
 }

@@ -19,6 +19,7 @@ export type SearchCourseItem = {
   filesEnabled?: boolean
   attendanceEnabled?: boolean
   whiteboardEnabled?: boolean
+  reportCardsEnabled?: boolean
   questionBankEnabled?: boolean
   standardsAlignmentEnabled?: boolean
 }

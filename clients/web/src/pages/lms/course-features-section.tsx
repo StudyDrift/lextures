@@ -55,6 +55,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
   const filesEnabled = course.filesEnabled !== false
   const attendanceEnabled = course.attendanceEnabled === true
   const whiteboardEnabled = course.whiteboardEnabled === true
+  const reportCardsEnabled = course.reportCardsEnabled === true
   const canvasGradeSyncEnabled = course.canvasGradeSyncEnabled === true
 
   const persistCanvasGradeSync = useCallback(
@@ -104,6 +105,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       filesEnabled?: boolean
       attendanceEnabled?: boolean
       whiteboardEnabled?: boolean
+      reportCardsEnabled?: boolean
     }) => {
       setSaving(true)
       setMessage(null)
@@ -133,6 +135,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           filesEnabled: patch.filesEnabled ?? filesEnabled,
           attendanceEnabled: patch.attendanceEnabled ?? attendanceEnabled,
           whiteboardEnabled: patch.whiteboardEnabled ?? whiteboardEnabled,
+          reportCardsEnabled: patch.reportCardsEnabled ?? reportCardsEnabled,
         }
         const updated = await patchCourseFeatures(courseCode, body)
         onCourseUpdated(updated)
@@ -163,6 +166,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       filesEnabled,
       attendanceEnabled,
       whiteboardEnabled,
+      reportCardsEnabled,
       calendarEnabled,
       courseCode,
       feedEnabled,
@@ -305,6 +309,13 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
           onToggle: () => void persist({ questionBankEnabled: !questionBankEnabled }),
         },
         {
+          label: 'Report cards',
+          description:
+            'Author district-formatted report cards with comment banks, narrative comments, and PDF release to the parent portal.',
+          enabled: reportCardsEnabled,
+          onToggle: () => void persist({ reportCardsEnabled: !reportCardsEnabled }),
+        },
+        {
           label: 'Quiz hints & worked examples',
           description:
             'Let learners request progressive hints and unlock worked examples during quizzes (question-bank items with UUID ids).',
@@ -364,6 +375,7 @@ export function CourseFeaturesSection({ courseCode, course, onCourseUpdated }: P
       srsEnabled,
       standardsAlignmentEnabled,
       whiteboardEnabled,
+      reportCardsEnabled,
       persist,
       persistCanvasGradeSync,
     ],

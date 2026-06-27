@@ -1,5 +1,38 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { initialsFromName, parseAccountProfile, profileName, shortcutHint } from '../top-bar-utils'
+import {
+  initialsFromName,
+  nameFieldsFromProfile,
+  parseAccountProfile,
+  profileName,
+  shortcutHint,
+} from '../top-bar-utils'
+
+describe('nameFieldsFromProfile', () => {
+  it('uses first and last name when present', () => {
+    expect(
+      nameFieldsFromProfile({
+        firstName: 'Ada',
+        lastName: 'Lovelace',
+        displayName: 'Display Only',
+      }),
+    ).toEqual({ firstName: 'Ada', lastName: 'Lovelace' })
+  })
+
+  it('splits display name when first and last are empty', () => {
+    expect(
+      nameFieldsFromProfile({
+        displayName: 'Chase Willden',
+      }),
+    ).toEqual({ firstName: 'Chase', lastName: 'Willden' })
+  })
+
+  it('puts a single-word display name in first name', () => {
+    expect(nameFieldsFromProfile({ displayName: 'Madonna' })).toEqual({
+      firstName: 'Madonna',
+      lastName: '',
+    })
+  })
+})
 
 describe('profileName', () => {
   it('returns Profile when profile is null', () => {

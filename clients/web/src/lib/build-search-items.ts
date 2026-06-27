@@ -570,6 +570,7 @@ const coursePageDefs: CoursePageDef[] = [
     suffix: '/report-cards',
     title: 'Report cards',
     hint: 'report cards comments grades release',
+    whenCourse: (c) => c.reportCardsEnabled === true,
     requiredPermission: courseGradebookViewPermission,
   },
   {

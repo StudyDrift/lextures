@@ -179,9 +179,10 @@ func ListReleasedForStudent(ctx context.Context, pool *pgxpool.Pool, studentID u
 	rows, err := pool.Query(ctx, `
 SELECT id, student_id, course_id, grading_period, final_grade_pct, letter_grade, comment,
        status, pdf_url, generated_at, released_at, created_at, updated_at
-FROM report_card.report_cards
-WHERE student_id = $1 AND status = 'released'
-ORDER BY grading_period DESC`, studentID)
+FROM report_card.report_cards rc
+JOIN course.courses c ON c.id = rc.course_id AND c.report_cards_enabled = true
+WHERE rc.student_id = $1 AND rc.status = 'released'
+ORDER BY rc.grading_period DESC`, studentID)
 	if err != nil {
 		return nil, err
 	}
