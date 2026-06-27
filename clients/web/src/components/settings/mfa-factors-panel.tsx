@@ -11,7 +11,11 @@ type Factor = {
   createdAt: string
 }
 
-export function MfaFactorsPanel() {
+type Props = {
+  embedded?: boolean
+}
+
+export function MfaFactorsPanel({ embedded = false }: Props) {
   const [loading, setLoading] = useState(true)
   const [factors, setFactors] = useState<Factor[]>([])
   const [error, setError] = useState<string | null>(null)
@@ -177,11 +181,11 @@ export function MfaFactorsPanel() {
   }
 
   if (loading) {
-    return <p className="mt-6 text-sm text-slate-500">Loading security settings…</p>
+    return <p className="text-sm text-slate-500">Loading security settings…</p>
   }
 
   return (
-    <div className="mt-10 border-t border-slate-200 pt-8 dark:border-neutral-700">
+    <div className={embedded ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-700'}>
       <h3 className="text-sm font-semibold text-slate-900 dark:text-neutral-100">Two-factor authentication</h3>
       <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
         Add an authenticator app or a passkey. Backup codes are shown once when you first enrol.

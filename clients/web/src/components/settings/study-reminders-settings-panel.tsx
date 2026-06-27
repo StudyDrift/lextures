@@ -11,7 +11,11 @@ import {
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
-export function StudyRemindersSettingsPanel() {
+type Props = {
+  embedded?: boolean
+}
+
+export function StudyRemindersSettingsPanel({ embedded = false }: Props) {
   const { ffStudyReminders, loading: featuresLoading } = usePlatformFeatures()
   const enableId = useId()
   const timeId = useId()
@@ -60,7 +64,10 @@ export function StudyRemindersSettingsPanel() {
   ]
 
   return (
-    <section aria-labelledby="study-reminders-heading" className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-neutral-700 dark:bg-neutral-900">
+    <section
+      aria-labelledby="study-reminders-heading"
+      className={`${embedded ? '' : 'mt-6 '}rounded-2xl border border-slate-200 bg-white p-5 dark:border-neutral-700 dark:bg-neutral-900`}
+    >
       <div className="flex items-start gap-3">
         <Bell className="mt-0.5 h-5 w-5 shrink-0 text-indigo-600 dark:text-indigo-300" aria-hidden />
         <div className="min-w-0 flex-1">

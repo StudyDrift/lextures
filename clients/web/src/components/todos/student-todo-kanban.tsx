@@ -14,7 +14,6 @@ import {
   type DragOverEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { CSS } from '@dnd-kit/utilities'
 import { CalendarDays, CheckCircle2 } from 'lucide-react'
 import { formatDueShort } from '../../lib/course-calendar-utils'
 import {
@@ -108,7 +107,7 @@ type TodoDraggableCardProps = {
 }
 
 function TodoDraggableCard({ item, overlay = false, isDragActive = false, weekBadge }: TodoDraggableCardProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: item.key,
     data: { itemKey: item.key, type: 'todo-item' },
   })
@@ -149,7 +148,6 @@ function TodoDraggableCard({ item, overlay = false, isDragActive = false, weekBa
   return (
     <article
       ref={overlay ? undefined : setNodeRef}
-      style={overlay ? undefined : { transform: CSS.Translate.toString(transform) }}
       className={[
         'group touch-manipulation rounded-lg bg-white transition-[box-shadow,opacity,transform] duration-150 ease-out dark:bg-neutral-900',
         CARD_SHADOW,
@@ -193,6 +191,7 @@ type TodoKanbanColumnProps = {
   isToday?: boolean
   variant: 'weekday' | 'done'
   showWeekBadge?: boolean
+  collapseEmpty?: boolean
   now: Date
 }
 
@@ -206,6 +205,7 @@ function TodoKanbanColumn({
   isToday = false,
   variant,
   showWeekBadge = false,
+  collapseEmpty = true,
   now,
 }: TodoKanbanColumnProps) {
   const isEmpty = items.length === 0
@@ -216,6 +216,29 @@ function TodoKanbanColumn({
   })
 
   const headerLabel = isDone ? title : shortTitle
+  const isCollapsed =
+    collapseEmpty && variant === 'weekday' && isEmpty && !isDragActive && !isDropTarget && !isOver
+
+  if (isCollapsed) {
+    return (
+      <section
+        ref={setNodeRef}
+        className="flex h-full w-9 shrink-0 flex-col overflow-hidden rounded-xl opacity-70 transition-opacity hover:opacity-100 sm:w-10"
+        aria-label={`${title} (0)`}
+      >
+        <div
+          className={[
+            'flex h-full flex-col items-center gap-2 rounded-xl py-2.5',
+            isToday
+              ? 'bg-indigo-600/90 text-white dark:bg-indigo-600/90'
+              : 'bg-slate-100/95 text-slate-500 dark:bg-neutral-800/95 dark:text-neutral-400',
+          ].join(' ')}
+        >
+          <span className="text-xs font-semibold uppercase">{shortTitle.charAt(0)}</span>
+        </div>
+      </section>
+    )
+  }
 
   return (
     <section
@@ -309,10 +332,11 @@ export type StudentTodoKanbanProps = {
   placements: StudentTodoPlacement[]
   weekOffsets: number[]
   now: Date
+  collapseEmpty?: boolean
   onItemMovedToDone?: (item: StudentTodoItem) => void | Promise<void>
 }
 
-export function StudentTodoKanban({ items, placements, weekOffsets, now, onItemMovedToDone }: StudentTodoKanbanProps) {
+export function StudentTodoKanban({ items, placements, weekOffsets, now, collapseEmpty = true, onItemMovedToDone }: StudentTodoKanbanProps) {
   const weekStartKey = useMemo(() => relativeWeekStartKey(now), [now])
   const normalizedWeekOffsets = useMemo(() => normalizeWeekOffsets(weekOffsets), [weekOffsets])
   const showWeekBadge = normalizedWeekOffsets.length > 1
@@ -478,6 +502,7 @@ export function StudentTodoKanban({ items, placements, weekOffsets, now, onItemM
                 isToday={normalizedWeekOffsets.includes(0) && columnId === today}
                 variant="weekday"
                 showWeekBadge={showWeekBadge}
+                collapseEmpty={collapseEmpty}
                 now={now}
               />
             ))}

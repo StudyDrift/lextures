@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { StudentTodoWeekPicker } from '../../components/todos/student-todo-week-picker'
+import { StudentTodoViewPicker } from '../../components/todos/student-todo-view-picker'
 import { authorizedFetch } from '../../lib/api'
 import { mapPool } from '../../lib/async-pool'
 import { readApiErrorMessage } from '../../lib/errors'
@@ -25,6 +26,7 @@ import { fetchStudentTodoBoardPlacements } from '../../lib/student-todo-board-ap
 import { collectStudentTodoItems } from '../../lib/student-todo-utils'
 import type { StudentTodoItem, StudentTodoPlacement } from '../../lib/student-todo-types'
 import { readStoredWeekOffsets, storeWeekOffsets } from '../../lib/student-todo-week'
+import { readStoredCollapseEmpty, storeCollapseEmpty } from '../../lib/student-todo-view'
 import { useRelativeWeekNow } from '../../lib/use-relative-week-now'
 import { LmsPage } from './lms-page'
 
@@ -37,10 +39,15 @@ export default function TodosPage() {
   const { allows, loading: permLoading } = usePermissions()
   const { now } = useRelativeWeekNow()
   const [weekOffsets, setWeekOffsets] = useState(() => readStoredWeekOffsets())
+  const [collapseEmpty, setCollapseEmpty] = useState(() => readStoredCollapseEmpty())
 
   useEffect(() => {
     storeWeekOffsets(weekOffsets)
   }, [weekOffsets])
+
+  useEffect(() => {
+    storeCollapseEmpty(collapseEmpty)
+  }, [collapseEmpty])
 
   const [courses, setCourses] = useState<CoursePublic[] | null>(null)
   const [coursesError, setCoursesError] = useState<string | null>(null)
@@ -186,7 +193,10 @@ export default function TodosPage() {
       fillHeight
       actions={
         showStudentBoard && !loading ? (
-          <StudentTodoWeekPicker value={weekOffsets} onChange={setWeekOffsets} now={now} />
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <StudentTodoViewPicker collapseEmpty={collapseEmpty} onCollapseEmptyChange={setCollapseEmpty} />
+            <StudentTodoWeekPicker value={weekOffsets} onChange={setWeekOffsets} now={now} />
+          </div>
         ) : undefined
       }
     >
@@ -214,6 +224,7 @@ export default function TodosPage() {
             placements={placements}
             weekOffsets={weekOffsets}
             now={now}
+            collapseEmpty={collapseEmpty}
             onItemMovedToDone={onItemMovedToDone}
           />
         </section>

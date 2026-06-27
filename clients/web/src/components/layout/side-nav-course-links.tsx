@@ -76,6 +76,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
     filesEnabled,
     attendanceEnabled,
     whiteboardEnabled,
+    reportCardsEnabled,
   } = useCourseNavFeatures()
   const { allows, loading: permLoading } = usePermissions()
   const {
@@ -261,7 +262,7 @@ export function SideNavCourseLinks({ courseCode }: SideNavCourseLinksProps) {
               Reading dashboard
             </SideNavLink>
           ) : null}
-          {canViewGradebook ? (
+          {reportCardsEnabled && canViewGradebook ? (
             <SideNavLink to={`${base}/report-cards`} icon={<ClipboardCheck className="h-5 w-5" />}>
               Report cards
             </SideNavLink>

@@ -33,7 +33,8 @@ SELECT
     c.office_hours_enabled,
     c.files_enabled,
     c.attendance_enabled,
-    c.whiteboard_enabled
+    c.whiteboard_enabled,
+    c.report_cards_enabled
 FROM course.courses c
 LEFT JOIN course.user_course_catalog_order o ON o.user_id = $1 AND o.course_id = c.id
 WHERE c.id IN (SELECT e.course_id FROM course.course_enrollments e WHERE e.user_id = $1 AND e.active)
@@ -70,6 +71,7 @@ ORDER BY o.sort_order NULLS LAST, c.title ASC
 			&it.FilesEnabled,
 			&it.AttendanceEnabled,
 			&it.WhiteboardEnabled,
+			&it.ReportCardsEnabled,
 		); err != nil {
 			return nil, err
 		}

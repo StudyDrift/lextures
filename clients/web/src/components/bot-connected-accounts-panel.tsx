@@ -15,8 +15,12 @@ const LABEL: Record<BotPlatform, string> = {
   discord: 'Discord',
 }
 
+type Props = {
+  embedded?: boolean
+}
+
 /** Settings panel for linking Slack/Discord for slash commands and DM reminders (plan 16.6). */
-export function BotConnectedAccountsPanel() {
+export function BotConnectedAccountsPanel({ embedded = false }: Props) {
   const [links, setLinks] = useState<BotUserLink[]>([])
   const [msg, setMsg] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
@@ -62,7 +66,7 @@ export function BotConnectedAccountsPanel() {
   }
 
   return (
-    <div className="mt-10 border-t border-slate-200 pt-8 dark:border-neutral-600">
+    <div className={embedded ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-600'}>
       <h3 className="text-sm font-medium text-slate-700 dark:text-neutral-200">Messaging apps</h3>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
         Link Slack or Discord to use <code className="text-xs">/lextures upcoming</code> and receive

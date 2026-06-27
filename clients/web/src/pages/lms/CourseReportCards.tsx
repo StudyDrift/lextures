@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Navigate, useParams } from 'react-router-dom'
+import { useCourseNavFeatures } from '../../context/course-nav-features-context'
 import {
   fetchCourseReportCards,
   patchReportCard,
@@ -51,6 +52,7 @@ function reportCardStatusBadgeClass(status: string | undefined): string {
 
 export default function CourseReportCards() {
   const { courseCode } = useParams<{ courseCode: string }>()
+  const { reportCardsEnabled, loading: featuresLoading } = useCourseNavFeatures()
   const [period, setPeriod] = useState<string>(currentQuarter())
   const [cards, setCards] = useState<ReportCard[]>([])
   const [roster, setRoster] = useState<RosterEntry[]>([])
@@ -251,6 +253,24 @@ export default function CourseReportCards() {
 
   const approvedCount = cards.filter((c) => c.status === 'approved').length
   const releasedCount = cards.filter((c) => c.status === 'released').length
+
+  if (!courseCode) {
+    return <Navigate to="/courses" replace />
+  }
+
+  if (featuresLoading) {
+    return (
+      <LmsPage title="Report Cards">
+        <p className="text-sm text-slate-500 dark:text-neutral-400" aria-busy="true">
+          Loading…
+        </p>
+      </LmsPage>
+    )
+  }
+
+  if (!reportCardsEnabled) {
+    return <Navigate to={`/courses/${encodeURIComponent(courseCode)}`} replace />
+  }
 
   return (
     <LmsPage title="Report Cards">

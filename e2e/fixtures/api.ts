@@ -640,6 +640,7 @@ export async function apiPatchCourseFeatures(
     lockdownModeEnabled?: boolean
     discussionsEnabled?: boolean
     sectionsEnabled?: boolean
+    reportCardsEnabled?: boolean
   },
 ): Promise<Record<string, unknown>> {
   const res = await fetch(
@@ -658,6 +659,7 @@ export async function apiPatchCourseFeatures(
         lockdownModeEnabled: features.lockdownModeEnabled ?? false,
         discussionsEnabled: features.discussionsEnabled ?? false,
         sectionsEnabled: features.sectionsEnabled,
+        reportCardsEnabled: features.reportCardsEnabled,
       }),
     },
   )

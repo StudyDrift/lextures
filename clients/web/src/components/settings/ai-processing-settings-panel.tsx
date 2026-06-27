@@ -5,7 +5,11 @@ import { readApiErrorMessage } from '../../lib/errors'
 import { aiDisclosureI18n } from '../../lib/ai-disclosure-i18n'
 import { toastMutationError, toastSaveOk } from '../../lib/lms-toast'
 
-export function AiProcessingSettingsPanel() {
+type Props = {
+  embedded?: boolean
+}
+
+export function AiProcessingSettingsPanel({ embedded = false }: Props) {
   const [optOut, setOptOut] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -54,11 +58,14 @@ export function AiProcessingSettingsPanel() {
   }, [optOut])
 
   if (loading) {
-    return <p className="mt-6 text-sm text-slate-500">Loading AI settings…</p>
+    return <p className="text-sm text-slate-500">Loading AI settings…</p>
   }
 
   return (
-    <section className="mt-8 border-t border-slate-200 pt-8 dark:border-neutral-600" aria-labelledby="ai-processing-heading">
+    <section
+      className={embedded ? '' : 'mt-8 border-t border-slate-200 pt-8 dark:border-neutral-600'}
+      aria-labelledby="ai-processing-heading"
+    >
       <h3 id="ai-processing-heading" className="text-sm font-medium text-slate-700 dark:text-neutral-200">
         {aiDisclosureI18n.optOutTitle}
       </h3>

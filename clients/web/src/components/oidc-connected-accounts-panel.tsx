@@ -12,8 +12,12 @@ type OidcStatus = {
   custom?: { id: string; displayName: string }[]
 }
 
+type Props = {
+  embedded?: boolean
+}
+
 /** Account settings: list linked OIDC identities and allow disconnect / connect-more. */
-export function OidcConnectedAccountsPanel() {
+export function OidcConnectedAccountsPanel({ embedded = false }: Props) {
   const [status, setStatus] = useState<OidcStatus | null>(null)
   const [ids, setIds] = useState<Identity[] | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
@@ -88,8 +92,10 @@ export function OidcConnectedAccountsPanel() {
   if (!status?.enabled) return null
 
   return (
-    <div className="mt-10 border-t border-slate-200 pt-8 dark:border-neutral-600">
-      <h3 className="text-sm font-medium text-slate-700 dark:text-neutral-200">Connected accounts</h3>
+    <div className={embedded ? '' : 'mt-10 border-t border-slate-200 pt-8 dark:border-neutral-600'}>
+      <h3 className="text-sm font-medium text-slate-700 dark:text-neutral-200">
+        {embedded ? 'Sign-in providers' : 'Connected accounts'}
+      </h3>
       <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
         Sign-in methods linked to this Lextures account (OpenID Connect).
       </p>

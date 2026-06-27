@@ -13,8 +13,18 @@
  *   [x] Parent portal shows report-cards section (or link) for linked student
  */
 import { test, expect, injectToken } from '../fixtures/test.js'
+import { apiPatchCourseFeatures } from '../fixtures/api.js'
 
 const apiBase = process.env.E2E_API_URL ?? 'http://localhost:8080'
+
+async function enableReportCards(token: string, courseCode: string) {
+  await apiPatchCourseFeatures(token, courseCode, {
+    feedEnabled: true,
+    calendarEnabled: true,
+    notebookEnabled: true,
+    reportCardsEnabled: true,
+  })
+}
 
 test.describe('Report Cards — API auth', () => {
   test('GET course report cards returns 401 without auth', async ({ seededCourse }) => {
@@ -64,9 +74,18 @@ test.describe('Report Cards — API auth', () => {
 })
 
 test.describe('Report Cards — authenticated API', () => {
+  test('instructor gets 404 when report cards are disabled', async ({ seededCourse }) => {
+    const res = await fetch(
+      `${apiBase}/api/v1/courses/${seededCourse.courseCode}/report-cards/Q1-2026`,
+      { headers: { Authorization: `Bearer ${seededCourse.instructorToken}` } },
+    )
+    expect(res.status).toBe(404)
+  })
+
   test('instructor can load report cards for course (returns 200 or empty list)', async ({
     seededCourse,
   }) => {
+    await enableReportCards(seededCourse.instructorToken, seededCourse.courseCode)
     const res = await fetch(
       `${apiBase}/api/v1/courses/${seededCourse.courseCode}/report-cards/Q1-2026`,
       { headers: { Authorization: `Bearer ${seededCourse.instructorToken}` } },
@@ -87,6 +106,7 @@ test.describe('Report Cards — authenticated API', () => {
   })
 
   test('PATCH report card with invalid ID returns 404 not 500', async ({ seededCourse }) => {
+    await enableReportCards(seededCourse.instructorToken, seededCourse.courseCode)
     const res = await fetch(
       `${apiBase}/api/v1/report-cards/00000000-0000-0000-0000-000000000099`,
       {
@@ -104,6 +124,7 @@ test.describe('Report Cards — authenticated API', () => {
 
 test.describe('Report Cards — UI', () => {
   test('report cards page loads for instructor', async ({ coursePage: page, seededCourse }) => {
+    await enableReportCards(seededCourse.instructorToken, seededCourse.courseCode)
     await page.goto(`/courses/${seededCourse.courseCode}/report-cards`)
     await expect(page.getByRole('heading', { name: /report cards/i })).toBeVisible({
       timeout: 8000,
@@ -114,6 +135,7 @@ test.describe('Report Cards — UI', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    await enableReportCards(seededCourse.instructorToken, seededCourse.courseCode)
     await page.goto(`/courses/${seededCourse.courseCode}/report-cards`)
     await expect(page.getByLabel(/grading period/i)).toBeVisible({ timeout: 8000 })
   })
@@ -122,6 +144,7 @@ test.describe('Report Cards — UI', () => {
     coursePage: page,
     seededCourse,
   }) => {
+    await enableReportCards(seededCourse.instructorToken, seededCourse.courseCode)
     await page.goto(`/courses/${seededCourse.courseCode}/report-cards`)
     // Either shows student rows or "No students enrolled"
     await expect(

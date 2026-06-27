@@ -9,18 +9,20 @@ type Props = {
   timezone: string
   onTimezoneChange: (value: string) => void
   disabled?: boolean
+  embedded?: boolean
 }
 
 export function LocaleFormatSettingsPanel({
   timezone,
   onTimezoneChange,
   disabled,
+  embedded = false,
 }: Props) {
   const tzId = useId()
   const browserTz = detectBrowserTimeZone()
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className={embedded ? 'space-y-4' : 'mt-8 space-y-4'}>
       <div>
         <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">Time zone</p>
         <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">

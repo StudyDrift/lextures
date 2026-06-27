@@ -70,6 +70,7 @@ type CoursePublic struct {
 	FilesEnabled                  bool             `json:"filesEnabled"`
 	AttendanceEnabled             bool             `json:"attendanceEnabled"`
 	WhiteboardEnabled             bool             `json:"whiteboardEnabled"`
+	ReportCardsEnabled            bool             `json:"reportCardsEnabled"`
 	CanvasGradeSyncEnabled        bool             `json:"canvasGradeSyncEnabled"`
 	RequireCaptions               bool             `json:"requireCaptions"`
 	CourseType                    string           `json:"courseType"`
@@ -147,6 +148,7 @@ const coursePublicSelect = `
     c.files_enabled,
     c.attendance_enabled,
     c.whiteboard_enabled,
+    c.report_cards_enabled,
     c.canvas_grade_sync_enabled,
     c.require_captions,
     c.course_type,
@@ -243,6 +245,7 @@ func scanCoursePublicFromRow(row pgx.Row) (CoursePublic, error) {
 		&p.FilesEnabled,
 		&p.AttendanceEnabled,
 		&p.WhiteboardEnabled,
+		&p.ReportCardsEnabled,
 		&p.CanvasGradeSyncEnabled,
 		&p.RequireCaptions,
 		&p.CourseType,

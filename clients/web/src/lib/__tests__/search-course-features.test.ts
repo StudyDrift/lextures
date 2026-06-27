@@ -41,6 +41,7 @@ describe('mergeCoursesWithNavFeatures', () => {
         filesEnabled: true,
         attendanceEnabled: false,
         whiteboardEnabled: false,
+        reportCardsEnabled: false,
       },
     )
     const bio = merged.find((c) => c.courseCode === 'BIO')
@@ -63,6 +64,7 @@ describe('mergeCoursesWithNavFeatures', () => {
       filesEnabled: true,
       attendanceEnabled: false,
       whiteboardEnabled: false,
+      reportCardsEnabled: false,
     })
     expect(merged).toHaveLength(1)
     expect(merged[0]?.courseCode).toBe('NEW')

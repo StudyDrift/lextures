@@ -207,7 +207,7 @@ func (d Deps) runCanvasImport(
 	prefetchGroup.Go(func() error {
 		var loadErr error
 		course, loadErr = canvasGetObject(prefetchCtx, client, canvasBase, accessToken,
-			fmt.Sprintf("courses/%d", canvasCourseID), url.Values{"include[]": []string{"syllabus_body"}})
+			fmt.Sprintf("courses/%d", canvasCourseID), url.Values{"include[]": []string{"syllabus_body", "course_image"}})
 		return loadErr
 	})
 	if include.Modules {
@@ -309,6 +309,16 @@ func (d Deps) runCanvasImport(
 		if settingsErr != nil {
 			_ = settingsTx.Rollback(ctx)
 			return errors.New("Failed to update course settings.")
+		}
+		// Use the Canvas course banner as the course hero image (shown on the
+		// course dashboard banner and the courses page cards). Only overwrite
+		// when Canvas actually has an image so we don't clear an existing hero.
+		if heroURL := strAt(course, "image_download_url", ""); heroURL != "" {
+			_, settingsErr = settingsTx.Exec(ctx, `UPDATE course.courses SET hero_image_url = $1, updated_at = NOW() WHERE id = $2`, heroURL, courseID)
+			if settingsErr != nil {
+				_ = settingsTx.Rollback(ctx)
+				return errors.New("Failed to update course banner.")
+			}
 		}
 		syllabusHTML := strAt(course, "syllabus_body", "")
 		if syllabusHTML != "" {

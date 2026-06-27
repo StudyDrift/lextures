@@ -13,9 +13,10 @@ import { LOCALE_OPTIONS, resolveResourceLanguage } from '../../i18n/supported-lo
 type Props = {
   initialLocale?: string | null
   onLocaleChange?: (tag: string) => void
+  embedded?: boolean
 }
 
-export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
+export function LocaleSwitcher({ initialLocale, onLocaleChange, embedded = false }: Props) {
   const { t } = useTranslation('common')
   const { rtlEnabled } = usePlatformFeatures()
   const selectId = useId()
@@ -78,7 +79,7 @@ export function LocaleSwitcher({ initialLocale, onLocaleChange }: Props) {
   )
 
   return (
-    <div className="mt-8">
+    <div className={embedded ? '' : 'mt-8'}>
       <div className="flex items-center gap-2">
         <Globe className="h-4 w-4 text-slate-500 dark:text-neutral-400" aria-hidden />
         <p className="text-sm font-medium text-slate-700 dark:text-neutral-200">{t('common.locale.label')}</p>

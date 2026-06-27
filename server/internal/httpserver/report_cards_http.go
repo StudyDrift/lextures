@@ -19,6 +19,32 @@ import (
 	"github.com/lextures/lextures/server/internal/service/reportpdf"
 )
 
+func (d Deps) reportCardsFeatureOff(w http.ResponseWriter, r *http.Request, courseCode string) bool {
+	enabled, err := course.ReportCardsEnabledForCourseCode(r.Context(), d.Pool, courseCode)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+		return true
+	}
+	if !enabled {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Report cards are not enabled for this course.")
+		return true
+	}
+	return false
+}
+
+func (d Deps) reportCardsFeatureOffForCourseID(w http.ResponseWriter, r *http.Request, courseID uuid.UUID) bool {
+	enabled, err := course.ReportCardsEnabledForCourseID(r.Context(), d.Pool, courseID)
+	if err != nil {
+		apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course.")
+		return true
+	}
+	if !enabled {
+		apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Report cards are not enabled for this course.")
+		return true
+	}
+	return false
+}
+
 func (d Deps) registerReportCardRoutes(r chi.Router) {
 	// Instructor: list / manage report cards for a course+period
 	r.Get("/api/v1/courses/{course_code}/report-cards/{period}", d.handleListCourseReportCards())
@@ -60,6 +86,9 @@ func (d Deps) handleListCourseReportCards() http.HandlerFunc {
 		}
 		if !hasPerm {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Gradebook access required.")
+			return
+		}
+		if d.reportCardsFeatureOff(w, r, courseCode) {
 			return
 		}
 		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
@@ -135,6 +164,9 @@ func (d Deps) handlePatchReportCard() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Report card not found.")
 			return
 		}
+		if d.reportCardsFeatureOffForCourseID(w, r, existing.CourseID) {
+			return
+		}
 		if !d.canManageReportCard(w, r, actorID, existing.CourseID) {
 			return
 		}
@@ -174,6 +206,9 @@ func (d Deps) handleGenerateReportCardPDF() http.HandlerFunc {
 		}
 		if existing == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Report card not found.")
+			return
+		}
+		if d.reportCardsFeatureOffForCourseID(w, r, existing.CourseID) {
 			return
 		}
 		if !d.canManageReportCard(w, r, actorID, existing.CourseID) {
@@ -284,6 +319,9 @@ func (d Deps) handleReleaseReportCards() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		if d.reportCardsFeatureOff(w, r, courseCode) {
+			return
+		}
 		released, err := reportcards.ReleaseCards(r.Context(), d.Pool, *cid, period)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to release report cards.")
@@ -323,6 +361,9 @@ func (d Deps) handleDownloadReportCardPDF() http.HandlerFunc {
 		}
 		if existing == nil {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Report card not found.")
+			return
+		}
+		if d.reportCardsFeatureOffForCourseID(w, r, existing.CourseID) {
 			return
 		}
 
