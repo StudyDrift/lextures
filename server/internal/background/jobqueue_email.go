@@ -74,6 +74,7 @@ func (h emailDeliveryHandler) Execute(ctx context.Context, payload json.RawMessa
 // (plan 17.3 NFR maintainability).
 func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 	r.Register(JobTypeEmailDelivery, emailDeliveryHandler{pool: pool, cfg: cfg})
+	registerScheduledJobs(r, pool, cfg)
 }
 
 // EnqueueEmail queues a transactional email for asynchronous delivery on the

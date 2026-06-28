@@ -33,7 +33,7 @@ func workerTestPool(t *testing.T) *pgxpool.Pool {
 		t.Fatal(err)
 	}
 	t.Cleanup(pool.Close)
-	if _, err := pool.Exec(ctx, `TRUNCATE jobs.queue, jobs.dead_letters`); err != nil {
+	if _, err := pool.Exec(ctx, `TRUNCATE jobs.queue, jobs.dead_letters, jobs.schedule_history`); err != nil {
 		t.Fatal(err)
 	}
 	return pool

@@ -26,6 +26,7 @@ import (
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/redisclient"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
+	"github.com/lextures/lextures/server/internal/scheduler"
 	"github.com/lextures/lextures/server/internal/service/cleverauth"
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
@@ -73,6 +74,9 @@ type Deps struct {
 	SmsNotificationQueue *smsnotificationqueue.Bus
 	// GradingAgentQueue publishes grading-agent batch jobs to RabbitMQ (or in-memory fallback).
 	GradingAgentQueue *gradingagentqueue.Bus
+	// Scheduler exposes the configured scheduled jobs for the admin scheduler API
+	// (plan 17.4). When nil, scheduler admin endpoints return 501.
+	Scheduler *scheduler.Scheduler
 	// Storage is the object-storage driver (plan 8.1). When nil, falls back to local disk reads.
 	Storage filestorage.Driver
 	// DRM is the DRM / watermarking service (plan 8.10). When nil, DRM endpoints return 501.
@@ -159,6 +163,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerSettingsRoutes(r)
 	d.registerAdminRoutes(r)
 	d.registerAdminJobRoutes(r)
+	d.registerAdminSchedulerRoutes(r)
 	d.registerSCIMRoutes(r)
 	r.Route("/api/v1", func(s chi.Router) { d.registerAccommodationRoutes(s) })
 	d.registerAttendanceRoutes(r)

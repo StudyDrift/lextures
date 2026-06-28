@@ -18,6 +18,7 @@ import {
   Webhook,
   Archive,
   Activity,
+  Clock,
 } from 'lucide-react'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 import { usePermissions } from '../../context/use-permissions'
@@ -146,6 +147,15 @@ export function SideNavAdminLinks() {
               Caption compliance
             </SideNavLink>
           ) : null}
+
+          <SideNavSectionLabel>Platform</SideNavSectionLabel>
+          <SideNavLink
+            to="/admin/scheduled-jobs"
+            className={() => (active('/admin/scheduled-jobs') ? sideNavActiveClass : '')}
+            icon={<Clock className="h-5 w-5" />}
+          >
+            Scheduled jobs
+          </SideNavLink>
 
           {showIntegrations ? (
             <>

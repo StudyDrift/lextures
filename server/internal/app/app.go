@@ -42,6 +42,7 @@ import (
 	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
+	"github.com/lextures/lextures/server/internal/scheduler"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
 )
 
@@ -130,6 +131,16 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	// rows with SELECT ... FOR UPDATE SKIP LOCKED so they coordinate via Postgres.
 	background.StartJobQueueWorker(ctx, pool, merged)
 
+	// Scheduled-jobs / cron layer (plan 17.4). The Scheduler is always
+	// constructed so the admin API can list and manually trigger jobs, but the
+	// tick loop only runs when enabled and the job queue is on (scheduled
+	// triggers enqueue onto that queue). The distributed lock makes it safe to
+	// run on every instance.
+	sched := scheduler.New(pool, "")
+	if pool != nil && merged.SchedulerEnabled && merged.BackgroundJobsEnabled {
+		sched.Start(ctx)
+	}
+
 	ltiRT := lti.NewFromConfig(merged)
 	brandingResolver := orgbranding.NewResolver(pool, merged.BrandingMultitenantHostSuffix, webHostFromOrigin(merged.PublicWebOrigin))
 
@@ -186,6 +197,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		CanvasSubmissionSyncJobs:  canvasSubmissionSyncJobs,
 		GradingAgentQueue:         gradingAgentQueue,
 		SmsNotificationQueue:      smsNotificationQueue,
+		Scheduler:                 sched,
 		Storage:                   storage,
 		StorageQuota:              quotaSvc,
 		Integrations:              integrations.NewService(pool, integrationsPublicBase(merged), []byte(cfg.JWTSecret)),

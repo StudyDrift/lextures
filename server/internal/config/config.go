@@ -129,6 +129,11 @@ type Config struct {
 	// app instance (default 4 when unset).
 	BackgroundJobsConcurrency int
 
+	// SchedulerEnabled gates the cron-like scheduled-job layer (plan 17.4,
+	// rollout flag scheduler_enabled). It requires BackgroundJobsEnabled because
+	// scheduled triggers enqueue onto the generic job queue.
+	SchedulerEnabled bool
+
 	// PushNotificationsEnabled gates Web Push (VAPID) notifications (plan 6.3).
 	PushNotificationsEnabled bool
 	// SmsNotificationsEnabled gates SMS notification enqueueing (Twilio delivery).
@@ -751,6 +756,7 @@ func Load() Config {
 		CanvasSubmissionSyncConcurrency:   canvasSubmissionSyncConcurrency(),
 		BackgroundJobsEnabled:             boolEnv("BACKGROUND_JOBS_ENABLED"),
 		BackgroundJobsConcurrency:         intEnvDefault("BACKGROUND_JOBS_CONCURRENCY", 4),
+		SchedulerEnabled:                  boolEnv("SCHEDULER_ENABLED"),
 		SmsNotificationsEnabled:           boolEnv("SMS_NOTIFICATIONS_ENABLED"),
 		SmsNotificationQueueName:          stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
 		SmsNotificationConcurrency:        smsNotificationConcurrency(),

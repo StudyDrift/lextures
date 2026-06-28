@@ -36,3 +36,18 @@ VALUES ($1, $2, $3, $4, $5, $6, $7)
 func ElapsedMs(start time.Time) int {
 	return int(time.Since(start).Milliseconds())
 }
+
+// RequestLogRetention is the GDPR retention window for API request logs
+// (plan 17.4 NFR privacy). Rows older than this are deleted by the
+// request_log_retention scheduled job.
+const RequestLogRetention = 90 * 24 * time.Hour
+
+// DeleteRequestLogsOlderThan removes api.request_log rows created before cutoff,
+// returning the number deleted (plan 17.4 FR-4, AC-6).
+func DeleteRequestLogsOlderThan(ctx context.Context, pool *pgxpool.Pool, cutoff time.Time) (int64, error) {
+	tag, err := pool.Exec(ctx, `DELETE FROM api.request_log WHERE created_at < $1`, cutoff)
+	if err != nil {
+		return 0, err
+	}
+	return tag.RowsAffected(), nil
+}
