@@ -344,6 +344,7 @@ LIMIT 1
 		for _, rec := range invitedEnrollments {
 			webhooksvc.EmitEnrollmentCreatedEvent(d.Pool, d.effectiveConfig(), orgID, *cid, courseCode, rec.enrollmentID, rec.userID, "student")
 		}
+		d.invalidateCourseEnrollmentsCache(r.Context(), *cid)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		_ = json.NewEncoder(w).Encode(modelenrollment.AddEnrollmentsResponse{
 			Added:           added,
@@ -533,6 +534,7 @@ WHERE ce.id = $1 AND c.course_code = $2 AND (ce.active OR ce.invitation_pending)
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollment.")
 			return
 		}
+		d.invalidateCourseEnrollmentsCache(r.Context(), courseID)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
@@ -607,6 +609,7 @@ WHERE ce.id = $1 AND c.course_code = $2 AND (ce.active OR ce.invitation_pending)
 		}
 		d.notifyCourses(uid)
 		d.notifyEnrollmentsForCourse(ctx, courseCode)
+		d.invalidateCourseEnrollmentsCache(r.Context(), courseID)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

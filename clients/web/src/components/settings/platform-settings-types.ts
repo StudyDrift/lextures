@@ -67,6 +67,7 @@ export type PlatformSettingsPayload = {
   ffAiStudyBuddy: boolean
   ffApiTokens: boolean
   ffCalendarFeeds: boolean
+  ffRedisCache: boolean
   ffAcademicCalendar: boolean
   ffClassroomSignals: boolean
   ffConferenceScheduling: boolean

@@ -127,7 +127,7 @@ test('Public catalog: unauthenticated browse, search, filter, and JSON-LD', asyn
     `${API_BASE}/api/v1/public/catalog/courses?q=${encodeURIComponent(publicTitle)}&sort=relevance`,
   )
   expect(searchRes.ok).toBeTruthy()
-  expect(searchRes.headers.get('cache-control')).toContain('max-age=60')
+  expect(searchRes.headers.get('cache-control')).toContain('max-age=3600')
   const search = (await searchRes.json()) as {
     courses: Array<{ courseCode: string; slug: string; priceCents: number }>
     total: number

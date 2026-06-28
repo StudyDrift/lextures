@@ -12,6 +12,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	calendartokens "github.com/lextures/lextures/server/internal/repos/calendartokens"
 	courserepo "github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/repos/enrollment"
 	userrepo "github.com/lextures/lextures/server/internal/repos/user"
 	calendarsvc "github.com/lextures/lextures/server/internal/service/calendar"
@@ -152,6 +153,24 @@ func (d Deps) serveUserCalendarFeed(w http.ResponseWriter, r *http.Request, user
 		}
 	}
 
+	redisKey := objectcache.UserCalendarKey(userID.String(), func() *string {
+		if courseID == nil {
+			return nil
+		}
+		s := courseID.String()
+		return &s
+	}())
+	if c := d.objectCache(); c != nil {
+		var body []byte
+		if hit, _ := c.GetJSON(ctx, redisKey, objectcache.ResourceUserCalendar, &body); hit {
+			w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
+			w.Header().Set("X-Cache", "hit")
+			calendarsvc.RecordFeedRequest(calendarFeedType(courseID), "hit")
+			_, _ = w.Write(body)
+			return
+		}
+	}
+
 	if body, ok := calendarsvc.DefaultFeedCache.Get(cacheKey, now); ok {
 		w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
 		w.Header().Set("X-Cache", "hit")
@@ -169,6 +188,9 @@ func (d Deps) serveUserCalendarFeed(w http.ResponseWriter, r *http.Request, user
 	tz := d.userTimezone(ctx, userID)
 	body := calendarsvc.BuildICalendar(events, d.effectiveConfig().PublicWebOrigin, tz, now)
 	calendarsvc.DefaultFeedCache.Set(cacheKey, body, now)
+	if c := d.objectCache(); c != nil {
+		_ = c.SetJSON(ctx, redisKey, body, cacheTTLUserCalendar)
+	}
 
 	w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
 	w.Header().Set("X-Cache", "miss")
@@ -304,7 +326,7 @@ func (d Deps) handlePostMeCalendarToken() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to generate calendar token.")
 			return
 		}
-		calendarsvc.DefaultFeedCache.InvalidateUser(userID.String())
+		d.invalidateUserCalendarCache(r.Context(), userID)
 		base := calendarFeedBaseURL(r, d.effectiveConfig().PublicWebOrigin)
 		writeJSON(w, http.StatusOK, calendarTokenCreatedJSON{
 			Token:     secret,

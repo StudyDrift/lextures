@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -20,13 +21,16 @@ type S3Config struct {
 	Bucket          string
 	UseSSL          bool
 	Region          string
+	// CDNBaseURL rewrites presigned URL hosts to the CDN edge (plan 17.5 FR-5).
+	CDNBaseURL string
 }
 
 // S3Driver implements Driver using the minio-go v7 SDK.
 // It works with AWS S3, Cloudflare R2, and MinIO via endpoint override.
 type S3Driver struct {
-	client *minio.Client
-	bucket string
+	client     *minio.Client
+	bucket     string
+	cdnBaseURL string
 }
 
 // NewS3Driver creates an S3Driver. endpoint should be the host[:port] only (no scheme).
@@ -42,7 +46,7 @@ func NewS3Driver(cfg S3Config) (*S3Driver, error) {
 	if err != nil {
 		return nil, fmt.Errorf("filestorage/s3: new client: %w", err)
 	}
-	return &S3Driver{client: client, bucket: cfg.Bucket}, nil
+	return &S3Driver{client: client, bucket: cfg.Bucket, cdnBaseURL: strings.TrimSpace(cfg.CDNBaseURL)}, nil
 }
 
 func (d *S3Driver) PutObject(ctx context.Context, key string, r io.Reader, size int64, contentType string) error {
@@ -68,7 +72,25 @@ func (d *S3Driver) GetPresignedURL(ctx context.Context, key string, ttl time.Dur
 	if err != nil {
 		return "", fmt.Errorf("filestorage/s3: presign %q: %w", key, err)
 	}
-	return u.String(), nil
+	return d.rewriteCDNHost(u.String()), nil
+}
+
+func (d *S3Driver) rewriteCDNHost(raw string) string {
+	cdn := strings.TrimSpace(d.cdnBaseURL)
+	if cdn == "" {
+		return raw
+	}
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return raw
+	}
+	cdnURL, err := url.Parse(cdn)
+	if err != nil {
+		return raw
+	}
+	parsed.Scheme = cdnURL.Scheme
+	parsed.Host = cdnURL.Host
+	return parsed.String()
 }
 
 func (d *S3Driver) DeleteObject(ctx context.Context, key string) error {

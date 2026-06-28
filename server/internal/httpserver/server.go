@@ -25,6 +25,7 @@ import (
 	"github.com/lextures/lextures/server/internal/openapi"
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/redisclient"
+	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/service/cleverauth"
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
@@ -90,6 +91,8 @@ type Deps struct {
 	// Redis is the shared Redis client for cross-instance state (plan 17.2). When
 	// nil, the server runs single-instance and the readiness probe skips Redis.
 	Redis *redisclient.Client
+	// ObjectCache is the Redis-backed object cache for hot read paths (plan 17.5).
+	ObjectCache *objectcache.Service
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -113,7 +116,9 @@ func NewHandler(d Deps) http.Handler {
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5))
 	r.Use(logging.AccessLog)
+	r.Use(authenticatedNoStoreMiddleware)
 	r.Use(d.publicAPIMiddleware)
 	ready := d.Ready
 	if ready == nil {

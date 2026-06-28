@@ -68,6 +68,7 @@ func (d Deps) handleReorderCourseStructure() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to reorder course structure.")
 			return
 		}
+		d.invalidateCourseStructureCache(r.Context(), *cid)
 		items, err := coursestructurerepo.ListForCourseWithEnrichment(r.Context(), d.Pool, *cid, true)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course structure.")

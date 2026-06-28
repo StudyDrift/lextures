@@ -99,6 +99,16 @@ output "course_files_irsa_role_arn" {
   value       = module.irsa_course_files.iam_role_arn
 }
 
+output "course_files_cdn_domain_name" {
+  description = "CloudFront domain for course file CDN (plan 17.5)."
+  value       = aws_cloudfront_distribution.course_files.domain_name
+}
+
+output "course_files_cdn_url" {
+  description = "HTTPS URL prefix for STORAGE_CDN_BASE_URL."
+  value       = "https://${aws_cloudfront_distribution.course_files.domain_name}"
+}
+
 output "backup_bucket_name" {
   description = "Encrypted S3 bucket for WAL-G and object-storage backups (plan 10.15)."
   value       = aws_s3_bucket.backups.id

@@ -14,7 +14,6 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursestructure"
 	"github.com/lextures/lextures/server/internal/courseroles"
-	calendarsvc "github.com/lextures/lextures/server/internal/service/calendar"
 )
 
 // handlePatchCourseStructureItem is PATCH /api/v1/courses/{course_code}/structure/items/{item_id}
@@ -172,8 +171,9 @@ func (d Deps) handlePatchCourseStructureItemDueAt() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update due date.")
 			return
 		}
+		d.invalidateCourseStructureCache(r.Context(), *cid)
 		if d.calendarFeedsEnabled() {
-			calendarsvc.DefaultFeedCache.InvalidateCourse(cid.String())
+			d.invalidateCourseCalendarCache(r.Context(), *cid)
 		}
 		w.WriteHeader(http.StatusNoContent)
 	}
@@ -243,6 +243,7 @@ func (d Deps) handleDeleteCourseStructureItem() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to archive structure item.")
 			return
 		}
+		d.invalidateCourseStructureCache(r.Context(), *cid)
 		w.WriteHeader(http.StatusNoContent)
 	}
 }

@@ -105,6 +105,7 @@ type platformFeaturesJSON struct {
 	FFBotTeams                  bool `json:"ffBotTeams"`
 	FFBotDiscord                bool `json:"ffBotDiscord"`
 	FFCalendarFeeds             bool `json:"ffCalendarFeeds"`
+	FFRedisCache                bool `json:"ffRedisCache"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
@@ -217,6 +218,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFBotTeams:                  cfg.FFBotTeams,
 		FFBotDiscord:                cfg.FFBotDiscord,
 		FFCalendarFeeds:             cfg.FFCalendarFeeds,
+		FFRedisCache:                cfg.FFRedisCache,
 
 		LRSAnonymizeActors:           cfg.LRSAnonymizeActors,
 		FERPAWorkflowEnabled:         cfg.FERPAWorkflowEnabled,

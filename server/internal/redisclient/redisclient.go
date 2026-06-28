@@ -12,6 +12,7 @@ package redisclient
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -116,6 +117,70 @@ func (c *Client) Set(ctx context.Context, key, value string, ttl time.Duration) 
 		return fmt.Errorf("redisclient: not configured")
 	}
 	return c.rdb.Set(ctx, key, value, ttl).Err()
+}
+
+// Get returns the string value at key. Missing keys return ("", nil).
+func (c *Client) Get(ctx context.Context, key string) (string, error) {
+	if c == nil || c.rdb == nil {
+		return "", fmt.Errorf("redisclient: not configured")
+	}
+	val, err := c.rdb.Get(ctx, key).Result()
+	if errors.Is(err, redis.Nil) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return val, nil
+}
+
+// Del removes one or more keys. No-op when keys is empty.
+func (c *Client) Del(ctx context.Context, keys ...string) error {
+	if c == nil || c.rdb == nil {
+		return fmt.Errorf("redisclient: not configured")
+	}
+	if len(keys) == 0 {
+		return nil
+	}
+	return c.rdb.Del(ctx, keys...).Err()
+}
+
+// DelByPrefix deletes all keys matching prefix*. Uses SCAN to avoid blocking Redis.
+func (c *Client) DelByPrefix(ctx context.Context, prefix string) error {
+	if c == nil || c.rdb == nil {
+		return fmt.Errorf("redisclient: not configured")
+	}
+	if prefix == "" {
+		return nil
+	}
+	return c.DelByPattern(ctx, prefix+"*")
+}
+
+// DelByPattern deletes all keys matching a glob-style pattern (e.g. cache:user:*:calendar:course:abc).
+func (c *Client) DelByPattern(ctx context.Context, pattern string) error {
+	if c == nil || c.rdb == nil {
+		return fmt.Errorf("redisclient: not configured")
+	}
+	if pattern == "" {
+		return nil
+	}
+	var cursor uint64
+	for {
+		keys, next, err := c.rdb.Scan(ctx, cursor, pattern, 100).Result()
+		if err != nil {
+			return err
+		}
+		if len(keys) > 0 {
+			if err := c.rdb.Del(ctx, keys...).Err(); err != nil {
+				return err
+			}
+		}
+		cursor = next
+		if cursor == 0 {
+			break
+		}
+	}
+	return nil
 }
 
 // Exists reports whether key is present.
