@@ -38,7 +38,7 @@ func testPool(t *testing.T) *pgxpool.Pool {
 func reset(t *testing.T, pool *pgxpool.Pool) {
 	t.Helper()
 	if _, err := pool.Exec(context.Background(),
-		`TRUNCATE jobs.queue, jobs.dead_letters`); err != nil {
+		`TRUNCATE jobs.queue, jobs.dead_letters, jobs.schedule_history`); err != nil {
 		t.Fatal(err)
 	}
 }

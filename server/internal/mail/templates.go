@@ -36,6 +36,8 @@ func RenderTemplate(name string, vars map[string]string, branding *BrandingOpts)
 		return renderGradePosted(vars, logo, color)
 	case "assignment_created":
 		return renderAssignmentCreated(vars, logo, color)
+	case "assignment_due_reminder":
+		return renderAssignmentDueReminder(vars, logo, color)
 	case "discussion_reply":
 		return renderDiscussionReply(vars, logo, color)
 	case "password_reset":
@@ -113,6 +115,31 @@ Open assignment: %s
 <p><a href="%s" style="color:%s;font-weight:600;">Open assignment</a></p>`,
 		template.HTMLEscapeString(assignment),
 		template.HTMLEscapeString(course),
+		template.HTMLEscapeString(link),
+		color,
+	), logo, vars["unsubscribeUrl"])
+	if err != nil {
+		return RenderedEmail{}, err
+	}
+	return RenderedEmail{Subject: subject, BodyText: bodyText, HTMLBody: html}, nil
+}
+
+func renderAssignmentDueReminder(vars map[string]string, logo, color string) (RenderedEmail, error) {
+	course := vars["courseName"]
+	assignment := vars["assignmentName"]
+	due := vars["dueAt"]
+	link := vars["link"]
+	subject := fmt.Sprintf("Reminder: %s is due soon — %s", assignment, course)
+	bodyText := fmt.Sprintf(`Your assignment "%s" in %s is due %s.
+
+Open assignment: %s
+`, assignment, course, due, link)
+	html, err := renderLayout("Assignment due soon", fmt.Sprintf(
+		`<p>Your assignment <strong>%s</strong> in <strong>%s</strong> is due <strong>%s</strong>.</p>
+<p><a href="%s" style="color:%s;font-weight:600;">Open assignment</a></p>`,
+		template.HTMLEscapeString(assignment),
+		template.HTMLEscapeString(course),
+		template.HTMLEscapeString(due),
 		template.HTMLEscapeString(link),
 		color,
 	), logo, vars["unsubscribeUrl"])

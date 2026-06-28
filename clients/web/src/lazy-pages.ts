@@ -97,6 +97,7 @@ export const StudentDemographicsPage = lazy(() => import('./pages/admin/student-
 export const SisIntegrationPage = lazy(() => import('./pages/admin/sis-integration'))
 export const IntegrationsAdminPage = lazy(() => import('./pages/admin/integrations'))
 export const WebhooksAdminPage = lazy(() => import('./pages/admin/webhooks'))
+export const ScheduledJobsAdminPage = lazy(() => import('./pages/admin/scheduled-jobs'))
 export const BookstoreIntegrationPage = lazy(() => import('./pages/admin/BookstoreIntegration'))
 export const IncompletesAdminPage = lazy(() => import('./pages/admin/incompletes'))
 export const CourseCatalogPage = lazy(() => import('./pages/lms/course-catalog'))
