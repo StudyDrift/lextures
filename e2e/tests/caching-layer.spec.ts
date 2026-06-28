@@ -6,7 +6,7 @@
  *   [x] public catalog responses include long-lived cache headers with ETag (FR-2)
  *   [x] offline banner component exists in app shell (AC-4 UI prerequisite)
  */
-import { expect, test } from '@playwright/test'
+import { test, expect } from '../fixtures/test.js'
 
 const API_BASE = process.env.E2E_API_URL ?? 'http://localhost:8080'
 
