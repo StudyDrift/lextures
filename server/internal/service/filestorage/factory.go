@@ -15,6 +15,7 @@ type BackendConfig struct {
 	Bucket          string
 	UseSSL          bool
 	Region          string
+	CDNBaseURL      string
 }
 
 // New returns a Driver for the configured backend.
@@ -42,6 +43,7 @@ func New(cfg BackendConfig) (Driver, error) {
 			Bucket:          cfg.Bucket,
 			UseSSL:          cfg.UseSSL,
 			Region:          cfg.Region,
+			CDNBaseURL:      cfg.CDNBaseURL,
 		})
 	default:
 		return nil, fmt.Errorf("filestorage: unknown backend %q (supported: local, s3, r2, minio)", cfg.Backend)

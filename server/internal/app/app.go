@@ -33,6 +33,7 @@ import (
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/migrate"
 	"github.com/lextures/lextures/server/internal/notifevents"
+	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/redisclient"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
@@ -110,6 +111,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		Bucket:          cfg.StorageBucket,
 		UseSSL:          cfg.StorageUseSSL,
 		Region:          cfg.StorageRegion,
+		CDNBaseURL:      merged.StorageCDNBaseURL,
 	})
 	if storageErr != nil {
 		return fmt.Errorf("app: storage: %w", storageErr)
@@ -178,12 +180,14 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	if jwtBlocklist != nil {
 		jwtSigner = jwtSigner.WithBlocklist(jwtBlocklist)
 	}
+	platform := platformstate.New(merged)
 	deps := httpserver.Deps{
-		Pool:                      pool,
+		Pool: pool,
 		Redis:                     redisClient,
+		ObjectCache: objectcache.New(redisClient, func() bool { return platform.Config().FFRedisCache }),
 		JWTSigner:                 jwtSigner,
 		Config:                    cfg,
-		Platform:                  platformstate.New(merged),
+		Platform:                  platform,
 		OIDC:                      oidcauth.NewService(merged),
 		Comm:                      commevents.New(),
 		Lti:                       ltiRT,

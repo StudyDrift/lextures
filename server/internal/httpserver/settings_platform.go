@@ -161,6 +161,7 @@ type platformSettingsJSON struct {
 	FFBotTeams                      bool `json:"ffBotTeams"`
 	FFBotDiscord                    bool `json:"ffBotDiscord"`
 	FFCalendarFeeds                 bool `json:"ffCalendarFeeds"`
+	FFRedisCache                    bool `json:"ffRedisCache"`
 
 	LRSAnonymizeActors           bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         bool    `json:"ferpaWorkflowEnabled"`
@@ -371,6 +372,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFBotTeams:                      merged.FFBotTeams,
 			FFBotDiscord:                    merged.FFBotDiscord,
 			FFCalendarFeeds:                 merged.FFCalendarFeeds,
+			FFRedisCache:                    merged.FFRedisCache,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,
@@ -556,6 +558,7 @@ type putPlatformBody struct {
 	FFBotTeams                      *bool `json:"ffBotTeams"`
 	FFBotDiscord                    *bool `json:"ffBotDiscord"`
 	FFCalendarFeeds                 *bool `json:"ffCalendarFeeds"`
+	FFRedisCache                    *bool `json:"ffRedisCache"`
 
 	LRSAnonymizeActors           *bool    `json:"lrsAnonymizeActors"`
 	FERPAWorkflowEnabled         *bool    `json:"ferpaWorkflowEnabled"`
@@ -887,6 +890,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffbotteams", body.FFBotTeams, func(v bool) { wr.FFBotTeams = &v })
 		setBool("ffbotdiscord", body.FFBotDiscord, func(v bool) { wr.FFBotDiscord = &v })
 		setBool("ffcalendarfeeds", body.FFCalendarFeeds, func(v bool) { wr.FFCalendarFeeds = &v })
+		setBool("ffrediscache", body.FFRedisCache, func(v bool) { wr.FFRedisCache = &v })
 		setBool("lrsanonymizeactors", body.LRSAnonymizeActors, func(v bool) { wr.LRSAnonymizeActors = &v })
 		setBool("ferpaworkflowenabled", body.FERPAWorkflowEnabled, func(v bool) { wr.FERPAWorkflowEnabled = &v })
 		setBool("dpaportalenabled", body.DPAPortalEnabled, func(v bool) { wr.DPAPortalEnabled = &v })
@@ -1051,6 +1055,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFBotTeams:                      merged.FFBotTeams,
 			FFBotDiscord:                    merged.FFBotDiscord,
 			FFCalendarFeeds:                 merged.FFCalendarFeeds,
+			FFRedisCache:                    merged.FFRedisCache,
 			LRSAnonymizeActors:              merged.LRSAnonymizeActors,
 			FERPAWorkflowEnabled:            merged.FERPAWorkflowEnabled,
 			DPAPortalEnabled:                merged.DPAPortalEnabled,

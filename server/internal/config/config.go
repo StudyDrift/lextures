@@ -172,6 +172,9 @@ type Config struct {
 	StorageSecretAccessKey string
 	// StorageRegion is the AWS/R2 region (e.g. "us-east-1"). Optional for MinIO.
 	StorageRegion string
+	// StorageCDNBaseURL is the CDN origin for public media URLs (plan 17.5 FR-5).
+	// When set, presigned download URLs are rewritten to use this host (e.g. https://cdn.example.com).
+	StorageCDNBaseURL string
 	// StorageUseSSL controls TLS for S3 connections (default true for s3/r2, false for minio in dev).
 	StorageUseSSL bool
 	// StoragePresignTTL is the presigned URL TTL in seconds (default 3600).
@@ -452,6 +455,9 @@ type Config struct {
 	// FFCalendarFeeds enables iCal/CalDAV calendar feed subscriptions (plan 16.5).
 	// Managed in Settings → Global platform (not process env).
 	FFCalendarFeeds bool
+	// FFRedisCache enables Redis-backed object caching for hot read paths (plan 17.5).
+	// Managed in Settings → Global platform (not process env).
+	FFRedisCache bool
 
 	// SlackBotClientID is the Slack app client id for bot OAuth (plan 16.6).
 	SlackBotClientID string
@@ -694,6 +700,7 @@ func Load() Config {
 		StorageAccessKeyID:     firstNonEmptyTrimmed("STORAGE_ACCESS_KEY_ID", "AWS_ACCESS_KEY_ID"),
 		StorageSecretAccessKey: firstNonEmptyTrimmed("STORAGE_SECRET_ACCESS_KEY", "AWS_SECRET_ACCESS_KEY"),
 		StorageRegion:          firstNonEmptyTrimmed("STORAGE_REGION", "AWS_REGION"),
+		StorageCDNBaseURL:      strings.TrimSpace(os.Getenv("STORAGE_CDN_BASE_URL")),
 		StorageUseSSL:          storageUseSSL(),
 		StoragePresignTTL:      storagePresignTTL(),
 		StorageMigrateLocal:    boolEnv("STORAGE_MIGRATE_LOCAL"),

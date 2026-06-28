@@ -137,6 +137,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Multi-provider checkout (Stripe + PayPal), transaction history, async webhooks, and admin refunds (plan 16.8).',
   },
   {
+    key: 'ffRedisCache',
+    label: 'Redis object cache',
+    description:
+      'Cache hot read paths (course structure, enrollments, public catalog, calendar feeds) in shared Redis (plan 17.5).',
+  },
+  {
     key: 'ffRevenueShare',
     label: 'Creator revenue share & affiliates',
     description:

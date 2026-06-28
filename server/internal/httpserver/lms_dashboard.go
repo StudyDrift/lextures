@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/courseroles"
+	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/coursefeed"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
@@ -351,10 +352,26 @@ func (d Deps) handleCourseStructure() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify permissions.")
 			return
 		}
-		items, err := coursestructure.ListForCourseWithEnrichment(r.Context(), d.Pool, *cid, staffView)
-		if err != nil {
-			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course structure.")
-			return
+		type structureCache struct {
+			Items []coursestructure.ItemResponse `json:"items"`
+		}
+		cacheKey := objectcache.CourseStructureKey(cid.String(), staffView)
+		var items []coursestructure.ItemResponse
+		if c := d.objectCache(); c != nil {
+			var cached structureCache
+			if hit, _ := c.GetJSON(r.Context(), cacheKey, objectcache.ResourceCourseStructure, &cached); hit {
+				items = cached.Items
+			}
+		}
+		if items == nil {
+			items, err = coursestructure.ListForCourseWithEnrichment(r.Context(), d.Pool, *cid, staffView)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load course structure.")
+				return
+			}
+			if c := d.objectCache(); c != nil {
+				_ = c.SetJSON(r.Context(), cacheKey, structureCache{Items: items}, cacheTTLCourseStructure)
+			}
 		}
 		if !staffView {
 			eid, err := enrollment.GetStudentEnrollmentID(r.Context(), d.Pool, *cid, viewer)
@@ -865,6 +882,19 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You do not have permission to view the roster.")
 			return
 		}
+		cid, err := course.GetIDByCourseCode(r.Context(), d.Pool, courseCode)
+		if err != nil || cid == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
+			return
+		}
+		cacheKey := objectcache.CourseEnrollmentsKey(cid.String())
+		if c := d.objectCache(); c != nil {
+			var cached resp
+			if hit, _ := c.GetJSON(r.Context(), cacheKey, objectcache.ResourceCourseEnrollments, &cached); hit {
+				writeJSON(w, http.StatusOK, cached)
+				return
+			}
+		}
 		roster, err := enrollment.ListRosterForCourse(r.Context(), d.Pool, courseCode)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load enrollments.")
@@ -905,8 +935,12 @@ func (d Deps) handleCourseEnrollmentsList() http.HandlerFunc {
 			r.InvitationPending = e.InvitationPending
 			out = append(out, r)
 		}
+		payload := resp{Enrollments: out}
+		if c := d.objectCache(); c != nil {
+			_ = c.SetJSON(r.Context(), cacheKey, payload, cacheTTLCourseEnrollments)
+		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(resp{Enrollments: out})
+		_ = json.NewEncoder(w).Encode(payload)
 	}
 }
 

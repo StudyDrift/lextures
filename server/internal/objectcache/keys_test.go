@@ -1,0 +1,40 @@
+package objectcache
+
+import (
+	"testing"
+
+	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
+)
+
+func TestCourseStructureKey(t *testing.T) {
+	if got := CourseStructureKey("abc", true); got != "cache:course:abc:structure:staff" {
+		t.Fatalf("staff key: %q", got)
+	}
+	if got := CourseStructureKey("abc", false); got != "cache:course:abc:structure:student" {
+		t.Fatalf("student key: %q", got)
+	}
+}
+
+func TestCatalogPageKeyStable(t *testing.T) {
+	f := repoCourse.PublicCatalogFilter{Q: "go", Limit: 20, Offset: 0}
+	a := CatalogPageKey(f)
+	b := CatalogPageKey(f)
+	if a != b {
+		t.Fatalf("expected stable key, got %q vs %q", a, b)
+	}
+	f2 := f
+	f2.Q = "rust"
+	if CatalogPageKey(f2) == a {
+		t.Fatal("expected different key for different filter")
+	}
+}
+
+func TestUserCalendarKey(t *testing.T) {
+	cid := "course-1"
+	if got := UserCalendarKey("u1", &cid); got != "cache:user:u1:calendar:course:course-1" {
+		t.Fatalf("course scoped: %q", got)
+	}
+	if got := UserCalendarKey("u1", nil); got != "cache:user:u1:calendar" {
+		t.Fatalf("user scoped: %q", got)
+	}
+}
