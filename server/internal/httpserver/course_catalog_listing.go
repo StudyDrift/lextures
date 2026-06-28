@@ -111,6 +111,7 @@ func (d Deps) handlePutCourseCatalogListing() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Course not found.")
 			return
 		}
+		d.invalidateCatalogCache(r.Context())
 		writeJSON(w, http.StatusOK, map[string]any{"listing": listing})
 	}
 }

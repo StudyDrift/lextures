@@ -89,6 +89,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffAiStudyBuddy: false,
     ffApiTokens: false,
     ffCalendarFeeds: true,
+    ffRedisCache: false,
     ffAcademicCalendar: false,
     ffClassroomSignals: false,
     ffConferenceScheduling: false,

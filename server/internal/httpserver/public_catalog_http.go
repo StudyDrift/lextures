@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/objectcache"
 	repoCourse "github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/service/catalogsearch"
 )
@@ -30,12 +31,8 @@ func (d Deps) publicCatalogOff(w http.ResponseWriter) bool {
 	return false
 }
 
-// publicCatalogCacheHeaders sets the 60-second CDN cache headers required for the
-// public catalog (FR-9 / §9). Safe for anonymous, non-personalised responses.
-func publicCatalogCacheHeaders(w http.ResponseWriter) {
-	w.Header().Set("Cache-Control", "public, max-age=60, s-maxage=60")
-	w.Header().Set("Vary", "Accept-Encoding")
-}
+// publicCatalogCacheHeaders sets CDN-friendly cache headers (plan 17.5 FR-2).
+// Defined in cache_layer.go; kept as a forwarding comment for discoverability.
 
 func (d Deps) handlePublicCatalogList() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -87,13 +84,25 @@ func (d Deps) handlePublicCatalogList() http.HandlerFunc {
 		f.Offset = off
 
 		svc := catalogsearch.New(d.Pool)
+		cacheKey := objectcache.CatalogPageKey(f)
+		var cached catalogsearch.SearchResult
+		if c := d.objectCache(); c != nil {
+			if hit, _ := c.GetJSON(r.Context(), cacheKey, objectcache.ResourceCatalogPage, &cached); hit {
+				publicCatalogCacheHeaders(w)
+				writeJSONWithETag(w, r, http.StatusOK, cached)
+				return
+			}
+		}
 		res, err := svc.Search(r.Context(), f)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to search catalog.")
 			return
 		}
+		if c := d.objectCache(); c != nil {
+			_ = c.SetJSON(r.Context(), cacheKey, res, cacheTTLCatalogPage)
+		}
 		publicCatalogCacheHeaders(w)
-		writeJSON(w, http.StatusOK, res)
+		writeJSONWithETag(w, r, http.StatusOK, res)
 	}
 }
 
@@ -109,7 +118,7 @@ func (d Deps) handlePublicCatalogCategories() http.HandlerFunc {
 			return
 		}
 		publicCatalogCacheHeaders(w)
-		writeJSON(w, http.StatusOK, map[string]any{"categories": cats})
+		writeJSONWithETag(w, r, http.StatusOK, map[string]any{"categories": cats})
 	}
 }
 
@@ -130,7 +139,7 @@ func (d Deps) handlePublicCatalogDetail() http.HandlerFunc {
 			return
 		}
 		publicCatalogCacheHeaders(w)
-		writeJSON(w, http.StatusOK, map[string]any{
+		writeJSONWithETag(w, r, http.StatusOK, map[string]any{
 			"course": c,
 			"jsonLd": catalogsearch.BuildCourseJSONLD(*c, requestBaseURL(r)),
 		})
@@ -156,7 +165,7 @@ func (d Deps) handlePublicCatalogJSONLD() http.HandlerFunc {
 			return
 		}
 		publicCatalogCacheHeaders(w)
-		writeJSON(w, http.StatusOK, catalogsearch.BuildCourseJSONLD(*c, requestBaseURL(r)))
+		writeJSONWithETag(w, r, http.StatusOK, catalogsearch.BuildCourseJSONLD(*c, requestBaseURL(r)))
 	}
 }
 

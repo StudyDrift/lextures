@@ -149,6 +149,7 @@ type Row struct {
 	FFBotTeams                      *bool
 	FFBotDiscord                    *bool
 	FFCalendarFeeds                 *bool
+	FFRedisCache                    *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -312,6 +313,7 @@ type Write struct {
 	FFBotTeams                      *bool
 	FFBotDiscord                    *bool
 	FFCalendarFeeds                 *bool
+	FFRedisCache                    *bool
 
 	// Previously env-only flags (categories B and C), now platform-managed.
 	LRSAnonymizeActors           *bool
@@ -470,6 +472,7 @@ SELECT
 	ff_bot_teams,
 	ff_bot_discord,
 	ff_calendar_feeds,
+	ff_redis_cache,
 	ff_revenue_share,
 	ff_tax_collection,
 	lrs_anonymize_actors,
@@ -624,6 +627,7 @@ WHERE id = 1
 		&r.FFBotTeams,
 		&r.FFBotDiscord,
 		&r.FFCalendarFeeds,
+		&r.FFRedisCache,
 		&r.FFRevenueShare,
 		&r.FFTaxCollection,
 		&r.LRSAnonymizeActors,
@@ -826,6 +830,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_bot_teams,
 	ff_bot_discord,
 	ff_calendar_feeds,
+	ff_redis_cache,
 	ff_revenue_share,
 	ff_tax_collection,
 	mfa_enabled,
@@ -985,6 +990,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_bot_teams = COALESCE(EXCLUDED.ff_bot_teams, settings.platform_app_settings.ff_bot_teams),
 	ff_bot_discord = COALESCE(EXCLUDED.ff_bot_discord, settings.platform_app_settings.ff_bot_discord),
 	ff_calendar_feeds = COALESCE(EXCLUDED.ff_calendar_feeds, settings.platform_app_settings.ff_calendar_feeds),
+	ff_redis_cache = COALESCE(EXCLUDED.ff_redis_cache, settings.platform_app_settings.ff_redis_cache),
 	ff_revenue_share = COALESCE(EXCLUDED.ff_revenue_share, settings.platform_app_settings.ff_revenue_share),
 	ff_tax_collection = COALESCE(EXCLUDED.ff_tax_collection, settings.platform_app_settings.ff_tax_collection),
 	lrs_anonymize_actors = COALESCE(EXCLUDED.lrs_anonymize_actors, settings.platform_app_settings.lrs_anonymize_actors),
@@ -1137,6 +1143,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFBotTeams,
 		w.FFBotDiscord,
 		w.FFCalendarFeeds,
+		w.FFRedisCache,
 		w.FFRevenueShare,
 		w.FFTaxCollection,
 		w.MFAEnabled,
