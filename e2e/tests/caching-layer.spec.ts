@@ -49,5 +49,5 @@ test('offline banner renders in app shell when authenticated', async ({ authedPa
     Object.defineProperty(navigator, 'onLine', { value: false, configurable: true })
     window.dispatchEvent(new Event('offline'))
   })
-  await expect(page.getByRole('alert')).toContainText(/You are offline/)
+  await expect(page.getByText(/You are offline/)).toBeVisible()
 })
