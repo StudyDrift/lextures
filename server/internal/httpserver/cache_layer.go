@@ -25,10 +25,6 @@ func (d Deps) objectCache() *objectcache.Service {
 	return d.ObjectCache
 }
 
-func (d Deps) redisCacheEnabled() bool {
-	return d.effectiveConfig().FFRedisCache
-}
-
 func (d Deps) invalidateCourseStructureCache(ctx context.Context, courseID uuid.UUID) {
 	if c := d.objectCache(); c != nil {
 		_ = c.InvalidateCourseStructure(ctx, courseID.String())
