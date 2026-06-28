@@ -166,6 +166,7 @@ struct DashboardView: View {
                         }
                     }
                     .padding(16)
+                    .padding(.bottom, 8)
                 }
                 .refreshable {
                     await model.load(accessToken: session.accessToken, force: true)
@@ -437,15 +438,18 @@ struct DashboardView: View {
                 .padding(.horizontal, 2)
             }
             .scrollClipDisabled()
+            .padding(.bottom, 4)
         }
     }
 
     private func courseCarouselCard(_ course: CourseSummary) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             ZStack(alignment: .topTrailing) {
-                RoundedRectangle(cornerRadius: 0)
-                    .fill(LexturesTheme.coverGradient(for: course.courseCode))
-                    .frame(height: 84)
+                CourseHeroImage(
+                    urlString: course.heroImageUrl,
+                    fallbackKey: course.courseCode,
+                    height: 84
+                )
                 Image(systemName: "book.fill")
                     .font(.title3)
                     .foregroundStyle(.white.opacity(0.5))

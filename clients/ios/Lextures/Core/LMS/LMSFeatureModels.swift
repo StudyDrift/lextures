@@ -158,12 +158,16 @@ struct AssignmentSubmission: Decodable, Identifiable, Hashable {
     var submittedByDisplayName: String?
     var blindLabel: String?
     var attachmentFilename: String?
+    var attachmentMimeType: String?
+    var attachmentContentPath: String?
+    var bodyText: String?
     var submittedAt: String
     var updatedAt: String?
     var versionNumber: Int?
     var resubmissionRequested: Bool?
     var revisionDueAt: String?
     var revisionFeedback: String?
+    var isGraded: Bool?
 
     /// Name shown in staff lists; respects blind grading.
     var displayName: String {
@@ -179,6 +183,27 @@ struct MySubmissionResponse: Decodable {
 
 struct SubmissionsListResponse: Decodable {
     var submissions: [AssignmentSubmission]
+
+    enum CodingKeys: String, CodingKey { case submissions }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        // The list endpoint returns a roster row for every enrolled student, including
+        // non-submitters that lack `id`/`submittedAt`. Decode leniently and keep only
+        // real submissions so one placeholder doesn't fail the whole list.
+        let rows = try container.decodeIfPresent([LossyDecodable<AssignmentSubmission>].self, forKey: .submissions) ?? []
+        submissions = rows.compactMap(\.value)
+    }
+}
+
+/// Decodes `T` if possible, otherwise yields `nil` without throwing — used to skip
+/// malformed/placeholder elements inside an array without failing the whole decode.
+struct LossyDecodable<T: Decodable>: Decodable {
+    let value: T?
+
+    init(from decoder: Decoder) throws {
+        value = try? T(from: decoder)
+    }
 }
 
 /// GET/PUT `.../submissions/{id}/grade`.
@@ -191,15 +216,86 @@ struct SubmissionGrade: Decodable {
     var excused: Bool?
 }
 
+// MARK: - Quiz attempts (staff)
+
+/// Row from GET `/quizzes/{item}/attempts`.
+struct QuizAttemptSummary: Decodable, Identifiable, Hashable {
+    var id: String
+    var studentUserId: String?
+    var attemptNumber: Int
+    var submittedAt: String
+    var scorePercent: Double?
+    var pointsEarned: Double
+    var pointsPossible: Double
+    var studentName: String?
+    var needsManualGrading: Bool?
+}
+
+struct QuizAttemptsListResponse: Decodable {
+    var attempts: [QuizAttemptSummary]
+}
+
 // MARK: - Grading backlog (staff)
 
 /// Row from GET `/courses/{code}/grading-backlog`.
 struct GradingBacklogItem: Decodable, Identifiable, Hashable {
+    var itemId: String?
+    var itemType: String? // "assignment" | "quiz"
     var assignmentId: String
     var assignmentTitle: String
     var ungradedCount: Int
 
-    var id: String { assignmentId }
+    var resolvedItemId: String { itemId ?? assignmentId }
+    var isQuiz: Bool { itemType == "quiz" }
+    var id: String { "\(itemType ?? "assignment")-\(resolvedItemId)" }
+}
+
+enum GradingSubmissionMapper {
+    static func quizAttemptsToSubmissions(_ attempts: [QuizAttemptSummary]) -> [AssignmentSubmission] {
+        var byStudent: [String: QuizAttemptSummary] = [:]
+        for attempt in attempts {
+            let key = attempt.studentUserId?.trimmingCharacters(in: .whitespacesAndNewlines).nonEmpty ?? attempt.id
+            if let existing = byStudent[key] {
+                if attempt.attemptNumber >= existing.attemptNumber {
+                    byStudent[key] = attempt
+                }
+            } else {
+                byStudent[key] = attempt
+            }
+        }
+        return byStudent.values
+            .sorted { ($0.studentName ?? "") < ($1.studentName ?? "") }
+            .map { attempt in
+                AssignmentSubmission(
+                    id: attempt.id,
+                    submittedBy: attempt.studentUserId,
+                    submittedByDisplayName: attempt.studentName,
+                    blindLabel: nil,
+                    attachmentFilename: nil,
+                    submittedAt: attempt.submittedAt,
+                    updatedAt: nil,
+                    versionNumber: attempt.attemptNumber > 1 ? attempt.attemptNumber : nil,
+                    resubmissionRequested: nil,
+                    revisionDueAt: nil,
+                    revisionFeedback: nil,
+                    isGraded: attempt.needsManualGrading == false
+                )
+            }
+    }
+
+    static func filterSubmissions(_ submissions: [AssignmentSubmission], graded: String?) -> [AssignmentSubmission] {
+        guard let graded, graded != "all" else { return submissions }
+        if graded == "graded" {
+            return submissions.filter { $0.isGraded == true }
+        }
+        return submissions.filter { $0.isGraded != true }
+    }
+}
+
+private extension String {
+    var nonEmpty: String? {
+        isEmpty ? nil : self
+    }
 }
 
 struct GradingBacklogResponse: Decodable {

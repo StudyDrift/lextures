@@ -115,6 +115,42 @@ extension LMSAPI {
         return try decode(SubmissionsListResponse.self, from: data).submissions
     }
 
+    static func fetchQuizAttempts(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> [QuizAttemptSummary] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/attempts",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(QuizAttemptsListResponse.self, from: data).attempts
+    }
+
+    static func fetchGradingSubmissions(
+        courseCode: String,
+        backlogItem: GradingBacklogItem,
+        graded: String?,
+        accessToken: String
+    ) async throws -> [AssignmentSubmission] {
+        if backlogItem.isQuiz {
+            let attempts = try await fetchQuizAttempts(
+                courseCode: courseCode,
+                itemId: backlogItem.resolvedItemId,
+                accessToken: accessToken
+            )
+            let submissions = GradingSubmissionMapper.quizAttemptsToSubmissions(attempts)
+            return GradingSubmissionMapper.filterSubmissions(submissions, graded: graded ?? "all")
+        }
+        return try await fetchSubmissions(
+            courseCode: courseCode,
+            itemId: backlogItem.resolvedItemId,
+            graded: graded,
+            accessToken: accessToken
+        )
+    }
+
     static func fetchSubmissionGrade(
         courseCode: String,
         itemId: String,

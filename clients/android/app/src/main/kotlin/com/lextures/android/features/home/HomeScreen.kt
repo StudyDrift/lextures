@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -96,41 +97,43 @@ fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
             .fillMaxSize()
             .background(sceneBackground()),
     ) {
-        // Content leaves room for the floating bar so lists and FABs stay reachable.
-        val contentModifier = Modifier
-            .fillMaxSize()
-            .navigationBarsPadding()
-            .padding(bottom = 96.dp)
-        when (selectedTab) {
-            HomeTab.Dashboard.name -> DashboardTab(
-                session = session,
-                shell = shell,
-                onOpenProfile = { selectedTab = HomeTab.Profile.name },
-                modifier = contentModifier,
-            )
-            HomeTab.Courses.name -> CoursesTab(session = session, modifier = contentModifier)
-            HomeTab.Notebooks.name -> NotebooksTab(session = session, modifier = contentModifier)
-            HomeTab.Inbox.name -> InboxTab(
-                session = session,
-                onUnreadChanged = { shell.unreadInbox = it },
-                modifier = contentModifier,
-            )
-            HomeTab.Profile.name -> ProfileTab(
-                session = session,
-                shell = shell,
-                modifier = contentModifier,
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .navigationBarsPadding(),
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                when (selectedTab) {
+                    HomeTab.Dashboard.name -> DashboardTab(
+                        session = session,
+                        shell = shell,
+                        onOpenProfile = { selectedTab = HomeTab.Profile.name },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    HomeTab.Courses.name -> CoursesTab(session = session, modifier = Modifier.fillMaxSize())
+                    HomeTab.Notebooks.name -> NotebooksTab(session = session, modifier = Modifier.fillMaxSize())
+                    HomeTab.Inbox.name -> InboxTab(
+                        session = session,
+                        onUnreadChanged = { shell.unreadInbox = it },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                    HomeTab.Profile.name -> ProfileTab(
+                        session = session,
+                        shell = shell,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            }
+
+            LexturesTabBar(
+                selected = selectedTab,
+                unreadInbox = shell.unreadInbox,
+                onSelect = { selectedTab = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 6.dp),
             )
         }
-
-        LexturesTabBar(
-            selected = selectedTab,
-            unreadInbox = shell.unreadInbox,
-            onSelect = { selectedTab = it },
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(start = 24.dp, end = 24.dp, bottom = 10.dp),
-        )
     }
 }
 

@@ -127,12 +127,30 @@ fun GradingBacklogSection(
                             )
                         }
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(
-                                text = item.assignmentTitle,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = textPrimary(),
-                            )
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text(
+                                    text = item.assignmentTitle,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = textPrimary(),
+                                    modifier = Modifier.weight(1f, fill = false),
+                                )
+                                if (item.isQuiz) {
+                                    Text(
+                                        text = "Quiz",
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = LexturesColors.Amber,
+                                        modifier = Modifier
+                                            .clip(RoundedCornerShape(50))
+                                            .background(LexturesColors.Amber.copy(alpha = 0.14f))
+                                            .padding(horizontal = 6.dp, vertical = 2.dp),
+                                    )
+                                }
+                            }
                             Text(
                                 text = "${item.ungradedCount} ungraded submission${if (item.ungradedCount == 1) "" else "s"}",
                                 fontSize = 12.sp,
@@ -233,21 +251,32 @@ fun SubmissionsListScreen(
     var submissions by remember { mutableStateOf<List<AssignmentSubmission>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
-    var grading by remember { mutableStateOf<AssignmentSubmission?>(null) }
+    var quizInfo by remember { mutableStateOf<AssignmentSubmission?>(null) }
+    // Frozen submissions snapshot + starting index for the speed grader.
+    var speedGrader by remember { mutableStateOf<Pair<List<AssignmentSubmission>, Int>?>(null) }
     var reloadKey by remember { mutableStateOf(0) }
 
     BackHandler(onBack = onBack)
 
-    grading?.let { submission ->
-        GradeSubmissionScreen(
+    quizInfo?.let { submission ->
+        QuizAttemptInfoScreen(
+            backlogItem = backlogItem,
+            submission = submission,
+            onDone = { quizInfo = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    speedGrader?.let { (snapshot, startIndex) ->
+        SpeedGraderScreen(
             session = session,
             course = course,
-            assignmentId = backlogItem.assignmentId,
-            submission = submission,
-            onDone = { saved ->
-                grading = null
-                if (saved) reloadKey++
-            },
+            assignmentId = backlogItem.resolvedItemId,
+            submissions = snapshot,
+            startIndex = startIndex,
+            onSaved = { reloadKey++ },
+            onBack = { speedGrader = null },
             modifier = modifier,
         )
         return
@@ -258,9 +287,9 @@ fun SubmissionsListScreen(
         loading = true
         errorMessage = null
         try {
-            submissions = LmsApi.fetchSubmissions(
+            submissions = LmsApi.fetchGradingSubmissions(
                 courseCode = course.courseCode,
-                itemId = backlogItem.assignmentId,
+                backlogItem = backlogItem,
                 graded = filter.takeIf { it != "all" },
                 accessToken = token,
             )
@@ -324,7 +353,13 @@ fun SubmissionsListScreen(
                 }
             } else {
                 items(submissions, key = { it.id }) { submission ->
-                    LmsCard(onClick = { grading = submission }) {
+                    LmsCard(onClick = {
+                        if (backlogItem.isQuiz) {
+                            quizInfo = submission
+                        } else {
+                            speedGrader = submissions to submissions.indexOf(submission)
+                        }
+                    }) {
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             verticalAlignment = Alignment.CenterVertically,
@@ -400,42 +435,15 @@ fun SubmissionsListScreen(
     }
 }
 
-/** Full-screen grade entry: points + comment for one submission. */
+/** Quiz attempts must be graded per question on web (mobile v1 is read-only). */
 @Composable
-fun GradeSubmissionScreen(
-    session: AuthSession,
-    course: CourseSummary,
-    assignmentId: String,
+fun QuizAttemptInfoScreen(
+    backlogItem: GradingBacklogItem,
     submission: AssignmentSubmission,
-    onDone: (saved: Boolean) -> Unit,
+    onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accessToken by session.accessToken.collectAsState()
-    val scope = rememberCoroutineScope()
-
-    var pointsText by remember { mutableStateOf("") }
-    var comment by remember { mutableStateOf("") }
-    var maxPoints by remember { mutableStateOf<Double?>(null) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-    var saving by remember { mutableStateOf(false) }
-
-    BackHandler { onDone(false) }
-
-    LaunchedEffect(accessToken, submission.id) {
-        val token = accessToken ?: return@LaunchedEffect
-        // Pre-fill when a grade already exists; also learns maxPoints for validation.
-        runCatching {
-            LmsApi.fetchSubmissionGrade(course.courseCode, assignmentId, submission.id, token)
-        }.getOrNull()?.let { grade ->
-            maxPoints = grade.maxPoints
-            grade.pointsEarned?.let { pointsText = formatPoints(it) }
-            comment = grade.instructorComment.orEmpty()
-        }
-    }
-
-    val pointsValue = pointsText.replace(',', '.').toDoubleOrNull()
-    val pointsValid = pointsValue != null && pointsValue >= 0 &&
-        (maxPoints == null || pointsValue <= maxPoints!!)
+    BackHandler(onBack = onDone)
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -444,11 +452,11 @@ fun GradeSubmissionScreen(
                 .padding(top = 8.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = { onDone(false) }) {
+            IconButton(onClick = onDone) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = "Grade submission",
+                text = "Quiz attempt",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
@@ -460,10 +468,6 @@ fun GradeSubmissionScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            errorMessage?.let { message ->
-                item { LmsErrorBanner(message) }
-            }
-
             item {
                 LmsCard {
                     Text(text = submission.displayName, style = LexturesType.display(18), color = textPrimary())
@@ -472,132 +476,25 @@ fun GradeSubmissionScreen(
                         fontSize = 12.sp,
                         color = textSecondary(),
                     )
-                    submission.attachmentFilename?.takeIf { it.isNotEmpty() }?.let { filename ->
-                        Text(text = filename, fontSize = 12.sp, color = textSecondary())
+                    submission.versionNumber?.takeIf { it > 1 }?.let { attempt ->
                         Text(
-                            text = "Open the web app to review file submissions in full.",
-                            fontSize = 11.sp,
-                            fontStyle = FontStyle.Italic,
+                            text = "Attempt $attempt",
+                            fontSize = 12.sp,
                             color = textSecondary(),
                         )
                     }
                 }
             }
-
             item {
                 LmsCard {
-                    Text(text = "Score", style = LexturesType.display(17), color = textPrimary())
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        OutlinedTextField(
-                            value = pointsText,
-                            onValueChange = { pointsText = it },
-                            label = { Text("Points") },
-                            isError = pointsText.isNotEmpty() && !pointsValid,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                            singleLine = true,
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = LexturesColors.Primary,
-                                cursorColor = LexturesColors.Primary,
-                            ),
-                            modifier = Modifier.weight(1f),
-                        )
-                        maxPoints?.let {
-                            Text(
-                                text = "/ ${formatPoints(it)} pts",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = textSecondary(),
-                            )
-                        }
-                    }
-                    if (pointsText.isNotEmpty() && !pointsValid) {
-                        Text(
-                            text = maxPoints?.let { "Enter a number between 0 and ${formatPoints(it)}." }
-                                ?: "Enter a valid number.",
-                            fontSize = 12.sp,
-                            color = LexturesColors.Error,
-                        )
-                    }
-                }
-            }
-
-            item {
-                LmsCard {
-                    Text(text = "Feedback", style = LexturesType.display(17), color = textPrimary())
-                    OutlinedTextField(
-                        value = comment,
-                        onValueChange = { comment = it },
-                        label = { Text("Comment for the student (optional)") },
-                        minLines = 3,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = LexturesColors.Primary,
-                            cursorColor = LexturesColors.Primary,
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
+                    Text(text = "Grade on web", style = LexturesType.display(17), color = textPrimary())
+                    Text(
+                        text = "Quiz answers are graded question by question. Open the web app to review responses and enter scores for ${backlogItem.assignmentTitle}.",
+                        fontSize = 14.sp,
+                        color = textSecondary(),
                     )
-                }
-            }
-
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            if (pointsValid && !saving) LexturesColors.Primary
-                            else LexturesColors.Primary.copy(alpha = 0.55f),
-                        )
-                        .clickable(enabled = pointsValid && !saving) {
-                            val token = accessToken ?: return@clickable
-                            val points = pointsValue ?: return@clickable
-                            scope.launch {
-                                saving = true
-                                errorMessage = null
-                                runCatching {
-                                    LmsApi.putSubmissionGrade(
-                                        courseCode = course.courseCode,
-                                        itemId = assignmentId,
-                                        submissionId = submission.id,
-                                        gradeBody = SubmissionGradePut(
-                                            pointsEarned = points,
-                                            instructorComment = comment.trim().takeIf { it.isNotEmpty() },
-                                        ),
-                                        accessToken = token,
-                                    )
-                                }.onSuccess {
-                                    saving = false
-                                    onDone(true)
-                                }.onFailure {
-                                    saving = false
-                                    errorMessage = session.mapError(it)
-                                }
-                            }
-                        }
-                        .padding(vertical = 14.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    if (saving) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                        )
-                    } else {
-                        Text(
-                            text = "Save grade",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                        )
-                    }
                 }
             }
         }
     }
 }
-
-private fun formatPoints(points: Double): String =
-    if (points % 1.0 == 0.0) points.toLong().toString() else points.toString()
