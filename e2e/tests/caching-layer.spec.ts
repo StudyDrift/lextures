@@ -43,10 +43,11 @@ test.describe('caching layer HTTP headers', () => {
   })
 })
 
-test('offline banner renders in app shell', async ({ page }) => {
-  await page.goto('/')
+test('offline banner renders in app shell when authenticated', async ({ authedPage: page }) => {
+  await page.goto('/dashboard')
   await page.evaluate(() => {
+    Object.defineProperty(navigator, 'onLine', { value: false, configurable: true })
     window.dispatchEvent(new Event('offline'))
   })
-  await expect(page.getByText(/You are offline/)).toBeVisible()
+  await expect(page.getByRole('alert')).toContainText(/You are offline/)
 })
