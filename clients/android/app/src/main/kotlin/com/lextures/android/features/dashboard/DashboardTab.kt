@@ -72,6 +72,7 @@ import com.lextures.android.features.grading.GradingBacklogScreen
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsAvatarChip
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.features.home.CourseHeroImage
 import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSectionHeader
@@ -242,9 +243,9 @@ fun DashboardTab(
         return
     }
 
-    LazyColumn(
+        LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         item {
@@ -419,6 +420,7 @@ fun DashboardTab(
                         CourseCarouselCard(
                             course = course,
                             counts = courseCounts[course.courseCode],
+                            accessToken = accessToken,
                             onClick = { openCourse = course },
                         )
                     }
@@ -612,9 +614,9 @@ fun AnnouncementCard(
 private fun CourseCarouselCard(
     course: CourseSummary,
     counts: Pair<Int, Int>?,
+    accessToken: String?,
     onClick: () -> Unit,
 ) {
-    val dark = isDarkTheme()
     Column(
         modifier = Modifier
             .width(190.dp)
@@ -622,12 +624,13 @@ private fun CourseCarouselCard(
             .background(cardBackground())
             .clickable(onClick = onClick),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(84.dp)
-                .background(coverBrush(course.courseCode)),
-        ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            CourseHeroImage(
+                url = course.heroImageUrl,
+                fallbackKey = course.courseCode,
+                accessToken = accessToken,
+                height = 84.dp,
+            )
             Icon(
                 Icons.AutoMirrored.Filled.MenuBook,
                 contentDescription = null,

@@ -47,9 +47,20 @@ struct GradingBacklogSection: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(item.assignmentTitle)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    HStack(spacing: 6) {
+                        Text(item.assignmentTitle)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                        if item.isQuiz {
+                            Text("Quiz")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.amber)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(LexturesTheme.amber.opacity(0.14))
+                                .clipShape(Capsule())
+                        }
+                    }
                     Text("\(item.ungradedCount) ungraded submission\(item.ungradedCount == 1 ? "" : "s")")
                         .font(.caption)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
@@ -177,12 +188,20 @@ struct SubmissionsListView: View {
         .task { await load() }
         .task(id: filter) { await load() }
         .sheet(item: $grading) { submission in
-            GradeSubmissionSheet(
-                course: course,
-                assignmentId: backlogItem.assignmentId,
-                submission: submission
-            ) {
-                Task { await load() }
+            if backlogItem.isQuiz {
+                QuizAttemptInfoSheet(
+                    backlogItem: backlogItem,
+                    submission: submission
+                )
+            } else {
+                SpeedGraderView(
+                    course: course,
+                    assignmentId: backlogItem.resolvedItemId,
+                    submissions: submissions,
+                    startIndex: submissions.firstIndex(of: submission) ?? 0
+                ) {
+                    Task { await load() }
+                }
             }
         }
     }
@@ -238,9 +257,9 @@ struct SubmissionsListView: View {
         errorMessage = nil
         defer { loading = false }
         do {
-            submissions = try await LMSAPI.fetchSubmissions(
+            submissions = try await LMSAPI.fetchGradingSubmissions(
                 courseCode: course.courseCode,
-                itemId: backlogItem.assignmentId,
+                backlogItem: backlogItem,
                 graded: filter.queryValue,
                 accessToken: token
             )
@@ -250,33 +269,13 @@ struct SubmissionsListView: View {
     }
 }
 
-/// Bottom sheet: enter points + comment for one submission.
-struct GradeSubmissionSheet: View {
-    @Environment(AuthSession.self) private var session
+/// Quiz attempts must be graded per question on web (mobile v1 is read-only).
+struct QuizAttemptInfoSheet: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
-    let course: CourseSummary
-    let assignmentId: String
+    let backlogItem: GradingBacklogItem
     let submission: AssignmentSubmission
-    var onSaved: () -> Void = {}
-
-    @State private var pointsText = ""
-    @State private var comment = ""
-    @State private var maxPoints: Double?
-    @State private var errorMessage: String?
-    @State private var loading = true
-    @State private var saving = false
-
-    private var pointsValue: Double? {
-        Double(pointsText.replacingOccurrences(of: ",", with: "."))
-    }
-
-    private var pointsValid: Bool {
-        guard let value = pointsValue else { return false }
-        if let max = maxPoints { return value >= 0 && value <= max }
-        return value >= 0
-    }
 
     var body: some View {
         NavigationStack {
@@ -285,10 +284,6 @@ struct GradeSubmissionSheet: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 14) {
-                        if let errorMessage {
-                            LMSErrorBanner(message: errorMessage)
-                        }
-
                         LMSCard {
                             Text(submission.displayName)
                                 .font(LexturesTheme.displayFont(18))
@@ -296,137 +291,33 @@ struct GradeSubmissionSheet: View {
                             Text("Submitted \(LMSDates.shortDateTime(submission.submittedAt))")
                                 .font(.caption)
                                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                            if let filename = submission.attachmentFilename, !filename.isEmpty {
-                                Label(filename, systemImage: "paperclip")
+                            if let version = submission.versionNumber, version > 1 {
+                                Text("Attempt \(version)")
                                     .font(.caption)
-                                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                                Text("Open the web app to review file submissions in full.")
-                                    .font(.caption2)
-                                    .italic()
                                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                             }
                         }
 
                         LMSCard {
-                            Text("Score")
+                            Text("Grade on web")
                                 .font(LexturesTheme.displayFont(17))
                                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                            HStack(spacing: 10) {
-                                TextField("Points", text: $pointsText)
-                                    .keyboardType(.decimalPad)
-                                    .font(LexturesTheme.displayFont(22, weight: .bold))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
-                                    .frame(width: 120)
-                                    .background(LexturesTheme.sceneBackground(for: colorScheme).opacity(0.7))
-                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .stroke(
-                                                pointsText.isEmpty || pointsValid
-                                                    ? LexturesTheme.fieldBorder(for: colorScheme)
-                                                    : LexturesTheme.error,
-                                                lineWidth: 1
-                                            )
-                                    )
-                                if let max = maxPoints {
-                                    Text("/ \(max.formatted()) pts")
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                                }
-                            }
-                            if !pointsText.isEmpty && !pointsValid {
-                                Text(maxPoints.map { "Enter a number between 0 and \($0.formatted())." } ?? "Enter a valid number.")
-                                    .font(.caption)
-                                    .foregroundStyle(LexturesTheme.error)
-                            }
+                            Text("Quiz answers are graded question by question. Open the web app to review responses and enter scores for \(backlogItem.assignmentTitle).")
+                                .font(.subheadline)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                         }
-
-                        LMSCard {
-                            Text("Feedback")
-                                .font(LexturesTheme.displayFont(17))
-                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                            TextField("Comment for the student (optional)", text: $comment, axis: .vertical)
-                                .lineLimit(4 ... 8)
-                                .padding(12)
-                                .background(LexturesTheme.sceneBackground(for: colorScheme).opacity(0.7))
-                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                        .stroke(LexturesTheme.fieldBorder(for: colorScheme), lineWidth: 1)
-                                )
-                        }
-
-                        Button {
-                            Task { await save() }
-                        } label: {
-                            if saving {
-                                ProgressView()
-                                    .frame(maxWidth: .infinity)
-                            } else {
-                                Text("Save grade")
-                            }
-                        }
-                        .buttonStyle(AuthPrimaryButtonStyle())
-                        .disabled(!pointsValid || saving || loading)
                     }
                     .padding(16)
                 }
             }
-            .navigationTitle("Grade submission")
+            .navigationTitle("Quiz attempt")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
                 }
             }
-            .task { await loadExisting() }
         }
-        .presentationDetents([.large])
-    }
-
-    private func loadExisting() async {
-        guard let token = session.accessToken else {
-            loading = false
-            return
-        }
-        loading = true
-        defer { loading = false }
-        // Pre-fill when a grade already exists; also learns maxPoints for validation.
-        if let grade = try? await LMSAPI.fetchSubmissionGrade(
-            courseCode: course.courseCode,
-            itemId: assignmentId,
-            submissionId: submission.id,
-            accessToken: token
-        ) {
-            maxPoints = grade.maxPoints
-            if let earned = grade.pointsEarned {
-                pointsText = earned.formatted()
-            }
-            comment = grade.instructorComment ?? ""
-        }
-    }
-
-    private func save() async {
-        guard let token = session.accessToken, let points = pointsValue else { return }
-        saving = true
-        errorMessage = nil
-        defer { saving = false }
-        do {
-            try await LMSAPI.putSubmissionGrade(
-                courseCode: course.courseCode,
-                itemId: assignmentId,
-                submissionId: submission.id,
-                body: .init(
-                    pointsEarned: points,
-                    instructorComment: comment.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : comment
-                ),
-                accessToken: token
-            )
-            onSaved()
-            dismiss()
-        } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not save the grade."
-        }
+        .presentationDetents([.medium, .large])
     }
 }

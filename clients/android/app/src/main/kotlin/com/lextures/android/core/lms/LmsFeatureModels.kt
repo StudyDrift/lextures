@@ -185,17 +185,24 @@ data class SyllabusPayload(
 /** Row from `/assignments/{item}/submissions` and `/submissions/mine`. */
 @Serializable
 data class AssignmentSubmission(
-    val id: String,
+    // Defaulted so roster placeholder rows (enrolled students with no submission yet,
+    // which the list endpoint returns without an `id`) decode instead of failing the
+    // whole list; callers drop the blank-id rows since they aren't gradeable.
+    val id: String = "",
     val submittedBy: String? = null,
     val submittedByDisplayName: String? = null,
     val blindLabel: String? = null,
     val attachmentFilename: String? = null,
+    val attachmentMimeType: String? = null,
+    val attachmentContentPath: String? = null,
+    val bodyText: String? = null,
     val submittedAt: String = "",
     val updatedAt: String? = null,
     val versionNumber: Int? = null,
     val resubmissionRequested: Boolean? = null,
     val revisionDueAt: String? = null,
     val revisionFeedback: String? = null,
+    val isGraded: Boolean? = null,
 ) {
     /** Name shown in staff lists; respects blind grading. */
     val displayName: String
@@ -234,15 +241,77 @@ data class SubmissionGradePut(
 
 // endregion
 
+// region Quiz attempts (staff)
+
+/** Row from GET `/quizzes/{item}/attempts`. */
+@Serializable
+data class QuizAttemptSummary(
+    val id: String,
+    val studentUserId: String? = null,
+    val attemptNumber: Int = 1,
+    val submittedAt: String = "",
+    val scorePercent: Double? = null,
+    val pointsEarned: Double = 0.0,
+    val pointsPossible: Double = 0.0,
+    val studentName: String? = null,
+    val needsManualGrading: Boolean? = null,
+)
+
+@Serializable
+data class QuizAttemptsListResponse(
+    val attempts: List<QuizAttemptSummary> = emptyList(),
+)
+
+// endregion
+
 // region Grading backlog (staff)
 
 /** Row from GET `/courses/{code}/grading-backlog`. */
 @Serializable
 data class GradingBacklogItem(
+    val itemId: String? = null,
+    val itemType: String? = null, // "assignment" | "quiz"
     val assignmentId: String,
     val assignmentTitle: String = "",
     val ungradedCount: Int = 0,
-)
+) {
+    val resolvedItemId: String get() = itemId ?: assignmentId
+    val isQuiz: Boolean get() = itemType == "quiz"
+}
+
+object GradingSubmissionMapper {
+    fun quizAttemptsToSubmissions(attempts: List<QuizAttemptSummary>): List<AssignmentSubmission> {
+        val byStudent = linkedMapOf<String, QuizAttemptSummary>()
+        for (attempt in attempts) {
+            val key = attempt.studentUserId?.trim()?.takeIf { it.isNotEmpty() } ?: attempt.id
+            val existing = byStudent[key]
+            if (existing == null || attempt.attemptNumber >= existing.attemptNumber) {
+                byStudent[key] = attempt
+            }
+        }
+        return byStudent.values
+            .sortedBy { it.studentName.orEmpty() }
+            .map { attempt ->
+                AssignmentSubmission(
+                    id = attempt.id,
+                    submittedBy = attempt.studentUserId,
+                    submittedByDisplayName = attempt.studentName,
+                    submittedAt = attempt.submittedAt,
+                    versionNumber = attempt.attemptNumber.takeIf { it > 1 },
+                    isGraded = attempt.needsManualGrading == false,
+                )
+            }
+    }
+
+    fun filterSubmissions(submissions: List<AssignmentSubmission>, graded: String?): List<AssignmentSubmission> {
+        if (graded.isNullOrEmpty() || graded == "all") return submissions
+        return if (graded == "graded") {
+            submissions.filter { it.isGraded == true }
+        } else {
+            submissions.filter { it.isGraded != true }
+        }
+    }
+}
 
 @Serializable
 data class GradingBacklogResponse(

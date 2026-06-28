@@ -203,7 +203,35 @@ object LmsApi {
         var path = "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(itemId)}/submissions"
         if (!graded.isNullOrEmpty()) path += "?graded=$graded"
         val (body, _) = client.request(path, accessToken = accessToken)
-        decode<SubmissionsListResponse>(body).submissions
+        // Drop roster placeholders (enrolled students with no submission) — no id to grade.
+        decode<SubmissionsListResponse>(body).submissions.filter { it.id.isNotBlank() }
+    }
+
+    suspend fun fetchQuizAttempts(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): List<QuizAttemptSummary> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/attempts",
+            accessToken = accessToken,
+        )
+        decode<QuizAttemptsListResponse>(body).attempts
+    }
+
+    suspend fun fetchGradingSubmissions(
+        courseCode: String,
+        backlogItem: GradingBacklogItem,
+        graded: String?,
+        accessToken: String,
+    ): List<AssignmentSubmission> = withContext(Dispatchers.IO) {
+        if (backlogItem.isQuiz) {
+            val attempts = fetchQuizAttempts(courseCode, backlogItem.resolvedItemId, accessToken)
+            val submissions = GradingSubmissionMapper.quizAttemptsToSubmissions(attempts)
+            GradingSubmissionMapper.filterSubmissions(submissions, graded ?: "all")
+        } else {
+            fetchSubmissions(courseCode, backlogItem.resolvedItemId, graded, accessToken)
+        }
     }
 
     suspend fun fetchSubmissionGrade(

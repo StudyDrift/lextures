@@ -55,11 +55,13 @@ struct MainTabView: View {
     @State private var shell = AppShellModel()
 
     var body: some View {
-        ZStack(alignment: .bottom) {
+        VStack(spacing: 0) {
             tabContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             LexturesTabBar(shell: shell)
                 .padding(.horizontal, 24)
-                .padding(.bottom, 4)
+                .padding(.top, 8)
+                .padding(.bottom, 6)
         }
         .environment(shell)
         .task {
@@ -81,9 +83,6 @@ struct MainTabView: View {
 
     private func pane<Content: View>(_ tab: AppTab, @ViewBuilder content: () -> Content) -> some View {
         content()
-            .safeAreaInset(edge: .bottom) {
-                Color.clear.frame(height: 70)
-            }
             .opacity(shell.selectedTab == tab ? 1 : 0)
             .allowsHitTesting(shell.selectedTab == tab)
             .accessibilityHidden(shell.selectedTab != tab)

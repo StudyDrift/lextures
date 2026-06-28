@@ -317,8 +317,7 @@ struct NotebookPagesView: View {
         .buttonStyle(.plain)
         .padding(.horizontal, 20)
         .padding(.top, 20)
-        // Navigation destinations don't inherit MainTabView's bottom inset (70pt).
-        .padding(.bottom, 20 + 70)
+        .padding(.bottom, 20)
         .accessibilityLabel("New page")
     }
 
