@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 260_ff_eportfolio_platform_flag.sql
+-- See docs/runbooks/database-migration-rollback.md

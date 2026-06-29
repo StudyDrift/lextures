@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 289_study_reminders.sql
+-- See docs/runbooks/database-migration-rollback.md

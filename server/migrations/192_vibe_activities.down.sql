@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 192_vibe_activities.sql
+-- See docs/runbooks/database-migration-rollback.md

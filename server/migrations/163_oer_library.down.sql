@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 163_oer_library.sql
+-- See docs/runbooks/database-migration-rollback.md

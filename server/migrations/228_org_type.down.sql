@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 228_org_type.sql
+-- See docs/runbooks/database-migration-rollback.md

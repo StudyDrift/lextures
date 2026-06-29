@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 021_module_content_pages.sql
+-- See docs/runbooks/database-migration-rollback.md

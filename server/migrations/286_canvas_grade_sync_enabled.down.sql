@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 286_canvas_grade_sync_enabled.sql
+-- See docs/runbooks/database-migration-rollback.md

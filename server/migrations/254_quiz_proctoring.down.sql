@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 254_quiz_proctoring.sql
+-- See docs/runbooks/database-migration-rollback.md

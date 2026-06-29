@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 101_qti_common_cartridge_import.sql
+-- See docs/runbooks/database-migration-rollback.md

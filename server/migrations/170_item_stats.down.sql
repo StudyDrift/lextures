@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 170_item_stats.sql
+-- See docs/runbooks/database-migration-rollback.md

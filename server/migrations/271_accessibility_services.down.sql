@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 271_accessibility_services.sql
+-- See docs/runbooks/database-migration-rollback.md

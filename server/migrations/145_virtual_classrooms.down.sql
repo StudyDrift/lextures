@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 145_virtual_classrooms.sql
+-- See docs/runbooks/database-migration-rollback.md

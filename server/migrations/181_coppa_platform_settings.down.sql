@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 181_coppa_platform_settings.sql
+-- See docs/runbooks/database-migration-rollback.md

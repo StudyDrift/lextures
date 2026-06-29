@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 309_submission_attachments.sql
+-- See docs/runbooks/database-migration-rollback.md

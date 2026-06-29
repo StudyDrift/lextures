@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 303_conditional_release.sql
+-- See docs/runbooks/database-migration-rollback.md

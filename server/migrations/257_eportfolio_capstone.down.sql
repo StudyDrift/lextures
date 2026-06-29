@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 257_eportfolio_capstone.sql
+-- See docs/runbooks/database-migration-rollback.md

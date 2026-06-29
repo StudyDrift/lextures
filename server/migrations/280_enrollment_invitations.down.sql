@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 280_enrollment_invitations.sql
+-- See docs/runbooks/database-migration-rollback.md

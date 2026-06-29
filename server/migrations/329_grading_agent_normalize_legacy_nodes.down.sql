@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 329_grading_agent_normalize_legacy_nodes.sql
+-- See docs/runbooks/database-migration-rollback.md

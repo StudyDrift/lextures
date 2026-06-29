@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 125_refresh_tokens.sql
+-- See docs/runbooks/database-migration-rollback.md

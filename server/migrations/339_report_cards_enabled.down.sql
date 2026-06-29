@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 339_report_cards_enabled.sql
+-- See docs/runbooks/database-migration-rollback.md

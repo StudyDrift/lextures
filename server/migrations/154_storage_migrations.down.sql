@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 154_storage_migrations.sql
+-- See docs/runbooks/database-migration-rollback.md

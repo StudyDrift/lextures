@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 235_cloud_provider_credentials.sql
+-- See docs/runbooks/database-migration-rollback.md

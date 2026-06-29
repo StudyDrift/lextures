@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 345_migration_deploy_tracking.sql
+-- Removing deploy_id tracking loses deploy correlation metadata only; schema is otherwise unchanged.

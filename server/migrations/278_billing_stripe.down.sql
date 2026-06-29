@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 278_billing_stripe.sql
+-- See docs/runbooks/database-migration-rollback.md

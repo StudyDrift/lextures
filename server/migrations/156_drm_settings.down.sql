@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 156_drm_settings.sql
+-- See docs/runbooks/database-migration-rollback.md

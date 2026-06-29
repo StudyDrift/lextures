@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 317_tenant_ai_settings.sql
+-- See docs/runbooks/database-migration-rollback.md

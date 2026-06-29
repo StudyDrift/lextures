@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 305_scorm_packages.sql
+-- See docs/runbooks/database-migration-rollback.md

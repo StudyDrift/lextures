@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 086_signup_teacher_course_create.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 325_submission_body_text.sql
+-- See docs/runbooks/database-migration-rollback.md

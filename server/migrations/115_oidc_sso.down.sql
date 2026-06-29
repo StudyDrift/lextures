@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 115_oidc_sso.sql
+-- See docs/runbooks/database-migration-rollback.md

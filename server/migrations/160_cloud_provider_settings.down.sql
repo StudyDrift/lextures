@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 160_cloud_provider_settings.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 274_ceu_tracking.sql
+-- See docs/runbooks/database-migration-rollback.md

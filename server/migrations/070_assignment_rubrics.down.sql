@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 070_assignment_rubrics.sql
+-- See docs/runbooks/database-migration-rollback.md

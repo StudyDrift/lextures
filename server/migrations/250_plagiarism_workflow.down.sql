@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 250_plagiarism_workflow.sql
+-- See docs/runbooks/database-migration-rollback.md

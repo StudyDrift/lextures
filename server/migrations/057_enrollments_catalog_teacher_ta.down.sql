@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 057_enrollments_catalog_teacher_ta.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 293_instructor_comments_json.sql
+-- See docs/runbooks/database-migration-rollback.md

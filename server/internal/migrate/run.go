@@ -8,6 +8,9 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log/slog"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -78,7 +81,7 @@ func runLocked(ctx context.Context, conn *pgx.Conn, fsys fs.FS, dir string) erro
 	}
 	var list []migrationFile
 	for _, e := range entries {
-		if e.IsDir() {
+		if e.IsDir() || !isUpMigration(e.Name()) {
 			continue
 		}
 		p := dir + "/" + e.Name()
@@ -89,10 +92,14 @@ func runLocked(ctx context.Context, conn *pgx.Conn, fsys fs.FS, dir string) erro
 		list = append(list, mf)
 	}
 	sortMigrations(list)
+	trackDeployID := hasDeployIDColumn(ctx, conn)
 	for _, mf := range list {
 		p := dir + "/" + mf.Name
-		if err := applyIfNeeded(ctx, conn, fsys, p, mf); err != nil {
+		if err := applyIfNeeded(ctx, conn, fsys, p, mf, trackDeployID); err != nil {
 			return err
+		}
+		if !trackDeployID && hasDeployIDColumn(ctx, conn) {
+			trackDeployID = true
 		}
 	}
 	return nil
@@ -105,7 +112,8 @@ func ensureMigrationsTable(ctx context.Context, c *pgx.Conn) error {
   installed_on TIMESTAMPTZ NOT NULL DEFAULT now(),
   success BOOLEAN NOT NULL,
   checksum BYTEA NOT NULL,
-  execution_time BIGINT NOT NULL
+  execution_time BIGINT NOT NULL,
+  deploy_id TEXT
 );`, sqlxMigrationsTable)
 	_, err := c.Exec(ctx, q)
 	if err != nil {
@@ -128,7 +136,20 @@ func checkNotDirty(ctx context.Context, c *pgx.Conn) error {
 	return fmt.Errorf("migrate: previous migration (version %d) did not complete successfully; fix _sqlx_migrations before continuing", ver)
 }
 
-func applyIfNeeded(ctx context.Context, c *pgx.Conn, fsys fs.FS, rel string, mf migrationFile) error {
+func hasDeployIDColumn(ctx context.Context, c *pgx.Conn) bool {
+	var exists bool
+	err := c.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1
+			FROM information_schema.columns
+			WHERE table_schema = current_schema()
+			  AND table_name = $1
+			  AND column_name = 'deploy_id'
+		)`, sqlxMigrationsTable).Scan(&exists)
+	return err == nil && exists
+}
+
+func applyIfNeeded(ctx context.Context, c *pgx.Conn, fsys fs.FS, rel string, mf migrationFile, trackDeployID bool) error {
 	body, err := fs.ReadFile(fsys, rel)
 	if err != nil {
 		return fmt.Errorf("migrate: read %q: %w", rel, err)
@@ -159,8 +180,23 @@ func applyIfNeeded(ctx context.Context, c *pgx.Conn, fsys fs.FS, rel string, mf 
 	if _, err := tx.Exec(ctx, string(body)); err != nil {
 		return fmt.Errorf("migrate: exec v%d: %w", mf.Version, err)
 	}
-	ins := fmt.Sprintf("INSERT INTO %s (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, -1)", sqlxMigrationsTable)
-	if _, err := tx.Exec(ctx, ins, int64(mf.Version), mf.Description, sum[:]); err != nil {
+	deployID := strings.TrimSpace(os.Getenv("DEPLOY_ID"))
+	var ins string
+	var insArgs []any
+	if trackDeployID {
+		ins = fmt.Sprintf(
+			"INSERT INTO %s (version, description, success, checksum, execution_time, deploy_id) VALUES ($1, $2, true, $3, -1, $4)",
+			sqlxMigrationsTable,
+		)
+		insArgs = []any{int64(mf.Version), mf.Description, sum[:], deployID}
+	} else {
+		ins = fmt.Sprintf(
+			"INSERT INTO %s (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, -1)",
+			sqlxMigrationsTable,
+		)
+		insArgs = []any{int64(mf.Version), mf.Description, sum[:]}
+	}
+	if _, err := tx.Exec(ctx, ins, insArgs...); err != nil {
 		return err
 	}
 	if err := tx.Commit(ctx); err != nil {
@@ -171,5 +207,12 @@ func applyIfNeeded(ctx context.Context, c *pgx.Conn, fsys fs.FS, rel string, mf 
 	if _, err := c.Exec(ctx, u, elapsed, int64(mf.Version)); err != nil {
 		return fmt.Errorf("migrate: set execution time v%d: %w", mf.Version, err)
 	}
+	slog.Info("migration applied",
+		"version", mf.Version,
+		"description", mf.Description,
+		"file", mf.Name,
+		"duration_ms", time.Since(t0).Milliseconds(),
+		"deploy_id", deployID,
+	)
 	return nil
 }

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 152_multilingual_messaging.sql
+-- See docs/runbooks/database-migration-rollback.md

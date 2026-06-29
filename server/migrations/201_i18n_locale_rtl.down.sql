@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 201_i18n_locale_rtl.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 095_hints_scaffolding.sql
+-- See docs/runbooks/database-migration-rollback.md

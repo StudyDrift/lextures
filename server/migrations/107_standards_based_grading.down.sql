@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 107_standards_based_grading.sql
+-- See docs/runbooks/database-migration-rollback.md

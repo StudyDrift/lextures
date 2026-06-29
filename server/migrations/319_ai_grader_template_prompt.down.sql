@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 319_ai_grader_template_prompt.sql
+-- See docs/runbooks/database-migration-rollback.md

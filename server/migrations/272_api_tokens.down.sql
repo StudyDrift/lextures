@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 272_api_tokens.sql
+-- See docs/runbooks/database-migration-rollback.md

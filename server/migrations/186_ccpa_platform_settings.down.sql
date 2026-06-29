@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 186_ccpa_platform_settings.sql
+-- See docs/runbooks/database-migration-rollback.md

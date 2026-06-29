@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 214_speech_to_text.sql
+-- See docs/runbooks/database-migration-rollback.md

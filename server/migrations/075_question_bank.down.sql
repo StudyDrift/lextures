@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 075_question_bank.sql
+-- See docs/runbooks/database-migration-rollback.md

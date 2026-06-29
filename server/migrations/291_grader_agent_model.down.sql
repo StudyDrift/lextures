@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 291_grader_agent_model.sql
+-- See docs/runbooks/database-migration-rollback.md

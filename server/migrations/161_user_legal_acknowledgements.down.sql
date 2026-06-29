@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 161_user_legal_acknowledgements.sql
+-- See docs/runbooks/database-migration-rollback.md

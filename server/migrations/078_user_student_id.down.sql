@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 078_user_student_id.sql
+-- See docs/runbooks/database-migration-rollback.md

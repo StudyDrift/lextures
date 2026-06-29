@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 241_feed_announcements_channel.sql
+-- See docs/runbooks/database-migration-rollback.md

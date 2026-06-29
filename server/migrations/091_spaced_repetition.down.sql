@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 091_spaced_repetition.sql
+-- See docs/runbooks/database-migration-rollback.md

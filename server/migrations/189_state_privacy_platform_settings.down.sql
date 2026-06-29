@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 189_state_privacy_platform_settings.sql
+-- See docs/runbooks/database-migration-rollback.md

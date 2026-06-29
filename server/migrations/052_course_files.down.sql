@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 052_course_files.sql
+-- See docs/runbooks/database-migration-rollback.md

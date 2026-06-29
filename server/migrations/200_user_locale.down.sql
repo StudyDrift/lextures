@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 200_user_locale.sql
+-- See docs/runbooks/database-migration-rollback.md

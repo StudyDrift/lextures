@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 022_module_publish_visibility.sql
+-- See docs/runbooks/database-migration-rollback.md

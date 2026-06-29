@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 076_quiz_lockdown_mode.sql
+-- See docs/runbooks/database-migration-rollback.md

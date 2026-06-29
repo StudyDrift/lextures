@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 203_user_timezone.sql
+-- See docs/runbooks/database-migration-rollback.md

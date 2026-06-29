@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 194_encryption_at_rest.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 123_mfa_totp_webauthn.sql
+-- See docs/runbooks/database-migration-rollback.md

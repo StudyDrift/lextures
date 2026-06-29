@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 109_assignment_group_drop_rules.sql
+-- See docs/runbooks/database-migration-rollback.md

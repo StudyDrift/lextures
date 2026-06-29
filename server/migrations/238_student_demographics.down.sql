@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 238_student_demographics.sql
+-- See docs/runbooks/database-migration-rollback.md

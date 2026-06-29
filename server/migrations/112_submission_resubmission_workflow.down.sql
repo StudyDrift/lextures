@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 112_submission_resubmission_workflow.sql
+-- See docs/runbooks/database-migration-rollback.md

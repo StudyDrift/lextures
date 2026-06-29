@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 004_communication.sql
+-- See docs/runbooks/database-migration-rollback.md

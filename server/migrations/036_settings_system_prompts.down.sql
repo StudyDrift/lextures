@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 036_settings_system_prompts.sql
+-- See docs/runbooks/database-migration-rollback.md

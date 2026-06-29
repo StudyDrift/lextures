@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 110_grade_audit_events.sql
+-- See docs/runbooks/database-migration-rollback.md

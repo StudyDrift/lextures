@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 040_quiz_adaptive.sql
+-- See docs/runbooks/database-migration-rollback.md

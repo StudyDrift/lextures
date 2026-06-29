@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 003_user_ai_and_course_hero.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 323_grading_agent_results_unique_run_submission.sql
+-- See docs/runbooks/database-migration-rollback.md

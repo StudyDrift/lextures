@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 190_soc2_compliance.sql
+-- See docs/runbooks/database-migration-rollback.md

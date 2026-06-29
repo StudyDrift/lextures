@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 256_bookstore_textbook.sql
+-- See docs/runbooks/database-migration-rollback.md

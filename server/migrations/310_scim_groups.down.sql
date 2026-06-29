@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 310_scim_groups.sql
+-- See docs/runbooks/database-migration-rollback.md

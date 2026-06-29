@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 206_a11y_screen_reader_audit.sql
+-- See docs/runbooks/database-migration-rollback.md

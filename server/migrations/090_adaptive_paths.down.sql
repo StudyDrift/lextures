@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 090_adaptive_paths.sql
+-- See docs/runbooks/database-migration-rollback.md

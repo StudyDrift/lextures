@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 255_he_library_ereserves.sql
+-- See docs/runbooks/database-migration-rollback.md

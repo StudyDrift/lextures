@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 288_user_phone_sms_notifications.sql
+-- See docs/runbooks/database-migration-rollback.md

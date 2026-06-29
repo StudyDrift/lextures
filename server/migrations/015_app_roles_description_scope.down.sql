@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 015_app_roles_description_scope.sql
+-- See docs/runbooks/database-migration-rollback.md

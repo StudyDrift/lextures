@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 297_public_api.sql
+-- See docs/runbooks/database-migration-rollback.md

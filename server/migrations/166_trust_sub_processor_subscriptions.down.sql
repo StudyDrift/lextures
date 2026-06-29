@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 166_trust_sub_processor_subscriptions.sql
+-- See docs/runbooks/database-migration-rollback.md

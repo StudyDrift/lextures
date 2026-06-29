@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 155_tus_uploads.sql
+-- See docs/runbooks/database-migration-rollback.md

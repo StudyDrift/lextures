@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 132_cross_listing.sql
+-- See docs/runbooks/database-migration-rollback.md

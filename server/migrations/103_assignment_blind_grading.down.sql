@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 103_assignment_blind_grading.sql
+-- See docs/runbooks/database-migration-rollback.md

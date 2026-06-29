@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 032_user_profile_fields.sql
+-- See docs/runbooks/database-migration-rollback.md

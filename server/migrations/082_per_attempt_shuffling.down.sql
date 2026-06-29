@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 082_per_attempt_shuffling.sql
+-- See docs/runbooks/database-migration-rollback.md

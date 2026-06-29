@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 267_feature_flags_env_to_db.sql
+-- See docs/runbooks/database-migration-rollback.md

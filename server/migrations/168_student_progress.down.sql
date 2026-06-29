@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 168_student_progress.sql
+-- See docs/runbooks/database-migration-rollback.md

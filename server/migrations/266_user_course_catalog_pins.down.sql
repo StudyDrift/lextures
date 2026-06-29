@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 266_user_course_catalog_pins.sql
+-- See docs/runbooks/database-migration-rollback.md

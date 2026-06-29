@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 240_canvas_import_jobs.sql
+-- See docs/runbooks/database-migration-rollback.md

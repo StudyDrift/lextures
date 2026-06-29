@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 215_accommodations_engine.sql
+-- See docs/runbooks/database-migration-rollback.md

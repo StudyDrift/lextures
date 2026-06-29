@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 237_conference_scheduling.sql
+-- See docs/runbooks/database-migration-rollback.md

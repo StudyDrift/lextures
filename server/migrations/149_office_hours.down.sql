@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 149_office_hours.sql
+-- See docs/runbooks/database-migration-rollback.md

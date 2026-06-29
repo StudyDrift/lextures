@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 150_support_widget.sql
+-- See docs/runbooks/database-migration-rollback.md

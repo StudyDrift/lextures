@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 133_course_blueprints.sql
+-- See docs/runbooks/database-migration-rollback.md

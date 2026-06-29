@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 167_equation_editor_open_audit.sql
+-- See docs/runbooks/database-migration-rollback.md

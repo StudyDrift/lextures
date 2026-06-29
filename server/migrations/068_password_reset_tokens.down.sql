@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 068_password_reset_tokens.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 135_org_role_grants.sql
+-- See docs/runbooks/database-migration-rollback.md

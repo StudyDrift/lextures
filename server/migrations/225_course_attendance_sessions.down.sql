@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 225_course_attendance_sessions.sql
+-- See docs/runbooks/database-migration-rollback.md
