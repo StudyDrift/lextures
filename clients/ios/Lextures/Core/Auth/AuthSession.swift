@@ -122,6 +122,8 @@ final class AuthSession {
     }
 
     func signOut() {
+        let savedToken = accessToken
+        Task { await PushManager.shared.deregisterFromBackend(explicitAccessToken: savedToken) }
         KeychainStore.deleteAll()
         accessToken = nil
         refreshToken = nil

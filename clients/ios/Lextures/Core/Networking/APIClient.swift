@@ -17,6 +17,10 @@ struct APIClient {
         var request = URLRequest(url: AppConfiguration.apiURL(path: path))
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("ios", forHTTPHeaderField: "X-Platform")
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            request.setValue(version, forHTTPHeaderField: "X-App-Version")
+        }
 
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")

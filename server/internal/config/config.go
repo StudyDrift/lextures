@@ -145,6 +145,14 @@ type Config struct {
 	// VAPIDSubject is the mailto: or https: URI sent in the VAPID JWT sub claim.
 	VAPIDSubject string
 
+	// Native push (APNs / FCM) credentials for mobile apps (plans 21.5, M0.1).
+	APNSP8Key               string
+	APNSKeyID               string
+	APNSTeamID              string
+	APNSBundleID            string
+	APNSEnvironment         string // "development" or "production"
+	FCMServiceAccountJSON   string
+
 	// VirtualClassroomEnabled gates the virtual meeting / live classroom feature (plan 6.4).
 	VirtualClassroomEnabled bool
 
@@ -721,6 +729,12 @@ func Load() Config {
 		VAPIDPublicKey:           firstNonEmptyTrimmed("VAPID_PUBLIC_KEY"),
 		VAPIDPrivateKey:          firstNonEmptyTrimmed("VAPID_PRIVATE_KEY"),
 		VAPIDSubject:             stringDefault(firstNonEmptyTrimmed("VAPID_SUBJECT"), "mailto:admin@lextures.com"),
+		APNSP8Key:                firstNonEmptyTrimmed("APNS_P8_KEY"),
+		APNSKeyID:                firstNonEmptyTrimmed("APNS_KEY_ID"),
+		APNSTeamID:               firstNonEmptyTrimmed("APNS_TEAM_ID"),
+		APNSBundleID:             firstNonEmptyTrimmed("APNS_BUNDLE_ID"),
+		APNSEnvironment:          stringDefault(firstNonEmptyTrimmed("APNS_ENVIRONMENT"), "production"),
+		FCMServiceAccountJSON:    firstNonEmptyTrimmed("FCM_SERVICE_ACCOUNT_JSON"),
 
 		VirtualClassroomEnabled: true,
 		JitsiBaseURL:            stringDefault(firstNonEmptyTrimmed("JITSI_BASE_URL"), "https://meet.jit.si"),

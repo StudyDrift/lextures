@@ -287,6 +287,7 @@ def main() -> None:
         w("\t\t\tbuildSettings = {")
         w(f'\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;')
         w(f'\t\t\t\tASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;')
+        w(f'\t\t\t\tCODE_SIGN_ENTITLEMENTS = {APP_NAME}/Resources/Lextures.entitlements;')
         w(f'\t\t\t\tCODE_SIGN_STYLE = Automatic;')
         w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 1;')
         w(f'\t\t\t\tDEVELOPMENT_TEAM = "";')

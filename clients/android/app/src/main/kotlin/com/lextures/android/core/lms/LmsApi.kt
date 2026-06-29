@@ -277,6 +277,42 @@ object LmsApi {
             decode<GradingBacklogResponse>(body).items
         }
 
+    suspend fun markAllNotificationsRead(accessToken: String) = withContext(Dispatchers.IO) {
+        client.request(
+            path = "/api/v1/me/notifications/read-all",
+            method = "POST",
+            accessToken = accessToken,
+        )
+    }
+
+    suspend fun registerDeviceToken(token: String, platform: String, accessToken: String): DeviceTokenResponse =
+        withContext(Dispatchers.IO) {
+            val body = client.encodeBody(
+                DeviceTokenRegistration(
+                    token = token,
+                    platform = platform,
+                    appBundleId = "com.lextures.android",
+                    appVersion = com.lextures.android.BuildConfig.VERSION_NAME,
+                ),
+                DeviceTokenRegistration.serializer(),
+            )
+            val (response, _) = client.request(
+                path = "/api/v1/me/device-tokens",
+                method = "POST",
+                body = body,
+                accessToken = accessToken,
+            )
+            decode(response)
+        }
+
+    suspend fun deregisterDeviceToken(id: String, accessToken: String) = withContext(Dispatchers.IO) {
+        client.request(
+            path = "/api/v1/me/device-tokens/${encodePath(id)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+    }
+
     // Attendance
 
     suspend fun fetchAttendanceSessions(courseCode: String, accessToken: String): List<AttendanceSession> =

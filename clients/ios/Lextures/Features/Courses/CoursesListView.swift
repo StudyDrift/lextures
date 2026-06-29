@@ -2,12 +2,16 @@ import SwiftUI
 
 struct CoursesListView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @State private var courses: [CourseSummary] = []
     @State private var errorMessage: String?
     @State private var loading = false
     @State private var loadedOnce = false
     @State private var searchText = ""
+    @State private var deepLinkedCourse: CourseSummary?
+    @State private var deepLinkSection: CourseDeepLinkSection?
+    @State private var deepLinkItemId: String?
 
     private var filteredCourses: [CourseSummary] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -57,9 +61,47 @@ struct CoursesListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search courses")
             .navigationDestination(for: CourseSummary.self) { course in
-                CourseDetailView(course: course)
+                CourseDetailView(
+                    course: course,
+                    initialSection: mapSection(deepLinkSection),
+                    initialItemId: deepLinkItemId
+                )
+            }
+            .navigationDestination(item: $deepLinkedCourse) { course in
+                CourseDetailView(
+                    course: course,
+                    initialSection: mapSection(deepLinkSection),
+                    initialItemId: deepLinkItemId
+                )
             }
             .task { await load() }
+            .onChange(of: shell.pendingDeepLink) { _, link in
+                guard let link else { return }
+                if case let .course(code, section, itemId) = link {
+                    deepLinkSection = section
+                    deepLinkItemId = itemId
+                    Task { await openCourse(code: code) }
+                }
+                shell.pendingDeepLink = nil
+            }
+        }
+    }
+
+    private func mapSection(_ section: CourseDeepLinkSection?) -> CourseDetailView.Section? {
+        switch section {
+        case .grades: return .grades
+        case .overview, .feed, .discussions, .none: return .overview
+        case .modules: return .modules
+        }
+    }
+
+    private func openCourse(code: String) async {
+        guard let token = session.accessToken else { return }
+        do {
+            let course = try await LMSAPI.fetchCourse(courseCode: code, accessToken: token)
+            deepLinkedCourse = course
+        } catch {
+            shell.openDeepLink(.home)
         }
     }
 

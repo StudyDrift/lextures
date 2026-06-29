@@ -48,6 +48,8 @@ import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.sceneBackground
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MeProfile
+import com.lextures.android.core.push.PushManager
+import com.lextures.android.core.routing.DeepLinkDestination
 import com.lextures.android.features.courses.CoursesTab
 import com.lextures.android.features.dashboard.DashboardTab
 import com.lextures.android.features.inbox.InboxTab
@@ -70,6 +72,18 @@ class HomeShellState {
     var profile by mutableStateOf<MeProfile?>(null)
     var unreadInbox by mutableIntStateOf(0)
     var unreadNotifications by mutableIntStateOf(0)
+    var pendingDeepLink by mutableStateOf<DeepLinkDestination?>(null)
+
+    fun openDeepLink(destination: DeepLinkDestination) {
+        pendingDeepLink = destination
+        selectedTabOverride = when (destination) {
+            DeepLinkDestination.Home -> HomeTab.Dashboard.name
+            DeepLinkDestination.Inbox -> HomeTab.Inbox.name
+            is DeepLinkDestination.Course -> HomeTab.Courses.name
+        }
+    }
+
+    var selectedTabOverride by mutableStateOf<String?>(null)
 
     suspend fun refresh(accessToken: String?) {
         val token = accessToken ?: return
@@ -87,9 +101,29 @@ fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
     var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Dashboard.name) }
     val shell = remember { HomeShellState() }
     val accessToken by session.accessToken.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val pushManager = remember { PushManager.getInstance(context) }
+    val externalDeepLink by pushManager.pendingDeepLink.collectAsState()
 
     LaunchedEffect(accessToken) {
         shell.refresh(accessToken)
+        if (accessToken != null) {
+            pushManager.requestTokenSync()
+        }
+    }
+
+    LaunchedEffect(shell.selectedTabOverride) {
+        shell.selectedTabOverride?.let {
+            selectedTab = it
+            shell.selectedTabOverride = null
+        }
+    }
+
+    LaunchedEffect(externalDeepLink) {
+        externalDeepLink?.let { destination ->
+            shell.openDeepLink(destination)
+            pushManager.consumePendingDeepLink()
+        }
     }
 
     Box(
@@ -110,7 +144,11 @@ fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
                         onOpenProfile = { selectedTab = HomeTab.Profile.name },
                         modifier = Modifier.fillMaxSize(),
                     )
-                    HomeTab.Courses.name -> CoursesTab(session = session, modifier = Modifier.fillMaxSize())
+                    HomeTab.Courses.name -> CoursesTab(
+                        session = session,
+                        shell = shell,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                     HomeTab.Notebooks.name -> NotebooksTab(session = session, modifier = Modifier.fillMaxSize())
                     HomeTab.Inbox.name -> InboxTab(
                         session = session,

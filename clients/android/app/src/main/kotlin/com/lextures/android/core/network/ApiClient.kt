@@ -1,5 +1,6 @@
 package com.lextures.android.core.network
 
+import com.lextures.android.BuildConfig
 import com.lextures.android.core.config.AppConfiguration
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -21,6 +22,8 @@ class ApiClient(
         val builder = Request.Builder()
             .url(AppConfiguration.apiUrl(path))
             .header("Accept", "application/json")
+            .header("X-Platform", "android")
+            .header("X-App-Version", BuildConfig.VERSION_NAME)
 
         if (body != null) {
             builder
