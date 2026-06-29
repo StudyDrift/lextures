@@ -62,6 +62,51 @@ describe('Login', () => {
     })
   })
 
+  it('shows a rate-limit cooldown message and disables submit on HTTP 429 (plan 17.6)', async () => {
+    server.use(
+      http.post('http://localhost:8080/api/v1/auth/login', () =>
+        HttpResponse.json(
+          { title: 'Too Many Requests', status: 429 },
+          { status: 429, headers: { 'Retry-After': '42' } },
+        ),
+      ),
+    )
+
+    const { user } = renderWithRouter(<Login />, { route: '/login', path: '/login' })
+
+    await user.type(screen.getByLabelText(/^email$/i), 'x@y.z')
+    await user.type(screen.getByLabelText(/^password$/i), 'whatever1')
+    await user.click(screen.getByRole('button', { name: /^sign in$/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent(/wait 42 seconds/i)
+    })
+    // Submit is blocked while the cooldown is active.
+    expect(screen.getByRole('button', { name: /wait 42 seconds/i })).toBeDisabled()
+  })
+
+  it('warns after 5 failed attempts before the server 429 threshold (plan 17.6)', async () => {
+    server.use(
+      http.post('http://localhost:8080/api/v1/auth/login', () =>
+        HttpResponse.json(
+          { error: { code: 'INVALID_CREDENTIALS', message: 'Invalid email or password.' } },
+          { status: 401 },
+        ),
+      ),
+    )
+
+    const { user } = renderWithRouter(<Login />, { route: '/login', path: '/login' })
+    await user.type(screen.getByLabelText(/^email$/i), 'x@y.z')
+    await user.type(screen.getByLabelText(/^password$/i), 'wrong')
+    for (let i = 0; i < 5; i++) {
+      await user.click(screen.getByRole('button', { name: /^sign in$/i }))
+      await waitFor(() => expect(screen.getByRole('status')).toBeInTheDocument())
+    }
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent(/several failed attempts/i)
+    })
+  })
+
   it('shows Log in with Clever when the API reports Clever SSO is available', async () => {
     server.use(
       http.get('http://localhost:8080/api/v1/auth/oidc/status', () =>

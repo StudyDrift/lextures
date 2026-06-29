@@ -51,6 +51,9 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
+  // Rate-limit (plan 17.6): count failed attempts and honour 429 Retry-After.
+  const [failedAttempts, setFailedAttempts] = useState(0)
+  const [retryAfter, setRetryAfter] = useState(0)
   const [saml, setSaml] = useState<{
     enabled: boolean
     idp?: { id: string; label: string; forceSaml: boolean }
@@ -115,6 +118,15 @@ export default function Login() {
     }
   }, [])
 
+  // Count down the rate-limit cooldown once a 429 sets retryAfter.
+  useEffect(() => {
+    if (retryAfter <= 0) return
+    const id = window.setInterval(() => {
+      setRetryAfter((s) => (s <= 1 ? 0 : s - 1))
+    }, 1000)
+    return () => window.clearInterval(id)
+  }, [retryAfter])
+
   if (getAccessToken()) {
     return <Navigate to="/" replace />
   }
@@ -122,6 +134,7 @@ export default function Login() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     if (orgSlug && orgLookupError) return
+    if (retryAfter > 0) return
     setStatus('loading')
     setMessage(null)
     try {
@@ -138,11 +151,23 @@ export default function Login() {
       } catch {
         raw = {}
       }
-      if (!res.ok) {
+      if (res.status === 429) {
+        const headerVal = Number(res.headers.get('Retry-After'))
+        const secs = Number.isFinite(headerVal) && headerVal > 0 ? Math.ceil(headerVal) : 60
+        setRetryAfter(secs)
         setStatus('error')
-        setMessage(readApiErrorMessage(raw))
+        setMessage(t('auth.login.rateLimited', { seconds: secs }))
         return
       }
+      if (!res.ok) {
+        const attempts = failedAttempts + 1
+        setFailedAttempts(attempts)
+        setStatus('error')
+        // Warn before the server-side 429 threshold (plan 17.6 §10).
+        setMessage(attempts >= 5 ? t('auth.login.tooManyAttempts') : readApiErrorMessage(raw))
+        return
+      }
+      setFailedAttempts(0)
       const data = raw as {
         access_token?: string
         mfa_pending_token?: string
@@ -273,8 +298,16 @@ export default function Login() {
                   </p>
                 )}
 
-                <button type="submit" disabled={status === 'loading'} className={authPrimaryButtonClass}>
-                  {status === 'loading' ? t('auth.login.submitting') : t('auth.login.submit')}
+                <button
+                  type="submit"
+                  disabled={status === 'loading' || retryAfter > 0}
+                  className={authPrimaryButtonClass}
+                >
+                  {status === 'loading'
+                    ? t('auth.login.submitting')
+                    : retryAfter > 0
+                      ? t('auth.login.rateLimited', { seconds: retryAfter })
+                      : t('auth.login.submit')}
                 </button>
               </form>
             )}

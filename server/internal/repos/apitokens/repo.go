@@ -314,6 +314,8 @@ type ResolvedToken struct {
 	ServiceAccountName *string
 	Scopes             []string
 	CourseIDs          []uuid.UUID
+	// RateLimitPerMin is the per-token quota override (plan 17.6 FR-6); nil uses the deployment default.
+	RateLimitPerMin *int
 }
 
 // ResolveBearer looks up a bearer secret and returns the token when valid.
@@ -326,10 +328,10 @@ func ResolveBearer(ctx context.Context, pool *pgxpool.Pool, rawToken string, now
 	var rt ResolvedToken
 	var expiresAt *time.Time
 	err := pool.QueryRow(ctx, `
-SELECT id, owner_user_id, org_id, service_account_name, scopes, course_ids, expires_at
+SELECT id, owner_user_id, org_id, service_account_name, scopes, course_ids, expires_at, rate_limit_per_min
 FROM auth.api_tokens
 WHERE token_hash = $1 AND revoked_at IS NULL
-`, h).Scan(&rt.ID, &rt.OwnerUserID, &rt.OrgID, &rt.ServiceAccountName, &rt.Scopes, &rt.CourseIDs, &expiresAt)
+`, h).Scan(&rt.ID, &rt.OwnerUserID, &rt.OrgID, &rt.ServiceAccountName, &rt.Scopes, &rt.CourseIDs, &expiresAt, &rt.RateLimitPerMin)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, errors.New("invalid access key")
 	}

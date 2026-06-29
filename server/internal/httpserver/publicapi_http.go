@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/publicapi"
+	"github.com/lextures/lextures/server/internal/ratelimit"
 )
 
 // publicAPIMiddleware intercepts ltk_ bearer requests to the versioned public API surface (plan 16.1).
@@ -71,10 +73,8 @@ func (d Deps) servePublicAPI(w http.ResponseWriter, r *http.Request, rt publicap
 	*r = *r.WithContext(ctx)
 
 	if tok != nil {
-		key := tok.TokenID.String()
-		if allowed, retry := publicapi.DefaultLimiter.Allow(key, time.Now()); !allowed {
-			publicapi.WriteRateLimited(w, r.URL.Path, retry)
-			return http.StatusTooManyRequests, userID
+		if status, ok := d.enforceAPITokenLimit(w, r, tok); !ok {
+			return status, userID
 		}
 	}
 
@@ -104,6 +104,45 @@ func (d Deps) servePublicAPI(w http.ResponseWriter, r *http.Request, rt publicap
 		publicapi.WriteNotFound(w, r.URL.Path)
 		return http.StatusNotFound, userID
 	}
+}
+
+// enforceAPITokenLimit applies the per-token public API quota (plan 17.6 FR-2)
+// with optional per-token override (FR-6). When rate limiting is enabled it uses
+// the shared Redis limiter; otherwise it falls back to the in-process limiter so
+// behaviour is unchanged on deployments without the feature flag. Returns ok=false
+// (and the 429 status) when the request is rejected.
+func (d Deps) enforceAPITokenLimit(w http.ResponseWriter, r *http.Request, tok *auth.APITokenAuth) (int, bool) {
+	cfg := d.effectiveConfig().RateLimits
+	if !cfg.Enabled {
+		if allowed, retry := publicapi.DefaultLimiter.Allow(tok.TokenID.String(), time.Now()); !allowed {
+			publicapi.WriteRateLimited(w, r.URL.Path, retry)
+			return http.StatusTooManyRequests, false
+		}
+		return http.StatusOK, true
+	}
+	rule := cfg.APIToken
+	if tok.RateLimitPerMin != nil && *tok.RateLimitPerMin > 0 {
+		rule.Limit = *tok.RateLimitPerMin
+	}
+	limiter := d.buildRateLimiter()
+	dec := limiter.Allow(r.Context(), limiter.TokenKey(tok.TokenID.String(), "api"), rule, ratelimit.LimitTypeToken)
+	writeRateLimitHeaders(w, dec)
+	if !dec.Allowed {
+		ratelimit.RecordExceeded("api_token", ratelimit.LimitTypeToken)
+		if cfg.MonitorOnly {
+			return http.StatusOK, true
+		}
+		w.Header().Set("Retry-After", strconv.Itoa(dec.RetryAfter))
+		publicapi.WriteProblem(w, publicapi.Problem{
+			Type:     "https://lextures.io/errors/rate-limited",
+			Title:    "Too Many Requests",
+			Status:   http.StatusTooManyRequests,
+			Detail:   "Token quota of " + strconv.Itoa(dec.Limit) + " requests/min exceeded. Retry after " + strconv.Itoa(dec.RetryAfter) + " seconds.",
+			Instance: r.URL.Path,
+		})
+		return http.StatusTooManyRequests, false
+	}
+	return http.StatusOK, true
 }
 
 func (d Deps) publicAPIAuth(w http.ResponseWriter, r *http.Request, requiredScope string) (uuid.UUID, context.Context, *auth.APITokenAuth, bool) {

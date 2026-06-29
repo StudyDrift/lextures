@@ -540,6 +540,9 @@ type Config struct {
 	// RedisPoolMax is the maximum Redis connections per instance (default 20).
 	RedisPoolMax int
 
+	// RateLimits configures Redis-backed request rate limiting (plan 17.6).
+	RateLimits RateLimits
+
 	// DBPoolMaxConns caps pgx pool connections per instance for multi-instance
 	// deployments (instances × DBPoolMaxConns must stay under Postgres
 	// max_connections) — plan 17.2 FR-7. 0 keeps the pgx default.
@@ -752,6 +755,7 @@ func Load() Config {
 		RedisURL:            firstNonEmptyTrimmed("REDIS_URL"),
 		RedisPoolMin:        intEnvDefault("REDIS_POOL_MIN", redisclient.DefaultPoolMin),
 		RedisPoolMax:        intEnvDefault("REDIS_POOL_MAX", redisclient.DefaultPoolMax),
+		RateLimits:          rateLimitsFromEnv(),
 		DBPoolMaxConns:      intEnvDefault("DB_POOL_MAX_CONNS", 0),
 		DBPoolMinConns:      intEnvDefault("DB_POOL_MIN_CONNS", 0),
 		ShutdownTimeoutSecs: intEnvDefault("SHUTDOWN_TIMEOUT_SECS", defaultShutdownTimeoutSecs),
