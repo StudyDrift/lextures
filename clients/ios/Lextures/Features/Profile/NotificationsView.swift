@@ -48,7 +48,7 @@ struct NotificationsView: View {
                     } else {
                         ForEach(visible) { notification in
                             Button {
-                                Task { await markRead(notification) }
+                                Task { await openNotification(notification) }
                             } label: {
                                 notificationCard(notification)
                             }
@@ -133,6 +133,13 @@ struct NotificationsView: View {
             shell.unreadNotifications = page.unreadCount
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load notifications."
+        }
+    }
+
+    private func openNotification(_ notification: AppNotification) async {
+        await markRead(notification)
+        if let actionUrl = notification.actionUrl {
+            shell.openDeepLink(DeepLinkRouter.resolve(actionUrl))
         }
     }
 

@@ -2,12 +2,18 @@ import SwiftUI
 
 struct CoursesListView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
+    @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     @State private var courses: [CourseSummary] = []
+    @State private var cacheLabel: String?
     @State private var errorMessage: String?
     @State private var loading = false
     @State private var loadedOnce = false
     @State private var searchText = ""
+    @State private var deepLinkedCourse: CourseSummary?
+    @State private var deepLinkSection: CourseDeepLinkSection?
+    @State private var deepLinkItemId: String?
 
     private var filteredCourses: [CourseSummary] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -26,6 +32,12 @@ struct CoursesListView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
+                        if !NetworkMonitor.shared.isOnline {
+                            OfflineBanner()
+                        }
+                        if let cacheLabel {
+                            StalenessChip(label: cacheLabel)
+                        }
                         if let errorMessage {
                             LMSErrorBanner(message: errorMessage)
                         }
@@ -57,9 +69,47 @@ struct CoursesListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search courses")
             .navigationDestination(for: CourseSummary.self) { course in
-                CourseDetailView(course: course)
+                CourseDetailView(
+                    course: course,
+                    initialSection: mapSection(deepLinkSection),
+                    initialItemId: deepLinkItemId
+                )
+            }
+            .navigationDestination(item: $deepLinkedCourse) { course in
+                CourseDetailView(
+                    course: course,
+                    initialSection: mapSection(deepLinkSection),
+                    initialItemId: deepLinkItemId
+                )
             }
             .task { await load() }
+            .onChange(of: shell.pendingDeepLink) { _, link in
+                guard let link else { return }
+                if case let .course(code, section, itemId) = link {
+                    deepLinkSection = section
+                    deepLinkItemId = itemId
+                    Task { await openCourse(code: code) }
+                }
+                shell.pendingDeepLink = nil
+            }
+        }
+    }
+
+    private func mapSection(_ section: CourseDeepLinkSection?) -> CourseDetailView.Section? {
+        switch section {
+        case .grades: return .grades
+        case .overview, .feed, .discussions, .none: return .overview
+        case .modules: return .modules
+        }
+    }
+
+    private func openCourse(code: String) async {
+        guard let token = session.accessToken else { return }
+        do {
+            let course = try await LMSAPI.fetchCourse(courseCode: code, accessToken: token)
+            deepLinkedCourse = course
+        } catch {
+            shell.openDeepLink(.home)
         }
     }
 
@@ -73,7 +123,18 @@ struct CoursesListView: View {
             loadedOnce = true
         }
         do {
-            courses = try await LMSAPI.fetchCourses(accessToken: token)
+            let result = try await offline.cachedFetch(
+                key: OfflineCacheKey.courses(),
+                accessToken: token
+            ) {
+                try await LMSAPI.fetchCourses(accessToken: token)
+            }
+            courses = result.value
+            if let cached = result.cached, cached.isStale(isOnline: NetworkMonitor.shared.isOnline) {
+                cacheLabel = cached.lastUpdatedLabel
+            } else {
+                cacheLabel = nil
+            }
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load courses."
         }

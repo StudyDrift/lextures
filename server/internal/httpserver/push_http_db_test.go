@@ -233,4 +233,76 @@ func TestPushHTTP_Pg(t *testing.T) {
 			t.Fatalf("expected unreadCount >= 1, got %v", unread)
 		}
 	})
+
+	t.Run("register_device_token_apns", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]any{
+			"token":    "apns-device-token-" + time.Now().Format("150405.000"),
+			"platform": "apns",
+		})
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/me/device-tokens", bytes.NewReader(body))
+		req = req.WithContext(ctx)
+		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Platform", "ios")
+		req.Header.Set("X-App-Version", "1.0.0")
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusCreated {
+			t.Fatalf("register device token: %d %s", rr.Code, rr.Body.String())
+		}
+		var resp map[string]string
+		_ = json.NewDecoder(rr.Body).Decode(&resp)
+		if resp["id"] == "" {
+			t.Fatal("expected id in response")
+		}
+	})
+
+	t.Run("list_and_delete_device_token", func(t *testing.T) {
+		tokenValue := "fcm-device-token-" + time.Now().Format("150405.000")
+		body, _ := json.Marshal(map[string]any{
+			"token":    tokenValue,
+			"platform": "fcm",
+		})
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/me/device-tokens", bytes.NewReader(body))
+		req = req.WithContext(ctx)
+		req.Header.Set("Authorization", "Bearer "+token)
+		req.Header.Set("Content-Type", "application/json")
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusCreated {
+			t.Fatalf("create device token: %d", rr.Code)
+		}
+		var createResp map[string]string
+		_ = json.NewDecoder(rr.Body).Decode(&createResp)
+		id := createResp["id"]
+
+		rr2 := httptest.NewRecorder()
+		req2 := httptest.NewRequest(http.MethodGet, "/api/v1/me/device-tokens", nil)
+		req2 = req2.WithContext(ctx)
+		req2.Header.Set("Authorization", "Bearer "+token)
+		h.ServeHTTP(rr2, req2)
+		if rr2.Code != http.StatusOK {
+			t.Fatalf("list device tokens: %d", rr2.Code)
+		}
+
+		rr3 := httptest.NewRecorder()
+		req3 := httptest.NewRequest(http.MethodDelete, "/api/v1/me/device-tokens/"+id, nil)
+		req3 = req3.WithContext(ctx)
+		req3.Header.Set("Authorization", "Bearer "+token)
+		h.ServeHTTP(rr3, req3)
+		if rr3.Code != http.StatusNoContent {
+			t.Fatalf("delete device token: %d %s", rr3.Code, rr3.Body.String())
+		}
+	})
+
+	t.Run("device_token_requires_auth", func(t *testing.T) {
+		body, _ := json.Marshal(map[string]any{"token": "x", "platform": "apns"})
+		rr := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/me/device-tokens", bytes.NewReader(body))
+		req = req.WithContext(ctx)
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusUnauthorized {
+			t.Fatalf("expected 401, got %d", rr.Code)
+		}
+	})
 }

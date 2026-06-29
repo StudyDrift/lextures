@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
 	"github.com/lextures/lextures/server/internal/apierr"
+	"github.com/lextures/lextures/server/internal/repos/devicepushtokens"
 	"github.com/lextures/lextures/server/internal/repos/notificationsinbox"
 	"github.com/lextures/lextures/server/internal/repos/pushsubscriptions"
 )
@@ -137,5 +139,92 @@ func (d Deps) handleMarkAllNotificationsRead() http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// handlePostMyDeviceToken registers an APNs or FCM device token for the authenticated user.
+func (d Deps) handlePostMyDeviceToken() http.HandlerFunc {
+	type body struct {
+		Token       string `json:"token"`
+		Platform    string `json:"platform"`
+		AppBundleID string `json:"appBundleId"`
+		AppVersion  string `json:"appVersion"`
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		payload, err := io.ReadAll(io.LimitReader(r.Body, 1<<16))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Could not read body.")
+			return
+		}
+		var b body
+		if err := json.Unmarshal(payload, &b); err != nil || strings.TrimSpace(b.Token) == "" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "token is required.")
+			return
+		}
+		platform := strings.ToLower(strings.TrimSpace(b.Platform))
+		if platform == "" {
+			platform = strings.ToLower(strings.TrimSpace(r.Header.Get("X-Platform")))
+		}
+		if platform != "apns" && platform != "fcm" {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "platform must be apns or fcm.")
+			return
+		}
+		appVersion := strings.TrimSpace(b.AppVersion)
+		if appVersion == "" {
+			appVersion = strings.TrimSpace(r.Header.Get("X-App-Version"))
+		}
+		id, err := devicepushtokens.Insert(r.Context(), d.Pool, userID, strings.TrimSpace(b.Token), platform, b.AppBundleID, appVersion)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not save device token.")
+			return
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusCreated)
+		_ = json.NewEncoder(w).Encode(map[string]string{"id": id.String()})
+	}
+}
+
+// handleDeleteMyDeviceToken removes a registered device token.
+func (d Deps) handleDeleteMyDeviceToken() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		idStr := chi.URLParam(r, "id")
+		id, err := uuid.Parse(idStr)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid device token id.")
+			return
+		}
+		if err := devicepushtokens.Delete(r.Context(), d.Pool, id, userID); err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not delete device token.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+// handleGetMyDeviceTokens lists active device tokens for session management.
+func (d Deps) handleGetMyDeviceTokens() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		rows, err := devicepushtokens.ListForUser(r.Context(), d.Pool, userID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Could not load device tokens.")
+			return
+		}
+		if rows == nil {
+			rows = []devicepushtokens.Row{}
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"tokens": rows})
 	}
 }

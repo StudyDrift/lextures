@@ -37,6 +37,24 @@ final class AppShellModel {
     var profile: MeProfile?
     var unreadInbox = 0
     var unreadNotifications = 0
+    var pendingDeepLink: DeepLinkDestination?
+
+    func openDeepLink(_ destination: DeepLinkDestination) {
+        pendingDeepLink = destination
+        switch destination {
+        case .home:
+            selectedTab = .home
+        case .inbox:
+            selectedTab = .inbox
+        case .course:
+            selectedTab = .courses
+        }
+    }
+
+    func consumePendingDeepLink() -> DeepLinkDestination? {
+        defer { pendingDeepLink = nil }
+        return pendingDeepLink
+    }
 
     func refresh(accessToken: String?) async {
         guard let token = accessToken else { return }
@@ -66,6 +84,19 @@ struct MainTabView: View {
         .environment(shell)
         .task {
             await shell.refresh(accessToken: session.accessToken)
+        }
+        .onOpenURL { url in
+            shell.openDeepLink(DeepLinkRouter.resolve(url.absoluteString))
+        }
+        .onAppear {
+            PushManager.shared.configure(accessToken: { session.accessToken }) { destination in
+                shell.openDeepLink(destination)
+            }
+        }
+        .onChange(of: session.accessToken) { _, token in
+            if token != nil {
+                Task { await PushManager.shared.syncTokenWithBackend() }
+            }
         }
     }
 

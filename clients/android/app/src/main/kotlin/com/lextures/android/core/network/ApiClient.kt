@@ -1,5 +1,6 @@
 package com.lextures.android.core.network
 
+import com.lextures.android.BuildConfig
 import com.lextures.android.core.config.AppConfiguration
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -17,10 +18,21 @@ class ApiClient(
         method: String = "GET",
         body: String? = null,
         accessToken: String? = null,
+        idempotencyKey: String? = null,
+    ): Pair<String, Int> = requestRaw(path, method, body, accessToken, idempotencyKey)
+
+    suspend fun requestRaw(
+        path: String,
+        method: String = "GET",
+        body: String? = null,
+        accessToken: String? = null,
+        idempotencyKey: String? = null,
     ): Pair<String, Int> {
         val builder = Request.Builder()
             .url(AppConfiguration.apiUrl(path))
             .header("Accept", "application/json")
+            .header("X-Platform", "android")
+            .header("X-App-Version", BuildConfig.VERSION_NAME)
 
         if (body != null) {
             builder
@@ -32,6 +44,10 @@ class ApiClient(
 
         if (!accessToken.isNullOrBlank()) {
             builder.header("Authorization", "Bearer $accessToken")
+        }
+
+        if (!idempotencyKey.isNullOrBlank()) {
+            builder.header("X-Idempotency-Key", idempotencyKey)
         }
 
         val response = try {

@@ -7,118 +7,138 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		82F50A6D5D5E43828442CCBD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1301A212010F4351854D97E2 /* AppDelegate.swift */; };
-		784E0470C7624962A401A324 /* LexturesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D415D032C1844FE8F45BEF8 /* LexturesApp.swift */; };
-		F8965C4982244EE78E5EE37C /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05C698800AC4B4982D29CB3 /* RootView.swift */; };
-		7F15AC9A98B6416298F0E2E7 /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D739C14D557424987C25589 /* AuthAPI.swift */; };
-		907C146ACDEB442EA8753A33 /* AuthSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6181CDF4144C6DA7F52348 /* AuthSession.swift */; };
-		1F5C1A2103634B1AA90F6FC7 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C6051B7BF8414390521478 /* KeychainStore.swift */; };
-		5B469EA7D91B48A19F2E8B23 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD67529F427421A959CDE06 /* AppConfiguration.swift */; };
-		A8355B9444DD4689B446E3C3 /* AuthFieldRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB6FB1565C8C4741B4BDB608 /* AuthFieldRepresentable.swift */; };
-		E451AEA9FC0744499CB5C433 /* BrandLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0B7BF1060994AC5B0F29552 /* BrandLogoView.swift */; };
-		702C67F952FC4D46AA84A8BC /* LexturesTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B958A7508C42DC8E698769 /* LexturesTheme.swift */; };
-		0DDD0A011A774ACDA7D98719 /* CourseHeroImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3057DF4A62FB48B3B0E0F19D /* CourseHeroImage.swift */; };
-		45B8F60107DA4FB89F79ABD3 /* LMSAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E56F3D33F844AF2A9078879 /* LMSAPI.swift */; };
-		E432DCE16E254852AF729D02 /* LMSAPIFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783FB56FEA8646E493E1F892 /* LMSAPIFeatures.swift */; };
-		C1BAFCCDB8774722A856622B /* LMSFeatureModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A67EC2E472DF4AC496EE5228 /* LMSFeatureModels.swift */; };
-		A2B6E36705424B8CA8A44435 /* LMSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30950446704F46C39BC5C627 /* LMSModels.swift */; };
-		1FCD610119E1473CAC908160 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCBFDA4B1F445E48F9384EB /* APIClient.swift */; };
-		14CE03443A8745428D2C58C0 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C81475601FE54C2396AFD164 /* APIError.swift */; };
-		948089F4A7D94BA6B6B440B3 /* NetworkBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A158EF966AA4F73BBA4DD3F /* NetworkBootstrap.swift */; };
-		FE442D38DF5943658F411B8C /* NotebookDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61CA06827D1441A39B9E9CB8 /* NotebookDrawing.swift */; };
-		B8CB210AE90B4A6D89B78AAC /* NotebookMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = B470832CAE1B4390B7E1F400 /* NotebookMarkdown.swift */; };
-		FA4D6C553EAC4506B9C6EC18 /* NotebookSlashCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEBB821FDA5141A090CF8ED1 /* NotebookSlashCommands.swift */; };
-		14ABFC0C18D4485380E22A6F /* NotebookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18AB274F28DA4765B6936B7D /* NotebookStore.swift */; };
-		67CBB3E91C854E7C8CBBCAD8 /* NotebookSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFC6E7A1E8742C694CAE9D3 /* NotebookSync.swift */; };
-		7336F2BDCAD344028E65F1C9 /* NotebookTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7F690D75FCF4CAE9E31A8BE /* NotebookTree.swift */; };
-		DC7055D49D6C4FBEA9CC12A6 /* AuthFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD2BF03169B40F8BB4603F9 /* AuthFlowView.swift */; };
-		2146B0E97CB74C5C8D915307 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA08181B1FD143698CFE9F1D /* LoginView.swift */; };
-		BBD20591AAB84D09A1484AC4 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 158C7F82B9C44AAD9C19D313 /* SignupView.swift */; };
-		9F5FA2B4FB834CB4BAF8B162 /* CourseAttendanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BD0FD4519034CFF87ACDD97 /* CourseAttendanceView.swift */; };
-		24AFD590C4D448EEBC569D77 /* CourseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83819D2C91854BAA87DD64C9 /* CourseDetailView.swift */; };
-		A438FB26B7F0432490351D64 /* CourseGradesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB0AD28460E743AF8914E93B /* CourseGradesView.swift */; };
-		5E1483A418784253841907CB /* CourseSyllabusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6879EF8BB3B4773A6AB90B3 /* CourseSyllabusView.swift */; };
-		3971A8515B0F4D838E1A7640 /* CoursesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B4EA2DF1FEE40ED88024562 /* CoursesListView.swift */; };
-		758D9D32FFA44F0DB20E2769 /* ItemDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38E26170E6E246CDA60E2648 /* ItemDetailRows.swift */; };
-		2BC799521809413B8DC138DE /* ItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66635F9C2404AEBB6C0D702 /* ItemDetailView.swift */; };
-		8F35B2C6D54048F1B527BE2C /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7044CD091D4D44B29700AA65 /* DashboardView.swift */; };
-		43088A0355A74E9E9EAEC991 /* GradingBacklogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA929DA3E86949FCA7458E25 /* GradingBacklogView.swift */; };
-		296E6CBE9A1B4B48B5C9228A /* SpeedGraderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C9DD73050B4C399A795450 /* SpeedGraderView.swift */; };
-		AC1EDDCFE1F946999F54E5A0 /* AnnouncementsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A62E6ECC3E1F485BABFD045C /* AnnouncementsViews.swift */; };
-		266BCB111888433A920A873F /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B217EF481094A78ABCE9D57 /* MainTabView.swift */; };
-		F0A827C700444C738EBCDEBC /* ComposeMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55F1EB560B414CE5BC72DEE6 /* ComposeMessageView.swift */; };
-		1D2FC8DA7AE24011BC76220F /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEB66BAF728D40CB940CE163 /* InboxView.swift */; };
-		EA17F526D17B4487B1EFCFE5 /* MessageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C73DF511F2A44B59807813A /* MessageDetailView.swift */; };
-		A1DB372571294385BDCE6F00 /* NotebookDrawingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88989E14E9745ADB033A900 /* NotebookDrawingViews.swift */; };
-		8C87B19F5D184B45BF3B6562 /* NotebookEditorSupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75620A8776714D22A8755B24 /* NotebookEditorSupportViews.swift */; };
-		325F0F9BFA324FCF9074196C /* NotebookEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0039BFFD2DB74196B025B372 /* NotebookEditorView.swift */; };
-		BE3FBB94981149DE9DC6F9A2 /* NotebookPagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7226267AC7F04A61943EB563 /* NotebookPagesView.swift */; };
-		5F02869576C64C3198D1981F /* NotebooksListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47260659CDF34919A49376AD /* NotebooksListView.swift */; };
-		AA5F25AC893F4E8E8AA9A00B /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD437F6AD0D46B49256D2F8 /* NotificationsView.swift */; };
-		F9669A6F09A94BC998E3846F /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0560960CA0824DD4A44A525A /* ProfileView.swift */; };
-		1C871944AD4A4331BB1FDF04 /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EECC55348A146E6A8930358 /* SplashView.swift */; };
-		8295FCA9E58242AEBF0D6B24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 570B2FDFD3F84458BF4B2290 /* Assets.xcassets */; };
+		2EE79BE25A5E4389888FED26 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE0CBFCD78C47129E82CFEF /* AppDelegate.swift */; };
+		3FD53EA9303E4BB2B324C4E0 /* LexturesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FF9952DA2C443E8FD28F2E /* LexturesApp.swift */; };
+		2502DA276A844CF79A26E561 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC1995EA9F5A492B853F2277 /* RootView.swift */; };
+		80DE9219A2254A7DADAB6D62 /* AuthAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE7176821F04BE780B90F95 /* AuthAPI.swift */; };
+		AB9CF7562E0A41B382938C8E /* AuthSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38EA45EB25314C56B18B366A /* AuthSession.swift */; };
+		64DA209BAA9B4A6FA97208B7 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 437DECB0F8B149EE9CC70D04 /* KeychainStore.swift */; };
+		E46B14472F924CB4A8AEBFFA /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8A516CA242F401AAB31CE9A /* AppConfiguration.swift */; };
+		4F670FF0AA9047B6A1B189AF /* AuthFieldRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F980E8427FBE496FA3D8792F /* AuthFieldRepresentable.swift */; };
+		7EDB7C468ED4406C9765122C /* BrandLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AAF240F36F44814AA346807 /* BrandLogoView.swift */; };
+		5A3739F0028F4CF299BAE3E4 /* LexturesTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9FDB6E9E1D94ECEB58906BC /* LexturesTheme.swift */; };
+		7CE95E23E277484EBCA00419 /* SyncStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BF3AE1A983D4ADABB90EC00 /* SyncStatusView.swift */; };
+		62B771C0D537475C81E08269 /* CourseHeroImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C5CFB097024989A1D9C545 /* CourseHeroImage.swift */; };
+		95D44883B41247A7B8C57907 /* LMSAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = D47F56826C80420B83236225 /* LMSAPI.swift */; };
+		8BEDDD3935014D6EB5698E35 /* LMSAPIFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEE3A85563E54B4CB0D5CF4E /* LMSAPIFeatures.swift */; };
+		F3A13BFCD99B48E194541B52 /* LMSFeatureModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37DA60023D74E378AD328E5 /* LMSFeatureModels.swift */; };
+		26F0AA12BF4144A9B2C4F956 /* LMSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F7DA4FBF34B4F418278877B /* LMSModels.swift */; };
+		311D8F2D7007404BAB8E1B8E /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4056630A3264DA1AD7BF0A6 /* APIClient.swift */; };
+		1183203892E9466CB3024135 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A41A7194F77A438BBBBCC227 /* APIError.swift */; };
+		84E28DB597654E378A7D8E9A /* NetworkBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1F5EF43DB742D69D8259F7 /* NetworkBootstrap.swift */; };
+		481E969EE800446BA568EC01 /* NotebookDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 856BF3BA54244798AADFF7C0 /* NotebookDrawing.swift */; };
+		656ADDE11ECD48408EC5ADE1 /* NotebookMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2065F901454D2BAC62BCD6 /* NotebookMarkdown.swift */; };
+		37F16EED767A4F0EA7C045BE /* NotebookSlashCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE8EB8DADD6A4978BBBB2EFF /* NotebookSlashCommands.swift */; };
+		8D116B5F64104BE38711A99F /* NotebookStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE5399822074124AEF3B1F6 /* NotebookStore.swift */; };
+		332F72E773E24CC5AB79AE01 /* NotebookSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD80C61D328640ABBBB22B9B /* NotebookSync.swift */; };
+		AD1850B1AFFC4C439C26254D /* NotebookTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A1772141E8485FA5C0B00E /* NotebookTree.swift */; };
+		95DA88C5EFD5498BB63BA80A /* CacheStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2136B8B6B85142A6A79B59CF /* CacheStore.swift */; };
+		EBCE092C590B46D1A9F06901 /* DownloadStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43B1F2A460BE4340ABFD700B /* DownloadStore.swift */; };
+		63D9666CC49F4FBBA73F4788 /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF7898B2DDA94497B985FC6A /* NetworkMonitor.swift */; };
+		DDE2B9368BB44CF3A368097F /* OfflineModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D857AC0C21441592D76402 /* OfflineModels.swift */; };
+		C5D8D7DBCED74C50B30E4175 /* OfflineService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE81352449A04534A0227AA2 /* OfflineService.swift */; };
+		49FA78487F964F0C803B35DE /* OutboxStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5748A3C7F3A8424C83FF91C2 /* OutboxStore.swift */; };
+		BC6AA12F322440FAA8AE588D /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C21B22C9A17E4CF9B3767B6D /* SyncEngine.swift */; };
+		E38EA429F9E34A7182C84E7F /* PushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6BBD8DCACAD4CCC8E35356D /* PushManager.swift */; };
+		6A595268205B4989BCA17CEB /* DeepLinkRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68FA347541A740229E9EB148 /* DeepLinkRouter.swift */; };
+		C35FE1AD996243DD9DEECFF8 /* AuthFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F7A165634C54A6DA346BC9A /* AuthFlowView.swift */; };
+		074BB7DDEC02420E9EF31000 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ADAA5B0C03A454E82722F90 /* LoginView.swift */; };
+		5B8D44EAAA5341D4B0EE4550 /* SignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F8ADC6AE5604FA79A7A5938 /* SignupView.swift */; };
+		71AA815996A945FE95C96357 /* CourseAttendanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F2AA9B2A3794D24993610A6 /* CourseAttendanceView.swift */; };
+		5F3F675623BD420AA81C05B6 /* CourseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8C0F2FC6B9484190DDCE03 /* CourseDetailView.swift */; };
+		7ABFF1F1C5A64C52B77FAB53 /* CourseGradesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506D3A58568840EDA0BDC5D5 /* CourseGradesView.swift */; };
+		E360668F79AD48F898EA282B /* CourseSyllabusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A9F5D45A8F84D148FF1FF1B /* CourseSyllabusView.swift */; };
+		7DFD0DEE38764BC49C9E7C17 /* CoursesListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3891732E73234EB5BF33176E /* CoursesListView.swift */; };
+		3D4AB3C162BB462D82FEC613 /* ItemDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ECB187B7AAB4892816837F3 /* ItemDetailRows.swift */; };
+		4F8078884BA34EE282EDB5F3 /* ItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 206F482D27614EAEB21D0F3B /* ItemDetailView.swift */; };
+		7B75956C321A430DA551E632 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70EA18C315F74839A02B5D65 /* DashboardView.swift */; };
+		03308502926741B389070DD2 /* GradingBacklogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3073E68B76854070A5C56FF9 /* GradingBacklogView.swift */; };
+		BD73614E5508459AB87F1EA7 /* SpeedGraderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0C65616812845F784FF6E19 /* SpeedGraderView.swift */; };
+		628381FAFFC1496C84939410 /* AnnouncementsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D13CB65F144228AA63B0F2 /* AnnouncementsViews.swift */; };
+		5E3818577ABC4C9988E5E40B /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D7B9603FED447828FD5C389 /* MainTabView.swift */; };
+		5FBB081EB0C441AAA7F016C1 /* ComposeMessageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3E22C4169914665B2192193 /* ComposeMessageView.swift */; };
+		20102E2BA38247839A75B24B /* InboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7FCB8530DB66407384A972F7 /* InboxView.swift */; };
+		81C53EB13C4A438CB9CA5323 /* MessageDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70A123F73781443688C53F05 /* MessageDetailView.swift */; };
+		57878D420B4546A6946C04C4 /* NotebookDrawingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10021085635D4CDEB58BCCC5 /* NotebookDrawingViews.swift */; };
+		95C741095E4C4C3296F8C6D8 /* NotebookEditorSupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = DCA3BD1519544904A4F43F7D /* NotebookEditorSupportViews.swift */; };
+		40EC79384711479C95D6C8BC /* NotebookEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491542BD78C04C8793B14680 /* NotebookEditorView.swift */; };
+		14982A8D20184ABDAB496649 /* NotebookPagesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9057C5B01D54707834D7255 /* NotebookPagesView.swift */; };
+		04980EFC8303433F989953D0 /* NotebooksListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A554934FA734B7992702D15 /* NotebooksListView.swift */; };
+		4A8A87256B7E46B1AEE0368B /* NotificationsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 215A6F9D07D24351A872B7C3 /* NotificationsView.swift */; };
+		DC5341785E8B45CEB93525C4 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2818008B53A4A6A8A295855 /* ProfileView.swift */; };
+		52E81E7B31024C34801D6D3E /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29A430E0290948BC917F4AEF /* SplashView.swift */; };
+		373102926E2B44CCB4927118 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E3D5CBB9E2C144FC87349E48 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		254C11EEEC9D4475BD749587 /* Lextures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lextures.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		1301A212010F4351854D97E2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0D415D032C1844FE8F45BEF8 /* LexturesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesApp.swift; sourceTree = "<group>"; };
-		A05C698800AC4B4982D29CB3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		1D739C14D557424987C25589 /* AuthAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAPI.swift; sourceTree = "<group>"; };
-		AA6181CDF4144C6DA7F52348 /* AuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
-		56C6051B7BF8414390521478 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
-		AAD67529F427421A959CDE06 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
-		FB6FB1565C8C4741B4BDB608 /* AuthFieldRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFieldRepresentable.swift; sourceTree = "<group>"; };
-		E0B7BF1060994AC5B0F29552 /* BrandLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandLogoView.swift; sourceTree = "<group>"; };
-		F0B958A7508C42DC8E698769 /* LexturesTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesTheme.swift; sourceTree = "<group>"; };
-		3057DF4A62FB48B3B0E0F19D /* CourseHeroImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseHeroImage.swift; sourceTree = "<group>"; };
-		3E56F3D33F844AF2A9078879 /* LMSAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPI.swift; sourceTree = "<group>"; };
-		783FB56FEA8646E493E1F892 /* LMSAPIFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeatures.swift; sourceTree = "<group>"; };
-		A67EC2E472DF4AC496EE5228 /* LMSFeatureModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModels.swift; sourceTree = "<group>"; };
-		30950446704F46C39BC5C627 /* LMSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSModels.swift; sourceTree = "<group>"; };
-		2BCBFDA4B1F445E48F9384EB /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
-		C81475601FE54C2396AFD164 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
-		8A158EF966AA4F73BBA4DD3F /* NetworkBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkBootstrap.swift; sourceTree = "<group>"; };
-		61CA06827D1441A39B9E9CB8 /* NotebookDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawing.swift; sourceTree = "<group>"; };
-		B470832CAE1B4390B7E1F400 /* NotebookMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookMarkdown.swift; sourceTree = "<group>"; };
-		BEBB821FDA5141A090CF8ED1 /* NotebookSlashCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSlashCommands.swift; sourceTree = "<group>"; };
-		18AB274F28DA4765B6936B7D /* NotebookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStore.swift; sourceTree = "<group>"; };
-		0AFC6E7A1E8742C694CAE9D3 /* NotebookSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSync.swift; sourceTree = "<group>"; };
-		A7F690D75FCF4CAE9E31A8BE /* NotebookTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTree.swift; sourceTree = "<group>"; };
-		7CD2BF03169B40F8BB4603F9 /* AuthFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFlowView.swift; sourceTree = "<group>"; };
-		AA08181B1FD143698CFE9F1D /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		158C7F82B9C44AAD9C19D313 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
-		0BD0FD4519034CFF87ACDD97 /* CourseAttendanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseAttendanceView.swift; sourceTree = "<group>"; };
-		83819D2C91854BAA87DD64C9 /* CourseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailView.swift; sourceTree = "<group>"; };
-		CB0AD28460E743AF8914E93B /* CourseGradesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGradesView.swift; sourceTree = "<group>"; };
-		A6879EF8BB3B4773A6AB90B3 /* CourseSyllabusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSyllabusView.swift; sourceTree = "<group>"; };
-		6B4EA2DF1FEE40ED88024562 /* CoursesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesListView.swift; sourceTree = "<group>"; };
-		38E26170E6E246CDA60E2648 /* ItemDetailRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailRows.swift; sourceTree = "<group>"; };
-		A66635F9C2404AEBB6C0D702 /* ItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailView.swift; sourceTree = "<group>"; };
-		7044CD091D4D44B29700AA65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
-		CA929DA3E86949FCA7458E25 /* GradingBacklogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradingBacklogView.swift; sourceTree = "<group>"; };
-		A4C9DD73050B4C399A795450 /* SpeedGraderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedGraderView.swift; sourceTree = "<group>"; };
-		A62E6ECC3E1F485BABFD045C /* AnnouncementsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementsViews.swift; sourceTree = "<group>"; };
-		3B217EF481094A78ABCE9D57 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
-		55F1EB560B414CE5BC72DEE6 /* ComposeMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeMessageView.swift; sourceTree = "<group>"; };
-		AEB66BAF728D40CB940CE163 /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
-		9C73DF511F2A44B59807813A /* MessageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDetailView.swift; sourceTree = "<group>"; };
-		A88989E14E9745ADB033A900 /* NotebookDrawingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawingViews.swift; sourceTree = "<group>"; };
-		75620A8776714D22A8755B24 /* NotebookEditorSupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookEditorSupportViews.swift; sourceTree = "<group>"; };
-		0039BFFD2DB74196B025B372 /* NotebookEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookEditorView.swift; sourceTree = "<group>"; };
-		7226267AC7F04A61943EB563 /* NotebookPagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookPagesView.swift; sourceTree = "<group>"; };
-		47260659CDF34919A49376AD /* NotebooksListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebooksListView.swift; sourceTree = "<group>"; };
-		9FD437F6AD0D46B49256D2F8 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
-		0560960CA0824DD4A44A525A /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		9EECC55348A146E6A8930358 /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
-		570B2FDFD3F84458BF4B2290 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		CCCEE0D2EF1C437894E4B4CE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C69D6A1902944F5482EC8494 /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
+		0B19D5A8BA444CAB81AF3C32 /* Lextures.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lextures.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DEE0CBFCD78C47129E82CFEF /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		25FF9952DA2C443E8FD28F2E /* LexturesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesApp.swift; sourceTree = "<group>"; };
+		FC1995EA9F5A492B853F2277 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		CCE7176821F04BE780B90F95 /* AuthAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAPI.swift; sourceTree = "<group>"; };
+		38EA45EB25314C56B18B366A /* AuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
+		437DECB0F8B149EE9CC70D04 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		C8A516CA242F401AAB31CE9A /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
+		F980E8427FBE496FA3D8792F /* AuthFieldRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFieldRepresentable.swift; sourceTree = "<group>"; };
+		5AAF240F36F44814AA346807 /* BrandLogoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandLogoView.swift; sourceTree = "<group>"; };
+		A9FDB6E9E1D94ECEB58906BC /* LexturesTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexturesTheme.swift; sourceTree = "<group>"; };
+		3BF3AE1A983D4ADABB90EC00 /* SyncStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStatusView.swift; sourceTree = "<group>"; };
+		50C5CFB097024989A1D9C545 /* CourseHeroImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseHeroImage.swift; sourceTree = "<group>"; };
+		D47F56826C80420B83236225 /* LMSAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPI.swift; sourceTree = "<group>"; };
+		DEE3A85563E54B4CB0D5CF4E /* LMSAPIFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeatures.swift; sourceTree = "<group>"; };
+		D37DA60023D74E378AD328E5 /* LMSFeatureModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModels.swift; sourceTree = "<group>"; };
+		0F7DA4FBF34B4F418278877B /* LMSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSModels.swift; sourceTree = "<group>"; };
+		D4056630A3264DA1AD7BF0A6 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		A41A7194F77A438BBBBCC227 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		DE1F5EF43DB742D69D8259F7 /* NetworkBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkBootstrap.swift; sourceTree = "<group>"; };
+		856BF3BA54244798AADFF7C0 /* NotebookDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawing.swift; sourceTree = "<group>"; };
+		EE2065F901454D2BAC62BCD6 /* NotebookMarkdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookMarkdown.swift; sourceTree = "<group>"; };
+		FE8EB8DADD6A4978BBBB2EFF /* NotebookSlashCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSlashCommands.swift; sourceTree = "<group>"; };
+		3BE5399822074124AEF3B1F6 /* NotebookStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStore.swift; sourceTree = "<group>"; };
+		FD80C61D328640ABBBB22B9B /* NotebookSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSync.swift; sourceTree = "<group>"; };
+		D8A1772141E8485FA5C0B00E /* NotebookTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTree.swift; sourceTree = "<group>"; };
+		2136B8B6B85142A6A79B59CF /* CacheStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheStore.swift; sourceTree = "<group>"; };
+		43B1F2A460BE4340ABFD700B /* DownloadStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadStore.swift; sourceTree = "<group>"; };
+		AF7898B2DDA94497B985FC6A /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
+		A5D857AC0C21441592D76402 /* OfflineModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineModels.swift; sourceTree = "<group>"; };
+		CE81352449A04534A0227AA2 /* OfflineService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineService.swift; sourceTree = "<group>"; };
+		5748A3C7F3A8424C83FF91C2 /* OutboxStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutboxStore.swift; sourceTree = "<group>"; };
+		C21B22C9A17E4CF9B3767B6D /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+		A6BBD8DCACAD4CCC8E35356D /* PushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushManager.swift; sourceTree = "<group>"; };
+		68FA347541A740229E9EB148 /* DeepLinkRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepLinkRouter.swift; sourceTree = "<group>"; };
+		3F7A165634C54A6DA346BC9A /* AuthFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFlowView.swift; sourceTree = "<group>"; };
+		3ADAA5B0C03A454E82722F90 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		0F8ADC6AE5604FA79A7A5938 /* SignupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupView.swift; sourceTree = "<group>"; };
+		5F2AA9B2A3794D24993610A6 /* CourseAttendanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseAttendanceView.swift; sourceTree = "<group>"; };
+		1C8C0F2FC6B9484190DDCE03 /* CourseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDetailView.swift; sourceTree = "<group>"; };
+		506D3A58568840EDA0BDC5D5 /* CourseGradesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseGradesView.swift; sourceTree = "<group>"; };
+		3A9F5D45A8F84D148FF1FF1B /* CourseSyllabusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseSyllabusView.swift; sourceTree = "<group>"; };
+		3891732E73234EB5BF33176E /* CoursesListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursesListView.swift; sourceTree = "<group>"; };
+		9ECB187B7AAB4892816837F3 /* ItemDetailRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailRows.swift; sourceTree = "<group>"; };
+		206F482D27614EAEB21D0F3B /* ItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailView.swift; sourceTree = "<group>"; };
+		70EA18C315F74839A02B5D65 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		3073E68B76854070A5C56FF9 /* GradingBacklogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradingBacklogView.swift; sourceTree = "<group>"; };
+		C0C65616812845F784FF6E19 /* SpeedGraderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedGraderView.swift; sourceTree = "<group>"; };
+		F4D13CB65F144228AA63B0F2 /* AnnouncementsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementsViews.swift; sourceTree = "<group>"; };
+		5D7B9603FED447828FD5C389 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		B3E22C4169914665B2192193 /* ComposeMessageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeMessageView.swift; sourceTree = "<group>"; };
+		7FCB8530DB66407384A972F7 /* InboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InboxView.swift; sourceTree = "<group>"; };
+		70A123F73781443688C53F05 /* MessageDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageDetailView.swift; sourceTree = "<group>"; };
+		10021085635D4CDEB58BCCC5 /* NotebookDrawingViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawingViews.swift; sourceTree = "<group>"; };
+		DCA3BD1519544904A4F43F7D /* NotebookEditorSupportViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookEditorSupportViews.swift; sourceTree = "<group>"; };
+		491542BD78C04C8793B14680 /* NotebookEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookEditorView.swift; sourceTree = "<group>"; };
+		C9057C5B01D54707834D7255 /* NotebookPagesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookPagesView.swift; sourceTree = "<group>"; };
+		6A554934FA734B7992702D15 /* NotebooksListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebooksListView.swift; sourceTree = "<group>"; };
+		215A6F9D07D24351A872B7C3 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		D2818008B53A4A6A8A295855 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		29A430E0290948BC917F4AEF /* SplashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashView.swift; sourceTree = "<group>"; };
+		E3D5CBB9E2C144FC87349E48 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DF4C1155F0464E928AD70D7B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FFC866F91C74983A729006D /* Development.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Development.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C7EC4AFCB13D433CBBF5F709 /* Frameworks */ = {
+		43AD6065E3FE4BC19DC80F8C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -128,252 +148,286 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		5088BEAA630644AC80095F60 /* Lextures */ = {
+		EE2C85E65A9B453C897619D9 /* Lextures */ = {
 			isa = PBXGroup;
 			children = (
-				879E070FC2AE4CFCB28AA8A0 /* Resources */,
-				7183A8C0C5C54F79A2C33C2E /* App */,
-				A96867ED43FF456E8C9CBC92 /* Core */,
-				FCB7E1B3782940FE918FD48E /* Features */,
+				F239983C7DA145749A16C99D /* Resources */,
+				F72B0D831D674EE496571324 /* App */,
+				08B2045B5CE44FE4A07FAD17 /* Core */,
+				6C64F25B415D465087C168E8 /* Features */,
 			);
 			path = Lextures;
 			sourceTree = "<group>";
 		};
-		7183A8C0C5C54F79A2C33C2E /* App */ = {
+		F72B0D831D674EE496571324 /* App */ = {
 			isa = PBXGroup;
 			children = (
-				1301A212010F4351854D97E2 /* AppDelegate.swift */,
-				0D415D032C1844FE8F45BEF8 /* LexturesApp.swift */,
-				A05C698800AC4B4982D29CB3 /* RootView.swift */,
+				DEE0CBFCD78C47129E82CFEF /* AppDelegate.swift */,
+				25FF9952DA2C443E8FD28F2E /* LexturesApp.swift */,
+				FC1995EA9F5A492B853F2277 /* RootView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
 		};
-		A96867ED43FF456E8C9CBC92 /* Core */ = {
+		08B2045B5CE44FE4A07FAD17 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				394D09F44A4347B8BFF14205 /* Auth */,
-				BC52FB02985F4AF6B1EBA202 /* Config */,
-				12B39C9629E74E99A194D299 /* Design */,
-				5AD5C41C896E49D290A4239D /* LMS */,
-				AFA30B99D5E1476A85171AE3 /* Networking */,
-				C8C127479964405B8EFC1455 /* Notebook */,
+				03EC695B2DE544368BCEA54F /* Auth */,
+				4D9CEC92B87C490C9C3A1E9C /* Config */,
+				A6F596C1EB6D4F8691D9476A /* Design */,
+				FF057EC5A2D74379B30C6027 /* LMS */,
+				AD56D43412FE458CA2394117 /* Networking */,
+				5405F16A91104BD894A22FE4 /* Notebook */,
+				C6F48F0DCBFC42B99DF0FC4B /* Offline */,
+				400CF5EBA3994EAD9B8F0EC0 /* Push */,
+				DA2AF10B145742AEAE75619C /* Routing */,
 			);
 			path = Core;
 			sourceTree = "<group>";
 		};
-		FCB7E1B3782940FE918FD48E /* Features */ = {
+		6C64F25B415D465087C168E8 /* Features */ = {
 			isa = PBXGroup;
 			children = (
-				72E33627E1C249E9AE85E3ED /* Auth */,
-				7675643BA72541F19D3FFDD6 /* Courses */,
-				B0681CA130754335868C3665 /* Dashboard */,
-				60857CE5780847E78E2E0FDB /* Grading */,
-				75DCE22BF6CB448EB44884D1 /* Home */,
-				496EF4A60F954C288B84726E /* Inbox */,
-				CD497CED663140BAB992D27B /* Notebooks */,
-				FDB20FAAEEBE480EB249DF7E /* Profile */,
-				311ED73FCE5B4516AE6BBF60 /* Splash */,
+				1D6BCCE564B24D24BE6E5533 /* Auth */,
+				23FCE618AF5045A7A81FB590 /* Courses */,
+				FAA04EF8C2C44FD2B3E8282C /* Dashboard */,
+				8FCF60D981494A5FB7C90B07 /* Grading */,
+				528FCDAD88B041AB8B302108 /* Home */,
+				2DC24A485E5746B1BE5A30A5 /* Inbox */,
+				B3497D6990E748AAA238F50D /* Notebooks */,
+				C6D5406C2F644CDEBAA93279 /* Profile */,
+				31477B022FAB4C8CBECB7C6B /* Splash */,
 			);
 			path = Features;
 			sourceTree = "<group>";
 		};
-		879E070FC2AE4CFCB28AA8A0 /* Resources */ = {
+		F239983C7DA145749A16C99D /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				570B2FDFD3F84458BF4B2290 /* Assets.xcassets */,
-				CCCEE0D2EF1C437894E4B4CE /* Info.plist */,
+				E3D5CBB9E2C144FC87349E48 /* Assets.xcassets */,
+				DF4C1155F0464E928AD70D7B /* Info.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		394D09F44A4347B8BFF14205 /* Auth */ = {
+		03EC695B2DE544368BCEA54F /* Auth */ = {
 			isa = PBXGroup;
 			children = (
-				1D739C14D557424987C25589 /* AuthAPI.swift */,
-				AA6181CDF4144C6DA7F52348 /* AuthSession.swift */,
-				56C6051B7BF8414390521478 /* KeychainStore.swift */,
+				CCE7176821F04BE780B90F95 /* AuthAPI.swift */,
+				38EA45EB25314C56B18B366A /* AuthSession.swift */,
+				437DECB0F8B149EE9CC70D04 /* KeychainStore.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
 		};
-		BC52FB02985F4AF6B1EBA202 /* Config */ = {
+		4D9CEC92B87C490C9C3A1E9C /* Config */ = {
 			isa = PBXGroup;
 			children = (
-				AAD67529F427421A959CDE06 /* AppConfiguration.swift */,
+				C8A516CA242F401AAB31CE9A /* AppConfiguration.swift */,
 			);
 			path = Config;
 			sourceTree = "<group>";
 		};
-		12B39C9629E74E99A194D299 /* Design */ = {
+		A6F596C1EB6D4F8691D9476A /* Design */ = {
 			isa = PBXGroup;
 			children = (
-				FB6FB1565C8C4741B4BDB608 /* AuthFieldRepresentable.swift */,
-				E0B7BF1060994AC5B0F29552 /* BrandLogoView.swift */,
-				F0B958A7508C42DC8E698769 /* LexturesTheme.swift */,
+				F980E8427FBE496FA3D8792F /* AuthFieldRepresentable.swift */,
+				5AAF240F36F44814AA346807 /* BrandLogoView.swift */,
+				A9FDB6E9E1D94ECEB58906BC /* LexturesTheme.swift */,
+				3BF3AE1A983D4ADABB90EC00 /* SyncStatusView.swift */,
 			);
 			path = Design;
 			sourceTree = "<group>";
 		};
-		5AD5C41C896E49D290A4239D /* LMS */ = {
+		FF057EC5A2D74379B30C6027 /* LMS */ = {
 			isa = PBXGroup;
 			children = (
-				3057DF4A62FB48B3B0E0F19D /* CourseHeroImage.swift */,
-				3E56F3D33F844AF2A9078879 /* LMSAPI.swift */,
-				783FB56FEA8646E493E1F892 /* LMSAPIFeatures.swift */,
-				A67EC2E472DF4AC496EE5228 /* LMSFeatureModels.swift */,
-				30950446704F46C39BC5C627 /* LMSModels.swift */,
+				50C5CFB097024989A1D9C545 /* CourseHeroImage.swift */,
+				D47F56826C80420B83236225 /* LMSAPI.swift */,
+				DEE3A85563E54B4CB0D5CF4E /* LMSAPIFeatures.swift */,
+				D37DA60023D74E378AD328E5 /* LMSFeatureModels.swift */,
+				0F7DA4FBF34B4F418278877B /* LMSModels.swift */,
 			);
 			path = LMS;
 			sourceTree = "<group>";
 		};
-		AFA30B99D5E1476A85171AE3 /* Networking */ = {
+		AD56D43412FE458CA2394117 /* Networking */ = {
 			isa = PBXGroup;
 			children = (
-				2BCBFDA4B1F445E48F9384EB /* APIClient.swift */,
-				C81475601FE54C2396AFD164 /* APIError.swift */,
-				8A158EF966AA4F73BBA4DD3F /* NetworkBootstrap.swift */,
+				D4056630A3264DA1AD7BF0A6 /* APIClient.swift */,
+				A41A7194F77A438BBBBCC227 /* APIError.swift */,
+				DE1F5EF43DB742D69D8259F7 /* NetworkBootstrap.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
 		};
-		C8C127479964405B8EFC1455 /* Notebook */ = {
+		5405F16A91104BD894A22FE4 /* Notebook */ = {
 			isa = PBXGroup;
 			children = (
-				61CA06827D1441A39B9E9CB8 /* NotebookDrawing.swift */,
-				B470832CAE1B4390B7E1F400 /* NotebookMarkdown.swift */,
-				BEBB821FDA5141A090CF8ED1 /* NotebookSlashCommands.swift */,
-				18AB274F28DA4765B6936B7D /* NotebookStore.swift */,
-				0AFC6E7A1E8742C694CAE9D3 /* NotebookSync.swift */,
-				A7F690D75FCF4CAE9E31A8BE /* NotebookTree.swift */,
+				856BF3BA54244798AADFF7C0 /* NotebookDrawing.swift */,
+				EE2065F901454D2BAC62BCD6 /* NotebookMarkdown.swift */,
+				FE8EB8DADD6A4978BBBB2EFF /* NotebookSlashCommands.swift */,
+				3BE5399822074124AEF3B1F6 /* NotebookStore.swift */,
+				FD80C61D328640ABBBB22B9B /* NotebookSync.swift */,
+				D8A1772141E8485FA5C0B00E /* NotebookTree.swift */,
 			);
 			path = Notebook;
 			sourceTree = "<group>";
 		};
-		72E33627E1C249E9AE85E3ED /* Auth */ = {
+		C6F48F0DCBFC42B99DF0FC4B /* Offline */ = {
 			isa = PBXGroup;
 			children = (
-				7CD2BF03169B40F8BB4603F9 /* AuthFlowView.swift */,
-				AA08181B1FD143698CFE9F1D /* LoginView.swift */,
-				158C7F82B9C44AAD9C19D313 /* SignupView.swift */,
+				2136B8B6B85142A6A79B59CF /* CacheStore.swift */,
+				43B1F2A460BE4340ABFD700B /* DownloadStore.swift */,
+				AF7898B2DDA94497B985FC6A /* NetworkMonitor.swift */,
+				A5D857AC0C21441592D76402 /* OfflineModels.swift */,
+				CE81352449A04534A0227AA2 /* OfflineService.swift */,
+				5748A3C7F3A8424C83FF91C2 /* OutboxStore.swift */,
+				C21B22C9A17E4CF9B3767B6D /* SyncEngine.swift */,
+			);
+			path = Offline;
+			sourceTree = "<group>";
+		};
+		400CF5EBA3994EAD9B8F0EC0 /* Push */ = {
+			isa = PBXGroup;
+			children = (
+				A6BBD8DCACAD4CCC8E35356D /* PushManager.swift */,
+			);
+			path = Push;
+			sourceTree = "<group>";
+		};
+		DA2AF10B145742AEAE75619C /* Routing */ = {
+			isa = PBXGroup;
+			children = (
+				68FA347541A740229E9EB148 /* DeepLinkRouter.swift */,
+			);
+			path = Routing;
+			sourceTree = "<group>";
+		};
+		1D6BCCE564B24D24BE6E5533 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				3F7A165634C54A6DA346BC9A /* AuthFlowView.swift */,
+				3ADAA5B0C03A454E82722F90 /* LoginView.swift */,
+				0F8ADC6AE5604FA79A7A5938 /* SignupView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
 		};
-		7675643BA72541F19D3FFDD6 /* Courses */ = {
+		23FCE618AF5045A7A81FB590 /* Courses */ = {
 			isa = PBXGroup;
 			children = (
-				0BD0FD4519034CFF87ACDD97 /* CourseAttendanceView.swift */,
-				83819D2C91854BAA87DD64C9 /* CourseDetailView.swift */,
-				CB0AD28460E743AF8914E93B /* CourseGradesView.swift */,
-				A6879EF8BB3B4773A6AB90B3 /* CourseSyllabusView.swift */,
-				6B4EA2DF1FEE40ED88024562 /* CoursesListView.swift */,
-				38E26170E6E246CDA60E2648 /* ItemDetailRows.swift */,
-				A66635F9C2404AEBB6C0D702 /* ItemDetailView.swift */,
+				5F2AA9B2A3794D24993610A6 /* CourseAttendanceView.swift */,
+				1C8C0F2FC6B9484190DDCE03 /* CourseDetailView.swift */,
+				506D3A58568840EDA0BDC5D5 /* CourseGradesView.swift */,
+				3A9F5D45A8F84D148FF1FF1B /* CourseSyllabusView.swift */,
+				3891732E73234EB5BF33176E /* CoursesListView.swift */,
+				9ECB187B7AAB4892816837F3 /* ItemDetailRows.swift */,
+				206F482D27614EAEB21D0F3B /* ItemDetailView.swift */,
 			);
 			path = Courses;
 			sourceTree = "<group>";
 		};
-		B0681CA130754335868C3665 /* Dashboard */ = {
+		FAA04EF8C2C44FD2B3E8282C /* Dashboard */ = {
 			isa = PBXGroup;
 			children = (
-				7044CD091D4D44B29700AA65 /* DashboardView.swift */,
+				70EA18C315F74839A02B5D65 /* DashboardView.swift */,
 			);
 			path = Dashboard;
 			sourceTree = "<group>";
 		};
-		60857CE5780847E78E2E0FDB /* Grading */ = {
+		8FCF60D981494A5FB7C90B07 /* Grading */ = {
 			isa = PBXGroup;
 			children = (
-				CA929DA3E86949FCA7458E25 /* GradingBacklogView.swift */,
-				A4C9DD73050B4C399A795450 /* SpeedGraderView.swift */,
+				3073E68B76854070A5C56FF9 /* GradingBacklogView.swift */,
+				C0C65616812845F784FF6E19 /* SpeedGraderView.swift */,
 			);
 			path = Grading;
 			sourceTree = "<group>";
 		};
-		75DCE22BF6CB448EB44884D1 /* Home */ = {
+		528FCDAD88B041AB8B302108 /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				A62E6ECC3E1F485BABFD045C /* AnnouncementsViews.swift */,
-				3B217EF481094A78ABCE9D57 /* MainTabView.swift */,
+				F4D13CB65F144228AA63B0F2 /* AnnouncementsViews.swift */,
+				5D7B9603FED447828FD5C389 /* MainTabView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
 		};
-		496EF4A60F954C288B84726E /* Inbox */ = {
+		2DC24A485E5746B1BE5A30A5 /* Inbox */ = {
 			isa = PBXGroup;
 			children = (
-				55F1EB560B414CE5BC72DEE6 /* ComposeMessageView.swift */,
-				AEB66BAF728D40CB940CE163 /* InboxView.swift */,
-				9C73DF511F2A44B59807813A /* MessageDetailView.swift */,
+				B3E22C4169914665B2192193 /* ComposeMessageView.swift */,
+				7FCB8530DB66407384A972F7 /* InboxView.swift */,
+				70A123F73781443688C53F05 /* MessageDetailView.swift */,
 			);
 			path = Inbox;
 			sourceTree = "<group>";
 		};
-		CD497CED663140BAB992D27B /* Notebooks */ = {
+		B3497D6990E748AAA238F50D /* Notebooks */ = {
 			isa = PBXGroup;
 			children = (
-				A88989E14E9745ADB033A900 /* NotebookDrawingViews.swift */,
-				75620A8776714D22A8755B24 /* NotebookEditorSupportViews.swift */,
-				0039BFFD2DB74196B025B372 /* NotebookEditorView.swift */,
-				7226267AC7F04A61943EB563 /* NotebookPagesView.swift */,
-				47260659CDF34919A49376AD /* NotebooksListView.swift */,
+				10021085635D4CDEB58BCCC5 /* NotebookDrawingViews.swift */,
+				DCA3BD1519544904A4F43F7D /* NotebookEditorSupportViews.swift */,
+				491542BD78C04C8793B14680 /* NotebookEditorView.swift */,
+				C9057C5B01D54707834D7255 /* NotebookPagesView.swift */,
+				6A554934FA734B7992702D15 /* NotebooksListView.swift */,
 			);
 			path = Notebooks;
 			sourceTree = "<group>";
 		};
-		FDB20FAAEEBE480EB249DF7E /* Profile */ = {
+		C6D5406C2F644CDEBAA93279 /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				9FD437F6AD0D46B49256D2F8 /* NotificationsView.swift */,
-				0560960CA0824DD4A44A525A /* ProfileView.swift */,
+				215A6F9D07D24351A872B7C3 /* NotificationsView.swift */,
+				D2818008B53A4A6A8A295855 /* ProfileView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
 		};
-		311ED73FCE5B4516AE6BBF60 /* Splash */ = {
+		31477B022FAB4C8CBECB7C6B /* Splash */ = {
 			isa = PBXGroup;
 			children = (
-				9EECC55348A146E6A8930358 /* SplashView.swift */,
+				29A430E0290948BC917F4AEF /* SplashView.swift */,
 			);
 			path = Splash;
 			sourceTree = "<group>";
 		};
-		EEA523EE34AD4DED8A7F8E1C /* Products */ = {
+		F8A65146AF474B0D8499F548 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				254C11EEEC9D4475BD749587 /* Lextures.app */,
+				0B19D5A8BA444CAB81AF3C32 /* Lextures.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		664E20BD81234DB98F5AA996 /* Config */ = {
+		CEE108F631FE457C96638C6E /* Config */ = {
 			isa = PBXGroup;
 			children = (
-				C69D6A1902944F5482EC8494 /* Development.xcconfig */,
+				4FFC866F91C74983A729006D /* Development.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
 		};
-		77C73FBA6C6F4C09BF133922 = {
+		160EE579A0A14504BAABE86D = {
 			isa = PBXGroup;
 			children = (
-				5088BEAA630644AC80095F60 /* Lextures */,
-				664E20BD81234DB98F5AA996 /* Config */,
-				EEA523EE34AD4DED8A7F8E1C /* Products */,
+				EE2C85E65A9B453C897619D9 /* Lextures */,
+				CEE108F631FE457C96638C6E /* Config */,
+				F8A65146AF474B0D8499F548 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F47E623D641A4B928ED3D17B /* Lextures */ = {
+		BEDCBAE16D44422B86C2755A /* Lextures */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 188A05F6354847109CA41D7E /* Build configuration list for PBXNativeTarget "Lextures" */;
+			buildConfigurationList = BA3FB8500B8E423FA07FC563 /* Build configuration list for PBXNativeTarget "Lextures" */;
 			buildPhases = (
-				D372C888004B481BA6E7CD7F /* Sources */,
-				C7EC4AFCB13D433CBBF5F709 /* Frameworks */,
-				7086059935AA43199C065B9F /* Resources */,
+				A2D61AC2D395438FB4A63370 /* Sources */,
+				43AD6065E3FE4BC19DC80F8C /* Frameworks */,
+				3BDF35D080E34245AF2F0D70 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -381,25 +435,25 @@
 			);
 			name = "Lextures";
 			productName = Lextures;
-			productReference = 254C11EEEC9D4475BD749587 /* Lextures.app */;
+			productReference = 0B19D5A8BA444CAB81AF3C32 /* Lextures.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		836022E2E20A4C148F2405A9 /* Project object */ = {
+		86E21AA1C71A4504A58465C1 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					F47E623D641A4B928ED3D17B = {
+					BEDCBAE16D44422B86C2755A = {
 						CreatedOnToolsVersion = 16.0;
 					};
 				};
 			};
-			buildConfigurationList = 2BFE7BD8F1244BBFA33C2BF0 /* Build configuration list for PBXProject "Lextures" */;
+			buildConfigurationList = 92DD71D73D864815B1C4BFF5 /* Build configuration list for PBXProject "Lextures" */;
 			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -407,89 +461,99 @@
 				en,
 				Base,
 			);
-			mainGroup = 77C73FBA6C6F4C09BF133922;
-			productRefGroup = EEA523EE34AD4DED8A7F8E1C /* Products */;
+			mainGroup = 160EE579A0A14504BAABE86D;
+			productRefGroup = F8A65146AF474B0D8499F548 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F47E623D641A4B928ED3D17B /* Lextures */,
+				BEDCBAE16D44422B86C2755A /* Lextures */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		7086059935AA43199C065B9F /* Resources */ = {
+		3BDF35D080E34245AF2F0D70 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
-				8295FCA9E58242AEBF0D6B24 /* Assets.xcassets in Resources */,
+				373102926E2B44CCB4927118 /* Assets.xcassets in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D372C888004B481BA6E7CD7F /* Sources */ = {
+		A2D61AC2D395438FB4A63370 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			runOnlyForDeploymentPostprocessing = 0;
 			files = (
-				82F50A6D5D5E43828442CCBD /* AppDelegate.swift in Sources */,
-				784E0470C7624962A401A324 /* LexturesApp.swift in Sources */,
-				F8965C4982244EE78E5EE37C /* RootView.swift in Sources */,
-				7F15AC9A98B6416298F0E2E7 /* AuthAPI.swift in Sources */,
-				907C146ACDEB442EA8753A33 /* AuthSession.swift in Sources */,
-				1F5C1A2103634B1AA90F6FC7 /* KeychainStore.swift in Sources */,
-				5B469EA7D91B48A19F2E8B23 /* AppConfiguration.swift in Sources */,
-				A8355B9444DD4689B446E3C3 /* AuthFieldRepresentable.swift in Sources */,
-				E451AEA9FC0744499CB5C433 /* BrandLogoView.swift in Sources */,
-				702C67F952FC4D46AA84A8BC /* LexturesTheme.swift in Sources */,
-				0DDD0A011A774ACDA7D98719 /* CourseHeroImage.swift in Sources */,
-				45B8F60107DA4FB89F79ABD3 /* LMSAPI.swift in Sources */,
-				E432DCE16E254852AF729D02 /* LMSAPIFeatures.swift in Sources */,
-				C1BAFCCDB8774722A856622B /* LMSFeatureModels.swift in Sources */,
-				A2B6E36705424B8CA8A44435 /* LMSModels.swift in Sources */,
-				1FCD610119E1473CAC908160 /* APIClient.swift in Sources */,
-				14CE03443A8745428D2C58C0 /* APIError.swift in Sources */,
-				948089F4A7D94BA6B6B440B3 /* NetworkBootstrap.swift in Sources */,
-				FE442D38DF5943658F411B8C /* NotebookDrawing.swift in Sources */,
-				B8CB210AE90B4A6D89B78AAC /* NotebookMarkdown.swift in Sources */,
-				FA4D6C553EAC4506B9C6EC18 /* NotebookSlashCommands.swift in Sources */,
-				14ABFC0C18D4485380E22A6F /* NotebookStore.swift in Sources */,
-				67CBB3E91C854E7C8CBBCAD8 /* NotebookSync.swift in Sources */,
-				7336F2BDCAD344028E65F1C9 /* NotebookTree.swift in Sources */,
-				DC7055D49D6C4FBEA9CC12A6 /* AuthFlowView.swift in Sources */,
-				2146B0E97CB74C5C8D915307 /* LoginView.swift in Sources */,
-				BBD20591AAB84D09A1484AC4 /* SignupView.swift in Sources */,
-				9F5FA2B4FB834CB4BAF8B162 /* CourseAttendanceView.swift in Sources */,
-				24AFD590C4D448EEBC569D77 /* CourseDetailView.swift in Sources */,
-				A438FB26B7F0432490351D64 /* CourseGradesView.swift in Sources */,
-				5E1483A418784253841907CB /* CourseSyllabusView.swift in Sources */,
-				3971A8515B0F4D838E1A7640 /* CoursesListView.swift in Sources */,
-				758D9D32FFA44F0DB20E2769 /* ItemDetailRows.swift in Sources */,
-				2BC799521809413B8DC138DE /* ItemDetailView.swift in Sources */,
-				8F35B2C6D54048F1B527BE2C /* DashboardView.swift in Sources */,
-				43088A0355A74E9E9EAEC991 /* GradingBacklogView.swift in Sources */,
-				296E6CBE9A1B4B48B5C9228A /* SpeedGraderView.swift in Sources */,
-				AC1EDDCFE1F946999F54E5A0 /* AnnouncementsViews.swift in Sources */,
-				266BCB111888433A920A873F /* MainTabView.swift in Sources */,
-				F0A827C700444C738EBCDEBC /* ComposeMessageView.swift in Sources */,
-				1D2FC8DA7AE24011BC76220F /* InboxView.swift in Sources */,
-				EA17F526D17B4487B1EFCFE5 /* MessageDetailView.swift in Sources */,
-				A1DB372571294385BDCE6F00 /* NotebookDrawingViews.swift in Sources */,
-				8C87B19F5D184B45BF3B6562 /* NotebookEditorSupportViews.swift in Sources */,
-				325F0F9BFA324FCF9074196C /* NotebookEditorView.swift in Sources */,
-				BE3FBB94981149DE9DC6F9A2 /* NotebookPagesView.swift in Sources */,
-				5F02869576C64C3198D1981F /* NotebooksListView.swift in Sources */,
-				AA5F25AC893F4E8E8AA9A00B /* NotificationsView.swift in Sources */,
-				F9669A6F09A94BC998E3846F /* ProfileView.swift in Sources */,
-				1C871944AD4A4331BB1FDF04 /* SplashView.swift in Sources */,
+				2EE79BE25A5E4389888FED26 /* AppDelegate.swift in Sources */,
+				3FD53EA9303E4BB2B324C4E0 /* LexturesApp.swift in Sources */,
+				2502DA276A844CF79A26E561 /* RootView.swift in Sources */,
+				80DE9219A2254A7DADAB6D62 /* AuthAPI.swift in Sources */,
+				AB9CF7562E0A41B382938C8E /* AuthSession.swift in Sources */,
+				64DA209BAA9B4A6FA97208B7 /* KeychainStore.swift in Sources */,
+				E46B14472F924CB4A8AEBFFA /* AppConfiguration.swift in Sources */,
+				4F670FF0AA9047B6A1B189AF /* AuthFieldRepresentable.swift in Sources */,
+				7EDB7C468ED4406C9765122C /* BrandLogoView.swift in Sources */,
+				5A3739F0028F4CF299BAE3E4 /* LexturesTheme.swift in Sources */,
+				7CE95E23E277484EBCA00419 /* SyncStatusView.swift in Sources */,
+				62B771C0D537475C81E08269 /* CourseHeroImage.swift in Sources */,
+				95D44883B41247A7B8C57907 /* LMSAPI.swift in Sources */,
+				8BEDDD3935014D6EB5698E35 /* LMSAPIFeatures.swift in Sources */,
+				F3A13BFCD99B48E194541B52 /* LMSFeatureModels.swift in Sources */,
+				26F0AA12BF4144A9B2C4F956 /* LMSModels.swift in Sources */,
+				311D8F2D7007404BAB8E1B8E /* APIClient.swift in Sources */,
+				1183203892E9466CB3024135 /* APIError.swift in Sources */,
+				84E28DB597654E378A7D8E9A /* NetworkBootstrap.swift in Sources */,
+				481E969EE800446BA568EC01 /* NotebookDrawing.swift in Sources */,
+				656ADDE11ECD48408EC5ADE1 /* NotebookMarkdown.swift in Sources */,
+				37F16EED767A4F0EA7C045BE /* NotebookSlashCommands.swift in Sources */,
+				8D116B5F64104BE38711A99F /* NotebookStore.swift in Sources */,
+				332F72E773E24CC5AB79AE01 /* NotebookSync.swift in Sources */,
+				AD1850B1AFFC4C439C26254D /* NotebookTree.swift in Sources */,
+				95DA88C5EFD5498BB63BA80A /* CacheStore.swift in Sources */,
+				EBCE092C590B46D1A9F06901 /* DownloadStore.swift in Sources */,
+				63D9666CC49F4FBBA73F4788 /* NetworkMonitor.swift in Sources */,
+				DDE2B9368BB44CF3A368097F /* OfflineModels.swift in Sources */,
+				C5D8D7DBCED74C50B30E4175 /* OfflineService.swift in Sources */,
+				49FA78487F964F0C803B35DE /* OutboxStore.swift in Sources */,
+				BC6AA12F322440FAA8AE588D /* SyncEngine.swift in Sources */,
+				E38EA429F9E34A7182C84E7F /* PushManager.swift in Sources */,
+				6A595268205B4989BCA17CEB /* DeepLinkRouter.swift in Sources */,
+				C35FE1AD996243DD9DEECFF8 /* AuthFlowView.swift in Sources */,
+				074BB7DDEC02420E9EF31000 /* LoginView.swift in Sources */,
+				5B8D44EAAA5341D4B0EE4550 /* SignupView.swift in Sources */,
+				71AA815996A945FE95C96357 /* CourseAttendanceView.swift in Sources */,
+				5F3F675623BD420AA81C05B6 /* CourseDetailView.swift in Sources */,
+				7ABFF1F1C5A64C52B77FAB53 /* CourseGradesView.swift in Sources */,
+				E360668F79AD48F898EA282B /* CourseSyllabusView.swift in Sources */,
+				7DFD0DEE38764BC49C9E7C17 /* CoursesListView.swift in Sources */,
+				3D4AB3C162BB462D82FEC613 /* ItemDetailRows.swift in Sources */,
+				4F8078884BA34EE282EDB5F3 /* ItemDetailView.swift in Sources */,
+				7B75956C321A430DA551E632 /* DashboardView.swift in Sources */,
+				03308502926741B389070DD2 /* GradingBacklogView.swift in Sources */,
+				BD73614E5508459AB87F1EA7 /* SpeedGraderView.swift in Sources */,
+				628381FAFFC1496C84939410 /* AnnouncementsViews.swift in Sources */,
+				5E3818577ABC4C9988E5E40B /* MainTabView.swift in Sources */,
+				5FBB081EB0C441AAA7F016C1 /* ComposeMessageView.swift in Sources */,
+				20102E2BA38247839A75B24B /* InboxView.swift in Sources */,
+				81C53EB13C4A438CB9CA5323 /* MessageDetailView.swift in Sources */,
+				57878D420B4546A6946C04C4 /* NotebookDrawingViews.swift in Sources */,
+				95C741095E4C4C3296F8C6D8 /* NotebookEditorSupportViews.swift in Sources */,
+				40EC79384711479C95D6C8BC /* NotebookEditorView.swift in Sources */,
+				14982A8D20184ABDAB496649 /* NotebookPagesView.swift in Sources */,
+				04980EFC8303433F989953D0 /* NotebooksListView.swift in Sources */,
+				4A8A87256B7E46B1AEE0368B /* NotificationsView.swift in Sources */,
+				DC5341785E8B45CEB93525C4 /* ProfileView.swift in Sources */,
+				52E81E7B31024C34801D6D3E /* SplashView.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		19929032AF6246888F9F9851 /* Debug */ = {
+		06F267A3BA464307903E0024 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -508,7 +572,7 @@
 			};
 			name = Debug;
 		};
-		16D90CC1A934482C91E3E5C6 /* Release */ = {
+		74EACB968C704A91910BCAF5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -526,12 +590,13 @@
 			};
 			name = Release;
 		};
-		32C52A445E6E40C292B116C7 /* Debug */ = {
+		CC0034BE957844C7BB74448E /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C69D6A1902944F5482EC8494 /* Development.xcconfig */;
+			baseConfigurationReference = 4FFC866F91C74983A729006D /* Development.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Lextures/Resources/Lextures.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -553,12 +618,13 @@
 			};
 			name = Debug;
 		};
-		22C07234871740C79BE21C47 /* Release */ = {
+		586B82A211624317A0FF3DBF /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C69D6A1902944F5482EC8494 /* Development.xcconfig */;
+			baseConfigurationReference = 4FFC866F91C74983A729006D /* Development.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Lextures/Resources/Lextures.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
@@ -583,25 +649,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2BFE7BD8F1244BBFA33C2BF0 /* Build configuration list for PBXProject "Lextures" */ = {
+		92DD71D73D864815B1C4BFF5 /* Build configuration list for PBXProject "Lextures" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				19929032AF6246888F9F9851 /* Debug */,
-				16D90CC1A934482C91E3E5C6 /* Release */,
+				06F267A3BA464307903E0024 /* Debug */,
+				74EACB968C704A91910BCAF5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		188A05F6354847109CA41D7E /* Build configuration list for PBXNativeTarget "Lextures" */ = {
+		BA3FB8500B8E423FA07FC563 /* Build configuration list for PBXNativeTarget "Lextures" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				32C52A445E6E40C292B116C7 /* Debug */,
-				22C07234871740C79BE21C47 /* Release */,
+				CC0034BE957844C7BB74448E /* Debug */,
+				586B82A211624317A0FF3DBF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 836022E2E20A4C148F2405A9 /* Project object */;
+	rootObject = 86E21AA1C71A4504A58465C1 /* Project object */;
 }

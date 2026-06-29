@@ -52,6 +52,7 @@ import com.lextures.android.core.lms.AppNotification
 import com.lextures.android.core.lms.Broadcast
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.routing.DeepLinkRouter
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsEmptyState
@@ -166,15 +167,18 @@ fun NotificationsScreen(
                     LmsCard(
                         accent = if (notification.isRead) null else LexturesColors.BrandTeal,
                         onClick = {
-                            if (notification.isRead) return@LmsCard
                             val token = accessToken ?: return@LmsCard
-                            // Optimistic flip; the next refresh re-syncs on failure.
-                            notifications = notifications.map {
-                                if (it.id == notification.id) it.copy(isRead = true) else it
+                            if (!notification.isRead) {
+                                notifications = notifications.map {
+                                    if (it.id == notification.id) it.copy(isRead = true) else it
+                                }
+                                shell.unreadNotifications = (shell.unreadNotifications - 1).coerceAtLeast(0)
+                                scope.launch {
+                                    runCatching { LmsApi.markNotificationRead(notification.id, token) }
+                                }
                             }
-                            shell.unreadNotifications = (shell.unreadNotifications - 1).coerceAtLeast(0)
-                            scope.launch {
-                                runCatching { LmsApi.markNotificationRead(notification.id, token) }
+                            notification.actionUrl?.let { url ->
+                                shell.openDeepLink(DeepLinkRouter.resolve(url))
                             }
                         },
                     ) {

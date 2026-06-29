@@ -44,6 +44,40 @@ extension LMSAPI {
         )
     }
 
+    // MARK: - Device push tokens (APNs / FCM)
+
+    static func registerDeviceToken(
+        token: String,
+        platform: String,
+        accessToken: String
+    ) async throws -> DeviceTokenResponse {
+        let bundleId = Bundle.main.bundleIdentifier
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+        let body = DeviceTokenRegistration(
+            token: token,
+            platform: platform,
+            appBundleId: bundleId,
+            appVersion: version
+        )
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/device-tokens",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(DeviceTokenResponse.self, from: data)
+    }
+
+    static func deregisterDeviceToken(id: String, accessToken: String) async throws {
+        _ = try await client.request(
+            path: "/api/v1/me/device-tokens/\(encodePath(id))",
+            method: "DELETE",
+            authorized: true,
+            accessToken: accessToken
+        )
+    }
+
     // MARK: - Announcements (org broadcasts)
 
     static func fetchMyBroadcasts(accessToken: String) async throws -> [Broadcast] {

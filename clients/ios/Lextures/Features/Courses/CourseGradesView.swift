@@ -4,15 +4,23 @@ import SwiftUI
 /// gradebook column, with held / dropped / excused treatments.
 struct CourseGradesSection: View {
     @Environment(AuthSession.self) private var session
+    @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
 
     @State private var grades: MyGradesResponse?
+    @State private var cacheLabel: String?
     @State private var errorMessage: String?
     @State private var loading = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            if !NetworkMonitor.shared.isOnline {
+                OfflineBanner()
+            }
+            if let cacheLabel {
+                StalenessChip(label: cacheLabel)
+            }
             if let errorMessage {
                 LMSErrorBanner(message: errorMessage)
             }
@@ -169,7 +177,18 @@ struct CourseGradesSection: View {
         errorMessage = nil
         defer { loading = false }
         do {
-            grades = try await LMSAPI.fetchMyGrades(courseCode: course.courseCode, accessToken: token)
+            let result = try await offline.cachedFetch(
+                key: OfflineCacheKey.myGrades(course.courseCode),
+                accessToken: token
+            ) {
+                try await LMSAPI.fetchMyGrades(courseCode: course.courseCode, accessToken: token)
+            }
+            grades = result.value
+            if let cached = result.cached, cached.isStale(isOnline: NetworkMonitor.shared.isOnline) {
+                cacheLabel = cached.lastUpdatedLabel
+            } else {
+                cacheLabel = nil
+            }
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load grades."
         }
