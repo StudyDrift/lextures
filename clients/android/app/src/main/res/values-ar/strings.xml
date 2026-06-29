@@ -111,15 +111,27 @@
     <string name="tabs_notebooks">دفاتر الملاحظات</string>
     <string name="tabs_profile">الملف الشخصي</string>
     <plurals name="mobile_dashboard_dueThisWeek_count">
+        <item quantity="zero">%1$d واجبات مستحقة هذا الأسبوع</item>
         <item quantity="one">واجب واحد مستحق هذا الأسبوع</item>
+        <item quantity="two">%1$d واجبات مستحقة هذا الأسبوع</item>
+        <item quantity="few">%1$d واجبات مستحقة هذا الأسبوع</item>
+        <item quantity="many">%1$d واجبات مستحقة هذا الأسبوع</item>
         <item quantity="other">%1$d واجبات مستحقة هذا الأسبوع</item>
     </plurals>
     <plurals name="mobile_grading_submissionCount">
+        <item quantity="zero">%1$d تسليمات في الانتظار</item>
         <item quantity="one">تسليم واحد في الانتظار</item>
+        <item quantity="two">%1$d تسليمات في الانتظار</item>
+        <item quantity="few">%1$d تسليمات في الانتظار</item>
+        <item quantity="many">%1$d تسليمات في الانتظار</item>
         <item quantity="other">%1$d تسليمات في الانتظار</item>
     </plurals>
     <plurals name="mobile_pendingSync_waiting">
+        <item quantity="zero">%1$d تغييرات في انتظار الرفع</item>
         <item quantity="one">تغيير واحد في انتظار الرفع</item>
+        <item quantity="two">%1$d تغييرات في انتظار الرفع</item>
+        <item quantity="few">%1$d تغييرات في انتظار الرفع</item>
+        <item quantity="many">%1$d تغييرات في انتظار الرفع</item>
         <item quantity="other">%1$d تغييرات في انتظار الرفع</item>
     </plurals>
 </resources>

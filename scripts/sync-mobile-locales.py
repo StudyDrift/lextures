@@ -22,6 +22,8 @@ ANDROID_LOCALE_DIRS = {
     "en-XA": "values-en-rXA",
 }
 
+ANDROID_ARABIC_PLURAL_QUANTITIES = ("zero", "one", "two", "few", "many", "other")
+
 IOS_LOCALE_CODES = {
     "en": "en",
     "es": "es",
@@ -54,6 +56,25 @@ def escape_android_string(value: str) -> str:
     if out.startswith("@"):
         out = "\\" + out
     return out
+
+
+def complete_android_plural_forms(tag: str, forms: dict[str, str]) -> dict[str, str]:
+    """Android lint requires all CLDR plural categories for Arabic."""
+    if tag != "ar":
+        return forms
+    completed = dict(forms)
+    fallback = (
+        completed.get("other")
+        or completed.get("many")
+        or completed.get("few")
+        or completed.get("two")
+        or completed.get("one")
+        or completed.get("zero")
+        or ""
+    )
+    for quantity in ANDROID_ARABIC_PLURAL_QUANTITIES:
+        completed.setdefault(quantity, fallback)
+    return completed
 
 
 def load_locale(tag: str) -> dict:
@@ -108,9 +129,10 @@ def write_android_strings(tag: str, data: dict) -> None:
     for key, forms in sorted(data.get("plurals", {}).items()):
         plural = ET.SubElement(resources, "plurals", name=android_name(key))
         for quantity in ("zero", "one", "two", "few", "many", "other"):
-            if quantity in forms:
+            localized = complete_android_plural_forms(tag, forms)
+            if quantity in localized:
                 entry = ET.SubElement(plural, "item", quantity=quantity)
-                entry.text = escape_android_string(android_format(forms[quantity]))
+                entry.text = escape_android_string(android_format(localized[quantity]))
 
     indent_xml(resources)
     out_dir = ANDROID_RES / folder
