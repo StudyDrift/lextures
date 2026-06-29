@@ -131,6 +131,7 @@ export async function seedE2EPlatformFeatures(): Promise<void> {
         'securityDisclosureModuleEnabled',
         'engagementTrackingEnabled',
         'adminAuditLogEnabled',
+        'adminConsoleEnabled',
         'avScanningEnabled',
         'clamavStub',
         'storageQuotasEnabled',

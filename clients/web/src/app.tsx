@@ -151,7 +151,7 @@ export default function App() {
             <Route path="/calendar" element={<Pages.Calendar />} />
             <Route path="/todos" element={<Pages.TodosPage />} />
             <Route path="/admin/accommodations" element={<Pages.AdminAccommodationsPage />} />
-            <Route path="/admin" element={<Pages.AdminLayout />}>
+            <Route path="/org-admin" element={<Pages.AdminLayout />}>
               <Route index element={<Pages.AdminOverview />} />
               <Route path="users" element={<Pages.AdminUsers />} />
               <Route path="courses" element={<Pages.AdminCourses />} />

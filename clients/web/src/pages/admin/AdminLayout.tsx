@@ -13,12 +13,12 @@ import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
 const navItems = [
-  { to: '/admin', label: 'Overview', icon: LayoutDashboard, end: true },
-  { to: '/admin/users', label: 'Users', icon: Users },
-  { to: '/admin/courses', label: 'Courses', icon: BookOpen },
-  { to: '/admin/integrations', label: 'Integrations', icon: Plug },
-  { to: '/admin/settings', label: 'Settings', icon: Settings },
-  { to: '/admin/audit-log', label: 'Audit log', icon: ScrollText },
+  { to: '/org-admin', label: 'Overview', icon: LayoutDashboard, end: true },
+  { to: '/org-admin/users', label: 'Users', icon: Users },
+  { to: '/org-admin/courses', label: 'Courses', icon: BookOpen },
+  { to: '/org-admin/integrations', label: 'Integrations', icon: Plug },
+  { to: '/org-admin/settings', label: 'Settings', icon: Settings },
+  { to: '/org-admin/audit-log', label: 'Audit log', icon: ScrollText },
 ]
 
 export default function AdminLayout() {

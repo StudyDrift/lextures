@@ -37,18 +37,18 @@ export default function SideNavAdminConsoleLink({ orgId }: { orgId: string | nul
   if (!canAccess) return null
 
   const active =
-    location.pathname === '/admin' ||
-    location.pathname.startsWith('/admin/users') ||
-    location.pathname.startsWith('/admin/courses') ||
-    location.pathname.startsWith('/admin/settings') ||
-    location.pathname.startsWith('/admin/audit-log') ||
-    location.pathname === '/admin/integrations'
+    location.pathname === '/org-admin' ||
+    location.pathname.startsWith('/org-admin/users') ||
+    location.pathname.startsWith('/org-admin/courses') ||
+    location.pathname.startsWith('/org-admin/settings') ||
+    location.pathname.startsWith('/org-admin/audit-log') ||
+    location.pathname === '/org-admin/integrations'
 
   return (
     <>
       <SideNavSectionLabel>Admin console</SideNavSectionLabel>
       <SideNavLink
-        to={orgPath('/admin', orgId)}
+        to={orgPath('/org-admin', orgId)}
         className={() => (active ? sideNavActiveClass : '')}
         icon={<LayoutDashboard className="h-5 w-5" />}
       >
