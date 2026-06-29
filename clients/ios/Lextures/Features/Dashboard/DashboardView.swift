@@ -70,7 +70,7 @@ final class DashboardModel {
             announcements = await broadcastsTask
             await loadStaffBacklogs(accessToken: accessToken)
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load your dashboard."
+            errorMessage = L.text("mobile.dashboard.error.load")
         }
     }
 
@@ -235,7 +235,7 @@ struct DashboardView: View {
                 }
 
                 if !model.dueThisWeek.isEmpty {
-                    Text("\(model.dueThisWeek.count) assignment\(model.dueThisWeek.count == 1 ? "" : "s") due this week")
+                    Text(L.plural("mobile.dashboard.dueThisWeek.count", count: model.dueThisWeek.count))
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(LexturesTheme.primaryDeep)
                         .padding(.horizontal, 10)
@@ -244,7 +244,7 @@ struct DashboardView: View {
                         .clipShape(Capsule())
                         .padding(.top, 8)
                 } else if !model.loading {
-                    Text("You're all caught up")
+                    Text(L.text("mobile.dashboard.caughtUp"))
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.9))
                         .padding(.horizontal, 10)
@@ -280,15 +280,15 @@ struct DashboardView: View {
             }
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Notifications")
+        .accessibilityLabel(L.text("mobile.profile.notifications"))
     }
 
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case ..<12: return "Good morning"
-        case ..<17: return "Good afternoon"
-        default: return "Good evening"
+        case ..<12: return L.text("mobile.dashboard.greeting.morning")
+        case ..<17: return L.text("mobile.dashboard.greeting.afternoon")
+        default: return L.text("mobile.dashboard.greeting.evening")
         }
     }
 
@@ -307,9 +307,9 @@ struct DashboardView: View {
 
     private var statsRow: some View {
         HStack(spacing: 12) {
-            statCard(value: "\(model.courses.count)", label: "Courses", systemImage: "books.vertical.fill", tint: LexturesTheme.accent(for: colorScheme))
-            statCard(value: "\(model.dueThisWeek.count)", label: "Due this week", systemImage: "clock.fill", tint: LexturesTheme.coral)
-            statCard(value: "\(shell.unreadInbox)", label: "Unread", systemImage: "tray.fill", tint: LexturesTheme.amber)
+            statCard(value: "\(model.courses.count)", label: L.text("mobile.dashboard.stat.courses"), systemImage: "books.vertical.fill", tint: LexturesTheme.accent(for: colorScheme))
+            statCard(value: "\(model.dueThisWeek.count)", label: L.text("mobile.dashboard.stat.dueThisWeek"), systemImage: "clock.fill", tint: LexturesTheme.coral)
+            statCard(value: "\(shell.unreadInbox)", label: L.text("mobile.dashboard.stat.unread"), systemImage: "tray.fill", tint: LexturesTheme.amber)
         }
     }
 
@@ -335,7 +335,7 @@ struct DashboardView: View {
     @ViewBuilder
     private var teacherSnapshot: some View {
         if !model.staffBacklogs.isEmpty {
-            LMSSectionHeader(title: "Needs grading", systemImage: "checkmark.rectangle.stack")
+            LMSSectionHeader(title: L.text("mobile.dashboard.section.needsGrading"), systemImage: "checkmark.rectangle.stack")
             ForEach(model.staffBacklogs) { backlog in
                 NavigationLink(value: backlog) {
                     LMSCard(accent: LexturesTheme.amber) {
@@ -345,7 +345,7 @@ struct DashboardView: View {
                                 Text(backlog.course.displayTitle)
                                     .font(.subheadline.weight(.semibold))
                                     .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                                Text("\(backlog.total) submission\(backlog.total == 1 ? "" : "s") waiting")
+                                Text(L.plural("mobile.grading.submissionCount", count: backlog.total))
                                     .font(.caption)
                                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                             }
@@ -369,11 +369,11 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var dueSoonSection: some View {
-        LMSSectionHeader(title: "Due this week", systemImage: "calendar")
+        LMSSectionHeader(title: L.text("mobile.dashboard.section.dueThisWeek"), systemImage: "calendar")
         if model.dueThisWeek.isEmpty {
             LMSCard {
                 Label {
-                    Text("Nothing due this week. Enjoy the breathing room!")
+                    Text(L.text("mobile.dashboard.empty.dueThisWeek"))
                         .font(.subheadline)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                 } icon: {
@@ -423,12 +423,12 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var coursesCarousel: some View {
-        LMSSectionHeader(title: "Your courses", systemImage: "book.fill")
+        LMSSectionHeader(title: L.text("mobile.dashboard.section.yourCourses"), systemImage: "book.fill")
         if model.courses.isEmpty && !model.loading {
             LMSEmptyState(
                 systemImage: "book",
-                title: "No courses yet",
-                message: "Courses you enroll in will show up here."
+                title: L.text("mobile.dashboard.empty.courses.title"),
+                message: L.text("mobile.dashboard.empty.courses.message")
             )
         } else {
             ScrollView(.horizontal, showsIndicators: false) {

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthApi
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.AuthCard
@@ -31,6 +32,7 @@ import com.lextures.android.core.design.BrandLogo
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.i18n.L
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,21 +51,21 @@ fun LoginScreen(
 
     AuthScreenContainer(modifier = modifier) {
         AuthHeader(
-            title = "Sign in",
-            subtitle = "Use the email your course or school uses. SSO options appear when your organization connects them.",
+            title = L.text(R.string.auth_login_title),
+            subtitle = L.text(R.string.auth_login_subtitle),
         )
 
         AuthCard {
             Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                 AuthTextField(
-                    title = "Email",
+                    title = L.text(R.string.auth_login_email),
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = "you@school.edu",
+                    placeholder = L.text(R.string.auth_login_emailPlaceholder),
                     keyboardType = KeyboardType.Email,
                 )
                 AuthTextField(
-                    title = "Password",
+                    title = L.text(R.string.auth_login_password),
                     value = password,
                     onValueChange = { password = it },
                     placeholder = "••••••••",
@@ -80,7 +82,7 @@ fun LoginScreen(
                 }
 
                 AuthPrimaryButton(
-                    text = if (isLoading) "Signing in…" else "Sign in",
+                    text = if (isLoading) L.text(R.string.auth_login_submitting) else L.text(R.string.auth_login_submit),
                     enabled = !isLoading && email.isNotBlank() && password.isNotBlank(),
                     onClick = {
                         scope.launch {
@@ -108,15 +110,15 @@ fun LoginScreen(
                     horizontalArrangement = Arrangement.End,
                 ) {
                     Text(
-                        text = "Forgot password?",
+                        text = L.text(R.string.auth_login_forgotPassword),
                         color = LexturesColors.PrimaryMuted.copy(alpha = 0.7f),
                         fontSize = 15.sp,
                     )
                 }
 
                 AuthFooterLink(
-                    prompt = "New here?",
-                    actionLabel = "Create an account",
+                    prompt = L.text(R.string.auth_login_newHere),
+                    actionLabel = L.text(R.string.auth_login_createAccount),
                     onAction = onCreateAccount,
                 )
             }

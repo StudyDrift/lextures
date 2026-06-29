@@ -9,11 +9,11 @@ enum AppTab: String, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .home: return "Home"
-        case .courses: return "Courses"
-        case .notebooks: return "Notebooks"
-        case .inbox: return "Inbox"
-        case .profile: return "Profile"
+        case .home: return L.text("tabs.home")
+        case .courses: return L.text("tabs.courses")
+        case .notebooks: return L.text("tabs.notebooks")
+        case .inbox: return L.text("tabs.inbox")
+        case .profile: return L.text("tabs.profile")
         }
     }
 
@@ -378,7 +378,7 @@ struct LMSAvatarButton: View {
                 )
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("Profile")
+        .accessibilityLabel(L.text("tabs.profile"))
     }
 }
 
@@ -444,6 +444,6 @@ struct LMSProgressRing: View {
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
         }
         .frame(width: size, height: size)
-        .accessibilityLabel("\(Int((progress * 100).rounded())) percent complete")
+        .accessibilityLabel(L.format("mobile.profile.percentComplete", Int((progress * 100).rounded())))
     }
 }

@@ -48,21 +48,11 @@ struct ComposeMessageView: View {
                         autocapitalization: .sentences
                     )
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Message")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                        TextEditor(text: $bodyText)
-                            .scrollContentBackground(.hidden)
-                            .padding(8)
-                            .frame(minHeight: 180)
-                            .background(colorScheme == .dark ? Color(white: 0.05) : .white)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .stroke(LexturesTheme.fieldBorder(for: colorScheme), lineWidth: 1)
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    }
+                    DictationField(
+                        title: "Message",
+                        text: $bodyText,
+                        placeholder: "Write your message…"
+                    )
 
                     Spacer()
                 }

@@ -25,9 +25,15 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
@@ -51,9 +57,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.BuildConfig
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.config.AppConfiguration
+import com.lextures.android.core.i18n.L
+import com.lextures.android.core.i18n.LocalLocalePreferences
+import com.lextures.android.core.i18n.LocaleApi
+import com.lextures.android.core.i18n.LocalePreferences
 import com.lextures.android.core.design.HeroBrush
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
@@ -62,9 +73,12 @@ import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.features.home.HomeShellState
-import com.lextures.android.features.home.LmsCard
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import com.lextures.android.core.accessibility.rememberAccessibilityPreferencesState
 
 /** Profile tab: identity hero, notifications, app info, and sign-out. */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileTab(
     session: AuthSession,
@@ -81,6 +95,10 @@ fun ProfileTab(
     val storageBytes by offline.storageBytes.collectAsState()
     val outboxItems by offline.outboxItems.collectAsState()
     val scope = rememberCoroutineScope()
+    val accessibilityState = rememberAccessibilityPreferencesState()
+    val localePreferences = LocalLocalePreferences.current
+    var localeExpanded by remember { mutableStateOf(false) }
+    var localeError by remember { mutableStateOf<String?>(null) }
 
     if (showNotifications) {
         NotificationsScreen(
@@ -195,6 +213,98 @@ fun ProfileTab(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = LexturesColors.Error,
+                )
+            }
+        }
+
+        LmsCard {
+            Text(text = L.text(R.string.common_locale_label), style = LexturesType.display(17), color = textPrimary())
+            Text(text = L.text(R.string.common_locale_description), fontSize = 12.sp, color = textSecondary())
+            ExposedDropdownMenuBox(
+                expanded = localeExpanded,
+                onExpandedChange = { localeExpanded = it },
+            ) {
+                val selected = LocalePreferences.localeOptions.firstOrNull { it.tag == localePreferences.localeTag }
+                OutlinedTextField(
+                    value = selected?.let {
+                        if (it.tag == LocalePreferences.SYSTEM_TAG) L.text(R.string.common_locale_systemDefault) else it.label
+                    }.orEmpty(),
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = localeExpanded) },
+                    modifier = Modifier
+                        .menuAnchor()
+                        .fillMaxWidth(),
+                )
+                ExposedDropdownMenu(
+                    expanded = localeExpanded,
+                    onDismissRequest = { localeExpanded = false },
+                ) {
+                    LocalePreferences.localeOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    if (option.tag == LocalePreferences.SYSTEM_TAG) {
+                                        L.text(R.string.common_locale_systemDefault)
+                                    } else {
+                                        option.label
+                                    },
+                                )
+                            },
+                            onClick = {
+                                localeExpanded = false
+                                val previous = localePreferences.localeTag
+                                localePreferences.setLocaleTag(option.tag)
+                                val token = accessToken
+                                if (token != null) {
+                                    scope.launch {
+                                        try {
+                                            val apiTag = if (option.tag == LocalePreferences.SYSTEM_TAG) {
+                                                java.util.Locale.getDefault().toLanguageTag()
+                                            } else {
+                                                option.tag
+                                            }
+                                            LocaleApi.saveLocale(apiTag, token)
+                                        } catch (_: Exception) {
+                                            localePreferences.setLocaleTag(previous)
+                                            localeError = L.text(R.string.common_locale_saveError)
+                                        }
+                                    }
+                                }
+                            },
+                        )
+                    }
+                }
+            }
+            localeError?.let {
+                Text(text = it, fontSize = 12.sp, color = LexturesColors.Error)
+            }
+        }
+
+        LmsCard {
+            Text(text = L.text(R.string.mobile_profile_accessibility), style = LexturesType.display(17), color = textPrimary())
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Dyslexia-friendly display",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = textPrimary(),
+                    )
+                    Text(
+                        text = "Rounded type, extra spacing, and relaxed line height app-wide.",
+                        fontSize = 12.sp,
+                        color = textSecondary(),
+                    )
+                }
+                Switch(
+                    checked = accessibilityState.dyslexiaDisplayEnabled,
+                    onCheckedChange = accessibilityState::setDyslexiaDisplayEnabled,
+                    colors = SwitchDefaults.colors(checkedTrackColor = LexturesColors.Primary),
                 )
             }
         }

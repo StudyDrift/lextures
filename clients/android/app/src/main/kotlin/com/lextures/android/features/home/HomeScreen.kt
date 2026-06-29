@@ -42,7 +42,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.i18n.L
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.sceneBackground
@@ -56,12 +58,12 @@ import com.lextures.android.features.inbox.InboxTab
 import com.lextures.android.features.notebooks.NotebooksTab
 import com.lextures.android.features.profile.ProfileTab
 
-enum class HomeTab(val label: String, val icon: ImageVector) {
-    Dashboard("Home", Icons.Default.Home),
-    Courses("Courses", Icons.AutoMirrored.Filled.MenuBook),
-    Notebooks("Notebooks", Icons.Default.EditNote),
-    Inbox("Inbox", Icons.Default.Inbox),
-    Profile("Profile", Icons.Default.Person),
+enum class HomeTab(val labelRes: Int, val icon: ImageVector) {
+    Dashboard(R.string.tabs_home, Icons.Default.Home),
+    Courses(R.string.tabs_courses, Icons.AutoMirrored.Filled.MenuBook),
+    Notebooks(R.string.tabs_notebooks, Icons.Default.EditNote),
+    Inbox(R.string.tabs_inbox, Icons.Default.Inbox),
+    Profile(R.string.tabs_profile, Icons.Default.Person),
 }
 
 /**
@@ -214,7 +216,7 @@ fun LexturesTabBar(
                     .clip(CircleShape)
                     .background(if (isSelected) LexturesColors.BrandCream else Color.Transparent)
                     .clickable { onSelect(tab.name) }
-                    .semantics { contentDescription = tab.label },
+                    .semantics { contentDescription = L.text(tab.labelRes) },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

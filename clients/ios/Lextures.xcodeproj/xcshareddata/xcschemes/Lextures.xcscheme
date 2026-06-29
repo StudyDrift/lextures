@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "BEDCBAE16D44422B86C2755A"
+               BlueprintIdentifier = "5E502D4099A44677AD0B5566"
                BuildableName = "Lextures.app"
                BlueprintName = "Lextures"
                ReferencedContainer = "container:Lextures.xcodeproj">
@@ -36,11 +36,30 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "BEDCBAE16D44422B86C2755A"
+            BlueprintIdentifier = "5E502D4099A44677AD0B5566"
             BuildableName = "Lextures.app"
             BlueprintName = "Lextures"
             ReferencedContainer = "container:Lextures.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F193C349D5B1457498EE4EED"
+               BuildableName = "LexturesTests.xctest"
+               BlueprintName = "LexturesTests"
+               ReferencedContainer = "container:Lextures.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
+   </TestAction>
 </Scheme>

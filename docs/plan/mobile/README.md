@@ -138,8 +138,8 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M10.1 Parent portal](M10.1-parent-portal.md) | 13.1 parent portal, parent-dashboard | **P1** |
 | [M10.2 Conference booking (parent)](M10.2-conference-booking.md) | 13.12 conference scheduling | **P1** |
 | [M11.1 Take attendance (instructor)](M11.1-take-attendance.md) | 13.2 daily attendance | **P1** |
-| [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](M0.3-accessibility.md) | 12.1/12.2/12.8 a11y | **P1** |
-| [M0.4 i18n, locale & RTL](M0.4-i18n-rtl.md) | 11.1 i18n, 11.2 RTL, 11.3/11.4 locale/tz | **P1** |
+| [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **P1** |
+| [M0.4 i18n, locale & RTL](../completed/mobile/M0.4-i18n-rtl.md) | 11.1 i18n, 11.2 RTL, 11.3/11.4 locale/tz | **Done** |
 | [M1.4 Profile, settings & accommodations](M1.4-settings-accommodations.md) | settings, my-accommodations, 12.10 engine | **P1** |
 
 ### Later / situational (P2)

@@ -5,9 +5,12 @@ struct ProfileView: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
+    @Environment(LocalePreferences.self) private var localePreferences
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityPreferences) private var accessibilityPreferences
     @State private var confirmingSignOut = false
     @State private var confirmingClearCache = false
+    @State private var localeError: String?
 
     var body: some View {
         NavigationStack {
@@ -21,6 +24,8 @@ struct ProfileView: View {
                             offlineSyncCard
                         }
                         offlineStorageCard
+                        localeCard
+                        accessibilityCard
                         accountCard
                         notificationsCard
                         aboutCard
@@ -32,30 +37,30 @@ struct ProfileView: View {
                     await shell.refresh(accessToken: session.accessToken)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle(L.text("mobile.profile.title"))
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: NotificationsRoute.self) { _ in
                 NotificationsView()
             }
             .confirmationDialog(
-                "Sign out of Lextures?",
+                L.text("mobile.profile.signOutConfirm"),
                 isPresented: $confirmingSignOut,
                 titleVisibility: .visible
             ) {
-                Button("Sign out", role: .destructive) {
+                Button(L.text("mobile.profile.signOut"), role: .destructive) {
                     session.signOut()
                 }
             }
             .confirmationDialog(
-                "Clear offline storage?",
+                L.text("mobile.profile.clearCacheConfirm"),
                 isPresented: $confirmingClearCache,
                 titleVisibility: .visible
             ) {
-                Button("Clear cache", role: .destructive) {
+                Button(L.text("mobile.profile.clearCache"), role: .destructive) {
                     Task { await offline.clearStorage() }
                 }
             } message: {
-                Text("Removes cached reads and downloads from this device. Queued changes are kept until they sync.")
+                Text(L.text("mobile.profile.clearCacheMessage"))
             }
             .task { await offline.refreshState() }
         }
@@ -95,15 +100,15 @@ struct ProfileView: View {
     private var displayName: String {
         let name = shell.profile?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !name.isEmpty { return name }
-        return shell.profile?.firstName ?? "Welcome"
+        return shell.profile?.firstName ?? L.text("mobile.profile.welcome")
     }
 
     private var offlineSyncCard: some View {
         LMSCard {
-            Text("Pending sync")
+            Text(L.text("mobile.profile.pendingSync"))
                 .font(LexturesTheme.displayFont(17))
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            Text("\(offline.pendingCount) change\(offline.pendingCount == 1 ? "" : "s") waiting to upload")
+            Text(L.plural("mobile.pendingSync.waiting", count: offline.pendingCount))
                 .font(.caption)
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             ForEach(offline.outboxItems.filter {
@@ -116,7 +121,7 @@ struct ProfileView: View {
                         .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                     OutboxStatusChip(status: item.status)
                     if item.status == .failed || item.status == .conflict {
-                        Button("Retry") {
+                        Button(L.text("mobile.profile.retry")) {
                             Task { await offline.retryOutboxItem(id: item.id, accessToken: session.accessToken) }
                         }
                         .font(.caption.weight(.semibold))
@@ -126,13 +131,60 @@ struct ProfileView: View {
         }
     }
 
+    private var localeCard: some View {
+        LMSCard {
+            Text(L.text("common.locale.label"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            Text(L.text("common.locale.description"))
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            Picker(L.text("common.locale.label"), selection: Binding(
+                get: { localePreferences.localeTag },
+                set: { newTag in Task { await saveLocale(tag: newTag) } }
+            )) {
+                ForEach(LocalePreferences.localeOptions, id: \.tag) { option in
+                    Text(option.tag == "system" ? L.text("common.locale.systemDefault") : option.label)
+                        .tag(option.tag)
+                }
+            }
+            .pickerStyle(.menu)
+            if let localeError {
+                Text(localeError)
+                    .font(.caption)
+                    .foregroundStyle(LexturesTheme.error)
+            }
+        }
+    }
+
+    private var accessibilityCard: some View {
+        LMSCard {
+            Text(L.text("mobile.profile.accessibility"))
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            Toggle(isOn: Binding(
+                get: { accessibilityPreferences.dyslexiaDisplayEnabled },
+                set: { accessibilityPreferences.dyslexiaDisplayEnabled = $0 }
+            )) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L.text("mobile.profile.dyslexiaFriendly"))
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    Text(L.text("mobile.profile.dyslexiaFriendlyDescription"))
+                        .font(.caption)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                }
+            }
+        }
+    }
+
     private var offlineStorageCard: some View {
         LMSCard {
-            Text("Offline storage")
+            Text(L.text("mobile.profile.offlineStorage"))
                 .font(LexturesTheme.displayFont(17))
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
             infoRow(
-                label: "Cache size",
+                label: L.text("mobile.profile.cacheSize"),
                 value: ByteCountFormatter.string(fromByteCount: Int64(offline.storageBytes), countStyle: .file),
                 systemImage: "internaldrive"
             )
@@ -140,7 +192,7 @@ struct ProfileView: View {
             Button {
                 confirmingClearCache = true
             } label: {
-                Label("Clear cached data", systemImage: "trash")
+                Label(L.text("mobile.profile.clearCachedData"), systemImage: "trash")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(LexturesTheme.error)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -151,14 +203,14 @@ struct ProfileView: View {
 
     private var accountCard: some View {
         LMSCard {
-            Text("Account")
+            Text(L.text("mobile.profile.account"))
                 .font(LexturesTheme.displayFont(17))
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            infoRow(label: "Display name", value: displayName, systemImage: "person")
+            infoRow(label: L.text("mobile.profile.displayName"), value: displayName, systemImage: "person")
             Divider()
             infoRow(
-                label: "Email",
-                value: shell.profile?.email ?? session.userEmail ?? "—",
+                label: L.text("mobile.profile.email"),
+                value: shell.profile?.email ?? session.userEmail ?? L.text("mobile.emDash"),
                 systemImage: "envelope"
             )
         }
@@ -175,13 +227,13 @@ struct ProfileView: View {
                         .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.18 : 0.14))
                         .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Notifications")
+                        Text(L.text("mobile.profile.notifications"))
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
                         Text(
                             shell.unreadNotifications > 0
-                                ? "\(shell.unreadNotifications) unread"
-                                : "You're all caught up"
+                                ? L.format("mobile.profile.unread", shell.unreadNotifications)
+                                : L.text("mobile.dashboard.caughtUp")
                         )
                         .font(.caption)
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
@@ -199,6 +251,7 @@ struct ProfileView: View {
                     Image(systemName: "chevron.right")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
+                        .flipsForRightToLeftLayoutDirection(true)
                 }
                 .contentShape(Rectangle())
             }
@@ -211,12 +264,12 @@ struct ProfileView: View {
 
     private var aboutCard: some View {
         LMSCard {
-            Text("About")
+            Text(L.text("mobile.profile.about"))
                 .font(LexturesTheme.displayFont(17))
                 .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            infoRow(label: "Version", value: appVersion, systemImage: "app.badge")
+            infoRow(label: L.text("mobile.profile.version"), value: appVersion, systemImage: "app.badge")
             Divider()
-            infoRow(label: "Server", value: AppConfiguration.apiBaseURL.absoluteString, systemImage: "server.rack")
+            infoRow(label: L.text("mobile.profile.server"), value: AppConfiguration.apiBaseURL.absoluteString, systemImage: "server.rack")
         }
     }
 
@@ -231,7 +284,7 @@ struct ProfileView: View {
         Button {
             confirmingSignOut = true
         } label: {
-            Label("Sign out", systemImage: "rectangle.portrait.and.arrow.right")
+            Label(L.text("mobile.profile.signOut"), systemImage: "rectangle.portrait.and.arrow.right")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(LexturesTheme.error)
                 .frame(maxWidth: .infinity)
@@ -240,6 +293,22 @@ struct ProfileView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
+    }
+
+    @MainActor
+    private func saveLocale(tag: String) async {
+        localeError = nil
+        let previous = localePreferences.localeTag
+        localePreferences.localeTag = tag
+        guard let token = session.accessToken else { return }
+        let apiTag = tag == "system" ? Locale.current.identifier : tag
+        do {
+            let saved = try await LocaleAPI.saveLocale(apiTag, accessToken: token)
+            localePreferences.applyStoredTag(saved)
+        } catch {
+            localePreferences.localeTag = previous
+            localeError = L.text("common.locale.saveError")
+        }
     }
 
     private func infoRow(label: String, value: String, systemImage: String) -> some View {

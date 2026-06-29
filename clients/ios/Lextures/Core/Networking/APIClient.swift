@@ -44,6 +44,7 @@ struct APIClient {
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("ios", forHTTPHeaderField: "X-Platform")
+        request.setValue(LocalePreferences.acceptLanguageHeaderValue(), forHTTPHeaderField: "Accept-Language")
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             request.setValue(version, forHTTPHeaderField: "X-App-Version")
         }

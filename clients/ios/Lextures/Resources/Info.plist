@@ -47,5 +47,9 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Lextures uses the microphone for speech-to-text dictation in message and assignment fields.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Lextures uses speech recognition so you can dictate long responses instead of typing.</string>
 </dict>
 </plist>

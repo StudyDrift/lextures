@@ -54,9 +54,42 @@ enum LexturesTheme {
         scheme == .dark ? textSecondaryDark : textSecondary
     }
 
+    /// High-contrast text when Increase Contrast is enabled.
+    static func textPrimary(highContrast: Bool, scheme: ColorScheme) -> Color {
+        if highContrast {
+            return scheme == .dark ? .white : Color(hex: 0x0A1210)
+        }
+        return textPrimary(for: scheme)
+    }
+
+    static func textSecondary(highContrast: Bool, scheme: ColorScheme) -> Color {
+        if highContrast {
+            return scheme == .dark ? Color(hex: 0xE8ECEB) : Color(hex: 0x3A4A46)
+        }
+        return textSecondary(for: scheme)
+    }
+
     /// Brighter primary for dark backgrounds.
     static func accent(for scheme: ColorScheme) -> Color {
         scheme == .dark ? brandTeal : primary
+    }
+
+    static func accent(highContrast: Bool, scheme: ColorScheme) -> Color {
+        highContrast ? (scheme == .dark ? Color(hex: 0x8FE0D0) : Color(hex: 0x0A5C52)) : accent(for: scheme)
+    }
+
+    /// WCAG AA contrast for primary text on scene background (light and dark).
+    static var primaryTextContrastMeetsAA: Bool {
+        let light = AccessibilitySupport.contrastRatio(
+            foreground: ColorComponents(hex: 0x1F2D2A),
+            background: ColorComponents(hex: 0xFAF5EA)
+        )
+        let dark = AccessibilitySupport.contrastRatio(
+            foreground: ColorComponents(hex: 0xF2EFE6),
+            background: ColorComponents(hex: 0x111B19)
+        )
+        return AccessibilitySupport.meetsWCAGAA(ratio: light)
+            && AccessibilitySupport.meetsWCAGAA(ratio: dark)
     }
 
     // MARK: Display typography (serif, editorial)

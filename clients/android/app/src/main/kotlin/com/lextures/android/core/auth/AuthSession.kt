@@ -4,6 +4,7 @@ import android.app.Application
 import android.util.Base64
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.lextures.android.R
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.offline.OfflineService
@@ -129,25 +130,22 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
     }
 
     fun serverUnreachableMessage(): String =
-        "Could not reach the server at ${AppConfiguration.apiBaseUrl}. Is the API running?"
+        getApplication<Application>().getString(R.string.auth_login_serverUnreachable)
 
     fun mapError(error: Throwable): String {
+        val app = getApplication<Application>()
         return when (error) {
-            is AuthSessionError -> error.message ?: error.toString()
+            is AuthSessionError.MfaRequired -> app.getString(R.string.mobile_auth_mfaRequired)
+            is AuthSessionError.MissingAccessToken -> app.getString(R.string.mobile_auth_missingToken)
             is ApiError.Transport -> serverUnreachableMessage()
             is ApiError -> error.message ?: error.toString()
-            else -> error.localizedMessage ?: error.toString()
+            else -> error.localizedMessage ?: app.getString(R.string.common_error_generic)
         }
     }
 
-    sealed class AuthSessionError(message: String) : Exception(message) {
-        data object MfaRequired : AuthSessionError(
-            "Multi-factor authentication is required. Complete sign-in on the web app for now.",
-        )
-
-        data object MissingAccessToken : AuthSessionError(
-            "Unexpected sign-in response.",
-        )
+    sealed class AuthSessionError : Exception() {
+        data object MfaRequired : AuthSessionError()
+        data object MissingAccessToken : AuthSessionError()
     }
 
     companion object {
