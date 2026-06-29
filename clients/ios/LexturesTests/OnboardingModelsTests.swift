@@ -24,7 +24,10 @@ final class OnboardingModelsTests: XCTestCase {
 
     func testDecodesLearnerGoalsEnvelope() throws {
         let json = """
-        {"goals":{"id":"g1","userId":"u1","topic":"python","dailyMinutes":20,"priorKnowledgeLevel":"beginner","diagnosticSkipped":true,"onboardingStep":6,"onboardingCompleted":true,"reminderOptIn":false,"recommendedCourseCode":"PY101","recommendedCourseTitle":"Python Basics"}}
+        {"goals":{"id":"g1","userId":"u1","topic":"python","dailyMinutes":20,\
+        "priorKnowledgeLevel":"beginner","diagnosticSkipped":true,"onboardingStep":6,\
+        "onboardingCompleted":true,"reminderOptIn":false,"recommendedCourseCode":"PY101",\
+        "recommendedCourseTitle":"Python Basics"}}
         """
         let envelope = try JSONDecoder().decode(GoalsEnvelope.self, from: Data(json.utf8))
         XCTAssertEqual(envelope.goals.recommendedCourseCode, "PY101")
