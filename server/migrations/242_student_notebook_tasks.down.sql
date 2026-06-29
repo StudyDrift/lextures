@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 242_student_notebook_tasks.sql
+-- See docs/runbooks/database-migration-rollback.md

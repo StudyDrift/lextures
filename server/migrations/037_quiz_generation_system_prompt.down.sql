@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 037_quiz_generation_system_prompt.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 051_content_page_user_markups.sql
+-- See docs/runbooks/database-migration-rollback.md

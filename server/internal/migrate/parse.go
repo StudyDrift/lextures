@@ -22,6 +22,9 @@ func parseMigrationName(filename string) (migrationFile, error) {
 	if i := strings.LastIndex(filename, "/"); i >= 0 {
 		base = filename[i+1:]
 	}
+	if isDownMigration(base) {
+		return migrationFile{}, fmt.Errorf("migration: %q is a down migration companion, not an up migration", filename)
+	}
 	m := migrationName.FindStringSubmatch(base)
 	if len(m) != 3 {
 		return migrationFile{}, fmt.Errorf("migration: invalid file name %q (expected NNN_desc.sql)", filename)

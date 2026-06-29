@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 236_command_palette_search.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 195_admin_audit_log.sql
+-- See docs/runbooks/database-migration-rollback.md

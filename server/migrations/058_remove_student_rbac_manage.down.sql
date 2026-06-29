@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 058_remove_student_rbac_manage.sql
+-- See docs/runbooks/database-migration-rollback.md

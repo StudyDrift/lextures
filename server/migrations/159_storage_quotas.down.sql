@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 159_storage_quotas.sql
+-- See docs/runbooks/database-migration-rollback.md

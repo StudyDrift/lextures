@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 031_platform_inbox_sender.sql
+-- See docs/runbooks/database-migration-rollback.md

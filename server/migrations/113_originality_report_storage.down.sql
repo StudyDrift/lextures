@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 113_originality_report_storage.sql
+-- See docs/runbooks/database-migration-rollback.md

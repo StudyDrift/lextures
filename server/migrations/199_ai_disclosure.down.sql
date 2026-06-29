@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 199_ai_disclosure.sql
+-- See docs/runbooks/database-migration-rollback.md

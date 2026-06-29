@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 035_ensure_module_quizzes_schema.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 249_course_evaluations.sql
+-- See docs/runbooks/database-migration-rollback.md

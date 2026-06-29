@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 061_global_admin_role.sql
+-- See docs/runbooks/database-migration-rollback.md

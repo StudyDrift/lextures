@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 081_question_versioning_backfill_published.sql
+-- See docs/runbooks/database-migration-rollback.md

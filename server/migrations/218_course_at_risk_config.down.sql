@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 218_course_at_risk_config.sql
+-- See docs/runbooks/database-migration-rollback.md

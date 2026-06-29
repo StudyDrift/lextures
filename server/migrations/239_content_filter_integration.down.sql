@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 239_content_filter_integration.sql
+-- See docs/runbooks/database-migration-rollback.md

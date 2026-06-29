@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 322_grading_agent_review_indexes.sql
+-- See docs/runbooks/database-migration-rollback.md

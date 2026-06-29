@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 025_module_assignments.sql
+-- See docs/runbooks/database-migration-rollback.md

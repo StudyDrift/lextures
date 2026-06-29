@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 116_course_enrollment_roles_catalog.sql
+-- See docs/runbooks/database-migration-rollback.md

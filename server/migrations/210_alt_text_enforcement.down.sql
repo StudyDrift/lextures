@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 210_alt_text_enforcement.sql
+-- See docs/runbooks/database-migration-rollback.md

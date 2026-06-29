@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 140_cli_auth_sessions.sql
+-- See docs/runbooks/database-migration-rollback.md

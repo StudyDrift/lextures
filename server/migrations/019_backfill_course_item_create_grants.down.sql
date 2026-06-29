@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 019_backfill_course_item_create_grants.sql
+-- See docs/runbooks/database-migration-rollback.md

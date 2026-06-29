@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 279_learning_paths.sql
+-- See docs/runbooks/database-migration-rollback.md

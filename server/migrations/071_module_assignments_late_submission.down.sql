@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 071_module_assignments_late_submission.sql
+-- See docs/runbooks/database-migration-rollback.md

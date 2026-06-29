@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 174_xapi_caliper_emission.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 173_outcomes_report.sql
+-- See docs/runbooks/database-migration-rollback.md

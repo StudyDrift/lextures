@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 054_seed_default_assignment_groups.sql
+-- See docs/runbooks/database-migration-rollback.md

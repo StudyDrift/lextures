@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 245_enrollment_state_machine.sql
+-- See docs/runbooks/database-migration-rollback.md

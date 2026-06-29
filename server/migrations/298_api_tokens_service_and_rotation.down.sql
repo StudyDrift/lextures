@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 298_api_tokens_service_and_rotation.sql
+-- See docs/runbooks/database-migration-rollback.md

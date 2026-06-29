@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 171_mastery_heatmap_cache.sql
+-- See docs/runbooks/database-migration-rollback.md

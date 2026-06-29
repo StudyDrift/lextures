@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 306_peer_review.sql
+-- See docs/runbooks/database-migration-rollback.md

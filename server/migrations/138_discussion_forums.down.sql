@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 138_discussion_forums.sql
+-- See docs/runbooks/database-migration-rollback.md

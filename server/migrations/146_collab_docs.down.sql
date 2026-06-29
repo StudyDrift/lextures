@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 146_collab_docs.sql
+-- See docs/runbooks/database-migration-rollback.md

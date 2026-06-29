@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 018_rename_module_create_to_item_create.sql
+-- See docs/runbooks/database-migration-rollback.md

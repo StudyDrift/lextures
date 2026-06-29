@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 096_misconceptions.sql
+-- See docs/runbooks/database-migration-rollback.md

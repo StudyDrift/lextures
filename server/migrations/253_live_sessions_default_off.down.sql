@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 253_live_sessions_default_off.sql
+-- See docs/runbooks/database-migration-rollback.md

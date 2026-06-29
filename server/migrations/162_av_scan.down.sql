@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 162_av_scan.sql
+-- See docs/runbooks/database-migration-rollback.md

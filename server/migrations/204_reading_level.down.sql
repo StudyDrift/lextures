@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 204_reading_level.sql
+-- See docs/runbooks/database-migration-rollback.md

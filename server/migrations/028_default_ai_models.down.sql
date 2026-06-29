@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 028_default_ai_models.sql
+-- See docs/runbooks/database-migration-rollback.md

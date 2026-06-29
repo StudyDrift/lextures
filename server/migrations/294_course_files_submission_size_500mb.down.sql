@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 294_course_files_submission_size_500mb.sql
+-- See docs/runbooks/database-migration-rollback.md

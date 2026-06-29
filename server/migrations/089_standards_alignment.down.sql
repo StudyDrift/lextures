@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 089_standards_alignment.sql
+-- See docs/runbooks/database-migration-rollback.md

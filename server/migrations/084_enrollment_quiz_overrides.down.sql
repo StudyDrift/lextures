@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 084_enrollment_quiz_overrides.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 111_grade_excused_state.sql
+-- See docs/runbooks/database-migration-rollback.md

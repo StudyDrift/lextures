@@ -47,6 +47,9 @@ jobs:
       - name: go mod download
         run: go mod download
 
+      - name: Migration lint (plan 17.10)
+        run: go run ./cmd/migrate-lint
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:

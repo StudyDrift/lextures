@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 016_enrollment_teacher_not_owner.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 137_parent_student_links.sql
+-- See docs/runbooks/database-migration-rollback.md

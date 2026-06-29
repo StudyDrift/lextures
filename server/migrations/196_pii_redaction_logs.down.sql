@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 196_pii_redaction_logs.sql
+-- See docs/runbooks/database-migration-rollback.md

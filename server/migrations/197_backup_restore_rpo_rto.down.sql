@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 197_backup_restore_rpo_rto.sql
+-- See docs/runbooks/database-migration-rollback.md

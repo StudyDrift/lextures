@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 142_onboarding_events.sql
+-- See docs/runbooks/database-migration-rollback.md

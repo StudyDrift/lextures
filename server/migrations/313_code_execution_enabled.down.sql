@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 313_code_execution_enabled.sql
+-- See docs/runbooks/database-migration-rollback.md

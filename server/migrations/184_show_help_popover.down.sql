@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 184_show_help_popover.sql
+-- See docs/runbooks/database-migration-rollback.md

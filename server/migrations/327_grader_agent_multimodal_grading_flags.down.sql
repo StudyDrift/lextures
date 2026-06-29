@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 327_grader_agent_multimodal_grading_flags.sql
+-- See docs/runbooks/database-migration-rollback.md

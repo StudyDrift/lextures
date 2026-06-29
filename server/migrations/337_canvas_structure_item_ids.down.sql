@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 337_canvas_structure_item_ids.sql
+-- See docs/runbooks/database-migration-rollback.md

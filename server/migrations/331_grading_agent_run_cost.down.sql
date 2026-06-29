@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 331_grading_agent_run_cost.sql
+-- See docs/runbooks/database-migration-rollback.md

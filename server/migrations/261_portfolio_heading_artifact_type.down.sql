@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 261_portfolio_heading_artifact_type.sql
+-- See docs/runbooks/database-migration-rollback.md

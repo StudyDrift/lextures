@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 268_ff_ui_mode_column.sql
+-- See docs/runbooks/database-migration-rollback.md

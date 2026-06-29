@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 277_self_paced_mode.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 335_quiz_manual_grading_is_correct_backfill.sql
+-- See docs/runbooks/database-migration-rollback.md

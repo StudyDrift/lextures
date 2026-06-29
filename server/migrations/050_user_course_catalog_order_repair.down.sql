@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 050_user_course_catalog_order_repair.sql
+-- See docs/runbooks/database-migration-rollback.md

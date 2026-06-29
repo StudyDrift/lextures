@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 259_co_curricular_transcript.sql
+-- See docs/runbooks/database-migration-rollback.md

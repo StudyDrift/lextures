@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 059_course_gradebook_view_permission.sql
+-- See docs/runbooks/database-migration-rollback.md

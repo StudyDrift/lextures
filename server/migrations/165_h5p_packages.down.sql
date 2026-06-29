@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 165_h5p_packages.sql
+-- See docs/runbooks/database-migration-rollback.md

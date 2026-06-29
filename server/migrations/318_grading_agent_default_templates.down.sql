@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 318_grading_agent_default_templates.sql
+-- See docs/runbooks/database-migration-rollback.md

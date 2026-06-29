@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 092_irt_calibration.sql
+-- See docs/runbooks/database-migration-rollback.md

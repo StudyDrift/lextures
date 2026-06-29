@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 212_high_contrast_reduced_motion.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 336_student_todo_board.sql
+-- See docs/runbooks/database-migration-rollback.md

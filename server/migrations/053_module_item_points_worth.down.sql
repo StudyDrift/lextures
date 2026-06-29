@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 053_module_item_points_worth.sql
+-- See docs/runbooks/database-migration-rollback.md

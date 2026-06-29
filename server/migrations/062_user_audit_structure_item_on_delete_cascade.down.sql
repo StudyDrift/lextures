@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 062_user_audit_structure_item_on_delete_cascade.sql
+-- See docs/runbooks/database-migration-rollback.md

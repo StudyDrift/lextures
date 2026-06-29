@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 332_zapier_connector.sql
+-- See docs/runbooks/database-migration-rollback.md

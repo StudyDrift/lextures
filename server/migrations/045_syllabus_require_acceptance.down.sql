@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 045_syllabus_require_acceptance.sql
+-- See docs/runbooks/database-migration-rollback.md

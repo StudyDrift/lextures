@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 143_permission_first_rbac.sql
+-- See docs/runbooks/database-migration-rollback.md

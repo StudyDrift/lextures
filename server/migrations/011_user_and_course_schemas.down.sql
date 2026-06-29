@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 011_user_and_course_schemas.sql
+-- See docs/runbooks/database-migration-rollback.md

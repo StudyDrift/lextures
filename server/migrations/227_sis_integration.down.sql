@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 227_sis_integration.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 093_diagnostic_placement.sql
+-- See docs/runbooks/database-migration-rollback.md

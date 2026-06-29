@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 301_calendar_tokens.sql
+-- See docs/runbooks/database-migration-rollback.md

@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 299_webhook_subscriptions.sql
+-- See docs/runbooks/database-migration-rollback.md

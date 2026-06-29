@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 338_job_queue.sql
+-- See docs/runbooks/database-migration-rollback.md

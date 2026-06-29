@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 198_security_reports.sql
+-- See docs/runbooks/database-migration-rollback.md

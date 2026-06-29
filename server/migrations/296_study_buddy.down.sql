@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 296_study_buddy.sql
+-- See docs/runbooks/database-migration-rollback.md

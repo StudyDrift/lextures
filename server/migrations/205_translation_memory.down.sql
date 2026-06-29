@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 205_translation_memory.sql
+-- See docs/runbooks/database-migration-rollback.md

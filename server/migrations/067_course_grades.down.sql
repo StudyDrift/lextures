@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 067_course_grades.sql
+-- See docs/runbooks/database-migration-rollback.md

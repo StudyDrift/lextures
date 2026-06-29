@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 055_course_enrollments_read_permission.sql
+-- See docs/runbooks/database-migration-rollback.md

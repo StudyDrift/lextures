@@ -1,0 +1,3 @@
+-- Rollback not supported: restore from backup
+-- Companion to: 085_schema_debt_settings_version_indexes_fk.sql
+-- See docs/runbooks/database-migration-rollback.md
