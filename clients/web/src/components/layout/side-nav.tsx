@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { matchPath, NavLink, useLocation } from 'react-router-dom'
 import { BrandLogo } from '../brand-logo'
 import { useShellNav } from './use-shell-nav'
@@ -8,7 +8,9 @@ import { SideNavMainLinks } from './side-nav-main-links'
 import { SideNavFooter } from './side-nav-footer'
 import { SideNavSettingsLinks } from './side-nav-settings-links'
 import { SideNavCommandPaletteTrigger } from './side-nav-command-palette'
-import { SideNavPinnedCourses } from './side-nav-pinned-courses'
+const SideNavPinnedCourses = lazy(() =>
+  import('./side-nav-pinned-courses').then((m) => ({ default: m.SideNavPinnedCourses })),
+)
 import { SideNavTooltip } from './side-nav-tooltip'
 import { isSettingsShellRoute } from './side-nav-path-utils'
 
@@ -104,7 +106,9 @@ export function SideNav() {
           </SideNavTooltip>
         </div>
         <SideNavCommandPaletteTrigger />
-        <SideNavPinnedCourses />
+        <Suspense fallback={null}>
+          <SideNavPinnedCourses />
+        </Suspense>
         <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
           <nav
             className={`absolute inset-0 flex flex-col gap-1 overflow-y-auto px-3 pb-3 pt-0 transition-[opacity,transform] duration-300 ease-out ${
