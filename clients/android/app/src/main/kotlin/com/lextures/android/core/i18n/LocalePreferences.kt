@@ -36,7 +36,7 @@ class LocalePreferences(context: Context) {
     val acceptLanguageHeader: String
         get() = effectiveTag
 
-    fun setLocaleTag(tag: String) {
+    fun updateLocaleTag(tag: String) {
         localeTag = tag
         prefs.edit().putString(KEY_LOCALE, tag).apply()
         MobileLocale.acceptLanguage = acceptLanguageHeader

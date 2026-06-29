@@ -59,12 +59,12 @@ class AccessibilityPreferencesState(context: Context) {
     var ttsSpeed by mutableFloatStateOf(backing.ttsSpeed)
         private set
 
-    fun setDyslexiaDisplayEnabled(enabled: Boolean) {
+    fun updateDyslexiaDisplayEnabled(enabled: Boolean) {
         dyslexiaDisplayEnabled = enabled
         backing.dyslexiaDisplayEnabled = enabled
     }
 
-    fun setTtsSpeed(speed: Float) {
+    fun updateTtsSpeed(speed: Float) {
         ttsSpeed = speed
         backing.ttsSpeed = speed
     }

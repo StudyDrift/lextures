@@ -254,7 +254,7 @@ fun ProfileTab(
                             onClick = {
                                 localeExpanded = false
                                 val previous = localePreferences.localeTag
-                                localePreferences.setLocaleTag(option.tag)
+                                localePreferences.updateLocaleTag(option.tag)
                                 val token = accessToken
                                 if (token != null) {
                                     scope.launch {
@@ -266,7 +266,7 @@ fun ProfileTab(
                                             }
                                             LocaleApi.saveLocale(apiTag, token)
                                         } catch (_: Exception) {
-                                            localePreferences.setLocaleTag(previous)
+                                            localePreferences.updateLocaleTag(previous)
                                             localeError = L.text(context, localePreferences, R.string.common_locale_saveError)
                                         }
                                     }
@@ -303,7 +303,7 @@ fun ProfileTab(
                 }
                 Switch(
                     checked = accessibilityState.dyslexiaDisplayEnabled,
-                    onCheckedChange = accessibilityState::setDyslexiaDisplayEnabled,
+                    onCheckedChange = accessibilityState::updateDyslexiaDisplayEnabled,
                     colors = SwitchDefaults.colors(checkedTrackColor = LexturesColors.Primary),
                 )
             }
