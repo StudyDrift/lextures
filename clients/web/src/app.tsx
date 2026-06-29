@@ -151,6 +151,14 @@ export default function App() {
             <Route path="/calendar" element={<Pages.Calendar />} />
             <Route path="/todos" element={<Pages.TodosPage />} />
             <Route path="/admin/accommodations" element={<Pages.AdminAccommodationsPage />} />
+            <Route path="/admin" element={<Pages.AdminLayout />}>
+              <Route index element={<Pages.AdminOverview />} />
+              <Route path="users" element={<Pages.AdminUsers />} />
+              <Route path="courses" element={<Pages.AdminCourses />} />
+              <Route path="integrations" element={<Pages.AdminIntegrations />} />
+              <Route path="settings" element={<Pages.AdminSettingsPage />} />
+              <Route path="audit-log" element={<Pages.AdminAuditLog />} />
+            </Route>
             <Route path="/admin/accommodations/audit" element={<Pages.AccommodationAuditPage />} />
             <Route path="/admin/ccr/achievements" element={<Pages.AdminCCRAchievementsPage />} />
             <Route path="/admin/quarantine" element={<Pages.AdminQuarantinePage />} />

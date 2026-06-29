@@ -69,6 +69,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffEportfolio: false,
     ffTranscripts: false,
     ffWebhooks: false,
+    adminConsoleEnabled: false,
     ffZapierConnector: false,
     ffAdvisingIntegration: false,
     ffResearchConsent: false,

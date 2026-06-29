@@ -62,6 +62,7 @@ export type PlatformFeatures = {
   ffContentFilterIntegration: boolean
   ffSisIntegration: boolean
   ffWebhooks: boolean
+  adminConsoleEnabled: boolean
   ffZapierConnector: boolean
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
@@ -154,6 +155,7 @@ const defaultFeatures: PlatformFeatures = {
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
   ffWebhooks: false,
+  adminConsoleEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
@@ -245,6 +247,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffContentFilterIntegration: false,
     ffSisIntegration: false,
   ffWebhooks: false,
+  adminConsoleEnabled: false,
   ffZapierConnector: false,
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
@@ -343,6 +346,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffContentFilterIntegration: data.ffContentFilterIntegration === true,
           ffSisIntegration: data.ffSisIntegration === true,
           ffWebhooks: data.ffWebhooks === true,
+          adminConsoleEnabled: data.adminConsoleEnabled === true,
           ffZapierConnector: data.ffZapierConnector === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
@@ -398,6 +402,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffContentFilterIntegration: next.ffContentFilterIntegration === true,
           ffSisIntegration: next.ffSisIntegration === true,
           ffWebhooks: next.ffWebhooks === true,
+          adminConsoleEnabled: next.adminConsoleEnabled === true,
           ffZapierConnector: next.ffZapierConnector === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,

@@ -90,6 +90,7 @@ type Row struct {
 	StatePrivacyEnabled             *bool
 	IsoIsmsEnabled                  *bool
 	AdminAuditLogEnabled            *bool
+	AdminConsoleEnabled             *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
 	RTLEnabled                      *bool
@@ -254,6 +255,7 @@ type Write struct {
 	StatePrivacyEnabled             *bool
 	IsoIsmsEnabled                  *bool
 	AdminAuditLogEnabled            *bool
+	AdminConsoleEnabled             *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
 	RTLEnabled                      *bool
@@ -416,6 +418,7 @@ SELECT
 	state_privacy_enabled,
 	iso_isms_enabled,
 	admin_audit_log_enabled,
+	admin_console_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
 	rtl_enabled,
@@ -571,6 +574,7 @@ WHERE id = 1
 		&r.StatePrivacyEnabled,
 		&r.IsoIsmsEnabled,
 		&r.AdminAuditLogEnabled,
+		&r.AdminConsoleEnabled,
 		&r.DataResidencyEnabled,
 		&r.AiDisclosureEnabled,
 		&r.RTLEnabled,
@@ -777,6 +781,7 @@ INSERT INTO settings.platform_app_settings (
 	state_privacy_enabled,
 	iso_isms_enabled,
 	admin_audit_log_enabled,
+	admin_console_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
 	rtl_enabled,
@@ -937,6 +942,7 @@ ON CONFLICT (id) DO UPDATE SET
 	state_privacy_enabled = COALESCE(EXCLUDED.state_privacy_enabled, settings.platform_app_settings.state_privacy_enabled),
 	iso_isms_enabled = COALESCE(EXCLUDED.iso_isms_enabled, settings.platform_app_settings.iso_isms_enabled),
 	admin_audit_log_enabled = COALESCE(EXCLUDED.admin_audit_log_enabled, settings.platform_app_settings.admin_audit_log_enabled),
+	admin_console_enabled = COALESCE(EXCLUDED.admin_console_enabled, settings.platform_app_settings.admin_console_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
 	rtl_enabled = COALESCE(EXCLUDED.rtl_enabled, settings.platform_app_settings.rtl_enabled),
 	ai_disclosure_enabled = COALESCE(EXCLUDED.ai_disclosure_enabled, settings.platform_app_settings.ai_disclosure_enabled),
@@ -1090,6 +1096,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.StatePrivacyEnabled,
 		w.IsoIsmsEnabled,
 		w.AdminAuditLogEnabled,
+		w.AdminConsoleEnabled,
 		w.DataResidencyEnabled,
 		w.AiDisclosureEnabled,
 		w.RTLEnabled,

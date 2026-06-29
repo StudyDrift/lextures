@@ -47,6 +47,7 @@ export type PlatformSettingsPayload = {
   ffEportfolio: boolean
   ffTranscripts: boolean
   ffWebhooks: boolean
+  adminConsoleEnabled: boolean
   ffZapierConnector: boolean
   ffAdvisingIntegration: boolean
   ffResearchConsent: boolean

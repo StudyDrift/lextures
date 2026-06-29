@@ -1,5 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import {
+  LayoutDashboard,
   Award,
   BarChart2,
   CalendarRange,
@@ -30,6 +31,7 @@ import { sideNavActiveClass } from './side-nav-styles'
 import { SideNavLink } from './side-nav-link'
 import { SideNavSectionLabel } from './side-nav-section-label'
 import { useViewerOrgId } from './use-viewer-org-id'
+import { useAdminConsoleAccess } from '../../lib/use-admin-console-access'
 
 function orgPath(base: string, orgId: string | null): string {
   if (!orgId) return base
@@ -62,7 +64,9 @@ export function SideNavAdminLinks() {
     ffCoCurricularTranscript,
     ffLibrary,
     ffLearningPaths,
+    adminConsoleEnabled,
   } = usePlatformFeatures()
+  const { canAccess: canAccessAdminConsole, loading: adminConsoleLoading } = useAdminConsoleAccess()
 
   const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
   const broadcastsPath = orgId ? `/admin/broadcasts/${encodeURIComponent(orgId)}` : '/admin/broadcasts'
@@ -87,10 +91,35 @@ export function SideNavAdminLinks() {
     (ffLibrary && !!orgId) ||
     ffLearningPaths
 
-  if (!canManageRbac && !showCcrAdmin) return null
+  if (!canManageRbac && !showCcrAdmin && !(adminConsoleEnabled && !adminConsoleLoading && canAccessAdminConsole)) {
+    return null
+  }
+
+  const showAdminConsole = adminConsoleEnabled && !adminConsoleLoading && canAccessAdminConsole
 
   return (
     <>
+      {showAdminConsole ? (
+        <>
+          <SideNavSectionLabel first={!showCcrAdmin && !canManageRbac}>Admin console</SideNavSectionLabel>
+          <SideNavLink
+            to={orgPath('/admin', orgId)}
+            className={() =>
+              location.pathname === '/admin' || location.pathname.startsWith('/admin/users') ||
+              location.pathname.startsWith('/admin/courses') ||
+              location.pathname.startsWith('/admin/settings') ||
+              location.pathname.startsWith('/admin/audit-log') ||
+              (location.pathname.startsWith('/admin/integrations') &&
+                !location.pathname.startsWith('/admin/integrations/'))
+                ? sideNavActiveClass
+                : ''
+            }
+            icon={<LayoutDashboard className="h-5 w-5" />}
+          >
+            Admin console
+          </SideNavLink>
+        </>
+      ) : null}
       {showCcrAdmin && !canManageRbac ? (
         <>
           <SideNavSectionLabel first>Student records</SideNavSectionLabel>

@@ -36,6 +36,9 @@ const (
 	EventContentDelete        = "content_delete"
 	EventIncompleteGranted    = "incomplete_granted"
 	EventIncompleteResolved   = "incomplete_resolved"
+	EventUserDeactivate       = "user_deactivate"
+	EventCourseArchive        = "course_archive"
+	EventOrgSettingsChange    = "org_settings_change"
 )
 
 var ErrNotFound = errors.New("adminaudit: event not found")

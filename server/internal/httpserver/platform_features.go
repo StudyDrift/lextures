@@ -107,6 +107,7 @@ type platformFeaturesJSON struct {
 	FFCalendarFeeds             bool `json:"ffCalendarFeeds"`
 
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
+	AdminConsoleEnabled  bool `json:"adminConsoleEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
 	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
 	AiStudyBuddyEnabled  bool `json:"aiStudyBuddyEnabled"`
@@ -228,6 +229,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		IRTCatModeEnabled:            cfg.IRTCatModeEnabled,
 		AdaptiveLearnerModelEnabled:  cfg.AdaptiveLearnerModelEnabled,
 		LearnerModelEMAAlpha:         cfg.LearnerModelEMAAlpha,
+		AdminConsoleEnabled:          cfg.AdminConsoleEnabled,
 	}
 }
 

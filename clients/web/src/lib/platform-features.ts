@@ -48,6 +48,7 @@ export type PlatformFeaturesSnapshot = {
   ffContentFilterIntegration?: boolean
   ffSisIntegration?: boolean
   ffWebhooks?: boolean
+  adminConsoleEnabled?: boolean
   ffZapierConnector?: boolean
   ffCatalogIntegration?: boolean
   ffEnrollmentStateMachine?: boolean
@@ -132,6 +133,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffContentFilterIntegration: false,
   ffSisIntegration: false,
   ffWebhooks: false,
+  adminConsoleEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
