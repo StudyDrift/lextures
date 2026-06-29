@@ -324,6 +324,8 @@ type Config struct {
 	AdminAuditLogEnabled bool
 	// AdminConsoleEnabled gates the org admin console UI and /api/v1/admin-console/* APIs (plan 18.1).
 	AdminConsoleEnabled bool
+	// BulkCsvImportEnabled gates org-admin bulk user CSV import (plan 18.2).
+	BulkCsvImportEnabled bool
 	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.

@@ -2,6 +2,7 @@ import { NavLink, Navigate, Outlet, useSearchParams } from 'react-router-dom'
 import {
   Activity,
   BookOpen,
+  FileUp,
   LayoutDashboard,
   Plug,
   ScrollText,
@@ -12,7 +13,7 @@ import { useEffect, useState } from 'react'
 import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
-const navItems = [
+const baseNavItems = [
   { to: '/org-admin', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/org-admin/users', label: 'Users', icon: Users },
   { to: '/org-admin/courses', label: 'Courses', icon: BookOpen },
@@ -21,8 +22,10 @@ const navItems = [
   { to: '/org-admin/audit-log', label: 'Audit log', icon: ScrollText },
 ]
 
+const importNavItem = { to: '/org-admin/import', label: 'Import', icon: FileUp, end: false as const }
+
 export default function AdminLayout() {
-  const { adminConsoleEnabled } = usePlatformFeatures()
+  const { adminConsoleEnabled, bulkCsvImportEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
@@ -61,6 +64,10 @@ export default function AdminLayout() {
     if (!orgId) return path
     return `${path}?orgId=${encodeURIComponent(orgId)}`
   }
+
+  const navItems = bulkCsvImportEnabled
+    ? [...baseNavItems.slice(0, 2), importNavItem, ...baseNavItems.slice(2)]
+    : baseNavItems
 
   return (
     <div className="flex min-h-0 flex-1 flex-col md:flex-row">

@@ -63,6 +63,7 @@ export type PlatformFeatures = {
   ffSisIntegration: boolean
   ffWebhooks: boolean
   adminConsoleEnabled: boolean
+  bulkCsvImportEnabled: boolean
   ffZapierConnector: boolean
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
@@ -156,6 +157,7 @@ const defaultFeatures: PlatformFeatures = {
   ffSisIntegration: false,
   ffWebhooks: false,
   adminConsoleEnabled: false,
+  bulkCsvImportEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
@@ -248,6 +250,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
     ffSisIntegration: false,
   ffWebhooks: false,
   adminConsoleEnabled: false,
+  bulkCsvImportEnabled: false,
   ffZapierConnector: false,
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
@@ -347,6 +350,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffSisIntegration: data.ffSisIntegration === true,
           ffWebhooks: data.ffWebhooks === true,
           adminConsoleEnabled: data.adminConsoleEnabled === true,
+          bulkCsvImportEnabled: data.bulkCsvImportEnabled === true,
           ffZapierConnector: data.ffZapierConnector === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
@@ -403,6 +407,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffSisIntegration: next.ffSisIntegration === true,
           ffWebhooks: next.ffWebhooks === true,
           adminConsoleEnabled: next.adminConsoleEnabled === true,
+          bulkCsvImportEnabled: next.bulkCsvImportEnabled === true,
           ffZapierConnector: next.ffZapierConnector === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,
