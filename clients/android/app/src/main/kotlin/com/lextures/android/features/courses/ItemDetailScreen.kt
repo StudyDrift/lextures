@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
+import com.lextures.android.core.accessibility.ReadAloudControls
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.AuthPrimaryButton
@@ -243,6 +244,7 @@ fun ItemDetailScreen(
             if (!markdown.isNullOrBlank()) {
                 item {
                     LmsCard {
+                        ReadAloudControls(text = markdown)
                         MarkdownText(markdown)
                     }
                 }

@@ -237,8 +237,11 @@ struct ItemDetailView: View {
 
     private func contentCard(_ markdown: String) -> some View {
         LMSCard {
+            ReadAloudButton(text: markdown)
             MarkdownTextView(markdown: markdown)
+                .lexturesReadableText()
         }
+        .accessibilityElement(children: .contain)
     }
 
     private func externalLinkCard(_ url: String) -> some View {

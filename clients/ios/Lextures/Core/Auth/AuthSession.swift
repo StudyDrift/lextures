@@ -134,7 +134,7 @@ final class AuthSession {
     }
 
     func serverUnreachableMessage() -> String {
-        "Could not reach the server. Is the API running?"
+        String(localized: "auth.login.serverUnreachable")
     }
 
     enum AuthSessionError: LocalizedError {
@@ -144,9 +144,9 @@ final class AuthSession {
         var errorDescription: String? {
             switch self {
             case .mfaRequired:
-                return "Multi-factor authentication is required. Complete sign-in on the web app for now."
+                return String(localized: "mobile.auth.mfaRequired")
             case .missingAccessToken:
-                return "Unexpected sign-in response."
+                return String(localized: "mobile.auth.missingToken")
             }
         }
     }

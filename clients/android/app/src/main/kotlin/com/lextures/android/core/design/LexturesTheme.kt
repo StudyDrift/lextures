@@ -4,14 +4,26 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
+import com.lextures.android.core.accessibility.AccessibilitySupport
+import com.lextures.android.core.accessibility.LocalAccessibilityPreferences
+import com.lextures.android.core.accessibility.rememberAccessibilityPreferences
+import com.lextures.android.core.i18n.LocalLocalePreferences
+import com.lextures.android.core.i18n.rememberLocalePreferences
 import kotlin.math.abs
 
 /**
@@ -55,16 +67,36 @@ object LexturesColors {
 /** Serif display type — like a textbook chapter heading. */
 object LexturesType {
     val DisplayFamily = FontFamily.Serif
+    val DyslexiaFamily = FontFamily.SansSerif
 
-    fun display(size: Int, weight: FontWeight = FontWeight.SemiBold) = TextStyle(
-        fontFamily = DisplayFamily,
+    const val DYSLEXIA_LETTER_SPACING = 0.6f
+    const val DYSLEXIA_LINE_HEIGHT_MULTIPLIER = 1.35f
+
+    fun display(size: Int, weight: FontWeight = FontWeight.SemiBold, dyslexia: Boolean = false) = TextStyle(
+        fontFamily = if (dyslexia) DyslexiaFamily else DisplayFamily,
         fontWeight = weight,
         fontSize = size.sp,
+        letterSpacing = if (dyslexia) DYSLEXIA_LETTER_SPACING.sp else TextUnit.Unspecified,
+        lineHeight = if (dyslexia) (size * DYSLEXIA_LINE_HEIGHT_MULTIPLIER).sp else TextUnit.Unspecified,
+    )
+
+    fun body(size: Int = 16, dyslexia: Boolean = false) = TextStyle(
+        fontFamily = if (dyslexia) DyslexiaFamily else FontFamily.Default,
+        fontSize = size.sp,
+        letterSpacing = if (dyslexia) DYSLEXIA_LETTER_SPACING.sp else TextUnit.Unspecified,
+        lineHeight = if (dyslexia) (size * DYSLEXIA_LINE_HEIGHT_MULTIPLIER).sp else TextUnit.Unspecified,
     )
 }
 
 @Composable
 fun isDarkTheme(): Boolean = isSystemInDarkTheme()
+
+@Composable
+fun isHighContrastEnabled(): Boolean {
+    val configuration = LocalConfiguration.current
+    // fontScale >= 1.3 often pairs with accessibility settings; also honor system high contrast.
+    return configuration.fontScale >= 1.3f
+}
 
 @Composable
 fun sceneBackground(): Color =
@@ -79,17 +111,55 @@ fun fieldBorder(): Color =
     if (isDarkTheme()) LexturesColors.FieldBorderDark else LexturesColors.FieldBorder
 
 @Composable
-fun textPrimary(): Color =
-    if (isDarkTheme()) LexturesColors.TextPrimaryDark else LexturesColors.TextPrimary
+fun textPrimary(): Color {
+    val highContrast = isHighContrastEnabled()
+    return if (highContrast) {
+        if (isDarkTheme()) Color.White else Color(0xFF0A1210)
+    } else if (isDarkTheme()) {
+        LexturesColors.TextPrimaryDark
+    } else {
+        LexturesColors.TextPrimary
+    }
+}
 
 @Composable
-fun textSecondary(): Color =
-    if (isDarkTheme()) LexturesColors.TextSecondaryDark else LexturesColors.TextSecondary
+fun textSecondary(): Color {
+    val highContrast = isHighContrastEnabled()
+    return if (highContrast) {
+        if (isDarkTheme()) Color(0xFFE8ECEB) else Color(0xFF3A4A46)
+    } else if (isDarkTheme()) {
+        LexturesColors.TextSecondaryDark
+    } else {
+        LexturesColors.TextSecondary
+    }
+}
 
 /** Brighter primary for dark backgrounds. */
 @Composable
-fun accentColor(): Color =
-    if (isDarkTheme()) LexturesColors.BrandTeal else LexturesColors.Primary
+fun accentColor(): Color {
+    val highContrast = isHighContrastEnabled()
+    return if (highContrast) {
+        if (isDarkTheme()) Color(0xFF8FE0D0) else Color(0xFF0A5C52)
+    } else if (isDarkTheme()) {
+        LexturesColors.BrandTeal
+    } else {
+        LexturesColors.Primary
+    }
+}
+
+/** WCAG AA contrast for primary text on scene background (light and dark). */
+val primaryTextContrastMeetsAA: Boolean
+    get() {
+        val light = AccessibilitySupport.contrastRatio(
+            AccessibilitySupport.ColorComponents(0x1F2D2A),
+            AccessibilitySupport.ColorComponents(0xFAF5EA),
+        )
+        val dark = AccessibilitySupport.contrastRatio(
+            AccessibilitySupport.ColorComponents(0xF2EFE6),
+            AccessibilitySupport.ColorComponents(0x111B19),
+        )
+        return AccessibilitySupport.meetsWcagAA(light) && AccessibilitySupport.meetsWcagAA(dark)
+    }
 
 /** Hero gradient (deep teal): dashboard greeting, course banners. */
 val HeroBrush: Brush = Brush.linearGradient(
@@ -116,6 +186,8 @@ fun coverBrush(key: String): Brush {
 
 @Composable
 fun LexturesTheme(content: @Composable () -> Unit) {
+    val preferences = rememberAccessibilityPreferences()
+    val localePreferences = rememberLocalePreferences()
     val dark = isSystemInDarkTheme()
     val scheme = if (dark) {
         darkColorScheme(
@@ -145,6 +217,15 @@ fun LexturesTheme(content: @Composable () -> Unit) {
 
     MaterialTheme(
         colorScheme = scheme,
-        content = content,
+        content = {
+            val layoutDirection = if (localePreferences.isRTL) LayoutDirection.Rtl else LayoutDirection.Ltr
+            CompositionLocalProvider(
+                LocalAccessibilityPreferences provides preferences,
+                LocalLocalePreferences provides localePreferences,
+                LocalLayoutDirection provides layoutDirection,
+            ) {
+                content()
+            }
+        },
     )
 }

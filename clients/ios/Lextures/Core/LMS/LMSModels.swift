@@ -174,32 +174,15 @@ enum MailboxFolder: String, CaseIterable, Identifiable {
 }
 
 enum LMSDates {
-    private static let isoFractional: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter
-    }()
-
-    private static let iso: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
-
     static func parse(_ raw: String?) -> Date? {
-        guard let raw, !raw.isEmpty else { return nil }
-        return isoFractional.date(from: raw) ?? iso.date(from: raw)
+        DateFormatting.parse(raw)
     }
 
     static func shortDateTime(_ raw: String?) -> String {
-        guard let date = parse(raw) else { return "" }
-        return date.formatted(date: .abbreviated, time: .shortened)
+        DateFormatting.formatDateTime(raw)
     }
 
     static func relative(_ raw: String?) -> String {
-        guard let date = parse(raw) else { return "" }
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .short
-        return formatter.localizedString(for: date, relativeTo: Date())
+        DateFormatting.formatRelative(raw)
     }
 }

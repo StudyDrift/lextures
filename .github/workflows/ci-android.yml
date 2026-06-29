@@ -37,6 +37,12 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      - name: Accessibility artifacts
+        run: ../../scripts/check-mobile-a11y.sh
+
+      - name: I18n artifacts
+        run: ../../scripts/check-mobile-i18n.sh
+
       - name: Lint
         run: ./gradlew lint --no-daemon
 

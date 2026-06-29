@@ -15,22 +15,22 @@ struct LoginView: View {
         ScrollView {
             VStack(spacing: 0) {
                 authHeader(
-                    title: "Sign in",
-                    subtitle: "Use the email your course or school uses. SSO options appear when your organization connects them."
+                    title: L.text("auth.login.title"),
+                    subtitle: L.text("auth.login.subtitle")
                 )
 
                 AuthCard {
                     VStack(spacing: 20) {
                         AuthTextField(
-                            title: "Email",
+                            title: L.text("auth.login.email"),
                             text: $email,
-                            placeholder: "you@school.edu",
+                            placeholder: L.text("auth.login.emailPlaceholder"),
                             keyboard: .emailAddress,
                             textContentType: .username
                         )
 
                         AuthTextField(
-                            title: "Password",
+                            title: L.text("auth.login.password"),
                             text: $password,
                             placeholder: "••••••••",
                             isSecure: true,
@@ -45,20 +45,22 @@ struct LoginView: View {
                                 .accessibilityAddTraits(.isStaticText)
                         }
 
-                        Button(isLoading ? "Signing in…" : "Sign in") {
+                        Button(isLoading ? L.text("auth.login.submitting") : L.text("auth.login.submit")) {
                             Task { await submit() }
                         }
                         .buttonStyle(AuthPrimaryButtonStyle())
                         .disabled(isLoading || email.isEmpty || password.isEmpty)
+                        .accessibilityLabel(isLoading ? L.text("auth.login.submitting") : L.text("auth.login.submit"))
+                        .minimumTapTarget()
 
                         HStack {
                             Spacer()
-                            Text("Forgot password?")
+                            Text(L.text("auth.login.forgotPassword"))
                                 .font(.subheadline)
                                 .foregroundStyle(LexturesTheme.primaryMuted)
                                 .opacity(0.7)
                         }
-                        .accessibilityHint("Password reset will be available in a future app update.")
+                        .accessibilityHint(L.text("auth.login.forgotPasswordHint"))
 
                         footerLink
                     }
@@ -72,9 +74,9 @@ struct LoginView: View {
 
     private var footerLink: some View {
         HStack(spacing: 4) {
-            Text("New here?")
+            Text(L.text("auth.login.newHere"))
                 .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            Button("Create an account", action: onCreateAccount)
+            Button(L.text("auth.login.createAccount"), action: onCreateAccount)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(LexturesTheme.primaryMuted)
         }

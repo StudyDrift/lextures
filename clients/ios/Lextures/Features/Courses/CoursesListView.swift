@@ -65,7 +65,7 @@ struct CoursesListView: View {
                 }
                 .refreshable { await load(force: true) }
             }
-            .navigationTitle("Courses")
+            .navigationTitle(L.text("mobile.courses.title"))
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search courses")
             .navigationDestination(for: CourseSummary.self) { course in

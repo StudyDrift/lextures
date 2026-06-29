@@ -31,6 +31,12 @@ jobs:
       - name: Lint
         run: swiftlint lint --reporter github-actions-logging
 
+      - name: Accessibility artifacts
+        run: ../../scripts/check-mobile-a11y.sh
+
+      - name: I18n artifacts
+        run: ../../scripts/check-mobile-i18n.sh
+
       - name: Build (simulator)
         run: |
           set -o pipefail
@@ -42,15 +48,14 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             | xcpretty
 
-      # No test targets exist yet. Re-enable once a test target is added to
-      # the scheme (Xcode → scheme editor → Test tab → +).
-      # - name: Test
-      #   run: |
-      #     set -o pipefail
-      #     xcodebuild test \
-      #       -project Lextures.xcodeproj \
-      #       -scheme Lextures \
-      #       -destination 'generic/platform=iOS Simulator' \
-      #       -configuration Debug \
-      #       CODE_SIGNING_ALLOWED=NO \
-      #       | xcpretty
+      # Unit tests for accessibility helpers and future coverage.
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Lextures.xcodeproj \
+            -scheme Lextures \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO \
+            | xcpretty

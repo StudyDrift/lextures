@@ -2,6 +2,7 @@ package com.lextures.android.core.network
 
 import com.lextures.android.BuildConfig
 import com.lextures.android.core.config.AppConfiguration
+import com.lextures.android.core.i18n.MobileLocale
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -33,6 +34,7 @@ class ApiClient(
             .header("Accept", "application/json")
             .header("X-Platform", "android")
             .header("X-App-Version", BuildConfig.VERSION_NAME)
+            .header("Accept-Language", MobileLocale.acceptLanguage)
 
         if (body != null) {
             builder

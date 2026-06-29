@@ -34,6 +34,7 @@ import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
+import com.lextures.android.core.accessibility.DictationField
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.SendMessageRequest
 import com.lextures.android.features.home.LmsErrorBanner
@@ -140,15 +141,11 @@ fun ComposeMessageScreen(
                 colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = LexturesColors.Primary),
             )
 
-            OutlinedTextField(
+            DictationField(
+                title = "Message",
                 value = bodyText,
                 onValueChange = { bodyText = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                label = { Text("Message") },
-                shape = RoundedCornerShape(10.dp),
-                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = LexturesColors.Primary),
+                modifier = Modifier.weight(1f),
             )
         }
     }

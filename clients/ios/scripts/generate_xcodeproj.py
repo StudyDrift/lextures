@@ -27,8 +27,19 @@ def collect_swift_files() -> list[str]:
     return paths
 
 
+def collect_test_files() -> list[str]:
+    tests_root = ROOT / f"{APP_NAME}Tests"
+    if not tests_root.exists():
+        return []
+    return sorted(
+        path.relative_to(ROOT).as_posix()
+        for path in tests_root.rglob("*.swift")
+    )
+
+
 def main() -> None:
     swift_files = collect_swift_files()
+    test_files = collect_test_files()
 
     project_id = gen_id()
     target_id = gen_id()
@@ -46,14 +57,27 @@ def main() -> None:
     app_product = gen_id()
     app_group = gen_id()
     assets_ref = gen_id()
+    localizable_ref = gen_id()
     info_plist_ref = gen_id()
     dev_xcconfig_ref = gen_id()
     config_group = gen_id()
     assets_build = gen_id()
+    localizable_build = gen_id()
+
+    test_target_id = gen_id()
+    test_sources_phase = gen_id()
+    test_frameworks_phase = gen_id()
+    test_config_list = gen_id()
+    test_debug = gen_id()
+    test_release = gen_id()
+    test_product = gen_id()
+    test_dependency = gen_id()
+    test_group = gen_id()
+    container_proxy = gen_id()
 
     file_refs: dict[str, str] = {}
     build_files: dict[str, str] = {}
-    for path in swift_files:
+    for path in swift_files + test_files:
         file_refs[path] = gen_id()
         build_files[path] = gen_id()
 
@@ -69,7 +93,7 @@ def main() -> None:
     w("\tobjects = {")
 
     w("\n/* Begin PBXBuildFile section */")
-    for path in swift_files:
+    for path in swift_files + test_files:
         base = os.path.basename(path)
         w(
             f"\t\t{build_files[path]} /* {base} in Sources */ = {{isa = PBXBuildFile; fileRef = {file_refs[path]} /* {base} */; }};"
@@ -77,19 +101,29 @@ def main() -> None:
     w(
         f"\t\t{assets_build} /* Assets.xcassets in Resources */ = {{isa = PBXBuildFile; fileRef = {assets_ref} /* Assets.xcassets */; }};"
     )
+    w(
+        f"\t\t{localizable_build} /* Localizable.xcstrings in Resources */ = {{isa = PBXBuildFile; fileRef = {localizable_ref} /* Localizable.xcstrings */; }};"
+    )
     w("/* End PBXBuildFile section */")
 
     w("\n/* Begin PBXFileReference section */")
     w(
         f"\t\t{app_product} /* {APP_NAME}.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = {APP_NAME}.app; sourceTree = BUILT_PRODUCTS_DIR; }};"
     )
-    for path in swift_files:
+    if test_files:
+        w(
+            f"\t\t{test_product} /* {APP_NAME}Tests.xctest */ = {{isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = {APP_NAME}Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; }};"
+        )
+    for path in swift_files + test_files:
         base = os.path.basename(path)
         w(
             f"\t\t{file_refs[path]} /* {base} */ = {{isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = {base}; sourceTree = \"<group>\"; }};"
         )
     w(
         f"\t\t{assets_ref} /* Assets.xcassets */ = {{isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = \"<group>\"; }};"
+    )
+    w(
+        f"\t\t{localizable_ref} /* Localizable.xcstrings */ = {{isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = \"<group>\"; }};"
     )
     w(
         f"\t\t{info_plist_ref} /* Info.plist */ = {{isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = \"<group>\"; }};"
@@ -111,6 +145,8 @@ def main() -> None:
 
     # Groups
     dir_groups: dict[str, str] = {APP_NAME: app_group}
+    if test_files:
+        dir_groups[f"{APP_NAME}Tests"] = test_group
     resources_group = gen_id()
     dir_groups[f"{APP_NAME}/Resources"] = resources_group
 
@@ -131,6 +167,7 @@ def main() -> None:
         if directory == f"{APP_NAME}/Resources":
             children = [
                 f"{assets_ref} /* Assets.xcassets */",
+                f"{localizable_ref} /* Localizable.xcstrings */",
                 f"{info_plist_ref} /* Info.plist */",
             ]
         else:
@@ -138,7 +175,7 @@ def main() -> None:
             for sub, sub_gid in dir_groups.items():
                 if sub.startswith(prefix) and sub.count("/") == directory.count("/") + 1:
                     children.append(f"{sub_gid} /* {os.path.basename(sub)} */")
-            for path in swift_files:
+            for path in swift_files + test_files:
                 if os.path.dirname(path) == directory:
                     children.append(f"{file_refs[path]} /* {os.path.basename(path)} */")
 
@@ -157,6 +194,8 @@ def main() -> None:
     w("\t\t\tisa = PBXGroup;")
     w("\t\t\tchildren = (")
     w(f"\t\t\t\t{app_product} /* {APP_NAME}.app */,")
+    if test_files:
+        w(f"\t\t\t\t{test_product} /* {APP_NAME}Tests.xctest */,")
     w("\t\t\t);")
     w("\t\t\tname = Products;")
     w('\t\t\tsourceTree = "<group>";')
@@ -175,6 +214,8 @@ def main() -> None:
     w("\t\t\tisa = PBXGroup;")
     w("\t\t\tchildren = (")
     w(f"\t\t\t\t{app_group} /* {APP_NAME} */,")
+    if test_files:
+        w(f"\t\t\t\t{test_group} /* {APP_NAME}Tests */,")
     w(f"\t\t\t\t{config_group} /* Config */,")
     w(f"\t\t\t\t{products_group} /* Products */,")
     w("\t\t\t);")
@@ -200,7 +241,44 @@ def main() -> None:
     w(f"\t\t\tproductReference = {app_product} /* {APP_NAME}.app */;")
     w('\t\t\tproductType = "com.apple.product-type.application";')
     w("\t\t};")
+    if test_files:
+        w(f"\t\t{test_target_id} /* {APP_NAME}Tests */ = {{")
+        w("\t\t\tisa = PBXNativeTarget;")
+        w(f'\t\t\tbuildConfigurationList = {test_config_list} /* Build configuration list for PBXNativeTarget "{APP_NAME}Tests" */;')
+        w("\t\t\tbuildPhases = (")
+        w(f"\t\t\t\t{test_sources_phase} /* Sources */,")
+        w(f"\t\t\t\t{test_frameworks_phase} /* Frameworks */,")
+        w("\t\t\t);")
+        w("\t\t\tbuildRules = (")
+        w("\t\t\t);")
+        w("\t\t\tdependencies = (")
+        w(f"\t\t\t\t{test_dependency} /* PBXTargetDependency */,")
+        w("\t\t\t);")
+        w(f'\t\t\tname = "{APP_NAME}Tests";')
+        w(f"\t\t\tproductName = {APP_NAME}Tests;")
+        w(f"\t\t\tproductReference = {test_product} /* {APP_NAME}Tests.xctest */;")
+        w('\t\t\tproductType = "com.apple.product-type.bundle.unit-test";')
+        w("\t\t};")
     w("/* End PBXNativeTarget section */")
+
+    if test_files:
+        w("\n/* Begin PBXContainerItemProxy section */")
+        w(f"\t\t{container_proxy} /* PBXContainerItemProxy */ = {{")
+        w("\t\t\tisa = PBXContainerItemProxy;")
+        w(f"\t\t\tcontainerPortal = {project_id} /* Project object */;")
+        w("\t\t\tproxyType = 1;")
+        w(f"\t\t\tremoteGlobalIDString = {target_id};")
+        w(f'\t\t\tremoteInfo = {APP_NAME};')
+        w("\t\t\t};")
+        w("/* End PBXContainerItemProxy section */")
+
+        w("\n/* Begin PBXTargetDependency section */")
+        w(f"\t\t{test_dependency} /* PBXTargetDependency */ = {{")
+        w("\t\t\tisa = PBXTargetDependency;")
+        w(f"\t\t\ttarget = {target_id} /* {APP_NAME} */;")
+        w(f"\t\t\ttargetProxy = {container_proxy} /* PBXContainerItemProxy */;")
+        w("\t\t};")
+        w("/* End PBXTargetDependency section */")
 
     w("\n/* Begin PBXProject section */")
     w(f"\t\t{project_id} /* Project object */ = {{")
@@ -229,6 +307,8 @@ def main() -> None:
     w("\t\t\tprojectRoot = \"\";")
     w("\t\t\ttargets = (")
     w(f"\t\t\t\t{target_id} /* {APP_NAME} */,")
+    if test_files:
+        w(f"\t\t\t\t{test_target_id} /* {APP_NAME}Tests */,")
     w("\t\t\t);")
     w("\t\t};")
     w("/* End PBXProject section */")
@@ -240,6 +320,7 @@ def main() -> None:
     w("\t\t\trunOnlyForDeploymentPostprocessing = 0;")
     w("\t\t\tfiles = (")
     w(f"\t\t\t\t{assets_build} /* Assets.xcassets in Resources */,")
+    w(f"\t\t\t\t{localizable_build} /* Localizable.xcstrings in Resources */,")
     w("\t\t\t);")
     w("\t\t};")
     w("/* End PBXResourcesBuildPhase section */")
@@ -256,6 +337,30 @@ def main() -> None:
     w("\t\t\t);")
     w("\t\t};")
     w("/* End PBXSourcesBuildPhase section */")
+
+    if test_files:
+        w("\n/* Begin PBXSourcesBuildPhase section */")
+        w(f"\t\t{test_sources_phase} /* Sources */ = {{")
+        w("\t\t\tisa = PBXSourcesBuildPhase;")
+        w("\t\t\tbuildActionMask = 2147483647;")
+        w("\t\t\trunOnlyForDeploymentPostprocessing = 0;")
+        w("\t\t\tfiles = (")
+        for path in test_files:
+            base = os.path.basename(path)
+            w(f"\t\t\t\t{build_files[path]} /* {base} in Sources */,")
+        w("\t\t\t);")
+        w("\t\t};")
+        w("/* End PBXSourcesBuildPhase section */")
+
+        w("\n/* Begin PBXFrameworksBuildPhase section */")
+        w(f"\t\t{test_frameworks_phase} /* Frameworks */ = {{")
+        w("\t\t\tisa = PBXFrameworksBuildPhase;")
+        w("\t\t\tbuildActionMask = 2147483647;")
+        w("\t\t\trunOnlyForDeploymentPostprocessing = 0;")
+        w("\t\t\tfiles = (")
+        w("\t\t\t);")
+        w("\t\t};")
+        w("/* End PBXFrameworksBuildPhase section */")
 
     w("\n/* Begin XCBuildConfiguration section */")
     for cfg_id, name in ((debug_config, "Debug"), (release_config, "Release")):
@@ -292,6 +397,8 @@ def main() -> None:
         w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 1;')
         w(f'\t\t\t\tDEVELOPMENT_TEAM = "";')
         w(f'\t\t\t\tENABLE_PREVIEWS = YES;')
+        if name == "Debug":
+            w(f'\t\t\t\tENABLE_TESTABILITY = YES;')
         w(f'\t\t\t\tGENERATE_INFOPLIST_FILE = NO;')
         w(f'\t\t\t\tINFOPLIST_FILE = {APP_NAME}/Resources/Info.plist;')
         w(f'\t\t\t\tLD_RUNPATH_SEARCH_PATHS = (')
@@ -309,6 +416,27 @@ def main() -> None:
         w("\t\t\t};")
         w(f'\t\t\tname = {name};')
         w("\t\t};")
+
+    if test_files:
+        for cfg_id, name in ((test_debug, "Debug"), (test_release, "Release")):
+            w(f"\t\t{cfg_id} /* {name} */ = {{")
+            w("\t\t\tisa = XCBuildConfiguration;")
+            w(f"\t\t\tbaseConfigurationReference = {dev_xcconfig_ref} /* Development.xcconfig */;")
+            w("\t\t\tbuildSettings = {")
+            w(f'\t\t\t\tBUNDLE_LOADER = "$(TEST_HOST)";')
+            w(f'\t\t\t\tCODE_SIGN_STYLE = Automatic;')
+            w(f'\t\t\t\tCURRENT_PROJECT_VERSION = 1;')
+            w(f'\t\t\t\tGENERATE_INFOPLIST_FILE = YES;')
+            w(f'\t\t\t\tIPHONEOS_DEPLOYMENT_TARGET = {DEPLOYMENT_TARGET};')
+            w(f'\t\t\t\tMARKETING_VERSION = 0.1.0;')
+            w(f'\t\t\t\tPRODUCT_BUNDLE_IDENTIFIER = {BUNDLE_ID}.tests;')
+            w(f'\t\t\t\tPRODUCT_NAME = "$(TARGET_NAME)";')
+            w(f'\t\t\t\tSWIFT_VERSION = 5.0;')
+            w(f'\t\t\t\tTARGETED_DEVICE_FAMILY = 1;')
+            w(f'\t\t\t\tTEST_HOST = "$(BUILT_PRODUCTS_DIR)/{APP_NAME}.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/{APP_NAME}";')
+            w("\t\t\t};")
+            w(f'\t\t\tname = {name};')
+            w("\t\t};")
     w("/* End XCBuildConfiguration section */")
 
     w("\n/* Begin XCConfigurationList section */")
@@ -331,6 +459,17 @@ def main() -> None:
     w("\t\t\tdefaultConfigurationIsVisible = 0;")
     w("\t\t\tdefaultConfigurationName = Release;")
     w("\t\t};")
+
+    if test_files:
+        w(f"\t\t{test_config_list} /* Build configuration list for PBXNativeTarget \"{APP_NAME}Tests\" */ = {{")
+        w("\t\t\tisa = XCConfigurationList;")
+        w("\t\t\tbuildConfigurations = (")
+        w(f"\t\t\t\t{test_debug} /* Debug */,")
+        w(f"\t\t\t\t{test_release} /* Release */,")
+        w("\t\t\t);")
+        w("\t\t\tdefaultConfigurationIsVisible = 0;")
+        w("\t\t\tdefaultConfigurationName = Release;")
+        w("\t\t};")
     w("/* End XCConfigurationList section */")
 
     w("\t};")
@@ -391,6 +530,25 @@ def main() -> None:
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
+   <TestAction
+      buildConfiguration = "Debug"
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES">
+      <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "{test_target_id if test_files else target_id}"
+               BuildableName = "{APP_NAME}Tests.xctest"
+               BlueprintName = "{APP_NAME}Tests"
+               ReferencedContainer = "container:{APP_NAME}.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
+      </Testables>
+   </TestAction>
 </Scheme>
 """,
         encoding="utf-8",
