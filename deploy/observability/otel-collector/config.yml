@@ -1,0 +1,44 @@
+# OpenTelemetry Collector configuration (plan 17.7 FR-2).
+#
+# The Lextures API exports OTLP/HTTP spans to this collector
+# (OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4318). The collector batches and
+# forwards them to Tempo for storage and Grafana exploration. The pipeline is
+# async and isolated from the app: if the collector is down, the app's batch
+# exporter drops spans without blocking requests (NFR Reliability).
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+  # Drop any attribute that could carry PII before storage (defence in depth on
+  # top of the app-side no-PII policy — NFR Privacy / FERPA).
+  attributes/scrub:
+    actions:
+      - key: enduser.id
+        action: delete
+      - key: user.email
+        action: delete
+      - key: http.request.header.authorization
+        action: delete
+
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  debug:
+    verbosity: basic
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/scrub, batch]
+      exporters: [otlp/tempo]

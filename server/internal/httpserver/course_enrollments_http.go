@@ -23,6 +23,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
 	webhooksvc "github.com/lextures/lextures/server/internal/service/webhooks"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 func parseEnrollmentEmails(raw string) []string {
@@ -329,6 +330,9 @@ LIMIT 1
 		if err := tx.Commit(ctx); err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save enrollments.")
 			return
+		}
+		for range added {
+			telemetry.RecordBusinessEvent("enrollment_created") // plan 17.7 FR-5e
 		}
 		d.notifyCoursesForUsers(addedUserIDs...)
 		d.notifyEnrollmentsForCourse(ctx, courseCode)

@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/auth/jwtblocklist"
@@ -36,25 +37,33 @@ import (
 	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/redisclient"
+	"github.com/lextures/lextures/server/internal/repos/jobqueue"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/platformconfig"
+	"github.com/lextures/lextures/server/internal/scheduler"
+	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	"github.com/lextures/lextures/server/internal/service/integrations"
-	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/storagequota"
-	"github.com/lextures/lextures/server/internal/scheduler"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // Run starts the API. Pass the migration file tree (e.g. serverdata.Migrations from the module root).
 func Run(ctx context.Context, fsys fs.FS) error {
 	cfg := config.Load()
+	// Observability stack (plan 17.7): Prometheus metrics, OTel traces, Sentry.
+	// Built before logging.Configure so the Sentry ERROR-forwarding handler is
+	// chained downstream of PII redaction (Sentry never sees unredacted PII).
+	tel := telemetry.Init(ctx, telemetryConfig(cfg))
+	defer tel.Shutdown(context.Background())
 	logging.Configure(logging.Settings{
 		DisableRedaction: cfg.DisablePIIRedaction,
 		ExtraFields:      cfg.PIIRedactFields,
 		HMACSecret:       []byte(cfg.JWTSecret),
 		AppEnv:           cfg.AppEnv,
+		WrapInner:        tel.WrapSlog,
 	})
 	if err := cfg.Validate(); err != nil {
 		return err
@@ -81,6 +90,15 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		slog.Info("redis connected", "pool_min", cfg.RedisPoolMin, "pool_max", cfg.RedisPoolMax)
 	}
 	jwtBlocklist := jwtblocklist.New(redisClient)
+
+	// Wire live DB/Redis/job-queue snapshots into the metrics collector so the
+	// /metrics endpoint reflects current pool utilisation and queue depth at
+	// scrape time (plan 17.7 FR-1). Closures keep telemetry decoupled from these
+	// packages; nil sub-systems are simply omitted.
+	if err := tel.RegisterSources(telemetrySources(pool, redisClient)); err != nil {
+		slog.Warn("telemetry: collector registration failed", "err", err)
+	}
+
 	if cfg.RunMigrations {
 		if err := migrate.RunWithFS(ctx, fsys, cfg.DatabaseURL); err != nil {
 			return err
@@ -182,9 +200,9 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 	platform := platformstate.New(merged)
 	deps := httpserver.Deps{
-		Pool: pool,
+		Pool:                      pool,
 		Redis:                     redisClient,
-		ObjectCache: objectcache.New(redisClient, func() bool { return platform.Config().FFRedisCache }),
+		ObjectCache:               objectcache.New(redisClient, func() bool { return platform.Config().FFRedisCache }),
 		JWTSigner:                 jwtSigner,
 		Config:                    cfg,
 		Platform:                  platform,
@@ -205,12 +223,34 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		Storage:                   storage,
 		StorageQuota:              quotaSvc,
 		Integrations:              integrations.NewService(pool, integrationsPublicBase(merged), []byte(cfg.JWTSecret)),
-		Bots: botsservice.NewFromConfig(merged, pool, integrationsPublicBase(merged)),
+		Bots:                      botsservice.NewFromConfig(merged, pool, integrationsPublicBase(merged)),
+		Telemetry:                 tel,
 	}
 	background.StartCanvasImportConsumer(ctx, canvasImportQueue, deps)
 	background.StartCanvasSubmissionSyncConsumer(ctx, canvasSubmissionSyncQueue, deps)
 	background.StartGradingAgentConsumer(ctx, gradingAgentQueue, deps)
 	background.StartSmsNotificationConsumer(ctx, smsNotificationQueue, pool, merged)
+	// Internal metrics server (plan 17.7 FR-1 / NFR Security): /metrics is served
+	// on a separate port that is firewalled to the VPC and never exposed via the
+	// public load balancer (AC-6). It runs independently of the main API so a
+	// scrape can succeed even while the API is saturated.
+	var metricsSrv *http.Server
+	if cfg.Observability.MetricsEnabled && cfg.Observability.MetricsAddr != "" {
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", tel.MetricsHandler())
+		mux.HandleFunc("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("ok"))
+		})
+		metricsSrv = &http.Server{Addr: cfg.Observability.MetricsAddr, Handler: mux}
+		go func() {
+			slog.Info("metrics server started", "addr", cfg.Observability.MetricsAddr)
+			if err := metricsSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+				slog.Error("metrics server failed", "err", err)
+			}
+		}()
+	}
+
 	srv := &http.Server{
 		Addr:    cfg.HTTPAddr,
 		Handler: httpserver.NewHandler(deps),
@@ -230,6 +270,9 @@ func Run(ctx context.Context, fsys fs.FS) error {
 		shctx, cancel := context.WithTimeout(context.Background(), drain)
 		defer cancel()
 		_ = srv.Shutdown(shctx)
+		if metricsSrv != nil {
+			_ = metricsSrv.Shutdown(shctx)
+		}
 		<-errCh
 		return nil
 	case err := <-errCh:
@@ -247,6 +290,74 @@ func integrationsPublicBase(cfg config.Config) string {
 		return cfg.OIDCPublicBaseURL
 	}
 	return cfg.SAMLPublicBaseURL
+}
+
+// telemetryConfig maps the app configuration onto the telemetry package's
+// decoupled config (plan 17.7).
+func telemetryConfig(cfg config.Config) telemetry.Config {
+	o := cfg.Observability
+	return telemetry.Config{
+		ServiceName: o.ServiceName,
+		Version:     o.Version,
+		Environment: cfg.AppEnv,
+		OTel: telemetry.OTelConfig{
+			Endpoint:    o.OTelEndpoint,
+			Insecure:    o.OTelInsecure,
+			SampleRatio: o.OTelSampleRatio,
+		},
+		Sentry: telemetry.SentryConfig{
+			DSN:              o.SentryDSN,
+			TracesSampleRate: o.SentryTracesSampleRate,
+		},
+	}
+}
+
+// telemetrySources builds the live snapshot closures the metrics collector reads
+// at scrape time. Each closure tolerates a nil sub-system (plan 17.7 FR-1).
+func telemetrySources(pool *pgxpool.Pool, rc *redisclient.Client) telemetry.Sources {
+	var s telemetry.Sources
+	if pool != nil {
+		s.DBPool = func() telemetry.DBPoolSnapshot {
+			st := pool.Stat()
+			return telemetry.DBPoolSnapshot{
+				Total:        st.TotalConns(),
+				Acquired:     st.AcquiredConns(),
+				Idle:         st.IdleConns(),
+				Max:          st.MaxConns(),
+				Constructing: st.ConstructingConns(),
+			}
+		}
+		s.JobQueue = func() (telemetry.JobQueueSnapshot, bool) {
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			st, err := jobqueue.GetStats(ctx, pool)
+			if err != nil {
+				return telemetry.JobQueueSnapshot{}, false
+			}
+			return telemetry.JobQueueSnapshot{
+				Pending:     st.Pending,
+				Running:     st.Running,
+				Failed:      st.Failed,
+				DeadLetters: st.DeadLetters,
+				Depth:       st.Depth,
+				ByType:      st.ByType,
+			}, true
+		}
+	}
+	if rc != nil {
+		s.Redis = func() telemetry.RedisPoolSnapshot {
+			st := rc.Redis().PoolStats()
+			return telemetry.RedisPoolSnapshot{
+				Total:    st.TotalConns,
+				Idle:     st.IdleConns,
+				Stale:    st.StaleConns,
+				Hits:     uint64(st.Hits),
+				Misses:   uint64(st.Misses),
+				Timeouts: uint64(st.Timeouts),
+			}
+		}
+	}
+	return s
 }
 
 func isUndefinedTable(err error) bool {

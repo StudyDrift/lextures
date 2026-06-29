@@ -1,0 +1,43 @@
+{
+  "uid": "lextures-business-metrics",
+  "title": "Lextures — Business Metrics",
+  "tags": ["lextures", "business"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Business events rate",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (event) (rate(lextures_business_events_total[5m]))", "legendFormat": "{{event}}" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Enrollments (24h)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "increase(lextures_business_events_total{event=\"enrollment_created\"}[24h])", "legendFormat": "enrollments" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Grade submissions (24h)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "increase(lextures_business_events_total{event=\"grade_submitted\"}[24h])", "legendFormat": "grade submissions" }
+      ]
+    }
+  ]
+}

@@ -7,9 +7,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/lextures/lextures/server/internal/logging"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // NewPool opens a single shared pgx connection pool.
@@ -26,11 +28,39 @@ func NewPool(ctx context.Context, dsn string) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
+	var tracers []pgx.QueryTracer
 	if sqlTraceEnabled() {
-		cfg.ConnConfig.Tracer = logging.SQLTrace{}
+		tracers = append(tracers, logging.SQLTrace{})
+	}
+	// OTel DB spans are no-ops unless a request trace is active (plan 17.7 FR-2,
+	// AC-2). The tracer self-checks for a recording span, so this adds no
+	// overhead when tracing is disabled.
+	tracers = append(tracers, telemetry.NewPgxTracer())
+	switch len(tracers) {
+	case 1:
+		cfg.ConnConfig.Tracer = tracers[0]
+	default:
+		cfg.ConnConfig.Tracer = multiQueryTracer(tracers)
 	}
 	applyPoolSizing(cfg)
 	return pgxpool.NewWithConfig(ctx, cfg)
+}
+
+// multiQueryTracer fans a pgx query trace out to several tracers (e.g. the slog
+// SQL shape logger and the OpenTelemetry span tracer).
+type multiQueryTracer []pgx.QueryTracer
+
+func (m multiQueryTracer) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryStartData) context.Context {
+	for _, t := range m {
+		ctx = t.TraceQueryStart(ctx, conn, data)
+	}
+	return ctx
+}
+
+func (m multiQueryTracer) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
+	for _, t := range m {
+		t.TraceQueryEnd(ctx, conn, data)
+	}
 }
 
 // applyPoolSizing overrides pgx pool min/max from the environment. The DSN's own

@@ -1,0 +1,39 @@
+# Prometheus scrape configuration for the Lextures observability stack (plan 17.7).
+#
+# The application exposes metrics on an INTERNAL port (METRICS_ADDR, default
+# :9090) that is firewalled to the VPC and never routed through the public load
+# balancer (FR-1 / NFR Security / AC-6). Prometheus runs inside the same private
+# network and scrapes each app instance directly (pull model — NFR Scalability).
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: lextures-production
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  # The Lextures API instances. In Kubernetes this is replaced by
+  # kubernetes_sd_configs with role: pod and the prometheus.io/scrape annotation;
+  # the static list here documents the local docker-compose topology.
+  - job_name: lextures-api
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - api:9090
+        labels:
+          service: lextures-api
+
+  # Meta-monitoring: Prometheus scrapes itself so we alert on scrape health
+  # (plan 17.7 NFR Observability).
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090

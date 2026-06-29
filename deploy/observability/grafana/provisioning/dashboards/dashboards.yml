@@ -1,0 +1,15 @@
+# Grafana dashboard provisioning (plan 17.7 FR-5). Loads the JSON dashboards
+# checked into deploy/observability/grafana/dashboards.
+apiVersion: 1
+
+providers:
+  - name: lextures
+    orgId: 1
+    folder: Lextures
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false
