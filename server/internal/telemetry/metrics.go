@@ -36,6 +36,7 @@ type Metrics struct {
 	aiProviderLatency   *prometheus.HistogramVec
 	aiProviderCostTotal *prometheus.CounterVec
 	businessEvents      *prometheus.CounterVec
+	healthChecks        *prometheus.CounterVec
 	buildInfo           *prometheus.GaugeVec
 }
 
@@ -83,6 +84,11 @@ func NewMetrics() *Metrics {
 			Name:      "business_events_total",
 			Help:      "Business events (enrollments, grade submissions, etc.) by type.",
 		}, []string{"event"}),
+		healthChecks: prometheus.NewCounterVec(prometheus.CounterOpts{
+			Namespace: namespace,
+			Name:      "health_check_total",
+			Help:      "Health probe invocations by endpoint and HTTP-style status (plan 17.8).",
+		}, []string{"endpoint", "status"}),
 		buildInfo: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "build_info",
@@ -98,6 +104,7 @@ func NewMetrics() *Metrics {
 		m.aiProviderLatency,
 		m.aiProviderCostTotal,
 		m.businessEvents,
+		m.healthChecks,
 		m.buildInfo,
 		collectors.NewGoCollector(),
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
@@ -166,4 +173,15 @@ func (m *Metrics) IncBusinessEvent(event string) {
 		return
 	}
 	m.businessEvents.WithLabelValues(event).Inc()
+}
+
+// IncHealthCheck records one health probe result (plan 17.8 Observability).
+func (m *Metrics) IncHealthCheck(endpoint, status string) {
+	if endpoint == "" {
+		endpoint = "unknown"
+	}
+	if status == "" {
+		status = "unknown"
+	}
+	m.healthChecks.WithLabelValues(endpoint, status).Inc()
 }

@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -33,5 +34,12 @@ func TestNewHandler_ReadyWithPool(t *testing.T) {
 	h.ServeHTTP(rr, r)
 	if rr.Code != http.StatusOK {
 		t.Fatalf("ready: %d body %s", rr.Code, rr.Body.String())
+	}
+	var body ReadyResponse
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("json: %v", err)
+	}
+	if body.Status != "ready" || body.Checks["postgres"] != "ok" {
+		t.Fatalf("body %+v", body)
 	}
 }

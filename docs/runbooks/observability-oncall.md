@@ -54,6 +54,15 @@ metrics port blocked. Check the instance health/readiness probe and the load
 balancer pool. If the instance is serving traffic but not scrapeable, verify
 `METRICS_ENABLED`/`METRICS_ADDR` and the VPC firewall rule.
 
+### ReadinessProbeUnhealthy
+*`GET /health/ready` returning 503 for 30s.* The load balancer may have removed
+this instance from rotation. Check Postgres and Redis connectivity from the
+instance (`curl /health/detailed` with a Global Admin JWT for per-component
+latency). Common causes: RDS/Postgres outage, Redis unreachable, or the
+dedicated health-check pool cannot connect while the main pool is exhausted.
+Mitigate by restoring the dependency or restarting the instance after the DB
+recovers.
+
 ## Sentry triage
 
 1. Triage by Sentry environment (production vs staging) and severity.

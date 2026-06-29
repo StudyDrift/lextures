@@ -55,7 +55,11 @@ services:
     expose:
       - "8080"
     healthcheck:
-      test: ["CMD", "/usr/bin/curl", "-fsS", "http://127.0.0.1:8080/health/ready"]
+      test:
+        [
+          "CMD-SHELL",
+          "/usr/bin/curl -fsS http://127.0.0.1:8080/health/live && /usr/bin/curl -fsS http://127.0.0.1:8080/health/ready",
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
