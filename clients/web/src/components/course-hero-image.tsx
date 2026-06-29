@@ -1,23 +1,29 @@
 import { type ComponentPropsWithoutRef, useEffect, useState } from 'react'
 import { authorizedFetch } from '../lib/api'
 import { needsAuthenticatedCourseImageSrc, resolveAuthorizedFetchPath } from '../lib/course-file-image'
+import { courseHeroImageSrc, type CourseHeroImageSize } from '../lib/course-hero-image-url'
 
-type Props = ComponentPropsWithoutRef<'img'>
+type Props = ComponentPropsWithoutRef<'img'> & {
+  /** `full` preserves original quality (course dashboard); catalog sizes request smaller thumbnails. */
+  size?: CourseHeroImageSize
+}
 
 /** Renders a hero image, fetching with auth when src is a course-files content URL. */
-export function CourseHeroImage({ src, className, alt = '', ...props }: Props) {
+export function CourseHeroImage({ src, size = 'full', className, alt = '', ...props }: Props) {
+  const fetchSrc = courseHeroImageSrc(src, size)
+
   const [resolvedSrc, setResolvedSrc] = useState<string | undefined>(() =>
-    src && !needsAuthenticatedCourseImageSrc(src) ? src : undefined,
+    fetchSrc && !needsAuthenticatedCourseImageSrc(fetchSrc) ? fetchSrc : undefined,
   )
 
   useEffect(() => {
     let cancelled = false
     let blobUrl: string | null = null
-    if (!src || !needsAuthenticatedCourseImageSrc(src)) {
-      setResolvedSrc(src ?? undefined)
+    if (!fetchSrc || !needsAuthenticatedCourseImageSrc(fetchSrc)) {
+      setResolvedSrc(fetchSrc ?? undefined)
       return
     }
-    void authorizedFetch(resolveAuthorizedFetchPath(src))
+    void authorizedFetch(resolveAuthorizedFetchPath(fetchSrc))
       .then((r) => {
         if (!r.ok) throw new Error(String(r.status))
         return r.blob()
@@ -34,7 +40,7 @@ export function CourseHeroImage({ src, className, alt = '', ...props }: Props) {
       cancelled = true
       if (blobUrl) URL.revokeObjectURL(blobUrl)
     }
-  }, [src])
+  }, [fetchSrc])
 
   return (
     <img

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
+	"github.com/lextures/lextures/server/internal/service/imageproxy"
 )
 
 // handleGetCourseFileContent is GET /api/v1/courses/{course_code}/course-files/{file_id}/content
@@ -48,10 +50,11 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 			return
 		}
 
+		resizeOpts := parseCourseFileImageResizeOpts(r)
 		cfg := d.effectiveConfig()
 
-		// S3-backed: generate presigned URL and redirect
-		if d.Storage != nil {
+		// S3-backed: generate presigned URL and redirect (skip when serving a resized thumbnail)
+		if d.Storage != nil && resizeOpts.MaxWidth <= 0 && resizeOpts.MaxHeight <= 0 {
 			ttl := time.Duration(cfg.StoragePresignTTL) * time.Second
 			if ttl <= 0 {
 				ttl = time.Hour
@@ -78,9 +81,56 @@ func (d Deps) handleGetCourseFileContent() http.HandlerFunc {
 		if ct == "" {
 			ct = "application/octet-stream"
 		}
+		if resizeOpts.MaxWidth > 0 || resizeOpts.MaxHeight > 0 {
+			resized, resizedCT, err := imageproxy.ResizeIfNeeded(b, ct, resizeOpts)
+			if err != nil {
+				if errors.Is(err, imageproxy.ErrNotImage) {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Resize is only supported for images.")
+					return
+				}
+				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInternal, "Could not resize image.")
+				return
+			}
+			b = resized
+			ct = resizedCT
+		}
 		w.Header().Set("Content-Type", ct)
 		w.Header().Set("Cache-Control", "private, max-age=86400")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(b)
 	}
+}
+
+const courseFileImageResizeMaxDim = 2048
+
+func parseCourseFileImageResizeOpts(r *http.Request) imageproxy.ResizeOpts {
+	q := r.URL.Query()
+	maxW := clampCourseFileImageResizeDim(q.Get("w"))
+	maxH := clampCourseFileImageResizeDim(q.Get("h"))
+	quality := 85
+	if raw := strings.TrimSpace(q.Get("q")); raw != "" {
+		if n, err := strconv.Atoi(raw); err == nil && n > 0 && n <= 100 {
+			quality = n
+		}
+	}
+	return imageproxy.ResizeOpts{
+		MaxWidth:  maxW,
+		MaxHeight: maxH,
+		Quality:   quality,
+	}
+}
+
+func clampCourseFileImageResizeDim(raw string) int {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return 0
+	}
+	n, err := strconv.Atoi(raw)
+	if err != nil || n <= 0 {
+		return 0
+	}
+	if n > courseFileImageResizeMaxDim {
+		return courseFileImageResizeMaxDim
+	}
+	return n
 }

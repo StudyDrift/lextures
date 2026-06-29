@@ -1,7 +1,34 @@
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  closestCorners,
+  defaultDropAnimation,
+  pointerWithin,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type CollisionDetection,
+  type DragCancelEvent,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+} from '@dnd-kit/core'
+import { SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { useCoursePins } from '../../context/course-pinned-context'
 import { heroImageObjectStyle } from '../../lib/hero-image-position'
 import type { PinnedCourseSummary } from '../../lib/course-catalog-settings-api'
+import {
+  computeNextPinRows,
+  flatPinnedRows,
+  newRowDropId,
+  pinRowsEqual,
+  resolvePinDropTarget,
+  rowDropId,
+} from '../../lib/pinned-courses-layout'
 import { useShellNav } from './use-shell-nav'
 import { SideNavTooltip } from './side-nav-tooltip'
 import { CourseHeroImage } from '../course-hero-image'
@@ -17,68 +44,431 @@ const gridColsMap: Record<number, string> = {
   4: 'grid-cols-4',
 }
 
-export function SideNavPinnedCourses() {
-  const { pinnedCourses, loading, flashPinnedCourseId } = useCoursePins()
-  const { sideNavCollapsed } = useShellNav()
-  const location = useLocation()
+const iosDropAnimation = {
+  ...defaultDropAnimation,
+  duration: 220,
+  easing: 'cubic-bezier(0.2, 0, 0, 1)',
+}
 
-  if (loading || pinnedCourses.length === 0) return null
+const NEW_ROW_DROP_ID = newRowDropId()
 
-  const cols = Math.min(pinnedCourses.length, 4)
+/** Prefer the new-row slot and row gutters over sortable tile collisions. */
+const pinCollisionDetection: CollisionDetection = (args) => {
+  const pointerHits = pointerWithin(args)
+  const newRowHit = pointerHits.find((collision) => collision.id === NEW_ROW_DROP_ID)
+  if (newRowHit) return [newRowHit]
+
+  const cornerHits = closestCorners(args)
+  const sortableHit = cornerHits.find((collision) => !String(collision.id).startsWith('row:'))
+  if (sortableHit) return [sortableHit]
+
+  const rowHit = pointerHits.find(
+    (collision) => String(collision.id).startsWith('row:') && collision.id !== NEW_ROW_DROP_ID,
+  )
+  if (rowHit) return [rowHit]
+
+  return cornerHits
+}
+
+type PinnedCourseTileVisualProps = {
+  course: PinnedCourseSummary
+  active: boolean
+  sideNavCollapsed: boolean
+  overlay?: boolean
+  isPlaceholder?: boolean
+  isDragActive?: boolean
+  onSuppressNavClick?: () => boolean
+  onConsumeNavSuppress?: () => void
+}
+
+function PinnedCourseTileVisual({
+  course,
+  active,
+  sideNavCollapsed,
+  overlay = false,
+  isPlaceholder = false,
+  isDragActive = false,
+  onSuppressNavClick,
+  onConsumeNavSuppress,
+}: PinnedCourseTileVisualProps) {
+  const href = `/courses/${encodeURIComponent(course.courseCode)}`
+  const title = pinnedCourseTitle(course)
+
+  return (
+    <div
+      className={[
+        isPlaceholder ? 'pointer-events-none' : '',
+        overlay ? 'scale-[1.06]' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <NavLink
+        to={href}
+        aria-label={title}
+        aria-current={active ? 'page' : undefined}
+        draggable={false}
+        tabIndex={isPlaceholder ? -1 : undefined}
+        onClick={(event) => {
+          if (onSuppressNavClick?.()) {
+            event.preventDefault()
+            onConsumeNavSuppress?.()
+          }
+        }}
+        className={[
+          'group relative block overflow-hidden rounded-xl ring-1 ring-black/[0.06] hover:ring-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:ring-white/10 dark:hover:ring-indigo-400/40',
+          sideNavCollapsed ? 'h-9 w-9' : 'h-10 w-full',
+          active ? 'ring-2 ring-indigo-500 dark:ring-indigo-400' : '',
+          !sideNavCollapsed && !overlay && !isPlaceholder
+            ? 'cursor-grab touch-none active:cursor-grabbing'
+            : '',
+          overlay
+            ? 'cursor-grabbing shadow-lg shadow-black/20 ring-2 ring-indigo-400/50'
+            : '',
+          isDragActive && !overlay ? 'pointer-events-none' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <CourseHeroImage
+          src={course.heroImageUrl ?? '/course-card-hero.png'}
+          size="catalog-thumb"
+          alt=""
+          draggable={false}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+          style={heroImageObjectStyle(course.heroImageObjectPosition)}
+        />
+        <span
+          className={[
+            'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent opacity-0 transition-opacity group-hover:opacity-100',
+            active ? 'opacity-100' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          aria-hidden
+        />
+      </NavLink>
+    </div>
+  )
+}
+
+type SortablePinnedCourseTileProps = {
+  course: PinnedCourseSummary
+  active: boolean
+  flashPinnedCourseId: string | null
+  sideNavCollapsed: boolean
+  isDragActive: boolean
+}
+
+function SortablePinnedCourseTile({
+  course,
+  active,
+  flashPinnedCourseId,
+  sideNavCollapsed,
+  isDragActive,
+}: SortablePinnedCourseTileProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: course.id,
+    disabled: sideNavCollapsed,
+  })
+  const suppressNavRef = useRef(false)
+  const wasDraggingRef = useRef(false)
+
+  useEffect(() => {
+    if (wasDraggingRef.current && !isDragging) {
+      suppressNavRef.current = true
+    }
+    wasDraggingRef.current = isDragging
+  }, [isDragging])
+
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition ?? 'transform 200ms cubic-bezier(0.2, 0, 0, 1)',
+    opacity: isDragging ? 0 : 1,
+    zIndex: isDragging ? 0 : undefined,
+  }
+
+  const title = pinnedCourseTitle(course)
+
+  return (
+    <SideNavTooltip content={title} hoverWhenExpanded instant={flashPinnedCourseId === course.id}>
+      <div ref={setNodeRef} className="min-w-0" style={style} {...listeners} {...attributes}>
+        <PinnedCourseTileVisual
+          course={course}
+          active={active}
+          sideNavCollapsed={sideNavCollapsed}
+          isPlaceholder={isDragging}
+          isDragActive={isDragActive}
+          onSuppressNavClick={() => isDragActive || isDragging || suppressNavRef.current}
+          onConsumeNavSuppress={() => {
+            suppressNavRef.current = false
+          }}
+        />
+      </div>
+    </SideNavTooltip>
+  )
+}
+
+function PinnedCourseRow({
+  rowIndex,
+  courses,
+  sideNavCollapsed,
+  flashPinnedCourseId,
+  activeCourseIds,
+  isDragActive,
+}: {
+  rowIndex: number
+  courses: PinnedCourseSummary[]
+  sideNavCollapsed: boolean
+  flashPinnedCourseId: string | null
+  activeCourseIds: Set<string>
+  isDragActive: boolean
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: rowDropId(rowIndex),
+    disabled: sideNavCollapsed,
+  })
+  const cols = Math.min(Math.max(courses.length, 1), 4)
   const gridColsClass = gridColsMap[cols] ?? 'grid-cols-4'
 
   return (
     <div
-      className={`shrink-0 px-3 py-3 ${sideNavCollapsed ? 'flex flex-col items-center gap-1.5' : `grid ${gridColsClass} gap-1.5`}`}
+      ref={setNodeRef}
+      className={[
+        sideNavCollapsed ? 'flex flex-col items-center gap-1.5' : `grid ${gridColsClass} gap-1.5`,
+        isOver && isDragActive ? 'rounded-xl bg-indigo-50/70 ring-1 ring-indigo-300/50 dark:bg-indigo-950/20 dark:ring-indigo-500/30' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {courses.map((course) => (
+        <SortablePinnedCourseTile
+          key={course.id}
+          course={course}
+          active={activeCourseIds.has(course.id)}
+          flashPinnedCourseId={flashPinnedCourseId}
+          sideNavCollapsed={sideNavCollapsed}
+          isDragActive={isDragActive}
+        />
+      ))}
+    </div>
+  )
+}
+
+/** Invisible hit area below the grid — no visible chrome. */
+function NewPinnedRowDropZone() {
+  const { setNodeRef } = useDroppable({ id: NEW_ROW_DROP_ID })
+  return <div ref={setNodeRef} className="h-12 w-full" aria-hidden />
+}
+
+function NewRowPlaceholder() {
+  return (
+    <div
+      className="h-10 w-full rounded-xl bg-indigo-500/5 transition-[height,opacity] duration-200 ease-out dark:bg-indigo-400/5"
+      aria-hidden
+    />
+  )
+}
+
+export function SideNavPinnedCourses() {
+  const { pinnedRows, loading, flashPinnedCourseId, reorderPinnedRows } = useCoursePins()
+  const { sideNavCollapsed } = useShellNav()
+  const location = useLocation()
+  const [activeDragId, setActiveDragId] = useState<string | null>(null)
+  const [hoveringNewRow, setHoveringNewRow] = useState(false)
+  const [localRows, setLocalRows] = useState<PinnedCourseSummary[][]>([])
+  const localRowsRef = useRef(localRows)
+  const hoveringNewRowRef = useRef(false)
+  const activeDragIdRef = useRef<string | null>(null)
+  const saveTimeoutRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    localRowsRef.current = localRows
+  }, [localRows])
+
+  useEffect(() => {
+    hoveringNewRowRef.current = hoveringNewRow
+  }, [hoveringNewRow])
+
+  useEffect(() => {
+    activeDragIdRef.current = activeDragId
+  }, [activeDragId])
+
+  useEffect(() => {
+    if (activeDragId) return
+    setLocalRows(pinnedRows)
+  }, [pinnedRows, activeDragId])
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current !== null) {
+        window.clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 },
+    }),
+  )
+
+  const sortableIds = useMemo(() => flatPinnedRows(localRows).map((course) => course.id), [localRows])
+
+  const activeCourseIds = useMemo(() => {
+    const ids = new Set<string>()
+    for (const row of localRows) {
+      for (const course of row) {
+        const href = `/courses/${encodeURIComponent(course.courseCode)}`
+        if (location.pathname === href || location.pathname.startsWith(`${href}/`)) {
+          ids.add(course.id)
+        }
+      }
+    }
+    return ids
+  }, [localRows, location.pathname])
+
+  const activeCourse = useMemo(() => {
+    if (!activeDragId) return null
+    for (const row of localRows) {
+      const found = row.find((course) => course.id === activeDragId)
+      if (found) return found
+    }
+    return null
+  }, [activeDragId, localRows])
+
+  const queueSave = useCallback(
+    (rows: PinnedCourseSummary[][]) => {
+      if (saveTimeoutRef.current !== null) {
+        window.clearTimeout(saveTimeoutRef.current)
+      }
+      saveTimeoutRef.current = window.setTimeout(() => {
+        saveTimeoutRef.current = null
+        void reorderPinnedRows(rows).catch(() => {
+          setLocalRows(pinnedRows)
+        })
+      }, 250)
+    },
+    [pinnedRows, reorderPinnedRows],
+  )
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveDragId(String(event.active.id))
+    setHoveringNewRow(false)
+  }, [])
+
+  const handleDragOver = useCallback(
+    (event: DragOverEvent) => {
+      const { active, over } = event
+      if (!over) {
+        setHoveringNewRow(false)
+        return
+      }
+
+      const overId = String(over.id)
+      if (overId === NEW_ROW_DROP_ID) {
+        setHoveringNewRow(true)
+        return
+      }
+
+      setHoveringNewRow(false)
+      if (active.id === over.id) return
+
+      const courseId = String(active.id)
+      setLocalRows((current) => {
+        const target = resolvePinDropTarget(current, overId)
+        if (!target || target.kind === 'new-row') return current
+        const next = computeNextPinRows(current, courseId, target)
+        return pinRowsEqual(current, next) ? current : next
+      })
+    },
+    [],
+  )
+
+  const handleDragEnd = useCallback(
+    (_event: DragEndEvent) => {
+      const draggedId = activeDragIdRef.current
+      let finalRows = localRowsRef.current
+
+      if (hoveringNewRowRef.current && draggedId) {
+        finalRows = computeNextPinRows(finalRows, draggedId, { kind: 'new-row' })
+        setLocalRows(finalRows)
+      }
+
+      setActiveDragId(null)
+      setHoveringNewRow(false)
+
+      if (!pinRowsEqual(finalRows, pinnedRows)) {
+        queueSave(finalRows)
+      }
+    },
+    [pinnedRows, queueSave],
+  )
+
+  const handleDragCancel = useCallback((_event: DragCancelEvent) => {
+    setActiveDragId(null)
+    setHoveringNewRow(false)
+    setLocalRows(pinnedRows)
+  }, [pinnedRows])
+
+  if (loading || localRows.length === 0) return null
+
+  const isDragging = activeDragId !== null
+
+  const rowsContent = (
+    <div
+      className={[
+        'shrink-0 px-3 py-3',
+        sideNavCollapsed ? 'flex flex-col items-center gap-1.5' : 'flex flex-col gap-1.5',
+      ].join(' ')}
       aria-label="Pinned courses"
     >
-      {pinnedCourses.map((course) => {
-        const href = `/courses/${encodeURIComponent(course.courseCode)}`
-        const active =
-          location.pathname === href || location.pathname.startsWith(`${href}/`)
-        const title = pinnedCourseTitle(course)
-
-        return (
-          <SideNavTooltip
-            key={course.id}
-            content={title}
-            hoverWhenExpanded
-            instant={flashPinnedCourseId === course.id}
-          >
-            <NavLink
-              to={href}
-              aria-label={title}
-              aria-current={active ? 'page' : undefined}
-              className={[
-                'group relative block overflow-hidden rounded-xl ring-1 ring-black/[0.06] transition-[background-color,color,border-color] hover:ring-indigo-400/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 dark:ring-white/10 dark:hover:ring-indigo-400/40',
-                sideNavCollapsed ? 'h-9 w-9' : 'h-10 w-full',
-                active ? 'ring-2 ring-indigo-500 dark:ring-indigo-400' : '',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-            >
-              <CourseHeroImage
-                src={course.heroImageUrl ?? '/course-card-hero.png'}
-                alt=""
-                draggable={false}
-                loading="lazy"
-                decoding="async"
-                className="h-full w-full object-cover"
-                style={heroImageObjectStyle(course.heroImageObjectPosition)}
-              />
-              <span
-                className={[
-                  'pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 to-transparent opacity-0 transition-[opacity,background-color,color,border-color] group-hover:opacity-100',
-                  active ? 'opacity-100' : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-hidden
-              />
-            </NavLink>
-          </SideNavTooltip>
-        )
-      })}
+      {localRows.map((row, rowIndex) => (
+        <PinnedCourseRow
+          key={`pin-row-${rowIndex}`}
+          rowIndex={rowIndex}
+          courses={row}
+          sideNavCollapsed={sideNavCollapsed}
+          flashPinnedCourseId={flashPinnedCourseId}
+          activeCourseIds={activeCourseIds}
+          isDragActive={isDragging}
+        />
+      ))}
+      {hoveringNewRow ? <NewRowPlaceholder /> : null}
     </div>
+  )
+
+  if (sideNavCollapsed) return rowsContent
+
+  return (
+    <DndContext
+      sensors={sensors}
+      collisionDetection={pinCollisionDetection}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <SortableContext items={sortableIds} strategy={rectSortingStrategy}>
+        {rowsContent}
+      </SortableContext>
+      {isDragging ? (
+        <div className="shrink-0 px-3">
+          <NewPinnedRowDropZone />
+        </div>
+      ) : null}
+      <DragOverlay dropAnimation={iosDropAnimation}>
+        {activeCourse ? (
+          <PinnedCourseTileVisual
+            course={activeCourse}
+            active={activeCourseIds.has(activeCourse.id)}
+            sideNavCollapsed={false}
+            overlay
+          />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   )
 }

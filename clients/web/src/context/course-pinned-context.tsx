@@ -13,14 +13,22 @@ import { getAccessToken } from '../lib/auth'
 import {
   fetchPinnedCourses,
   putCourseCatalogPin,
+  putCourseCatalogPinLayout,
   type PinnedCourseSummary,
 } from '../lib/course-catalog-settings-api'
+import {
+  flatPinnedRows,
+  normalizePinRows,
+  rowsFromFlatCourses,
+  rowsToCourseIds,
+} from '../lib/pinned-courses-layout'
 import { useCoursesRevision } from './use-inbox-unread'
 
 const PINNED_TOOLTIP_FLASH_MS = 2600
 
 type CoursePinnedContextValue = {
   pinnedCourses: PinnedCourseSummary[]
+  pinnedRows: PinnedCourseSummary[][]
   pinnedCourseIds: Set<string>
   /** Course id that should show an instant sidebar title tooltip after pinning. */
   flashPinnedCourseId: string | null
@@ -32,6 +40,7 @@ type CoursePinnedContextValue = {
     pinned: boolean,
     optimisticCourse?: PinnedCourseSummary,
   ) => Promise<void>
+  reorderPinnedRows: (rows: PinnedCourseSummary[][]) => Promise<void>
 }
 
 const CoursePinnedContext = createContext<CoursePinnedContextValue | null>(null)
@@ -54,14 +63,24 @@ function toPinnedSummary(course: {
   }
 }
 
+function resolvePinnedRows(
+  courses: PinnedCourseSummary[],
+  rows: PinnedCourseSummary[][],
+): PinnedCourseSummary[][] {
+  if (rows.length > 0) return rows
+  return rowsFromFlatCourses(courses)
+}
+
 export function CoursePinnedProvider({ children }: { children: ReactNode }) {
   const coursesRevision = useCoursesRevision()
-  const [pinnedCourses, setPinnedCourses] = useState<PinnedCourseSummary[]>([])
+  const [pinnedRows, setPinnedRows] = useState<PinnedCourseSummary[][]>([])
   const [loading, setLoading] = useState(true)
   const [togglingCourseId, setTogglingCourseId] = useState<string | null>(null)
   const [flashPinnedCourseId, setFlashPinnedCourseId] = useState<string | null>(null)
   const flashTimeoutRef = useRef<number | null>(null)
   const flashRafRef = useRef<number | null>(null)
+
+  const pinnedCourses = useMemo(() => flatPinnedRows(pinnedRows), [pinnedRows])
 
   const flashPinnedTooltip = useCallback((courseId: string) => {
     if (flashTimeoutRef.current !== null) {
@@ -85,37 +104,41 @@ export function CoursePinnedProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const applyPinnedPayload = useCallback((courses: PinnedCourseSummary[], rows: PinnedCourseSummary[][]) => {
+    setPinnedRows(resolvePinnedRows(courses, rows))
+  }, [])
+
   const refreshPinned = useCallback(async () => {
     if (!getAccessToken()) {
-      setPinnedCourses([])
+      setPinnedRows([])
       setLoading(false)
       return
     }
     try {
-      const courses = await fetchPinnedCourses()
-      setPinnedCourses(courses)
+      const payload = await fetchPinnedCourses()
+      applyPinnedPayload(payload.courses, payload.rows)
     } catch {
       /* keep previous list */
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [applyPinnedPayload])
 
   useEffect(() => {
     let cancelled = false
     void (async () => {
       if (!getAccessToken()) {
         if (!cancelled) {
-          setPinnedCourses([])
+          setPinnedRows([])
           setLoading(false)
         }
         return
       }
       try {
-        const courses = await fetchPinnedCourses()
-        if (!cancelled) setPinnedCourses(courses)
+        const payload = await fetchPinnedCourses()
+        if (!cancelled) applyPinnedPayload(payload.courses, payload.rows)
       } catch {
-        if (!cancelled) setPinnedCourses([])
+        if (!cancelled) setPinnedRows([])
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -123,17 +146,41 @@ export function CoursePinnedProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [coursesRevision, refreshPinned])
+  }, [coursesRevision, refreshPinned, applyPinnedPayload])
+
+  const reorderPinnedRows = useCallback(
+    async (rows: PinnedCourseSummary[][]) => {
+      const normalized = normalizePinRows(rows.filter((row) => row.length > 0))
+      const previous = pinnedRows
+      setPinnedRows(normalized)
+      try {
+        await putCourseCatalogPinLayout(rowsToCourseIds(normalized))
+      } catch (err) {
+        setPinnedRows(previous)
+        throw err
+      }
+    },
+    [pinnedRows],
+  )
 
   const togglePin = useCallback(
     async (courseId: string, pinned: boolean, optimisticCourse?: PinnedCourseSummary) => {
-      const previous = pinnedCourses
+      const previous = pinnedRows
       setTogglingCourseId(courseId)
-      setPinnedCourses((current) => {
-        if (!pinned) return current.filter((course) => course.id !== courseId)
-        if (current.some((course) => course.id === courseId)) return current
+      setPinnedRows((current) => {
+        if (!pinned) {
+          return normalizePinRows(current.map((row) => row.filter((course) => course.id !== courseId)))
+        }
+        if (current.some((row) => row.some((course) => course.id === courseId))) return current
         if (!optimisticCourse) return current
-        return [...current, optimisticCourse]
+        const next = current.map((row) => [...row])
+        const lastRow = next[next.length - 1]
+        if (lastRow && lastRow.length < 4) {
+          lastRow.push(optimisticCourse)
+        } else {
+          next.push([optimisticCourse])
+        }
+        return next
       })
       const clearFlash = () => {
         setFlashPinnedCourseId(null)
@@ -160,14 +207,14 @@ export function CoursePinnedProvider({ children }: { children: ReactNode }) {
         await putCourseCatalogPin(courseId, pinned)
         await refreshPinned()
       } catch (err) {
-        setPinnedCourses(previous)
+        setPinnedRows(previous)
         if (pinned) clearFlash()
         throw err
       } finally {
         setTogglingCourseId(null)
       }
     },
-    [pinnedCourses, refreshPinned, flashPinnedCourseId, flashPinnedTooltip],
+    [pinnedRows, refreshPinned, flashPinnedCourseId, flashPinnedTooltip],
   )
 
   const pinnedCourseIds = useMemo(
@@ -178,14 +225,26 @@ export function CoursePinnedProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       pinnedCourses,
+      pinnedRows,
       pinnedCourseIds,
       flashPinnedCourseId,
       loading,
       togglingCourseId,
       refreshPinned,
       togglePin,
+      reorderPinnedRows,
     }),
-    [pinnedCourses, pinnedCourseIds, flashPinnedCourseId, loading, togglingCourseId, refreshPinned, togglePin],
+    [
+      pinnedCourses,
+      pinnedRows,
+      pinnedCourseIds,
+      flashPinnedCourseId,
+      loading,
+      togglingCourseId,
+      refreshPinned,
+      togglePin,
+      reorderPinnedRows,
+    ],
   )
 
   return <CoursePinnedContext.Provider value={value}>{children}</CoursePinnedContext.Provider>

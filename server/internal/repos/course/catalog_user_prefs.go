@@ -54,6 +54,7 @@ type PinnedCourseSummary struct {
 }
 
 const maxCatalogPins = 20
+const maxCatalogPinsPerRow = 4
 
 func defaultCatalogPrefs() UserCatalogPrefs {
 	labels := make(map[string]string, len(DefaultKanbanColumnLabels))
@@ -346,7 +347,7 @@ func ListUserCatalogPinIDs(ctx context.Context, pool *pgxpool.Pool, userID uuid.
 SELECT course_id
 FROM course.user_course_catalog_pins
 WHERE user_id = $1
-ORDER BY sort_order ASC, updated_at ASC
+ORDER BY row_index ASC, sort_order ASC, updated_at ASC
 `, userID)
 	if err != nil {
 		return nil, err
@@ -411,19 +412,142 @@ SELECT EXISTS (
 	if already {
 		return nil
 	}
-	var nextSort int
+	var rowIndex, sortOrder int
 	if err := pool.QueryRow(ctx, `
-SELECT COALESCE(MAX(sort_order), -1) + 1
+SELECT COALESCE(MAX(row_index), 0), COUNT(*)::int
 FROM course.user_course_catalog_pins
-WHERE user_id = $1
-`, userID).Scan(&nextSort); err != nil {
+WHERE user_id = $1 AND row_index = (SELECT COALESCE(MAX(row_index), 0) FROM course.user_course_catalog_pins WHERE user_id = $1)
+`, userID).Scan(&rowIndex, &sortOrder); err != nil {
 		return err
 	}
+	if sortOrder >= maxCatalogPinsPerRow {
+		rowIndex++
+		sortOrder = 0
+	}
 	_, err = pool.Exec(ctx, `
-INSERT INTO course.user_course_catalog_pins (user_id, course_id, sort_order, updated_at)
-VALUES ($1, $2, $3, now())
-`, userID, courseID, nextSort)
+INSERT INTO course.user_course_catalog_pins (user_id, course_id, row_index, sort_order, updated_at)
+VALUES ($1, $2, $3, $4, now())
+`, userID, courseID, rowIndex, sortOrder)
 	return err
+}
+
+// ReplaceUserCatalogPinLayout replaces the sidebar pin grid for the user.
+// Each inner slice is one row (at most maxCatalogPinsPerRow course ids).
+func ReplaceUserCatalogPinLayout(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID, rows [][]uuid.UUID) error {
+	seen := map[uuid.UUID]struct{}{}
+	var placements []struct {
+		courseID  uuid.UUID
+		rowIndex  int
+		sortOrder int
+	}
+	for rowIndex, row := range rows {
+		if len(row) > maxCatalogPinsPerRow {
+			return fmt.Errorf("pin row exceeds limit")
+		}
+		for sortOrder, id := range row {
+			if _, dup := seen[id]; dup {
+				return fmt.Errorf("duplicate course in pin layout")
+			}
+			seen[id] = struct{}{}
+			placements = append(placements, struct {
+				courseID  uuid.UUID
+				rowIndex  int
+				sortOrder int
+			}{courseID: id, rowIndex: rowIndex, sortOrder: sortOrder})
+		}
+	}
+	if len(placements) == 0 {
+		return nil
+	}
+
+	idList := make([]uuid.UUID, 0, len(placements))
+	for id := range seen {
+		idList = append(idList, id)
+	}
+	var pinned int
+	if err := pool.QueryRow(ctx, `
+SELECT COUNT(*)
+FROM course.user_course_catalog_pins
+WHERE user_id = $1 AND course_id = ANY($2::uuid[])
+`, userID, idList).Scan(&pinned); err != nil {
+		return err
+	}
+	if pinned != len(idList) {
+		return fmt.Errorf("pin layout includes unpinned courses")
+	}
+
+	tx, err := pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	for _, p := range placements {
+		if _, err := tx.Exec(ctx, `
+UPDATE course.user_course_catalog_pins
+SET row_index = $3, sort_order = $4, updated_at = now()
+WHERE user_id = $1 AND course_id = $2
+`, userID, p.courseID, p.rowIndex, p.sortOrder); err != nil {
+			return err
+		}
+	}
+	return tx.Commit(ctx)
+}
+
+// ListUserPinnedCourseRows returns pinned courses grouped by sidebar row.
+func ListUserPinnedCourseRows(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUID) ([][]PinnedCourseSummary, error) {
+	rows, err := pool.Query(ctx, `
+SELECT
+    c.id,
+    c.course_code,
+    c.title,
+    c.hero_image_url,
+    c.hero_image_object_position,
+    n.nickname,
+    p.row_index
+FROM course.user_course_catalog_pins p
+JOIN course.courses c ON c.id = p.course_id
+JOIN course.course_enrollments e ON e.course_id = c.id AND e.user_id = p.user_id
+LEFT JOIN course.user_course_catalog_nicknames n ON n.user_id = p.user_id AND n.course_id = c.id
+WHERE p.user_id = $1
+  AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
+  AND NOT c.archived
+ORDER BY p.row_index ASC, p.sort_order ASC, p.updated_at ASC
+`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	rowByIndex := map[int][]PinnedCourseSummary{}
+	var rowOrder []int
+	for rows.Next() {
+		var item PinnedCourseSummary
+		var rowIndex int
+		if err := rows.Scan(
+			&item.ID,
+			&item.CourseCode,
+			&item.Title,
+			&item.HeroImageURL,
+			&item.HeroImageObjectPosition,
+			&item.CatalogNickname,
+			&rowIndex,
+		); err != nil {
+			return nil, err
+		}
+		if _, ok := rowByIndex[rowIndex]; !ok {
+			rowOrder = append(rowOrder, rowIndex)
+		}
+		rowByIndex[rowIndex] = append(rowByIndex[rowIndex], item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	out := make([][]PinnedCourseSummary, 0, len(rowOrder))
+	for _, rowIndex := range rowOrder {
+		out = append(out, rowByIndex[rowIndex])
+	}
+	return out, nil
 }
 
 // ListUserPinnedCourseSummaries returns pinned enrolled courses for sidebar shortcuts.
@@ -443,7 +567,7 @@ LEFT JOIN course.user_course_catalog_nicknames n ON n.user_id = p.user_id AND n.
 WHERE p.user_id = $1
   AND (e.active OR e.state IN ('withdrawn', 'dropped', 'no_credit', 'audit', 'incomplete'))
   AND NOT c.archived
-ORDER BY p.sort_order ASC, p.updated_at ASC
+ORDER BY p.row_index ASC, p.sort_order ASC, p.updated_at ASC
 `, userID)
 	if err != nil {
 		return nil, err
