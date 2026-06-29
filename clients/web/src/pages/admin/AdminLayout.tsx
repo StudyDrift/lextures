@@ -9,6 +9,7 @@ import {
   Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { AdminSearchBar } from '../../components/admin/AdminSearchBar'
 import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
@@ -96,7 +97,10 @@ export default function AdminLayout() {
         {canAccess === null ? (
           <p className="text-sm text-slate-500">Loading admin console…</p>
         ) : (
-          <Outlet />
+          <>
+            <AdminSearchBar />
+            <Outlet />
+          </>
         )}
       </div>
     </div>

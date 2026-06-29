@@ -158,6 +158,7 @@ export default function App() {
               <Route path="integrations" element={<Pages.AdminIntegrations />} />
               <Route path="settings" element={<Pages.AdminSettingsPage />} />
               <Route path="audit-log" element={<Pages.AdminAuditLog />} />
+              <Route path="search" element={<Pages.AdminSearchResults />} />
             </Route>
             <Route path="/admin/accommodations/audit" element={<Pages.AccommodationAuditPage />} />
             <Route path="/admin/ccr/achievements" element={<Pages.AdminCCRAchievementsPage />} />
