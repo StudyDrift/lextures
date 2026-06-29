@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/api"
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
+	impersonationrepo "github.com/lextures/lextures/server/internal/repos/impersonation"
 )
 
 // APITokenAuth carries scope grants from a personal or service access key.
@@ -55,7 +56,7 @@ func RequireAccessKeyScope(w http.ResponseWriter, ctx context.Context, required 
 	return false
 }
 
-// UserFromRequestOrAccessKey authenticates via login JWT or access key (ltk_…).
+// UserFromRequestOrAccessKey authenticates via login JWT, impersonation JWT, or access key (ltk_…).
 func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpool.Pool, ipHashKey string, tokensEnabled bool) (AuthUser, context.Context, error) {
 	token, ok := BearerToken(r.Header)
 	if !ok {
@@ -104,6 +105,30 @@ func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpoo
 		}
 		ctx := context.WithValue(r.Context(), apiTokenAuthKey{}, meta)
 		return AuthUser{UserID: row.ID.String(), Email: row.Email}, ctx, nil
+	}
+	if signer != nil && JWTType(token) == "impersonation" {
+		imp, err := signer.VerifyImpersonation(token)
+		if err != nil {
+			return AuthUser{}, r.Context(), err
+		}
+		active, err := impersonationrepo.IsActive(r.Context(), pool, imp.JTI, timeNow())
+		if err != nil {
+			return AuthUser{}, r.Context(), ErrInvalidToken
+		}
+		if !active {
+			return AuthUser{}, r.Context(), ErrInvalidToken
+		}
+		ctx := WithImpersonation(r.Context(), ImpersonationSession{
+			AdminID:      imp.AdminID,
+			TargetUserID: imp.TargetUserID,
+			JTI:          imp.JTI,
+		})
+		return AuthUser{
+			UserID:  imp.TargetUserID,
+			Email:   imp.TargetEmail,
+			OrgID:   imp.OrgID,
+			OrgSlug: imp.OrgSlug,
+		}, ctx, nil
 	}
 	u, err := signer.Verify(r.Context(), token)
 	return u, r.Context(), err

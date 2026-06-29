@@ -72,6 +72,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables the org admin console at /admin with user/course management, settings, and audit log for org_admin and global admin users.',
   },
   {
+    key: 'impersonationEnabled',
+    label: 'Admin impersonation',
+    description:
+      'Allows org admins and global admins to view the application as a specific user (read-only) with a persistent banner and audit trail.',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',

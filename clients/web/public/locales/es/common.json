@@ -625,5 +625,10 @@
   "gradingAgent.settings.fromTemplate.multiAssignmentHint": "Se crea un borrador del agente de calificación para cada tarea seleccionada. Abra cualquier fila de la tabla de tareas para configurarlo.",
   "gradingAgent.settings.fromTemplate.create": "Crear",
   "gradingAgent.settings.fromTemplate.creating": "Creando…",
-  "gradingAgent.settings.fromTemplate.error": "No se pudieron crear agentes de calificación a partir de esta plantilla."
+  "gradingAgent.settings.fromTemplate.error": "No se pudieron crear agentes de calificación a partir de esta plantilla.",
+  "impersonation.viewAs": "Ver como",
+  "impersonation.confirm": "Está a punto de ver la aplicación como {{name}}. Todas las escrituras estarán bloqueadas. ¿Continuar?",
+  "impersonation.banner.viewingAs": "Está viendo como {{name}}.",
+  "impersonation.banner.exit": "Salir de la suplantación",
+  "impersonation.banner.exiting": "Saliendo…"
 }

@@ -154,6 +154,7 @@ func NewHandler(d Deps) http.Handler {
 	if health.metrics == nil && metrics != nil {
 		health.metrics = metrics
 	}
+	r.Use(d.impersonationWriteBlockMiddleware())
 	r.Get("/api/openapi.json", openapi.ServeOpenAPI)
 	r.Get("/api/docs", openapi.ServeDocs)
 	r.Get("/health", handleHealthAlias(metrics))
@@ -262,6 +263,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerISORoutes(r)
 	d.registerAdminAuditLogRoutes(r)
 	d.registerAdminConsoleRoutes(r)
+	d.registerImpersonationRoutes(r)
 	d.registerSecurityReportsRoutes(r)
 	d.registerDataResidencyRoutes(r)
 	d.registerAIDisclosureRoutes(r)

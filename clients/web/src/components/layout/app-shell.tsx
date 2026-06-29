@@ -23,6 +23,8 @@ import { UiThemeSync } from './ui-theme-sync'
 import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
+import { ImpersonationBanner } from '../ImpersonationBanner'
+import { useImpersonationBannerOffset } from '../../hooks/use-impersonation-banner-offset'
 
 const IncidentStatusBanner = lazy(() =>
   import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
@@ -37,6 +39,7 @@ function AppShellLayout() {
   const { focus } = useQuizShellFocus()
   const { readingFocus, setReadingFocus } = useReadingShellFocus()
   const hideChrome = Boolean(focus || readingFocus)
+  const bannerOffset = useImpersonationBannerOffset()
 
   useFocusOnRoute()
 
@@ -51,8 +54,9 @@ function AppShellLayout() {
       <LocaleBootstrapSync />
       <ReadingRuler />
       <SkipLink />
+      <ImpersonationBanner />
       <div
-        className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
+        className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${bannerOffset} ${
           focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
         }`}
       >

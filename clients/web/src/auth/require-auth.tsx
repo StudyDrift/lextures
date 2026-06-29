@@ -1,9 +1,9 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { getAccessToken } from '../lib/auth'
+import { getBearerToken } from '../lib/impersonation'
 
 export function RequireAuth() {
   const location = useLocation()
-  if (!getAccessToken()) {
+  if (!getBearerToken()) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
   return <Outlet />

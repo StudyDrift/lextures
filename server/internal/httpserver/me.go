@@ -194,11 +194,15 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 		Name string `json:"name"`
 		Slug string `json:"slug,omitempty"`
 	}
+	type impersonationInfo struct {
+		AdminID string `json:"adminId"`
+	}
 	type resp struct {
-		ID          string   `json:"id"`
-		Email       string   `json:"email"`
-		DisplayName *string  `json:"displayName"`
-		Org         *orgInfo `json:"org,omitempty"`
+		ID            string             `json:"id"`
+		Email         string             `json:"email"`
+		DisplayName   *string            `json:"displayName"`
+		Org           *orgInfo           `json:"org,omitempty"`
+		Impersonating *impersonationInfo `json:"impersonating,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
@@ -211,6 +215,9 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 			return
 		}
 		out := resp{ID: row.ID, Email: row.Email, DisplayName: row.DisplayName}
+		if imp, ok := auth.ImpersonationFromContext(r.Context()); ok {
+			out.Impersonating = &impersonationInfo{AdminID: imp.AdminID}
+		}
 		orgID, err := organization.OrgIDForUser(r.Context(), d.Pool, userID)
 		if err == nil && orgID != uuid.Nil {
 			var name, slug string

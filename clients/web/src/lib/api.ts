@@ -1,4 +1,4 @@
-import { getAccessToken } from './auth'
+import { getBearerToken } from './impersonation'
 import {
   applyAuthTokenResponse,
   clearSessionTokens,
@@ -137,7 +137,7 @@ export async function authorizedFetch(path: string, init?: RequestInit): Promise
 
   for (let attempt = 0; attempt < attempts; attempt++) {
     const headers = new Headers(init?.headers)
-    const token = getAccessToken()
+    const token = getBearerToken()
     if (token) {
       headers.set('Authorization', `Bearer ${token}`)
     }
@@ -149,7 +149,7 @@ export async function authorizedFetch(path: string, init?: RequestInit): Promise
         const ok = await tryRefreshSession()
         if (ok) {
           const h2 = new Headers(init?.headers)
-          const t2 = getAccessToken()
+          const t2 = getBearerToken()
           if (t2) {
             h2.set('Authorization', `Bearer ${t2}`)
           }

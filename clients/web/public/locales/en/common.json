@@ -625,5 +625,10 @@
   "gradingAgent.settings.fromTemplate.multiAssignmentHint": "A draft grading agent is created for each selected assignment. Open any row from the assignments table to configure it.",
   "gradingAgent.settings.fromTemplate.create": "Create",
   "gradingAgent.settings.fromTemplate.creating": "Creating…",
-  "gradingAgent.settings.fromTemplate.error": "Could not create grading agents from this template."
+  "gradingAgent.settings.fromTemplate.error": "Could not create grading agents from this template.",
+  "impersonation.viewAs": "View as",
+  "impersonation.confirm": "You are about to view the application as {{name}}. All writes will be blocked. Continue?",
+  "impersonation.banner.viewingAs": "You are viewing as {{name}}.",
+  "impersonation.banner.exit": "Exit impersonation",
+  "impersonation.banner.exiting": "Exiting…"
 }
