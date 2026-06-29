@@ -38,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.i18n.L
+import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.sceneBackground
@@ -186,6 +188,8 @@ fun LexturesTabBar(
     modifier: Modifier = Modifier,
 ) {
     val dark = isDarkTheme()
+    val context = LocalContext.current
+    val localePrefs = LocalLocalePreferences.current
     val shape = RoundedCornerShape(50)
     Row(
         modifier = modifier
@@ -216,7 +220,7 @@ fun LexturesTabBar(
                     .clip(CircleShape)
                     .background(if (isSelected) LexturesColors.BrandCream else Color.Transparent)
                     .clickable { onSelect(tab.name) }
-                    .semantics { contentDescription = L.text(tab.labelRes) },
+                    .semantics { contentDescription = L.text(context, localePrefs, tab.labelRes) },
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

@@ -33,7 +33,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ExposedDropdownMenu
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
@@ -73,6 +72,7 @@ import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.features.home.HomeShellState
+import com.lextures.android.features.home.LmsCard
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import com.lextures.android.core.accessibility.rememberAccessibilityPreferencesState

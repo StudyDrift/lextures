@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.textPrimary
+import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.accessibility.DictationField
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.SendMessageRequest

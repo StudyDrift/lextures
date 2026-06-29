@@ -24,6 +24,7 @@ import com.lextures.android.core.accessibility.LocalAccessibilityPreferences
 import com.lextures.android.core.accessibility.rememberAccessibilityPreferences
 import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.i18n.rememberLocalePreferences
+import kotlin.math.abs
 
 /**
  * Lextures by StudyDrift brand system.
@@ -181,12 +182,6 @@ fun coverBrush(key: String): Brush {
         start = Offset.Zero,
         end = Offset(420f, 420f),
     )
-}
-
-@Composable
-fun rememberLocalePreferences(): LocalePreferences {
-    val context = LocalContext.current
-    return remember { LocalePreferences(context.applicationContext) }
 }
 
 @Composable
