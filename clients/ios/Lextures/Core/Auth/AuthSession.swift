@@ -122,6 +122,7 @@ final class AuthSession {
     }
 
     func signOut() {
+        OfflineService.shared.clearAllOnLogout()
         KeychainStore.deleteAll()
         accessToken = nil
         refreshToken = nil

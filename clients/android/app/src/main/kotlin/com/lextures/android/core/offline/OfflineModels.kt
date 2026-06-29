@@ -1,0 +1,69 @@
+package com.lextures.android.core.offline
+
+import java.time.Instant
+import java.time.temporal.ChronoUnit
+import java.util.UUID
+import kotlinx.serialization.Serializable
+
+object OfflineCacheKey {
+    fun courses(): String = "courses"
+    fun course(courseCode: String): String = "course:$courseCode"
+    fun courseStructure(courseCode: String): String = "course:$courseCode:structure"
+    fun myGrades(courseCode: String): String = "course:$courseCode:my-grades"
+    fun itemDetail(courseCode: String, itemId: String): String = "course:$courseCode:item:$itemId"
+}
+
+data class Cached<T>(
+    val value: T,
+    val fetchedAt: Instant,
+) {
+    fun isStale(isOnline: Boolean, maxFreshMinutes: Long = 5): Boolean =
+        !isOnline || ChronoUnit.MINUTES.between(fetchedAt, Instant.now()) > maxFreshMinutes
+
+    fun lastUpdatedLabel(): String {
+        val minutes = ChronoUnit.MINUTES.between(fetchedAt, Instant.now()).coerceAtLeast(0)
+        return when {
+            minutes < 1 -> "Last updated just now"
+            minutes < 60 -> "Last updated $minutes min ago"
+            else -> "Last updated ${ChronoUnit.HOURS.between(fetchedAt, Instant.now())} hr ago"
+        }
+    }
+}
+
+enum class OutboxStatus(val userLabel: String) {
+    Queued("Saved locally — will sync"),
+    Syncing("Syncing…"),
+    Synced("Synced"),
+    Failed("Sync failed — retry"),
+    Conflict("Conflict — review required"),
+}
+
+@Serializable
+data class OutboxItem(
+    val id: String = UUID.randomUUID().toString(),
+    val createdAtEpochMs: Long = System.currentTimeMillis(),
+    val sequence: Int = 0,
+    val method: String,
+    val path: String,
+    val bodyJson: String? = null,
+    val label: String,
+    val status: String = OutboxStatus.Queued.name,
+    val lastError: String? = null,
+) {
+    val idempotencyKey: String get() = id
+
+    fun outboxStatus(): OutboxStatus =
+        runCatching { OutboxStatus.valueOf(status) }.getOrDefault(OutboxStatus.Queued)
+}
+
+object OfflineStorageBudget {
+    const val DEFAULT_MAX_BYTES: Long = 50L * 1024 * 1024
+}
+
+@Serializable
+data class OfflineSyncMetrics(
+    val successCount: Int = 0,
+    val failureCount: Int = 0,
+    val conflictCount: Int = 0,
+    val lastSyncEpochMs: Long? = null,
+)

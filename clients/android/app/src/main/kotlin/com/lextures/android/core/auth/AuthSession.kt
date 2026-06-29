@@ -6,6 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.network.ApiError
+import com.lextures.android.core.offline.OfflineService
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -117,6 +118,7 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
     }
 
     fun signOut() {
+        OfflineService.get(getApplication()).clearAllOnLogout()
         tokenStore.clearAll()
         _accessToken.value = null
         _userEmail.value = null

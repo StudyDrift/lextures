@@ -51,11 +51,16 @@ import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.AttendanceSession
+import androidx.compose.ui.platform.LocalContext
+import com.lextures.android.core.design.OfflineBanner
+import com.lextures.android.core.design.StalenessChip
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.GradingBacklogItem
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.offline.OfflineCacheKey
+import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.grading.GradingBacklogSection
 import com.lextures.android.features.grading.SubmissionsListScreen
 import com.lextures.android.features.home.LmsCard
@@ -82,9 +87,13 @@ fun CourseDetailScreen(
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
+    val context = LocalContext.current
+    val offline = remember { OfflineService.get(context) }
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
 
     var section by rememberSaveable(course.courseCode) { mutableStateOf("modules") }
     var items by remember { mutableStateOf<List<CourseStructureItem>>(emptyList()) }
+    var cacheLabel by remember { mutableStateOf<String?>(null) }
     var hasAttendanceSessions by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
@@ -136,7 +145,16 @@ fun CourseDetailScreen(
             hasAttendanceSessions = runCatching {
                 LmsApi.fetchAttendanceSessions(course.courseCode, token).isNotEmpty()
             }.getOrDefault(false)
-            items = LmsApi.fetchCourseStructure(course.courseCode, token)
+            val result = offline.cachedFetch(
+                key = OfflineCacheKey.courseStructure(course.courseCode),
+                accessToken = token,
+                serializer = kotlinx.serialization.builtins.ListSerializer(CourseStructureItem.serializer()),
+            ) {
+                LmsApi.fetchCourseStructure(course.courseCode, token)
+            }
+            items = result.first
+            val cached = result.second
+            cacheLabel = if (cached != null && cached.isStale(isOnline)) cached.lastUpdatedLabel() else null
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -256,6 +274,13 @@ fun CourseDetailScreen(
 
             errorMessage?.let { message ->
                 item { LmsErrorBanner(message) }
+            }
+
+            if (!isOnline) {
+                item { OfflineBanner() }
+            }
+            cacheLabel?.let { label ->
+                item { StalenessChip(label = label) }
             }
 
             when (section) {

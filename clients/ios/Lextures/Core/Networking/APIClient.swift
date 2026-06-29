@@ -12,19 +12,49 @@ struct APIClient {
         method: String = "GET",
         body: (any Encodable)? = nil,
         authorized: Bool = false,
-        accessToken: String? = nil
+        accessToken: String? = nil,
+        idempotencyKey: String? = nil
+    ) async throws -> (Data, HTTPURLResponse) {
+        let bodyData: Data?
+        if let body {
+            bodyData = try JSONEncoder().encode(AnyEncodable(body))
+        } else {
+            bodyData = nil
+        }
+        return try await requestRaw(
+            path: path,
+            method: method,
+            bodyData: bodyData,
+            authorized: authorized,
+            accessToken: accessToken,
+            idempotencyKey: idempotencyKey
+        )
+    }
+
+    /// Sends a request with a pre-encoded JSON body (used by the offline outbox replay path).
+    func requestRaw(
+        path: String,
+        method: String = "GET",
+        bodyData: Data? = nil,
+        authorized: Bool = false,
+        accessToken: String? = nil,
+        idempotencyKey: String? = nil
     ) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: AppConfiguration.apiURL(path: path))
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Accept")
 
-        if let body {
+        if let bodyData {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
+            request.httpBody = bodyData
         }
 
         if authorized, let accessToken {
             request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        }
+
+        if let idempotencyKey, !idempotencyKey.isEmpty {
+            request.setValue(idempotencyKey, forHTTPHeaderField: "X-Idempotency-Key")
         }
 
         let data: Data

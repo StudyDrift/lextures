@@ -17,6 +17,15 @@ class ApiClient(
         method: String = "GET",
         body: String? = null,
         accessToken: String? = null,
+        idempotencyKey: String? = null,
+    ): Pair<String, Int> = requestRaw(path, method, body, accessToken, idempotencyKey)
+
+    suspend fun requestRaw(
+        path: String,
+        method: String = "GET",
+        body: String? = null,
+        accessToken: String? = null,
+        idempotencyKey: String? = null,
     ): Pair<String, Int> {
         val builder = Request.Builder()
             .url(AppConfiguration.apiUrl(path))
@@ -32,6 +41,10 @@ class ApiClient(
 
         if (!accessToken.isNullOrBlank()) {
             builder.header("Authorization", "Bearer $accessToken")
+        }
+
+        if (!idempotencyKey.isNullOrBlank()) {
+            builder.header("X-Idempotency-Key", idempotencyKey)
         }
 
         val response = try {
