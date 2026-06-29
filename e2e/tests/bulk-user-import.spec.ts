@@ -169,8 +169,11 @@ not-an-email,Bob,Jones,student
     await apiSignup(orgAdminEmail)
     const { access_token: orgToken } = await apiLogin(orgAdminEmail)
     const meRes = await fetch(`${API_BASE}/api/v1/me`, { headers: authHeaders(orgToken) })
-    const me = (await meRes.json()) as { id: string; org_id?: string }
-    await grantOrgAdmin(adminToken, me.org_id ?? '', me.id)
+    const me = (await meRes.json()) as { id: string; orgId?: string }
+    const orgId = me.orgId ?? (await (await fetch(`${API_BASE}/api/v1/me/org-role-capabilities`, {
+      headers: authHeaders(orgToken),
+    })).json() as { orgId: string }).orgId
+    await grantOrgAdmin(adminToken, orgId, me.id)
 
     const studentEmail = uniqueEmail('student')
     const csv = `email,first_name,last_name,role,external_id
