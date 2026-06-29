@@ -142,9 +142,10 @@ See `variables.tf` for EKS/RDS/Redis sizing overrides.
 
 ## CI and deployment
 
-- Pull requests: `.github/workflows/ci.yml` runs `make iac-check` when `iac/**` changes.
+- Pull requests: `.github/workflows/ci.yml` runs `make iac-check` when `iac/**` changes, canary unit tests and zero-downtime rolling-restart validation when `deploy/**` changes.
 - Optional plan comments: when `TF_TOKEN` and HCP Terraform workspace are configured, CI can post `terraform plan` output on PRs.
-- Production apply: `.github/workflows/deploy-production.yml` — manual `workflow_dispatch` only, gated by GitHub Environment approval.
+- Production deploy: `.github/workflows/deploy-production.yml` — manual `workflow_dispatch` with `rolling`, `blue-green`, or `canary` strategies (plan 17.9). Gated by GitHub Environment approval.
+- Traffic weights: `iac/production/deploy-traffic.tf` variables `deploy_canary_weight` / `deploy_stable_weight`, applied via `deploy/scripts/traffic_split.sh`.
 
 ## Local validation
 

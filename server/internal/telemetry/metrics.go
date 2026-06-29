@@ -43,20 +43,28 @@ type Metrics struct {
 // NewMetrics builds a self-contained registry (not the global default, so tests
 // can construct independent instances) with the application metrics and the
 // standard Go runtime + process collectors registered.
-func NewMetrics() *Metrics {
+// deployColor labels HTTP metrics for blue/green canary analysis (plan 17.9).
+func NewMetrics(deployColor ...string) *Metrics {
+	color := "stable"
+	if len(deployColor) > 0 && deployColor[0] != "" {
+		color = deployColor[0]
+	}
+	constLabels := prometheus.Labels{"deploy_color": color}
 	reg := prometheus.NewRegistry()
 	m := &Metrics{
 		registry: reg,
 		httpRequests: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Namespace: namespace,
-			Name:      "http_requests_total",
-			Help:      "Total HTTP requests by method, route group, and status class.",
+			Namespace:   namespace,
+			Name:        "http_requests_total",
+			Help:        "Total HTTP requests by method, route group, and status class.",
+			ConstLabels: constLabels,
 		}, []string{"method", "route", "status"}),
 		httpDuration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: namespace,
-			Name:      "http_request_duration_seconds",
-			Help:      "HTTP request latency in seconds by method and route group.",
-			Buckets:   durationBuckets,
+			Namespace:   namespace,
+			Name:        "http_request_duration_seconds",
+			Help:        "HTTP request latency in seconds by method and route group.",
+			Buckets:     durationBuckets,
+			ConstLabels: constLabels,
 		}, []string{"method", "route"}),
 		httpInFlight: prometheus.NewGauge(prometheus.GaugeOpts{
 			Namespace: namespace,
@@ -90,9 +98,10 @@ func NewMetrics() *Metrics {
 			Help:      "Health probe invocations by endpoint and HTTP-style status (plan 17.8).",
 		}, []string{"endpoint", "status"}),
 		buildInfo: prometheus.NewGaugeVec(prometheus.GaugeOpts{
-			Namespace: namespace,
-			Name:      "build_info",
-			Help:      "Build metadata; always 1, labels carry version and environment.",
+			Namespace:   namespace,
+			Name:        "build_info",
+			Help:        "Build metadata; always 1, labels carry version and environment.",
+			ConstLabels: constLabels,
 		}, []string{"version", "env"}),
 	}
 

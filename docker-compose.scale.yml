@@ -51,6 +51,7 @@ services:
       DB_POOL_MAX_CONNS: "20"
       DB_POOL_MIN_CONNS: "2"
       SHUTDOWN_TIMEOUT_SECS: "30"
+      DEPLOY_COLOR: ${DEPLOY_COLOR:-stable}
     # No host port: enables `--scale api=N`. Caddy reaches replicas via Docker DNS.
     expose:
       - "8080"

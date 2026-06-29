@@ -1,0 +1,92 @@
+# Kubernetes manifests for zero-downtime and canary deploys (plan 17.9).
+#
+# Apply after `terraform output -raw kubectl_config_command`:
+#   kubectl apply -f deploy/k8s/
+#
+# The API Deployment uses a RollingUpdate with maxUnavailable=0 so new pods pass
+# /health/ready before old pods terminate (FR-1). Canary traffic splitting is
+# configured on the Ingress via ALB weighted target groups.
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lextures-api
+  namespace: lextures
+  labels:
+    app: lextures-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: lextures-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: lextures-api
+        deploy-color: blue
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      terminationGracePeriodSeconds: 35
+      containers:
+        - name: api
+          image: ghcr.io/lextures/server-go:latest
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 9090
+          env:
+            - name: DEPLOY_COLOR
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['deploy-color']
+            - name: SHUTDOWN_TIMEOUT_SECS
+              value: "30"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lextures-api-blue
+  namespace: lextures
+spec:
+  selector:
+    app: lextures-api
+    deploy-color: blue
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lextures-api-green
+  namespace: lextures
+spec:
+  selector:
+    app: lextures-api
+    deploy-color: green
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

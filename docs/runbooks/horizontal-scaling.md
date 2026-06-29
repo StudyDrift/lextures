@@ -39,6 +39,8 @@ an instance whose Redis or DB link is down.
 
 ## Rolling restart / zero-downtime deploy
 
+See also `docs/runbooks/production-deploy-canary.md` (plan 17.9) for blue/green and canary procedures.
+
 1. The LB stops routing new traffic to an instance once `/health/ready` fails or
    the instance is marked draining.
 2. On `SIGTERM` the process stops accepting new connections and drains in-flight

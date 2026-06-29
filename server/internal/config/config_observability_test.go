@@ -8,6 +8,7 @@ func TestObservabilityFromEnv_Defaults(t *testing.T) {
 		"METRICS_ENABLED", "METRICS_ADDR", "OTEL_EXPORTER_OTLP_ENDPOINT", "OTEL_ENDPOINT",
 		"OTEL_EXPORTER_OTLP_INSECURE", "OTEL_TRACES_SAMPLE_RATIO", "SENTRY_DSN",
 		"SENTRY_TRACES_SAMPLE_RATE", "OTEL_SERVICE_NAME", "OBSERVABILITY_SERVICE_NAME",
+		"DEPLOY_COLOR",
 	} {
 		t.Setenv(k, "")
 	}
@@ -36,6 +37,9 @@ func TestObservabilityFromEnv_Defaults(t *testing.T) {
 	}
 	if o.SentryTracesSampleRate != 0.1 {
 		t.Errorf("SentryTracesSampleRate = %v, want 0.1", o.SentryTracesSampleRate)
+	}
+	if o.DeployColor != "stable" {
+		t.Errorf("DeployColor = %q, want stable", o.DeployColor)
 	}
 }
 

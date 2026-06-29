@@ -12,6 +12,7 @@ global:
 
 rule_files:
   - /etc/prometheus/alerts.yml
+  - /etc/prometheus/recording_rules.yml
 
 alerting:
   alertmanagers:

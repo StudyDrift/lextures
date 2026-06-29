@@ -1,0 +1,30 @@
+# Prometheus recording rules for deploy canary analysis (plan 17.9 FR-4).
+groups:
+  - name: lextures-deploy-canary
+    interval: 30s
+    rules:
+      - record: lextures:http_error_rate
+        expr: |
+          sum(rate(lextures_http_requests_total{status="5xx"}[5m]))
+            /
+          clamp_min(sum(rate(lextures_http_requests_total[5m])), 1)
+
+      - record: lextures:http_error_rate:by_deploy_color
+        expr: |
+          sum(rate(lextures_http_requests_total{status="5xx"}[5m])) by (deploy_color)
+            /
+          clamp_min(sum(rate(lextures_http_requests_total[5m])) by (deploy_color), 1)
+
+      - record: lextures:http_request_duration_p95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(lextures_http_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      - record: lextures:http_request_duration_p95:by_deploy_color
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(lextures_http_request_duration_seconds_bucket[5m])) by (le, deploy_color)
+          )
