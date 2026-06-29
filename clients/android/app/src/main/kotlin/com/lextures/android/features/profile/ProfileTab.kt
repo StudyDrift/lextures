@@ -28,11 +28,20 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import com.lextures.android.core.design.OutboxStatusChip
+import com.lextures.android.core.offline.OutboxStatus
+import com.lextures.android.core.offline.OfflineService
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,7 +72,15 @@ fun ProfileTab(
     modifier: Modifier = Modifier,
 ) {
     var confirmingSignOut by remember { mutableStateOf(false) }
+    var confirmingClearCache by remember { mutableStateOf(false) }
     var showNotifications by remember { mutableStateOf(false) }
+    val accessToken by session.accessToken.collectAsState()
+    val context = LocalContext.current
+    val offline = remember { OfflineService.get(context) }
+    val pendingCount by offline.pendingCount.collectAsState()
+    val storageBytes by offline.storageBytes.collectAsState()
+    val outboxItems by offline.outboxItems.collectAsState()
+    val scope = rememberCoroutineScope()
 
     if (showNotifications) {
         NotificationsScreen(
@@ -124,6 +141,61 @@ fun ProfileTab(
                 if (email.isNotEmpty()) {
                     Text(text = email, fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f))
                 }
+            }
+        }
+
+        if (pendingCount > 0) {
+            LmsCard {
+                Text(text = "Pending sync", style = LexturesType.display(17), color = textPrimary())
+                Text(
+                    text = "$pendingCount change${if (pendingCount == 1) "" else "s"} waiting to upload",
+                    fontSize = 12.sp,
+                    color = textSecondary(),
+                )
+                outboxItems.filter {
+                    val status = it.outboxStatus()
+                    status == OutboxStatus.Queued || status == OutboxStatus.Failed || status == OutboxStatus.Conflict
+                }.forEach { item ->
+                    Column(modifier = Modifier.padding(top = 8.dp)) {
+                        Text(text = item.label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = textPrimary())
+                        OutboxStatusChip(status = item.outboxStatus())
+                        if (item.outboxStatus() == OutboxStatus.Failed || item.outboxStatus() == OutboxStatus.Conflict) {
+                            TextButton(onClick = {
+                                scope.launch {
+                                    offline.retryOutboxItem(item.id, accessToken)
+                                }
+                            }) {
+                                Text("Retry")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        LmsCard {
+            Text(text = "Offline storage", style = LexturesType.display(17), color = textPrimary())
+            InfoRow(
+                Icons.Default.Storage,
+                "Cache size",
+                android.text.format.Formatter.formatFileSize(context, storageBytes),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable { confirmingClearCache = true }
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = null, tint = LexturesColors.Error)
+                Text(
+                    text = "Clear cached data",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = LexturesColors.Error,
+                )
             }
         }
 
@@ -224,6 +296,27 @@ fun ProfileTab(
                 color = LexturesColors.Error,
             )
         }
+    }
+
+    if (confirmingClearCache) {
+        AlertDialog(
+            onDismissRequest = { confirmingClearCache = false },
+            title = { Text("Clear offline storage?") },
+            text = {
+                Text("Removes cached reads and downloads from this device. Queued changes are kept until they sync.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmingClearCache = false
+                    offline.clearStorage()
+                }) {
+                    Text("Clear cache", color = LexturesColors.Error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingClearCache = false }) { Text("Cancel") }
+            },
+        )
     }
 
     if (confirmingSignOut) {

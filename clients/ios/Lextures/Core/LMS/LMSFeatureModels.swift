@@ -78,7 +78,7 @@ struct BroadcastsResponse: Decodable {
 // MARK: - My grades
 
 /// Column from `/my-grades` / gradebook grid (subset used on mobile).
-struct GradeColumn: Decodable, Identifiable, Hashable {
+struct GradeColumn: Codable, Identifiable, Hashable {
     var id: String
     var kind: String
     var title: String
@@ -87,12 +87,18 @@ struct GradeColumn: Decodable, Identifiable, Hashable {
     var assignmentGroupId: String?
 }
 
-struct AssignmentGroup: Decodable, Hashable {
+struct AssignmentGroup: Codable, Hashable {
     var id: String
     var name: String
     var weightPercent: Double
 
     enum CodingKeys: String, CodingKey { case id, name, weightPercent }
+
+    init(id: String, name: String, weightPercent: Double) {
+        self.id = id
+        self.name = name
+        self.weightPercent = weightPercent
+    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -100,10 +106,17 @@ struct AssignmentGroup: Decodable, Hashable {
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
         weightPercent = try container.decodeIfPresent(Double.self, forKey: .weightPercent) ?? 0
     }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(weightPercent, forKey: .weightPercent)
+    }
 }
 
 /// GET `/courses/{code}/my-grades` (student only).
-struct MyGradesResponse: Decodable {
+struct MyGradesResponse: Codable {
     var columns: [GradeColumn]
     var grades: [String: String]
     var displayGrades: [String: String]
@@ -117,6 +130,24 @@ struct MyGradesResponse: Decodable {
         case heldGradeItemIds, droppedGrades, gradeStatuses
     }
 
+    init(
+        columns: [GradeColumn] = [],
+        grades: [String: String] = [:],
+        displayGrades: [String: String] = [:],
+        assignmentGroups: [AssignmentGroup] = [],
+        heldGradeItemIds: [String] = [],
+        droppedGrades: [String: Bool] = [:],
+        gradeStatuses: [String: String] = [:]
+    ) {
+        self.columns = columns
+        self.grades = grades
+        self.displayGrades = displayGrades
+        self.assignmentGroups = assignmentGroups
+        self.heldGradeItemIds = heldGradeItemIds
+        self.droppedGrades = droppedGrades
+        self.gradeStatuses = gradeStatuses
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         columns = try container.decodeIfPresent([GradeColumn].self, forKey: .columns) ?? []
@@ -126,6 +157,17 @@ struct MyGradesResponse: Decodable {
         heldGradeItemIds = try container.decodeIfPresent([String].self, forKey: .heldGradeItemIds) ?? []
         droppedGrades = try container.decodeIfPresent([String: Bool].self, forKey: .droppedGrades) ?? [:]
         gradeStatuses = try container.decodeIfPresent([String: String].self, forKey: .gradeStatuses) ?? [:]
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(columns, forKey: .columns)
+        try container.encode(grades, forKey: .grades)
+        try container.encode(displayGrades, forKey: .displayGrades)
+        try container.encode(assignmentGroups, forKey: .assignmentGroups)
+        try container.encode(heldGradeItemIds, forKey: .heldGradeItemIds)
+        try container.encode(droppedGrades, forKey: .droppedGrades)
+        try container.encode(gradeStatuses, forKey: .gradeStatuses)
     }
 }
 
