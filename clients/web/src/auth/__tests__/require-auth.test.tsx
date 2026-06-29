@@ -1,24 +1,24 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getAccessToken } from '../../lib/auth'
+import { getBearerToken } from '../../lib/auth'
 import { RequireAuth } from '../require-auth'
 
 vi.mock('../../lib/auth', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../lib/auth')>()
   return {
     ...actual,
-    getAccessToken: vi.fn(),
+    getBearerToken: vi.fn(),
   }
 })
 
 describe('RequireAuth', () => {
   beforeEach(() => {
-    vi.mocked(getAccessToken).mockReset()
+    vi.mocked(getBearerToken).mockReset()
   })
 
   it('renders child routes when a token exists', () => {
-    vi.mocked(getAccessToken).mockReturnValue('tok')
+    vi.mocked(getBearerToken).mockReturnValue('tok')
     render(
       <MemoryRouter initialEntries={['/']}>
         <Routes>
@@ -33,7 +33,7 @@ describe('RequireAuth', () => {
   })
 
   it('redirects to login when there is no token', () => {
-    vi.mocked(getAccessToken).mockReturnValue(null)
+    vi.mocked(getBearerToken).mockReturnValue(null)
     render(
       <MemoryRouter initialEntries={['/']}>
         <Routes>
