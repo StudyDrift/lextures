@@ -307,6 +307,7 @@ func telemetryConfig(cfg config.Config) telemetry.Config {
 		ServiceName: o.ServiceName,
 		Version:     o.Version,
 		Environment: cfg.AppEnv,
+		DeployColor: o.DeployColor,
 		OTel: telemetry.OTelConfig{
 			Endpoint:    o.OTelEndpoint,
 			Insecure:    o.OTelInsecure,

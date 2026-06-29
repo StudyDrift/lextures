@@ -591,6 +591,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       iac: ${{ steps.filter.outputs.iac }}
+      deploy: ${{ steps.filter.outputs.deploy }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -600,6 +601,30 @@ jobs:
             iac:
               - 'iac/**'
               - 'Makefile'
+            deploy:
+              - 'deploy/**'
+              - 'docker-compose.scale.yml'
+              - '.github/workflows/deploy-production.yml'
+
+  deploy-scripts:
+    name: Deploy scripts (canary unit tests)
+    needs: iac-changes
+    if: needs.iac-changes.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Canary analysis unit tests (plan 17.9)
+        run: python3 -m unittest deploy/scripts/test_canary_analyze.py -v
+
+  deploy-rolling-restart:
+    name: Deploy (zero-downtime rolling restart)
+    needs: iac-changes
+    if: needs.iac-changes.outputs.deploy == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zero 502/503 during rolling restart (AC-1)
+        run: bash deploy/scripts/test_rolling_restart_zero_downtime.sh
 
   iac-terraform:
     name: IaC (Terraform fmt + validate)

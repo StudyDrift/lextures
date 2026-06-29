@@ -18,6 +18,7 @@ The API reads these environment variables (see `server/internal/config`):
 | `SENTRY_DSN` | _(empty)_ | Sentry project DSN (separate per environment — FR-4). Empty disables Sentry. |
 | `SENTRY_TRACES_SAMPLE_RATE` | `0.1` | Sentry performance-transaction sampling. |
 | `APP_VERSION` | _(empty)_ | Build/release id for `build_info` and Sentry release. |
+| `DEPLOY_COLOR` | `stable` | Blue/green/canary label on HTTP metrics (plan 17.9). |
 
 `/metrics` is served on a **separate** HTTP server (`METRICS_ADDR`), not on the
 public API port, so it can be firewalled independently and a scrape still
@@ -42,6 +43,7 @@ spans flow to Tempo.
 ```
 prometheus/prometheus.yml   Scrape config (pull model; in-VPC targets)
 prometheus/alerts.yml       Alert rules (FR-6): error rate, p95, dead letters, DB pool
+prometheus/recording_rules.yml  Recording rules for canary analysis (plan 17.9)
 otel-collector/config.yml   OTLP receiver → batch → Tempo (PII-scrubbing processor)
 tempo/tempo.yml             Local single-binary trace store
 grafana/provisioning/       Datasources + dashboard providers
@@ -52,9 +54,10 @@ grafana/dashboards/         HTTP Overview, Database & Cache, Job Queue, AI Provi
 
 All application metrics are prefixed `lextures_`. Key series:
 
-- `lextures_http_requests_total{method,route,status}` — `route` is the chi route
+- `lextures_http_requests_total{method,route,status,deploy_color}` — `route` is the chi route
   pattern and `status` is a 2xx/3xx/4xx/5xx class (bounded cardinality).
-- `lextures_http_request_duration_seconds_bucket{method,route}` — latency histogram.
+- `lextures_http_request_duration_seconds_bucket{method,route,deploy_color}` — latency histogram.
+- `lextures:http_error_rate`, `lextures:http_request_duration_p95` — recording rules for deploy canary analysis (17.9).
 - `lextures_db_pool_*`, `lextures_db_pool_utilization_ratio` — pgx pool.
 - `lextures_redis_pool_*` — Redis pool.
 - `lextures_job_queue_depth`, `lextures_job_queue_jobs{status}`,

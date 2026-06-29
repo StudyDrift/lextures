@@ -630,6 +630,10 @@ type Observability struct {
 	SentryDSN string
 	// SentryTracesSampleRate samples performance transactions (default 0.1 — FR-3).
 	SentryTracesSampleRate float64
+
+	// DeployColor labels Prometheus metrics for blue/green and canary analysis
+	// (plan 17.9). Set via DEPLOY_COLOR (e.g. blue, green, stable).
+	DeployColor string
 }
 
 // Load reads configuration from the environment.
@@ -851,6 +855,7 @@ func observabilityFromEnv() Observability {
 		OTelSampleRatio:        floatEnvDefault("OTEL_TRACES_SAMPLE_RATIO", 0.1),
 		SentryDSN:              firstNonEmptyTrimmed("SENTRY_DSN"),
 		SentryTracesSampleRate: floatEnvDefault("SENTRY_TRACES_SAMPLE_RATE", 0.1),
+		DeployColor:            stringDefault(firstNonEmptyTrimmed("DEPLOY_COLOR"), "stable"),
 	}
 }
 

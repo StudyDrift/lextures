@@ -32,7 +32,7 @@ func TestMetricsMiddleware_RecordsRouteAndStatus(t *testing.T) {
 	}
 
 	body := scrape(t, m)
-	want := `lextures_http_requests_total{method="GET",route="/api/v1/courses/{courseId}",status="2xx"} 2`
+	want := `lextures_http_requests_total{deploy_color="stable",method="GET",route="/api/v1/courses/{courseId}",status="2xx"} 2`
 	if !strings.Contains(body, want) {
 		t.Errorf("expected aggregated series %q in:\n%s", want, body)
 	}

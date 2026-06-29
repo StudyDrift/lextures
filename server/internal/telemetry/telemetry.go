@@ -12,6 +12,7 @@ type Config struct {
 	ServiceName string
 	Version     string
 	Environment string
+	DeployColor string
 
 	OTel   OTelConfig
 	Sentry SentryConfig
@@ -34,7 +35,7 @@ type Telemetry struct {
 // are logged and the corresponding component is disabled — so a broken
 // observability backend cannot prevent the server from starting.
 func Init(ctx context.Context, cfg Config) *Telemetry {
-	t := &Telemetry{Metrics: NewMetrics()}
+	t := &Telemetry{Metrics: NewMetrics(cfg.DeployColor)}
 	t.Metrics.SetBuildInfo(cfg.Version, cfg.Environment)
 	setDefault(t.Metrics)
 

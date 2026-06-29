@@ -24,7 +24,7 @@ func TestMetricsHandler_Exposition(t *testing.T) {
 	for _, want := range []string{
 		"lextures_http_requests_total",
 		"lextures_http_request_duration_seconds",
-		`lextures_build_info{env="test",version="1.2.3"} 1`,
+		`lextures_build_info{deploy_color="stable",env="test",version="1.2.3"} 1`,
 		"lextures_ai_provider_calls_total",
 		"lextures_ai_estimated_cost_dollars_total",
 		`lextures_business_events_total{event="enrollment_created"} 1`,
@@ -34,6 +34,16 @@ func TestMetricsHandler_Exposition(t *testing.T) {
 		if !strings.Contains(body, want) {
 			t.Errorf("exposition missing %q", want)
 		}
+	}
+}
+
+func TestMetrics_DeployColorLabel(t *testing.T) {
+	m := NewMetrics("green")
+	m.SetBuildInfo("abc123", "production")
+	rr := httptest.NewRecorder()
+	m.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	if !strings.Contains(rr.Body.String(), `deploy_color="green"`) {
+		t.Error("expected deploy_color=green on metrics series")
 	}
 }
 
