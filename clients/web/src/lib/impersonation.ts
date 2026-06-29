@@ -1,10 +1,16 @@
-import { getAccessToken, notifyAuthTokenListeners, setAccessToken } from './auth'
 import { apiUrl } from './api'
+import {
+  clearImpersonationToken,
+  getAccessToken,
+  getBearerToken,
+  getImpersonationToken,
+  notifyAuthTokenListeners,
+  setAccessToken,
+  setImpersonationToken,
+} from './auth'
 
-const IMPERSONATION_TOKEN_KEY = 'studydrift_impersonation_token'
 const ADMIN_BACKUP_TOKEN_KEY = 'studydrift_admin_session_backup'
 
-let memoryImpersonation: string | null = null
 let memoryBackup: string | null = null
 
 export type MeImpersonation = {
@@ -42,18 +48,7 @@ function removeStorage(key: string): void {
   }
 }
 
-/** Bearer token for API calls — impersonation token takes precedence when active. */
-export function getBearerToken(): string | null {
-  return getImpersonationToken() ?? getAccessToken()
-}
-
-export function getImpersonationToken(): string | null {
-  try {
-    return readStorage(IMPERSONATION_TOKEN_KEY) ?? memoryImpersonation
-  } catch {
-    return memoryImpersonation
-  }
-}
+export { getBearerToken, getImpersonationToken }
 
 export function isImpersonating(): boolean {
   return getImpersonationToken() != null
@@ -66,19 +61,12 @@ export function startImpersonationSession(impersonationToken: string): void {
     writeStorage(ADMIN_BACKUP_TOKEN_KEY, current)
     memoryBackup = null
   }
-  try {
-    writeStorage(IMPERSONATION_TOKEN_KEY, impersonationToken)
-    memoryImpersonation = null
-  } catch {
-    memoryImpersonation = impersonationToken
-  }
-  notifyAuthTokenListeners()
+  setImpersonationToken(impersonationToken)
 }
 
 /** Clear impersonation state and restore the backed-up admin token. */
 export function endImpersonationSession(): void {
-  memoryImpersonation = null
-  removeStorage(IMPERSONATION_TOKEN_KEY)
+  clearImpersonationToken()
   const backup = readStorage(ADMIN_BACKUP_TOKEN_KEY) ?? memoryBackup
   memoryBackup = null
   removeStorage(ADMIN_BACKUP_TOKEN_KEY)

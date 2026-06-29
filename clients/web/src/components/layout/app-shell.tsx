@@ -23,11 +23,12 @@ import { UiThemeSync } from './ui-theme-sync'
 import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
-import { ImpersonationBanner } from '../ImpersonationBanner'
-import { useImpersonationBannerOffset } from '../../hooks/use-impersonation-banner-offset'
 
 const IncidentStatusBanner = lazy(() =>
   import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
+)
+const ImpersonationChrome = lazy(() =>
+  import('../impersonation-chrome').then((m) => ({ default: m.ImpersonationChrome })),
 )
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
@@ -39,7 +40,9 @@ function AppShellLayout() {
   const { focus } = useQuizShellFocus()
   const { readingFocus, setReadingFocus } = useReadingShellFocus()
   const hideChrome = Boolean(focus || readingFocus)
-  const bannerOffset = useImpersonationBannerOffset()
+  const shellClassName = `flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
+    focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
+  }`
 
   useFocusOnRoute()
 
@@ -54,12 +57,32 @@ function AppShellLayout() {
       <LocaleBootstrapSync />
       <ReadingRuler />
       <SkipLink />
-      <ImpersonationBanner />
-      <div
-        className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${bannerOffset} ${
-          focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
-        }`}
+      <Suspense
+        fallback={
+          <div className={shellClassName}>
+            {!hideChrome ? <SideNav /> : null}
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-neutral-900">
+              {focus ? (
+                <QuizFocusTopBar model={focus} />
+              ) : readingFocus ? (
+                <ReadingFocusTopBar />
+              ) : (
+                <TopBar />
+              )}
+              <OfflineBanner />
+              <LegalUpdateBanner />
+              <main
+                id="main-content"
+                tabIndex={-1}
+                className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto outline-none dark:bg-neutral-900"
+              >
+                <Outlet />
+              </main>
+            </div>
+          </div>
+        }
       >
+        <ImpersonationChrome shellClassName={shellClassName}>
         {!hideChrome ? <SideNav /> : null}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-neutral-900">
           {focus ? (
@@ -82,7 +105,8 @@ function AppShellLayout() {
             <Outlet />
           </main>
         </div>
-      </div>
+        </ImpersonationChrome>
+      </Suspense>
       </LmsExperienceRoot>
     </CourseNavFeaturesProvider>
   )

@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { getBearerToken } from '../lib/impersonation'
+import { getBearerToken } from '../lib/auth'
 
 export function RequireAuth() {
   const location = useLocation()

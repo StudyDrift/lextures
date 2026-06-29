@@ -1,4 +1,4 @@
-import { getBearerToken } from './impersonation'
+import { getBearerToken } from './auth'
 import {
   applyAuthTokenResponse,
   clearSessionTokens,
