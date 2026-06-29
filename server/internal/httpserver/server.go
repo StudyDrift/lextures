@@ -22,22 +22,23 @@ import (
 	"github.com/lextures/lextures/server/internal/logging"
 	"github.com/lextures/lextures/server/internal/lti"
 	"github.com/lextures/lextures/server/internal/notifevents"
+	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/openapi"
 	"github.com/lextures/lextures/server/internal/platformstate"
 	"github.com/lextures/lextures/server/internal/redisclient"
-	"github.com/lextures/lextures/server/internal/objectcache"
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/scheduler"
+	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/cleverauth"
 	drmservice "github.com/lextures/lextures/server/internal/service/drm"
 	"github.com/lextures/lextures/server/internal/service/filestorage"
 	integrationsservice "github.com/lextures/lextures/server/internal/service/integrations"
-	botsservice "github.com/lextures/lextures/server/internal/service/bots"
 	"github.com/lextures/lextures/server/internal/service/oidcauth"
 	"github.com/lextures/lextures/server/internal/service/openrouter"
-	"github.com/lextures/lextures/server/internal/service/storagequota"
 	statuspageservice "github.com/lextures/lextures/server/internal/service/statuspage"
+	"github.com/lextures/lextures/server/internal/service/storagequota"
 	"github.com/lextures/lextures/server/internal/smsnotificationqueue"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // Deps is the minimal set of server dependencies. Expand with auth, LTI, etc. during the migration.
@@ -97,6 +98,10 @@ type Deps struct {
 	Redis *redisclient.Client
 	// ObjectCache is the Redis-backed object cache for hot read paths (plan 17.5).
 	ObjectCache *objectcache.Service
+	// Telemetry installs the observability middleware chain (Prometheus metrics,
+	// OpenTelemetry spans, X-Trace-Id header, Sentry panic capture) — plan 17.7.
+	// When nil, the server runs without instrumentation.
+	Telemetry *telemetry.Telemetry
 }
 
 func (d Deps) effectiveConfig() config.Config {
@@ -118,11 +123,25 @@ func NewHandler(d Deps) http.Handler {
 	r := chi.NewRouter()
 	r.Use(corsAll)
 	r.Use(middleware.RequestID)
+	// Observability runs outermost (after RequestID) so traces, the X-Trace-Id
+	// header, and HTTP metrics cover every request — including those later
+	// rejected by rate limiting (plan 17.7 FR-1/FR-2/FR-8).
+	if d.Telemetry != nil {
+		for _, mw := range d.Telemetry.ObserveMiddlewares() {
+			r.Use(mw)
+		}
+	}
 	// Rate limiting runs before RealIP so it sees the genuine TCP peer and can
 	// reject forged X-Forwarded-For headers from untrusted clients (plan 17.6).
 	r.Use(d.rateLimitMiddleware(d.buildRateLimiter()))
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	// Sentry panic capture sits just inside chi's Recoverer so it reports the
+	// panic (with PII scrubbed) before Recoverer converts it to a 500
+	// (plan 17.7 FR-3, AC-3). No-op when Sentry is disabled.
+	if d.Telemetry != nil {
+		r.Use(d.Telemetry.SentryRecoverMiddleware)
+	}
 	r.Use(middleware.Compress(5))
 	r.Use(logging.AccessLog)
 	r.Use(authenticatedNoStoreMiddleware)

@@ -1,0 +1,71 @@
+{
+  "uid": "lextures-database-cache",
+  "title": "Lextures — Database & Cache",
+  "tags": ["lextures", "database", "redis"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "DB pool connections",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "lextures_db_pool_acquired_connections", "legendFormat": "acquired" },
+        { "refId": "B", "expr": "lextures_db_pool_idle_connections", "legendFormat": "idle" },
+        { "refId": "C", "expr": "lextures_db_pool_total_connections", "legendFormat": "total" },
+        { "refId": "D", "expr": "lextures_db_pool_max_connections", "legendFormat": "max" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "gauge",
+      "title": "DB pool utilization",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1,
+          "thresholds": { "mode": "absolute", "steps": [
+            { "color": "green", "value": null },
+            { "color": "yellow", "value": 0.75 },
+            { "color": "red", "value": 0.9 }
+          ] }
+        },
+        "overrides": []
+      },
+      "targets": [
+        { "refId": "A", "expr": "lextures_db_pool_utilization_ratio", "legendFormat": "utilization" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Redis pool connections",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "lextures_redis_pool_total_connections", "legendFormat": "total" },
+        { "refId": "B", "expr": "lextures_redis_pool_idle_connections", "legendFormat": "idle" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Redis pool hit/miss rate",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "rate(lextures_redis_pool_hits_total[5m])", "legendFormat": "hits/s" },
+        { "refId": "B", "expr": "rate(lextures_redis_pool_misses_total[5m])", "legendFormat": "misses/s" },
+        { "refId": "C", "expr": "rate(lextures_redis_pool_timeouts_total[5m])", "legendFormat": "timeouts/s" }
+      ]
+    }
+  ]
+}

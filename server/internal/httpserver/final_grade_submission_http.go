@@ -15,21 +15,22 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/course"
 	"github.com/lextures/lextures/server/internal/repos/finalgradesub"
 	"github.com/lextures/lextures/server/internal/service/gradeexport"
+	"github.com/lextures/lextures/server/internal/telemetry"
 )
 
 // handleFinalGradesPreview is GET /api/v1/courses/{course_code}/final-grades/preview.
 func (d Deps) handleFinalGradesPreview() http.HandlerFunc {
 	type studentGradeOut struct {
-		EnrollmentID  string  `json:"enrollmentId"`
-		UserID        string  `json:"userId"`
-		DisplayName   string  `json:"displayName"`
-		ExternalSISID string  `json:"externalSisId,omitempty"`
-		State         string  `json:"state"`
-		ComputedGrade string  `json:"computedGrade"`
-		FinalGrade    string  `json:"finalGrade"`
-		OverrideReason string `json:"overrideReason,omitempty"`
-		AlreadySubmitted bool `json:"alreadySubmitted"`
-		SubmittedAt   *string `json:"submittedAt,omitempty"`
+		EnrollmentID     string  `json:"enrollmentId"`
+		UserID           string  `json:"userId"`
+		DisplayName      string  `json:"displayName"`
+		ExternalSISID    string  `json:"externalSisId,omitempty"`
+		State            string  `json:"state"`
+		ComputedGrade    string  `json:"computedGrade"`
+		FinalGrade       string  `json:"finalGrade"`
+		OverrideReason   string  `json:"overrideReason,omitempty"`
+		AlreadySubmitted bool    `json:"alreadySubmitted"`
+		SubmittedAt      *string `json:"submittedAt,omitempty"`
 	}
 	type previewResp struct {
 		Grades []studentGradeOut `json:"grades"`
@@ -201,6 +202,9 @@ func (d Deps) handleFinalGradesSubmit() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save grade submissions.")
 			return
 		}
+		for range rows {
+			telemetry.RecordBusinessEvent("grade_submitted") // plan 17.7 FR-5e
+		}
 
 		resp := submitResp{Count: len(rows)}
 		if method == "csv" {
@@ -282,13 +286,13 @@ func (d Deps) handleFinalGradesExportCSV() http.HandlerFunc {
 // handleAdminFinalGradesStatus is GET /api/v1/admin/final-grades/status.
 func (d Deps) handleAdminFinalGradesStatus() http.HandlerFunc {
 	type courseStatusOut struct {
-		CourseID       string  `json:"courseId"`
-		CourseCode     string  `json:"courseCode"`
-		CourseTitle    string  `json:"courseTitle"`
-		InstructorName string  `json:"instructorName"`
-		TotalStudents  int     `json:"totalStudents"`
-		SubmittedCount int     `json:"submittedCount"`
-		AllSubmitted   bool    `json:"allSubmitted"`
+		CourseID        string  `json:"courseId"`
+		CourseCode      string  `json:"courseCode"`
+		CourseTitle     string  `json:"courseTitle"`
+		InstructorName  string  `json:"instructorName"`
+		TotalStudents   int     `json:"totalStudents"`
+		SubmittedCount  int     `json:"submittedCount"`
+		AllSubmitted    bool    `json:"allSubmitted"`
 		LastSubmittedAt *string `json:"lastSubmittedAt,omitempty"`
 	}
 	type statusResp struct {

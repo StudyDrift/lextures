@@ -1,0 +1,81 @@
+# Prometheus alerting rules for Lextures (plan 17.7 FR-6 / AC-5).
+#
+# Each alert maps 1:1 to an entry in the alerting playbook
+# (docs/runbooks/observability-oncall.md). Thresholds match FR-6:
+#   - error_rate > 1% for 5 min
+#   - p95 latency > 1 s for 5 min
+#   - job dead-letter count > 10
+#   - DB pool utilization > 90%
+groups:
+  - name: lextures-http
+    rules:
+      - alert: HighErrorRate
+        # 5xx responses as a fraction of all responses over 5 minutes.
+        expr: |
+          sum(rate(lextures_http_requests_total{status="5xx"}[5m]))
+            /
+          clamp_min(sum(rate(lextures_http_requests_total[5m])), 1)
+            > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          statuspage_component: api
+        annotations:
+          summary: "API 5xx error rate above 1%"
+          description: "5xx error rate is {{ $value | humanizePercentage }} over the last 5m (threshold 1%)."
+          runbook: "docs/runbooks/observability-oncall.md#higherrorrate"
+
+      - alert: HighP95Latency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(lextures_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: critical
+          statuspage_component: api
+        annotations:
+          summary: "API p95 latency above 1s"
+          description: "p95 request latency is {{ $value | humanizeDuration }} over the last 5m (threshold 1s)."
+          runbook: "docs/runbooks/observability-oncall.md#highp95latency"
+
+  - name: lextures-jobs
+    rules:
+      - alert: JobQueueDeadLetterBacklog
+        expr: lextures_job_queue_dead_letters > 10
+        for: 1m
+        labels:
+          severity: warning
+          statuspage_component: job_queue
+        annotations:
+          summary: "Job queue dead-letter backlog above 10"
+          description: "{{ $value }} un-redriven dead letters in the job queue (threshold 10)."
+          runbook: "docs/runbooks/observability-oncall.md#jobqueuedeadletterbacklog"
+
+  - name: lextures-database
+    rules:
+      - alert: DBPoolNearExhaustion
+        expr: lextures_db_pool_utilization_ratio > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          statuspage_component: database
+        annotations:
+          summary: "Database connection pool over 90% utilised"
+          description: "DB pool utilisation is {{ $value | humanizePercentage }} (threshold 90%); requests may start queueing for a connection."
+          runbook: "docs/runbooks/observability-oncall.md#dbpoolnearexhaustion"
+
+  - name: lextures-meta
+    rules:
+      - alert: APITargetDown
+        # Meta-monitoring: the metrics endpoint is unreachable (NFR Observability).
+        expr: up{job="lextures-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          statuspage_component: api
+        annotations:
+          summary: "Lextures API metrics target is down"
+          description: "Prometheus cannot scrape {{ $labels.instance }} (/metrics unreachable for 2m)."
+          runbook: "docs/runbooks/observability-oncall.md#apitargetdown"

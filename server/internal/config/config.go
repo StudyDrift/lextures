@@ -590,6 +590,38 @@ type Config struct {
 	AlertmanagerWebhookSecret string
 	// StatusPageSummaryCacheSecs is the in-memory cache TTL for the summary proxy.
 	StatusPageSummaryCacheSecs int
+
+	// Observability configures Prometheus metrics, OpenTelemetry traces, and
+	// Sentry error reporting (plan 17.7). All fields are optional; an empty
+	// MetricsAddr disables the metrics endpoint, an empty OTel endpoint disables
+	// tracing, and an empty Sentry DSN disables error reporting.
+	Observability Observability
+}
+
+// Observability holds Prometheus / OpenTelemetry / Sentry settings (plan 17.7).
+type Observability struct {
+	// ServiceName labels metrics and traces (default "lextures-api").
+	ServiceName string
+	// Version is the running build/release identifier (build_info, Sentry release).
+	Version string
+
+	// MetricsEnabled gates the internal /metrics server. Default true.
+	MetricsEnabled bool
+	// MetricsAddr is the listen address for the internal metrics server. It MUST
+	// be a separate, VPC-internal port — never the public LB port (FR-1, AC-6).
+	MetricsAddr string
+
+	// OTelEndpoint is the OTLP/HTTP collector endpoint (host:port). Empty disables tracing.
+	OTelEndpoint string
+	// OTelInsecure sends plaintext OTLP to an in-VPC collector. Default true.
+	OTelInsecure bool
+	// OTelSampleRatio is the head-based trace sample rate (0..1). Default 0.1 (FR-3).
+	OTelSampleRatio float64
+
+	// SentryDSN is the project DSN (separate per environment — FR-4). Empty disables Sentry.
+	SentryDSN string
+	// SentryTracesSampleRate samples performance transactions (default 0.1 — FR-3).
+	SentryTracesSampleRate float64
 }
 
 // Load reads configuration from the environment.
@@ -760,32 +792,51 @@ func Load() Config {
 		DBPoolMinConns:      intEnvDefault("DB_POOL_MIN_CONNS", 0),
 		ShutdownTimeoutSecs: intEnvDefault("SHUTDOWN_TIMEOUT_SECS", defaultShutdownTimeoutSecs),
 
-		RabbitMQURL:                       firstNonEmptyTrimmed("RABBITMQ_URL"),
-		CanvasImportQueueName:             stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
-		CanvasImportConcurrency:           canvasImportConcurrency(),
-		CanvasSubmissionSyncQueueName:     stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
-		CanvasSubmissionSyncConcurrency:   canvasSubmissionSyncConcurrency(),
-		BackgroundJobsEnabled:             boolEnv("BACKGROUND_JOBS_ENABLED"),
-		BackgroundJobsConcurrency:         intEnvDefault("BACKGROUND_JOBS_CONCURRENCY", 4),
-		SchedulerEnabled:                  boolEnv("SCHEDULER_ENABLED"),
-		SmsNotificationsEnabled:           boolEnv("SMS_NOTIFICATIONS_ENABLED"),
-		SmsNotificationQueueName:          stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
-		SmsNotificationConcurrency:        smsNotificationConcurrency(),
-		TwilioAccountSID:                  firstNonEmptyTrimmed("TWILIO_ACCOUNT_SID"),
-		TwilioAuthToken:                   firstNonEmptyTrimmed("TWILIO_AUTH_TOKEN"),
-		TwilioFromNumber:                  firstNonEmptyTrimmed("TWILIO_FROM_NUMBER"),
+		RabbitMQURL:                     firstNonEmptyTrimmed("RABBITMQ_URL"),
+		CanvasImportQueueName:           stringDefault(firstNonEmptyTrimmed("CANVAS_IMPORT_QUEUE_NAME"), "canvas.course.import"),
+		CanvasImportConcurrency:         canvasImportConcurrency(),
+		CanvasSubmissionSyncQueueName:   stringDefault(firstNonEmptyTrimmed("CANVAS_SUBMISSION_SYNC_QUEUE_NAME"), "canvas.submission.sync"),
+		CanvasSubmissionSyncConcurrency: canvasSubmissionSyncConcurrency(),
+		BackgroundJobsEnabled:           boolEnv("BACKGROUND_JOBS_ENABLED"),
+		BackgroundJobsConcurrency:       intEnvDefault("BACKGROUND_JOBS_CONCURRENCY", 4),
+		SchedulerEnabled:                boolEnv("SCHEDULER_ENABLED"),
+		SmsNotificationsEnabled:         boolEnv("SMS_NOTIFICATIONS_ENABLED"),
+		SmsNotificationQueueName:        stringDefault(firstNonEmptyTrimmed("SMS_NOTIFICATION_QUEUE_NAME"), "notifications.sms"),
+		SmsNotificationConcurrency:      smsNotificationConcurrency(),
+		TwilioAccountSID:                firstNonEmptyTrimmed("TWILIO_ACCOUNT_SID"),
+		TwilioAuthToken:                 firstNonEmptyTrimmed("TWILIO_AUTH_TOKEN"),
+		TwilioFromNumber:                firstNonEmptyTrimmed("TWILIO_FROM_NUMBER"),
 
 		EnableAPIDocs: boolEnv("ENABLE_API_DOCS"),
 
 		AiProviderAbstractionEnabled: boolEnv("AI_PROVIDER_ABSTRACTION_ENABLED"),
 
-		StatusPageEnabled:            boolEnv("STATUS_PAGE_ENABLED"),
-		StatusPageURL:                stringDefault(firstNonEmptyTrimmed("STATUS_PAGE_URL"), "https://status.lextures.io"),
-		StatuspageAPIKey:             firstNonEmptyTrimmed("STATUSPAGE_API_KEY"),
-		StatuspagePageID:             firstNonEmptyTrimmed("STATUSPAGE_PAGE_ID"),
-		StatuspageComponentMapJSON:   statuspageComponentMapJSON(),
-		AlertmanagerWebhookSecret:    firstNonEmptyTrimmed("ALERTMANAGER_WEBHOOK_SECRET"),
-		StatusPageSummaryCacheSecs:   statusPageSummaryCacheSecs(),
+		StatusPageEnabled:          boolEnv("STATUS_PAGE_ENABLED"),
+		StatusPageURL:              stringDefault(firstNonEmptyTrimmed("STATUS_PAGE_URL"), "https://status.lextures.io"),
+		StatuspageAPIKey:           firstNonEmptyTrimmed("STATUSPAGE_API_KEY"),
+		StatuspagePageID:           firstNonEmptyTrimmed("STATUSPAGE_PAGE_ID"),
+		StatuspageComponentMapJSON: statuspageComponentMapJSON(),
+		AlertmanagerWebhookSecret:  firstNonEmptyTrimmed("ALERTMANAGER_WEBHOOK_SECRET"),
+		StatusPageSummaryCacheSecs: statusPageSummaryCacheSecs(),
+
+		Observability: observabilityFromEnv(),
+	}
+}
+
+// observabilityFromEnv reads the plan 17.7 observability settings. Metrics
+// default ON (internal :9090) since the endpoint is harmless when unscraped;
+// tracing and Sentry default OFF until an endpoint/DSN is supplied.
+func observabilityFromEnv() Observability {
+	return Observability{
+		ServiceName:            stringDefault(firstNonEmptyTrimmed("OTEL_SERVICE_NAME", "OBSERVABILITY_SERVICE_NAME"), "lextures-api"),
+		Version:                firstNonEmptyTrimmed("APP_VERSION", "GIT_SHA", "SOURCE_VERSION"),
+		MetricsEnabled:         boolEnvDefault("METRICS_ENABLED", true),
+		MetricsAddr:            stringDefault(firstNonEmptyTrimmed("METRICS_ADDR"), ":9090"),
+		OTelEndpoint:           firstNonEmptyTrimmed("OTEL_EXPORTER_OTLP_ENDPOINT", "OTEL_ENDPOINT"),
+		OTelInsecure:           boolEnvDefault("OTEL_EXPORTER_OTLP_INSECURE", true),
+		OTelSampleRatio:        floatEnvDefault("OTEL_TRACES_SAMPLE_RATIO", 0.1),
+		SentryDSN:              firstNonEmptyTrimmed("SENTRY_DSN"),
+		SentryTracesSampleRate: floatEnvDefault("SENTRY_TRACES_SAMPLE_RATE", 0.1),
 	}
 }
 
@@ -906,6 +957,33 @@ func boolEnv(key string) bool {
 	default:
 		return false
 	}
+}
+
+// boolEnvDefault parses a boolean env var, returning def when unset. Used for
+// flags that default ON (e.g. METRICS_ENABLED).
+func boolEnvDefault(key string, def bool) bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv(key))) {
+	case "1", "true", "yes", "on":
+		return true
+	case "0", "false", "no", "off":
+		return false
+	default:
+		return def
+	}
+}
+
+// floatEnvDefault parses a float env var (e.g. a sample ratio), returning def
+// when unset or invalid.
+func floatEnvDefault(key string, def float64) float64 {
+	raw := strings.TrimSpace(os.Getenv(key))
+	if raw == "" {
+		return def
+	}
+	v, err := strconv.ParseFloat(raw, 64)
+	if err != nil || v < 0 {
+		return def
+	}
+	return v
 }
 
 func firstNonEmptyTrimmed(keys ...string) string {

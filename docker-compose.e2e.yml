@@ -68,6 +68,10 @@ services:
       RUN_MIGRATIONS: "true"
       COURSE_FILES_ROOT: /var/course-files
       PORT: "8080"
+      # Observability (plan 17.7): internal Prometheus metrics on a separate port
+      # so the e2e suite can scrape /metrics while confirming it is NOT served on
+      # the public API port (FR-1 / AC-6).
+      METRICS_ADDR: ":9090"
       CLAMAV_ADDR: ${CLAMAV_ADDR:-clamav:3310}
       EMAIL_NOTIFICATIONS_ENABLED: ${EMAIL_NOTIFICATIONS_ENABLED:-false}
       COPPA_WORKFLOW_ENABLED: "true"
@@ -89,6 +93,7 @@ services:
       RABBITMQ_URL: amqp://e2e:e2e@rabbitmq:5672/
     ports:
       - "8080:8080"
+      - "9090:9090"
     depends_on:
       postgres:
         condition: service_healthy

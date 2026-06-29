@@ -1,0 +1,53 @@
+{
+  "uid": "lextures-ai-provider",
+  "title": "Lextures — AI Provider Usage",
+  "tags": ["lextures", "ai"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "1m",
+  "time": { "from": "now-24h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "AI calls by provider/model",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "ops" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (provider, model) (rate(lextures_ai_provider_calls_total[5m]))", "legendFormat": "{{provider}}/{{model}}" }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "AI error rate",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum(rate(lextures_ai_provider_calls_total{outcome=\"error\"}[5m])) / clamp_min(sum(rate(lextures_ai_provider_calls_total[5m])), 1)", "legendFormat": "error ratio" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "AI latency p95 by model",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "s" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "histogram_quantile(0.95, sum by (provider, model, le) (rate(lextures_ai_provider_latency_seconds_bucket[5m])))", "legendFormat": "{{provider}}/{{model}}" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Estimated AI spend ($/h)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "fieldConfig": { "defaults": { "unit": "currencyUSD" }, "overrides": [] },
+      "targets": [
+        { "refId": "A", "expr": "sum by (provider, model) (rate(lextures_ai_estimated_cost_dollars_total[1h])) * 3600", "legendFormat": "{{provider}}/{{model}}" }
+      ]
+    }
+  ]
+}

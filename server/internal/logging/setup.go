@@ -12,6 +12,11 @@ type Settings struct {
 	ExtraFields      []string
 	HMACSecret       []byte
 	AppEnv           string
+	// WrapInner optionally wraps the JSON output handler before PII redaction is
+	// layered on top. The observability layer (plan 17.7) uses this to tap
+	// ERROR-level records for Sentry downstream of redaction, so Sentry never
+	// sees unredacted PII. Nil leaves the chain unchanged.
+	WrapInner func(slog.Handler) slog.Handler
 }
 
 // Configure installs the default slog logger with a PII redacting handler.
@@ -36,7 +41,11 @@ func Configure(s Settings) {
 		}
 		inner = slog.NewJSONHandler(os.Stderr, opts)
 	}
-	h := NewRedactHandler(inner, redactor)
+	var base slog.Handler = inner
+	if s.WrapInner != nil {
+		base = s.WrapInner(base)
+	}
+	h := NewRedactHandler(base, redactor)
 	slog.SetDefault(slog.New(h))
 
 	env := strings.ToLower(strings.TrimSpace(s.AppEnv))
