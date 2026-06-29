@@ -66,6 +66,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Let org admins register HTTPS endpoints for signed grade, enrollment, and submission events.',
   },
   {
+    key: 'adminConsoleEnabled',
+    label: 'Admin console',
+    description:
+      'Enables the org admin console at /admin with user/course management, settings, and audit log for org_admin and global admin users.',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',

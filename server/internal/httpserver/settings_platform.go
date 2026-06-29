@@ -108,6 +108,7 @@ type platformSettingsJSON struct {
 	CoppaWorkflowEnabled            bool `json:"coppaWorkflowEnabled"`
 	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled            bool `json:"adminAuditLogEnabled"`
+	AdminConsoleEnabled             bool `json:"adminConsoleEnabled"`
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
@@ -319,6 +320,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			CoppaWorkflowEnabled:            merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
+			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
@@ -503,6 +505,7 @@ type putPlatformBody struct {
 	StatePrivacyEnabled             *bool `json:"statePrivacyEnabled"`
 	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled            *bool `json:"adminAuditLogEnabled"`
+	AdminConsoleEnabled             *bool `json:"adminConsoleEnabled"`
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
 	BackupModuleEnabled             *bool `json:"backupModuleEnabled"`
 	RTLEnabled                      *bool `json:"rtlEnabled"`
@@ -837,6 +840,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffuimode", body.FFUiMode, func(v bool) { wr.FFUiMode = &v })
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
+		setBool("adminconsoleenabled", body.AdminConsoleEnabled, func(v bool) { wr.AdminConsoleEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
@@ -1002,6 +1006,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			CoppaWorkflowEnabled:            merged.CoppaWorkflowEnabled,
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
+			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,

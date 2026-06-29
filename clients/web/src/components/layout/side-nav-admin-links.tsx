@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { useLocation } from 'react-router-dom'
 import {
   Award,
@@ -31,6 +32,8 @@ import { SideNavLink } from './side-nav-link'
 import { SideNavSectionLabel } from './side-nav-section-label'
 import { useViewerOrgId } from './use-viewer-org-id'
 
+const SideNavAdminConsoleLink = lazy(() => import('./side-nav-admin-console-link'))
+
 function orgPath(base: string, orgId: string | null): string {
   if (!orgId) return base
   const sep = base.includes('?') ? '&' : '?'
@@ -62,6 +65,7 @@ export function SideNavAdminLinks() {
     ffCoCurricularTranscript,
     ffLibrary,
     ffLearningPaths,
+    adminConsoleEnabled,
   } = usePlatformFeatures()
 
   const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
@@ -87,10 +91,17 @@ export function SideNavAdminLinks() {
     (ffLibrary && !!orgId) ||
     ffLearningPaths
 
-  if (!canManageRbac && !showCcrAdmin) return null
+  if (!canManageRbac && !showCcrAdmin && !adminConsoleEnabled) {
+    return null
+  }
 
   return (
     <>
+      {adminConsoleEnabled ? (
+        <Suspense fallback={null}>
+          <SideNavAdminConsoleLink orgId={orgId} />
+        </Suspense>
+      ) : null}
       {showCcrAdmin && !canManageRbac ? (
         <>
           <SideNavSectionLabel first>Student records</SideNavSectionLabel>
