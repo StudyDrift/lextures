@@ -74,6 +74,12 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	}
 	defer pool.Close()
 
+	healthPool, err := db.NewHealthPool(ctx, cfg.DatabaseURL)
+	if err != nil {
+		return fmt.Errorf("app: health pool: %w", err)
+	}
+	defer healthPool.Close()
+
 	// Shared Redis powers cross-instance state (JWT blocklist, rate limits,
 	// caches) so the app tier can scale horizontally (plan 17.2). Unset REDIS_URL
 	// keeps single-instance behaviour (redisClient is nil).
@@ -201,6 +207,7 @@ func Run(ctx context.Context, fsys fs.FS) error {
 	platform := platformstate.New(merged)
 	deps := httpserver.Deps{
 		Pool:                      pool,
+		Health:                    httpserver.NewHealthProbe(healthPool, redisClient, tel.Metrics),
 		Redis:                     redisClient,
 		ObjectCache:               objectcache.New(redisClient, func() bool { return platform.Config().FFRedisCache }),
 		JWTSigner:                 jwtSigner,

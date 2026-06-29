@@ -1,9 +1,7 @@
 package httpserver
 
 import (
-	"context"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -44,7 +42,9 @@ import (
 // Deps is the minimal set of server dependencies. Expand with auth, LTI, etc. during the migration.
 type Deps struct {
 	Pool      *pgxpool.Pool
-	Ready     ReadyChecker
+	// Health is the dedicated readiness/liveness probe (plan 17.8). When nil,
+	// NewHandler builds a probe from Pool and Redis for tests.
+	Health    *HealthProbe
 	JWTSigner *auth.JWTSigner
 	// Config is the environment-only configuration (used with DB overrides in Platform).
 	Config   config.Config
@@ -146,14 +146,20 @@ func NewHandler(d Deps) http.Handler {
 	r.Use(logging.AccessLog)
 	r.Use(authenticatedNoStoreMiddleware)
 	r.Use(d.publicAPIMiddleware)
-	ready := d.Ready
-	if ready == nil {
-		ready = defaultReady(d.Pool, d.Redis)
+	health := d.healthProbe()
+	var metrics *telemetry.Metrics
+	if d.Telemetry != nil {
+		metrics = d.Telemetry.Metrics
+	}
+	if health.metrics == nil && metrics != nil {
+		health.metrics = metrics
 	}
 	r.Get("/api/openapi.json", openapi.ServeOpenAPI)
 	r.Get("/api/docs", openapi.ServeDocs)
-	r.Get("/health", handleHealth())
-	r.Get("/health/ready", handleReady(ready))
+	r.Get("/health", handleHealthAlias(metrics))
+	r.Get("/health/live", handleLive(metrics))
+	r.Get("/health/ready", handleReady(health))
+	r.Get("/health/detailed", d.handleHealthDetailed(health))
 	r.Post("/api/v1/public/onboarding/track", d.handlePublicOnboardingTrack())
 	r.Get("/api/v1/public/branding/resolve", d.handlePublicBrandingResolve())
 	r.Get("/api/v1/public/orgs/by-slug/{slug}", d.handlePublicOrgBySlug())
@@ -267,32 +273,9 @@ func NewHandler(d Deps) http.Handler {
 	return r
 }
 
-// defaultReady builds a readiness probe that verifies the database and, when
-// configured, the shared Redis instance (plan 17.2 FR-1: GET /health/ready feeds
-// the load balancer, which must include Redis connectivity). Redis is only
-// checked when present so single-instance deployments stay healthy without it.
-func defaultReady(p *pgxpool.Pool, rc *redisclient.Client) ReadyChecker {
-	if p == nil {
-		return func() error { return errNoDBPool }
+func (d Deps) healthProbe() *HealthProbe {
+	if d.Health != nil {
+		return d.Health
 	}
-	return func() error {
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		defer cancel()
-		if err := p.Ping(ctx); err != nil {
-			return err
-		}
-		if rc != nil {
-			if err := rc.Ping(ctx); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
+	return NewHealthProbe(d.Pool, d.Redis, nil)
 }
-
-var errNoDBPool = &degradedErr{s: "database pool is not configured"}
-
-// degradedErr is a lightweight error type for readiness.
-type degradedErr struct{ s string }
-
-func (e *degradedErr) Error() string { return e.s }

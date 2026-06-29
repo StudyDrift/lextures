@@ -73,6 +73,16 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/usr/bin/curl -fsS http://127.0.0.1:8080/health/live && /usr/bin/curl -fsS http://127.0.0.1:8080/health/ready",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 60s
 
   web:
     build:
