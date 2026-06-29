@@ -1,6 +1,7 @@
 package com.lextures.android.core.push
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -99,6 +100,7 @@ class PushManager private constructor(private val appContext: Context) {
         return current
     }
 
+    @SuppressLint("MissingPermission")
     fun showLocalNotification(title: String, body: String, actionUrl: String?) {
         if (!hasNotificationPermission()) return
         ensureNotificationChannel()
