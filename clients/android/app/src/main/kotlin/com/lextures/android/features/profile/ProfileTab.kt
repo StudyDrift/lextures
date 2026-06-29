@@ -267,7 +267,7 @@ fun ProfileTab(
                                             LocaleApi.saveLocale(apiTag, token)
                                         } catch (_: Exception) {
                                             localePreferences.setLocaleTag(previous)
-                                            localeError = L.text(R.string.common_locale_saveError)
+                                            localeError = L.text(context, localePreferences, R.string.common_locale_saveError)
                                         }
                                     }
                                 }
