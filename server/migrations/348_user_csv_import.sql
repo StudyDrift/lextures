@@ -60,6 +60,14 @@ CREATE INDEX IF NOT EXISTS idx_user_import_jobs_org_status
 CREATE INDEX IF NOT EXISTS idx_user_import_jobs_org_created
     ON provisioning.user_import_jobs (org_id, created_at DESC);
 
+-- Extend provisioning_role_map to allow csv_import provider (plan 18.2).
+ALTER TABLE "user".provisioning_role_map
+    DROP CONSTRAINT IF EXISTS provisioning_role_map_provider_check;
+
+ALTER TABLE "user".provisioning_role_map
+    ADD CONSTRAINT provisioning_role_map_provider_check
+    CHECK (provider IN ('saml', 'oidc', 'scim', 'oneroster', 'clever', 'classlink', 'csv_import'));
+
 INSERT INTO "user".provisioning_role_map (provider, external_role, app_role_id, account_type)
 SELECT 'csv_import', 'teacher', r.id, 'standard' FROM "user".app_roles r WHERE r.name = 'Teacher'
 UNION ALL SELECT 'csv_import', 'student', r.id, 'standard' FROM "user".app_roles r WHERE r.name = 'Student'

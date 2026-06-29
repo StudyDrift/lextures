@@ -141,7 +141,7 @@ func (d Deps) handleAdminImportUpload() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Missing file field.")
 			return
 		}
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 
 		data, err := io.ReadAll(io.LimitReader(file, maxUserImportFileBytes+1))
 		if err != nil {
