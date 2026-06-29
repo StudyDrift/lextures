@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist'
+import { GlobalWorkerOptions, getDocument, TextLayer } from 'pdfjs-dist'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { apiUrl, authorizedFetch } from '../../lib/api'
 import { getAccessToken } from '../../lib/auth'
 import type { SubmissionAnnotationApi } from '../../lib/courses-api'
 import { FilePreviewFallback } from '../file-preview-fallback'
+import { ensureTextLayerStyles } from '../../lib/pdf-text-layer'
 import type { AnnotationTool } from './annotation-toolbar'
 
 GlobalWorkerOptions.workerSrc = workerSrc
@@ -22,7 +23,10 @@ export type AnnotationViewerProps = {
   tool: AnnotationTool
   colour: string
   annotations: SubmissionAnnotationApi[]
-  onHighlightComplete?: (page: number, rect: NormRect) => void
+  selectedId?: string | null
+  onSelectAnnotation?: (id: string) => void
+  /** Highlight is reported as one or more normalized rectangles (text selection quads). */
+  onHighlightComplete?: (page: number, rects: NormRect[]) => void
   onDrawComplete?: (page: number, points: NormPoint[]) => void
   onPinComplete?: (page: number, pt: NormPoint) => void
   onTextBoxComplete?: (page: number, rect: NormRect) => void
@@ -37,15 +41,37 @@ function normFromClient(rect: DOMRect, clientX: number, clientY: number): NormPo
   }
 }
 
-function parseHighlight(c: unknown): NormRect | null {
-  if (!c || typeof c !== 'object') return null
-  const o = c as Record<string, unknown>
+function finiteRect(o: Record<string, unknown>): NormRect | null {
   const x1 = typeof o.x1 === 'number' ? o.x1 : Number(o.x1)
   const y1 = typeof o.y1 === 'number' ? o.y1 : Number(o.y1)
   const x2 = typeof o.x2 === 'number' ? o.x2 : Number(o.x2)
   const y2 = typeof o.y2 === 'number' ? o.y2 : Number(o.y2)
   if (![x1, y1, x2, y2].every((n) => Number.isFinite(n))) return null
   return { x1, y1, x2, y2 }
+}
+
+function parseRect(c: unknown): NormRect | null {
+  if (!c || typeof c !== 'object') return null
+  return finiteRect(c as Record<string, unknown>)
+}
+
+// Highlights may be stored as a single legacy rect ({x1,y1,x2,y2}) or as text-selection
+// quads ({ rects: [...] }). Return every rectangle to draw.
+function parseHighlightRects(c: unknown): NormRect[] {
+  if (!c || typeof c !== 'object') return []
+  const o = c as Record<string, unknown>
+  if (Array.isArray(o.rects)) {
+    const out: NormRect[] = []
+    for (const r of o.rects) {
+      if (r && typeof r === 'object') {
+        const parsed = finiteRect(r as Record<string, unknown>)
+        if (parsed) out.push(parsed)
+      }
+    }
+    return out
+  }
+  const single = finiteRect(o)
+  return single ? [single] : []
 }
 
 function parsePoints(c: unknown): NormPoint[] {
@@ -72,6 +98,31 @@ function parsePin(c: unknown): NormPoint | null {
   return { x, y }
 }
 
+// Collect the bounding rectangles of the current text selection that fall on a given page
+// box, normalized to that box. Used to turn a text drag-select into highlight quads.
+function selectionRectsForBox(box: DOMRect): NormRect[] {
+  const sel = window.getSelection()
+  if (!sel || sel.isCollapsed || sel.rangeCount === 0) return []
+  const out: NormRect[] = []
+  for (let i = 0; i < sel.rangeCount; i += 1) {
+    const range = sel.getRangeAt(i)
+    const rects = range.getClientRects()
+    for (let j = 0; j < rects.length; j += 1) {
+      const rc = rects[j]
+      if (!rc || rc.width < 1 || rc.height < 1) continue
+      const cx = rc.left + rc.width / 2
+      const cy = rc.top + rc.height / 2
+      if (cx < box.left || cx > box.right || cy < box.top || cy > box.bottom) continue
+      const x1 = Math.max(0, (rc.left - box.left) / box.width)
+      const y1 = Math.max(0, (rc.top - box.top) / box.height)
+      const x2 = Math.min(1, (rc.right - box.left) / box.width)
+      const y2 = Math.min(1, (rc.bottom - box.top) / box.height)
+      if (x2 - x1 > 0.001 && y2 - y1 > 0.001) out.push({ x1, y1, x2, y2 })
+    }
+  }
+  return out
+}
+
 function PageOverlay({
   page,
   width,
@@ -80,6 +131,9 @@ function PageOverlay({
   readOnly,
   tool,
   colour,
+  selectedId,
+  textSelectHighlight,
+  onSelectAnnotation,
   onHighlightComplete,
   onDrawComplete,
   onPinComplete,
@@ -92,7 +146,11 @@ function PageOverlay({
   readOnly: boolean
   tool: AnnotationTool
   colour: string
-  onHighlightComplete?: (page: number, rect: NormRect) => void
+  selectedId?: string | null
+  /** When true, highlight is created via text selection (PDF), not SVG rectangle drag. */
+  textSelectHighlight: boolean
+  onSelectAnnotation?: (id: string) => void
+  onHighlightComplete?: (page: number, rects: NormRect[]) => void
   onDrawComplete?: (page: number, points: NormPoint[]) => void
   onPinComplete?: (page: number, pt: NormPoint) => void
   onTextBoxComplete?: (page: number, rect: NormRect) => void
@@ -106,9 +164,13 @@ function PageOverlay({
 
   const annForPage = useMemo(() => annotations.filter((a) => a.page === page), [annotations, page])
 
+  // SVG drag is disabled for highlight when text-selection mode is active so the text
+  // layer underneath can receive the selection gesture.
+  const svgInteractive =
+    !readOnly && tool !== 'select' && !(tool === 'highlight' && textSelectHighlight)
+
   const onPointerDown = (e: React.PointerEvent) => {
-    if (readOnly || !rootRef.current) return
-    if (tool === 'select') return
+    if (!svgInteractive || !rootRef.current) return
     const rect = rootRef.current.getBoundingClientRect()
     const p = normFromClient(rect, e.clientX, e.clientY)
     if (tool === 'highlight' || tool === 'text') {
@@ -122,7 +184,7 @@ function PageOverlay({
   }
 
   const onPointerMove = (e: React.PointerEvent) => {
-    if (!drag || readOnly || !rootRef.current) return
+    if (!drag || !svgInteractive || !rootRef.current) return
     const rect = rootRef.current.getBoundingClientRect()
     const p = normFromClient(rect, e.clientX, e.clientY)
     if (drag.kind === 'pin') return
@@ -139,7 +201,7 @@ function PageOverlay({
   }
 
   const finish = (e: React.PointerEvent) => {
-    if (!drag || readOnly || !rootRef.current) return
+    if (!drag || !svgInteractive || !rootRef.current) return
     const rect = rootRef.current.getBoundingClientRect()
     const p = normFromClient(rect, e.clientX, e.clientY)
     try {
@@ -167,7 +229,7 @@ function PageOverlay({
       return
     }
     if (drag.kind === 'highlight') {
-      onHighlightComplete?.(page, { x1, y1, x2, y2 })
+      onHighlightComplete?.(page, [{ x1, y1, x2, y2 }])
     } else if (drag.kind === 'text') {
       onTextBoxComplete?.(page, { x1, y1, x2, y2 })
     }
@@ -184,19 +246,13 @@ function PageOverlay({
         }
       : null
 
-  const interact = !readOnly && tool !== 'select'
-
   return (
-    <div
-      ref={rootRef}
-      className="absolute inset-0"
-      style={{ width, height }}
-    >
+    <div ref={rootRef} className="absolute inset-0" style={{ width, height }}>
       <svg
         width={width}
         height={height}
-        className={interact ? 'touch-none' : 'pointer-events-none'}
-        style={{ pointerEvents: interact ? 'auto' : 'none' }}
+        className={svgInteractive ? 'touch-none' : 'pointer-events-none'}
+        style={{ pointerEvents: svgInteractive ? 'auto' : 'none' }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={finish}
@@ -205,25 +261,43 @@ function PageOverlay({
         aria-label={`Annotations page ${page}`}
       >
         {annForPage.map((a) => {
+          const selected = selectedId === a.id
+          const selectable = Boolean(onSelectAnnotation)
+          const onClick = selectable
+            ? (e: React.MouseEvent) => {
+                e.stopPropagation()
+                onSelectAnnotation?.(a.id)
+              }
+            : undefined
+          const cursor = selectable ? 'pointer' : undefined
+          // Selected annotations get pointer events so a click selects them even when the
+          // active tool would otherwise route gestures elsewhere.
+          const groupPointer = selectable ? ('auto' as const) : undefined
           if (a.toolType === 'highlight') {
-            const r = parseHighlight(a.coordsJson)
-            if (!r) return null
-            const sx = Math.min(r.x1, r.x2) * width
-            const sy = Math.min(r.y1, r.y2) * height
-            const sw = Math.abs(r.x2 - r.x1) * width
-            const sh = Math.abs(r.y2 - r.y1) * height
+            const rects = parseHighlightRects(a.coordsJson)
+            if (rects.length === 0) return null
             return (
-              <rect
-                key={a.id}
-                x={sx}
-                y={sy}
-                width={sw}
-                height={sh}
-                fill={a.colour}
-                fillOpacity={0.35}
-                stroke={a.colour}
-                strokeWidth={1}
-              />
+              <g key={a.id} onClick={onClick} style={{ cursor, pointerEvents: groupPointer }}>
+                {rects.map((r, i) => {
+                  const sx = Math.min(r.x1, r.x2) * width
+                  const sy = Math.min(r.y1, r.y2) * height
+                  const sw = Math.abs(r.x2 - r.x1) * width
+                  const sh = Math.abs(r.y2 - r.y1) * height
+                  return (
+                    <rect
+                      key={i}
+                      x={sx}
+                      y={sy}
+                      width={sw}
+                      height={sh}
+                      fill={a.colour}
+                      fillOpacity={selected ? 0.5 : 0.35}
+                      stroke={selected ? a.colour : 'none'}
+                      strokeWidth={selected ? 1.5 : 0}
+                    />
+                  )
+                })}
+              </g>
             )
           }
           if (a.toolType === 'draw') {
@@ -238,9 +312,11 @@ function PageOverlay({
                 d={d}
                 fill="none"
                 stroke={a.colour}
-                strokeWidth={2}
+                strokeWidth={selected ? 3 : 2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                onClick={onClick}
+                style={{ cursor, pointerEvents: groupPointer }}
               />
             )
           }
@@ -250,10 +326,23 @@ function PageOverlay({
             const cx = pt.x * width
             const cy = pt.y * height
             const s = Math.max(6, Math.min(width, height) * 0.02)
-            return <circle key={a.id} cx={cx} cy={cy} r={s} fill={a.colour} fillOpacity={0.85} />
+            return (
+              <circle
+                key={a.id}
+                cx={cx}
+                cy={cy}
+                r={selected ? s * 1.25 : s}
+                fill={a.colour}
+                fillOpacity={0.85}
+                stroke={selected ? '#1e293b' : 'none'}
+                strokeWidth={selected ? 1.5 : 0}
+                onClick={onClick}
+                style={{ cursor, pointerEvents: groupPointer }}
+              />
+            )
           }
           if (a.toolType === 'text') {
-            const r = parseHighlight(a.coordsJson)
+            const r = parseRect(a.coordsJson)
             if (!r) return null
             const sx = Math.min(r.x1, r.x2) * width
             const sy = Math.min(r.y1, r.y2) * height
@@ -269,7 +358,9 @@ function PageOverlay({
                 fill="none"
                 stroke={a.colour}
                 strokeDasharray="4 3"
-                strokeWidth={1.5}
+                strokeWidth={selected ? 2.5 : 1.5}
+                onClick={onClick}
+                style={{ cursor, pointerEvents: groupPointer }}
               />
             )
           }
@@ -309,6 +400,8 @@ export function AnnotationViewer({
   tool,
   colour,
   annotations,
+  selectedId,
+  onSelectAnnotation,
   onHighlightComplete,
   onDrawComplete,
   onPinComplete,
@@ -319,7 +412,17 @@ export function AnnotationViewer({
   const [imageDisplaySize, setImageDisplaySize] = useState({ w: 400, h: 300 })
   const [pageLayouts, setPageLayouts] = useState<{ n: number; w: number; h: number }[]>([])
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([])
+  const textRefs = useRef<(HTMLDivElement | null)[]>([])
+  const pageBoxRefs = useRef<(HTMLDivElement | null)[]>([])
   const pageObjsRef = useRef<Awaited<ReturnType<PDFDocumentProxy['getPage']>>[]>([])
+
+  useEffect(() => {
+    ensureTextLayerStyles()
+  }, [])
+
+  // PDF text highlighting works by selecting the transparent text layer; for images we keep
+  // the rectangle-drag fallback.
+  const textSelectHighlight = mimeType === 'application/pdf'
 
   useEffect(() => {
     if (!filePath || !mimeType) return undefined
@@ -398,8 +501,23 @@ export function AnnotationViewer({
         canvas.width = vp.width
         canvas.height = vp.height
         const ctx = canvas.getContext('2d')
-        if (!ctx) return
-        await page.render({ canvasContext: ctx, viewport: vp }).promise
+        if (ctx) {
+          await page.render({ canvasContext: ctx, viewport: vp }).promise
+        }
+        // Selectable transparent text layer used to drive highlight selection + copy/find.
+        const textDiv = textRefs.current[idx]
+        if (textDiv) {
+          textDiv.innerHTML = ''
+          textDiv.className = 'pdf-tl'
+          textDiv.style.setProperty('--scale-factor', String(PDF_SCALE))
+          try {
+            const textContent = await page.getTextContent()
+            const layer = new TextLayer({ textContentSource: textContent, container: textDiv, viewport: vp })
+            await layer.render()
+          } catch {
+            /* text layer is best-effort */
+          }
+        }
       }),
     )
   }, [])
@@ -408,6 +526,20 @@ export function AnnotationViewer({
     if (!pageLayouts.length) return
     void renderPdfPages()
   }, [pageLayouts, renderPdfPages])
+
+  const handlePageMouseUp = useCallback(
+    (idx: number) => {
+      if (readOnly || tool !== 'highlight' || !textSelectHighlight) return
+      const box = pageBoxRefs.current[idx]
+      const layout = pageLayouts[idx]
+      if (!box || !layout) return
+      const rects = selectionRectsForBox(box.getBoundingClientRect())
+      if (rects.length === 0) return
+      onHighlightComplete?.(layout.n, rects)
+      window.getSelection()?.removeAllRanges()
+    },
+    [readOnly, tool, textSelectHighlight, pageLayouts, onHighlightComplete],
+  )
 
   if (!filePath || !mimeType) {
     return (
@@ -437,7 +569,6 @@ export function AnnotationViewer({
   }
 
   if (imageUrl) {
-    const imageReadOnly = true
     return (
       <div className="max-h-[80vh] overflow-auto rounded-xl border border-slate-200 bg-white dark:border-neutral-700 dark:bg-neutral-950">
         <div className="relative inline-block max-w-full">
@@ -455,9 +586,12 @@ export function AnnotationViewer({
             width={imageDisplaySize.w}
             height={imageDisplaySize.h}
             annotations={annotations}
-            readOnly={readOnly || imageReadOnly}
+            readOnly={readOnly}
             tool={tool}
             colour={colour}
+            selectedId={selectedId}
+            textSelectHighlight={false}
+            onSelectAnnotation={onSelectAnnotation}
             onHighlightComplete={onHighlightComplete}
             onDrawComplete={onDrawComplete}
             onPinComplete={onPinComplete}
@@ -465,7 +599,7 @@ export function AnnotationViewer({
           />
         </div>
         <p className="border-t border-slate-200 px-3 py-2 text-xs text-slate-500 dark:border-neutral-700 dark:text-neutral-400">
-          Image submissions show annotations as an overlay preview. Use PDF uploads for full in-browser marking.
+          Image submissions highlight by dragging a box. Use PDF uploads to highlight selected text.
         </p>
       </div>
     )
@@ -475,15 +609,39 @@ export function AnnotationViewer({
     return <p className="text-sm text-slate-500 dark:text-neutral-400">Loading PDF…</p>
   }
 
+  const textLayerInteractive = !readOnly && tool === 'highlight' && textSelectHighlight
+
   return (
-    <div className="max-h-[80vh] space-y-4 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-neutral-700 dark:bg-neutral-950/40">
+    <div className="max-h-[80vh] space-y-4 overflow-auto rounded-xl border border-slate-200 bg-slate-50/50 p-3 dark:border-neutral-700 dark:bg-neutral-950/40">
       {pageLayouts.map((pv, idx) => (
-        <div key={pv.n} className="relative mx-auto inline-block max-w-full shadow-sm">
+        <div
+          key={pv.n}
+          ref={(el) => {
+            pageBoxRefs.current[idx] = el
+          }}
+          className="relative mx-auto shadow-sm"
+          style={{ width: pv.w, height: pv.h }}
+          onMouseUp={() => handlePageMouseUp(idx)}
+        >
           <canvas
             ref={(el) => {
               canvasRefs.current[idx] = el
             }}
-            className="block max-w-full bg-white dark:bg-neutral-950"
+            className="block bg-white dark:bg-neutral-950"
+          />
+          <div
+            ref={(el) => {
+              textRefs.current[idx] = el
+            }}
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: pv.w,
+              height: pv.h,
+              pointerEvents: textLayerInteractive ? 'auto' : 'none',
+              cursor: textLayerInteractive ? 'text' : 'default',
+            }}
           />
           <PageOverlay
             page={pv.n}
@@ -493,6 +651,9 @@ export function AnnotationViewer({
             readOnly={readOnly}
             tool={tool}
             colour={colour}
+            selectedId={selectedId}
+            textSelectHighlight={textSelectHighlight}
+            onSelectAnnotation={onSelectAnnotation}
             onHighlightComplete={onHighlightComplete}
             onDrawComplete={onDrawComplete}
             onPinComplete={onPinComplete}

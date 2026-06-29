@@ -225,8 +225,25 @@ jobs:
       - name: Validate design-token contrast pairs (WCAG 2.1 AA)
         run: npm run contrast:check
 
+  e2e-changes:
+    name: Detect E2E-relevant changes
+    runs-on: ubuntu-latest
+    outputs:
+      e2e: ${{ steps.filter.outputs.e2e }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            e2e:
+              - 'server/**'
+              - 'clients/web/**'
+
   e2e-build:
     name: E2E build (API + web)
+    needs: e2e-changes
+    if: needs.e2e-changes.outputs.e2e == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
@@ -534,8 +551,8 @@ jobs:
 
   e2e-report:
     name: E2E report (merge shards)
-    needs: [e2e]
-    if: ${{ !cancelled() && always() }}
+    needs: [e2e-changes, e2e]
+    if: ${{ needs.e2e-changes.outputs.e2e == 'true' && !cancelled() && always() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
