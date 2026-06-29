@@ -1,6 +1,9 @@
 package adminsearch
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestParseTypes_DefaultAll(t *testing.T) {
 	f := ParseTypes("")
@@ -32,14 +35,11 @@ func TestScrubQueryPII_NoEmail(t *testing.T) {
 
 func TestScrubQueryPII_EmailHashed(t *testing.T) {
 	got := ScrubQueryPII("find alice@school.edu")
-	if got == "find alice@school.edu" {
+	if strings.Contains(got, "alice@school.edu") {
 		t.Fatal("expected email to be scrubbed")
 	}
-	if got[:6] != "find e" && got[:5] != "find " {
-		// should contain email: prefix hash
-	}
-	if len(got) < 10 {
-		t.Fatalf("too short: %q", got)
+	if !strings.HasPrefix(got, "find email:") {
+		t.Fatalf("expected email hash prefix, got %q", got)
 	}
 }
 
