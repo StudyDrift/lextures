@@ -20,6 +20,9 @@ var validAnnotationTools = map[string]bool{
 	"draw":      true,
 	"text":      true,
 	"pin":       true,
+	// anchor: text-range highlight + comment on reflowable previews (DOCX/PPTX/XLSX/MD/code).
+	// coords_json carries character offsets + quoted text rather than page geometry.
+	"anchor": true,
 }
 
 func annotationToJSON(a submissionannotations.AnnotationRow) map[string]any {

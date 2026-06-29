@@ -265,6 +265,33 @@ fun AuthPrimaryButton(
 }
 
 @Composable
+fun AuthOutlineButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val shape = RoundedCornerShape(14.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(50.dp)
+            .clip(shape)
+            .background(cardBackground())
+            .border(1.dp, fieldBorder(), shape)
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 15.sp,
+            color = textPrimary().copy(alpha = if (enabled) 1f else 0.55f),
+        )
+    }
+}
+
+@Composable
 fun AuthFooterLink(
     prompt: String,
     actionLabel: String,

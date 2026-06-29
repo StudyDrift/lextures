@@ -52,7 +52,7 @@ Verified in the iOS/Android trees as of this plan:
 
 | Area | iOS | Android | Notes |
 |---|---|---|---|
-| Auth (email/password, signup, secure token store, session) | ✅ | ✅ | Keychain / encrypted store; no SSO/MFA/magic-link/biometric yet |
+| Auth (email/password, signup, secure token store, session, biometric lock, session mgmt, SSO/MFA/magic link) | ✅ | ✅ | Keychain / encrypted store; SSO/MFA/magic link ([M1.1](../completed/mobile/M1.1-sso-mfa-magic-link.md)) |
 | Navigation shell (Home, Courses, Notebooks, Inbox, Profile tabs) | ✅ | ✅ | 5-tab bar; no deep-link routing yet |
 | Dashboard / Home + announcements | ✅ | ✅ | Read-only |
 | Courses: list, detail, syllabus, **grades (read)**, attendance (read), item detail | ✅ | ✅ | View-only; no module content-type rendering |
@@ -120,9 +120,9 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 
 | Story | Source feature(s) | Disposition |
 |---|---|---|
-| [M1.1 SSO, MFA & magic link](M1.1-sso-mfa-magic-link.md) | 4.1/4.2 SSO, 4.6 MFA, 4.7 magic link | **P1** |
-| [M1.2 Biometric unlock & sessions](M1.2-biometric-sessions.md) | 4.8/4.9 sessions, biometric | **P1** |
-| [M1.3 Onboarding & placement diagnostic](M1.3-onboarding-diagnostic.md) | onboarding, 1.7/15.11 diagnostic | **P1** |
+| [M1.1 SSO, MFA & magic link](../completed/mobile/M1.1-sso-mfa-magic-link.md) ✅ | 4.1/4.2 SSO, 4.6 MFA, 4.7 magic link | **Done** |
+| [M1.2 Biometric unlock & sessions](../completed/mobile/M1.2-biometric-sessions.md) ✅ | 4.8/4.9 sessions, biometric | **Done** |
+| [M1.3 Onboarding & placement diagnostic](../completed/mobile/M1.3-onboarding-diagnostic.md) | onboarding, 1.7/15.11 diagnostic | **Done** |
 | [M2.2 Notification center & preferences](M2.2-notification-center.md) | 6.2 notifications, notification prefs | **P1** |
 | [M3.3 Interactive content: H5P/SCORM/LTI](M3.3-interactive-content.md) | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **P1** |
 | [M5.2 Peer review](M5.2-peer-review.md) | 3.15 peer review | **P1** |

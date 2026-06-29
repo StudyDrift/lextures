@@ -101,13 +101,21 @@ class HomeShellState {
 
 /** Post-auth shell: Home, Courses, Notebooks, Inbox, Profile behind a floating pill tab bar. */
 @Composable
-fun HomeScreen(session: AuthSession, modifier: Modifier = Modifier) {
+fun HomeScreen(
+    session: AuthSession,
+    modifier: Modifier = Modifier,
+    initialDeepLink: DeepLinkDestination? = null,
+) {
     var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Dashboard.name) }
     val shell = remember { HomeShellState() }
     val accessToken by session.accessToken.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
     val pushManager = remember { PushManager.getInstance(context) }
     val externalDeepLink by pushManager.pendingDeepLink.collectAsState()
+
+    LaunchedEffect(initialDeepLink) {
+        initialDeepLink?.let { shell.openDeepLink(it) }
+    }
 
     LaunchedEffect(accessToken) {
         shell.refresh(accessToken)

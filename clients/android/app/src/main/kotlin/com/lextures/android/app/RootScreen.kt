@@ -5,18 +5,22 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.lextures.android.core.auth.AuthPhase
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.auth.BiometricGate
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.auth.AuthFlowScreen
-import com.lextures.android.features.home.HomeScreen
+import com.lextures.android.features.onboarding.AuthenticatedRootScreen
+import com.lextures.android.features.profile.BiometricLockScreen
 import com.lextures.android.features.splash.SplashScreen
 
 @Composable
@@ -25,6 +29,8 @@ fun RootScreen(session: AuthSession, modifier: Modifier = Modifier) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val offline = OfflineService.get(context)
+    val biometricGate = remember { BiometricGate.get(context) }
+    val isLocked by biometricGate.isLocked.collectAsState()
 
     LaunchedEffect(accessToken, phase) {
         if (phase == AuthPhase.Authenticated) {
@@ -51,7 +57,12 @@ fun RootScreen(session: AuthSession, modifier: Modifier = Modifier) {
         when (current) {
             AuthPhase.Splash -> SplashScreen()
             AuthPhase.Unauthenticated -> AuthFlowScreen(session = session)
-            AuthPhase.Authenticated -> HomeScreen(session = session)
+            AuthPhase.Authenticated -> Box(modifier = Modifier.fillMaxSize()) {
+                AuthenticatedRootScreen(session = session)
+                if (isLocked) {
+                    BiometricLockScreen(biometricGate = biometricGate)
+                }
+            }
         }
     }
 }

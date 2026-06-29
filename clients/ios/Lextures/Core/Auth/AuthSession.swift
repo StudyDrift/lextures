@@ -7,6 +7,10 @@ enum AuthPhase: Equatable {
     case authenticated
 }
 
+enum SignOutReason: Equatable {
+    case sessionRevoked
+}
+
 enum MFARequired: Equatable {
     case challenge
     case setup
@@ -19,6 +23,8 @@ final class AuthSession {
     var accessToken: String?
     var userEmail: String?
     var mfaRequired: MFARequired?
+    var mfaPendingToken: String?
+    private(set) var lastSignOutReason: SignOutReason?
 
     private var refreshToken: String?
     private var refreshTask: Task<Void, Never>?
@@ -30,6 +36,7 @@ final class AuthSession {
     init() {
         accessToken = KeychainStore.read(key: KeychainStore.Keys.accessToken)
         refreshToken = KeychainStore.read(key: KeychainStore.Keys.refreshToken)
+        NetworkAuthContext.configure(session: self)
     }
 
     func finishSplash() {
@@ -78,7 +85,7 @@ final class AuthSession {
         } catch {
             // Only an explicit rejection ends the session; network blips keep it.
             if case APIError.httpStatus(let code, _) = error, code == 401 || code == 403 {
-                signOut()
+                signOut(reason: .sessionRevoked)
             }
         }
     }
@@ -100,7 +107,8 @@ final class AuthSession {
     }
 
     func applyTokenResponse(_ response: AuthTokenResponse) throws {
-        if response.requiresMFA == true, response.mfaPendingToken != nil {
+        if response.requiresMFA == true, let pending = response.mfaPendingToken, !pending.isEmpty {
+            mfaPendingToken = pending
             mfaRequired = response.mfaSetupRequired == true ? .setup : .challenge
             throw AuthSessionError.mfaRequired
         }
@@ -117,20 +125,42 @@ final class AuthSession {
 
         accessToken = token
         userEmail = response.user?.email
-        mfaRequired = nil
+        clearMfaFlow()
         phase = .authenticated
     }
 
-    func signOut() {
+    func handleAuthCallback(_ payload: AuthCallbackPayload) async throws {
+        if let magicToken = payload.magicLinkToken {
+            let response = try await AuthAPI.consumeMagicLink(token: magicToken)
+            try applyTokenResponse(response)
+            return
+        }
+        try applyTokenResponse(payload.asTokenResponse)
+    }
+
+    func clearMfaFlow() {
+        mfaRequired = nil
+        mfaPendingToken = nil
+    }
+
+    func signOut(reason: SignOutReason? = nil) {
         let savedToken = accessToken
+        BiometricGate.shared.resetOnSignOut()
         Task { await PushManager.shared.deregisterFromBackend(explicitAccessToken: savedToken) }
         OfflineService.shared.clearAllOnLogout()
         KeychainStore.deleteAll()
         accessToken = nil
         refreshToken = nil
         userEmail = nil
-        mfaRequired = nil
+        clearMfaFlow()
+        lastSignOutReason = reason
         phase = .unauthenticated
+    }
+
+    func consumeSignOutMessage() -> String? {
+        guard lastSignOutReason == .sessionRevoked else { return nil }
+        lastSignOutReason = nil
+        return String(localized: "mobile.auth.sessionRevoked")
     }
 
     func serverUnreachableMessage() -> String {

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RootView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(BiometricGate.self) private var biometricGate
     @Environment(\.scenePhase) private var scenePhase
     @Bindable private var networkMonitor = NetworkMonitor.shared
 
@@ -23,34 +24,53 @@ struct RootView: View {
                 AuthFlowView()
                     .transition(.opacity)
             case .authenticated:
-                MainTabView()
+                AuthenticatedRootView()
                     .transition(.opacity)
-                    .environment(OfflineService.shared)
-                    .task {
-                        OfflineService.shared.configure(accessToken: session.accessToken)
-                        await OfflineService.shared.syncNow(accessToken: session.accessToken)
-                        // Keep the access token fresh while the app stays open.
-                        while !Task.isCancelled {
-                            try? await Task.sleep(for: .seconds(10 * 60))
-                            await session.refreshIfNeeded()
-                        }
-                    }
             }
         }
         .animation(.easeInOut(duration: 0.35), value: session.phase)
+        .onOpenURL { url in
+            Task { await handleIncomingURL(url) }
+        }
         .onChange(of: scenePhase) { _, newPhase in
-            // Returning from background: the token has likely expired in the meantime.
-            if newPhase == .active, session.phase == .authenticated {
-                Task {
-                    await session.refreshIfNeeded()
-                    await OfflineService.shared.syncNow(accessToken: session.accessToken)
+            switch newPhase {
+            case .background:
+                biometricGate.recordBackground()
+            case .active:
+                biometricGate.evaluateOnForeground()
+                if session.phase == .authenticated {
+                    Task {
+                        await session.refreshIfNeeded()
+                        await OfflineService.shared.syncNow(accessToken: session.accessToken)
+                    }
                 }
+            case .inactive:
+                break
+            @unknown default:
+                break
             }
         }
         .onChange(of: networkMonitor.isOnline) { _, online in
             if online, session.phase == .authenticated {
                 Task { await OfflineService.shared.syncNow(accessToken: session.accessToken) }
             }
+        }
+    }
+
+    @MainActor
+    private func handleIncomingURL(_ url: URL) async {
+        if AuthCallbackParser.parse(url.absoluteString) != nil {
+            do {
+                try await session.handleAuthCallback(AuthCallbackParser.parse(url.absoluteString)!)
+            } catch AuthSession.AuthSessionError.mfaRequired {
+                // MFA state stored; AuthFlowView shows the challenge screen.
+            } catch {
+                // Ignore invalid/expired deep links at the root; login UI handles user-initiated flows.
+            }
+            return
+        }
+        if session.phase == .authenticated {
+            // Navigation deep links are handled inside MainTabView as well.
         }
     }
 }

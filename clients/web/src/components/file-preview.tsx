@@ -8,6 +8,7 @@ import { FilePreviewFallback } from './file-preview-fallback'
 import { OfficeHtmlPreview } from './office-html-preview'
 import { PdfViewer } from './pdf-viewer'
 import { TextFilePreview } from './text-file-preview'
+import type { AnchorSurfaceProps } from './annotation/anchored-annotation-layer'
 
 export type FilePreviewProps = {
   open: boolean
@@ -338,6 +339,11 @@ export type FilePreviewBodyProps = {
   /** When `message-only`, load errors omit sidebar download UI (e.g. submission modal). */
   errorVariant?: 'standalone' | 'message-only'
   className?: string
+  /**
+   * When provided (SpeedGrader), enables text-anchor highlight annotations over reflowable
+   * previews (office/text/code). Ignored for non-text formats.
+   */
+  annotation?: AnchorSurfaceProps
 }
 
 export function FilePreviewBody({
@@ -346,6 +352,7 @@ export function FilePreviewBody({
   mimeType,
   errorVariant = 'standalone',
   className,
+  annotation,
 }: FilePreviewBodyProps) {
   const previewType = detectPreviewType(mimeType, filename)
 
@@ -364,7 +371,7 @@ export function FilePreviewBody({
         <AudioViewer filePath={filePath} filename={filename} />
       )}
       {previewType === 'office' && (
-        <OfficeHtmlPreview filePath={filePath} filename={filename} />
+        <OfficeHtmlPreview filePath={filePath} filename={filename} annotation={annotation} />
       )}
       {previewType === 'text' && (
         <TextFilePreview
@@ -372,10 +379,16 @@ export function FilePreviewBody({
           filename={filename}
           mimeType={mimeType}
           errorVariant={errorVariant}
+          annotation={annotation}
         />
       )}
       {previewType === 'code' && (
-        <CodeFilePreview filePath={filePath} filename={filename} errorVariant={errorVariant} />
+        <CodeFilePreview
+          filePath={filePath}
+          filename={filename}
+          errorVariant={errorVariant}
+          annotation={annotation}
+        />
       )}
       {previewType === 'none' && (
         <UnsupportedFileView filePath={filePath} filename={filename} />

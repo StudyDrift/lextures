@@ -9,6 +9,11 @@ export type AnnotationToolbarProps = {
   onColourChange: (c: string) => void
   disabled?: boolean
   readOnly?: boolean
+  /**
+   * `anchor` is for reflowable docs (text/code/office): highlight-by-text-selection only, so
+   * the geometric tool buttons are replaced with a hint and just the colour picker is shown.
+   */
+  variant?: 'full' | 'anchor'
 }
 
 export function AnnotationToolbar({
@@ -18,8 +23,38 @@ export function AnnotationToolbar({
   onColourChange,
   disabled,
   readOnly,
+  variant = 'full',
 }: AnnotationToolbarProps) {
   if (readOnly) return null
+
+  if (variant === 'anchor') {
+    return (
+      <div
+        role="toolbar"
+        aria-label="Annotation tools"
+        className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/90 p-2 shadow-card dark:bg-neutral-900/90"
+      >
+        <span className="px-1 text-xs font-medium text-slate-600 dark:text-neutral-300">
+          Select text to highlight, then add a comment.
+        </span>
+        <span className="mx-1 h-6 w-px bg-slate-200 dark:bg-neutral-700" aria-hidden />
+        {PRESET_COLOURS.map((c) => (
+          <button
+            key={c}
+            type="button"
+            disabled={disabled}
+            aria-label={`Colour ${c}`}
+            title={c}
+            onClick={() => onColourChange(c)}
+            className={`h-8 w-8 rounded-full border-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-50 ${
+              colour.toUpperCase() === c.toUpperCase() ? 'border-indigo-600' : 'border-slate-300 dark:border-neutral-600'
+            }`}
+            style={{ backgroundColor: c }}
+          />
+        ))}
+      </div>
+    )
+  }
 
   const tools: { id: AnnotationTool; label: string; hint: string }[] = [
     { id: 'select', label: 'Select', hint: 'Select and scroll' },

@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.androidx.browser)
+    implementation(libs.androidx.biometric)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
 

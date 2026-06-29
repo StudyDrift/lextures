@@ -7,7 +7,9 @@
         "paths": [
           "/courses/*",
           "/inbox",
-          "/inbox/*"
+          "/inbox/*",
+          "/login/magic-link",
+          "/login/magic-link/*"
         ]
       }
     ]

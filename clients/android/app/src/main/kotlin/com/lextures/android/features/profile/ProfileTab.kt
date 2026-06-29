@@ -76,6 +76,7 @@ import com.lextures.android.features.home.LmsCard
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import com.lextures.android.core.accessibility.rememberAccessibilityPreferencesState
+import com.lextures.android.core.auth.BiometricGate
 
 /** Profile tab: identity hero, notifications, app info, and sign-out. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -88,8 +89,10 @@ fun ProfileTab(
     var confirmingSignOut by remember { mutableStateOf(false) }
     var confirmingClearCache by remember { mutableStateOf(false) }
     var showNotifications by remember { mutableStateOf(false) }
+    var showDeviceSessions by remember { mutableStateOf(false) }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
+    val biometricGate = remember { BiometricGate.get(context) }
     val offline = remember { OfflineService.get(context) }
     val pendingCount by offline.pendingCount.collectAsState()
     val storageBytes by offline.storageBytes.collectAsState()
@@ -105,6 +108,15 @@ fun ProfileTab(
             session = session,
             shell = shell,
             onBack = { showNotifications = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showDeviceSessions) {
+        DeviceSessionsScreen(
+            session = session,
+            onBack = { showDeviceSessions = false },
             modifier = modifier,
         )
         return
@@ -306,6 +318,77 @@ fun ProfileTab(
                     onCheckedChange = accessibilityState::updateDyslexiaDisplayEnabled,
                     colors = SwitchDefaults.colors(checkedTrackColor = LexturesColors.Primary),
                 )
+            }
+        }
+
+        LmsCard {
+            Text(
+                text = L.text(context, localePreferences, R.string.mobile_profile_security),
+                style = LexturesType.display(17),
+                color = textPrimary(),
+            )
+            if (biometricGate.canEnableBiometrics) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = localePreferences.localizedContext(context).getString(
+                                R.string.mobile_biometric_toggle,
+                                biometricGate.biometryLabel(context),
+                            ),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = textPrimary(),
+                        )
+                        Text(
+                            text = L.text(context, localePreferences, R.string.mobile_biometric_toggleDescription),
+                            fontSize = 12.sp,
+                            color = textSecondary(),
+                        )
+                    }
+                    Switch(
+                        checked = biometricGate.isEnabled,
+                        onCheckedChange = { biometricGate.isEnabled = it },
+                        colors = SwitchDefaults.colors(checkedTrackColor = LexturesColors.Primary),
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+                    .clickable { showDeviceSessions = true },
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(LexturesColors.BrandTeal.copy(alpha = if (isDarkTheme()) 0.18f else 0.14f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Default.Dns, contentDescription = null, tint = accentColor(), modifier = Modifier.size(16.dp))
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = L.text(context, localePreferences, R.string.mobile_sessions_title),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textPrimary(),
+                    )
+                    Text(
+                        text = L.text(context, localePreferences, R.string.mobile_sessions_profileHint),
+                        fontSize = 12.sp,
+                        color = textSecondary(),
+                    )
+                }
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary())
             }
         }
 

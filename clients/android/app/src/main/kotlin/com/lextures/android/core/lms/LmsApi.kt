@@ -2,9 +2,12 @@ package com.lextures.android.core.lms
 
 import com.lextures.android.core.network.ApiClient
 import com.lextures.android.core.network.ApiError
+import com.lextures.android.core.network.parseApiErrorMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import java.net.URLEncoder
 
 /** LMS endpoints used by the post-auth tabs (parity with web `courses-api` / `communication-api`). */
@@ -342,5 +345,82 @@ object LmsApi {
                 accessToken = accessToken,
             )
         }
+    }
+
+    // Onboarding (plan 15.11 / M1.3)
+
+    /** Returns null when the onboarding feature flag is off (HTTP 404). */
+    suspend fun fetchOnboardingStatus(accessToken: String): OnboardingStatus? = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw("/api/v1/me/onboarding-status", accessToken = accessToken)
+        when (code) {
+            404 -> null
+            in 200..299 -> decode<OnboardingStatus>(body)
+            else -> throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+    }
+
+    suspend fun postOnboarding(payload: Map<String, Any?>, accessToken: String): LearnerGoals =
+        withContext(Dispatchers.IO) {
+            val body = buildJsonObject {
+                payload.forEach { (key, value) ->
+                    when (value) {
+                        null -> Unit
+                        is Boolean -> put(key, JsonPrimitive(value))
+                        is Int -> put(key, JsonPrimitive(value))
+                        is Double -> put(key, JsonPrimitive(value))
+                        is String -> put(key, JsonPrimitive(value))
+                        is Map<*, *> -> {
+                            @Suppress("UNCHECKED_CAST")
+                            val answers = value as Map<String, Int>
+                            put(
+                                key,
+                                buildJsonObject {
+                                    answers.forEach { (answerKey, answerValue) ->
+                                        put(answerKey, JsonPrimitive(answerValue))
+                                    }
+                                },
+                            )
+                        }
+                        else -> Unit
+                    }
+                }
+            }.toString()
+            val (response, code) = client.requestRaw(
+                path = "/api/v1/me/onboarding",
+                method = "POST",
+                body = body,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) {
+                throw ApiError.HttpStatus(code, parseApiErrorMessage(response))
+            }
+            decode<GoalsEnvelope>(response).goals
+        }
+
+    suspend fun fetchDiagnosticQuestions(topic: String, accessToken: String): List<DiagnosticQuestion> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/me/onboarding/diagnostic-questions?topic=${encodeQuery(topic)}",
+                accessToken = accessToken,
+            )
+            decode<DiagnosticQuestionsResponse>(body).questions
+        }
+
+    suspend fun saveStudyReminderPrefs(optIn: Boolean, reminderTime: String, accessToken: String) {
+        if (!optIn) return
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val body = """
+                    {"preferences":[{"eventType":"study_reminder","emailEnabled":true,"pushEnabled":true,"digestMode":"instant"}]}
+                """.trimIndent()
+                client.request(
+                    path = "/api/v1/me/notification-preferences",
+                    method = "PUT",
+                    body = body,
+                    accessToken = accessToken,
+                )
+            }
+        }
+        reminderTime
     }
 }

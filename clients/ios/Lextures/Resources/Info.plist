@@ -47,9 +47,22 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Lextures uses Face ID or Touch ID to unlock the app after it has been in the background.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lextures uses the microphone for speech-to-text dictation in message and assignment fields.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Lextures uses speech recognition so you can dictate long responses instead of typing.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.lextures.ios.auth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>lextures</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

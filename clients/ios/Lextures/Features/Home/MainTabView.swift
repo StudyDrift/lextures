@@ -70,6 +70,7 @@ final class AppShellModel {
 /// Post-auth shell: Home, Courses, Notebooks, Inbox, Profile behind a floating pill tab bar.
 struct MainTabView: View {
     @Environment(AuthSession.self) private var session
+    var initialDeepLink: DeepLinkDestination?
     @State private var shell = AppShellModel()
 
     var body: some View {
@@ -91,6 +92,9 @@ struct MainTabView: View {
         .onAppear {
             PushManager.shared.configure(accessToken: { session.accessToken }) { destination in
                 shell.openDeepLink(destination)
+            }
+            if let initialDeepLink {
+                shell.openDeepLink(initialDeepLink)
             }
         }
         .onChange(of: session.accessToken) { _, token in
