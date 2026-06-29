@@ -34,6 +34,16 @@ object DeepLinkRouter {
             return if (stripped.startsWith("/")) stripped else "/$stripped"
         }
         if (value.startsWith("/")) return value
+        if (value.startsWith("http://") || value.startsWith("https://")) {
+            val uri = runCatching { java.net.URI(value) }.getOrNull() ?: return null
+            val host = uri.host?.lowercase().orEmpty()
+            if (host == "lextures.com" || host.endsWith(".lextures.com") || host == "localhost") {
+                var path = uri.path.orEmpty()
+                if (!path.startsWith("/")) path = "/$path"
+                return path.ifEmpty { null }
+            }
+            return null
+        }
         val uri = runCatching { android.net.Uri.parse(value) }.getOrNull() ?: return null
         val host = uri.host?.lowercase().orEmpty()
         if (host == "lextures.com" || host.endsWith(".lextures.com") || host == "localhost") {
