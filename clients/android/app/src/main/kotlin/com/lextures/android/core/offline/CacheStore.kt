@@ -25,7 +25,7 @@ class CacheStore(
     private val json = Json { ignoreUnknownKeys = true }
     private var index: MutableMap<String, CacheEntry> = loadIndex()
 
-    inline fun <reified T> get(key: String, serializer: kotlinx.serialization.KSerializer<T>): Cached<T>? {
+    fun <T> get(key: String, serializer: kotlinx.serialization.KSerializer<T>): Cached<T>? {
         val entry = index[key] ?: return null
         val now = Instant.now()
         index[key] = entry.copy(lastAccessEpochMs = now.toEpochMilli())
@@ -34,7 +34,7 @@ class CacheStore(
         return Cached(value = value, fetchedAt = Instant.ofEpochMilli(entry.fetchedAtEpochMs))
     }
 
-    inline fun <reified T> put(key: String, value: T, serializer: kotlinx.serialization.KSerializer<T>) {
+    fun <T> put(key: String, value: T, serializer: kotlinx.serialization.KSerializer<T>) {
         val payload = json.encodeToString(serializer, value)
         val now = Instant.now()
         index[key] = CacheEntry(

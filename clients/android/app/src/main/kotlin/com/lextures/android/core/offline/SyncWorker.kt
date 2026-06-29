@@ -25,7 +25,7 @@ class SyncWorker(
         if (isRunning) return metrics
         isRunning = true
         try {
-            for (var item in outbox.pendingItems()) {
+            for (item in outbox.pendingItems()) {
                 if (outbox.wasApplied(item.idempotencyKey)) {
                     outbox.update(item.copy(status = OutboxStatus.Synced.name))
                     continue
