@@ -72,6 +72,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables the org admin console at /admin with user/course management, settings, and audit log for org_admin and global admin users.',
   },
   {
+    key: 'adminSearchEnabled',
+    label: 'Admin org-wide search',
+    description:
+      'Enables cross-course search for org admins across users, courses, and content within their organization.',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',
