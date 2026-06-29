@@ -84,6 +84,7 @@ async function grantOrgAdmin(actorToken: string, orgId: string, userId: string) 
   }
 }
 
+test.describe.serial('Admin console', () => {
 test('AdminConsole: disabled feature returns 404', async () => {
   const email = uniqueEmail('disabled')
   await apiSignup(email)
@@ -177,4 +178,5 @@ test('AdminConsole: org admin workflow', async () => {
     body: JSON.stringify({ email: studentEmail, password: PASSWORD }),
   })
   expect(loginRes.status).toBe(401)
+})
 })
