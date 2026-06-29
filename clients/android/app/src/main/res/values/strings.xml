@@ -50,7 +50,7 @@
     <string name="mobile_courses_otherItems">Other items</string>
     <string name="mobile_courses_points">%1$s pts</string>
     <string name="mobile_courses_title">Courses</string>
-    <string name="mobile_dashboard_caughtUp">You're all caught up</string>
+    <string name="mobile_dashboard_caughtUp">You\'re all caught up</string>
     <string name="mobile_dashboard_empty_courses_message">Courses you enroll in will show up here.</string>
     <string name="mobile_dashboard_empty_courses_title">No courses yet</string>
     <string name="mobile_dashboard_empty_dueThisWeek">Nothing due this week. Enjoy the breathing room!</string>

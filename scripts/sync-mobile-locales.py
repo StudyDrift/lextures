@@ -47,6 +47,15 @@ def android_format(value: str) -> str:
     return out
 
 
+def escape_android_string(value: str) -> str:
+    """Escape characters Android treats specially in <string> resources."""
+    out = value.replace("\\", "\\\\")
+    out = out.replace("'", "\\'")
+    if out.startswith("@"):
+        out = "\\" + out
+    return out
+
+
 def load_locale(tag: str) -> dict:
     path = LOCALES_DIR / f"{tag}.json"
     with path.open(encoding="utf-8") as handle:
@@ -94,14 +103,14 @@ def write_android_strings(tag: str, data: dict) -> None:
     resources = ET.Element("resources")
     for key, value in sorted(data.get("strings", {}).items()):
         item = ET.SubElement(resources, "string", name=android_name(key))
-        item.text = android_format(value)
+        item.text = escape_android_string(android_format(value))
 
     for key, forms in sorted(data.get("plurals", {}).items()):
         plural = ET.SubElement(resources, "plurals", name=android_name(key))
         for quantity in ("zero", "one", "two", "few", "many", "other"):
             if quantity in forms:
                 entry = ET.SubElement(plural, "item", quantity=quantity)
-                entry.text = android_format(forms[quantity])
+                entry.text = escape_android_string(android_format(forms[quantity]))
 
     indent_xml(resources)
     out_dir = ANDROID_RES / folder
