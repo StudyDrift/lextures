@@ -7,6 +7,8 @@ struct CourseDetailView: View {
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
+    var initialSection: Section?
+    var initialItemId: String?
 
     enum Section: String, CaseIterable {
         case overview = "Overview"
@@ -22,6 +24,16 @@ struct CourseDetailView: View {
     @State private var hasAttendanceSessions = false
     @State private var errorMessage: String?
     @State private var loading = false
+    @State private var linkedItem: CourseStructureItem?
+
+    init(course: CourseSummary, initialSection: Section? = nil, initialItemId: String? = nil) {
+        self.course = course
+        self.initialSection = initialSection
+        self.initialItemId = initialItemId
+        if let initialSection {
+            _section = State(initialValue: initialSection)
+        }
+    }
 
     private var sections: [Section] {
         var out: [Section] = [.overview, .modules]
@@ -106,7 +118,16 @@ struct CourseDetailView: View {
         .navigationDestination(for: GradingBacklogItem.self) { backlogItem in
             SubmissionsListView(course: course, backlogItem: backlogItem)
         }
+        .navigationDestination(item: $linkedItem) { item in
+            ItemDetailView(course: course, item: item)
+        }
         .task { await load() }
+        .onChange(of: items) { _, loaded in
+            guard linkedItem == nil,
+                  let itemId = initialItemId,
+                  let match = loaded.first(where: { $0.id == itemId }) else { return }
+            linkedItem = match
+        }
     }
 
     /// Gradient cover banner — matches the course's tile color across the app.

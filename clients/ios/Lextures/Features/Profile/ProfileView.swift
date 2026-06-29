@@ -203,6 +203,9 @@ struct ProfileView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .simultaneousGesture(TapGesture().onEnded {
+                Task { await PushManager.shared.requestPermissionIfNeeded() }
+            })
         }
     }
 

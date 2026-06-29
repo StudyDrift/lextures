@@ -57,6 +57,19 @@ data class NotificationsPage(
     val unreadCount: Int = 0,
 )
 
+@Serializable
+data class DeviceTokenRegistration(
+    val token: String,
+    val platform: String,
+    val appBundleId: String? = null,
+    val appVersion: String? = null,
+)
+
+@Serializable
+data class DeviceTokenResponse(
+    val id: String,
+)
+
 // endregion
 
 // region Announcements (org broadcasts)

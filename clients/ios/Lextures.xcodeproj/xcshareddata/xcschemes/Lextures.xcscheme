@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "B67074F106FD4A6B98C4ABF2"
+               BlueprintIdentifier = "BEDCBAE16D44422B86C2755A"
                BuildableName = "Lextures.app"
                BlueprintName = "Lextures"
                ReferencedContainer = "container:Lextures.xcodeproj">
@@ -36,7 +36,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "B67074F106FD4A6B98C4ABF2"
+            BlueprintIdentifier = "BEDCBAE16D44422B86C2755A"
             BuildableName = "Lextures.app"
             BlueprintName = "Lextures"
             ReferencedContainer = "container:Lextures.xcodeproj">

@@ -31,12 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
@@ -51,6 +50,8 @@ import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.core.offline.fetchCoursesCached
+import com.lextures.android.core.routing.DeepLinkDestination
+import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsCoverTile
 import com.lextures.android.features.home.LmsEmptyState
@@ -58,7 +59,11 @@ import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSkeletonList
 
 @Composable
-fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
+fun CoursesTab(
+    session: AuthSession,
+    shell: HomeShellState? = null,
+    modifier: Modifier = Modifier,
+) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
@@ -84,6 +89,17 @@ fun CoursesTab(session: AuthSession, modifier: Modifier = Modifier) {
             errorMessage = session.mapError(e)
         } finally {
             loading = false
+        }
+    }
+
+    LaunchedEffect(shell?.pendingDeepLink, accessToken) {
+        val link = shell?.pendingDeepLink ?: return@LaunchedEffect
+        val token = accessToken ?: return@LaunchedEffect
+        if (link is DeepLinkDestination.Course) {
+            runCatching { LmsApi.fetchCourse(link.code, token) }
+                .onSuccess { openCourse = it }
+                .onFailure { shell.openDeepLink(DeepLinkDestination.Home) }
+            shell.pendingDeepLink = null
         }
     }
 

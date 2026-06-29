@@ -57,6 +57,30 @@ struct NotificationsPage: Decodable {
     }
 }
 
+struct DeviceTokenRegistration: Encodable {
+    var token: String
+    var platform: String
+    var appBundleId: String?
+    var appVersion: String?
+}
+
+struct DeviceTokenResponse: Decodable {
+    var id: String
+}
+
+struct DeviceTokensPage: Decodable {
+    var tokens: [DevicePushToken]
+}
+
+struct DevicePushToken: Decodable, Identifiable {
+    var id: String
+    var platform: String
+    var appBundleId: String?
+    var appVersion: String?
+    var isActive: Bool
+    var createdAt: String
+}
+
 // MARK: - Announcements (org broadcasts)
 
 /// Row from GET `/api/v1/me/broadcasts`.

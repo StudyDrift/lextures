@@ -1,0 +1,15 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.lextures.ios",
+        "paths": [
+          "/courses/*",
+          "/inbox",
+          "/inbox/*"
+        ]
+      }
+    ]
+  }
+}
