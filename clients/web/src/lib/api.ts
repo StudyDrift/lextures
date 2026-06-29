@@ -41,8 +41,30 @@ export function apiUrl(path: string): string {
   return joinApiBase(apiBaseUrl(), path)
 }
 
-/** WebSocket URL for the same API host as {@link apiUrl}. */
+function shouldProxyWebSocketViaPageOrigin(): boolean {
+  if (typeof window === 'undefined') {
+    return false
+  }
+  const api = new URL(apiBaseUrl())
+  if (api.host === window.location.host) {
+    return false
+  }
+  // Local dev: Vite on :5173 proxying to Go API on :8080 (direct ws://localhost:8080
+  // fails when port 8080 is SSH-tunneled without WebSocket upgrade support).
+  return api.hostname === 'localhost' || api.hostname === '127.0.0.1'
+}
+
+/**
+ * WebSocket URL for the same API host as {@link apiUrl}.
+ * In local dev, when the SPA and API run on different ports, route through the page
+ * origin so Vite's `/api` proxy handles the upgrade.
+ */
 export function wsUrl(path: string): string {
+  const p = path.startsWith('/') ? path : `/${path}`
+  if (shouldProxyWebSocketViaPageOrigin()) {
+    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
+    return `${proto}//${window.location.host}${p}`
+  }
   return apiUrl(path).replace(/^http/, 'ws')
 }
 

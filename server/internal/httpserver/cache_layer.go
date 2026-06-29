@@ -1,10 +1,13 @@
 package httpserver
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -92,6 +95,23 @@ func (w *cacheHeaderWriter) Write(b []byte) (int, error) {
 		w.WriteHeader(http.StatusOK)
 	}
 	return w.ResponseWriter.Write(b)
+}
+
+func (w *cacheHeaderWriter) Flush() {
+	if f, ok := w.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+func (w *cacheHeaderWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
+	if hj, ok := w.ResponseWriter.(http.Hijacker); ok {
+		return hj.Hijack()
+	}
+	return nil, nil, errors.New("http.Hijacker not supported")
+}
+
+func (w *cacheHeaderWriter) Unwrap() http.ResponseWriter {
+	return w.ResponseWriter
 }
 
 func requestIsAuthenticated(r *http.Request) bool {

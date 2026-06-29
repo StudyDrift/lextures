@@ -89,12 +89,30 @@ export async function putCourseCatalogNickname(courseId: string, nickname: strin
   throw new Error(readApiErrorMessage(raw))
 }
 
-export async function fetchPinnedCourses(): Promise<PinnedCourseSummary[]> {
+export type PinnedCoursesPayload = {
+  courses: PinnedCourseSummary[]
+  rows: PinnedCourseSummary[][]
+}
+
+export async function fetchPinnedCourses(): Promise<PinnedCoursesPayload> {
   const res = await authorizedFetch('/api/v1/courses/catalog-pins')
   const raw: unknown = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(readApiErrorMessage(raw))
-  const data = raw as { courses?: PinnedCourseSummary[] }
-  return data.courses ?? []
+  const data = raw as { courses?: PinnedCourseSummary[]; rows?: PinnedCourseSummary[][] }
+  const courses = data.courses ?? []
+  const rows = data.rows ?? []
+  return { courses, rows }
+}
+
+export async function putCourseCatalogPinLayout(rows: string[][]): Promise<void> {
+  const res = await authorizedFetch('/api/v1/courses/catalog-pins/layout', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ rows }),
+  })
+  if (res.ok) return
+  const raw: unknown = await res.json().catch(() => ({}))
+  throw new Error(readApiErrorMessage(raw))
 }
 
 export async function putCourseCatalogPin(courseId: string, pinned: boolean): Promise<void> {

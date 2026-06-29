@@ -1,4 +1,4 @@
-import { apiBaseUrl, authorizedFetch } from './api'
+import { authorizedFetch, wsUrl } from './api'
 import { getAccessToken } from './auth'
 
 export type MailboxParty = {
@@ -112,10 +112,7 @@ export async function sendMessage(
 /** WebSocket URL for mailbox notifications (auth is sent in first WS message). */
 export function mailboxWebSocketUrl(): string | null {
   if (!getAccessToken()) return null
-  const base = apiBaseUrl()
-  const u = new URL(base)
-  u.protocol = u.protocol === 'https:' ? 'wss:' : 'ws:'
-  return `${u.origin}/api/v1/communication/ws`
+  return wsUrl('/api/v1/communication/ws')
 }
 
 export type MailboxWsMessage = {

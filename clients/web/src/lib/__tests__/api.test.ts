@@ -6,7 +6,7 @@ import {
   getRefreshToken,
   setRefreshToken,
 } from '../session-tokens'
-import { apiBaseUrl, apiUrl, authorizedFetch, backoffWithJitterMs, joinApiBase } from '../api'
+import { apiBaseUrl, apiUrl, authorizedFetch, backoffWithJitterMs, joinApiBase, wsUrl } from '../api'
 import { server } from '../../test/mocks/server'
 
 describe('joinApiBase', () => {
@@ -35,6 +35,24 @@ describe('apiUrl', () => {
     vi.stubEnv('VITE_API_URL', '')
     expect(apiBaseUrl()).toBe('http://localhost:8080')
     expect(apiUrl('/api/v1/x')).toBe('http://localhost:8080/api/v1/x')
+  })
+})
+
+describe('wsUrl', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('uses the API host when the API is not on localhost', () => {
+    vi.stubEnv('VITE_API_URL', 'https://api.example.com')
+    expect(wsUrl('/api/v1/ws/notifications')).toBe('wss://api.example.com/api/v1/ws/notifications')
+  })
+
+  it('routes through the page origin in local dev when API is on another port', () => {
+    vi.stubEnv('VITE_API_URL', 'http://localhost:8080')
+    expect(wsUrl('/api/v1/communication/ws')).toBe(
+      `ws://${window.location.host}/api/v1/communication/ws`,
+    )
   })
 })
 

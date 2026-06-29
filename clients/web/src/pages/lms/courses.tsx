@@ -1,4 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type MutableRefObject, type SVGProps } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+  type MutableRefObject,
+  type PointerEvent as ReactPointerEvent,
+  type SVGProps,
+} from 'react'
 import { Link } from 'react-router-dom'
 import {
   closestCorners,
@@ -7,6 +18,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -53,6 +65,7 @@ import { formatRelativeCompact } from '../../lib/format-datetime'
 import { CourseCatalogStatusPill } from '../../components/ui/status-vocabulary'
 import { canCreateCourses } from '../../lib/rbac-api'
 import { CourseHeroImage } from '../../components/course-hero-image'
+import type { CourseHeroImageSize } from '../../lib/course-hero-image-url'
 import { CourseEnrollmentInvitationActions } from '../../components/enrollment/course-enrollment-invitation-actions'
 
 export type { CoursePublic } from '../../lib/courses-api'
@@ -98,6 +111,92 @@ function CreateCourseIcon({ className, ...props }: SVGProps<SVGSVGElement>) {
 }
 
 const COURSE_GRID_SORT_ID = 'course-catalog-grid'
+const CATALOG_DRAG_ACTIVATION_DISTANCE_SQ = 8 * 8
+
+type CatalogPointerDragGuard = {
+  x: number
+  y: number
+  moved: boolean
+}
+
+function catalogCardPointerDownCapture(
+  guard: MutableRefObject<CatalogPointerDragGuard>,
+  e: ReactPointerEvent<HTMLElement>,
+) {
+  guard.current = { x: e.clientX, y: e.clientY, moved: false }
+}
+
+function shouldSuppressCatalogLinkClick(opts: {
+  pointerGuard?: MutableRefObject<CatalogPointerDragGuard>
+  justFinishedDraggingRef?: MutableRefObject<boolean>
+  isDragging?: boolean
+  catalogDragActive?: boolean
+  suppressAfterDragRef?: MutableRefObject<boolean>
+}): boolean {
+  return Boolean(
+    opts.isDragging ||
+      opts.catalogDragActive ||
+      opts.suppressAfterDragRef?.current ||
+      opts.justFinishedDraggingRef?.current ||
+      opts.pointerGuard?.current.moved,
+  )
+}
+
+function consumeCatalogLinkClickSuppress(opts: {
+  pointerGuard?: MutableRefObject<CatalogPointerDragGuard>
+  justFinishedDraggingRef?: MutableRefObject<boolean>
+  suppressAfterDragRef?: MutableRefObject<boolean>
+}) {
+  if (opts.pointerGuard) opts.pointerGuard.current.moved = false
+  if (opts.justFinishedDraggingRef) opts.justFinishedDraggingRef.current = false
+  if (opts.suppressAfterDragRef) opts.suppressAfterDragRef.current = false
+}
+
+function useCatalogSortablePointerGuard(isDragging: boolean) {
+  const pointerGuardRef = useRef<CatalogPointerDragGuard>({ x: 0, y: 0, moved: false })
+  const justFinishedDraggingRef = useRef(false)
+  const wasDraggingRef = useRef(false)
+
+  useEffect(() => {
+    if (isDragging) {
+      pointerGuardRef.current.moved = true
+      justFinishedDraggingRef.current = false
+    } else if (wasDraggingRef.current) {
+      pointerGuardRef.current.moved = true
+      justFinishedDraggingRef.current = true
+    }
+    wasDraggingRef.current = isDragging
+  }, [isDragging])
+
+  const onPointerDownCapture = useCallback((e: ReactPointerEvent<HTMLElement>) => {
+    justFinishedDraggingRef.current = false
+    catalogCardPointerDownCapture(pointerGuardRef, e)
+    const pointerId = e.pointerId
+
+    const onWindowPointerMove = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return
+      if (pointerGuardRef.current.moved) return
+      const dx = ev.clientX - pointerGuardRef.current.x
+      const dy = ev.clientY - pointerGuardRef.current.y
+      if (dx * dx + dy * dy >= CATALOG_DRAG_ACTIVATION_DISTANCE_SQ) {
+        pointerGuardRef.current.moved = true
+      }
+    }
+
+    const endWindowTracking = (ev: PointerEvent) => {
+      if (ev.pointerId !== pointerId) return
+      window.removeEventListener('pointermove', onWindowPointerMove)
+      window.removeEventListener('pointerup', endWindowTracking)
+      window.removeEventListener('pointercancel', endWindowTracking)
+    }
+
+    window.addEventListener('pointermove', onWindowPointerMove)
+    window.addEventListener('pointerup', endWindowTracking)
+    window.addEventListener('pointercancel', endWindowTracking)
+  }, [])
+
+  return { pointerGuardRef, justFinishedDraggingRef, onPointerDownCapture }
+}
 
 type CatalogSection = {
   key: string
@@ -110,6 +209,14 @@ type SortableCourseProps = {
   setNodeRef: (node: HTMLElement | null) => void
   style: CSSProperties
   isDragging: boolean
+  pointerGuardRef: MutableRefObject<CatalogPointerDragGuard>
+  justFinishedDraggingRef: MutableRefObject<boolean>
+  onPointerDownCapture: (e: ReactPointerEvent<HTMLElement>) => void
+}
+
+type CatalogCourseDragProps = {
+  catalogDragActive: boolean
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
 }
 
 function formatEditedAgo(iso: string): string {
@@ -120,6 +227,33 @@ function formatCourseTermLabel(course: CoursePublic): string {
   return course.term?.name?.trim() || '—'
 }
 
+const CATALOG_LIST_HERO_FRAME =
+  'relative aspect-[7/5] w-28 shrink-0 overflow-hidden rounded-lg bg-slate-100 dark:bg-neutral-800'
+
+function CatalogCourseHero({
+  course,
+  size,
+  className,
+}: {
+  course: CoursePublic
+  size: CourseHeroImageSize
+  className: string
+}) {
+  return (
+    <CourseHeroImage
+      data-lex-hero
+      src={course.heroImageUrl ?? '/course-card-hero.png'}
+      size={size}
+      alt=""
+      draggable={false}
+      loading="lazy"
+      decoding="async"
+      className={className}
+      style={heroImageObjectStyle(course.heroImageObjectPosition)}
+    />
+  )
+}
+
 function catalogViewUsesGrid(view: CourseCatalogView): boolean {
   return view === 'cards' || view === 'gallery'
 }
@@ -127,22 +261,19 @@ function catalogViewUsesGrid(view: CourseCatalogView): boolean {
 function CourseCard({
   course,
   sortable,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  catalogDragActive: boolean
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
-  sortable?: {
-    listeners: Record<string, unknown>
-    setNodeRef: (node: HTMLElement | null) => void
-    style: CSSProperties
-    isDragging: boolean
-  }
+  sortable?: SortableCourseProps
 }) {
   const courseHref = `/courses/${encodeURIComponent(course.courseCode)}`
   const badgeLabel = courseCatalogStatusLabel(course)
@@ -152,16 +283,7 @@ function CourseCard({
 
   const heroBlock = (
     <>
-      <CourseHeroImage
-        data-lex-hero
-        src={course.heroImageUrl ?? '/course-card-hero.png'}
-        alt=""
-        draggable={false}
-        loading="lazy"
-        decoding="async"
-        className="h-40 w-full object-cover"
-        style={heroImageObjectStyle(course.heroImageObjectPosition)}
-      />
+      <CatalogCourseHero course={course} size="catalog-card" className="h-40 w-full object-cover" />
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"
         aria-hidden
@@ -184,6 +306,26 @@ function CourseCard({
 
   const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
 
+  const suppressLinkClick = () =>
+    shouldSuppressCatalogLinkClick({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      isDragging: sortable?.isDragging,
+      catalogDragActive,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+
+  const onCatalogLinkClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!suppressLinkClick()) return
+    e.preventDefault()
+    e.stopPropagation()
+    consumeCatalogLinkClickSuppress({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+  }
+
   return (
     <article
       ref={sortable?.setNodeRef}
@@ -195,6 +337,7 @@ function CourseCard({
       ]
         .filter(Boolean)
         .join(' ')}
+      onPointerDownCapture={sortable?.onPointerDownCapture}
       {...(sortable ? sortable.listeners : {})}
     >
       <div className={invitationMutedClass}>
@@ -207,12 +350,7 @@ function CourseCard({
             to={courseHref}
             className="relative block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
             aria-label={`Open ${displayTitle}`}
-            onClick={(e) => {
-              if (!suppressNavigateAfterDragRef?.current) return
-              e.preventDefault()
-              e.stopPropagation()
-              suppressNavigateAfterDragRef.current = false
-            }}
+            onClick={onCatalogLinkClick}
           >
             {heroBlock}
           </Link>
@@ -257,13 +395,14 @@ function CourseCard({
 
 function SortableCourseCard({
   course,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+} & CatalogCourseDragProps & {
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -271,6 +410,8 @@ function SortableCourseCard({
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
+  const { pointerGuardRef, justFinishedDraggingRef, onPointerDownCapture } =
+    useCatalogSortablePointerGuard(isDragging)
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -282,6 +423,7 @@ function SortableCourseCard({
     <div className="h-full min-h-0">
       <CourseCard
         course={course}
+        catalogDragActive={catalogDragActive}
         suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
         onNicknameChange={onNicknameChange}
         onPinnedChange={onPinnedChange}
@@ -291,6 +433,9 @@ function SortableCourseCard({
           setNodeRef,
           style,
           isDragging,
+          pointerGuardRef,
+          justFinishedDraggingRef,
+          onPointerDownCapture,
         }}
       />
     </div>
@@ -300,13 +445,15 @@ function SortableCourseCard({
 function CourseListRow({
   course,
   sortable,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  catalogDragActive: boolean
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -319,6 +466,26 @@ function CourseListRow({
   const invitationPending = courseInvitationPending(course)
   const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
 
+  const suppressLinkClick = () =>
+    shouldSuppressCatalogLinkClick({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      isDragging: sortable?.isDragging,
+      catalogDragActive,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+
+  const onCatalogLinkClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!suppressLinkClick()) return
+    e.preventDefault()
+    e.stopPropagation()
+    consumeCatalogLinkClickSuppress({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+  }
+
   return (
     <article
       ref={sortable?.setNodeRef}
@@ -330,44 +497,30 @@ function CourseListRow({
       ]
         .filter(Boolean)
         .join(' ')}
+      onPointerDownCapture={sortable?.onPointerDownCapture}
       {...(sortable ? sortable.listeners : {})}
     >
       <div className="flex min-w-0 flex-1 items-stretch gap-4 p-3 sm:p-4">
         <div className={invitationMutedClass}>
         {invitationPending ? (
-          <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg sm:h-20 sm:w-28" aria-hidden>
-            <CourseHeroImage
-              data-lex-hero
-              src={course.heroImageUrl ?? '/course-card-hero.png'}
-              alt=""
-              draggable={false}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-              style={heroImageObjectStyle(course.heroImageObjectPosition)}
+          <div className={CATALOG_LIST_HERO_FRAME} aria-hidden>
+            <CatalogCourseHero
+              course={course}
+              size="catalog-list"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         ) : (
           <Link
             to={courseHref}
-            className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 sm:h-20 sm:w-28"
+            className={`${CATALOG_LIST_HERO_FRAME} focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500`}
             aria-label={`Open ${displayTitle}`}
-            onClick={(e) => {
-              if (!suppressNavigateAfterDragRef?.current) return
-              e.preventDefault()
-              e.stopPropagation()
-              suppressNavigateAfterDragRef.current = false
-            }}
+            onClick={onCatalogLinkClick}
           >
-            <CourseHeroImage
-              data-lex-hero
-              src={course.heroImageUrl ?? '/course-card-hero.png'}
-              alt=""
-              draggable={false}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-              style={heroImageObjectStyle(course.heroImageObjectPosition)}
+            <CatalogCourseHero
+              course={course}
+              size="catalog-list"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </Link>
         )}
@@ -392,12 +545,7 @@ function CourseListRow({
             <Link
               to={courseHref}
               className="text-start text-sm leading-snug text-slate-600 line-clamp-2 hover:text-indigo-600 dark:text-neutral-400 dark:hover:text-indigo-300"
-              onClick={(e) => {
-                if (!suppressNavigateAfterDragRef?.current) return
-                e.preventDefault()
-                e.stopPropagation()
-                suppressNavigateAfterDragRef.current = false
-              }}
+              onClick={onCatalogLinkClick}
             >
               {descriptionBlurb}
             </Link>
@@ -418,13 +566,14 @@ function CourseListRow({
 
 function SortableCourseListRow({
   course,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+} & CatalogCourseDragProps & {
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -432,6 +581,8 @@ function SortableCourseListRow({
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
+  const { pointerGuardRef, justFinishedDraggingRef, onPointerDownCapture } =
+    useCatalogSortablePointerGuard(isDragging)
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -442,6 +593,7 @@ function SortableCourseListRow({
   return (
     <CourseListRow
       course={course}
+      catalogDragActive={catalogDragActive}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
@@ -451,6 +603,9 @@ function SortableCourseListRow({
         setNodeRef,
         style,
         isDragging,
+        pointerGuardRef,
+        justFinishedDraggingRef,
+        onPointerDownCapture,
       }}
     />
   )
@@ -459,13 +614,15 @@ function SortableCourseListRow({
 function CourseGalleryTile({
   course,
   sortable,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  catalogDragActive: boolean
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -476,6 +633,26 @@ function CourseGalleryTile({
   const displayTitle = courseCatalogDisplayTitle(course)
   const invitationPending = courseInvitationPending(course)
   const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
+
+  const suppressLinkClick = () =>
+    shouldSuppressCatalogLinkClick({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      isDragging: sortable?.isDragging,
+      catalogDragActive,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+
+  const onCatalogLinkClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!suppressLinkClick()) return
+    e.preventDefault()
+    e.stopPropagation()
+    consumeCatalogLinkClickSuppress({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+  }
 
   return (
     <article
@@ -488,20 +665,16 @@ function CourseGalleryTile({
       ]
         .filter(Boolean)
         .join(' ')}
+      onPointerDownCapture={sortable?.onPointerDownCapture}
       {...(sortable ? sortable.listeners : {})}
     >
       <div className={invitationMutedClass}>
       {invitationPending ? (
         <div className="relative block aspect-[4/3]" aria-hidden>
-          <CourseHeroImage
-            data-lex-hero
-            src={course.heroImageUrl ?? '/course-card-hero.png'}
-            alt=""
-            draggable={false}
-            loading="lazy"
-            decoding="async"
+          <CatalogCourseHero
+            course={course}
+            size="catalog-gallery"
             className="absolute inset-0 h-full w-full object-cover"
-            style={heroImageObjectStyle(course.heroImageObjectPosition)}
           />
         </div>
       ) : (
@@ -509,22 +682,12 @@ function CourseGalleryTile({
         to={courseHref}
         className="relative block aspect-[4/3] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-indigo-500"
         aria-label={`Open ${displayTitle}`}
-        onClick={(e) => {
-          if (!suppressNavigateAfterDragRef?.current) return
-          e.preventDefault()
-          e.stopPropagation()
-          suppressNavigateAfterDragRef.current = false
-        }}
+        onClick={onCatalogLinkClick}
       >
-        <CourseHeroImage
-          data-lex-hero
-          src={course.heroImageUrl ?? '/course-card-hero.png'}
-          alt=""
-          draggable={false}
-          loading="lazy"
-          decoding="async"
+        <CatalogCourseHero
+          course={course}
+          size="catalog-gallery"
           className="absolute inset-0 h-full w-full object-cover"
-          style={heroImageObjectStyle(course.heroImageObjectPosition)}
         />
         <div
           className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"
@@ -563,13 +726,14 @@ function CourseGalleryTile({
 
 function SortableCourseGalleryTile({
   course,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+} & CatalogCourseDragProps & {
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -577,6 +741,8 @@ function SortableCourseGalleryTile({
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
+  const { pointerGuardRef, justFinishedDraggingRef, onPointerDownCapture } =
+    useCatalogSortablePointerGuard(isDragging)
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -587,6 +753,7 @@ function SortableCourseGalleryTile({
   return (
     <CourseGalleryTile
       course={course}
+      catalogDragActive={catalogDragActive}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
@@ -596,6 +763,9 @@ function SortableCourseGalleryTile({
         setNodeRef,
         style,
         isDragging,
+        pointerGuardRef,
+        justFinishedDraggingRef,
+        onPointerDownCapture,
       }}
     />
   )
@@ -619,13 +789,15 @@ function CourseCatalogTableHeader() {
 function CourseTableRow({
   course,
   sortable,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef?: MutableRefObject<boolean>
+  catalogDragActive: boolean
+  suppressNavigateAfterDragRef: MutableRefObject<boolean>
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -635,6 +807,26 @@ function CourseTableRow({
   const badgeLabel = courseCatalogStatusLabel(course)
   const invitationPending = courseInvitationPending(course)
   const invitationMutedClass = invitationPending ? 'opacity-60 grayscale' : ''
+
+  const suppressLinkClick = () =>
+    shouldSuppressCatalogLinkClick({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      isDragging: sortable?.isDragging,
+      catalogDragActive,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+
+  const onCatalogLinkClick = (e: ReactMouseEvent<HTMLAnchorElement>) => {
+    if (!suppressLinkClick()) return
+    e.preventDefault()
+    e.stopPropagation()
+    consumeCatalogLinkClickSuppress({
+      pointerGuard: sortable?.pointerGuardRef,
+      justFinishedDraggingRef: sortable?.justFinishedDraggingRef,
+      suppressAfterDragRef: suppressNavigateAfterDragRef,
+    })
+  }
 
   return (
     <article
@@ -647,6 +839,7 @@ function CourseTableRow({
       ]
         .filter(Boolean)
         .join(' ')}
+      onPointerDownCapture={sortable?.onPointerDownCapture}
       {...(sortable ? sortable.listeners : {})}
     >
       <div className="flex min-w-0 items-start gap-2">
@@ -669,12 +862,7 @@ function CourseTableRow({
             <Link
               to={courseHref}
               className={`mt-1 inline-block text-xs font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-300 dark:hover:text-indigo-200 ${invitationMutedClass}`}
-              onClick={(e) => {
-                if (!suppressNavigateAfterDragRef?.current) return
-                e.preventDefault()
-                e.stopPropagation()
-                suppressNavigateAfterDragRef.current = false
-              }}
+              onClick={onCatalogLinkClick}
             >
               Open course
             </Link>
@@ -702,13 +890,14 @@ function CourseTableRow({
 
 function SortableCourseTableRow({
   course,
+  catalogDragActive,
   suppressNavigateAfterDragRef,
   onNicknameChange,
   onPinnedChange,
   onInvitationResolved,
 }: {
   course: CoursePublic
-  suppressNavigateAfterDragRef: MutableRefObject<boolean>
+} & CatalogCourseDragProps & {
   onNicknameChange: CatalogNicknameChangeHandler
   onPinnedChange: CatalogPinnedChangeHandler
   onInvitationResolved?: CatalogInvitationResolvedHandler
@@ -716,6 +905,8 @@ function SortableCourseTableRow({
   const { listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: course.id,
   })
+  const { pointerGuardRef, justFinishedDraggingRef, onPointerDownCapture } =
+    useCatalogSortablePointerGuard(isDragging)
   const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -726,6 +917,7 @@ function SortableCourseTableRow({
   return (
     <CourseTableRow
       course={course}
+      catalogDragActive={catalogDragActive}
       suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
       onNicknameChange={onNicknameChange}
       onPinnedChange={onPinnedChange}
@@ -735,6 +927,9 @@ function SortableCourseTableRow({
         setNodeRef,
         style,
         isDragging,
+        pointerGuardRef,
+        justFinishedDraggingRef,
+        onPointerDownCapture,
       }}
     />
   )
@@ -787,6 +982,7 @@ export default function Courses() {
   }, [orgId])
   /** After a catalog drag, the browser may emit a click on the card link; block that navigation. */
   const suppressNavigateAfterDragRef = useRef(false)
+  const [catalogDragActive, setCatalogDragActive] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -955,17 +1151,26 @@ export default function Courses() {
   const clearSuppressNavigateAfterDragSoon = useCallback(() => {
     window.setTimeout(() => {
       suppressNavigateAfterDragRef.current = false
-    }, 200)
+    }, 300)
   }, [])
 
-  const handleDragStart = useCallback(() => {
+  const finishCatalogDrag = useCallback(() => {
     suppressNavigateAfterDragRef.current = true
+    clearSuppressNavigateAfterDragSoon()
+    window.setTimeout(() => {
+      setCatalogDragActive(false)
+    }, 0)
+  }, [clearSuppressNavigateAfterDragSoon])
+
+  const handleDragStart = useCallback((_event: DragStartEvent) => {
+    suppressNavigateAfterDragRef.current = true
+    setCatalogDragActive(true)
   }, [])
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event
-      clearSuppressNavigateAfterDragSoon()
+      finishCatalogDrag()
       if (!over || active.id === over.id || !courses?.length) return
       setError(null)
       const oldIndex = courses.findIndex((c) => c.id === active.id)
@@ -979,12 +1184,12 @@ export default function Courses() {
         setError('Could not save course order. Try again.')
       })
     },
-    [courses, clearSuppressNavigateAfterDragSoon],
+    [courses, finishCatalogDrag],
   )
 
   const handleDragCancel = useCallback(() => {
-    clearSuppressNavigateAfterDragSoon()
-  }, [clearSuppressNavigateAfterDragSoon])
+    finishCatalogDrag()
+  }, [finishCatalogDrag])
 
   const sortStrategy = catalogViewUsesGrid(catalogView) ? rectSortingStrategy : verticalListSortingStrategy
 
@@ -996,6 +1201,7 @@ export default function Courses() {
             <SortableCourseCard
               key={course.id}
               course={course}
+              catalogDragActive={catalogDragActive}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
@@ -1007,6 +1213,7 @@ export default function Courses() {
             <SortableCourseGalleryTile
               key={course.id}
               course={course}
+              catalogDragActive={catalogDragActive}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
@@ -1018,6 +1225,7 @@ export default function Courses() {
             <SortableCourseTableRow
               key={course.id}
               course={course}
+              catalogDragActive={catalogDragActive}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
@@ -1029,6 +1237,7 @@ export default function Courses() {
             <SortableCourseListRow
               key={course.id}
               course={course}
+              catalogDragActive={catalogDragActive}
               suppressNavigateAfterDragRef={suppressNavigateAfterDragRef}
               onNicknameChange={handleNicknameChange}
               onPinnedChange={handlePinnedChange}
@@ -1043,7 +1252,7 @@ export default function Courses() {
         }
       }
     },
-    [catalogView, handleInvitationResolved, handleNicknameChange, handlePinnedChange],
+    [catalogDragActive, catalogView, handleInvitationResolved, handleNicknameChange, handlePinnedChange],
   )
 
   const renderCourseItems = useCallback(

@@ -38,7 +38,8 @@ type putCatalogPinBody struct {
 }
 
 type pinnedCoursesResponse struct {
-	Courses []course.PinnedCourseSummary `json:"courses"`
+	Courses []course.PinnedCourseSummary   `json:"courses"`
+	Rows    [][]course.PinnedCourseSummary `json:"rows"`
 }
 
 func (d Deps) handleGetCourseCatalogSettings() http.HandlerFunc {
@@ -248,16 +249,68 @@ func (d Deps) handleGetCourseCatalogPins() http.HandlerFunc {
 		if !ok {
 			return
 		}
-		courses, err := course.ListUserPinnedCourseSummaries(r.Context(), d.Pool, userID)
+		rows, err := course.ListUserPinnedCourseRows(r.Context(), d.Pool, userID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load pinned courses.")
 			return
 		}
-		if courses == nil {
-			courses = []course.PinnedCourseSummary{}
+		if rows == nil {
+			rows = [][]course.PinnedCourseSummary{}
+		}
+		courses := make([]course.PinnedCourseSummary, 0)
+		for _, row := range rows {
+			courses = append(courses, row...)
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(pinnedCoursesResponse{Courses: courses})
+		_ = json.NewEncoder(w).Encode(pinnedCoursesResponse{Courses: courses, Rows: rows})
+	}
+}
+
+func (d Deps) handlePutCourseCatalogPinLayout() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPut {
+			w.Header().Set("Allow", http.MethodPut)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		userID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		var body struct {
+			Rows [][]string `json:"rows"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
+			return
+		}
+		if body.Rows == nil {
+			body.Rows = [][]string{}
+		}
+		rows := make([][]uuid.UUID, 0, len(body.Rows))
+		for _, row := range body.Rows {
+			parsedRow := make([]uuid.UUID, 0, len(row))
+			for _, rawID := range row {
+				id, err := uuid.Parse(strings.TrimSpace(rawID))
+				if err != nil {
+					apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid course id in pin layout.")
+					return
+				}
+				parsedRow = append(parsedRow, id)
+			}
+			rows = append(rows, parsedRow)
+		}
+		if err := course.ReplaceUserCatalogPinLayout(r.Context(), d.Pool, userID, rows); err != nil {
+			if strings.Contains(err.Error(), "pin row exceeds") ||
+				strings.Contains(err.Error(), "duplicate") ||
+				strings.Contains(err.Error(), "unpinned") {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
+				return
+			}
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to save pin layout.")
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
