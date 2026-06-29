@@ -4,6 +4,7 @@ import SwiftUI
 /// (Overview · Modules · Grades · Attendance · Grading by role).
 struct CourseDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
     var initialSection: Section?
@@ -19,6 +20,7 @@ struct CourseDetailView: View {
 
     @State private var section: Section = .modules
     @State private var items: [CourseStructureItem] = []
+    @State private var cacheLabel: String?
     @State private var hasAttendanceSessions = false
     @State private var errorMessage: String?
     @State private var loading = false
@@ -82,6 +84,10 @@ struct CourseDetailView: View {
 
                     if let errorMessage {
                         LMSErrorBanner(message: errorMessage)
+                    }
+
+                    if let cacheLabel {
+                        StalenessChip(label: cacheLabel)
                     }
 
                     switch section {
@@ -295,7 +301,18 @@ struct CourseDetailView: View {
                 courseCode: course.courseCode,
                 accessToken: token
             )) ?? []
-            items = try await LMSAPI.fetchCourseStructure(courseCode: course.courseCode, accessToken: token)
+            let result = try await offline.cachedFetch(
+                key: OfflineCacheKey.courseStructure(course.courseCode),
+                accessToken: token
+            ) {
+                try await LMSAPI.fetchCourseStructure(courseCode: course.courseCode, accessToken: token)
+            }
+            items = result.value
+            if let cached = result.cached, cached.isStale(isOnline: NetworkMonitor.shared.isOnline) {
+                cacheLabel = cached.lastUpdatedLabel
+            } else {
+                cacheLabel = nil
+            }
             hasAttendanceSessions = await !sessionsTask.isEmpty
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load course content."

@@ -44,7 +44,13 @@ final class DashboardModel {
         do {
             async let broadcastsTask = (try? LMSAPI.fetchMyBroadcasts(accessToken: accessToken)) ?? []
 
-            let list = try await LMSAPI.fetchCourses(accessToken: accessToken)
+            let listResult = try await OfflineService.shared.cachedFetch(
+                key: OfflineCacheKey.courses(),
+                accessToken: accessToken
+            ) {
+                try await LMSAPI.fetchCourses(accessToken: accessToken)
+            }
+            let list = listResult.value
             // The list GET omits viewer roles; enrich from the single-course GET.
             let enriched = await withTaskGroup(of: CourseSummary.self) { group in
                 for course in list {

@@ -1,7 +1,7 @@
 import Foundation
 
 /// Subset of web `CoursePublic` (camelCase JSON) used by the mobile app.
-struct CourseSummary: Decodable, Identifiable, Hashable {
+struct CourseSummary: Codable, Identifiable, Hashable {
     var id: String
     var courseCode: String
     var title: String
@@ -35,7 +35,7 @@ struct CoursesResponse: Decodable {
 }
 
 /// Mirrors web `CourseStructureItem` (subset).
-struct CourseStructureItem: Decodable, Identifiable, Hashable {
+struct CourseStructureItem: Codable, Identifiable, Hashable {
     var id: String
     var sortOrder: Int
     var kind: String

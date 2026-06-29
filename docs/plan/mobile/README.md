@@ -114,7 +114,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M7.2 AI tutor & Ask-AI](M7.2-ai-tutor.md) | 6.9 AI tutor, ask-ai-page, 15.12 study buddy | None | **P0** |
 | [M8.1 Review & spaced repetition](M8.1-review-spaced-repetition.md) | 1.5 spaced repetition, review-session-page | None | **P0** |
 | [M0.1 Native push & deep links](M0.1-push-deep-links.md) | 6.3 push, 21.5 APNs/FCM | None | **P0** |
-| [M0.2 Offline mode & sync](M0.2-offline-sync.md) | 7.3 offline PWA (web), 21.x offline | None | **P0** |
+| [M0.2 Offline mode & sync](../completed/mobile/M0.2-offline-sync.md) ✅ | 7.3 offline PWA (web), 21.x offline | None | **P0** |
 
 ### High-value breadth (P1)
 

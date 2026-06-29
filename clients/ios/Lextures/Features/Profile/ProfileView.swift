@@ -4,8 +4,10 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
+    @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     @State private var confirmingSignOut = false
+    @State private var confirmingClearCache = false
 
     var body: some View {
         NavigationStack {
@@ -15,6 +17,10 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         identityHero
+                        if offline.pendingCount > 0 {
+                            offlineSyncCard
+                        }
+                        offlineStorageCard
                         accountCard
                         notificationsCard
                         aboutCard
@@ -40,6 +46,18 @@ struct ProfileView: View {
                     session.signOut()
                 }
             }
+            .confirmationDialog(
+                "Clear offline storage?",
+                isPresented: $confirmingClearCache,
+                titleVisibility: .visible
+            ) {
+                Button("Clear cache", role: .destructive) {
+                    Task { await offline.clearStorage() }
+                }
+            } message: {
+                Text("Removes cached reads and downloads from this device. Queued changes are kept until they sync.")
+            }
+            .task { await offline.refreshState() }
         }
     }
 
@@ -78,6 +96,57 @@ struct ProfileView: View {
         let name = shell.profile?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !name.isEmpty { return name }
         return shell.profile?.firstName ?? "Welcome"
+    }
+
+    private var offlineSyncCard: some View {
+        LMSCard {
+            Text("Pending sync")
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            Text("\(offline.pendingCount) change\(offline.pendingCount == 1 ? "" : "s") waiting to upload")
+                .font(.caption)
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+            ForEach(offline.outboxItems.filter {
+                $0.status == .queued || $0.status == .failed || $0.status == .conflict
+            }) { item in
+                Divider()
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(item.label)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    OutboxStatusChip(status: item.status)
+                    if item.status == .failed || item.status == .conflict {
+                        Button("Retry") {
+                            Task { await offline.retryOutboxItem(id: item.id, accessToken: session.accessToken) }
+                        }
+                        .font(.caption.weight(.semibold))
+                    }
+                }
+            }
+        }
+    }
+
+    private var offlineStorageCard: some View {
+        LMSCard {
+            Text("Offline storage")
+                .font(LexturesTheme.displayFont(17))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+            infoRow(
+                label: "Cache size",
+                value: ByteCountFormatter.string(fromByteCount: Int64(offline.storageBytes), countStyle: .file),
+                systemImage: "internaldrive"
+            )
+            Divider()
+            Button {
+                confirmingClearCache = true
+            } label: {
+                Label("Clear cached data", systemImage: "trash")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.error)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+        }
     }
 
     private var accountCard: some View {

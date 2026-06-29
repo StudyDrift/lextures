@@ -3,8 +3,10 @@ import SwiftUI
 struct CoursesListView: View {
     @Environment(AuthSession.self) private var session
     @Environment(AppShellModel.self) private var shell
+    @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     @State private var courses: [CourseSummary] = []
+    @State private var cacheLabel: String?
     @State private var errorMessage: String?
     @State private var loading = false
     @State private var loadedOnce = false
@@ -30,6 +32,12 @@ struct CoursesListView: View {
 
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
+                        if !NetworkMonitor.shared.isOnline {
+                            OfflineBanner()
+                        }
+                        if let cacheLabel {
+                            StalenessChip(label: cacheLabel)
+                        }
                         if let errorMessage {
                             LMSErrorBanner(message: errorMessage)
                         }
@@ -115,7 +123,18 @@ struct CoursesListView: View {
             loadedOnce = true
         }
         do {
-            courses = try await LMSAPI.fetchCourses(accessToken: token)
+            let result = try await offline.cachedFetch(
+                key: OfflineCacheKey.courses(),
+                accessToken: token
+            ) {
+                try await LMSAPI.fetchCourses(accessToken: token)
+            }
+            courses = result.value
+            if let cached = result.cached, cached.isStale(isOnline: NetworkMonitor.shared.isOnline) {
+                cacheLabel = cached.lastUpdatedLabel
+            } else {
+                cacheLabel = nil
+            }
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load courses."
         }

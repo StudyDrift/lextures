@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -38,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
+import com.lextures.android.core.design.OfflineBanner
+import com.lextures.android.core.design.StalenessChip
 import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.fieldBorder
@@ -45,6 +48,8 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.offline.OfflineService
+import com.lextures.android.core.offline.fetchCoursesCached
 import com.lextures.android.core.routing.DeepLinkDestination
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
@@ -60,8 +65,12 @@ fun CoursesTab(
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
+    val context = LocalContext.current
+    val offline = remember { OfflineService.get(context) }
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
 
     var courses by remember { mutableStateOf<List<CourseSummary>>(emptyList()) }
+    var cacheLabel by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var searchText by remember { mutableStateOf("") }
@@ -72,7 +81,10 @@ fun CoursesTab(
         loading = true
         errorMessage = null
         try {
-            courses = LmsApi.fetchCourses(token)
+            val result = offline.fetchCoursesCached(token) { LmsApi.fetchCourses(token) }
+            courses = result.first
+            val cached = result.second
+            cacheLabel = if (cached != null && cached.isStale(isOnline)) cached.lastUpdatedLabel() else null
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -139,6 +151,16 @@ fun CoursesTab(
                 unfocusedContainerColor = cardBackground(),
             ),
         )
+
+        if (!isOnline) {
+            OfflineBanner(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp))
+        }
+        cacheLabel?.let {
+            StalenessChip(
+                label = it,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+        }
 
         when {
             loading && courses.isEmpty() -> LmsSkeletonList(
