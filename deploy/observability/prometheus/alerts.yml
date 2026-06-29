@@ -70,7 +70,7 @@ groups:
     rules:
       - alert: ReadinessProbeUnhealthy
         expr: |
-          sum(rate(lextures_health_check_total{endpoint="ready",status="503"}[1m])) > 0
+          sum(rate(lextures_health_check_total{endpoint="ready",status="5xx"}[1m])) > 0
         for: 30s
         labels:
           severity: critical

@@ -53,7 +53,7 @@ type DetailedResponse struct {
 
 func handleLive(metrics *telemetry.Metrics) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		recordHealthMetric(metrics, "live", "200")
+		recordHealthMetric(metrics, "live", "2xx")
 		writeHealthJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	}
 }
@@ -68,10 +68,7 @@ func handleReady(probe *HealthProbe) http.HandlerFunc {
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		resp, code := probe.Ready(r.Context())
-		statusLabel := "200"
-		if code != http.StatusOK {
-			statusLabel = "503"
-		}
+		statusLabel := healthStatusLabel(code)
 		recordHealthMetric(probe.metrics, "ready", statusLabel)
 		writeHealthJSON(w, code, resp)
 	}
@@ -86,7 +83,7 @@ func (d Deps) handleHealthDetailed(probe *HealthProbe) http.HandlerFunc {
 			return
 		}
 		checks := probe.Detailed(r.Context())
-		recordHealthMetric(probe.metrics, "detailed", "200")
+		recordHealthMetric(probe.metrics, "detailed", "2xx")
 		writeHealthJSON(w, http.StatusOK, DetailedResponse{Checks: checks})
 	}
 }
@@ -184,10 +181,20 @@ func checkLabel(ok bool) string {
 	return "fail"
 }
 
-func recordHealthMetric(metrics *telemetry.Metrics, endpoint, status string) {
+func recordHealthMetric(metrics *telemetry.Metrics, endpoint, statusClass string) {
 	if metrics != nil {
-		metrics.IncHealthCheck(endpoint, status)
+		metrics.IncHealthCheck(endpoint, statusClass)
 	}
+}
+
+// healthStatusLabel buckets readiness HTTP codes into low-cardinality classes
+// (2xx/5xx) so health metrics do not emit raw numeric status labels that
+// collide with observability E2E assertions (plan 17.7 / 17.8).
+func healthStatusLabel(code int) string {
+	if code >= 500 {
+		return "5xx"
+	}
+	return "2xx"
 }
 
 func writeHealthJSON(w http.ResponseWriter, code int, payload any) {

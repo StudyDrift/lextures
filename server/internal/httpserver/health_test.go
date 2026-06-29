@@ -107,7 +107,7 @@ func TestHealthCheckMetrics(t *testing.T) {
 	rr := httptest.NewRecorder()
 	handleReady(probe)(rr, httptest.NewRequest(http.MethodGet, "/health/ready", nil))
 	body := scrapeMetrics(t, m)
-	if !strings.Contains(body, `lextures_health_check_total{endpoint="ready",status="503"}`) {
+	if !strings.Contains(body, `lextures_health_check_total{endpoint="ready",status="5xx"}`) {
 		t.Fatalf("expected health_check metric in:\n%s", body)
 	}
 }
