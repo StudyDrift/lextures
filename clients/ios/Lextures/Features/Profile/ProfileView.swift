@@ -26,6 +26,7 @@ struct ProfileView: View {
                         offlineStorageCard
                         localeCard
                         accessibilityCard
+                        ProfileSecurityCard()
                         accountCard
                         notificationsCard
                         aboutCard
@@ -41,6 +42,9 @@ struct ProfileView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationDestination(for: NotificationsRoute.self) { _ in
                 NotificationsView()
+            }
+            .navigationDestination(for: DeviceSessionsRoute.self) { _ in
+                DeviceSessionsView()
             }
             .confirmationDialog(
                 L.text("mobile.profile.signOutConfirm"),

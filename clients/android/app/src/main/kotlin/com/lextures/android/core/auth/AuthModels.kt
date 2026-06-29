@@ -55,3 +55,82 @@ data class AuthTokenResponse(
     @SerialName("mfa_setup_required") val mfaSetupRequired: Boolean? = null,
     val user: AuthUser? = null,
 )
+
+@Serializable
+data class SamlStatusResponse(
+    val enabled: Boolean = false,
+    val idp: SamlIdpInfo? = null,
+) {
+    @Serializable
+    data class SamlIdpInfo(
+        val id: String,
+        val label: String,
+        @SerialName("forceSaml") val forceSaml: Boolean = false,
+    )
+}
+
+@Serializable
+data class OidcStatusResponse(
+    val enabled: Boolean = false,
+    @SerialName("cleverEnabled") val cleverEnabled: Boolean? = null,
+    @SerialName("classlinkEnabled") val classlinkEnabled: Boolean? = null,
+    val clever: Boolean? = null,
+    val classlink: Boolean? = null,
+    val google: Boolean? = null,
+    val microsoft: Boolean? = null,
+    val apple: Boolean? = null,
+    val custom: List<OidcCustomProvider>? = null,
+) {
+    @Serializable
+    data class OidcCustomProvider(
+        val id: String,
+        @SerialName("displayName") val displayName: String,
+    )
+
+    val showsClever: Boolean get() = cleverEnabled == true || clever == true
+    val showsClassLink: Boolean get() = classlinkEnabled == true || classlink == true
+}
+
+@Serializable
+data class MagicLinkRequest(
+    val email: String,
+    @SerialName("redirect_to") val redirectTo: String? = null,
+)
+
+@Serializable
+data class MagicLinkRequestResponse(
+    val message: String? = null,
+)
+
+@Serializable
+data class MagicLinkConsumeRequest(
+    val token: String,
+)
+
+@Serializable
+data class MfaTotpChallengeRequest(
+    val code: String,
+)
+
+@Serializable
+data class MfaTotpEnrolVerifyRequest(
+    @SerialName("credential_id") val credentialId: String,
+    val code: String,
+)
+
+@Serializable
+data class MfaBackupChallengeRequest(
+    val code: String,
+)
+
+@Serializable
+data class MfaTotpEnrolResponse(
+    @SerialName("credential_id") val credentialId: String? = null,
+    @SerialName("otpauth_uri") val otpauthUri: String? = null,
+)
+
+@Serializable
+data class MfaWebAuthnBeginResponse(
+    @SerialName("session_id") val sessionId: String? = null,
+    val options: kotlinx.serialization.json.JsonObject? = null,
+)

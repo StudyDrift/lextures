@@ -38,7 +38,8 @@ struct APIClient {
         bodyData: Data? = nil,
         authorized: Bool = false,
         accessToken: String? = nil,
-        idempotencyKey: String? = nil
+        idempotencyKey: String? = nil,
+        isRetryAfterRefresh: Bool = false
     ) async throws -> (Data, HTTPURLResponse) {
         var request = URLRequest(url: AppConfiguration.apiURL(path: path))
         request.httpMethod = method
@@ -75,11 +76,50 @@ struct APIClient {
         }
 
         guard (200 ... 299).contains(http.statusCode) else {
+            if http.statusCode == 401, authorized {
+                if isRetryAfterRefresh {
+                    await MainActor.run {
+                        NetworkAuthContext.session?.signOut(reason: .sessionRevoked)
+                    }
+                } else if path != "/api/v1/auth/refresh",
+                          let retried = try await retryAfterUnauthorized(
+                              path: path,
+                              method: method,
+                              bodyData: bodyData,
+                              accessToken: accessToken,
+                              idempotencyKey: idempotencyKey
+                          ) {
+                    return retried
+                }
+            }
             let message = parseAPIErrorMessage(from: data)
             throw APIError.httpStatus(http.statusCode, message: message)
         }
 
         return (data, http)
+    }
+
+    private func retryAfterUnauthorized(
+        path: String,
+        method: String,
+        bodyData: Data?,
+        accessToken: String?,
+        idempotencyKey: String?
+    ) async throws -> (Data, HTTPURLResponse)? {
+        let session = await MainActor.run { NetworkAuthContext.session }
+        guard let session else { return nil }
+        await session.refreshIfNeeded(force: true)
+        let newToken = await MainActor.run { session.accessToken }
+        guard let newToken else { return nil }
+        return try await requestRaw(
+            path: path,
+            method: method,
+            bodyData: bodyData,
+            authorized: true,
+            accessToken: newToken,
+            idempotencyKey: idempotencyKey,
+            isRetryAfterRefresh: true
+        )
     }
 }
 

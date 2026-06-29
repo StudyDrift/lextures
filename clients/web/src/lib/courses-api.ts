@@ -6957,7 +6957,9 @@ export async function fetchSubmissionAnnotations(
 export type PostSubmissionAnnotationInput = {
   clientId: string
   page: number
-  toolType: 'highlight' | 'draw' | 'text' | 'pin'
+  // 'anchor' is a text-range highlight for reflowable previews (DOCX/PPTX/XLSX/Markdown/code);
+  // the others are geometric overlays for PDF/image.
+  toolType: 'highlight' | 'draw' | 'text' | 'pin' | 'anchor'
   colour: string
   coordsJson: unknown
   body?: string

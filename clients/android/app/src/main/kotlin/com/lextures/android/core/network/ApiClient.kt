@@ -1,6 +1,7 @@
 package com.lextures.android.core.network
 
 import com.lextures.android.BuildConfig
+import com.lextures.android.core.auth.SignOutReason
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.i18n.MobileLocale
 import kotlinx.serialization.encodeToString
@@ -28,6 +29,7 @@ class ApiClient(
         body: String? = null,
         accessToken: String? = null,
         idempotencyKey: String? = null,
+        isRetryAfterRefresh: Boolean = false,
     ): Pair<String, Int> {
         val builder = Request.Builder()
             .url(AppConfiguration.apiUrl(path))
@@ -62,6 +64,27 @@ class ApiClient(
             val responseBody = it.body?.string().orEmpty()
             val code = it.code
             if (code !in 200..299) {
+                if (code == 401 && !accessToken.isNullOrBlank()) {
+                    if (isRetryAfterRefresh) {
+                        NetworkAuthContext.session?.signOut(SignOutReason.SessionRevoked)
+                    } else if (path != "/api/v1/auth/refresh") {
+                        val session = NetworkAuthContext.session
+                        if (session != null) {
+                            session.refreshIfNeeded(force = true)
+                            val newToken = session.accessToken.value
+                            if (!newToken.isNullOrBlank()) {
+                                return requestRaw(
+                                    path = path,
+                                    method = method,
+                                    body = body,
+                                    accessToken = newToken,
+                                    idempotencyKey = idempotencyKey,
+                                    isRetryAfterRefresh = true,
+                                )
+                            }
+                        }
+                    }
+                }
                 throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
             }
             return responseBody to code

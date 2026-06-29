@@ -274,4 +274,66 @@ extension LMSAPI {
             accessToken: accessToken
         )
     }
+
+    // MARK: - Onboarding (plan 15.11 / M1.3)
+
+    /// Returns nil when the onboarding feature flag is off (HTTP 404).
+    static func fetchOnboardingStatus(accessToken: String) async throws -> OnboardingStatus? {
+        let (data, response) = try await client.request(
+            path: "/api/v1/me/onboarding-status",
+            authorized: true,
+            accessToken: accessToken
+        )
+        if response.statusCode == 404 { return nil }
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(OnboardingStatus.self, from: data)
+    }
+
+    static func postOnboarding(body: [String: Any], accessToken: String) async throws -> LearnerGoals {
+        let bodyData = try JSONSerialization.data(withJSONObject: body)
+        let (data, response) = try await client.requestRaw(
+            path: "/api/v1/me/onboarding",
+            method: "POST",
+            bodyData: bodyData,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(GoalsEnvelope.self, from: data).goals
+    }
+
+    static func fetchDiagnosticQuestions(topic: String, accessToken: String) async throws -> [DiagnosticQuestion] {
+        let encoded = topic.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? topic
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/onboarding/diagnostic-questions?topic=\(encoded)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(DiagnosticQuestionsResponse.self, from: data).questions
+    }
+
+    static func saveStudyReminderPrefs(optIn: Bool, reminderTime: String, accessToken: String) async {
+        guard optIn else { return }
+        struct Preference: Encodable {
+            var eventType = "study_reminder"
+            var emailEnabled = true
+            var pushEnabled = true
+            var digestMode = "instant"
+        }
+        struct Body: Encodable {
+            var preferences: [Preference]
+        }
+        _ = try? await client.request(
+            path: "/api/v1/me/notification-preferences",
+            method: "PUT",
+            body: Body(preferences: [Preference()]),
+            authorized: true,
+            accessToken: accessToken
+        )
+        _ = reminderTime
+    }
 }

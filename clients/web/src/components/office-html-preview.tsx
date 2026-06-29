@@ -1,22 +1,65 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download } from 'lucide-react'
 import { authorizedFetch } from '../lib/api'
 import { fileContentUrlToPreviewUrl } from '../lib/course-files-api'
+import { AnchoredAnnotationLayer, type AnchorSurfaceProps } from './annotation/anchored-annotation-layer'
 
 type OfficeHtmlPreviewProps = {
   /** Authenticated content URL; preview URL is derived by replacing `/content` with `/preview`. */
   filePath: string
   filename: string
+  /**
+   * When provided, the office HTML is rendered inline (not in an iframe) so text-anchor
+   * highlights can be drawn over it. The HTML is already sanitized server-side (bluemonday).
+   */
+  annotation?: AnchorSurfaceProps
 }
 
-export function OfficeHtmlPreview({ filePath, filename }: OfficeHtmlPreviewProps) {
+const SCOPE_CLASS = 'office-inline-scope'
+
+// Scope the server's preview stylesheet to the inline container so it can't leak into the app.
+// The office preview CSS is a flat ruleset (no @media / nesting), so a per-selector prefix is
+// sufficient; `body`/`:root` rules are retargeted at the scope element itself.
+function scopeOfficeCss(css: string): string {
+  return css.replace(/([^{}]+)\{([^}]*)\}/g, (_m, rawSelectors: string, decls: string) => {
+    const scoped = rawSelectors
+      .split(',')
+      .map((sel) => {
+        const s = sel.trim()
+        if (!s) return ''
+        if (s === 'body' || s === 'html' || s === ':root') return `.${SCOPE_CLASS}`
+        return `.${SCOPE_CLASS} ${s}`
+      })
+      .filter(Boolean)
+      .join(', ')
+    return `${scoped} { ${decls.trim()} }`
+  })
+}
+
+/** Parse the server preview document into a scoped <style> + body markup for inline rendering. */
+function parseInlineOfficeHtml(html: string): { css: string; body: string } {
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  const css = Array.from(doc.querySelectorAll('style'))
+    .map((s) => s.textContent ?? '')
+    .join('\n')
+  return { css: scopeOfficeCss(css), body: doc.body?.innerHTML ?? '' }
+}
+
+export function OfficeHtmlPreview({ filePath, filename, annotation }: OfficeHtmlPreviewProps) {
   const [html, setHtml] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [iframeSrc, setIframeSrc] = useState<string | null>(null)
   const blobUrlRef = useRef<string | null>(null)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const contentRef = useRef<HTMLDivElement | null>(null)
 
   const previewUrl = fileContentUrlToPreviewUrl(filePath)
+
+  const inline = useMemo(
+    () => (html && annotation ? parseInlineOfficeHtml(html) : null),
+    [html, annotation],
+  )
 
   useEffect(() => {
     if (!previewUrl) {
@@ -114,6 +157,32 @@ export function OfficeHtmlPreview({ filePath, filename }: OfficeHtmlPreviewProps
           <Download className="h-4 w-4" aria-hidden="true" />
           Download to view
         </button>
+      </div>
+    )
+  }
+
+  // Inline (annotatable) render: the office body is placed in the light DOM with a scoped
+  // stylesheet so the anchor layer can walk its text nodes and paint highlights over it.
+  if (annotation && inline) {
+    return (
+      <div
+        ref={scrollRef}
+        className={`${SCOPE_CLASS} relative h-full overflow-auto bg-white`}
+      >
+        {/* eslint-disable-next-line react/no-danger -- server-sanitized office preview HTML */}
+        <style dangerouslySetInnerHTML={{ __html: inline.css }} />
+        {/* eslint-disable-next-line react/no-danger -- server-sanitized office preview HTML */}
+        <div ref={contentRef} dangerouslySetInnerHTML={{ __html: inline.body }} />
+        <AnchoredAnnotationLayer
+          scrollRef={scrollRef}
+          contentRef={contentRef}
+          annotations={annotation.annotations}
+          readOnly={annotation.readOnly}
+          selectedId={annotation.selectedAnnotationId}
+          onSelectAnnotation={annotation.onSelectAnnotation}
+          onAnchorComplete={annotation.onAnchorComplete}
+          recomputeKey={`office:${inline.body.length}`}
+        />
       </div>
     )
   }

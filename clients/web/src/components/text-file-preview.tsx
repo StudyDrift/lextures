@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { createThemedMarkdownComponents } from './markdown/markdown-themed-components'
@@ -7,6 +7,7 @@ import { isMarkdownFilename } from '../lib/file-type'
 import { resolveMarkdownTheme } from '../lib/markdown-theme'
 import { useLmsDarkMode } from '../hooks/use-lms-dark-mode'
 import { FilePreviewFallback } from './file-preview-fallback'
+import { AnchoredAnnotationLayer, type AnchorSurfaceProps } from './annotation/anchored-annotation-layer'
 
 /** Max bytes to load into the preview (avoids huge files in memory). */
 const MAX_TEXT_PREVIEW_BYTES = 2 * 1024 * 1024
@@ -18,9 +19,11 @@ type TextFilePreviewProps = {
   filename: string
   mimeType?: string | null
   errorVariant?: 'standalone' | 'message-only'
+  /** When provided, enables text-anchor highlight annotations over the rendered content. */
+  annotation?: AnchorSurfaceProps
 }
 
-export function TextFilePreview({ filePath, filename, mimeType, errorVariant = 'standalone' }: TextFilePreviewProps) {
+export function TextFilePreview({ filePath, filename, mimeType, errorVariant = 'standalone', annotation }: TextFilePreviewProps) {
   const markdownFile = isMarkdownFilename(filename, mimeType)
   const lmsUiDark = useLmsDarkMode()
   const mdTheme = useMemo(
@@ -32,6 +35,7 @@ export function TextFilePreview({ filePath, filename, mimeType, errorVariant = '
     [mdTheme],
   )
   const tablistId = useId()
+  const panelRef = useRef<HTMLElement | null>(null)
   const [tab, setTab] = useState<TextFileTab>(markdownFile ? 'preview' : 'source')
   const [content, setContent] = useState<string | null>(null)
   const [truncated, setTruncated] = useState(false)
@@ -136,20 +140,48 @@ export function TextFilePreview({ filePath, filename, mimeType, errorVariant = '
         <div
           id="markdown-preview-panel"
           role="tabpanel"
-          className={`lms-scope syllabus-md markdown-file-preview min-h-0 flex-1 overflow-auto px-6 py-4 ${mdTheme.classes.article}`}
+          ref={(el) => {
+            panelRef.current = el
+          }}
+          className={`lms-scope syllabus-md markdown-file-preview relative min-h-0 flex-1 overflow-auto px-6 py-4 ${mdTheme.classes.article}`}
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
             {content ?? ''}
           </ReactMarkdown>
+          {annotation ? (
+            <AnchoredAnnotationLayer
+              scrollRef={panelRef}
+              annotations={annotation.annotations}
+              readOnly={annotation.readOnly}
+              selectedId={annotation.selectedAnnotationId}
+              onSelectAnnotation={annotation.onSelectAnnotation}
+              onAnchorComplete={annotation.onAnchorComplete}
+              recomputeKey={`preview:${content?.length ?? 0}`}
+            />
+          ) : null}
         </div>
       ) : (
         <pre
           id="markdown-source-panel"
           role={markdownFile ? 'tabpanel' : undefined}
           aria-label={`Text preview of ${filename}`}
-          className="min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-sm leading-relaxed text-slate-800 dark:text-neutral-200"
+          ref={(el) => {
+            panelRef.current = el
+          }}
+          className="relative min-h-0 flex-1 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-sm leading-relaxed text-slate-800 dark:text-neutral-200"
         >
           {content ?? ''}
+          {annotation ? (
+            <AnchoredAnnotationLayer
+              scrollRef={panelRef}
+              annotations={annotation.annotations}
+              readOnly={annotation.readOnly}
+              selectedId={annotation.selectedAnnotationId}
+              onSelectAnnotation={annotation.onSelectAnnotation}
+              onAnchorComplete={annotation.onAnchorComplete}
+              recomputeKey={`source:${content?.length ?? 0}`}
+            />
+          ) : null}
         </pre>
       )}
     </div>

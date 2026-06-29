@@ -101,6 +101,157 @@ struct AuthTokenResponse: Decodable {
     }
 }
 
+struct SamlStatusResponse: Decodable {
+    var enabled: Bool
+    var idp: SamlIdpInfo?
+
+    struct SamlIdpInfo: Decodable {
+        var id: String
+        var label: String
+        var forceSaml: Bool
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case label
+            case forceSaml
+        }
+    }
+}
+
+struct OidcStatusResponse: Decodable {
+    var enabled: Bool
+    var cleverEnabled: Bool?
+    var classlinkEnabled: Bool?
+    var clever: Bool?
+    var classlink: Bool?
+    var google: Bool?
+    var microsoft: Bool?
+    var apple: Bool?
+    var custom: [OidcCustomProvider]?
+
+    struct OidcCustomProvider: Decodable {
+        var id: String
+        var displayName: String
+    }
+
+    var showsClever: Bool { cleverEnabled == true || clever == true }
+    var showsClassLink: Bool { classlinkEnabled == true || classlink == true }
+}
+
+struct MagicLinkRequest: Encodable {
+    var email: String
+    var redirectTo: String?
+
+    enum CodingKeys: String, CodingKey {
+        case email
+        case redirectTo = "redirect_to"
+    }
+}
+
+struct MagicLinkRequestResponse: Decodable {
+    var message: String?
+}
+
+struct MagicLinkConsumeRequest: Encodable {
+    var token: String
+}
+
+struct MfaTotpChallengeRequest: Encodable {
+    var code: String
+}
+
+struct MfaTotpEnrolVerifyRequest: Encodable {
+    var credentialId: String
+    var code: String
+
+    enum CodingKeys: String, CodingKey {
+        case credentialId = "credential_id"
+        case code
+    }
+}
+
+struct MfaBackupChallengeRequest: Encodable {
+    var code: String
+}
+
+struct MfaTotpEnrolResponse: Decodable {
+    var credentialId: String?
+    var otpauthUri: String?
+
+    enum CodingKeys: String, CodingKey {
+        case credentialId = "credential_id"
+        case otpauthUri = "otpauth_uri"
+    }
+}
+
+struct MfaWebAuthnBeginResponse: Decodable {
+    var sessionId: String?
+    var options: Data?
+
+    enum CodingKeys: String, CodingKey {
+        case sessionId = "session_id"
+        case options
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        sessionId = try container.decodeIfPresent(String.self, forKey: .sessionId)
+        if let nested = try? container.decode([String: JSONAny].self, forKey: .options) {
+            options = try JSONEncoder().encode(nested)
+        } else {
+            options = nil
+        }
+    }
+}
+
+/// Decodes arbitrary JSON subtrees for WebAuthn option payloads.
+private struct JSONAny: Codable {
+    let value: Any
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let value = try? container.decode(Bool.self) {
+            self.value = value
+        } else if let value = try? container.decode(Int.self) {
+            self.value = value
+        } else if let value = try? container.decode(Double.self) {
+            self.value = value
+        } else if let value = try? container.decode(String.self) {
+            self.value = value
+        } else if let value = try? container.decode([String: JSONAny].self) {
+            self.value = value.mapValues(\.value)
+        } else if let value = try? container.decode([JSONAny].self) {
+            self.value = value.map(\.value)
+        } else {
+            self.value = NSNull()
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        switch value {
+        case let value as Bool:
+            try container.encode(value)
+        case let value as Int:
+            try container.encode(value)
+        case let value as Double:
+            try container.encode(value)
+        case let value as String:
+            try container.encode(value)
+        case let value as [String: Any]:
+            try container.encode(value.mapValues { JSONAny(value: $0) })
+        case let value as [Any]:
+            try container.encode(value.map { JSONAny(value: $0) })
+        default:
+            try container.encodeNil()
+        }
+    }
+
+    init(value: Any) {
+        self.value = value
+    }
+}
+
 struct RefreshRequest: Encodable {
     var refreshToken: String
 
@@ -111,6 +262,139 @@ struct RefreshRequest: Encodable {
 
 enum AuthAPI {
     private static let client = APIClient()
+
+    static func fetchSamlStatus() async -> SamlStatusResponse {
+        do {
+            let (data, _) = try await client.request(path: "/api/v1/auth/saml/status")
+            return (try? JSONDecoder().decode(SamlStatusResponse.self, from: data))
+                ?? SamlStatusResponse(enabled: false, idp: nil)
+        } catch {
+            return SamlStatusResponse(enabled: false, idp: nil)
+        }
+    }
+
+    static func fetchOidcStatus() async -> OidcStatusResponse {
+        do {
+            let (data, _) = try await client.request(path: "/api/v1/auth/oidc/status")
+            return (try? JSONDecoder().decode(OidcStatusResponse.self, from: data))
+                ?? OidcStatusResponse(enabled: false, cleverEnabled: false, classlinkEnabled: false, clever: false, classlink: false, google: false, microsoft: false, apple: false, custom: [])
+        } catch {
+            return OidcStatusResponse(enabled: false, cleverEnabled: false, classlinkEnabled: false, clever: false, classlink: false, google: false, microsoft: false, apple: false, custom: [])
+        }
+    }
+
+    static func requestMagicLink(email: String) async throws -> MagicLinkRequestResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/magic-link/request",
+            method: "POST",
+            body: MagicLinkRequest(email: email, redirectTo: "/")
+        )
+        return try JSONDecoder().decode(MagicLinkRequestResponse.self, from: data)
+    }
+
+    static func consumeMagicLink(token: String) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/magic-link/consume",
+            method: "POST",
+            body: MagicLinkConsumeRequest(token: token)
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
+    static func mfaTotpChallenge(code: String, mfaPendingToken: String) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/mfa/totp/challenge",
+            method: "POST",
+            body: MfaTotpChallengeRequest(code: code),
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
+    static func mfaTotpEnrol(mfaPendingToken: String) async throws -> MfaTotpEnrolResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/mfa/totp/enrol",
+            method: "POST",
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+        return try JSONDecoder().decode(MfaTotpEnrolResponse.self, from: data)
+    }
+
+    static func mfaTotpVerifyEnrol(credentialId: String, code: String, mfaPendingToken: String) async throws {
+        _ = try await client.request(
+            path: "/api/v1/auth/mfa/totp/verify-enrol",
+            method: "POST",
+            body: MfaTotpEnrolVerifyRequest(credentialId: credentialId, code: code),
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+    }
+
+    static func mfaSetupComplete(mfaPendingToken: String) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/mfa/setup/complete",
+            method: "POST",
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
+    static func mfaBackupChallenge(code: String, mfaPendingToken: String) async throws -> AuthTokenResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/auth/mfa/backup/challenge",
+            method: "POST",
+            body: MfaBackupChallengeRequest(code: code),
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
+
+    static func mfaWebAuthnBegin(setup: Bool, mfaPendingToken: String) async throws -> MfaWebAuthnBeginResponse {
+        let path = setup
+            ? "/api/v1/auth/mfa/webauthn/register/begin"
+            : "/api/v1/auth/mfa/webauthn/authenticate/begin"
+        let (data, _) = try await client.request(
+            path: path,
+            method: "POST",
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+        return try JSONDecoder().decode(MfaWebAuthnBeginResponse.self, from: data)
+    }
+
+    static func mfaWebAuthnComplete(
+        setup: Bool,
+        sessionId: String,
+        credentialJSON: Data,
+        mfaPendingToken: String
+    ) async throws -> AuthTokenResponse? {
+        let path = setup
+            ? "/api/v1/auth/mfa/webauthn/register/complete"
+            : "/api/v1/auth/mfa/webauthn/authenticate/complete"
+        var body: [String: Any] = [
+            "session_id": sessionId,
+            "credential": try JSONSerialization.jsonObject(with: credentialJSON),
+        ]
+        if setup {
+            body["display_name"] = ""
+        }
+        let bodyData = try JSONSerialization.data(withJSONObject: body)
+        let (data, _) = try await client.requestRaw(
+            path: path,
+            method: "POST",
+            bodyData: bodyData,
+            authorized: true,
+            accessToken: mfaPendingToken
+        )
+        if setup {
+            return nil
+        }
+        return try JSONDecoder().decode(AuthTokenResponse.self, from: data)
+    }
 
     /// Exchanges a refresh token for a new access token (+ rotated refresh token).
     static func refresh(refreshToken: String) async throws -> AuthTokenResponse {

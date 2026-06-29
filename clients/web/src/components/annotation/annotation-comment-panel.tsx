@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SubmissionAnnotationApi } from '../../lib/courses-api'
+import { parseTextAnchor } from '../../lib/text-anchor'
 
 export type AnnotationCommentPanelProps = {
   annotations: SubmissionAnnotationApi[]
@@ -16,6 +17,21 @@ const TOOL_LABELS: Record<string, string> = {
   draw: 'Drawing',
   pin: 'Pin',
   text: 'Text box',
+  anchor: 'Highlight',
+}
+
+/** Short quoted passage for a text-anchor annotation, or null for geometric tools. */
+function anchorQuote(a: SubmissionAnnotationApi): string | null {
+  if (a.toolType !== 'anchor') return null
+  const anchor = parseTextAnchor(a.coordsJson)
+  const quote = anchor?.quote?.trim()
+  return quote ? quote : null
+}
+
+/** Anchor highlights aren't paginated, so hide the "Page N" prefix for them. */
+function annotationLabel(a: SubmissionAnnotationApi): string {
+  const tool = TOOL_LABELS[a.toolType] ?? a.toolType
+  return a.toolType === 'anchor' ? tool : `Page ${a.page} · ${tool}`
 }
 
 function CommentEditor({
@@ -117,8 +133,13 @@ export function AnnotationCommentPanel({
                         className="inline-block h-3 w-3 shrink-0 rounded-sm border border-black/10"
                         style={{ backgroundColor: a.colour }}
                       />
-                      Page {a.page} · {TOOL_LABELS[a.toolType] ?? a.toolType}
+                      {annotationLabel(a)}
                     </div>
+                    {anchorQuote(a) ? (
+                      <div className="mt-1 line-clamp-2 border-s-2 border-slate-300 ps-2 italic text-slate-500 dark:border-neutral-600 dark:text-neutral-400">
+                        “{anchorQuote(a)}”
+                      </div>
+                    ) : null}
                     {readOnly || !selected ? (
                       a.body ? (
                         <div className="mt-1 line-clamp-4 whitespace-pre-wrap text-slate-600 dark:text-neutral-300">

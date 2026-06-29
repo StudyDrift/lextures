@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.lextures.android.R
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.network.ApiError
+import com.lextures.android.core.network.NetworkAuthContext
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.core.push.PushManager
 import kotlinx.coroutines.delay
@@ -23,6 +24,15 @@ enum class AuthPhase {
     Authenticated,
 }
 
+enum class SignOutReason {
+    SessionRevoked,
+}
+
+enum class MfaRequired {
+    Challenge,
+    Setup,
+}
+
 class AuthSession(application: Application) : AndroidViewModel(application) {
     private val tokenStore = TokenStore(application)
 
@@ -35,6 +45,15 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
     private val _userEmail = MutableStateFlow<String?>(null)
     val userEmail: StateFlow<String?> = _userEmail.asStateFlow()
 
+    private val _mfaRequired = MutableStateFlow<MfaRequired?>(null)
+    val mfaRequired: StateFlow<MfaRequired?> = _mfaRequired.asStateFlow()
+
+    private val _mfaPendingToken = MutableStateFlow<String?>(null)
+    val mfaPendingToken: StateFlow<String?> = _mfaPendingToken.asStateFlow()
+
+    private val _lastSignOutReason = MutableStateFlow<SignOutReason?>(null)
+    val lastSignOutReason: StateFlow<SignOutReason?> = _lastSignOutReason.asStateFlow()
+
     val isSignedIn: Boolean
         get() = !_accessToken.value.isNullOrBlank()
 
@@ -44,6 +63,7 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
     private val refreshMutex = Mutex()
 
     init {
+        NetworkAuthContext.session = this
         viewModelScope.launch {
             // Refresh in parallel with the splash so a stale 15-minute access
             // token is replaced before the app shows.
@@ -97,7 +117,7 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
             } catch (e: ApiError.HttpStatus) {
                 // Only an explicit rejection ends the session; network blips keep it.
                 if (e.code == 401 || e.code == 403) {
-                    signOut()
+                    signOut(SignOutReason.SessionRevoked)
                 }
             } catch (_: Exception) {
                 // Transport/decoding errors: keep the session and retry later.
@@ -106,7 +126,13 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
     }
 
     suspend fun applyTokenResponse(response: AuthTokenResponse) {
-        if (response.requiresMfa == true && response.mfaPendingToken != null) {
+        if (response.requiresMfa == true && !response.mfaPendingToken.isNullOrBlank()) {
+            _mfaPendingToken.value = response.mfaPendingToken
+            _mfaRequired.value = if (response.mfaSetupRequired == true) {
+                MfaRequired.Setup
+            } else {
+                MfaRequired.Challenge
+            }
             throw AuthSessionError.MfaRequired
         }
 
@@ -116,17 +142,40 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
         tokenStore.saveTokens(token, response.refreshToken)
         _accessToken.value = token
         _userEmail.value = response.user?.email
+        clearMfaFlow()
         _phase.value = AuthPhase.Authenticated
     }
 
-    fun signOut() {
+    suspend fun handleAuthCallback(payload: AuthCallbackPayload) {
+        if (!payload.magicLinkToken.isNullOrBlank()) {
+            applyTokenResponse(AuthApi.consumeMagicLink(payload.magicLinkToken))
+            return
+        }
+        applyTokenResponse(payload.asTokenResponse())
+    }
+
+    fun clearMfaFlow() {
+        _mfaRequired.value = null
+        _mfaPendingToken.value = null
+    }
+
+    fun signOut(reason: SignOutReason? = null) {
         val savedToken = _accessToken.value
+        BiometricGate.get(getApplication()).resetOnSignOut()
         PushManager.getInstance(getApplication()).deregisterFromBackend(savedToken)
         OfflineService.get(getApplication()).clearAllOnLogout()
         tokenStore.clearAll()
         _accessToken.value = null
         _userEmail.value = null
+        clearMfaFlow()
+        _lastSignOutReason.value = reason
         _phase.value = AuthPhase.Unauthenticated
+    }
+
+    fun consumeSignOutMessage(): String? {
+        if (_lastSignOutReason.value != SignOutReason.SessionRevoked) return null
+        _lastSignOutReason.value = null
+        return getApplication<Application>().getString(R.string.mobile_auth_sessionRevoked)
     }
 
     fun serverUnreachableMessage(): String =

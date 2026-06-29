@@ -38,6 +38,8 @@ import { AnnotationViewer } from './annotation-viewer'
 import { FeedbackMediaPlayerList } from './feedback-media-player'
 import { FeedbackMediaRecorder } from './feedback-media-recorder'
 import { FilePreviewBody } from '../file-preview'
+import type { AnchorSurfaceProps } from './anchored-annotation-layer'
+import type { TextAnchor } from '../../lib/text-anchor'
 import { detectPreviewType } from '../../lib/file-type'
 import { SubmissionNavigator } from './submission-navigator'
 import { useSpeedGraderHotkeys } from './speed-grader-shortcuts'
@@ -278,6 +280,13 @@ function AssignmentAnnotationWorkbenchInner({
   const readOnlyDocument =
     readOnly || (mode === 'staff' && resubmissionWorkflowEnabled && !viewIsLatest)
 
+  // Reflowable previews (office/text/code) use text-anchor highlights rather than the geometric
+  // PDF/image overlay; the two share the comment panel and persistence path.
+  const isAnchorDoc =
+    displayPreviewType === 'office' ||
+    displayPreviewType === 'text' ||
+    displayPreviewType === 'code'
+
   useEffect(() => {
     if (mode === 'student' && mine?.resubmissionRequested && mine.revisionDueAt) {
       const t = window.setInterval(() => setDeadlineNow(Date.now()), 15_000)
@@ -494,6 +503,12 @@ function AssignmentAnnotationWorkbenchInner({
 
   const onTextBoxComplete = (page: number, rect: { x1: number; y1: number; x2: number; y2: number }) => {
     void createAndSelect({ page, toolType: 'text', coordsJson: rect })
+  }
+
+  // Reflowable docs (DOCX/PPTX/XLSX/Markdown/text/code) anchor highlights to a text range
+  // instead of page geometry; page is fixed at 1.
+  const onAnchorComplete = (anchor: TextAnchor) => {
+    void createAndSelect({ page: 1, toolType: 'anchor', coordsJson: anchor })
   }
 
   // Re-post the same clientId so the server upserts the body in place (edit the comment on an
@@ -809,6 +824,17 @@ function AssignmentAnnotationWorkbenchInner({
           mimeType={displayMimeType}
           errorVariant={previewErrorVariant}
           className="h-full min-h-[40vh]"
+          annotation={
+            annotationsActive && isAnchorDoc
+              ? ({
+                  annotations,
+                  readOnly: readOnlyDocument,
+                  selectedAnnotationId: selectedId,
+                  onSelectAnnotation: setSelectedId,
+                  onAnchorComplete: readOnlyDocument ? undefined : onAnchorComplete,
+                } satisfies AnchorSurfaceProps)
+              : undefined
+          }
         />
       )
     ) : displayBodyText ? (
@@ -877,6 +903,7 @@ function AssignmentAnnotationWorkbenchInner({
           onColourChange={setColour}
           disabled={busy || !(current?.attachmentFileId || displayFilePath)}
           readOnly={readOnlyDocument}
+          variant={isAnchorDoc ? 'anchor' : 'full'}
         />
       ) : null}
       <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-start">

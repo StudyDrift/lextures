@@ -44,6 +44,7 @@ import { authorizedFetch } from '../lib/api'
 import { useLmsDarkMode } from '../hooks/use-lms-dark-mode'
 import { downloadAuthorizedFile } from '../lib/download-file'
 import { FilePreviewFallback } from './file-preview-fallback'
+import { AnchoredAnnotationLayer, type AnchorSurfaceProps } from './annotation/anchored-annotation-layer'
 
 SyntaxHighlighter.registerLanguage('bash', bash)
 SyntaxHighlighter.registerLanguage('c', c)
@@ -159,10 +160,13 @@ type CodeFilePreviewProps = {
   filePath: string
   filename: string
   errorVariant?: 'standalone' | 'message-only'
+  /** When provided, enables text-anchor highlight annotations over the rendered code. */
+  annotation?: AnchorSurfaceProps
 }
 
-export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone' }: CodeFilePreviewProps) {
+export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone', annotation }: CodeFilePreviewProps) {
   const isDark = useLmsDarkMode()
+  const scrollRef = useRef<HTMLDivElement | null>(null)
   const [content, setContent] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -280,7 +284,7 @@ export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone
         </p>
       )}
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div ref={scrollRef} className="relative min-h-0 flex-1 overflow-auto">
         <SyntaxHighlighter
           language={language}
           style={isDark ? oneDark : oneLight}
@@ -297,6 +301,17 @@ export function CodeFilePreview({ filePath, filename, errorVariant = 'standalone
         >
           {content ?? ''}
         </SyntaxHighlighter>
+        {annotation ? (
+          <AnchoredAnnotationLayer
+            scrollRef={scrollRef}
+            annotations={annotation.annotations}
+            readOnly={annotation.readOnly}
+            selectedId={annotation.selectedAnnotationId}
+            onSelectAnnotation={annotation.onSelectAnnotation}
+            onAnchorComplete={annotation.onAnchorComplete}
+            recomputeKey={`${language}:${content?.length ?? 0}`}
+          />
+        ) : null}
       </div>
     </div>
   )
