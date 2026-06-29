@@ -54,15 +54,22 @@ const NEW_ROW_DROP_ID = newRowDropId()
 
 /** Prefer the new-row slot and row gutters over sortable tile collisions. */
 const pinCollisionDetection: CollisionDetection = (args) => {
-  const pointerHits = pointerWithin(args)
-  const newRowHit = pointerHits.find((collision) => collision.id === NEW_ROW_DROP_ID)
-  if (newRowHit) return [newRowHit]
+  // Anything at or below the top of the new-row zone counts as a new-row drop.
+  // The zone is full width, so a Y-only check (with no lower bound) keeps it
+  // reachable even when dragging the last tile of the bottom row — where the
+  // nearest sortable corner would otherwise always win — and tolerates
+  // overshooting past the thin zone.
+  const newRowRect = args.droppableRects.get(NEW_ROW_DROP_ID)
+  const pointerY = args.pointerCoordinates?.y
+  if (newRowRect && pointerY != null && pointerY >= newRowRect.top) {
+    return [{ id: NEW_ROW_DROP_ID }]
+  }
 
   const cornerHits = closestCorners(args)
   const sortableHit = cornerHits.find((collision) => !String(collision.id).startsWith('row:'))
   if (sortableHit) return [sortableHit]
 
-  const rowHit = pointerHits.find(
+  const rowHit = pointerWithin(args).find(
     (collision) => String(collision.id).startsWith('row:') && collision.id !== NEW_ROW_DROP_ID,
   )
   if (rowHit) return [rowHit]
@@ -257,18 +264,24 @@ function PinnedCourseRow({
   )
 }
 
-/** Invisible hit area below the grid — no visible chrome. */
-function NewPinnedRowDropZone() {
+/**
+ * Fixed-height hit area below the grid for dropping into a new row. The height
+ * stays constant whether or not it's hovered so the drop zone never shifts out
+ * from under the pointer (which would otherwise cause hover flicker).
+ */
+function NewPinnedRowDropZone({ active }: { active: boolean }) {
   const { setNodeRef } = useDroppable({ id: NEW_ROW_DROP_ID })
-  return <div ref={setNodeRef} className="h-12 w-full" aria-hidden />
-}
-
-function NewRowPlaceholder() {
   return (
-    <div
-      className="h-10 w-full rounded-xl bg-indigo-500/5 transition-[height,opacity] duration-200 ease-out dark:bg-indigo-400/5"
-      aria-hidden
-    />
+    <div ref={setNodeRef} className="flex h-12 w-full items-center" aria-hidden>
+      <div
+        className={[
+          'h-10 w-full rounded-xl transition-colors duration-150',
+          active
+            ? 'bg-indigo-500/10 ring-1 ring-indigo-300/50 dark:bg-indigo-400/10 dark:ring-indigo-500/30'
+            : 'bg-indigo-500/5 dark:bg-indigo-400/5',
+        ].join(' ')}
+      />
+    </div>
   )
 }
 
@@ -282,7 +295,6 @@ export function SideNavPinnedCourses() {
   const localRowsRef = useRef(localRows)
   const hoveringNewRowRef = useRef(false)
   const activeDragIdRef = useRef<string | null>(null)
-  const saveTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     localRowsRef.current = localRows
@@ -300,14 +312,6 @@ export function SideNavPinnedCourses() {
     if (activeDragId) return
     setLocalRows(pinnedRows)
   }, [pinnedRows, activeDragId])
-
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current !== null) {
-        window.clearTimeout(saveTimeoutRef.current)
-      }
-    }
-  }, [])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -338,21 +342,6 @@ export function SideNavPinnedCourses() {
     }
     return null
   }, [activeDragId, localRows])
-
-  const queueSave = useCallback(
-    (rows: PinnedCourseSummary[][]) => {
-      if (saveTimeoutRef.current !== null) {
-        window.clearTimeout(saveTimeoutRef.current)
-      }
-      saveTimeoutRef.current = window.setTimeout(() => {
-        saveTimeoutRef.current = null
-        void reorderPinnedRows(rows).catch(() => {
-          setLocalRows(pinnedRows)
-        })
-      }, 250)
-    },
-    [pinnedRows, reorderPinnedRows],
-  )
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveDragId(String(event.active.id))
@@ -401,10 +390,15 @@ export function SideNavPinnedCourses() {
       setHoveringNewRow(false)
 
       if (!pinRowsEqual(finalRows, pinnedRows)) {
-        queueSave(finalRows)
+        // Commit synchronously: reorderPinnedRows updates pinnedRows optimistically
+        // before awaiting the API, so the effect that syncs localRows from
+        // pinnedRows on drag end sees the new order and doesn't snap back.
+        void reorderPinnedRows(finalRows).catch(() => {
+          setLocalRows(pinnedRows)
+        })
       }
     },
-    [pinnedRows, queueSave],
+    [pinnedRows, reorderPinnedRows],
   )
 
   const handleDragCancel = useCallback((_event: DragCancelEvent) => {
@@ -436,7 +430,6 @@ export function SideNavPinnedCourses() {
           isDragActive={isDragging}
         />
       ))}
-      {hoveringNewRow ? <NewRowPlaceholder /> : null}
     </div>
   )
 
@@ -455,8 +448,8 @@ export function SideNavPinnedCourses() {
         {rowsContent}
       </SortableContext>
       {isDragging ? (
-        <div className="shrink-0 px-3">
-          <NewPinnedRowDropZone />
+        <div className="shrink-0 px-3 pb-3">
+          <NewPinnedRowDropZone active={hoveringNewRow} />
         </div>
       ) : null}
       <DragOverlay dropAnimation={iosDropAnimation}>

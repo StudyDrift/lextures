@@ -3,7 +3,6 @@ import { X } from 'lucide-react'
 import { formatDateTime } from '../../lib/format'
 import {
   deleteSubmissionAnnotation,
-  downloadSubmissionAnnotatedPdf,
   downloadSubmissionAttachmentsArchive,
   fetchModuleAssignmentMySubmission,
   fetchModuleAssignmentSubmissions,
@@ -450,67 +449,73 @@ function AssignmentAnnotationWorkbenchInner({
     if (!annotationsActive && feedbackMediaEnabled) setPanel('media')
   }, [annotationsActive, feedbackMediaEnabled])
 
-  async function persistAnnotation(payload: PostSubmissionAnnotationInput) {
-    if (!current?.id || readOnlyDocument) return
+  async function persistAnnotation(
+    payload: PostSubmissionAnnotationInput,
+  ): Promise<SubmissionAnnotationApi | null> {
+    if (!current?.id || readOnlyDocument) return null
     setBusy(true)
     try {
-      await postSubmissionAnnotation(courseCode, itemId, current.id, payload)
+      const created = await postSubmissionAnnotation(courseCode, itemId, current.id, payload)
       await reloadAnnotations()
+      return created
     } catch (e) {
       window.alert(e instanceof Error ? e.message : 'Could not save annotation.')
+      return null
     } finally {
       setBusy(false)
     }
   }
 
-  const promptBody = () => window.prompt('Comment (optional)')?.trim() ?? ''
-
-  const onHighlightComplete = (page: number, rect: { x1: number; y1: number; x2: number; y2: number }) => {
-    const body = promptBody()
-    void persistAnnotation({
+  // Create an annotation with no comment yet, then select it so the comment box opens — the
+  // grader types the comment inline instead of through a blocking prompt.
+  async function createAndSelect(
+    payload: Omit<PostSubmissionAnnotationInput, 'clientId' | 'colour'>,
+  ) {
+    const created = await persistAnnotation({
       clientId: crypto.randomUUID(),
-      page,
-      toolType: 'highlight',
       colour,
-      coordsJson: rect,
-      body: body || undefined,
+      ...payload,
     })
+    if (created) setSelectedId(created.id)
+  }
+
+  const onHighlightComplete = (page: number, rects: { x1: number; y1: number; x2: number; y2: number }[]) => {
+    if (rects.length === 0) return
+    void createAndSelect({ page, toolType: 'highlight', coordsJson: { rects } })
   }
 
   const onDrawComplete = (page: number, points: { x: number; y: number }[]) => {
-    const body = promptBody()
-    void persistAnnotation({
-      clientId: crypto.randomUUID(),
-      page,
-      toolType: 'draw',
-      colour,
-      coordsJson: { points },
-      body: body || undefined,
-    })
+    void createAndSelect({ page, toolType: 'draw', coordsJson: { points } })
   }
 
   const onPinComplete = (page: number, pt: { x: number; y: number }) => {
-    const body = promptBody()
-    void persistAnnotation({
-      clientId: crypto.randomUUID(),
-      page,
-      toolType: 'pin',
-      colour,
-      coordsJson: pt,
-      body: body || undefined,
-    })
+    void createAndSelect({ page, toolType: 'pin', coordsJson: pt })
   }
 
   const onTextBoxComplete = (page: number, rect: { x1: number; y1: number; x2: number; y2: number }) => {
-    const body = promptBody()
-    void persistAnnotation({
-      clientId: crypto.randomUUID(),
-      page,
-      toolType: 'text',
-      colour,
-      coordsJson: rect,
-      body: body || undefined,
-    })
+    void createAndSelect({ page, toolType: 'text', coordsJson: rect })
+  }
+
+  // Re-post the same clientId so the server upserts the body in place (edit the comment on an
+  // existing highlight/drawing/pin).
+  async function onUpdateAnnotationBody(annotation: SubmissionAnnotationApi, body: string) {
+    if (!current?.id || readOnlyDocument) return
+    setBusy(true)
+    try {
+      await postSubmissionAnnotation(courseCode, itemId, current.id, {
+        clientId: annotation.clientId,
+        page: annotation.page,
+        toolType: annotation.toolType as PostSubmissionAnnotationInput['toolType'],
+        colour: annotation.colour,
+        coordsJson: annotation.coordsJson,
+        body: body.trim() || undefined,
+      })
+      await reloadAnnotations()
+    } catch (e) {
+      window.alert(e instanceof Error ? e.message : 'Could not save comment.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function onDeleteAnnotation(id: string) {
@@ -660,18 +665,6 @@ function AssignmentAnnotationWorkbenchInner({
     }
   }
 
-  async function onDownloadAnnotated() {
-    if (!current?.id) return
-    setBusy(true)
-    try {
-      await downloadSubmissionAnnotatedPdf(courseCode, itemId, current.id)
-    } catch (e) {
-      window.alert(e instanceof Error ? e.message : 'Download failed.')
-    } finally {
-      setBusy(false)
-    }
-  }
-
   async function onDownloadAllAttachments() {
     if (!current?.id) return
     setDownloadAllBusy(true)
@@ -794,6 +787,8 @@ function AssignmentAnnotationWorkbenchInner({
           tool={tool}
           colour={colour}
           annotations={annotations}
+          selectedId={selectedId}
+          onSelectAnnotation={setSelectedId}
           onHighlightComplete={
             annotationsActive && !readOnlyDocument ? onHighlightComplete : undefined
           }
@@ -868,6 +863,37 @@ function AssignmentAnnotationWorkbenchInner({
         )}
       </div>
     )
+
+  // Shared markup surface: annotation toolbar above, document + comment list side by side.
+  // Used by both the inline and modal (preview / gradebook) layouts so annotation works the
+  // same everywhere.
+  const annotationDocArea = (
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      {annotationsActive && !readOnlyDocument ? (
+        <AnnotationToolbar
+          tool={tool}
+          onToolChange={setTool}
+          colour={colour}
+          onColourChange={setColour}
+          disabled={busy || !(current?.attachmentFileId || displayFilePath)}
+          readOnly={readOnlyDocument}
+        />
+      ) : null}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-start">
+        <div className="min-h-0 min-w-0 flex-1">{documentPreviewContent}</div>
+        {annotationsActive ? (
+          <AnnotationCommentPanel
+            annotations={annotations}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            readOnly={readOnlyDocument}
+            onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
+            onUpdateBody={readOnlyDocument ? undefined : onUpdateAnnotationBody}
+          />
+        ) : null}
+      </div>
+    </div>
+  )
 
   if (presentation === 'modal') {
     return (
@@ -956,8 +982,8 @@ function AssignmentAnnotationWorkbenchInner({
           <ResizableSplitPane
             storageKey="lextures:submission-grade-sidebar-width"
             primary={
-              <div className="h-full min-h-[40vh] bg-slate-50 dark:bg-neutral-800/60">
-                {documentPreviewContent}
+              <div className="h-full min-h-[40vh] overflow-auto bg-slate-50 p-3 dark:bg-neutral-800/60">
+                {annotationDocArea}
               </div>
             }
             secondary={gradingSidebar}
@@ -1311,82 +1337,19 @@ function AssignmentAnnotationWorkbenchInner({
         </div>
       ) : null}
 
-      {showDocPanel &&
-      annotationsActive &&
-      panel === 'document' &&
-      displayMimeType === 'application/pdf' &&
-      current?.id ? (
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            disabled={busy}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-900 dark:hover:bg-neutral-800"
-            onClick={() => void onDownloadAnnotated()}
-          >
-            Download annotated PDF
-          </button>
-        </div>
-      ) : null}
 
       {showDocPanel && panel === 'document' ? (
         staffGradingSidebarActive && gradingSidebar ? (
           <div className="min-h-[min(70vh,720px)]">
             <ResizableSplitPane
               storageKey="lextures:submission-grade-sidebar-width-inline"
-              primary={
-                <div className="flex h-full min-h-0 flex-col gap-4">
-                  {annotationsActive ? (
-                    <AnnotationToolbar
-                      tool={tool}
-                      onToolChange={setTool}
-                      colour={colour}
-                      onColourChange={setColour}
-                      disabled={busy || !(current?.attachmentFileId || displayFilePath)}
-                      readOnly={readOnlyDocument}
-                    />
-                  ) : null}
-                  <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row lg:items-start">
-                    <div className="min-h-0 min-w-0 flex-1">{documentPreviewContent}</div>
-                    {annotationsActive ? (
-                      <AnnotationCommentPanel
-                        annotations={annotations}
-                        selectedId={selectedId}
-                        onSelect={setSelectedId}
-                        readOnly={readOnlyDocument}
-                        onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              }
+              primary={annotationDocArea}
               secondary={gradingSidebar}
             />
           </div>
         ) : (
           <>
-            {annotationsActive ? (
-              <AnnotationToolbar
-                tool={tool}
-                onToolChange={setTool}
-                colour={colour}
-                onColourChange={setColour}
-                disabled={busy || !(current?.attachmentFileId || displayFilePath)}
-                readOnly={readOnlyDocument}
-              />
-            ) : null}
-
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-              <div className="min-w-0 flex-1">{documentPreviewContent}</div>
-              {annotationsActive ? (
-                <AnnotationCommentPanel
-                  annotations={annotations}
-                  selectedId={selectedId}
-                  onSelect={setSelectedId}
-                  readOnly={readOnlyDocument}
-                  onDelete={readOnlyDocument ? undefined : onDeleteAnnotation}
-                />
-              ) : null}
-            </div>
+            {annotationDocArea}
             {studentFeedbackSidebar ? (
               <div className="min-h-[min(40vh,480px)] overflow-hidden rounded-xl border border-slate-200 dark:border-neutral-600">
                 {studentFeedbackSidebar}

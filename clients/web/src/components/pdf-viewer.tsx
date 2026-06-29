@@ -3,30 +3,10 @@ import { getDocument, GlobalWorkerOptions, TextLayer } from 'pdfjs-dist'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import workerSrc from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { authorizedFetch } from '../lib/api'
+import { ensureTextLayerStyles } from '../lib/pdf-text-layer'
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from 'lucide-react'
 
 GlobalWorkerOptions.workerSrc = workerSrc
-
-let _textLayerStyleInjected = false
-
-function ensureTextLayerStyles() {
-  if (_textLayerStyleInjected || typeof document === 'undefined') return
-  if (document.getElementById('pdf-text-layer-css')) {
-    _textLayerStyleInjected = true
-    return
-  }
-  const el = document.createElement('style')
-  el.id = 'pdf-text-layer-css'
-  // Minimal styles for the pdfjs TextLayer class — spans are positioned absolutely
-  // using the --scale-factor CSS variable set per-container.
-  el.textContent = [
-    '.pdf-tl{position:absolute;inset:0;overflow:hidden;line-height:1;text-align:initial;}',
-    '.pdf-tl span,.pdf-tl br{color:transparent;position:absolute;white-space:pre;cursor:text;transform-origin:0% 0%;}',
-    '.pdf-tl ::selection{background:rgba(99,102,241,.35);color:transparent;}',
-  ].join('')
-  document.head.appendChild(el)
-  _textLayerStyleInjected = true
-}
 
 const MIN_SCALE = 0.5
 const MAX_SCALE = 3.0
