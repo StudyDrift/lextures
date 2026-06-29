@@ -45,8 +45,9 @@ func TestAdminSearch_OrgScoped_Pg(t *testing.T) {
 	}
 
 	ts := time.Now().Format("20060102150405")
+	unique := "as" + ts
 	emOrg := "as-org-" + ts + "@e.com"
-	aliceName := "Alice Johnson"
+	aliceName := "Alice Johnson" + unique
 	orgRow, err := user.InsertUser(ctx, pool, emOrg, ph, &aliceName)
 	if err != nil {
 		t.Fatalf("user: %v", err)
@@ -63,31 +64,32 @@ func TestAdminSearch_OrgScoped_Pg(t *testing.T) {
 		t.Fatalf("grant org admin: %v", err)
 	}
 	_, err = pool.Exec(ctx, `
-UPDATE "user".users SET first_name = 'Alice', last_name = 'Johnson' WHERE id = $1
-`, orgUID)
+UPDATE "user".users SET first_name = 'Alice', last_name = $2 WHERE id = $1
+`, orgUID, "Johnson"+unique)
 	if err != nil {
 		t.Fatalf("update alice: %v", err)
 	}
 
-	otherOrg, err := organization.Create(ctx, pool, "Other Org "+ts, "other-"+ts, nil, nil, "us-east-1", nil)
+	otherOrg, err := organization.Create(ctx, pool, "Other Org "+ts, "other-"+ts, nil, nil, "us-east", nil)
 	if err != nil {
 		t.Fatalf("create org: %v", err)
 	}
 	emOther := "as-other-" + ts + "@e.com"
-	bobName := "Bob Johnson"
+	bobName := "Bob Johnson" + unique
 	otherRow, err := user.InsertUser(ctx, pool, emOther, ph, &bobName)
 	if err != nil {
 		t.Fatalf("other user: %v", err)
 	}
 	otherUID := uuid.MustParse(otherRow.ID)
 	_, err = pool.Exec(ctx, `
-UPDATE "user".users SET org_id = $1, first_name = 'Bob', last_name = 'Johnson' WHERE id = $2
-`, otherOrg.ID, otherUID)
+UPDATE "user".users SET org_id = $1, first_name = 'Bob', last_name = $3 WHERE id = $2
+`, otherOrg.ID, otherUID, "Johnson"+unique)
 	if err != nil {
 		t.Fatalf("move other user: %v", err)
 	}
 
-	_, err = course.CreateCourse(ctx, pool, orgUID, "Biology 101", "Intro biology course", "", nil, nil, nil)
+	courseTitle := "Biology " + unique
+	_, err = course.CreateCourse(ctx, pool, orgUID, courseTitle, "Intro biology course", "", nil, nil, nil)
 	if err != nil {
 		t.Fatalf("course: %v", err)
 	}
@@ -104,7 +106,7 @@ UPDATE "user".users SET org_id = $1, first_name = 'Bob', last_name = 'Johnson' W
 	})
 
 	rr := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodGet, "/api/v1/admin/search?q=johnson&types=users", nil)
+	r := httptest.NewRequest(http.MethodGet, "/api/v1/admin/search?q="+unique+"&types=users", nil)
 	r = r.WithContext(ctx)
 	r.Header.Set("Authorization", "Bearer "+orgTok)
 	h.ServeHTTP(rr, r)
@@ -112,10 +114,10 @@ UPDATE "user".users SET org_id = $1, first_name = 'Bob', last_name = 'Johnson' W
 		t.Fatalf("search status=%d body=%s", rr.Code, rr.Body.String())
 	}
 	body := rr.Body.String()
-	if !strings.Contains(body, "Alice Johnson") && !strings.Contains(body, emOrg) {
+	if !strings.Contains(body, emOrg) {
 		t.Fatalf("expected org user in results: %s", body)
 	}
-	if strings.Contains(body, emOther) || strings.Contains(body, "Bob Johnson") {
+	if strings.Contains(body, emOther) {
 		t.Fatalf("cross-org user leaked: %s", body)
 	}
 
@@ -127,7 +129,7 @@ UPDATE "user".users SET org_id = $1, first_name = 'Bob', last_name = 'Johnson' W
 	if rr2.Code != http.StatusOK {
 		t.Fatalf("fuzzy search status=%d body=%s", rr2.Code, rr2.Body.String())
 	}
-	if !strings.Contains(rr2.Body.String(), "Biology") {
+	if !strings.Contains(rr2.Body.String(), courseTitle) && !strings.Contains(rr2.Body.String(), "Biology") {
 		t.Fatalf("expected Biology course via fuzzy match: %s", rr2.Body.String())
 	}
 }
