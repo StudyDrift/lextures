@@ -614,7 +614,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Canary analysis unit tests (plan 17.9)
-        run: python3 -m unittest deploy/scripts/test_canary_analyze.py -v
+        working-directory: deploy/scripts
+        run: python3 -m unittest test_canary_analyze.py -v
 
   deploy-rolling-restart:
     name: Deploy (zero-downtime rolling restart)
