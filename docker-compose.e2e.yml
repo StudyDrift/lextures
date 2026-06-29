@@ -48,10 +48,19 @@ services:
       retries: 10
       start_period: 20s
 
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
   server:
     build:
       context: ./server
       dockerfile: Dockerfile
+    image: lextures-e2e-server:latest
     environment:
       DATABASE_URL: postgres://e2e:e2e@postgres:5432/e2e?sslmode=disable
       JWT_SECRET: e2e-test-secret-do-not-use-outside-tests
@@ -87,6 +96,39 @@ services:
         condition: service_healthy
     healthcheck:
       # Server image installs curl (not wget); wget would keep the container unhealthy and break `compose up --wait`.
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/health -o /dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # Dedicated low-limit instance for the rate-limiting e2e spec (plan 17.6). Kept
+  # separate from `server` so the strict per-IP auth cap does not throttle the
+  # rest of the suite, which all shares one client IP. Reuses the server image
+  # and the shared Redis so limits are enforced exactly as in production.
+  server-ratelimit:
+    image: lextures-e2e-server:latest
+    environment:
+      DATABASE_URL: postgres://e2e:e2e@postgres:5432/e2e?sslmode=disable
+      JWT_SECRET: e2e-test-secret-do-not-use-outside-tests
+      RUN_MIGRATIONS: "false"
+      COURSE_FILES_ROOT: /var/course-files
+      PORT: "8080"
+      CLAMAV_STUB: "true"
+      REDIS_URL: redis://redis:6379
+      RATE_LIMITING_ENABLED: "true"
+      RATE_LIMIT_AUTH_PER_MIN: "5"
+      RATE_LIMIT_AUTH_PER_HOUR: "100"
+      RATE_LIMIT_GLOBAL_PER_MIN: "100000"
+    ports:
+      - "8081:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      server:
+        condition: service_healthy
+    healthcheck:
       test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/health -o /dev/null || exit 1"]
       interval: 5s
       timeout: 5s

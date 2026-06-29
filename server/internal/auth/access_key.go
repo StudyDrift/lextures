@@ -23,6 +23,8 @@ type APITokenAuth struct {
 	CourseIDs          []uuid.UUID
 	OrgID              *uuid.UUID
 	ServiceAccountName *string
+	// RateLimitPerMin is the per-token quota override (plan 17.6 FR-6); nil uses the deployment default.
+	RateLimitPerMin *int
 }
 
 type apiTokenAuthKey struct{}
@@ -71,10 +73,11 @@ func UserFromRequestOrAccessKey(r *http.Request, signer *JWTSigner, pool *pgxpoo
 		apitokens.RecordUsage(rt.ID, ipHash)
 
 		meta := &APITokenAuth{
-			TokenID:   rt.ID,
-			Scopes:    rt.Scopes,
-			CourseIDs: rt.CourseIDs,
-			OrgID:     rt.OrgID,
+			TokenID:         rt.ID,
+			Scopes:          rt.Scopes,
+			CourseIDs:       rt.CourseIDs,
+			OrgID:           rt.OrgID,
+			RateLimitPerMin: rt.RateLimitPerMin,
 		}
 		if rt.ServiceAccountName != nil {
 			meta.ServiceAccountName = rt.ServiceAccountName

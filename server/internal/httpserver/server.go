@@ -118,6 +118,9 @@ func NewHandler(d Deps) http.Handler {
 	r := chi.NewRouter()
 	r.Use(corsAll)
 	r.Use(middleware.RequestID)
+	// Rate limiting runs before RealIP so it sees the genuine TCP peer and can
+	// reject forged X-Forwarded-For headers from untrusted clients (plan 17.6).
+	r.Use(d.rateLimitMiddleware(d.buildRateLimiter()))
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5))
