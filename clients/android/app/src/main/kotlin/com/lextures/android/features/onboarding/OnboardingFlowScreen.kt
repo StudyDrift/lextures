@@ -72,7 +72,6 @@ import com.lextures.android.features.home.HomeScreen
 import com.lextures.android.features.home.LmsCard
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -629,7 +628,7 @@ private fun onboardingBack(step: OnboardingStep): OnboardingStep? = when (step) 
 }
 
 private fun isoDate(millis: Long): String =
-    LocalDate.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault())
+    Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate()
         .format(DateTimeFormatter.ISO_LOCAL_DATE)
 
 private fun reminderTime(hour: Int, minute: Int): String =
