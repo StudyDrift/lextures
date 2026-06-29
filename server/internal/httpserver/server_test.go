@@ -1,6 +1,7 @@
 package httpserver
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,12 +25,12 @@ func TestNewHandler_ReadyNilPool(t *testing.T) {
 	if rr.Code != http.StatusServiceUnavailable {
 		t.Fatalf("ready: %d", rr.Code)
 	}
-}
-
-func TestDegradedErr(t *testing.T) {
-	e := &degradedErr{s: "x"}
-	if e.Error() != "x" {
-		t.Fatalf("Error: %q", e.Error())
+	var body ReadyResponse
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatalf("json: %v", err)
+	}
+	if body.Status != "unhealthy" || body.Checks["postgres"] != "fail" {
+		t.Fatalf("body %+v", body)
 	}
 }
 

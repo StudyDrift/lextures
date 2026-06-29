@@ -66,6 +66,20 @@ groups:
           description: "DB pool utilisation is {{ $value | humanizePercentage }} (threshold 90%); requests may start queueing for a connection."
           runbook: "docs/runbooks/observability-oncall.md#dbpoolnearexhaustion"
 
+  - name: lextures-health
+    rules:
+      - alert: ReadinessProbeUnhealthy
+        expr: |
+          sum(rate(lextures_health_check_total{endpoint="ready",status="5xx"}[1m])) > 0
+        for: 30s
+        labels:
+          severity: critical
+          statuspage_component: api
+        annotations:
+          summary: "Readiness probe returning 503 for 30s"
+          description: "GET /health/ready has been failing for at least 30 seconds; load balancer may be draining this instance."
+          runbook: "docs/runbooks/observability-oncall.md#readinessprobeunhealthy"
+
   - name: lextures-meta
     rules:
       - alert: APITargetDown

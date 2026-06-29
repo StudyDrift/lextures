@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
@@ -9,10 +10,9 @@ import (
 	"github.com/lextures/lextures/server/internal/redisclient"
 )
 
-// TestDefaultReady_RedisDown verifies that when Redis is configured but
-// unreachable, the readiness probe fails (plan 17.2 FR-1) — the load balancer
-// then removes the instance from rotation.
-func TestDefaultReady_RedisDown(t *testing.T) {
+// TestHealthProbe_RedisDown verifies that when Redis is configured but
+// unreachable, the readiness probe fails (plan 17.2 FR-1 / 17.8 AC-2).
+func TestHealthProbe_RedisDown(t *testing.T) {
 	mr := miniredis.RunT(t)
 	rc, err := redisclient.New(context.Background(), redisclient.Config{URL: "redis://" + mr.Addr()})
 	if err != nil {
@@ -20,16 +20,21 @@ func TestDefaultReady_RedisDown(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = rc.Close() })
 
-	// With a nil pool, defaultReady short-circuits to the no-DB error regardless
-	// of Redis; assert that branch so the check is exercised without a Postgres.
-	check := defaultReady(nil, rc)
-	if err := check(); err == nil {
-		t.Fatalf("expected not-ready without DB pool")
+	probe := NewHealthProbe(nil, rc, nil)
+	resp, code := probe.Ready(context.Background())
+	if code != http.StatusServiceUnavailable {
+		t.Fatalf("code %d", code)
+	}
+	if resp.Checks["postgres"] != "fail" || resp.Checks["redis"] != "ok" {
+		t.Fatalf("before redis down: %+v", resp)
 	}
 
-	// Closing miniredis makes Redis ping fail; ensure the Redis client surfaces it.
 	mr.Close()
-	if err := rc.Ping(context.Background()); err == nil {
-		t.Fatalf("expected redis ping to fail after close")
+	resp, code = probe.Ready(context.Background())
+	if code != http.StatusServiceUnavailable {
+		t.Fatalf("code after redis down: %d", code)
+	}
+	if resp.Status != "unhealthy" || resp.Checks["redis"] != "fail" {
+		t.Fatalf("after redis down: %+v", resp)
 	}
 }

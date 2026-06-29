@@ -31,10 +31,49 @@ const spec = `{
     "/health": {
       "get": {
         "tags": ["meta"],
-        "summary": "Liveness",
+        "summary": "Liveness (alias for /health/live)",
         "responses": {
           "200": {
-            "description": "JSON liveness payload"
+            "description": "JSON liveness payload {\"status\":\"ok\"}"
+          }
+        }
+      }
+    },
+    "/health/live": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Liveness probe",
+        "responses": {
+          "200": {
+            "description": "Process is alive; no dependency checks"
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Readiness probe",
+        "responses": {
+          "200": {
+            "description": "All critical dependencies reachable"
+          },
+          "503": {
+            "description": "One or more dependencies unavailable (safe JSON, no internal errors)"
+          }
+        }
+      }
+    },
+    "/health/detailed": {
+      "get": {
+        "tags": ["meta"],
+        "summary": "Detailed health (Global Admin JWT required)",
+        "responses": {
+          "200": {
+            "description": "Per-component latency and safe error summaries"
+          },
+          "401": {
+            "description": "Authentication required"
           }
         }
       }
