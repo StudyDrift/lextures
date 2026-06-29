@@ -1,3 +1,3 @@
 -- Rollback not supported: restore from backup
--- Companion to: 345_submission_annotation_anchor.sql
+-- Companion to: 347_admin_console_enabled.sql
 -- See docs/runbooks/database-migration-rollback.md
