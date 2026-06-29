@@ -277,14 +277,6 @@ object LmsApi {
             decode<GradingBacklogResponse>(body).items
         }
 
-    suspend fun markAllNotificationsRead(accessToken: String) = withContext(Dispatchers.IO) {
-        client.request(
-            path = "/api/v1/me/notifications/read-all",
-            method = "POST",
-            accessToken = accessToken,
-        )
-    }
-
     suspend fun registerDeviceToken(token: String, platform: String, accessToken: String): DeviceTokenResponse =
         withContext(Dispatchers.IO) {
             val body = client.encodeBody(

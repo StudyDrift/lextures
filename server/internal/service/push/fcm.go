@@ -89,7 +89,7 @@ func (d *NativeDispatcher) sendFCM(ctx context.Context, row devicepushtokens.Row
 	if err != nil {
 		return DeliveryResult{Retryable: true}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {

@@ -116,7 +116,7 @@ func (d *NativeDispatcher) sendAPNS(ctx context.Context, row devicepushtokens.Ro
 	if err != nil {
 		return DeliveryResult{Retryable: true}, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	switch resp.StatusCode {
 	case http.StatusOK:
