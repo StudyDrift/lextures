@@ -409,7 +409,7 @@ func WriteResultCSV(path string, outcomes []RowOutcome) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	w := csv.NewWriter(f)
 	if err := w.Write([]string{"row", "email", "outcome", "detail"}); err != nil {
 		return err

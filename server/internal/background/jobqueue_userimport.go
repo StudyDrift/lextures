@@ -67,7 +67,7 @@ func (h userImportHandler) Execute(ctx context.Context, payload json.RawMessage)
 		_ = userimport.Complete(ctx, h.pool, job.ID, userimport.CompleteParams{Status: userimport.StatusFailed})
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	parsed, err := csvimport.ParseCSV(f, job.ImportProfile)
 	if err != nil {
