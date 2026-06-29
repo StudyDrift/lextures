@@ -40,10 +40,7 @@ func rollbackSupported(body []byte) bool {
 		return false
 	}
 	lower := strings.ToLower(stripped)
-	if strings.Contains(lower, "rollback not supported") {
-		return false
-	}
-	return true
+	return !strings.Contains(lower, "rollback not supported")
 }
 
 // stripSQLComments removes -- line comments and /* */ block comments.
