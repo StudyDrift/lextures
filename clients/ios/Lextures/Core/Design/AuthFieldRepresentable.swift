@@ -27,6 +27,8 @@ struct AuthFieldRepresentable: UIViewRepresentable {
         field.placeholder = placeholder
         field.font = .preferredFont(forTextStyle: .body)
         field.textColor = UIColor.label
+        field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        field.setContentHuggingPriority(.defaultLow, for: .horizontal)
         field.addTarget(
             context.coordinator,
             action: #selector(Coordinator.textDidChange),
@@ -50,6 +52,12 @@ struct AuthFieldRepresentable: UIViewRepresentable {
             uiView.isSecureTextEntry = isSecure
             uiView.text = current
         }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: AuthUITextField, context: Context) -> CGSize? {
+        guard let width = proposal.width, width.isFinite, width > 0 else { return nil }
+        let measured = uiView.sizeThatFits(CGSize(width: width, height: .greatestFiniteMagnitude))
+        return CGSize(width: width, height: max(measured.height, 20))
     }
 
     func makeCoordinator() -> Coordinator {

@@ -89,7 +89,14 @@ object LexturesType {
 }
 
 @Composable
-fun isDarkTheme(): Boolean = isSystemInDarkTheme()
+fun isDarkTheme(): Boolean {
+    val appearance = ThemePreference.get(LocalContext.current).appearance
+    return when (appearance) {
+        ThemeAppearance.LIGHT -> false
+        ThemeAppearance.DARK -> true
+        ThemeAppearance.SYSTEM -> isSystemInDarkTheme()
+    }
+}
 
 @Composable
 fun isHighContrastEnabled(): Boolean {
@@ -188,7 +195,7 @@ fun coverBrush(key: String): Brush {
 fun LexturesTheme(content: @Composable () -> Unit) {
     val preferences = rememberAccessibilityPreferences()
     val localePreferences = rememberLocalePreferences()
-    val dark = isSystemInDarkTheme()
+    val dark = isDarkTheme()
     val scheme = if (dark) {
         darkColorScheme(
             primary = LexturesColors.BrandTeal,

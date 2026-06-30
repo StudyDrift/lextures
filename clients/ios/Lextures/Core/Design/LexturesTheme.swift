@@ -240,6 +240,7 @@ struct AuthTextField: View {
                 autocapitalization: isSecure ? .none : autocapitalization
             )
             .focused($focused)
+            .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
             .background(colorScheme == .dark ? Color(hex: 0x141F1D) : LexturesTheme.sceneBackground.opacity(0.6))
@@ -253,5 +254,6 @@ struct AuthTextField: View {
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             .animation(.easeOut(duration: 0.15), value: focused)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

@@ -51,6 +51,7 @@ import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.sceneBackground
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.AccountProfile
 import com.lextures.android.core.lms.MeProfile
 import com.lextures.android.core.push.PushManager
 import com.lextures.android.core.routing.DeepLinkDestination
@@ -74,6 +75,7 @@ enum class HomeTab(val labelRes: Int, val icon: ImageVector) {
  */
 class HomeShellState {
     var profile by mutableStateOf<MeProfile?>(null)
+    var accountProfile by mutableStateOf<AccountProfile?>(null)
     var unreadInbox by mutableIntStateOf(0)
     var unreadNotifications by mutableIntStateOf(0)
     var pendingDeepLink by mutableStateOf<DeepLinkDestination?>(null)
@@ -92,6 +94,7 @@ class HomeShellState {
     suspend fun refresh(accessToken: String?) {
         val token = accessToken ?: return
         runCatching { LmsApi.fetchMe(token) }.getOrNull()?.let { profile = it }
+        runCatching { LmsApi.fetchAccountProfile(token) }.getOrNull()?.let { accountProfile = it }
         runCatching { LmsApi.fetchUnreadInboxCount(token) }.getOrNull()?.let { unreadInbox = it }
         runCatching { LmsApi.fetchNotifications(token) }.getOrNull()?.let {
             unreadNotifications = it.unreadCount

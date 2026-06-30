@@ -23,4 +23,8 @@ enum AppConfiguration {
         let normalized = path.hasPrefix("/") ? path : "/\(path)"
         return URL(string: base + normalized)!
     }
+
+    /// Public web pages (privacy/trust center, accessibility statement) are served
+    /// from the same origin as the API in this monorepo deployment.
+    static func webURL(path: String) -> URL { apiURL(path: path) }
 }

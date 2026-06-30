@@ -6,6 +6,7 @@ struct LexturesApp: App {
     @State private var authSession = AuthSession()
     @State private var localePreferences = LocalePreferences.shared
     @State private var biometricGate = BiometricGate.shared
+    @State private var themePreference = ThemePreference.shared
 
     var body: some Scene {
         WindowGroup {
@@ -14,8 +15,10 @@ struct LexturesApp: App {
                 .environment(biometricGate)
                 .environment(AccessibilityPreferences.shared)
                 .environment(localePreferences)
+                .environment(themePreference)
                 .environment(\.locale, localePreferences.effectiveLocale)
                 .environment(\.layoutDirection, localePreferences.layoutDirection)
+                .preferredColorScheme(themePreference.colorScheme)
         }
     }
 }
