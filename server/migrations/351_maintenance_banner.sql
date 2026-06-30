@@ -1,5 +1,7 @@
 -- Plan 18.6: Maintenance / outage banner controls.
 
+CREATE SCHEMA IF NOT EXISTS platform;
+
 ALTER TABLE settings.platform_app_settings
     ADD COLUMN IF NOT EXISTS maintenance_banner_enabled BOOLEAN;
 

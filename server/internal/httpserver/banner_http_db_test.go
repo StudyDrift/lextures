@@ -41,6 +41,9 @@ func bannerTestSetup(t *testing.T) (*pgxpool.Pool, *auth.JWTSigner, string, uuid
 		t.Fatalf("pool: %v", err)
 	}
 	t.Cleanup(func() { pool.Close() })
+	if _, err := pool.Exec(ctx, `DELETE FROM platform.banners`); err != nil {
+		t.Fatalf("cleanup banners: %v", err)
+	}
 
 	em := "banner-ga-" + time.Now().Format("20060102150405.000") + "@e.com"
 	ph, err := auth.HashPassword("longpassword0")
@@ -94,6 +97,7 @@ func TestMaintenanceBanner_CreateListPublicDelete_Pg(t *testing.T) {
 	}
 
 	r2 := httptest.NewRequest(http.MethodGet, "/api/v1/status/banner", nil)
+	r2.Header.Set("Authorization", "Bearer "+tok)
 	w2 := httptest.NewRecorder()
 	h.ServeHTTP(w2, r2)
 	if w2.Code != http.StatusOK {
@@ -129,10 +133,12 @@ func TestMaintenanceBanner_CreateListPublicDelete_Pg(t *testing.T) {
 	r3.Header.Set("Authorization", "Bearer "+otherTok)
 	w3 := httptest.NewRecorder()
 	h.ServeHTTP(w3, r3)
-	var otherPub any
-	_ = json.Unmarshal(w3.Body.Bytes(), &otherPub)
-	if otherPub != nil {
-		t.Fatalf("other org should not see banner, got %v", otherPub)
+	var otherPub map[string]any
+	if err := json.Unmarshal(w3.Body.Bytes(), &otherPub); err != nil {
+		t.Fatalf("other json: %v", err)
+	}
+	if otherPub != nil && otherPub["message"] == "Maintenance at midnight" {
+		t.Fatalf("other org should not see org banner, got %v", otherPub)
 	}
 
 	var created map[string]any

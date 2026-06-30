@@ -397,25 +397,18 @@ func (d Deps) handleStatuspageBannerWebhook() http.HandlerFunc {
 }
 
 func (d Deps) statuspageWebhookActor(ctx context.Context) (uuid.UUID, error) {
-	rows, err := d.Pool.Query(ctx, `
+	row := d.Pool.QueryRow(ctx, `
 SELECT u.id FROM "user".users u
-JOIN "user".user_role_assignments ura ON ura.user_id = u.id
-JOIN "user".app_roles ar ON ar.id = ura.role_id
+JOIN "user".user_app_roles uar ON uar.user_id = u.id
+JOIN "user".app_roles ar ON ar.id = uar.role_id
 WHERE ar.name = 'Global Admin'
 ORDER BY u.created_at ASC
 LIMIT 1`)
-	if err != nil {
-		return uuid.UUID{}, err
+	var id uuid.UUID
+	if err := row.Scan(&id); err != nil {
+		return uuid.UUID{}, errNoGlobalAdmin
 	}
-	defer rows.Close()
-	if rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return uuid.UUID{}, err
-		}
-		return id, nil
-	}
-	return uuid.UUID{}, errNoGlobalAdmin
+	return id, nil
 }
 
 var errNoGlobalAdmin = errBannerWebhookActor("no global admin user found")
