@@ -35,8 +35,9 @@ type Metrics struct {
 	aiProviderCalls     *prometheus.CounterVec
 	aiProviderLatency   *prometheus.HistogramVec
 	aiProviderCostTotal *prometheus.CounterVec
-	businessEvents      *prometheus.CounterVec
-	healthChecks        *prometheus.CounterVec
+		businessEvents      *prometheus.CounterVec
+		bannerActive        *prometheus.GaugeVec
+		healthChecks        *prometheus.CounterVec
 	buildInfo           *prometheus.GaugeVec
 }
 
@@ -92,6 +93,11 @@ func NewMetrics(deployColor ...string) *Metrics {
 			Name:      "business_events_total",
 			Help:      "Business events (enrollments, grade submissions, etc.) by type.",
 		}, []string{"event"}),
+		bannerActive: prometheus.NewGaugeVec(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "banner_active",
+			Help:      "Whether a maintenance banner is currently active (1) or not (0) by scope and severity (plan 18.6).",
+		}, []string{"scope", "severity"}),
 		healthChecks: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "health_check_total",
@@ -113,6 +119,7 @@ func NewMetrics(deployColor ...string) *Metrics {
 		m.aiProviderLatency,
 		m.aiProviderCostTotal,
 		m.businessEvents,
+		m.bannerActive,
 		m.healthChecks,
 		m.buildInfo,
 		collectors.NewGoCollector(),
@@ -182,6 +189,23 @@ func (m *Metrics) IncBusinessEvent(event string) {
 		return
 	}
 	m.businessEvents.WithLabelValues(event).Inc()
+}
+
+// SetBannerActive records the currently served maintenance banner gauge (plan 18.6).
+// Pass empty scope to clear all known label combinations to zero.
+func (m *Metrics) SetBannerActive(scope, severity string) {
+	for _, sc := range []string{"global", "org"} {
+		for _, sev := range []string{"info", "warning", "error"} {
+			m.bannerActive.WithLabelValues(sc, sev).Set(0)
+		}
+	}
+	if scope == "" {
+		return
+	}
+	if severity == "" {
+		severity = "info"
+	}
+	m.bannerActive.WithLabelValues(scope, severity).Set(1)
 }
 
 // IncHealthCheck records one health probe result (plan 17.8 Observability).

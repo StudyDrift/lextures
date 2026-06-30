@@ -77,3 +77,14 @@ func TestMetrics_IncBusinessEventEmptyNoop(t *testing.T) {
 		t.Error("empty event should not create a series")
 	}
 }
+
+func TestMetrics_SetBannerActive(t *testing.T) {
+	m := NewMetrics()
+	m.SetBannerActive("global", "warning")
+	rr := httptest.NewRecorder()
+	m.Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	body := rr.Body.String()
+	if !strings.Contains(body, `lextures_banner_active{scope="global",severity="warning"} 1`) {
+		t.Errorf("expected active global warning gauge, got: %s", body)
+	}
+}

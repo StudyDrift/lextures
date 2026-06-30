@@ -66,6 +66,7 @@ export type PlatformFeatures = {
   impersonationEnabled: boolean
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
+  maintenanceBannerEnabled: boolean
   ffZapierConnector: boolean
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
@@ -162,6 +163,7 @@ const defaultFeatures: PlatformFeatures = {
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
+  maintenanceBannerEnabled: true,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
@@ -257,6 +259,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
+  maintenanceBannerEnabled: true,
   ffZapierConnector: false,
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
@@ -359,6 +362,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           impersonationEnabled: data.impersonationEnabled === true,
           bulkCsvImportEnabled: data.bulkCsvImportEnabled === true,
           adminSearchEnabled: data.adminSearchEnabled === true,
+          maintenanceBannerEnabled: data.maintenanceBannerEnabled !== false,
           ffZapierConnector: data.ffZapierConnector === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
@@ -418,6 +422,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           impersonationEnabled: next.impersonationEnabled === true,
           bulkCsvImportEnabled: next.bulkCsvImportEnabled === true,
           adminSearchEnabled: next.adminSearchEnabled === true,
+          maintenanceBannerEnabled: next.maintenanceBannerEnabled !== false,
           ffZapierConnector: next.ffZapierConnector === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,

@@ -90,6 +90,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables cross-course search for org admins across users, courses, and content within their organization.',
   },
   {
+    key: 'maintenanceBannerEnabled',
+    label: 'Maintenance banners',
+    description:
+      'Enables site-wide and org-scoped maintenance/outage banners with admin publishing and Statuspage webhook integration (plan 18.6).',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',

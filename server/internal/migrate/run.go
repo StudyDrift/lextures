@@ -21,6 +21,15 @@ const sqlxMigrationsTable = "_sqlx_migrations"
 
 // RunWithFS applies SQL migrations from fsys (directory root, e.g. "migrations").
 func RunWithFS(ctx context.Context, fsys fs.FS, dsn string) error {
+	release, err := acquireIntegrationMigrateGate()
+	if err != nil {
+		return err
+	}
+	defer release()
+	return runWithFS(ctx, fsys, dsn)
+}
+
+func runWithFS(ctx context.Context, fsys fs.FS, dsn string) error {
 	if dsn == "" {
 		return fmt.Errorf("migrate: empty database URL")
 	}

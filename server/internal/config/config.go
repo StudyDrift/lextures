@@ -330,6 +330,8 @@ type Config struct {
 	BulkCsvImportEnabled bool
 	// AdminSearchEnabled gates org-wide admin search UI and /api/v1/admin/search APIs (plan 18.4).
 	AdminSearchEnabled bool
+	// MaintenanceBannerEnabled gates site-wide / org maintenance banners and banner admin APIs (plan 18.6).
+	MaintenanceBannerEnabled bool
 	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.
@@ -604,6 +606,8 @@ type Config struct {
 	StatuspageComponentMapJSON string
 	// AlertmanagerWebhookSecret authenticates Alertmanager webhook posts.
 	AlertmanagerWebhookSecret string
+	// StatuspageWebhookSecret verifies HMAC signatures on Statuspage incident webhooks (plan 18.6).
+	StatuspageWebhookSecret string
 	// StatusPageSummaryCacheSecs is the in-memory cache TTL for the summary proxy.
 	StatusPageSummaryCacheSecs int
 
@@ -843,6 +847,7 @@ func Load() Config {
 		StatuspagePageID:           firstNonEmptyTrimmed("STATUSPAGE_PAGE_ID"),
 		StatuspageComponentMapJSON: statuspageComponentMapJSON(),
 		AlertmanagerWebhookSecret:  firstNonEmptyTrimmed("ALERTMANAGER_WEBHOOK_SECRET"),
+		StatuspageWebhookSecret:    firstNonEmptyTrimmed("STATUSPAGE_WEBHOOK_SECRET"),
 		StatusPageSummaryCacheSecs: statusPageSummaryCacheSecs(),
 
 		Observability: observabilityFromEnv(),

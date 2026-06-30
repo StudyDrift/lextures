@@ -24,6 +24,9 @@ import { LocaleBootstrapSync } from './locale-sync'
 import { LmsExperienceRoot } from './lms-experience-root'
 import { LegalUpdateBanner } from '../legal/legal-update-banner'
 
+const MaintenanceStatusBanner = lazy(() =>
+  import('../StatusBanner').then((m) => ({ default: m.StatusBanner })),
+)
 const IncidentStatusBanner = lazy(() =>
   import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
 )
@@ -69,6 +72,9 @@ function AppShellLayout() {
             <TopBar />
           )}
           <OfflineBanner />
+          <Suspense fallback={null}>
+            <MaintenanceStatusBanner />
+          </Suspense>
           <Suspense fallback={null}>
             <IncidentStatusBanner />
           </Suspense>
