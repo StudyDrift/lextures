@@ -432,7 +432,7 @@ test.describe('Persistent AI Tutor API (plan 19.1)', () => {
       { headers: { Authorization: `Bearer ${studToken}` } },
     )
     expect(res.status()).toBe(403)
-    const body = (await res.json()) as { message?: string }
-    expect(body.message).toContain('AI tutor is disabled for your account')
+    const body = (await res.json()) as { error?: { message?: string } }
+    expect(body.error?.message).toContain('AI tutor is disabled for your account')
   })
 })
