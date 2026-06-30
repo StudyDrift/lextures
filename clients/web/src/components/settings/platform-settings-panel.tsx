@@ -73,6 +73,7 @@ function emptyForm(): PlatformSettingsPayload {
     impersonationEnabled: false,
     bulkCsvImportEnabled: false,
     adminSearchEnabled: false,
+    emailTemplateEditorEnabled: false,
     ffZapierConnector: false,
     ffAdvisingIntegration: false,
     ffResearchConsent: false,

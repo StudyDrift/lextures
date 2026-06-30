@@ -51,6 +51,7 @@ export type PlatformSettingsPayload = {
   impersonationEnabled: boolean
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
+  emailTemplateEditorEnabled: boolean
   ffZapierConnector: boolean
   ffAdvisingIntegration: boolean
   ffResearchConsent: boolean

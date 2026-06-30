@@ -16,6 +16,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgbranding"
 	"github.com/lextures/lextures/server/internal/repos/organization"
 	digestsvc "github.com/lextures/lextures/server/internal/service/emaildigest"
+	emailtemplatesvc "github.com/lextures/lextures/server/internal/service/emailtemplates"
 	"github.com/lextures/lextures/server/internal/service/notifications"
 )
 
@@ -44,7 +45,8 @@ func deliverEmailJob(ctx context.Context, pool *pgxpool.Pool, cfg config.Config,
 	}
 	branding := brandingForRecipient(ctx, pool, job.RecipientID)
 	mailBranding := mailBrandingFromRow(branding)
-	rendered, err := mail.RenderTemplate(job.Template, job.TemplateVars, mailBranding)
+	orgID, _ := organization.OrgIDForUser(ctx, pool, job.RecipientID)
+	rendered, err := emailtemplatesvc.RenderForDelivery(ctx, pool, orgID, job.Template, job.TemplateVars, mailBranding)
 	if err != nil {
 		return err
 	}

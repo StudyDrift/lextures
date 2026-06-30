@@ -110,8 +110,9 @@ type platformFeaturesJSON struct {
 	AdminConsoleEnabled  bool `json:"adminConsoleEnabled"`
 	ImpersonationEnabled bool `json:"impersonationEnabled"`
 	BulkCsvImportEnabled bool `json:"bulkCsvImportEnabled"`
-	AdminSearchEnabled   bool `json:"adminSearchEnabled"`
-	OpenRouterConfigured bool `json:"openRouterConfigured"`
+	AdminSearchEnabled           bool `json:"adminSearchEnabled"`
+	EmailTemplateEditorEnabled   bool `json:"emailTemplateEditorEnabled"`
+	OpenRouterConfigured         bool `json:"openRouterConfigured"`
 	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
 	AiStudyBuddyEnabled  bool `json:"aiStudyBuddyEnabled"`
 
@@ -236,6 +237,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		ImpersonationEnabled:         cfg.ImpersonationEnabled,
 		BulkCsvImportEnabled:         cfg.BulkCsvImportEnabled,
 		AdminSearchEnabled:           cfg.AdminSearchEnabled,
+		EmailTemplateEditorEnabled:   cfg.EmailTemplateEditorEnabled,
 	}
 }
 

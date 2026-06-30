@@ -9,6 +9,7 @@ import {
   Filter,
   Library,
   Megaphone,
+  Mail,
   Route,
   School,
   Shield,
@@ -66,6 +67,7 @@ export function SideNavAdminLinks() {
     ffLibrary,
     ffLearningPaths,
     adminConsoleEnabled,
+    emailTemplateEditorEnabled,
   } = usePlatformFeatures()
 
   const captionsEnabled = videoCaptionsEnabled || autoCaptioningEnabled
@@ -76,7 +78,7 @@ export function SideNavAdminLinks() {
     location.pathname === path || location.pathname.startsWith(`${path}/`)
 
   const showCcrAdmin = canManageAccommodations && ffCoCurricularTranscript
-  const showIntegrations = ffSisIntegration || ffWebhooks || ffContentFilterIntegration
+  const showIntegrations = ffSisIntegration || ffWebhooks || ffContentFilterIntegration || emailTemplateEditorEnabled
   const showStudentRecords =
     ffDemographics ||
     ffIncompleteGradeWorkflow ||
@@ -187,6 +189,15 @@ export function SideNavAdminLinks() {
                   icon={<Webhook className="h-5 w-5" />}
                 >
                   Webhooks
+                </SideNavLink>
+              ) : null}
+              {emailTemplateEditorEnabled ? (
+                <SideNavLink
+                  to={orgPath('/admin/email-templates', orgId)}
+                  className={() => (active('/admin/email-templates') ? sideNavActiveClass : '')}
+                  icon={<Mail className="h-5 w-5" />}
+                >
+                  Email templates
                 </SideNavLink>
               ) : null}
               {ffContentFilterIntegration ? (

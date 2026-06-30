@@ -330,6 +330,8 @@ type Config struct {
 	BulkCsvImportEnabled bool
 	// AdminSearchEnabled gates org-wide admin search UI and /api/v1/admin/search APIs (plan 18.4).
 	AdminSearchEnabled bool
+	// EmailTemplateEditorEnabled gates org admin email template editor APIs and UI (plan 18.5).
+	EmailTemplateEditorEnabled bool
 	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.

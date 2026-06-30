@@ -135,6 +135,7 @@ func (d Deps) registerAdminConsoleRoutes(r chi.Router) {
 	r.Get("/api/v1/admin-console/integrations", d.handleAdminConsoleIntegrations())
 	r.Get("/api/v1/me/admin-console-capabilities", d.handleMeAdminConsoleCapabilities())
 	d.registerAdminImportRoutes(r)
+	d.registerAdminEmailTemplateRoutes(r)
 }
 
 func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
