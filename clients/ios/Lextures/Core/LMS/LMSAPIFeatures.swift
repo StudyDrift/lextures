@@ -447,5 +447,39 @@ extension LMSAPI {
         return try decode(AcademicCalendarEventsResponse.self, from: data).events
     }
 
+    // MARK: - Module progress & completion (M3.1)
+
+    /// Returns nil when conditional release is disabled (HTTP 404).
+    static func fetchModulesProgress(courseCode: String, accessToken: String) async throws -> ModulesProgressSnapshot? {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/modules/progress",
+            authorized: true,
+            accessToken: accessToken
+        )
+        if response.statusCode == 404 { return nil }
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(ModulesProgressSnapshot.self, from: data)
+    }
+
+    static func markItemComplete(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> MarkItemCompleteResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/items/\(encodePath(itemId))/complete",
+            method: "POST",
+            body: EmptyBody(),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return (try? decode(MarkItemCompleteResponse.self, from: data)) ?? MarkItemCompleteResponse()
+    }
+
     private struct EmptyBody: Encodable {}
 }

@@ -64,7 +64,7 @@ struct CourseStructureResponse: Decodable {
 
 /// Tolerant union of the per-kind item GET responses
 /// (`/content-pages/{id}`, `/assignments/{id}`, `/quizzes/{id}`, `/external-links/{id}`).
-struct ModuleItemDetail: Decodable {
+struct ModuleItemDetail: Codable {
     var title: String?
     var markdown: String?
     var dueAt: String?
@@ -96,7 +96,7 @@ struct ModuleItemDetail: Decodable {
     var url: String?
     var provider: String?
 
-    struct QuestionStub: Decodable {
+    struct QuestionStub: Codable {
         var id: String?
     }
 

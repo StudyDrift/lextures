@@ -99,9 +99,8 @@ object ItemKind {
         else -> "Item"
     }
 
-    /** Kinds with a detail endpoint — these rows are tappable. */
-    fun isOpenable(kind: String): Boolean =
-        kind in setOf("content_page", "assignment", "quiz", "external_link")
+    /** Kinds the module list can navigate to (including placeholders for upcoming epics). */
+    fun isOpenable(kind: String): Boolean = ModuleContentLogic.isNavigable(kind)
 }
 
 /** Activity detail: content body plus the settings "preview box" (parity with web). */

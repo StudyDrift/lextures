@@ -545,3 +545,46 @@ data class AcademicCalendarEventsResponse(
 )
 
 // endregion
+
+// region Module progress & conditional release (M3.1)
+
+@Serializable
+data class LockReason(
+    val code: String = "",
+    val message: String = "",
+    val itemId: String? = null,
+    val title: String? = null,
+)
+
+@Serializable
+data class ItemLockState(
+    val itemId: String,
+    val locked: Boolean = false,
+    val complete: Boolean = false,
+    val reason: LockReason? = null,
+)
+
+@Serializable
+data class ModuleLockState(
+    val moduleId: String,
+    val title: String = "",
+    val sortOrder: Int = 0,
+    val locked: Boolean = false,
+    val complete: Boolean = false,
+    val reason: LockReason? = null,
+    val items: List<ItemLockState>? = null,
+)
+
+@Serializable
+data class ModulesProgressSnapshot(
+    val enrollmentId: String = "",
+    val modules: List<ModuleLockState> = emptyList(),
+)
+
+@Serializable
+data class MarkItemCompleteResponse(
+    val enrollmentId: String? = null,
+    val justComplete: Boolean? = null,
+)
+
+// endregion

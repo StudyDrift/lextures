@@ -344,9 +344,9 @@ enum ItemKind {
         }
     }
 
-    /// Kinds with a detail endpoint — these rows are tappable.
+    /// Kinds the module list can navigate to (including placeholders for upcoming epics).
     static func isOpenable(_ kind: String) -> Bool {
-        ["content_page", "assignment", "quiz", "external_link"].contains(kind)
+        ModuleContentLogic.isNavigable(kind)
     }
 }
 

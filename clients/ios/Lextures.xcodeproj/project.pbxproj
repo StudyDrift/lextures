@@ -41,6 +41,13 @@
 		9B044632A9974F319A0C8050 /* LMSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98382F5678594CB39F7AF3E4 /* LMSModels.swift */; };
 		A1B2C3D4E5F6478990A1B2C3 /* PlannerLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7489901B2C3D4 /* PlannerLogic.swift */; };
 		C3D4E5F6A7B8490112233445 /* NotificationLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9401122334455 /* NotificationLogic.swift */; };
+		M3A1B2C3D4E5411122334401 /* ModuleContentLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334402 /* ModuleContentLogic.swift */; };
+		M3A1B2C3D4E5411122334403 /* CourseMarkdownContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334404 /* CourseMarkdownContentView.swift */; };
+		M3A1B2C3D4E5411122334405 /* ModuleListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334406 /* ModuleListView.swift */; };
+		M3A1B2C3D4E5411122334407 /* ContentPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334408 /* ContentPageView.swift */; };
+		M3A1B2C3D4E5411122334409 /* WebItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334410 /* WebItemView.swift */; };
+		M3A1B2C3D4E5411122334411 /* ModuleItemRouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334412 /* ModuleItemRouteView.swift */; };
+		M3A1B2C3D4E5411122334413 /* ModuleContentModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M3A1B2C3D4E5411122334414 /* ModuleContentModelsTests.swift */; };
 		D5E6F7A8B9C0411223344556 /* NotificationPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6A7B8C9D0411223344556 /* NotificationPreferencesView.swift */; };
 		7573FE3E2C404A3091B6C4A1 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C47DDFE8FE40478BAB3E22 /* OnboardingModels.swift */; };
 		99F923C74A49424997DBC097 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAD7E54C0C84416BD214927 /* APIClient.swift */; };
@@ -154,6 +161,13 @@
 		98382F5678594CB39F7AF3E4 /* LMSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSModels.swift; sourceTree = "<group>"; };
 		B2C3D4E5F6A7489901B2C3D4 /* PlannerLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerLogic.swift; sourceTree = "<group>"; };
 		D4E5F6A7B8C9401122334455 /* NotificationLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationLogic.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334402 /* ModuleContentLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleContentLogic.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334404 /* CourseMarkdownContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMarkdownContentView.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334406 /* ModuleListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleListView.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334408 /* ContentPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentPageView.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334410 /* WebItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebItemView.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334412 /* ModuleItemRouteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleItemRouteView.swift; sourceTree = "<group>"; };
+		M3A1B2C3D4E5411122334414 /* ModuleContentModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleContentModelsTests.swift; sourceTree = "<group>"; };
 		28C47DDFE8FE40478BAB3E22 /* OnboardingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingModels.swift; sourceTree = "<group>"; };
 		9EAD7E54C0C84416BD214927 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		F832A9FCA8924C4D991C9013 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
@@ -265,6 +279,7 @@
 				E3784FB835994C24B21B4F60 /* SettingsAccommodationsTests.swift */,
 				C6D7E8F9A0B1428394C5D6E7 /* PlannerModelsTests.swift */,
 				F6A7B8C9D0E1428394C5D6E8 /* NotificationModelsTests.swift */,
+				M3A1B2C3D4E5411122334414 /* ModuleContentModelsTests.swift */,
 			);
 			path = LexturesTests;
 			sourceTree = "<group>";
@@ -394,6 +409,7 @@
 				98382F5678594CB39F7AF3E4 /* LMSModels.swift */,
 				B2C3D4E5F6A7489901B2C3D4 /* PlannerLogic.swift */,
 				D4E5F6A7B8C9401122334455 /* NotificationLogic.swift */,
+				M3A1B2C3D4E5411122334402 /* ModuleContentLogic.swift */,
 				28C47DDFE8FE40478BAB3E22 /* OnboardingModels.swift */,
 			);
 			path = LMS;
@@ -476,6 +492,11 @@
 				1F19FED039A04C7BA89AA0BF /* CoursesListView.swift */,
 				97F2829CE211455FA877386E /* ItemDetailRows.swift */,
 				407556A9CF044391AAB5A927 /* ItemDetailView.swift */,
+				M3A1B2C3D4E5411122334404 /* CourseMarkdownContentView.swift */,
+				M3A1B2C3D4E5411122334406 /* ModuleListView.swift */,
+				M3A1B2C3D4E5411122334408 /* ContentPageView.swift */,
+				M3A1B2C3D4E5411122334410 /* WebItemView.swift */,
+				M3A1B2C3D4E5411122334412 /* ModuleItemRouteView.swift */,
 			);
 			path = Courses;
 			sourceTree = "<group>";
@@ -742,6 +763,7 @@
 				9B044632A9974F319A0C8050 /* LMSModels.swift in Sources */,
 				A1B2C3D4E5F6478990A1B2C3 /* PlannerLogic.swift in Sources */,
 				C3D4E5F6A7B8490112233445 /* NotificationLogic.swift in Sources */,
+				M3A1B2C3D4E5411122334401 /* ModuleContentLogic.swift in Sources */,
 				7573FE3E2C404A3091B6C4A1 /* OnboardingModels.swift in Sources */,
 				99F923C74A49424997DBC097 /* APIClient.swift in Sources */,
 				B96E69AE38DD4CDBA99B8D65 /* APIError.swift in Sources */,
@@ -775,6 +797,11 @@
 				63AF331D039146A7B3A4F136 /* CoursesListView.swift in Sources */,
 				ABC6FAAA9B7547619382557B /* ItemDetailRows.swift in Sources */,
 				60D2B82D109C4E5EB4E2D68B /* ItemDetailView.swift in Sources */,
+				M3A1B2C3D4E5411122334403 /* CourseMarkdownContentView.swift in Sources */,
+				M3A1B2C3D4E5411122334405 /* ModuleListView.swift in Sources */,
+				M3A1B2C3D4E5411122334407 /* ContentPageView.swift in Sources */,
+				M3A1B2C3D4E5411122334409 /* WebItemView.swift in Sources */,
+				M3A1B2C3D4E5411122334411 /* ModuleItemRouteView.swift in Sources */,
 				7E4C03B27E32438885D1765F /* DashboardView.swift in Sources */,
 				A3B4C5D6E7F8489901A2B3C4 /* CalendarSubscribeSheet.swift in Sources */,
 				E1F2A3B4C5D6489909E0F1A2 /* CalendarView.swift in Sources */,
@@ -824,6 +851,7 @@
 				771C35CD417349AAB4C99F3B /* SettingsAccommodationsTests.swift in Sources */,
 				B5C6D7E8F9A0418293B4C5D6 /* PlannerModelsTests.swift in Sources */,
 				E7F8A9B0C1D2418293B4C5D7 /* NotificationModelsTests.swift in Sources */,
+				M3A1B2C3D4E5411122334413 /* ModuleContentModelsTests.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */
