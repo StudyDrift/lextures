@@ -74,6 +74,7 @@ func (h emailDeliveryHandler) Execute(ctx context.Context, payload json.RawMessa
 // (plan 17.3 NFR maintainability).
 func RegisterBuiltinJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 	r.Register(JobTypeEmailDelivery, emailDeliveryHandler{pool: pool, cfg: cfg})
+	RegisterUserImportJob(r, pool, cfg)
 	registerScheduledJobs(r, pool, cfg)
 }
 

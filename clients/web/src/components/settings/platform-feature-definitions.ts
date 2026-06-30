@@ -72,6 +72,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables the org admin console at /admin with user/course management, settings, and audit log for org_admin and global admin users.',
   },
   {
+    key: 'bulkCsvImportEnabled',
+    label: 'Bulk user CSV import',
+    description:
+      'Enables org admins to upload CSV files to create, update, or deactivate users in bulk (plan 18.2).',
+  },
+  {
     key: 'adminSearchEnabled',
     label: 'Admin org-wide search',
     description:

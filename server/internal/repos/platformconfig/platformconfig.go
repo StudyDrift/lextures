@@ -91,6 +91,7 @@ type Row struct {
 	IsoIsmsEnabled                  *bool
 	AdminAuditLogEnabled            *bool
 	AdminConsoleEnabled             *bool
+	BulkCsvImportEnabled            *bool
 	AdminSearchEnabled              *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
@@ -257,6 +258,7 @@ type Write struct {
 	IsoIsmsEnabled                  *bool
 	AdminAuditLogEnabled            *bool
 	AdminConsoleEnabled             *bool
+	BulkCsvImportEnabled            *bool
 	AdminSearchEnabled              *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
@@ -421,6 +423,7 @@ SELECT
 	iso_isms_enabled,
 	admin_audit_log_enabled,
 	admin_console_enabled,
+	bulk_csv_import_enabled,
 	admin_search_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
@@ -578,6 +581,7 @@ WHERE id = 1
 		&r.IsoIsmsEnabled,
 		&r.AdminAuditLogEnabled,
 		&r.AdminConsoleEnabled,
+		&r.BulkCsvImportEnabled,
 		&r.AdminSearchEnabled,
 		&r.DataResidencyEnabled,
 		&r.AiDisclosureEnabled,
@@ -786,6 +790,7 @@ INSERT INTO settings.platform_app_settings (
 	iso_isms_enabled,
 	admin_audit_log_enabled,
 	admin_console_enabled,
+	bulk_csv_import_enabled,
 	admin_search_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
@@ -948,6 +953,7 @@ ON CONFLICT (id) DO UPDATE SET
 	iso_isms_enabled = COALESCE(EXCLUDED.iso_isms_enabled, settings.platform_app_settings.iso_isms_enabled),
 	admin_audit_log_enabled = COALESCE(EXCLUDED.admin_audit_log_enabled, settings.platform_app_settings.admin_audit_log_enabled),
 	admin_console_enabled = COALESCE(EXCLUDED.admin_console_enabled, settings.platform_app_settings.admin_console_enabled),
+	bulk_csv_import_enabled = COALESCE(EXCLUDED.bulk_csv_import_enabled, settings.platform_app_settings.bulk_csv_import_enabled),
 	admin_search_enabled = COALESCE(EXCLUDED.admin_search_enabled, settings.platform_app_settings.admin_search_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
 	rtl_enabled = COALESCE(EXCLUDED.rtl_enabled, settings.platform_app_settings.rtl_enabled),
@@ -1103,6 +1109,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.IsoIsmsEnabled,
 		w.AdminAuditLogEnabled,
 		w.AdminConsoleEnabled,
+		w.BulkCsvImportEnabled,
 		w.AdminSearchEnabled,
 		w.DataResidencyEnabled,
 		w.AiDisclosureEnabled,

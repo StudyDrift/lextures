@@ -109,6 +109,7 @@ type platformSettingsJSON struct {
 	IsoIsmsEnabled                  bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled            bool `json:"adminAuditLogEnabled"`
 	AdminConsoleEnabled             bool `json:"adminConsoleEnabled"`
+	BulkCsvImportEnabled            bool `json:"bulkCsvImportEnabled"`
 	AdminSearchEnabled              bool `json:"adminSearchEnabled"`
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      bool `json:"rtlEnabled"`
@@ -322,6 +323,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
 			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
+			BulkCsvImportEnabled:            merged.BulkCsvImportEnabled,
 			AdminSearchEnabled:              merged.AdminSearchEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
@@ -508,6 +510,7 @@ type putPlatformBody struct {
 	IsoIsmsEnabled                  *bool `json:"isoIsmsEnabled"`
 	AdminAuditLogEnabled            *bool `json:"adminAuditLogEnabled"`
 	AdminConsoleEnabled             *bool `json:"adminConsoleEnabled"`
+	BulkCsvImportEnabled            *bool `json:"bulkCsvImportEnabled"`
 	AdminSearchEnabled              *bool `json:"adminSearchEnabled"`
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
 	BackupModuleEnabled             *bool `json:"backupModuleEnabled"`
@@ -844,6 +847,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("isoismsenabled", body.IsoIsmsEnabled, func(v bool) { wr.IsoIsmsEnabled = &v })
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
 		setBool("adminconsoleenabled", body.AdminConsoleEnabled, func(v bool) { wr.AdminConsoleEnabled = &v })
+		setBool("bulkcsvimportenabled", body.BulkCsvImportEnabled, func(v bool) { wr.BulkCsvImportEnabled = &v })
 		setBool("adminsearchenabled", body.AdminSearchEnabled, func(v bool) { wr.AdminSearchEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
@@ -1011,6 +1015,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			IsoIsmsEnabled:                  merged.IsoIsmsEnabled,
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
 			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
+			BulkCsvImportEnabled:            merged.BulkCsvImportEnabled,
 			AdminSearchEnabled:              merged.AdminSearchEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,

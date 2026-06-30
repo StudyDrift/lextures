@@ -49,6 +49,7 @@ export type PlatformFeaturesSnapshot = {
   ffSisIntegration?: boolean
   ffWebhooks?: boolean
   adminConsoleEnabled?: boolean
+  bulkCsvImportEnabled?: boolean
   adminSearchEnabled?: boolean
   ffZapierConnector?: boolean
   ffCatalogIntegration?: boolean
@@ -135,6 +136,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffSisIntegration: false,
   ffWebhooks: false,
   adminConsoleEnabled: false,
+  bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
