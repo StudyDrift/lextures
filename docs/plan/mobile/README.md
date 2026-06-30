@@ -106,8 +106,8 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 |---|---|---|---|
 | [M4.1 Quiz taker & question types](M4.1-quiz-taker.md) | 2.2 question types, 2.3 math, 2.7 timers/auto-submit, 2.8 shuffling, 2.9 attempts, quiz attempt page | Attempts read-only | **P0** |
 | [M5.1 Assignment submission](M5.1-assignment-submission.md) | 3.13 resubmission, 8.2 resumable upload, module assignment page | None (grade-only) | **P0** |
-| [M3.1 Module content viewer](M3.1-module-content-viewer.md) | module content/external-link/textbook pages, 8.7 image/pdf preview, 1.11 conditional release | None | **P0** |
-| [M3.2 Course files browser](M3.2-course-files.md) | course-files-page, 8.1 storage, 8.7 preview | None | **P0** |
+| [M3.1 Module content viewer](../completed/mobile/M3.1-module-content-viewer.md) ✅ | module content/external-link/textbook pages, 8.7 image/pdf preview, 1.11 conditional release | Done | **P0** |
+| [M3.2 Course files browser](../completed/mobile/M3.2-course-files.md) ✅ | course-files-page, 8.1 storage, 8.7 preview | Done | **P0** |
 | [M2.1 Calendar & to-dos](M2.1-calendar-todos.md) | calendar, todos-page, 16.5 feeds | None | **P0** |
 | [M6.1 Grades, feedback & what-if](M6.1-grades-feedback.md) | my-grades (built-read), 3.1 annotation, 3.2 a/v feedback, 3.16 what-if, rubrics | Grades read-only | **P0** |
 | [M7.1 Course discussions](M7.1-discussions.md) | 6.1 threaded forums, course-discussions-page | None | **P0** |
@@ -124,7 +124,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M1.2 Biometric unlock & sessions](../completed/mobile/M1.2-biometric-sessions.md) ✅ | 4.8/4.9 sessions, biometric | **Done** |
 | [M1.3 Onboarding & placement diagnostic](../completed/mobile/M1.3-onboarding-diagnostic.md) | onboarding, 1.7/15.11 diagnostic | **Done** |
 | [M2.2 Notification center & preferences](M2.2-notification-center.md) | 6.2 notifications, notification prefs | **P1** |
-| [M3.3 Interactive content: H5P/SCORM/LTI](M3.3-interactive-content.md) | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **P1** |
+| [M3.3 Interactive content: H5P/SCORM/LTI](../completed/mobile/M3.3-interactive-content.md) ✅ | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **Done** |
 | [M5.2 Peer review](M5.2-peer-review.md) | 3.15 peer review | **P1** |
 | [M6.2 Standards-based grades & mastery](M6.2-standards-mastery.md) | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **P1** |
 | [M7.3 Office hours booking](M7.3-office-hours.md) | 6.7 office hours | **P1** |
@@ -146,7 +146,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 
 | Story | Source feature(s) | Disposition |
 |---|---|---|
-| [M3.4 Conditional release & prerequisites UX](M3.4-conditional-release.md) | 1.11 conditional release polish | **P2** |
+| [M3.4 Conditional release & prerequisites UX](../completed/mobile/M3.4-conditional-release.md) ✅ | 1.11 conditional release polish | **Done** |
 | [M4.2 Lockdown / kiosk mode](M4.2-lockdown-kiosk.md) | 2.10 lockdown | **P2** |
 | [M5.3 Code-execution questions](M5.3-code-execution.md) | 2.4 code exec | **P2** |
 | [M10.3 Behavior/PBIS & hall pass](M10.3-behavior-hallpass.md) | 13.3 behavior, 13.9 hall pass | **P2** |
@@ -172,7 +172,7 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    (cross-cutting), then M4.1 quiz taker, M5.1 submission, M3.1/M3.2 content+files,
    M2.1 calendar, M6.1 grades+feedback, M7.1 discussions, M7.2 AI tutor, M8.1 review.
    Exit criteria: a student completes a full week of coursework with no browser.
-2. **Wave 2 — Breadth (P1).** Auth depth (M1.x), interactive content (M3.3),
+2. **Wave 2 — Breadth (P1).** Auth depth (M1.x), interactive content (M3.3 ✅),
    standards/mastery (M6.2), groups/office-hours (M7.3/M7.4), adaptive (M8.2–M8.4),
    self-learner commerce (M9.x), parent (M10.1/M10.2), accessibility & i18n
    (M0.3/M0.4), settings (M1.4), instructor attendance (M11.1).

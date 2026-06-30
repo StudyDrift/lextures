@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -64,6 +63,10 @@ import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
 import com.lextures.android.core.lms.ModuleContentLogic
 import com.lextures.android.core.lms.ModulesProgressSnapshot
+import com.lextures.android.core.lms.RequirementsLogic
+import com.lextures.android.features.files.CourseFilesScreen
+import com.lextures.android.features.files.FilePreviewScreen
+import com.lextures.android.core.lms.FilePreviewTarget
 
 /**
  * Course home: gradient hero + segmented sections
@@ -90,15 +93,26 @@ fun CourseDetailScreen(
     var loading by remember { mutableStateOf(true) }
 
     var openItem by remember { mutableStateOf<CourseStructureItem?>(null) }
-    var lockDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var lockedItem by remember { mutableStateOf<CourseStructureItem?>(null) }
     var openAttendanceSession by remember { mutableStateOf<AttendanceSession?>(null) }
     var openBacklogItem by remember { mutableStateOf<GradingBacklogItem?>(null) }
+    var openFilePreview by remember { mutableStateOf<FilePreviewTarget?>(null) }
 
     val emptyCourseTitle = moduleEmptyCourseTitle()
     val emptyCourseHint = moduleEmptyCourseHint()
-    val lockedDefault = moduleLockedDefaultLabel()
+    val groups = remember(items) { ModuleContentLogic.buildModuleGroups(items) }
 
     BackHandler(onBack = onBack)
+
+    openFilePreview?.let { preview ->
+        FilePreviewScreen(
+            session = session,
+            target = preview,
+            onBack = { openFilePreview = null },
+            modifier = modifier,
+        )
+        return
+    }
 
     openItem?.let { selected ->
         ModuleItemRouteScreen(
@@ -110,17 +124,6 @@ fun CourseDetailScreen(
             modifier = modifier,
         )
         return
-    }
-
-    lockDialog?.let { (title, message) ->
-        AlertDialog(
-            onDismissRequest = { lockDialog = null },
-            title = { Text(title) },
-            text = { Text(message) },
-            confirmButton = {
-                TextButton(onClick = { lockDialog = null }) { Text("OK") }
-            },
-        )
     }
 
     openAttendanceSession?.let { selected ->
@@ -174,12 +177,11 @@ fun CourseDetailScreen(
     val sections = buildList {
         add("overview" to "Overview")
         add("modules" to "Modules")
+        add("files" to "Files")
         if (course.viewerIsStudent) add("grades" to "Grades")
         if (course.viewerIsStaff || hasAttendanceSessions) add("attendance" to "Attendance")
         if (course.viewerIsStaff) add("grading" to "Grading")
     }
-
-    val groups = remember(items) { ModuleContentLogic.buildModuleGroups(items) }
 
     Column(modifier = modifier) {
         Row(
@@ -307,6 +309,14 @@ fun CourseDetailScreen(
                     )
                 }
 
+                "files" -> item {
+                    CourseFilesScreen(
+                        session = session,
+                        course = course,
+                        onOpenPreview = { openFilePreview = it },
+                    )
+                }
+
                 else -> {
                     if (loading && items.isEmpty()) {
                         item { LmsSkeletonList(count = 3) }
@@ -325,17 +335,25 @@ fun CourseDetailScreen(
                                 groups = groups,
                                 progress = progress,
                                 onSelectItem = { openItem = it },
-                                onLockedItem = { item, reason ->
-                                    lockDialog = item.title to (
-                                        reason?.message ?: lockedDefault
-                                        )
-                                },
+                                onLockedItem = { item, _ -> lockedItem = item },
                             )
                         }
                     }
                 }
             }
         }
+    }
+
+    lockedItem?.let { item ->
+        RequirementsSheet(
+            targetItem = item,
+            groups = groups,
+            progress = progress,
+            onDismiss = { lockedItem = null },
+            onGoToRequired = { itemId ->
+                RequirementsLogic.findItem(itemId, groups)?.let { openItem = it }
+            },
+        )
     }
 }
 

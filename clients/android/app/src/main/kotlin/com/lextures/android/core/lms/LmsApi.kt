@@ -543,4 +543,125 @@ object LmsApi {
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
         runCatching { decode<MarkItemCompleteResponse>(body) }.getOrDefault(MarkItemCompleteResponse())
     }
+
+    // Course files (M3.2)
+
+    suspend fun fetchCourseFilesRoot(courseCode: String, accessToken: String): CourseFileFolderContents =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/files",
+                accessToken = accessToken,
+            )
+            decode(body)
+        }
+
+    suspend fun fetchCourseFilesFolder(
+        courseCode: String,
+        folderId: String,
+        accessToken: String,
+    ): CourseFileFolderContents = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/files/folders/${encodePath(folderId)}",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    // Interactive content (M3.3)
+
+    suspend fun fetchModuleH5P(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): ModuleH5PPayload = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/h5p-items/${encodePath(itemId)}",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun fetchModuleScorm(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): ModuleScormPayload = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/scorm-items/${encodePath(itemId)}",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun launchScorm(
+        courseCode: String,
+        scoId: String,
+        accessToken: String,
+    ): ScormLaunchResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/scorm/${encodePath(scoId)}/launch",
+            method = "POST",
+            body = "{}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchModuleLtiLink(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): ModuleLtiLinkPayload = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/lti-links/${encodePath(itemId)}",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun postLtiEmbedTicket(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): LtiEmbedTicketResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/lti-links/${encodePath(itemId)}/embed-ticket",
+            method = "POST",
+            body = "{}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchModuleVibeActivity(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): ModuleVibeActivityPayload = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/vibe-activities/${encodePath(itemId)}",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun postXapiStatement(
+        courseCode: String,
+        packageId: String,
+        statement: kotlinx.serialization.json.JsonElement,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val payload = XapiStatementBody(courseCode, packageId, statement)
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/xapi/statements",
+            method = "POST",
+            body = client.encodeBody(payload, XapiStatementBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299 && code != 204) {
+            throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+    }
 }

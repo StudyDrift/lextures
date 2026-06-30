@@ -82,6 +82,8 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.coil.compose)
     implementation(libs.coil.svg)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)

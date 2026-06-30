@@ -115,6 +115,13 @@ object L {
         return prefs.localizedContext(context).resources.getQuantityString(id, count, count)
     }
 
+    @Composable
+    fun format(@androidx.annotation.StringRes id: Int, vararg args: Any): String {
+        val context = LocalContext.current
+        val prefs = LocalLocalePreferences.current
+        return prefs.localizedContext(context).getString(id, *args)
+    }
+
     fun text(context: Context, prefs: LocalePreferences, @androidx.annotation.StringRes id: Int): String =
         prefs.localizedContext(context).getString(id)
 

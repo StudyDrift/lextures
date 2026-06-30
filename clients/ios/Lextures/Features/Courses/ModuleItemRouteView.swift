@@ -47,9 +47,9 @@ struct ModuleItemRouteView: View {
         case .externalLink, .webContent:
             WebItemLoader(course: course, item: item)
         case .interactive:
-            ModuleItemPlaceholderView(item: item, messageKey: "mobile.modules.placeholder.interactive")
+            LaunchContainerView(course: course, item: item, onProgressChanged: onProgressChanged)
         case .file:
-            ModuleItemPlaceholderView(item: item, messageKey: "mobile.modules.placeholder.file")
+            FilePreviewView(target: FilePreviewTarget.from(moduleItem: item, courseCode: course.courseCode))
         case .unsupported:
             ModuleItemPlaceholderView(item: item, messageKey: "mobile.modules.placeholder.unsupported")
         }

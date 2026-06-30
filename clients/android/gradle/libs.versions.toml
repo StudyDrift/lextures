@@ -13,6 +13,7 @@ okhttp = "4.12.0"
 serialization = "1.7.3"
 coroutines = "1.9.0"
 coil = "2.7.0"
+media3 = "1.5.1"
 browser = "1.8.0"
 biometric = "1.1.0"
 
@@ -34,6 +35,8 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "coroutines" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
+androidx-media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+androidx-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
