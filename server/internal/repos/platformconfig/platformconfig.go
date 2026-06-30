@@ -96,6 +96,7 @@ type Row struct {
 	AdminSearchEnabled              *bool
 	EmailTemplateEditorEnabled      *bool
 	MaintenanceBannerEnabled        *bool
+	CustomFieldsEnabled             *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
 	RTLEnabled                      *bool
@@ -266,6 +267,7 @@ type Write struct {
 	AdminSearchEnabled              *bool
 	EmailTemplateEditorEnabled      *bool
 	MaintenanceBannerEnabled        *bool
+	CustomFieldsEnabled             *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
 	RTLEnabled                      *bool
@@ -434,6 +436,7 @@ SELECT
 	admin_search_enabled,
 	email_template_editor_enabled,
 	maintenance_banner_enabled,
+	custom_fields_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
 	rtl_enabled,
@@ -595,6 +598,7 @@ WHERE id = 1
 		&r.AdminSearchEnabled,
 		&r.EmailTemplateEditorEnabled,
 		&r.MaintenanceBannerEnabled,
+		&r.CustomFieldsEnabled,
 		&r.DataResidencyEnabled,
 		&r.AiDisclosureEnabled,
 		&r.RTLEnabled,
@@ -807,6 +811,7 @@ INSERT INTO settings.platform_app_settings (
 	admin_search_enabled,
 	email_template_editor_enabled,
 	maintenance_banner_enabled,
+	custom_fields_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
 	rtl_enabled,
@@ -973,6 +978,7 @@ ON CONFLICT (id) DO UPDATE SET
 	admin_search_enabled = COALESCE(EXCLUDED.admin_search_enabled, settings.platform_app_settings.admin_search_enabled),
 	email_template_editor_enabled = COALESCE(EXCLUDED.email_template_editor_enabled, settings.platform_app_settings.email_template_editor_enabled),
 	maintenance_banner_enabled = COALESCE(EXCLUDED.maintenance_banner_enabled, settings.platform_app_settings.maintenance_banner_enabled),
+	custom_fields_enabled = COALESCE(EXCLUDED.custom_fields_enabled, settings.platform_app_settings.custom_fields_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
 	rtl_enabled = COALESCE(EXCLUDED.rtl_enabled, settings.platform_app_settings.rtl_enabled),
 	ai_disclosure_enabled = COALESCE(EXCLUDED.ai_disclosure_enabled, settings.platform_app_settings.ai_disclosure_enabled),
@@ -1132,6 +1138,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AdminSearchEnabled,
 		w.EmailTemplateEditorEnabled,
 		w.MaintenanceBannerEnabled,
+		w.CustomFieldsEnabled,
 		w.DataResidencyEnabled,
 		w.AiDisclosureEnabled,
 		w.RTLEnabled,

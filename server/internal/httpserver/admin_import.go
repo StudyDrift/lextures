@@ -18,6 +18,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/background"
 	"github.com/lextures/lextures/server/internal/repos/userimport"
+	cfrepo "github.com/lextures/lextures/server/internal/repos/customfields"
 	"github.com/lextures/lextures/server/internal/service/clamav"
 	"github.com/lextures/lextures/server/internal/service/csvimport"
 )
@@ -187,7 +188,17 @@ func (d Deps) handleAdminImportUpload() http.HandlerFunc {
 		dryRun := strings.EqualFold(strings.TrimSpace(r.FormValue("dry_run")), "true") ||
 			strings.EqualFold(strings.TrimSpace(r.FormValue("dryRun")), "true")
 
-		parsed, err := csvimport.ParseCSV(strings.NewReader(string(data)), profile)
+		var extraCols []string
+		if cfg.CustomFieldsEnabled {
+			defs, defErr := cfrepo.ListDefinitions(ctx, d.Pool, orgID, cfrepo.EntityUser, false)
+			if defErr == nil {
+				for _, def := range defs {
+					extraCols = append(extraCols, def.Key)
+				}
+			}
+		}
+
+		parsed, err := csvimport.ParseCSVWithExtraColumns(strings.NewReader(string(data)), profile, extraCols)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return

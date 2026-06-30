@@ -113,6 +113,7 @@ type platformFeaturesJSON struct {
 	AdminSearchEnabled           bool `json:"adminSearchEnabled"`
 	EmailTemplateEditorEnabled   bool `json:"emailTemplateEditorEnabled"`
 	MaintenanceBannerEnabled     bool `json:"maintenanceBannerEnabled"`
+	CustomFieldsEnabled          bool `json:"customFieldsEnabled"`
 	OpenRouterConfigured         bool `json:"openRouterConfigured"`
 	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
 	AiStudyBuddyEnabled  bool `json:"aiStudyBuddyEnabled"`
@@ -240,6 +241,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		AdminSearchEnabled:           cfg.AdminSearchEnabled,
 		EmailTemplateEditorEnabled:   cfg.EmailTemplateEditorEnabled,
 		MaintenanceBannerEnabled:     cfg.MaintenanceBannerEnabled,
+		CustomFieldsEnabled:          cfg.CustomFieldsEnabled,
 	}
 }
 

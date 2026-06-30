@@ -10,6 +10,7 @@ import (
 	"github.com/lextures/lextures/server/internal/auth"
 	"github.com/lextures/lextures/server/internal/repos/oidc"
 	"github.com/lextures/lextures/server/internal/repos/organization"
+	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/meperm"
 )
@@ -203,6 +204,7 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 		DisplayName   *string            `json:"displayName"`
 		Org           *orgInfo           `json:"org,omitempty"`
 		Impersonating *impersonationInfo `json:"impersonating,omitempty"`
+		CustomFields  map[string]any     `json:"customFields,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
@@ -225,6 +227,16 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 SELECT name, slug FROM tenant.organizations WHERE id = $1
 `, orgID).Scan(&name, &slug); err == nil {
 				out.Org = &orgInfo{ID: orgID.String(), Name: name, Slug: slug}
+			}
+			if d.effectiveConfig().CustomFieldsEnabled && wantsInclude(r, "custom_fields") {
+				svc := cfservice.New(d.Pool)
+				audience, audErr := svc.AudienceForUser(r.Context(), userID, orgID)
+				if audErr == nil {
+					fields, fieldErr := svc.GetUserValues(r.Context(), orgID, userID, audience, false)
+					if fieldErr == nil && len(fields) > 0 {
+						out.CustomFields = fields
+					}
+				}
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")

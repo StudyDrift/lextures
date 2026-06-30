@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { usePlatformFeatures } from '../../context/platform-features-context'
@@ -10,7 +10,10 @@ import {
   type AdminUser,
   type Paginated,
 } from '../../lib/admin-console-api'
+import { fetchCustomFields, usersExportUrl } from '../../lib/custom-fields-api'
 import { startImpersonationSession } from '../../lib/impersonation'
+
+const AdminUserCustomFieldsPanel = lazy(() => import('./AdminUserCustomFieldsPanel'))
 
 const ROLES = ['', 'student', 'instructor', 'ta', 'admin']
 const PAGE_SIZES = [25, 50, 100]
@@ -30,12 +33,16 @@ export default function AdminUsers() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [canManage, setCanManage] = useState(false)
+  const [customFieldsEnabled, setCustomFieldsEnabled] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     void fetchAdminConsoleCapabilities()
       .then((caps) => {
-        if (!cancelled) setCanManage(caps.canManage)
+        if (!cancelled) {
+          setCanManage(caps.canManage)
+          setCustomFieldsEnabled(caps.customFieldsEnabled)
+        }
       })
       .catch(() => {
         if (!cancelled) setCanManage(false)
@@ -97,13 +104,28 @@ export default function AdminUsers() {
 
   const showViewAs = impersonationEnabled && canManage
 
+  const [fieldDefsCount, setFieldDefsCount] = useState(0)
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!customFieldsEnabled) return
+    void fetchCustomFields('user', orgId)
+      .then((defs) => setFieldDefsCount(defs.length))
+      .catch(() => setFieldDefsCount(0))
+  }, [customFieldsEnabled, orgId])
+
+  function openCustomFields(user: AdminUser) {
+    setExpandedUserId((current) => (current === user.id ? null : user.id))
+  }
+
   return (
     <div>
       <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
         Users
       </h1>
 
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap gap-3">
         <label className="flex flex-col text-sm">
           <span className="mb-1 text-slate-600 dark:text-slate-400">Search</span>
           <input
@@ -151,6 +173,15 @@ export default function AdminUsers() {
             ))}
           </select>
         </label>
+        </div>
+        {customFieldsEnabled && canManage && (
+          <a
+            href={usersExportUrl(orgId)}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-slate-200"
+          >
+            Export CSV
+          </a>
+        )}
       </div>
 
       {error ? (
@@ -199,6 +230,7 @@ export default function AdminUsers() {
               </tr>
             ) : (
               data.items.map((user) => (
+                <>
                 <tr key={user.id} className="border-t border-slate-100 dark:border-neutral-800">
                   <td className="sticky left-0 bg-white px-4 py-2 dark:bg-neutral-900">{user.email}</td>
                   <td className="px-4 py-2">{user.displayName ?? '—'}</td>
@@ -207,6 +239,15 @@ export default function AdminUsers() {
                   <td className="px-4 py-2">{user.active ? 'Active' : 'Deactivated'}</td>
                   <td className="px-4 py-2">
                     <div className="flex flex-wrap gap-3">
+                      {customFieldsEnabled && canManage && fieldDefsCount > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => openCustomFields(user)}
+                          className="text-sm text-slate-600 hover:underline dark:text-slate-300"
+                        >
+                          Custom fields
+                        </button>
+                      ) : null}
                       {showViewAs && user.active && !user.orgRole ? (
                         <button
                           type="button"
@@ -230,6 +271,20 @@ export default function AdminUsers() {
                     </div>
                   </td>
                 </tr>
+                {expandedUserId === user.id ? (
+                  <tr key={`${user.id}-fields`} className="border-t border-slate-100 bg-slate-50 dark:border-neutral-800 dark:bg-neutral-950">
+                    <td colSpan={6} className="px-4 py-4">
+                      <Suspense fallback={<p className="text-sm text-slate-500">Loading custom fields…</p>}>
+                        <AdminUserCustomFieldsPanel
+                          userId={user.id}
+                          orgId={orgId}
+                          onClose={() => setExpandedUserId(null)}
+                        />
+                      </Suspense>
+                    </td>
+                  </tr>
+                ) : null}
+                </>
               ))
             )}
           </tbody>

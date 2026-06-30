@@ -4,6 +4,7 @@ import {
   BookOpen,
   FileUp,
   LayoutDashboard,
+  ListTree,
   Megaphone,
   Plug,
   ScrollText,
@@ -16,6 +17,8 @@ import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
 import { usePlatformFeatures } from '../../context/platform-features-context'
 
 const bannersNavItem = { to: '/org-admin/banners', label: 'Notices', icon: Megaphone, end: false as const }
+
+const customFieldsNavItem = { to: '/org-admin/custom-fields', label: 'Custom fields', icon: ListTree, end: false as const }
 
 const baseNavItems = [
   { to: '/org-admin', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -33,12 +36,16 @@ export default function AdminLayout() {
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
+  const [customFieldsEnabled, setCustomFieldsEnabled] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     void fetchAdminConsoleCapabilities()
       .then((c) => {
-        if (!cancelled) setCanAccess(c.enabled && c.canAccess)
+        if (!cancelled) {
+          setCanAccess(c.enabled && c.canAccess)
+          setCustomFieldsEnabled(c.customFieldsEnabled)
+        }
       })
       .catch(() => {
         if (!cancelled) setCanAccess(false)
@@ -73,6 +80,10 @@ export default function AdminLayout() {
     let items = [...baseNavItems]
     if (bulkCsvImportEnabled) {
       items = [...items.slice(0, 2), importNavItem, ...items.slice(2)]
+    }
+    if (customFieldsEnabled) {
+      const usersIdx = items.findIndex((i) => i.to === '/org-admin/users')
+      items = [...items.slice(0, usersIdx + 1), customFieldsNavItem, ...items.slice(usersIdx + 1)]
     }
     if (maintenanceBannerEnabled) {
       const integrationsIdx = items.findIndex((i) => i.to === '/org-admin/integrations')

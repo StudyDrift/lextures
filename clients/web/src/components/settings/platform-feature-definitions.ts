@@ -90,6 +90,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables cross-course search for org admins across users, courses, and content within their organization.',
   },
   {
+    key: 'customFieldsEnabled',
+    label: 'Custom fields',
+    description: 'Org metadata on users, courses, and enrollments (18.7).',
+  },
+  {
     key: 'emailTemplateEditorEnabled',
     label: 'Email template editor',
     description:

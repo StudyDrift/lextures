@@ -6,6 +6,7 @@ export type AdminConsoleCapabilities = {
   canAccess: boolean
   canManage: boolean
   isGlobalAdmin: boolean
+  customFieldsEnabled: boolean
 }
 
 export type AdminOverview = {
