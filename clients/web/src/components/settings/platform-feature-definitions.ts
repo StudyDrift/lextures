@@ -78,6 +78,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Allows org admins and global admins to view the application as a specific user (read-only) with a persistent banner and audit trail.',
   },
   {
+    key: 'bulkCsvImportEnabled',
+    label: 'Bulk user CSV import',
+    description:
+      'Enables org admins to upload CSV files to create, update, or deactivate users in bulk (plan 18.2).',
+  },
+  {
     key: 'adminSearchEnabled',
     label: 'Admin org-wide search',
     description:

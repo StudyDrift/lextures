@@ -85,6 +85,11 @@ function orgQuery(orgId?: string | null): string {
   return `?orgId=${encodeURIComponent(orgId)}`
 }
 
+function orgAmp(orgId?: string | null): string {
+  if (!orgId) return ''
+  return `&orgId=${encodeURIComponent(orgId)}`
+}
+
 async function parseJson<T>(res: Response): Promise<T> {
   const raw: unknown = await res.json().catch(() => ({}))
   if (!res.ok) {
@@ -225,3 +230,87 @@ export async function startImpersonation(targetUserId: string): Promise<Imperson
   })
   return parseJson(res)
 }
+
+export type ImportRowError = {
+  row: number
+  column: string
+  message: string
+  code?: string
+}
+
+export type ImportJobStatus = {
+  jobId: string
+  status: 'queued' | 'running' | 'complete' | 'failed'
+  mergeStrategy: string
+  importProfile: string
+  dryRun: boolean
+  totalRows?: number
+  processedRows: number
+  errorRows: number
+  createdCount: number
+  updatedCount: number
+  deactivatedCount: number
+  skippedCount: number
+  errors: ImportRowError[]
+  createdAt: string
+  updatedAt: string
+  hasResult: boolean
+}
+
+export type ImportJobSummary = {
+  jobId: string
+  status: string
+  mergeStrategy: string
+  importProfile: string
+  dryRun: boolean
+  totalRows?: number
+  processedRows: number
+  errorRows: number
+  createdAt: string
+}
+
+export type ImportUploadResponse = {
+  jobId: string
+  parseErrors: ImportRowError[]
+  totalRows: number
+  filename: string
+}
+
+export async function uploadUserImport(
+  file: File,
+  opts: { mergeStrategy: string; profile: string; dryRun: boolean; orgId?: string | null },
+): Promise<ImportUploadResponse> {
+  const form = new FormData()
+  form.append('file', file)
+  form.append('merge_strategy', opts.mergeStrategy)
+  form.append('profile', opts.profile)
+  form.append('dry_run', opts.dryRun ? 'true' : 'false')
+  const res = await authorizedFetch(`/api/v1/admin-console/imports${orgQuery(opts.orgId)}`, {
+    method: 'POST',
+    body: form,
+  })
+  return parseJson(res)
+}
+
+export async function fetchImportJobStatus(jobId: string, orgId?: string | null): Promise<ImportJobStatus> {
+  const res = await authorizedFetch(`/api/v1/admin-console/imports/${jobId}${orgQuery(orgId)}`)
+  return parseJson(res)
+}
+
+export async function fetchImportJobs(orgId?: string | null, page = 1): Promise<Paginated<ImportJobSummary>> {
+  const sp = new URLSearchParams({ page: String(page), perPage: '25' })
+  const res = await authorizedFetch(`/api/v1/admin-console/imports?${sp}${orgAmp(orgId)}`)
+  return parseJson(res)
+}
+
+export function importResultUrl(jobId: string, orgId?: string | null): string {
+  const base = import.meta.env.VITE_API_URL ?? ''
+  const q = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
+  return `${base}/api/v1/admin-console/imports/${jobId}/result${q}`
+}
+
+export const CSV_TEMPLATE = `email,first_name,last_name,role,external_id
+teacher@example.edu,Jane,Smith,teacher,T001
+student@example.edu,John,Doe,student,S001
+`
+

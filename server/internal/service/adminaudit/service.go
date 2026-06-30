@@ -36,6 +36,8 @@ const (
 	EventContentDelete        = "content_delete"
 	EventIncompleteGranted    = "incomplete_granted"
 	EventIncompleteResolved   = "incomplete_resolved"
+	EventUserCreate           = "user_create"
+	EventUserUpdate           = "user_update"
 	EventUserDeactivate       = "user_deactivate"
 	EventCourseArchive        = "course_archive"
 	EventOrgSettingsChange    = "org_settings_change"

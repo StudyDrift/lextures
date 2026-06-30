@@ -109,6 +109,7 @@ type platformFeaturesJSON struct {
 	AiDisclosureEnabled  bool `json:"aiDisclosureEnabled"`
 	AdminConsoleEnabled  bool `json:"adminConsoleEnabled"`
 	ImpersonationEnabled bool `json:"impersonationEnabled"`
+	BulkCsvImportEnabled bool `json:"bulkCsvImportEnabled"`
 	AdminSearchEnabled   bool `json:"adminSearchEnabled"`
 	OpenRouterConfigured bool `json:"openRouterConfigured"`
 	RagNotebookEnabled   bool `json:"ragNotebookEnabled"`
@@ -233,6 +234,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		LearnerModelEMAAlpha:         cfg.LearnerModelEMAAlpha,
 		AdminConsoleEnabled:          cfg.AdminConsoleEnabled,
 		ImpersonationEnabled:         cfg.ImpersonationEnabled,
+		BulkCsvImportEnabled:         cfg.BulkCsvImportEnabled,
 		AdminSearchEnabled:           cfg.AdminSearchEnabled,
 	}
 }

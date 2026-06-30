@@ -326,6 +326,8 @@ type Config struct {
 	AdminConsoleEnabled bool
 	// ImpersonationEnabled gates admin "view as student" impersonation (plan 18.3).
 	ImpersonationEnabled bool
+	// BulkCsvImportEnabled gates org-admin bulk user CSV import (plan 18.2).
+	BulkCsvImportEnabled bool
 	// AdminSearchEnabled gates org-wide admin search UI and /api/v1/admin/search APIs (plan 18.4).
 	AdminSearchEnabled bool
 	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
