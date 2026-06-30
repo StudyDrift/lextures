@@ -63,5 +63,8 @@ If the report shows `NO_FCP`, verify the auth token (`LH_TOKEN`), API availabili
 - `golangci-lint` must be built with Go >= 1.25 to lint this project. Use the latest version.
 - The password-signup endpoint enforces HIBP (Have I Been Pwned) breach checking. Use long, random passwords for test accounts.
 - The pre-commit hook (`.husky/pre-commit`) runs `lint-staged` (ESLint fix) and `tsc -b` from `clients/web/`. This runs automatically on commit if husky is installed.
-- Docker daemon must be started manually with `dockerd &>/var/log/dockerd.log &` before using `docker compose` commands in this VM environment.
+- Docker daemon must be started manually before using `docker compose` (dependencies Postgres + RabbitMQ run as containers). `dockerd` needs root and a writable log path, so start it with `sudo bash -c 'dockerd >/var/log/dockerd.log 2>&1 &'` and wait ~10s for `docker info` to succeed.
+- The `ubuntu` user is added to the `docker` group during setup, so plain `docker`/`docker compose` work in fresh login shells once the daemon is up; the shell that performed the `usermod` still needs `sg docker -c '<cmd>'` (or `sudo`) until a new login picks up the group.
 - The fuse-overlayfs storage driver and iptables-legacy are required for Docker-in-Docker in this environment.
+- Go 1.25 lives at `/usr/local/go/bin` (the system default `go` is 1.22). Setup appends this to `~/.bashrc`; if `go version` shows 1.22, prepend `/usr/local/go/bin` to `PATH`.
+- Run the Go API and web SPA natively (`go run ./cmd/server`, `npm run dev`); only Postgres and RabbitMQ need Docker. The API reads `server/.env` (copy from `server/.env.example`) — it is gitignored, so recreate it if missing.
