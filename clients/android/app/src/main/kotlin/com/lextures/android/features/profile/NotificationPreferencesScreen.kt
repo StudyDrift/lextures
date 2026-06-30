@@ -36,7 +36,6 @@ import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
-import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.NotificationLogic
 import com.lextures.android.core.lms.NotificationPreference
@@ -71,6 +70,13 @@ fun NotificationPreferencesScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var saveMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
+
+    val preferencesTitle = notificationsPreferencesTitle()
+    val preferencesDescription = notificationsPreferencesDescription()
+    val preferencesSavedMessage = notificationsPreferencesSavedMessage()
+    val preferencesPushLabel = notificationsPreferencesPushLabel()
+    val preferencesEmailLabel = notificationsPreferencesEmailLabel()
+    val preferencesSaveMutationLabel = notificationsPreferencesSaveMutationLabel()
 
     BackHandler(onBack = onBack)
 
@@ -112,7 +118,7 @@ fun NotificationPreferencesScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = L.text("mobile.notifications.preferences.title"),
+                text = preferencesTitle,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
@@ -126,7 +132,7 @@ fun NotificationPreferencesScreen(
         ) {
             item {
                 Text(
-                    text = L.text("mobile.notifications.preferences.description"),
+                    text = preferencesDescription,
                     fontSize = 12.sp,
                     color = textSecondary(),
                 )
@@ -149,7 +155,7 @@ fun NotificationPreferencesScreen(
                     item {
                         LmsCard {
                             Text(
-                                text = L.text("mobile.notifications.category.${category.name.lowercase()}"),
+                                text = categoryLabel(category),
                                 style = LexturesType.display(17),
                                 color = textPrimary(),
                             )
@@ -159,6 +165,8 @@ fun NotificationPreferencesScreen(
                                 }
                                 PreferenceRow(
                                     row = row,
+                                    pushLabel = preferencesPushLabel,
+                                    emailLabel = preferencesEmailLabel,
                                     onPushChange = { enabled ->
                                         preferences = preferences.map {
                                             if (it.eventType == row.eventType) it.copy(pushEnabled = enabled) else it
@@ -168,11 +176,12 @@ fun NotificationPreferencesScreen(
                                             offline = offline,
                                             context = context,
                                             json = json,
+                                            scope = scope,
                                             preferences = preferences,
                                             eventType = row.eventType,
-                                            scope = scope,
+                                            saveMutationLabel = preferencesSaveMutationLabel,
                                             onError = { errorMessage = it },
-                                            onSaved = { saveMessage = L.text("mobile.notifications.preferences.saved") },
+                                            onSaved = { saveMessage = preferencesSavedMessage },
                                         )
                                     },
                                     onEmailChange = { enabled ->
@@ -184,11 +193,12 @@ fun NotificationPreferencesScreen(
                                             offline = offline,
                                             context = context,
                                             json = json,
+                                            scope = scope,
                                             preferences = preferences,
                                             eventType = row.eventType,
-                                            scope = scope,
+                                            saveMutationLabel = preferencesSaveMutationLabel,
                                             onError = { errorMessage = it },
-                                            onSaved = { saveMessage = L.text("mobile.notifications.preferences.saved") },
+                                            onSaved = { saveMessage = preferencesSavedMessage },
                                         )
                                     },
                                 )
@@ -204,16 +214,12 @@ fun NotificationPreferencesScreen(
 @Composable
 private fun PreferenceRow(
     row: NotificationPreference,
+    pushLabel: String,
+    emailLabel: String,
     onPushChange: (Boolean) -> Unit,
     onEmailChange: (Boolean) -> Unit,
 ) {
-    val eventLabel = L.text(NotificationLogic.eventLabelKey(row.eventType)).let { localized ->
-        if (localized == NotificationLogic.eventLabelKey(row.eventType)) {
-            row.eventType.replace('_', ' ')
-        } else {
-            localized
-        }
-    }
+    val eventLabel = eventTypeLabel(row.eventType)
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,12 +232,12 @@ private fun PreferenceRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = L.text("mobile.notifications.preferences.push"), fontSize = 14.sp, color = textSecondary())
+            Text(text = pushLabel, fontSize = 14.sp, color = textSecondary())
             Switch(
                 checked = row.pushEnabled,
                 onCheckedChange = onPushChange,
                 modifier = Modifier.semantics {
-                    contentDescription = "$eventLabel, ${L.text("mobile.notifications.preferences.push")}"
+                    contentDescription = "$eventLabel, $pushLabel"
                 },
             )
         }
@@ -240,12 +246,12 @@ private fun PreferenceRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(text = L.text("mobile.notifications.preferences.email"), fontSize = 14.sp, color = textSecondary())
+            Text(text = emailLabel, fontSize = 14.sp, color = textSecondary())
             Switch(
                 checked = row.emailEnabled,
                 onCheckedChange = onEmailChange,
                 modifier = Modifier.semantics {
-                    contentDescription = "$eventLabel, ${L.text("mobile.notifications.preferences.email")}"
+                    contentDescription = "$eventLabel, $emailLabel"
                 },
             )
         }
@@ -257,9 +263,10 @@ private fun persistPreference(
     offline: OfflineService,
     context: android.content.Context,
     json: Json,
+    scope: kotlinx.coroutines.CoroutineScope,
     preferences: List<NotificationPreference>,
     eventType: String,
-    scope: kotlinx.coroutines.CoroutineScope,
+    saveMutationLabel: String,
     onError: (String) -> Unit,
     onSaved: () -> Unit,
 ) {
@@ -268,6 +275,7 @@ private fun persistPreference(
         val row = preferences.firstOrNull { it.eventType == eventType } ?: return@launch
         val ownerKey = NotebookStore.jwtSubject(token) ?: "anonymous"
         val body = json.encodeToString(
+            NotificationPreferencesUpdate.serializer(),
             NotificationPreferencesUpdate(
                 preferences = listOf(
                     NotificationPreferencePatch(
@@ -283,7 +291,7 @@ private fun persistPreference(
                 method = "PUT",
                 path = "/api/v1/me/notification-preferences",
                 bodyJson = body,
-                label = L.text("mobile.notifications.preferences.saveLabel"),
+                label = saveMutationLabel,
                 accessToken = token,
             )
             NotificationPreferencesCache.save(context, ownerKey, preferences)

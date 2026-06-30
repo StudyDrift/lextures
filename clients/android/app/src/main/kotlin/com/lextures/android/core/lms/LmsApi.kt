@@ -192,7 +192,7 @@ object LmsApi {
         val (body, _) = client.request(
             path = "/api/v1/me/notification-preferences",
             method = "PUT",
-            body = json.encodeToString(update),
+            body = json.encodeToString(NotificationPreferencesUpdate.serializer(), update),
             accessToken = accessToken,
         )
         decode<NotificationPreferencesResponse>(body).preferences

@@ -53,7 +53,6 @@ import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
-import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.AppNotification
 import com.lextures.android.core.lms.Broadcast
 import com.lextures.android.core.lms.LmsApi
@@ -94,6 +93,11 @@ fun NotificationsScreen(
     var staleLabel by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
+    val staleOfflineLabel = notificationsStaleOfflineLabel()
+    val markAllReadLabel = notificationsMarkAllReadLabel()
+    val markAllReadMutationLabel = notificationsMarkAllReadMutationLabel()
+    val markReadMutationLabel = notificationsMarkReadMutationLabel()
+
     BackHandler(onBack = onBack)
 
     LaunchedEffect(accessToken) {
@@ -119,7 +123,7 @@ fun NotificationsScreen(
             if (notifications.isEmpty()) {
                 errorMessage = session.mapError(e)
             } else {
-                staleLabel = staleLabel ?: L.text("mobile.notifications.stale.offline")
+                staleLabel = staleLabel ?: staleOfflineLabel
             }
         } finally {
             loading = false
@@ -140,7 +144,7 @@ fun NotificationsScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = L.text("mobile.notifications.title"),
+                text = notificationsTitle(),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
@@ -149,13 +153,13 @@ fun NotificationsScreen(
             IconButton(onClick = onOpenPreferences) {
                 Icon(
                     Icons.Default.Settings,
-                    contentDescription = L.text("mobile.notifications.preferences.title"),
+                    contentDescription = notificationsPreferencesTitle(),
                     tint = textPrimary(),
                 )
             }
             if (notifications.any { !it.isRead }) {
                 Text(
-                    text = L.text("mobile.notifications.markAllRead"),
+                    text = markAllReadLabel,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     color = accentColor(),
@@ -169,7 +173,7 @@ fun NotificationsScreen(
                                         method = "POST",
                                         path = "/api/v1/me/notifications/read-all",
                                         bodyJson = "{}",
-                                        label = L.text("mobile.notifications.markAllReadLabel"),
+                                        label = markAllReadMutationLabel,
                                         accessToken = token,
                                     )
                                 }.onSuccess {
@@ -192,7 +196,7 @@ fun NotificationsScreen(
         ) {
             item {
                 LmsSegmentedChips(
-                    options = NotificationFilter.entries.map { it.id to L.text(it.labelKey) },
+                    options = NotificationFilter.entries.map { it.id to filterLabel(it) },
                     selectedId = filter,
                     onSelect = { filter = it },
                 )
@@ -215,18 +219,18 @@ fun NotificationsScreen(
                     LmsEmptyState(
                         icon = Icons.Default.Notifications,
                         title = when (activeFilter) {
-                            NotificationFilter.Unread -> L.text("mobile.notifications.empty.unread")
-                            else -> L.text("mobile.notifications.empty.all")
+                            NotificationFilter.Unread -> notificationsEmptyUnreadTitle()
+                            else -> notificationsEmptyAllTitle()
                         },
-                        message = L.text("mobile.notifications.empty.message"),
+                        message = notificationsEmptyMessage(),
                     )
                 }
             } else {
                 items(visible, key = { it.id }) { notification ->
                     val readLabel = if (notification.isRead) {
-                        L.text("mobile.notifications.accessibility.read")
+                        notificationsAccessibilityReadLabel()
                     } else {
-                        L.text("mobile.notifications.accessibility.unread")
+                        notificationsAccessibilityUnreadLabel()
                     }
                     LmsCard(
                         accent = if (notification.isRead) null else LexturesColors.BrandTeal,
@@ -243,7 +247,7 @@ fun NotificationsScreen(
                                             method = "POST",
                                             path = "/api/v1/me/notifications/${notification.id}/read",
                                             bodyJson = "{}",
-                                            label = L.text("mobile.notifications.markReadLabel"),
+                                            label = markReadMutationLabel,
                                             accessToken = token,
                                         )
                                     }
@@ -323,12 +327,6 @@ fun NotificationsScreen(
             }
         }
     }
-}
-
-private fun eventTypeLabel(eventType: String): String {
-    val key = NotificationLogic.eventLabelKey(eventType)
-    val localized = L.text(key)
-    return if (localized == key) eventType.replace('_', ' ') else localized
 }
 
 private fun iconFor(eventType: String): ImageVector = when (NotificationLogic.category(eventType)) {
