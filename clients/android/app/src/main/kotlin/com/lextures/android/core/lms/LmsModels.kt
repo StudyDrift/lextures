@@ -20,6 +20,9 @@ data class CourseSummary(
     val published: Boolean? = null,
     val catalogNickname: String? = null,
     val notebookEnabled: Boolean? = null,
+    val calendarEnabled: Boolean? = null,
+    val orgId: String? = null,
+    val termId: String? = null,
     val viewerEnrollmentRoles: List<String>? = null,
 ) {
     val displayTitle: String

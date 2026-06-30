@@ -9,6 +9,9 @@ enum OfflineCacheKey {
     static func itemDetail(courseCode: String, itemId: String) -> String {
         "course:\(courseCode):item:\(itemId)"
     }
+    static func plannerSnapshot() -> String { "planner:snapshot" }
+    static func notificationsPage() -> String { "notifications:page" }
+    static func notificationPreferences() -> String { "notifications:preferences" }
 }
 
 /// A cached value plus freshness metadata for read screens.

@@ -282,6 +282,11 @@ export function CourseExportImportSection({ courseCode }: { courseCode: string }
                   ] as const,
                   ['settings', 'Settings', 'Course title, overview, dates, visibility, and syllabus sections.'] as const,
                   [
+                    'announcements',
+                    'Announcements',
+                    'Course announcements posted in Canvas, imported into the Feed #announcements channel.',
+                  ] as const,
+                  [
                     'files',
                     'Files',
                     'Course file folders and attachments from Canvas Files (shown on the course Files page).',

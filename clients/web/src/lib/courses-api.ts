@@ -5527,6 +5527,7 @@ export type CanvasImportInclude = {
   grades: boolean
   settings: boolean
   files: boolean
+  announcements: boolean
 }
 
 export const CANVAS_IMPORT_INCLUDE_ALL: CanvasImportInclude = {
@@ -5537,6 +5538,7 @@ export const CANVAS_IMPORT_INCLUDE_ALL: CanvasImportInclude = {
   grades: true,
   settings: true,
   files: true,
+  announcements: true,
 }
 
 export type PostCourseImportCanvasBody = {

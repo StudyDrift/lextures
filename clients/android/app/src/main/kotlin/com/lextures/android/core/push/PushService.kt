@@ -19,6 +19,7 @@ class PushService : FirebaseMessagingService() {
             ?: message.data["body"]
             ?: ""
         val actionUrl = message.data["action_url"]
-        pushManager.showLocalNotification(title, body, actionUrl)
+        val eventType = message.data["event_type"]
+        pushManager.showLocalNotification(title, body, actionUrl, eventType)
     }
 }

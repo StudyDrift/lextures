@@ -80,6 +80,40 @@ extension LMSAPI {
         )
     }
 
+    static func fetchNotificationPreferences(accessToken: String) async throws -> [NotificationPreference] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/notification-preferences",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(NotificationPreferencesResponse.self, from: data).preferences
+    }
+
+    static func updateNotificationPreferences(
+        _ preferences: [NotificationPreference],
+        accessToken: String
+    ) async throws -> [NotificationPreference] {
+        let body = NotificationPreferencesUpdate(
+            preferences: preferences.map {
+                NotificationPreferencePatch(
+                    eventType: $0.eventType,
+                    emailEnabled: $0.emailEnabled,
+                    pushEnabled: $0.pushEnabled,
+                    smsEnabled: $0.smsEnabled,
+                    digestMode: $0.digestMode
+                )
+            }
+        )
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/notification-preferences",
+            method: "PUT",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(NotificationPreferencesResponse.self, from: data).preferences
+    }
+
     // MARK: - Device push tokens (APNs / FCM)
 
     static func registerDeviceToken(
@@ -372,4 +406,46 @@ extension LMSAPI {
         )
         _ = reminderTime
     }
+
+    // MARK: - Planner (todos + calendar, M2.1)
+
+    static func fetchCalendarTokenInfo(accessToken: String) async throws -> CalendarTokenInfo {
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/calendar-token",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(CalendarTokenInfo.self, from: data)
+    }
+
+    static func createCalendarToken(accessToken: String) async throws -> CalendarTokenCreated {
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/calendar-token",
+            method: "POST",
+            body: EmptyBody(),
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(CalendarTokenCreated.self, from: data)
+    }
+
+    static func fetchAcademicCalendarEvents(
+        orgId: String,
+        termId: String?,
+        accessToken: String
+    ) async throws -> [AcademicCalendarEvent] {
+        var path = "/api/v1/orgs/\(encodePath(orgId))/calendar/events"
+        if let termId, !termId.isEmpty {
+            let encoded = termId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? termId
+            path += "?term_id=\(encoded)"
+        }
+        let (data, response) = try await client.request(path: path, authorized: true, accessToken: accessToken)
+        if response.statusCode == 404 { return [] }
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AcademicCalendarEventsResponse.self, from: data).events
+    }
+
+    private struct EmptyBody: Encodable {}
 }

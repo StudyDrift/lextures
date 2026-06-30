@@ -39,6 +39,9 @@
 		E237285EBB8C4B838B10A0F9 /* LMSAPIFeatures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71BCE627FB0E4BF8B8F9E385 /* LMSAPIFeatures.swift */; };
 		D7DFF07DF5B54EE299DE3872 /* LMSFeatureModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A4D9797973942B89ACAD16A /* LMSFeatureModels.swift */; };
 		9B044632A9974F319A0C8050 /* LMSModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98382F5678594CB39F7AF3E4 /* LMSModels.swift */; };
+		A1B2C3D4E5F6478990A1B2C3 /* PlannerLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A7489901B2C3D4 /* PlannerLogic.swift */; };
+		C3D4E5F6A7B8490112233445 /* NotificationLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9401122334455 /* NotificationLogic.swift */; };
+		D5E6F7A8B9C0411223344556 /* NotificationPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6A7B8C9D0411223344556 /* NotificationPreferencesView.swift */; };
 		7573FE3E2C404A3091B6C4A1 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C47DDFE8FE40478BAB3E22 /* OnboardingModels.swift */; };
 		99F923C74A49424997DBC097 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EAD7E54C0C84416BD214927 /* APIClient.swift */; };
 		B96E69AE38DD4CDBA99B8D65 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F832A9FCA8924C4D991C9013 /* APIError.swift */; };
@@ -73,6 +76,12 @@
 		ABC6FAAA9B7547619382557B /* ItemDetailRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97F2829CE211455FA877386E /* ItemDetailRows.swift */; };
 		60D2B82D109C4E5EB4E2D68B /* ItemDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407556A9CF044391AAB5A927 /* ItemDetailView.swift */; };
 		7E4C03B27E32438885D1765F /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC9160B5D01C409AB1218E8D /* DashboardView.swift */; };
+		C3D4E5F6A7B8489901C2D3E4 /* DueReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9489902D3E4F5 /* DueReminderScheduler.swift */; };
+		E5F6A7B8C9D0489903E4F5A6 /* PlannerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A7B8C9D0E1489904F5A6B7 /* PlannerModel.swift */; };
+		A7B8C9D0E1F2489905A6B7C8 /* PlannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C9D0E1F2A3489906B7C8D9 /* PlannerView.swift */; };
+		C9D0E1F2A3B4489907C8D9E0 /* TodosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C5489908D9E0F1 /* TodosView.swift */; };
+		E1F2A3B4C5D6489909E0F1A2 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A3B4C5D6E7489900F1A2B3 /* CalendarView.swift */; };
+		A3B4C5D6E7F8489901A2B3C4 /* CalendarSubscribeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C5D6E7F8A9489902B3C4D5 /* CalendarSubscribeSheet.swift */; };
 		1F4AAAE5695145BFB5012CC6 /* GradingBacklogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BDD773D22894E5C93D1C096 /* GradingBacklogView.swift */; };
 		AC8FB87377DF414C9A26F0C4 /* SpeedGraderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56E63C464D64510B2ED3760 /* SpeedGraderView.swift */; };
 		C9DB6E74EC3746CBA8AA6490 /* AnnouncementsViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0884946FB1FB4C9AB56DB3BF /* AnnouncementsViews.swift */; };
@@ -102,6 +111,8 @@
 		440959E8D90944B2A4772C12 /* I18nTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B63433C37254D2085585426 /* I18nTests.swift */; };
 		82E18B8FC6E84B0DA658C738 /* OnboardingModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4369D9F68DC445C7A4BC0563 /* OnboardingModelsTests.swift */; };
 		771C35CD417349AAB4C99F3B /* SettingsAccommodationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3784FB835994C24B21B4F60 /* SettingsAccommodationsTests.swift */; };
+		B5C6D7E8F9A0418293B4C5D6 /* PlannerModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D7E8F9A0B1428394C5D6E7 /* PlannerModelsTests.swift */; };
+		E7F8A9B0C1D2418293B4C5D7 /* NotificationModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A7B8C9D0E1428394C5D6E8 /* NotificationModelsTests.swift */; };
 		711799B9D1F1408A9BCB0B2F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2053DE5D0F5246A3AEB9D1D4 /* Assets.xcassets */; };
 		7C91B2C542B2444EA0DC3317 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 9970321D683343F8AB2E7AA9 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
@@ -141,6 +152,8 @@
 		71BCE627FB0E4BF8B8F9E385 /* LMSAPIFeatures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIFeatures.swift; sourceTree = "<group>"; };
 		7A4D9797973942B89ACAD16A /* LMSFeatureModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModels.swift; sourceTree = "<group>"; };
 		98382F5678594CB39F7AF3E4 /* LMSModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSModels.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A7489901B2C3D4 /* PlannerLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerLogic.swift; sourceTree = "<group>"; };
+		D4E5F6A7B8C9401122334455 /* NotificationLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationLogic.swift; sourceTree = "<group>"; };
 		28C47DDFE8FE40478BAB3E22 /* OnboardingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingModels.swift; sourceTree = "<group>"; };
 		9EAD7E54C0C84416BD214927 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		F832A9FCA8924C4D991C9013 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
@@ -175,6 +188,12 @@
 		97F2829CE211455FA877386E /* ItemDetailRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailRows.swift; sourceTree = "<group>"; };
 		407556A9CF044391AAB5A927 /* ItemDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemDetailView.swift; sourceTree = "<group>"; };
 		CC9160B5D01C409AB1218E8D /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		D4E5F6A7B8C9489902D3E4F5 /* DueReminderScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueReminderScheduler.swift; sourceTree = "<group>"; };
+		F6A7B8C9D0E1489904F5A6B7 /* PlannerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerModel.swift; sourceTree = "<group>"; };
+		B8C9D0E1F2A3489906B7C8D9 /* PlannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerView.swift; sourceTree = "<group>"; };
+		D0E1F2A3B4C5489908D9E0F1 /* TodosView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodosView.swift; sourceTree = "<group>"; };
+		F2A3B4C5D6E7489900F1A2B3 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
+		B4C5D6E7F8A9489902B3C4D5 /* CalendarSubscribeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSubscribeSheet.swift; sourceTree = "<group>"; };
 		9BDD773D22894E5C93D1C096 /* GradingBacklogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradingBacklogView.swift; sourceTree = "<group>"; };
 		F56E63C464D64510B2ED3760 /* SpeedGraderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedGraderView.swift; sourceTree = "<group>"; };
 		0884946FB1FB4C9AB56DB3BF /* AnnouncementsViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnouncementsViews.swift; sourceTree = "<group>"; };
@@ -194,6 +213,7 @@
 		6DE8F92464EC4AF5A823B613 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		0A687BB990EB4B6CA04A014C /* MyAccommodationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAccommodationsView.swift; sourceTree = "<group>"; };
 		F7CA3697048642E093499028 /* NotificationsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationsView.swift; sourceTree = "<group>"; };
+		E5F6A7B8C9D0411223344556 /* NotificationPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreferencesView.swift; sourceTree = "<group>"; };
 		49517DA52F4E4B8A8BD9B932 /* ProfileSecurityCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSecurityCard.swift; sourceTree = "<group>"; };
 		891583FDCE194268AF7214EC /* ProfileSettingsCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSettingsCards.swift; sourceTree = "<group>"; };
 		6AA7F17A55E04639A7A17662 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -204,6 +224,8 @@
 		1B63433C37254D2085585426 /* I18nTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I18nTests.swift; sourceTree = "<group>"; };
 		4369D9F68DC445C7A4BC0563 /* OnboardingModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingModelsTests.swift; sourceTree = "<group>"; };
 		E3784FB835994C24B21B4F60 /* SettingsAccommodationsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsAccommodationsTests.swift; sourceTree = "<group>"; };
+		C6D7E8F9A0B1428394C5D6E7 /* PlannerModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlannerModelsTests.swift; sourceTree = "<group>"; };
+		F6A7B8C9D0E1428394C5D6E8 /* NotificationModelsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationModelsTests.swift; sourceTree = "<group>"; };
 		2053DE5D0F5246A3AEB9D1D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9970321D683343F8AB2E7AA9 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		50BF7F8F0E4B42BBBCFE13BB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -241,6 +263,8 @@
 				1B63433C37254D2085585426 /* I18nTests.swift */,
 				4369D9F68DC445C7A4BC0563 /* OnboardingModelsTests.swift */,
 				E3784FB835994C24B21B4F60 /* SettingsAccommodationsTests.swift */,
+				C6D7E8F9A0B1428394C5D6E7 /* PlannerModelsTests.swift */,
+				F6A7B8C9D0E1428394C5D6E8 /* NotificationModelsTests.swift */,
 			);
 			path = LexturesTests;
 			sourceTree = "<group>";
@@ -285,6 +309,7 @@
 				E8BA3C8D274942A5B37B666E /* Notebooks */,
 				55622603749343E2B2CD7061 /* Onboarding */,
 				D263B5A078CE4F27B9704BC2 /* Profile */,
+				1A2B3C4D5E6F7890ABCDEFF1 /* Planner */,
 				1952CD29E9EE4B7083789A00 /* Splash */,
 			);
 			path = Features;
@@ -367,6 +392,8 @@
 				71BCE627FB0E4BF8B8F9E385 /* LMSAPIFeatures.swift */,
 				7A4D9797973942B89ACAD16A /* LMSFeatureModels.swift */,
 				98382F5678594CB39F7AF3E4 /* LMSModels.swift */,
+				B2C3D4E5F6A7489901B2C3D4 /* PlannerLogic.swift */,
+				D4E5F6A7B8C9401122334455 /* NotificationLogic.swift */,
 				28C47DDFE8FE40478BAB3E22 /* OnboardingModels.swift */,
 			);
 			path = LMS;
@@ -461,6 +488,19 @@
 			path = Dashboard;
 			sourceTree = "<group>";
 		};
+		1A2B3C4D5E6F7890ABCDEFF1 /* Planner */ = {
+			isa = PBXGroup;
+			children = (
+				B4C5D6E7F8A9489902B3C4D5 /* CalendarSubscribeSheet.swift */,
+				F2A3B4C5D6E7489900F1A2B3 /* CalendarView.swift */,
+				D4E5F6A7B8C9489902D3E4F5 /* DueReminderScheduler.swift */,
+				F6A7B8C9D0E1489904F5A6B7 /* PlannerModel.swift */,
+				B8C9D0E1F2A3489906B7C8D9 /* PlannerView.swift */,
+				D0E1F2A3B4C5489908D9E0F1 /* TodosView.swift */,
+			);
+			path = Planner;
+			sourceTree = "<group>";
+		};
 		644DE4EFF8584DC288D34D6B /* Grading */ = {
 			isa = PBXGroup;
 			children = (
@@ -518,6 +558,7 @@
 				6DE8F92464EC4AF5A823B613 /* EditProfileView.swift */,
 				0A687BB990EB4B6CA04A014C /* MyAccommodationsView.swift */,
 				F7CA3697048642E093499028 /* NotificationsView.swift */,
+				E5F6A7B8C9D0411223344556 /* NotificationPreferencesView.swift */,
 				49517DA52F4E4B8A8BD9B932 /* ProfileSecurityCard.swift */,
 				891583FDCE194268AF7214EC /* ProfileSettingsCards.swift */,
 				6AA7F17A55E04639A7A17662 /* ProfileView.swift */,
@@ -699,6 +740,8 @@
 				E237285EBB8C4B838B10A0F9 /* LMSAPIFeatures.swift in Sources */,
 				D7DFF07DF5B54EE299DE3872 /* LMSFeatureModels.swift in Sources */,
 				9B044632A9974F319A0C8050 /* LMSModels.swift in Sources */,
+				A1B2C3D4E5F6478990A1B2C3 /* PlannerLogic.swift in Sources */,
+				C3D4E5F6A7B8490112233445 /* NotificationLogic.swift in Sources */,
 				7573FE3E2C404A3091B6C4A1 /* OnboardingModels.swift in Sources */,
 				99F923C74A49424997DBC097 /* APIClient.swift in Sources */,
 				B96E69AE38DD4CDBA99B8D65 /* APIError.swift in Sources */,
@@ -733,6 +776,12 @@
 				ABC6FAAA9B7547619382557B /* ItemDetailRows.swift in Sources */,
 				60D2B82D109C4E5EB4E2D68B /* ItemDetailView.swift in Sources */,
 				7E4C03B27E32438885D1765F /* DashboardView.swift in Sources */,
+				A3B4C5D6E7F8489901A2B3C4 /* CalendarSubscribeSheet.swift in Sources */,
+				E1F2A3B4C5D6489909E0F1A2 /* CalendarView.swift in Sources */,
+				C3D4E5F6A7B8489901C2D3E4 /* DueReminderScheduler.swift in Sources */,
+				E5F6A7B8C9D0489903E4F5A6 /* PlannerModel.swift in Sources */,
+				A7B8C9D0E1F2489905A6B7C8 /* PlannerView.swift in Sources */,
+				C9D0E1F2A3B4489907C8D9E0 /* TodosView.swift in Sources */,
 				1F4AAAE5695145BFB5012CC6 /* GradingBacklogView.swift in Sources */,
 				AC8FB87377DF414C9A26F0C4 /* SpeedGraderView.swift in Sources */,
 				C9DB6E74EC3746CBA8AA6490 /* AnnouncementsViews.swift in Sources */,
@@ -752,6 +801,7 @@
 				BB24F49BCA3C44C7B8F79AE7 /* EditProfileView.swift in Sources */,
 				496A344650BE440D872C45A2 /* MyAccommodationsView.swift in Sources */,
 				85132FAFC4DF4B07BBFF7ED7 /* NotificationsView.swift in Sources */,
+				D5E6F7A8B9C0411223344556 /* NotificationPreferencesView.swift in Sources */,
 				A51EB3D6A87E460B9B0DD07E /* ProfileSecurityCard.swift in Sources */,
 				6FCFEF23572549FE82A92DFB /* ProfileSettingsCards.swift in Sources */,
 				7BC32404685D4B6AAC0F4EBB /* ProfileView.swift in Sources */,
@@ -772,6 +822,8 @@
 				440959E8D90944B2A4772C12 /* I18nTests.swift in Sources */,
 				82E18B8FC6E84B0DA658C738 /* OnboardingModelsTests.swift in Sources */,
 				771C35CD417349AAB4C99F3B /* SettingsAccommodationsTests.swift in Sources */,
+				B5C6D7E8F9A0418293B4C5D6 /* PlannerModelsTests.swift in Sources */,
+				E7F8A9B0C1D2418293B4C5D7 /* NotificationModelsTests.swift in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */

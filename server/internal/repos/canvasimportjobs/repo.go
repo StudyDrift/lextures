@@ -25,13 +25,14 @@ const (
 
 // Include mirrors the Canvas import include flags stored as JSONB.
 type Include struct {
-	Modules     bool `json:"modules"`
-	Assignments bool `json:"assignments"`
-	Quizzes     bool `json:"quizzes"`
-	Enrollments bool `json:"enrollments"`
-	Grades      bool `json:"grades"`
-	Settings    bool `json:"settings"`
-	Files       bool `json:"files"`
+	Modules       bool `json:"modules"`
+	Assignments   bool `json:"assignments"`
+	Quizzes       bool `json:"quizzes"`
+	Enrollments   bool `json:"enrollments"`
+	Grades        bool `json:"grades"`
+	Settings      bool `json:"settings"`
+	Files         bool `json:"files"`
+	Announcements bool `json:"announcements"`
 }
 
 // Job is a row from jobs.canvas_import_jobs (access token is not stored).

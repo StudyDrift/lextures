@@ -195,6 +195,9 @@ struct DashboardView: View {
             .navigationDestination(for: NotificationsRoute.self) { _ in
                 NotificationsView()
             }
+            .navigationDestination(for: PlannerRoute.self) { route in
+                PlannerView(initialTab: route.initialTab)
+            }
             .task {
                 await model.load(accessToken: session.accessToken)
             }
@@ -378,7 +381,16 @@ struct DashboardView: View {
 
     @ViewBuilder
     private var dueSoonSection: some View {
-        LMSSectionHeader(title: L.text("mobile.dashboard.section.dueThisWeek"), systemImage: "calendar")
+        HStack {
+            LMSSectionHeader(title: L.text("mobile.dashboard.section.dueThisWeek"), systemImage: "calendar")
+            Spacer(minLength: 0)
+            NavigationLink(value: PlannerRoute(initialTab: .todos)) {
+                Text(L.text("mobile.planner.viewAll"))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+            }
+            .buttonStyle(.plain)
+        }
         if model.dueThisWeek.isEmpty {
             LMSCard {
                 Label {

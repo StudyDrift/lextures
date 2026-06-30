@@ -215,13 +215,14 @@ func terminalWSMessage(ctx context.Context, conn *websocket.Conn, job *canvasimp
 
 func includeToRepo(i canvasImportInclude) canvasimportjobs.Include {
 	return canvasimportjobs.Include{
-		Modules:     i.Modules,
-		Assignments: i.Assignments,
-		Quizzes:     i.Quizzes,
-		Enrollments: i.Enrollments,
-		Grades:      i.Grades,
-		Settings:    i.Settings,
-		Files:       i.Files,
+		Modules:       i.Modules,
+		Assignments:   i.Assignments,
+		Quizzes:       i.Quizzes,
+		Enrollments:   i.Enrollments,
+		Grades:        i.Grades,
+		Settings:      i.Settings,
+		Files:         i.Files,
+		Announcements: i.Announcements,
 	}
 }
 
@@ -274,13 +275,14 @@ func (d Deps) processCanvasImportQueueMessage(ctx context.Context, msg canvasimp
 		return err
 	}
 	include := canvasImportInclude{
-		Modules:     msg.Include.Modules,
-		Assignments: msg.Include.Assignments,
-		Quizzes:     msg.Include.Quizzes,
-		Enrollments: msg.Include.Enrollments,
-		Grades:      msg.Include.Grades,
-		Settings:    msg.Include.Settings,
-		Files:       msg.Include.Files,
+		Modules:       msg.Include.Modules,
+		Assignments:   msg.Include.Assignments,
+		Quizzes:       msg.Include.Quizzes,
+		Enrollments:   msg.Include.Enrollments,
+		Grades:        msg.Include.Grades,
+		Settings:      msg.Include.Settings,
+		Files:         msg.Include.Files,
+		Announcements: msg.Include.Announcements,
 	}.withDefaults()
 
 	importErr := d.runCanvasImport(ctx, msg.UserID, msg.CourseCode, msg.Mode, msg.CanvasBaseURL, msg.CanvasCourseID, msg.AccessToken, include, progress)

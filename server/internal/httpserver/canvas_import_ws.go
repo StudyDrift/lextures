@@ -131,22 +131,24 @@ type canvasImportWSFirstMessage struct {
 }
 
 type canvasImportInclude struct {
-	Modules     bool `json:"modules"`
-	Assignments bool `json:"assignments"`
-	Quizzes     bool `json:"quizzes"`
-	Enrollments bool `json:"enrollments"`
-	Grades      bool `json:"grades"`
-	Settings    bool `json:"settings"`
-	Files       bool `json:"files"`
+	Modules       bool `json:"modules"`
+	Assignments   bool `json:"assignments"`
+	Quizzes       bool `json:"quizzes"`
+	Enrollments   bool `json:"enrollments"`
+	Grades        bool `json:"grades"`
+	Settings      bool `json:"settings"`
+	Files         bool `json:"files"`
+	Announcements bool `json:"announcements"`
 }
 
 func (i canvasImportInclude) withDefaults() canvasImportInclude {
-	if !i.Modules && !i.Assignments && !i.Quizzes && !i.Enrollments && !i.Grades && !i.Settings && !i.Files {
-		return canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true, Files: true}
+	if !i.Modules && !i.Assignments && !i.Quizzes && !i.Enrollments && !i.Grades && !i.Settings && !i.Files && !i.Announcements {
+		return canvasImportInclude{Modules: true, Assignments: true, Quizzes: true, Enrollments: true, Grades: true, Settings: true, Files: true, Announcements: true}
 	}
 	// Legacy clients send every category except files; treat that as "import everything".
 	if i.Modules && i.Assignments && i.Quizzes && i.Enrollments && i.Grades && i.Settings && !i.Files {
 		i.Files = true
+		i.Announcements = true
 	}
 	return i
 }
@@ -187,7 +189,7 @@ func (d Deps) runCanvasImport(
 	enrollmentRows := []map[string]any{}
 	canvasSections := []map[string]any{}
 	rosterEmailByCanvasUID := make(map[int64]string)
-	needEnrollmentRows := include.Enrollments || include.Grades || include.Assignments
+	needEnrollmentRows := include.Enrollments || include.Grades || include.Assignments || include.Announcements
 	needCanvasSections := needEnrollmentRows || include.Assignments || include.Quizzes || include.Modules
 
 	if !progress("Loading course data from Canvas...") {
@@ -260,7 +262,7 @@ func (d Deps) runCanvasImport(
 	}
 
 	var canvasUserToLocal map[int64]uuid.UUID
-	if include.Grades || include.Assignments {
+	if include.Grades || include.Assignments || include.Announcements {
 		canvasUserToLocal = buildCanvasUserIDToLexturesUserID(ctx, d.Pool, client, canvasBase, accessToken, canvasCourseID, enrollmentRows, rosterEmailByCanvasUID)
 	}
 
@@ -583,7 +585,7 @@ func (d Deps) runCanvasImport(
 				return err
 			}
 			role := canvasEnrollmentTypeToRole(canvasEnrollmentTypeFromRow(e))
-			if (include.Grades || include.Assignments) && canvasUID > 0 {
+			if (include.Grades || include.Assignments || include.Announcements) && canvasUID > 0 {
 				if canvasUserToLocal == nil {
 					canvasUserToLocal = make(map[int64]uuid.UUID)
 				}
@@ -743,6 +745,25 @@ func (d Deps) runCanvasImport(
 		}
 		if err := rewriteCanvasLinksInCourseMarkdown(ctx, d.Pool, courseID, rc); err != nil {
 			log.Printf("canvas-import: link rewrite err=%v", err)
+		}
+	}
+
+	if include.Announcements {
+		if !progress("Importing announcements from Canvas...") {
+			return context.Canceled
+		}
+		announcementCount, announcementErr := canvasImportAnnouncements(
+			ctx, d.Pool, client, canvasBase, accessToken, canvasCourseID, courseID, importerUserID, canvasUserToLocal, mode,
+		)
+		if announcementErr != nil {
+			return announcementErr
+		}
+		if announcementCount > 0 {
+			if !progress(fmt.Sprintf("Imported %d announcement(s) from Canvas into #announcements.", announcementCount)) {
+				return context.Canceled
+			}
+		} else if !progress("No Canvas announcements to import.") {
+			return context.Canceled
 		}
 	}
 
