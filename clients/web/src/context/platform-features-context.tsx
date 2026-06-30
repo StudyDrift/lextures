@@ -66,6 +66,7 @@ export type PlatformFeatures = {
   impersonationEnabled: boolean
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
+  customFieldsEnabled: boolean
   emailTemplateEditorEnabled: boolean
   maintenanceBannerEnabled: boolean
   ffZapierConnector: boolean
@@ -164,6 +165,7 @@ const defaultFeatures: PlatformFeatures = {
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
+  customFieldsEnabled: false,
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
   ffZapierConnector: false,
@@ -261,6 +263,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
+  customFieldsEnabled: false,
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
   ffZapierConnector: false,
@@ -365,6 +368,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           impersonationEnabled: data.impersonationEnabled === true,
           bulkCsvImportEnabled: data.bulkCsvImportEnabled === true,
           adminSearchEnabled: data.adminSearchEnabled === true,
+          customFieldsEnabled: data.customFieldsEnabled === true,
           emailTemplateEditorEnabled: data.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: data.maintenanceBannerEnabled !== false,
           ffZapierConnector: data.ffZapierConnector === true,
@@ -426,6 +430,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           impersonationEnabled: next.impersonationEnabled === true,
           bulkCsvImportEnabled: next.bulkCsvImportEnabled === true,
           adminSearchEnabled: next.adminSearchEnabled === true,
+          customFieldsEnabled: next.customFieldsEnabled === true,
           emailTemplateEditorEnabled: next.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: next.maintenanceBannerEnabled !== false,
           ffZapierConnector: next.ffZapierConnector === true,

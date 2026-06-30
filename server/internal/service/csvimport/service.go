@@ -14,6 +14,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	"github.com/lextures/lextures/server/internal/repos/user"
+	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
 	"github.com/lextures/lextures/server/internal/service/adminaudit"
 	"github.com/lextures/lextures/server/internal/service/authservice"
 )
@@ -137,6 +138,10 @@ func processOneRow(ctx context.Context, pool *pgxpool.Pool, p ProcessParams, row
 				return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
 					[]RowError{{Row: row.RowNumber, Column: "email", Message: err.Error(), Code: "create_failed"}}
 			}
+			if err := applyImportedCustomFields(ctx, pool, p.OrgID, uid, row); err != nil {
+				return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
+					[]RowError{{Row: row.RowNumber, Column: "custom_fields", Message: err.Error(), Code: "custom_fields_failed"}}
+			}
 			outcome.Outcome = "created"
 			_ = recordUserAudit(ctx, pool, p.OrgID, p.ActorID, adminaudit.EventUserCreate, uid, nil, rowSnapshot(row))
 			return outcome, nil
@@ -161,6 +166,10 @@ func processOneRow(ctx context.Context, pool *pgxpool.Pool, p ProcessParams, row
 	if err := updateUser(ctx, pool, p.OrgID, existing.ID, row); err != nil {
 		return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
 			[]RowError{{Row: row.RowNumber, Column: "email", Message: err.Error(), Code: "update_failed"}}
+	}
+	if err := applyImportedCustomFields(ctx, pool, p.OrgID, existing.ID, row); err != nil {
+		return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
+			[]RowError{{Row: row.RowNumber, Column: "custom_fields", Message: err.Error(), Code: "custom_fields_failed"}}
 	}
 	outcome.Outcome = "updated"
 	_ = recordUserAudit(ctx, pool, p.OrgID, p.ActorID, adminaudit.EventUserUpdate, existing.ID, before, rowSnapshot(row))
@@ -377,6 +386,25 @@ UPDATE "user".users SET deactivated_at = COALESCE(deactivated_at, NOW()), login_
 		count++
 	}
 	return count, outcomes, rows.Err()
+}
+
+func applyImportedCustomFields(ctx context.Context, pool *pgxpool.Pool, orgID, userID uuid.UUID, row ParsedRow) error {
+	if len(row.CustomFields) == 0 {
+		return nil
+	}
+	incoming := make(map[string]any, len(row.CustomFields))
+	for k, v := range row.CustomFields {
+		incoming[k] = v
+	}
+	svc := cfservice.New(pool)
+	_, valErrs, err := svc.SetUserValues(ctx, orgID, userID, incoming)
+	if err != nil {
+		return err
+	}
+	if len(valErrs) > 0 {
+		return fmt.Errorf("%s: %s", valErrs[0].Key, valErrs[0].Message)
+	}
+	return nil
 }
 
 func existingSnapshot(u *existingUser) []byte {

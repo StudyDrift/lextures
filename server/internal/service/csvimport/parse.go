@@ -20,12 +20,13 @@ type RowError struct {
 
 // ParsedRow is a validated user row ready for import.
 type ParsedRow struct {
-	RowNumber  int
-	Email      string
-	FirstName  string
-	LastName   string
-	Role       string
-	ExternalID string
+	RowNumber    int
+	Email        string
+	FirstName    string
+	LastName     string
+	Role         string
+	ExternalID   string
+	CustomFields map[string]string
 }
 
 // ParseResult holds parsed rows and validation errors.
@@ -55,6 +56,11 @@ func ParseMergeStrategy(s string) (MergeStrategy, error) {
 
 // ParseCSV reads and validates a user import CSV.
 func ParseCSV(r io.Reader, profile Profile) (*ParseResult, error) {
+	return ParseCSVWithExtraColumns(r, profile, nil)
+}
+
+// ParseCSVWithExtraColumns accepts additional logical column keys (e.g. custom field keys).
+func ParseCSVWithExtraColumns(r io.Reader, profile Profile, extraColumns []string) (*ParseResult, error) {
 	raw, err := io.ReadAll(r)
 	if err != nil {
 		return nil, fmt.Errorf("read csv: %w", err)
@@ -74,6 +80,14 @@ func ParseCSV(r io.Reader, profile Profile) (*ParseResult, error) {
 	}
 	idx := buildHeaderIndex(header)
 	colMap := profile.ColumnMap()
+	for _, key := range extraColumns {
+		if key == "" {
+			continue
+		}
+		if _, exists := colMap[key]; !exists {
+			colMap[key] = []string{key}
+		}
+	}
 
 	res := &ParseResult{}
 	rowNum := 1 // header is row 1
@@ -89,7 +103,7 @@ func ParseCSV(r io.Reader, profile Profile) (*ParseResult, error) {
 		if rowEmpty(rec) {
 			continue
 		}
-		parsed, errs := parseRecord(rowNum, rec, idx, colMap)
+		parsed, errs := parseRecord(rowNum, rec, idx, colMap, extraColumns)
 		if len(errs) > 0 {
 			res.Errors = append(res.Errors, errs...)
 			continue
@@ -128,7 +142,7 @@ func getCol(rec []string, idx map[string]int, names ...string) string {
 	return ""
 }
 
-func parseRecord(rowNum int, rec []string, idx map[string]int, colMap map[string][]string) (ParsedRow, []RowError) {
+func parseRecord(rowNum int, rec []string, idx map[string]int, colMap map[string][]string, extraColumns []string) (ParsedRow, []RowError) {
 	var errs []RowError
 	email := getCol(rec, idx, colMap["email"]...)
 	if email == "" {
@@ -147,13 +161,20 @@ func parseRecord(rowNum int, rec []string, idx map[string]int, colMap map[string
 	if len(errs) > 0 {
 		return ParsedRow{}, errs
 	}
+	custom := make(map[string]string)
+	for _, key := range extraColumns {
+		if val := getCol(rec, idx, key); val != "" {
+			custom[key] = val
+		}
+	}
 	return ParsedRow{
-		RowNumber:  rowNum,
-		Email:      strings.ToLower(email),
-		FirstName:  first,
-		LastName:   last,
-		Role:       role,
-		ExternalID: extID,
+		RowNumber:    rowNum,
+		Email:        strings.ToLower(email),
+		FirstName:    first,
+		LastName:     last,
+		Role:         role,
+		ExternalID:   extID,
+		CustomFields: custom,
 	}, nil
 }
 

@@ -230,10 +230,11 @@ func compileUserArchive(ctx context.Context, pool *pgxpool.Pool, userID uuid.UUI
 	}
 	var p profileRow
 	var tz sql.NullString
+	var customRaw []byte
 	err := pool.QueryRow(ctx, `
-SELECT email, display_name, first_name, last_name, timezone, created_at
+SELECT email, display_name, first_name, last_name, timezone, created_at, custom_fields
   FROM "user".users WHERE id = $1
-`, userID).Scan(&p.Email, &p.DisplayName, &p.FirstName, &p.LastName, &tz, &p.CreatedAt)
+`, userID).Scan(&p.Email, &p.DisplayName, &p.FirstName, &p.LastName, &tz, &p.CreatedAt, &customRaw)
 	if err != nil {
 		return "", err
 	}
@@ -251,6 +252,7 @@ SELECT email, display_name, first_name, last_name, timezone, created_at
 		UserID         string           `json:"userId"`
 		Profile        profileRow       `json:"profile"`
 		Consents       []consentSummary `json:"consents"`
+		CustomFields   map[string]any   `json:"customFields,omitempty"`
 		AIInferenceLog []map[string]any `json:"aiInferenceLog,omitempty"`
 		ExportedAt     string           `json:"exportedAt"`
 	}
@@ -269,10 +271,16 @@ SELECT email, display_name, first_name, last_name, timezone, created_at
 
 	aiLog := dsarAIInferenceSummary(ctx, pool, os.Getenv("JWT_SECRET"), userID)
 
+	var customFields map[string]any
+	if len(customRaw) > 0 {
+		_ = json.Unmarshal(customRaw, &customFields)
+	}
+
 	doc := archiveDoc{
 		UserID:         userID.String(),
 		Profile:        p,
 		Consents:       cs,
+		CustomFields:   customFields,
 		AIInferenceLog: aiLog,
 		ExportedAt:     time.Now().UTC().Format(time.RFC3339),
 	}

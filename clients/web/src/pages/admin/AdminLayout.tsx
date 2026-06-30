@@ -4,6 +4,7 @@ import {
   BookOpen,
   FileUp,
   LayoutDashboard,
+  ListTree,
   Megaphone,
   Plug,
   ScrollText,
@@ -17,6 +18,8 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 
 const bannersNavItem = { to: '/org-admin/banners', label: 'Notices', icon: Megaphone, end: false as const }
 
+const customFieldsNavItem = { to: '/org-admin/custom-fields', label: 'Custom fields', icon: ListTree, end: false as const }
+
 const baseNavItems = [
   { to: '/org-admin', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/org-admin/users', label: 'Users', icon: Users },
@@ -29,7 +32,7 @@ const baseNavItems = [
 const importNavItem = { to: '/org-admin/import', label: 'Import', icon: FileUp, end: false as const }
 
 export default function AdminLayout() {
-  const { adminConsoleEnabled, bulkCsvImportEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
+  const { adminConsoleEnabled, bulkCsvImportEnabled, customFieldsEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
@@ -73,6 +76,10 @@ export default function AdminLayout() {
     let items = [...baseNavItems]
     if (bulkCsvImportEnabled) {
       items = [...items.slice(0, 2), importNavItem, ...items.slice(2)]
+    }
+    if (customFieldsEnabled) {
+      const usersIdx = items.findIndex((i) => i.to === '/org-admin/users')
+      items = [...items.slice(0, usersIdx + 1), customFieldsNavItem, ...items.slice(usersIdx + 1)]
     }
     if (maintenanceBannerEnabled) {
       const integrationsIdx = items.findIndex((i) => i.to === '/org-admin/integrations')

@@ -21,6 +21,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
+	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
 )
 
 func (d Deps) adminConsoleEnabled(w http.ResponseWriter) bool {
@@ -125,6 +126,8 @@ func (d Deps) resolveAdminConsoleOrgID(w http.ResponseWriter, r *http.Request, a
 func (d Deps) registerAdminConsoleRoutes(r chi.Router) {
 	r.Get("/api/v1/admin-console/overview", d.handleAdminConsoleOverview())
 	r.Get("/api/v1/admin-console/users", d.handleAdminConsoleUsers())
+	r.Get("/api/v1/admin-console/users/export.csv", d.handleAdminConsoleUsersExport())
+	r.Get("/api/v1/admin-console/users/{userId}", d.handleAdminConsoleUserGet())
 	r.Patch("/api/v1/admin-console/users/{userId}", d.handleAdminConsoleUserPatch())
 	r.Get("/api/v1/admin-console/courses", d.handleAdminConsoleCourses())
 	r.Patch("/api/v1/admin-console/courses/{courseId}/status", d.handleAdminConsoleCourseStatusPatch())
@@ -136,6 +139,7 @@ func (d Deps) registerAdminConsoleRoutes(r chi.Router) {
 	r.Get("/api/v1/me/admin-console-capabilities", d.handleMeAdminConsoleCapabilities())
 	d.registerAdminImportRoutes(r)
 	d.registerAdminEmailTemplateRoutes(r)
+	d.registerAdminCustomFieldRoutes(r)
 }
 
 func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
@@ -309,8 +313,9 @@ func (d Deps) handleAdminConsoleUserPatch() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			Active *bool   `json:"active"`
-			Role   *string `json:"role"`
+			Active       *bool          `json:"active"`
+			Role         *string        `json:"role"`
+			CustomFields map[string]any `json:"customFields"`
 		}
 		if err := json.Unmarshal(raw, &body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -375,6 +380,27 @@ ON CONFLICT DO NOTHING
 				return
 			}
 			d.recordAdminConsoleAudit(r, actor, &orgID, auditservice.EventRoleGrant, "user", &targetID, nil, raw)
+		}
+
+		if body.CustomFields != nil {
+			if !d.effectiveConfig().CustomFieldsEnabled {
+				apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Custom fields are not enabled.")
+				return
+			}
+			merged, valErrs, err := cfservice.New(d.Pool).SetUserValues(ctx, orgID, targetID, body.CustomFields)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update custom fields.")
+				return
+			}
+			if len(valErrs) > 0 {
+				writeCustomFieldValidationErrors(w, valErrs)
+				return
+			}
+			d.recordAdminConsoleAudit(r, actor, &orgID, auditservice.EventUserUpdate, "user", &targetID, nil, raw)
+			if wantsInclude(r, "custom_fields") {
+				writeJSON(w, http.StatusOK, map[string]any{"id": targetID.String(), "customFields": merged})
+				return
+			}
 		}
 
 		result, err := adminconsole.ListUsers(ctx, d.Pool, orgID, adminconsole.ListParams{Page: 1, PerPage: 1, Query: targetID.String()})

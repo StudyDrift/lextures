@@ -5,9 +5,14 @@ import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   fetchAdminConsoleCapabilities,
   fetchAdminUsers,
+  fetchCustomFields,
+  fetchAdminUser,
   patchAdminUser,
+  patchAdminUserCustomFields,
   startImpersonation,
+  usersExportUrl,
   type AdminUser,
+  type CustomFieldDefinition,
   type Paginated,
 } from '../../lib/admin-console-api'
 import { startImpersonationSession } from '../../lib/impersonation'
@@ -18,7 +23,7 @@ const PAGE_SIZES = [25, 50, 100]
 export default function AdminUsers() {
   const { t } = useTranslation('common')
   const titleId = useId()
-  const { impersonationEnabled } = usePlatformFeatures()
+  const { impersonationEnabled, customFieldsEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [q, setQ] = useState('')
@@ -97,13 +102,71 @@ export default function AdminUsers() {
 
   const showViewAs = impersonationEnabled && canManage
 
+  const [fieldDefs, setFieldDefs] = useState<CustomFieldDefinition[]>([])
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null)
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
+  const [fieldBusy, setFieldBusy] = useState(false)
+
+  useEffect(() => {
+    if (!customFieldsEnabled) return
+    void fetchCustomFields('user', orgId)
+      .then(setFieldDefs)
+      .catch(() => setFieldDefs([]))
+  }, [customFieldsEnabled, orgId])
+
+  async function openCustomFields(user: AdminUser) {
+    if (expandedUserId === user.id) {
+      setExpandedUserId(null)
+      return
+    }
+    setExpandedUserId(user.id)
+    setFieldValues({})
+    try {
+      const detail = await fetchAdminUser(user.id, orgId, true)
+      const next: Record<string, string> = {}
+      for (const def of fieldDefs) {
+        const raw = detail.customFields?.[def.key]
+        next[def.key] = raw == null ? '' : String(raw)
+      }
+      setFieldValues(next)
+    } catch {
+      setFieldValues({})
+    }
+  }
+
+  async function saveCustomFields(userId: string) {
+    setFieldBusy(true)
+    try {
+      const payload: Record<string, unknown> = {}
+      for (const def of fieldDefs) {
+        const raw = fieldValues[def.key] ?? ''
+        if (def.fieldType === 'boolean') {
+          payload[def.key] = raw === 'true'
+        } else if (def.fieldType === 'number' && raw !== '') {
+          payload[def.key] = Number(raw)
+        } else if (raw !== '') {
+          payload[def.key] = raw
+        } else {
+          payload[def.key] = null
+        }
+      }
+      await patchAdminUserCustomFields(userId, payload, orgId)
+      setExpandedUserId(null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to save custom fields.')
+    } finally {
+      setFieldBusy(false)
+    }
+  }
+
   return (
     <div>
       <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
         Users
       </h1>
 
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-wrap gap-3">
         <label className="flex flex-col text-sm">
           <span className="mb-1 text-slate-600 dark:text-slate-400">Search</span>
           <input
@@ -151,6 +214,15 @@ export default function AdminUsers() {
             ))}
           </select>
         </label>
+        </div>
+        {customFieldsEnabled && canManage && (
+          <a
+            href={usersExportUrl(orgId)}
+            className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-neutral-700 dark:text-slate-200"
+          >
+            Export CSV
+          </a>
+        )}
       </div>
 
       {error ? (
@@ -199,6 +271,7 @@ export default function AdminUsers() {
               </tr>
             ) : (
               data.items.map((user) => (
+                <>
                 <tr key={user.id} className="border-t border-slate-100 dark:border-neutral-800">
                   <td className="sticky left-0 bg-white px-4 py-2 dark:bg-neutral-900">{user.email}</td>
                   <td className="px-4 py-2">{user.displayName ?? '—'}</td>
@@ -207,6 +280,15 @@ export default function AdminUsers() {
                   <td className="px-4 py-2">{user.active ? 'Active' : 'Deactivated'}</td>
                   <td className="px-4 py-2">
                     <div className="flex flex-wrap gap-3">
+                      {customFieldsEnabled && canManage && fieldDefs.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => void openCustomFields(user)}
+                          className="text-sm text-slate-600 hover:underline dark:text-slate-300"
+                        >
+                          Custom fields
+                        </button>
+                      ) : null}
                       {showViewAs && user.active && !user.orgRole ? (
                         <button
                           type="button"
@@ -230,6 +312,63 @@ export default function AdminUsers() {
                     </div>
                   </td>
                 </tr>
+                {expandedUserId === user.id ? (
+                  <tr key={`${user.id}-fields`} className="border-t border-slate-100 bg-slate-50 dark:border-neutral-800 dark:bg-neutral-950">
+                    <td colSpan={6} className="px-4 py-4">
+                      <fieldset className="space-y-3">
+                        <legend className="text-sm font-medium text-slate-800 dark:text-slate-200">Custom fields</legend>
+                        {fieldDefs.map((def) => (
+                          <label key={def.id} className="block max-w-md text-sm">
+                            <span className="mb-1 block">{def.label}</span>
+                            {def.fieldType === 'select' ? (
+                              <select
+                                value={fieldValues[def.key] ?? ''}
+                                onChange={(e) => setFieldValues({ ...fieldValues, [def.key]: e.target.value })}
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                              >
+                                <option value="">—</option>
+                                {(def.selectOptions ?? []).map((opt) => (
+                                  <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                              </select>
+                            ) : def.fieldType === 'boolean' ? (
+                              <select
+                                value={fieldValues[def.key] ?? ''}
+                                onChange={(e) => setFieldValues({ ...fieldValues, [def.key]: e.target.value })}
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                              >
+                                <option value="">—</option>
+                                <option value="true">Yes</option>
+                                <option value="false">No</option>
+                              </select>
+                            ) : (
+                              <input
+                                type={def.fieldType === 'number' ? 'number' : def.fieldType === 'date' ? 'date' : 'text'}
+                                value={fieldValues[def.key] ?? ''}
+                                onChange={(e) => setFieldValues({ ...fieldValues, [def.key]: e.target.value })}
+                                className="w-full rounded-lg border border-slate-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+                              />
+                            )}
+                          </label>
+                        ))}
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            disabled={fieldBusy}
+                            onClick={() => void saveCustomFields(user.id)}
+                            className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                          >
+                            Save custom fields
+                          </button>
+                          <button type="button" onClick={() => setExpandedUserId(null)} className="rounded-lg px-3 py-2 text-sm">
+                            Cancel
+                          </button>
+                        </div>
+                      </fieldset>
+                    </td>
+                  </tr>
+                ) : null}
+                </>
               ))
             )}
           </tbody>
