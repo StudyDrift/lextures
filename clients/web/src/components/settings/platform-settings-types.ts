@@ -53,6 +53,7 @@ export type PlatformSettingsPayload = {
   adminSearchEnabled: boolean
   emailTemplateEditorEnabled: boolean
   maintenanceBannerEnabled: boolean
+  customFieldsEnabled: boolean
   ffZapierConnector: boolean
   ffAdvisingIntegration: boolean
   ffResearchConsent: boolean

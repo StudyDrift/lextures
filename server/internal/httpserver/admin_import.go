@@ -20,6 +20,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/userimport"
 	"github.com/lextures/lextures/server/internal/service/clamav"
 	"github.com/lextures/lextures/server/internal/service/csvimport"
+	cfrepo "github.com/lextures/lextures/server/internal/repos/customfields"
 )
 
 const (
@@ -187,7 +188,21 @@ func (d Deps) handleAdminImportUpload() http.HandlerFunc {
 		dryRun := strings.EqualFold(strings.TrimSpace(r.FormValue("dry_run")), "true") ||
 			strings.EqualFold(strings.TrimSpace(r.FormValue("dryRun")), "true")
 
-		parsed, err := csvimport.ParseCSV(strings.NewReader(string(data)), profile)
+		var customDefs []csvimport.CustomFieldDef
+		if d.effectiveConfig().CustomFieldsEnabled {
+			defs, derr := cfrepo.ListDefinitions(ctx, d.Pool, orgID, cfrepo.EntityUser)
+			if derr != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load custom fields.")
+				return
+			}
+			for _, def := range defs {
+				customDefs = append(customDefs, csvimport.CustomFieldDef{
+					Key: def.Key, FieldType: string(def.FieldType), Options: def.SelectOptions,
+				})
+			}
+		}
+
+		parsed, err := csvimport.ParseCSVWithCustomFields(strings.NewReader(string(data)), profile, customDefs)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, err.Error())
 			return

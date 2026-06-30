@@ -75,6 +75,7 @@ function emptyForm(): PlatformSettingsPayload {
     adminSearchEnabled: false,
     emailTemplateEditorEnabled: false,
     maintenanceBannerEnabled: true,
+    customFieldsEnabled: false,
     ffZapierConnector: false,
     ffAdvisingIntegration: false,
     ffResearchConsent: false,

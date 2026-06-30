@@ -96,6 +96,7 @@ export const AdminSettingsPage = lazy(() => import('./pages/admin/AdminSettings'
 export const AdminAuditLog = lazy(() => import('./pages/admin/AdminAuditLog'))
 export const AdminIntegrations = lazy(() => import('./pages/admin/AdminIntegrations'))
 export const AdminImport = lazy(() => import('./pages/admin/AdminImport'))
+export const AdminCustomFields = lazy(() => import('./pages/admin/AdminCustomFields'))
 export const AdminBanners = lazy(() => import('./pages/admin/AdminBanners'))
 export const AdminSearchResults = lazy(() => import('./pages/admin/AdminSearchResults'))
 export const AttendanceExport = lazy(() => import('./pages/admin/AttendanceExport'))

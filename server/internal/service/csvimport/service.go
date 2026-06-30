@@ -16,6 +16,8 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/service/adminaudit"
 	"github.com/lextures/lextures/server/internal/service/authservice"
+	cfrepo "github.com/lextures/lextures/server/internal/repos/customfields"
+	cfsvc "github.com/lextures/lextures/server/internal/service/customfields"
 )
 
 const batchSize = 500
@@ -137,6 +139,10 @@ func processOneRow(ctx context.Context, pool *pgxpool.Pool, p ProcessParams, row
 				return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
 					[]RowError{{Row: row.RowNumber, Column: "email", Message: err.Error(), Code: "create_failed"}}
 			}
+			if cfErrs := applyUserCustomFields(ctx, pool, p.OrgID, uid, row); len(cfErrs) > 0 {
+				return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: "custom field validation failed"},
+					cfErrs
+			}
 			outcome.Outcome = "created"
 			_ = recordUserAudit(ctx, pool, p.OrgID, p.ActorID, adminaudit.EventUserCreate, uid, nil, rowSnapshot(row))
 			return outcome, nil
@@ -161,6 +167,10 @@ func processOneRow(ctx context.Context, pool *pgxpool.Pool, p ProcessParams, row
 	if err := updateUser(ctx, pool, p.OrgID, existing.ID, row); err != nil {
 		return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: err.Error()},
 			[]RowError{{Row: row.RowNumber, Column: "email", Message: err.Error(), Code: "update_failed"}}
+	}
+	if cfErrs := applyUserCustomFields(ctx, pool, p.OrgID, existing.ID, row); len(cfErrs) > 0 {
+		return RowOutcome{RowNumber: row.RowNumber, Email: row.Email, Outcome: "error", Detail: "custom field validation failed"},
+			cfErrs
 	}
 	outcome.Outcome = "updated"
 	_ = recordUserAudit(ctx, pool, p.OrgID, p.ActorID, adminaudit.EventUserUpdate, existing.ID, before, rowSnapshot(row))
@@ -401,6 +411,51 @@ func recordUserAudit(ctx context.Context, pool *pgxpool.Pool, orgID, actorID uui
 		AfterValue:  after,
 	})
 	return err
+}
+
+func applyUserCustomFields(ctx context.Context, pool *pgxpool.Pool, orgID, userID uuid.UUID, row ParsedRow) []RowError {
+	if len(row.CustomFields) == 0 {
+		return nil
+	}
+	defs, err := cfrepo.ListDefinitions(ctx, pool, orgID, cfrepo.EntityUser)
+	if err != nil {
+		return []RowError{{Row: row.RowNumber, Column: "custom_fields", Message: err.Error(), Code: "internal"}}
+	}
+	defByKey := make(map[string]cfrepo.Definition, len(defs))
+	for _, d := range defs {
+		defByKey[d.Key] = d
+	}
+	coerced := make(map[string]any, len(row.CustomFields))
+	for key, raw := range row.CustomFields {
+		def, ok := defByKey[key]
+		if !ok {
+			return []RowError{{Row: row.RowNumber, Column: key, Message: "unknown custom field column", Code: "unknown_field"}}
+		}
+		rawStr, _ := raw.(string)
+		val, err := cfsvc.CoerceCSVValue(def, rawStr)
+		if err != nil {
+			return []RowError{{Row: row.RowNumber, Column: key, Message: err.Error(), Code: "invalid_value"}}
+		}
+		if val != nil {
+			coerced[key] = val
+		}
+	}
+	existing, err := cfrepo.GetUserCustomFields(ctx, pool, userID)
+	if err != nil {
+		return []RowError{{Row: row.RowNumber, Column: "custom_fields", Message: err.Error(), Code: "internal"}}
+	}
+	merged := cfsvc.MergePatch(existing, coerced)
+	if errs := cfsvc.ValidateValues(defs, merged); len(errs) > 0 {
+		out := make([]RowError, 0, len(errs))
+		for _, e := range errs {
+			out = append(out, RowError{Row: row.RowNumber, Column: e.Key, Message: e.Message, Code: "invalid_value"})
+		}
+		return out
+	}
+	if err := cfrepo.SetUserCustomFields(ctx, pool, orgID, userID, merged); err != nil {
+		return []RowError{{Row: row.RowNumber, Column: "custom_fields", Message: err.Error(), Code: "update_failed"}}
+	}
+	return nil
 }
 
 // WriteResultCSV writes per-row outcomes to path.

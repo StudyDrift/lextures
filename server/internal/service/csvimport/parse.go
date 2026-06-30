@@ -20,12 +20,13 @@ type RowError struct {
 
 // ParsedRow is a validated user row ready for import.
 type ParsedRow struct {
-	RowNumber  int
-	Email      string
-	FirstName  string
-	LastName   string
-	Role       string
-	ExternalID string
+	RowNumber    int
+	Email        string
+	FirstName    string
+	LastName     string
+	Role         string
+	ExternalID   string
+	CustomFields map[string]any
 }
 
 // ParseResult holds parsed rows and validation errors.
@@ -55,6 +56,18 @@ func ParseMergeStrategy(s string) (MergeStrategy, error) {
 
 // ParseCSV reads and validates a user import CSV.
 func ParseCSV(r io.Reader, profile Profile) (*ParseResult, error) {
+	return ParseCSVWithCustomFields(r, profile, nil)
+}
+
+// CustomFieldDef is a minimal view of a custom field definition for CSV parsing.
+type CustomFieldDef struct {
+	Key       string
+	FieldType string
+	Options   []string
+}
+
+// ParseCSVWithCustomFields reads CSV and maps columns matching custom field keys.
+func ParseCSVWithCustomFields(r io.Reader, profile Profile, customDefs []CustomFieldDef) (*ParseResult, error) {
 	raw, err := io.ReadAll(r)
 	if err != nil {
 		return nil, fmt.Errorf("read csv: %w", err)
@@ -89,7 +102,7 @@ func ParseCSV(r io.Reader, profile Profile) (*ParseResult, error) {
 		if rowEmpty(rec) {
 			continue
 		}
-		parsed, errs := parseRecord(rowNum, rec, idx, colMap)
+		parsed, errs := parseRecord(rowNum, rec, idx, colMap, customDefs)
 		if len(errs) > 0 {
 			res.Errors = append(res.Errors, errs...)
 			continue
@@ -128,7 +141,7 @@ func getCol(rec []string, idx map[string]int, names ...string) string {
 	return ""
 }
 
-func parseRecord(rowNum int, rec []string, idx map[string]int, colMap map[string][]string) (ParsedRow, []RowError) {
+func parseRecord(rowNum int, rec []string, idx map[string]int, colMap map[string][]string, customDefs []CustomFieldDef) (ParsedRow, []RowError) {
 	var errs []RowError
 	email := getCol(rec, idx, colMap["email"]...)
 	if email == "" {
@@ -147,13 +160,22 @@ func parseRecord(rowNum int, rec []string, idx map[string]int, colMap map[string
 	if len(errs) > 0 {
 		return ParsedRow{}, errs
 	}
+	customFields := map[string]any{}
+	for _, def := range customDefs {
+		raw := getCol(rec, idx, def.Key)
+		if raw == "" {
+			continue
+		}
+		customFields[def.Key] = raw
+	}
 	return ParsedRow{
-		RowNumber:  rowNum,
-		Email:      strings.ToLower(email),
-		FirstName:  first,
-		LastName:   last,
-		Role:       role,
-		ExternalID: extID,
+		RowNumber:    rowNum,
+		Email:        strings.ToLower(email),
+		FirstName:    first,
+		LastName:     last,
+		Role:         role,
+		ExternalID:   extID,
+		CustomFields: customFields,
 	}, nil
 }
 

@@ -102,6 +102,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables site-wide and org-scoped maintenance/outage banners with admin publishing and Statuspage webhook integration (plan 18.6).',
   },
   {
+    key: 'customFieldsEnabled',
+    label: 'Custom fields',
+    description:
+      'Enables org admins to define custom metadata fields on users, courses, and enrollments with visibility controls (plan 18.7).',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',

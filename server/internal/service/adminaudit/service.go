@@ -41,6 +41,7 @@ const (
 	EventUserDeactivate       = "user_deactivate"
 	EventCourseArchive        = "course_archive"
 	EventOrgSettingsChange    = "org_settings_change"
+	EventCustomFieldDefinitionChange = "custom_field_definition_change"
 )
 
 var ErrNotFound = errors.New("adminaudit: event not found")

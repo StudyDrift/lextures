@@ -21,6 +21,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/orgroles"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
+	cfsvc "github.com/lextures/lextures/server/internal/service/customfields"
 )
 
 func (d Deps) adminConsoleEnabled(w http.ResponseWriter) bool {
@@ -136,6 +137,7 @@ func (d Deps) registerAdminConsoleRoutes(r chi.Router) {
 	r.Get("/api/v1/me/admin-console-capabilities", d.handleMeAdminConsoleCapabilities())
 	d.registerAdminImportRoutes(r)
 	d.registerAdminEmailTemplateRoutes(r)
+	d.registerAdminCustomFieldRoutes(r)
 }
 
 func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
@@ -309,8 +311,9 @@ func (d Deps) handleAdminConsoleUserPatch() http.HandlerFunc {
 			return
 		}
 		var body struct {
-			Active *bool   `json:"active"`
-			Role   *string `json:"role"`
+			Active       *bool          `json:"active"`
+			Role         *string        `json:"role"`
+			CustomFields map[string]any `json:"customFields"`
 		}
 		if err := json.Unmarshal(raw, &body); err != nil {
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid JSON body.")
@@ -377,10 +380,45 @@ ON CONFLICT DO NOTHING
 			d.recordAdminConsoleAudit(r, actor, &orgID, auditservice.EventRoleGrant, "user", &targetID, nil, raw)
 		}
 
+		if len(body.CustomFields) > 0 {
+			if !d.effectiveConfig().CustomFieldsEnabled {
+				apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Custom fields are not enabled.")
+				return
+			}
+			_, valErrs, err := d.customFieldsService().PatchUserCustomFields(ctx, orgID, targetID, body.CustomFields)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to update custom fields.")
+				return
+			}
+			if len(valErrs) > 0 {
+				apierr.WriteJSON(w, http.StatusUnprocessableEntity, apierr.CodeInvalidInput, valErrs.Error())
+				return
+			}
+		}
+
 		result, err := adminconsole.ListUsers(ctx, d.Pool, orgID, adminconsole.ListParams{Page: 1, PerPage: 1, Query: targetID.String()})
 		if err != nil || len(result.Items) == 0 {
-			writeJSON(w, http.StatusOK, map[string]any{"id": targetID.String()})
+			out := map[string]any{"id": targetID.String()}
+			if queryIncludes(r, "custom_fields") && d.effectiveConfig().CustomFieldsEnabled {
+				fields, ferr := d.customFieldsService().UserCustomFieldsForViewer(ctx, orgID, targetID, cfsvc.ViewerAdmin)
+				if ferr == nil {
+					out["customFields"] = fields
+				}
+			}
+			writeJSON(w, http.StatusOK, out)
 			return
+		}
+		item := result.Items[0]
+		if queryIncludes(r, "custom_fields") && d.effectiveConfig().CustomFieldsEnabled {
+			fields, ferr := d.customFieldsService().UserCustomFieldsForViewer(ctx, orgID, targetID, cfsvc.ViewerAdmin)
+			if ferr == nil {
+				writeJSON(w, http.StatusOK, map[string]any{
+					"id": item.ID, "email": item.Email, "displayName": item.DisplayName,
+					"role": item.Role, "orgRole": item.OrgRole, "active": item.Active,
+					"createdAt": item.CreatedAt, "customFields": fields,
+				})
+				return
+			}
 		}
 		writeJSON(w, http.StatusOK, result.Items[0])
 	}

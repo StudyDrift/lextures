@@ -8,6 +8,7 @@ import {
   Plug,
   ScrollText,
   Settings,
+  SlidersHorizontal,
   Users,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -27,9 +28,10 @@ const baseNavItems = [
 ]
 
 const importNavItem = { to: '/org-admin/import', label: 'Import', icon: FileUp, end: false as const }
+const customFieldsNavItem = { to: '/org-admin/custom-fields', label: 'Custom fields', icon: SlidersHorizontal, end: false as const }
 
 export default function AdminLayout() {
-  const { adminConsoleEnabled, bulkCsvImportEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
+  const { adminConsoleEnabled, bulkCsvImportEnabled, customFieldsEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
@@ -73,6 +75,10 @@ export default function AdminLayout() {
     let items = [...baseNavItems]
     if (bulkCsvImportEnabled) {
       items = [...items.slice(0, 2), importNavItem, ...items.slice(2)]
+    }
+    if (customFieldsEnabled) {
+      const insertAt = bulkCsvImportEnabled ? 3 : 2
+      items = [...items.slice(0, insertAt), customFieldsNavItem, ...items.slice(insertAt)]
     }
     if (maintenanceBannerEnabled) {
       const integrationsIdx = items.findIndex((i) => i.to === '/org-admin/integrations')

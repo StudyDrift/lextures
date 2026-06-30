@@ -203,6 +203,7 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 		DisplayName   *string            `json:"displayName"`
 		Org           *orgInfo           `json:"org,omitempty"`
 		Impersonating *impersonationInfo `json:"impersonating,omitempty"`
+		CustomFields  map[string]any     `json:"customFields,omitempty"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, ok := d.meUserID(w, r)
@@ -225,6 +226,15 @@ func (d Deps) handleGetMe() http.HandlerFunc {
 SELECT name, slug FROM tenant.organizations WHERE id = $1
 `, orgID).Scan(&name, &slug); err == nil {
 				out.Org = &orgInfo{ID: orgID.String(), Name: name, Slug: slug}
+			}
+		}
+		if queryIncludes(r, "custom_fields") && d.effectiveConfig().CustomFieldsEnabled {
+			level, err := d.customFieldsViewerLevel(r.Context(), userID, orgID)
+			if err == nil {
+				fields, ferr := d.customFieldsService().UserCustomFieldsForViewer(r.Context(), orgID, userID, level)
+				if ferr == nil && len(fields) > 0 {
+					out.CustomFields = fields
+				}
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
