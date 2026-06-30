@@ -192,7 +192,7 @@ enum PlannerLogic {
 
         return items.sorted { lhs, rhs in
             switch (lhs.dueAt, rhs.dueAt) {
-            case let (l?, r?): return l < r
+            case let (left?, right?): return left < right
             case (nil, _?): return false
             case (_?, nil): return true
             case (nil, nil): return lhs.title.localizedCaseInsensitiveCompare(rhs.title) == .orderedAscending
@@ -315,10 +315,10 @@ enum PlannerLogic {
 
     static func dateKeyLocal(_ date: Date) -> String {
         let calendar = Calendar.current
-        let y = calendar.component(.year, from: date)
-        let m = calendar.component(.month, from: date)
-        let d = calendar.component(.day, from: date)
-        return String(format: "%04d-%02d-%02d", y, m, d)
+        let year = calendar.component(.year, from: date)
+        let month = calendar.component(.month, from: date)
+        let day = calendar.component(.day, from: date)
+        return String(format: "%04d-%02d-%02d", year, month, day)
     }
 
     static func events(on day: Date, events: [PlannerCalendarEvent]) -> [PlannerCalendarEvent] {
