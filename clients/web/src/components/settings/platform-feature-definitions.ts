@@ -96,6 +96,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables org admins to customize transactional email templates with merge fields, preview, and version history (plan 18.5).',
   },
   {
+    key: 'maintenanceBannerEnabled',
+    label: 'Maintenance banners',
+    description:
+      'Enables site-wide and org-scoped maintenance/outage banners with admin publishing and Statuspage webhook integration (plan 18.6).',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',

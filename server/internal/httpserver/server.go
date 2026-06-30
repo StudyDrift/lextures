@@ -271,6 +271,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAIProviderSettingsRoutes(r)
 	d.registerBackupOpsRoutes(r)
 	d.registerStatusRoutes(r)
+	d.registerBannerRoutes(r)
 	d.registerPIIRedactionRoutes(r)
 	d.registerUnimplementedV1(r)
 	d.mountRouterErrorHandlers(r)

@@ -15,6 +15,11 @@ import (
 // RollbackLatest applies the down.sql companion for the most recently applied migration.
 // Returns ErrRollbackNotSupported when the companion is a documented no-op stub.
 func RollbackLatest(ctx context.Context, fsys fs.FS, dsn string) error {
+	release, err := acquireIntegrationMigrateGate()
+	if err != nil {
+		return err
+	}
+	defer release()
 	if dsn == "" {
 		return fmt.Errorf("migrate: empty database URL")
 	}

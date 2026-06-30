@@ -139,6 +139,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.BulkCsvImportEnabled = mergeBool(db.BulkCsvImportEnabled, false)
 	out.AdminSearchEnabled = mergeBool(db.AdminSearchEnabled, false)
 	out.EmailTemplateEditorEnabled = mergeBool(db.EmailTemplateEditorEnabled, false)
+	out.MaintenanceBannerEnabled = mergeBool(db.MaintenanceBannerEnabled, true)
 	out.DataResidencyEnabled = mergeBool(db.DataResidencyEnabled, false)
 	out.AiDisclosureEnabled = mergeBool(db.AiDisclosureEnabled, def.AiDisclosureEnabled)
 	out.RTLEnabled = mergeBool(db.RTLEnabled, false)

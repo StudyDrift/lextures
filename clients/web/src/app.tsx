@@ -157,6 +157,7 @@ export default function App() {
               <Route path="import" element={<Pages.AdminImport />} />
               <Route path="courses" element={<Pages.AdminCourses />} />
               <Route path="integrations" element={<Pages.AdminIntegrations />} />
+              <Route path="banners" element={<Pages.AdminBanners />} />
               <Route path="settings" element={<Pages.AdminSettingsPage />} />
               <Route path="audit-log" element={<Pages.AdminAuditLog />} />
               <Route path="search" element={<Pages.AdminSearchResults />} />

@@ -53,6 +53,7 @@ export type PlatformFeaturesSnapshot = {
   bulkCsvImportEnabled?: boolean
   adminSearchEnabled?: boolean
   emailTemplateEditorEnabled?: boolean
+  maintenanceBannerEnabled?: boolean
   ffZapierConnector?: boolean
   ffCatalogIntegration?: boolean
   ffEnrollmentStateMachine?: boolean
@@ -142,6 +143,7 @@ const defaults: PlatformFeaturesSnapshot = {
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
   emailTemplateEditorEnabled: false,
+  maintenanceBannerEnabled: true,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
