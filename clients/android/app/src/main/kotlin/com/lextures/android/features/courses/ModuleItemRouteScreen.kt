@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.textPrimary
-import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
@@ -107,13 +106,14 @@ fun ModuleItemPlaceholderScreen(
     modifier: Modifier = Modifier,
 ) {
     BackHandler(onBack = onBack)
+    val placeholderMessage = modulePlaceholderLabel(modulePlaceholderRes(messageKey))
     Column(modifier = modifier) {
         RowHeader(title = item.title, onBack = onBack)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LmsEmptyState(
                 icon = ItemKind.icon(item.kind),
                 title = item.title,
-                message = L.text(messageKey),
+                message = placeholderMessage,
             )
         }
     }
@@ -132,6 +132,8 @@ private fun WebItemLoaderScreen(
     var url by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val noLinkLabel = moduleNoLinkLabel()
+    val loadErrorFallback = moduleLoadErrorLabel()
 
     BackHandler(onBack = onBack)
 
@@ -144,7 +146,7 @@ private fun WebItemLoaderScreen(
             if (link.isNotEmpty()) {
                 url = link
             } else {
-                errorMessage = L.text("mobile.modules.noLink")
+                errorMessage = noLinkLabel
             }
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
@@ -172,7 +174,7 @@ private fun WebItemLoaderScreen(
                 LmsEmptyState(
                     icon = Icons.AutoMirrored.Filled.ArrowBack,
                     title = item.title,
-                    message = errorMessage ?: L.text("mobile.modules.loadError"),
+                    message = errorMessage ?: loadErrorFallback,
                 )
             }
         }

@@ -37,7 +37,6 @@ import com.lextures.android.core.design.coverBrush
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
-import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LockReason
@@ -91,7 +90,7 @@ fun ModuleList(
 
                 if (group.items.isEmpty()) {
                     Text(
-                        text = L.text("mobile.modules.empty"),
+                        text = moduleEmptyLabel(),
                         fontSize = 12.sp,
                         fontStyle = FontStyle.Italic,
                         color = textSecondary(),
@@ -122,7 +121,20 @@ private fun ModuleListItemRow(
     val navigable = ModuleContentLogic.isNavigable(item.kind)
     val locked = ModuleContentLogic.isLocked(progress, item.id)
     val complete = ModuleContentLogic.isComplete(progress, item.id)
-    val a11y = ModuleContentLogic.accessibilityLabel(item, progress)
+    val completeLabel = moduleCompleteLabel()
+    val a11y = buildString {
+        append(ItemKind.label(item.kind))
+        append(", ")
+        append(item.title)
+        if (complete) {
+            append(", ")
+            append(completeLabel)
+        }
+        ModuleContentLogic.itemLockState(progress, item.id)?.reason?.message?.takeIf { it.isNotEmpty() }?.let {
+            append(", ")
+            append(it)
+        }
+    }
 
     ModuleItemRow(
         item = item,

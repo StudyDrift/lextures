@@ -64,7 +64,6 @@ import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
 import com.lextures.android.core.lms.ModuleContentLogic
 import com.lextures.android.core.lms.ModulesProgressSnapshot
-import com.lextures.android.core.i18n.L
 
 /**
  * Course home: gradient hero + segmented sections
@@ -94,6 +93,10 @@ fun CourseDetailScreen(
     var lockDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
     var openAttendanceSession by remember { mutableStateOf<AttendanceSession?>(null) }
     var openBacklogItem by remember { mutableStateOf<GradingBacklogItem?>(null) }
+
+    val emptyCourseTitle = moduleEmptyCourseTitle()
+    val emptyCourseHint = moduleEmptyCourseHint()
+    val lockedDefault = moduleLockedDefaultLabel()
 
     BackHandler(onBack = onBack)
 
@@ -311,8 +314,8 @@ fun CourseDetailScreen(
                         item {
                             LmsEmptyState(
                                 icon = Icons.Default.Layers,
-                                title = L.text("mobile.modules.emptyCourse"),
-                                message = L.text("mobile.modules.emptyCourseHint"),
+                                title = emptyCourseTitle,
+                                message = emptyCourseHint,
                             )
                         }
                     } else {
@@ -324,7 +327,7 @@ fun CourseDetailScreen(
                                 onSelectItem = { openItem = it },
                                 onLockedItem = { item, reason ->
                                     lockDialog = item.title to (
-                                        reason?.message ?: L.text("mobile.modules.lockedDefault")
+                                        reason?.message ?: lockedDefault
                                         )
                                 },
                             )

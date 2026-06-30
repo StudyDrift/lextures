@@ -68,6 +68,7 @@ import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.lms.ModuleContentLogic
 import com.lextures.android.core.lms.ModuleItemDetail
 import com.lextures.android.core.lms.SubmissionGrade
 import com.lextures.android.features.home.LmsCard

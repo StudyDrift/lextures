@@ -1,7 +1,5 @@
 package com.lextures.android.core.lms
 
-import com.lextures.android.core.i18n.L
-
 data class ModuleGroup(
     val id: String,
     val title: String,
@@ -60,11 +58,4 @@ object ModuleContentLogic {
 
     fun isComplete(progress: ModulesProgressSnapshot?, itemId: String): Boolean =
         itemLockState(progress, itemId)?.complete == true
-
-    fun accessibilityLabel(item: CourseStructureItem, progress: ModulesProgressSnapshot?): String {
-        val parts = mutableListOf(ItemKind.label(item.kind), item.title)
-        if (isComplete(progress, item.id)) parts.add(L.text("mobile.modules.complete"))
-        itemLockState(progress, item.id)?.reason?.message?.takeIf { it.isNotEmpty() }?.let { parts.add(it) }
-        return parts.joinToString(", ")
-    }
 }

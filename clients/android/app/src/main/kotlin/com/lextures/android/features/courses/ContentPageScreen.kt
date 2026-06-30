@@ -39,7 +39,6 @@ import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.StalenessChip
 import com.lextures.android.core.design.textPrimary
-import com.lextures.android.core.i18n.L
 import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
@@ -75,6 +74,10 @@ fun ContentPageScreen(
     var markingComplete by remember { mutableStateOf(false) }
     var isComplete by remember { mutableStateOf(false) }
 
+    val markDoneLabel = moduleMarkDoneLabel()
+    val markingDoneLabel = moduleMarkingDoneLabel()
+    val completeLabel = moduleCompleteLabel()
+
     BackHandler(onBack = onBack)
 
     LaunchedEffect(accessToken, item.id) {
@@ -88,7 +91,7 @@ fun ContentPageScreen(
                 serializer = ModuleItemDetail.serializer(),
             ) {
                 LmsApi.fetchItemDetail(course.courseCode, item, token)
-                    ?: throw IllegalStateException(L.text("mobile.modules.loadError"))
+                    ?: throw IllegalStateException("missing content page")
             }
             detail = result.first
             val cached = result.second
@@ -141,7 +144,7 @@ fun ContentPageScreen(
                         ) {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, tint = LexturesColors.Primary)
                             Text(
-                                text = L.text("mobile.modules.complete"),
+                                text = completeLabel,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = LexturesColors.Primary,
@@ -175,11 +178,7 @@ fun ContentPageScreen(
                 if (!loading && course.viewerIsStudent && !isComplete) {
                     item {
                         AuthPrimaryButton(
-                            text = if (markingComplete) {
-                                L.text("mobile.modules.markingDone")
-                            } else {
-                                L.text("mobile.modules.markDone")
-                            },
+                            text = if (markingComplete) markingDoneLabel else markDoneLabel,
                             onClick = {
                                 val token = accessToken ?: return@AuthPrimaryButton
                                 scope.launch {
@@ -189,7 +188,7 @@ fun ContentPageScreen(
                                             method = "POST",
                                             path = "/api/v1/courses/${course.courseCode}/items/${item.id}/complete",
                                             bodyJson = null,
-                                            label = L.text("mobile.modules.markDone"),
+                                            label = markDoneLabel,
                                             accessToken = token,
                                         )
                                         isComplete = true

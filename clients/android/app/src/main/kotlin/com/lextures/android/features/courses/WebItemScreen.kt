@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.lextures.android.core.config.AppConfiguration
 import com.lextures.android.core.design.textPrimary
-import com.lextures.android.core.i18n.L
 
 /** In-app browser for external links and textbook resources (M3.1). */
 @SuppressLint("SetJavaScriptEnabled")
@@ -39,6 +38,8 @@ fun WebItemScreen(
             else -> urlString
         }
     }
+
+    val openExternalLabel = moduleOpenExternalLabel()
 
     Column(modifier = modifier.fillMaxSize()) {
         AndroidView(
@@ -78,7 +79,7 @@ fun WebItemScreen(
             onClick = { runCatching { Uri.parse(resolvedUrl) }.getOrNull()?.let(onOpenExternal) },
             modifier = Modifier.fillMaxWidth().padding(8.dp),
         ) {
-            Text(L.text("mobile.modules.openExternal"), color = textPrimary())
+            Text(openExternalLabel, color = textPrimary())
         }
     }
 }
