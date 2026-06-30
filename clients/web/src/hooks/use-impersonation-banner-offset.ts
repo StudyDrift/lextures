@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { getImpersonationToken } from '../lib/auth'
 import { fetchMeProfile } from '../lib/impersonation'
 
 /** Padding offset when the impersonation banner is visible. */
@@ -8,6 +9,10 @@ export function useImpersonationBannerOffset(): string {
   useEffect(() => {
     let cancelled = false
     async function check() {
+      if (!getImpersonationToken()) {
+        if (!cancelled) setOffset('')
+        return
+      }
       const me = await fetchMeProfile()
       if (!cancelled) {
         setOffset(me?.impersonating ? 'pt-11' : '')

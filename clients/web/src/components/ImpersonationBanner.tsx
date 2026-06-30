@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { getImpersonationToken } from '../lib/auth'
 import { exitImpersonation, fetchMeProfile, type MeProfile } from '../lib/impersonation'
 
 export function ImpersonationBanner() {
@@ -11,6 +12,10 @@ export function ImpersonationBanner() {
   const [exiting, setExiting] = useState(false)
 
   const load = useCallback(async () => {
+    if (!getImpersonationToken()) {
+      setProfile(null)
+      return
+    }
     const me = await fetchMeProfile()
     setProfile(me?.impersonating ? me : null)
   }, [])
