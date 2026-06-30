@@ -36,6 +36,8 @@ import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.ModuleContentLogic
 import com.lextures.android.core.lms.ModuleItemDestination
+import com.lextures.android.core.lms.FilePreviewTarget
+import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.features.home.LmsEmptyState
 
 /** Routes a structure item to its native destination (M3.1). */
@@ -77,15 +79,17 @@ fun ModuleItemRouteScreen(
             onBack = onBack,
             modifier = modifier,
         )
-        ModuleItemDestination.Interactive -> ModuleItemPlaceholderScreen(
+        ModuleItemDestination.Interactive -> LaunchContainerScreen(
+            session = session,
+            course = course,
             item = item,
-            messageKey = "mobile.modules.placeholder.interactive",
             onBack = onBack,
+            onProgressChanged = onProgressChanged,
             modifier = modifier,
         )
-        ModuleItemDestination.File -> ModuleItemPlaceholderScreen(
-            item = item,
-            messageKey = "mobile.modules.placeholder.file",
+        ModuleItemDestination.File -> FilePreviewScreen(
+            session = session,
+            target = FilePreviewTarget.from(item, course.courseCode),
             onBack = onBack,
             modifier = modifier,
         )
@@ -182,7 +186,7 @@ private fun WebItemLoaderScreen(
 }
 
 @Composable
-private fun RowHeader(title: String, onBack: () -> Unit) {
+internal fun RowHeader(title: String, onBack: () -> Unit) {
     androidx.compose.foundation.layout.Row(
         modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically,

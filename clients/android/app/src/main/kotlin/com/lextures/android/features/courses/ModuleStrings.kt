@@ -21,7 +21,37 @@ import com.lextures.android.core.i18n.L
 
 @Composable fun moduleLockedDefaultLabel(): String = L.text(R.string.mobile_modules_lockedDefault)
 
+@Composable fun moduleRequirementsTitle(): String = L.text(R.string.mobile_modules_requirements_title)
+
+@Composable fun moduleRequirementsDoneLabel(): String = L.text(R.string.mobile_modules_requirements_done)
+
+@Composable fun moduleRequirementsListLabel(): String = L.text(R.string.mobile_modules_requirements_listLabel)
+
+@Composable fun moduleRequirementsProgressLabel(met: Int, total: Int): String =
+    L.format(R.string.mobile_modules_requirements_progress, met, total)
+
+@Composable fun moduleRequirementsProgressA11yLabel(met: Int, total: Int): String =
+    L.format(R.string.mobile_modules_requirements_progressA11y, met, total)
+
+@Composable fun moduleRequirementsMetLabel(): String = L.text(R.string.mobile_modules_requirements_met)
+
+@Composable fun moduleRequirementsUnmetLabel(): String = L.text(R.string.mobile_modules_requirements_unmet)
+
+@Composable fun moduleRequirementsGoToNextLabel(): String = L.text(R.string.mobile_modules_requirements_goToNext)
+
 @Composable fun moduleOpenExternalLabel(): String = L.text(R.string.mobile_modules_openExternal)
+
+@Composable fun moduleWebLoadErrorLabel(): String = L.text(R.string.mobile_modules_webLoadError)
+
+@Composable fun moduleInteractiveOfflineLabel(): String = L.text(R.string.mobile_modules_interactive_offline)
+
+@Composable fun moduleInteractivePreparingLabel(): String = L.text(R.string.mobile_modules_interactive_preparing)
+
+@Composable fun moduleInteractiveRetryLabel(): String = L.text(R.string.mobile_modules_interactive_retry)
+
+@Composable fun moduleInteractiveResumeLabel(): String = L.text(R.string.mobile_modules_interactive_resume)
+
+@Composable fun moduleInteractiveLtiErrorLabel(): String = L.text(R.string.mobile_modules_interactive_ltiError)
 
 @Composable fun moduleNoLinkLabel(): String = L.text(R.string.mobile_modules_noLink)
 

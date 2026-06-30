@@ -546,6 +546,113 @@ data class AcademicCalendarEventsResponse(
 
 // endregion
 
+// region Course files (M3.2)
+
+@Serializable
+data class CourseFileFolder(
+    val id: String,
+    val courseId: String,
+    val parentId: String? = null,
+    val name: String,
+    val createdAt: String = "",
+    val updatedAt: String = "",
+)
+
+@Serializable
+data class CourseFileItem(
+    val id: String,
+    val courseId: String,
+    val folderId: String? = null,
+    val storageKey: String = "",
+    val originalFilename: String = "",
+    val displayName: String = "",
+    val mimeType: String = "",
+    val byteSize: Long = 0,
+    val createdAt: String = "",
+    val updatedAt: String = "",
+) {
+    val title: String
+        get() = displayName.trim().ifEmpty { originalFilename }
+}
+
+@Serializable
+data class CourseFileBreadcrumb(
+    val id: String,
+    val name: String,
+)
+
+@Serializable
+data class CourseFileFolderContents(
+    val folderId: String? = null,
+    val breadcrumbs: List<CourseFileBreadcrumb>? = null,
+    val folders: List<CourseFileFolder> = emptyList(),
+    val files: List<CourseFileItem> = emptyList(),
+)
+
+enum class CourseFileContentSource {
+    FileManager,
+    CourseFile,
+}
+
+data class FilePreviewTarget(
+    val courseCode: String,
+    val displayName: String,
+    val mimeType: String?,
+    val byteSize: Long?,
+    val source: CourseFileContentSource,
+    val sourceId: String,
+) {
+    val id: String
+        get() = when (source) {
+            CourseFileContentSource.FileManager -> "fm:$sourceId"
+            CourseFileContentSource.CourseFile -> "cf:$sourceId"
+        }
+
+    companion object {
+        fun from(file: CourseFileItem, courseCode: String) = FilePreviewTarget(
+            courseCode = courseCode,
+            displayName = file.title,
+            mimeType = file.mimeType,
+            byteSize = file.byteSize,
+            source = CourseFileContentSource.FileManager,
+            sourceId = file.id,
+        )
+
+        fun from(moduleItem: CourseStructureItem, courseCode: String) = FilePreviewTarget(
+            courseCode = courseCode,
+            displayName = moduleItem.title,
+            mimeType = CourseFileLogic.guessMimeType(moduleItem.title),
+            byteSize = null,
+            source = CourseFileContentSource.FileManager,
+            sourceId = moduleItem.id,
+        )
+
+        fun submissionAttachment(
+            courseCode: String,
+            fileId: String,
+            fileName: String,
+            mimeType: String?,
+        ) = FilePreviewTarget(
+            courseCode = courseCode,
+            displayName = fileName,
+            mimeType = mimeType,
+            byteSize = null,
+            source = CourseFileContentSource.CourseFile,
+            sourceId = fileId,
+        )
+    }
+}
+
+enum class FilePreviewKind {
+    Image,
+    Pdf,
+    Audio,
+    Video,
+    DownloadOnly,
+}
+
+// endregion
+
 // region Module progress & conditional release (M3.1)
 
 @Serializable
@@ -585,6 +692,80 @@ data class ModulesProgressSnapshot(
 data class MarkItemCompleteResponse(
     val enrollmentId: String? = null,
     val justComplete: Boolean? = null,
+)
+
+// endregion
+
+// region Interactive content (M3.3)
+
+@Serializable
+data class ModuleH5PPayload(
+    val packageId: String = "",
+    val itemId: String? = null,
+    val title: String = "",
+    val contentType: String? = null,
+    val extractStatus: String = "",
+    val assetsBaseUrl: String? = null,
+    val downloadUrl: String? = null,
+)
+
+@Serializable
+data class ModuleScormSco(
+    val id: String = "",
+    val identifier: String? = null,
+    val title: String? = null,
+    val launchHref: String? = null,
+)
+
+@Serializable
+data class ModuleScormPayload(
+    val packageId: String = "",
+    val itemId: String? = null,
+    val title: String = "",
+    val packageType: String? = null,
+    val extractStatus: String = "",
+    val assetsBaseUrl: String? = null,
+    val downloadUrl: String? = null,
+    val scos: List<ModuleScormSco> = emptyList(),
+)
+
+@Serializable
+data class ScormLaunchResponse(
+    val registrationId: String = "",
+    val launchUrl: String? = null,
+    val renderUrl: String = "",
+    val initialCmi: Map<String, String> = emptyMap(),
+)
+
+@Serializable
+data class ModuleLtiLinkPayload(
+    val itemId: String = "",
+    val title: String = "",
+    val externalToolId: String? = null,
+    val externalToolName: String? = null,
+    val resourceLinkId: String? = null,
+    val lineItemUrl: String? = null,
+)
+
+@Serializable
+data class LtiEmbedTicketResponse(
+    val ticket: String = "",
+)
+
+@Serializable
+data class ModuleVibeActivityPayload(
+    val id: String = "",
+    val title: String = "",
+    val html: String? = null,
+    val published: Boolean? = null,
+    val archived: Boolean? = null,
+)
+
+@Serializable
+data class XapiStatementBody(
+    val courseCode: String,
+    val packageId: String,
+    val statement: kotlinx.serialization.json.JsonElement,
 )
 
 // endregion

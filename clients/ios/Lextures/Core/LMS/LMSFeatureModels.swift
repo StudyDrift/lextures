@@ -600,6 +600,203 @@ struct AcademicCalendarEventsResponse: Decodable {
     var events: [AcademicCalendarEvent]
 }
 
+// MARK: - Course files (M3.2)
+
+struct CourseFileFolder: Codable, Identifiable, Hashable {
+    var id: String
+    var courseId: String
+    var parentId: String?
+    var name: String
+    var createdAt: String
+    var updatedAt: String
+}
+
+struct CourseFileItem: Codable, Identifiable, Hashable {
+    var id: String
+    var courseId: String
+    var folderId: String?
+    var storageKey: String
+    var originalFilename: String
+    var displayName: String
+    var mimeType: String
+    var byteSize: Int64
+    var createdAt: String
+    var updatedAt: String
+
+    var title: String {
+        let name = displayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? originalFilename : name
+    }
+}
+
+struct CourseFileBreadcrumb: Codable, Identifiable, Hashable {
+    var id: String
+    var name: String
+}
+
+struct CourseFileFolderContents: Codable {
+    var folderId: String?
+    var breadcrumbs: [CourseFileBreadcrumb]?
+    var folders: [CourseFileFolder]
+    var files: [CourseFileItem]
+
+    init(
+        folderId: String? = nil,
+        breadcrumbs: [CourseFileBreadcrumb]? = nil,
+        folders: [CourseFileFolder] = [],
+        files: [CourseFileItem] = []
+    ) {
+        self.folderId = folderId
+        self.breadcrumbs = breadcrumbs
+        self.folders = folders
+        self.files = files
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        folderId = try container.decodeIfPresent(String.self, forKey: .folderId)
+        breadcrumbs = try container.decodeIfPresent([CourseFileBreadcrumb].self, forKey: .breadcrumbs)
+        folders = try container.decodeIfPresent([CourseFileFolder].self, forKey: .folders) ?? []
+        files = try container.decodeIfPresent([CourseFileItem].self, forKey: .files) ?? []
+    }
+}
+
+/// Identifies a previewable file from the file manager or legacy course-files store.
+enum CourseFileContentSource: Hashable {
+    case fileManager(itemId: String)
+    case courseFile(fileId: String)
+}
+
+/// Reusable preview target for M3.2, module file items (M3.1), and submission attachments (M5.1).
+struct FilePreviewTarget: Hashable, Identifiable {
+    var id: String { sourceKey }
+    let courseCode: String
+    let displayName: String
+    let mimeType: String?
+    let byteSize: Int64?
+    let source: CourseFileContentSource
+
+    var sourceKey: String {
+        switch source {
+        case .fileManager(let itemId): return "fm:\(itemId)"
+        case .courseFile(let fileId): return "cf:\(fileId)"
+        }
+    }
+
+    static func from(file item: CourseFileItem, courseCode: String) -> FilePreviewTarget {
+        FilePreviewTarget(
+            courseCode: courseCode,
+            displayName: item.title,
+            mimeType: item.mimeType,
+            byteSize: item.byteSize,
+            source: .fileManager(itemId: item.id)
+        )
+    }
+
+    static func from(moduleItem item: CourseStructureItem, courseCode: String) -> FilePreviewTarget {
+        FilePreviewTarget(
+            courseCode: courseCode,
+            displayName: item.title,
+            mimeType: CourseFileLogic.guessMimeType(from: item.title),
+            byteSize: nil,
+            source: .fileManager(itemId: item.id)
+        )
+    }
+
+    static func submissionAttachment(
+        courseCode: String,
+        fileId: String,
+        fileName: String,
+        mimeType: String?
+    ) -> FilePreviewTarget {
+        FilePreviewTarget(
+            courseCode: courseCode,
+            displayName: fileName,
+            mimeType: mimeType,
+            byteSize: nil,
+            source: .courseFile(fileId: fileId)
+        )
+    }
+}
+
+enum FilePreviewKind: Equatable {
+    case image
+    case pdf
+    case audio
+    case video
+    case downloadOnly
+}
+
+// MARK: - Interactive content (M3.3)
+
+struct ModuleH5PPayload: Decodable {
+    var packageId: String
+    var itemId: String?
+    var title: String
+    var contentType: String?
+    var extractStatus: String
+    var assetsBaseUrl: String?
+    var downloadUrl: String?
+}
+
+struct ModuleScormSco: Decodable {
+    var id: String
+    var identifier: String?
+    var title: String?
+    var launchHref: String?
+}
+
+struct ModuleScormPayload: Decodable {
+    var packageId: String
+    var itemId: String?
+    var title: String
+    var packageType: String?
+    var extractStatus: String
+    var assetsBaseUrl: String?
+    var downloadUrl: String?
+    var scos: [ModuleScormSco]
+}
+
+struct ScormLaunchResponse: Decodable {
+    var registrationId: String
+    var launchUrl: String?
+    var renderUrl: String
+    var initialCmi: [String: String]?
+
+    enum CodingKeys: String, CodingKey {
+        case registrationId, launchUrl, renderUrl, initialCmi
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        registrationId = try container.decodeIfPresent(String.self, forKey: .registrationId) ?? ""
+        launchUrl = try container.decodeIfPresent(String.self, forKey: .launchUrl)
+        renderUrl = try container.decodeIfPresent(String.self, forKey: .renderUrl) ?? ""
+        initialCmi = try container.decodeIfPresent([String: String].self, forKey: .initialCmi)
+    }
+}
+
+struct ModuleLtiLinkPayload: Decodable {
+    var itemId: String
+    var title: String
+    var externalToolId: String?
+    var externalToolName: String?
+    var resourceLinkId: String?
+    var lineItemUrl: String?
+}
+
+struct LtiEmbedTicketResponse: Decodable {
+    var ticket: String
+}
+
+struct ModuleVibeActivityPayload: Decodable {
+    var id: String
+    var title: String
+    var html: String?
+    var published: Bool?
+    var archived: Bool?
+}
+
 /// Human label + tint key for an attendance status string.
 enum AttendanceStatusInfo {
     static func label(_ status: String) -> String {

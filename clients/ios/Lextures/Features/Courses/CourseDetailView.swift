@@ -13,6 +13,7 @@ struct CourseDetailView: View {
     enum Section: String, CaseIterable {
         case overview = "Overview"
         case modules = "Modules"
+        case files = "Files"
         case grades = "Grades"
         case attendance = "Attendance"
         case grading = "Grading"
@@ -26,13 +27,7 @@ struct CourseDetailView: View {
     @State private var errorMessage: String?
     @State private var loading = false
     @State private var linkedItem: CourseStructureItem?
-    @State private var lockAlert: LockAlert?
-
-    private struct LockAlert: Identifiable {
-        let id = UUID()
-        let title: String
-        let message: String
-    }
+    @State private var lockedItem: CourseStructureItem?
 
     init(course: CourseSummary, initialSection: Section? = nil, initialItemId: String? = nil) {
         self.course = course
@@ -44,7 +39,7 @@ struct CourseDetailView: View {
     }
 
     private var sections: [Section] {
-        var out: [Section] = [.overview, .modules]
+        var out: [Section] = [.overview, .modules, .files]
         if course.viewerIsStudent { out.append(.grades) }
         if course.viewerIsStaff || hasAttendanceSessions { out.append(.attendance) }
         if course.viewerIsStaff { out.append(.grading) }
@@ -82,6 +77,8 @@ struct CourseDetailView: View {
                         CourseSyllabusSection(course: course)
                     case .modules:
                         modulesSection
+                    case .files:
+                        CourseFilesView(course: course)
                     case .grades:
                         CourseGradesSection(course: course)
                     case .attendance:
@@ -108,11 +105,16 @@ struct CourseDetailView: View {
         .navigationDestination(item: $linkedItem) { item in
             ModuleItemRouteView(course: course, item: item, onProgressChanged: refreshProgress)
         }
-        .alert(item: $lockAlert) { alert in
-            Alert(
-                title: Text(alert.title),
-                message: Text(alert.message),
-                dismissButton: .default(Text("OK"))
+        .sheet(item: $lockedItem) { item in
+            RequirementsView(
+                targetItem: item,
+                groups: moduleGroups,
+                progress: progress,
+                onGoToRequired: { itemId in
+                    if let match = RequirementsLogic.findItem(id: itemId, in: moduleGroups) {
+                        linkedItem = match
+                    }
+                }
             )
         }
         .task { await load() }
@@ -198,11 +200,8 @@ struct CourseDetailView: View {
                 groups: moduleGroups,
                 progress: progress,
                 onSelectItem: { linkedItem = $0 },
-                onLockedItem: { item, reason in
-                    lockAlert = LockAlert(
-                        title: item.title,
-                        message: reason?.message ?? L.text("mobile.modules.lockedDefault")
-                    )
+                onLockedItem: { item, _ in
+                    lockedItem = item
                 }
             )
         }

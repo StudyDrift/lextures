@@ -482,4 +482,142 @@ extension LMSAPI {
     }
 
     private struct EmptyBody: Encodable {}
+
+    // MARK: - Course files (M3.2)
+
+    static func fetchCourseFilesRoot(courseCode: String, accessToken: String) async throws -> CourseFileFolderContents {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/files",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(CourseFileFolderContents.self, from: data)
+    }
+
+    static func fetchCourseFilesFolder(
+        courseCode: String,
+        folderId: String,
+        accessToken: String
+    ) async throws -> CourseFileFolderContents {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/files/folders/\(encodePath(folderId))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(CourseFileFolderContents.self, from: data)
+    }
+
+    // MARK: - Interactive content (M3.3)
+
+    static func fetchModuleH5P(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> ModuleH5PPayload {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/h5p-items/\(encodePath(itemId))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ModuleH5PPayload.self, from: data)
+    }
+
+    static func fetchModuleScorm(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> ModuleScormPayload {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/scorm-items/\(encodePath(itemId))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ModuleScormPayload.self, from: data)
+    }
+
+    static func launchScorm(
+        courseCode: String,
+        scoId: String,
+        accessToken: String
+    ) async throws -> ScormLaunchResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/scorm/\(encodePath(scoId))/launch",
+            method: "POST",
+            body: EmptyBody(),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(ScormLaunchResponse.self, from: data)
+    }
+
+    static func fetchModuleLtiLink(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> ModuleLtiLinkPayload {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/lti-links/\(encodePath(itemId))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ModuleLtiLinkPayload.self, from: data)
+    }
+
+    static func postLtiEmbedTicket(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> LtiEmbedTicketResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/lti-links/\(encodePath(itemId))/embed-ticket",
+            method: "POST",
+            body: EmptyBody(),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(LtiEmbedTicketResponse.self, from: data)
+    }
+
+    static func fetchModuleVibeActivity(
+        courseCode: String,
+        itemId: String,
+        accessToken: String
+    ) async throws -> ModuleVibeActivityPayload {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/vibe-activities/\(encodePath(itemId))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(ModuleVibeActivityPayload.self, from: data)
+    }
+
+    static func postXAPIStatement(
+        courseCode: String,
+        packageId: String,
+        statement: [String: Any],
+        accessToken: String
+    ) async throws {
+        let payload: [String: Any] = [
+            "courseCode": courseCode,
+            "packageId": packageId,
+            "statement": statement,
+        ]
+        let bodyData = try JSONSerialization.data(withJSONObject: payload)
+        let (data, response) = try await client.requestRaw(
+            path: "/api/v1/xapi/statements",
+            method: "POST",
+            bodyData: bodyData,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) || response.statusCode == 204 else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
 }
