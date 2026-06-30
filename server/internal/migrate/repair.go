@@ -362,6 +362,88 @@ SELECT EXISTS (
 	return tx.Commit(ctx)
 }
 
+// repairMigration345RenumberCollision fixes demo DBs that applied submission_annotation_anchor
+// as v345 before main's 345_migration_deploy_tracking.sql landed and the anchor migration
+// was renumbered to 346 (plan 17.10 / admin console renumber).
+func repairMigration345RenumberCollision(ctx context.Context, c *pgx.Conn, fsys fs.FS, dir string) error {
+	if !migrateRepairChecksumsEnabled() {
+		return nil
+	}
+	var v345Desc string
+	err := c.QueryRow(ctx,
+		`SELECT description FROM `+sqlxMigrationsTable+` WHERE version = 345`,
+	).Scan(&v345Desc)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil
+		}
+		return fmt.Errorf("migrate repair v345 renumber: %w", err)
+	}
+	if v345Desc != "submission_annotation_anchor" {
+		return nil
+	}
+	var deployIDColumn bool
+	err = c.QueryRow(ctx, `
+		SELECT EXISTS (
+			SELECT 1
+			FROM information_schema.columns
+			WHERE table_schema = current_schema()
+			  AND table_name = $1
+			  AND column_name = 'deploy_id'
+		)`, sqlxMigrationsTable).Scan(&deployIDColumn)
+	if err != nil {
+		return fmt.Errorf("migrate repair v345 renumber: %w", err)
+	}
+	if deployIDColumn {
+		return nil
+	}
+
+	deployBody, err := fs.ReadFile(fsys, dir+"/345_migration_deploy_tracking.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v345 renumber: read deploy_tracking: %w", err)
+	}
+	if _, err := c.Exec(ctx, string(deployBody)); err != nil {
+		return fmt.Errorf("migrate repair v345 renumber: apply deploy_tracking: %w", err)
+	}
+
+	deploySum := sqlxChecksum(deployBody)
+	anchorBody, err := fs.ReadFile(fsys, dir+"/346_submission_annotation_anchor.sql")
+	if err != nil {
+		return fmt.Errorf("migrate repair v345 renumber: read submission_annotation_anchor: %w", err)
+	}
+	anchorSum := sqlxChecksum(anchorBody)
+
+	tx, err := c.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	if _, err := tx.Exec(ctx,
+		`UPDATE `+sqlxMigrationsTable+` SET description = $1, checksum = $2 WHERE version = 345`,
+		"migration_deploy_tracking", deploySum[:],
+	); err != nil {
+		return fmt.Errorf("migrate repair v345 renumber: update v345: %w", err)
+	}
+
+	var v346Exists bool
+	if err := tx.QueryRow(ctx,
+		`SELECT EXISTS (SELECT 1 FROM `+sqlxMigrationsTable+` WHERE version = 346)`,
+	).Scan(&v346Exists); err != nil {
+		return fmt.Errorf("migrate repair v345 renumber: check v346: %w", err)
+	}
+	if !v346Exists {
+		if _, err := tx.Exec(ctx,
+			`INSERT INTO `+sqlxMigrationsTable+` (version, description, success, checksum, execution_time) VALUES ($1, $2, true, $3, 0)`,
+			int64(346), "submission_annotation_anchor", anchorSum[:],
+		); err != nil {
+			return fmt.Errorf("migrate repair v345 renumber: insert v346: %w", err)
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
 // repairMigration334RenumberCollision fixes dev/demo DBs that applied
 // quiz_manual_grading_is_correct_backfill as v334 before main's 334_marketplace.sql
 // landed and the backfill was renumbered to 335.
