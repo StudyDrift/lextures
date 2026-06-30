@@ -152,6 +152,7 @@ type Row struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
+	FFLessonGenerator               *bool
 	FFPersistentTutor               *bool
 	FFAPITokens                     *bool
 	FFBotSlack                      *bool
@@ -325,6 +326,7 @@ type Write struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
+	FFLessonGenerator               *bool
 	FFPersistentTutor               *bool
 	FFAPITokens                     *bool
 	FFBotSlack                      *bool
@@ -493,6 +495,7 @@ SELECT
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
+	ff_lesson_generator,
 	ff_persistent_tutor,
 	ff_api_tokens,
 	ff_bot_slack,
@@ -657,6 +660,7 @@ WHERE id = 1
 		&r.FFOnboardingFlow,
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
+		&r.FFLessonGenerator,
 		&r.FFPersistentTutor,
 		&r.FFAPITokens,
 		&r.FFBotSlack,
@@ -869,6 +873,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
+	ff_lesson_generator,
 	ff_persistent_tutor,
 	ff_api_tokens,
 	ff_bot_slack,
@@ -1038,6 +1043,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
+	ff_lesson_generator = COALESCE(EXCLUDED.ff_lesson_generator, settings.platform_app_settings.ff_lesson_generator),
 	ff_persistent_tutor = COALESCE(EXCLUDED.ff_persistent_tutor, settings.platform_app_settings.ff_persistent_tutor),
 	ff_api_tokens = COALESCE(EXCLUDED.ff_api_tokens, settings.platform_app_settings.ff_api_tokens),
 	ff_bot_slack = COALESCE(EXCLUDED.ff_bot_slack, settings.platform_app_settings.ff_bot_slack),
@@ -1200,6 +1206,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFOnboardingFlow,
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
+		w.FFLessonGenerator,
 		w.FFPersistentTutor,
 		w.FFAPITokens,
 		w.FFBotSlack,

@@ -408,6 +408,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
   },
   {
+    key: 'ffLessonGenerator',
+    label: 'AI lesson generator',
+    description:
+      'Instructor wizard to generate lesson plans, differentiated activities, formative quizzes, and rubrics from learning objectives (plan 19.2).',
+  },
+  {
     key: 'ffPersistentTutor',
     label: 'Persistent AI tutor',
     description:

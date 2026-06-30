@@ -10,6 +10,7 @@ const FEATURE_KEYS = [
   { key: 'syllabus_generation', label: 'Syllabus generation' },
   { key: 'translation', label: 'Translation' },
   { key: 'quiz_generation', label: 'Quiz generation' },
+  { key: 'lesson_generation', label: 'Lesson generator' },
 ] as const
 
 export function AiGovernancePanel() {

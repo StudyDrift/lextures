@@ -281,6 +281,12 @@ func (d Deps) registerCourseRoutes(r chi.Router) {
 	r.Delete("/api/v1/courses/{course_code}/blueprint/children/{child_course_code}", d.handleDeleteCourseBlueprintChild())
 	r.Post("/api/v1/courses/{course_code}/blueprint/push", d.handlePostCourseBlueprintPush())
 	r.Get("/api/v1/courses/{course_code}/blueprint/sync-logs", d.handleGetCourseBlueprintSyncLogs())
+	r.Route("/api/v1/courses/{course_code}/lesson-generator", func(lg chi.Router) {
+		lg.Post("/", d.handlePostLessonGenerator())
+		lg.Get("/{job_id}", d.handleGetLessonGeneratorJob())
+		lg.Post("/{job_id}/regenerate-component", d.handlePostLessonGeneratorRegenerate())
+		lg.Post("/{job_id}/save-to-course", d.handlePostLessonGeneratorSave())
+	})
 	r.Route("/api/v1/courses/{course_code}/syllabus", func(s chi.Router) {
 		s.Get("/acceptance-status", d.handleSyllabusAcceptanceStatus())
 		s.Get("/markups", d.handleListSyllabusMarkups())

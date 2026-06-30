@@ -100,6 +100,7 @@ type platformFeaturesJSON struct {
 	FFOnboardingFlow            bool `json:"ffOnboardingFlow"`
 	FFStudyReminders            bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy              bool `json:"ffAiStudyBuddy"`
+	FFLessonGenerator           bool `json:"ffLessonGenerator"`
 	FFPersistentTutor           bool `json:"ffPersistentTutor"`
 	FFAPITokens                 bool `json:"ffApiTokens"`
 	FFBotSlack                  bool `json:"ffBotSlack"`
@@ -221,6 +222,7 @@ func platformFeaturesFromConfig(cfg config.Config) platformFeaturesJSON {
 		FFOnboardingFlow:            cfg.FFOnboardingFlow,
 		FFStudyReminders:            cfg.FFStudyReminders,
 		FFAIStudyBuddy:              cfg.FFAIStudyBuddy,
+		FFLessonGenerator:           cfg.FFLessonGenerator,
 		FFPersistentTutor:           cfg.FFPersistentTutor,
 		FFAPITokens:                 cfg.FFAPITokens,
 		FFBotSlack:                  cfg.FFBotSlack,

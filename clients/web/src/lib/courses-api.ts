@@ -5086,6 +5086,159 @@ export async function generateSyllabusSectionMarkdown(
   return parseApiResponse('generateSyllabusSectionMarkdown', generatedSyllabusSectionMarkdownSchema, raw)
 }
 
+/** Plan 19.2 — AI lesson generator input. */
+export type LessonGeneratorInput = {
+  learningObjective: string
+  gradeLevel: string
+  subject: string
+  durationMinutes?: number
+  standardsCode?: string
+  differentiationLevels?: string[]
+}
+
+export type LessonProvenance = {
+  generated_by: string
+  model_id: string
+  generation_ts: string
+}
+
+export type LessonComponentSlot = {
+  key: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  error?: string | null
+  content?: Record<string, unknown> | null
+  provenance?: LessonProvenance | null
+}
+
+export type LessonPackage = {
+  jobId: string
+  status: string
+  components: LessonComponentSlot[]
+  standardsDisclaimer?: string | null
+}
+
+function parseLessonPackage(raw: unknown): LessonPackage {
+  const o = raw as Record<string, unknown>
+  const components = Array.isArray(o.components) ? o.components : []
+  return {
+    jobId: String(o.jobId ?? o.job_id ?? ''),
+    status: String(o.status ?? 'pending'),
+    components: components.map((c) => {
+      const row = c as Record<string, unknown>
+      const prov = row.provenance as Record<string, unknown> | null | undefined
+      return {
+        key: String(row.key ?? ''),
+        status: (row.status as LessonComponentSlot['status']) ?? 'pending',
+        error: row.error != null ? String(row.error) : null,
+        content: (row.content as Record<string, unknown>) ?? null,
+        provenance: prov
+          ? {
+              generated_by: String(prov.generated_by ?? prov.generatedBy ?? ''),
+              model_id: String(prov.model_id ?? prov.modelId ?? ''),
+              generation_ts: String(prov.generation_ts ?? prov.generationTs ?? ''),
+            }
+          : null,
+      }
+    }),
+    standardsDisclaimer:
+      o.standardsDisclaimer != null
+        ? String(o.standardsDisclaimer)
+        : o.standards_disclaimer != null
+          ? String(o.standards_disclaimer)
+          : null,
+  }
+}
+
+/** POST lesson-generator — queues async generation job. */
+export async function startLessonGeneration(
+  courseCode: string,
+  body: LessonGeneratorInput,
+): Promise<{ jobId: string }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/lesson-generator`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        learning_objective: body.learningObjective,
+        grade_level: body.gradeLevel,
+        subject: body.subject,
+        duration_minutes: body.durationMinutes,
+        standards_code: body.standardsCode,
+        differentiation_levels: body.differentiationLevels,
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { job_id?: string; jobId?: string }
+  const jobId = o.job_id ?? o.jobId
+  if (!jobId) throw new Error('Missing job id.')
+  return { jobId: String(jobId) }
+}
+
+/** GET lesson-generator job status and components. */
+export async function fetchLessonGeneratorJob(
+  courseCode: string,
+  jobId: string,
+): Promise<LessonPackage> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/lesson-generator/${encodeURIComponent(jobId)}`,
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseLessonPackage(raw)
+}
+
+/** POST regenerate-component — re-run one component. */
+export async function regenerateLessonComponent(
+  courseCode: string,
+  jobId: string,
+  component: string,
+): Promise<LessonPackage> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/lesson-generator/${encodeURIComponent(jobId)}/regenerate-component`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ component }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  return parseLessonPackage(raw)
+}
+
+/** POST save-to-course — creates draft module with accepted assets. */
+export async function saveLessonPackageToCourse(
+  courseCode: string,
+  jobId: string,
+  body: {
+    acceptedComponents: string[]
+    moduleTitle?: string
+    componentEdits?: Record<string, unknown>
+  },
+): Promise<{ moduleId: string }> {
+  const res = await authorizedFetch(
+    `/api/v1/courses/${encodeURIComponent(courseCode)}/lesson-generator/${encodeURIComponent(jobId)}/save-to-course`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        accepted_components: body.acceptedComponents,
+        module_title: body.moduleTitle,
+        component_edits: body.componentEdits,
+      }),
+    },
+  )
+  const raw = await parseJson(res)
+  if (!res.ok) throw new Error(readApiErrorMessage(raw))
+  const o = raw as { module_id?: string; moduleId?: string }
+  const moduleId = o.module_id ?? o.moduleId
+  if (!moduleId) throw new Error('Missing module id.')
+  return { moduleId: String(moduleId) }
+}
+
 export async function fetchCourseGradingSettings(courseCode: string): Promise<CourseGradingSettings> {
   const res = await authorizedFetch(
     `/api/v1/courses/${encodeURIComponent(courseCode)}/grading`,

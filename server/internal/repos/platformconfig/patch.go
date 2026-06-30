@@ -186,6 +186,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("ff_onboarding_flow", w.FFOnboardingFlow)
 	addBool("ff_study_reminders", w.FFStudyReminders)
 	addBool("ff_ai_study_buddy", w.FFAIStudyBuddy)
+	addBool("ff_lesson_generator", w.FFLessonGenerator)
 	addBool("ff_persistent_tutor", w.FFPersistentTutor)
 	addBool("ff_api_tokens", w.FFAPITokens)
 	addBool("ff_bot_slack", w.FFBotSlack)

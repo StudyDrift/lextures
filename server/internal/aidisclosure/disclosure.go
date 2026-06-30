@@ -63,6 +63,7 @@ var disclosureFeatures = []FeatureCard{
 	{Key: "quiz_generation", Label: "Adaptive quiz generation", Description: "Generates quiz items from course materials."},
 	{Key: "vibe_generation", Label: "Interactive activity generation", Description: "Drafts self-contained HTML learning activities."},
 	{Key: "grader_agent", Label: "Grading agent", Description: "Suggests scores and feedback on student submissions."},
+	{Key: "lesson_generation", Label: "Lesson generator", Description: "Generates lesson plans, activities, and formative assessments from learning objectives."},
 	{Key: "ai_study_buddy", Label: "AI study buddy", Description: "Standalone study companion for self-learners."},
 	{Key: "alt_text_suggestion", Label: "Alt-text suggestions", Description: "Suggests accessible image descriptions for course media."},
 }
@@ -73,7 +74,7 @@ var platformModelBindings = []modelBinding{
 	{
 		modelID: user.DefaultCourseSetupModelID,
 		purposes: []string{
-			"ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation", "ai_study_buddy",
+			"ai_tutor", "rag_notebook", "syllabus_generation", "quiz_generation", "lesson_generation", "ai_study_buddy",
 		},
 		dataSent: "Course context, prompts, and user questions necessary for the feature; PII is redacted where configured.",
 	},

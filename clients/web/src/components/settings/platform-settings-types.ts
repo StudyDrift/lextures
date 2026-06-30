@@ -73,6 +73,7 @@ export type PlatformSettingsPayload = {
   ffWhatifGrades: boolean
   ffGradeCurving: boolean
   ffAiStudyBuddy: boolean
+  ffLessonGenerator: boolean
   ffPersistentTutor: boolean
   ffApiTokens: boolean
   ffCalendarFeeds: boolean
