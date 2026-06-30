@@ -23,7 +23,13 @@ func TestRepairMigration345RenumberCollision_Integration(t *testing.T) {
 	t.Setenv("MIGRATE_REPAIR_CHECKSUMS", "1")
 
 	ctx := context.Background()
-	if err := RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+	release, err := acquireIntegrationMigrateGate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer release()
+
+	if err := runWithFS(ctx, serverdata.Migrations, dsn); err != nil {
 		t.Fatalf("baseline migrate: %v", err)
 	}
 
@@ -60,7 +66,7 @@ func TestRepairMigration345RenumberCollision_Integration(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := RunWithFS(ctx, serverdata.Migrations, dsn); err != nil {
+	if err := runWithFS(ctx, serverdata.Migrations, dsn); err != nil {
 		t.Fatalf("repair migrate: %v", err)
 	}
 
