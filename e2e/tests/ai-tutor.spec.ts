@@ -339,3 +339,100 @@ test.describe('AI Tutor UI', () => {
     await expect(page.getByRole('button', { name: /Open AI Tutor/i })).not.toBeVisible()
   })
 })
+
+test.describe('Persistent AI Tutor API (plan 19.1)', () => {
+  test('GET sessions returns 404 when ffPersistentTutor is off', async ({ request }) => {
+    const featuresRes = await request.get(`${API_BASE}/api/v1/platform/features`)
+    const features = (await featuresRes.json()) as { ffPersistentTutor?: boolean }
+    if (features.ffPersistentTutor) {
+      test.skip(true, 'ffPersistentTutor is enabled on this stack')
+    }
+    const { access_token } = await apiSignup({
+      email: uniqueEmail('persist-off'),
+      password: PASSWORD,
+      displayName: 'Persist Off',
+    })
+    const res = await request.get(`${API_BASE}/api/v1/courses/C-FAKE/tutor/sessions`, {
+      headers: { Authorization: `Bearer ${access_token}` },
+    })
+    expect(res.status()).toBe(404)
+  })
+
+  test('POST session creates session when persistent tutor enabled', async ({ request }) => {
+    const featuresRes = await request.get(`${API_BASE}/api/v1/platform/features`)
+    const features = (await featuresRes.json()) as { ffPersistentTutor?: boolean }
+    if (!features.ffPersistentTutor) {
+      test.skip(true, 'ffPersistentTutor is false on the API')
+    }
+
+    const email = uniqueEmail('persist-instr')
+    const studEmail = uniqueEmail('persist-stud')
+    const { access_token: instrToken } = await apiSignup({
+      email,
+      password: PASSWORD,
+      displayName: 'Persist Instructor',
+    })
+    const { access_token: studToken } = await apiSignup({
+      email: studEmail,
+      password: PASSWORD,
+      displayName: 'Persist Student',
+    })
+    const course = await apiCreateCourse(instrToken, { title: 'Persistent Tutor Course' })
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
+    await enableAiTutor(instrToken, course.courseCode)
+
+    const createRes = await request.post(
+      `${API_BASE}/api/v1/courses/${course.courseCode}/tutor/sessions`,
+      { headers: authHeaders(studToken), data: {} },
+    )
+    expect(createRes.status()).toBe(201)
+    const session = (await createRes.json()) as { id: string }
+    expect(typeof session.id).toBe('string')
+
+    const getRes = await request.get(
+      `${API_BASE}/api/v1/courses/${course.courseCode}/tutor/sessions/${session.id}`,
+      { headers: { Authorization: `Bearer ${studToken}` } },
+    )
+    expect(getRes.status()).toBe(200)
+    const detail = (await getRes.json()) as { messages: unknown[] }
+    expect(Array.isArray(detail.messages)).toBe(true)
+  })
+
+  test('ai_tutor_opt_out returns 403 on tutor sessions', async ({ request }) => {
+    const featuresRes = await request.get(`${API_BASE}/api/v1/platform/features`)
+    const features = (await featuresRes.json()) as { ffPersistentTutor?: boolean }
+    if (!features.ffPersistentTutor) {
+      test.skip(true, 'ffPersistentTutor is false on the API')
+    }
+
+    const email = uniqueEmail('optout-instr')
+    const studEmail = uniqueEmail('optout-stud')
+    const { access_token: instrToken } = await apiSignup({
+      email,
+      password: PASSWORD,
+      displayName: 'Optout Instructor',
+    })
+    const { access_token: studToken } = await apiSignup({
+      email: studEmail,
+      password: PASSWORD,
+      displayName: 'Optout Student',
+    })
+    const course = await apiCreateCourse(instrToken, { title: 'Optout Tutor Course' })
+    await apiEnroll(instrToken, course.courseCode, studEmail, 'student', studToken)
+    await enableAiTutor(instrToken, course.courseCode)
+
+    const putRes = await request.put(`${API_BASE}/api/v1/settings/ai-tutor-opt-out`, {
+      headers: authHeaders(studToken),
+      data: { aiTutorOptOut: true },
+    })
+    expect(putRes.status()).toBe(200)
+
+    const res = await request.get(
+      `${API_BASE}/api/v1/courses/${course.courseCode}/tutor/sessions`,
+      { headers: { Authorization: `Bearer ${studToken}` } },
+    )
+    expect(res.status()).toBe(403)
+    const body = (await res.json()) as { error?: { message?: string } }
+    expect(body.error?.message).toContain('AI tutor is disabled for your account')
+  })
+})

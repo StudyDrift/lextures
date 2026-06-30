@@ -152,6 +152,7 @@ type Row struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
+	FFPersistentTutor               *bool
 	FFAPITokens                     *bool
 	FFBotSlack                      *bool
 	FFBotTeams                      *bool
@@ -324,6 +325,7 @@ type Write struct {
 	FFOnboardingFlow                *bool
 	FFStudyReminders                *bool
 	FFAIStudyBuddy                  *bool
+	FFPersistentTutor               *bool
 	FFAPITokens                     *bool
 	FFBotSlack                      *bool
 	FFBotTeams                      *bool
@@ -491,6 +493,7 @@ SELECT
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
+	ff_persistent_tutor,
 	ff_api_tokens,
 	ff_bot_slack,
 	ff_bot_teams,
@@ -654,6 +657,7 @@ WHERE id = 1
 		&r.FFOnboardingFlow,
 		&r.FFStudyReminders,
 		&r.FFAIStudyBuddy,
+		&r.FFPersistentTutor,
 		&r.FFAPITokens,
 		&r.FFBotSlack,
 		&r.FFBotTeams,
@@ -865,6 +869,7 @@ INSERT INTO settings.platform_app_settings (
 	ff_onboarding_flow,
 	ff_study_reminders,
 	ff_ai_study_buddy,
+	ff_persistent_tutor,
 	ff_api_tokens,
 	ff_bot_slack,
 	ff_bot_teams,
@@ -1033,6 +1038,7 @@ ON CONFLICT (id) DO UPDATE SET
 	ff_onboarding_flow = COALESCE(EXCLUDED.ff_onboarding_flow, settings.platform_app_settings.ff_onboarding_flow),
 	ff_study_reminders = COALESCE(EXCLUDED.ff_study_reminders, settings.platform_app_settings.ff_study_reminders),
 	ff_ai_study_buddy = COALESCE(EXCLUDED.ff_ai_study_buddy, settings.platform_app_settings.ff_ai_study_buddy),
+	ff_persistent_tutor = COALESCE(EXCLUDED.ff_persistent_tutor, settings.platform_app_settings.ff_persistent_tutor),
 	ff_api_tokens = COALESCE(EXCLUDED.ff_api_tokens, settings.platform_app_settings.ff_api_tokens),
 	ff_bot_slack = COALESCE(EXCLUDED.ff_bot_slack, settings.platform_app_settings.ff_bot_slack),
 	ff_bot_teams = COALESCE(EXCLUDED.ff_bot_teams, settings.platform_app_settings.ff_bot_teams),
@@ -1194,6 +1200,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.FFOnboardingFlow,
 		w.FFStudyReminders,
 		w.FFAIStudyBuddy,
+		w.FFPersistentTutor,
 		w.FFAPITokens,
 		w.FFBotSlack,
 		w.FFBotTeams,

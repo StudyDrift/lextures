@@ -110,6 +110,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.FFOnboardingFlow = mergeBool(db.FFOnboardingFlow, false)
 	out.FFStudyReminders = mergeBool(db.FFStudyReminders, false)
 	out.FFAIStudyBuddy = mergeBool(db.FFAIStudyBuddy, false)
+	out.FFPersistentTutor = mergeBool(db.FFPersistentTutor, false)
 	out.FFAPITokens = mergeBool(db.FFAPITokens, false)
 	out.FFBotSlack = mergeBool(db.FFBotSlack, false)
 	out.FFBotTeams = mergeBool(db.FFBotTeams, false)

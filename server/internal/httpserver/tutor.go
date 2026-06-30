@@ -29,6 +29,7 @@ func (d Deps) registerTutorRoutes(r chi.Router) {
 	r.Post("/api/v1/courses/{course_code}/tutor/message", d.handlePostTutorMessage())
 	r.Delete("/api/v1/courses/{course_code}/tutor/conversation", d.handleDeleteTutorConversation())
 	r.Get("/api/v1/me/token-budget", d.handleGetTokenBudget())
+	d.registerPersistentTutorRoutes(r)
 }
 
 // handleGetTutorConversation is GET /api/v1/courses/{course_code}/tutor/conversation.
@@ -47,6 +48,9 @@ func (d Deps) handleGetTutorConversation() http.HandlerFunc {
 		}
 		if !c.AiTutorEnabled {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "AI tutor is not enabled for this course.")
+			return
+		}
+		if !d.enforceAITutorAccess(w, r, userID) {
 			return
 		}
 
@@ -95,6 +99,9 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 		}
 		if !c.AiTutorEnabled {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "AI tutor is not enabled for this course.")
+			return
+		}
+		if !d.enforceAITutorAccess(w, r, userID) {
 			return
 		}
 
@@ -184,7 +191,7 @@ func (d Deps) handlePostTutorMessage() http.HandlerFunc {
 			}, fullText.Usage, true)
 		}
 		if streamErr != nil {
-			tutorSSEError(w, flusher, "I'm having trouble right now. Please try again in a moment.")
+			tutorSSEError(w, flusher, "The tutor is temporarily unavailable. Your conversation history is saved.")
 			return
 		}
 

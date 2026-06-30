@@ -13,6 +13,7 @@ import (
 	"github.com/lextures/lextures/server/internal/publicapi"
 	"github.com/lextures/lextures/server/internal/repos/apitokens"
 	subrepo "github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	tutorsessionrepo "github.com/lextures/lextures/server/internal/repos/tutorsession"
 	webhooksrepo "github.com/lextures/lextures/server/internal/repos/webhooks"
 	"github.com/lextures/lextures/server/internal/scheduler"
 )
@@ -79,6 +80,25 @@ func registerScheduledJobs(r *Registry, pool *pgxpool.Pool, cfg config.Config) {
 		}
 		if len(rows) > 0 {
 			slog.Info("scheduled.inactive_integration_alert", "flagged", len(rows))
+		}
+		return nil
+	}))
+
+	r.Register(scheduler.JobTypeTutorSessionRetention, HandlerFunc(func(ctx context.Context, _ json.RawMessage) error {
+		orgs, err := tutorsessionrepo.ListOrgRetentionDays(ctx, pool)
+		if err != nil {
+			return err
+		}
+		var total int64
+		for _, org := range orgs {
+			n, err := tutorsessionrepo.PurgeExpiredSessions(ctx, pool, org.OrgID, org.RetentionDays)
+			if err != nil {
+				return err
+			}
+			total += n
+		}
+		if total > 0 {
+			slog.Info("scheduled.tutor_session_retention", "deleted", total)
 		}
 		return nil
 	}))

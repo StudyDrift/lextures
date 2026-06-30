@@ -99,8 +99,8 @@ func TestIsDue(t *testing.T) {
 
 func TestBuiltinJobsCompile(t *testing.T) {
 	jobs := BuiltinJobs()
-	if len(jobs) != 5 {
-		t.Fatalf("expected 5 builtin jobs, got %d", len(jobs))
+	if len(jobs) != 6 {
+		t.Fatalf("expected 6 builtin jobs, got %d", len(jobs))
 	}
 	seen := map[string]bool{}
 	for _, j := range jobs {
