@@ -153,8 +153,9 @@ func (d Deps) handleAdminImportUpload() http.HandlerFunc {
 			return
 		}
 
-		if d.effectiveConfig().AvScanningEnabled {
-			client := clamav.NewClient(d.Config.ClamAVAddr, d.Config.ClamAVStub)
+		cfg := d.effectiveConfig()
+		if cfg.AvScanningEnabled {
+			client := clamav.NewClient(d.Config.ClamAVAddr, cfg.ClamAVStub)
 			scan, err := client.ScanStream(r.Context(), strings.NewReader(string(data)))
 			if err != nil {
 				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Virus scan failed.")

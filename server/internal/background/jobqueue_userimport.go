@@ -76,6 +76,7 @@ func (h userImportHandler) Execute(ctx context.Context, payload json.RawMessage)
 	}
 
 	cursor := job.CursorRow
+	parseErrorCount := len(parsed.Errors)
 	result, err := csvimport.Process(ctx, h.pool, csvimport.ProcessParams{
 		JobID:         job.ID,
 		OrgID:         job.OrgID,
@@ -87,7 +88,7 @@ func (h userImportHandler) Execute(ctx context.Context, payload json.RawMessage)
 		OnProgress: func(processed, errors int) {
 			_ = userimport.UpdateProgress(ctx, h.pool, job.ID, userimport.ProgressUpdate{
 				ProcessedRows: cursor + processed,
-				ErrorRows:     errors,
+				ErrorRows:     parseErrorCount + errors,
 				CursorRow:     cursor + processed,
 			})
 		},
@@ -110,13 +111,14 @@ func (h userImportHandler) Execute(ctx context.Context, payload json.RawMessage)
 
 	_ = os.Remove(*job.InputFilePath)
 
+	allErrors := append(parsed.Errors, result.Errors...)
 	status := userimport.StatusComplete
 	if err := userimport.Complete(ctx, h.pool, job.ID, userimport.CompleteParams{
 		Status:         status,
 		ResultFilePath: resultPath,
-		Errors:         result.Errors,
+		Errors:         allErrors,
 		ProcessedRows:  result.ProcessedRows,
-		ErrorRows:      result.ErrorRows,
+		ErrorRows:      len(allErrors),
 		CreatedCount:   result.CreatedCount,
 		UpdatedCount:   result.UpdatedCount,
 		Deactivated:    result.DeactivatedCount,
@@ -129,7 +131,7 @@ func (h userImportHandler) Execute(ctx context.Context, payload json.RawMessage)
 		"job_id", job.ID,
 		"org_id", job.OrgID,
 		"rows_processed", result.ProcessedRows,
-		"errors_count", result.ErrorRows,
+		"errors_count", len(allErrors),
 		"dry_run", job.DryRun,
 	)
 	return nil
