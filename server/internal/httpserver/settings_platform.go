@@ -112,6 +112,7 @@ type platformSettingsJSON struct {
 	ImpersonationEnabled            bool `json:"impersonationEnabled"`
 	BulkCsvImportEnabled            bool `json:"bulkCsvImportEnabled"`
 	AdminSearchEnabled              bool `json:"adminSearchEnabled"`
+	EmailTemplateEditorEnabled      bool `json:"emailTemplateEditorEnabled"`
 	MaintenanceBannerEnabled        bool `json:"maintenanceBannerEnabled"`
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      bool `json:"rtlEnabled"`
@@ -328,6 +329,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			ImpersonationEnabled:            merged.ImpersonationEnabled,
 			BulkCsvImportEnabled:            merged.BulkCsvImportEnabled,
 			AdminSearchEnabled:              merged.AdminSearchEnabled,
+			EmailTemplateEditorEnabled:      merged.EmailTemplateEditorEnabled,
 			MaintenanceBannerEnabled:        merged.MaintenanceBannerEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
@@ -517,6 +519,7 @@ type putPlatformBody struct {
 	ImpersonationEnabled            *bool `json:"impersonationEnabled"`
 	BulkCsvImportEnabled            *bool `json:"bulkCsvImportEnabled"`
 	AdminSearchEnabled              *bool `json:"adminSearchEnabled"`
+	EmailTemplateEditorEnabled      *bool `json:"emailTemplateEditorEnabled"`
 	MaintenanceBannerEnabled        *bool `json:"maintenanceBannerEnabled"`
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
 	BackupModuleEnabled             *bool `json:"backupModuleEnabled"`
@@ -856,6 +859,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("impersonationenabled", body.ImpersonationEnabled, func(v bool) { wr.ImpersonationEnabled = &v })
 		setBool("bulkcsvimportenabled", body.BulkCsvImportEnabled, func(v bool) { wr.BulkCsvImportEnabled = &v })
 		setBool("adminsearchenabled", body.AdminSearchEnabled, func(v bool) { wr.AdminSearchEnabled = &v })
+		setBool("emailtemplateeditorenabled", body.EmailTemplateEditorEnabled, func(v bool) { wr.EmailTemplateEditorEnabled = &v })
 		setBool("maintenancebannerenabled", body.MaintenanceBannerEnabled, func(v bool) { wr.MaintenanceBannerEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
@@ -1026,6 +1030,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			ImpersonationEnabled:            merged.ImpersonationEnabled,
 			BulkCsvImportEnabled:            merged.BulkCsvImportEnabled,
 			AdminSearchEnabled:              merged.AdminSearchEnabled,
+			EmailTemplateEditorEnabled:      merged.EmailTemplateEditorEnabled,
 			MaintenanceBannerEnabled:        merged.MaintenanceBannerEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,

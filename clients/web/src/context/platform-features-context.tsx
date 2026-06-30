@@ -66,6 +66,7 @@ export type PlatformFeatures = {
   impersonationEnabled: boolean
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
+  emailTemplateEditorEnabled: boolean
   maintenanceBannerEnabled: boolean
   ffZapierConnector: boolean
   ffCatalogIntegration: boolean
@@ -163,6 +164,7 @@ const defaultFeatures: PlatformFeatures = {
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
+  emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
@@ -259,6 +261,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   impersonationEnabled: false,
   bulkCsvImportEnabled: false,
   adminSearchEnabled: false,
+  emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
   ffZapierConnector: false,
     ffCatalogIntegration: false,
@@ -362,6 +365,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           impersonationEnabled: data.impersonationEnabled === true,
           bulkCsvImportEnabled: data.bulkCsvImportEnabled === true,
           adminSearchEnabled: data.adminSearchEnabled === true,
+          emailTemplateEditorEnabled: data.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: data.maintenanceBannerEnabled !== false,
           ffZapierConnector: data.ffZapierConnector === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
@@ -422,6 +426,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           impersonationEnabled: next.impersonationEnabled === true,
           bulkCsvImportEnabled: next.bulkCsvImportEnabled === true,
           adminSearchEnabled: next.adminSearchEnabled === true,
+          emailTemplateEditorEnabled: next.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: next.maintenanceBannerEnabled !== false,
           ffZapierConnector: next.ffZapierConnector === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,

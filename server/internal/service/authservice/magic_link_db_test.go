@@ -93,7 +93,7 @@ func TestMagicLink_Consume_Pg(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	const plaintext = "unit-test-magic-token-32bytes!!"
+	plaintext := "unit-test-magic-" + uuid.New().String()
 	h := sha256.Sum256([]byte(plaintext))
 	_, err = pool.Exec(ctx, `
 INSERT INTO "user".magic_link_tokens (user_id, token_hash, expires_at, redirect_to)

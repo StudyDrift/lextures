@@ -195,6 +195,7 @@ export default function App() {
             <Route path="/admin/consortium" element={<Pages.ConsortiumAgreementsPage />} />
             <Route path="/admin/accessibility" element={<Pages.AccessibilityServicesPage />} />
             <Route path="/admin/evaluations/templates" element={<Pages.EvaluationTemplates />} />
+            <Route path="/admin/email-templates" element={<Pages.AdminEmailTemplates />} />
             <Route path="/admin/evaluations/report" element={<Pages.EvaluationReport />} />
             <Route path="/admin/reviews" element={<Pages.CourseReviewsModerationPage />} />
             <Route path="/reports" element={<Pages.Reports />} />

@@ -75,8 +75,19 @@ LIMIT 1
 		t.Fatalf("upsert score: %v", err)
 	}
 	_, created, err := atrisk.CreateAlert(ctx, pool, enrollmentID, day, score, comp.TopFactor)
-	if err != nil || !created {
-		t.Fatalf("create alert: created=%v err=%v", created, err)
+	if err != nil {
+		t.Fatalf("create alert: %v", err)
+	}
+	if !created {
+		var exists bool
+		err = pool.QueryRow(ctx, `
+SELECT EXISTS (
+  SELECT 1 FROM analytics.at_risk_alerts
+  WHERE enrollment_id = $1 AND triggered_date = $2::date
+)`, enrollmentID, day.Format("2006-01-02")).Scan(&exists)
+		if err != nil || !exists {
+			t.Fatalf("create alert: created=false and no existing row: exists=%v err=%v", exists, err)
+		}
 	}
 	n, err := svc.RunForCourse(ctx, courseID, day)
 	if err != nil {

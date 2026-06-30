@@ -90,6 +90,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Enables cross-course search for org admins across users, courses, and content within their organization.',
   },
   {
+    key: 'emailTemplateEditorEnabled',
+    label: 'Email template editor',
+    description:
+      'Enables org admins to customize transactional email templates with merge fields, preview, and version history (plan 18.5).',
+  },
+  {
     key: 'maintenanceBannerEnabled',
     label: 'Maintenance banners',
     description:

@@ -94,6 +94,7 @@ type Row struct {
 	ImpersonationEnabled            *bool
 	BulkCsvImportEnabled            *bool
 	AdminSearchEnabled              *bool
+	EmailTemplateEditorEnabled      *bool
 	MaintenanceBannerEnabled        *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
@@ -263,6 +264,7 @@ type Write struct {
 	ImpersonationEnabled            *bool
 	BulkCsvImportEnabled            *bool
 	AdminSearchEnabled              *bool
+	EmailTemplateEditorEnabled      *bool
 	MaintenanceBannerEnabled        *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
@@ -430,6 +432,7 @@ SELECT
 	impersonation_enabled,
 	bulk_csv_import_enabled,
 	admin_search_enabled,
+	email_template_editor_enabled,
 	maintenance_banner_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
@@ -590,6 +593,7 @@ WHERE id = 1
 		&r.ImpersonationEnabled,
 		&r.BulkCsvImportEnabled,
 		&r.AdminSearchEnabled,
+		&r.EmailTemplateEditorEnabled,
 		&r.MaintenanceBannerEnabled,
 		&r.DataResidencyEnabled,
 		&r.AiDisclosureEnabled,
@@ -801,6 +805,7 @@ INSERT INTO settings.platform_app_settings (
 	impersonation_enabled,
 	bulk_csv_import_enabled,
 	admin_search_enabled,
+	email_template_editor_enabled,
 	maintenance_banner_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
@@ -966,6 +971,7 @@ ON CONFLICT (id) DO UPDATE SET
 	impersonation_enabled = COALESCE(EXCLUDED.impersonation_enabled, settings.platform_app_settings.impersonation_enabled),
 	bulk_csv_import_enabled = COALESCE(EXCLUDED.bulk_csv_import_enabled, settings.platform_app_settings.bulk_csv_import_enabled),
 	admin_search_enabled = COALESCE(EXCLUDED.admin_search_enabled, settings.platform_app_settings.admin_search_enabled),
+	email_template_editor_enabled = COALESCE(EXCLUDED.email_template_editor_enabled, settings.platform_app_settings.email_template_editor_enabled),
 	maintenance_banner_enabled = COALESCE(EXCLUDED.maintenance_banner_enabled, settings.platform_app_settings.maintenance_banner_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
 	rtl_enabled = COALESCE(EXCLUDED.rtl_enabled, settings.platform_app_settings.rtl_enabled),
@@ -1124,6 +1130,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.ImpersonationEnabled,
 		w.BulkCsvImportEnabled,
 		w.AdminSearchEnabled,
+		w.EmailTemplateEditorEnabled,
 		w.MaintenanceBannerEnabled,
 		w.DataResidencyEnabled,
 		w.AiDisclosureEnabled,
