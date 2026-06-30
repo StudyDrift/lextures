@@ -64,11 +64,11 @@ func (d Deps) handlePostLessonGenerator() http.HandlerFunc {
 		JobID string `json:"job_id"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.requireLessonGenerator(w) {
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireLessonGenerator(w) {
 			return
 		}
 		isStaff, err := enrollment.UserIsCourseStaff(r.Context(), d.Pool, courseCode, viewer)
@@ -167,11 +167,11 @@ func (d Deps) logAIInferenceAllowedBackground(ctx context.Context, userID uuid.U
 // handleGetLessonGeneratorJob is GET /api/v1/courses/{course_code}/lesson-generator/{job_id}
 func (d Deps) handleGetLessonGeneratorJob() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.requireLessonGenerator(w) {
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireLessonGenerator(w) {
 			return
 		}
 		jobID, err := uuid.Parse(chi.URLParam(r, "job_id"))
@@ -224,11 +224,11 @@ func (d Deps) handlePostLessonGeneratorRegenerate() http.HandlerFunc {
 		Component string `json:"component"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.requireLessonGenerator(w) {
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireLessonGenerator(w) {
 			return
 		}
 		isStaff, err := enrollment.UserIsCourseStaff(r.Context(), d.Pool, courseCode, viewer)
@@ -311,11 +311,11 @@ func (d Deps) handlePostLessonGeneratorSave() http.HandlerFunc {
 		ModuleID string `json:"module_id"`
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !d.requireLessonGenerator(w) {
-			return
-		}
 		courseCode, viewer, ok := d.requireCourseAccess(w, r)
 		if !ok {
+			return
+		}
+		if !d.requireLessonGenerator(w) {
 			return
 		}
 		isStaff, err := enrollment.UserIsCourseStaff(r.Context(), d.Pool, courseCode, viewer)
