@@ -110,6 +110,7 @@ type platformSettingsJSON struct {
 	AdminAuditLogEnabled            bool `json:"adminAuditLogEnabled"`
 	AdminConsoleEnabled             bool `json:"adminConsoleEnabled"`
 	ImpersonationEnabled            bool `json:"impersonationEnabled"`
+	AdminSearchEnabled              bool `json:"adminSearchEnabled"`
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
@@ -323,6 +324,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
 			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
 			ImpersonationEnabled:            merged.ImpersonationEnabled,
+			AdminSearchEnabled:              merged.AdminSearchEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
@@ -509,6 +511,7 @@ type putPlatformBody struct {
 	AdminAuditLogEnabled            *bool `json:"adminAuditLogEnabled"`
 	AdminConsoleEnabled             *bool `json:"adminConsoleEnabled"`
 	ImpersonationEnabled            *bool `json:"impersonationEnabled"`
+	AdminSearchEnabled              *bool `json:"adminSearchEnabled"`
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
 	BackupModuleEnabled             *bool `json:"backupModuleEnabled"`
 	RTLEnabled                      *bool `json:"rtlEnabled"`
@@ -845,6 +848,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("adminauditlogenabled", body.AdminAuditLogEnabled, func(v bool) { wr.AdminAuditLogEnabled = &v })
 		setBool("adminconsoleenabled", body.AdminConsoleEnabled, func(v bool) { wr.AdminConsoleEnabled = &v })
 		setBool("impersonationenabled", body.ImpersonationEnabled, func(v bool) { wr.ImpersonationEnabled = &v })
+		setBool("adminsearchenabled", body.AdminSearchEnabled, func(v bool) { wr.AdminSearchEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
@@ -1012,6 +1016,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			AdminAuditLogEnabled:            merged.AdminAuditLogEnabled,
 			AdminConsoleEnabled:             merged.AdminConsoleEnabled,
 			ImpersonationEnabled:            merged.ImpersonationEnabled,
+			AdminSearchEnabled:              merged.AdminSearchEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,

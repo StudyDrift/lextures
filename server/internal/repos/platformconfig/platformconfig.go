@@ -92,6 +92,7 @@ type Row struct {
 	AdminAuditLogEnabled            *bool
 	AdminConsoleEnabled             *bool
 	ImpersonationEnabled            *bool
+	AdminSearchEnabled              *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
 	RTLEnabled                      *bool
@@ -258,6 +259,7 @@ type Write struct {
 	AdminAuditLogEnabled            *bool
 	AdminConsoleEnabled             *bool
 	ImpersonationEnabled            *bool
+	AdminSearchEnabled              *bool
 	DataResidencyEnabled            *bool
 	AiDisclosureEnabled             *bool
 	RTLEnabled                      *bool
@@ -422,6 +424,7 @@ SELECT
 	admin_audit_log_enabled,
 	admin_console_enabled,
 	impersonation_enabled,
+	admin_search_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
 	rtl_enabled,
@@ -579,6 +582,7 @@ WHERE id = 1
 		&r.AdminAuditLogEnabled,
 		&r.AdminConsoleEnabled,
 		&r.ImpersonationEnabled,
+		&r.AdminSearchEnabled,
 		&r.DataResidencyEnabled,
 		&r.AiDisclosureEnabled,
 		&r.RTLEnabled,
@@ -787,6 +791,7 @@ INSERT INTO settings.platform_app_settings (
 	admin_audit_log_enabled,
 	admin_console_enabled,
 	impersonation_enabled,
+	admin_search_enabled,
 	data_residency_enabled,
 	ai_disclosure_enabled,
 	rtl_enabled,
@@ -949,6 +954,7 @@ ON CONFLICT (id) DO UPDATE SET
 	admin_audit_log_enabled = COALESCE(EXCLUDED.admin_audit_log_enabled, settings.platform_app_settings.admin_audit_log_enabled),
 	admin_console_enabled = COALESCE(EXCLUDED.admin_console_enabled, settings.platform_app_settings.admin_console_enabled),
 	impersonation_enabled = COALESCE(EXCLUDED.impersonation_enabled, settings.platform_app_settings.impersonation_enabled),
+	admin_search_enabled = COALESCE(EXCLUDED.admin_search_enabled, settings.platform_app_settings.admin_search_enabled),
 	data_residency_enabled = COALESCE(EXCLUDED.data_residency_enabled, settings.platform_app_settings.data_residency_enabled),
 	rtl_enabled = COALESCE(EXCLUDED.rtl_enabled, settings.platform_app_settings.rtl_enabled),
 	ai_disclosure_enabled = COALESCE(EXCLUDED.ai_disclosure_enabled, settings.platform_app_settings.ai_disclosure_enabled),
@@ -1104,6 +1110,7 @@ ON CONFLICT (id) DO UPDATE SET
 		w.AdminAuditLogEnabled,
 		w.AdminConsoleEnabled,
 		w.ImpersonationEnabled,
+		w.AdminSearchEnabled,
 		w.DataResidencyEnabled,
 		w.AiDisclosureEnabled,
 		w.RTLEnabled,

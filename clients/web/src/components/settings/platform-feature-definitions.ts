@@ -78,6 +78,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Allows org admins and global admins to view the application as a specific user (read-only) with a persistent banner and audit trail.',
   },
   {
+    key: 'adminSearchEnabled',
+    label: 'Admin org-wide search',
+    description:
+      'Enables cross-course search for org admins across users, courses, and content within their organization.',
+  },
+  {
     key: 'ffZapierConnector',
     label: 'Zapier / Make connector',
     description: 'Enable REST-hook webhook subscriptions from Zapier and Make.com automation platforms.',

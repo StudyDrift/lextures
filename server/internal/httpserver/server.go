@@ -264,6 +264,7 @@ func NewHandler(d Deps) http.Handler {
 	d.registerAdminAuditLogRoutes(r)
 	d.registerAdminConsoleRoutes(r)
 	d.registerImpersonationRoutes(r)
+	d.registerAdminSearchRoutes(r)
 	d.registerSecurityReportsRoutes(r)
 	d.registerDataResidencyRoutes(r)
 	d.registerAIDisclosureRoutes(r)
