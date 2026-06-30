@@ -324,6 +324,8 @@ type Config struct {
 	AdminAuditLogEnabled bool
 	// AdminConsoleEnabled gates the org admin console UI and /api/v1/admin-console/* APIs (plan 18.1).
 	AdminConsoleEnabled bool
+	// ImpersonationEnabled gates admin "view as student" impersonation (plan 18.3).
+	ImpersonationEnabled bool
 	// BulkCsvImportEnabled gates org-admin bulk user CSV import (plan 18.2).
 	BulkCsvImportEnabled bool
 	// AdminSearchEnabled gates org-wide admin search UI and /api/v1/admin/search APIs (plan 18.4).

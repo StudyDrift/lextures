@@ -70,6 +70,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffTranscripts: false,
     ffWebhooks: false,
     adminConsoleEnabled: false,
+    impersonationEnabled: false,
     bulkCsvImportEnabled: false,
     adminSearchEnabled: false,
     ffZapierConnector: false,

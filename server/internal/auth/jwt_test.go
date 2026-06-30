@@ -149,6 +149,33 @@ func TestJWTSignerLTIEmbedTicketRoundTrip(t *testing.T) {
 	}
 }
 
+func TestJWTSignerImpersonationRoundTrip(t *testing.T) {
+	signer := newTestSigner("unit-test-secret")
+	adminID := "11111111-1111-4111-8111-111111111111"
+	orgID := "22222222-2222-4222-8222-222222222222"
+
+	tok, imp, err := signer.SignImpersonation(adminID, userID, "student@school.edu", orgID, "demo")
+	if err != nil {
+		t.Fatalf("SignImpersonation: %v", err)
+	}
+	if imp.AdminID != adminID || imp.TargetUserID != userID || imp.JTI == "" {
+		t.Fatalf("imp: %#v", imp)
+	}
+	if JWTType(tok) != "impersonation" {
+		t.Fatalf("typ: %q", JWTType(tok))
+	}
+	got, err := signer.VerifyImpersonation(tok)
+	if err != nil {
+		t.Fatalf("VerifyImpersonation: %v", err)
+	}
+	if got.TargetUserID != userID || got.AdminID != adminID {
+		t.Fatalf("got: %#v", got)
+	}
+	if _, err := signer.Verify(context.Background(), tok); err == nil {
+		t.Fatal("login verify should reject impersonation token")
+	}
+}
+
 func TestJWTSignerLoginTokenIsNotLTIEmbedTicket(t *testing.T) {
 	signer := newTestSigner("unit-test-secret")
 	token, err := signer.Sign(context.Background(), userID, "a@b.com", "", "", nil)

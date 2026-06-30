@@ -1,8 +1,10 @@
 const ACCESS_TOKEN_KEY = 'studydrift_access_token'
 const ACCOUNT_TYPE_KEY = 'studydrift_account_type'
+const IMPERSONATION_TOKEN_KEY = 'studydrift_impersonation_token'
 
 /** In-memory fallback when `localStorage` is unavailable (tests, private mode). */
 let memoryToken: string | null = null
+let memoryImpersonationToken: string | null = null
 
 export function notifyAuthTokenListeners(): void {
   if (typeof window !== 'undefined') {
@@ -26,6 +28,40 @@ export function getAccessToken(): string | null {
   } catch {
     return memoryToken
   }
+}
+
+/** Active impersonation JWT when an admin is viewing as another user (plan 18.3). */
+export function getImpersonationToken(): string | null {
+  try {
+    return localStorage.getItem(IMPERSONATION_TOKEN_KEY) ?? memoryImpersonationToken
+  } catch {
+    return memoryImpersonationToken
+  }
+}
+
+export function setImpersonationToken(token: string): void {
+  try {
+    localStorage.setItem(IMPERSONATION_TOKEN_KEY, token)
+    memoryImpersonationToken = null
+  } catch {
+    memoryImpersonationToken = token
+  }
+  notifyAuthTokenListeners()
+}
+
+export function clearImpersonationToken(): void {
+  memoryImpersonationToken = null
+  try {
+    localStorage.removeItem(IMPERSONATION_TOKEN_KEY)
+  } catch {
+    /* ignore */
+  }
+  notifyAuthTokenListeners()
+}
+
+/** Bearer token for API calls — impersonation token takes precedence when active. */
+export function getBearerToken(): string | null {
+  return getImpersonationToken() ?? getAccessToken()
 }
 
 export function clearAccessToken(): void {

@@ -1,17 +1,24 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
+  fetchAdminConsoleCapabilities,
   fetchAdminUsers,
   patchAdminUser,
+  startImpersonation,
   type AdminUser,
   type Paginated,
 } from '../../lib/admin-console-api'
+import { startImpersonationSession } from '../../lib/impersonation'
 
 const ROLES = ['', 'student', 'instructor', 'ta', 'admin']
 const PAGE_SIZES = [25, 50, 100]
 
 export default function AdminUsers() {
+  const { t } = useTranslation('common')
   const titleId = useId()
+  const { impersonationEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [q, setQ] = useState('')
@@ -22,6 +29,21 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
+  const [canManage, setCanManage] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    void fetchAdminConsoleCapabilities()
+      .then((caps) => {
+        if (!cancelled) setCanManage(caps.canManage)
+      })
+      .catch(() => {
+        if (!cancelled) setCanManage(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -53,6 +75,27 @@ export default function AdminUsers() {
       setBusy(null)
     }
   }
+
+  async function viewAs(user: AdminUser) {
+    const name = user.displayName?.trim() || user.email
+    const msg = t('impersonation.confirm', {
+      name,
+      defaultValue:
+        'You are about to view the application as {{name}}. All writes will be blocked. Continue?',
+    })
+    if (!window.confirm(msg)) return
+    setBusy(user.id)
+    try {
+      const result = await startImpersonation(user.id)
+      startImpersonationSession(result.impersonation_token)
+      window.location.assign('/')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to start impersonation.')
+      setBusy(null)
+    }
+  }
+
+  const showViewAs = impersonationEnabled && canManage
 
   return (
     <div>
@@ -163,16 +206,28 @@ export default function AdminUsers() {
                   <td className="px-4 py-2">{user.orgRole ?? '—'}</td>
                   <td className="px-4 py-2">{user.active ? 'Active' : 'Deactivated'}</td>
                   <td className="px-4 py-2">
-                    {user.active ? (
-                      <button
-                        type="button"
-                        disabled={busy === user.id}
-                        onClick={() => void deactivate(user)}
-                        className="text-sm text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
-                      >
-                        Deactivate
-                      </button>
-                    ) : null}
+                    <div className="flex flex-wrap gap-3">
+                      {showViewAs && user.active && !user.orgRole ? (
+                        <button
+                          type="button"
+                          disabled={busy === user.id}
+                          onClick={() => void viewAs(user)}
+                          className="text-sm text-indigo-600 hover:underline disabled:opacity-50 dark:text-indigo-400"
+                        >
+                          {t('impersonation.viewAs', { defaultValue: 'View as' })}
+                        </button>
+                      ) : null}
+                      {user.active ? (
+                        <button
+                          type="button"
+                          disabled={busy === user.id}
+                          onClick={() => void deactivate(user)}
+                          className="text-sm text-red-600 hover:underline disabled:opacity-50 dark:text-red-400"
+                        >
+                          Deactivate
+                        </button>
+                      ) : null}
+                    </div>
                   </td>
                 </tr>
               ))

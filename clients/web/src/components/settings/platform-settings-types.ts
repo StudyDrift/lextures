@@ -48,6 +48,7 @@ export type PlatformSettingsPayload = {
   ffTranscripts: boolean
   ffWebhooks: boolean
   adminConsoleEnabled: boolean
+  impersonationEnabled: boolean
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
   ffZapierConnector: boolean

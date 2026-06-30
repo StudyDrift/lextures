@@ -27,6 +27,9 @@ import { LegalUpdateBanner } from '../legal/legal-update-banner'
 const IncidentStatusBanner = lazy(() =>
   import('../incident-status-banner').then((m) => ({ default: m.IncidentStatusBanner })),
 )
+const ImpersonationChrome = lazy(() =>
+  import('../impersonation-chrome').then((m) => ({ default: m.ImpersonationChrome })),
+)
 import { OfflineBanner } from '../offline-banner'
 import { SkipLink } from '../skip-link'
 import { useFocusOnRoute } from '../../lib/a11y'
@@ -37,6 +40,9 @@ function AppShellLayout() {
   const { focus } = useQuizShellFocus()
   const { readingFocus, setReadingFocus } = useReadingShellFocus()
   const hideChrome = Boolean(focus || readingFocus)
+  const shellClassName = `flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
+    focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
+  }`
 
   useFocusOnRoute()
 
@@ -51,11 +57,8 @@ function AppShellLayout() {
       <LocaleBootstrapSync />
       <ReadingRuler />
       <SkipLink />
-      <div
-        className={`flex h-dvh min-h-0 overflow-hidden bg-slate-50 dark:bg-neutral-950 ${
-          focus ? 'ring-2 ring-inset ring-indigo-900/35 dark:ring-amber-400/25' : ''
-        }`}
-      >
+      <Suspense fallback={null}>
+        <ImpersonationChrome shellClassName={shellClassName}>
         {!hideChrome ? <SideNav /> : null}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-neutral-900">
           {focus ? (
@@ -78,7 +81,8 @@ function AppShellLayout() {
             <Outlet />
           </main>
         </div>
-      </div>
+        </ImpersonationChrome>
+      </Suspense>
       </LmsExperienceRoot>
     </CourseNavFeaturesProvider>
   )

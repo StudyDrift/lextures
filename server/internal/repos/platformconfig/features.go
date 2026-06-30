@@ -135,6 +135,7 @@ func applyPlatformBools(out *config.Config, db *Row, def Defaults) {
 	out.IsoIsmsEnabled = mergeBool(db.IsoIsmsEnabled, false)
 	out.AdminAuditLogEnabled = mergeBool(db.AdminAuditLogEnabled, def.AdminAuditLogEnabled)
 	out.AdminConsoleEnabled = mergeBool(db.AdminConsoleEnabled, false)
+	out.ImpersonationEnabled = mergeBool(db.ImpersonationEnabled, false)
 	out.BulkCsvImportEnabled = mergeBool(db.BulkCsvImportEnabled, false)
 	out.AdminSearchEnabled = mergeBool(db.AdminSearchEnabled, false)
 	out.DataResidencyEnabled = mergeBool(db.DataResidencyEnabled, false)

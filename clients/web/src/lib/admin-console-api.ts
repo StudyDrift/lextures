@@ -216,6 +216,21 @@ export function formatStorageBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }
 
+export type ImpersonationStartResult = {
+  impersonation_token: string
+  expires_at: string
+  target: { id: string; email: string; displayName?: string | null }
+}
+
+export async function startImpersonation(targetUserId: string): Promise<ImpersonationStartResult> {
+  const res = await authorizedFetch('/api/v1/admin-console/impersonate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target_user_id: targetUserId }),
+  })
+  return parseJson(res)
+}
+
 export type ImportRowError = {
   row: number
   column: string

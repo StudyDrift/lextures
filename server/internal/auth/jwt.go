@@ -23,7 +23,8 @@ const (
 	AccessTokenTTL = 15 * time.Minute
 	defaultTokenTTL = AccessTokenTTL
 	mfaPendingTTL     = 60 * time.Second
-	ltiEmbedTicketTTL = 15 * time.Minute
+	ltiEmbedTicketTTL   = 15 * time.Minute
+	impersonationTTL    = 60 * time.Minute
 	// Rust jsonwebtoken's default validation allows 60 seconds of clock skew.
 	jwtExpiryLeeway = time.Minute
 )
@@ -57,6 +58,17 @@ type LTIEmbedTicket struct {
 	UserID   string
 	CourseID string
 	ItemID   string
+}
+
+// ImpersonationUser is the identity encoded in an admin impersonation JWT (plan 18.3).
+type ImpersonationUser struct {
+	AdminID      string
+	TargetUserID string
+	TargetEmail  string
+	OrgID        string
+	OrgSlug      string
+	JTI          string
+	ExpiresAt    time.Time
 }
 
 // Blocklist is the cross-instance JWT revocation store (plan 17.2 FR-4). A
@@ -317,6 +329,90 @@ func (s *JWTSigner) SignLTIEmbedTicket(userID, courseID, itemID string) (string,
 	})
 }
 
+// SignImpersonation issues a short-lived impersonation JWT for viewing as another user (plan 18.3).
+func (s *JWTSigner) SignImpersonation(adminID, targetUserID, targetEmail, orgID, orgSlug string) (string, ImpersonationUser, error) {
+	if !isUUID(adminID) || !isUUID(targetUserID) || strings.TrimSpace(targetEmail) == "" {
+		return "", ImpersonationUser{}, ErrInvalidToken
+	}
+	if orgID != "" && !isUUID(orgID) {
+		return "", ImpersonationUser{}, ErrInvalidToken
+	}
+	jti := uuid.NewString()
+	exp := s.now().Add(impersonationTTL)
+	claims := impersonationClaims{
+		Typ:           "impersonation",
+		Impersonation: true,
+		AdminID:       adminID,
+		Subject:       targetUserID,
+		Email:         targetEmail,
+		OrgID:         orgID,
+		OrgSlug:       orgSlug,
+		JTI:           jti,
+		Expires:       unixSeconds(exp),
+	}
+	tok, err := s.sign(claims)
+	if err != nil {
+		return "", ImpersonationUser{}, err
+	}
+	return tok, ImpersonationUser{
+		AdminID:      adminID,
+		TargetUserID: targetUserID,
+		TargetEmail:  targetEmail,
+		OrgID:        strings.TrimSpace(orgID),
+		OrgSlug:      strings.TrimSpace(orgSlug),
+		JTI:          jti,
+		ExpiresAt:    exp.UTC(),
+	}, nil
+}
+
+// VerifyImpersonation validates an impersonation JWT.
+func (s *JWTSigner) VerifyImpersonation(token string) (ImpersonationUser, error) {
+	var claims impersonationClaims
+	if err := s.verify(token, &claims); err != nil {
+		return ImpersonationUser{}, err
+	}
+	if claims.Typ != "impersonation" || !claims.Impersonation {
+		return ImpersonationUser{}, ErrInvalidToken
+	}
+	if !isUUID(claims.AdminID) || !isUUID(claims.Subject) || strings.TrimSpace(claims.Email) == "" || !isUUID(claims.JTI) {
+		return ImpersonationUser{}, ErrInvalidToken
+	}
+	if claims.OrgID != "" && !isUUID(claims.OrgID) {
+		return ImpersonationUser{}, ErrInvalidToken
+	}
+	if isExpired(claims.Expires, s.now()) {
+		return ImpersonationUser{}, ErrExpiredToken
+	}
+	return ImpersonationUser{
+		AdminID:      claims.AdminID,
+		TargetUserID: claims.Subject,
+		TargetEmail:  claims.Email,
+		OrgID:        strings.TrimSpace(claims.OrgID),
+		OrgSlug:      strings.TrimSpace(claims.OrgSlug),
+		JTI:          claims.JTI,
+		ExpiresAt:    time.Unix(claims.Expires, 0).UTC(),
+	}, nil
+}
+
+// JWTType returns the typ claim from a JWT payload without verifying the signature.
+func JWTType(token string) string {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return ""
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return ""
+	}
+	var peek struct {
+		Typ string `json:"typ"`
+	}
+	if err := json.Unmarshal(payload, &peek); err != nil {
+		return ""
+	}
+	return peek.Typ
+}
+
 // VerifyLTIEmbedTicket validates a short-lived LTI iframe token.
 func (s *JWTSigner) VerifyLTIEmbedTicket(token string) (LTIEmbedTicket, error) {
 	var claims ltiEmbedTicketClaims
@@ -416,6 +512,18 @@ type ltiEmbedTicketClaims struct {
 	CourseID string `json:"course_id"`
 	ItemID   string `json:"item_id"`
 	Expires  int64  `json:"exp"`
+}
+
+type impersonationClaims struct {
+	Typ           string `json:"typ"`
+	Impersonation bool   `json:"impersonation"`
+	AdminID       string `json:"admin_id"`
+	Subject       string `json:"sub"`
+	Email         string `json:"email"`
+	OrgID         string `json:"org_id,omitempty"`
+	OrgSlug       string `json:"org_slug,omitempty"`
+	JTI           string `json:"jti"`
+	Expires       int64  `json:"exp"`
 }
 
 func unixSeconds(t time.Time) int64 {

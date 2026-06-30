@@ -126,6 +126,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("iso_isms_enabled", w.IsoIsmsEnabled)
 	addBool("admin_audit_log_enabled", w.AdminAuditLogEnabled)
 	addBool("admin_console_enabled", w.AdminConsoleEnabled)
+	addBool("impersonation_enabled", w.ImpersonationEnabled)
 	addBool("bulk_csv_import_enabled", w.BulkCsvImportEnabled)
 	addBool("admin_search_enabled", w.AdminSearchEnabled)
 	addBool("data_residency_enabled", w.DataResidencyEnabled)

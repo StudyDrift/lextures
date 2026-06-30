@@ -625,5 +625,10 @@
   "gradingAgent.settings.fromTemplate.multiAssignmentHint": "Un brouillon d'agent de notation est créé pour chaque devoir sélectionné. Ouvrez n'importe quelle ligne du tableau des devoirs pour le configurer.",
   "gradingAgent.settings.fromTemplate.create": "Créer",
   "gradingAgent.settings.fromTemplate.creating": "Création…",
-  "gradingAgent.settings.fromTemplate.error": "Impossible de créer des agents de notation à partir de ce modèle."
+  "gradingAgent.settings.fromTemplate.error": "Impossible de créer des agents de notation à partir de ce modèle.",
+  "impersonation.viewAs": "Voir en tant que",
+  "impersonation.confirm": "Vous allez afficher l'application en tant que {{name}}. Toutes les écritures seront bloquées. Continuer ?",
+  "impersonation.banner.viewingAs": "Vous consultez en tant que {{name}}.",
+  "impersonation.banner.exit": "Quitter l'usurpation",
+  "impersonation.banner.exiting": "Sortie…"
 }

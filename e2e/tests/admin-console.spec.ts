@@ -92,8 +92,8 @@ test('AdminConsole: disabled feature returns 404', async () => {
   const res = await fetch(`${API_BASE}/api/v1/admin-console/overview`, {
     headers: authHeaders(access_token),
   })
-  // Default off — expect 404 unless another test enabled it globally.
-  if (res.status === 200) {
+  // Default off — expect 404 unless another test enabled it globally (403 when enabled).
+  if (res.status === 200 || res.status === 403) {
     test.skip(true, 'admin console already enabled globally')
   }
   expect(res.status).toBe(404)
@@ -122,8 +122,8 @@ test('AdminConsole: org admin workflow', async () => {
   const meRes = await fetch(`${API_BASE}/api/v1/me`, {
     headers: authHeaders(orgAdmin.access_token),
   })
-  const me = (await meRes.json()) as { id: string; orgId?: string }
-  const orgId = me.orgId ?? (await (await fetch(`${API_BASE}/api/v1/me/org-role-capabilities`, {
+  const me = (await meRes.json()) as { id: string; org?: { id: string }; orgId?: string }
+  const orgId = me.org?.id ?? me.orgId ?? (await (await fetch(`${API_BASE}/api/v1/me/org-role-capabilities`, {
     headers: authHeaders(orgAdmin.access_token),
   })).json() as { orgId: string }).orgId
 
