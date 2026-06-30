@@ -132,6 +132,7 @@ func patch(ctx context.Context, pool *pgxpool.Pool, w *Write) error {
 	addBool("email_template_editor_enabled", w.EmailTemplateEditorEnabled)
 	addBool("maintenance_banner_enabled", w.MaintenanceBannerEnabled)
 	addBool("custom_fields_enabled", w.CustomFieldsEnabled)
+	addBool("seat_management_enabled", w.SeatManagementEnabled)
 	addBool("data_residency_enabled", w.DataResidencyEnabled)
 	addBool("ai_disclosure_enabled", w.AiDisclosureEnabled)
 	addBool("rtl_enabled", w.RTLEnabled)

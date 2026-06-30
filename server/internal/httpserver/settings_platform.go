@@ -115,6 +115,7 @@ type platformSettingsJSON struct {
 	EmailTemplateEditorEnabled      bool `json:"emailTemplateEditorEnabled"`
 	MaintenanceBannerEnabled        bool `json:"maintenanceBannerEnabled"`
 	CustomFieldsEnabled             bool `json:"customFieldsEnabled"`
+	SeatManagementEnabled           bool `json:"seatManagementEnabled"`
 	DataResidencyEnabled            bool `json:"dataResidencyEnabled"`
 	RTLEnabled                      bool `json:"rtlEnabled"`
 	SecurityDisclosureModuleEnabled bool `json:"securityDisclosureModuleEnabled"`
@@ -333,6 +334,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			EmailTemplateEditorEnabled:      merged.EmailTemplateEditorEnabled,
 			MaintenanceBannerEnabled:        merged.MaintenanceBannerEnabled,
 			CustomFieldsEnabled:             merged.CustomFieldsEnabled,
+			SeatManagementEnabled:           merged.SeatManagementEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,
@@ -524,6 +526,7 @@ type putPlatformBody struct {
 	EmailTemplateEditorEnabled      *bool `json:"emailTemplateEditorEnabled"`
 	MaintenanceBannerEnabled        *bool `json:"maintenanceBannerEnabled"`
 	CustomFieldsEnabled             *bool `json:"customFieldsEnabled"`
+	SeatManagementEnabled           *bool `json:"seatManagementEnabled"`
 	DataResidencyEnabled            *bool `json:"dataResidencyEnabled"`
 	BackupModuleEnabled             *bool `json:"backupModuleEnabled"`
 	RTLEnabled                      *bool `json:"rtlEnabled"`
@@ -865,6 +868,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("emailtemplateeditorenabled", body.EmailTemplateEditorEnabled, func(v bool) { wr.EmailTemplateEditorEnabled = &v })
 		setBool("maintenancebannerenabled", body.MaintenanceBannerEnabled, func(v bool) { wr.MaintenanceBannerEnabled = &v })
 		setBool("customfieldsenabled", body.CustomFieldsEnabled, func(v bool) { wr.CustomFieldsEnabled = &v })
+		setBool("seatmanagementenabled", body.SeatManagementEnabled, func(v bool) { wr.SeatManagementEnabled = &v })
 		setBool("dataresidencyenabled", body.DataResidencyEnabled, func(v bool) { wr.DataResidencyEnabled = &v })
 		setBool("rtlenabled", body.RTLEnabled, func(v bool) { wr.RTLEnabled = &v })
 		setBool("securitydisclosuremoduleenabled", body.SecurityDisclosureModuleEnabled, func(v bool) { wr.SecurityDisclosureModuleEnabled = &v })
@@ -1037,6 +1041,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			EmailTemplateEditorEnabled:      merged.EmailTemplateEditorEnabled,
 			MaintenanceBannerEnabled:        merged.MaintenanceBannerEnabled,
 			CustomFieldsEnabled:             merged.CustomFieldsEnabled,
+			SeatManagementEnabled:           merged.SeatManagementEnabled,
 			DataResidencyEnabled:            merged.DataResidencyEnabled,
 			RTLEnabled:                      merged.RTLEnabled,
 			SecurityDisclosureModuleEnabled: merged.SecurityDisclosureModuleEnabled,

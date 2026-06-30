@@ -52,6 +52,7 @@ export type PlatformSettingsPayload = {
   bulkCsvImportEnabled: boolean
   adminSearchEnabled: boolean
   customFieldsEnabled: boolean
+  seatManagementEnabled: boolean
   emailTemplateEditorEnabled: boolean
   maintenanceBannerEnabled: boolean
   ffZapierConnector: boolean

@@ -31,6 +31,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/user"
 	"github.com/lextures/lextures/server/internal/validation"
 	"github.com/lextures/lextures/server/internal/service/learningevents"
+	"github.com/lextures/lextures/server/internal/service/licensesvc"
 
 	"github.com/lextures/lextures/server/internal/auth/hibp"
 )
@@ -115,6 +116,9 @@ var ErrOrgSuspended = errors.New("org suspended")
 // ErrEmailTaken is a unique email violation.
 var ErrEmailTaken = errors.New("email taken")
 
+// ErrSeatLimitReached is returned when signup would exceed the org seat license (plan 18.8).
+var ErrSeatLimitReached = errors.New("seat_limit_reached")
+
 // FieldError is client-facing input validation.
 type FieldError struct{ Message string }
 
@@ -194,6 +198,17 @@ WHERE id <> $1::uuid`, communication.PlatformInboxSenderID.String()).Scan(&human
 		return AuthResponse{}, err
 	}
 	firstHuman := humanCount == 0
+
+	bootstrapExempt := firstHuman && cfg.BootstrapAdminEmail != "" && email == cfg.BootstrapAdminEmail
+	if cfg.SeatManagementEnabled && !bootstrapExempt {
+		svc := licensesvc.New(pool, cfg)
+		if err := svc.CheckCanActivateTx(ctx, tx, uuid.Nil, organization.SeedDefaultOrgID); err != nil {
+			if errors.Is(err, licensesvc.ErrSeatLimitReached) {
+				return AuthResponse{}, ErrSeatLimitReached
+			}
+			return AuthResponse{}, err
+		}
+	}
 
 	row, err := user.InsertUserTx(ctx, tx, email, ph, dn)
 	if err != nil {
@@ -418,6 +433,10 @@ func HTTPErrorFor(err error) (status int, code, msg string) {
 	}
 	if errors.Is(err, ErrOrgSuspended) {
 		return http.StatusForbidden, apierr.CodeOrgSuspended, "This organization has been suspended."
+	}
+	if errors.Is(err, ErrSeatLimitReached) {
+		return http.StatusUnprocessableEntity, apierr.CodeSeatLimitReached,
+			"Your organization has reached its licensed seat limit. Contact your administrator to request additional seats."
 	}
 	if errors.Is(err, ErrOrgNotFound) {
 		return http.StatusNotFound, apierr.CodeNotFound, "No organization found for that sign-in address."

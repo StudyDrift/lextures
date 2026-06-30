@@ -95,6 +95,11 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
     description: 'Org metadata on users, courses, and enrollments (18.7).',
   },
   {
+    key: 'seatManagementEnabled',
+    label: 'Seat license management',
+    description: 'Org seat limits, utilization dashboards, and super-admin license management (18.8).',
+  },
+  {
     key: 'emailTemplateEditorEnabled',
     label: 'Email template editor',
     description:

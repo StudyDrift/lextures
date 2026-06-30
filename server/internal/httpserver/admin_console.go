@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strconv"
@@ -22,6 +23,7 @@ import (
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	auditservice "github.com/lextures/lextures/server/internal/service/adminaudit"
 	cfservice "github.com/lextures/lextures/server/internal/service/customfields"
+	"github.com/lextures/lextures/server/internal/service/licensesvc"
 )
 
 func (d Deps) adminConsoleEnabled(w http.ResponseWriter) bool {
@@ -140,6 +142,7 @@ func (d Deps) registerAdminConsoleRoutes(r chi.Router) {
 	d.registerAdminImportRoutes(r)
 	d.registerAdminEmailTemplateRoutes(r)
 	d.registerAdminCustomFieldRoutes(r)
+	d.registerAdminLicenseRoutes(r)
 }
 
 func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
@@ -192,6 +195,7 @@ func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
 			"canManage":           canManage,
 			"isGlobalAdmin":       ga,
 			"customFieldsEnabled": d.effectiveConfig().CustomFieldsEnabled,
+			"seatManagementEnabled": d.effectiveConfig().SeatManagementEnabled,
 		})
 	}
 }
@@ -234,6 +238,7 @@ func (d Deps) handleAdminConsoleOverview() http.HandlerFunc {
 			"pendingEnrollments": overview.PendingEnrollments,
 			"storageBytes":     overview.StorageBytes,
 			"recentAuditEvents": recent,
+			"license":          d.licenseOverviewJSON(r, orgID),
 		})
 	}
 }
@@ -354,6 +359,14 @@ WHERE id = $1 AND org_id = $2
 			}
 			d.recordAdminConsoleAudit(r, actor, &orgID, auditservice.EventUserDeactivate, "user", &targetID, nil, raw)
 		} else if body.Active != nil && *body.Active {
+			if err := d.licenseService().CheckCanActivate(ctx, targetID, orgID); err != nil {
+				if errors.Is(err, licensesvc.ErrSeatLimitReached) {
+					writeSeatLimitError(w)
+					return
+				}
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify seat license.")
+				return
+			}
 			_, err := d.Pool.Exec(ctx, `
 UPDATE "user".users SET deactivated_at = NULL, login_blocked = FALSE WHERE id = $1 AND org_id = $2
 `, targetID, orgID)
