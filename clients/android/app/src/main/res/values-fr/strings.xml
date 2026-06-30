@@ -102,6 +102,8 @@
     <string name="mobile_biometric_toggleDescription">Exige la biométrie après une minute en arrière-plan.</string>
     <string name="mobile_biometric_touchId">Touch ID</string>
     <string name="mobile_biometric_unlock">Déverrouiller</string>
+    <string name="mobile_common_retry">Réessayer</string>
+    <string name="mobile_common_save">Enregistrer</string>
     <string name="mobile_courses_due">À rendre %1$s</string>
     <string name="mobile_courses_empty_message">Les cours auxquels vous vous inscrivez apparaîtront ici.</string>
     <string name="mobile_courses_empty_title">Pas encore de cours</string>

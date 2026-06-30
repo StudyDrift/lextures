@@ -258,7 +258,9 @@
     "mobile.accommodations.windowUntil": "Activo hasta %@",
     "mobile.accommodations.emptyTitle": "Sin adaptaciones",
     "mobile.accommodations.emptyBody": "No tienes adaptaciones activas en este momento. Si esperabas alguna, comunícate con tu institución.",
-    "mobile.accommodations.loadError": "No se pudieron cargar tus adaptaciones."
+    "mobile.accommodations.loadError": "No se pudieron cargar tus adaptaciones.",
+    "mobile.common.retry": "Reintentar",
+    "mobile.common.save": "Guardar"
   },
   "plurals": {
     "mobile.pendingSync.waiting": {

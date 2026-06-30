@@ -258,7 +258,9 @@
     "mobile.accommodations.windowUntil": "[Äçţîṽë ûñţîľ %@]",
     "mobile.accommodations.emptyTitle": "[Ñö äççöɱɱöđäţîöñš]",
     "mobile.accommodations.emptyBody": "[Ÿöû đöñ’t ĥäṽë äñÿ äçţîṽë äççöɱɱöđäţîöñš ŕîğĥţ ñöŵ. Îƒ ÿöû ëẋþëçţ öñë, çöñţäçţ ÿöûŕ îñšţîţûţîöñ.]",
-    "mobile.accommodations.loadError": "[Çöûľđñ’t ľöäđ ÿöûŕ äççöɱɱöđäţîöñš.]"
+    "mobile.accommodations.loadError": "[Çöûľđñ’t ľöäđ ÿöûŕ äççöɱɱöđäţîöñš.]",
+    "mobile.common.retry": "[Ŕëţŕÿ]",
+    "mobile.common.save": "[Šäṽë]"
   },
   "plurals": {
     "mobile.pendingSync.waiting": {

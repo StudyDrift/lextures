@@ -102,6 +102,8 @@
     <string name="mobile_biometric_toggleDescription">[Ŕëqüîŕë ḅîöḿëţŕîçš äƒţëŕ öñë ḿîñüţë îñ ţĥë ḅäçķġŕöüñđ.]</string>
     <string name="mobile_biometric_touchId">[Ţöûçĥ ÎÐ]</string>
     <string name="mobile_biometric_unlock">[Ûñĺöçķ]</string>
+    <string name="mobile_common_retry">[Ŕëţŕÿ]</string>
+    <string name="mobile_common_save">[Šäṽë]</string>
     <string name="mobile_courses_due">[Ðûë %1$s]</string>
     <string name="mobile_courses_empty_message">[Çöüŕšëš ÿöü ëñŕöľľ îñ ŵîľľ šĥöŵ ûþ ĥëŕë.]</string>
     <string name="mobile_courses_empty_title">[Ñö çöüŕšëš ÿëţ]</string>

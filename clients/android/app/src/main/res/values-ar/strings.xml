@@ -102,6 +102,8 @@
     <string name="mobile_biometric_toggleDescription">يتطلب القياسات الحيوية بعد دقيقة في الخلفية.</string>
     <string name="mobile_biometric_touchId">Touch ID</string>
     <string name="mobile_biometric_unlock">فتح القفل</string>
+    <string name="mobile_common_retry">إعادة المحاولة</string>
+    <string name="mobile_common_save">حفظ</string>
     <string name="mobile_courses_due">مستحق %1$s</string>
     <string name="mobile_courses_empty_message">ستظهر المقررات التي تسجل فيها هنا.</string>
     <string name="mobile_courses_empty_title">لا توجد مقررات بعد</string>

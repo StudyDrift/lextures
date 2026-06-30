@@ -258,7 +258,9 @@
     "mobile.accommodations.windowUntil": "Actif jusqu’au %@",
     "mobile.accommodations.emptyTitle": "Aucun aménagement",
     "mobile.accommodations.emptyBody": "Vous n’avez aucun aménagement actif pour le moment. Si vous en attendez un, contactez votre établissement.",
-    "mobile.accommodations.loadError": "Impossible de charger vos aménagements."
+    "mobile.accommodations.loadError": "Impossible de charger vos aménagements.",
+    "mobile.common.retry": "Réessayer",
+    "mobile.common.save": "Enregistrer"
   },
   "plurals": {
     "mobile.pendingSync.waiting": {

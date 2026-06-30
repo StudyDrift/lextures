@@ -258,7 +258,9 @@
     "mobile.accommodations.windowUntil": "نشط حتى %@",
     "mobile.accommodations.emptyTitle": "لا توجد تسهيلات",
     "mobile.accommodations.emptyBody": "ليس لديك أي تسهيلات نشطة حاليًا. إذا كنت تتوقع وجودها، فتواصل مع مؤسستك.",
-    "mobile.accommodations.loadError": "تعذّر تحميل تسهيلاتك."
+    "mobile.accommodations.loadError": "تعذّر تحميل تسهيلاتك.",
+    "mobile.common.retry": "إعادة المحاولة",
+    "mobile.common.save": "حفظ"
   },
   "plurals": {
     "mobile.pendingSync.waiting": {

@@ -102,6 +102,8 @@
     <string name="mobile_biometric_toggleDescription">Require biometrics after the app has been in the background for a minute.</string>
     <string name="mobile_biometric_touchId">Touch ID</string>
     <string name="mobile_biometric_unlock">Unlock</string>
+    <string name="mobile_common_retry">Retry</string>
+    <string name="mobile_common_save">Save</string>
     <string name="mobile_courses_due">Due %1$s</string>
     <string name="mobile_courses_empty_message">Courses you enroll in will show up here.</string>
     <string name="mobile_courses_empty_title">No courses yet</string>
