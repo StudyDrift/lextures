@@ -408,6 +408,12 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
       'Persistent self-learner AI companion with course-grounded answers, memory, and proactive study prompts (plan 15.12).',
   },
   {
+    key: 'ffPersistentTutor',
+    label: 'Persistent AI tutor',
+    description:
+      'Named tutor sessions with conversation history, RAG citations, and instructor concept-confusion digests (plan 19.1).',
+  },
+  {
     key: 'ffAcademicCalendar',
     label: 'Academic calendar',
     description:

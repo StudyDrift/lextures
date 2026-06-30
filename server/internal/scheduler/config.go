@@ -9,6 +9,7 @@ const (
 	JobTypeRequestLogRetention = "scheduled.request_log_retention"
 	JobTypeDueDateReminder     = "scheduled.due_date_reminder"
 	JobTypeInactiveIntegration = "scheduled.inactive_integration_alert"
+	JobTypeTutorSessionRetention = "scheduled.tutor_session_retention"
 )
 
 // ScheduledJob is one configuration-driven entry in the schedule list. New
@@ -73,6 +74,13 @@ func BuiltinJobs() []ScheduledJob {
 			Spec:           "0 6 * * *", // daily 06:00 UTC
 			JobType:        JobTypeInactiveIntegration,
 			Description:    "Flag webhook subscriptions with no delivery activity in over 12 hours.",
+			DefaultEnabled: true,
+		},
+		{
+			Name:           "tutor_session_retention",
+			Spec:           "30 4 * * *", // daily 04:30 UTC
+			JobType:        JobTypeTutorSessionRetention,
+			Description:    "Purge tutor sessions older than each org's retention policy (plan 19.1).",
 			DefaultEnabled: true,
 		},
 	}

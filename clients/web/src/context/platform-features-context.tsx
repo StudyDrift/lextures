@@ -103,6 +103,7 @@ export type PlatformFeatures = {
   ffOnboardingFlow: boolean
   ffStudyReminders: boolean
   ffAiStudyBuddy: boolean
+  ffPersistentTutor: boolean
   ffCalendarFeeds: boolean
   aiStudyBuddyEnabled: boolean
   gdprModuleEnabled: boolean
@@ -202,6 +203,7 @@ const defaultFeatures: PlatformFeatures = {
   ffOnboardingFlow: false,
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
+  ffPersistentTutor: false,
   ffCalendarFeeds: true,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
@@ -300,6 +302,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   ffOnboardingFlow: false,
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
+  ffPersistentTutor: false,
   ffCalendarFeeds: true,
   aiStudyBuddyEnabled: false,
   gdprModuleEnabled: false,
@@ -405,6 +408,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffOnboardingFlow: data.ffOnboardingFlow === true,
           ffStudyReminders: data.ffStudyReminders === true,
           ffAiStudyBuddy: data.ffAiStudyBuddy === true,
+          ffPersistentTutor: data.ffPersistentTutor === true,
           ffCalendarFeeds: data.ffCalendarFeeds === true,
           aiStudyBuddyEnabled: data.aiStudyBuddyEnabled === true,
           gdprModuleEnabled: data.gdprModuleEnabled === true,
@@ -467,6 +471,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           ffOnboardingFlow: next.ffOnboardingFlow === true,
           ffStudyReminders: next.ffStudyReminders === true,
           ffAiStudyBuddy: next.ffAiStudyBuddy === true,
+          ffPersistentTutor: next.ffPersistentTutor === true,
           ffCalendarFeeds: next.ffCalendarFeeds === true,
           aiStudyBuddyEnabled: next.aiStudyBuddyEnabled === true,
           gdprModuleEnabled: next.gdprModuleEnabled === true,
