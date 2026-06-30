@@ -27,15 +27,32 @@ func isolatedMigrationDSN(t *testing.T) string {
 	if err != nil {
 		t.Fatalf("parse DATABASE_URL: %v", err)
 	}
-	dbName := "migrate_it_" + strings.ReplaceAll(uuid.New().String(), "-", "")[:20]
-	adminCfg.Database = "postgres"
-	adminConn, err := pgx.ConnectConfig(ctx, adminCfg)
-	if err != nil {
-		t.Fatalf("admin connect: %v", err)
+	maintenanceDB := adminCfg.Database
+	if maintenanceDB == "" {
+		maintenanceDB = "postgres"
 	}
+	dbName := "migrate_it_" + strings.ReplaceAll(uuid.New().String(), "-", "")[:20]
+
+	var adminConn *pgx.Conn
+	for _, db := range []string{maintenanceDB, "postgres"} {
+		if db == "" {
+			continue
+		}
+		cfg := *adminCfg
+		cfg.Database = db
+		adminConn, err = pgx.ConnectConfig(ctx, &cfg)
+		if err == nil {
+			maintenanceDB = db
+			break
+		}
+	}
+	if adminConn == nil {
+		t.Skipf("cannot provision isolated rollback database: admin connect: %v", err)
+	}
+
 	if _, err := adminConn.Exec(ctx, "CREATE DATABASE "+pgx.Identifier{dbName}.Sanitize()); err != nil {
 		_ = adminConn.Close(ctx)
-		t.Fatalf("create database: %v", err)
+		t.Skipf("cannot provision isolated rollback database: create: %v", err)
 	}
 	_ = adminConn.Close(ctx)
 
@@ -49,8 +66,9 @@ func isolatedMigrationDSN(t *testing.T) string {
 	t.Cleanup(func() {
 		cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
-		adminCfg.Database = "postgres"
-		conn, err := pgx.ConnectConfig(cleanupCtx, adminCfg)
+		cfg := *adminCfg
+		cfg.Database = maintenanceDB
+		conn, err := pgx.ConnectConfig(cleanupCtx, &cfg)
 		if err != nil {
 			return
 		}

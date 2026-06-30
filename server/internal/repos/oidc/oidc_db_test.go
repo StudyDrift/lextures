@@ -29,7 +29,7 @@ func TestListByUserID_and_Delete_Pg(t *testing.T) {
 		t.Fatalf("pool: %v", err)
 	}
 	defer pool.Close()
-	em := "oidc-" + time.Now().Format("20060102150405") + "@e.com"
+	em := "oidc-" + uuid.New().String() + "@e.com"
 	ph, err := auth.HashPassword("longpassword0")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
@@ -43,13 +43,15 @@ func TestListByUserID_and_Delete_Pg(t *testing.T) {
 		t.Fatal(err)
 	}
 	var id1, id2 uuid.UUID
+	sub1 := "g-sub-" + uuid.New().String()
 	err = pool.QueryRow(ctx, `INSERT INTO settings.user_oidc_identities (user_id, provider, sub, email)
-VALUES ($1, 'google', 'g-sub-1', 'a@a.com') RETURNING id`, uid).Scan(&id1)
+VALUES ($1, 'google', $2, 'a@a.com') RETURNING id`, uid, sub1).Scan(&id1)
 	if err != nil {
 		t.Fatalf("insert oidc1: %v", err)
 	}
+	sub2 := "ap-sub-" + uuid.New().String()
 	err = pool.QueryRow(ctx, `INSERT INTO settings.user_oidc_identities (user_id, provider, sub, email)
-VALUES ($1, 'apple', 'ap-sub', NULL) RETURNING id`, uid).Scan(&id2)
+VALUES ($1, 'apple', $2, NULL) RETURNING id`, uid, sub2).Scan(&id2)
 	if err != nil {
 		t.Fatalf("insert oidc2: %v", err)
 	}
