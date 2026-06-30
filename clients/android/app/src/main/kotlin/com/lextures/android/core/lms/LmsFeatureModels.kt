@@ -140,6 +140,35 @@ data class NotificationsPage(
     val unreadCount: Int = 0,
 )
 
+/** Row from GET `/api/v1/me/notification-preferences`. */
+@Serializable
+data class NotificationPreference(
+    val eventType: String,
+    val emailEnabled: Boolean = true,
+    val pushEnabled: Boolean = true,
+    val smsEnabled: Boolean = false,
+    val digestMode: String = "instant",
+)
+
+@Serializable
+data class NotificationPreferencesResponse(
+    val preferences: List<NotificationPreference> = emptyList(),
+)
+
+@Serializable
+data class NotificationPreferencePatch(
+    val eventType: String,
+    val emailEnabled: Boolean? = null,
+    val pushEnabled: Boolean? = null,
+    val smsEnabled: Boolean? = null,
+    val digestMode: String? = null,
+)
+
+@Serializable
+data class NotificationPreferencesUpdate(
+    val preferences: List<NotificationPreferencePatch>,
+)
+
 @Serializable
 data class DeviceTokenRegistration(
     val token: String,
@@ -471,5 +500,48 @@ object AttendanceStatusInfo {
         else -> status.replace('_', ' ').replaceFirstChar { it.uppercase() }
     }
 }
+
+// region Planner (todos + calendar, M2.1)
+
+@Serializable
+data class CalendarCourseFeed(
+    val courseId: String,
+    val courseCode: String,
+    val title: String,
+    val feedUrl: String,
+)
+
+@Serializable
+data class CalendarTokenInfo(
+    val hasToken: Boolean? = null,
+    val personalFeedUrl: String? = null,
+    val expiresAt: String? = null,
+    val courseFeeds: List<CalendarCourseFeed>? = null,
+)
+
+@Serializable
+data class CalendarTokenCreated(
+    val token: String,
+    val feedUrl: String? = null,
+    val expiresAt: String? = null,
+)
+
+@Serializable
+data class AcademicCalendarEvent(
+    val id: String,
+    val orgId: String,
+    val termId: String? = null,
+    val eventType: String,
+    val eventName: String,
+    val startDate: String,
+    val endDate: String? = null,
+    val allDay: Boolean = false,
+    val notes: String? = null,
+)
+
+@Serializable
+data class AcademicCalendarEventsResponse(
+    val events: List<AcademicCalendarEvent> = emptyList(),
+)
 
 // endregion

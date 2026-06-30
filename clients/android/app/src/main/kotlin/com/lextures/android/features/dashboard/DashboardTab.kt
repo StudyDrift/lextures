@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
 import com.lextures.android.core.design.HeroBrush
 import com.lextures.android.core.design.LexturesColors
@@ -79,7 +81,11 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSectionHeader
 import com.lextures.android.features.home.LmsSkeletonList
+import com.lextures.android.features.planner.PlannerScreen
+import com.lextures.android.features.planner.PlannerTab
+import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.profile.AnnouncementsScreen
+import com.lextures.android.features.profile.NotificationPreferencesScreen
 import com.lextures.android.features.profile.NotificationsScreen
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -129,7 +135,12 @@ fun DashboardTab(
     var openDueItem by remember { mutableStateOf<DueItem?>(null) }
     var openBacklog by remember { mutableStateOf<StaffBacklog?>(null) }
     var showNotifications by remember { mutableStateOf(false) }
+    var showNotificationPreferences by remember { mutableStateOf(false) }
     var showAnnouncements by remember { mutableStateOf(false) }
+    var showPlanner by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val offline = remember { OfflineService.get(context) }
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
@@ -226,11 +237,21 @@ fun DashboardTab(
         return
     }
 
+    if (showNotificationPreferences) {
+        NotificationPreferencesScreen(
+            session = session,
+            onBack = { showNotificationPreferences = false },
+            modifier = modifier,
+        )
+        return
+    }
+
     if (showNotifications) {
         NotificationsScreen(
             session = session,
             shell = shell,
             onBack = { showNotifications = false },
+            onOpenPreferences = { showNotificationPreferences = true },
             modifier = modifier,
         )
         return
@@ -240,6 +261,18 @@ fun DashboardTab(
         AnnouncementsScreen(
             session = session,
             onBack = { showAnnouncements = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showPlanner) {
+        PlannerScreen(
+            session = session,
+            offline = offline,
+            isOnline = isOnline,
+            initialTab = PlannerTab.Todos,
+            onBack = { showPlanner = false },
             modifier = modifier,
         )
         return
@@ -337,7 +370,24 @@ fun DashboardTab(
             }
         }
 
-        item { LmsSectionHeader("Due this week", Icons.Default.CalendarMonth) }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                LmsSectionHeader("Due this week", Icons.Default.CalendarMonth, modifier = Modifier.weight(1f))
+                Text(
+                    text = context.getString(R.string.mobile_planner_viewAll),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = accentColor(),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .clickable { showPlanner = true }
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                )
+            }
+        }
         if (dueThisWeek.isEmpty()) {
             item {
                 LmsCard {

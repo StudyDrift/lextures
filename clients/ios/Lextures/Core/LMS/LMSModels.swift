@@ -12,7 +12,12 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var published: Bool?
     var catalogNickname: String?
     var notebookEnabled: Bool?
+    var calendarEnabled: Bool?
+    var orgId: String?
+    var termId: String?
     var viewerEnrollmentRoles: [String]?
+
+    var isCalendarEnabled: Bool { calendarEnabled != false }
 
     var displayTitle: String {
         let nick = catalogNickname?.trimmingCharacters(in: .whitespacesAndNewlines)

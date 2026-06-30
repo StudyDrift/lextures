@@ -16,6 +16,9 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.lextures.android.R
 import com.lextures.android.app.MainActivity
 import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.NotificationLogic
+import com.lextures.android.core.lms.NotificationPreferencesCache
+import com.lextures.android.core.notebook.NotebookStore
 import com.lextures.android.core.routing.DeepLinkDestination
 import com.lextures.android.core.routing.DeepLinkRouter
 import kotlinx.coroutines.CoroutineScope
@@ -101,8 +104,9 @@ class PushManager private constructor(private val appContext: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun showLocalNotification(title: String, body: String, actionUrl: String?) {
+    fun showLocalNotification(title: String, body: String, actionUrl: String?, eventType: String? = null) {
         if (!hasNotificationPermission()) return
+        if (!shouldShowPush(eventType)) return
         ensureNotificationChannel()
         val intent = Intent(appContext, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -123,6 +127,15 @@ class PushManager private constructor(private val appContext: Context) {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .build()
         NotificationManagerCompat.from(appContext).notify(actionUrl.hashCode(), notification)
+    }
+
+    private fun shouldShowPush(eventType: String?): Boolean {
+        if (eventType.isNullOrBlank()) return true
+        val token = accessTokenProvider?.invoke()?.takeIf { it.isNotBlank() } ?: return true
+        val ownerKey = NotebookStore.jwtSubject(token) ?: return true
+        val preferences = NotificationPreferencesCache.load(appContext, ownerKey)
+        if (preferences.isEmpty()) return true
+        return NotificationLogic.isPushEnabled(eventType, preferences)
     }
 
     private fun ensureNotificationChannel() {

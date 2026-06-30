@@ -168,6 +168,36 @@ object LmsApi {
         }
     }
 
+    suspend fun fetchNotificationPreferences(accessToken: String): List<NotificationPreference> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request("/api/v1/me/notification-preferences", accessToken = accessToken)
+            decode<NotificationPreferencesResponse>(body).preferences
+        }
+
+    suspend fun updateNotificationPreferences(
+        preferences: List<NotificationPreference>,
+        accessToken: String,
+    ): List<NotificationPreference> = withContext(Dispatchers.IO) {
+        val update = NotificationPreferencesUpdate(
+            preferences = preferences.map {
+                NotificationPreferencePatch(
+                    eventType = it.eventType,
+                    emailEnabled = it.emailEnabled,
+                    pushEnabled = it.pushEnabled,
+                    smsEnabled = it.smsEnabled,
+                    digestMode = it.digestMode,
+                )
+            },
+        )
+        val (body, _) = client.request(
+            path = "/api/v1/me/notification-preferences",
+            method = "PUT",
+            body = json.encodeToString(NotificationPreferencesUpdate.serializer(), update),
+            accessToken = accessToken,
+        )
+        decode<NotificationPreferencesResponse>(body).preferences
+    }
+
     // Announcements (org broadcasts)
 
     suspend fun fetchMyBroadcasts(accessToken: String): List<Broadcast> = withContext(Dispatchers.IO) {
@@ -447,5 +477,39 @@ object LmsApi {
             }
         }
         reminderTime
+    }
+
+    // Planner (todos + calendar, M2.1)
+
+    suspend fun fetchCalendarTokenInfo(accessToken: String): CalendarTokenInfo = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/calendar-token", accessToken = accessToken)
+        decode(body)
+    }
+
+    suspend fun createCalendarToken(accessToken: String): CalendarTokenCreated = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/me/calendar-token",
+            method = "POST",
+            body = "{}",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun fetchAcademicCalendarEvents(
+        orgId: String,
+        termId: String?,
+        accessToken: String,
+    ): List<AcademicCalendarEvent> = withContext(Dispatchers.IO) {
+        var path = "/api/v1/orgs/${encodePath(orgId)}/calendar/events"
+        if (!termId.isNullOrEmpty()) {
+            path += "?term_id=${encodeQuery(termId)}"
+        }
+        val (body, code) = client.requestRaw(path, accessToken = accessToken)
+        when (code) {
+            404 -> emptyList()
+            in 200..299 -> decode<AcademicCalendarEventsResponse>(body).events
+            else -> throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
     }
 }

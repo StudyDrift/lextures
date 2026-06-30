@@ -34,7 +34,7 @@ struct MeProfile: Decodable {
 // MARK: - Notifications
 
 /// Row from GET `/api/v1/me/notifications`.
-struct AppNotification: Decodable, Identifiable, Hashable {
+struct AppNotification: Codable, Identifiable, Hashable {
     var id: String
     var eventType: String
     var title: String
@@ -42,19 +42,102 @@ struct AppNotification: Decodable, Identifiable, Hashable {
     var actionUrl: String?
     var isRead: Bool
     var createdAt: String
+
+    init(
+        id: String,
+        eventType: String,
+        title: String,
+        body: String,
+        actionUrl: String? = nil,
+        isRead: Bool = false,
+        createdAt: String = ""
+    ) {
+        self.id = id
+        self.eventType = eventType
+        self.title = title
+        self.body = body
+        self.actionUrl = actionUrl
+        self.isRead = isRead
+        self.createdAt = createdAt
+    }
 }
 
-struct NotificationsPage: Decodable {
+struct NotificationsPage: Codable {
     var notifications: [AppNotification]
     var unreadCount: Int
 
     enum CodingKeys: String, CodingKey { case notifications, unreadCount }
+
+    init(notifications: [AppNotification] = [], unreadCount: Int = 0) {
+        self.notifications = notifications
+        self.unreadCount = unreadCount
+    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         notifications = try container.decodeIfPresent([AppNotification].self, forKey: .notifications) ?? []
         unreadCount = try container.decodeIfPresent(Int.self, forKey: .unreadCount) ?? 0
     }
+}
+
+/// Row from GET `/api/v1/me/notification-preferences`.
+struct NotificationPreference: Codable, Identifiable, Hashable {
+    var id: String { eventType }
+    var eventType: String
+    var emailEnabled: Bool
+    var pushEnabled: Bool
+    var smsEnabled: Bool
+    var digestMode: String
+
+    enum CodingKeys: String, CodingKey {
+        case eventType, emailEnabled, pushEnabled, smsEnabled, digestMode
+    }
+
+    init(
+        eventType: String,
+        emailEnabled: Bool = true,
+        pushEnabled: Bool = true,
+        smsEnabled: Bool = false,
+        digestMode: String = "instant"
+    ) {
+        self.eventType = eventType
+        self.emailEnabled = emailEnabled
+        self.pushEnabled = pushEnabled
+        self.smsEnabled = smsEnabled
+        self.digestMode = digestMode
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        eventType = try container.decode(String.self, forKey: .eventType)
+        emailEnabled = try container.decodeIfPresent(Bool.self, forKey: .emailEnabled) ?? true
+        pushEnabled = try container.decodeIfPresent(Bool.self, forKey: .pushEnabled) ?? true
+        smsEnabled = try container.decodeIfPresent(Bool.self, forKey: .smsEnabled) ?? false
+        digestMode = try container.decodeIfPresent(String.self, forKey: .digestMode) ?? "instant"
+    }
+}
+
+struct NotificationPreferencesResponse: Decodable {
+    var preferences: [NotificationPreference]
+
+    enum CodingKeys: String, CodingKey { case preferences }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        preferences = try container.decodeIfPresent([NotificationPreference].self, forKey: .preferences) ?? []
+    }
+}
+
+struct NotificationPreferencePatch: Encodable {
+    var eventType: String
+    var emailEnabled: Bool?
+    var pushEnabled: Bool?
+    var smsEnabled: Bool?
+    var digestMode: String?
+}
+
+struct NotificationPreferencesUpdate: Encodable {
+    var preferences: [NotificationPreferencePatch]
 }
 
 struct DeviceTokenRegistration: Encodable {
@@ -408,6 +491,64 @@ struct AttendanceSessionDetail: Decodable {
 
 struct AttendanceSessionsResponse: Decodable {
     var sessions: [AttendanceSession]
+}
+
+// MARK: - Planner (todos + calendar, M2.1)
+
+/// Row from GET `/api/v1/me/notebook-tasks`.
+struct NotebookTask: Decodable, Identifiable, Hashable {
+    var id: String
+    var courseCode: String
+    var notebookPageId: String
+    var taskText: String
+    var completed: Bool
+    var dueAt: String?
+    var createdAt: String?
+    var updatedAt: String?
+}
+
+struct NotebookTasksResponse: Decodable {
+    var tasks: [NotebookTask]
+}
+
+struct CalendarCourseFeed: Decodable, Hashable {
+    var courseId: String
+    var courseCode: String
+    var title: String
+    var feedUrl: String
+}
+
+struct CalendarTokenStatus: Decodable {
+    var hasToken: Bool?
+}
+
+struct CalendarTokenInfo: Decodable {
+    var hasToken: Bool?
+    var personalFeedUrl: String?
+    var expiresAt: String?
+    var courseFeeds: [CalendarCourseFeed]?
+}
+
+struct CalendarTokenCreated: Decodable {
+    var token: String
+    var feedUrl: String?
+    var expiresAt: String?
+}
+
+struct AcademicCalendarEvent: Decodable, Identifiable, Hashable {
+    var id: String
+    var orgId: String
+    var termId: String?
+    var eventType: String
+    var eventName: String
+    var startDate: String
+    var endDate: String?
+    var allDay: Bool
+    var notes: String?
+}
+
+struct AcademicCalendarEventsResponse: Decodable {
+    var events: [AcademicCalendarEvent]
 }
 
 /// Human label + tint key for an attendance status string.

@@ -11,6 +11,9 @@ object OfflineCacheKey {
     fun courseStructure(courseCode: String): String = "course:$courseCode:structure"
     fun myGrades(courseCode: String): String = "course:$courseCode:my-grades"
     fun itemDetail(courseCode: String, itemId: String): String = "course:$courseCode:item:$itemId"
+    fun plannerSnapshot(): String = "planner:snapshot"
+    fun notificationsPage(): String = "notifications:page"
+    fun notificationPreferences(): String = "notifications:preferences"
 }
 
 data class Cached<T>(

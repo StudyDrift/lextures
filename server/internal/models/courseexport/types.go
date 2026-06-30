@@ -138,12 +138,14 @@ type CourseImportRequest struct {
 }
 
 type CanvasImportInclude struct {
-	Modules     bool `json:"modules"`
-	Assignments bool `json:"assignments"`
-	Quizzes     bool `json:"quizzes"`
-	Enrollments bool `json:"enrollments"`
-	Grades      bool `json:"grades"`
-	Settings    bool `json:"settings"`
+	Modules       bool `json:"modules"`
+	Assignments   bool `json:"assignments"`
+	Quizzes       bool `json:"quizzes"`
+	Enrollments   bool `json:"enrollments"`
+	Grades        bool `json:"grades"`
+	Settings      bool `json:"settings"`
+	Files         bool `json:"files"`
+	Announcements bool `json:"announcements"`
 }
 
 type CourseCanvasImportRequest struct {

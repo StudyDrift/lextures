@@ -96,6 +96,7 @@ fun ProfileTab(
     var confirmingSignOut by remember { mutableStateOf(false) }
     var confirmingClearCache by remember { mutableStateOf(false) }
     var showNotifications by remember { mutableStateOf(false) }
+    var showNotificationPreferences by remember { mutableStateOf(false) }
     var showDeviceSessions by remember { mutableStateOf(false) }
     var showEditProfile by remember { mutableStateOf(false) }
     var showAccommodations by remember { mutableStateOf(false) }
@@ -113,11 +114,21 @@ fun ProfileTab(
     var localeExpanded by remember { mutableStateOf(false) }
     var localeError by remember { mutableStateOf<String?>(null) }
 
+    if (showNotificationPreferences) {
+        NotificationPreferencesScreen(
+            session = session,
+            onBack = { showNotificationPreferences = false },
+            modifier = modifier,
+        )
+        return
+    }
+
     if (showNotifications) {
         NotificationsScreen(
             session = session,
             shell = shell,
             onBack = { showNotifications = false },
+            onOpenPreferences = { showNotificationPreferences = true },
             modifier = modifier,
         )
         return

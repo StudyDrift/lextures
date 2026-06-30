@@ -182,6 +182,15 @@ enum LMSAPI {
         )
     }
 
+    static func fetchNotebookTasks(accessToken: String) async throws -> [NotebookTask] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/notebook-tasks",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(NotebookTasksResponse.self, from: data).tasks
+    }
+
     // MARK: - Notebooks (server sync, parity with web `student-notebook-sync`)
 
     struct NotebookEntry: Decodable {

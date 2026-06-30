@@ -17,10 +17,32 @@ data class NotebookTaskUpsert(
     val dueAt: String?,
 )
 
+@Serializable
+data class NotebookTask(
+    val id: String,
+    val courseCode: String,
+    val notebookPageId: String,
+    val taskText: String,
+    val completed: Boolean,
+    val dueAt: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null,
+)
+
+@Serializable
+data class NotebookTasksResponse(
+    val tasks: List<NotebookTask> = emptyList(),
+)
+
 /** Server-side notebook tasks (dashboard sync, parity with web `notebook-tasks-api`). */
 object NotebookTasksApi {
     private val client = ApiClient()
     private val json = Json { ignoreUnknownKeys = true }
+
+    suspend fun fetch(accessToken: String): List<NotebookTask> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/notebook-tasks", accessToken = accessToken)
+        json.decodeFromString<NotebookTasksResponse>(body).tasks
+    }
 
     suspend fun upsert(task: NotebookTaskUpsert, accessToken: String): Unit = withContext(Dispatchers.IO) {
         client.request(

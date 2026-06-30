@@ -120,8 +120,15 @@ final class PushManager: NSObject {
     }
 
     func handleForegroundNotification(_ notification: UNNotification) {
-        // System banner is shown via willPresent delegate; badge sync happens via shell refresh.
         _ = notification
+    }
+
+    private static func shouldPresentPush(eventType: String?) -> Bool {
+        guard let eventType, !eventType.isEmpty else { return true }
+        let ownerKey = NotebookStore.jwtSubject(from: shared.accessTokenProvider?()) ?? "anonymous"
+        let preferences = NotificationPreferencesCache.load(ownerKey: ownerKey)
+        if preferences.isEmpty { return true }
+        return NotificationLogic.isPushEnabled(eventType: eventType, preferences: preferences)
     }
 }
 
@@ -130,7 +137,13 @@ extension PushManager: UNUserNotificationCenterDelegate {
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
-        [.banner, .sound, .badge]
+        let userInfo = notification.request.content.userInfo
+        let eventType = (userInfo["event_type"] as? String)
+            ?? (userInfo["eventType"] as? String)
+        let show = await MainActor.run {
+            Self.shouldPresentPush(eventType: eventType)
+        }
+        return show ? [.banner, .sound, .badge] : []
     }
 
     nonisolated func userNotificationCenter(

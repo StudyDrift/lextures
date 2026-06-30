@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.filled.Forum
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -38,6 +40,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,6 +57,12 @@ import com.lextures.android.core.lms.AppNotification
 import com.lextures.android.core.lms.Broadcast
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.lms.NotificationCategory
+import com.lextures.android.core.lms.NotificationFilter
+import com.lextures.android.core.lms.NotificationLogic
+import com.lextures.android.core.lms.NotificationsPage
+import com.lextures.android.core.offline.OfflineCacheKey
+import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.core.routing.DeepLinkRouter
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
@@ -60,22 +71,32 @@ import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
 import kotlinx.coroutines.launch
+import kotlinx.serialization.serializer
 
-/** In-app notification inbox: filter chips, mark-read on tap, mark-all-read. */
+/** In-app notification inbox: category filters, mark-read on tap, mark-all-read, preferences. */
 @Composable
 fun NotificationsScreen(
     session: AuthSession,
     shell: HomeShellState,
     onBack: () -> Unit,
+    onOpenPreferences: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val offline = remember { OfflineService.get(context) }
 
-    var filter by remember { mutableStateOf("all") }
+    var filter by remember { mutableStateOf(NotificationFilter.All.id) }
     var notifications by remember { mutableStateOf<List<AppNotification>>(emptyList()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var staleLabel by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
+
+    val staleOfflineLabel = notificationsStaleOfflineLabel()
+    val markAllReadLabel = notificationsMarkAllReadLabel()
+    val markAllReadMutationLabel = notificationsMarkAllReadMutationLabel()
+    val markReadMutationLabel = notificationsMarkReadMutationLabel()
 
     BackHandler(onBack = onBack)
 
@@ -84,17 +105,33 @@ fun NotificationsScreen(
         loading = true
         errorMessage = null
         try {
-            val page = LmsApi.fetchNotifications(token)
+            val (page, cached) = offline.cachedFetch(
+                key = OfflineCacheKey.notificationsPage(),
+                accessToken = token,
+                serializer = serializer<NotificationsPage>(),
+            ) {
+                LmsApi.fetchNotifications(token)
+            }
             notifications = page.notifications
             shell.unreadNotifications = page.unreadCount
+            staleLabel = if (cached?.isStale(offline.networkMonitor.isOnline.value) == true) {
+                cached.lastUpdatedLabel()
+            } else {
+                null
+            }
         } catch (e: Exception) {
-            errorMessage = session.mapError(e)
+            if (notifications.isEmpty()) {
+                errorMessage = session.mapError(e)
+            } else {
+                staleLabel = staleLabel ?: staleOfflineLabel
+            }
         } finally {
             loading = false
         }
     }
 
-    val visible = if (filter == "unread") notifications.filter { !it.isRead } else notifications
+    val activeFilter = NotificationFilter.entries.firstOrNull { it.id == filter } ?: NotificationFilter.All
+    val visible = NotificationLogic.filter(notifications, activeFilter)
 
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -107,15 +144,22 @@ fun NotificationsScreen(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
             Text(
-                text = "Notifications",
+                text = notificationsTitle(),
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
                 modifier = Modifier.weight(1f),
             )
+            IconButton(onClick = onOpenPreferences) {
+                Icon(
+                    Icons.Default.Settings,
+                    contentDescription = notificationsPreferencesTitle(),
+                    tint = textPrimary(),
+                )
+            }
             if (notifications.any { !it.isRead }) {
                 Text(
-                    text = "Mark all read",
+                    text = markAllReadLabel,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
                     color = accentColor(),
@@ -124,9 +168,19 @@ fun NotificationsScreen(
                         .clickable {
                             val token = accessToken ?: return@clickable
                             scope.launch {
-                                runCatching { LmsApi.markAllNotificationsRead(token) }.onSuccess {
+                                runCatching {
+                                    offline.enqueueMutation(
+                                        method = "POST",
+                                        path = "/api/v1/me/notifications/read-all",
+                                        bodyJson = "{}",
+                                        label = markAllReadMutationLabel,
+                                        accessToken = token,
+                                    )
+                                }.onSuccess {
                                     notifications = notifications.map { it.copy(isRead = true) }
                                     shell.unreadNotifications = 0
+                                }.onFailure {
+                                    errorMessage = session.mapError(it)
                                 }
                             }
                         }
@@ -142,10 +196,16 @@ fun NotificationsScreen(
         ) {
             item {
                 LmsSegmentedChips(
-                    options = listOf("all" to "All", "unread" to "Unread"),
+                    options = NotificationFilter.entries.map { it.id to filterLabel(it) },
                     selectedId = filter,
                     onSelect = { filter = it },
                 )
+            }
+
+            staleLabel?.let { label ->
+                item {
+                    Text(text = label, fontSize = 12.sp, color = textSecondary())
+                }
             }
 
             errorMessage?.let { message ->
@@ -158,12 +218,20 @@ fun NotificationsScreen(
                 item {
                     LmsEmptyState(
                         icon = Icons.Default.Notifications,
-                        title = if (filter == "unread") "No unread notifications" else "No notifications",
-                        message = "Course activity and updates will appear here.",
+                        title = when (activeFilter) {
+                            NotificationFilter.Unread -> notificationsEmptyUnreadTitle()
+                            else -> notificationsEmptyAllTitle()
+                        },
+                        message = notificationsEmptyMessage(),
                     )
                 }
             } else {
                 items(visible, key = { it.id }) { notification ->
+                    val readLabel = if (notification.isRead) {
+                        notificationsAccessibilityReadLabel()
+                    } else {
+                        notificationsAccessibilityUnreadLabel()
+                    }
                     LmsCard(
                         accent = if (notification.isRead) null else LexturesColors.BrandTeal,
                         onClick = {
@@ -174,12 +242,23 @@ fun NotificationsScreen(
                                 }
                                 shell.unreadNotifications = (shell.unreadNotifications - 1).coerceAtLeast(0)
                                 scope.launch {
-                                    runCatching { LmsApi.markNotificationRead(notification.id, token) }
+                                    runCatching {
+                                        offline.enqueueMutation(
+                                            method = "POST",
+                                            path = "/api/v1/me/notifications/${notification.id}/read",
+                                            bodyJson = "{}",
+                                            label = markReadMutationLabel,
+                                            accessToken = token,
+                                        )
+                                    }
                                 }
                             }
                             notification.actionUrl?.let { url ->
                                 shell.openDeepLink(DeepLinkRouter.resolve(url))
                             }
+                        },
+                        modifier = Modifier.semantics {
+                            contentDescription = "$readLabel. ${notification.title}. ${notification.body}"
                         },
                     ) {
                         Row(
@@ -217,6 +296,12 @@ fun NotificationsScreen(
                                         color = textSecondary(),
                                     )
                                 }
+                                Text(
+                                    text = eventTypeLabel(notification.eventType),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = accentColor(),
+                                )
                                 if (notification.body.isNotEmpty()) {
                                     Text(
                                         text = notification.body,
@@ -244,11 +329,12 @@ fun NotificationsScreen(
     }
 }
 
-private fun iconFor(eventType: String): ImageVector = when {
-    eventType.contains("grade") -> Icons.Default.Verified
-    eventType.contains("message") || eventType.contains("inbox") -> Icons.Default.Email
-    eventType.contains("due") || eventType.contains("assignment") -> Icons.Default.Schedule
-    eventType.contains("announcement") || eventType.contains("broadcast") -> Icons.Default.Campaign
+private fun iconFor(eventType: String): ImageVector = when (NotificationLogic.category(eventType)) {
+    NotificationCategory.Grades -> Icons.Default.Verified
+    NotificationCategory.Messages -> Icons.Default.Email
+    NotificationCategory.Assignments, NotificationCategory.Reminders -> Icons.Default.Schedule
+    NotificationCategory.Announcements -> Icons.Default.Campaign
+    NotificationCategory.Discussions -> Icons.Default.Forum
     else -> Icons.Default.Notifications
 }
 
