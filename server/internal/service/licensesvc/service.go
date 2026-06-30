@@ -86,11 +86,14 @@ func (s *Service) CheckCanActivateTx(ctx context.Context, tx pgx.Tx, userID, org
 	}
 	var maxSeats, usedSeats int
 	err = tx.QueryRow(ctx, `
-SELECT COALESCE(l.max_seats, -1), COALESCE(l.used_seats, tenant.count_learner_seats($1))
-FROM (SELECT $1::uuid AS org_id) sub
-LEFT JOIN tenant.licenses l ON l.org_id = sub.org_id
-FOR UPDATE OF l
+SELECT max_seats, COALESCE(used_seats, tenant.count_learner_seats($1))
+FROM tenant.licenses
+WHERE org_id = $1
+FOR UPDATE
 `, orgID).Scan(&maxSeats, &usedSeats)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil
+	}
 	if err != nil {
 		return err
 	}
