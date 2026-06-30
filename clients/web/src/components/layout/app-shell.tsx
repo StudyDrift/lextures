@@ -57,31 +57,7 @@ function AppShellLayout() {
       <LocaleBootstrapSync />
       <ReadingRuler />
       <SkipLink />
-      <Suspense
-        fallback={
-          <div className={shellClassName}>
-            {!hideChrome ? <SideNav /> : null}
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-neutral-900">
-              {focus ? (
-                <QuizFocusTopBar model={focus} />
-              ) : readingFocus ? (
-                <ReadingFocusTopBar />
-              ) : (
-                <TopBar />
-              )}
-              <OfflineBanner />
-              <LegalUpdateBanner />
-              <main
-                id="main-content"
-                tabIndex={-1}
-                className="lms-scope lms-print-root flex min-h-0 min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto outline-none dark:bg-neutral-900"
-              >
-                <Outlet />
-              </main>
-            </div>
-          </div>
-        }
-      >
+      <Suspense fallback={null}>
         <ImpersonationChrome shellClassName={shellClassName}>
         {!hideChrome ? <SideNav /> : null}
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-white dark:bg-neutral-900">

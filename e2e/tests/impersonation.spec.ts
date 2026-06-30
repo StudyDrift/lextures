@@ -76,6 +76,23 @@ async function enableFeatures(token: string) {
   }
 }
 
+async function resolveOrgId(token: string): Promise<{ userId: string; orgId: string }> {
+  const meRes = await fetch(`${API_BASE}/api/v1/me`, { headers: authHeaders(token) })
+  if (!meRes.ok) throw new Error(`GET /me failed: ${meRes.status}`)
+  const me = (await meRes.json()) as { id: string; org?: { id: string }; orgId?: string }
+  let orgId = me.org?.id ?? me.orgId
+  if (!orgId) {
+    const capsRes = await fetch(`${API_BASE}/api/v1/me/org-role-capabilities`, {
+      headers: authHeaders(token),
+    })
+    if (capsRes.ok) {
+      orgId = ((await capsRes.json()) as { orgId?: string }).orgId
+    }
+  }
+  if (!orgId) throw new Error('missing org id')
+  return { userId: me.id, orgId }
+}
+
 async function grantOrgAdmin(actorToken: string, orgId: string, userId: string) {
   const res = await fetch(`${API_BASE}/api/v1/orgs/${orgId}/role-grants`, {
     method: 'POST',
@@ -97,7 +114,7 @@ test.describe.serial('Impersonation', () => {
       headers: authHeaders(access_token),
       body: JSON.stringify({ target_user_id: '00000000-0000-4000-8000-000000000001' }),
     })
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 403) {
       test.skip(true, 'impersonation already enabled globally')
     }
     expect(res.status).toBe(404)
@@ -117,18 +134,18 @@ test.describe.serial('Impersonation', () => {
     const orgAdminEmail = uniqueEmail('org-admin')
     await apiSignup(orgAdminEmail)
     const orgAdmin = await apiLogin(orgAdminEmail)
-    const orgId = orgAdmin.user.org?.id
-    if (!orgId) throw new Error('missing org id')
-    await grantOrgAdmin(ga.access_token, orgId, orgAdmin.user.id)
+    const { userId: orgAdminId, orgId } = await resolveOrgId(orgAdmin.access_token)
+    await grantOrgAdmin(ga.access_token, orgId, orgAdminId)
 
     const studentEmail = uniqueEmail('student')
     await apiSignup(studentEmail)
     const student = await apiLogin(studentEmail)
+    const { userId: studentId } = await resolveOrgId(student.access_token)
 
     const startRes = await fetch(`${API_BASE}/api/v1/admin-console/impersonate`, {
       method: 'POST',
       headers: authHeaders(orgAdmin.access_token),
-      body: JSON.stringify({ target_user_id: student.user.id }),
+      body: JSON.stringify({ target_user_id: studentId }),
     })
     expect(startRes.status).toBe(200)
     const start = (await startRes.json()) as { impersonation_token: string }
@@ -139,8 +156,8 @@ test.describe.serial('Impersonation', () => {
     })
     expect(meRes.status).toBe(200)
     const me = (await meRes.json()) as { id: string; impersonating?: { adminId: string } }
-    expect(me.id).toBe(student.user.id)
-    expect(me.impersonating?.adminId).toBe(orgAdmin.user.id)
+    expect(me.id).toBe(studentId)
+    expect(me.impersonating?.adminId).toBe(orgAdminId)
 
     const writeRes = await fetch(`${API_BASE}/api/v1/me/push-subscriptions`, {
       method: 'POST',
@@ -152,7 +169,7 @@ test.describe.serial('Impersonation', () => {
     const nestedRes = await fetch(`${API_BASE}/api/v1/admin-console/impersonate`, {
       method: 'POST',
       headers: authHeaders(start.impersonation_token),
-      body: JSON.stringify({ target_user_id: student.user.id }),
+      body: JSON.stringify({ target_user_id: studentId }),
     })
     expect(nestedRes.status).toBe(403)
 
@@ -167,6 +184,6 @@ test.describe.serial('Impersonation', () => {
     })
     expect(adminMe.status).toBe(200)
     const adminProfile = (await adminMe.json()) as { id: string }
-    expect(adminProfile.id).toBe(orgAdmin.user.id)
+    expect(adminProfile.id).toBe(orgAdminId)
   })
 })

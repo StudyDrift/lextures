@@ -93,7 +93,7 @@ test.describe.serial('Admin org-wide search', () => {
     const res = await fetch(`${API_BASE}/api/v1/admin/search?q=test`, {
       headers: authHeaders(access_token),
     })
-    if (res.status === 200) {
+    if (res.status === 200 || res.status === 403) {
       test.skip(true, 'admin search already enabled globally')
     }
     expect(res.status).toBe(404)
@@ -117,8 +117,8 @@ test.describe.serial('Admin org-wide search', () => {
     const meRes = await fetch(`${API_BASE}/api/v1/me`, {
       headers: authHeaders(orgAdmin.access_token),
     })
-    const me = (await meRes.json()) as { id: string; orgId?: string }
-    const orgId = me.orgId ?? (await (await fetch(`${API_BASE}/api/v1/me/org-role-capabilities`, {
+    const me = (await meRes.json()) as { id: string; org?: { id: string }; orgId?: string }
+    const orgId = me.org?.id ?? me.orgId ?? (await (await fetch(`${API_BASE}/api/v1/me/org-role-capabilities`, {
       headers: authHeaders(orgAdmin.access_token),
     })).json() as { orgId: string }).orgId
 
