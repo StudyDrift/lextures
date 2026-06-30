@@ -1,7 +1,6 @@
 package com.lextures.android.features.courses
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,15 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,13 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.activity.compose.BackHandler
 import com.lextures.android.core.auth.AuthSession
-import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
-import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.coverBrush
-import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
-import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.AttendanceSession
 import androidx.compose.ui.platform.LocalContext
 import com.lextures.android.core.design.OfflineBanner
@@ -68,12 +62,8 @@ import com.lextures.android.features.home.LmsEmptyState
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
-
-private data class ModuleGroup(
-    val id: String,
-    val title: String,
-    val items: List<CourseStructureItem>,
-)
+import com.lextures.android.core.lms.ModuleContentLogic
+import com.lextures.android.core.lms.ModulesProgressSnapshot
 
 /**
  * Course home: gradient hero + segmented sections
@@ -93,26 +83,44 @@ fun CourseDetailScreen(
 
     var section by rememberSaveable(course.courseCode) { mutableStateOf("modules") }
     var items by remember { mutableStateOf<List<CourseStructureItem>>(emptyList()) }
+    var progress by remember { mutableStateOf<ModulesProgressSnapshot?>(null) }
     var cacheLabel by remember { mutableStateOf<String?>(null) }
     var hasAttendanceSessions by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
 
     var openItem by remember { mutableStateOf<CourseStructureItem?>(null) }
+    var lockDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
     var openAttendanceSession by remember { mutableStateOf<AttendanceSession?>(null) }
     var openBacklogItem by remember { mutableStateOf<GradingBacklogItem?>(null) }
+
+    val emptyCourseTitle = moduleEmptyCourseTitle()
+    val emptyCourseHint = moduleEmptyCourseHint()
+    val lockedDefault = moduleLockedDefaultLabel()
 
     BackHandler(onBack = onBack)
 
     openItem?.let { selected ->
-        ItemDetailScreen(
+        ModuleItemRouteScreen(
             session = session,
             course = course,
             item = selected,
             onBack = { openItem = null },
+            onProgressChanged = { refreshProgress(accessToken, course, offline) { progress = it } },
             modifier = modifier,
         )
         return
+    }
+
+    lockDialog?.let { (title, message) ->
+        AlertDialog(
+            onDismissRequest = { lockDialog = null },
+            title = { Text(title) },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { lockDialog = null }) { Text("OK") }
+            },
+        )
     }
 
     openAttendanceSession?.let { selected ->
@@ -155,6 +163,7 @@ fun CourseDetailScreen(
             items = result.first
             val cached = result.second
             cacheLabel = if (cached != null && cached.isStale(isOnline)) cached.lastUpdatedLabel() else null
+            refreshProgress(accessToken, course, offline) { progress = it }
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -170,17 +179,7 @@ fun CourseDetailScreen(
         if (course.viewerIsStaff) add("grading" to "Grading")
     }
 
-    val groups = remember(items) {
-        val modules = items.filter { it.isModule }.sortedBy { it.sortOrder }
-        val children = items.filter { !it.isModule && it.parentId != null }.groupBy { it.parentId }
-        val grouped = modules.map { module ->
-            ModuleGroup(module.id, module.title, (children[module.id] ?: emptyList()).sortedBy { it.sortOrder })
-        }
-        val orphans = items
-            .filter { !it.isModule && it.parentId == null && it.kind != "heading" }
-            .sortedBy { it.sortOrder }
-        if (orphans.isEmpty()) grouped else grouped + ModuleGroup("__orphans__", "Other items", orphans)
-    }
+    val groups = remember(items) { ModuleContentLogic.buildModuleGroups(items) }
 
     Column(modifier = modifier) {
         Row(
@@ -315,62 +314,56 @@ fun CourseDetailScreen(
                         item {
                             LmsEmptyState(
                                 icon = Icons.Default.Layers,
-                                title = "No content yet",
-                                message = "Modules and assignments will appear here once published.",
+                                title = emptyCourseTitle,
+                                message = emptyCourseHint,
                             )
                         }
                     } else {
-                        itemsIndexed(groups, key = { _, group -> group.id }) { index, group ->
-                            LmsCard {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(26.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(coverBrush(course.courseCode)),
-                                        contentAlignment = Alignment.Center,
-                                    ) {
-                                        Text(
-                                            text = "${index + 1}",
-                                            style = LexturesType.display(13, FontWeight.Bold),
-                                            color = Color.White,
+                        item {
+                            ModuleList(
+                                course = course,
+                                groups = groups,
+                                progress = progress,
+                                onSelectItem = { openItem = it },
+                                onLockedItem = { item, reason ->
+                                    lockDialog = item.title to (
+                                        reason?.message ?: lockedDefault
                                         )
-                                    }
-                                    Text(
-                                        text = group.title,
-                                        style = LexturesType.display(17),
-                                        color = textPrimary(),
-                                    )
-                                }
-
-                                if (group.items.isEmpty()) {
-                                    Text(
-                                        text = "Nothing in this module yet",
-                                        fontSize = 12.sp,
-                                        fontStyle = FontStyle.Italic,
-                                        color = textSecondary(),
-                                    )
-                                } else {
-                                    group.items.forEachIndexed { itemIndex, item ->
-                                        if (itemIndex > 0) {
-                                            HorizontalDivider()
-                                        }
-                                        ModuleItemRow(
-                                            item = item,
-                                            openable = ItemKind.isOpenable(item.kind),
-                                            onClick = { openItem = item },
-                                        )
-                                    }
-                                }
-                            }
+                                },
+                            )
                         }
                     }
                 }
             }
         }
+    }
+}
+
+private suspend fun refreshProgress(
+    accessToken: String?,
+    course: CourseSummary,
+    offline: OfflineService,
+    onResult: (ModulesProgressSnapshot?) -> Unit,
+) {
+    if (!course.viewerIsStudent) {
+        onResult(null)
+        return
+    }
+    val token = accessToken ?: return
+    runCatching {
+        offline.cachedFetch(
+            key = OfflineCacheKey.modulesProgress(course.courseCode),
+            accessToken = token,
+            serializer = ModulesProgressSnapshot.serializer(),
+        ) {
+            LmsApi.fetchModulesProgress(course.courseCode, token) ?: ModulesProgressSnapshot()
+        }.first
+    }.onSuccess { snapshot ->
+        onResult(
+            if (snapshot.modules.isEmpty() && snapshot.enrollmentId.isEmpty()) null else snapshot,
+        )
+    }.onFailure {
+        onResult(null)
     }
 }
 
@@ -387,78 +380,3 @@ private fun HeroChip(text: String) {
             .padding(horizontal = 9.dp, vertical = 4.dp),
     )
 }
-
-@Composable
-private fun ModuleItemRow(
-    item: CourseStructureItem,
-    openable: Boolean,
-    onClick: () -> Unit,
-) {
-    var rowModifier = Modifier.fillMaxWidth()
-    if (openable) {
-        rowModifier = rowModifier.clickable(onClick = onClick)
-    }
-    Row(
-        modifier = rowModifier.padding(vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(LexturesColors.BrandTeal.copy(alpha = if (isDarkTheme()) 0.16f else 0.13f)),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                ItemKind.icon(item.kind),
-                contentDescription = null,
-                tint = accentColor(),
-                modifier = Modifier.size(16.dp),
-            )
-        }
-        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = item.title,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                color = textPrimary(),
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Text(text = ItemKind.label(item.kind), fontSize = 11.sp, color = textSecondary())
-                LmsDates.parse(item.dueAt)?.let {
-                    Text(
-                        text = "Due ${LmsDates.shortDateTime(item.dueAt)}",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = LexturesColors.Coral,
-                    )
-                }
-            }
-        }
-        val points = item.pointsWorth ?: item.pointsPossible
-        if (points != null) {
-            Text(
-                text = "${formatPoints(points)} pts",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = LexturesColors.Amber,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(LexturesColors.Amber.copy(alpha = 0.13f))
-                    .padding(horizontal = 7.dp, vertical = 3.dp),
-            )
-        }
-        if (openable) {
-            Icon(
-                Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = textSecondary().copy(alpha = 0.6f),
-                modifier = Modifier.size(16.dp),
-            )
-        }
-    }
-}
-
-private fun formatPoints(points: Double): String =
-    if (points % 1.0 == 0.0) points.toLong().toString() else points.toString()

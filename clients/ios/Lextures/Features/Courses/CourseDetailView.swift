@@ -20,11 +20,19 @@ struct CourseDetailView: View {
 
     @State private var section: Section = .modules
     @State private var items: [CourseStructureItem] = []
+    @State private var progress: ModulesProgressSnapshot?
     @State private var cacheLabel: String?
     @State private var hasAttendanceSessions = false
     @State private var errorMessage: String?
     @State private var loading = false
     @State private var linkedItem: CourseStructureItem?
+    @State private var lockAlert: LockAlert?
+
+    private struct LockAlert: Identifiable {
+        let id = UUID()
+        let title: String
+        let message: String
+    }
 
     init(course: CourseSummary, initialSection: Section? = nil, initialItemId: String? = nil) {
         self.course = course
@@ -43,29 +51,8 @@ struct CourseDetailView: View {
         return out
     }
 
-    private struct ModuleGroup: Identifiable {
-        let id: String
-        let title: String
-        let items: [CourseStructureItem]
-    }
-
     private var moduleGroups: [ModuleGroup] {
-        let modules = items.filter(\.isModule).sorted { $0.sortOrder < $1.sortOrder }
-        let children = Dictionary(grouping: items.filter { !$0.isModule && $0.parentId != nil }) { $0.parentId! }
-        var groups: [ModuleGroup] = modules.map { module in
-            ModuleGroup(
-                id: module.id,
-                title: module.title,
-                items: (children[module.id] ?? []).sorted { $0.sortOrder < $1.sortOrder }
-            )
-        }
-        let orphans = items
-            .filter { !$0.isModule && $0.parentId == nil && $0.kind != "heading" }
-            .sorted { $0.sortOrder < $1.sortOrder }
-        if !orphans.isEmpty {
-            groups.append(ModuleGroup(id: "__orphans__", title: "Other items", items: orphans))
-        }
-        return groups
+        ModuleContentLogic.buildModuleGroups(from: items)
     }
 
     var body: some View {
@@ -110,7 +97,7 @@ struct CourseDetailView: View {
         .navigationTitle(course.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: CourseStructureItem.self) { item in
-            ItemDetailView(course: course, item: item)
+            ModuleItemRouteView(course: course, item: item, onProgressChanged: refreshProgress)
         }
         .navigationDestination(for: AttendanceSession.self) { attendanceSession in
             AttendanceSessionDetailView(course: course, attendanceSession: attendanceSession)
@@ -119,7 +106,14 @@ struct CourseDetailView: View {
             SubmissionsListView(course: course, backlogItem: backlogItem)
         }
         .navigationDestination(item: $linkedItem) { item in
-            ItemDetailView(course: course, item: item)
+            ModuleItemRouteView(course: course, item: item, onProgressChanged: refreshProgress)
+        }
+        .alert(item: $lockAlert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
+            )
         }
         .task { await load() }
         .onChange(of: items) { _, loaded in
@@ -195,100 +189,23 @@ struct CourseDetailView: View {
         } else if moduleGroups.isEmpty {
             LMSEmptyState(
                 systemImage: "square.stack.3d.up",
-                title: "No content yet",
-                message: "Modules and assignments will appear here once published."
+                title: L.text("mobile.modules.emptyCourse"),
+                message: L.text("mobile.modules.emptyCourseHint")
             )
         } else {
-            ForEach(Array(moduleGroups.enumerated()), id: \.element.id) { index, group in
-                moduleCard(group, number: index + 1)
-            }
-        }
-    }
-
-    private func moduleCard(_ group: ModuleGroup, number: Int) -> some View {
-        LMSCard {
-            HStack(spacing: 10) {
-                Text("\(number)")
-                    .font(LexturesTheme.displayFont(14, weight: .bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 26, height: 26)
-                    .background(LexturesTheme.coverGradient(for: course.courseCode))
-                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                Text(group.title)
-                    .font(LexturesTheme.displayFont(17))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            }
-
-            if group.items.isEmpty {
-                Text("Nothing in this module yet")
-                    .font(.caption)
-                    .italic()
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            } else {
-                ForEach(Array(group.items.enumerated()), id: \.element.id) { index, item in
-                    if index > 0 {
-                        Divider()
-                    }
-                    if ItemKind.isOpenable(item.kind) {
-                        NavigationLink(value: item) {
-                            itemRow(item, openable: true)
-                        }
-                        .buttonStyle(.plain)
-                    } else {
-                        itemRow(item, openable: false)
-                    }
+            ModuleListView(
+                course: course,
+                groups: moduleGroups,
+                progress: progress,
+                onSelectItem: { linkedItem = $0 },
+                onLockedItem: { item, reason in
+                    lockAlert = LockAlert(
+                        title: item.title,
+                        message: reason?.message ?? L.text("mobile.modules.lockedDefault")
+                    )
                 }
-            }
+            )
         }
-    }
-
-    private func itemRow(_ item: CourseStructureItem, openable: Bool) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: ItemKind.icon(for: item.kind))
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                .frame(width: 32, height: 32)
-                .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.16 : 0.13))
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(item.title)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                HStack(spacing: 6) {
-                    Text(ItemKind.label(for: item.kind))
-                        .font(.caption2.weight(.medium))
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    if let due = LMSDates.parse(item.dueAt) {
-                        Text("·")
-                            .font(.caption2)
-                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                        Text("Due \(due.formatted(date: .abbreviated, time: .shortened))")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(LexturesTheme.coral)
-                    }
-                }
-            }
-
-            Spacer(minLength: 0)
-
-            if let points = item.pointsWorth ?? item.pointsPossible {
-                Text("\(points.formatted()) pts")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.amber)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .background(LexturesTheme.amber.opacity(0.13))
-                    .clipShape(Capsule())
-            }
-            if openable {
-                Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
-            }
-        }
-        .padding(.vertical, 4)
-        .contentShape(Rectangle())
     }
 
     private func load() async {
@@ -314,8 +231,25 @@ struct CourseDetailView: View {
                 cacheLabel = nil
             }
             hasAttendanceSessions = await !sessionsTask.isEmpty
+            await refreshProgress()
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load course content."
+        }
+    }
+
+    private func refreshProgress() async {
+        guard let token = session.accessToken, course.viewerIsStudent else { return }
+        do {
+            let result = try await offline.cachedFetch(
+                key: OfflineCacheKey.modulesProgress(course.courseCode),
+                accessToken: token
+            ) {
+                try await LMSAPI.fetchModulesProgress(courseCode: course.courseCode, accessToken: token)
+                    ?? ModulesProgressSnapshot()
+            }
+            progress = result.value.modules.isEmpty && result.value.enrollmentId.isEmpty ? nil : result.value
+        } catch {
+            progress = nil
         }
     }
 }

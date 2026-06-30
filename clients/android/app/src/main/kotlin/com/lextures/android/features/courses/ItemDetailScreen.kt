@@ -68,6 +68,7 @@ import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
+import com.lextures.android.core.lms.ModuleContentLogic
 import com.lextures.android.core.lms.ModuleItemDetail
 import com.lextures.android.core.lms.SubmissionGrade
 import com.lextures.android.features.home.LmsCard
@@ -99,9 +100,8 @@ object ItemKind {
         else -> "Item"
     }
 
-    /** Kinds with a detail endpoint — these rows are tappable. */
-    fun isOpenable(kind: String): Boolean =
-        kind in setOf("content_page", "assignment", "quiz", "external_link")
+    /** Kinds the module list can navigate to (including placeholders for upcoming epics). */
+    fun isOpenable(kind: String): Boolean = ModuleContentLogic.isNavigable(kind)
 }
 
 /** Activity detail: content body plus the settings "preview box" (parity with web). */

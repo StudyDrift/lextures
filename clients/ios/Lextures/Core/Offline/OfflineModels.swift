@@ -9,6 +9,12 @@ enum OfflineCacheKey {
     static func itemDetail(courseCode: String, itemId: String) -> String {
         "course:\(courseCode):item:\(itemId)"
     }
+    static func modulesProgress(_ courseCode: String) -> String {
+        "course:\(courseCode):modules-progress"
+    }
+    static func contentPage(courseCode: String, itemId: String) -> String {
+        "course:\(courseCode):content-page:\(itemId)"
+    }
     static func plannerSnapshot() -> String { "planner:snapshot" }
     static func notificationsPage() -> String { "notifications:page" }
     static func notificationPreferences() -> String { "notifications:preferences" }

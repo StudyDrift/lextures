@@ -512,4 +512,35 @@ object LmsApi {
             else -> throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
         }
     }
+
+    // Module progress & completion (M3.1)
+
+    /** Returns null when conditional release is disabled (HTTP 404). */
+    suspend fun fetchModulesProgress(courseCode: String, accessToken: String): ModulesProgressSnapshot? =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/modules/progress",
+                accessToken = accessToken,
+            )
+            when (code) {
+                404 -> null
+                in 200..299 -> decode(body)
+                else -> throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            }
+        }
+
+    suspend fun markItemComplete(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): MarkItemCompleteResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/items/${encodePath(itemId)}/complete",
+            method = "POST",
+            body = "{}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        runCatching { decode<MarkItemCompleteResponse>(body) }.getOrDefault(MarkItemCompleteResponse())
+    }
 }

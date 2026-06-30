@@ -451,6 +451,55 @@ struct GradingBacklogResponse: Decodable {
     var items: [GradingBacklogItem]
 }
 
+// MARK: - Module progress & conditional release (M3.1)
+
+struct LockReason: Codable, Hashable {
+    var code: String
+    var message: String
+    var itemId: String?
+    var title: String?
+}
+
+struct ItemLockState: Codable, Hashable {
+    var itemId: String
+    var locked: Bool
+    var complete: Bool
+    var reason: LockReason?
+}
+
+struct ModuleLockState: Codable, Hashable {
+    var moduleId: String
+    var title: String
+    var sortOrder: Int
+    var locked: Bool
+    var complete: Bool
+    var reason: LockReason?
+    var items: [ItemLockState]?
+}
+
+struct ModulesProgressSnapshot: Codable, Hashable {
+    var enrollmentId: String
+    var modules: [ModuleLockState]
+
+    enum CodingKeys: String, CodingKey { case enrollmentId, modules }
+
+    init(enrollmentId: String = "", modules: [ModuleLockState] = []) {
+        self.enrollmentId = enrollmentId
+        self.modules = modules
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        enrollmentId = try container.decodeIfPresent(String.self, forKey: .enrollmentId) ?? ""
+        modules = try container.decodeIfPresent([ModuleLockState].self, forKey: .modules) ?? []
+    }
+}
+
+struct MarkItemCompleteResponse: Decodable {
+    var enrollmentId: String?
+    var justComplete: Bool?
+}
+
 // MARK: - Attendance
 
 /// Session from GET `/courses/{code}/attendance/sessions`.
