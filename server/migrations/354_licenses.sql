@@ -131,7 +131,7 @@ INSERT INTO settings.email_template_slots (id, description, merge_fields, defaul
 VALUES (
     'seat_utilization_alert',
     'Seat license utilization threshold alert for org admins (plan 18.8).',
-    ARRAY['orgName', 'usedSeats', 'maxSeats', 'percentUsed', 'thresholdPct', 'unsubscribeUrl'],
+    '{"orgName":"Organization name","usedSeats":"Active learner seats used","maxSeats":"Licensed seat limit","percentUsed":"Utilization percentage","thresholdPct":"Alert threshold percentage","unsubscribeUrl":"One-click unsubscribe link"}'::jsonb,
     '<p>Your organization <strong>{{orgName}}</strong> has reached {{thresholdPct}}% of its licensed seats ({{usedSeats}} / {{maxSeats}}).</p><p>Contact your Lextures representative to purchase additional seats before new users are blocked.</p>',
     'Your organization {{orgName}} has reached {{thresholdPct}}% of its licensed seats ({{usedSeats}} / {{maxSeats}}). Contact your Lextures representative to purchase additional seats.'
 )

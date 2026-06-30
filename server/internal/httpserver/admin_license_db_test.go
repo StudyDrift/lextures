@@ -90,7 +90,14 @@ UPDATE "user".users SET deactivated_at = NOW(), login_blocked = TRUE WHERE id = 
 		t.Fatal(err)
 	}
 
-	max := 1
+	used, err := licenserepo.CountLearnerSeats(ctx, pool, defOrg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if used < 1 {
+		t.Fatalf("expected at least one active learner seat, got %d", used)
+	}
+	max := used
 	_, err = licenserepo.Upsert(ctx, pool, defOrg, licenserepo.Patch{MaxSeats: &max, Tier: func() *string { s := "starter"; return &s }()})
 	if err != nil {
 		t.Fatal(err)

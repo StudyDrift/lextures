@@ -43,6 +43,7 @@ func TestCheckCanActivate_Unlimited_Pg(t *testing.T) {
 	defer pool.Close()
 
 	orgID := organization.SeedDefaultOrgID
+	_, _ = pool.Exec(ctx, `DELETE FROM tenant.licenses WHERE org_id = $1`, orgID)
 	ph, err := auth.HashPassword("longpassword0")
 	if err != nil {
 		t.Fatal(err)
@@ -77,12 +78,6 @@ func TestCheckCanActivate_AtLimit_Pg(t *testing.T) {
 	defer pool.Close()
 
 	orgID := organization.SeedDefaultOrgID
-	max := 1
-	_, err = licenserepo.Upsert(ctx, pool, orgID, licenserepo.Patch{MaxSeats: &max, Tier: strPtr("starter")})
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	ph, err := auth.HashPassword("longpassword0")
 	if err != nil {
 		t.Fatal(err)
@@ -93,6 +88,15 @@ func TestCheckCanActivate_AtLimit_Pg(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := licenserepo.RefreshUsedSeats(ctx, pool, orgID); err != nil {
+		t.Fatal(err)
+	}
+	used, err := licenserepo.CountLearnerSeats(ctx, pool, orgID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	max := used
+	_, err = licenserepo.Upsert(ctx, pool, orgID, licenserepo.Patch{MaxSeats: &max, Tier: strPtr("starter")})
+	if err != nil {
 		t.Fatal(err)
 	}
 
