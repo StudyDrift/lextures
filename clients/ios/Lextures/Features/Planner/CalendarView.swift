@@ -173,6 +173,7 @@ struct CalendarView: View {
         case .contentPage: return L.text("mobile.planner.kind.page")
         case .notebookTask: return L.text("mobile.planner.kind.task")
         case .academic: return L.text("mobile.planner.kind.academic")
+        case .officeHours: return L.text("mobile.planner.kind.officeHours")
         }
     }
 

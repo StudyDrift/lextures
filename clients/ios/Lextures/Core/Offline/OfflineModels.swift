@@ -21,6 +21,7 @@ enum OfflineCacheKey {
     static func plannerSnapshot() -> String { "planner:snapshot" }
     static func notificationsPage() -> String { "notifications:page" }
     static func notificationPreferences() -> String { "notifications:preferences" }
+    static func officeHours(_ courseCode: String) -> String { "course:\(courseCode):office-hours" }
 }
 
 /// A cached value plus freshness metadata for read screens.

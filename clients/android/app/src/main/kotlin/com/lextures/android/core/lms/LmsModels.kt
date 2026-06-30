@@ -21,6 +21,7 @@ data class CourseSummary(
     val catalogNickname: String? = null,
     val notebookEnabled: Boolean? = null,
     val calendarEnabled: Boolean? = null,
+    val officeHoursEnabled: Boolean? = null,
     val orgId: String? = null,
     val termId: String? = null,
     val viewerEnrollmentRoles: List<String>? = null,
@@ -90,6 +91,7 @@ data class ModuleItemDetail(
     val adaptiveDeliveryMode: String? = null,
     val timeLimitMinutes: Int? = null,
     val passingScorePercent: Int? = null,
+    val requiresQuizAccessCode: Boolean? = null,
     val questions: List<QuestionStub>? = null,
 
     // Assignment submission settings

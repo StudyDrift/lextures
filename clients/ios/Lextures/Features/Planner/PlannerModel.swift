@@ -129,6 +129,7 @@ final class PlannerModel {
 
         let notebookTasks = try await notebookTasksTask
         var academic: [AcademicCalendarEvent] = []
+        var officeHoursByCourse: [String: OfficeHoursAvailability] = [:]
         var seenKeys = Set<String>()
         for course in studentCourses {
             guard let orgId = course.orgId else { continue }
@@ -142,6 +143,21 @@ final class PlannerModel {
             academic.append(contentsOf: rows)
         }
 
+        await withTaskGroup(of: (String, OfficeHoursAvailability?).self) { group in
+            for course in studentCourses where course.isOfficeHoursEnabled {
+                group.addTask {
+                    let availability = try? await LMSAPI.fetchOfficeHoursAvailability(
+                        courseCode: course.courseCode,
+                        accessToken: accessToken
+                    )
+                    return (course.courseCode, availability)
+                }
+            }
+            for await (code, availability) in group {
+                if let availability { officeHoursByCourse[code] = availability }
+            }
+        }
+
         let todos = PlannerLogic.collectTodos(
             studentCourses: studentCourses,
             structureByCourseCode: structures,
@@ -152,7 +168,8 @@ final class PlannerModel {
             studentCourses: studentCourses,
             structureByCourseCode: structures,
             notebookTasks: notebookTasks,
-            academicEvents: academic
+            academicEvents: academic,
+            officeHoursByCourseCode: officeHoursByCourse
         )
         return PlannerLogic.encodeSnapshot(todos: todos, events: events)
     }

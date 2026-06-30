@@ -217,6 +217,9 @@ data class GradeColumn(
     val maxPoints: Double? = null,
     val dueAt: String? = null,
     val assignmentGroupId: String? = null,
+    val neverDrop: Boolean = false,
+    val replaceWithFinal: Boolean = false,
+    val rubric: RubricDefinition? = null,
 )
 
 @Serializable
@@ -224,6 +227,38 @@ data class AssignmentGroup(
     val id: String,
     val name: String = "",
     val weightPercent: Double = 0.0,
+    val dropLowest: Int = 0,
+    val dropHighest: Int = 0,
+    val replaceLowestWithFinal: Boolean = false,
+)
+
+@Serializable
+data class RubricLevel(
+    val label: String = "",
+    val points: Double = 0.0,
+    val description: String? = null,
+)
+
+@Serializable
+data class RubricCriterion(
+    val id: String,
+    val title: String = "",
+    val description: String? = null,
+    val levels: List<RubricLevel> = emptyList(),
+)
+
+@Serializable
+data class RubricDefinition(
+    val title: String? = null,
+    val criteria: List<RubricCriterion> = emptyList(),
+)
+
+@Serializable
+data class GradeComment(
+    val id: String? = null,
+    val displayName: String? = null,
+    val body: String = "",
+    val createdAt: String? = null,
 )
 
 /** GET `/courses/{code}/my-grades` (student only). */
@@ -237,49 +272,6 @@ data class MyGradesResponse(
     val droppedGrades: Map<String, Boolean> = emptyMap(),
     val gradeStatuses: Map<String, String> = emptyMap(),
 )
-
-/**
- * Weighted-total math for `/my-grades` (simplified port of the web logic:
- * per-group earned/possible, weights renormalized over groups that have grades).
- */
-object GradeMath {
-    fun overallPercent(response: MyGradesResponse): Double? {
-        var flatEarned = 0.0
-        var flatPossible = 0.0
-        val groupEarned = mutableMapOf<String, Double>()
-        val groupPossible = mutableMapOf<String, Double>()
-
-        for (column in response.columns) {
-            val max = column.maxPoints ?: continue
-            if (max <= 0) continue
-            if (response.droppedGrades[column.id] == true) continue
-            if (response.gradeStatuses[column.id] == "excused") continue
-            val earned = response.grades[column.id]?.toDoubleOrNull() ?: continue
-
-            flatEarned += earned
-            flatPossible += max
-            val key = column.assignmentGroupId ?: ""
-            groupEarned[key] = (groupEarned[key] ?: 0.0) + earned
-            groupPossible[key] = (groupPossible[key] ?: 0.0) + max
-        }
-
-        if (flatPossible <= 0) return null
-
-        val weighted = response.assignmentGroups.filter { it.weightPercent > 0 }
-        if (weighted.isEmpty()) return flatEarned / flatPossible * 100
-
-        var weightTotal = 0.0
-        var weightedSum = 0.0
-        for (group in weighted) {
-            val possible = groupPossible[group.id] ?: continue
-            if (possible <= 0) continue
-            weightTotal += group.weightPercent
-            weightedSum += (groupEarned[group.id] ?: 0.0) / possible * group.weightPercent
-        }
-        if (weightTotal <= 0) return flatEarned / flatPossible * 100
-        return weightedSum / weightTotal * 100
-    }
-}
 
 // endregion
 
@@ -352,10 +344,75 @@ data class SubmissionGrade(
     val submissionId: String? = null,
     val pointsEarned: Double? = null,
     val maxPoints: Double? = null,
+    val rubricScores: Map<String, Double>? = null,
     val instructorComment: String? = null,
+    val comments: List<GradeComment>? = null,
     val posted: Boolean? = null,
     val excused: Boolean? = null,
+    val gradedByAi: Boolean? = null,
 )
+
+@Serializable
+data class SubmissionAnnotation(
+    val id: String,
+    val submissionId: String? = null,
+    val page: Int = 1,
+    val toolType: String = "",
+    val colour: String = "#facc15",
+    val coordsJson: AnnotationCoords? = null,
+    val body: String? = null,
+    val createdAt: String? = null,
+)
+
+@Serializable
+data class AnnotationCoords(
+    val x1: Double? = null,
+    val y1: Double? = null,
+    val x2: Double? = null,
+    val y2: Double? = null,
+    val x: Double? = null,
+    val y: Double? = null,
+    val points: List<AnnotationPoint>? = null,
+    val rects: List<AnnotationRect>? = null,
+)
+
+@Serializable
+data class AnnotationPoint(val x: Double = 0.0, val y: Double = 0.0)
+
+@Serializable
+data class AnnotationRect(val x1: Double = 0.0, val y1: Double = 0.0, val x2: Double = 0.0, val y2: Double = 0.0)
+
+@Serializable
+data class SubmissionFeedbackMedia(
+    val id: String,
+    val mediaType: String = "audio",
+    val mimeType: String = "",
+    val durationSecs: Double? = null,
+    val contentPath: String = "",
+    val createdAt: String? = null,
+)
+
+@Serializable
+data class SubmissionAnnotationsResponse(val annotations: List<SubmissionAnnotation> = emptyList())
+
+@Serializable
+data class SubmissionFeedbackMediaResponse(val items: List<SubmissionFeedbackMedia> = emptyList())
+
+@Serializable
+data class FeedbackPlaybackInfo(
+    val contentPath: String,
+    val captionPath: String? = null,
+    val expiresAt: String? = null,
+)
+
+@Serializable
+data class PlatformFeatures(
+    val ffWhatifGrades: Boolean? = null,
+    val feedbackMediaEnabled: Boolean? = null,
+)
+
+/** Navigation target for grade feedback detail (M6.1). */
+data class GradeFeedbackRoute(val column: GradeColumn)
 
 @Serializable
 data class SubmissionGradePut(
@@ -490,6 +547,67 @@ data class AttendanceSessionsResponse(
 @Serializable
 data class SelfReportBody(val status: String)
 
+// region Office hours (M7.3)
+
+@Serializable
+data class AvailabilityWindow(
+    val id: String,
+    val instructorId: String,
+    val courseId: String? = null,
+    val dayOfWeek: Int? = null,
+    val windowDate: String? = null,
+    val startTime: String,
+    val endTime: String,
+    val slotDurationMinutes: Int = 15,
+    val location: String? = null,
+    val isVirtual: Boolean = false,
+    val status: String = "active",
+    val createdAt: String? = null,
+)
+
+@Serializable
+data class AppointmentSlot(
+    val id: String,
+    val windowId: String,
+    val slotStart: String,
+    val slotEnd: String,
+    val studentId: String? = null,
+    val studentNote: String? = null,
+    val meetingId: String? = null,
+    val status: String,
+    val bookedAt: String? = null,
+)
+
+@Serializable
+data class OfficeHoursAvailability(
+    val windows: List<AvailabilityWindow> = emptyList(),
+    val slots: List<AppointmentSlot> = emptyList(),
+)
+
+@Serializable
+data class OfficeHoursAvailabilityResponse(
+    val windows: List<AvailabilityWindow>? = null,
+    val slots: List<AppointmentSlot>? = null,
+)
+
+@Serializable
+data class MyAppointmentsResponse(
+    val appointments: List<AppointmentSlot>? = null,
+)
+
+@Serializable
+data class BookOfficeHoursSlotBody(
+    val note: String? = null,
+)
+
+@Serializable
+data class MeetingJoinResponse(
+    val joinUrl: String? = null,
+    val hostUrl: String? = null,
+)
+
+// endregion
+
 object AttendanceStatusInfo {
     fun label(status: String): String = when (status) {
         "present" -> "Present"
@@ -592,6 +710,8 @@ data class CourseFileFolderContents(
 enum class CourseFileContentSource {
     FileManager,
     CourseFile,
+    /** Absolute API path from submission `attachmentContentPath`. */
+    DirectPath,
 }
 
 data class FilePreviewTarget(
@@ -606,6 +726,7 @@ data class FilePreviewTarget(
         get() = when (source) {
             CourseFileContentSource.FileManager -> "fm:$sourceId"
             CourseFileContentSource.CourseFile -> "cf:$sourceId"
+            CourseFileContentSource.DirectPath -> "dp:${sourceId.hashCode()}"
         }
 
     companion object {
@@ -639,6 +760,20 @@ data class FilePreviewTarget(
             byteSize = null,
             source = CourseFileContentSource.CourseFile,
             sourceId = fileId,
+        )
+
+        fun submissionContentPath(
+            courseCode: String,
+            contentPath: String,
+            fileName: String,
+            mimeType: String?,
+        ) = FilePreviewTarget(
+            courseCode = courseCode,
+            displayName = fileName,
+            mimeType = mimeType,
+            byteSize = null,
+            source = CourseFileContentSource.DirectPath,
+            sourceId = contentPath,
         )
     }
 }

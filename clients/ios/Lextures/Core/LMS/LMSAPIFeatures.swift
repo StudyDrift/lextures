@@ -179,6 +179,58 @@ extension LMSAPI {
         return try decode(MyGradesResponse.self, from: data)
     }
 
+    static func fetchPlatformFeatures(accessToken: String) async throws -> PlatformFeatures {
+        let (data, _) = try await client.request(
+            path: "/api/v1/platform/features",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(PlatformFeatures.self, from: data)
+    }
+
+    static func fetchSubmissionAnnotations(
+        courseCode: String,
+        itemId: String,
+        submissionId: String,
+        accessToken: String
+    ) async throws -> [SubmissionAnnotation] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/assignments/\(encodePath(itemId))/submissions/\(encodePath(submissionId))/annotations",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(SubmissionAnnotationsResponse.self, from: data).annotations
+    }
+
+    static func fetchSubmissionFeedbackMedia(
+        courseCode: String,
+        itemId: String,
+        submissionId: String,
+        accessToken: String
+    ) async throws -> [SubmissionFeedbackMedia] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/assignments/\(encodePath(itemId))/submissions/\(encodePath(submissionId))/feedback-media",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(SubmissionFeedbackMediaResponse.self, from: data).items
+    }
+
+    static func fetchFeedbackPlaybackInfo(
+        courseCode: String,
+        itemId: String,
+        submissionId: String,
+        mediaId: String,
+        accessToken: String
+    ) async throws -> FeedbackPlaybackInfo {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/assignments/\(encodePath(itemId))/submissions/\(encodePath(submissionId))/feedback-media/\(encodePath(mediaId))/url",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(FeedbackPlaybackInfo.self, from: data)
+    }
+
     // MARK: - Syllabus
 
     static func fetchSyllabus(courseCode: String, accessToken: String) async throws -> SyllabusPayload {
@@ -230,6 +282,131 @@ extension LMSAPI {
             accessToken: accessToken
         )
         return try decode(QuizAttemptsListResponse.self, from: data).attempts
+    }
+
+    // MARK: - Quiz delivery (M4.1)
+
+    static func fetchModuleQuiz(
+        courseCode: String,
+        itemId: String,
+        attemptId: String?,
+        accessToken: String
+    ) async throws -> ModuleQuizPayload {
+        var path = "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))"
+        if let attemptId, !attemptId.isEmpty {
+            let encoded = attemptId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? attemptId
+            path += "?attemptId=\(encoded)"
+        }
+        let (data, _) = try await client.request(path: path, authorized: true, accessToken: accessToken)
+        return try decode(ModuleQuizPayload.self, from: data)
+    }
+
+    static func startQuiz(
+        courseCode: String,
+        itemId: String,
+        accessCode: String?,
+        accessToken: String
+    ) async throws -> QuizStartResponse {
+        let trimmed = accessCode?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let body = QuizStartRequest(quizAccessCode: (trimmed?.isEmpty == false) ? trimmed : nil)
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/start",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(QuizStartResponse.self, from: data)
+    }
+
+    static func fetchQuizCurrentQuestion(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        accessToken: String
+    ) async throws -> QuizCurrentQuestionResponse {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/attempts/\(encodePath(attemptId))/current-question",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(QuizCurrentQuestionResponse.self, from: data)
+    }
+
+    static func advanceQuiz(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        responseItem: QuizQuestionResponseItem,
+        accessToken: String
+    ) async throws -> QuizAdvanceResponse {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/attempts/\(encodePath(attemptId))/advance",
+            method: "POST",
+            body: responseItem,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(QuizAdvanceResponse.self, from: data)
+    }
+
+    static func submitQuiz(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        responses: [QuizQuestionResponseItem]?,
+        accessToken: String
+    ) async throws -> QuizSubmitResponse {
+        let body = QuizSubmitRequest(attemptId: attemptId, responses: responses)
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/submit",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(QuizSubmitResponse.self, from: data)
+    }
+
+    static func fetchQuizResults(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        accessToken: String
+    ) async throws -> QuizResultsResponse {
+        let encoded = attemptId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? attemptId
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/results?attemptId=\(encoded)",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(QuizResultsResponse.self, from: data)
+    }
+
+    static func postQuizFocusLoss(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        eventType: String,
+        accessToken: String
+    ) async {
+        let body = QuizFocusLossRequest(eventType: eventType, durationMs: nil)
+        _ = try? await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/quizzes/\(encodePath(itemId))/attempts/\(encodePath(attemptId))/focus-loss",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
     }
 
     static func fetchGradingSubmissions(
@@ -619,5 +796,86 @@ extension LMSAPI {
         guard (200 ... 299).contains(response.statusCode) || response.statusCode == 204 else {
             throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
         }
+    }
+
+    // MARK: - Office hours (M7.3)
+
+    static func fetchOfficeHoursAvailability(
+        courseCode: String,
+        accessToken: String
+    ) async throws -> OfficeHoursAvailability {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/availability",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        let raw = try decode(OfficeHoursAvailabilityResponse.self, from: data)
+        return OfficeHoursAvailability(
+            windows: raw.windows ?? [],
+            slots: raw.slots ?? []
+        )
+    }
+
+    static func bookOfficeHoursSlot(
+        slotId: String,
+        note: String?,
+        accessToken: String
+    ) async throws -> AppointmentSlot {
+        let trimmed = note?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let body = BookOfficeHoursSlotBody(note: (trimmed?.isEmpty == false) ? trimmed : nil)
+        let (data, response) = try await client.request(
+            path: "/api/v1/slots/\(encodePath(slotId))/book",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        if response.statusCode == 409 {
+            throw APIError.httpStatus(409, message: L.text("mobile.officeHours.conflict"))
+        }
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AppointmentSlot.self, from: data)
+    }
+
+    static func cancelOfficeHoursBooking(slotId: String, accessToken: String) async throws -> AppointmentSlot {
+        let (data, response) = try await client.request(
+            path: "/api/v1/slots/\(encodePath(slotId))/book",
+            method: "DELETE",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(AppointmentSlot.self, from: data)
+    }
+
+    static func fetchMyAppointments(accessToken: String) async throws -> [AppointmentSlot] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/me/appointments",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(MyAppointmentsResponse.self, from: data).appointments ?? []
+    }
+
+    static func fetchMeetingJoinURL(meetingId: String, accessToken: String) async throws -> String? {
+        let (data, response) = try await client.request(
+            path: "/api/v1/meetings/\(encodePath(meetingId))/join",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else { return nil }
+        let join = try decode(MeetingJoinResponse.self, from: data).joinUrl?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return join?.isEmpty == false ? join : nil
     }
 }

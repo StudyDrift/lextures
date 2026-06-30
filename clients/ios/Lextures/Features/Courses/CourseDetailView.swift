@@ -15,6 +15,7 @@ struct CourseDetailView: View {
         case modules = "Modules"
         case files = "Files"
         case grades = "Grades"
+        case officeHours = "Office Hours"
         case attendance = "Attendance"
         case grading = "Grading"
     }
@@ -41,6 +42,7 @@ struct CourseDetailView: View {
     private var sections: [Section] {
         var out: [Section] = [.overview, .modules, .files]
         if course.viewerIsStudent { out.append(.grades) }
+        if course.isOfficeHoursEnabled { out.append(.officeHours) }
         if course.viewerIsStaff || hasAttendanceSessions { out.append(.attendance) }
         if course.viewerIsStaff { out.append(.grading) }
         return out
@@ -56,7 +58,7 @@ struct CourseDetailView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
-                    header
+                    CourseBanner(course: course)
 
                     LMSSegmentedChips(
                         options: sections,
@@ -81,6 +83,8 @@ struct CourseDetailView: View {
                         CourseFilesView(course: course)
                     case .grades:
                         CourseGradesSection(course: course)
+                    case .officeHours:
+                        CourseOfficeHoursSection(course: course)
                     case .attendance:
                         CourseAttendanceSection(course: course)
                     case .grading:
@@ -124,62 +128,6 @@ struct CourseDetailView: View {
                   let match = loaded.first(where: { $0.id == itemId }) else { return }
             linkedItem = match
         }
-    }
-
-    /// Gradient cover banner — matches the course's tile color across the app.
-    private var header: some View {
-        ZStack(alignment: .topTrailing) {
-            Circle()
-                .fill(.white.opacity(0.08))
-                .frame(width: 140, height: 140)
-                .offset(x: 44, y: -52)
-
-            VStack(alignment: .leading, spacing: 7) {
-                Text(course.courseCode.uppercased())
-                    .font(.caption2.weight(.semibold))
-                    .tracking(1.2)
-                    .foregroundStyle(.white.opacity(0.8))
-                Text(course.title)
-                    .font(LexturesTheme.displayFont(22))
-                    .foregroundStyle(.white)
-                if !course.description.isEmpty {
-                    Text(course.description)
-                        .font(.footnote)
-                        .foregroundStyle(.white.opacity(0.85))
-                        .lineLimit(3)
-                }
-                HStack(spacing: 6) {
-                    if let starts = LMSDates.parse(course.startsAt) {
-                        heroChip(starts.formatted(date: .abbreviated, time: .omitted), icon: "calendar")
-                    }
-                    ForEach(roleBadges, id: \.self) { role in
-                        heroChip(role, icon: "person.fill")
-                    }
-                }
-                .padding(.top, 4)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(20)
-        }
-        .background(LexturesTheme.coverGradient(for: course.courseCode))
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 14, y: 7)
-    }
-
-    private var roleBadges: [String] {
-        (course.viewerEnrollmentRoles ?? []).map { role in
-            role.count <= 2 ? role.uppercased() : role.capitalized
-        }
-    }
-
-    private func heroChip(_ text: String, icon: String) -> some View {
-        Label(text, systemImage: icon)
-            .font(.caption.weight(.medium))
-            .foregroundStyle(.white)
-            .padding(.horizontal, 9)
-            .padding(.vertical, 4)
-            .background(.white.opacity(0.16))
-            .clipShape(Capsule())
     }
 
     // MARK: Modules

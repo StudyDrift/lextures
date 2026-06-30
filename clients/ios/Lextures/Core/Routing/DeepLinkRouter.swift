@@ -11,6 +11,7 @@ enum CourseDeepLinkSection: String, Equatable {
     case overview
     case modules
     case grades
+    case officeHours
     case feed
     case discussions
 }
@@ -63,6 +64,8 @@ enum DeepLinkRouter {
         switch segments[2].lowercased() {
         case "grades":
             return .course(code: courseCode, section: .grades, itemId: nil)
+        case "office-hours":
+            return .course(code: courseCode, section: .officeHours, itemId: nil)
         case "feed":
             return .course(code: courseCode, section: .feed, itemId: nil)
         case "discussions":

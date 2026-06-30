@@ -39,6 +39,7 @@ import com.lextures.android.core.lms.ModuleItemDestination
 import com.lextures.android.core.lms.FilePreviewTarget
 import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.features.home.LmsEmptyState
+import com.lextures.android.features.quiz.QuizIntroScreen
 
 /** Routes a structure item to its native destination (M3.1). */
 @Composable
@@ -59,10 +60,12 @@ fun ModuleItemRouteScreen(
             onProgressChanged = onProgressChanged,
             modifier = modifier,
         )
-        ModuleItemDestination.Quiz -> ModuleItemPlaceholderScreen(
+        ModuleItemDestination.Quiz -> QuizIntroScreen(
+            session = session,
+            course = course,
             item = item,
-            messageKey = "mobile.modules.placeholder.quiz",
             onBack = onBack,
+            onProgressChanged = onProgressChanged,
             modifier = modifier,
         )
         ModuleItemDestination.Assignment -> ItemDetailScreen(

@@ -13,11 +13,14 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var catalogNickname: String?
     var notebookEnabled: Bool?
     var calendarEnabled: Bool?
+    var officeHoursEnabled: Bool?
     var orgId: String?
     var termId: String?
     var viewerEnrollmentRoles: [String]?
 
     var isCalendarEnabled: Bool { calendarEnabled != false }
+
+    var isOfficeHoursEnabled: Bool { officeHoursEnabled == true }
 
     var displayTitle: String {
         let nick = catalogNickname?.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -83,6 +86,7 @@ struct ModuleItemDetail: Codable {
     var adaptiveDeliveryMode: String?
     var timeLimitMinutes: Int?
     var passingScorePercent: Int?
+    var requiresQuizAccessCode: Bool?
     var questions: [QuestionStub]?
 
     // Assignment submission settings

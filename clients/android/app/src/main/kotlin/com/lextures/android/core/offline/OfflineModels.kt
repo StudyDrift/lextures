@@ -19,6 +19,7 @@ object OfflineCacheKey {
     fun plannerSnapshot(): String = "planner:snapshot"
     fun notificationsPage(): String = "notifications:page"
     fun notificationPreferences(): String = "notifications:preferences"
+    fun officeHours(courseCode: String): String = "course:$courseCode:office-hours"
 }
 
 data class Cached<T>(

@@ -98,6 +98,7 @@ struct CoursesListView: View {
     private func mapSection(_ section: CourseDeepLinkSection?) -> CourseDetailView.Section? {
         switch section {
         case .grades: return .grades
+        case .officeHours: return .officeHours
         case .overview, .feed, .discussions, .none: return .overview
         case .modules: return .modules
         }

@@ -192,19 +192,77 @@ struct GradeColumn: Codable, Identifiable, Hashable {
     var maxPoints: Double?
     var dueAt: String?
     var assignmentGroupId: String?
+    var neverDrop: Bool
+    var replaceWithFinal: Bool
+    var rubric: RubricDefinition?
+
+    enum CodingKeys: String, CodingKey {
+        case id, kind, title, maxPoints, dueAt, assignmentGroupId
+        case neverDrop, replaceWithFinal, rubric
+    }
+
+    init(
+        id: String,
+        kind: String,
+        title: String,
+        maxPoints: Double? = nil,
+        dueAt: String? = nil,
+        assignmentGroupId: String? = nil,
+        neverDrop: Bool = false,
+        replaceWithFinal: Bool = false,
+        rubric: RubricDefinition? = nil
+    ) {
+        self.id = id
+        self.kind = kind
+        self.title = title
+        self.maxPoints = maxPoints
+        self.dueAt = dueAt
+        self.assignmentGroupId = assignmentGroupId
+        self.neverDrop = neverDrop
+        self.replaceWithFinal = replaceWithFinal
+        self.rubric = rubric
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        kind = try container.decodeIfPresent(String.self, forKey: .kind) ?? ""
+        title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
+        maxPoints = try container.decodeIfPresent(Double.self, forKey: .maxPoints)
+        dueAt = try container.decodeIfPresent(String.self, forKey: .dueAt)
+        assignmentGroupId = try container.decodeIfPresent(String.self, forKey: .assignmentGroupId)
+        neverDrop = try container.decodeIfPresent(Bool.self, forKey: .neverDrop) ?? false
+        replaceWithFinal = try container.decodeIfPresent(Bool.self, forKey: .replaceWithFinal) ?? false
+        rubric = try container.decodeIfPresent(RubricDefinition.self, forKey: .rubric)
+    }
 }
 
 struct AssignmentGroup: Codable, Hashable {
     var id: String
     var name: String
     var weightPercent: Double
+    var dropLowest: Int
+    var dropHighest: Int
+    var replaceLowestWithFinal: Bool
 
-    enum CodingKeys: String, CodingKey { case id, name, weightPercent }
+    enum CodingKeys: String, CodingKey {
+        case id, name, weightPercent, dropLowest, dropHighest, replaceLowestWithFinal
+    }
 
-    init(id: String, name: String, weightPercent: Double) {
+    init(
+        id: String,
+        name: String,
+        weightPercent: Double,
+        dropLowest: Int = 0,
+        dropHighest: Int = 0,
+        replaceLowestWithFinal: Bool = false
+    ) {
         self.id = id
         self.name = name
         self.weightPercent = weightPercent
+        self.dropLowest = dropLowest
+        self.dropHighest = dropHighest
+        self.replaceLowestWithFinal = replaceLowestWithFinal
     }
 
     init(from decoder: Decoder) throws {
@@ -212,6 +270,9 @@ struct AssignmentGroup: Codable, Hashable {
         id = try container.decode(String.self, forKey: .id)
         name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
         weightPercent = try container.decodeIfPresent(Double.self, forKey: .weightPercent) ?? 0
+        dropLowest = try container.decodeIfPresent(Int.self, forKey: .dropLowest) ?? 0
+        dropHighest = try container.decodeIfPresent(Int.self, forKey: .dropHighest) ?? 0
+        replaceLowestWithFinal = try container.decodeIfPresent(Bool.self, forKey: .replaceLowestWithFinal) ?? false
     }
 
     func encode(to encoder: Encoder) throws {
@@ -219,7 +280,37 @@ struct AssignmentGroup: Codable, Hashable {
         try container.encode(id, forKey: .id)
         try container.encode(name, forKey: .name)
         try container.encode(weightPercent, forKey: .weightPercent)
+        try container.encode(dropLowest, forKey: .dropLowest)
+        try container.encode(dropHighest, forKey: .dropHighest)
+        try container.encode(replaceLowestWithFinal, forKey: .replaceLowestWithFinal)
     }
+}
+
+struct RubricLevel: Codable, Hashable {
+    var label: String
+    var points: Double
+    var description: String?
+}
+
+struct RubricCriterion: Codable, Hashable, Identifiable {
+    var id: String
+    var title: String
+    var description: String?
+    var levels: [RubricLevel]
+}
+
+struct RubricDefinition: Codable, Hashable {
+    var title: String?
+    var criteria: [RubricCriterion]
+}
+
+struct GradeComment: Decodable, Identifiable, Hashable {
+    var id: String?
+    var displayName: String?
+    var body: String
+    var createdAt: String?
+
+    var resolvedId: String { id ?? body.hashValue.description }
 }
 
 /// GET `/courses/{code}/my-grades` (student only).
@@ -360,9 +451,81 @@ struct SubmissionGrade: Decodable {
     var submissionId: String?
     var pointsEarned: Double?
     var maxPoints: Double?
+    var rubricScores: [String: Double]?
     var instructorComment: String?
+    var comments: [GradeComment]?
     var posted: Bool?
     var excused: Bool?
+    var gradedByAi: Bool?
+}
+
+struct SubmissionAnnotation: Decodable, Identifiable, Hashable {
+    var id: String
+    var submissionId: String?
+    var page: Int
+    var toolType: String
+    var colour: String
+    var coordsJson: AnnotationCoords?
+    var body: String?
+    var createdAt: String?
+}
+
+/// Loose JSON holder for annotation geometry (highlight rects, draw paths, pins).
+struct AnnotationCoords: Decodable, Hashable {
+    var x1: Double?
+    var y1: Double?
+    var x2: Double?
+    var y2: Double?
+    var x: Double?
+    var y: Double?
+    var points: [AnnotationPoint]?
+    var rects: [AnnotationRect]?
+}
+
+struct AnnotationPoint: Decodable, Hashable {
+    var x: Double
+    var y: Double
+}
+
+struct AnnotationRect: Decodable, Hashable {
+    var x1: Double
+    var y1: Double
+    var x2: Double
+    var y2: Double
+}
+
+struct SubmissionFeedbackMedia: Decodable, Identifiable, Hashable {
+    var id: String
+    var mediaType: String
+    var mimeType: String
+    var durationSecs: Double?
+    var contentPath: String
+    var createdAt: String?
+}
+
+struct SubmissionAnnotationsResponse: Decodable {
+    var annotations: [SubmissionAnnotation]
+}
+
+struct SubmissionFeedbackMediaResponse: Decodable {
+    var items: [SubmissionFeedbackMedia]
+}
+
+struct FeedbackPlaybackInfo: Decodable {
+    var contentPath: String
+    var captionPath: String?
+    var expiresAt: String?
+}
+
+/// GET `/api/v1/platform/features` (subset used on mobile).
+struct PlatformFeatures: Decodable {
+    var ffWhatifGrades: Bool?
+    var feedbackMediaEnabled: Bool?
+}
+
+/// Navigation target for grade feedback detail (M6.1).
+struct GradeFeedbackRoute: Hashable {
+    var column: GradeColumn
 }
 
 // MARK: - Quiz attempts (staff)
@@ -443,6 +606,10 @@ enum GradingSubmissionMapper {
 
 private extension String {
     var nonEmpty: String? {
+        isEmpty ? nil : self
+    }
+
+    var nilIfEmpty: String? {
         isEmpty ? nil : self
     }
 }
@@ -540,6 +707,58 @@ struct AttendanceSessionDetail: Decodable {
 
 struct AttendanceSessionsResponse: Decodable {
     var sessions: [AttendanceSession]
+}
+
+// MARK: - Office hours (M7.3)
+
+struct AvailabilityWindow: Codable, Identifiable, Hashable {
+    var id: String
+    var instructorId: String
+    var courseId: String?
+    var dayOfWeek: Int?
+    var windowDate: String?
+    var startTime: String
+    var endTime: String
+    var slotDurationMinutes: Int
+    var location: String?
+    var isVirtual: Bool
+    var status: String
+    var createdAt: String?
+}
+
+struct AppointmentSlot: Codable, Identifiable, Hashable {
+    var id: String
+    var windowId: String
+    var slotStart: String
+    var slotEnd: String
+    var studentId: String?
+    var studentNote: String?
+    var meetingId: String?
+    var status: String
+    var bookedAt: String?
+}
+
+struct OfficeHoursAvailability: Codable, Hashable {
+    var windows: [AvailabilityWindow]
+    var slots: [AppointmentSlot]
+}
+
+struct OfficeHoursAvailabilityResponse: Decodable {
+    var windows: [AvailabilityWindow]?
+    var slots: [AppointmentSlot]?
+}
+
+struct MyAppointmentsResponse: Decodable {
+    var appointments: [AppointmentSlot]?
+}
+
+struct BookOfficeHoursSlotBody: Encodable {
+    var note: String?
+}
+
+struct MeetingJoinResponse: Decodable {
+    var joinUrl: String?
+    var hostUrl: String?
 }
 
 // MARK: - Planner (todos + calendar, M2.1)
@@ -665,6 +884,8 @@ struct CourseFileFolderContents: Codable {
 enum CourseFileContentSource: Hashable {
     case fileManager(itemId: String)
     case courseFile(fileId: String)
+    /// Absolute API path from submission `attachmentContentPath`.
+    case directPath(String)
 }
 
 /// Reusable preview target for M3.2, module file items (M3.1), and submission attachments (M5.1).
@@ -680,6 +901,7 @@ struct FilePreviewTarget: Hashable, Identifiable {
         switch source {
         case .fileManager(let itemId): return "fm:\(itemId)"
         case .courseFile(let fileId): return "cf:\(fileId)"
+        case .directPath(let path): return "dp:\(path.hashValue)"
         }
     }
 
@@ -715,6 +937,21 @@ struct FilePreviewTarget: Hashable, Identifiable {
             mimeType: mimeType,
             byteSize: nil,
             source: .courseFile(fileId: fileId)
+        )
+    }
+
+    static func submissionContentPath(
+        courseCode: String,
+        contentPath: String,
+        fileName: String,
+        mimeType: String?
+    ) -> FilePreviewTarget {
+        FilePreviewTarget(
+            courseCode: courseCode,
+            displayName: fileName,
+            mimeType: mimeType,
+            byteSize: nil,
+            source: .directPath(contentPath)
         )
     }
 }

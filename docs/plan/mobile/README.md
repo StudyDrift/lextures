@@ -55,7 +55,7 @@ Verified in the iOS/Android trees as of this plan:
 | Auth (email/password, signup, secure token store, session, biometric lock, session mgmt, SSO/MFA/magic link) | ✅ | ✅ | Keychain / encrypted store; SSO/MFA/magic link ([M1.1](../completed/mobile/M1.1-sso-mfa-magic-link.md)) |
 | Navigation shell (Home, Courses, Notebooks, Inbox, Profile tabs) | ✅ | ✅ | 5-tab bar; no deep-link routing yet |
 | Dashboard / Home + announcements | ✅ | ✅ | Read-only |
-| Courses: list, detail, syllabus, **grades (read)**, attendance (read), item detail | ✅ | ✅ | View-only; no module content-type rendering |
+| Courses: list, detail, syllabus, **grades (feedback, what-if)**, attendance (read), item detail | ✅ | ✅ | Student grades with rubric/annotation/a-v feedback |
 | Grading: backlog, submissions list, **Speed Grader** | ✅ | ✅ | Instructor; see `../speed-grader-mobile.md` |
 | Inbox: list, thread, compose | ✅ | ✅ | 1:1 messaging |
 | Notebooks: editor, drawing, pages, slash commands, markdown, sync | ✅ | ✅ | Rich; near-parity with web notebooks |
@@ -104,12 +104,12 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 
 | Story | Source feature(s) | Status today | Disposition |
 |---|---|---|---|
-| [M4.1 Quiz taker & question types](M4.1-quiz-taker.md) | 2.2 question types, 2.3 math, 2.7 timers/auto-submit, 2.8 shuffling, 2.9 attempts, quiz attempt page | Attempts read-only | **P0** |
+| [M4.1 Quiz taker & question types](../completed/mobile/M4.1-quiz-taker.md) | 2.2 question types, 2.3 math, 2.7 timers/auto-submit, 2.8 shuffling, 2.9 attempts, quiz attempt page | **DONE** | **P0** |
 | [M5.1 Assignment submission](M5.1-assignment-submission.md) | 3.13 resubmission, 8.2 resumable upload, module assignment page | None (grade-only) | **P0** |
 | [M3.1 Module content viewer](../completed/mobile/M3.1-module-content-viewer.md) ✅ | module content/external-link/textbook pages, 8.7 image/pdf preview, 1.11 conditional release | Done | **P0** |
 | [M3.2 Course files browser](../completed/mobile/M3.2-course-files.md) ✅ | course-files-page, 8.1 storage, 8.7 preview | Done | **P0** |
 | [M2.1 Calendar & to-dos](M2.1-calendar-todos.md) | calendar, todos-page, 16.5 feeds | None | **P0** |
-| [M6.1 Grades, feedback & what-if](M6.1-grades-feedback.md) | my-grades (built-read), 3.1 annotation, 3.2 a/v feedback, 3.16 what-if, rubrics | Grades read-only | **P0** |
+| [M6.1 Grades, feedback & what-if](../completed/mobile/M6.1-grades-feedback.md) ✅ | my-grades, 3.1 annotation, 3.2 a/v feedback, 3.16 what-if, rubrics | **DONE** | **P0** |
 | [M7.1 Course discussions](M7.1-discussions.md) | 6.1 threaded forums, course-discussions-page | None | **P0** |
 | [M7.2 AI tutor & Ask-AI](M7.2-ai-tutor.md) | 6.9 AI tutor, ask-ai-page, 15.12 study buddy | None | **P0** |
 | [M8.1 Review & spaced repetition](M8.1-review-spaced-repetition.md) | 1.5 spaced repetition, review-session-page | None | **P0** |
@@ -127,7 +127,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M3.3 Interactive content: H5P/SCORM/LTI](../completed/mobile/M3.3-interactive-content.md) ✅ | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **Done** |
 | [M5.2 Peer review](M5.2-peer-review.md) | 3.15 peer review | **P1** |
 | [M6.2 Standards-based grades & mastery](M6.2-standards-mastery.md) | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **P1** |
-| [M7.3 Office hours booking](M7.3-office-hours.md) | 6.7 office hours | **P1** |
+| [M7.3 Office hours booking](../completed/mobile/M7.3-office-hours.md) ✅ | 6.7 office hours | **Done** |
 | [M7.4 Group spaces & collab docs](M7.4-groups-collab.md) | 6.6 groups, 6.5 collab docs | **P1** |
 | [M8.2 Adaptive paths & recommendations](M8.2-paths-recommendations.md) | 1.4 paths, 1.8 recommendations, my-paths | **P1** |
 | [M8.3 Study insights & self-reflection](M8.3-study-insights.md) | 9.1 progress, 9.9 reflection, study-insights | **P1** |
@@ -155,6 +155,32 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M12.1 e-Portfolio & artifacts](M12.1-eportfolio.md) | 14.12 e-portfolio, portfolios pages | **P2** |
 | [M12.2 Credentials wallet & transcripts](M12.2-credentials-transcripts.md) | 14.13 CCR, transcripts, 15.6 LinkedIn share | **P2** |
 
+### Newly identified gap stories (2026-06-30 parity scan)
+
+A scan of the web LMS pages and server routes against the stories above surfaced
+**distinct, student/instructor-facing surfaces with live endpoints that no story
+covered**, plus the navigation redesign needed to hold them. Added as stories:
+
+| Story | Source feature(s) | Server endpoints (exist) | Disposition |
+|---|---|---|---|
+| [M0.5 Redesign: role-aware IA & navigation](M0.5-redesign-information-architecture.md) | shell redesign; course workspace; role adaptation | — (client) | **P0 (foundation)** |
+| [M0.6 Universal search & command palette](M0.6-universal-search.md) | global search, `command-palette-go-to` | `/search`, `/search/query`, `/library/search`, `/oer/search`, `/standards/search` | **P1** |
+| [M3.5 Vibe activities](M3.5-vibe-activities.md) | `course-module-vibe-activity-page` (AI interactive content type) | `/courses/{c}/vibe-activities/{item}` | **P1** |
+| [M3.6 Library, e-reserves & OER](M3.6-library-ereserves-oer.md) | 14.10 e-reserves, OER, `library-catalog-page` | `/library/search`, `/oer/search`, `/courses/{c}/library-resources/*` | **P1** |
+| [M6.3 Immersive reader: read-aloud, captions & translation](M6.3-immersive-reader.md) | 12.x read-aloud/captions, 11.x translation, reading prefs | `/files/{o}/captions/*`, course-translation, reading-preferences | **P1** |
+| [M7.5 Live classes & virtual meetings](M7.5-live-classes-virtual-meetings.md) | `course-live-page`, virtual meetings, whiteboards | `/meetings/*`, `/courses/{c}/meetings`, `/courses/{c}/whiteboards/*` | **P1** |
+| [M7.6 Course feed & channels (real-time)](M7.6-course-feed-channels.md) | `course-feed-page` (distinct from M7.1 discussions) | `/courses/{c}/feed/*`, `/feed/ws` | **P1** |
+| [M7.7 Course evaluations & surveys](M7.7-course-evaluations-surveys.md) | 14.7 course evaluations, surveys | `/courses/{c}/evaluations/status\|submit\|results` | **P1** |
+| [M7.8 Academic advising (student)](M7.8-academic-advising.md) | advising notes + appointments (HE) | `/me/advising-notes`, `/me/advising/config`, scheduler | **P2** |
+| [M11.3 Instructor insights & at-risk](M11.3-instructor-insights-at-risk.md) | `course-at-risk`, `course-whats-working`, student-progress | at-risk, instructor-insights, student-progress | **P1** |
+| [M1.5 Profile depth: demographics, custom fields & research consent](M1.5-profile-depth-demographics-consent.md) | demographics, custom fields, research studies | demographics, custom-fields, research-consent | **P2** |
+
+> **The redesign ([M0.5](M0.5-redesign-information-architecture.md)) is the keystone.**
+> The current flat 5-tab shell + four-chip course detail cannot surface the breadth above.
+> M0.5 introduces a role-aware shell, a scalable course **workspace** sub-nav, a **More**
+> hub, and a header **search** entry — and defines the destination-registry contract every
+> story above plugs into. Sequence it first within its wave.
+
 ### Stays web-only (reachable via in-app web view)
 
 Authoring and admin surfaces that are desktop-bound and out of scope for native:
@@ -168,16 +194,24 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
 
 ## 6. Sequencing / roadmap
 
+0. **Wave 0 — Redesign foundation (P0).** [M0.5](M0.5-redesign-information-architecture.md)
+   role-aware IA / course workspace / More hub / search entry lands first (behind a flag,
+   with a clean fallback to the current shell) so every wave below has discoverable homes
+   and a destination-registry contract to plug into. [M0.6](M0.6-universal-search.md)
+   universal search follows immediately to fill the search entry.
 1. **Wave 1 — Student core (P0).** M0.1 push + M0.2 offline scaffolding land first
    (cross-cutting), then M4.1 quiz taker, M5.1 submission, M3.1/M3.2 content+files,
    M2.1 calendar, M6.1 grades+feedback, M7.1 discussions, M7.2 AI tutor, M8.1 review.
    Exit criteria: a student completes a full week of coursework with no browser.
-2. **Wave 2 — Breadth (P1).** Auth depth (M1.x), interactive content (M3.3 ✅),
-   standards/mastery (M6.2), groups/office-hours (M7.3/M7.4), adaptive (M8.2–M8.4),
-   self-learner commerce (M9.x), parent (M10.1/M10.2), accessibility & i18n
-   (M0.3/M0.4), settings (M1.4), instructor attendance (M11.1).
+2. **Wave 2 — Breadth (P1).** Auth depth (M1.x), interactive content (M3.3 ✅) +
+   M3.5 vibe activities + M3.6 library/e-reserves, standards/mastery (M6.2),
+   M6.3 immersive reader, groups/office-hours (M7.3/M7.4) + M7.5 live classes +
+   M7.6 course feed + M7.7 evaluations, adaptive (M8.2–M8.4), self-learner commerce
+   (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3/M0.4), settings (M1.4),
+   instructor attendance (M11.1) + M11.3 instructor insights/at-risk.
 3. **Wave 3 — Situational (P2).** Lockdown, code exec, behavior/hall-pass,
-   age-appropriate UI, e-portfolio/credentials, instructor broadcast.
+   age-appropriate UI, e-portfolio/credentials, instructor broadcast, M7.8 advising,
+   M1.5 profile depth (demographics/custom fields/research consent).
 
 Each wave ships behind staged store releases (TestFlight / Play internal track →
 pilot cohort → GA). Per-feature server flags gate anything risky.

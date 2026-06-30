@@ -12,6 +12,8 @@ object CourseFileLogic {
                 "/api/v1/courses/${encodePath(courseCode)}/files/items/${encodePath(sourceId)}/content"
             CourseFileContentSource.CourseFile ->
                 "/api/v1/courses/${encodePath(courseCode)}/course-files/${encodePath(sourceId)}/content"
+            CourseFileContentSource.DirectPath ->
+                if (sourceId.startsWith("/")) sourceId else "/$sourceId"
         }
 
     fun previewPath(courseCode: String, itemId: String): String =

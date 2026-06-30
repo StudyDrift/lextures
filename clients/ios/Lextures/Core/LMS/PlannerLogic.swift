@@ -28,6 +28,7 @@ enum PlannerCalendarEventKind: String, Hashable {
     case contentPage
     case notebookTask
     case academic
+    case officeHours
 }
 
 struct StudentTodoItem: Identifiable, Hashable {
@@ -59,6 +60,38 @@ struct PlannerCalendarEvent: Identifiable, Hashable {
     let structureKind: String?
     let structureItemId: String?
     let notebookPageId: String?
+    let officeHoursSlotId: String?
+    let meetingId: String?
+
+    init(
+        id: String,
+        title: String,
+        courseCode: String?,
+        courseTitle: String?,
+        startsAt: Date,
+        endsAt: Date?,
+        allDay: Bool,
+        kind: PlannerCalendarEventKind,
+        structureKind: String?,
+        structureItemId: String?,
+        notebookPageId: String?,
+        officeHoursSlotId: String? = nil,
+        meetingId: String? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.courseCode = courseCode
+        self.courseTitle = courseTitle
+        self.startsAt = startsAt
+        self.endsAt = endsAt
+        self.allDay = allDay
+        self.kind = kind
+        self.structureKind = structureKind
+        self.structureItemId = structureItemId
+        self.notebookPageId = notebookPageId
+        self.officeHoursSlotId = officeHoursSlotId
+        self.meetingId = meetingId
+    }
 }
 
 struct PlannerCourseFilter: Hashable, Identifiable {
@@ -100,6 +133,8 @@ struct CachedPlannerCalendarEvent: Codable, Hashable {
     var structureKind: String?
     var structureItemId: String?
     var notebookPageId: String?
+    var officeHoursSlotId: String?
+    var meetingId: String?
 }
 
 enum DueReminderLeadTime: Int, CaseIterable, Identifiable {
@@ -231,7 +266,8 @@ enum PlannerLogic {
         studentCourses: [CourseSummary],
         structureByCourseCode: [String: [CourseStructureItem]],
         notebookTasks: [NotebookTask],
-        academicEvents: [AcademicCalendarEvent]
+        academicEvents: [AcademicCalendarEvent],
+        officeHoursByCourseCode: [String: OfficeHoursAvailability] = [:]
     ) -> [PlannerCalendarEvent] {
         var events: [PlannerCalendarEvent] = []
         let courseTitles = Dictionary(uniqueKeysWithValues: studentCourses.map { ($0.courseCode, $0.displayTitle) })
@@ -300,6 +336,11 @@ enum PlannerLogic {
                 )
             )
         }
+
+        events.append(contentsOf: OfficeHoursLogic.collectCalendarEvents(
+            studentCourses: studentCourses,
+            availabilityByCourseCode: officeHoursByCourseCode
+        ))
 
         return events.sorted { $0.startsAt < $1.startsAt }
     }
@@ -439,7 +480,9 @@ enum PlannerLogic {
             kind: event.kind.rawValue,
             structureKind: event.structureKind,
             structureItemId: event.structureItemId,
-            notebookPageId: event.notebookPageId
+            notebookPageId: event.notebookPageId,
+            officeHoursSlotId: event.officeHoursSlotId,
+            meetingId: event.meetingId
         )
     }
 
@@ -455,7 +498,9 @@ enum PlannerLogic {
             kind: PlannerCalendarEventKind(rawValue: cached.kind) ?? .academic,
             structureKind: cached.structureKind,
             structureItemId: cached.structureItemId,
-            notebookPageId: cached.notebookPageId
+            notebookPageId: cached.notebookPageId,
+            officeHoursSlotId: cached.officeHoursSlotId,
+            meetingId: cached.meetingId
         )
     }
 }
