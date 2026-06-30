@@ -186,11 +186,12 @@ func (d Deps) handleMeAdminConsoleCapabilities() http.HandlerFunc {
 			}
 		}
 		writeJSON(w, http.StatusOK, map[string]any{
-			"enabled":   enabled,
-			"orgId":     orgID.String(),
-			"canAccess": canAccess,
-			"canManage": canManage,
-			"isGlobalAdmin": ga,
+			"enabled":             enabled,
+			"orgId":               orgID.String(),
+			"canAccess":           canAccess,
+			"canManage":           canManage,
+			"isGlobalAdmin":       ga,
+			"customFieldsEnabled": d.effectiveConfig().CustomFieldsEnabled,
 		})
 	}
 }

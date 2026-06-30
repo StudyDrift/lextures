@@ -167,7 +167,6 @@ func UpdateDefinition(ctx context.Context, pool *pgxpool.Pool, orgID, id uuid.UU
 	if sortOrder != nil {
 		sets = append(sets, fmt.Sprintf("sort_order = $%d", argIdx))
 		args = append(args, *sortOrder)
-		argIdx++
 	}
 	if len(sets) == 0 {
 		return GetDefinition(ctx, pool, orgID, id)

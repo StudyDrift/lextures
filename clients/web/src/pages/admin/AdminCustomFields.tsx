@@ -1,11 +1,9 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { GripVertical, Plus, Trash2 } from 'lucide-react'
-import { usePlatformFeatures } from '../../context/platform-features-context'
 import {
   createCustomField,
   deleteCustomField,
-  fetchAdminConsoleCapabilities,
   fetchCustomFields,
   reorderCustomFields,
   updateCustomField,
@@ -13,7 +11,8 @@ import {
   type CustomFieldEntityType,
   type CustomFieldType,
   type CustomFieldVisibility,
-} from '../../lib/admin-console-api'
+} from '../../lib/custom-fields-api'
+import { fetchAdminConsoleCapabilities } from '../../lib/admin-console-api'
 
 const ENTITY_TABS: { id: CustomFieldEntityType; label: string }[] = [
   { id: 'user', label: 'Users' },
@@ -51,12 +50,12 @@ export default function AdminCustomFields() {
   const drawerTitleId = useId()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
-  const { customFieldsEnabled } = usePlatformFeatures()
   const [entityType, setEntityType] = useState<CustomFieldEntityType>('user')
   const [fields, setFields] = useState<CustomFieldDefinition[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [canManage, setCanManage] = useState(false)
+  const [customFieldsEnabled, setCustomFieldsEnabled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [editing, setEditing] = useState<CustomFieldDefinition | null>(null)
   const [draft, setDraft] = useState<DraftField>(emptyDraft())
@@ -65,8 +64,14 @@ export default function AdminCustomFields() {
 
   useEffect(() => {
     void fetchAdminConsoleCapabilities()
-      .then((c) => setCanManage(c.canManage))
-      .catch(() => setCanManage(false))
+      .then((c) => {
+        setCanManage(c.canManage)
+        setCustomFieldsEnabled(c.customFieldsEnabled)
+      })
+      .catch(() => {
+        setCanManage(false)
+        setCustomFieldsEnabled(false)
+      })
   }, [])
 
   const load = useCallback(async () => {

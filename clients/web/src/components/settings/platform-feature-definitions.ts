@@ -92,8 +92,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
   {
     key: 'customFieldsEnabled',
     label: 'Custom fields',
-    description:
-      'Enables org admins to define custom metadata fields on users, courses, and enrollments (plan 18.7).',
+    description: 'Org metadata on users, courses, and enrollments (18.7).',
   },
   {
     key: 'emailTemplateEditorEnabled',

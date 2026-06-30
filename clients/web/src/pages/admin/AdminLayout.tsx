@@ -32,16 +32,20 @@ const baseNavItems = [
 const importNavItem = { to: '/org-admin/import', label: 'Import', icon: FileUp, end: false as const }
 
 export default function AdminLayout() {
-  const { adminConsoleEnabled, bulkCsvImportEnabled, customFieldsEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
+  const { adminConsoleEnabled, bulkCsvImportEnabled, maintenanceBannerEnabled } = usePlatformFeatures()
   const [searchParams] = useSearchParams()
   const orgId = searchParams.get('orgId')
   const [canAccess, setCanAccess] = useState<boolean | null>(null)
+  const [customFieldsEnabled, setCustomFieldsEnabled] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     void fetchAdminConsoleCapabilities()
       .then((c) => {
-        if (!cancelled) setCanAccess(c.enabled && c.canAccess)
+        if (!cancelled) {
+          setCanAccess(c.enabled && c.canAccess)
+          setCustomFieldsEnabled(c.customFieldsEnabled)
+        }
       })
       .catch(() => {
         if (!cancelled) setCanAccess(false)
