@@ -8,10 +8,7 @@ export function readApiErrorMessage(raw: unknown): string {
     }
   }
   if (raw && typeof raw === 'object' && 'error' in raw) {
-    const err = (raw as { error?: { code?: string; message?: string } }).error
-    if (err?.code === 'SEAT_LIMIT_REACHED') {
-      return 'Your organization has reached its licensed seat limit. Contact your administrator to request additional seats.'
-    }
+    const err = (raw as { error?: { message?: string } }).error
     if (err?.message) return err.message
   }
   if (raw && typeof raw === 'object' && 'message' in raw) {

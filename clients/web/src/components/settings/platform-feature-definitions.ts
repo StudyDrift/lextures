@@ -97,8 +97,7 @@ const PLATFORM_FEATURE_DEFINITIONS_UNSORTED: PlatformFeatureDefinition[] = [
   {
     key: 'seatManagementEnabled',
     label: 'Seat license management',
-    description:
-      'Enforces org seat limits, utilization dashboards, and super-admin license management (plan 18.8).',
+    description: 'Org seat limits, utilization dashboards, and super-admin license management (18.8).',
   },
   {
     key: 'emailTemplateEditorEnabled',
