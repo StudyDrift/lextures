@@ -36,6 +36,7 @@ const (
 	FeatureAltTextSuggestion          = "alt_text_suggestion"
 	FeatureVibeGeneration             = "vibe_generation"
 	FeatureGraderAgent                = "grader_agent"
+	FeatureLessonGeneration           = "lesson_generation"
 	FeatureAIStudyBuddy               = "ai_study_buddy"
 )
 

@@ -464,6 +464,9 @@ type Config struct {
 	// FFAIStudyBuddy enables the self-learner AI study buddy with persistent memory (plan 15.12).
 	// Managed in Settings → Global platform (not process env).
 	FFAIStudyBuddy bool
+	// FFLessonGenerator enables the AI lesson generator wizard for instructors (plan 19.2).
+	// Managed in Settings → Global platform (not process env).
+	FFLessonGenerator bool
 	// FFPersistentTutor enables named tutor sessions with RAG citations (plan 19.1).
 	// Managed in Settings → Global platform (not process env).
 	FFPersistentTutor bool

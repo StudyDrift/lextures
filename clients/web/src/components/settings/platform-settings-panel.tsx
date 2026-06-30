@@ -95,6 +95,7 @@ function emptyForm(): PlatformSettingsPayload {
     ffWhatifGrades: false,
     ffGradeCurving: false,
     ffAiStudyBuddy: false,
+    ffLessonGenerator: false,
     ffPersistentTutor: false,
     ffApiTokens: false,
     ffCalendarFeeds: true,

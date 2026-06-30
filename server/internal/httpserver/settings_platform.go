@@ -164,6 +164,7 @@ type platformSettingsJSON struct {
 	FFOnboardingFlow                bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  bool `json:"ffAiStudyBuddy"`
+	FFLessonGenerator               bool `json:"ffLessonGenerator"`
 	FFPersistentTutor               bool `json:"ffPersistentTutor"`
 	FFAPITokens                     bool `json:"ffApiTokens"`
 	FFBotSlack                      bool `json:"ffBotSlack"`
@@ -384,6 +385,7 @@ func (d Deps) handleGetPlatformSettings() http.HandlerFunc {
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
+			FFLessonGenerator:               merged.FFLessonGenerator,
 			FFPersistentTutor:               merged.FFPersistentTutor,
 			FFAPITokens:                     merged.FFAPITokens,
 			FFBotSlack:                      merged.FFBotSlack,
@@ -579,6 +581,7 @@ type putPlatformBody struct {
 	FFOnboardingFlow                *bool `json:"ffOnboardingFlow"`
 	FFStudyReminders                *bool `json:"ffStudyReminders"`
 	FFAIStudyBuddy                  *bool `json:"ffAiStudyBuddy"`
+	FFLessonGenerator               *bool `json:"ffLessonGenerator"`
 	FFPersistentTutor               *bool `json:"ffPersistentTutor"`
 	FFAPITokens                     *bool `json:"ffApiTokens"`
 	FFBotSlack                      *bool `json:"ffBotSlack"`
@@ -920,6 +923,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 		setBool("ffonboardingflow", body.FFOnboardingFlow, func(v bool) { wr.FFOnboardingFlow = &v })
 		setBool("ffstudyreminders", body.FFStudyReminders, func(v bool) { wr.FFStudyReminders = &v })
 		setBool("ffaistudybuddy", body.FFAIStudyBuddy, func(v bool) { wr.FFAIStudyBuddy = &v })
+		setBool("fflessongenerator", body.FFLessonGenerator, func(v bool) { wr.FFLessonGenerator = &v })
 		setBool("ffpersistenttutor", body.FFPersistentTutor, func(v bool) { wr.FFPersistentTutor = &v })
 		setBool("ffapitokens", body.FFAPITokens, func(v bool) { wr.FFAPITokens = &v })
 		setBool("ffbotslack", body.FFBotSlack, func(v bool) { wr.FFBotSlack = &v })
@@ -1094,6 +1098,7 @@ func (d Deps) handlePutPlatformSettings() http.HandlerFunc {
 			FFOnboardingFlow:                merged.FFOnboardingFlow,
 			FFStudyReminders:                merged.FFStudyReminders,
 			FFAIStudyBuddy:                  merged.FFAIStudyBuddy,
+			FFLessonGenerator:               merged.FFLessonGenerator,
 			FFPersistentTutor:               merged.FFPersistentTutor,
 			FFAPITokens:                     merged.FFAPITokens,
 			FFBotSlack:                      merged.FFBotSlack,

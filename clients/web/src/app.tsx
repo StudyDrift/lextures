@@ -97,6 +97,7 @@ export default function App() {
               <Route path="collab-docs/:docId?" element={<Pages.CourseCollabDocsPage />} />
               <Route path="files" element={<Pages.CourseFilesPage />} />
               <Route path="groups" element={<Pages.CourseGroupsPage />} />
+              <Route path="lesson-generator" element={<Pages.LessonGeneratorPage />} />
               <Route path="syllabus" element={<Pages.CourseSyllabus />} />
               <Route path="modules/content/:itemId" element={<Pages.CourseModuleContentPage />} />
               <Route path="modules/assignment/:itemId" element={<Pages.CourseModuleAssignmentPage />} />

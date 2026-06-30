@@ -90,6 +90,7 @@ export type PlatformFeaturesSnapshot = {
   ffOnboardingFlow?: boolean
   ffStudyReminders?: boolean
   ffAiStudyBuddy?: boolean
+  ffLessonGenerator?: boolean
   ffPersistentTutor?: boolean
   ffCalendarFeeds?: boolean
   aiStudyBuddyEnabled?: boolean
@@ -182,6 +183,7 @@ const defaults: PlatformFeaturesSnapshot = {
   ffOnboardingFlow: false,
   ffStudyReminders: false,
   ffAiStudyBuddy: false,
+  ffLessonGenerator: false,
   ffPersistentTutor: false,
   ffCalendarFeeds: true,
   aiStudyBuddyEnabled: false,
