@@ -7,6 +7,22 @@ export type AdminConsoleCapabilities = {
   canManage: boolean
   isGlobalAdmin: boolean
   customFieldsEnabled: boolean
+  seatManagementEnabled: boolean
+}
+
+export type OrgLicense = {
+  orgId: string
+  orgName?: string
+  orgSlug?: string
+  tier: string
+  maxSeats: number
+  usedSeats: number
+  unlimited: boolean
+  percentUsed?: number
+  contractStart?: string | null
+  contractEnd?: string | null
+  contractExpiringSoon?: boolean
+  notes?: string | null
 }
 
 export type AdminOverview = {
@@ -16,6 +32,7 @@ export type AdminOverview = {
   pendingEnrollments: number
   storageBytes: number
   recentAuditEvents: AuditEvent[]
+  license?: OrgLicense | null
 }
 
 export type AdminUser = {
@@ -314,4 +331,39 @@ export const CSV_TEMPLATE = `email,first_name,last_name,role,external_id
 teacher@example.edu,Jane,Smith,teacher,T001
 student@example.edu,John,Doe,student,S001
 `
+
+export async function fetchOrgLicense(orgId?: string | null): Promise<OrgLicense> {
+  const res = await authorizedFetch(`/api/v1/admin-console/license${orgQuery(orgId)}`)
+  return parseJson(res)
+}
+
+export async function fetchAdminLicenses(limit = 100, offset = 0): Promise<{ items: OrgLicense[] }> {
+  const sp = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+  const res = await authorizedFetch(`/api/v1/admin/licenses?${sp}`)
+  return parseJson(res)
+}
+
+export async function patchOrgLicense(
+  orgId: string,
+  body: Partial<{
+    tier: string
+    maxSeats: number
+    contractStart: string
+    contractEnd: string
+    notes: string
+  }>,
+): Promise<OrgLicense> {
+  const res = await authorizedFetch(`/api/v1/admin/licenses/${encodeURIComponent(orgId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return parseJson(res)
+}
+
+export function seatUtilizationColor(percent: number): string {
+  if (percent >= 95) return 'bg-red-500'
+  if (percent >= 80) return 'bg-amber-500'
+  return 'bg-emerald-500'
+}
 

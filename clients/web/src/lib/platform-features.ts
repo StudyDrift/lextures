@@ -54,6 +54,7 @@ export type PlatformFeaturesSnapshot = {
   adminSearchEnabled?: boolean
   emailTemplateEditorEnabled?: boolean
   maintenanceBannerEnabled?: boolean
+  seatManagementEnabled?: boolean
   ffZapierConnector?: boolean
   ffCatalogIntegration?: boolean
   ffEnrollmentStateMachine?: boolean
@@ -144,6 +145,7 @@ const defaults: PlatformFeaturesSnapshot = {
   adminSearchEnabled: false,
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
+  seatManagementEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,

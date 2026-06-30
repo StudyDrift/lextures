@@ -68,6 +68,7 @@ export type PlatformFeatures = {
   adminSearchEnabled: boolean
   emailTemplateEditorEnabled: boolean
   maintenanceBannerEnabled: boolean
+  seatManagementEnabled: boolean
   ffZapierConnector: boolean
   ffCatalogIntegration: boolean
   ffEnrollmentStateMachine: boolean
@@ -166,6 +167,7 @@ const defaultFeatures: PlatformFeatures = {
   adminSearchEnabled: false,
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
+  seatManagementEnabled: false,
   ffZapierConnector: false,
   ffCatalogIntegration: false,
   ffEnrollmentStateMachine: false,
@@ -263,6 +265,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
   adminSearchEnabled: false,
   emailTemplateEditorEnabled: false,
   maintenanceBannerEnabled: true,
+  seatManagementEnabled: false,
   ffZapierConnector: false,
     ffCatalogIntegration: false,
     ffEnrollmentStateMachine: false,
@@ -367,6 +370,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           adminSearchEnabled: data.adminSearchEnabled === true,
           emailTemplateEditorEnabled: data.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: data.maintenanceBannerEnabled !== false,
+          seatManagementEnabled: data.seatManagementEnabled === true,
           ffZapierConnector: data.ffZapierConnector === true,
           ffCatalogIntegration: data.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: data.ffEnrollmentStateMachine === true,
@@ -428,6 +432,7 @@ export function PlatformFeaturesProvider({ children }: { children: ReactNode }) 
           adminSearchEnabled: next.adminSearchEnabled === true,
           emailTemplateEditorEnabled: next.emailTemplateEditorEnabled === true,
           maintenanceBannerEnabled: next.maintenanceBannerEnabled !== false,
+          seatManagementEnabled: next.seatManagementEnabled === true,
           ffZapierConnector: next.ffZapierConnector === true,
           ffCatalogIntegration: next.ffCatalogIntegration === true,
           ffEnrollmentStateMachine: next.ffEnrollmentStateMachine === true,

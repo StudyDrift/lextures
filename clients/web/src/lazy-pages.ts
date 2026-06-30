@@ -132,6 +132,7 @@ export const CourseEvaluation = lazy(() => import('./pages/lms/CourseEvaluation'
 export const CourseEvaluationResults = lazy(() => import('./pages/lms/CourseEvaluationResults'))
 export const EvaluationTemplates = lazy(() => import('./pages/admin/EvaluationTemplates'))
 export const AdminEmailTemplates = lazy(() => import('./pages/admin/AdminEmailTemplates'))
+export const SuperAdminLicenses = lazy(() => import('./pages/admin/SuperAdminLicenses'))
 export const EvaluationReport = lazy(() => import('./pages/admin/EvaluationReport'))
 export const PrivacyCentrePage = lazy(() => import('./pages/privacy-centre-page'))
 export const MyPortfoliosPage = lazy(() => import('./pages/lms/my-portfolios-page'))

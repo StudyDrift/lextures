@@ -106,6 +106,8 @@ func defaultSubject(eventType string) string {
 		return "Streak at risk"
 	case EventStudyReminderWeeklySummary:
 		return "Weekly learning summary"
+	case EventSeatUtilizationAlert:
+		return "Seat license utilization alert"
 	default:
 		return "Notification from StudyDrift"
 	}

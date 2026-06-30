@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { BookOpen, HardDrive, UserPlus, Users } from 'lucide-react'
+import { LicenseDetailsCard } from '../../components/admin/seat-utilization'
 import {
   fetchAdminOverview,
   formatStorageBytes,
@@ -56,6 +57,17 @@ export default function AdminOverview() {
     void load()
   }, [load])
 
+  const contractBanner =
+    data?.license?.contractExpiringSoon && data.license.contractEnd ? (
+      <div
+        role="status"
+        className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
+      >
+        Your license contract ends on {data.license.contractEnd}. Contact your Lextures representative to
+        renew before access is affected.
+      </div>
+    ) : null
+
   return (
     <div>
       <h1 id={titleId} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
@@ -64,6 +76,8 @@ export default function AdminOverview() {
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
         Organization utilization and recent administrative activity.
       </p>
+
+      {contractBanner}
 
       {error ? (
         <p role="alert" className="mt-4 text-sm text-red-600 dark:text-red-400">
@@ -85,6 +99,12 @@ export default function AdminOverview() {
               icon={HardDrive}
             />
           </div>
+
+          {data.license ? (
+            <div className="mt-6">
+              <LicenseDetailsCard license={data.license} />
+            </div>
+          ) : null}
 
           <section className="mt-8" aria-labelledby={`${titleId}-audit`}>
             <h2 id={`${titleId}-audit`} className="text-base font-semibold text-slate-900 dark:text-slate-100">

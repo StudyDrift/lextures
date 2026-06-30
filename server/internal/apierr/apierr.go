@@ -34,6 +34,8 @@ const (
 	CodeTenantAIPolicyDisabled   = "TENANT_AI_POLICY_DISABLED"
 	CodeOrgSuspended        = "ORG_SUSPENDED"
 	CodePaymentRequired     = "PAYMENT_REQUIRED"
+	// CodeSeatLimitReached is returned when an org has no remaining learner seats (plan 18.8).
+	CodeSeatLimitReached = "SEAT_LIMIT_REACHED"
 )
 
 // Body matches server/src/error.rs JSON error envelope.

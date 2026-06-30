@@ -336,6 +336,8 @@ type Config struct {
 	MaintenanceBannerEnabled bool
 	// CustomFieldsEnabled gates org-admin custom field schemas and value APIs (plan 18.7).
 	CustomFieldsEnabled bool
+	// SeatManagementEnabled gates org seat license enforcement and license admin APIs (plan 18.8).
+	SeatManagementEnabled bool
 	// DataResidencyEnabled gates per-tenant region pinning enforcement and the data residency compliance admin API (plan 10.12).
 	DataResidencyEnabled bool
 	// AiDisclosureEnabled gates AI opt-out, gateway enforcement, inference logging, and disclosure APIs (plan 10.17). Defaults to true.

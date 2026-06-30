@@ -1,0 +1,11 @@
+DROP TRIGGER IF EXISTS trg_org_role_grants_license_seat_sync ON "user".org_role_grants;
+DROP FUNCTION IF EXISTS tenant.sync_license_on_org_role_grant();
+DROP TRIGGER IF EXISTS trg_users_license_seat_sync ON "user".users;
+DROP FUNCTION IF EXISTS tenant.sync_license_on_user_change();
+DROP FUNCTION IF EXISTS tenant.refresh_license_used_seats(UUID);
+DROP FUNCTION IF EXISTS tenant.count_learner_seats(UUID);
+DROP TABLE IF EXISTS tenant.license_utilization_alerts;
+DROP TABLE IF EXISTS tenant.licenses;
+DROP TYPE IF EXISTS tenant.license_tier;
+DELETE FROM settings.email_template_slots WHERE id = 'seat_utilization_alert';
+ALTER TABLE settings.platform_app_settings DROP COLUMN IF EXISTS seat_management_enabled;
