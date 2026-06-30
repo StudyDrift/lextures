@@ -196,7 +196,7 @@ ${studentEmail},Test,Student,student,EXT-${Date.now()}
     expect(job.status).toBe('complete')
     expect((job as { createdCount: number }).createdCount).toBeGreaterThanOrEqual(1)
 
-    const usersRes = await fetch(`${API_BASE}/api/v1/admin-console/users?search=${encodeURIComponent(studentEmail.split('@')[0])}`, {
+    const usersRes = await fetch(`${API_BASE}/api/v1/admin-console/users?q=${encodeURIComponent(studentEmail)}`, {
       headers: authHeaders(orgToken),
     })
     expect(usersRes.status).toBe(200)
