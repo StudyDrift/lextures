@@ -94,8 +94,8 @@ test.describe.serial('Seat license management', () => {
     await enableFeatures(ga.access_token)
 
     const meRes = await fetch(`${API_BASE}/api/v1/me`, { headers: authHeaders(ga.access_token) })
-    const me = (await meRes.json()) as { org_id: string; id: string }
-    const orgId = me.org_id
+    const me = (await meRes.json()) as { id: string; org: { id: string } }
+    const orgId = me.org.id
 
     const patchRes = await fetch(`${API_BASE}/api/v1/admin/licenses/${orgId}`, {
       method: 'PATCH',
