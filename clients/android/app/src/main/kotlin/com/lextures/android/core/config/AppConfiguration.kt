@@ -20,4 +20,13 @@ object AppConfiguration {
         val normalized = if (path.startsWith("/")) path else "/$path"
         return URL(apiBaseUrl + normalized)
     }
+
+    /**
+     * Public web pages (privacy/trust center, accessibility statement) are served
+     * from the same origin as the API in this monorepo deployment.
+     */
+    fun webUrl(path: String): String {
+        val normalized = if (path.startsWith("/")) path else "/$path"
+        return apiBaseUrl + normalized
+    }
 }

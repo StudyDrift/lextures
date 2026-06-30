@@ -37,6 +37,89 @@ data class MeProfile(
 
 // endregion
 
+// region Account settings & accommodations
+
+/** GET/PATCH `/api/v1/settings/account` — the server-backed, editable profile. */
+@Serializable
+data class AccountProfile(
+    val email: String = "",
+    val displayName: String? = null,
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val avatarUrl: String? = null,
+    val phoneNumber: String? = null,
+)
+
+/** Body for PATCH `/api/v1/settings/account`. Only editable fields are sent. */
+@Serializable
+data class AccountProfilePatch(
+    val firstName: String? = null,
+    val lastName: String? = null,
+    val avatarUrl: String? = null,
+    val phoneNumber: String? = null,
+)
+
+/** First/last name for forms — falls back to splitting `displayName` (parity with web). */
+fun nameFieldsFromProfile(profile: AccountProfile): Pair<String, String> {
+    val first = profile.firstName?.trim().orEmpty()
+    val last = profile.lastName?.trim().orEmpty()
+    if (first.isNotEmpty() || last.isNotEmpty()) return first to last
+    val display = profile.displayName?.trim().orEmpty()
+    if (display.isEmpty()) return "" to ""
+    val parts = display.split(Regex("\\s+")).filter { it.isNotEmpty() }
+    if (parts.isEmpty()) return "" to ""
+    if (parts.size == 1) return parts[0] to ""
+    return parts[0] to parts.drop(1).joinToString(" ")
+}
+
+fun AccountProfile.resolvedDisplayName(): String {
+    val (first, last) = nameFieldsFromProfile(this)
+    val combined = listOf(first, last).filter { it.isNotEmpty() }.joinToString(" ")
+    if (combined.isNotEmpty()) return combined
+    return displayName?.trim()?.takeIf { it.isNotEmpty() } ?: email
+}
+
+fun AccountProfile.resolvedInitials(): String {
+    val parts = resolvedDisplayName().split(Regex("\\s+")).filter { it.isNotEmpty() }
+    return when {
+        parts.size >= 2 -> "${parts.first().first()}${parts.last().first()}".uppercase()
+        parts.size == 1 -> parts[0].take(1).uppercase()
+        else -> email.take(1).uppercase()
+    }
+}
+
+/** GET `/api/v1/me/accommodations` — the student's currently active supports. */
+@Serializable
+data class MyAccommodationsResponse(
+    val accommodations: List<MyAccommodation> = emptyList(),
+)
+
+@Serializable
+data class MyAccommodation(
+    val courseCode: String? = null,
+    val hasExtendedTime: Boolean = false,
+    val hasExtraAttempts: Boolean = false,
+    val hintsAlwaysAvailable: Boolean = false,
+    val reducedDistractionRecommended: Boolean = false,
+    val speechToTextEnabled: Boolean = false,
+    val ttsEnabled: Boolean = false,
+    val dyslexiaDisplayEnabled: Boolean = false,
+    val highContrastEnabled: Boolean = false,
+    val reducedMotionEnabled: Boolean = false,
+    val separateSetting: Boolean = false,
+    val effectiveFrom: String? = null,
+    val effectiveUntil: String? = null,
+) {
+    /** True when this entry carries no active supports (defensive — server filters these out). */
+    val isEmpty: Boolean
+        get() = !hasExtendedTime && !hasExtraAttempts && !hintsAlwaysAvailable &&
+            !reducedDistractionRecommended && !speechToTextEnabled && !ttsEnabled &&
+            !dyslexiaDisplayEnabled && !highContrastEnabled && !reducedMotionEnabled &&
+            !separateSetting
+}
+
+// endregion
+
 // region Notifications
 
 /** Row from GET `/api/v1/me/notifications`. */

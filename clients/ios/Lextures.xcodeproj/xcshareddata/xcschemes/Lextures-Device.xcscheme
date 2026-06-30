@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "2650"
+   LastUpgradeVersion = "2660"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8F997FB82501439484AC211A"
+               BlueprintIdentifier = "0B16D941C71D4E4DA679C961"
                BuildableName = "Lextures.app"
                BlueprintName = "Lextures"
                ReferencedContainer = "container:Lextures.xcodeproj">
@@ -43,7 +43,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8F997FB82501439484AC211A"
+            BlueprintIdentifier = "0B16D941C71D4E4DA679C961"
             BuildableName = "Lextures.app"
             BlueprintName = "Lextures"
             ReferencedContainer = "container:Lextures.xcodeproj">

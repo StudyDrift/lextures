@@ -2211,6 +2211,720 @@
         }
       }
     },
+    "mobile.accommodations.dyslexiaDisplay": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عرض ملائم لعسر القراءة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dyslexia-friendly display"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ðÿšľëẋîä-ƒŕîëñđľÿ đîšþľäÿ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantalla adaptada a la dislexia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affichage adapté à la dyslexie"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.emptyBody": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ليس لديك أي تسهيلات نشطة حاليًا. إذا كنت تتوقع وجودها، فتواصل مع مؤسستك."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You don’t have any active accommodations right now. If you expect one, contact your institution."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ÿöû đöñ’t ĥäṽë äñÿ äçţîṽë äççöɱɱöđäţîöñš ŕîğĥţ ñöŵ. Îƒ ÿöû ëẋþëçţ öñë, çöñţäçţ ÿöûŕ îñšţîţûţîöñ.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No tienes adaptaciones activas en este momento. Si esperabas alguna, comunícate con tu institución."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vous n’avez aucun aménagement actif pour le moment. Si vous en attendez un, contactez votre établissement."
+          }
+        }
+      }
+    },
+    "mobile.accommodations.emptyTitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "لا توجد تسهيلات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No accommodations"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ñö äççöɱɱöđäţîöñš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sin adaptaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun aménagement"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.extendedTime": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "وقت إضافي في الأنشطة المؤقتة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extended time on timed activities"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ëẋţëñđëđ ţîɱë öñ ţîɱëđ äçţîṽîţîëš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiempo extendido en actividades cronometradas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temps prolongé pour les activités chronométrées"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.extraAttempts": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "محاولات إضافية في الاختبارات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra attempts on quizzes"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ëẋţŕä äţţëɱþţš öñ ǫûîžžëš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Intentos adicionales en cuestionarios"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tentatives supplémentaires aux quiz"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.highContrast": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "عرض عالي التباين"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High-contrast display"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ĥîğĥ-çöñţŕäšţ đîšþľäÿ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pantalla de alto contraste"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Affichage à contraste élevé"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.hints": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "التلميحات متاحة دائمًا"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hints always available"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ĥîñţš äľŵäÿš äṽäîľäƀľë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pistas siempre disponibles"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indices toujours disponibles"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.intro": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يتم تطبيق هذه التسهيلات المعتمدة تلقائيًا. تواصل مع مؤسستك لإجراء تغييرات."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "These approved supports are applied automatically. Contact your institution to make changes."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ţĥëšë äþþŕöṽëđ šûþþöŕţš äŕë äþþľîëđ äûţöɱäţîçäľľÿ. Çöñţäçţ ÿöûŕ îñšţîţûţîöñ ţö ɱäķë çĥäñğëš.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estos apoyos aprobados se aplican automáticamente. Comunícate con tu institución para hacer cambios."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ces aides approuvées sont appliquées automatiquement. Contactez votre établissement pour toute modification."
+          }
+        }
+      }
+    },
+    "mobile.accommodations.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر تحميل تسهيلاتك."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t load your accommodations."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûľđñ’t ľöäđ ÿöûŕ äççöɱɱöđäţîöñš.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron cargar tus adaptaciones."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de charger vos aménagements."
+          }
+        }
+      }
+    },
+    "mobile.accommodations.readAloud": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "القراءة الصوتية (تحويل النص إلى كلام)"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read-aloud (text-to-speech)"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ŕëäđ-äľöûđ (ţëẋţ-ţö-šþëëçĥ)]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lectura en voz alta (texto a voz)"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lecture à voix haute (synthèse vocale)"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.reducedDistraction": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "يُوصى بوضع تقليل التشتيت"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reduced-distraction mode recommended"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ŕëđûçëđ-đîšţŕäçţîöñ ɱöđë ŕëçöɱɱëñđëđ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se recomienda el modo de distracción reducida"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mode distraction réduite recommandé"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.reducedMotion": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حركة مُقلّلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reduced motion"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ŕëđûçëđ ɱöţîöñ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Movimiento reducido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animations réduites"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.scopeAll": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "جميع المقررات"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All courses"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äľľ çöûŕšëš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Todos los cursos"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tous les cours"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.scopeCourse": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مقرر %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Course %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûŕšë %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Curso %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cours %@"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.separateSetting": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بيئة اختبار منفصلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Separate testing setting"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Šëþäŕäţë ţëšţîñğ šëţţîñğ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entorno de evaluación separado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Environnement d’examen séparé"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.speechToText": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تحويل الكلام إلى نص للإجابات المكتوبة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speech-to-text for written answers"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Šþëëçĥ-ţö-ţëẋţ ƒöŕ ŵŕîţţëñ äñšŵëŕš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voz a texto para respuestas escritas"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconnaissance vocale pour les réponses écrites"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الدعم المعتمد المطبّق على عملك"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Approved supports applied to your work"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äþþŕöṽëđ šûþþöŕţš äþþľîëđ ţö ÿöûŕ ŵöŕķ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apoyos aprobados aplicados a tu trabajo"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aides approuvées appliquées à votre travail"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تسهيلاتي"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My accommodations"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ṁÿ äççöɱɱöđäţîöñš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mis adaptaciones"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mes aménagements"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.windowBetween": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نشط %@ – %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active %@ – %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äçţîṽë %@ – %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activo %@ – %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actif %@ – %@"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.windowFrom": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نشط من %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active from %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äçţîṽë ƒŕöɱ %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activo desde %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actif à partir du %@"
+          }
+        }
+      }
+    },
+    "mobile.accommodations.windowUntil": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "نشط حتى %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active until %@"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äçţîṽë ûñţîľ %@]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Activo hasta %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actif jusqu’au %@"
+          }
+        }
+      }
+    },
     "mobile.announcements.empty.message": {
       "localizations": {
         "ar": {
@@ -2751,6 +3465,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Déverrouiller"
+          }
+        }
+      }
+    },
+    "mobile.common.retry": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "إعادة المحاولة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ŕëţŕÿ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reintentar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Réessayer"
+          }
+        }
+      }
+    },
+    "mobile.common.save": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "حفظ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Šäṽë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
           }
         }
       }
@@ -3635,6 +4417,346 @@
           "stringUnit": {
             "state": "translated",
             "value": "Non lus"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.avatarHint": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الصق رابط https لصورة مربعة."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste an https link to a square image."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Þäšţë äñ ĥţţþš ľîñķ ţö ä šǫûäŕë îɱäğë.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pega un enlace https a una imagen cuadrada."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collez un lien https vers une image carrée."
+          }
+        }
+      }
+    },
+    "mobile.editProfile.avatarUrl": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رابط صورة الأفاتار"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avatar image URL"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äṽäţäŕ îɱäğë ÛŔĽ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL de la imagen de avatar"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL de l’image d’avatar"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.firstName": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم الأول"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "First name"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ƒîŕšţ ñäɱë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prénom"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.lastName": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اسم العائلة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last name"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ľäšţ ñäɱë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apellido"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.loadError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر تحميل ملفك الشخصي."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t load your profile."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûľđñ’t ľöäđ ÿöûŕ þŕöƒîľë.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo cargar tu perfil."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de charger votre profil."
+          }
+        }
+      }
+    },
+    "mobile.editProfile.phone": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "رقم الهاتف"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Phone number"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Þĥöñë ñûɱƀëŕ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Número de teléfono"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Numéro de téléphone"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.saveError": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعذّر حفظ تغييراتك. يرجى المحاولة مرة أخرى."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t save your changes. Please try again."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çöûľđñ’t šäṽë ÿöûŕ çĥäñğëš. Þľëäšë ţŕÿ äğäîñ.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudieron guardar los cambios. Inténtalo de nuevo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible d’enregistrer vos modifications. Veuillez réessayer."
+          }
+        }
+      }
+    },
+    "mobile.editProfile.saved": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تم الحفظ"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Šäṽëđ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Guardado"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistré"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.subtitle": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الاسم والصورة وبيانات الاتصال"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Name, photo, and contact details"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ñäɱë, þĥöţö, äñđ çöñţäçţ đëţäîľš]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nombre, foto y datos de contacto"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nom, photo et coordonnées"
+          }
+        }
+      }
+    },
+    "mobile.editProfile.title": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "تعديل الملف الشخصي"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit profile"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ëđîţ þŕöƒîľë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Editar perfil"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modifier le profil"
           }
         }
       }
@@ -7273,6 +8395,312 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sessions actives"
+          }
+        }
+      }
+    },
+    "mobile.settings.accessibilityStatement": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "بيان إمكانية الوصول"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accessibility statement"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äççëššîƀîľîţÿ šţäţëɱëñţ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Declaración de accesibilidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Déclaration d’accessibilité"
+          }
+        }
+      }
+    },
+    "mobile.settings.appearance": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "المظهر"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appearance"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Äþþëäŕäñçë]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apariencia"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apparence"
+          }
+        }
+      }
+    },
+    "mobile.settings.appearance.description": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "اختر شكل Lextures على هذا الجهاز."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose how Lextures looks on this device."
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Çĥööšë ĥöŵ Ľëẋţûŕëš ľööķš öñ ţĥîš đëṽîçë.]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elige cómo se ve Lextures en este dispositivo."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez l’apparence de Lextures sur cet appareil."
+          }
+        }
+      }
+    },
+    "mobile.settings.privacyCenter": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مركز الخصوصية"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy center"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Þŕîṽäçÿ çëñţëŕ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centro de privacidad"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centre de confidentialité"
+          }
+        }
+      }
+    },
+    "mobile.settings.privacyTrust": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "الخصوصية والثقة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy & trust"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Þŕîṽäçÿ & ţŕûšţ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacidad y confianza"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confidentialité et confiance"
+          }
+        }
+      }
+    },
+    "mobile.settings.theme.dark": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "داكن"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ðäŕķ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oscuro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sombre"
+          }
+        }
+      }
+    },
+    "mobile.settings.theme.light": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "فاتح"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Light"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ľîğĥţ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claro"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clair"
+          }
+        }
+      }
+    },
+    "mobile.settings.theme.system": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "النظام"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Šÿšţëɱ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sistema"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Système"
+          }
+        }
+      }
+    },
+    "mobile.settings.trustCenter": {
+      "localizations": {
+        "ar": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "مركز الثقة"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trust center"
+          }
+        },
+        "en-XA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "[Ţŕûšţ çëñţëŕ]"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centro de confianza"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centre de confiance"
           }
         }
       }

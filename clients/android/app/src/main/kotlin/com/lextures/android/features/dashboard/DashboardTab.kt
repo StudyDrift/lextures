@@ -70,6 +70,8 @@ import com.lextures.android.features.courses.ItemDetailScreen
 import com.lextures.android.features.courses.ItemKind
 import com.lextures.android.features.grading.GradingBacklogScreen
 import com.lextures.android.features.home.HomeShellState
+import com.lextures.android.core.lms.nameFieldsFromProfile
+import com.lextures.android.core.lms.resolvedInitials
 import com.lextures.android.features.home.LmsAvatarChip
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.CourseHeroImage
@@ -251,11 +253,15 @@ fun DashboardTab(
         item {
             HeroPanel(
                 greeting = greetingText(),
-                name = shell.profile?.firstName ?: "",
+                name = shell.accountProfile?.let { nameFieldsFromProfile(it).first }
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: shell.profile?.firstName.orEmpty(),
                 dueCount = dueThisWeek.size,
                 loading = loading,
                 unreadNotifications = shell.unreadNotifications,
-                avatarInitials = shell.profile?.initials ?: "··",
+                avatarInitials = shell.accountProfile?.resolvedInitials()
+                    ?: shell.profile?.initials ?: "··",
+                avatarUrl = shell.accountProfile?.avatarUrl,
                 onOpenNotifications = { showNotifications = true },
                 onOpenProfile = onOpenProfile,
             )
@@ -439,6 +445,7 @@ private fun HeroPanel(
     loading: Boolean,
     unreadNotifications: Int,
     avatarInitials: String,
+    avatarUrl: String? = null,
     onOpenNotifications: () -> Unit,
     onOpenProfile: () -> Unit,
 ) {
@@ -513,7 +520,11 @@ private fun HeroPanel(
                             )
                         }
                     }
-                    LmsAvatarChip(initials = avatarInitials, onClick = onOpenProfile)
+                    LmsAvatarChip(
+                        initials = avatarInitials,
+                        avatarUrl = avatarUrl,
+                        onClick = onOpenProfile,
+                    )
                 }
             }
 

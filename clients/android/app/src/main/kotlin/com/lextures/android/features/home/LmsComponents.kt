@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
+import com.lextures.android.core.design.ProfileAvatar
 import com.lextures.android.core.design.cardBackground
 import com.lextures.android.core.design.coverBrush
 import com.lextures.android.core.design.fieldBorder
@@ -369,21 +370,39 @@ fun LmsAvatarChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     size: Int = 34,
+    avatarUrl: String? = null,
 ) {
     Box(
         modifier = modifier
             .size(size.dp)
             .clip(CircleShape)
-            .background(com.lextures.android.core.design.HeroBrush)
             .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = initials,
-            fontSize = (size * 0.36).sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-        )
+        if (avatarUrl.isNullOrBlank()) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.16f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = initials,
+                    fontSize = (size * 0.36).sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+            }
+        } else {
+            ProfileAvatar(
+                avatarUrl = avatarUrl,
+                initials = initials,
+                size = size.dp,
+                initialsBackground = Color.White.copy(alpha = 0.16f),
+                initialsForeground = Color.White,
+            )
+        }
     }
 }

@@ -222,7 +222,7 @@ struct DashboardView: View {
                         Text(greetingText + ",")
                             .font(LexturesTheme.displayFont(26))
                             .foregroundStyle(.white)
-                        Text(shell.profile?.firstName ?? session.userEmail ?? "")
+                        Text(greetingFirstName)
                             .font(LexturesTheme.displayFont(26))
                             .foregroundStyle(LexturesTheme.brandCream)
                             .lineLimit(1)
@@ -281,6 +281,15 @@ struct DashboardView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L.text("mobile.profile.notifications"))
+    }
+
+    private var greetingFirstName: String {
+        if let account = shell.accountProfile {
+            let first = account.resolvedNameFields.firstName
+            if !first.isEmpty { return first }
+        }
+        if let first = shell.profile?.firstName, !first.isEmpty { return first }
+        return session.userEmail ?? ""
     }
 
     private var greetingText: String {

@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8F997FB82501439484AC211A"
+               BlueprintIdentifier = "0B16D941C71D4E4DA679C961"
                BuildableName = "Lextures.app"
                BlueprintName = "Lextures"
                ReferencedContainer = "container:Lextures.xcodeproj">
@@ -36,7 +36,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8F997FB82501439484AC211A"
+            BlueprintIdentifier = "0B16D941C71D4E4DA679C961"
             BuildableName = "Lextures.app"
             BlueprintName = "Lextures"
             ReferencedContainer = "container:Lextures.xcodeproj">
@@ -54,7 +54,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D8734AA4800C4EFBBC65C20D"
+               BlueprintIdentifier = "7B1D19B8F4F04664B41B83E5"
                BuildableName = "LexturesTests.xctest"
                BlueprintName = "LexturesTests"
                ReferencedContainer = "container:Lextures.xcodeproj">

@@ -15,6 +15,42 @@ extension LMSAPI {
         return try decode(MeProfile.self, from: data)
     }
 
+    // MARK: - Account settings (editable profile)
+
+    static func fetchAccountProfile(accessToken: String) async throws -> AccountProfile {
+        let (data, _) = try await client.request(
+            path: "/api/v1/settings/account",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(AccountProfile.self, from: data)
+    }
+
+    static func updateAccountProfile(
+        _ patch: AccountProfilePatch,
+        accessToken: String
+    ) async throws -> AccountProfile {
+        let (data, _) = try await client.request(
+            path: "/api/v1/settings/account",
+            method: "PATCH",
+            body: patch,
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(AccountProfile.self, from: data)
+    }
+
+    // MARK: - My accommodations
+
+    static func fetchMyAccommodations(accessToken: String) async throws -> [MyAccommodation] {
+        let (data, _) = try await client.request(
+            path: "/api/v1/me/accommodations",
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(MyAccommodationsResponse.self, from: data).accommodations
+    }
+
     // MARK: - Notifications
 
     static func fetchNotifications(accessToken: String) async throws -> NotificationsPage {

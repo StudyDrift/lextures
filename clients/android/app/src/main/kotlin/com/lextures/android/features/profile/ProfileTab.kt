@@ -23,7 +23,9 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -68,11 +70,16 @@ import com.lextures.android.core.design.HeroBrush
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
+import com.lextures.android.core.design.ThemeAppearance
+import com.lextures.android.core.design.ThemePreference
 import com.lextures.android.core.design.isDarkTheme
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.core.lms.resolvedDisplayName
+import com.lextures.android.core.lms.resolvedInitials
+import com.lextures.android.core.design.ProfileAvatar
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import com.lextures.android.core.accessibility.rememberAccessibilityPreferencesState
@@ -90,8 +97,11 @@ fun ProfileTab(
     var confirmingClearCache by remember { mutableStateOf(false) }
     var showNotifications by remember { mutableStateOf(false) }
     var showDeviceSessions by remember { mutableStateOf(false) }
+    var showEditProfile by remember { mutableStateOf(false) }
+    var showAccommodations by remember { mutableStateOf(false) }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
+    val themePreference = remember { ThemePreference.get(context) }
     val biometricGate = remember { BiometricGate.get(context) }
     val offline = remember { OfflineService.get(context) }
     val pendingCount by offline.pendingCount.collectAsState()
@@ -122,8 +132,31 @@ fun ProfileTab(
         return
     }
 
-    val displayName = shell.profile?.displayName?.trim().orEmpty()
-        .ifEmpty { shell.profile?.firstName ?: "Welcome" }
+    if (showEditProfile) {
+        EditProfileScreen(
+            session = session,
+            shell = shell,
+            onBack = { showEditProfile = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showAccommodations) {
+        MyAccommodationsScreen(
+            session = session,
+            onBack = { showAccommodations = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    val displayName = shell.accountProfile?.resolvedDisplayName()
+        ?: shell.profile?.displayName?.trim().orEmpty()
+            .ifEmpty { shell.profile?.firstName ?: "Welcome" }
+    val profileInitials = shell.accountProfile?.resolvedInitials()
+        ?: shell.profile?.initials ?: "··"
+    val avatarUrl = shell.accountProfile?.avatarUrl
     val email = shell.profile?.email ?: ""
 
     Column(
@@ -154,24 +187,35 @@ fun ProfileTab(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(76.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.16f)),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = shell.profile?.initials ?: "··",
-                        style = LexturesType.display(28, FontWeight.Bold),
-                        color = Color.White,
-                    )
-                }
+                ProfileAvatar(
+                    avatarUrl = avatarUrl,
+                    initials = profileInitials,
+                    size = 76.dp,
+                    initialsBackground = Color.White.copy(alpha = 0.16f),
+                    initialsForeground = Color.White,
+                )
                 Text(text = displayName, style = LexturesType.display(22), color = Color.White)
                 if (email.isNotEmpty()) {
                     Text(text = email, fontSize = 13.sp, color = Color.White.copy(alpha = 0.8f))
                 }
             }
+        }
+
+        // Personal: edit profile + accommodations
+        LmsCard {
+            SettingsNavRow(
+                icon = Icons.Default.Person,
+                title = L.text(R.string.mobile_editProfile_title),
+                subtitle = L.text(R.string.mobile_editProfile_subtitle),
+                onClick = { showEditProfile = true },
+            )
+            SettingsNavRow(
+                icon = Icons.Default.VerifiedUser,
+                title = L.text(R.string.mobile_accommodations_title),
+                subtitle = L.text(R.string.mobile_accommodations_subtitle),
+                onClick = { showAccommodations = true },
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
 
         if (pendingCount > 0) {
@@ -198,6 +242,55 @@ fun ProfileTab(
                                 Text("Retry")
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // Appearance (theme override)
+        LmsCard {
+            Text(
+                text = L.text(R.string.mobile_settings_appearance),
+                style = LexturesType.display(17),
+                color = textPrimary(),
+            )
+            Text(
+                text = L.text(R.string.mobile_settings_appearance_description),
+                fontSize = 12.sp,
+                color = textSecondary(),
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                val options = listOf(
+                    ThemeAppearance.SYSTEM to R.string.mobile_settings_theme_system,
+                    ThemeAppearance.LIGHT to R.string.mobile_settings_theme_light,
+                    ThemeAppearance.DARK to R.string.mobile_settings_theme_dark,
+                )
+                options.forEach { (appearance, labelRes) ->
+                    val selected = themePreference.appearance == appearance
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(
+                                if (selected) {
+                                    LexturesColors.Primary.copy(alpha = 0.16f)
+                                } else {
+                                    Color.Transparent
+                                },
+                            )
+                            .clickable { themePreference.update(appearance) }
+                            .padding(vertical = 10.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = L.text(labelRes),
+                            fontSize = 14.sp,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (selected) accentColor() else textSecondary(),
+                        )
                     }
                 }
             }
@@ -457,6 +550,27 @@ fun ProfileTab(
             }
         }
 
+        // Privacy & trust
+        LmsCard {
+            Text(
+                text = L.text(R.string.mobile_settings_privacyTrust),
+                style = LexturesType.display(17),
+                color = textPrimary(),
+            )
+            LegalLinkRow(
+                title = L.text(R.string.mobile_settings_privacyCenter),
+                path = "/privacy",
+            )
+            LegalLinkRow(
+                title = L.text(R.string.mobile_settings_trustCenter),
+                path = "/security",
+            )
+            LegalLinkRow(
+                title = L.text(R.string.mobile_settings_accessibilityStatement),
+                path = "/accessibility",
+            )
+        }
+
         // About
         LmsCard {
             Text(text = "About", style = LexturesType.display(17), color = textPrimary())
@@ -527,6 +641,70 @@ fun ProfileTab(
             dismissButton = {
                 TextButton(onClick = { confirmingSignOut = false }) { Text("Cancel") }
             },
+        )
+    }
+}
+
+@Composable
+private fun SettingsNavRow(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(LexturesColors.BrandTeal.copy(alpha = if (isDarkTheme()) 0.18f else 0.14f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = accentColor(), modifier = Modifier.size(16.dp))
+        }
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(text = title, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = textPrimary())
+            Text(text = subtitle, fontSize = 12.sp, color = textSecondary())
+        }
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = textSecondary().copy(alpha = 0.6f),
+        )
+    }
+}
+
+@Composable
+private fun LegalLinkRow(title: String, path: String) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable {
+                val uri = android.net.Uri.parse(AppConfiguration.webUrl(path))
+                context.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, uri))
+            }
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Default.OpenInNew, contentDescription = null, tint = accentColor(), modifier = Modifier.size(17.dp))
+        Text(
+            text = title,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            color = textPrimary(),
+            modifier = Modifier.weight(1f),
         )
     }
 }

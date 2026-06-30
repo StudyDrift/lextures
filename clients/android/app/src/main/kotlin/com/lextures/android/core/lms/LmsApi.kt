@@ -114,6 +114,31 @@ object LmsApi {
         decode<MeProfile>(body)
     }
 
+    // Account settings (editable profile)
+
+    suspend fun fetchAccountProfile(accessToken: String): AccountProfile = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/settings/account", accessToken = accessToken)
+        decode<AccountProfile>(body)
+    }
+
+    suspend fun updateAccountProfile(patch: AccountProfilePatch, accessToken: String): AccountProfile =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                path = "/api/v1/settings/account",
+                method = "PATCH",
+                body = client.encodeBody(patch, AccountProfilePatch.serializer()),
+                accessToken = accessToken,
+            )
+            decode<AccountProfile>(body)
+        }
+
+    // My accommodations
+
+    suspend fun fetchMyAccommodations(accessToken: String): List<MyAccommodation> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/accommodations", accessToken = accessToken)
+        decode<MyAccommodationsResponse>(body).accommodations
+    }
+
     // Notifications
 
     suspend fun fetchNotifications(accessToken: String): NotificationsPage = withContext(Dispatchers.IO) {

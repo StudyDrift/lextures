@@ -26,13 +26,23 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
   const wsReconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const inboxHydratedRef = useRef(false)
   const toastedIdsRef = useRef<Set<string>>(loadNotificationToastedIds())
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const refresh = useCallback(async () => {
+    if (!mountedRef.current) return
     setLoading(true)
     try {
       const res = await authorizedFetch('/api/v1/me/notifications')
-      if (!res.ok) return
+      if (!mountedRef.current || !res.ok) return
       const data = (await res.json()) as { notifications: InboxNotification[]; unreadCount: number }
+      if (!mountedRef.current) return
       const incoming = data.notifications ?? []
       let toToast: InboxNotification[] = []
       setNotifications((prev) => {
@@ -58,11 +68,15 @@ export function InboxNotificationsProvider({ children }: { children: ReactNode }
           toast.success(n.title, { description: n.body })
         }
       }
-      setUnreadCount(data.unreadCount ?? 0)
+      if (mountedRef.current) {
+        setUnreadCount(data.unreadCount ?? 0)
+      }
     } catch {
       /* ignore */
     } finally {
-      setLoading(false)
+      if (mountedRef.current) {
+        setLoading(false)
+      }
     }
   }, [bumpCoursesRevision])
 

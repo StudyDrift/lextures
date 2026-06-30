@@ -35,6 +35,7 @@ enum AppTab: String, CaseIterable, Identifiable {
 final class AppShellModel {
     var selectedTab: AppTab = .home
     var profile: MeProfile?
+    var accountProfile: AccountProfile?
     var unreadInbox = 0
     var unreadNotifications = 0
     var pendingDeepLink: DeepLinkDestination?
@@ -59,9 +60,11 @@ final class AppShellModel {
     func refresh(accessToken: String?) async {
         guard let token = accessToken else { return }
         async let me = try? LMSAPI.fetchMe(accessToken: token)
+        async let account = try? LMSAPI.fetchAccountProfile(accessToken: token)
         async let inbox = try? LMSAPI.fetchUnreadInboxCount(accessToken: token)
         async let notifications = try? LMSAPI.fetchNotifications(accessToken: token)
         if let me = await me { profile = me }
+        if let account = await account { accountProfile = account }
         if let inbox = await inbox { unreadInbox = inbox }
         if let page = await notifications { unreadNotifications = page.unreadCount }
     }
@@ -372,14 +375,18 @@ struct LMSAvatarButton: View {
         Button {
             shell.selectedTab = .profile
         } label: {
-            Circle()
-                .fill(LexturesTheme.heroGradient)
-                .frame(width: size, height: size)
-                .overlay(
-                    Text(shell.profile?.initials ?? "··")
-                        .font(.system(size: size * 0.36, weight: .bold))
-                        .foregroundStyle(.white)
-                )
+            ProfileAvatarView(
+                avatarUrl: shell.accountProfile?.avatarUrl,
+                initials: shell.accountProfile?.resolvedInitials ?? shell.profile?.initials ?? "··",
+                size: size,
+                initialsBackground: .white.opacity(0.16),
+                initialsForeground: .white
+            )
+            .clipShape(Circle())
+            .overlay(
+                Circle()
+                    .stroke(.white.opacity(0.35), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L.text("tabs.profile"))

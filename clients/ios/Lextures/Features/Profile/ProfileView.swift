@@ -23,12 +23,15 @@ struct ProfileView: View {
                         if offline.pendingCount > 0 {
                             offlineSyncCard
                         }
+                        ProfilePersonalCard()
                         offlineStorageCard
+                        ProfileAppearanceCard()
                         localeCard
                         accessibilityCard
                         ProfileSecurityCard()
                         accountCard
                         notificationsCard
+                        ProfileLegalCard()
                         aboutCard
                         signOutButton
                     }
@@ -45,6 +48,12 @@ struct ProfileView: View {
             }
             .navigationDestination(for: DeviceSessionsRoute.self) { _ in
                 DeviceSessionsView()
+            }
+            .navigationDestination(for: EditProfileRoute.self) { _ in
+                EditProfileView()
+            }
+            .navigationDestination(for: MyAccommodationsRoute.self) { _ in
+                MyAccommodationsView()
             }
             .confirmationDialog(
                 L.text("mobile.profile.signOutConfirm"),
@@ -78,14 +87,13 @@ struct ProfileView: View {
                 .offset(x: 46, y: -56)
 
             VStack(spacing: 10) {
-                Circle()
-                    .fill(.white.opacity(0.16))
-                    .frame(width: 76, height: 76)
-                    .overlay(
-                        Text(shell.profile?.initials ?? "··")
-                            .font(LexturesTheme.displayFont(28, weight: .bold))
-                            .foregroundStyle(.white)
-                    )
+                ProfileAvatarView(
+                    avatarUrl: shell.accountProfile?.avatarUrl,
+                    initials: profileInitials,
+                    size: 76,
+                    initialsBackground: .white.opacity(0.16),
+                    initialsForeground: .white
+                )
                 Text(displayName)
                     .font(LexturesTheme.displayFont(22))
                     .foregroundStyle(.white)
@@ -102,9 +110,16 @@ struct ProfileView: View {
     }
 
     private var displayName: String {
+        if let account = shell.accountProfile {
+            return account.resolvedDisplayName
+        }
         let name = shell.profile?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if !name.isEmpty { return name }
         return shell.profile?.firstName ?? L.text("mobile.profile.welcome")
+    }
+
+    private var profileInitials: String {
+        shell.accountProfile?.resolvedInitials ?? shell.profile?.initials ?? "··"
     }
 
     private var offlineSyncCard: some View {
