@@ -220,6 +220,14 @@
 		R8V1EW140000000000000020 /* ReviewSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8V1EW030000000000000020 /* ReviewSessionView.swift */; };
 		R8V1EW150000000000000020 /* ReviewReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8V1EW040000000000000020 /* ReviewReminderScheduler.swift */; };
 		R8V1EW160000000000000020 /* ReviewLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8V1EW070000000000000020 /* ReviewLogicTests.swift */; };
+		A1B2C3D4E5F6478990A1B2C3D4 /* PeerReviewLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2C3D4E5F6A748990B1C2D3E4F5 /* PeerReviewLogic.swift */; };
+		C3D4E5F6A7B84990C1D2E3F4A5B6 /* LMSFeatureModelsPeerReview.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C94091D2E3F4A5B6C7 /* LMSFeatureModelsPeerReview.swift */; };
+		E5F6A7B8C9D04192E3F4A5B6C7D8 /* LMSAPIPeerReview.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6A7B8C9D0E142A3F4A5B6C7D8E9 /* LMSAPIPeerReview.swift */; };
+		A7B8C9D0E1F243B4A5B6C7D8E9F0 /* PeerReviewListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8C9D0E1F2A344C5B6C7D8E9F0A1 /* PeerReviewListView.swift */; };
+		C9D0E1F2A3B445D6C7D8E9F0A1B2 /* PeerReviewDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E1F2A3B4C546E7D8E9F0A1B2C3 /* PeerReviewDetailView.swift */; };
+		E1F2A3B4C5D647F8E9F0A1B2C3D4 /* ReviewsReceivedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A3B4C5D6E748091A2B3C4D5E6F7 /* ReviewsReceivedView.swift */; };
+		A3B4C5D6E7F8491A2B3C4D5E6F7A8 /* RubricScorerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C5D6E7F8A942B3C4D5E6F7A8B9 /* RubricScorerView.swift */; };
+		C5D6E7F8A9B043D4E5F6A7B8C9D0 /* PeerReviewLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E7F8A9B0C144E5F6A7B8C9D0E1 /* PeerReviewLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -450,6 +458,14 @@
 		R8V1EW050000000000000020 /* ReviewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewModels.swift; sourceTree = "<group>"; };
 		R8V1EW060000000000000020 /* LMSAPIReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReview.swift; sourceTree = "<group>"; };
 		R8V1EW070000000000000020 /* ReviewLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewLogicTests.swift; sourceTree = "<group>"; };
+		B2C3D4E5F6A748990B1C2D3E4F5 /* PeerReviewLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewLogic.swift; sourceTree = "<group>"; };
+		D4E5F6A7B8C94091D2E3F4A5B6C7 /* LMSFeatureModelsPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPeerReview.swift; sourceTree = "<group>"; };
+		F6A7B8C9D0E142A3F4A5B6C7D8E9 /* LMSAPIPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPeerReview.swift; sourceTree = "<group>"; };
+		B8C9D0E1F2A344C5B6C7D8E9F0A1 /* PeerReviewListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewListView.swift; sourceTree = "<group>"; };
+		D0E1F2A3B4C546E7D8E9F0A1B2C3 /* PeerReviewDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewDetailView.swift; sourceTree = "<group>"; };
+		F2A3B4C5D6E748091A2B3C4D5E6F7 /* ReviewsReceivedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsReceivedView.swift; sourceTree = "<group>"; };
+		B4C5D6E7F8A942B3C4D5E6F7A8B9 /* RubricScorerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RubricScorerView.swift; sourceTree = "<group>"; };
+		D6E7F8A9B0C144E5F6A7B8C9D0E1 /* PeerReviewLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -686,6 +702,7 @@
 		9675A7A45CC240A0A4F7B883 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				B1C2D3E4F5A6478990ABCDEF01 /* PeerReview */,
 				R8V1EW010000000000000020 /* Review */,
 				A2F38050F87E47D8841DA2DD /* Tutor */,
 				81F2E4188BBA4822A198C056 /* Discussions */,
@@ -843,6 +860,7 @@
 		D177268EB0164406B86F0376 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				D6E7F8A9B0C144E5F6A7B8C9D0E1 /* PeerReviewLogicTests.swift */,
 				F79285C9BC784AEFA1C40F21 /* TutorLogicTests.swift */,
 				R8V1EW070000000000000020 /* ReviewLogicTests.swift */,
 				D409F0EB287D4F239C250117 /* DiscussionLogicTests.swift */,
@@ -908,6 +926,9 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				F6A7B8C9D0E142A3F4A5B6C7D8E9 /* LMSAPIPeerReview.swift */,
+				D4E5F6A7B8C94091D2E3F4A5B6C7 /* LMSFeatureModelsPeerReview.swift */,
+				B2C3D4E5F6A748990B1C2D3E4F5 /* PeerReviewLogic.swift */,
 				0767A07BDABC4E57B5E531D6 /* TutorStreamClient.swift */,
 				8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */,
 				4BC9EE68C03F499385880A6E /* LMSFeatureModelsTutor.swift */,
@@ -1022,6 +1043,17 @@
 			path = Review;
 			sourceTree = "<group>";
 		};
+		B1C2D3E4F5A6478990ABCDEF01 /* PeerReview */ = {
+			isa = PBXGroup;
+			children = (
+				B8C9D0E1F2A344C5B6C7D8E9F0A1 /* PeerReviewListView.swift */,
+				D0E1F2A3B4C546E7D8E9F0A1B2C3 /* PeerReviewDetailView.swift */,
+				F2A3B4C5D6E748091A2B3C4D5E6F7 /* ReviewsReceivedView.swift */,
+				B4C5D6E7F8A942B3C4D5E6F7A8B9 /* RubricScorerView.swift */,
+			);
+			path = PeerReview;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1111,6 +1143,13 @@
 			buildActionMask = 2147483647;
 			files = (
 
+				A3B4C5D6E7F8491A2B3C4D5E6F7A8 /* RubricScorerView.swift in Sources */,
+				E1F2A3B4C5D647F8E9F0A1B2C3D4 /* ReviewsReceivedView.swift in Sources */,
+				C9D0E1F2A3B445D6C7D8E9F0A1B2 /* PeerReviewDetailView.swift in Sources */,
+				A7B8C9D0E1F243B4A5B6C7D8E9F0 /* PeerReviewListView.swift in Sources */,
+				E5F6A7B8C9D04192E3F4A5B6C7D8 /* LMSAPIPeerReview.swift in Sources */,
+				C3D4E5F6A7B84990C1D2E3F4A5B6 /* LMSFeatureModelsPeerReview.swift in Sources */,
+				A1B2C3D4E5F6478990A1B2C3D4 /* PeerReviewLogic.swift in Sources */,
 				CF494658471641B8B712C9D0 /* TutorLauncher.swift in Sources */,
 				R8V1EW110000000000000020 /* ReviewModels.swift in Sources */,
 				R8V1EW120000000000000020 /* LMSAPIReview.swift in Sources */,
@@ -1304,6 +1343,7 @@
 			buildActionMask = 2147483647;
 			files = (
 
+				C5D6E7F8A9B043D4E5F6A7B8C9D0 /* PeerReviewLogicTests.swift in Sources */,
 				FA4D4D6AD50D45EF87DBBBE1 /* TutorLogicTests.swift in Sources */,
 				R8V1EW160000000000000020 /* ReviewLogicTests.swift in Sources */,
 				29C3063A926C4569BA929FFE /* DiscussionLogicTests.swift in Sources */,

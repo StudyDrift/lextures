@@ -78,12 +78,14 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case advising
     case settings
     case askAi
+    case peerReviews
 
     var id: String { rawValue }
 
     var label: String {
         switch self {
         case .askAi: return L.text("mobile.tutor.askAi")
+        case .peerReviews: return L.text("mobile.peerReview.title")
         case .calendar: return L.text("mobile.ia.more.calendar")
         case .planner: return L.text("mobile.ia.more.planner")
         case .catalog: return L.text("mobile.ia.more.catalog")
@@ -100,6 +102,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     var systemImage: String {
         switch self {
         case .askAi: return "sparkles"
+        case .peerReviews: return "person.2.wave.2.fill"
         case .calendar: return "calendar"
         case .planner: return "list.bullet.rectangle"
         case .catalog: return "books.vertical"
@@ -231,6 +234,7 @@ struct MobilePlatformFeatures: Equatable {
     var ragNotebookEnabled = false
     var aiStudyBuddyEnabled = false
     var aiDisclosureEnabled = false
+    var ffPeerReview = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -249,7 +253,8 @@ struct MobilePlatformFeatures: Equatable {
             ffAiStudyBuddy: features?.ffAiStudyBuddy == true,
             ragNotebookEnabled: features?.ragNotebookEnabled == true,
             aiStudyBuddyEnabled: features?.aiStudyBuddyEnabled == true,
-            aiDisclosureEnabled: features?.aiDisclosureEnabled == true
+            aiDisclosureEnabled: features?.aiDisclosureEnabled == true,
+            ffPeerReview: features?.ffPeerReview == true
         )
     }
 
@@ -302,6 +307,7 @@ enum MobileDestinations {
         switch context {
         case .learning:
             if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
+            if platform.ffPeerReview { out.append(.peerReviews) }
             out += [.calendar, .planner, .catalog, .paths, .reading]
             if platform.libraryBrowseEnabled { out.append(.library) }
             out += [.portfolio, .credentials, .advising, .settings]

@@ -70,7 +70,7 @@ sessions, quiz **attempts (read)**, syllabus, notebooks, me.
 assignment ✅, rendering module content types (pages/files/links/LTI/H5P/SCORM),
 **discussions** ✅, calendar/to-dos, viewing rich feedback (annotations, audio/video,
 rubrics), what-if grades, **the AI tutor** ✅, adaptive review/paths, native push +
-deep links, and offline.
+deep links, and offline. **Peer review** ✅ (M5.2).
 
 ## 4. Epics & numbering
 
@@ -125,7 +125,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M1.3 Onboarding & placement diagnostic](../completed/mobile/M1.3-onboarding-diagnostic.md) | onboarding, 1.7/15.11 diagnostic | **Done** |
 | [M2.2 Notification center & preferences](M2.2-notification-center.md) | 6.2 notifications, notification prefs | **P1** |
 | [M3.3 Interactive content: H5P/SCORM/LTI](../completed/mobile/M3.3-interactive-content.md) ✅ | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **Done** |
-| [M5.2 Peer review](M5.2-peer-review.md) | 3.15 peer review | **P1** |
+| [M5.2 Peer review](../completed/mobile/M5.2-peer-review.md) ✅ | 3.15 peer review | **DONE** | **P1** |
 | [M6.2 Standards-based grades & mastery](M6.2-standards-mastery.md) | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **P1** |
 | [M7.3 Office hours booking](../completed/mobile/M7.3-office-hours.md) ✅ | 6.7 office hours | **Done** |
 | [M7.4 Group spaces & collab docs](M7.4-groups-collab.md) | 6.6 groups, 6.5 collab docs | **P1** |

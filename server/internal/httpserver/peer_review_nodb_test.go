@@ -33,4 +33,12 @@ func TestPeerReview_FeatureOff(t *testing.T) {
 	if w.Code != http.StatusNotFound {
 		t.Fatalf("feature off want 404 got %d", w.Code)
 	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/peer-review/allocations/00000000-0000-0000-0000-000000000001", nil)
+	req.Header.Set("Authorization", "Bearer "+tok)
+	w = httptest.NewRecorder()
+	h.ServeHTTP(w, req)
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("allocation detail feature off want 404 got %d", w.Code)
+	}
 }

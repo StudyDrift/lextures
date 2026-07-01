@@ -15,6 +15,7 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/repos/coursefiles"
 	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	prrepo "github.com/lextures/lextures/server/internal/repos/peerreview"
 	"github.com/lextures/lextures/server/internal/repos/submissionattachments"
 )
 
@@ -62,7 +63,15 @@ func (d Deps) handleGetSubmissionAttachmentsArchive() http.HandlerFunc {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify access.")
 			return
 		}
+		canPeerReview := false
 		if !canViewAll && subRow.SubmittedBy != viewer {
+			canPeerReview, err = prrepo.ReviewerHasAllocationForSubmission(r.Context(), d.Pool, viewer, submissionID)
+			if err != nil {
+				apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to verify access.")
+				return
+			}
+		}
+		if !canViewAll && subRow.SubmittedBy != viewer && !canPeerReview {
 			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "Not allowed.")
 			return
 		}

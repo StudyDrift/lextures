@@ -152,6 +152,8 @@ struct ProfileMoreDestinationScreen: View {
             LibraryBrowseView()
         } else if destination == .askAi {
             TutorChatView(mode: .askAi)
+        } else if destination == .peerReviews {
+            PeerReviewListView()
         } else {
             MoreDestinationPlaceholder(destination: destination)
         }

@@ -299,6 +299,49 @@ object LmsApi {
             decode<PlatformFeatures>(body)
         }
 
+    suspend fun fetchPeerReviewAssigned(accessToken: String): List<PeerReviewAllocation> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw("/api/v1/peer-review/assigned", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            decode<PeerReviewAssignedResponse>(body).allocations
+        }
+
+    suspend fun fetchPeerReviewAllocation(allocationId: String, accessToken: String): PeerReviewAllocationDetail =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/peer-review/allocations/${encodePath(allocationId)}",
+                accessToken = accessToken,
+            )
+            decode<PeerReviewAllocationDetail>(body)
+        }
+
+    suspend fun submitPeerReview(
+        allocationId: String,
+        body: PeerReviewSubmitRequest,
+        accessToken: String,
+    ): PeerReviewSubmitResponse = withContext(Dispatchers.IO) {
+        val (responseBody, _) = client.request(
+            path = "/api/v1/peer-review/allocations/${encodePath(allocationId)}",
+            method = "POST",
+            body = client.encodeBody(body, PeerReviewSubmitRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<PeerReviewSubmitResponse>(responseBody)
+    }
+
+    suspend fun fetchPeerReviewReceived(
+        courseCode: String,
+        assignmentId: String,
+        accessToken: String,
+    ): List<PeerReviewReceivedItem> = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(assignmentId)}/peer-review/received",
+            accessToken = accessToken,
+        )
+        if (code == 404) return@withContext emptyList()
+        decode<PeerReviewReceivedResponse>(body).reviews
+    }
+
     suspend fun fetchSubmissionAnnotations(
         courseCode: String,
         itemId: String,

@@ -46,6 +46,7 @@ enum class MoreDestination(val labelRes: String) {
     Advising("mobile_ia_more_advising"),
     Settings("mobile_ia_more_settings"),
     AskAi("mobile_tutor_askAi"),
+    PeerReviews("mobile_peerReview_title"),
 }
 
 /** Course-scoped workspace chips (registry-driven). */
@@ -123,6 +124,7 @@ data class MobilePlatformFeatures(
     val ragNotebookEnabled: Boolean = false,
     val aiStudyBuddyEnabled: Boolean = false,
     val aiDisclosureEnabled: Boolean = false,
+    val ffPeerReview: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -145,6 +147,7 @@ data class MobilePlatformFeatures(
             ragNotebookEnabled = features?.ragNotebookEnabled == true,
             aiStudyBuddyEnabled = features?.aiStudyBuddyEnabled == true,
             aiDisclosureEnabled = features?.aiDisclosureEnabled == true,
+            ffPeerReview = features?.ffPeerReview == true,
         )
     }
 }
@@ -192,6 +195,7 @@ object MobileDestinations {
         when (context) {
             MobileRoleContext.Learning -> {
                 if (TutorLogic.askAiEnabled(platform)) add(MoreDestination.AskAi)
+                if (platform.ffPeerReview) add(MoreDestination.PeerReviews)
                 add(MoreDestination.Calendar)
                 add(MoreDestination.Planner)
                 add(MoreDestination.Catalog)

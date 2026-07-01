@@ -11,8 +11,10 @@ import (
 	"github.com/lextures/lextures/server/internal/apierr"
 	"github.com/lextures/lextures/server/internal/gradingredaction"
 	"github.com/lextures/lextures/server/internal/models/peerreview"
-	prrepo "github.com/lextures/lextures/server/internal/repos/peerreview"
 	"github.com/lextures/lextures/server/internal/repos/course"
+	"github.com/lextures/lextures/server/internal/repos/coursemoduleassignments"
+	"github.com/lextures/lextures/server/internal/repos/moduleassignmentsubmissions"
+	prrepo "github.com/lextures/lextures/server/internal/repos/peerreview"
 	"github.com/lextures/lextures/server/internal/repos/rbac"
 	peerreviewsvc "github.com/lextures/lextures/server/internal/service/peerreview"
 )
@@ -44,6 +46,7 @@ func (d Deps) registerPeerReviewRoutes(r chi.Router) {
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/peer-review/received", d.handleGetPeerReviewReceived())
 	r.Get("/api/v1/courses/{course_code}/assignments/{item_id}/peer-review/summary", d.handleGetPeerReviewSummary())
 	r.Get("/api/v1/peer-review/assigned", d.handleGetPeerReviewAssigned())
+	r.Get("/api/v1/peer-review/allocations/{allocation_id}", d.handleGetPeerReviewAllocation())
 	r.Post("/api/v1/peer-review/allocations/{allocation_id}", d.handlePostPeerReviewSubmit())
 	r.Post("/api/v1/courses/{course_code}/groups/{group_id}/team-eval", d.handlePostTeamPeerEval())
 }
@@ -274,15 +277,21 @@ WHERE ce.user_id = $1 AND ce.active
 
 func (d Deps) allocationToJSON(a prrepo.AllocationRow, cfg *prrepo.ConfigRow, viewer uuid.UUID) map[string]any {
 	out := map[string]any{
-		"id":               a.ID.String(),
-		"configId":         a.ConfigID.String(),
-		"assignmentId":     a.AssignmentID.String(),
-		"courseId":         a.CourseID.String(),
-		"courseCode":       a.CourseCode,
+		"id":                 a.ID.String(),
+		"configId":           a.ConfigID.String(),
+		"assignmentId":       a.AssignmentID.String(),
+		"courseId":           a.CourseID.String(),
+		"courseCode":         a.CourseCode,
 		"targetSubmissionId": a.TargetSubmissionID.String(),
-		"status":           string(a.Status),
-		"assignedAt":       a.AssignedAt.Format(time.RFC3339),
-		"anonymity":        string(cfg.Anonymity),
+		"status":             string(a.Status),
+		"assignedAt":         a.AssignedAt.Format(time.RFC3339),
+		"anonymity":          string(cfg.Anonymity),
+	}
+	if cfg.ClosesAt != nil {
+		out["closesAt"] = cfg.ClosesAt.Format(time.RFC3339)
+	}
+	if cfg.OpensAt != nil {
+		out["opensAt"] = cfg.OpensAt.Format(time.RFC3339)
 	}
 	labelRank := blindLabelRank(a.TargetSubmissionID)
 	switch cfg.Anonymity {
@@ -300,6 +309,92 @@ type peerReviewSubmitBody struct {
 	Score        *float64           `json:"score"`
 	RubricScores map[string]float64 `json:"rubricScores"`
 	Comments     *string            `json:"comments"`
+}
+
+func peerReviewRubricScoresFromJSON(raw []byte) map[string]float64 {
+	if len(raw) == 0 {
+		return nil
+	}
+	var out map[string]float64
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return nil
+	}
+	return out
+}
+
+func (d Deps) handleGetPeerReviewAllocation() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if d.peerReviewFeatureOff(w) {
+			return
+		}
+		viewer, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		allocationID, err := uuid.Parse(chi.URLParam(r, "allocation_id"))
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid allocation id.")
+			return
+		}
+		alloc, err := prrepo.GetAllocationByID(r.Context(), d.Pool, allocationID)
+		if err != nil || alloc == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Allocation not found.")
+			return
+		}
+		if alloc.ReviewerUserID != viewer {
+			apierr.WriteJSON(w, http.StatusForbidden, apierr.CodeForbidden, "You are not assigned to review this submission.")
+			return
+		}
+		cfg, err := prrepo.GetConfigByAssignment(r.Context(), d.Pool, alloc.CourseID, alloc.AssignmentID)
+		if err != nil || cfg == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Peer review is not configured.")
+			return
+		}
+		subRow, err := moduleassignmentsubmissions.GetByIDForCourse(r.Context(), d.Pool, alloc.CourseID, alloc.TargetSubmissionID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load submission.")
+			return
+		}
+		if subRow == nil {
+			apierr.WriteJSON(w, http.StatusNotFound, apierr.CodeNotFound, "Submission not found.")
+			return
+		}
+		redact := cfg.Anonymity == peerreview.AnonymityDoubleBlind || cfg.Anonymity == peerreview.AnonymityReviewerAnon
+		blindRank := blindLabelRank(alloc.TargetSubmissionID)
+		submissionJSON := d.submissionToJSON(r.Context(), alloc.CourseCode, *subRow, redact, blindRank, "")
+
+		var rubric any
+		if rubricMap, err := coursemoduleassignments.RubricByItemID(r.Context(), d.Pool, alloc.CourseID, []uuid.UUID{alloc.AssignmentID}); err == nil {
+			if raw, ok := rubricMap[alloc.AssignmentID]; ok && len(raw) > 0 {
+				_ = json.Unmarshal(raw, &rubric)
+			}
+		}
+
+		assignmentTitle := ""
+		_ = d.Pool.QueryRow(r.Context(), `
+SELECT title FROM course.course_structure_items WHERE id = $1
+`, alloc.AssignmentID).Scan(&assignmentTitle)
+
+		var reviewJSON map[string]any
+		if rev, err := prrepo.GetReviewByAllocation(r.Context(), d.Pool, allocationID); err == nil && rev != nil {
+			reviewJSON = map[string]any{
+				"id":           rev.ID.String(),
+				"allocationId": rev.AllocationID.String(),
+				"score":        rev.Score,
+				"rubricScores": peerReviewRubricScoresFromJSON(rev.RubricScoresJSON),
+				"comments":     rev.Comments,
+				"submittedAt":  rev.SubmittedAt.Format(time.RFC3339),
+			}
+		}
+
+		writeJSON(w, http.StatusOK, map[string]any{
+			"allocation":      d.allocationToJSON(*alloc, cfg, viewer),
+			"assignmentTitle": assignmentTitle,
+			"submission":      submissionJSON,
+			"rubric":          rubric,
+			"review":          reviewJSON,
+		})
+	}
 }
 
 func (d Deps) handlePostPeerReviewSubmit() http.HandlerFunc {

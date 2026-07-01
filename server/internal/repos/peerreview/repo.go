@@ -326,6 +326,35 @@ UPDATE course.peer_review_allocations SET status = $2 WHERE id = $1
 	return err
 }
 
+func GetReviewByAllocation(ctx context.Context, pool *pgxpool.Pool, allocationID uuid.UUID) (*ReviewRow, error) {
+	var r ReviewRow
+	err := pool.QueryRow(ctx, `
+SELECT id, allocation_id, score, rubric_scores_json, comments, submitted_at
+FROM course.peer_reviews
+WHERE allocation_id = $1
+`, allocationID).Scan(&r.ID, &r.AllocationID, &r.Score, &r.RubricScoresJSON, &r.Comments, &r.SubmittedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &r, nil
+}
+
+func ReviewerHasAllocationForSubmission(ctx context.Context, pool *pgxpool.Pool, reviewerUserID, submissionID uuid.UUID) (bool, error) {
+	var ok bool
+	err := pool.QueryRow(ctx, `
+SELECT EXISTS (
+    SELECT 1
+    FROM course.peer_review_allocations a
+    JOIN course.course_enrollments ce ON ce.id = a.reviewer_enrollment_id
+    WHERE a.target_submission_id = $1 AND ce.user_id = $2
+)
+`, submissionID, reviewerUserID).Scan(&ok)
+	return ok, err
+}
+
 func UpsertReview(ctx context.Context, pool *pgxpool.Pool, allocationID uuid.UUID, score *float64, rubricScores map[string]float64, comments *string) (*ReviewRow, error) {
 	var rubricJSON []byte
 	if len(rubricScores) > 0 {
