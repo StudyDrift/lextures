@@ -38,13 +38,22 @@ func TestAdminLicense_SeatLimitOnReactivate_Pg(t *testing.T) {
 	}
 	defer pool.Close()
 
-	defOrg := organization.SeedDefaultOrgID
+	uniq := uuid.NewString()[:8]
+	ts := time.Now().Format("20060102150405")
+	orgSlug := "sl-" + uniq
+	testOrgRow, err := organization.Create(ctx, pool, "Seat Limit Test "+ts, orgSlug, nil, nil, "", nil)
+	if err != nil {
+		t.Fatalf("org: %v", err)
+	}
+	testOrg := testOrgRow.ID
+	defer func() { _, _ = pool.Exec(ctx, `DELETE FROM tenant.licenses WHERE org_id = $1`, testOrg) }()
+
 	ph, err := auth.HashPassword("longpassword0")
 	if err != nil {
 		t.Fatalf("hash: %v", err)
 	}
 
-	emGA := "lic-ga-" + time.Now().Format("20060102150405") + "@e.com"
+	emGA := "lic-ga-" + uniq + "@e.com"
 	gaRow, err := user.InsertUser(ctx, pool, emGA, ph, nil)
 	if err != nil {
 		t.Fatalf("user: %v", err)
@@ -53,32 +62,40 @@ func TestAdminLicense_SeatLimitOnReactivate_Pg(t *testing.T) {
 	if err := rbac.AssignUserRoleByName(ctx, pool, gaID, "Global Admin"); err != nil {
 		t.Fatalf("ga: %v", err)
 	}
-	slugGA, _ := organization.OrgSlugForUser(ctx, pool, gaID)
 
-	emAdmin := "lic-admin-" + time.Now().Format("20060102150405") + "@e.com"
+	emAdmin := "lic-admin-" + uniq + "@e.com"
 	adminRow, err := user.InsertUser(ctx, pool, emAdmin, ph, nil)
 	if err != nil {
 		t.Fatalf("user: %v", err)
 	}
 	adminID := uuid.MustParse(adminRow.ID)
-	if _, err := orgroles.Create(ctx, pool, defOrg, adminID, nil, orgroles.RoleOrgAdmin, &gaID, nil); err != nil {
+	if _, err := pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, testOrg, adminID); err != nil {
+		t.Fatalf("move admin: %v", err)
+	}
+	if _, err := orgroles.Create(ctx, pool, testOrg, adminID, nil, orgroles.RoleOrgAdmin, &gaID, nil); err != nil {
 		t.Fatalf("grant: %v", err)
 	}
-	slugAdmin, _ := organization.OrgSlugForUser(ctx, pool, adminID)
+	slugAdmin := testOrgRow.Slug
 
-	emA := "lic-a-" + time.Now().Format("20060102150405") + "@e.com"
+	emA := "lic-a-" + uniq + "@e.com"
 	rowA, err := user.InsertUser(ctx, pool, emA, ph, nil)
 	if err != nil {
 		t.Fatalf("user: %v", err)
 	}
 	idA := uuid.MustParse(rowA.ID)
+	if _, err := pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, testOrg, idA); err != nil {
+		t.Fatalf("move user a: %v", err)
+	}
 
-	emB := "lic-b-" + time.Now().Format("20060102150405") + "@e.com"
+	emB := "lic-b-" + uniq + "@e.com"
 	rowB, err := user.InsertUser(ctx, pool, emB, ph, nil)
 	if err != nil {
 		t.Fatalf("user: %v", err)
 	}
 	idB := uuid.MustParse(rowB.ID)
+	if _, err := pool.Exec(ctx, `UPDATE "user".users SET org_id = $1 WHERE id = $2`, testOrg, idB); err != nil {
+		t.Fatalf("move user b: %v", err)
+	}
 
 	_, err = pool.Exec(ctx, `
 UPDATE "user".users SET deactivated_at = NOW(), login_blocked = TRUE WHERE id = $1
@@ -86,11 +103,11 @@ UPDATE "user".users SET deactivated_at = NOW(), login_blocked = TRUE WHERE id = 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := licenserepo.RefreshUsedSeats(ctx, pool, defOrg); err != nil {
+	if err := licenserepo.RefreshUsedSeats(ctx, pool, testOrg); err != nil {
 		t.Fatal(err)
 	}
 
-	used, err := licenserepo.CountLearnerSeats(ctx, pool, defOrg)
+	used, err := licenserepo.CountLearnerSeats(ctx, pool, testOrg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,17 +115,16 @@ UPDATE "user".users SET deactivated_at = NOW(), login_blocked = TRUE WHERE id = 
 		t.Fatalf("expected at least one active learner seat, got %d", used)
 	}
 	max := used
-	_, err = licenserepo.Upsert(ctx, pool, defOrg, licenserepo.Patch{MaxSeats: &max, Tier: func() *string { s := "starter"; return &s }()})
+	_, err = licenserepo.Upsert(ctx, pool, testOrg, licenserepo.Patch{MaxSeats: &max, Tier: func() *string { s := "starter"; return &s }()})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	signer := auth.NewJWTSignerWithPool("01234567890123456789012345678901", pool)
-	adminTok, err := signer.Sign(ctx, adminRow.ID, emAdmin, defOrg.String(), slugAdmin, nil)
+	adminTok, err := signer.Sign(ctx, adminRow.ID, emAdmin, testOrg.String(), slugAdmin, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_ = slugGA
 
 	h := NewHandler(Deps{
 		Pool:      pool,
@@ -139,7 +155,7 @@ UPDATE "user".users SET deactivated_at = NOW(), login_blocked = TRUE WHERE id = 
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := licenserepo.RefreshUsedSeats(ctx, pool, defOrg); err != nil {
+	if err := licenserepo.RefreshUsedSeats(ctx, pool, testOrg); err != nil {
 		t.Fatal(err)
 	}
 
