@@ -31,7 +31,10 @@ data class CourseSummary(
     val filesEnabled: Boolean? = null,
     val attendanceEnabled: Boolean? = null,
     val sectionsEnabled: Boolean? = null,
+    val resubmissionWorkflowEnabled: Boolean? = null,
+    val aiTutorEnabled: Boolean? = null,
 ) {
+    val isAiTutorEnabled: Boolean get() = aiTutorEnabled == true
     val displayTitle: String
         get() = catalogNickname?.trim()?.takeIf { it.isNotEmpty() } ?: title
 

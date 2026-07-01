@@ -21,6 +21,13 @@ object OfflineCacheKey {
     fun notificationsPage(): String = "notifications:page"
     fun notificationPreferences(): String = "notifications:preferences"
     fun officeHours(courseCode: String): String = "course:$courseCode:office-hours"
+    fun discussionForums(courseCode: String): String = "course:$courseCode:discussion-forums"
+    fun discussionThreads(courseCode: String, forumId: String): String =
+        "course:$courseCode:discussion-threads:$forumId"
+    fun discussionThread(courseCode: String, threadId: String): String =
+        "course:$courseCode:discussion-thread:$threadId"
+    fun discussionPosts(courseCode: String, threadId: String): String =
+        "course:$courseCode:discussion-posts:$threadId"
 }
 
 data class Cached<T>(

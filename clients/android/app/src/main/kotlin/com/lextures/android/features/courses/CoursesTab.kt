@@ -77,6 +77,7 @@ fun CoursesTab(
     var searchText by remember { mutableStateOf("") }
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
     var deepLinkSection by remember { mutableStateOf<com.lextures.android.core.navigation.CourseWorkspaceSection?>(null) }
+    var deepLinkThreadId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
@@ -99,6 +100,7 @@ fun CoursesTab(
         val token = accessToken ?: return@LaunchedEffect
         if (link is DeepLinkDestination.Course) {
             deepLinkSection = com.lextures.android.core.navigation.CourseWorkspaceSection.from(link.section)
+            deepLinkThreadId = link.itemId
             runCatching { LmsApi.fetchCourse(link.code, token) }
                 .onSuccess { openCourse = it }
                 .onFailure { shell.openDeepLink(DeepLinkDestination.Home) }
@@ -110,9 +112,10 @@ fun CoursesTab(
         CourseDetailScreen(
             session = session,
             course = course,
-            onBack = { openCourse = null; deepLinkSection = null },
+            onBack = { openCourse = null; deepLinkSection = null; deepLinkThreadId = null },
             shell = shell,
             initialSection = deepLinkSection,
+            initialThreadId = deepLinkThreadId,
             modifier = modifier,
         )
         return

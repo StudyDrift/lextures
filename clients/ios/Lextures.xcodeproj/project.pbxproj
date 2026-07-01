@@ -191,6 +191,28 @@
 		E7F8091A3B4C5D6E7F8092F /* ProfileViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F8091A3B4C5D6E7F8092E /* ProfileViewSections.swift */; };
 		3C4D5E6F708192A3B4C5D6E7F /* ProfilePersonalDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F708192A3B4C5D6E7E /* ProfilePersonalDetailsView.swift */; };
 		4D5E6F708192A3B4C5D6E7F80 /* ResearchStudiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5E6F708192A3B4C5D6E7F8F /* ResearchStudiesView.swift */; };
+		0187C23C0AE54C1686409126 /* AssignmentLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC0110C79EBC4E5B8402D50C /* AssignmentLogic.swift */; };
+		AAB7BEFB34404CEBB2360F45 /* DiscussionLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3782F8285144A8282414028 /* DiscussionLogic.swift */; };
+		ECF3ECFE25CF4115A991111D /* LMSAPIDiscussions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080A92D8F9454E8A84D5C126 /* LMSAPIDiscussions.swift */; };
+		D592E24AC90241009951E220 /* LMSAPITutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7034DAA0F439465CA60F01D6 /* LMSAPITutor.swift */; };
+		6B601EB5D5A0438D93F41073 /* LMSFeatureModelsDiscussions.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F23D4CB9B34608BDFF52C0 /* LMSFeatureModelsDiscussions.swift */; };
+		08580A1065284E9FB955AE8D /* LMSFeatureModelsTutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BC9EE68C03F499385880A6E /* LMSFeatureModelsTutor.swift */; };
+		E04DE250969449BAAD797198 /* TutorLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */; };
+		3DD0BCEFF5E042B195C0FCDC /* TutorStreamClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0767A07BDABC4E57B5E531D6 /* TutorStreamClient.swift */; };
+		35BDEA0579904FCDB9C76DE5 /* AssignmentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CA4E942C00845B195DE0F22 /* AssignmentDetailView.swift */; };
+		BC0CEE4E54464483ADEED9C5 /* AssignmentDraftStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18DE37EE0E0E4F76B1EF3A04 /* AssignmentDraftStore.swift */; };
+		5053584B744240C692E235A0 /* AttachmentUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01770DCC545B460ABCF0C4AC /* AttachmentUploader.swift */; };
+		38BC1801903D47128558B1A0 /* CourseDiscussionsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0740CD15B21C4D4A864FC6C5 /* CourseDiscussionsSection.swift */; };
+		8FA81A74B405478ABD3BB327 /* DiscussionThreadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824D36B30B0A4F5F9B098CF6 /* DiscussionThreadView.swift */; };
+		3C53B179DFBC416985A91927 /* DiscussionsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 638B158DE352445A93F6D0EF /* DiscussionsListView.swift */; };
+		2A03F4B98D3446D58654F3C1 /* PostComposerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6221383657FA4F6A92F19886 /* PostComposerView.swift */; };
+		23299442725443BA8B9F163E /* TutorChatModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12C3B4E710C3428C912C59FD /* TutorChatModel.swift */; };
+		EA2656D1FF0444B3B75D3714 /* TutorChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFE68D874DC4BFA97FD7D23 /* TutorChatView.swift */; };
+		031CDB9867A246CB947C2520 /* TutorFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF7F4E0EB4204B85ACFA1CE7 /* TutorFlowLayout.swift */; };
+		CF494658471641B8B712C9D0 /* TutorLauncher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59BBA6832654A9397F03221 /* TutorLauncher.swift */; };
+		2D3A43490592470881DD625D /* AssignmentLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31D7F54C6AE74B4A881E6668 /* AssignmentLogicTests.swift */; };
+		29C3063A926C4569BA929FFE /* DiscussionLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D409F0EB287D4F239C250117 /* DiscussionLogicTests.swift */; };
+		FA4D4D6AD50D45EF87DBBBE1 /* TutorLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F79285C9BC784AEFA1C40F21 /* TutorLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -392,6 +414,28 @@
 		A1B2C3D4E5F6478990ABCD02 /* TakeAttendanceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceLogic.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6478990ABCD04 /* TakeAttendanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6478990ABCD06 /* TakeAttendanceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceLogicTests.swift; sourceTree = "<group>"; };
+		DC0110C79EBC4E5B8402D50C /* AssignmentLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignmentLogic.swift; sourceTree = "<group>"; };
+		F3782F8285144A8282414028 /* DiscussionLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionLogic.swift; sourceTree = "<group>"; };
+		080A92D8F9454E8A84D5C126 /* LMSAPIDiscussions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIDiscussions.swift; sourceTree = "<group>"; };
+		7034DAA0F439465CA60F01D6 /* LMSAPITutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPITutor.swift; sourceTree = "<group>"; };
+		B5F23D4CB9B34608BDFF52C0 /* LMSFeatureModelsDiscussions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsDiscussions.swift; sourceTree = "<group>"; };
+		4BC9EE68C03F499385880A6E /* LMSFeatureModelsTutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsTutor.swift; sourceTree = "<group>"; };
+		8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLogic.swift; sourceTree = "<group>"; };
+		0767A07BDABC4E57B5E531D6 /* TutorStreamClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorStreamClient.swift; sourceTree = "<group>"; };
+		1CA4E942C00845B195DE0F22 /* AssignmentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignmentDetailView.swift; sourceTree = "<group>"; };
+		18DE37EE0E0E4F76B1EF3A04 /* AssignmentDraftStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignmentDraftStore.swift; sourceTree = "<group>"; };
+		01770DCC545B460ABCF0C4AC /* AttachmentUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttachmentUploader.swift; sourceTree = "<group>"; };
+		0740CD15B21C4D4A864FC6C5 /* CourseDiscussionsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDiscussionsSection.swift; sourceTree = "<group>"; };
+		824D36B30B0A4F5F9B098CF6 /* DiscussionThreadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionThreadView.swift; sourceTree = "<group>"; };
+		638B158DE352445A93F6D0EF /* DiscussionsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionsListView.swift; sourceTree = "<group>"; };
+		6221383657FA4F6A92F19886 /* PostComposerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostComposerView.swift; sourceTree = "<group>"; };
+		12C3B4E710C3428C912C59FD /* TutorChatModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorChatModel.swift; sourceTree = "<group>"; };
+		DDFE68D874DC4BFA97FD7D23 /* TutorChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorChatView.swift; sourceTree = "<group>"; };
+		FF7F4E0EB4204B85ACFA1CE7 /* TutorFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorFlowLayout.swift; sourceTree = "<group>"; };
+		D59BBA6832654A9397F03221 /* TutorLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLauncher.swift; sourceTree = "<group>"; };
+		31D7F54C6AE74B4A881E6668 /* AssignmentLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssignmentLogicTests.swift; sourceTree = "<group>"; };
+		D409F0EB287D4F239C250117 /* DiscussionLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscussionLogicTests.swift; sourceTree = "<group>"; };
+		F79285C9BC784AEFA1C40F21 /* TutorLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -627,6 +671,9 @@
 		9675A7A45CC240A0A4F7B883 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				A2F38050F87E47D8841DA2DD /* Tutor */,
+				81F2E4188BBA4822A198C056 /* Discussions */,
+				71025D7F411C42B8977AC4C2 /* Assignments */,
 				6BA024E866664746813EA35A /* Auth */,
 				5536672DABBD4FDDB58C9A2D /* Courses */,
 				1920B879A116481BA2D9B736 /* Dashboard */,
@@ -780,6 +827,9 @@
 		D177268EB0164406B86F0376 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				F79285C9BC784AEFA1C40F21 /* TutorLogicTests.swift */,
+				D409F0EB287D4F239C250117 /* DiscussionLogicTests.swift */,
+				31D7F54C6AE74B4A881E6668 /* AssignmentLogicTests.swift */,
 				F86C72FFBE4D43FEA5DAEF08 /* AccessibilitySupportTests.swift */,
 				86D3AE75861543FF829C46A2 /* AuthCallbackParserTests.swift */,
 				6B95931B95194887B8FA20F9 /* BiometricGateTests.swift */,
@@ -841,6 +891,14 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				0767A07BDABC4E57B5E531D6 /* TutorStreamClient.swift */,
+				8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */,
+				4BC9EE68C03F499385880A6E /* LMSFeatureModelsTutor.swift */,
+				B5F23D4CB9B34608BDFF52C0 /* LMSFeatureModelsDiscussions.swift */,
+				7034DAA0F439465CA60F01D6 /* LMSAPITutor.swift */,
+				080A92D8F9454E8A84D5C126 /* LMSAPIDiscussions.swift */,
+				F3782F8285144A8282414028 /* DiscussionLogic.swift */,
+				DC0110C79EBC4E5B8402D50C /* AssignmentLogic.swift */,
 				B2164B51DD6540849CCC3738 /* AccountAccommodationModels.swift */,
 				893A64734D934D0FA79430C2 /* CourseFileLogic.swift */,
 				A6B1C0010000000000000011 /* GradeCalculator.swift */,
@@ -900,6 +958,39 @@
 				C62AA2E95C064618ACBB9E01 /* UniversalSearchView.swift */,
 			);
 			path = Search;
+			sourceTree = "<group>";
+		};
+
+		71025D7F411C42B8977AC4C2 /* Assignments */ = {
+			isa = PBXGroup;
+			children = (
+				1CA4E942C00845B195DE0F22 /* AssignmentDetailView.swift */,
+				18DE37EE0E0E4F76B1EF3A04 /* AssignmentDraftStore.swift */,
+				01770DCC545B460ABCF0C4AC /* AttachmentUploader.swift */,
+			);
+			path = Assignments;
+			sourceTree = "<group>";
+		};
+		81F2E4188BBA4822A198C056 /* Discussions */ = {
+			isa = PBXGroup;
+			children = (
+				0740CD15B21C4D4A864FC6C5 /* CourseDiscussionsSection.swift */,
+				824D36B30B0A4F5F9B098CF6 /* DiscussionThreadView.swift */,
+				638B158DE352445A93F6D0EF /* DiscussionsListView.swift */,
+				6221383657FA4F6A92F19886 /* PostComposerView.swift */,
+			);
+			path = Discussions;
+			sourceTree = "<group>";
+		};
+		A2F38050F87E47D8841DA2DD /* Tutor */ = {
+			isa = PBXGroup;
+			children = (
+				12C3B4E710C3428C912C59FD /* TutorChatModel.swift */,
+				DDFE68D874DC4BFA97FD7D23 /* TutorChatView.swift */,
+				FF7F4E0EB4204B85ACFA1CE7 /* TutorFlowLayout.swift */,
+				D59BBA6832654A9397F03221 /* TutorLauncher.swift */,
+			);
+			path = Tutor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -990,7 +1081,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				99DB00FCA2D843E19525D096 /* AppDelegate.swift in Sources */,
+
+				CF494658471641B8B712C9D0 /* TutorLauncher.swift in Sources */,
+				031CDB9867A246CB947C2520 /* TutorFlowLayout.swift in Sources */,
+				EA2656D1FF0444B3B75D3714 /* TutorChatView.swift in Sources */,
+				23299442725443BA8B9F163E /* TutorChatModel.swift in Sources */,
+				2A03F4B98D3446D58654F3C1 /* PostComposerView.swift in Sources */,
+				3C53B179DFBC416985A91927 /* DiscussionsListView.swift in Sources */,
+				8FA81A74B405478ABD3BB327 /* DiscussionThreadView.swift in Sources */,
+				38BC1801903D47128558B1A0 /* CourseDiscussionsSection.swift in Sources */,
+				5053584B744240C692E235A0 /* AttachmentUploader.swift in Sources */,
+				BC0CEE4E54464483ADEED9C5 /* AssignmentDraftStore.swift in Sources */,
+				35BDEA0579904FCDB9C76DE5 /* AssignmentDetailView.swift in Sources */,
+				3DD0BCEFF5E042B195C0FCDC /* TutorStreamClient.swift in Sources */,
+				E04DE250969449BAAD797198 /* TutorLogic.swift in Sources */,
+				08580A1065284E9FB955AE8D /* LMSFeatureModelsTutor.swift in Sources */,
+				6B601EB5D5A0438D93F41073 /* LMSFeatureModelsDiscussions.swift in Sources */,
+				D592E24AC90241009951E220 /* LMSAPITutor.swift in Sources */,
+				ECF3ECFE25CF4115A991111D /* LMSAPIDiscussions.swift in Sources */,
+				AAB7BEFB34404CEBB2360F45 /* DiscussionLogic.swift in Sources */,
+				0187C23C0AE54C1686409126 /* AssignmentLogic.swift in Sources */,				99DB00FCA2D843E19525D096 /* AppDelegate.swift in Sources */,
 				B7C0E6BEEF6C4B938565002D /* LexturesApp.swift in Sources */,
 				5501872990484C42A3974954 /* RootView.swift in Sources */,
 				F17B0DE575CA45B780B2FA13 /* AccessibilityPreferences.swift in Sources */,
@@ -1158,7 +1268,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C95E1AA9393D4B2DBEAC028E /* AccessibilitySupportTests.swift in Sources */,
+
+				FA4D4D6AD50D45EF87DBBBE1 /* TutorLogicTests.swift in Sources */,
+				29C3063A926C4569BA929FFE /* DiscussionLogicTests.swift in Sources */,
+				2D3A43490592470881DD625D /* AssignmentLogicTests.swift in Sources */,				C95E1AA9393D4B2DBEAC028E /* AccessibilitySupportTests.swift in Sources */,
 				459BBC09A32845CFB8833BB9 /* AuthCallbackParserTests.swift in Sources */,
 				C5EA11E56CDA49AEA482AA45 /* BiometricGateTests.swift in Sources */,
 				45D1BB57893C4B1891ED7040 /* CourseFileModelsTests.swift in Sources */,

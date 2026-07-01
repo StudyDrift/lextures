@@ -320,7 +320,7 @@ private fun DetailChip(text: String, icon: ImageVector, tint: Color) {
     }
 }
 
-private fun detailRows(item: CourseStructureItem, detail: ModuleItemDetail?): List<Pair<String, String>> {
+internal fun detailRows(item: CourseStructureItem, detail: ModuleItemDetail?): List<Pair<String, String>> {
     val rows = mutableListOf<Pair<String, String>>()
     val due = detail?.dueAt ?: item.dueAt
     if (LmsDates.parse(due) != null) {

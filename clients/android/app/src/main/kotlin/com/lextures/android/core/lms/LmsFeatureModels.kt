@@ -334,6 +334,16 @@ data class MySubmissionResponse(
 )
 
 @Serializable
+data class SubmitAssignmentTextRequest(
+    val text: String,
+)
+
+@Serializable
+data class SubmitAssignmentResponse(
+    val submission: AssignmentSubmission,
+)
+
+@Serializable
 data class SubmissionsListResponse(
     val submissions: List<AssignmentSubmission> = emptyList(),
 )
@@ -426,6 +436,11 @@ data class PlatformFeatures(
     val customFieldsEnabled: Boolean? = null,
     val ffDemographics: Boolean? = null,
     val ffResearchConsent: Boolean? = null,
+    val ffPersistentTutor: Boolean? = null,
+    val ffAiStudyBuddy: Boolean? = null,
+    val ragNotebookEnabled: Boolean? = null,
+    val aiStudyBuddyEnabled: Boolean? = null,
+    val aiDisclosureEnabled: Boolean? = null,
 )
 
 @Serializable
@@ -1079,6 +1094,189 @@ data class XapiStatementBody(
     val courseCode: String,
     val packageId: String,
     val statement: kotlinx.serialization.json.JsonElement,
+)
+
+// region Discussions (M7.1)
+
+@Serializable
+data class DiscussionForum(
+    val id: String = "",
+    val name: String = "",
+    val description: String? = null,
+    val position: Int = 0,
+    val createdAt: String = "",
+)
+
+@Serializable
+data class DiscussionThreadSummary(
+    val id: String = "",
+    val forumId: String = "",
+    val authorId: String = "",
+    val title: String = "",
+    val isPinned: Boolean = false,
+    val isLocked: Boolean = false,
+    val requirePostFirst: Boolean = false,
+    val assignmentStructureItemId: String? = null,
+    val createdAt: String = "",
+    val updatedAt: String = "",
+    val replyCount: Int = 0,
+)
+
+@Serializable
+data class DiscussionThreadDetail(
+    val id: String = "",
+    val forumId: String = "",
+    val authorId: String = "",
+    val title: String = "",
+    val isPinned: Boolean = false,
+    val isLocked: Boolean = false,
+    val requirePostFirst: Boolean = false,
+    val assignmentStructureItemId: String? = null,
+    val createdAt: String = "",
+    val updatedAt: String = "",
+    val replyCount: Int = 0,
+    val body: kotlinx.serialization.json.JsonElement = DiscussionLogic.encodeBody(""),
+) {
+    val bodyPlainText: String get() = DiscussionLogic.plainText(body)
+}
+
+@Serializable
+data class DiscussionPost(
+    val id: String = "",
+    val threadId: String = "",
+    val parentPostId: String? = null,
+    val authorId: String = "",
+    val body: kotlinx.serialization.json.JsonElement = DiscussionLogic.encodeBody(""),
+    val upvoteCount: Int = 0,
+    val viewerUpvoted: Boolean = false,
+    val createdAt: String = "",
+    val updatedAt: String = "",
+) {
+    val bodyPlainText: String get() = DiscussionLogic.plainText(body)
+}
+
+@Serializable
+data class DiscussionForumsResponse(val forums: List<DiscussionForum>? = null)
+
+@Serializable
+data class DiscussionThreadsResponse(val threads: List<DiscussionThreadSummary>? = null)
+
+@Serializable
+data class DiscussionPostsResponse(
+    val posts: List<DiscussionPost>? = null,
+    val hiddenUntilFirstPost: Boolean = false,
+)
+
+@Serializable
+data class CreateDiscussionThreadBody(
+    val title: String,
+    val body: kotlinx.serialization.json.JsonElement,
+    val assignmentStructureItemId: String? = null,
+    val requirePostFirst: Boolean? = null,
+)
+
+@Serializable
+data class CreateDiscussionPostBody(
+    val parentPostId: String? = null,
+    val body: kotlinx.serialization.json.JsonElement,
+    val idempotencyKey: String? = null,
+)
+
+@Serializable
+data class DiscussionUpvoteResponse(
+    val wasAdded: Boolean = false,
+    val upvoteCount: Int = 0,
+)
+
+// endregion
+
+// region AI tutor (M7.2)
+
+@Serializable
+data class TutorCitation(
+    val sourceId: String,
+    val chunkId: String,
+    val excerpt: String,
+    val title: String? = null,
+)
+
+@Serializable
+data class TutorMessage(
+    val role: String,
+    val content: String,
+    val citations: List<TutorCitation>? = null,
+    val id: String? = null,
+)
+
+@Serializable
+data class TutorConversationResponse(
+    val conversationId: String,
+    val messages: List<TutorMessage> = emptyList(),
+    val tokensUsed: Int = 0,
+    val tokenLimit: Int = 0,
+    val periodMonth: String = "",
+)
+
+@Serializable
+data class TutorSessionSummary(
+    val id: String,
+    val title: String? = null,
+    val createdAt: String,
+    val lastActive: String,
+)
+
+@Serializable
+data class TutorSessionDetailResponse(
+    val id: String,
+    val title: String? = null,
+    val createdAt: String,
+    val lastActive: String,
+    val messages: List<TutorMessage> = emptyList(),
+)
+
+@Serializable
+data class TutorTokenBudgetResponse(
+    val tokensUsed: Int = 0,
+    val tokenLimit: Int = 0,
+    val periodMonth: String = "",
+)
+
+@Serializable
+data class TutorMessageBody(val message: String)
+
+@Serializable
+data class TutorSessionMessageBody(val content: String)
+
+@Serializable
+data class StudyBuddyMessageBody(
+    val message: String,
+    val sessionId: String = "",
+)
+
+@Serializable
+data class NotebookRagNotebookInput(
+    val courseCode: String,
+    val courseTitle: String,
+    val markdown: String,
+)
+
+@Serializable
+data class NotebookRagQueryBody(
+    val question: String,
+    val notebooks: List<NotebookRagNotebookInput>,
+)
+
+@Serializable
+data class NotebookRagSource(
+    val courseCode: String,
+    val courseTitle: String,
+    val excerpt: String,
+)
+
+@Serializable
+data class NotebookRagQueryResponse(
+    val answerMarkdown: String,
+    val sources: List<NotebookRagSource>? = null,
 )
 
 // endregion

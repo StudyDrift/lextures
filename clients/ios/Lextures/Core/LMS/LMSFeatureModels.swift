@@ -421,6 +421,14 @@ struct MySubmissionResponse: Decodable {
     var submission: AssignmentSubmission?
 }
 
+struct SubmitAssignmentTextRequest: Encodable {
+    var text: String
+}
+
+struct SubmitAssignmentResponse: Decodable {
+    var submission: AssignmentSubmission
+}
+
 struct SubmissionsListResponse: Decodable {
     var submissions: [AssignmentSubmission]
 
@@ -543,6 +551,11 @@ struct PlatformFeatures: Decodable {
     var customFieldsEnabled: Bool?
     var ffDemographics: Bool?
     var ffResearchConsent: Bool?
+    var ffPersistentTutor: Bool?
+    var ffAiStudyBuddy: Bool?
+    var ragNotebookEnabled: Bool?
+    var aiStudyBuddyEnabled: Bool?
+    var aiDisclosureEnabled: Bool?
 }
 
 /// Navigation target for grade feedback detail (M6.1).
@@ -978,10 +991,5 @@ struct FilePreviewTarget: Hashable, Identifiable {
     }
 }
 
-enum FilePreviewKind: Equatable {
-    case image
-    case pdf
-    case audio
-    case video
-    case downloadOnly
-}
+
+

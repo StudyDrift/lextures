@@ -121,6 +121,53 @@ struct APIClient {
             isRetryAfterRefresh: true
         )
     }
+
+    /// Multipart file upload (assignment submissions, etc.).
+    func uploadMultipart(
+        path: String,
+        fieldName: String,
+        fileName: String,
+        mimeType: String,
+        fileData: Data,
+        accessToken: String,
+        onProgress: ((Double) -> Void)? = nil
+    ) async throws -> (Data, HTTPURLResponse) {
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var body = Data()
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append(
+            "Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(fileName)\"\r\n"
+                .data(using: .utf8)!
+        )
+        body.append("Content-Type: \(mimeType)\r\n\r\n".data(using: .utf8)!)
+        body.append(fileData)
+        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+
+        onProgress?(0)
+        var request = URLRequest(url: AppConfiguration.apiURL(path: path))
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("ios", forHTTPHeaderField: "X-Platform")
+        request.setValue(LocalePreferences.acceptLanguageHeaderValue(), forHTTPHeaderField: "Accept-Language")
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            request.setValue(version, forHTTPHeaderField: "X-App-Version")
+        }
+        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
+        request.httpBody = body
+
+        onProgress?(0.25)
+        let (data, response) = try await session.data(for: request)
+        onProgress?(1)
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.invalidResponse
+        }
+        guard (200 ... 299).contains(http.statusCode) else {
+            let message = parseAPIErrorMessage(from: data)
+            throw APIError.httpStatus(http.statusCode, message: message)
+        }
+        return (data, http)
+    }
 }
 
 /// Type-erased Encodable wrapper for generic JSON bodies.

@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +51,9 @@ import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.notebooks.NotebookContentView
+import com.lextures.android.features.tutor.TutorChatMode
+import com.lextures.android.features.tutor.TutorChatScreen
+import com.lextures.android.features.tutor.TutorFab
 import kotlinx.coroutines.launch
 
 /** Native content page reader with offline cache and completion (M3.1). */
@@ -73,6 +78,7 @@ fun ContentPageScreen(
     var loading by remember { mutableStateOf(true) }
     var markingComplete by remember { mutableStateOf(false) }
     var isComplete by remember { mutableStateOf(false) }
+    var showTutor by remember { mutableStateOf(false) }
 
     val markDoneLabel = moduleMarkDoneLabel()
     val markingDoneLabel = moduleMarkingDoneLabel()
@@ -107,7 +113,23 @@ fun ContentPageScreen(
         }
     }
 
-    Column(modifier = modifier) {
+    if (showTutor) {
+        Dialog(
+            onDismissRequest = { showTutor = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            TutorChatScreen(
+                session = session,
+                mode = TutorChatMode.Course(course, item),
+                shell = null,
+                onClose = { showTutor = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    Box(modifier = modifier) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -207,5 +229,12 @@ fun ContentPageScreen(
                 }
             }
         }
+    }
+        TutorFab(
+            course = course,
+            item = item,
+            onOpen = { showTutor = true },
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 }

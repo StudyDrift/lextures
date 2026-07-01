@@ -25,6 +25,16 @@ enum OfflineCacheKey {
     static func notificationsPage() -> String { "notifications:page" }
     static func notificationPreferences() -> String { "notifications:preferences" }
     static func officeHours(_ courseCode: String) -> String { "course:\(courseCode):office-hours" }
+    static func discussionForums(_ courseCode: String) -> String { "course:\(courseCode):discussion-forums" }
+    static func discussionThreads(courseCode: String, forumId: String) -> String {
+        "course:\(courseCode):discussion-threads:\(forumId)"
+    }
+    static func discussionThread(courseCode: String, threadId: String) -> String {
+        "course:\(courseCode):discussion-thread:\(threadId)"
+    }
+    static func discussionPosts(courseCode: String, threadId: String) -> String {
+        "course:\(courseCode):discussion-posts:\(threadId)"
+    }
 }
 
 /// A cached value plus freshness metadata for read screens.

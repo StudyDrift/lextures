@@ -39,6 +39,7 @@ import com.lextures.android.core.lms.ModuleItemDestination
 import com.lextures.android.core.lms.FilePreviewTarget
 import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.features.home.LmsEmptyState
+import com.lextures.android.features.assignments.AssignmentDetailScreen
 import com.lextures.android.features.quiz.QuizIntroScreen
 
 /** Routes a structure item to its native destination (M3.1). */
@@ -70,13 +71,24 @@ fun ModuleItemRouteScreen(
             onProgressChanged = onProgressChanged,
             modifier = modifier,
         )
-        ModuleItemDestination.Assignment -> ItemDetailScreen(
-            session = session,
-            course = course,
-            item = item,
-            onBack = onBack,
-            modifier = modifier,
-        )
+        ModuleItemDestination.Assignment ->
+            if (course.viewerIsStudent) {
+                AssignmentDetailScreen(
+                    session = session,
+                    course = course,
+                    item = item,
+                    onBack = onBack,
+                    modifier = modifier,
+                )
+            } else {
+                ItemDetailScreen(
+                    session = session,
+                    course = course,
+                    item = item,
+                    onBack = onBack,
+                    modifier = modifier,
+                )
+            }
         ModuleItemDestination.ExternalLink, ModuleItemDestination.WebContent -> WebItemLoaderScreen(
             session = session,
             course = course,

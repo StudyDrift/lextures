@@ -55,6 +55,7 @@ struct ContentPageView: View {
         }
         .navigationTitle(item.title)
         .navigationBarTitleDisplayMode(.inline)
+        .tutorLauncher(course: course, item: item)
         .task { await load() }
     }
 

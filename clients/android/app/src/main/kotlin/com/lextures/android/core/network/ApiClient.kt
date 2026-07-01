@@ -7,9 +7,12 @@ import com.lextures.android.core.i18n.MobileLocale
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.File
 
 class ApiClient(
     private val http: OkHttpClient = OkHttpClient(),
@@ -93,4 +96,49 @@ class ApiClient(
 
     fun <T> encodeBody(value: T, serializer: kotlinx.serialization.KSerializer<T>): String =
         json.encodeToString(serializer, value)
+
+    suspend fun uploadMultipart(
+        path: String,
+        fieldName: String,
+        fileName: String,
+        mimeType: String,
+        fileBytes: ByteArray,
+        accessToken: String,
+    ): String {
+        val temp = File.createTempFile("lextures-upload-", "-$fileName")
+        try {
+            temp.writeBytes(fileBytes)
+            val body = MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart(
+                    fieldName,
+                    fileName,
+                    temp.asRequestBody(mimeType.toMediaType()),
+                )
+                .build()
+            val request = Request.Builder()
+                .url(AppConfiguration.apiUrl(path))
+                .post(body)
+                .header("Accept", "application/json")
+                .header("Authorization", "Bearer $accessToken")
+                .header("X-Platform", "android")
+                .header("X-App-Version", BuildConfig.VERSION_NAME)
+                .header("Accept-Language", MobileLocale.acceptLanguage)
+                .build()
+            val response = try {
+                http.newCall(request).execute()
+            } catch (e: Exception) {
+                throw ApiError.Transport(e)
+            }
+            response.use {
+                val responseBody = it.body?.string().orEmpty()
+                if (it.code !in 200..299) {
+                    throw ApiError.HttpStatus(it.code, parseApiErrorMessage(responseBody))
+                }
+                return responseBody
+            }
+        } finally {
+            temp.delete()
+        }
+    }
 }
