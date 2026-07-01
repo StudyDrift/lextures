@@ -18,11 +18,11 @@ export function DocsCtaSection() {
             className="font-display mt-4 text-[clamp(28px,3.5vw,36px)] font-semibold leading-[1.1] tracking-[-0.015em]"
             style={{ color: 'var(--ink)' }}
           >
-            Read the docs, then run your own instance
+            Documentation for administrators and instructors
           </h2>
           <p className="mt-4 max-w-[520px] text-[16px] leading-[1.6]" style={{ color: 'var(--text-soft)' }}>
-            Self-hosting guides, LTI setup, and course workflows — written for administrators and
-            developers who configure the system.
+            LTI setup, course workflows, and integration guides — written for the people who
+            configure and run courses.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a href="/docs" className="btn-primary">
