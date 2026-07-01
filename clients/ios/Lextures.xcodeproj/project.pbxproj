@@ -95,6 +95,8 @@
 		A21DC8C95B43455E85B848E0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9400F5E47944B47BA675323 /* Assets.xcassets */; };
 		A4A69146DE1F47DF9166532B /* NotebookSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471D8ECEE08F40DFA04012C3 /* NotebookSync.swift */; };
 		A6B1C0010000000000000001 /* GradeCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B1C0010000000000000011 /* GradeCalculator.swift */; };
+		A6B1C0010000000000000006 /* GradeCalculator+MyGrades.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B1C0010000000000000016 /* GradeCalculator+MyGrades.swift */; };
+		A6B1C0010000000000000007 /* LMSInteractiveModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B1C0010000000000000017 /* LMSInteractiveModels.swift */; };
 		A6B1C0010000000000000002 /* GradeFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B1C0010000000000000012 /* GradeFeedbackView.swift */; };
 		A6B1C0010000000000000003 /* WhatIfController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B1C0010000000000000013 /* WhatIfController.swift */; };
 		A6B1C0010000000000000004 /* MarkupOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6B1C0010000000000000014 /* MarkupOverlayView.swift */; };
@@ -249,6 +251,8 @@
 		A5002AC2352E44DBA1D632DE /* NotebookDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookDrawing.swift; sourceTree = "<group>"; };
 		A53FC68D723545B7BABE8E15 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A6B1C0010000000000000011 /* GradeCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeCalculator.swift; sourceTree = "<group>"; };
+		A6B1C0010000000000000016 /* GradeCalculator+MyGrades.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GradeCalculator+MyGrades.swift"; sourceTree = "<group>"; };
+		A6B1C0010000000000000017 /* LMSInteractiveModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSInteractiveModels.swift; sourceTree = "<group>"; };
 		A6B1C0010000000000000012 /* GradeFeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GradeFeedbackView.swift; sourceTree = "<group>"; };
 		A6B1C0010000000000000013 /* WhatIfController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatIfController.swift; sourceTree = "<group>"; };
 		A6B1C0010000000000000014 /* MarkupOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkupOverlayView.swift; sourceTree = "<group>"; };
@@ -732,6 +736,8 @@
 				B2164B51DD6540849CCC3738 /* AccountAccommodationModels.swift */,
 				893A64734D934D0FA79430C2 /* CourseFileLogic.swift */,
 				A6B1C0010000000000000011 /* GradeCalculator.swift */,
+				A6B1C0010000000000000016 /* GradeCalculator+MyGrades.swift */,
+				A6B1C0010000000000000017 /* LMSInteractiveModels.swift */,
 				M730OH010000000000000011 /* OfficeHoursLogic.swift */,
 				C81328EF69A94A7186C6C8AF /* CourseHeroImage.swift */,
 				BF182C2E131E4D15B6896840 /* FileDownloadManager.swift */,
@@ -875,6 +881,8 @@
 				500DC865A4F14BF4BABF3451 /* AccountAccommodationModels.swift in Sources */,
 				AF48FC1D7E13428AB243714C /* CourseFileLogic.swift in Sources */,
 				A6B1C0010000000000000001 /* GradeCalculator.swift in Sources */,
+				A6B1C0010000000000000006 /* GradeCalculator+MyGrades.swift in Sources */,
+				A6B1C0010000000000000007 /* LMSInteractiveModels.swift in Sources */,
 				M730OH010000000000000001 /* OfficeHoursLogic.swift in Sources */,
 				9C88739632414F97A20105DE /* CourseHeroImage.swift in Sources */,
 				4C239F013FE14A5E82FEBD60 /* FileDownloadManager.swift in Sources */,
