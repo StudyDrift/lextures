@@ -68,4 +68,5 @@ fun calendarKindLabel(kind: PlannerCalendarEventKind): String = when (kind) {
     PlannerCalendarEventKind.ContentPage -> L.text(R.string.mobile_planner_kind_page)
     PlannerCalendarEventKind.NotebookTask -> L.text(R.string.mobile_planner_kind_task)
     PlannerCalendarEventKind.Academic -> L.text(R.string.mobile_planner_kind_academic)
+    PlannerCalendarEventKind.OfficeHours -> L.text(R.string.mobile_planner_kind_officeHours)
 }

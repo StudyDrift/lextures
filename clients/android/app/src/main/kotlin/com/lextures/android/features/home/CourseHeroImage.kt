@@ -27,7 +27,7 @@ fun CourseHeroImage(
     fallbackKey: String,
     accessToken: String?,
     modifier: Modifier = Modifier,
-    height: Dp = 84.dp,
+    height: Dp? = 84.dp,
 ) {
     val context = LocalContext.current
     val trimmed = url?.trim().orEmpty()
@@ -40,7 +40,7 @@ fun CourseHeroImage(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(height),
+            .then(if (height != null) Modifier.height(height) else Modifier.fillMaxSize()),
     ) {
         Box(
             modifier = Modifier

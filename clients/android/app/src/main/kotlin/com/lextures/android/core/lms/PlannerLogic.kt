@@ -19,6 +19,7 @@ enum class PlannerCalendarEventKind {
     ContentPage,
     NotebookTask,
     Academic,
+    OfficeHours,
 }
 
 data class StudentTodoItem(
@@ -50,6 +51,8 @@ data class PlannerCalendarEvent(
     val structureKind: String? = null,
     val structureItemId: String? = null,
     val notebookPageId: String? = null,
+    val officeHoursSlotId: String? = null,
+    val meetingId: String? = null,
 )
 
 data class PlannerCourseFilter(
@@ -92,6 +95,8 @@ data class CachedPlannerCalendarEvent(
     val structureKind: String? = null,
     val structureItemId: String? = null,
     val notebookPageId: String? = null,
+    val officeHoursSlotId: String? = null,
+    val meetingId: String? = null,
 )
 
 enum class DueReminderLeadTime(val minutes: Int) {
@@ -158,9 +163,12 @@ object PlannerLogic {
         return items.sortedWith(compareBy(nullsLast()) { it.dueAt })
     }
 
-    fun bucketTodos(items: List<StudentTodoItem>, zone: ZoneId = ZoneId.systemDefault()): Map<StudentTodoBucket, List<StudentTodoItem>> {
-        val now = Instant.now()
-        val today = LocalDate.now(zone)
+    fun bucketTodos(
+        items: List<StudentTodoItem>,
+        zone: ZoneId = ZoneId.systemDefault(),
+        now: Instant = Instant.now(),
+    ): Map<StudentTodoBucket, List<StudentTodoItem>> {
+        val today = now.atZone(zone).toLocalDate()
         val startOfToday = today.atStartOfDay(zone).toInstant()
         val endOfToday = today.plusDays(1).atStartOfDay(zone).minusSeconds(1).toInstant()
         val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant()
@@ -186,6 +194,7 @@ object PlannerLogic {
         structureByCourseCode: Map<String, List<CourseStructureItem>>,
         notebookTasks: List<NotebookTask>,
         academicEvents: List<AcademicCalendarEvent>,
+        officeHoursByCourseCode: Map<String, OfficeHoursAvailability> = emptyMap(),
     ): List<PlannerCalendarEvent> {
         val courseTitles = studentCourses.associate { it.courseCode to it.displayTitle }
         val events = mutableListOf<PlannerCalendarEvent>()
@@ -234,6 +243,8 @@ object PlannerLogic {
                 kind = PlannerCalendarEventKind.Academic,
             )
         }
+
+        events += OfficeHoursLogic.collectCalendarEvents(studentCourses, officeHoursByCourseCode)
 
         return events.sortedBy { it.startsAt }
     }
@@ -340,6 +351,8 @@ object PlannerLogic {
         structureKind = event.structureKind,
         structureItemId = event.structureItemId,
         notebookPageId = event.notebookPageId,
+        officeHoursSlotId = event.officeHoursSlotId,
+        meetingId = event.meetingId,
     )
 
     private fun decodedEvent(cached: CachedPlannerCalendarEvent) = PlannerCalendarEvent(
@@ -355,6 +368,8 @@ object PlannerLogic {
         structureKind = cached.structureKind,
         structureItemId = cached.structureItemId,
         notebookPageId = cached.notebookPageId,
+        officeHoursSlotId = cached.officeHoursSlotId,
+        meetingId = cached.meetingId,
     )
 }
 

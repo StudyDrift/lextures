@@ -64,7 +64,23 @@ import com.lextures.android.core.lms.AttendanceSession
 import com.lextures.android.core.lms.AttendanceSessionDetail
 import com.lextures.android.core.lms.AttendanceStatusInfo
 import com.lextures.android.core.lms.CourseSummary
-import com.lextures.android.core.lms.GradeMath
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Science
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import com.lextures.android.core.design.OfflineBanner
+import com.lextures.android.core.design.StalenessChip
+import com.lextures.android.core.lms.GradeCalculator
+import com.lextures.android.core.lms.GradeColumn
+import com.lextures.android.core.lms.GradeFeedbackRoute
+import com.lextures.android.core.offline.OfflineCacheKey
+import com.lextures.android.core.offline.OfflineService
+import com.lextures.android.features.grades.GradesDisplayLogic
+import com.lextures.android.features.grades.GradesSection
+import com.lextures.android.features.grades.WhatIfState
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.lms.MyGradesResponse
@@ -157,23 +173,43 @@ fun CourseSyllabusSection(
 
 // region Grades
 
-/** Student grades: overall summary plus one row per gradebook column. */
+/** Student grades: categories, totals, what-if, and feedback detail (M6.1). */
 @Composable
 fun CourseGradesSection(
     session: AuthSession,
     course: CourseSummary,
+    onOpenFeedback: (GradeFeedbackRoute) -> Unit = {},
 ) {
     val accessToken by session.accessToken.collectAsState()
+    val context = LocalContext.current
+    val offline = remember { OfflineService.get(context) }
+    val isOnline by offline.networkMonitor.isOnline.collectAsState()
+
     var grades by remember { mutableStateOf<MyGradesResponse?>(null) }
+    var cacheLabel by remember { mutableStateOf<String?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(true) }
+    val whatIf = remember { WhatIfState() }
+    var showWhatIfFeature by remember { mutableStateOf(false) }
 
     LaunchedEffect(accessToken, course.courseCode) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null
         try {
-            grades = LmsApi.fetchMyGrades(course.courseCode, token)
+            showWhatIfFeature = runCatching {
+                LmsApi.fetchPlatformFeatures(token).ffWhatifGrades
+            }.getOrNull() == true
+            val result = offline.cachedFetch(
+                key = OfflineCacheKey.myGrades(course.courseCode),
+                accessToken = token,
+                serializer = MyGradesResponse.serializer(),
+            ) {
+                LmsApi.fetchMyGrades(course.courseCode, token)
+            }
+            grades = result.first
+            val cached = result.second
+            cacheLabel = if (cached != null && cached.isStale(isOnline)) cached.lastUpdatedLabel() else null
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -182,6 +218,8 @@ fun CourseGradesSection(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (!isOnline) OfflineBanner()
+        cacheLabel?.let { StalenessChip(label = it) }
         errorMessage?.let { LmsErrorBanner(it) }
         val response = grades
         when {
@@ -193,139 +231,243 @@ fun CourseGradesSection(
                 message = "Grades will appear here as assignments are graded.",
             )
             else -> {
-                val overall = GradeMath.overallPercent(response)
-                LmsCard {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (overall != null) {
-                            LmsProgressRing(progress = (overall / 100).toFloat(), size = 56)
-                        } else {
-                            Box(
-                                modifier = Modifier
-                                    .size(56.dp)
-                                    .clip(CircleShape)
-                                    .background(LexturesColors.BrandTeal.copy(alpha = 0.1f)),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    Icons.Default.HourglassEmpty,
-                                    contentDescription = null,
-                                    tint = textSecondary(),
-                                    modifier = Modifier.size(22.dp),
-                                )
-                            }
-                        }
-                        Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                            Text(
-                                text = overall?.let { String.format("%.1f%%", it) } ?: "Not graded yet",
-                                style = LexturesType.display(22, FontWeight.Bold),
-                                color = textPrimary(),
-                            )
-                            Text(
-                                text = if (overall == null) {
-                                    "Your overall grade appears once work is graded."
-                                } else {
-                                    "Current overall grade"
-                                },
-                                fontSize = 12.sp,
-                                color = textSecondary(),
-                            )
-                        }
-                    }
+                GradesSummaryCard(response, whatIf)
+                if (showWhatIfFeature) {
+                    WhatIfPanel(whatIf)
                 }
-
-                response.columns.forEach { column ->
-                    val isDropped = response.droppedGrades[column.id] == true
-                    val isHeld = response.heldGradeItemIds.contains(column.id)
-                    val isExcused = response.gradeStatuses[column.id] == "excused"
-                    val score = response.grades[column.id]
-                    val display = response.displayGrades[column.id]
-
-                    LmsCard {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(
-                                        LexturesColors.BrandTeal.copy(alpha = if (isDarkTheme()) 0.16f else 0.13f),
-                                    ),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Icon(
-                                    ItemKind.icon(column.kind),
-                                    contentDescription = null,
-                                    tint = accentColor(),
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
-                            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                                Text(
-                                    text = column.title,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (isDropped) textSecondary() else textPrimary(),
-                                    textDecoration = if (isDropped) TextDecoration.LineThrough else null,
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                    LmsDates.parse(column.dueAt)?.let {
-                                        Text(
-                                            text = "Due ${LmsDates.shortDate(column.dueAt)}",
-                                            fontSize = 11.sp,
-                                            color = textSecondary(),
-                                        )
-                                    }
-                                    if (isDropped) GradeBadge("Dropped", textSecondary())
-                                    if (isHeld) GradeBadge("Held", LexturesColors.Amber)
-                                    if (isExcused) GradeBadge("Excused", accentColor())
-                                }
-                            }
-                            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                when {
-                                    isExcused -> Text(
-                                        text = "—",
-                                        style = LexturesType.display(16, FontWeight.Bold),
-                                        color = textSecondary(),
-                                    )
-                                    isHeld -> Icon(
-                                        Icons.Default.VisibilityOff,
-                                        contentDescription = "Grade held",
-                                        tint = LexturesColors.Amber,
-                                        modifier = Modifier.size(17.dp),
-                                    )
-                                    !score.isNullOrEmpty() -> {
-                                        Text(
-                                            text = column.maxPoints?.let { "$score / ${formatPts(it)}" } ?: score,
-                                            style = LexturesType.display(16, FontWeight.Bold),
-                                            color = textPrimary(),
-                                        )
-                                        if (!display.isNullOrEmpty() && display != score) {
-                                            Text(
-                                                text = display,
-                                                fontSize = 11.sp,
-                                                fontWeight = FontWeight.SemiBold,
-                                                color = accentColor(),
-                                            )
-                                        }
-                                    }
-                                    else -> Text(
-                                        text = "Not graded",
-                                        fontSize = 12.sp,
-                                        color = textSecondary(),
-                                    )
-                                }
-                            }
-                        }
+                val dropped = whatIf.activeDropped(response)
+                for (section in GradesDisplayLogic.buildSections(response)) {
+                    GradesCategoryHeader(section)
+                    for (column in section.columns) {
+                        GradeRow(
+                            column = column,
+                            response = response,
+                            dropped = dropped,
+                            whatIf = whatIf,
+                            showWhatIfFeature = showWhatIfFeature,
+                            onOpenFeedback = onOpenFeedback,
+                        )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun GradesSummaryCard(response: MyGradesResponse, whatIf: WhatIfState) {
+    val actual = whatIf.actualPercent(response)
+    val projected = whatIf.projectedPercent(response)
+    val display = if (whatIf.mode && whatIf.hasOverrides) projected else actual
+
+    LmsCard {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (display != null) {
+                LmsProgressRing(progress = (display / 100).toFloat(), size = 56)
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(LexturesColors.BrandTeal.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Default.HourglassEmpty, contentDescription = null, tint = textSecondary())
+                }
+            }
+            Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                if (whatIf.mode && whatIf.hasOverrides) {
+                    Text(
+                        text = "Hypothetical: ${GradeCalculator.formatFinalPercent(projected)}",
+                        style = LexturesType.display(20, FontWeight.Bold),
+                        color = accentColor(),
+                    )
+                    Text(
+                        text = "Actual: ${GradeCalculator.formatFinalPercent(actual)}",
+                        fontSize = 12.sp,
+                        color = textSecondary(),
+                    )
+                } else {
+                    Text(
+                        text = GradeCalculator.formatFinalPercent(actual),
+                        style = LexturesType.display(22, FontWeight.Bold),
+                        color = textPrimary(),
+                    )
+                    Text(
+                        text = if (actual == null) {
+                            "Your overall grade appears once work is graded."
+                        } else {
+                            "Current overall grade"
+                        },
+                        fontSize = 12.sp,
+                        color = textSecondary(),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WhatIfPanel(whatIf: WhatIfState) {
+    LmsCard {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Science, contentDescription = null, tint = accentColor())
+                    Text("What-if grades", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                }
+                Switch(checked = whatIf.mode, onCheckedChange = { whatIf.toggleMode() })
+            }
+            if (whatIf.mode) {
+                Text(
+                    "Enter hypothetical scores below. These projections are not saved and do not change your real grades.",
+                    fontSize = 12.sp,
+                    color = textSecondary(),
+                )
+                if (whatIf.hasOverrides) {
+                    Text(
+                        "Reset hypothetical scores",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = accentColor(),
+                        modifier = Modifier.clickable { whatIf.reset() },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GradesCategoryHeader(section: GradesSection) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(section.title, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = textSecondary())
+        section.weightPercent?.let {
+            Text("${it.toInt()}%", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = accentColor())
+        }
+    }
+}
+
+@Composable
+private fun GradeRow(
+    column: GradeColumn,
+    response: MyGradesResponse,
+    dropped: Map<String, Boolean>,
+    whatIf: WhatIfState,
+    showWhatIfFeature: Boolean,
+    onOpenFeedback: (GradeFeedbackRoute) -> Unit,
+) {
+    val isDropped = dropped[column.id] == true
+    val isHeld = response.heldGradeItemIds.contains(column.id)
+    val isExcused = response.gradeStatuses[column.id] == "excused"
+    val score = response.grades[column.id]
+    val display = response.displayGrades[column.id]
+    val hasOverride = whatIf.overrides[column.id]?.trim()?.isNotEmpty() == true
+    val isHypothetical = whatIf.mode && hasOverride
+    val badges = GradesDisplayLogic.statusBadges(column, response, dropped)
+    val canOpen = !isHeld && column.kind == "assignment" &&
+        (!score.isNullOrEmpty() || isExcused || response.gradeStatuses[column.id] == "graded")
+
+    LmsCard(onClick = { if (canOpen) onOpenFeedback(GradeFeedbackRoute(column)) }) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(LexturesColors.BrandTeal.copy(alpha = if (isDarkTheme()) 0.16f else 0.13f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(ItemKind.icon(column.kind), contentDescription = null, tint = accentColor(), modifier = Modifier.size(16.dp))
+            }
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    text = column.title,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isDropped) textSecondary() else textPrimary(),
+                    textDecoration = if (isDropped) TextDecoration.LineThrough else null,
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    LmsDates.parse(column.dueAt)?.let {
+                        Text("Due ${LmsDates.shortDate(column.dueAt)}", fontSize = 11.sp, color = textSecondary())
+                    }
+                    badges.forEach { GradeBadge(it, badgeTint(it)) }
+                    if (isHypothetical) GradeBadge("Hypothetical", accentColor())
+                }
+            }
+            if (whatIf.mode && showWhatIfFeature && !isExcused && !isHeld && (column.maxPoints ?: 0.0) > 0) {
+                OutlinedTextField(
+                    value = whatIf.overrides[column.id].orEmpty(),
+                    onValueChange = { whatIf.setOverride(column.id, it) },
+                    modifier = Modifier.size(width = 72.dp, height = 48.dp),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    singleLine = true,
+                    label = null,
+                )
+            } else {
+                GradeScoreColumn(isExcused, isHeld, score, display, column.maxPoints)
+            }
+            if (canOpen) {
+                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = textSecondary(), modifier = Modifier.size(16.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun GradeScoreColumn(
+    isExcused: Boolean,
+    isHeld: Boolean,
+    score: String?,
+    display: String?,
+    maxPoints: Double?,
+) {
+    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        when {
+            isExcused -> Text("—", style = LexturesType.display(16, FontWeight.Bold), color = textSecondary())
+            isHeld -> Icon(Icons.Default.VisibilityOff, contentDescription = "Grade held", tint = LexturesColors.Amber, modifier = Modifier.size(17.dp))
+            !score.isNullOrEmpty() -> {
+                Text(
+                    text = maxPoints?.let { "$score / ${formatPts(it)}" } ?: score,
+                    style = LexturesType.display(16, FontWeight.Bold),
+                    color = textPrimary(),
+                )
+                if (!display.isNullOrEmpty() && display != score) {
+                    Text(display, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = accentColor())
+                }
+                maxPoints?.takeIf { it > 0 }?.let { max ->
+                    score.replace(",", "").toDoubleOrNull()?.let { earned ->
+                        Text("${"%.1f".format(earned / max * 100)}%", fontSize = 11.sp, color = textSecondary())
+                    }
+                }
+            }
+            else -> Text("Not graded", fontSize = 12.sp, color = textSecondary())
+        }
+    }
+}
+
+@Composable
+private fun badgeTint(badge: String): Color = when (badge) {
+    "Dropped" -> textSecondary()
+    "Pending", "Late" -> LexturesColors.Amber
+    "Excused" -> accentColor()
+    else -> textSecondary()
 }
 
 @Composable

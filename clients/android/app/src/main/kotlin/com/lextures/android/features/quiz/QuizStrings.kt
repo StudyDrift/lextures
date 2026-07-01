@@ -1,0 +1,37 @@
+package com.lextures.android.features.quiz
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.lextures.android.R
+import com.lextures.android.core.i18n.L
+
+@Composable fun quizLabel(): String = L.text(R.string.mobile_quiz_label)
+@Composable fun quizStartLabel(): String = L.text(R.string.mobile_quiz_startAttempt)
+@Composable fun quizPreviousLabel(): String = L.text(R.string.mobile_quiz_previous)
+@Composable fun quizNextLabel(): String = L.text(R.string.mobile_quiz_next)
+@Composable fun quizSubmitLabel(): String = L.text(R.string.mobile_quiz_submit)
+@Composable fun quizDoneLabel(): String = L.text(R.string.mobile_quiz_done)
+@Composable fun quizSavedLabel(): String = L.text(R.string.mobile_quiz_saved)
+@Composable fun quizSaveFailedLabel(): String = L.text(R.string.mobile_quiz_saveFailed)
+@Composable fun quizNotYetSavedLabel(): String = L.text(R.string.mobile_quiz_notYetSaved)
+@Composable fun quizOpenOnWebLabel(): String = L.text(R.string.mobile_quiz_openOnWeb)
+@Composable fun quizOpenOnWebHintLabel(): String = L.text(R.string.mobile_quiz_openOnWebHint)
+@Composable fun quizShortAnswerPlaceholder(): String = L.text(R.string.mobile_quiz_shortAnswerPlaceholder)
+@Composable fun quizPreviousAttemptsLabel(): String = L.text(R.string.mobile_quiz_previousAttempts)
+@Composable fun quizAdaptiveWebOnlyLabel(): String = L.text(R.string.mobile_quiz_adaptiveWebOnly)
+@Composable fun quizNoAttemptsLabel(): String = L.text(R.string.mobile_quiz_noAttemptsRemaining)
+@Composable fun quizSubmittedLabel(): String = L.text(R.string.mobile_quiz_submitted)
+@Composable fun quizYourScoreLabel(): String = L.text(R.string.mobile_quiz_yourScore)
+@Composable fun quizPendingReviewLabel(): String = L.text(R.string.mobile_quiz_pendingReview)
+
+@Composable fun quizAttemptNumberLabel(number: Int): String =
+    L.format(R.string.mobile_quiz_attemptNumber, number)
+
+@Composable fun quizProgressLabel(current: Int, total: Int): String =
+    L.format(R.string.mobile_quiz_progress, current, total)
+
+@Composable fun quizQuestionNumberLabel(number: Int): String =
+    L.format(R.string.mobile_quiz_questionNumber, number)
+
+@Composable fun quizTimerLabel(value: String): String =
+    L.format(R.string.mobile_quiz_timeRemainingA11y, value)

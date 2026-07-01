@@ -41,7 +41,7 @@ struct ModuleItemRouteView: View {
         case .contentPage:
             ContentPageView(course: course, item: item, onProgressChanged: onProgressChanged)
         case .quiz:
-            ModuleItemPlaceholderView(item: item, messageKey: "mobile.modules.placeholder.quiz")
+            QuizIntroView(course: course, item: item, onProgressChanged: onProgressChanged)
         case .assignment:
             ItemDetailView(course: course, item: item)
         case .externalLink, .webContent:

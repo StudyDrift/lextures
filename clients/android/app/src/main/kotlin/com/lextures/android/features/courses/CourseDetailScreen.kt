@@ -1,18 +1,12 @@
 package com.lextures.android.features.courses
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -31,17 +25,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.activity.compose.BackHandler
 import com.lextures.android.core.auth.AuthSession
-import com.lextures.android.core.design.LexturesType
-import com.lextures.android.core.design.coverBrush
 import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.lms.AttendanceSession
 import androidx.compose.ui.platform.LocalContext
@@ -51,7 +40,6 @@ import com.lextures.android.core.lms.CourseStructureItem
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.GradingBacklogItem
 import com.lextures.android.core.lms.LmsApi
-import com.lextures.android.core.lms.LmsDates
 import com.lextures.android.core.offline.OfflineCacheKey
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.features.grading.GradingBacklogSection
@@ -62,11 +50,15 @@ import com.lextures.android.features.home.LmsErrorBanner
 import com.lextures.android.features.home.LmsSegmentedChips
 import com.lextures.android.features.home.LmsSkeletonList
 import com.lextures.android.core.lms.ModuleContentLogic
+import com.lextures.android.core.lms.isOfficeHoursEnabled
 import com.lextures.android.core.lms.ModulesProgressSnapshot
 import com.lextures.android.core.lms.RequirementsLogic
 import com.lextures.android.features.files.CourseFilesScreen
 import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.core.lms.FilePreviewTarget
+import com.lextures.android.core.lms.GradeFeedbackRoute
+import com.lextures.android.features.grades.GradeFeedbackScreen
+import com.lextures.android.features.officehours.CourseOfficeHoursSection
 
 /**
  * Course home: gradient hero + segmented sections
@@ -97,12 +89,24 @@ fun CourseDetailScreen(
     var openAttendanceSession by remember { mutableStateOf<AttendanceSession?>(null) }
     var openBacklogItem by remember { mutableStateOf<GradingBacklogItem?>(null) }
     var openFilePreview by remember { mutableStateOf<FilePreviewTarget?>(null) }
+    var openGradeFeedback by remember { mutableStateOf<GradeFeedbackRoute?>(null) }
 
     val emptyCourseTitle = moduleEmptyCourseTitle()
     val emptyCourseHint = moduleEmptyCourseHint()
     val groups = remember(items) { ModuleContentLogic.buildModuleGroups(items) }
 
     BackHandler(onBack = onBack)
+
+    openGradeFeedback?.let { route ->
+        GradeFeedbackScreen(
+            session = session,
+            course = course,
+            column = route.column,
+            onBack = { openGradeFeedback = null },
+            modifier = modifier,
+        )
+        return
+    }
 
     openFilePreview?.let { preview ->
         FilePreviewScreen(
@@ -179,6 +183,7 @@ fun CourseDetailScreen(
         add("modules" to "Modules")
         add("files" to "Files")
         if (course.viewerIsStudent) add("grades" to "Grades")
+        if (course.isOfficeHoursEnabled) add("officehours" to "Office Hours")
         if (course.viewerIsStaff || hasAttendanceSessions) add("attendance" to "Attendance")
         if (course.viewerIsStaff) add("grading" to "Grading")
     }
@@ -209,60 +214,10 @@ fun CourseDetailScreen(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
-                // Gradient cover banner — matches the course's tile color across the app.
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(24.dp))
-                        .background(coverBrush(course.courseCode)),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(140.dp)
-                            .offset(x = 260.dp, y = (-52).dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f)),
-                    )
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(7.dp),
-                    ) {
-                        Text(
-                            text = course.courseCode.uppercase(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            letterSpacing = 1.2.sp,
-                            color = Color.White.copy(alpha = 0.8f),
-                        )
-                        Text(
-                            text = course.title,
-                            style = LexturesType.display(22),
-                            color = Color.White,
-                        )
-                        if (course.description.isNotEmpty()) {
-                            Text(
-                                text = course.description,
-                                fontSize = 13.sp,
-                                color = Color.White.copy(alpha = 0.85f),
-                                maxLines = 3,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        Row(
-                            modifier = Modifier.padding(top = 4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            LmsDates.parse(course.startsAt)?.let {
-                                HeroChip("Starts ${LmsDates.shortDate(course.startsAt)}")
-                            }
-                            course.viewerEnrollmentRoles.orEmpty().forEach { role ->
-                                HeroChip(if (role.length <= 2) role.uppercase() else role.replaceFirstChar { it.uppercase() })
-                            }
-                        }
-                    }
-                }
+                CourseBanner(
+                    course = course,
+                    accessToken = accessToken,
+                )
             }
 
             item {
@@ -290,7 +245,15 @@ fun CourseDetailScreen(
                 }
 
                 "grades" -> item {
-                    CourseGradesSection(session = session, course = course)
+                    CourseGradesSection(
+                        session = session,
+                        course = course,
+                        onOpenFeedback = { openGradeFeedback = it },
+                    )
+                }
+
+                "officehours" -> item {
+                    CourseOfficeHoursSection(session = session, course = course)
                 }
 
                 "attendance" -> item {
@@ -383,18 +346,4 @@ private suspend fun refreshProgress(
     }.onFailure {
         onResult(null)
     }
-}
-
-@Composable
-private fun HeroChip(text: String) {
-    Text(
-        text = text,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.Medium,
-        color = Color.White,
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(Color.White.copy(alpha = 0.16f))
-            .padding(horizontal = 9.dp, vertical = 4.dp),
-    )
 }

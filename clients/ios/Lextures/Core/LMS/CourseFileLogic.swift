@@ -8,6 +8,8 @@ enum CourseFileLogic {
             return "/api/v1/courses/\(encoded)/files/items/\(LMSAPI.encodePath(itemId))/content"
         case .courseFile(let fileId):
             return "/api/v1/courses/\(encoded)/course-files/\(LMSAPI.encodePath(fileId))/content"
+        case .directPath(let path):
+            return path.hasPrefix("/") ? path : "/\(path)"
         }
     }
 

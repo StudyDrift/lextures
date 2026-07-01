@@ -5,14 +5,14 @@ struct CourseHeroImage: View {
     @Environment(AuthSession.self) private var session
     let urlString: String?
     let fallbackKey: String
-    var height: CGFloat = 84
+    var height: CGFloat? = 84
 
     @State private var image: UIImage?
 
     private static let cache = NSCache<NSString, UIImage>()
 
     var body: some View {
-        ZStack {
+        let imageBody = ZStack {
             if let image {
                 Image(uiImage: image)
                     .resizable()
@@ -21,11 +21,16 @@ struct CourseHeroImage: View {
                 LexturesTheme.coverGradient(for: fallbackKey)
             }
         }
-        .frame(height: height)
         .frame(maxWidth: .infinity)
         .clipped()
         .accessibilityHidden(true)
         .task(id: urlString) { await load() }
+
+        if let height {
+            imageBody.frame(height: height)
+        } else {
+            imageBody.frame(maxHeight: .infinity)
+        }
     }
 
     private func load() async {

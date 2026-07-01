@@ -227,6 +227,52 @@ object LmsApi {
             decode<MyGradesResponse>(body)
         }
 
+    suspend fun fetchPlatformFeatures(accessToken: String): PlatformFeatures =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request("/api/v1/platform/features", accessToken = accessToken)
+            decode<PlatformFeatures>(body)
+        }
+
+    suspend fun fetchSubmissionAnnotations(
+        courseCode: String,
+        itemId: String,
+        submissionId: String,
+        accessToken: String,
+    ): List<SubmissionAnnotation> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(itemId)}/submissions/${encodePath(submissionId)}/annotations",
+            accessToken = accessToken,
+        )
+        decode<SubmissionAnnotationsResponse>(body).annotations
+    }
+
+    suspend fun fetchSubmissionFeedbackMedia(
+        courseCode: String,
+        itemId: String,
+        submissionId: String,
+        accessToken: String,
+    ): List<SubmissionFeedbackMedia> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(itemId)}/submissions/${encodePath(submissionId)}/feedback-media",
+            accessToken = accessToken,
+        )
+        decode<SubmissionFeedbackMediaResponse>(body).items
+    }
+
+    suspend fun fetchFeedbackPlaybackInfo(
+        courseCode: String,
+        itemId: String,
+        submissionId: String,
+        mediaId: String,
+        accessToken: String,
+    ): FeedbackPlaybackInfo = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(itemId)}/submissions/${encodePath(submissionId)}/feedback-media/${encodePath(mediaId)}/url",
+            accessToken = accessToken,
+        )
+        decode<FeedbackPlaybackInfo>(body)
+    }
+
     // Syllabus
 
     suspend fun fetchSyllabus(courseCode: String, accessToken: String): SyllabusPayload =
@@ -275,6 +321,113 @@ object LmsApi {
             accessToken = accessToken,
         )
         decode<QuizAttemptsListResponse>(body).attempts
+    }
+
+    // Quiz delivery (M4.1)
+
+    suspend fun fetchModuleQuiz(
+        courseCode: String,
+        itemId: String,
+        attemptId: String?,
+        accessToken: String,
+    ): ModuleQuizPayload = withContext(Dispatchers.IO) {
+        var path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}"
+        if (!attemptId.isNullOrBlank()) path += "?attemptId=${encodeQuery(attemptId)}"
+        val (body, _) = client.request(path, accessToken = accessToken)
+        decode<ModuleQuizPayload>(body)
+    }
+
+    suspend fun startQuiz(
+        courseCode: String,
+        itemId: String,
+        accessCode: String?,
+        accessToken: String,
+    ): QuizStartResponse = withContext(Dispatchers.IO) {
+        val code = accessCode?.trim()?.takeIf { it.isNotEmpty() }
+        val (body, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/start",
+            method = "POST",
+            body = client.encodeBody(QuizStartRequest(quizAccessCode = code), QuizStartRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<QuizStartResponse>(body)
+    }
+
+    suspend fun fetchQuizCurrentQuestion(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        accessToken: String,
+    ): QuizCurrentQuestionResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/attempts/${encodePath(attemptId)}/current-question",
+            accessToken = accessToken,
+        )
+        decode<QuizCurrentQuestionResponse>(body)
+    }
+
+    suspend fun advanceQuiz(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        responseItem: QuizQuestionResponseItem,
+        accessToken: String,
+    ): QuizAdvanceResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/attempts/${encodePath(attemptId)}/advance",
+            method = "POST",
+            body = client.encodeBody(responseItem, QuizQuestionResponseItem.serializer()),
+            accessToken = accessToken,
+        )
+        decode<QuizAdvanceResponse>(body)
+    }
+
+    suspend fun submitQuiz(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        responses: List<QuizQuestionResponseItem>?,
+        accessToken: String,
+    ): QuizSubmitResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/submit",
+            method = "POST",
+            body = client.encodeBody(QuizSubmitRequest(attemptId, responses), QuizSubmitRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<QuizSubmitResponse>(body)
+    }
+
+    suspend fun fetchQuizResults(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        accessToken: String,
+    ): QuizResultsResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/results?attemptId=${encodeQuery(attemptId)}",
+            accessToken = accessToken,
+        )
+        decode<QuizResultsResponse>(body)
+    }
+
+    suspend fun postQuizFocusLoss(
+        courseCode: String,
+        itemId: String,
+        attemptId: String,
+        eventType: String,
+        accessToken: String,
+    ) {
+        withContext(Dispatchers.IO) {
+            runCatching {
+                client.request(
+                    path = "/api/v1/courses/${encodePath(courseCode)}/quizzes/${encodePath(itemId)}/attempts/${encodePath(attemptId)}/focus-loss",
+                    method = "POST",
+                    body = client.encodeBody(QuizFocusLossRequest(eventType), QuizFocusLossRequest.serializer()),
+                    accessToken = accessToken,
+                )
+            }
+        }
     }
 
     suspend fun fetchGradingSubmissions(
@@ -663,5 +816,68 @@ object LmsApi {
         if (code !in 200..299 && code != 204) {
             throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
         }
+    }
+
+    // Office hours (M7.3)
+
+    suspend fun fetchOfficeHoursAvailability(
+        courseCode: String,
+        accessToken: String,
+    ): OfficeHoursAvailability = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/availability",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        val raw = decode<OfficeHoursAvailabilityResponse>(body)
+        OfficeHoursAvailability(
+            windows = raw.windows.orEmpty(),
+            slots = raw.slots.orEmpty(),
+        )
+    }
+
+    suspend fun bookOfficeHoursSlot(
+        slotId: String,
+        note: String?,
+        accessToken: String,
+    ): AppointmentSlot = withContext(Dispatchers.IO) {
+        val payload = BookOfficeHoursSlotBody(note = note?.trim()?.takeIf { it.isNotEmpty() })
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/slots/${encodePath(slotId)}/book",
+            method = "POST",
+            body = client.encodeBody(payload, BookOfficeHoursSlotBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code == 409) throw ApiError.HttpStatus(code, "Slot already booked.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun cancelOfficeHoursBooking(
+        slotId: String,
+        accessToken: String,
+    ): AppointmentSlot = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/slots/${encodePath(slotId)}/book",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchMyAppointments(accessToken: String): List<AppointmentSlot> = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw("/api/v1/me/appointments", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<MyAppointmentsResponse>(body).appointments.orEmpty()
+    }
+
+    suspend fun fetchMeetingJoinUrl(meetingId: String, accessToken: String): String? = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/meetings/${encodePath(meetingId)}/join",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) return@withContext null
+        decode<MeetingJoinResponse>(body).joinUrl?.trim()?.takeIf { it.isNotEmpty() }
     }
 }
