@@ -62,6 +62,8 @@ enum SearchPathNavigator {
             return .more(.library)
         case "reading":
             return .more(.reading)
+        case "review":
+            return .deepLink(.review)
         case "credentials":
             return .more(.credentials)
         case "advising":

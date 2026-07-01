@@ -99,8 +99,8 @@ struct CoursesListView: View {
                     deepLinkSection = section
                     deepLinkItemId = itemId
                     Task { await openCourse(code: code) }
+                    shell.pendingDeepLink = nil
                 }
-                shell.pendingDeepLink = nil
             }
         }
     }

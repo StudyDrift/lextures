@@ -103,6 +103,7 @@ class HomeShellState {
     var universalSearchEnabled by mutableStateOf(false)
     var profileDepthEnabled by mutableStateOf(false)
     var pendingMoreDestination by mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null)
+    var pendingReview by mutableStateOf(false)
 
     val shellTabs: List<ShellTab>
         get() = if (iaRedesignEnabled) {
@@ -122,8 +123,18 @@ class HomeShellState {
         selectedTabOverride = when (destination) {
             DeepLinkDestination.Home -> shellTabKey(ShellTab.Home)
             DeepLinkDestination.Inbox -> shellTabKey(ShellTab.Inbox)
+            DeepLinkDestination.Review -> {
+                pendingReview = true
+                shellTabKey(ShellTab.Home)
+            }
             is DeepLinkDestination.Course -> shellTabKey(ShellTab.Courses)
         }
+    }
+
+    fun consumePendingReview(): Boolean {
+        val pending = pendingReview
+        pendingReview = false
+        return pending
     }
 
     fun navigateFromSearch(path: String) {

@@ -1,29 +1,41 @@
-import { ChevronDown, Github, Menu, X } from 'lucide-react'
+import { ChevronDown, Menu, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-const LINKS = {
-  demo: 'https://demo.lextures.com/',
-  github: 'https://github.com/StudyDrift/lextures',
-} as const
+const NAV_LINKS = [
+  { label: 'Product', href: '/#features' },
+  { label: 'Docs', href: '/docs' },
+  { label: 'Pricing', href: '/pricing' },
+] as const
 
-const INDUSTRIES = [
-  { label: 'Higher Education', href: '/higher-ed' },
+const AUDIENCE_LINKS = [
+  { label: 'Higher education', href: '/higher-ed' },
   { label: 'K–12', href: '/k-12' },
-  { label: 'Self-Learner', href: '/self-learner' },
-]
+  { label: 'Parents', href: '/parents' },
+  { label: 'Self-learners', href: '/self-learner' },
+] as const
 
 function Logo() {
   return (
-    <a href="/" className="flex items-center gap-2 no-underline" aria-label="Lextures home">
-      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-white shadow-sm">
-        <img src="/logo.svg" className="h-4 w-4 brightness-0 invert" alt="" aria-hidden />
+    <a href="/" className="flex items-center gap-3 no-underline" aria-label="Lextures home">
+      <img
+        src="/assets/lextures-mark.svg"
+        alt=""
+        aria-hidden
+        className="h-8 w-8"
+        width={32}
+        height={32}
+      />
+      <span
+        className="font-display text-[23px] font-semibold leading-none"
+        style={{ color: 'var(--ink-nav)' }}
+      >
+        Lextures
       </span>
-      <span className="text-[0.9375rem] font-semibold tracking-tight text-slate-900">Lextures</span>
     </a>
   )
 }
 
-function IndustriesDropdown({ onNavigate }: { onNavigate?: () => void }) {
+function AudienceDropdown({ onNavigate }: { onNavigate?: () => void }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -42,9 +54,10 @@ function IndustriesDropdown({ onNavigate }: { onNavigate?: () => void }) {
         onClick={() => setOpen(v => !v)}
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+        className="flex cursor-pointer items-center gap-1 text-[15px] font-medium"
+        style={{ color: 'var(--text)' }}
       >
-        Solutions
+        Who it&apos;s for
         <ChevronDown
           className={`h-3.5 w-3.5 transition-transform duration-150 ${open ? 'rotate-180' : ''}`}
           aria-hidden
@@ -52,146 +65,159 @@ function IndustriesDropdown({ onNavigate }: { onNavigate?: () => void }) {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-xl shadow-slate-900/10">
-          {INDUSTRIES.map(item => (
+        <div
+          className="absolute left-0 top-full z-50 mt-2 w-52 overflow-hidden border p-1"
+          style={{
+            backgroundColor: 'var(--panel)',
+            borderColor: 'var(--line-card)',
+            borderRadius: 'var(--radius-card)',
+            boxShadow: 'var(--shadow-panel)',
+          }}
+        >
+          {AUDIENCE_LINKS.map(item => (
             <a
               key={item.href}
               href={item.href}
-              onClick={() => { setOpen(false); onNavigate?.() }}
-              className="block rounded-lg px-3 py-2 text-sm font-medium text-slate-700 no-underline transition-colors hover:bg-slate-50 hover:text-slate-900"
+              onClick={() => {
+                setOpen(false)
+                onNavigate?.()
+              }}
+              className="block rounded px-3 py-2 text-[14px] font-medium no-underline"
+              style={{ color: 'var(--ink-nav)' }}
             >
               {item.label}
             </a>
           ))}
+          <a
+            href="/#institutions"
+            onClick={() => {
+              setOpen(false)
+              onNavigate?.()
+            }}
+            className="block rounded px-3 py-2 text-[14px] no-underline"
+            style={{ color: 'var(--text-soft)' }}
+          >
+            All audiences →
+          </a>
         </div>
       )}
     </div>
   )
 }
 
-const NAV_LINKS = [
-  { label: 'Pricing', href: '/pricing' },
-  { label: 'Blog', href: '/blog' },
-  { label: 'Docs', href: '/docs' },
-]
-
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const [mobileIndustriesOpen, setMobileIndustriesOpen] = useState(false)
+  const [mobileAudiencesOpen, setMobileAudiencesOpen] = useState(false)
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    return () => {
+      document.body.style.overflow = ''
+    }
   }, [menuOpen])
 
   const closeMenu = () => {
     setMenuOpen(false)
-    setMobileIndustriesOpen(false)
+    setMobileAudiencesOpen(false)
   }
 
   return (
     <>
-      <header className="sticky top-0 z-50 px-3 pt-3 pb-0 sm:px-4">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex h-[52px] items-center justify-between rounded-2xl border border-slate-200/80 bg-white/95 px-3 shadow-sm shadow-slate-900/5 backdrop-blur-xl sm:px-4">
-            <Logo />
+      <header
+        className="sticky top-0 z-50 border-b"
+        style={{ backgroundColor: 'var(--paper)', borderColor: 'var(--line)' }}
+      >
+        <div className="mx-auto flex h-[72px] max-w-[1200px] items-center justify-between px-5 md:px-10 xl:px-14">
+          <Logo />
 
-            {/* Desktop nav */}
-            <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
-              <IndustriesDropdown />
-              {NAV_LINKS.map(({ label, href }) => (
-                <a
-                  key={href}
-                  href={href}
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 no-underline transition-colors hover:bg-slate-100 hover:text-slate-900"
-                >
-                  {label}
-                </a>
-              ))}
-            </nav>
-
-            {/* Desktop actions */}
-            <div className="hidden items-center gap-2 md:flex">
+          <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
+            <AudienceDropdown />
+            {NAV_LINKS.map(({ label, href }) => (
               <a
-                href={LINKS.demo}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 no-underline transition-colors hover:bg-slate-100 hover:text-slate-900"
-                target="_blank"
-                rel="noopener noreferrer"
+                key={href}
+                href={href}
+                className="text-[15px] font-medium no-underline transition-colors"
+                style={{ color: 'var(--text)' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = 'var(--ink-nav)'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color = 'var(--text)'
+                }}
               >
-                Live demo
+                {label}
               </a>
-              <a
-                href={LINKS.github}
-                className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900"
-                aria-label="View on GitHub"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github className="h-4 w-4" />
-              </a>
-              <a href="/get-started" className="btn-primary py-2 text-xs">
-                Get Started
-              </a>
-            </div>
+            ))}
+          </nav>
 
-            {/* Mobile menu button */}
+          <div className="flex items-center gap-3">
+            <a href="/get-started" className="btn-nav-cta hidden sm:inline-flex">
+              Get started
+            </a>
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
-              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 md:hidden"
+              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded md:hidden"
+              style={{ color: 'var(--ink-nav)' }}
               aria-expanded={menuOpen}
               aria-controls="mobile-nav"
               aria-label="Open menu"
             >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-5 w-5" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile overlay */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col bg-white md:hidden"
+          className="fixed inset-0 z-[60] flex flex-col md:hidden"
           id="mobile-nav"
           role="dialog"
           aria-modal="true"
           aria-label="Navigation"
+          style={{ backgroundColor: 'var(--paper)' }}
         >
-          <div className="flex h-[52px] items-center justify-between border-b border-slate-100 px-4">
+          <div
+            className="flex h-[72px] items-center justify-between border-b px-5"
+            style={{ borderColor: 'var(--line)' }}
+          >
             <Logo />
             <button
               type="button"
               onClick={closeMenu}
-              className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100"
+              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded"
+              style={{ color: 'var(--ink-nav)' }}
               aria-label="Close menu"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-3" aria-label="Mobile primary">
+          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4" aria-label="Mobile primary">
             <div>
               <button
                 type="button"
-                onClick={() => setMobileIndustriesOpen(v => !v)}
-                className="flex w-full cursor-pointer items-center justify-between rounded-xl px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50"
-                aria-expanded={mobileIndustriesOpen}
+                onClick={() => setMobileAudiencesOpen(v => !v)}
+                className="flex w-full cursor-pointer items-center justify-between rounded px-3 py-3 text-[15px] font-medium"
+                style={{ color: 'var(--ink-nav)' }}
+                aria-expanded={mobileAudiencesOpen}
               >
-                Solutions
+                Who it&apos;s for
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-150 ${mobileIndustriesOpen ? 'rotate-180' : ''}`}
+                  className={`h-4 w-4 transition-transform duration-150 ${mobileAudiencesOpen ? 'rotate-180' : ''}`}
                   aria-hidden
                 />
               </button>
-              {mobileIndustriesOpen && (
-                <div className="ml-4 mt-1 flex flex-col gap-1 border-l-2 border-slate-100 pl-4">
-                  {INDUSTRIES.map(item => (
+              {mobileAudiencesOpen && (
+                <div className="ml-3 mt-1 flex flex-col gap-1 border-l-2 pl-4" style={{ borderColor: 'var(--line)' }}>
+                  {AUDIENCE_LINKS.map(item => (
                     <a
                       key={item.href}
                       href={item.href}
                       onClick={closeMenu}
-                      className="rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 no-underline transition hover:bg-slate-50 hover:text-slate-900"
+                      className="rounded px-3 py-2 text-[14px] no-underline"
+                      style={{ color: 'var(--text)' }}
                     >
                       {item.label}
                     </a>
@@ -205,35 +231,17 @@ export function Header() {
                 key={href}
                 href={href}
                 onClick={closeMenu}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-slate-800 no-underline transition hover:bg-slate-50"
+                className="rounded px-3 py-3 text-[15px] font-medium no-underline"
+                style={{ color: 'var(--ink-nav)' }}
               >
                 {label}
               </a>
             ))}
           </nav>
 
-          <div className="flex flex-col gap-2 border-t border-slate-100 p-4 pb-8">
-            <a href="/get-started" onClick={closeMenu} className="btn-primary w-full justify-center py-3">
-              Get Started
-            </a>
-            <a
-              href={LINKS.demo}
-              onClick={closeMenu}
-              className="btn-secondary w-full justify-center py-3"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Live Demo
-            </a>
-            <a
-              href={LINKS.github}
-              onClick={closeMenu}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 no-underline transition hover:bg-slate-50"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Github className="h-4 w-4" />
-              View on GitHub
+          <div className="border-t p-4 pb-8" style={{ borderColor: 'var(--line)' }}>
+            <a href="/get-started" onClick={closeMenu} className="btn-nav-cta w-full justify-center">
+              Get started
             </a>
           </div>
         </div>

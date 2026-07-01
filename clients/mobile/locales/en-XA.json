@@ -624,6 +624,34 @@
         "mobile.quiz.timeUp": "Time is up — submitting…",
         "mobile.quiz.unflag": "Remove flag",
         "mobile.quiz.yourScore": "Your score",
+        "mobile.review.answer": "[Äñšŵëŕ]",
+        "mobile.review.caughtUpMessage": "[Ŵĥëñ îñšţŕûçţöŕš ëñäɓľë ŠŘŠ öñ ä çöûŕšë äñð ţäġ ķûëšţîöñš, đûë îţëɱš äþþëäŕ ĥëŕë.]",
+        "mobile.review.caughtUpShort": "[Ýöû äŕë çäţĉĥëđ ûþ]",
+        "mobile.review.caughtUpTitle": "[Ýöû äŕë çäţĉĥëđ ûþ]",
+        "mobile.review.dashboardTitle": "[Řëṽîëŵ þŕäçţîçë]",
+        "mobile.review.done": "[Ðöñë]",
+        "mobile.review.error.load": "[Çöüľð ñöţ ļöäð ŕëṽîëŵ ɋûëûë.]",
+        "mobile.review.error.submit": "[Çöüľð ñöţ šäṽë ŕëṽîëŵ.]",
+        "mobile.review.filter.all": "[Äľľ çöûŕšëš]",
+        "mobile.review.grade.again": "[Äġäîñ]",
+        "mobile.review.grade.easy": "[Ëäšÿ]",
+        "mobile.review.grade.good": "[Ğööđ]",
+        "mobile.review.grade.hard": "[Ħäŕđ]",
+        "mobile.review.open": "[Öþëñ ŕëṽîëŵ]",
+        "mobile.review.progress": "[%d öƒ %d đûë]",
+        "mobile.review.question": "[Ǫûëšţîöñ]",
+        "mobile.review.recommendations": "[Šûġġëšţëđ ñëẋţ]",
+        "mobile.review.reminder.bodyDefault": "[Ţîɱë ƒöŕ ýöûŕ đäîľÿ ŕëṽîëŵ.]",
+        "mobile.review.reminder.hint": "[Ğëţ ä đäîľÿ ñûđġë ŵĥëñ îţëɱš äŕë đûë.]",
+        "mobile.review.reminder.label": "[Ðäîľÿ ŕëṽîëŵ ŕëɱîñđëŕ]",
+        "mobile.review.reminder.title": "[Řëṽîëŵ þŕäçţîçë]",
+        "mobile.review.reveal": "[Šĥöŵ äñšŵëŕ]",
+        "mobile.review.sessionTitle": "[Řëṽîëŵ]",
+        "mobile.review.start": "[Šţäŕţ ŕëṽîëŵ]",
+        "mobile.review.submitLabel": "[Řëṽîëŵ ŕäţîñġ]",
+        "mobile.review.subtitle": "[Šþäçëđ ŕëþëţîţîöñ ķëëþš ŵĥäţ ýöû ľëäŕñ.]",
+        "mobile.review.summaryTitle": "[Šëššîöñ çöɱþľëţë]",
+        "mobile.review.title": "[Řëṽîëŵ]",
         "mobile.search.action.attendanceSubtitle": "Open a course to take roll",
         "mobile.search.action.calendarSubtitle": "Your schedule",
         "mobile.search.action.gradesSubtitle": "Open a course gradebook",
@@ -777,6 +805,18 @@
         "mobile.ia.teach.ungraded": {
             "one": "%d ungraded",
             "other": "%d ungraded"
+        },
+        "mobile.review.dueCount": {
+            "one": "[%d ŕëṽîëŵ đûë ţöđäÿ]",
+            "other": "[%d ŕëṽîëŵš đûë ţöđäÿ]"
+        },
+        "mobile.review.streak": {
+            "one": "[%d-đäÿ šţŕëäķ]",
+            "other": "[%d-đäÿ šţŕëäķ]"
+        },
+        "mobile.review.summaryReviewed": {
+            "one": "[Ýöû ŕëṽîëŵëđ %d îţëɱ]",
+            "other": "[Ýöû ŕëṽîëŵëđ %d îţëɱš]"
         }
     }
 }

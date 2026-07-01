@@ -96,11 +96,13 @@ struct ConsentRecord: Decodable {
     var decision: ConsentDecision
 }
 
-/// Flexible JSON value for custom field payloads.
+/// Flexible JSON value for custom field payloads and review question payloads.
 enum JSONValue: Codable, Hashable {
     case string(String)
     case bool(Bool)
     case number(Double)
+    case object([String: JSONValue])
+    case array([JSONValue])
     case null
 
     init(from decoder: Decoder) throws {
@@ -113,6 +115,10 @@ enum JSONValue: Codable, Hashable {
             self = .number(numberValue)
         } else if let stringValue = try? container.decode(String.self) {
             self = .string(stringValue)
+        } else if let objectValue = try? container.decode([String: JSONValue].self) {
+            self = .object(objectValue)
+        } else if let arrayValue = try? container.decode([JSONValue].self) {
+            self = .array(arrayValue)
         } else {
             self = .null
         }
@@ -124,6 +130,8 @@ enum JSONValue: Codable, Hashable {
         case .string(let stringValue): try container.encode(stringValue)
         case .bool(let boolValue): try container.encode(boolValue)
         case .number(let numberValue): try container.encode(numberValue)
+        case .object(let objectValue): try container.encode(objectValue)
+        case .array(let arrayValue): try container.encode(arrayValue)
         case .null: try container.encodeNil()
         }
     }
@@ -132,7 +140,9 @@ enum JSONValue: Codable, Hashable {
         switch self {
         case .null: return true
         case .string(let stringValue): return stringValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        default: return false
+        case .array(let arrayValue): return arrayValue.isEmpty
+        case .object(let objectValue): return objectValue.isEmpty
+        case .bool, .number: return false
         }
     }
 }

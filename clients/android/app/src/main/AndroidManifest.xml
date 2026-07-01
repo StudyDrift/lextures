@@ -28,6 +28,10 @@
             android:name=".features.planner.PlannerReminderReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".features.review.ReviewReminderReceiver"
+            android:exported="false" />
+
         <activity
             android:name=".app.MainActivity"
             android:exported="true"

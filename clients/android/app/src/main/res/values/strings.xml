@@ -668,6 +668,34 @@
     <string name="mobile_quiz_timeUp">Time is up — submitting…</string>
     <string name="mobile_quiz_unflag">Remove flag</string>
     <string name="mobile_quiz_yourScore">Your score</string>
+    <string name="mobile_review_answer">Answer</string>
+    <string name="mobile_review_caughtUpMessage">When instructors enable SRS on a course and tag questions, due items appear here.</string>
+    <string name="mobile_review_caughtUpShort">You are caught up</string>
+    <string name="mobile_review_caughtUpTitle">You are caught up</string>
+    <string name="mobile_review_dashboardTitle">Review practice</string>
+    <string name="mobile_review_done">Done</string>
+    <string name="mobile_review_error_load">Could not load review queue.</string>
+    <string name="mobile_review_error_submit">Could not save review.</string>
+    <string name="mobile_review_filter_all">All courses</string>
+    <string name="mobile_review_grade_again">Again</string>
+    <string name="mobile_review_grade_easy">Easy</string>
+    <string name="mobile_review_grade_good">Good</string>
+    <string name="mobile_review_grade_hard">Hard</string>
+    <string name="mobile_review_open">Open review</string>
+    <string name="mobile_review_progress">%1$d of %2$d due</string>
+    <string name="mobile_review_question">Question</string>
+    <string name="mobile_review_recommendations">Suggested next</string>
+    <string name="mobile_review_reminder_bodyDefault">Time for your daily review.</string>
+    <string name="mobile_review_reminder_hint">Get a daily nudge when items are due.</string>
+    <string name="mobile_review_reminder_label">Daily review reminder</string>
+    <string name="mobile_review_reminder_title">Review practice</string>
+    <string name="mobile_review_reveal">Show answer</string>
+    <string name="mobile_review_sessionTitle">Review</string>
+    <string name="mobile_review_start">Start review</string>
+    <string name="mobile_review_submitLabel">Review rating</string>
+    <string name="mobile_review_subtitle">Spaced repetition keeps what you learn.</string>
+    <string name="mobile_review_summaryTitle">Session complete</string>
+    <string name="mobile_review_title">Review</string>
     <string name="mobile_search_action_attendanceSubtitle">Open a course to take roll</string>
     <string name="mobile_search_action_calendarSubtitle">Your schedule</string>
     <string name="mobile_search_action_gradesSubtitle">Open a course gradebook</string>
@@ -775,5 +803,17 @@
     <plurals name="mobile_planner_calendar_eventCount">
         <item quantity="one">%1$d event</item>
         <item quantity="other">%1$d events</item>
+    </plurals>
+    <plurals name="mobile_review_dueCount">
+        <item quantity="one">%1$d review due today</item>
+        <item quantity="other">%1$d reviews due today</item>
+    </plurals>
+    <plurals name="mobile_review_streak">
+        <item quantity="one">%1$d-day streak</item>
+        <item quantity="other">%1$d-day streak</item>
+    </plurals>
+    <plurals name="mobile_review_summaryReviewed">
+        <item quantity="one">You reviewed %1$d item</item>
+        <item quantity="other">You reviewed %1$d items</item>
     </plurals>
 </resources>

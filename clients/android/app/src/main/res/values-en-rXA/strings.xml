@@ -668,6 +668,34 @@
     <string name="mobile_quiz_timeUp">Time is up — submitting…</string>
     <string name="mobile_quiz_unflag">Remove flag</string>
     <string name="mobile_quiz_yourScore">Your score</string>
+    <string name="mobile_review_answer">[Äñšŵëŕ]</string>
+    <string name="mobile_review_caughtUpMessage">[Ŵĥëñ îñšţŕûçţöŕš ëñäɓľë ŠŘŠ öñ ä çöûŕšë äñð ţäġ ķûëšţîöñš, đûë îţëɱš äþþëäŕ ĥëŕë.]</string>
+    <string name="mobile_review_caughtUpShort">[Ýöû äŕë çäţĉĥëđ ûþ]</string>
+    <string name="mobile_review_caughtUpTitle">[Ýöû äŕë çäţĉĥëđ ûþ]</string>
+    <string name="mobile_review_dashboardTitle">[Řëṽîëŵ þŕäçţîçë]</string>
+    <string name="mobile_review_done">[Ðöñë]</string>
+    <string name="mobile_review_error_load">[Çöüľð ñöţ ļöäð ŕëṽîëŵ ɋûëûë.]</string>
+    <string name="mobile_review_error_submit">[Çöüľð ñöţ šäṽë ŕëṽîëŵ.]</string>
+    <string name="mobile_review_filter_all">[Äľľ çöûŕšëš]</string>
+    <string name="mobile_review_grade_again">[Äġäîñ]</string>
+    <string name="mobile_review_grade_easy">[Ëäšÿ]</string>
+    <string name="mobile_review_grade_good">[Ğööđ]</string>
+    <string name="mobile_review_grade_hard">[Ħäŕđ]</string>
+    <string name="mobile_review_open">[Öþëñ ŕëṽîëŵ]</string>
+    <string name="mobile_review_progress">[%1$d öƒ %2$d đûë]</string>
+    <string name="mobile_review_question">[Ǫûëšţîöñ]</string>
+    <string name="mobile_review_recommendations">[Šûġġëšţëđ ñëẋţ]</string>
+    <string name="mobile_review_reminder_bodyDefault">[Ţîɱë ƒöŕ ýöûŕ đäîľÿ ŕëṽîëŵ.]</string>
+    <string name="mobile_review_reminder_hint">[Ğëţ ä đäîľÿ ñûđġë ŵĥëñ îţëɱš äŕë đûë.]</string>
+    <string name="mobile_review_reminder_label">[Ðäîľÿ ŕëṽîëŵ ŕëɱîñđëŕ]</string>
+    <string name="mobile_review_reminder_title">[Řëṽîëŵ þŕäçţîçë]</string>
+    <string name="mobile_review_reveal">[Šĥöŵ äñšŵëŕ]</string>
+    <string name="mobile_review_sessionTitle">[Řëṽîëŵ]</string>
+    <string name="mobile_review_start">[Šţäŕţ ŕëṽîëŵ]</string>
+    <string name="mobile_review_submitLabel">[Řëṽîëŵ ŕäţîñġ]</string>
+    <string name="mobile_review_subtitle">[Šþäçëđ ŕëþëţîţîöñ ķëëþš ŵĥäţ ýöû ľëäŕñ.]</string>
+    <string name="mobile_review_summaryTitle">[Šëššîöñ çöɱþľëţë]</string>
+    <string name="mobile_review_title">[Řëṽîëŵ]</string>
     <string name="mobile_search_action_attendanceSubtitle">Open a course to take roll</string>
     <string name="mobile_search_action_calendarSubtitle">Your schedule</string>
     <string name="mobile_search_action_gradesSubtitle">Open a course gradebook</string>
@@ -775,5 +803,17 @@
     <plurals name="mobile_planner_calendar_eventCount">
         <item quantity="one">[%1$d ëṽëñţ]</item>
         <item quantity="other">[%1$d ëṽëñţš]</item>
+    </plurals>
+    <plurals name="mobile_review_dueCount">
+        <item quantity="one">[%1$d ŕëṽîëŵ đûë ţöđäÿ]</item>
+        <item quantity="other">[%1$d ŕëṽîëŵš đûë ţöđäÿ]</item>
+    </plurals>
+    <plurals name="mobile_review_streak">
+        <item quantity="one">[%1$d-đäÿ šţŕëäķ]</item>
+        <item quantity="other">[%1$d-đäÿ šţŕëäķ]</item>
+    </plurals>
+    <plurals name="mobile_review_summaryReviewed">
+        <item quantity="one">[Ýöû ŕëṽîëŵëđ %1$d îţëɱ]</item>
+        <item quantity="other">[Ýöû ŕëṽîëŵëđ %1$d îţëɱš]</item>
     </plurals>
 </resources>

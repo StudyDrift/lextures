@@ -668,6 +668,34 @@
     <string name="mobile_quiz_timeUp">Time is up — submitting…</string>
     <string name="mobile_quiz_unflag">Remove flag</string>
     <string name="mobile_quiz_yourScore">Your score</string>
+    <string name="mobile_review_answer">Réponse</string>
+    <string name="mobile_review_caughtUpMessage">Lorsque les enseignants activent la SRS sur un cours et étiquettent des questions, les éléments à réviser apparaissent ici.</string>
+    <string name="mobile_review_caughtUpShort">Vous êtes à jour</string>
+    <string name="mobile_review_caughtUpTitle">Vous êtes à jour</string>
+    <string name="mobile_review_dashboardTitle">Pratique de révision</string>
+    <string name="mobile_review_done">Terminé</string>
+    <string name="mobile_review_error_load">Impossible de charger la file de révision.</string>
+    <string name="mobile_review_error_submit">Impossible d\'enregistrer la révision.</string>
+    <string name="mobile_review_filter_all">Tous les cours</string>
+    <string name="mobile_review_grade_again">Encore</string>
+    <string name="mobile_review_grade_easy">Facile</string>
+    <string name="mobile_review_grade_good">Bien</string>
+    <string name="mobile_review_grade_hard">Difficile</string>
+    <string name="mobile_review_open">Ouvrir la révision</string>
+    <string name="mobile_review_progress">%1$d sur %2$d à réviser</string>
+    <string name="mobile_review_question">Question</string>
+    <string name="mobile_review_recommendations">Prochaine suggestion</string>
+    <string name="mobile_review_reminder_bodyDefault">C\'est l\'heure de votre révision quotidienne.</string>
+    <string name="mobile_review_reminder_hint">Recevez un rappel quotidien lorsque des éléments sont à réviser.</string>
+    <string name="mobile_review_reminder_label">Rappel de révision quotidienne</string>
+    <string name="mobile_review_reminder_title">Pratique de révision</string>
+    <string name="mobile_review_reveal">Afficher la réponse</string>
+    <string name="mobile_review_sessionTitle">Révision</string>
+    <string name="mobile_review_start">Commencer la révision</string>
+    <string name="mobile_review_submitLabel">Évaluation de révision</string>
+    <string name="mobile_review_subtitle">La répétition espacée consolide ce que vous apprenez.</string>
+    <string name="mobile_review_summaryTitle">Session terminée</string>
+    <string name="mobile_review_title">Révision</string>
     <string name="mobile_search_action_attendanceSubtitle">Open a course to take roll</string>
     <string name="mobile_search_action_calendarSubtitle">Your schedule</string>
     <string name="mobile_search_action_gradesSubtitle">Open a course gradebook</string>
@@ -775,5 +803,17 @@
     <plurals name="mobile_planner_calendar_eventCount">
         <item quantity="one">%1$d événement</item>
         <item quantity="other">%1$d événements</item>
+    </plurals>
+    <plurals name="mobile_review_dueCount">
+        <item quantity="one">%1$d révision à faire aujourd\'hui</item>
+        <item quantity="other">%1$d révisions à faire aujourd\'hui</item>
+    </plurals>
+    <plurals name="mobile_review_streak">
+        <item quantity="one">Série de %1$d jours</item>
+        <item quantity="other">Série de %1$d jours</item>
+    </plurals>
+    <plurals name="mobile_review_summaryReviewed">
+        <item quantity="one">Vous avez révisé %1$d élément</item>
+        <item quantity="other">Vous avez révisé %1$d éléments</item>
     </plurals>
 </resources>

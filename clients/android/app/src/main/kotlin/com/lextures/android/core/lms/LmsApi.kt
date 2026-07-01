@@ -1324,6 +1324,59 @@ object LmsApi {
             decode(responseBody)
         }
 
+    suspend fun fetchLearnerReviewQueue(
+        userId: String,
+        accessToken: String,
+        limit: Int = ReviewLogic.PREFETCH_LIMIT,
+        offset: Int = 0,
+    ): ReviewQueueResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/learners/${encodePath(userId)}/review-queue?limit=$limit&offset=$offset",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun fetchLearnerReviewStats(userId: String, accessToken: String): ReviewStats =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                path = "/api/v1/learners/${encodePath(userId)}/review-stats",
+                accessToken = accessToken,
+            )
+            decode(body)
+        }
+
+    suspend fun postLearnerSrsReview(
+        userId: String,
+        body: SrsReviewSubmitBody,
+        accessToken: String,
+        idempotencyKey: String? = null,
+    ): SrsReviewSubmitResponse = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/learners/${encodePath(userId)}/review",
+            method = "POST",
+            body = json.encodeToString(SrsReviewSubmitBody.serializer(), body),
+            accessToken = accessToken,
+            idempotencyKey = idempotencyKey,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun fetchLearnerRecommendations(
+        userId: String,
+        courseId: String,
+        surface: String,
+        accessToken: String,
+        limit: Int = 5,
+    ): LearnerRecommendationsResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/learners/${encodePath(userId)}/recommendations?courseId=${encodePath(courseId)}&surface=${encodePath(surface)}&limit=$limit",
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
     fun tutorMessageStream(
         courseCode: String,
         message: String,

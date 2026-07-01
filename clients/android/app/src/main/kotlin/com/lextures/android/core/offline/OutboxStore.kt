@@ -21,9 +21,9 @@ class OutboxStore(context: Context, ownerKey: String) {
     private var state = loadOutbox()
     private var appliedKeys: MutableSet<String> = loadAppliedKeys()
 
-    fun enqueue(method: String, path: String, bodyJson: String?, label: String): OutboxItem {
+    fun enqueue(method: String, path: String, bodyJson: String?, label: String, id: String? = null): OutboxItem {
         val item = OutboxItem(
-            id = UUID.randomUUID().toString(),
+            id = id ?: UUID.randomUUID().toString(),
             sequence = state.nextSequence,
             method = method,
             path = path,

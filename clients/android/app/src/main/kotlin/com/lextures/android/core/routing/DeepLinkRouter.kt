@@ -4,6 +4,7 @@ package com.lextures.android.core.routing
 sealed class DeepLinkDestination {
     data object Home : DeepLinkDestination()
     data object Inbox : DeepLinkDestination()
+    data object Review : DeepLinkDestination()
     data class Course(
         val code: String,
         val section: CourseDeepLinkSection? = null,
@@ -64,10 +65,10 @@ object DeepLinkRouter {
     private fun resolvePath(path: String): DeepLinkDestination {
         val segments = path.trim('/').split('/').filter { it.isNotEmpty() }
         if (segments.firstOrNull()?.lowercase() != "courses" || segments.size < 2) {
-            return if (segments.firstOrNull()?.lowercase() == "inbox") {
-                DeepLinkDestination.Inbox
-            } else {
-                DeepLinkDestination.Home
+            return when (segments.firstOrNull()?.lowercase()) {
+                "inbox" -> DeepLinkDestination.Inbox
+                "review" -> DeepLinkDestination.Review
+                else -> DeepLinkDestination.Home
             }
         }
 

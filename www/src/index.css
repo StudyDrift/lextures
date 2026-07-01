@@ -1,99 +1,266 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-serif: "Spectral", ui-serif, Georgia, serif;
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  /* Surfaces */
-  --color-surface: #f8fafc;
-  --color-surface-2: #f1f5f9;
-
-  /* Indigo accent */
-  --color-accent: #6366f1;
-  --color-accent-hover: #4f46e5;
-  --color-accent-muted: #eef2ff;
-  --color-accent-border: #c7d2fe;
-  --color-accent-light: #e0e7ff;
-
-  /* Dark palette */
-  --color-dark-bg: #020617;
-  --color-dark-surface: #0f172a;
-  --color-dark-card: #1e293b;
-  --color-dark-border: #334155;
+  /* Legacy aliases for inner pages during rollout */
+  --color-surface: #f6f1e7;
+  --color-accent: #1f7a63;
+  --color-accent-hover: #17313f;
+  --color-accent-muted: #eaf4f0;
+  --color-accent-border: #6ec0b1;
+  --color-accent-light: #eaf4f0;
 }
 
-/* ─────────────────────────────────────────────── Base ─── */
+:root {
+  /* Surfaces */
+  --paper: #f6f1e7;
+  --panel: #ffffff;
+  --panel-sunken: #f4f0e6;
+
+  /* Ink / text */
+  --ink: #14262f;
+  --ink-nav: #17313f;
+  --text: #4a5560;
+  --text-soft: #5a6570;
+  --muted: #a49a86;
+
+  /* Hairlines / borders */
+  --line: #e2dbcb;
+  --line-card: #e6dfcf;
+  --line-row: #f4efe2;
+
+  /* Brand accents */
+  --teal: #6ec0b1;
+  --teal-deep: #1f7a63;
+  --coral: #f6684b;
+  --orange: #f69945;
+  --cream: #f4e4c0;
+
+  /* Semantic tints */
+  --teal-tint: #eaf4f0;
+  --coral-tint: #fdf3ec;
+  --coral-line: #f8d9cb;
+  --grade-warn: #b0692e;
+
+  /* Radius & shadow */
+  --radius-panel: 12px;
+  --radius-card: 10px;
+  --radius-btn: 5px;
+  --radius-chip: 6px;
+  --shadow-panel: 0 24px 50px -24px rgba(20, 38, 47, 0.3);
+  --shadow-page: 0 30px 80px -30px rgba(16, 26, 36, 0.35);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   body {
-    @apply bg-white text-slate-700 antialiased font-sans;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply font-sans antialiased;
+    background-color: var(--paper);
+    color: var(--text);
   }
 
   ::selection {
-    @apply bg-indigo-100 text-indigo-950;
+    background-color: var(--teal-tint);
+    color: var(--ink);
   }
 
   a:not([class]) {
-    @apply text-accent underline-offset-4 transition-colors hover:text-accent-hover hover:underline;
+    color: var(--teal-deep);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.15s;
+  }
+
+  a:not([class]):hover {
+    color: var(--ink-nav);
   }
 }
 
-/* ──────────────────────────────────────────── Buttons ─── */
 @utility btn-primary {
-  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-[0_1px_3px_rgba(99,102,241,0.3),0_1px_2px_-1px_rgba(99,102,241,0.2)] transition-all duration-150 hover:bg-accent-hover hover:shadow-[0_4px_12px_rgba(99,102,241,0.35)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 font-medium text-white transition-colors duration-150;
+  padding: 14px 26px;
+  border-radius: var(--radius-btn);
+  background-color: var(--coral);
+  font-size: 15px;
+
+  &:hover {
+    background-color: #e85f44;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--teal-deep);
+    outline-offset: 2px;
+  }
 }
 
 @utility btn-secondary {
-  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-all duration-150 hover:border-slate-300 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent;
+  @apply inline-flex cursor-pointer items-center justify-center gap-2 font-medium transition-colors duration-150;
+  padding: 14px 26px;
+  border-radius: var(--radius-btn);
+  background: transparent;
+  border: 1px solid #cbc4b3;
+  color: var(--ink-nav);
+  font-size: 15px;
+
+  &:hover {
+    border-color: var(--ink-nav);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--teal-deep);
+    outline-offset: 2px;
+  }
 }
 
-@utility btn-ghost-dark {
-  @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-150 hover:border-white/25 hover:bg-white/15 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
+@utility btn-nav-cta {
+  @apply inline-flex cursor-pointer items-center justify-center font-medium transition-opacity duration-150;
+  padding: 9px 18px;
+  border-radius: var(--radius-btn);
+  background-color: var(--ink-nav);
+  color: var(--cream);
+  font-size: 15px;
+
+  &:hover {
+    opacity: 0.92;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--teal-deep);
+    outline-offset: 2px;
+  }
 }
 
-/* ───────────────────────────────────────────── Cards ─── */
-@utility feature-card {
-  @apply rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-200 hover:border-indigo-200 hover:shadow-[0_8px_30px_rgba(99,102,241,0.08)];
+@utility font-display {
+  font-family: var(--font-serif);
 }
 
-@utility feature-card-dark {
-  @apply rounded-2xl border border-slate-700/50 bg-slate-800/60 p-6 transition-all duration-200 hover:border-slate-600 hover:bg-slate-800/80;
+@utility section-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
-/* ──────────────────────────────────────────────── Prose ─── */
+@utility eyebrow-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 @utility prose-content {
-  @apply text-slate-700 leading-relaxed;
+  color: var(--text);
+  @apply leading-relaxed;
 
-  h2 { @apply mt-10 mb-4 text-2xl font-semibold tracking-tight text-slate-900 first:mt-0; }
-  h3 { @apply mt-8 mb-3 text-xl font-semibold text-slate-900; }
-  p  { @apply mb-5 leading-[1.75]; }
+  h2 {
+    @apply mt-10 mb-4 font-display text-2xl font-semibold tracking-tight first:mt-0;
+    color: var(--ink);
+  }
 
-  ul, ol { @apply mb-5 pl-6 space-y-2; }
-  ul { @apply list-disc; }
-  ol { @apply list-decimal; }
-  li { @apply leading-relaxed text-slate-700; }
+  h3 {
+    @apply mt-8 mb-3 text-xl font-semibold;
+    color: var(--ink);
+  }
 
-  strong { @apply font-semibold text-slate-900; }
-  em     { @apply italic; }
+  p {
+    @apply mb-5 leading-[1.75];
+  }
 
-  a { @apply text-accent underline-offset-4 transition-colors hover:text-accent-hover hover:underline; }
+  ul,
+  ol {
+    @apply mb-5 space-y-2 pl-6;
+  }
 
-  blockquote { @apply my-6 border-l-4 border-accent-border pl-5 italic text-slate-600; }
+  ul {
+    @apply list-disc;
+  }
 
-  pre { @apply my-6 overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950 p-5 text-sm leading-relaxed; }
-  code { @apply font-mono text-sm; }
-  pre code { @apply text-slate-300; }
-  :not(pre) > code { @apply rounded-lg bg-slate-100 px-1.5 py-0.5 text-[0.85em] text-slate-800; }
+  ol {
+    @apply list-decimal;
+  }
 
-  img { @apply my-8 w-full rounded-2xl border border-slate-200 shadow-sm transition-shadow duration-300 hover:shadow-md; }
-  hr  { @apply my-10 border-slate-200; }
+  li {
+    @apply leading-relaxed;
+    color: var(--text);
+  }
+
+  strong {
+    @apply font-semibold;
+    color: var(--ink);
+  }
+
+  em {
+    @apply italic;
+  }
+
+  a {
+    color: var(--teal-deep);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.15s;
+  }
+
+  a:hover {
+    color: var(--ink-nav);
+  }
+
+  blockquote {
+    @apply my-6 border-l-4 pl-5 italic;
+    border-color: var(--line);
+    color: var(--text-soft);
+  }
+
+  pre {
+    @apply my-6 overflow-x-auto rounded-[var(--radius-panel)] p-5 text-sm leading-relaxed;
+    border: 1px solid var(--ink-nav);
+    background-color: var(--ink-nav);
+    color: var(--cream);
+  }
+
+  code {
+    @apply font-mono text-sm;
+  }
+
+  pre code {
+    color: var(--cream);
+  }
+
+  :not(pre) > code {
+    @apply rounded px-1.5 py-0.5 text-[0.85em];
+    background-color: var(--panel-sunken);
+    color: var(--ink);
+  }
+
+  img {
+    @apply my-8 w-full rounded-[var(--radius-card)] border shadow-sm transition-shadow duration-300 hover:shadow-md;
+    border-color: var(--line-card);
+  }
+
+  hr {
+    @apply my-10;
+    border-color: var(--line);
+  }
 }

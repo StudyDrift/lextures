@@ -694,6 +694,34 @@
     "mobile.quiz.timeUp": "Time is up — submitting…",
     "mobile.quiz.unflag": "Remove flag",
     "mobile.quiz.yourScore": "Your score",
+    "mobile.review.answer": "Answer",
+    "mobile.review.caughtUpMessage": "When instructors enable SRS on a course and tag questions, due items appear here.",
+    "mobile.review.caughtUpShort": "You are caught up",
+    "mobile.review.caughtUpTitle": "You are caught up",
+    "mobile.review.dashboardTitle": "Review practice",
+    "mobile.review.done": "Done",
+    "mobile.review.error.load": "Could not load review queue.",
+    "mobile.review.error.submit": "Could not save review.",
+    "mobile.review.filter.all": "All courses",
+    "mobile.review.grade.again": "Again",
+    "mobile.review.grade.easy": "Easy",
+    "mobile.review.grade.good": "Good",
+    "mobile.review.grade.hard": "Hard",
+    "mobile.review.open": "Open review",
+    "mobile.review.progress": "%d of %d due",
+    "mobile.review.question": "Question",
+    "mobile.review.recommendations": "Suggested next",
+    "mobile.review.reminder.bodyDefault": "Time for your daily review.",
+    "mobile.review.reminder.hint": "Get a daily nudge when items are due.",
+    "mobile.review.reminder.label": "Daily review reminder",
+    "mobile.review.reminder.title": "Review practice",
+    "mobile.review.reveal": "Show answer",
+    "mobile.review.sessionTitle": "Review",
+    "mobile.review.start": "Start review",
+    "mobile.review.submitLabel": "Review rating",
+    "mobile.review.subtitle": "Spaced repetition keeps what you learn.",
+    "mobile.review.summaryTitle": "Session complete",
+    "mobile.review.title": "Review",
     "mobile.search.action.attendanceSubtitle": "Open a course to take roll",
     "mobile.search.action.calendarSubtitle": "Your schedule",
     "mobile.search.action.gradesSubtitle": "Open a course gradebook",
@@ -777,6 +805,18 @@
     "mobile.ia.teach.ungraded": {
       "one": "%d ungraded",
       "other": "%d ungraded"
+    },
+    "mobile.review.dueCount": {
+      "one": "%d review due today",
+      "other": "%d reviews due today"
+    },
+    "mobile.review.streak": {
+      "one": "%d-day streak",
+      "other": "%d-day streak"
+    },
+    "mobile.review.summaryReviewed": {
+      "one": "You reviewed %d item",
+      "other": "You reviewed %d items"
     }
   }
 }

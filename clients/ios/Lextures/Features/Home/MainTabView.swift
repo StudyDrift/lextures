@@ -48,6 +48,7 @@ final class AppShellModel {
     var universalSearchEnabled = MobileIaPreferences.isUniversalSearchEnabled
     var profileDepthEnabled = MobileProfileDepthPreferences.isEnabled
     var pendingMoreDestination: MoreDestination?
+    var pendingReview = false
 
     var shellTabs: [ShellTab] {
         iaRedesignEnabled
@@ -62,6 +63,9 @@ final class AppShellModel {
             selectShellTab(.home)
         case .inbox:
             selectShellTab(.inbox)
+        case .review:
+            selectShellTab(.home)
+            pendingReview = true
         case .course:
             selectShellTab(.courses)
         }
@@ -96,6 +100,11 @@ final class AppShellModel {
     func consumePendingMoreDestination() -> MoreDestination? {
         defer { pendingMoreDestination = nil }
         return pendingMoreDestination
+    }
+
+    func consumePendingReview() -> Bool {
+        defer { pendingReview = false }
+        return pendingReview
     }
 
     func navigateFromSearch(path: String) {

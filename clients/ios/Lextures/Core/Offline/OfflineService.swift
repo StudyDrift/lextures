@@ -81,7 +81,8 @@ final class OfflineService {
         body: (any Encodable)?,
         label: String,
         accessToken: String?,
-        preferQueue: Bool = false
+        preferQueue: Bool = false,
+        idempotencyKey: String? = nil
     ) async throws -> OutboxItem {
         let bodyJSON: String?
         if let body {
@@ -94,7 +95,7 @@ final class OfflineService {
         let online = NetworkMonitor.shared.isOnline
         if online && !preferQueue, let accessToken {
             let bodyData = bodyJSON.flatMap { $0.data(using: .utf8) }
-            let idempotencyKey = UUID().uuidString.lowercased()
+            let resolvedKey = idempotencyKey ?? UUID().uuidString.lowercased()
             do {
                 _ = try await APIClient().requestRaw(
                     path: path,
@@ -102,12 +103,12 @@ final class OfflineService {
                     bodyData: bodyData,
                     authorized: true,
                     accessToken: accessToken,
-                    idempotencyKey: idempotencyKey
+                    idempotencyKey: resolvedKey
                 )
-                await outboxStore.markApplied(idempotencyKey: idempotencyKey)
+                await outboxStore.markApplied(idempotencyKey: resolvedKey)
                 await refreshState()
                 return OutboxItem(
-                    id: idempotencyKey,
+                    id: resolvedKey,
                     createdAt: Date(),
                     sequence: -1,
                     method: method,
@@ -130,7 +131,8 @@ final class OfflineService {
             method: method,
             path: path,
             bodyJSON: bodyJSON,
-            label: label
+            label: label,
+            id: idempotencyKey
         )
         await refreshState()
         return item

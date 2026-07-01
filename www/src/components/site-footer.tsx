@@ -1,79 +1,87 @@
-import { Github } from 'lucide-react'
 import { SITE_LINKS } from '../lib/site-links'
 
 const NAV_COLUMNS = [
   {
     heading: 'Product',
     links: [
+      { label: 'Features', href: '/#features' },
       { label: 'Pricing', href: '/pricing' },
-      { label: 'Blog', href: '/blog' },
       { label: 'Documentation', href: '/docs' },
-      { label: 'Live Demo', href: SITE_LINKS.demo },
+      { label: 'Live demo', href: SITE_LINKS.demo },
     ],
   },
   {
-    heading: 'Solutions',
+    heading: 'Institutions',
     links: [
-      { label: 'Higher Education', href: '/higher-ed' },
+      { label: 'Higher education', href: '/higher-ed' },
       { label: 'K–12', href: '/k-12' },
-      { label: 'Self-Learner', href: '/self-learner' },
-      { label: 'Get Started', href: '/get-started' },
+      { label: 'Parents', href: '/parents' },
+      { label: 'Self-learners', href: '/self-learner' },
+    ],
+  },
+  {
+    heading: 'Project',
+    links: [
+      { label: 'GitHub', href: SITE_LINKS.github },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Self-hosting', href: '/docs/self-hosting' },
+      { label: 'Security', href: SITE_LINKS.security },
     ],
   },
   {
     heading: 'Legal',
     links: [
-      { label: 'Privacy Policy', href: SITE_LINKS.privacy },
-      { label: 'Terms of Service', href: SITE_LINKS.terms },
-      { label: 'Security', href: SITE_LINKS.security },
+      { label: 'Privacy policy', href: SITE_LINKS.privacy },
+      { label: 'Terms of service', href: SITE_LINKS.terms },
       { label: 'Accessibility', href: SITE_LINKS.accessibility },
-      { label: 'California Privacy Rights', href: SITE_LINKS.californiaPrivacyRights },
+      { label: 'California privacy rights', href: SITE_LINKS.californiaPrivacyRights },
     ],
   },
 ]
 
 export function SiteFooter() {
   return (
-    <footer className="bg-[#020617] text-slate-400">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        {/* Main grid */}
-        <div className="grid gap-10 border-b border-slate-800 py-14 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-          {/* Brand column */}
+    <footer className="border-t" style={{ backgroundColor: 'var(--paper)', borderColor: 'var(--line)' }}>
+      <div className="mx-auto max-w-[1200px] px-5 py-14 md:px-10 xl:px-14">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_repeat(4,minmax(0,1fr))]">
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                <img src="/logo.svg" className="h-4 w-4 brightness-0 invert" alt="" aria-hidden />
+            <div className="flex items-center gap-3">
+              <img
+                src="/assets/lextures-mark.svg"
+                alt=""
+                aria-hidden
+                className="h-7 w-7"
+                width={28}
+                height={28}
+              />
+              <span
+                className="font-display text-[20px] font-semibold"
+                style={{ color: 'var(--ink-nav)' }}
+              >
+                Lextures
               </span>
-              <span className="text-[0.9375rem] font-semibold text-white">Lextures</span>
             </div>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
-              Open-source adaptive LMS for courses, assessments, and institutional workflows.
-              Built in public under AGPL-3.0.
+            <p className="mt-4 max-w-xs text-[15px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+              Open-source LMS for courses, assessments, and the workflows that surround them.
             </p>
-            <a
-              href={SITE_LINKS.github}
-              className="mt-5 inline-flex items-center gap-2 text-sm text-slate-500 no-underline transition-colors hover:text-slate-300"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View Lextures on GitHub"
-            >
-              <Github className="h-4 w-4" />
-              GitHub
-            </a>
           </div>
 
-          {/* Nav columns */}
           {NAV_COLUMNS.map(({ heading, links }) => (
             <div key={heading}>
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                {heading}
-              </p>
-              <ul className="mt-4 space-y-3">
+              <p className="section-label">{heading}</p>
+              <ul className="mt-4 space-y-2.5">
                 {links.map(({ label, href }) => (
                   <li key={label}>
                     <a
                       href={href}
-                      className="text-sm text-slate-500 no-underline transition-colors hover:text-slate-200"
+                      className="text-[14px] no-underline transition-colors"
+                      style={{ color: 'var(--text-soft)' }}
+                      onMouseEnter={e => {
+                        e.currentTarget.style.color = 'var(--ink-nav)'
+                      }}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.color = 'var(--text-soft)'
+                      }}
                     >
                       {label}
                     </a>
@@ -84,10 +92,12 @@ export function SiteFooter() {
           ))}
         </div>
 
-        {/* Bottom bar */}
-        <div className="flex flex-col items-center justify-between gap-3 py-6 text-xs text-slate-600 sm:flex-row">
+        <div
+          className="mt-12 flex flex-col gap-2 border-t pt-6 text-[13px] sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderColor: 'var(--line)', color: 'var(--muted)' }}
+        >
           <p>© {new Date().getFullYear()} Lextures contributors. Released under AGPL-3.0.</p>
-          <p>Built in public · Self-host for free</p>
+          <p>Self-host on Postgres · LTI 1.3 · SCIM 2.0</p>
         </div>
       </div>
     </footer>

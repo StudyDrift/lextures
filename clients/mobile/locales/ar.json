@@ -624,6 +624,34 @@
         "mobile.quiz.timeUp": "Time is up — submitting…",
         "mobile.quiz.unflag": "Remove flag",
         "mobile.quiz.yourScore": "Your score",
+        "mobile.review.answer": "الإجابة",
+        "mobile.review.caughtUpMessage": "عندما يفعّل المدرّسون التكرار المتباعد في مقرر ويصنّفون الأسئلة، تظهر العناصر المستحقة هنا.",
+        "mobile.review.caughtUpShort": "أنت على اطلاع",
+        "mobile.review.caughtUpTitle": "أنت على اطلاع",
+        "mobile.review.dashboardTitle": "تمرين المراجعة",
+        "mobile.review.done": "تم",
+        "mobile.review.error.load": "تعذّر تحميل قائمة المراجعة.",
+        "mobile.review.error.submit": "تعذّر حفظ المراجعة.",
+        "mobile.review.filter.all": "جميع المقررات",
+        "mobile.review.grade.again": "مرة أخرى",
+        "mobile.review.grade.easy": "سهل",
+        "mobile.review.grade.good": "جيد",
+        "mobile.review.grade.hard": "صعب",
+        "mobile.review.open": "فتح المراجعة",
+        "mobile.review.progress": "%d من %d مستحقة",
+        "mobile.review.question": "السؤال",
+        "mobile.review.recommendations": "المقترح التالي",
+        "mobile.review.reminder.bodyDefault": "حان وقت مراجعتك اليومية.",
+        "mobile.review.reminder.hint": "احصل على تذكير يومي عندما تكون هناك عناصر مستحقة.",
+        "mobile.review.reminder.label": "تذكير المراجعة اليومية",
+        "mobile.review.reminder.title": "تمرين المراجعة",
+        "mobile.review.reveal": "إظهار الإجابة",
+        "mobile.review.sessionTitle": "مراجعة",
+        "mobile.review.start": "بدء المراجعة",
+        "mobile.review.submitLabel": "تقييم المراجعة",
+        "mobile.review.subtitle": "التكرار المتباعد يحافظ على ما تتعلمه.",
+        "mobile.review.summaryTitle": "اكتملت الجلسة",
+        "mobile.review.title": "مراجعة",
         "mobile.search.action.attendanceSubtitle": "Open a course to take roll",
         "mobile.search.action.calendarSubtitle": "Your schedule",
         "mobile.search.action.gradesSubtitle": "Open a course gradebook",
@@ -781,6 +809,30 @@
         "mobile.ia.teach.ungraded": {
             "one": "%d ungraded",
             "other": "%d ungraded"
+        },
+        "mobile.review.dueCount": {
+            "zero": "%d مراجعات مستحقة اليوم",
+            "one": "مراجعة واحدة مستحقة اليوم",
+            "two": "مراجعتان مستحقتان اليوم",
+            "few": "%d مراجعات مستحقة اليوم",
+            "many": "%d مراجعة مستحقة اليوم",
+            "other": "%d مراجعة مستحقة اليوم"
+        },
+        "mobile.review.streak": {
+            "zero": "سلسلة %d أيام",
+            "one": "سلسلة يوم واحد",
+            "two": "سلسلة يومين",
+            "few": "سلسلة %d أيام",
+            "many": "سلسلة %d يومًا",
+            "other": "سلسلة %d يوم"
+        },
+        "mobile.review.summaryReviewed": {
+            "zero": "راجعت %d عناصر",
+            "one": "راجعت عنصرًا واحدًا",
+            "two": "راجعت عنصرين",
+            "few": "راجعت %d عناصر",
+            "many": "راجعت %d عنصرًا",
+            "other": "راجعت %d عنصر"
         }
     }
 }
