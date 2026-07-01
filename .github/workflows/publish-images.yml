@@ -5,6 +5,8 @@
 #   ghcr.io/<org>/<repo>/web:latest     (+ :<git-sha>)
 #
 # Multi-arch (amd64 + arm64) for DigitalOcean and Oracle A1 VMs.
+# Dockerfiles compile on BUILDPLATFORM (native cross-compile / single Vite build)
+# so arm64 targets are not built under QEMU on amd64 runners.
 # Web is built with empty VITE_API_URL so the SPA uses the browser origin (nginx proxies /api/).
 
 name: Publish container images
@@ -23,19 +25,18 @@ permissions:
   packages: write
 
 jobs:
-  publish:
-    name: Build and push GHCR images
+  server:
+    name: Build and push server image
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set image names
-        id: images
+      - name: Set image name
+        id: image
         run: |
           REPO_LOWER="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
-          echo "server=ghcr.io/${REPO_LOWER}/server" >> "$GITHUB_OUTPUT"
-          echo "web=ghcr.io/${REPO_LOWER}/web" >> "$GITHUB_OUTPUT"
+          echo "name=ghcr.io/${REPO_LOWER}/server" >> "$GITHUB_OUTPUT"
 
       - uses: docker/setup-buildx-action@v3
 
@@ -53,10 +54,31 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ steps.images.outputs.server }}:latest
-            ${{ steps.images.outputs.server }}:${{ github.sha }}
+            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
           cache-from: type=gha,scope=publish-server
           cache-to: type=gha,mode=max,scope=publish-server
+
+  web:
+    name: Build and push web image
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image name
+        id: image
+        run: |
+          REPO_LOWER="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+          echo "name=ghcr.io/${REPO_LOWER}/web" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       - name: Build and push web image
         uses: docker/build-push-action@v6
@@ -68,16 +90,26 @@ jobs:
             VITE_API_URL=
           push: true
           tags: |
-            ${{ steps.images.outputs.web }}:latest
-            ${{ steps.images.outputs.web }}:${{ github.sha }}
+            ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:${{ github.sha }}
           cache-from: type=gha,scope=publish-web
           cache-to: type=gha,mode=max,scope=publish-web
 
+  summary:
+    name: Published images summary
+    runs-on: ubuntu-latest
+    needs:
+      - server
+      - web
+    steps:
       - name: Summary
+        env:
+          REPO_LOWER: ${{ github.repository }}
         run: |
+          REPO_LOWER="$(echo "${REPO_LOWER}" | tr '[:upper:]' '[:lower:]')"
           {
             echo "## Published images"
-            echo "- \`${{ steps.images.outputs.server }}:latest\`"
-            echo "- \`${{ steps.images.outputs.web }}:latest\`"
+            echo "- \`ghcr.io/${REPO_LOWER}/server:latest\`"
+            echo "- \`ghcr.io/${REPO_LOWER}/web:latest\`"
             echo "- Git SHA: \`${{ github.sha }}\`"
           } >> "$GITHUB_STEP_SUMMARY"

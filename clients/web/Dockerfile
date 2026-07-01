@@ -1,6 +1,7 @@
 # syntax=docker/dockerfile:1
 
-FROM node:22-alpine AS builder
+# Vite output is arch-independent; build once on the runner and reuse for all targets.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS builder
 WORKDIR /app
 
 ARG VITE_API_URL=http://localhost:8080
