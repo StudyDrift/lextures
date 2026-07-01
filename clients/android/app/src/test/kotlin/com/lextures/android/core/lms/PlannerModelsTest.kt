@@ -19,7 +19,7 @@ class PlannerModelsTest {
             todo("b", now),
             todo("c", later),
         )
-        val buckets = PlannerLogic.bucketTodos(items, zone)
+        val buckets = PlannerLogic.bucketTodos(items, zone, now)
         assertEquals(listOf("a"), buckets[StudentTodoBucket.Overdue]?.map { it.key })
         assertEquals(listOf("b"), buckets[StudentTodoBucket.Today]?.map { it.key })
         assertEquals(listOf("c"), buckets[StudentTodoBucket.Later]?.map { it.key })

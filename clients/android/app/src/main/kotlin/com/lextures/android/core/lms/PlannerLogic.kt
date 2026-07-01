@@ -163,9 +163,12 @@ object PlannerLogic {
         return items.sortedWith(compareBy(nullsLast()) { it.dueAt })
     }
 
-    fun bucketTodos(items: List<StudentTodoItem>, zone: ZoneId = ZoneId.systemDefault()): Map<StudentTodoBucket, List<StudentTodoItem>> {
-        val now = Instant.now()
-        val today = LocalDate.now(zone)
+    fun bucketTodos(
+        items: List<StudentTodoItem>,
+        zone: ZoneId = ZoneId.systemDefault(),
+        now: Instant = Instant.now(),
+    ): Map<StudentTodoBucket, List<StudentTodoItem>> {
+        val today = now.atZone(zone).toLocalDate()
         val startOfToday = today.atStartOfDay(zone).toInstant()
         val endOfToday = today.plusDays(1).atStartOfDay(zone).minusSeconds(1).toInstant()
         val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay(zone).toInstant()
