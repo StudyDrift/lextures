@@ -342,6 +342,25 @@ object LmsApi {
         decode<PeerReviewReceivedResponse>(body).reviews
     }
 
+    suspend fun fetchStudentMastery(
+        courseCode: String,
+        enrollmentId: String,
+        accessToken: String,
+    ): StudentMasteryRow = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/mastery",
+            accessToken = accessToken,
+        )
+        decode<StudentMasteryRow>(body)
+    }
+
+    suspend fun fetchMyReportCards(accessToken: String): List<ReportCardSummary> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw("/api/v1/me/report-cards", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            decode<MyReportCardsResponse>(body).reportCards
+        }
+
     suspend fun fetchSubmissionAnnotations(
         courseCode: String,
         itemId: String,

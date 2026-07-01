@@ -171,6 +171,8 @@ struct CourseDetailView: View {
             CourseFilesView(course: course)
         case .grades:
             CourseGradesSection(course: course)
+        case .mastery:
+            CourseMasterySection(course: course)
         case .officeHours:
             CourseOfficeHoursSection(course: course)
         case .attendance:

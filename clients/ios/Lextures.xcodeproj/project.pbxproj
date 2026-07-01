@@ -228,6 +228,12 @@
 		E1F2A3B4C5D647F8E9F0A1B2C3D4 /* ReviewsReceivedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A3B4C5D6E748091A2B3C4D5E6F7 /* ReviewsReceivedView.swift */; };
 		A3B4C5D6E7F8491A2B3C4D5E6F7A8 /* RubricScorerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C5D6E7F8A942B3C4D5E6F7A8B9 /* RubricScorerView.swift */; };
 		C5D6E7F8A9B043D4E5F6A7B8C9D0 /* PeerReviewLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E7F8A9B0C144E5F6A7B8C9D0E1 /* PeerReviewLogicTests.swift */; };
+		41D6AB9261584726A974C0F6 /* LMSFeatureModelsMastery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 891EE5F115514CCBA2BC5604 /* LMSFeatureModelsMastery.swift */; };
+		132EA7115AE04659ADAA30D0 /* LMSAPIMastery.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4871C67DBF640BE81DD9688 /* LMSAPIMastery.swift */; };
+		60E9BE53642F49FF86BCF21D /* MasteryLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB9BF06B158440AA8E636EF2 /* MasteryLogic.swift */; };
+		0F12556B50A44C3C93363A16 /* CourseMasterySection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 588AA216060C463B8612D748 /* CourseMasterySection.swift */; };
+		417325E2CF7D4C1E8A095B5B /* ReportCardListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 704710CEC0CB413C91BB9118 /* ReportCardListView.swift */; };
+		E2123E3363DF401F900289B1 /* MasteryLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9590015C2E3D4F768B183808 /* MasteryLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -462,6 +468,12 @@
 		D4E5F6A7B8C94091D2E3F4A5B6C7 /* LMSFeatureModelsPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPeerReview.swift; sourceTree = "<group>"; };
 		F6A7B8C9D0E142A3F4A5B6C7D8E9 /* LMSAPIPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIPeerReview.swift; sourceTree = "<group>"; };
 		B8C9D0E1F2A344C5B6C7D8E9F0A1 /* PeerReviewListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewListView.swift; sourceTree = "<group>"; };
+		891EE5F115514CCBA2BC5604 /* LMSFeatureModelsMastery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsMastery.swift; sourceTree = "<group>"; };
+		D4871C67DBF640BE81DD9688 /* LMSAPIMastery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIMastery.swift; sourceTree = "<group>"; };
+		CB9BF06B158440AA8E636EF2 /* MasteryLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryLogic.swift; sourceTree = "<group>"; };
+		588AA216060C463B8612D748 /* CourseMasterySection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseMasterySection.swift; sourceTree = "<group>"; };
+		704710CEC0CB413C91BB9118 /* ReportCardListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportCardListView.swift; sourceTree = "<group>"; };
+		9590015C2E3D4F768B183808 /* MasteryLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryLogicTests.swift; sourceTree = "<group>"; };
 		D0E1F2A3B4C546E7D8E9F0A1B2C3 /* PeerReviewDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerReviewDetailView.swift; sourceTree = "<group>"; };
 		F2A3B4C5D6E748091A2B3C4D5E6F7 /* ReviewsReceivedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsReceivedView.swift; sourceTree = "<group>"; };
 		B4C5D6E7F8A942B3C4D5E6F7A8B9 /* RubricScorerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RubricScorerView.swift; sourceTree = "<group>"; };
@@ -703,6 +715,7 @@
 			isa = PBXGroup;
 			children = (
 				B1C2D3E4F5A6478990ABCDEF01 /* PeerReview */,
+				EDA1DBE51CBE49B6BFE52A97 /* Mastery */,
 				R8V1EW010000000000000020 /* Review */,
 				A2F38050F87E47D8841DA2DD /* Tutor */,
 				81F2E4188BBA4822A198C056 /* Discussions */,
@@ -861,6 +874,7 @@
 			isa = PBXGroup;
 			children = (
 				D6E7F8A9B0C144E5F6A7B8C9D0E1 /* PeerReviewLogicTests.swift */,
+				9590015C2E3D4F768B183808 /* MasteryLogicTests.swift */,
 				F79285C9BC784AEFA1C40F21 /* TutorLogicTests.swift */,
 				R8V1EW070000000000000020 /* ReviewLogicTests.swift */,
 				D409F0EB287D4F239C250117 /* DiscussionLogicTests.swift */,
@@ -929,6 +943,9 @@
 				F6A7B8C9D0E142A3F4A5B6C7D8E9 /* LMSAPIPeerReview.swift */,
 				D4E5F6A7B8C94091D2E3F4A5B6C7 /* LMSFeatureModelsPeerReview.swift */,
 				B2C3D4E5F6A748990B1C2D3E4F5 /* PeerReviewLogic.swift */,
+				D4871C67DBF640BE81DD9688 /* LMSAPIMastery.swift */,
+				891EE5F115514CCBA2BC5604 /* LMSFeatureModelsMastery.swift */,
+				CB9BF06B158440AA8E636EF2 /* MasteryLogic.swift */,
 				0767A07BDABC4E57B5E531D6 /* TutorStreamClient.swift */,
 				8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */,
 				4BC9EE68C03F499385880A6E /* LMSFeatureModelsTutor.swift */,
@@ -1054,6 +1071,15 @@
 			path = PeerReview;
 			sourceTree = "<group>";
 		};
+		EDA1DBE51CBE49B6BFE52A97 /* Mastery */ = {
+			isa = PBXGroup;
+			children = (
+				588AA216060C463B8612D748 /* CourseMasterySection.swift */,
+				704710CEC0CB413C91BB9118 /* ReportCardListView.swift */,
+			);
+			path = Mastery;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1150,6 +1176,11 @@
 				E5F6A7B8C9D04192E3F4A5B6C7D8 /* LMSAPIPeerReview.swift in Sources */,
 				C3D4E5F6A7B84990C1D2E3F4A5B6 /* LMSFeatureModelsPeerReview.swift in Sources */,
 				A1B2C3D4E5F6478990A1B2C3D4 /* PeerReviewLogic.swift in Sources */,
+				0F12556B50A44C3C93363A16 /* CourseMasterySection.swift in Sources */,
+				417325E2CF7D4C1E8A095B5B /* ReportCardListView.swift in Sources */,
+				132EA7115AE04659ADAA30D0 /* LMSAPIMastery.swift in Sources */,
+				41D6AB9261584726A974C0F6 /* LMSFeatureModelsMastery.swift in Sources */,
+				60E9BE53642F49FF86BCF21D /* MasteryLogic.swift in Sources */,
 				CF494658471641B8B712C9D0 /* TutorLauncher.swift in Sources */,
 				R8V1EW110000000000000020 /* ReviewModels.swift in Sources */,
 				R8V1EW120000000000000020 /* LMSAPIReview.swift in Sources */,
@@ -1344,6 +1375,7 @@
 			files = (
 
 				C5D6E7F8A9B043D4E5F6A7B8C9D0 /* PeerReviewLogicTests.swift in Sources */,
+				E2123E3363DF401F900289B1 /* MasteryLogicTests.swift in Sources */,
 				FA4D4D6AD50D45EF87DBBBE1 /* TutorLogicTests.swift in Sources */,
 				R8V1EW160000000000000020 /* ReviewLogicTests.swift in Sources */,
 				29C3063A926C4569BA929FFE /* DiscussionLogicTests.swift in Sources */,

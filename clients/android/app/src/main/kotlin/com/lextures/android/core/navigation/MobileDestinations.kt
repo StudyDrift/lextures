@@ -47,6 +47,7 @@ enum class MoreDestination(val labelRes: String) {
     Settings("mobile_ia_more_settings"),
     AskAi("mobile_tutor_askAi"),
     PeerReviews("mobile_peerReview_title"),
+    ReportCards("mobile_mastery_reportCards"),
 }
 
 /** Course-scoped workspace chips (registry-driven). */
@@ -54,6 +55,7 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     Overview("mobile_ia_course_overview", "overview"),
     Modules("mobile_ia_course_modules", "modules"),
     Grades("mobile_ia_course_grades", "grades"),
+    Mastery("mobile_ia_course_mastery", "mastery"),
     Discussions("mobile_ia_course_discussions", "discussions"),
     Feed("mobile_ia_course_feed", "feed"),
     Live("mobile_ia_course_live", "live"),
@@ -196,6 +198,7 @@ object MobileDestinations {
             MobileRoleContext.Learning -> {
                 if (TutorLogic.askAiEnabled(platform)) add(MoreDestination.AskAi)
                 if (platform.ffPeerReview) add(MoreDestination.PeerReviews)
+                add(MoreDestination.ReportCards)
                 add(MoreDestination.Calendar)
                 add(MoreDestination.Planner)
                 add(MoreDestination.Catalog)
@@ -227,6 +230,7 @@ object MobileDestinations {
         add(CourseWorkspaceSection.Modules)
         if (ctx.course.isFilesEnabled) add(CourseWorkspaceSection.Files)
         if (ctx.course.viewerIsStudent) add(CourseWorkspaceSection.Grades)
+        if (ctx.course.viewerIsStudent && ctx.course.isMasteryEnabled) add(CourseWorkspaceSection.Mastery)
         if (ctx.course.isDiscussionsEnabled) add(CourseWorkspaceSection.Discussions)
         if (ctx.course.isFeedEnabled) add(CourseWorkspaceSection.Feed)
         if (ctx.course.isLiveSessionsEnabled) add(CourseWorkspaceSection.Live)

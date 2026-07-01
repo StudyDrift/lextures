@@ -123,10 +123,10 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M1.1 SSO, MFA & magic link](../completed/mobile/M1.1-sso-mfa-magic-link.md) ✅ | 4.1/4.2 SSO, 4.6 MFA, 4.7 magic link | **Done** |
 | [M1.2 Biometric unlock & sessions](../completed/mobile/M1.2-biometric-sessions.md) ✅ | 4.8/4.9 sessions, biometric | **Done** |
 | [M1.3 Onboarding & placement diagnostic](../completed/mobile/M1.3-onboarding-diagnostic.md) | onboarding, 1.7/15.11 diagnostic | **Done** |
-| [M2.2 Notification center & preferences](M2.2-notification-center.md) | 6.2 notifications, notification prefs | **P1** |
+| [M2.2 Notification center & preferences](../completed/mobile/M2.2-notification-center.md) ✅ | 6.2 notifications, notification prefs | **Done** |
 | [M3.3 Interactive content: H5P/SCORM/LTI](../completed/mobile/M3.3-interactive-content.md) ✅ | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **Done** |
 | [M5.2 Peer review](../completed/mobile/M5.2-peer-review.md) ✅ | 3.15 peer review | **DONE** | **P1** |
-| [M6.2 Standards-based grades & mastery](M6.2-standards-mastery.md) | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **P1** |
+| [M6.2 Standards-based grades & mastery](../completed/mobile/M6.2-standards-mastery.md) ✅ | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **Done** |
 | [M7.3 Office hours booking](../completed/mobile/M7.3-office-hours.md) ✅ | 6.7 office hours | **Done** |
 | [M7.4 Group spaces & collab docs](M7.4-groups-collab.md) | 6.6 groups, 6.5 collab docs | **P1** |
 | [M8.2 Adaptive paths & recommendations](M8.2-paths-recommendations.md) | 1.4 paths, 1.8 recommendations, my-paths | **P1** |
@@ -137,10 +137,10 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M9.3 Certificates, badges & gamification](M9.3-certificates-gamification.md) | 15.5 certs/badges, 15.9 gamification, leaderboard | **P1** |
 | [M10.1 Parent portal](M10.1-parent-portal.md) | 13.1 parent portal, parent-dashboard | **P1** |
 | [M10.2 Conference booking (parent)](M10.2-conference-booking.md) | 13.12 conference scheduling | **P1** |
-| [M11.1 Take attendance (instructor)](M11.1-take-attendance.md) | 13.2 daily attendance | **P1** |
-| [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **P1** |
+| [M11.1 Take attendance (instructor)](../completed/mobile/M11.1-take-attendance.md) ✅ | 13.2 daily attendance | **Done** |
+| [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **Done** |
 | [M0.4 i18n, locale & RTL](../completed/mobile/M0.4-i18n-rtl.md) | 11.1 i18n, 11.2 RTL, 11.3/11.4 locale/tz | **Done** |
-| [M1.4 Profile, settings & accommodations](M1.4-settings-accommodations.md) | settings, my-accommodations, 12.10 engine | **P1** |
+| [M1.4 Profile, settings & accommodations](../completed/mobile/M1.4-settings-accommodations.md) ✅ | settings, my-accommodations, 12.10 engine | **Done** |
 
 ### Later / situational (P2)
 
@@ -203,12 +203,12 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    (cross-cutting), then M4.1 quiz taker, M5.1 submission, M3.1/M3.2 content+files,
    M2.1 calendar, M6.1 grades+feedback, M7.1 discussions, M7.2 AI tutor, M8.1 review.
    Exit criteria: a student completes a full week of coursework with no browser.
-2. **Wave 2 — Breadth (P1).** Auth depth (M1.x), interactive content (M3.3 ✅) +
-   M3.5 vibe activities + M3.6 library/e-reserves, standards/mastery (M6.2),
-   M6.3 immersive reader, groups/office-hours (M7.3/M7.4) + M7.5 live classes +
+2. **Wave 2 — Breadth (P1).** Auth depth (M1.x ✅), interactive content (M3.3 ✅) +
+   M3.5 vibe activities + M3.6 library/e-reserves, standards/mastery (M6.2 ✅),
+   M6.3 immersive reader, groups/office-hours (M7.3 ✅/M7.4) + M7.5 live classes +
    M7.6 course feed + M7.7 evaluations, adaptive (M8.2–M8.4), self-learner commerce
-   (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3/M0.4), settings (M1.4),
-   instructor attendance (M11.1) + M11.3 instructor insights/at-risk.
+   (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
+   instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk.
 3. **Wave 3 — Situational (P2).** Lockdown, code exec, behavior/hall-pass,
    age-appropriate UI, e-portfolio/credentials, instructor broadcast, M7.8 advising,
    M1.5 profile depth (demographics/custom fields/research consent).

@@ -38,6 +38,17 @@ object FileDownloadManager {
         }
     }
 
+    suspend fun fetchReportCardPdf(cardId: String, accessToken: String): ByteArray {
+        val url = AppConfiguration.apiUrl("/api/v1/report-cards/$cardId/pdf").toString()
+        val request = authorizedRequest(url, accessToken)
+        http.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw ApiError.HttpStatus(response.code, null)
+            }
+            return response.body?.bytes() ?: ByteArray(0)
+        }
+    }
+
     suspend fun download(
         target: FilePreviewTarget,
         accessToken: String,

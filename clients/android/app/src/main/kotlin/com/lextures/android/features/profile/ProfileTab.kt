@@ -275,6 +275,11 @@ fun ProfileTab(
                         modifier = Modifier.fillMaxSize(),
                     )
                 }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.ReportCards) {
+                com.lextures.android.features.mastery.ReportCardListScreen(
+                    session = session,
+                    modifier = Modifier.fillMaxSize(),
+                )
             } else {
                 MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
             }

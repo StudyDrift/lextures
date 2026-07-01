@@ -38,6 +38,7 @@ func TestReportCardRoutes_NotFound404(t *testing.T) {
 		{http.MethodPost, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/report-cards/comment-bank"},
 		{http.MethodDelete, "/api/v1/admin/orgs/00000000-0000-0000-0000-000000000001/report-cards/comment-bank/00000000-0000-0000-0000-000000000002"},
 		{http.MethodGet, "/api/v1/parent/students/00000000-0000-0000-0000-000000000001/report-cards"},
+		{http.MethodGet, "/api/v1/me/report-cards"},
 	}
 
 	for _, c := range cases {
@@ -66,6 +67,7 @@ func TestReportCardRoutes_Unauthenticated401(t *testing.T) {
 		{http.MethodPatch, "/api/v1/report-cards/00000000-0000-0000-0000-000000000001"},
 		{http.MethodPost, "/api/v1/ai/report-card-comment"},
 		{http.MethodGet, "/api/v1/parent/students/00000000-0000-0000-0000-000000000001/report-cards"},
+		{http.MethodGet, "/api/v1/me/report-cards"},
 	}
 
 	for _, c := range cases {
@@ -92,6 +94,7 @@ func TestReportCardRoutes_MethodNotAllowed(t *testing.T) {
 	}{
 		{http.MethodDelete, "/api/v1/courses/CS101/report-cards/Q1-2026"},
 		{http.MethodGet, "/api/v1/report-cards/00000000-0000-0000-0000-000000000001/generate-pdf"},
+		{http.MethodPost, "/api/v1/me/report-cards"},
 	}
 
 	for _, c := range cases {

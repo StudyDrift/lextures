@@ -64,6 +64,8 @@ func (d Deps) registerReportCardRoutes(r chi.Router) {
 	r.Delete("/api/v1/admin/orgs/{orgId}/report-cards/comment-bank/{entryId}", d.handleDeleteCommentBankEntry())
 	// Parent portal: list released report cards for a linked student
 	r.Get("/api/v1/parent/students/{sid}/report-cards", d.handleParentReportCards())
+	// Student: list the caller's own released report cards (mobile M6.2)
+	r.Get("/api/v1/me/report-cards", d.handleMyReportCards())
 }
 
 // handleListCourseReportCards is GET /api/v1/courses/:course_code/report-cards/:period
@@ -632,6 +634,33 @@ func (d Deps) handleParentReportCards() http.HandlerFunc {
 		}
 
 		cards, err := reportcards.ListReleasedForStudent(r.Context(), d.Pool, studentID)
+		if err != nil {
+			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load report cards.")
+			return
+		}
+		out := make([]map[string]any, 0, len(cards))
+		for i := range cards {
+			out = append(out, reportCardToJSON(&cards[i]))
+		}
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_ = json.NewEncoder(w).Encode(map[string]any{"reportCards": out})
+	}
+}
+
+// handleMyReportCards serves GET /api/v1/me/report-cards — the caller's own
+// released report cards across all courses (mobile M6.2 student view).
+func (d Deps) handleMyReportCards() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			w.Header().Set("Allow", http.MethodGet)
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
+		actorID, ok := d.meUserID(w, r)
+		if !ok {
+			return
+		}
+		cards, err := reportcards.ListReleasedForStudent(r.Context(), d.Pool, actorID)
 		if err != nil {
 			apierr.WriteJSON(w, http.StatusInternalServerError, apierr.CodeInternal, "Failed to load report cards.")
 			return

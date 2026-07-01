@@ -116,6 +116,7 @@ enum SearchActionRegistry {
         case .settings: return "/settings/account"
         case .askAi: return "/ask-ai"
         case .peerReviews: return "/peer-reviews"
+        case .reportCards: return "/report-cards"
         }
     }
 }

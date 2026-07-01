@@ -364,6 +364,12 @@ fun CourseDetailScreen(
                             onOpenFeedback = { openGradeFeedback = it },
                         )
                     }
+                    CourseWorkspaceSection.Mastery -> item {
+                        com.lextures.android.features.mastery.CourseMasterySection(
+                            session = session,
+                            course = course,
+                        )
+                    }
                     CourseWorkspaceSection.OfficeHours -> item {
                         CourseOfficeHoursSection(session = session, course = course)
                     }

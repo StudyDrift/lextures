@@ -25,8 +25,13 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var sectionsEnabled: Bool?
     var resubmissionWorkflowEnabled: Bool?
     var aiTutorEnabled: Bool?
+    var viewerStudentEnrollmentId: String?
+    var standardsAlignmentEnabled: Bool?
+    var reportCardsEnabled: Bool?
 
     var isCalendarEnabled: Bool { calendarEnabled != false }
+
+    var isMasteryEnabled: Bool { standardsAlignmentEnabled == true }
 
     var isAiTutorEnabled: Bool { aiTutorEnabled == true }
 
