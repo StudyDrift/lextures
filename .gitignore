@@ -60,6 +60,7 @@ iac/production/*.tfstate.*
 iac/production/terraform.tfvars
 iac/production/crash.log
 iac/production/override.tf
+*.pem
 
 # Agents
 .agents/
