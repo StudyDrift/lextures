@@ -119,7 +119,7 @@ enum ProfileDepthLogic {
             case .number(let numberValue):
                 if numberValue.rounded(.towardZero) == numberValue { draft[def.key] = String(Int(numberValue)) }
                 else { draft[def.key] = String(numberValue) }
-            case .null: break
+            case .null, .array, .object: break
             }
         }
         return draft

@@ -24,6 +24,7 @@ final class DashboardModel {
     var courseItemCounts: [String: (modules: Int, items: Int)] = [:]
     var staffBacklogs: [StaffBacklog] = []
     var announcements: [Broadcast] = []
+    var reviewStats: ReviewStats?
     var errorMessage: String?
     var loading = false
     private var loadedOnce = false
@@ -69,6 +70,7 @@ final class DashboardModel {
             await loadStructures(accessToken: accessToken)
             announcements = await broadcastsTask
             await loadStaffBacklogs(accessToken: accessToken)
+            await loadReviewStats(accessToken: accessToken)
         } catch {
             errorMessage = L.text("mobile.dashboard.error.load")
         }
@@ -132,6 +134,19 @@ final class DashboardModel {
             .sorted { $0.total > $1.total }
     }
 
+    private func loadReviewStats(accessToken: String) async {
+        guard let userId = NotebookStore.jwtSubject(from: accessToken) else {
+            reviewStats = nil
+            return
+        }
+        reviewStats = try? await OfflineService.shared.cachedFetch(
+            key: OfflineCacheKey.reviewStats(),
+            accessToken: accessToken
+        ) {
+            try await LMSAPI.fetchLearnerReviewStats(userId: userId, accessToken: accessToken)
+        }.value
+    }
+
     /// Monday 00:00 through Sunday 23:59 of the current week (parity with web dashboard).
     static func currentWeek(now: Date = Date()) -> (Date, Date) {
         var calendar = Calendar.current
@@ -147,6 +162,7 @@ struct DashboardView: View {
     @Environment(AppShellModel.self) private var shell
     @Environment(\.colorScheme) private var colorScheme
     @State private var model = DashboardModel()
+    @State private var openReview = false
 
     var body: some View {
         NavigationStack {
@@ -165,10 +181,16 @@ struct DashboardView: View {
                             LMSSkeletonList(count: 4)
                         } else {
                             announcementCard
+                            reviewCard
                             statsRow
                             teacherSnapshot
                             dueSoonSection
-                            coursesCarousel
+                            DashboardCoursesCarousel(
+                                courses: model.courses,
+                                loading: model.loading,
+                                courseItemCounts: model.courseItemCounts,
+                                colorScheme: colorScheme
+                            )
                         }
                     }
                     .padding(16)
@@ -198,10 +220,22 @@ struct DashboardView: View {
             .navigationDestination(for: PlannerRoute.self) { route in
                 PlannerView(initialTab: route.initialTab)
             }
+            .navigationDestination(for: ReviewRoute.self) { _ in
+                ReviewHomeView()
+            }
+            .navigationDestination(isPresented: $openReview) {
+                ReviewHomeView()
+            }
             .task {
                 await model.load(accessToken: session.accessToken)
             }
+            .onAppear { openPendingReviewIfNeeded() }
         }
+    }
+
+    private func openPendingReviewIfNeeded() {
+        guard shell.consumePendingReview() else { return }
+        openReview = true
     }
 
     // MARK: Hero
@@ -333,6 +367,46 @@ struct DashboardView: View {
         }
     }
 
+    // MARK: Review practice
+
+    @ViewBuilder
+    private var reviewCard: some View {
+        if let stats = model.reviewStats {
+            NavigationLink(value: ReviewRoute()) {
+                LMSCard(accent: LexturesTheme.primary) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "rectangle.stack.fill")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(LexturesTheme.primary)
+                            .frame(width: 40, height: 40)
+                            .background(LexturesTheme.primary.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(L.text("mobile.review.dashboardTitle"))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                            Text(stats.dueToday > 0
+                                 ? L.plural("mobile.review.dueCount", count: stats.dueToday)
+                                 : L.text("mobile.review.caughtUpShort"))
+                                .font(.caption)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                            if stats.streak > 0 {
+                                Label(L.plural("mobile.review.streak", count: stats.streak), systemImage: "flame.fill")
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(LexturesTheme.amber)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                        Text(stats.dueToday > 0 ? L.text("mobile.review.start") : L.text("mobile.review.open"))
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(LexturesTheme.primary)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     // MARK: Stats
 
     private var statsRow: some View {
@@ -458,85 +532,6 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: Courses carousel
-
-    @ViewBuilder
-    private var coursesCarousel: some View {
-        LMSSectionHeader(title: L.text("mobile.dashboard.section.yourCourses"), systemImage: "book.fill")
-        if model.courses.isEmpty && !model.loading {
-            LMSEmptyState(
-                systemImage: "book",
-                title: L.text("mobile.dashboard.empty.courses.title"),
-                message: L.text("mobile.dashboard.empty.courses.message")
-            )
-        } else {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    ForEach(model.courses) { course in
-                        NavigationLink(value: course) {
-                            dashboardCourseCarouselCard(
-                                course,
-                                itemCounts: model.courseItemCounts[course.courseCode],
-                                colorScheme: colorScheme
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.vertical, 2)
-                .padding(.horizontal, 2)
-            }
-            .scrollClipDisabled()
-            .padding(.bottom, 4)
-        }
-    }
-
-}
-
-private func dashboardCourseCarouselCard(
-    _ course: CourseSummary,
-    itemCounts: (modules: Int, items: Int)?,
-    colorScheme: ColorScheme
-) -> some View {
-    VStack(alignment: .leading, spacing: 0) {
-        ZStack(alignment: .topTrailing) {
-            CourseHeroImage(
-                urlString: course.heroImageUrl,
-                fallbackKey: course.courseCode,
-                height: 84
-            )
-            Image(systemName: "book.fill")
-                .font(.title3)
-                .foregroundStyle(.white.opacity(0.5))
-                .padding(12)
-        }
-        VStack(alignment: .leading, spacing: 4) {
-            Text(course.displayTitle)
-                .font(LexturesTheme.displayFont(15))
-                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                .lineLimit(2, reservesSpace: true)
-                .multilineTextAlignment(.leading)
-            Text(dashboardCourseSubtitle(course, itemCounts: itemCounts))
-                .font(.caption2.weight(.medium))
-                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-        }
-        .padding(12)
-    }
-    .frame(width: 190, alignment: .leading)
-    .background(LexturesTheme.cardBackground(for: colorScheme))
-    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-    .overlay(
-        RoundedRectangle(cornerRadius: 18, style: .continuous)
-            .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(colorScheme == .dark ? 0.9 : 0.45), lineWidth: 1)
-    )
-    .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 12, y: 5)
-}
-
-private func dashboardCourseSubtitle(_ course: CourseSummary, itemCounts: (modules: Int, items: Int)?) -> String {
-    if let counts = itemCounts, counts.items > 0 {
-        return "\(counts.modules) module\(counts.modules == 1 ? "" : "s") · \(counts.items) item\(counts.items == 1 ? "" : "s")"
-    }
-    return course.courseCode.uppercased()
 }
 
 /// Value-type routes for dashboard navigation destinations.

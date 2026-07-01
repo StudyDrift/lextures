@@ -91,22 +91,23 @@ class OfflineService private constructor(context: Context) {
         label: String,
         accessToken: String?,
         preferQueue: Boolean = false,
+        idempotencyKey: String? = null,
     ): OutboxItem {
         val online = networkMonitor.isOnline.value
         if (online && !preferQueue && !accessToken.isNullOrBlank()) {
-            val idempotencyKey = UUID.randomUUID().toString()
+            val resolvedKey = idempotencyKey ?: UUID.randomUUID().toString()
             try {
                 apiClient.requestRaw(
                     path = path,
                     method = method,
                     body = bodyJson,
                     accessToken = accessToken,
-                    idempotencyKey = idempotencyKey,
+                    idempotencyKey = resolvedKey,
                 )
-                outboxStore.markApplied(idempotencyKey)
+                outboxStore.markApplied(resolvedKey)
                 refreshState()
                 return OutboxItem(
-                    id = idempotencyKey,
+                    id = resolvedKey,
                     method = method,
                     path = path,
                     bodyJson = bodyJson,
@@ -120,7 +121,7 @@ class OfflineService private constructor(context: Context) {
             }
         }
 
-        val item = outboxStore.enqueue(method, path, bodyJson, label)
+        val item = outboxStore.enqueue(method, path, bodyJson, label, idempotencyKey)
         refreshState()
         return item
     }

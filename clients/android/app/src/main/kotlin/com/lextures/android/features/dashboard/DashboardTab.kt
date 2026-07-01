@@ -85,6 +85,7 @@ import com.lextures.android.features.home.LmsSkeletonList
 import com.lextures.android.features.planner.PlannerScreen
 import com.lextures.android.features.planner.PlannerTab
 import com.lextures.android.core.offline.OfflineService
+import com.lextures.android.core.offline.OfflineCacheKey
 import com.lextures.android.features.profile.AnnouncementsScreen
 import com.lextures.android.features.profile.NotificationPreferencesScreen
 import com.lextures.android.features.profile.NotificationsScreen
@@ -139,6 +140,8 @@ fun DashboardTab(
     var showNotificationPreferences by remember { mutableStateOf(false) }
     var showAnnouncements by remember { mutableStateOf(false) }
     var showPlanner by remember { mutableStateOf(false) }
+    var showReview by remember { mutableStateOf(false) }
+    var reviewStats by remember { mutableStateOf<com.lextures.android.core.lms.ReviewStats?>(null) }
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
@@ -200,6 +203,17 @@ fun DashboardTab(
                     }
                 }.awaitAll()
             }.filterNotNull().filter { it.total > 0 }.sortedByDescending { it.total }
+
+            val learnerId = com.lextures.android.core.notebook.NotebookStore.jwtSubject(token)
+            reviewStats = learnerId?.let { id ->
+                runCatching {
+                    offline.cachedFetch(
+                        key = OfflineCacheKey.reviewStats(),
+                        accessToken = token,
+                        serializer = kotlinx.serialization.serializer<com.lextures.android.core.lms.ReviewStats>(),
+                    ) { LmsApi.fetchLearnerReviewStats(id, token) }.first
+                }.getOrNull()
+            }
         } catch (e: Exception) {
             errorMessage = session.mapError(e)
         } finally {
@@ -267,6 +281,22 @@ fun DashboardTab(
         return
     }
 
+    LaunchedEffect(shell.pendingReview) {
+        if (shell.consumePendingReview()) {
+            showReview = true
+        }
+    }
+
+    if (showReview) {
+        com.lextures.android.features.review.ReviewHomeScreen(
+            session = session,
+            shell = shell,
+            onBack = { showReview = false },
+            modifier = modifier,
+        )
+        return
+    }
+
     if (showPlanner) {
         PlannerScreen(
             session = session,
@@ -327,6 +357,59 @@ fun DashboardTab(
                     },
                     onSeeAll = { showAnnouncements = true },
                 )
+            }
+        }
+
+        reviewStats?.let { stats ->
+            item {
+                LmsCard(onClick = { showReview = true }) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = context.getString(R.string.mobile_review_dashboardTitle),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = textPrimary(),
+                            )
+                            Text(
+                                text = if (stats.dueToday > 0) {
+                                    context.resources.getQuantityString(
+                                        R.plurals.mobile_review_dueCount,
+                                        stats.dueToday,
+                                        stats.dueToday,
+                                    )
+                                } else {
+                                    context.getString(R.string.mobile_review_caughtUpShort)
+                                },
+                                fontSize = 12.sp,
+                                color = textSecondary(),
+                            )
+                            if (stats.streak > 0) {
+                                Text(
+                                    text = context.resources.getQuantityString(
+                                        R.plurals.mobile_review_streak,
+                                        stats.streak,
+                                        stats.streak,
+                                    ),
+                                    fontSize = 11.sp,
+                                    color = LexturesColors.Amber,
+                                )
+                            }
+                        }
+                        Text(
+                            text = context.getString(
+                                if (stats.dueToday > 0) R.string.mobile_review_start else R.string.mobile_review_open,
+                            ),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = accentColor(),
+                        )
+                    }
+                }
             }
         }
 

@@ -668,6 +668,34 @@
     <string name="mobile_quiz_timeUp">Time is up — submitting…</string>
     <string name="mobile_quiz_unflag">Remove flag</string>
     <string name="mobile_quiz_yourScore">Your score</string>
+    <string name="mobile_review_answer">الإجابة</string>
+    <string name="mobile_review_caughtUpMessage">عندما يفعّل المدرّسون التكرار المتباعد في مقرر ويصنّفون الأسئلة، تظهر العناصر المستحقة هنا.</string>
+    <string name="mobile_review_caughtUpShort">أنت على اطلاع</string>
+    <string name="mobile_review_caughtUpTitle">أنت على اطلاع</string>
+    <string name="mobile_review_dashboardTitle">تمرين المراجعة</string>
+    <string name="mobile_review_done">تم</string>
+    <string name="mobile_review_error_load">تعذّر تحميل قائمة المراجعة.</string>
+    <string name="mobile_review_error_submit">تعذّر حفظ المراجعة.</string>
+    <string name="mobile_review_filter_all">جميع المقررات</string>
+    <string name="mobile_review_grade_again">مرة أخرى</string>
+    <string name="mobile_review_grade_easy">سهل</string>
+    <string name="mobile_review_grade_good">جيد</string>
+    <string name="mobile_review_grade_hard">صعب</string>
+    <string name="mobile_review_open">فتح المراجعة</string>
+    <string name="mobile_review_progress">%1$d من %2$d مستحقة</string>
+    <string name="mobile_review_question">السؤال</string>
+    <string name="mobile_review_recommendations">المقترح التالي</string>
+    <string name="mobile_review_reminder_bodyDefault">حان وقت مراجعتك اليومية.</string>
+    <string name="mobile_review_reminder_hint">احصل على تذكير يومي عندما تكون هناك عناصر مستحقة.</string>
+    <string name="mobile_review_reminder_label">تذكير المراجعة اليومية</string>
+    <string name="mobile_review_reminder_title">تمرين المراجعة</string>
+    <string name="mobile_review_reveal">إظهار الإجابة</string>
+    <string name="mobile_review_sessionTitle">مراجعة</string>
+    <string name="mobile_review_start">بدء المراجعة</string>
+    <string name="mobile_review_submitLabel">تقييم المراجعة</string>
+    <string name="mobile_review_subtitle">التكرار المتباعد يحافظ على ما تتعلمه.</string>
+    <string name="mobile_review_summaryTitle">اكتملت الجلسة</string>
+    <string name="mobile_review_title">مراجعة</string>
     <string name="mobile_search_action_attendanceSubtitle">Open a course to take roll</string>
     <string name="mobile_search_action_calendarSubtitle">Your schedule</string>
     <string name="mobile_search_action_gradesSubtitle">Open a course gradebook</string>
@@ -795,5 +823,29 @@
         <item quantity="few">%1$d أحداث</item>
         <item quantity="many">%1$d حدثًا</item>
         <item quantity="other">%1$d حدث</item>
+    </plurals>
+    <plurals name="mobile_review_dueCount">
+        <item quantity="zero">%1$d مراجعات مستحقة اليوم</item>
+        <item quantity="one">مراجعة واحدة مستحقة اليوم</item>
+        <item quantity="two">مراجعتان مستحقتان اليوم</item>
+        <item quantity="few">%1$d مراجعات مستحقة اليوم</item>
+        <item quantity="many">%1$d مراجعة مستحقة اليوم</item>
+        <item quantity="other">%1$d مراجعة مستحقة اليوم</item>
+    </plurals>
+    <plurals name="mobile_review_streak">
+        <item quantity="zero">سلسلة %1$d أيام</item>
+        <item quantity="one">سلسلة يوم واحد</item>
+        <item quantity="two">سلسلة يومين</item>
+        <item quantity="few">سلسلة %1$d أيام</item>
+        <item quantity="many">سلسلة %1$d يومًا</item>
+        <item quantity="other">سلسلة %1$d يوم</item>
+    </plurals>
+    <plurals name="mobile_review_summaryReviewed">
+        <item quantity="zero">راجعت %1$d عناصر</item>
+        <item quantity="one">راجعت عنصرًا واحدًا</item>
+        <item quantity="two">راجعت عنصرين</item>
+        <item quantity="few">راجعت %1$d عناصر</item>
+        <item quantity="many">راجعت %1$d عنصرًا</item>
+        <item quantity="other">راجعت %1$d عنصر</item>
     </plurals>
 </resources>

@@ -28,4 +28,10 @@ class DeepLinkRouterTest {
         assertEquals("bio200", destination.code)
         assertEquals("a1", destination.itemId)
     }
+
+    @Test
+    fun resolvesReviewPath() {
+        val destination = DeepLinkRouter.resolve("/review")
+        assertTrue(destination is DeepLinkDestination.Review)
+    }
 }

@@ -50,6 +50,7 @@ object SearchPathNavigator {
             "paths" -> SearchNavigationTarget.MoreTarget(MoreDestination.Paths)
             "library" -> SearchNavigationTarget.MoreTarget(MoreDestination.Library)
             "reading" -> SearchNavigationTarget.MoreTarget(MoreDestination.Reading)
+            "review" -> SearchNavigationTarget.DeepLinkTarget(DeepLinkDestination.Review)
             "credentials" -> SearchNavigationTarget.MoreTarget(MoreDestination.Credentials)
             "advising" -> SearchNavigationTarget.MoreTarget(MoreDestination.Advising)
             "settings" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Profile)

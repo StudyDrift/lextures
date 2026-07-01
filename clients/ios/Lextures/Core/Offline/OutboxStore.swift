@@ -18,9 +18,9 @@ actor OutboxStore {
         load()
     }
 
-    func enqueue(method: String, path: String, bodyJSON: String?, label: String) -> OutboxItem {
+    func enqueue(method: String, path: String, bodyJSON: String?, label: String, id: String? = nil) -> OutboxItem {
         let item = OutboxItem(
-            id: UUID().uuidString.lowercased(),
+            id: id ?? UUID().uuidString.lowercased(),
             createdAt: Date(),
             sequence: nextSequence,
             method: method,

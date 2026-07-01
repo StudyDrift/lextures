@@ -1,210 +1,96 @@
-import { ArrowRight, BrainCircuit, RefreshCw, TrendingUp, Zap } from 'lucide-react'
-import { Header } from '../components/header'
-import { SiteFooter } from '../components/site-footer'
-
-const PROBLEMS = [
-  {
-    title: 'You don\'t know what you don\'t know',
-    body: 'Re-reading notes feels productive. It isn\'t. Without something that tests your recall, you mistake familiarity for understanding—and the gaps only show up when it counts.',
-  },
-  {
-    title: 'You forget faster than you learn',
-    body: 'The forgetting curve is steep. Without scheduled review, most of what you learned last week is gone by next week—regardless of how hard you studied.',
-  },
-  {
-    title: 'Generic content doesn\'t match your actual gaps',
-    body: 'A YouTube playlist or a textbook covers everything. You need practice on the specific concepts you\'re shaky on—not another tour through the parts you already understand.',
-  },
-]
+import {
+  AudienceCta,
+  AudienceHero,
+  CardGrid,
+  MarketingPageShell,
+} from '../components/marketing-page-shell'
+import { SITE_LINKS } from '../lib/site-links'
 
 const FEATURES = [
   {
-    icon: BrainCircuit,
-    title: 'Adaptive delivery always finds the right challenge',
-    body: 'Item Response Theory builds a running model of what you know. Every question is selected because it will tell the system something useful about your current ability—not because it\'s next in a sequence.',
+    title: 'Adaptive quizzes without an instructor',
+    body: 'Item Response Theory estimates your ability after each response and routes you to the next question that will teach the system the most — not whatever comes next in a fixed list.',
   },
   {
-    icon: RefreshCw,
-    title: 'Spaced repetition so you never cram again',
-    body: 'The SRS engine schedules review at the moment just before you\'re predicted to forget. Initial intervals are short; as you prove retention, they grow to days, then weeks. Knowledge compounds instead of evaporating.',
+    title: 'Spaced repetition review',
+    body: 'Review sessions queue items due today across your courses. Grade each recall (Again / Hard / Good / Easy) and the scheduler sets the next interval. Available on web, iOS, and Android.',
   },
   {
-    icon: Zap,
-    title: 'Generate a question bank from anything you\'re studying',
-    body: 'Paste in a textbook excerpt, a set of notes, or a list of learning objectives. Lextures generates a calibrated question bank in seconds, tagged by concept, ready to practice.',
+    title: 'Self-paced courses',
+    body: 'Enroll in courses marked self-paced and work on your schedule. What-if grade projection shows how pending assignments would affect your standing.',
   },
   {
-    icon: TrendingUp,
-    title: 'See exactly where you stand',
-    body: 'Your ability estimate is updated after every question. The dashboard shows which concepts are mastered, which are shaky, and which are scheduled for review—so you always know where to focus next.',
+    title: 'Build from your own material',
+    body: 'Create a course, add modules and question banks, or import QTI packages. Optional AI-assisted question generation when your instance has an OpenRouter key configured.',
+  },
+]
+
+const USE_CASES = [
+  {
+    title: 'Professional certification',
+    body: 'High-stakes exams where covering the syllabus once is not enough. Adaptive practice targets weak areas; spaced review keeps them retained under pressure.',
+  },
+  {
+    title: 'Language learning',
+    body: 'Vocabulary and grammar fade without structured retrieval practice. The review scheduler applies evidence-backed spacing automatically.',
+  },
+  {
+    title: 'Independent study',
+    body: 'Working through a textbook or online curriculum on your own timeline — with a gradebook and progress dashboard instead of a reading list alone.',
   },
 ]
 
 export function SelfLearnerPage() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-white text-slate-900">
-      <Header />
+    <MarketingPageShell>
+      <AudienceHero
+        eyebrow="Self-learner"
+        title="An adaptive study system that runs without a classroom"
+        lead="Create or enroll in courses, practice with IRT-routed quizzes, and clear spaced-repetition reviews from your phone. Self-host the full stack for free, or use the hosted demo with optional paid tiers."
+        primaryHref="/get-started"
+        primaryLabel="Start studying"
+        secondaryHref="/pricing"
+        secondaryLabel="Hosted pricing"
+      />
 
-      <main>
-        {/* Hero */}
-        <section className="border-b border-slate-200 bg-white py-20 sm:py-28">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
-              Self-Learner
-            </p>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-[3.25rem]">
-              Stop guessing what to study next
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">
-              An adaptive engine that builds a model of exactly what you know, schedules review before you forget, and always puts the right question in front of you—without an instructor in the loop.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-4">
-              <a href="#/get-started" className="btn-primary gap-2 px-6 py-3">
-                Try it free
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </a>
-              <a href="#/pricing" className="btn-secondary px-6 py-3">
-                See pricing
-              </a>
-            </div>
-          </div>
-        </section>
+      <CardGrid heading="How it works" items={FEATURES} columns={2} />
 
-        {/* Problems */}
-        <section className="py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-              Why self-directed studying usually fails
-            </h2>
-            <div className="mt-10 grid gap-5 sm:grid-cols-3">
-              {PROBLEMS.map(({ title, body }) => (
-                <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6">
-                  <h3 className="font-semibold text-slate-900">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{body}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+      <section className="border-b py-16 md:py-20" style={{ borderColor: 'var(--line)' }}>
+        <div className="mx-auto max-w-[960px] px-5 md:px-10 xl:px-14">
+          <h2 className="font-display text-[clamp(26px,3vw,34px)] font-semibold leading-tight" style={{ color: 'var(--ink)' }}>
+            What a study session looks like
+          </h2>
+          <p className="mt-4 max-w-[640px] text-[16px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+            Open the dashboard. Review items due today — concepts approaching the edge of your
+            predicted recall window. Answer adaptive quiz questions calibrated to your current level.
+            After each session, ability estimates update and the next review dates shift forward or
+            closer based on how you performed.
+          </p>
+        </div>
+      </section>
 
-        {/* Features */}
-        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-indigo-500">
-                How it works
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-                A system that works the way your memory actually works
-              </h2>
-            </div>
-            <div className="mt-12 grid gap-5 sm:grid-cols-2">
-              {FEATURES.map(({ icon: Icon, title, body }) => (
-                <article key={title} className="feature-card">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200">
-                    <Icon className="h-5 w-5" aria-hidden />
-                  </div>
-                  <h3 className="mt-5 text-base font-semibold text-slate-900">{title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">{body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+      <CardGrid heading="Common use cases" items={USE_CASES} columns={3} />
 
-        {/* How it fits into a study session */}
-        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-20">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-                  What a study session actually looks like
-                </h2>
-                <p className="mt-4 text-base leading-relaxed text-slate-600">
-                  You open Lextures. The dashboard shows you what is due for review today—concepts you learned earlier that are approaching the edge of your predicted recall window. You answer fifteen questions in twelve minutes. Ten are review; five are new material calibrated to your current ability level.
-                </p>
-                <p className="mt-4 text-base leading-relaxed text-slate-600">
-                  After each session, your ability estimates update. The concepts you answered correctly push their next review further out. The ones you missed come back sooner. Tomorrow\'s session is shorter because today\'s was efficient.
-                </p>
-                <p className="mt-4 text-base leading-relaxed text-slate-600">
-                  There is no syllabus to follow, no chapter to "finish." The system tracks what you know and builds toward what you want to know—at whatever pace fits your schedule.
-                </p>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { step: '1', title: 'Create or import a course', desc: 'Build a question bank from your notes, or import one. Lextures AI generates questions from raw text in seconds.' },
-                  { step: '2', title: 'Answer questions adaptively', desc: 'Every question is selected to maximally reduce uncertainty about your current ability level.' },
-                  { step: '3', title: 'Come back for scheduled review', desc: 'The SRS engine queues up the right concepts at the right time. Sessions stay short because they stay targeted.' },
-                  { step: '4', title: 'Watch mastery accumulate', desc: 'Ability estimates update in real time. Your dashboard shows where you stand on every concept, not just your last score.' },
-                ].map(({ step, title, desc }) => (
-                  <div key={step} className="flex gap-4 rounded-xl border border-slate-200 bg-white px-5 py-4">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">
-                      {step}
-                    </span>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{title}</p>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-500">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+      <section className="border-t py-12" style={{ borderColor: 'var(--line)' }}>
+        <div className="mx-auto max-w-[960px] px-5 md:px-10 xl:px-14">
+          <p className="text-[15px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
+            <strong style={{ color: 'var(--ink-nav)' }}>Self-host:</strong> clone the repo and run
+            without course or student limits.{' '}
+            <strong style={{ color: 'var(--ink-nav)' }}>Hosted demo:</strong> free tier limits apply
+            on demo.lextures.com; see pricing for details. Public course catalog and paid enrollment
+            require your administrator to enable those platform features.
+          </p>
+        </div>
+      </section>
 
-        {/* Use cases */}
-        <section className="border-t border-slate-200 bg-white py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-              Who uses Lextures as a self-learner
-            </h2>
-            <div className="mt-8 grid gap-5 sm:grid-cols-3">
-              {[
-                {
-                  label: 'Professional certification',
-                  desc: 'Studying for a bar exam, a medical board, a CPA, or a cloud certification—high-stakes tests where covering material is not enough. You need retained mastery under pressure.',
-                },
-                {
-                  label: 'Language acquisition',
-                  desc: 'Vocabulary and grammar that fade without structured review. Spaced repetition is the most evidence-backed approach to language retention; Lextures applies it automatically.',
-                },
-                {
-                  label: 'Independent coursework',
-                  desc: 'Working through a textbook, an online course, or a structured curriculum on your own timeline—with the scaffolding of an adaptive system rather than just a reading list.',
-                },
-              ].map(({ label, desc }) => (
-                <div key={label} className="rounded-xl border border-slate-200 bg-slate-50 p-6">
-                  <h3 className="font-semibold text-slate-900">{label}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">{desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="border-t border-slate-200 bg-slate-50 py-16 sm:py-20">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
-              Free for your first five courses
-            </h2>
-            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-slate-600">
-              Create an account, import your materials, and start a study session today. No credit card required.
-            </p>
-            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <a href="#/get-started" className="btn-primary gap-2 px-6 py-3">
-                Start for free
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </a>
-              <a href="#/pricing" className="btn-secondary px-6 py-3">
-                See pricing
-              </a>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <SiteFooter />
-    </div>
+      <AudienceCta
+        title="Try it on the hosted demo or your own server"
+        body="Sign up on demo.lextures.com to start immediately, or follow the self-hosting guide to run Lextures on your hardware with full control."
+        primaryHref="/get-started"
+        primaryLabel="Get started"
+        secondaryHref={SITE_LINKS.github}
+        secondaryLabel="View on GitHub"
+      />
+    </MarketingPageShell>
   )
 }

@@ -668,6 +668,34 @@
     <string name="mobile_quiz_timeUp">Time is up — submitting…</string>
     <string name="mobile_quiz_unflag">Remove flag</string>
     <string name="mobile_quiz_yourScore">Your score</string>
+    <string name="mobile_review_answer">Respuesta</string>
+    <string name="mobile_review_caughtUpMessage">Cuando los instructores activan SRS en un curso y etiquetan preguntas, los elementos pendientes aparecen aquí.</string>
+    <string name="mobile_review_caughtUpShort">Estás al día</string>
+    <string name="mobile_review_caughtUpTitle">Estás al día</string>
+    <string name="mobile_review_dashboardTitle">Práctica de repaso</string>
+    <string name="mobile_review_done">Listo</string>
+    <string name="mobile_review_error_load">No se pudo cargar la cola de repaso.</string>
+    <string name="mobile_review_error_submit">No se pudo guardar el repaso.</string>
+    <string name="mobile_review_filter_all">Todos los cursos</string>
+    <string name="mobile_review_grade_again">Otra vez</string>
+    <string name="mobile_review_grade_easy">Fácil</string>
+    <string name="mobile_review_grade_good">Bien</string>
+    <string name="mobile_review_grade_hard">Difícil</string>
+    <string name="mobile_review_open">Abrir repaso</string>
+    <string name="mobile_review_progress">%1$d de %2$d pendientes</string>
+    <string name="mobile_review_question">Pregunta</string>
+    <string name="mobile_review_recommendations">Siguiente sugerido</string>
+    <string name="mobile_review_reminder_bodyDefault">Es hora de tu repaso diario.</string>
+    <string name="mobile_review_reminder_hint">Recibe un recordatorio diario cuando haya elementos pendientes.</string>
+    <string name="mobile_review_reminder_label">Recordatorio de repaso diario</string>
+    <string name="mobile_review_reminder_title">Práctica de repaso</string>
+    <string name="mobile_review_reveal">Mostrar respuesta</string>
+    <string name="mobile_review_sessionTitle">Repaso</string>
+    <string name="mobile_review_start">Iniciar repaso</string>
+    <string name="mobile_review_submitLabel">Calificación de repaso</string>
+    <string name="mobile_review_subtitle">La repetición espaciada conserva lo que aprendes.</string>
+    <string name="mobile_review_summaryTitle">Sesión completada</string>
+    <string name="mobile_review_title">Repaso</string>
     <string name="mobile_search_action_attendanceSubtitle">Open a course to take roll</string>
     <string name="mobile_search_action_calendarSubtitle">Your schedule</string>
     <string name="mobile_search_action_gradesSubtitle">Open a course gradebook</string>
@@ -775,5 +803,17 @@
     <plurals name="mobile_planner_calendar_eventCount">
         <item quantity="one">%1$d evento</item>
         <item quantity="other">%1$d eventos</item>
+    </plurals>
+    <plurals name="mobile_review_dueCount">
+        <item quantity="one">%1$d repaso pendiente hoy</item>
+        <item quantity="other">%1$d repasos pendientes hoy</item>
+    </plurals>
+    <plurals name="mobile_review_streak">
+        <item quantity="one">Racha de %1$d días</item>
+        <item quantity="other">Racha de %1$d días</item>
+    </plurals>
+    <plurals name="mobile_review_summaryReviewed">
+        <item quantity="one">Repasaste %1$d elemento</item>
+        <item quantity="other">Repasaste %1$d elementos</item>
     </plurals>
 </resources>

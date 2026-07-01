@@ -4,6 +4,7 @@ import Foundation
 enum DeepLinkDestination: Equatable {
     case home
     case inbox
+    case review
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
 }
 
@@ -58,6 +59,9 @@ enum DeepLinkRouter {
         guard let first = segments.first?.lowercased(), first == "courses", segments.count >= 2 else {
             if segments.first?.lowercased() == "inbox" {
                 return .inbox
+            }
+            if segments.first?.lowercased() == "review" {
+                return .review
             }
             return .home
         }

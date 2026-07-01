@@ -35,6 +35,8 @@ enum OfflineCacheKey {
     static func discussionPosts(courseCode: String, threadId: String) -> String {
         "course:\(courseCode):discussion-posts:\(threadId)"
     }
+    static func reviewQueue() -> String { "review:queue" }
+    static func reviewStats() -> String { "review:stats" }
 }
 
 /// A cached value plus freshness metadata for read screens.

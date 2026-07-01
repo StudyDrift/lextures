@@ -624,6 +624,34 @@
         "mobile.quiz.timeUp": "Time is up — submitting…",
         "mobile.quiz.unflag": "Remove flag",
         "mobile.quiz.yourScore": "Your score",
+        "mobile.review.answer": "Réponse",
+        "mobile.review.caughtUpMessage": "Lorsque les enseignants activent la SRS sur un cours et étiquettent des questions, les éléments à réviser apparaissent ici.",
+        "mobile.review.caughtUpShort": "Vous êtes à jour",
+        "mobile.review.caughtUpTitle": "Vous êtes à jour",
+        "mobile.review.dashboardTitle": "Pratique de révision",
+        "mobile.review.done": "Terminé",
+        "mobile.review.error.load": "Impossible de charger la file de révision.",
+        "mobile.review.error.submit": "Impossible d'enregistrer la révision.",
+        "mobile.review.filter.all": "Tous les cours",
+        "mobile.review.grade.again": "Encore",
+        "mobile.review.grade.easy": "Facile",
+        "mobile.review.grade.good": "Bien",
+        "mobile.review.grade.hard": "Difficile",
+        "mobile.review.open": "Ouvrir la révision",
+        "mobile.review.progress": "%d sur %d à réviser",
+        "mobile.review.question": "Question",
+        "mobile.review.recommendations": "Prochaine suggestion",
+        "mobile.review.reminder.bodyDefault": "C'est l'heure de votre révision quotidienne.",
+        "mobile.review.reminder.hint": "Recevez un rappel quotidien lorsque des éléments sont à réviser.",
+        "mobile.review.reminder.label": "Rappel de révision quotidienne",
+        "mobile.review.reminder.title": "Pratique de révision",
+        "mobile.review.reveal": "Afficher la réponse",
+        "mobile.review.sessionTitle": "Révision",
+        "mobile.review.start": "Commencer la révision",
+        "mobile.review.submitLabel": "Évaluation de révision",
+        "mobile.review.subtitle": "La répétition espacée consolide ce que vous apprenez.",
+        "mobile.review.summaryTitle": "Session terminée",
+        "mobile.review.title": "Révision",
         "mobile.search.action.attendanceSubtitle": "Open a course to take roll",
         "mobile.search.action.calendarSubtitle": "Your schedule",
         "mobile.search.action.gradesSubtitle": "Open a course gradebook",
@@ -777,6 +805,18 @@
         "mobile.ia.teach.ungraded": {
             "one": "%d ungraded",
             "other": "%d ungraded"
+        },
+        "mobile.review.dueCount": {
+            "one": "%d révision à faire aujourd'hui",
+            "other": "%d révisions à faire aujourd'hui"
+        },
+        "mobile.review.streak": {
+            "one": "Série de %d jours",
+            "other": "Série de %d jours"
+        },
+        "mobile.review.summaryReviewed": {
+            "one": "Vous avez révisé %d élément",
+            "other": "Vous avez révisé %d éléments"
         }
     }
 }

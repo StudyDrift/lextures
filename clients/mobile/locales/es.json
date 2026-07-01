@@ -624,6 +624,34 @@
         "mobile.quiz.timeUp": "Time is up — submitting…",
         "mobile.quiz.unflag": "Remove flag",
         "mobile.quiz.yourScore": "Your score",
+        "mobile.review.answer": "Respuesta",
+        "mobile.review.caughtUpMessage": "Cuando los instructores activan SRS en un curso y etiquetan preguntas, los elementos pendientes aparecen aquí.",
+        "mobile.review.caughtUpShort": "Estás al día",
+        "mobile.review.caughtUpTitle": "Estás al día",
+        "mobile.review.dashboardTitle": "Práctica de repaso",
+        "mobile.review.done": "Listo",
+        "mobile.review.error.load": "No se pudo cargar la cola de repaso.",
+        "mobile.review.error.submit": "No se pudo guardar el repaso.",
+        "mobile.review.filter.all": "Todos los cursos",
+        "mobile.review.grade.again": "Otra vez",
+        "mobile.review.grade.easy": "Fácil",
+        "mobile.review.grade.good": "Bien",
+        "mobile.review.grade.hard": "Difícil",
+        "mobile.review.open": "Abrir repaso",
+        "mobile.review.progress": "%d de %d pendientes",
+        "mobile.review.question": "Pregunta",
+        "mobile.review.recommendations": "Siguiente sugerido",
+        "mobile.review.reminder.bodyDefault": "Es hora de tu repaso diario.",
+        "mobile.review.reminder.hint": "Recibe un recordatorio diario cuando haya elementos pendientes.",
+        "mobile.review.reminder.label": "Recordatorio de repaso diario",
+        "mobile.review.reminder.title": "Práctica de repaso",
+        "mobile.review.reveal": "Mostrar respuesta",
+        "mobile.review.sessionTitle": "Repaso",
+        "mobile.review.start": "Iniciar repaso",
+        "mobile.review.submitLabel": "Calificación de repaso",
+        "mobile.review.subtitle": "La repetición espaciada conserva lo que aprendes.",
+        "mobile.review.summaryTitle": "Sesión completada",
+        "mobile.review.title": "Repaso",
         "mobile.search.action.attendanceSubtitle": "Open a course to take roll",
         "mobile.search.action.calendarSubtitle": "Your schedule",
         "mobile.search.action.gradesSubtitle": "Open a course gradebook",
@@ -777,6 +805,18 @@
         "mobile.ia.teach.ungraded": {
             "one": "%d ungraded",
             "other": "%d ungraded"
+        },
+        "mobile.review.dueCount": {
+            "one": "%d repaso pendiente hoy",
+            "other": "%d repasos pendientes hoy"
+        },
+        "mobile.review.streak": {
+            "one": "Racha de %d días",
+            "other": "Racha de %d días"
+        },
+        "mobile.review.summaryReviewed": {
+            "one": "Repasaste %d elemento",
+            "other": "Repasaste %d elementos"
         }
     }
 }

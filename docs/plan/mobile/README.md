@@ -112,7 +112,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M6.1 Grades, feedback & what-if](../completed/mobile/M6.1-grades-feedback.md) ✅ | my-grades, 3.1 annotation, 3.2 a/v feedback, 3.16 what-if, rubrics | **DONE** | **P0** |
 | [M7.1 Course discussions](../completed/mobile/M7.1-discussions.md) ✅ | 6.1 threaded forums, course-discussions-page | **DONE** | **P0** |
 | [M7.2 AI tutor & Ask-AI](../completed/mobile/M7.2-ai-tutor.md) ✅ | 6.9 AI tutor, ask-ai-page, 15.12 study buddy | **DONE** | **P0** |
-| [M8.1 Review & spaced repetition](M8.1-review-spaced-repetition.md) | 1.5 spaced repetition, review-session-page | None | **P0** |
+| [M8.1 Review & spaced repetition](../completed/mobile/M8.1-review-spaced-repetition.md) ✅ | 1.5 spaced repetition, review-session-page | **DONE** | **P0** |
 | [M0.1 Native push & deep links](../completed/mobile/M0.1-push-deep-links.md) ✅ | 6.3 push, 21.5 APNs/FCM | **DONE** | **P0** |
 | [M0.2 Offline mode & sync](../completed/mobile/M0.2-offline-sync.md) ✅ | 7.3 offline PWA (web), 21.x offline | None | **P0** |
 
