@@ -6,6 +6,8 @@ struct CourseAttendanceSection: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
+    var onTakeAttendance: (() -> Void)?
+    var onOpenSession: ((AttendanceSession) -> Void)?
 
     @State private var sessions: [AttendanceSession] = []
     @State private var errorMessage: String?
@@ -13,28 +15,67 @@ struct CourseAttendanceSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if let errorMessage {
-                LMSErrorBanner(message: errorMessage)
+            if !course.isAttendanceEnabled {
+                LMSEmptyState(
+                    systemImage: "person.crop.circle.badge.xmark",
+                    title: L.text("mobile.attendance.disabled.title"),
+                    message: L.text("mobile.attendance.disabled.message")
+                )
+            } else if course.viewerIsStaff, let onTakeAttendance {
+                Button(action: onTakeAttendance) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "person.crop.circle.badge.checkmark")
+                        Text(L.text("mobile.attendance.take.title"))
+                            .font(.subheadline.weight(.semibold))
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                    .padding(12)
+                    .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.16 : 0.13))
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(L.text("mobile.attendance.take.newSessionHint"))
             }
 
-            if loading && sessions.isEmpty {
-                LMSSkeletonList(count: 3)
-            } else if sessions.isEmpty {
-                LMSEmptyState(
-                    systemImage: "person.crop.circle.badge.checkmark",
-                    title: "No attendance sessions",
-                    message: "Attendance sessions will appear here when your instructor opens one."
-                )
-            } else {
-                ForEach(sessions) { attendanceSession in
-                    NavigationLink(value: attendanceSession) {
-                        sessionCard(attendanceSession)
+            if course.isAttendanceEnabled {
+                if let errorMessage {
+                    LMSErrorBanner(message: errorMessage)
+                }
+
+                if loading && sessions.isEmpty {
+                    LMSSkeletonList(count: 3)
+                } else if sessions.isEmpty {
+                    LMSEmptyState(
+                        systemImage: "person.crop.circle.badge.checkmark",
+                        title: "No attendance sessions",
+                        message: "Attendance sessions will appear here when your instructor opens one."
+                    )
+                } else {
+                    ForEach(sessions) { attendanceSession in
+                        if let onOpenSession {
+                            Button {
+                                onOpenSession(attendanceSession)
+                            } label: {
+                                sessionCard(attendanceSession)
+                            }
+                            .buttonStyle(.plain)
+                        } else {
+                            NavigationLink(value: attendanceSession) {
+                                sessionCard(attendanceSession)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
-        .task { await load() }
+        .task(id: course.isAttendanceEnabled) {
+            guard course.isAttendanceEnabled else { return }
+            await load()
+        }
     }
 
     private func sessionCard(_ attendanceSession: AttendanceSession) -> some View {
@@ -99,8 +140,10 @@ struct CourseAttendanceSection: View {
         defer { loading = false }
         do {
             sessions = try await LMSAPI.fetchAttendanceSessions(courseCode: course.courseCode, accessToken: token)
+        } catch let APIError.httpStatus(404, _) {
+            sessions = []
         } catch {
-            errorMessage = (error as? LocalizedError)?.errorDescription ?? "Could not load attendance."
+            errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.attendance.take.loadError")
         }
     }
 }

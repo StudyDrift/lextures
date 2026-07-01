@@ -4,7 +4,6 @@ enum InteractiveLaunchKind: String, Equatable {
     case h5p
     case scorm
     case ltiLink
-    case vibeActivity
 }
 
 enum InteractiveLaunchContent: Equatable {
@@ -26,7 +25,6 @@ enum InteractiveLaunchLogic {
         case "h5p": return .h5p
         case "scorm": return .scorm
         case "lti_link": return .ltiLink
-        case "vibe_activity": return .vibeActivity
         default: return nil
         }
     }

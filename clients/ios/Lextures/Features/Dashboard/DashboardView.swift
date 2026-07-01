@@ -232,6 +232,9 @@ struct DashboardView: View {
                     }
                     Spacer(minLength: 8)
                     HStack(spacing: 10) {
+                        if shell.iaRedesignEnabled && shell.universalSearchEnabled {
+                            searchButton
+                        }
                         bellButton
                         LMSAvatarButton()
                     }
@@ -263,6 +266,21 @@ struct DashboardView: View {
         .background(LexturesTheme.heroGradient)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: LexturesTheme.primaryDeep.opacity(0.25), radius: 14, y: 7)
+    }
+
+    private var searchButton: some View {
+        Button {
+            shell.showUniversalSearch = true
+        } label: {
+            Image(systemName: "magnifyingglass")
+                .font(.subheadline)
+                .foregroundStyle(.white)
+                .frame(width: 34, height: 34)
+                .background(.white.opacity(0.16))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L.text("mobile.ia.search"))
     }
 
     private var bellButton: some View {
@@ -456,7 +474,11 @@ struct DashboardView: View {
                 HStack(spacing: 12) {
                     ForEach(model.courses) { course in
                         NavigationLink(value: course) {
-                            courseCarouselCard(course)
+                            dashboardCourseCarouselCard(
+                                course,
+                                itemCounts: model.courseItemCounts[course.courseCode],
+                                colorScheme: colorScheme
+                            )
                         }
                         .buttonStyle(.plain)
                     }
@@ -469,47 +491,52 @@ struct DashboardView: View {
         }
     }
 
-    private func courseCarouselCard(_ course: CourseSummary) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
-            ZStack(alignment: .topTrailing) {
-                CourseHeroImage(
-                    urlString: course.heroImageUrl,
-                    fallbackKey: course.courseCode,
-                    height: 84
-                )
-                Image(systemName: "book.fill")
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.5))
-                    .padding(12)
-            }
-            VStack(alignment: .leading, spacing: 4) {
-                Text(course.displayTitle)
-                    .font(LexturesTheme.displayFont(15))
-                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    .lineLimit(2, reservesSpace: true)
-                    .multilineTextAlignment(.leading)
-                Text(courseSubtitle(course))
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            }
-            .padding(12)
-        }
-        .frame(width: 190, alignment: .leading)
-        .background(LexturesTheme.cardBackground(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(colorScheme == .dark ? 0.9 : 0.45), lineWidth: 1)
-        )
-        .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 12, y: 5)
-    }
+}
 
-    private func courseSubtitle(_ course: CourseSummary) -> String {
-        if let counts = model.courseItemCounts[course.courseCode], counts.items > 0 {
-            return "\(counts.modules) module\(counts.modules == 1 ? "" : "s") · \(counts.items) item\(counts.items == 1 ? "" : "s")"
+private func dashboardCourseCarouselCard(
+    _ course: CourseSummary,
+    itemCounts: (modules: Int, items: Int)?,
+    colorScheme: ColorScheme
+) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+        ZStack(alignment: .topTrailing) {
+            CourseHeroImage(
+                urlString: course.heroImageUrl,
+                fallbackKey: course.courseCode,
+                height: 84
+            )
+            Image(systemName: "book.fill")
+                .font(.title3)
+                .foregroundStyle(.white.opacity(0.5))
+                .padding(12)
         }
-        return course.courseCode.uppercased()
+        VStack(alignment: .leading, spacing: 4) {
+            Text(course.displayTitle)
+                .font(LexturesTheme.displayFont(15))
+                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                .lineLimit(2, reservesSpace: true)
+                .multilineTextAlignment(.leading)
+            Text(dashboardCourseSubtitle(course, itemCounts: itemCounts))
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+        }
+        .padding(12)
     }
+    .frame(width: 190, alignment: .leading)
+    .background(LexturesTheme.cardBackground(for: colorScheme))
+    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+    .overlay(
+        RoundedRectangle(cornerRadius: 18, style: .continuous)
+            .stroke(LexturesTheme.fieldBorder(for: colorScheme).opacity(colorScheme == .dark ? 0.9 : 0.45), lineWidth: 1)
+    )
+    .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 12, y: 5)
+}
+
+private func dashboardCourseSubtitle(_ course: CourseSummary, itemCounts: (modules: Int, items: Int)?) -> String {
+    if let counts = itemCounts, counts.items > 0 {
+        return "\(counts.modules) module\(counts.modules == 1 ? "" : "s") · \(counts.items) item\(counts.items == 1 ? "" : "s")"
+    }
+    return course.courseCode.uppercased()
 }
 
 /// Value-type routes for dashboard navigation destinations.

@@ -13,6 +13,7 @@ object OfflineCacheKey {
     fun itemDetail(courseCode: String, itemId: String): String = "course:$courseCode:item:$itemId"
     fun modulesProgress(courseCode: String): String = "course:$courseCode:modules-progress"
     fun contentPage(courseCode: String, itemId: String): String = "course:$courseCode:content-page:$itemId"
+    fun vibeActivity(courseCode: String, itemId: String): String = "course:$courseCode:vibe-activity:$itemId"
     fun courseFiles(courseCode: String, folderId: String?): String =
         if (!folderId.isNullOrEmpty()) "course:$courseCode:files:folder:$folderId"
         else "course:$courseCode:files:root"

@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -75,6 +76,7 @@ fun CoursesTab(
     var loading by remember { mutableStateOf(true) }
     var searchText by remember { mutableStateOf("") }
     var openCourse by remember { mutableStateOf<CourseSummary?>(null) }
+    var deepLinkSection by remember { mutableStateOf<com.lextures.android.core.navigation.CourseWorkspaceSection?>(null) }
 
     LaunchedEffect(accessToken) {
         val token = accessToken ?: return@LaunchedEffect
@@ -96,6 +98,7 @@ fun CoursesTab(
         val link = shell?.pendingDeepLink ?: return@LaunchedEffect
         val token = accessToken ?: return@LaunchedEffect
         if (link is DeepLinkDestination.Course) {
+            deepLinkSection = com.lextures.android.core.navigation.CourseWorkspaceSection.from(link.section)
             runCatching { LmsApi.fetchCourse(link.code, token) }
                 .onSuccess { openCourse = it }
                 .onFailure { shell.openDeepLink(DeepLinkDestination.Home) }
@@ -107,7 +110,9 @@ fun CoursesTab(
         CourseDetailScreen(
             session = session,
             course = course,
-            onBack = { openCourse = null },
+            onBack = { openCourse = null; deepLinkSection = null },
+            shell = shell,
+            initialSection = deepLinkSection,
             modifier = modifier,
         )
         return
@@ -127,12 +132,24 @@ fun CoursesTab(
     }
 
     Column(modifier = modifier) {
-        Text(
-            text = "Courses",
-            style = LexturesType.display(24),
-            color = textPrimary(),
-            modifier = Modifier.padding(start = 16.dp, top = 12.dp),
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 8.dp, top = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "Courses",
+                style = LexturesType.display(24),
+                color = textPrimary(),
+            )
+            if (shell?.iaRedesignEnabled == true && shell.universalSearchEnabled) {
+                IconButton(onClick = { shell.showUniversalSearch = true }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search", tint = textPrimary())
+                }
+            }
+        }
 
         OutlinedTextField(
             value = searchText,

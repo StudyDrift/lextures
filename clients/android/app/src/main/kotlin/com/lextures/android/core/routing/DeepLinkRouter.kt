@@ -17,6 +17,13 @@ enum class CourseDeepLinkSection {
     Grades,
     Feed,
     Discussions,
+    OfficeHours,
+    Live,
+    Files,
+    Attendance,
+    People,
+    Evaluations,
+    Library,
 }
 
 /** Maps web-style action URLs and `lextures://` links to native navigation intents. */
@@ -71,8 +78,16 @@ object DeepLinkRouter {
 
         return when (segments[2].lowercase()) {
             "grades" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
+            "office-hours" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.OfficeHours)
             "feed" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Feed)
             "discussions" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Discussions)
+            "live", "live-sessions" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Live)
+            "files" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Files)
+            "attendance" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Attendance)
+            "people", "enrollments" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.People)
+            "evaluations", "evaluation-results" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Evaluations)
+            "library", "reading-dashboard" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Library)
+            "gradebook" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
             "assignments", "quizzes", "modules" -> DeepLinkDestination.Course(
                 code = courseCode,
                 section = CourseDeepLinkSection.Modules,

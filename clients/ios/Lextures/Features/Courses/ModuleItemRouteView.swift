@@ -32,6 +32,8 @@ struct ModuleItemPlaceholderView: View {
 
 /// Routes a structure item to its native destination (M3.1).
 struct ModuleItemRouteView: View {
+    @Environment(AppShellModel.self) private var shell
+
     let course: CourseSummary
     let item: CourseStructureItem
     var onProgressChanged: (() async -> Void)?
@@ -48,6 +50,19 @@ struct ModuleItemRouteView: View {
             WebItemLoader(course: course, item: item)
         case .interactive:
             LaunchContainerView(course: course, item: item, onProgressChanged: onProgressChanged)
+        case .vibeActivity:
+            VibeActivityView(
+                course: course,
+                item: item,
+                nativeEnabled: shell.platformFeatures.ffMobileVibeActivities,
+                onProgressChanged: onProgressChanged
+            )
+        case .libraryResource:
+            LibraryResourceView(
+                course: course,
+                item: item,
+                nativeEnabled: shell.platformFeatures.ffMobileLibraryEreserves
+            )
         case .file:
             FilePreviewView(target: FilePreviewTarget.from(moduleItem: item, courseCode: course.courseCode))
         case .unsupported:

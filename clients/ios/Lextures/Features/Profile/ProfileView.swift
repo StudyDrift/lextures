@@ -10,6 +10,8 @@ struct ProfileView: View {
     @Environment(\.accessibilityPreferences) private var accessibilityPreferences
     @State private var confirmingSignOut = false
     @State private var confirmingClearCache = false
+    @State private var confirmingClearSearchHistory = false
+    @State private var navigatedMoreDestination: MoreDestination?
     @State private var localeError: String?
 
     var body: some View {
@@ -20,17 +22,22 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         identityHero
+                        if shell.iaRedesignEnabled {
+                            ProfileIaContextCard()
+                            ProfileMoreHubCard()
+                        }
                         if offline.pendingCount > 0 {
-                            offlineSyncCard
+                            ProfileOfflineSyncCard()
                         }
                         ProfilePersonalCard()
+                        ProfileDepthCards()
                         offlineStorageCard
                         ProfileAppearanceCard()
                         localeCard
                         accessibilityCard
                         ProfileSecurityCard()
                         accountCard
-                        notificationsCard
+                        ProfileNotificationsCard()
                         ProfileLegalCard()
                         aboutCard
                         signOutButton
@@ -55,6 +62,21 @@ struct ProfileView: View {
             .navigationDestination(for: MyAccommodationsRoute.self) { _ in
                 MyAccommodationsView()
             }
+            .navigationDestination(for: ProfilePersonalDetailsRoute.self) { _ in
+                ProfilePersonalDetailsView()
+            }
+            .navigationDestination(for: ResearchStudiesRoute.self) { _ in
+                ResearchStudiesView()
+            }
+            .navigationDestination(for: MoreHubRoute.self) { _ in
+                MoreHubView()
+            }
+            .navigationDestination(for: MoreDestination.self) { destination in
+                ProfileMoreDestinationScreen(destination: destination)
+            }
+            .navigationDestination(item: $navigatedMoreDestination) { destination in
+                ProfileMoreDestinationScreen(destination: destination)
+            }
             .confirmationDialog(
                 L.text("mobile.profile.signOutConfirm"),
                 isPresented: $confirmingSignOut,
@@ -75,7 +97,19 @@ struct ProfileView: View {
             } message: {
                 Text(L.text("mobile.profile.clearCacheMessage"))
             }
+            .confirmationDialog(
+                L.text("mobile.search.clearHistoryConfirm"),
+                isPresented: $confirmingClearSearchHistory,
+                titleVisibility: .visible
+            ) {
+                Button(L.text("mobile.search.clearHistory"), role: .destructive) {
+                    SearchRecentsStore.clearAll()
+                }
+            } message: {
+                Text(L.text("mobile.search.clearHistoryMessage"))
+            }
             .task { await offline.refreshState() }
+            .onAppear { openPendingMoreDestinationIfNeeded() }
         }
     }
 
@@ -120,34 +154,6 @@ struct ProfileView: View {
 
     private var profileInitials: String {
         shell.accountProfile?.resolvedInitials ?? shell.profile?.initials ?? "··"
-    }
-
-    private var offlineSyncCard: some View {
-        LMSCard {
-            Text(L.text("mobile.profile.pendingSync"))
-                .font(LexturesTheme.displayFont(17))
-                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-            Text(L.plural("mobile.pendingSync.waiting", count: offline.pendingCount))
-                .font(.caption)
-                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-            ForEach(offline.outboxItems.filter {
-                $0.status == .queued || $0.status == .failed || $0.status == .conflict
-            }) { item in
-                Divider()
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(item.label)
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    OutboxStatusChip(status: item.status)
-                    if item.status == .failed || item.status == .conflict {
-                        Button(L.text("mobile.profile.retry")) {
-                            Task { await offline.retryOutboxItem(id: item.id, accessToken: session.accessToken) }
-                        }
-                        .font(.caption.weight(.semibold))
-                    }
-                }
-            }
-        }
     }
 
     private var localeCard: some View {
@@ -217,7 +223,24 @@ struct ProfileView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.plain)
+            if shell.universalSearchEnabled {
+                Divider()
+                Button {
+                    confirmingClearSearchHistory = true
+                } label: {
+                    Label(L.text("mobile.search.clearHistory"), systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.error)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
         }
+    }
+
+    private func openPendingMoreDestinationIfNeeded() {
+        guard let destination = shell.consumePendingMoreDestination() else { return }
+        navigatedMoreDestination = destination
     }
 
     private var accountCard: some View {
@@ -232,52 +255,6 @@ struct ProfileView: View {
                 value: shell.profile?.email ?? session.userEmail ?? L.text("mobile.emDash"),
                 systemImage: "envelope"
             )
-        }
-    }
-
-    private var notificationsCard: some View {
-        LMSCard {
-            NavigationLink(value: NotificationsRoute()) {
-                HStack(spacing: 12) {
-                    Image(systemName: "bell.fill")
-                        .font(.footnote.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                        .frame(width: 32, height: 32)
-                        .background(LexturesTheme.brandTeal.opacity(colorScheme == .dark ? 0.18 : 0.14))
-                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(L.text("mobile.profile.notifications"))
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                        Text(
-                            shell.unreadNotifications > 0
-                                ? L.format("mobile.profile.unread", shell.unreadNotifications)
-                                : L.text("mobile.dashboard.caughtUp")
-                        )
-                        .font(.caption)
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
-                    }
-                    Spacer(minLength: 0)
-                    if shell.unreadNotifications > 0 {
-                        Text("\(shell.unreadNotifications)")
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(LexturesTheme.coral)
-                            .clipShape(Capsule())
-                    }
-                    Image(systemName: "chevron.right")
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
-                        .flipsForRightToLeftLayoutDirection(true)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .simultaneousGesture(TapGesture().onEnded {
-                Task { await PushManager.shared.requestPermissionIfNeeded() }
-            })
         }
     }
 

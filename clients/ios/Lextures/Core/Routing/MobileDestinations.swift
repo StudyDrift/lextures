@@ -1,0 +1,355 @@
+import Foundation
+
+// MARK: - Role & shell
+
+/// Effective navigation persona derived from server-authoritative signals.
+enum MobileRoleKind: String, CaseIterable, Equatable {
+    case student
+    case instructor
+    case parent
+    case selfLearner
+}
+
+/// Persisted active context for multi-role users (Learning vs Teaching vs Parent).
+enum MobileRoleContext: String, CaseIterable, Equatable {
+    case learning
+    case teaching
+    case parent
+
+    var label: String {
+        switch self {
+        case .learning: return L.text("mobile.ia.context.learning")
+        case .teaching: return L.text("mobile.ia.context.teaching")
+        case .parent: return L.text("mobile.ia.context.parent")
+        }
+    }
+}
+
+/// Primary bottom-bar destinations (≤5 per shell).
+enum ShellTab: String, CaseIterable, Equatable, Identifiable {
+    case home
+    case courses
+    case notebooks
+    case inbox
+    case profile
+    case teach
+    case children
+    case calendar
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .home: return L.text("tabs.home")
+        case .courses: return L.text("tabs.courses")
+        case .notebooks: return L.text("tabs.notebooks")
+        case .inbox: return L.text("tabs.inbox")
+        case .profile: return L.text("tabs.profile")
+        case .teach: return L.text("mobile.ia.tabs.teach")
+        case .children: return L.text("mobile.ia.tabs.children")
+        case .calendar: return L.text("mobile.ia.tabs.calendar")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .home: return "house.fill"
+        case .courses: return "books.vertical.fill"
+        case .notebooks: return "square.and.pencil"
+        case .inbox: return "tray.fill"
+        case .profile: return "person.fill"
+        case .teach: return "checkmark.circle.fill"
+        case .children: return "figure.2.and.child.holdinghands"
+        case .calendar: return "calendar"
+        }
+    }
+}
+
+/// Secondary destinations surfaced from Profile / More hub.
+enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
+    case calendar
+    case planner
+    case catalog
+    case paths
+    case library
+    case reading
+    case portfolio
+    case credentials
+    case advising
+    case settings
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .calendar: return L.text("mobile.ia.more.calendar")
+        case .planner: return L.text("mobile.ia.more.planner")
+        case .catalog: return L.text("mobile.ia.more.catalog")
+        case .paths: return L.text("mobile.ia.more.paths")
+        case .library: return L.text("mobile.ia.more.library")
+        case .reading: return L.text("mobile.ia.more.reading")
+        case .portfolio: return L.text("mobile.ia.more.portfolio")
+        case .credentials: return L.text("mobile.ia.more.credentials")
+        case .advising: return L.text("mobile.ia.more.advising")
+        case .settings: return L.text("mobile.ia.more.settings")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .calendar: return "calendar"
+        case .planner: return "list.bullet.rectangle"
+        case .catalog: return "books.vertical"
+        case .paths: return "point.topleft.down.to.point.bottomright.curvepath"
+        case .library: return "books.vertical.fill"
+        case .reading: return "book.fill"
+        case .portfolio: return "folder.fill"
+        case .credentials: return "rosette"
+        case .advising: return "person.2.fill"
+        case .settings: return "gearshape.fill"
+        }
+    }
+}
+
+// MARK: - Course workspace
+
+/// Course-scoped workspace chips (registry-driven; not hardcoded to four).
+enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
+    case overview
+    case modules
+    case grades
+    case discussions
+    case feed
+    case live
+    case people
+    case files
+    case attendance
+    case evaluations
+    case library
+    case officeHours
+    case grading
+
+    var label: String {
+        switch self {
+        case .overview: return L.text("mobile.ia.course.overview")
+        case .modules: return L.text("mobile.ia.course.modules")
+        case .grades: return L.text("mobile.ia.course.grades")
+        case .discussions: return L.text("mobile.ia.course.discussions")
+        case .feed: return L.text("mobile.ia.course.feed")
+        case .live: return L.text("mobile.ia.course.live")
+        case .people: return L.text("mobile.ia.course.people")
+        case .files: return L.text("mobile.ia.course.files")
+        case .attendance: return L.text("mobile.ia.course.attendance")
+        case .evaluations: return L.text("mobile.ia.course.evaluations")
+        case .library: return L.text("mobile.ia.course.library")
+        case .officeHours: return L.text("mobile.ia.course.officeHours")
+        case .grading: return L.text("mobile.ia.course.grading")
+        }
+    }
+
+    /// Deep-link segment used by `DeepLinkRouter` / push payloads.
+    var deepLinkSegment: String? {
+        switch self {
+        case .overview: return "overview"
+        case .modules: return "modules"
+        case .grades: return "grades"
+        case .discussions: return "discussions"
+        case .feed: return "feed"
+        case .live: return "live"
+        case .people: return "people"
+        case .files: return "files"
+        case .attendance: return "attendance"
+        case .evaluations: return "evaluations"
+        case .library: return "library"
+        case .officeHours: return "office-hours"
+        case .grading: return "grading"
+        }
+    }
+
+    static func from(deepLink section: CourseDeepLinkSection) -> CourseWorkspaceSection? {
+        switch section {
+        case .overview: return .overview
+        case .modules: return .modules
+        case .grades: return .grades
+        case .feed: return .feed
+        case .discussions: return .discussions
+        case .officeHours: return .officeHours
+        case .live: return .live
+        case .files: return .files
+        case .attendance: return .attendance
+        case .people: return .people
+        case .evaluations: return .evaluations
+        case .library: return .library
+        }
+    }
+}
+
+struct RoleSnapshot: Equatable {
+    var hasStudentEnrollment = false
+    var hasStaffEnrollment = false
+    var hasParentDashboard = false
+    var hasSelfPacedEnrollment = false
+
+    var availableContexts: [MobileRoleContext] {
+        var out: [MobileRoleContext] = []
+        if hasParentDashboard { out.append(.parent) }
+        if hasStaffEnrollment { out.append(.teaching) }
+        if hasStudentEnrollment || hasSelfPacedEnrollment { out.append(.learning) }
+        if out.isEmpty { out.append(.learning) }
+        return out
+    }
+
+    func defaultContext() -> MobileRoleContext {
+        availableContexts.first ?? .learning
+    }
+
+    func resolvedContext(stored: MobileRoleContext?) -> MobileRoleContext {
+        guard let stored, availableContexts.contains(stored) else {
+            return defaultContext()
+        }
+        return stored
+    }
+}
+
+struct MobilePlatformFeatures: Equatable {
+    var ffLibrary = false
+    var ffCourseEvaluations = false
+    var ffMobileIaRedesign = false
+    var ffMobileVibeActivities = true
+    var ffMobileUniversalSearch = false
+    var ffMobileProfileDepth = false
+    var ffMobileLibraryEreserves = true
+    var oerLibraryEnabled = false
+    var customFieldsEnabled = false
+    var ffDemographics = false
+    var ffResearchConsent = false
+
+    static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
+        MobilePlatformFeatures(
+            ffLibrary: features?.ffLibrary == true,
+            ffCourseEvaluations: features?.ffCourseEvaluations == true,
+            ffMobileIaRedesign: features?.ffMobileIaRedesign == true,
+            ffMobileVibeActivities: features?.ffMobileVibeActivities != false,
+            ffMobileUniversalSearch: features?.ffMobileUniversalSearch == true,
+            ffMobileProfileDepth: features?.ffMobileProfileDepth == true,
+            ffMobileLibraryEreserves: features?.ffMobileLibraryEreserves != false,
+            oerLibraryEnabled: features?.oerLibraryEnabled == true,
+            customFieldsEnabled: features?.customFieldsEnabled == true,
+            ffDemographics: features?.ffDemographics == true,
+            ffResearchConsent: features?.ffResearchConsent == true
+        )
+    }
+
+    var libraryBrowseEnabled: Bool {
+        ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
+    }
+}
+
+struct CourseWorkspaceContext: Equatable {
+    var course: CourseSummary
+    var hasAttendanceSessions = false
+    var hasLibraryResources = false
+    var platformFeatures = MobilePlatformFeatures()
+}
+
+/// Registry: role-aware shell tabs, More hub, and course workspace chips.
+enum MobileDestinations {
+    static let maxPrimaryChips = 6
+    static let parentDashboardPermission = "app:user:account-parent-dashboard"
+
+    // MARK: Shell
+
+    static func shellTabs(context: MobileRoleContext) -> [ShellTab] {
+        switch context {
+        case .teaching:
+            return [.home, .courses, .teach, .inbox, .profile]
+        case .parent:
+            return [.home, .children, .calendar, .inbox, .profile]
+        case .learning:
+            return [.home, .courses, .notebooks, .inbox, .profile]
+        }
+    }
+
+    static func legacyTab(from shell: ShellTab) -> AppTab? {
+        switch shell {
+        case .home: return .home
+        case .courses: return .courses
+        case .notebooks: return .notebooks
+        case .inbox: return .inbox
+        case .profile: return .profile
+        case .teach, .children, .calendar: return nil
+        }
+    }
+
+    static func moreDestinations(
+        context: MobileRoleContext,
+        platform: MobilePlatformFeatures
+    ) -> [MoreDestination] {
+        var out: [MoreDestination] = []
+        switch context {
+        case .learning:
+            out += [.calendar, .planner, .catalog, .paths, .reading]
+            if platform.libraryBrowseEnabled { out.append(.library) }
+            out += [.portfolio, .credentials, .advising, .settings]
+        case .teaching:
+            out += [.calendar, .planner]
+            if platform.libraryBrowseEnabled { out.append(.library) }
+            out += [.advising, .settings]
+        case .parent:
+            out += [.calendar, .advising, .settings]
+        }
+        return out
+    }
+
+    // MARK: Course workspace
+
+    static func courseWorkspaceSections(_ ctx: CourseWorkspaceContext) -> [CourseWorkspaceSection] {
+        let course = ctx.course
+        var out: [CourseWorkspaceSection] = [.overview, .modules]
+
+        if course.isFilesEnabled { out.append(.files) }
+        if course.viewerIsStudent { out.append(.grades) }
+        if course.isDiscussionsEnabled { out.append(.discussions) }
+        if course.isFeedEnabled { out.append(.feed) }
+        if course.isLiveSessionsEnabled { out.append(.live) }
+        if course.viewerIsStaff && course.isSectionsEnabled { out.append(.people) }
+        if course.isOfficeHoursEnabled { out.append(.officeHours) }
+        if course.isAttendanceEnabled && (course.viewerIsStaff || ctx.hasAttendanceSessions) {
+            out.append(.attendance)
+        }
+        if course.viewerIsStaff {
+            out.append(.grading)
+            if ctx.platformFeatures.ffCourseEvaluations { out.append(.evaluations) }
+        }
+        if ctx.platformFeatures.ffMobileLibraryEreserves,
+           ctx.platformFeatures.ffLibrary,
+           ctx.hasLibraryResources {
+            out.append(.library)
+        }
+        return out
+    }
+
+    static func splitCourseChips(_ sections: [CourseWorkspaceSection]) -> (visible: [CourseWorkspaceSection], overflow: [CourseWorkspaceSection]) {
+        guard sections.count > maxPrimaryChips else {
+            return (sections, [])
+        }
+        let visible = Array(sections.prefix(maxPrimaryChips))
+        let overflow = Array(sections.dropFirst(maxPrimaryChips))
+        return (visible, overflow)
+    }
+
+    // MARK: Role derivation
+
+    static func buildRoleSnapshot(
+        permissions: [String],
+        courses: [CourseSummary],
+        selfPacedEnrollmentCount: Int = 0
+    ) -> RoleSnapshot {
+        RoleSnapshot(
+            hasStudentEnrollment: courses.contains(where: \.viewerIsStudent),
+            hasStaffEnrollment: courses.contains(where: \.viewerIsStaff),
+            hasParentDashboard: permissions.contains(parentDashboardPermission),
+            hasSelfPacedEnrollment: selfPacedEnrollmentCount > 0
+        )
+    }
+}

@@ -878,4 +878,5 @@ extension LMSAPI {
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return join?.isEmpty == false ? join : nil
     }
+
 }

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.FactCheck
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -297,6 +298,8 @@ fun DashboardTab(
                 avatarUrl = shell.accountProfile?.avatarUrl,
                 onOpenNotifications = { showNotifications = true },
                 onOpenProfile = onOpenProfile,
+                showSearch = shell.iaRedesignEnabled && shell.universalSearchEnabled,
+                onOpenSearch = { shell.showUniversalSearch = true },
             )
         }
 
@@ -498,6 +501,8 @@ private fun HeroPanel(
     avatarUrl: String? = null,
     onOpenNotifications: () -> Unit,
     onOpenProfile: () -> Unit,
+    showSearch: Boolean = false,
+    onOpenSearch: () -> Unit = {},
 ) {
     Box(
         modifier = Modifier
@@ -545,6 +550,23 @@ private fun HeroPanel(
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (showSearch) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.16f))
+                                .clickable(onClick = onOpenSearch),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = Color.White,
+                                modifier = Modifier.size(17.dp),
+                            )
+                        }
+                    }
                     Box(
                         modifier = Modifier
                             .size(34.dp)

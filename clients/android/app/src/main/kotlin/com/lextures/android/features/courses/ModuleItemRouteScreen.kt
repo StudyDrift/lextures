@@ -49,6 +49,8 @@ fun ModuleItemRouteScreen(
     item: CourseStructureItem,
     onBack: () -> Unit,
     onProgressChanged: suspend () -> Unit = {},
+    nativeVibeActivitiesEnabled: Boolean = true,
+    nativeLibraryEnabled: Boolean = true,
     modifier: Modifier = Modifier,
 ) {
     when (ModuleContentLogic.destination(item.kind)) {
@@ -88,6 +90,23 @@ fun ModuleItemRouteScreen(
             item = item,
             onBack = onBack,
             onProgressChanged = onProgressChanged,
+            modifier = modifier,
+        )
+        ModuleItemDestination.VibeActivity -> VibeActivityScreen(
+            session = session,
+            course = course,
+            item = item,
+            nativeEnabled = nativeVibeActivitiesEnabled,
+            onBack = onBack,
+            onProgressChanged = onProgressChanged,
+            modifier = modifier,
+        )
+        ModuleItemDestination.LibraryResource -> LibraryResourceScreen(
+            session = session,
+            course = course,
+            item = item,
+            nativeEnabled = nativeLibraryEnabled,
+            onBack = onBack,
             modifier = modifier,
         )
         ModuleItemDestination.File -> FilePreviewScreen(

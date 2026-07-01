@@ -7,7 +7,6 @@ enum class InteractiveLaunchKind {
     H5p,
     Scorm,
     LtiLink,
-    VibeActivity,
 }
 
 sealed class InteractiveLaunchContent {
@@ -28,7 +27,6 @@ object InteractiveLaunchLogic {
         "h5p" -> InteractiveLaunchKind.H5p
         "scorm" -> InteractiveLaunchKind.Scorm
         "lti_link" -> InteractiveLaunchKind.LtiLink
-        "vibe_activity" -> InteractiveLaunchKind.VibeActivity
         else -> null
     }
 

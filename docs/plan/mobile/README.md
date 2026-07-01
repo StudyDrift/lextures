@@ -173,7 +173,7 @@ covered**, plus the navigation redesign needed to hold them. Added as stories:
 | [M7.7 Course evaluations & surveys](M7.7-course-evaluations-surveys.md) | 14.7 course evaluations, surveys | `/courses/{c}/evaluations/status\|submit\|results` | **P1** |
 | [M7.8 Academic advising (student)](M7.8-academic-advising.md) | advising notes + appointments (HE) | `/me/advising-notes`, `/me/advising/config`, scheduler | **P2** |
 | [M11.3 Instructor insights & at-risk](M11.3-instructor-insights-at-risk.md) | `course-at-risk`, `course-whats-working`, student-progress | at-risk, instructor-insights, student-progress | **P1** |
-| [M1.5 Profile depth: demographics, custom fields & research consent](M1.5-profile-depth-demographics-consent.md) | demographics, custom fields, research studies | demographics, custom-fields, research-consent | **P2** |
+| [M1.5 Profile depth: demographics, custom fields & research consent](../completed/mobile/M1.5-profile-depth-demographics-consent.md) | demographics, custom fields, research studies | demographics, custom-fields, research-consent | **DONE** |
 
 > **The redesign ([M0.5](M0.5-redesign-information-architecture.md)) is the keystone.**
 > The current flat 5-tab shell + four-chip course detail cannot surface the breadth above.

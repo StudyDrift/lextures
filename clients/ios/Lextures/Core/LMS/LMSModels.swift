@@ -17,10 +17,28 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var orgId: String?
     var termId: String?
     var viewerEnrollmentRoles: [String]?
+    var feedEnabled: Bool?
+    var discussionsEnabled: Bool?
+    var liveSessionsEnabled: Bool?
+    var filesEnabled: Bool?
+    var attendanceEnabled: Bool?
+    var sectionsEnabled: Bool?
 
     var isCalendarEnabled: Bool { calendarEnabled != false }
 
     var isOfficeHoursEnabled: Bool { officeHoursEnabled == true }
+
+    var isFeedEnabled: Bool { feedEnabled != false }
+
+    var isDiscussionsEnabled: Bool { discussionsEnabled == true }
+
+    var isLiveSessionsEnabled: Bool { liveSessionsEnabled == true }
+
+    var isFilesEnabled: Bool { filesEnabled != false }
+
+    var isAttendanceEnabled: Bool { attendanceEnabled != false }
+
+    var isSectionsEnabled: Bool { sectionsEnabled != false }
 
     var displayTitle: String {
         let nick = catalogNickname?.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -15,6 +15,9 @@ enum OfflineCacheKey {
     static func contentPage(courseCode: String, itemId: String) -> String {
         "course:\(courseCode):content-page:\(itemId)"
     }
+    static func vibeActivity(courseCode: String, itemId: String) -> String {
+        "course:\(courseCode):vibe-activity:\(itemId)"
+    }
     static func courseFiles(courseCode: String, folderId: String?) -> String {
         CourseFileLogic.courseFilesCacheKey(courseCode: courseCode, folderId: folderId)
     }

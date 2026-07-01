@@ -532,6 +532,17 @@ struct FeedbackPlaybackInfo: Decodable {
 struct PlatformFeatures: Decodable {
     var ffWhatifGrades: Bool?
     var feedbackMediaEnabled: Bool?
+    var ffLibrary: Bool?
+    var ffCourseEvaluations: Bool?
+    var ffMobileIaRedesign: Bool?
+    var ffMobileVibeActivities: Bool?
+    var ffMobileUniversalSearch: Bool?
+    var ffMobileProfileDepth: Bool?
+    var ffMobileLibraryEreserves: Bool?
+    var oerLibraryEnabled: Bool?
+    var customFieldsEnabled: Bool?
+    var ffDemographics: Bool?
+    var ffResearchConsent: Bool?
 }
 
 /// Navigation target for grade feedback detail (M6.1).

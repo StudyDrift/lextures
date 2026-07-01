@@ -34,21 +34,57 @@ enum AppTab: String, CaseIterable, Identifiable {
 @Observable
 final class AppShellModel {
     var selectedTab: AppTab = .home
+    var selectedShellTab: ShellTab = .home
     var profile: MeProfile?
     var accountProfile: AccountProfile?
     var unreadInbox = 0
     var unreadNotifications = 0
     var pendingDeepLink: DeepLinkDestination?
+    var roleSnapshot = RoleSnapshot()
+    var activeRoleContext: MobileRoleContext = .learning
+    var platformFeatures = MobilePlatformFeatures()
+    var showUniversalSearch = false
+    var iaRedesignEnabled = MobileIaPreferences.isRedesignEnabled
+    var universalSearchEnabled = MobileIaPreferences.isUniversalSearchEnabled
+    var profileDepthEnabled = MobileProfileDepthPreferences.isEnabled
+    var pendingMoreDestination: MoreDestination?
+
+    var shellTabs: [ShellTab] {
+        iaRedesignEnabled
+            ? MobileDestinations.shellTabs(context: activeRoleContext)
+            : AppTab.allCases.map { legacyShellTab(for: $0) }
+    }
 
     func openDeepLink(_ destination: DeepLinkDestination) {
         pendingDeepLink = destination
         switch destination {
         case .home:
-            selectedTab = .home
+            selectShellTab(.home)
         case .inbox:
-            selectedTab = .inbox
+            selectShellTab(.inbox)
         case .course:
-            selectedTab = .courses
+            selectShellTab(.courses)
+        }
+    }
+
+    func selectShellTab(_ tab: ShellTab) {
+        selectedShellTab = tab
+        if let legacy = MobileDestinations.legacyTab(from: tab) {
+            selectedTab = legacy
+        }
+    }
+
+    func selectLegacyTab(_ tab: AppTab) {
+        selectedTab = tab
+        selectedShellTab = legacyShellTab(for: tab)
+    }
+
+    func setRoleContext(_ context: MobileRoleContext) {
+        activeRoleContext = context
+        MobileIaPreferences.saveRoleContext(context)
+        let tabs = MobileDestinations.shellTabs(context: context)
+        if !tabs.contains(selectedShellTab) {
+            selectShellTab(tabs.first ?? .home)
         }
     }
 
@@ -57,16 +93,75 @@ final class AppShellModel {
         return pendingDeepLink
     }
 
+    func consumePendingMoreDestination() -> MoreDestination? {
+        defer { pendingMoreDestination = nil }
+        return pendingMoreDestination
+    }
+
+    func navigateFromSearch(path: String) {
+        guard let target = SearchPathNavigator.resolve(path) else { return }
+        switch target {
+        case .shellTab(let tab):
+            selectShellTab(tab)
+        case .deepLink(let destination):
+            openDeepLink(destination)
+        case .more(let destination):
+            selectShellTab(.profile)
+            pendingMoreDestination = destination
+        }
+    }
+
     func refresh(accessToken: String?) async {
         guard let token = accessToken else { return }
         async let me = try? LMSAPI.fetchMe(accessToken: token)
         async let account = try? LMSAPI.fetchAccountProfile(accessToken: token)
         async let inbox = try? LMSAPI.fetchUnreadInboxCount(accessToken: token)
         async let notifications = try? LMSAPI.fetchNotifications(accessToken: token)
+        async let permissions = try? LMSAPI.fetchMyPermissions(accessToken: token)
+        async let platform = try? LMSAPI.fetchPlatformFeatures(accessToken: token)
+        async let courses = try? LMSAPI.fetchCourses(accessToken: token)
         if let me = await me { profile = me }
         if let account = await account { accountProfile = account }
         if let inbox = await inbox { unreadInbox = inbox }
         if let page = await notifications { unreadNotifications = page.unreadCount }
+        let features = MobilePlatformFeatures.from(await platform)
+        platformFeatures = features
+        if features.ffMobileIaRedesign {
+            iaRedesignEnabled = true
+            MobileIaPreferences.isRedesignEnabled = true
+        }
+        if features.ffMobileUniversalSearch {
+            universalSearchEnabled = true
+            MobileIaPreferences.isUniversalSearchEnabled = true
+        }
+        if features.ffMobileProfileDepth {
+            profileDepthEnabled = true
+            MobileProfileDepthPreferences.isEnabled = true
+        } else {
+            profileDepthEnabled = MobileProfileDepthPreferences.isEnabled
+        }
+        let courseList = await courses ?? []
+        roleSnapshot = MobileDestinations.buildRoleSnapshot(
+            permissions: await permissions ?? [],
+            courses: courseList
+        )
+        activeRoleContext = roleSnapshot.resolvedContext(stored: MobileIaPreferences.loadRoleContext())
+        if iaRedesignEnabled {
+            let tabs = MobileDestinations.shellTabs(context: activeRoleContext)
+            if !tabs.contains(selectedShellTab) {
+                selectShellTab(tabs.first ?? .home)
+            }
+        }
+    }
+
+    private func legacyShellTab(for tab: AppTab) -> ShellTab {
+        switch tab {
+        case .home: return .home
+        case .courses: return .courses
+        case .notebooks: return .notebooks
+        case .inbox: return .inbox
+        case .profile: return .profile
+        }
     }
 }
 
@@ -80,12 +175,26 @@ struct MainTabView: View {
         VStack(spacing: 0) {
             tabContent
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-            LexturesTabBar(shell: shell)
-                .padding(.horizontal, 24)
-                .padding(.top, 8)
-                .padding(.bottom, 6)
+            if shell.iaRedesignEnabled {
+                IaShellTabBar(shell: shell)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                    .padding(.bottom, 6)
+            } else {
+                LexturesTabBar(shell: shell)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                    .padding(.bottom, 6)
+            }
         }
         .environment(shell)
+        .sheet(isPresented: Bindable(shell).showUniversalSearch) {
+            if shell.universalSearchEnabled {
+                UniversalSearchView()
+            } else {
+                UniversalSearchPlaceholder()
+            }
+        }
         .task {
             await shell.refresh(accessToken: session.accessToken)
         }
@@ -110,12 +219,27 @@ struct MainTabView: View {
     /// Keeps every tab's view (and its NavigationStack) alive so switching
     /// tabs never loses scroll position or navigation state.
     private var tabContent: some View {
-        ZStack {
-            pane(.home) { DashboardView() }
-            pane(.courses) { CoursesListView() }
-            pane(.notebooks) { NotebooksListView() }
-            pane(.inbox) { InboxView() }
-            pane(.profile) { ProfileView() }
+        Group {
+            if shell.iaRedesignEnabled {
+                ZStack {
+                    iaPane(.home) { DashboardView() }
+                    iaPane(.courses) { CoursesListView() }
+                    iaPane(.notebooks) { NotebooksListView() }
+                    iaPane(.inbox) { InboxView() }
+                    iaPane(.profile) { ProfileView() }
+                    iaPane(.teach) { TeachHubView() }
+                    iaPane(.children) { ChildrenPlaceholderView() }
+                    iaPane(.calendar) { PlannerView(initialTab: .calendar) }
+                }
+            } else {
+                ZStack {
+                    pane(.home) { DashboardView() }
+                    pane(.courses) { CoursesListView() }
+                    pane(.notebooks) { NotebooksListView() }
+                    pane(.inbox) { InboxView() }
+                    pane(.profile) { ProfileView() }
+                }
+            }
         }
     }
 
@@ -125,11 +249,84 @@ struct MainTabView: View {
             .allowsHitTesting(shell.selectedTab == tab)
             .accessibilityHidden(shell.selectedTab != tab)
     }
+
+    private func iaPane<Content: View>(_ tab: ShellTab, @ViewBuilder content: () -> Content) -> some View {
+        content()
+            .opacity(shell.selectedShellTab == tab ? 1 : 0)
+            .allowsHitTesting(shell.selectedShellTab == tab)
+            .accessibilityHidden(shell.selectedShellTab != tab)
+    }
 }
 
 // MARK: - Floating pill tab bar
 
 /// Deep-teal floating capsule: selected tab gets a cream circular "puck".
+struct IaShellTabBar: View {
+    @Environment(\.colorScheme) private var colorScheme
+    @Bindable var shell: AppShellModel
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(shell.shellTabs, id: \.self) { tab in
+                Button {
+                    withAnimation(.spring(duration: 0.3)) {
+                        shell.selectShellTab(tab)
+                    }
+                } label: {
+                    shellTabIcon(tab)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tab.label)
+                .accessibilityAddTraits(shell.selectedShellTab == tab ? [.isSelected] : [])
+            }
+        }
+        .padding(.vertical, 9)
+        .padding(.horizontal, 10)
+        .background(
+            Capsule(style: .continuous)
+                .fill(colorScheme == .dark ? LexturesTheme.cardBackgroundDark : LexturesTheme.primaryDeep)
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(
+                    colorScheme == .dark ? LexturesTheme.fieldBorderDark : .white.opacity(0.08),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: LexturesTheme.primaryDeep.opacity(colorScheme == .dark ? 0 : 0.35), radius: 16, y: 8)
+    }
+
+    @ViewBuilder
+    private func shellTabIcon(_ tab: ShellTab) -> some View {
+        let selected = shell.selectedShellTab == tab
+        ZStack(alignment: .topTrailing) {
+            Image(systemName: tab.systemImage)
+                .font(.system(size: 17, weight: .semibold))
+                .foregroundStyle(
+                    selected
+                        ? LexturesTheme.primaryDeep
+                        : (colorScheme == .dark ? LexturesTheme.textSecondaryDark : .white.opacity(0.72))
+                )
+                .frame(width: 44, height: 44)
+                .background(
+                    Circle().fill(selected ? AnyShapeStyle(LexturesTheme.brandCream) : AnyShapeStyle(.clear))
+                )
+
+            if tab == .inbox && shell.unreadInbox > 0 {
+                Text(shell.unreadInbox > 99 ? "99+" : "\(shell.unreadInbox)")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(LexturesTheme.coral)
+                    .clipShape(Capsule())
+                    .offset(x: 4, y: -2)
+            }
+        }
+    }
+}
+
 struct LexturesTabBar: View {
     @Environment(\.colorScheme) private var colorScheme
     @Bindable var shell: AppShellModel
@@ -139,7 +336,7 @@ struct LexturesTabBar: View {
             ForEach(AppTab.allCases) { tab in
                 Button {
                     withAnimation(.spring(duration: 0.3)) {
-                        shell.selectedTab = tab
+                        shell.selectLegacyTab(tab)
                     }
                 } label: {
                     tabIcon(tab)
@@ -373,7 +570,11 @@ struct LMSAvatarButton: View {
 
     var body: some View {
         Button {
-            shell.selectedTab = .profile
+            if shell.iaRedesignEnabled {
+                shell.selectShellTab(.profile)
+            } else {
+                shell.selectLegacyTab(.profile)
+            }
         } label: {
             ProfileAvatarView(
                 avatarUrl: shell.accountProfile?.avatarUrl,

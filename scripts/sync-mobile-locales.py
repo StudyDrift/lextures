@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import json
 import sys
-import xml.dom.minidom
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -138,12 +137,9 @@ def write_android_strings(tag: str, data: dict) -> None:
     out_dir = ANDROID_RES / folder
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "strings.xml"
-    xml_bytes = ET.tostring(resources, encoding="utf-8", xml_declaration=True)
-    pretty = xml.dom.minidom.parseString(xml_bytes).toprettyxml(indent="    ")
-    lines = [line for line in pretty.splitlines() if line.strip()]
-    if lines and lines[0].startswith("<?xml"):
-        lines[0] = '<?xml version="1.0" encoding="utf-8"?>'
-    out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    # Use ElementTree only — xml.dom.minidom escapes quotes differently on macOS vs Linux.
+    xml_body = ET.tostring(resources, encoding="unicode")
+    out_path.write_text('<?xml version="1.0" encoding="utf-8"?>\n' + xml_body + "\n", encoding="utf-8")
 
 
 def ios_string_unit(value: str) -> dict:

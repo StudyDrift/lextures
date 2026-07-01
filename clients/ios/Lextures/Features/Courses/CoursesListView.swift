@@ -67,6 +67,16 @@ struct CoursesListView: View {
             }
             .navigationTitle(L.text("mobile.courses.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                if shell.iaRedesignEnabled && shell.universalSearchEnabled {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { shell.showUniversalSearch = true } label: {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        .accessibilityLabel(L.text("mobile.ia.search"))
+                    }
+                }
+            }
             .searchable(text: $searchText, prompt: "Search courses")
             .navigationDestination(for: CourseSummary.self) { course in
                 CourseDetailView(
@@ -95,13 +105,9 @@ struct CoursesListView: View {
         }
     }
 
-    private func mapSection(_ section: CourseDeepLinkSection?) -> CourseDetailView.Section? {
-        switch section {
-        case .grades: return .grades
-        case .officeHours: return .officeHours
-        case .overview, .feed, .discussions, .none: return .overview
-        case .modules: return .modules
-        }
+    private func mapSection(_ section: CourseDeepLinkSection?) -> CourseWorkspaceSection? {
+        guard let section else { return nil }
+        return CourseWorkspaceSection.from(deepLink: section)
     }
 
     private func openCourse(code: String) async {
