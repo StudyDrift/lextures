@@ -310,7 +310,7 @@ private fun CommentsSection(comments: List<GradeComment>) {
     }
 }
 
-@OptIn(UnstableApi::class)
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 private fun FeedbackMediaSection(
     session: AuthSession,
