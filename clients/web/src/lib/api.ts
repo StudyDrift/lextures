@@ -11,6 +11,9 @@ const defaultApi = 'http://localhost:8080'
 export function apiBaseUrl(): string {
   const v = import.meta.env.VITE_API_URL
   if (v == null) {
+    if (import.meta.env.MODE === 'test') {
+      return defaultApi
+    }
     return typeof window !== 'undefined' ? window.location.origin : defaultApi
   }
   const s = String(v).trim()
