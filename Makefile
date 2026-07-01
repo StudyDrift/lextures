@@ -1,4 +1,4 @@
-.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www iac-check server web cli www
+.PHONY: dev desktop e2e e2e-run e2e-teardown lighthouse-dashboard-dark lint lint-server lint-web lint-cli lint-www iac-check mobile mobile-android mobile-ios mobile-lint-android mobile-test-android mobile-lint-ios mobile-test-ios android ios server web cli www
 
 # Lint all apps, or pass one or more app names: `make lint server`, `make lint web www`.
 LINT_APPS := server web cli www
@@ -14,6 +14,60 @@ lint:
 # Swallow app names when passed as goals alongside `lint` (e.g. `make lint server`).
 server web www:
 	@:
+
+# Lint and test native mobile apps, or pass a platform: `make mobile ios`, `make mobile android`.
+MOBILE_APPS := android ios
+
+mobile:
+	@apps="$(filter $(MOBILE_APPS),$(MAKECMDGOALS))"; \
+	if [ -z "$$apps" ]; then apps="$(MOBILE_APPS)"; fi; \
+	for app in $$apps; do \
+		echo "==> mobile $$app"; \
+		$(MAKE) mobile-$$app || exit 1; \
+	done
+
+# Swallow platform names when passed as goals alongside `mobile`.
+android ios:
+	@:
+
+mobile-android: mobile-lint-android mobile-test-android
+
+mobile-ios: mobile-lint-ios mobile-test-ios
+
+mobile-lint-android:
+	cd clients/android && ./gradlew lint --no-daemon
+
+mobile-test-android:
+	cd clients/android && ./gradlew test --no-daemon
+
+mobile-lint-ios:
+	cd clients/ios && swiftlint lint
+
+mobile-test-ios:
+	@set -e; \
+	dest=''; \
+	booted=$$(xcrun simctl list devices booted 2>/dev/null | grep -E '^\s+iPhone' | head -1 | sed -E 's/^[[:space:]]+([^()]+)[[:space:]]*\(.*/\1/' | xargs); \
+	if [ -n "$$booted" ]; then \
+		dest="platform=iOS Simulator,name=$$booted"; \
+	else \
+		for sim in "iPhone 16" "iPhone 17" "iPhone 17 Pro" "iPhone 15"; do \
+			if xcrun simctl list devices available 2>/dev/null | grep -qF "    $$sim ("; then \
+				dest="platform=iOS Simulator,name=$$sim"; \
+				break; \
+			fi; \
+		done; \
+	fi; \
+	if [ -z "$$dest" ]; then \
+		echo "No iOS Simulator found. Install one in Xcode → Settings → Platforms."; \
+		exit 1; \
+	fi; \
+	echo "==> iOS test ($$dest)"; \
+	cd clients/ios && xcodebuild test \
+		-project Lextures.xcodeproj \
+		-scheme Lextures \
+		-destination "$$dest" \
+		-configuration Debug \
+		CODE_SIGNING_ALLOWED=NO
 
 lint-server:
 	$(MAKE) -C server lint

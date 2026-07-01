@@ -80,7 +80,13 @@ object DeepLinkRouter {
             "grades" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
             "office-hours" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.OfficeHours)
             "feed" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Feed)
-            "discussions" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Discussions)
+            "discussions" -> {
+                if (segments.size >= 5 && segments[3].equals("threads", ignoreCase = true)) {
+                    DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Discussions, segments[4])
+                } else {
+                    DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Discussions)
+                }
+            }
             "live", "live-sessions" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Live)
             "files" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Files)
             "attendance" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Attendance)

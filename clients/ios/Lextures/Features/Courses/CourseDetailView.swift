@@ -127,6 +127,7 @@ struct CourseDetailView: View {
                 }
             )
         }
+        .tutorLauncher(course: course)
         .task { await load() }
         .onChange(of: allSections) { _, sections in
             if !sections.contains(section), let first = sections.first {
@@ -182,7 +183,12 @@ struct CourseDetailView: View {
             GradingBacklogSection(course: course)
         case .library:
             CourseLibraryView(course: course, items: items, onSelectItem: { linkedItem = $0 })
-        case .discussions, .feed, .live, .people, .evaluations:
+        case .discussions:
+            CourseDiscussionsSection(
+                course: course,
+                initialThreadId: section == .discussions ? initialItemId : nil
+            )
+        case .feed, .live, .people, .evaluations:
             CourseDestinationPlaceholder(section: section)
         }
     }

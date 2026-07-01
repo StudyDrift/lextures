@@ -150,6 +150,8 @@ struct ProfileMoreDestinationScreen: View {
     var body: some View {
         if destination == .library && shell.platformFeatures.libraryBrowseEnabled {
             LibraryBrowseView()
+        } else if destination == .askAi {
+            TutorChatView(mode: .askAi)
         } else {
             MoreDestinationPlaceholder(destination: destination)
         }

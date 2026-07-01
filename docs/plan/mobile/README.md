@@ -67,9 +67,9 @@ messages, send message, unread count, notifications, broadcasts, attendance
 sessions, quiz **attempts (read)**, syllabus, notebooks, me.
 
 **The big student-facing gaps** (drive P0): taking a quiz, **submitting** an
-assignment, rendering module content types (pages/files/links/LTI/H5P/SCORM),
-discussions, calendar/to-dos, viewing rich feedback (annotations, audio/video,
-rubrics), what-if grades, the AI tutor, adaptive review/paths, native push +
+assignment ✅, rendering module content types (pages/files/links/LTI/H5P/SCORM),
+**discussions** ✅, calendar/to-dos, viewing rich feedback (annotations, audio/video,
+rubrics), what-if grades, **the AI tutor** ✅, adaptive review/paths, native push +
 deep links, and offline.
 
 ## 4. Epics & numbering
@@ -105,15 +105,15 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | Story | Source feature(s) | Status today | Disposition |
 |---|---|---|---|
 | [M4.1 Quiz taker & question types](../completed/mobile/M4.1-quiz-taker.md) | 2.2 question types, 2.3 math, 2.7 timers/auto-submit, 2.8 shuffling, 2.9 attempts, quiz attempt page | **DONE** | **P0** |
-| [M5.1 Assignment submission](M5.1-assignment-submission.md) | 3.13 resubmission, 8.2 resumable upload, module assignment page | None (grade-only) | **P0** |
+| [M5.1 Assignment submission](../completed/mobile/M5.1-assignment-submission.md) ✅ | 3.13 resubmission, 8.2 resumable upload, module assignment page | **DONE** | **P0** |
 | [M3.1 Module content viewer](../completed/mobile/M3.1-module-content-viewer.md) ✅ | module content/external-link/textbook pages, 8.7 image/pdf preview, 1.11 conditional release | Done | **P0** |
 | [M3.2 Course files browser](../completed/mobile/M3.2-course-files.md) ✅ | course-files-page, 8.1 storage, 8.7 preview | Done | **P0** |
-| [M2.1 Calendar & to-dos](M2.1-calendar-todos.md) | calendar, todos-page, 16.5 feeds | None | **P0** |
+| [M2.1 Calendar & to-dos](../completed/mobile/M2.1-calendar-todos.md) ✅ | calendar, todos-page, 16.5 feeds | **DONE** | **P0** |
 | [M6.1 Grades, feedback & what-if](../completed/mobile/M6.1-grades-feedback.md) ✅ | my-grades, 3.1 annotation, 3.2 a/v feedback, 3.16 what-if, rubrics | **DONE** | **P0** |
-| [M7.1 Course discussions](M7.1-discussions.md) | 6.1 threaded forums, course-discussions-page | None | **P0** |
-| [M7.2 AI tutor & Ask-AI](M7.2-ai-tutor.md) | 6.9 AI tutor, ask-ai-page, 15.12 study buddy | None | **P0** |
+| [M7.1 Course discussions](../completed/mobile/M7.1-discussions.md) ✅ | 6.1 threaded forums, course-discussions-page | **DONE** | **P0** |
+| [M7.2 AI tutor & Ask-AI](../completed/mobile/M7.2-ai-tutor.md) ✅ | 6.9 AI tutor, ask-ai-page, 15.12 study buddy | **DONE** | **P0** |
 | [M8.1 Review & spaced repetition](M8.1-review-spaced-repetition.md) | 1.5 spaced repetition, review-session-page | None | **P0** |
-| [M0.1 Native push & deep links](M0.1-push-deep-links.md) | 6.3 push, 21.5 APNs/FCM | None | **P0** |
+| [M0.1 Native push & deep links](../completed/mobile/M0.1-push-deep-links.md) ✅ | 6.3 push, 21.5 APNs/FCM | **DONE** | **P0** |
 | [M0.2 Offline mode & sync](../completed/mobile/M0.2-offline-sync.md) ✅ | 7.3 offline PWA (web), 21.x offline | None | **P0** |
 
 ### High-value breadth (P1)

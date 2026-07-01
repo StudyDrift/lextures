@@ -1,0 +1,4 @@
+# Assignment detail is a large single-file SwiftUI screen (M5.1).
+type_body_length:
+  warning: 350
+  error: 750

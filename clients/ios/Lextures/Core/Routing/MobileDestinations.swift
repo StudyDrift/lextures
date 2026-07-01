@@ -77,11 +77,13 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case credentials
     case advising
     case settings
+    case askAi
 
     var id: String { rawValue }
 
     var label: String {
         switch self {
+        case .askAi: return L.text("mobile.tutor.askAi")
         case .calendar: return L.text("mobile.ia.more.calendar")
         case .planner: return L.text("mobile.ia.more.planner")
         case .catalog: return L.text("mobile.ia.more.catalog")
@@ -97,6 +99,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
 
     var systemImage: String {
         switch self {
+        case .askAi: return "sparkles"
         case .calendar: return "calendar"
         case .planner: return "list.bullet.rectangle"
         case .catalog: return "books.vertical"
@@ -223,6 +226,11 @@ struct MobilePlatformFeatures: Equatable {
     var customFieldsEnabled = false
     var ffDemographics = false
     var ffResearchConsent = false
+    var ffPersistentTutor = false
+    var ffAiStudyBuddy = false
+    var ragNotebookEnabled = false
+    var aiStudyBuddyEnabled = false
+    var aiDisclosureEnabled = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -236,7 +244,12 @@ struct MobilePlatformFeatures: Equatable {
             oerLibraryEnabled: features?.oerLibraryEnabled == true,
             customFieldsEnabled: features?.customFieldsEnabled == true,
             ffDemographics: features?.ffDemographics == true,
-            ffResearchConsent: features?.ffResearchConsent == true
+            ffResearchConsent: features?.ffResearchConsent == true,
+            ffPersistentTutor: features?.ffPersistentTutor == true,
+            ffAiStudyBuddy: features?.ffAiStudyBuddy == true,
+            ragNotebookEnabled: features?.ragNotebookEnabled == true,
+            aiStudyBuddyEnabled: features?.aiStudyBuddyEnabled == true,
+            aiDisclosureEnabled: features?.aiDisclosureEnabled == true
         )
     }
 
@@ -288,6 +301,7 @@ enum MobileDestinations {
         var out: [MoreDestination] = []
         switch context {
         case .learning:
+            if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
             out += [.calendar, .planner, .catalog, .paths, .reading]
             if platform.libraryBrowseEnabled { out.append(.library) }
             out += [.portfolio, .credentials, .advising, .settings]

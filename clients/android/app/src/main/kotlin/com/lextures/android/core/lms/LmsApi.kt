@@ -364,6 +364,40 @@ object LmsApi {
         decode<MySubmissionResponse>(body).submission
     }
 
+    suspend fun submitAssignmentText(
+        courseCode: String,
+        itemId: String,
+        text: String,
+        accessToken: String,
+    ): AssignmentSubmission = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(itemId)}/submissions/text",
+            method = "POST",
+            body = client.encodeBody(SubmitAssignmentTextRequest(text), SubmitAssignmentTextRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<SubmitAssignmentResponse>(body).submission
+    }
+
+    suspend fun uploadAssignmentFile(
+        courseCode: String,
+        itemId: String,
+        fileBytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+        accessToken: String,
+    ): AssignmentSubmission = withContext(Dispatchers.IO) {
+        val body = client.uploadMultipart(
+            path = "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(itemId)}/submissions/upload",
+            fieldName = "file",
+            fileName = fileName,
+            mimeType = mimeType,
+            fileBytes = fileBytes,
+            accessToken = accessToken,
+        )
+        decode<SubmitAssignmentResponse>(body).submission
+    }
+
     suspend fun fetchSubmissions(
         courseCode: String,
         itemId: String,
@@ -1086,4 +1120,245 @@ object LmsApi {
             throw ApiError.HttpStatus(code, "Failed to record library access")
         }
     }
+
+    // Discussions (M7.1)
+
+    suspend fun fetchDiscussionForums(courseCode: String, accessToken: String): List<DiscussionForum> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/forums",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<DiscussionForumsResponse>(body).forums.orEmpty()
+        }
+
+    suspend fun fetchDiscussionThreads(
+        courseCode: String,
+        forumId: String,
+        accessToken: String,
+    ): List<DiscussionThreadSummary> = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/forums/${encodePath(forumId)}/threads",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<DiscussionThreadsResponse>(body).threads.orEmpty()
+    }
+
+    suspend fun fetchDiscussionThread(
+        courseCode: String,
+        threadId: String,
+        accessToken: String,
+    ): DiscussionThreadDetail = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/discussion-threads/${encodePath(threadId)}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchDiscussionPosts(
+        courseCode: String,
+        threadId: String,
+        accessToken: String,
+    ): DiscussionPostsResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/discussion-threads/${encodePath(threadId)}/posts",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun createDiscussionThread(
+        courseCode: String,
+        forumId: String,
+        title: String,
+        body: kotlinx.serialization.json.JsonElement,
+        accessToken: String,
+    ): DiscussionThreadDetail = withContext(Dispatchers.IO) {
+        val payload = CreateDiscussionThreadBody(title = title, body = body)
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/forums/${encodePath(forumId)}/threads",
+            method = "POST",
+            body = json.encodeToString(CreateDiscussionThreadBody.serializer(), payload),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun createDiscussionPost(
+        courseCode: String,
+        threadId: String,
+        parentPostId: String?,
+        body: kotlinx.serialization.json.JsonElement,
+        accessToken: String,
+        idempotencyKey: String? = null,
+    ): DiscussionPost = withContext(Dispatchers.IO) {
+        val payload = CreateDiscussionPostBody(
+            parentPostId = parentPostId,
+            body = body,
+            idempotencyKey = idempotencyKey,
+        )
+        val (responseBody, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/discussion-threads/${encodePath(threadId)}/posts",
+            method = "POST",
+            body = json.encodeToString(CreateDiscussionPostBody.serializer(), payload),
+            accessToken = accessToken,
+            idempotencyKey = idempotencyKey,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun deleteDiscussionPost(
+        courseCode: String,
+        postId: String,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/discussion-posts/${encodePath(postId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code != 204 && code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun upvoteDiscussionPost(
+        courseCode: String,
+        postId: String,
+        accessToken: String,
+    ): DiscussionUpvoteResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/discussion-posts/${encodePath(postId)}/upvote",
+            method = "POST",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    // AI tutor (M7.2)
+
+    suspend fun fetchTutorConversation(courseCode: String, accessToken: String): TutorConversationResponse =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/tutor/conversation",
+                accessToken = accessToken,
+            )
+            decode(body)
+        }
+
+    suspend fun resetTutorConversation(courseCode: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val (_, code) = client.requestRaw(
+            path = "/api/v1/courses/${encodePath(courseCode)}/tutor/conversation",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code != 204 && code !in 200..299) throw ApiError.HttpStatus(code, "Failed to reset conversation")
+    }
+
+    suspend fun fetchTutorSessions(courseCode: String, accessToken: String): List<TutorSessionSummary> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/tutor/sessions",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun createTutorSession(courseCode: String, accessToken: String): TutorSessionSummary =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                path = "/api/v1/courses/${encodePath(courseCode)}/tutor/sessions",
+                method = "POST",
+                body = "{}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchTutorSession(
+        courseCode: String,
+        sessionId: String,
+        accessToken: String,
+    ): TutorSessionDetailResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/tutor/sessions/${encodePath(sessionId)}",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun deleteTutorSession(courseCode: String, sessionId: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val (_, code) = client.requestRaw(
+                path = "/api/v1/courses/${encodePath(courseCode)}/tutor/sessions/${encodePath(sessionId)}",
+                method = "DELETE",
+                accessToken = accessToken,
+            )
+            if (code != 204 && code !in 200..299) throw ApiError.HttpStatus(code, "Failed to delete session")
+        }
+
+    suspend fun fetchTokenBudget(accessToken: String): TutorTokenBudgetResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/token-budget", accessToken = accessToken)
+        decode(body)
+    }
+
+    suspend fun queryNotebooks(body: NotebookRagQueryBody, accessToken: String): NotebookRagQueryResponse =
+        withContext(Dispatchers.IO) {
+            val (responseBody, code) = client.requestRaw(
+                path = "/api/v1/me/notebooks/query",
+                method = "POST",
+                body = json.encodeToString(NotebookRagQueryBody.serializer(), body),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode(responseBody)
+        }
+
+    fun tutorMessageStream(
+        courseCode: String,
+        message: String,
+        accessToken: String,
+        streamClient: TutorStreamClient = TutorStreamClient(),
+    ) = streamClient.stream(
+        path = "/api/v1/courses/${encodePath(courseCode)}/tutor/message",
+        body = json.encodeToString(TutorMessageBody.serializer(), TutorMessageBody(message)),
+        accessToken = accessToken,
+    )
+
+    fun tutorSessionMessageStream(
+        courseCode: String,
+        sessionId: String,
+        content: String,
+        accessToken: String,
+        streamClient: TutorStreamClient = TutorStreamClient(),
+    ) = streamClient.stream(
+        path = "/api/v1/courses/${encodePath(courseCode)}/tutor/sessions/${encodePath(sessionId)}/messages",
+        body = json.encodeToString(TutorSessionMessageBody.serializer(), TutorSessionMessageBody(content)),
+        accessToken = accessToken,
+    )
+
+    fun studyBuddyMessageStream(
+        courseCode: String,
+        message: String,
+        sessionId: String?,
+        accessToken: String,
+        streamClient: TutorStreamClient = TutorStreamClient(),
+    ) = streamClient.stream(
+        path = "/api/v1/courses/${encodePath(courseCode)}/study-buddy/message",
+        body = json.encodeToString(
+            StudyBuddyMessageBody.serializer(),
+            StudyBuddyMessageBody(message, sessionId.orEmpty()),
+        ),
+        accessToken = accessToken,
+    )
 }

@@ -45,7 +45,11 @@ struct ModuleItemRouteView: View {
         case .quiz:
             QuizIntroView(course: course, item: item, onProgressChanged: onProgressChanged)
         case .assignment:
-            ItemDetailView(course: course, item: item)
+            if course.viewerIsStudent {
+                AssignmentDetailView(course: course, item: item)
+            } else {
+                ItemDetailView(course: course, item: item)
+            }
         case .externalLink, .webContent:
             WebItemLoader(course: course, item: item)
         case .interactive:

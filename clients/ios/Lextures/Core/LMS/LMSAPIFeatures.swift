@@ -257,6 +257,43 @@ extension LMSAPI {
         return try decode(MySubmissionResponse.self, from: data).submission
     }
 
+    static func submitAssignmentText(
+        courseCode: String,
+        itemId: String,
+        text: String,
+        accessToken: String
+    ) async throws -> AssignmentSubmission {
+        let (data, _) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/assignments/\(encodePath(itemId))/submissions/text",
+            method: "POST",
+            body: SubmitAssignmentTextRequest(text: text),
+            authorized: true,
+            accessToken: accessToken
+        )
+        return try decode(SubmitAssignmentResponse.self, from: data).submission
+    }
+
+    static func uploadAssignmentFile(
+        courseCode: String,
+        itemId: String,
+        fileData: Data,
+        fileName: String,
+        mimeType: String,
+        accessToken: String,
+        onProgress: ((Double) -> Void)? = nil
+    ) async throws -> AssignmentSubmission {
+        let (data, _) = try await client.uploadMultipart(
+            path: "/api/v1/courses/\(encodePath(courseCode))/assignments/\(encodePath(itemId))/submissions/upload",
+            fieldName: "file",
+            fileName: fileName,
+            mimeType: mimeType,
+            fileData: fileData,
+            accessToken: accessToken,
+            onProgress: onProgress
+        )
+        return try decode(SubmitAssignmentResponse.self, from: data).submission
+    }
+
     static func fetchSubmissions(
         courseCode: String,
         itemId: String,

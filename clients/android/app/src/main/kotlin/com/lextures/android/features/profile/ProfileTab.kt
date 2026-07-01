@@ -251,6 +251,14 @@ fun ProfileTab(
                     shell = shell,
                     modifier = Modifier.fillMaxSize(),
                 )
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.AskAi) {
+                com.lextures.android.features.tutor.TutorChatScreen(
+                    session = session,
+                    mode = com.lextures.android.features.tutor.TutorChatMode.AskAi,
+                    shell = shell,
+                    onClose = { openMoreDestination = null },
+                    modifier = Modifier.fillMaxSize(),
+                )
             } else {
                 MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
             }

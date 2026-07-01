@@ -75,6 +75,9 @@ enum DeepLinkRouter {
         case "feed":
             return .course(code: courseCode, section: .feed, itemId: nil)
         case "discussions":
+            if segments.count >= 5, segments[3].lowercased() == "threads" {
+                return .course(code: courseCode, section: .discussions, itemId: segments[4])
+            }
             return .course(code: courseCode, section: .discussions, itemId: nil)
         case "live", "live-sessions":
             return .course(code: courseCode, section: .live, itemId: nil)

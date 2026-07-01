@@ -2,6 +2,7 @@ package com.lextures.android.core.navigation
 
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.PlatformFeatures
+import com.lextures.android.core.lms.TutorLogic
 import com.lextures.android.core.lms.isOfficeHoursEnabled
 import com.lextures.android.core.routing.CourseDeepLinkSection
 
@@ -44,6 +45,7 @@ enum class MoreDestination(val labelRes: String) {
     Credentials("mobile_ia_more_credentials"),
     Advising("mobile_ia_more_advising"),
     Settings("mobile_ia_more_settings"),
+    AskAi("mobile_tutor_askAi"),
 }
 
 /** Course-scoped workspace chips (registry-driven). */
@@ -116,6 +118,11 @@ data class MobilePlatformFeatures(
     val customFieldsEnabled: Boolean = false,
     val ffDemographics: Boolean = false,
     val ffResearchConsent: Boolean = false,
+    val ffPersistentTutor: Boolean = false,
+    val ffAiStudyBuddy: Boolean = false,
+    val ragNotebookEnabled: Boolean = false,
+    val aiStudyBuddyEnabled: Boolean = false,
+    val aiDisclosureEnabled: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -133,6 +140,11 @@ data class MobilePlatformFeatures(
             customFieldsEnabled = features?.customFieldsEnabled == true,
             ffDemographics = features?.ffDemographics == true,
             ffResearchConsent = features?.ffResearchConsent == true,
+            ffPersistentTutor = features?.ffPersistentTutor == true,
+            ffAiStudyBuddy = features?.ffAiStudyBuddy == true,
+            ragNotebookEnabled = features?.ragNotebookEnabled == true,
+            aiStudyBuddyEnabled = features?.aiStudyBuddyEnabled == true,
+            aiDisclosureEnabled = features?.aiDisclosureEnabled == true,
         )
     }
 }
@@ -179,6 +191,7 @@ object MobileDestinations {
     ): List<MoreDestination> = buildList {
         when (context) {
             MobileRoleContext.Learning -> {
+                if (TutorLogic.askAiEnabled(platform)) add(MoreDestination.AskAi)
                 add(MoreDestination.Calendar)
                 add(MoreDestination.Planner)
                 add(MoreDestination.Catalog)

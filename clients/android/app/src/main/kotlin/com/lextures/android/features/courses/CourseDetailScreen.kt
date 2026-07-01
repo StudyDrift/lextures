@@ -1,6 +1,7 @@
 package com.lextures.android.features.courses
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.lextures.android.features.tutor.TutorChatMode
+import com.lextures.android.features.tutor.TutorChatScreen
+import com.lextures.android.features.tutor.TutorFab
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -66,6 +70,7 @@ import com.lextures.android.core.lms.FilePreviewTarget
 import com.lextures.android.core.lms.GradeFeedbackRoute
 import com.lextures.android.features.grades.GradeFeedbackScreen
 import com.lextures.android.features.officehours.CourseOfficeHoursSection
+import com.lextures.android.features.discussions.CourseDiscussionsSection
 import com.lextures.android.core.navigation.CourseWorkspaceContext
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
@@ -85,12 +90,14 @@ fun CourseDetailScreen(
     onBack: () -> Unit,
     shell: HomeShellState? = null,
     initialSection: CourseWorkspaceSection? = null,
+    initialThreadId: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
+    val deepLinkThreadId = initialThreadId
 
     var section by rememberSaveable(course.courseCode) {
         mutableStateOf(initialSection?.name ?: "modules")
@@ -111,6 +118,7 @@ fun CourseDetailScreen(
     var openFilePreview by remember { mutableStateOf<FilePreviewTarget?>(null) }
     var openGradeFeedback by remember { mutableStateOf<GradeFeedbackRoute?>(null) }
     var showCourseSearch by remember { mutableStateOf(false) }
+    var showTutor by remember { mutableStateOf(false) }
 
     val emptyCourseTitle = moduleEmptyCourseTitle()
     val emptyCourseHint = moduleEmptyCourseHint()
@@ -261,7 +269,23 @@ fun CourseDetailScreen(
         }
     }
 
-    Column(modifier = modifier) {
+    if (showTutor) {
+        Dialog(
+            onDismissRequest = { showTutor = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false),
+        ) {
+            TutorChatScreen(
+                session = session,
+                mode = TutorChatMode.Course(course),
+                shell = shell,
+                onClose = { showTutor = false },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+    }
+
+    Box(modifier = modifier) {
+    Column(modifier = Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -382,7 +406,17 @@ fun CourseDetailScreen(
                             onSelectItem = { openItem = it },
                         )
                     }
-                    CourseWorkspaceSection.Discussions,
+                    CourseWorkspaceSection.Discussions -> item {
+                        CourseDiscussionsSection(
+                            session = session,
+                            course = course,
+                            initialThreadId = if (selectedSection == CourseWorkspaceSection.Discussions) {
+                                deepLinkThreadId
+                            } else {
+                                null
+                            },
+                        )
+                    }
                     CourseWorkspaceSection.Feed,
                     CourseWorkspaceSection.Live,
                     CourseWorkspaceSection.People,
@@ -481,6 +515,12 @@ fun CourseDetailScreen(
                 }
             }
         }
+    }
+        TutorFab(
+            course = course,
+            onOpen = { showTutor = true },
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 
     lockedItem?.let { item ->

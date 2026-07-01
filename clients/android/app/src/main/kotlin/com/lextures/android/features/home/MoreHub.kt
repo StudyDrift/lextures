@@ -113,4 +113,5 @@ private fun moreLabelRes(destination: MoreDestination): Int = when (destination)
     MoreDestination.Credentials -> R.string.mobile_ia_more_credentials
     MoreDestination.Advising -> R.string.mobile_ia_more_advising
     MoreDestination.Settings -> R.string.mobile_ia_more_settings
+    MoreDestination.AskAi -> R.string.mobile_tutor_askAi
 }
