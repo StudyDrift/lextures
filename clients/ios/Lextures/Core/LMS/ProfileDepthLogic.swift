@@ -79,7 +79,7 @@ enum ProfileDepthLogic {
             }
             switch def.fieldType {
             case "number":
-                if let n = Double(raw) { out[def.key] = .number(n) } else { out[def.key] = .null }
+                if let numberValue = Double(raw) { out[def.key] = .number(numberValue) } else { out[def.key] = .null }
             case "boolean":
                 out[def.key] = .bool(raw.lowercased() == "true")
             default:
@@ -92,15 +92,15 @@ enum ProfileDepthLogic {
     static func displayValue(for def: ProfileFieldDefinition, value: JSONValue?) -> String {
         guard let value, !value.isEmpty else { return L.text("mobile.emDash") }
         switch (def.fieldType, value) {
-        case ("boolean", .bool(let b)):
-            return b ? L.text("mobile.profileDepth.yes") : L.text("mobile.profileDepth.no")
-        case (_, .string(let s)):
-            return s
-        case (_, .number(let n)):
-            if n.rounded(.towardZero) == n { return String(Int(n)) }
-            return String(n)
-        case (_, .bool(let b)):
-            return b ? L.text("mobile.profileDepth.yes") : L.text("mobile.profileDepth.no")
+        case ("boolean", .bool(let boolValue)):
+            return boolValue ? L.text("mobile.profileDepth.yes") : L.text("mobile.profileDepth.no")
+        case (_, .string(let stringValue)):
+            return stringValue
+        case (_, .number(let numberValue)):
+            if numberValue.rounded(.towardZero) == numberValue { return String(Int(numberValue)) }
+            return String(numberValue)
+        case (_, .bool(let boolValue)):
+            return boolValue ? L.text("mobile.profileDepth.yes") : L.text("mobile.profileDepth.no")
         default:
             return L.text("mobile.emDash")
         }
@@ -114,11 +114,11 @@ enum ProfileDepthLogic {
         for def in definitions {
             guard let value = values[def.key] else { continue }
             switch value {
-            case .string(let s): draft[def.key] = s
-            case .bool(let b): draft[def.key] = b ? "true" : "false"
-            case .number(let n):
-                if n.rounded(.towardZero) == n { draft[def.key] = String(Int(n)) }
-                else { draft[def.key] = String(n) }
+            case .string(let stringValue): draft[def.key] = stringValue
+            case .bool(let boolValue): draft[def.key] = boolValue ? "true" : "false"
+            case .number(let numberValue):
+                if numberValue.rounded(.towardZero) == numberValue { draft[def.key] = String(Int(numberValue)) }
+                else { draft[def.key] = String(numberValue) }
             case .null: break
             }
         }
@@ -180,11 +180,11 @@ enum ProfileDepthLogic {
         guard trimmed.count == 10 else { return false }
         let parts = trimmed.split(separator: "-")
         guard parts.count == 3,
-              let y = Int(parts[0]), let m = Int(parts[1]), let d = Int(parts[2]) else { return false }
+              let year = Int(parts[0]), let month = Int(parts[1]), let day = Int(parts[2]) else { return false }
         var comps = DateComponents()
-        comps.year = y
-        comps.month = m
-        comps.day = d
+        comps.year = year
+        comps.month = month
+        comps.day = day
         return Calendar.current.date(from: comps) != nil
     }
 }

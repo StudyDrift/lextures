@@ -186,6 +186,9 @@
 		1A2B3C4D5E6F708192A3B4C5D /* ProfileDepthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A2B3C4D5E6F708192A3B4C5C /* ProfileDepthModels.swift */; };
 		5E6F708192A3B4C5D6E7F8091 /* ProfileDepthLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E6F708192A3B4C5D6E7F8090 /* ProfileDepthLogic.swift */; };
 		2B3C4D5E6F708192A3B4C5D6E /* ProfileDepthCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3C4D5E6F708192A3B4C5D6D /* ProfileDepthCards.swift */; };
+		E7F8091A3B4C5D6E7F8092B /* LMSAPIMobileWave.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F8091A3B4C5D6E7F8092A /* LMSAPIMobileWave.swift */; };
+		E7F8091A3B4C5D6E7F8092D /* LMSFeatureModelsMobile.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F8091A3B4C5D6E7F8092C /* LMSFeatureModelsMobile.swift */; };
+		E7F8091A3B4C5D6E7F8092F /* ProfileViewSections.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7F8091A3B4C5D6E7F8092E /* ProfileViewSections.swift */; };
 		3C4D5E6F708192A3B4C5D6E7F /* ProfilePersonalDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C4D5E6F708192A3B4C5D6E7E /* ProfilePersonalDetailsView.swift */; };
 		4D5E6F708192A3B4C5D6E7F80 /* ResearchStudiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D5E6F708192A3B4C5D6E7F8F /* ResearchStudiesView.swift */; };
 /* End PBXBuildFile section */
@@ -363,6 +366,9 @@
 		1A2B3C4D5E6F708192A3B4C5C /* ProfileDepthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDepthModels.swift; sourceTree = "<group>"; };
 		5E6F708192A3B4C5D6E7F8090 /* ProfileDepthLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDepthLogic.swift; sourceTree = "<group>"; };
 		2B3C4D5E6F708192A3B4C5D6D /* ProfileDepthCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDepthCards.swift; sourceTree = "<group>"; };
+		E7F8091A3B4C5D6E7F8092A /* LMSAPIMobileWave.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIMobileWave.swift; sourceTree = "<group>"; };
+		E7F8091A3B4C5D6E7F8092C /* LMSFeatureModelsMobile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsMobile.swift; sourceTree = "<group>"; };
+		E7F8091A3B4C5D6E7F8092E /* ProfileViewSections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewSections.swift; sourceTree = "<group>"; };
 		3C4D5E6F708192A3B4C5D6E7E /* ProfilePersonalDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePersonalDetailsView.swift; sourceTree = "<group>"; };
 		4D5E6F708192A3B4C5D6E7F8F /* ResearchStudiesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchStudiesView.swift; sourceTree = "<group>"; };
 		167CE62F1C7C43229558765E /* MobileDestinations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileDestinations.swift; sourceTree = "<group>"; };
@@ -418,6 +424,7 @@
 				70BFFCF2E12242079D41BE2F /* ProfileSecurityCard.swift */,
 				4869F4F366D54A73BD872409 /* ProfileSettingsCards.swift */,
 				2B3C4D5E6F708192A3B4C5D6D /* ProfileDepthCards.swift */,
+				E7F8091A3B4C5D6E7F8092E /* ProfileViewSections.swift */,
 				3C4D5E6F708192A3B4C5D6E7E /* ProfilePersonalDetailsView.swift */,
 				4D5E6F708192A3B4C5D6E7F8F /* ResearchStudiesView.swift */,
 				3DE8AABF071F49F59E80DF9B /* ProfileView.swift */,
@@ -845,7 +852,9 @@
 				5DD030CDA20C47C493D388DE /* InteractiveLaunchLogic.swift */,
 				EBDD39F8F24A4EB69DAFB87C /* LMSAPI.swift */,
 				36EF134991514C0B86FF1761 /* LMSAPIFeatures.swift */,
+				E7F8091A3B4C5D6E7F8092A /* LMSAPIMobileWave.swift */,
 				A0504D39B03542DF884796EC /* LMSFeatureModels.swift */,
+				E7F8091A3B4C5D6E7F8092C /* LMSFeatureModelsMobile.swift */,
 				6FF7AD1856CD46D1A0D4BB55 /* LMSModels.swift */,
 				7A820F310D8A4ECC85251942 /* ModuleContentLogic.swift */,
 				FB42466F88BD45019617DBB2 /* NotificationLogic.swift */,
@@ -1018,7 +1027,9 @@
 				07296549E1CF4B759A0D5AC1 /* InteractiveLaunchLogic.swift in Sources */,
 				4094C649706A4F73BB5F978E /* LMSAPI.swift in Sources */,
 				46392B4F18C744769251CC1D /* LMSAPIFeatures.swift in Sources */,
+				E7F8091A3B4C5D6E7F8092B /* LMSAPIMobileWave.swift in Sources */,
 				3D9C5ABA41074F61BD22B17F /* LMSFeatureModels.swift in Sources */,
+				E7F8091A3B4C5D6E7F8092D /* LMSFeatureModelsMobile.swift in Sources */,
 				17D825DBCE8B4BF982D10CE4 /* LMSModels.swift in Sources */,
 				2BD2DA13C46147D68F7083D0 /* ModuleContentLogic.swift in Sources */,
 				62EB45B550884323A85B55D8 /* NotificationLogic.swift in Sources */,
@@ -1128,6 +1139,7 @@
 				3FDE7CDA0BFD447A8344CE03 /* ProfileSecurityCard.swift in Sources */,
 				1449E46DC3C94968A5900C46 /* ProfileSettingsCards.swift in Sources */,
 				2B3C4D5E6F708192A3B4C5D6E /* ProfileDepthCards.swift in Sources */,
+				E7F8091A3B4C5D6E7F8092F /* ProfileViewSections.swift in Sources */,
 				3C4D5E6F708192A3B4C5D6E7F /* ProfilePersonalDetailsView.swift in Sources */,
 				4D5E6F708192A3B4C5D6E7F80 /* ResearchStudiesView.swift in Sources */,
 				132D335ED4194589A321D4BB /* ProfileView.swift in Sources */,

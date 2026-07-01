@@ -213,8 +213,8 @@ struct LibraryBrowseView: View {
 
     private func runSearch() async {
         guard let token = session.accessToken else { return }
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !q.isEmpty else { return }
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedQuery.isEmpty else { return }
         loading = true
         errorMessage = nil
         defer {
@@ -223,10 +223,10 @@ struct LibraryBrowseView: View {
         }
         do {
             if tab == .library && librarySearchEnabled {
-                catalogResults = try await LMSAPI.searchLibraryCatalog(query: q, accessToken: token)
+                catalogResults = try await LMSAPI.searchLibraryCatalog(query: trimmedQuery, accessToken: token)
                 oerResults = []
             } else if let provider = selectedProvider ?? LibraryResourceLogic.defaultOERProvider(from: oerProviders) {
-                let response = try await LMSAPI.searchOER(provider: provider, query: q, accessToken: token)
+                let response = try await LMSAPI.searchOER(provider: provider, query: trimmedQuery, accessToken: token)
                 oerResults = response.results
                 catalogResults = []
             }

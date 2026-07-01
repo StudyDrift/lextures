@@ -12,14 +12,8 @@ enum SearchPathNavigator {
         let trimmed = rawPath.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
 
-        if trimmed.hasPrefix("lextures://shell/") {
-            let segment = String(trimmed.dropFirst("lextures://shell/".count)).lowercased()
-            switch segment {
-            case "teach": return .shellTab(.teach)
-            case "children": return .shellTab(.children)
-            case "calendar": return .shellTab(.calendar)
-            default: break
-            }
+        if let shellTarget = resolveShellDeepLink(trimmed) {
+            return shellTarget
         }
 
         let path = trimmed.split(separator: "?").first.map(String.init) ?? trimmed
@@ -29,6 +23,21 @@ enum SearchPathNavigator {
             return .shellTab(.home)
         }
 
+        return resolveTopLevelSegment(segments, path: path)
+    }
+
+    private static func resolveShellDeepLink(_ trimmed: String) -> SearchNavigationTarget? {
+        guard trimmed.hasPrefix("lextures://shell/") else { return nil }
+        let segment = String(trimmed.dropFirst("lextures://shell/".count)).lowercased()
+        switch segment {
+        case "teach": return .shellTab(.teach)
+        case "children": return .shellTab(.children)
+        case "calendar": return .shellTab(.calendar)
+        default: return nil
+        }
+    }
+
+    private static func resolveTopLevelSegment(_ segments: [String], path: String) -> SearchNavigationTarget? {
         switch segments[0].lowercased() {
         case "courses":
             if segments.count == 1 { return .shellTab(.courses) }

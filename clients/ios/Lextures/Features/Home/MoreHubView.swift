@@ -16,9 +16,9 @@ struct MoreHubView: View {
     }
 
     private var filtered: [MoreDestination] {
-        let q = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
-        guard !q.isEmpty else { return destinations }
-        return destinations.filter { $0.label.lowercased().contains(q) }
+        let needle = query.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard !needle.isEmpty else { return destinations }
+        return destinations.filter { $0.label.lowercased().contains(needle) }
     }
 
     var body: some View {

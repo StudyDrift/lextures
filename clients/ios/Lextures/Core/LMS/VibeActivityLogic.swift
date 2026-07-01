@@ -117,6 +117,84 @@ enum VibeActivityLogic {
 
     // MARK: - Block parsing
 
+    private static func appendParsedTag(
+        _ tag: String,
+        attrs: String,
+        inner: String,
+        blocks: inout [VibeActivityBlock],
+        nextId: Int,
+        flushText: (String) -> Void
+    ) -> Int {
+        var id = nextId
+        switch tag {
+        case "h1", "h2", "h3", "h4", "h5", "h6":
+            let level = Int(tag.dropFirst()) ?? 2
+            blocks.append(VibeActivityBlock(id: id, kind: .heading(level: level, text: htmlToPlainText(inner))))
+            id += 1
+        case "p":
+            blocks.append(VibeActivityBlock(id: id, kind: .paragraph(htmlToPlainText(inner))))
+            id += 1
+        case "ul":
+            let items = listItems(from: inner, ordered: false)
+            if items.isEmpty {
+                flushText(inner)
+            } else {
+                blocks.append(VibeActivityBlock(id: id, kind: .bulletList(items)))
+                id += 1
+            }
+        case "ol":
+            let items = listItems(from: inner, ordered: true)
+            if items.isEmpty {
+                flushText(inner)
+            } else {
+                blocks.append(VibeActivityBlock(id: id, kind: .orderedList(items)))
+                id += 1
+            }
+        case "hr", "":
+            blocks.append(VibeActivityBlock(id: id, kind: .divider))
+            id += 1
+        case "textarea":
+            let placeholder = attributeValue("placeholder", in: attrs)
+            let prompt = htmlToPlainText(inner)
+            blocks.append(VibeActivityBlock(id: id, kind: .freeResponse(prompt: prompt, placeholder: placeholder)))
+            id += 1
+        case "input":
+            let type = (attributeValue("type", in: attrs) ?? "text").lowercased()
+            if type == "text" || type.isEmpty {
+                let placeholder = attributeValue("placeholder", in: attrs)
+                blocks.append(VibeActivityBlock(id: id, kind: .freeResponse(prompt: "", placeholder: placeholder)))
+                id += 1
+            } else {
+                blocks.append(VibeActivityBlock(id: id, kind: .unsupported("This input type works best on the web.")))
+                id += 1
+            }
+        case "button":
+            let label = htmlToPlainText(inner)
+            if !label.isEmpty {
+                blocks.append(VibeActivityBlock(id: id, kind: .checkButton(label: label, feedback: nil)))
+                id += 1
+            }
+        case "iframe", "canvas", "video":
+            blocks.append(VibeActivityBlock(id: id, kind: .unsupported("Embedded media works best on the web.")))
+            id += 1
+        case "div":
+            let childBlocks = parseSimpleBlocks(from: inner, startId: id)
+            if childBlocks.isEmpty {
+                let plain = htmlToPlainText(inner)
+                if !plain.isEmpty {
+                    blocks.append(VibeActivityBlock(id: id, kind: .paragraph(plain)))
+                    id += 1
+                }
+            } else {
+                blocks.append(contentsOf: childBlocks)
+                id = (blocks.last?.id ?? id) + 1
+            }
+        default:
+            flushText(inner)
+        }
+        return id
+    }
+
     private static func parseSimpleBlocks(from html: String, startId: Int) -> [VibeActivityBlock] {
         guard !html.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return [] }
         var blocks: [VibeActivityBlock] = []
@@ -143,73 +221,14 @@ enum VibeActivityLogic {
             let tag = (captureGroup(match, in: html, index: 1) ?? "").lowercased()
             let attrs = captureGroup(match, in: html, index: 2) ?? ""
             let inner = captureGroup(match, in: html, index: 3) ?? ""
-
-            switch tag {
-            case "h1", "h2", "h3", "h4", "h5", "h6":
-                let level = Int(tag.dropFirst()) ?? 2
-                blocks.append(VibeActivityBlock(id: id, kind: .heading(level: level, text: htmlToPlainText(inner))))
-                id += 1
-            case "p":
-                blocks.append(VibeActivityBlock(id: id, kind: .paragraph(htmlToPlainText(inner))))
-                id += 1
-            case "ul":
-                let items = listItems(from: inner, ordered: false)
-                if items.isEmpty {
-                    flushText(inner)
-                } else {
-                    blocks.append(VibeActivityBlock(id: id, kind: .bulletList(items)))
-                    id += 1
-                }
-            case "ol":
-                let items = listItems(from: inner, ordered: true)
-                if items.isEmpty {
-                    flushText(inner)
-                } else {
-                    blocks.append(VibeActivityBlock(id: id, kind: .orderedList(items)))
-                    id += 1
-                }
-            case "hr", "":
-                blocks.append(VibeActivityBlock(id: id, kind: .divider))
-                id += 1
-            case "textarea":
-                let placeholder = attributeValue("placeholder", in: attrs)
-                let prompt = htmlToPlainText(inner)
-                blocks.append(VibeActivityBlock(id: id, kind: .freeResponse(prompt: prompt, placeholder: placeholder)))
-                id += 1
-            case "input":
-                let type = (attributeValue("type", in: attrs) ?? "text").lowercased()
-                if type == "text" || type.isEmpty {
-                    let placeholder = attributeValue("placeholder", in: attrs)
-                    blocks.append(VibeActivityBlock(id: id, kind: .freeResponse(prompt: "", placeholder: placeholder)))
-                    id += 1
-                } else {
-                    blocks.append(VibeActivityBlock(id: id, kind: .unsupported("This input type works best on the web.")))
-                    id += 1
-                }
-            case "button":
-                let label = htmlToPlainText(inner)
-                if !label.isEmpty {
-                    blocks.append(VibeActivityBlock(id: id, kind: .checkButton(label: label, feedback: nil)))
-                    id += 1
-                }
-            case "iframe", "canvas", "video":
-                blocks.append(VibeActivityBlock(id: id, kind: .unsupported("Embedded media works best on the web.")))
-                id += 1
-            case "div":
-                let childBlocks = parseSimpleBlocks(from: inner, startId: id)
-                if childBlocks.isEmpty {
-                    let plain = htmlToPlainText(inner)
-                    if !plain.isEmpty {
-                        blocks.append(VibeActivityBlock(id: id, kind: .paragraph(plain)))
-                        id += 1
-                    }
-                } else {
-                    blocks.append(contentsOf: childBlocks)
-                    id = (blocks.last?.id ?? id) + 1
-                }
-            default:
-                flushText(inner)
-            }
+            id = appendParsedTag(
+                tag,
+                attrs: attrs,
+                inner: inner,
+                blocks: &blocks,
+                nextId: id,
+                flushText: flushText
+            )
 
             index = match.range.location + match.range.length
         }

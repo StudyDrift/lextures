@@ -107,12 +107,12 @@ enum JSONValue: Codable, Hashable {
         let container = try decoder.singleValueContainer()
         if container.decodeNil() {
             self = .null
-        } else if let b = try? container.decode(Bool.self) {
-            self = .bool(b)
-        } else if let n = try? container.decode(Double.self) {
-            self = .number(n)
-        } else if let s = try? container.decode(String.self) {
-            self = .string(s)
+        } else if let boolValue = try? container.decode(Bool.self) {
+            self = .bool(boolValue)
+        } else if let numberValue = try? container.decode(Double.self) {
+            self = .number(numberValue)
+        } else if let stringValue = try? container.decode(String.self) {
+            self = .string(stringValue)
         } else {
             self = .null
         }
@@ -121,9 +121,9 @@ enum JSONValue: Codable, Hashable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
-        case .string(let s): try container.encode(s)
-        case .bool(let b): try container.encode(b)
-        case .number(let n): try container.encode(n)
+        case .string(let stringValue): try container.encode(stringValue)
+        case .bool(let boolValue): try container.encode(boolValue)
+        case .number(let numberValue): try container.encode(numberValue)
         case .null: try container.encodeNil()
         }
     }
@@ -131,7 +131,7 @@ enum JSONValue: Codable, Hashable {
     var isEmpty: Bool {
         switch self {
         case .null: return true
-        case .string(let s): return s.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        case .string(let stringValue): return stringValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         default: return false
         }
     }
