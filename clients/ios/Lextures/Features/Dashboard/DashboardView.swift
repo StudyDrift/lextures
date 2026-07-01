@@ -495,7 +495,7 @@ struct DashboardView: View {
 
 private func dashboardCourseCarouselCard(
     _ course: CourseSummary,
-    itemCounts: CourseItemCounts?,
+    itemCounts: (modules: Int, items: Int)?,
     colorScheme: ColorScheme
 ) -> some View {
     VStack(alignment: .leading, spacing: 0) {
@@ -532,7 +532,7 @@ private func dashboardCourseCarouselCard(
     .shadow(color: LexturesTheme.cardShadow(for: colorScheme), radius: 12, y: 5)
 }
 
-private func dashboardCourseSubtitle(_ course: CourseSummary, itemCounts: CourseItemCounts?) -> String {
+private func dashboardCourseSubtitle(_ course: CourseSummary, itemCounts: (modules: Int, items: Int)?) -> String {
     if let counts = itemCounts, counts.items > 0 {
         return "\(counts.modules) module\(counts.modules == 1 ? "" : "s") · \(counts.items) item\(counts.items == 1 ? "" : "s")"
     }
