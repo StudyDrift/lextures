@@ -30,6 +30,9 @@ object OfflineCacheKey {
         "course:$courseCode:discussion-posts:$threadId"
     fun reviewQueue(): String = "review:queue"
     fun reviewStats(): String = "review:stats"
+    fun feedChannels(courseCode: String): String = "course:$courseCode:feed-channels"
+    fun feedMessages(courseCode: String, channelId: String): String =
+        "course:$courseCode:feed-messages:$channelId"
 }
 
 data class Cached<T>(

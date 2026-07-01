@@ -147,6 +147,7 @@ final class AuthSession {
         let savedToken = accessToken
         BiometricGate.shared.resetOnSignOut()
         Task { await PushManager.shared.deregisterFromBackend(explicitAccessToken: savedToken) }
+        RealtimeManager.shared.disconnect()
         OfflineService.shared.clearAllOnLogout()
         KeychainStore.deleteAll()
         accessToken = nil

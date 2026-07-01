@@ -1,0 +1,71 @@
+#!/bin/bash
+set -euo pipefail
+
+LOG=/var/log/lextures-bootstrap.log
+exec >>"$LOG" 2>&1
+echo "=== lextures bootstrap $(date -Is) ==="
+
+/usr/local/bin/lextures-mount-db-volume.sh
+
+curl -fsSL https://get.docker.com | sh
+systemctl daemon-reload
+systemctl enable docker
+systemctl start docker
+
+for i in $(seq 1 90); do
+  if systemctl is-active --quiet docker && test -S /var/run/docker.sock && docker info >/dev/null 2>&1; then
+    break
+  fi
+  systemctl start docker 2>/dev/null || true
+  sleep 2
+done
+
+if ! docker info >/dev/null 2>&1; then
+  echo "ERROR: Docker daemon not ready" >&2
+  exit 1
+fi
+
+if command -v ufw >/dev/null; then
+  ufw allow 22/tcp || true
+  ufw allow 80/tcp || true
+  ufw allow 443/tcp || true
+fi
+
+install -d -m 0755 /opt/lextures
+cat > /opt/lextures/README.txt <<'EOF'
+Lextures application VM (provisioned by Terraform)
+
+Paths:
+  /opt/lextures/docker-compose.deploy.yml
+  /opt/lextures/.env
+  /mnt/lextures-db/postgres
+  /mnt/lextures-db/course-files
+
+Logs:
+  /var/log/lextures-bootstrap.log
+  /var/log/lextures-deploy.log
+
+Status:
+  /var/lib/lextures-deploy-status
+
+Redeploy app stack:
+  sudo /usr/local/bin/lextures-deploy-app.sh
+EOF
+
+if id ubuntu >/dev/null 2>&1; then
+  usermod -aG docker ubuntu || true
+fi
+
+if [ "${deploy_enabled}" = "true" ] && [ -x /usr/local/bin/lextures-deploy-app.sh ]; then
+  if /usr/local/bin/lextures-deploy-app.sh; then
+    echo "deploy: ready" >>"$LOG"
+  else
+    echo "WARN: app deploy failed — see /var/log/lextures-deploy.log" >>"$LOG"
+    echo "failed" > /var/lib/lextures-deploy-status
+  fi
+else
+  echo "skipped: deploy_enabled=false" > /var/lib/lextures-deploy-status
+fi
+
+touch /var/lib/lextures-provisioned
+echo "=== lextures bootstrap complete $(date -Is) ==="

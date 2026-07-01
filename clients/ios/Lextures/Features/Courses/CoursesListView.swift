@@ -14,6 +14,7 @@ struct CoursesListView: View {
     @State private var deepLinkedCourse: CourseSummary?
     @State private var deepLinkSection: CourseDeepLinkSection?
     @State private var deepLinkItemId: String?
+    @Bindable private var realtime = RealtimeManager.shared
 
     private var filteredCourses: [CourseSummary] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
@@ -93,6 +94,12 @@ struct CoursesListView: View {
                 )
             }
             .task { await load() }
+            .onChange(of: realtime.coursesRevision) { _, _ in
+                Task { await load(force: true) }
+            }
+            .onChange(of: realtime.enrollmentsRevision) { _, _ in
+                Task { await load(force: true) }
+            }
             .onChange(of: shell.pendingDeepLink) { _, link in
                 guard let link else { return }
                 if case let .course(code, section, itemId) = link {

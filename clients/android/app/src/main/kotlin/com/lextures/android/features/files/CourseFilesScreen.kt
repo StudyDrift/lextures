@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.realtime.CourseFilesSocket
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.accentColor
@@ -85,6 +87,13 @@ fun CourseFilesScreen(
     var savedKeys by remember { mutableStateOf<Set<String>>(emptySet()) }
     var showClearConfirm by remember { mutableStateOf(false) }
 
+    val filesSocket = remember(course.courseCode) { CourseFilesSocket() }
+    val filesRevision by filesSocket.revision.collectAsState()
+    DisposableEffect(course.courseCode) {
+        filesSocket.connect(course.courseCode) { accessToken }
+        onDispose { filesSocket.disconnect() }
+    }
+
     val rootLabel = fileRootLabel()
     val emptyTitle = fileEmptyFolderTitle()
     val emptyHint = fileEmptyFolderHint()
@@ -97,7 +106,7 @@ fun CourseFilesScreen(
     val folderLabel = fileFolderLabel()
     val savedLabel = fileSavedLabel()
 
-    LaunchedEffect(accessToken, folderId) {
+    LaunchedEffect(accessToken, folderId, filesRevision) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null

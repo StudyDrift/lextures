@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.realtime.RealtimeManager
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.OfflineBanner
@@ -79,7 +80,10 @@ fun CoursesTab(
     var deepLinkSection by remember { mutableStateOf<com.lextures.android.core.navigation.CourseWorkspaceSection?>(null) }
     var deepLinkThreadId by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(accessToken) {
+    val coursesRevision by RealtimeManager.coursesRevision.collectAsState()
+    val enrollmentsRevision by RealtimeManager.enrollmentsRevision.collectAsState()
+
+    LaunchedEffect(accessToken, coursesRevision, enrollmentsRevision) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null

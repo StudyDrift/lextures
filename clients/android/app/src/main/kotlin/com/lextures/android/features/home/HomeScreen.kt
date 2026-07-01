@@ -66,6 +66,7 @@ import com.lextures.android.core.navigation.MobileRoleContext
 import com.lextures.android.core.navigation.RoleSnapshot
 import com.lextures.android.core.navigation.ShellTab
 import com.lextures.android.core.push.PushManager
+import com.lextures.android.core.realtime.RealtimeManager
 import com.lextures.android.core.routing.DeepLinkDestination
 import com.lextures.android.features.courses.CoursesTab
 import com.lextures.android.features.dashboard.DashboardTab
@@ -231,6 +232,18 @@ fun HomeScreen(
         shell.refresh(accessToken)
         if (accessToken != null) {
             pushManager.requestTokenSync()
+            RealtimeManager.configure { session.accessToken.value }
+        }
+    }
+
+    val mailboxRevision by RealtimeManager.mailboxRevision.collectAsState()
+    val coursesRevision by RealtimeManager.coursesRevision.collectAsState()
+    val enrollmentsRevision by RealtimeManager.enrollmentsRevision.collectAsState()
+    val notificationsRevision by RealtimeManager.notificationsRevision.collectAsState()
+    val realtimeRevisionSum = mailboxRevision + coursesRevision + enrollmentsRevision + notificationsRevision
+    LaunchedEffect(realtimeRevisionSum) {
+        if (realtimeRevisionSum > 0) {
+            shell.refresh(accessToken)
         }
     }
 

@@ -10,6 +10,7 @@ import com.lextures.android.core.network.ApiError
 import com.lextures.android.core.network.NetworkAuthContext
 import com.lextures.android.core.offline.OfflineService
 import com.lextures.android.core.push.PushManager
+import com.lextures.android.core.realtime.RealtimeManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -163,6 +164,7 @@ class AuthSession(application: Application) : AndroidViewModel(application) {
         val savedToken = _accessToken.value
         BiometricGate.get(getApplication()).resetOnSignOut()
         PushManager.getInstance(getApplication()).deregisterFromBackend(savedToken)
+        RealtimeManager.disconnect()
         OfflineService.get(getApplication()).clearAllOnLogout()
         tokenStore.clearAll()
         _accessToken.value = null

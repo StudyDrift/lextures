@@ -22,6 +22,7 @@ struct CourseDetailView: View {
     @State private var showCourseSearch = false
     @State private var takeAttendanceRoute: TakeAttendanceRoute?
     @State private var selectedAttendanceSession: AttendanceSession?
+    @State private var structureSocket = CourseStructureSocket()
 
     init(
         course: CourseSummary,
@@ -129,6 +130,13 @@ struct CourseDetailView: View {
         }
         .tutorLauncher(course: course)
         .task { await load() }
+        .task {
+            structureSocket.connect(courseCode: course.courseCode, accessToken: { session.accessToken })
+        }
+        .onDisappear { structureSocket.disconnect() }
+        .onChange(of: structureSocket.revision) { _, _ in
+            Task { await load() }
+        }
         .onChange(of: allSections) { _, sections in
             if !sections.contains(section), let first = sections.first {
                 section = first
@@ -190,7 +198,9 @@ struct CourseDetailView: View {
                 course: course,
                 initialThreadId: section == .discussions ? initialItemId : nil
             )
-        case .feed, .live, .people, .evaluations:
+        case .feed:
+            CourseFeedSection(course: course)
+        case .live, .people, .evaluations:
             CourseDestinationPlaceholder(section: section)
         }
     }

@@ -1,0 +1,52 @@
+#!/bin/bash
+set -euo pipefail
+MNT="/mnt/lextures-db"
+VOL_DEV=""
+
+ROOT_PART=$(findmnt -n -o SOURCE /)
+ROOT_DISK="/dev/$(lsblk -no pkname "$ROOT_PART" 2>/dev/null | head -1)"
+
+for _ in $(seq 1 90); do
+  for oci_dev in /dev/oracleoci/oraclevdb /dev/oracleoci/oraclevda; do
+    if [ -e "$oci_dev" ]; then
+      resolved=$(readlink -f "$oci_dev")
+      if [ "$resolved" != "$(readlink -f "$ROOT_DISK")" ]; then
+        VOL_DEV="$oci_dev"
+        break 2
+      fi
+    fi
+  done
+  CAND=$(lsblk -dpno NAME,TYPE | awk -v root="$ROOT_DISK" '$2=="disk" && $1!=root {print $1; exit}')
+  if [ -n "$${CAND:-}" ] && [ -e "$CAND" ]; then
+    VOL_DEV="$CAND"
+    break
+  fi
+  sleep 2
+done
+
+if [ -z "$VOL_DEV" ] || [ ! -e "$VOL_DEV" ]; then
+  echo "ERROR: data block volume not found" >&2
+  exit 1
+fi
+
+if ! blkid "$VOL_DEV" >/dev/null 2>&1; then
+  mkfs.ext4 -F -L lextures-db "$VOL_DEV"
+fi
+
+mkdir -p "$MNT"
+UUID=$(blkid -s UUID -o value "$VOL_DEV")
+if ! grep -qF "$UUID" /etc/fstab 2>/dev/null; then
+  echo "UUID=$UUID $MNT ext4 defaults,nofail,_netdev 0 2" >> /etc/fstab
+fi
+
+if ! mountpoint -q "$MNT"; then
+  mount "$VOL_DEV" "$MNT"
+fi
+
+mkdir -p "$MNT/postgres"
+chown -R 70:70 "$MNT/postgres"
+chmod 700 "$MNT/postgres"
+
+mkdir -p "$MNT/course-files"
+chown 65534:65534 "$MNT/course-files"
+chmod 755 "$MNT/course-files"

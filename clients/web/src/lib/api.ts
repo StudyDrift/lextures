@@ -7,12 +7,17 @@ import {
 
 const defaultApi = 'http://localhost:8080'
 
-/** Resolves the API origin. Treats empty/whitespace VITE_API_URL as unset (Docker/.env can set it to ""). */
+/** Resolves the API origin. Treats empty/whitespace VITE_API_URL as unset (same-origin when in the browser). */
 export function apiBaseUrl(): string {
   const v = import.meta.env.VITE_API_URL
-  if (v == null) return defaultApi
+  if (v == null) {
+    return typeof window !== 'undefined' ? window.location.origin : defaultApi
+  }
   const s = String(v).trim()
-  return s !== '' ? s : defaultApi
+  if (s === '') {
+    return typeof window !== 'undefined' ? window.location.origin : defaultApi
+  }
+  return s
 }
 
 const MAX_IDEMPOTENT_ATTEMPTS = 3

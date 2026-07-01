@@ -1,0 +1,34 @@
+#cloud-config
+# Scripts are base64-encoded to avoid cloud-init YAML parsing failures.
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - ca-certificates
+  - e2fsprogs
+  - util-linux
+  - python3
+
+write_files:
+  - path: /usr/local/bin/lextures-mount-db-volume.sh
+    encoding: b64
+    content: ${mount_script_b64}
+    permissions: "0755"
+%{ if deploy_enabled ~}
+  - path: /usr/local/bin/lextures-deploy-app.sh
+    encoding: b64
+    content: ${deploy_script_b64}
+    permissions: "0755"
+  - path: /etc/systemd/system/lextures.service
+    encoding: b64
+    content: ${compose_service_b64}
+    permissions: "0644"
+%{ endif ~}
+  - path: /usr/local/bin/lextures-bootstrap.sh
+    encoding: b64
+    content: ${bootstrap_script_b64}
+    permissions: "0755"
+
+runcmd:
+  - /usr/local/bin/lextures-bootstrap.sh

@@ -24,6 +24,17 @@ enum AppConfiguration {
         return URL(string: base + normalized)!
     }
 
+    /// Converts the API base (http/https) to a WebSocket URL (ws/wss) for realtime endpoints.
+    static func webSocketURL(path: String) -> URL {
+        let apiURL = apiURL(path: path)
+        var components = URLComponents(url: apiURL, resolvingAgainstBaseURL: false)!
+        switch components.scheme {
+        case "https": components.scheme = "wss"
+        default: components.scheme = "ws"
+        }
+        return components.url!
+    }
+
     /// Public web pages (privacy/trust center, accessibility statement) are served
     /// from the same origin as the API in this monorepo deployment.
     static func webURL(path: String) -> URL { apiURL(path: path) }

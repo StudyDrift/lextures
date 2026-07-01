@@ -31,10 +31,10 @@ describe('apiUrl', () => {
     expect(apiUrl('/api/v1/x')).toBe('https://api.example.com/api/v1/x')
   })
 
-  it('falls back when VITE_API_URL is empty (e.g. Docker .env placeholder)', () => {
+  it('falls back to the page origin when VITE_API_URL is empty (VM deploy behind nginx)', () => {
     vi.stubEnv('VITE_API_URL', '')
-    expect(apiBaseUrl()).toBe('http://localhost:8080')
-    expect(apiUrl('/api/v1/x')).toBe('http://localhost:8080/api/v1/x')
+    expect(apiBaseUrl()).toBe(window.location.origin)
+    expect(apiUrl('/api/v1/x')).toBe(`${window.location.origin}/api/v1/x`)
   })
 })
 

@@ -1,0 +1,106 @@
+#!/bin/bash
+# Installed by Terraform cloud-init when deploy_enabled is true.
+set -euo pipefail
+
+LOG=/var/log/lextures-deploy.log
+exec >>"$LOG" 2>&1
+echo "=== lextures deploy $(date -Is) ==="
+
+install -d -m 0755 /opt/lextures
+echo "${deploy_env_b64}" | base64 -d > /opt/lextures/.env
+echo "${deploy_compose_b64}" | base64 -d > /opt/lextures/docker-compose.deploy.yml
+chmod 600 /opt/lextures/.env
+
+if [ -z "${deploy_public_origin}" ]; then
+  PUBLIC_IP=""
+  if command -v curl >/dev/null 2>&1; then
+    PUBLIC_IP="$(curl -sf -H "Authorization: Bearer Oracle" -H "Content-Type: application/json" http://169.254.169.254/opc/v2/vnics/ 2>/dev/null \
+      | python3 -c 'import json,sys; data=json.load(sys.stdin); print(next((v.get("publicIp") or "" for v in data if v.get("publicIp")), ""))' 2>/dev/null || true)"
+    if [ -z "$PUBLIC_IP" ]; then
+      PUBLIC_IP="$(curl -fsS --max-time 10 https://ifconfig.me 2>/dev/null || true)"
+    fi
+  fi
+  if [ -n "$PUBLIC_IP" ]; then
+    echo "PUBLIC_WEB_ORIGIN=http://$PUBLIC_IP" >> /opt/lextures/.env
+  fi
+fi
+
+ORIGIN="$(grep '^PUBLIC_WEB_ORIGIN=' /opt/lextures/.env | cut -d= -f2- | tr -d '"')"
+HOST="$${ORIGIN#http://}"
+HOST="$${HOST#https://}"
+HOST="$${HOST%%/*}"
+if [ -n "$HOST" ]; then
+  echo "TLS_CERT_CN=$HOST" >> /opt/lextures/.env
+fi
+
+SERVER_IMAGE="$(grep '^LEXTURES_SERVER_IMAGE=' /opt/lextures/.env | cut -d= -f2- | tr -d '"')"
+WEB_IMAGE="$(grep '^LEXTURES_WEB_IMAGE=' /opt/lextures/.env | cut -d= -f2- | tr -d '"')"
+case "$SERVER_IMAGE$WEB_IMAGE" in
+  *ghcr.io/*)
+    if [ -z "${deploy_registry_password}" ] || [ -z "${deploy_registry_username}" ]; then
+      echo "ERROR: ghcr.io images require deploy_registry_username and deploy_registry_password in terraform.tfvars" >&2
+      echo "failed: missing ghcr registry credentials" > /var/lib/lextures-deploy-status
+      exit 1
+    fi
+    ;;
+esac
+
+for i in $(seq 1 120); do
+  if systemctl is-active --quiet docker && docker info >/dev/null 2>&1; then
+    break
+  fi
+  systemctl start docker 2>/dev/null || true
+  sleep 5
+done
+
+if ! docker info >/dev/null 2>&1; then
+  echo "ERROR: Docker daemon not ready" >&2
+  echo "failed: docker not ready" > /var/lib/lextures-deploy-status
+  exit 1
+fi
+
+if [ -n "${deploy_registry_password}" ] && [ -n "${deploy_registry_username}" ] && [ -n "${deploy_registry_host}" ]; then
+  printf '%s' "${deploy_registry_password}" | docker login "${deploy_registry_host}" -u "${deploy_registry_username}" --password-stdin
+fi
+
+cd /opt/lextures
+if ! docker compose -f docker-compose.deploy.yml --env-file .env pull; then
+  echo "ERROR: docker compose pull failed" >&2
+  echo "failed: compose pull" > /var/lib/lextures-deploy-status
+  exit 1
+fi
+if ! docker compose -f docker-compose.deploy.yml --env-file .env up -d --wait --wait-timeout 600; then
+  echo "ERROR: docker compose up failed" >&2
+  docker compose -f docker-compose.deploy.yml --env-file .env ps -a || true
+  echo "failed: compose up" > /var/lib/lextures-deploy-status
+  exit 1
+fi
+
+for i in $(seq 1 30); do
+  if curl -fsS --max-time 5 http://127.0.0.1/health >/dev/null 2>&1; then
+    break
+  fi
+  sleep 5
+done
+
+if ! curl -fsS --max-time 10 http://127.0.0.1/health >/dev/null 2>&1; then
+  echo "ERROR: nginx /health did not become ready on port 80" >&2
+  docker compose -f docker-compose.deploy.yml --env-file .env ps -a || true
+  echo "failed: health check" > /var/lib/lextures-deploy-status
+  exit 1
+fi
+
+if command -v ss >/dev/null 2>&1; then
+  ss -tln | grep -E ':80 |:443 ' || {
+    echo "ERROR: ports 80/443 are not listening" >&2
+    echo "failed: ports not listening" > /var/lib/lextures-deploy-status
+    exit 1
+  }
+fi
+
+systemctl daemon-reload
+systemctl enable lextures.service
+systemctl start lextures.service
+
+echo "ready" > /var/lib/lextures-deploy-status
+echo "=== lextures deploy complete $(date -Is) ==="

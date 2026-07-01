@@ -163,6 +163,7 @@ struct DashboardView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var model = DashboardModel()
     @State private var openReview = false
+    @Bindable private var realtime = RealtimeManager.shared
 
     var body: some View {
         NavigationStack {
@@ -228,6 +229,12 @@ struct DashboardView: View {
             }
             .task {
                 await model.load(accessToken: session.accessToken)
+            }
+            .onChange(of: realtime.coursesRevision) { _, _ in
+                Task { await model.load(accessToken: session.accessToken, force: true) }
+            }
+            .onChange(of: realtime.enrollmentsRevision) { _, _ in
+                Task { await model.load(accessToken: session.accessToken, force: true) }
             }
             .onAppear { openPendingReviewIfNeeded() }
         }
