@@ -18,6 +18,7 @@ struct CourseFilesView: View {
     @State private var previewTarget: FilePreviewTarget?
     @State private var showClearConfirm = false
     @State private var savedKeys: Set<String> = []
+    @State private var filesSocket = CourseFilesSocket()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -60,6 +61,13 @@ struct CourseFilesView: View {
         }
         .task(id: folderId) { await load() }
         .refreshable { await load() }
+        .task {
+            filesSocket.connect(courseCode: course.courseCode, accessToken: { session.accessToken })
+        }
+        .onDisappear { filesSocket.disconnect() }
+        .onChange(of: filesSocket.revision) { _, _ in
+            Task { await load() }
+        }
     }
 
     @ViewBuilder

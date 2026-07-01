@@ -170,6 +170,10 @@ func ListMessagesThreaded(ctx context.Context, pool *pgxpool.Pool, channelID, vi
 		vrows.Close()
 	}
 	toPublic := func(r msgRow) MessagePublic {
+		mentionIDs := mentions[r.ID]
+		if mentionIDs == nil {
+			mentionIDs = []uuid.UUID{}
+		}
 		return MessagePublic{
 			ID:                r.ID,
 			ChannelID:         r.ChannelID,
@@ -179,7 +183,7 @@ func ListMessagesThreaded(ctx context.Context, pool *pgxpool.Pool, channelID, vi
 			ParentMessageID:   r.ParentMessageID,
 			Body:              r.Body,
 			MentionsEveryone:  r.MentionsEveryone,
-			MentionUserIDs:    mentions[r.ID],
+			MentionUserIDs:    mentionIDs,
 			PinnedAt:          r.PinnedAt,
 			CreatedAt:         r.CreatedAt,
 			EditedAt:          r.EditedAt,
@@ -197,7 +201,9 @@ func ListMessagesThreaded(ctx context.Context, pool *pgxpool.Pool, channelID, vi
 	}
 	for _, r := range roots {
 		p := toPublic(r)
-		p.Replies = byParent[r.ID]
+		if rep := byParent[r.ID]; rep != nil {
+			p.Replies = rep
+		}
 		out = append(out, p)
 	}
 	return out, nil

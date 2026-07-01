@@ -74,6 +74,7 @@ private fun sectionLabel(
         CourseWorkspaceSection.Overview -> R.string.mobile_ia_course_overview
         CourseWorkspaceSection.Modules -> R.string.mobile_ia_course_modules
         CourseWorkspaceSection.Grades -> R.string.mobile_ia_course_grades
+        CourseWorkspaceSection.Mastery -> R.string.mobile_ia_course_mastery
         CourseWorkspaceSection.Discussions -> R.string.mobile_ia_course_discussions
         CourseWorkspaceSection.Feed -> R.string.mobile_ia_course_feed
         CourseWorkspaceSection.Live -> R.string.mobile_ia_course_live

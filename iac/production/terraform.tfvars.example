@@ -1,12 +1,53 @@
 # Copy to terraform.tfvars (do not commit secrets). Use Terraform workspaces for staging vs production.
 
-cloud_provider = "aws"
-environment    = "staging"
-aws_region     = "us-east-1"
+# ---------------------------------------------------------------------------
+# Small school (~300 students, ~15 teachers, under $100/mo)
+# ---------------------------------------------------------------------------
+# deployment_tier = "small"
+# cloud_provider  = "digitalocean"
+# environment     = "production"
+# digitalocean_region              = "nyc3"
+# digitalocean_droplet_size        = "s-4vcpu-8gb"   # ~$48/mo; use s-2vcpu-4gb (~$24) to save more
+# digitalocean_data_volume_size_gb = 50              # ~$5/mo
+# digitalocean_enable_droplet_backups = false         # optional weekly backups (~20% of droplet cost)
+
+# Oracle Cloud Always Free (same small tier)
+# deployment_tier   = "small"
+# cloud_provider    = "oracle"
+# environment       = "production"
+# oci_auth_method   = "tfvars"                        # default; or "config_file" with ~/.oci/config
+# oci_region        = "us-ashburn-1"                  # must be tenancy home region for Always Free
+# oci_compartment_id = "ocid1.compartment.oc1..aaaa..." # compartment OCID, not tenancy OCID
+# oci_tenancy_ocid     = "ocid1.tenancy.oc1..aaaa..."   # required for tfvars auth
+# oci_user_ocid        = "ocid1.user.oc1..aaaa..."
+# oci_fingerprint      = "aa:bb:cc:..."
+# oci_private_key_path = "/path/to/oci_api_key.pem"
+# oci_instance_ocpus      = 2                         # Always Free max on A1
+# oci_instance_memory_gbs = 12
+# oci_boot_volume_size_gb = 50
+# oci_data_volume_size_gb = 100                       # 150 GB total block storage within 200 GB free quota
+#
+# App deploy (cloud-init writes compose + .env and starts the stack on first boot)
+# deploy_enabled            = true
+# deploy_server_image       = "ghcr.io/your-org/lextures/server:latest"   # published on merge to main
+# deploy_web_image          = "ghcr.io/your-org/lextures/web:latest"
+# deploy_public_origin      = "https://school.example.com"                   # or leave empty for http://<public-ip>
+# deploy_registry_username  = "github-username"                                # required for private ghcr.io images
+# deploy_registry_password  = "ghp_..."                                        # GitHub PAT with read:packages
+# deploy_postgres_password  = ""                                               # auto-generated when empty
+# deploy_jwt_secret         = ""                                               # auto-generated when empty
+
+# ---------------------------------------------------------------------------
+# Enterprise (multi-school / district, AWS EKS + managed services)
+# ---------------------------------------------------------------------------
+deployment_tier = "enterprise"
+cloud_provider  = "aws"
+environment     = "staging"
+aws_region      = "us-east-1"
 
 # Staging-friendly sizing (module defaults also scale by environment)
-eks_node_desired_size = 2
-eks_node_instance_types = ["t3.large"]
+eks_node_desired_size     = 2
+eks_node_instance_types   = ["t3.large"]
 
 # Optional overrides (null = module picks staging/production defaults)
 # db_instance_class        = "db.t4g.medium"

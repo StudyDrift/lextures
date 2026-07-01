@@ -84,6 +84,7 @@ import com.lextures.android.features.courses.MarkdownText
 import com.lextures.android.features.courses.RowHeader
 import com.lextures.android.features.files.FilePreviewScreen
 import com.lextures.android.features.grades.GradeFeedbackScreen
+import com.lextures.android.features.peerreview.ReviewsReceivedScreen
 import com.lextures.android.features.home.LmsCard
 import com.lextures.android.features.home.LmsErrorBanner
 import kotlinx.coroutines.delay
@@ -130,6 +131,8 @@ fun AssignmentDetailScreen(
     var uploadProgress by remember { mutableDoubleStateOf(-1.0) }
     var uploadError by remember { mutableStateOf<String?>(null) }
     var openFeedback by remember { mutableStateOf<GradeFeedbackRoute?>(null) }
+    var showReceivedReviews by remember { mutableStateOf(false) }
+    var peerReviewEnabled by remember { mutableStateOf(false) }
     var openPreview by remember { mutableStateOf<FilePreviewTarget?>(null) }
     var cameraUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -161,7 +164,21 @@ fun AssignmentDetailScreen(
 
     LaunchedEffect(accessToken, item.id) {
         val token = accessToken ?: return@LaunchedEffect
+        peerReviewEnabled = runCatching {
+            LmsApi.fetchPlatformFeatures(token).ffPeerReview == true
+        }.getOrDefault(false)
         load(token)
+    }
+
+    if (showReceivedReviews) {
+        ReviewsReceivedScreen(
+            session = session,
+            courseCode = courseCode,
+            assignmentId = item.id,
+            modifier = modifier,
+        )
+        BackHandler { showReceivedReviews = false }
+        return
     }
 
     openFeedback?.let { route ->
@@ -456,6 +473,21 @@ fun AssignmentDetailScreen(
                                 )
                             }
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = textSecondary())
+                        }
+                    }
+                }
+            }
+
+            if (peerReviewEnabled && mySubmission != null) {
+                item {
+                    LmsCard(onClick = { showReceivedReviews = true }) {
+                        Column {
+                            Text(L.text(R.string.mobile_peerReview_receivedLink), fontWeight = FontWeight.SemiBold)
+                            Text(
+                                L.text(R.string.mobile_peerReview_receivedLinkHint),
+                                fontSize = 12.sp,
+                                color = textSecondary(),
+                            )
                         }
                     }
                 }

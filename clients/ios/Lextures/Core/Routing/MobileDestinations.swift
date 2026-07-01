@@ -78,12 +78,16 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case advising
     case settings
     case askAi
+    case peerReviews
+    case reportCards
 
     var id: String { rawValue }
 
     var label: String {
         switch self {
         case .askAi: return L.text("mobile.tutor.askAi")
+        case .peerReviews: return L.text("mobile.peerReview.title")
+        case .reportCards: return L.text("mobile.mastery.reportCards")
         case .calendar: return L.text("mobile.ia.more.calendar")
         case .planner: return L.text("mobile.ia.more.planner")
         case .catalog: return L.text("mobile.ia.more.catalog")
@@ -100,6 +104,8 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     var systemImage: String {
         switch self {
         case .askAi: return "sparkles"
+        case .peerReviews: return "person.2.wave.2.fill"
+        case .reportCards: return "doc.text.fill"
         case .calendar: return "calendar"
         case .planner: return "list.bullet.rectangle"
         case .catalog: return "books.vertical"
@@ -121,6 +127,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     case overview
     case modules
     case grades
+    case mastery
     case discussions
     case feed
     case live
@@ -137,6 +144,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .overview: return L.text("mobile.ia.course.overview")
         case .modules: return L.text("mobile.ia.course.modules")
         case .grades: return L.text("mobile.ia.course.grades")
+        case .mastery: return L.text("mobile.ia.course.mastery")
         case .discussions: return L.text("mobile.ia.course.discussions")
         case .feed: return L.text("mobile.ia.course.feed")
         case .live: return L.text("mobile.ia.course.live")
@@ -156,6 +164,7 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .overview: return "overview"
         case .modules: return "modules"
         case .grades: return "grades"
+        case .mastery: return "mastery"
         case .discussions: return "discussions"
         case .feed: return "feed"
         case .live: return "live"
@@ -231,6 +240,7 @@ struct MobilePlatformFeatures: Equatable {
     var ragNotebookEnabled = false
     var aiStudyBuddyEnabled = false
     var aiDisclosureEnabled = false
+    var ffPeerReview = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -249,7 +259,8 @@ struct MobilePlatformFeatures: Equatable {
             ffAiStudyBuddy: features?.ffAiStudyBuddy == true,
             ragNotebookEnabled: features?.ragNotebookEnabled == true,
             aiStudyBuddyEnabled: features?.aiStudyBuddyEnabled == true,
-            aiDisclosureEnabled: features?.aiDisclosureEnabled == true
+            aiDisclosureEnabled: features?.aiDisclosureEnabled == true,
+            ffPeerReview: features?.ffPeerReview == true
         )
     }
 
@@ -302,6 +313,8 @@ enum MobileDestinations {
         switch context {
         case .learning:
             if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
+            if platform.ffPeerReview { out.append(.peerReviews) }
+            out.append(.reportCards)
             out += [.calendar, .planner, .catalog, .paths, .reading]
             if platform.libraryBrowseEnabled { out.append(.library) }
             out += [.portfolio, .credentials, .advising, .settings]
@@ -323,6 +336,7 @@ enum MobileDestinations {
 
         if course.isFilesEnabled { out.append(.files) }
         if course.viewerIsStudent { out.append(.grades) }
+        if course.viewerIsStudent && course.isMasteryEnabled { out.append(.mastery) }
         if course.isDiscussionsEnabled { out.append(.discussions) }
         if course.isFeedEnabled { out.append(.feed) }
         if course.isLiveSessionsEnabled { out.append(.live) }

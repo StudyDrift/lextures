@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.realtime.RealtimeManager
 import com.lextures.android.core.design.HeroBrush
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
@@ -146,7 +147,10 @@ fun DashboardTab(
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
 
-    LaunchedEffect(accessToken) {
+    val coursesRevision by RealtimeManager.coursesRevision.collectAsState()
+    val enrollmentsRevision by RealtimeManager.enrollmentsRevision.collectAsState()
+
+    LaunchedEffect(accessToken, coursesRevision, enrollmentsRevision) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null

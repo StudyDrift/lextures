@@ -179,6 +179,7 @@ struct MainTabView: View {
     @Environment(AuthSession.self) private var session
     var initialDeepLink: DeepLinkDestination?
     @State private var shell = AppShellModel()
+    @Bindable private var realtime = RealtimeManager.shared
 
     var body: some View {
         VStack(spacing: 0) {
@@ -214,6 +215,7 @@ struct MainTabView: View {
             PushManager.shared.configure(accessToken: { session.accessToken }) { destination in
                 shell.openDeepLink(destination)
             }
+            RealtimeManager.shared.configure(accessToken: { session.accessToken })
             if let initialDeepLink {
                 shell.openDeepLink(initialDeepLink)
             }
@@ -221,7 +223,20 @@ struct MainTabView: View {
         .onChange(of: session.accessToken) { _, token in
             if token != nil {
                 Task { await PushManager.shared.syncTokenWithBackend() }
+                RealtimeManager.shared.configure(accessToken: { session.accessToken })
             }
+        }
+        .onChange(of: realtime.mailboxRevision) { _, _ in
+            Task { await shell.refresh(accessToken: session.accessToken) }
+        }
+        .onChange(of: realtime.coursesRevision) { _, _ in
+            Task { await shell.refresh(accessToken: session.accessToken) }
+        }
+        .onChange(of: realtime.enrollmentsRevision) { _, _ in
+            Task { await shell.refresh(accessToken: session.accessToken) }
+        }
+        .onChange(of: realtime.notificationsRevision) { _, _ in
+            Task { await shell.refresh(accessToken: session.accessToken) }
         }
     }
 

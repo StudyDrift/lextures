@@ -117,6 +117,7 @@ fun ProfileTab(
     var showMoreHub by remember { mutableStateOf(false) }
     var confirmingClearSearchHistory by remember { mutableStateOf(false) }
     var openMoreDestination by remember { mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null) }
+    var openPeerReviewAllocationId by remember { mutableStateOf<String?>(null) }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val themePreference = remember { ThemePreference.get(context) }
@@ -257,6 +258,26 @@ fun ProfileTab(
                     mode = com.lextures.android.features.tutor.TutorChatMode.AskAi,
                     shell = shell,
                     onClose = { openMoreDestination = null },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.PeerReviews) {
+                if (openPeerReviewAllocationId != null) {
+                    com.lextures.android.features.peerreview.PeerReviewDetailScreen(
+                        session = session,
+                        allocationId = openPeerReviewAllocationId!!,
+                        onSubmitted = { openPeerReviewAllocationId = null },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    com.lextures.android.features.peerreview.PeerReviewListScreen(
+                        session = session,
+                        onOpenAllocation = { openPeerReviewAllocationId = it },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.ReportCards) {
+                com.lextures.android.features.mastery.ReportCardListScreen(
+                    session = session,
                     modifier = Modifier.fillMaxSize(),
                 )
             } else {

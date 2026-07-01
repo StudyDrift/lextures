@@ -111,6 +111,8 @@ object SearchActionRegistry {
         MoreDestination.Advising -> "/advising"
         MoreDestination.Settings -> "/settings/account"
         MoreDestination.AskAi -> "/ask-ai"
+        MoreDestination.PeerReviews -> "/peer-reviews"
+        MoreDestination.ReportCards -> "/report-cards"
     }
 
     private fun shellTabLabel(context: Context, localePrefs: LocalePreferences, tab: ShellTab): String =
@@ -142,5 +144,7 @@ object SearchActionRegistry {
         MoreDestination.Advising -> R.string.mobile_ia_more_advising
         MoreDestination.Settings -> R.string.mobile_ia_more_settings
         MoreDestination.AskAi -> R.string.mobile_tutor_askAi
+        MoreDestination.PeerReviews -> R.string.mobile_peerReview_title
+        MoreDestination.ReportCards -> R.string.mobile_mastery_reportCards
     }
 }

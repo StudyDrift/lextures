@@ -70,7 +70,7 @@ sessions, quiz **attempts (read)**, syllabus, notebooks, me.
 assignment ✅, rendering module content types (pages/files/links/LTI/H5P/SCORM),
 **discussions** ✅, calendar/to-dos, viewing rich feedback (annotations, audio/video,
 rubrics), what-if grades, **the AI tutor** ✅, adaptive review/paths, native push +
-deep links, and offline.
+deep links, and offline. **Peer review** ✅ (M5.2).
 
 ## 4. Epics & numbering
 
@@ -123,10 +123,10 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M1.1 SSO, MFA & magic link](../completed/mobile/M1.1-sso-mfa-magic-link.md) ✅ | 4.1/4.2 SSO, 4.6 MFA, 4.7 magic link | **Done** |
 | [M1.2 Biometric unlock & sessions](../completed/mobile/M1.2-biometric-sessions.md) ✅ | 4.8/4.9 sessions, biometric | **Done** |
 | [M1.3 Onboarding & placement diagnostic](../completed/mobile/M1.3-onboarding-diagnostic.md) | onboarding, 1.7/15.11 diagnostic | **Done** |
-| [M2.2 Notification center & preferences](M2.2-notification-center.md) | 6.2 notifications, notification prefs | **P1** |
+| [M2.2 Notification center & preferences](../completed/mobile/M2.2-notification-center.md) ✅ | 6.2 notifications, notification prefs | **Done** |
 | [M3.3 Interactive content: H5P/SCORM/LTI](../completed/mobile/M3.3-interactive-content.md) ✅ | 8.12 H5P, 2.14 SCORM/xAPI, 2.12 LTI 1.3 | **Done** |
-| [M5.2 Peer review](M5.2-peer-review.md) | 3.15 peer review | **P1** |
-| [M6.2 Standards-based grades & mastery](M6.2-standards-mastery.md) | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **P1** |
+| [M5.2 Peer review](../completed/mobile/M5.2-peer-review.md) ✅ | 3.15 peer review | **DONE** | **P1** |
+| [M6.2 Standards-based grades & mastery](../completed/mobile/M6.2-standards-mastery.md) ✅ | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **Done** |
 | [M7.3 Office hours booking](../completed/mobile/M7.3-office-hours.md) ✅ | 6.7 office hours | **Done** |
 | [M7.4 Group spaces & collab docs](M7.4-groups-collab.md) | 6.6 groups, 6.5 collab docs | **P1** |
 | [M8.2 Adaptive paths & recommendations](M8.2-paths-recommendations.md) | 1.4 paths, 1.8 recommendations, my-paths | **P1** |
@@ -137,10 +137,10 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M9.3 Certificates, badges & gamification](M9.3-certificates-gamification.md) | 15.5 certs/badges, 15.9 gamification, leaderboard | **P1** |
 | [M10.1 Parent portal](M10.1-parent-portal.md) | 13.1 parent portal, parent-dashboard | **P1** |
 | [M10.2 Conference booking (parent)](M10.2-conference-booking.md) | 13.12 conference scheduling | **P1** |
-| [M11.1 Take attendance (instructor)](M11.1-take-attendance.md) | 13.2 daily attendance | **P1** |
-| [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **P1** |
+| [M11.1 Take attendance (instructor)](../completed/mobile/M11.1-take-attendance.md) ✅ | 13.2 daily attendance | **Done** |
+| [M0.3 Accessibility: VoiceOver/TalkBack & dynamic type](../completed/mobile/M0.3-accessibility.md) ✅ | 12.1/12.2/12.8 a11y | **Done** |
 | [M0.4 i18n, locale & RTL](../completed/mobile/M0.4-i18n-rtl.md) | 11.1 i18n, 11.2 RTL, 11.3/11.4 locale/tz | **Done** |
-| [M1.4 Profile, settings & accommodations](M1.4-settings-accommodations.md) | settings, my-accommodations, 12.10 engine | **P1** |
+| [M1.4 Profile, settings & accommodations](../completed/mobile/M1.4-settings-accommodations.md) ✅ | settings, my-accommodations, 12.10 engine | **Done** |
 
 ### Later / situational (P2)
 
@@ -163,13 +163,13 @@ covered**, plus the navigation redesign needed to hold them. Added as stories:
 
 | Story | Source feature(s) | Server endpoints (exist) | Disposition |
 |---|---|---|---|
-| [M0.5 Redesign: role-aware IA & navigation](M0.5-redesign-information-architecture.md) | shell redesign; course workspace; role adaptation | — (client) | **P0 (foundation)** |
-| [M0.6 Universal search & command palette](M0.6-universal-search.md) | global search, `command-palette-go-to` | `/search`, `/search/query`, `/library/search`, `/oer/search`, `/standards/search` | **P1** |
-| [M3.5 Vibe activities](M3.5-vibe-activities.md) | `course-module-vibe-activity-page` (AI interactive content type) | `/courses/{c}/vibe-activities/{item}` | **P1** |
-| [M3.6 Library, e-reserves & OER](M3.6-library-ereserves-oer.md) | 14.10 e-reserves, OER, `library-catalog-page` | `/library/search`, `/oer/search`, `/courses/{c}/library-resources/*` | **P1** |
+| [M0.5 Redesign: role-aware IA & navigation](../completed/mobile/M0.5-redesign-information-architecture.md) | shell redesign; course workspace; role adaptation | — (client) | **Done** |
+| [M0.6 Universal search & command palette](../completed/mobile/M0.6-universal-search.md) | global search, `command-palette-go-to` | `/search`, `/search/query`, `/library/search`, `/oer/search`, `/standards/search` | **Done** |
+| [M3.5 Vibe activities](../completed/mobile/M3.5-vibe-activities.md) | `course-module-vibe-activity-page` (AI interactive content type) | `/courses/{c}/vibe-activities/{item}` | **Done** |
+| [M3.6 Library, e-reserves & OER](../completed/mobile/M3.6-library-ereserves-oer.md) | 14.10 e-reserves, OER, `library-catalog-page` | `/library/search`, `/oer/search`, `/courses/{c}/library-resources/*` | **Done** |
 | [M6.3 Immersive reader: read-aloud, captions & translation](M6.3-immersive-reader.md) | 12.x read-aloud/captions, 11.x translation, reading prefs | `/files/{o}/captions/*`, course-translation, reading-preferences | **P1** |
 | [M7.5 Live classes & virtual meetings](M7.5-live-classes-virtual-meetings.md) | `course-live-page`, virtual meetings, whiteboards | `/meetings/*`, `/courses/{c}/meetings`, `/courses/{c}/whiteboards/*` | **P1** |
-| [M7.6 Course feed & channels (real-time)](M7.6-course-feed-channels.md) | `course-feed-page` (distinct from M7.1 discussions) | `/courses/{c}/feed/*`, `/feed/ws` | **P1** |
+| [M7.6 Course feed & channels (real-time)](../completed/mobile/M7.6-course-feed-channels.md) | `course-feed-page` (distinct from M7.1 discussions) | `/courses/{c}/feed/*`, `/feed/ws` | **Done** |
 | [M7.7 Course evaluations & surveys](M7.7-course-evaluations-surveys.md) | 14.7 course evaluations, surveys | `/courses/{c}/evaluations/status\|submit\|results` | **P1** |
 | [M7.8 Academic advising (student)](M7.8-academic-advising.md) | advising notes + appointments (HE) | `/me/advising-notes`, `/me/advising/config`, scheduler | **P2** |
 | [M11.3 Instructor insights & at-risk](M11.3-instructor-insights-at-risk.md) | `course-at-risk`, `course-whats-working`, student-progress | at-risk, instructor-insights, student-progress | **P1** |
@@ -203,12 +203,12 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    (cross-cutting), then M4.1 quiz taker, M5.1 submission, M3.1/M3.2 content+files,
    M2.1 calendar, M6.1 grades+feedback, M7.1 discussions, M7.2 AI tutor, M8.1 review.
    Exit criteria: a student completes a full week of coursework with no browser.
-2. **Wave 2 — Breadth (P1).** Auth depth (M1.x), interactive content (M3.3 ✅) +
-   M3.5 vibe activities + M3.6 library/e-reserves, standards/mastery (M6.2),
-   M6.3 immersive reader, groups/office-hours (M7.3/M7.4) + M7.5 live classes +
-   M7.6 course feed + M7.7 evaluations, adaptive (M8.2–M8.4), self-learner commerce
-   (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3/M0.4), settings (M1.4),
-   instructor attendance (M11.1) + M11.3 instructor insights/at-risk.
+2. **Wave 2 — Breadth (P1).** Auth depth (M1.x ✅), interactive content (M3.3 ✅) +
+   M3.5 vibe activities ✅ + M3.6 library/e-reserves ✅, standards/mastery (M6.2 ✅),
+   M6.3 immersive reader, groups/office-hours (M7.3 ✅/M7.4) + M7.5 live classes +
+   M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2–M8.4), self-learner commerce
+   (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
+   instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk.
 3. **Wave 3 — Situational (P2).** Lockdown, code exec, behavior/hall-pass,
    age-appropriate UI, e-portfolio/credentials, instructor broadcast, M7.8 advising,
    M1.5 profile depth (demographics/custom fields/research consent).

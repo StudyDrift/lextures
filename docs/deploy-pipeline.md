@@ -48,6 +48,17 @@ flowchart TD
 
 ## Image tagging (FR-6 / FR-8)
 
+### Small-tier VMs (Oracle / DigitalOcean)
+
+On every merge to `main`, `.github/workflows/publish-images.yml` pushes multi-arch (`amd64` + `arm64`):
+
+- `ghcr.io/<org>/<repo>/server:latest` and `:git-sha>`
+- `ghcr.io/<org>/<repo>/web:latest` and `:git-sha>`
+
+Set `deploy_server_image` / `deploy_web_image` in `iac/production/terraform.tfvars` to these `:latest` tags (or pin a SHA).
+
+### Enterprise (EKS)
+
 Each deploy pushes:
 
 - `ghcr.io/<org>/server-go:<git-sha>` — immutable primary tag

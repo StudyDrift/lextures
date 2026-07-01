@@ -13,7 +13,10 @@ import java.net.URLEncoder
 /** LMS endpoints used by the post-auth tabs (parity with web `courses-api` / `communication-api`). */
 object LmsApi {
     private val client = ApiClient()
-    private val json = Json { ignoreUnknownKeys = true }
+    // coerceInputValues: the server can send `null` (not `[]`) for optional list fields (e.g.
+    // feed message `mentionUserIds`/`replies` when there are none) — fall back to the declared
+    // default instead of failing the whole decode.
+    private val json = Json { ignoreUnknownKeys = true; coerceInputValues = true }
 
     private inline fun <reified T> decode(body: String): T =
         try {
@@ -297,6 +300,68 @@ object LmsApi {
         withContext(Dispatchers.IO) {
             val (body, _) = client.request("/api/v1/platform/features", accessToken = accessToken)
             decode<PlatformFeatures>(body)
+        }
+
+    suspend fun fetchPeerReviewAssigned(accessToken: String): List<PeerReviewAllocation> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw("/api/v1/peer-review/assigned", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            decode<PeerReviewAssignedResponse>(body).allocations
+        }
+
+    suspend fun fetchPeerReviewAllocation(allocationId: String, accessToken: String): PeerReviewAllocationDetail =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/peer-review/allocations/${encodePath(allocationId)}",
+                accessToken = accessToken,
+            )
+            decode<PeerReviewAllocationDetail>(body)
+        }
+
+    suspend fun submitPeerReview(
+        allocationId: String,
+        body: PeerReviewSubmitRequest,
+        accessToken: String,
+    ): PeerReviewSubmitResponse = withContext(Dispatchers.IO) {
+        val (responseBody, _) = client.request(
+            path = "/api/v1/peer-review/allocations/${encodePath(allocationId)}",
+            method = "POST",
+            body = client.encodeBody(body, PeerReviewSubmitRequest.serializer()),
+            accessToken = accessToken,
+        )
+        decode<PeerReviewSubmitResponse>(responseBody)
+    }
+
+    suspend fun fetchPeerReviewReceived(
+        courseCode: String,
+        assignmentId: String,
+        accessToken: String,
+    ): List<PeerReviewReceivedItem> = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/assignments/${encodePath(assignmentId)}/peer-review/received",
+            accessToken = accessToken,
+        )
+        if (code == 404) return@withContext emptyList()
+        decode<PeerReviewReceivedResponse>(body).reviews
+    }
+
+    suspend fun fetchStudentMastery(
+        courseCode: String,
+        enrollmentId: String,
+        accessToken: String,
+    ): StudentMasteryRow = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/mastery",
+            accessToken = accessToken,
+        )
+        decode<StudentMasteryRow>(body)
+    }
+
+    suspend fun fetchMyReportCards(accessToken: String): List<ReportCardSummary> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw("/api/v1/me/report-cards", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            decode<MyReportCardsResponse>(body).reportCards
         }
 
     suspend fun fetchSubmissionAnnotations(
@@ -1239,6 +1304,184 @@ object LmsApi {
         )
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
         decode(body)
+    }
+
+    // Course feed & channels (M7.6). Group variants reuse the same shapes for a future
+    // group-spaces screen (M7.4).
+
+    suspend fun fetchFeedChannels(courseCode: String, accessToken: String): List<FeedChannel> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/feed/channels",
+                accessToken = accessToken,
+            )
+            decode<FeedChannelsResponse>(body).channels
+        }
+
+    suspend fun createFeedChannel(courseCode: String, name: String, accessToken: String): FeedChannel =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/feed/channels",
+                method = "POST",
+                body = client.encodeBody(CreateFeedChannelBody(name), CreateFeedChannelBody.serializer()),
+                accessToken = accessToken,
+            )
+            decode(body)
+        }
+
+    suspend fun fetchFeedMessages(
+        courseCode: String,
+        channelId: String,
+        accessToken: String,
+    ): List<FeedMessage> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/feed/channels/${encodePath(channelId)}/messages",
+            accessToken = accessToken,
+        )
+        decode<FeedMessagesResponse>(body).messages
+    }
+
+    suspend fun postFeedMessage(
+        courseCode: String,
+        channelId: String,
+        body: String,
+        accessToken: String,
+        idempotencyKey: String? = null,
+    ): String = withContext(Dispatchers.IO) {
+        val payload = PostFeedMessageBody(body = body)
+        val (responseBody, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/feed/channels/${encodePath(channelId)}/messages",
+            method = "POST",
+            body = client.encodeBody(payload, PostFeedMessageBody.serializer()),
+            accessToken = accessToken,
+            idempotencyKey = idempotencyKey,
+        )
+        decode<PostFeedMessageResponse>(responseBody).id
+    }
+
+    suspend fun patchFeedMessage(courseCode: String, messageId: String, body: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/feed/messages/${encodePath(messageId)}",
+                method = "PATCH",
+                body = client.encodeBody(PatchFeedMessageBody(body), PatchFeedMessageBody.serializer()),
+                accessToken = accessToken,
+            )
+            Unit
+        }
+
+    suspend fun deleteFeedMessage(courseCode: String, messageId: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/feed/messages/${encodePath(messageId)}",
+                method = "DELETE",
+                accessToken = accessToken,
+            )
+            Unit
+        }
+
+    suspend fun pinFeedMessage(courseCode: String, messageId: String, pinned: Boolean, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/feed/messages/${encodePath(messageId)}/pin",
+                method = "PATCH",
+                body = client.encodeBody(PinFeedMessageBody(pinned), PinFeedMessageBody.serializer()),
+                accessToken = accessToken,
+            )
+            Unit
+        }
+
+    suspend fun likeFeedMessage(courseCode: String, messageId: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/feed/messages/${encodePath(messageId)}/like",
+                method = "POST",
+                accessToken = accessToken,
+            )
+            Unit
+        }
+
+    suspend fun unlikeFeedMessage(courseCode: String, messageId: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/feed/messages/${encodePath(messageId)}/like",
+                method = "DELETE",
+                accessToken = accessToken,
+            )
+            Unit
+        }
+
+    suspend fun fetchFeedRoster(courseCode: String, accessToken: String): List<FeedRosterPerson> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/feed/roster",
+                accessToken = accessToken,
+            )
+            decode<FeedRosterResponse>(body).people
+        }
+
+    suspend fun uploadFeedImage(
+        courseCode: String,
+        imageBytes: ByteArray,
+        fileName: String,
+        mimeType: String,
+        accessToken: String,
+    ): FeedImageUpload = withContext(Dispatchers.IO) {
+        val body = client.uploadMultipart(
+            path = "/api/v1/courses/${encodePath(courseCode)}/feed/upload-image",
+            fieldName = "file",
+            fileName = fileName,
+            mimeType = mimeType,
+            fileBytes = imageBytes,
+            accessToken = accessToken,
+        )
+        decode(body)
+    }
+
+    suspend fun fetchGroupFeedChannels(
+        courseCode: String,
+        groupId: String,
+        accessToken: String,
+    ): List<FeedChannel> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/groups/${encodePath(groupId)}/feed/channels",
+            accessToken = accessToken,
+        )
+        decode<FeedChannelsResponse>(body).channels
+    }
+
+    suspend fun fetchGroupFeedMessages(
+        courseCode: String,
+        groupId: String,
+        channelId: String,
+        accessToken: String,
+    ): List<FeedMessage> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            "/api/v1/courses/${encodePath(courseCode)}/groups/${encodePath(groupId)}" +
+                "/feed/channels/${encodePath(channelId)}/messages",
+            accessToken = accessToken,
+        )
+        decode<FeedMessagesResponse>(body).messages
+    }
+
+    suspend fun postGroupFeedMessage(
+        courseCode: String,
+        groupId: String,
+        channelId: String,
+        body: String,
+        accessToken: String,
+        idempotencyKey: String? = null,
+    ): String = withContext(Dispatchers.IO) {
+        val payload = PostFeedMessageBody(body = body)
+        val (responseBody, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/groups/${encodePath(groupId)}" +
+                "/feed/channels/${encodePath(channelId)}/messages",
+            method = "POST",
+            body = client.encodeBody(payload, PostFeedMessageBody.serializer()),
+            accessToken = accessToken,
+            idempotencyKey = idempotencyKey,
+        )
+        decode<PostFeedMessageResponse>(responseBody).id
     }
 
     // AI tutor (M7.2)

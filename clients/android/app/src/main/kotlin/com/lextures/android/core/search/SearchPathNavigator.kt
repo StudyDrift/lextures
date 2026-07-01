@@ -53,6 +53,8 @@ object SearchPathNavigator {
             "review" -> SearchNavigationTarget.DeepLinkTarget(DeepLinkDestination.Review)
             "credentials" -> SearchNavigationTarget.MoreTarget(MoreDestination.Credentials)
             "advising" -> SearchNavigationTarget.MoreTarget(MoreDestination.Advising)
+            "peer-reviews" -> SearchNavigationTarget.MoreTarget(MoreDestination.PeerReviews)
+            "report-cards" -> SearchNavigationTarget.MoreTarget(MoreDestination.ReportCards)
             "settings" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Profile)
             else -> {
                 val deep = DeepLinkRouter.resolve(path)

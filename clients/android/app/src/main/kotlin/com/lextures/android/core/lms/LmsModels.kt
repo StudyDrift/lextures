@@ -33,8 +33,12 @@ data class CourseSummary(
     val sectionsEnabled: Boolean? = null,
     val resubmissionWorkflowEnabled: Boolean? = null,
     val aiTutorEnabled: Boolean? = null,
+    val viewerStudentEnrollmentId: String? = null,
+    val standardsAlignmentEnabled: Boolean? = null,
+    val reportCardsEnabled: Boolean? = null,
 ) {
     val isAiTutorEnabled: Boolean get() = aiTutorEnabled == true
+    val isMasteryEnabled: Boolean get() = standardsAlignmentEnabled == true
     val displayTitle: String
         get() = catalogNickname?.trim()?.takeIf { it.isNotEmpty() } ?: title
 

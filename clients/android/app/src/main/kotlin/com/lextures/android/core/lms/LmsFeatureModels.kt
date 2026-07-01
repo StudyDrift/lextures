@@ -441,6 +441,7 @@ data class PlatformFeatures(
     val ragNotebookEnabled: Boolean? = null,
     val aiStudyBuddyEnabled: Boolean? = null,
     val aiDisclosureEnabled: Boolean? = null,
+    val ffPeerReview: Boolean? = null,
 )
 
 @Serializable

@@ -37,6 +37,10 @@ enum OfflineCacheKey {
     }
     static func reviewQueue() -> String { "review:queue" }
     static func reviewStats() -> String { "review:stats" }
+    static func feedChannels(_ courseCode: String) -> String { "course:\(courseCode):feed-channels" }
+    static func feedMessages(courseCode: String, channelId: String) -> String {
+        "course:\(courseCode):feed-messages:\(channelId)"
+    }
 }
 
 /// A cached value plus freshness metadata for read screens.

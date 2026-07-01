@@ -1,0 +1,83 @@
+# Publish small-tier / VM container images to GHCR on every merge to main.
+#
+# Images:
+#   ghcr.io/<org>/<repo>/server:latest  (+ :<git-sha>)
+#   ghcr.io/<org>/<repo>/web:latest     (+ :<git-sha>)
+#
+# Multi-arch (amd64 + arm64) for DigitalOcean and Oracle A1 VMs.
+# Web is built with empty VITE_API_URL so the SPA uses the browser origin (nginx proxies /api/).
+
+name: Publish container images
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: publish-images
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Build and push GHCR images
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image names
+        id: images
+        run: |
+          REPO_LOWER="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
+          echo "server=ghcr.io/${REPO_LOWER}/server" >> "$GITHUB_OUTPUT"
+          echo "web=ghcr.io/${REPO_LOWER}/web" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ steps.images.outputs.server }}:latest
+            ${{ steps.images.outputs.server }}:${{ github.sha }}
+          cache-from: type=gha,scope=publish-server
+          cache-to: type=gha,mode=max,scope=publish-server
+
+      - name: Build and push web image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./clients/web
+          file: ./clients/web/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            VITE_API_URL=
+          push: true
+          tags: |
+            ${{ steps.images.outputs.web }}:latest
+            ${{ steps.images.outputs.web }}:${{ github.sha }}
+          cache-from: type=gha,scope=publish-web
+          cache-to: type=gha,mode=max,scope=publish-web
+
+      - name: Summary
+        run: |
+          {
+            echo "## Published images"
+            echo "- \`${{ steps.images.outputs.server }}:latest\`"
+            echo "- \`${{ steps.images.outputs.web }}:latest\`"
+            echo "- Git SHA: \`${{ github.sha }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

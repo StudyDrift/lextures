@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 /// Student assignment detail: instructions, compose, submit, status, feedback link (M5.1).
 struct AssignmentDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
 
@@ -28,6 +29,7 @@ struct AssignmentDetailView: View {
     @State private var pendingAttachment: PendingAttachment?
     @State private var uploader = AttachmentUploader()
     @State private var feedbackRoute: GradeFeedbackRoute?
+    @State private var receivedReviewsRoute: PeerReviewsReceivedRoute?
     @State private var previewTarget: FilePreviewTarget?
     @State private var showCamera = false
     @State private var showFileImporter = false
@@ -71,6 +73,9 @@ struct AssignmentDetailView: View {
                         if status == .graded || (myGrade?.posted == true) {
                             feedbackLink
                         }
+                        if shell.platformFeatures.ffPeerReview, mySubmission != nil {
+                            peerReviewReceivedLink
+                        }
                         detailsCard
                     }
                 }
@@ -82,6 +87,13 @@ struct AssignmentDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(item: $feedbackRoute) { route in
             GradeFeedbackView(course: course, column: route.column)
+        }
+        .navigationDestination(item: $receivedReviewsRoute) { route in
+            ReviewsReceivedView(
+                courseCode: route.courseCode,
+                assignmentId: route.assignmentId,
+                assignmentTitle: route.assignmentTitle
+            )
         }
         .navigationDestination(item: $previewTarget) { target in
             FilePreviewView(target: target)
@@ -409,6 +421,32 @@ struct AssignmentDetailView: View {
                         Text(L.text("mobile.assignment.viewFeedback"))
                             .font(.subheadline.weight(.semibold))
                         Text(L.text("mobile.assignment.viewFeedbackHint"))
+                            .font(.caption)
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                }
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var peerReviewReceivedLink: some View {
+        Button {
+            receivedReviewsRoute = PeerReviewsReceivedRoute(
+                courseCode: courseCode,
+                assignmentId: item.id,
+                assignmentTitle: detail?.title ?? item.title
+            )
+        } label: {
+            LMSCard {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L.text("mobile.peerReview.receivedLink"))
+                            .font(.subheadline.weight(.semibold))
+                        Text(L.text("mobile.peerReview.receivedLinkHint"))
                             .font(.caption)
                             .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
                     }

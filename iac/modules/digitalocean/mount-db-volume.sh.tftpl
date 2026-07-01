@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euo pipefail
+VOL_DEV="/dev/disk/by-id/scsi-0DO_Volume_${db_volume_name}"
+MNT="/mnt/lextures-db"
+
+for _ in $(seq 1 60); do
+  if [ -e "$VOL_DEV" ]; then break; fi
+  sleep 2
+done
+if [ ! -e "$VOL_DEV" ]; then
+  echo "ERROR: block volume not found at $VOL_DEV" >&2
+  exit 1
+fi
+
+if ! blkid "$VOL_DEV" >/dev/null 2>&1; then
+  mkfs.ext4 -F -L lextures-db "$VOL_DEV"
+fi
+
+mkdir -p "$MNT"
+UUID=$(blkid -s UUID -o value "$VOL_DEV")
+if ! grep -qF "$UUID" /etc/fstab 2>/dev/null; then
+  echo "UUID=$UUID $MNT ext4 defaults,nofail 0 2" >> /etc/fstab
+fi
+
+if ! mountpoint -q "$MNT"; then
+  mount "$VOL_DEV" "$MNT"
+fi
+
+mkdir -p "$MNT/postgres"
+chown -R 70:70 "$MNT/postgres"
+chmod 700 "$MNT/postgres"
+
+mkdir -p "$MNT/course-files"
+chown 65534:65534 "$MNT/course-files"
+chmod 755 "$MNT/course-files"

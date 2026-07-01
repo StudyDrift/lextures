@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,6 +44,7 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.lms.AttendanceSession
 import com.lextures.android.core.lms.TakeAttendanceLogic
 import com.lextures.android.core.lms.TakeAttendanceRequest
+import com.lextures.android.core.realtime.CourseStructureSocket
 import androidx.compose.ui.platform.LocalContext
 import com.lextures.android.core.design.OfflineBanner
 import com.lextures.android.core.design.StalenessChip
@@ -71,6 +73,7 @@ import com.lextures.android.core.lms.GradeFeedbackRoute
 import com.lextures.android.features.grades.GradeFeedbackScreen
 import com.lextures.android.features.officehours.CourseOfficeHoursSection
 import com.lextures.android.features.discussions.CourseDiscussionsSection
+import com.lextures.android.features.feed.CourseFeedSection
 import com.lextures.android.core.navigation.CourseWorkspaceContext
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
@@ -123,6 +126,13 @@ fun CourseDetailScreen(
     val emptyCourseTitle = moduleEmptyCourseTitle()
     val emptyCourseHint = moduleEmptyCourseHint()
     val groups = remember(items) { ModuleContentLogic.buildModuleGroups(items) }
+
+    val structureSocket = remember(course.courseCode) { CourseStructureSocket() }
+    val structureRevision by structureSocket.revision.collectAsState()
+    DisposableEffect(course.courseCode) {
+        structureSocket.connect(course.courseCode) { accessToken }
+        onDispose { structureSocket.disconnect() }
+    }
 
     BackHandler(onBack = onBack)
 
@@ -195,7 +205,7 @@ fun CourseDetailScreen(
         return
     }
 
-    LaunchedEffect(accessToken, course.courseCode) {
+    LaunchedEffect(accessToken, course.courseCode, structureRevision) {
         val token = accessToken ?: return@LaunchedEffect
         loading = true
         errorMessage = null
@@ -364,6 +374,12 @@ fun CourseDetailScreen(
                             onOpenFeedback = { openGradeFeedback = it },
                         )
                     }
+                    CourseWorkspaceSection.Mastery -> item {
+                        com.lextures.android.features.mastery.CourseMasterySection(
+                            session = session,
+                            course = course,
+                        )
+                    }
                     CourseWorkspaceSection.OfficeHours -> item {
                         CourseOfficeHoursSection(session = session, course = course)
                     }
@@ -417,7 +433,9 @@ fun CourseDetailScreen(
                             },
                         )
                     }
-                    CourseWorkspaceSection.Feed,
+                    CourseWorkspaceSection.Feed -> item {
+                        CourseFeedSection(session = session, course = course)
+                    }
                     CourseWorkspaceSection.Live,
                     CourseWorkspaceSection.People,
                     CourseWorkspaceSection.Evaluations,

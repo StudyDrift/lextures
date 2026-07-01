@@ -65,6 +65,7 @@ services:
       # Shared Redis for the JWT blocklist, rate limits, and caches (plan 17.2). In
       # production REDIS_URL points at managed Redis over TLS (rediss://...).
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      PUBLIC_WEB_ORIGIN: ${PUBLIC_WEB_ORIGIN:-http://localhost:5173}
       # Drain in-flight requests on SIGTERM during rolling restarts (plan 17.2 FR-8).
       SHUTDOWN_TIMEOUT_SECS: "30"
     volumes:
@@ -90,6 +91,8 @@ services:
   web:
     image: ${LEXTURES_WEB_IMAGE:?LEXTURES_WEB_IMAGE is required}
     restart: unless-stopped
+    environment:
+      TLS_CERT_CN: ${TLS_CERT_CN:-demo.lextures.com}
     depends_on:
       server:
         condition: service_healthy

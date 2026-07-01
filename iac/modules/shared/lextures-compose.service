@@ -1,0 +1,17 @@
+[Unit]
+Description=Lextures application stack (Docker Compose)
+After=docker.service network-online.target
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/lextures
+ExecStartPre=/bin/bash -c 'test -f /opt/lextures/.env && test -f /opt/lextures/docker-compose.deploy.yml'
+ExecStart=/usr/bin/docker compose -f docker-compose.deploy.yml --env-file .env up -d --wait --wait-timeout 600
+ExecStop=/usr/bin/docker compose -f docker-compose.deploy.yml --env-file .env down
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target
