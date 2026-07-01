@@ -36,21 +36,21 @@ struct MarkupOverlayView: View {
         case "draw":
             if let points = annotation.coordsJson?.points, points.count >= 2 {
                 Path { path in
-                    path.move(to: CGPoint(x: points[0].x * size.width, y: points[0].y * size.height))
+                    path.move(to: CGPoint(x: points[0].coordX * size.width, y: points[0].coordY * size.height))
                     for point in points.dropFirst() {
-                        path.addLine(to: CGPoint(x: point.x * size.width, y: point.y * size.height))
+                        path.addLine(to: CGPoint(x: point.coordX * size.width, y: point.coordY * size.height))
                     }
                 }
                 .stroke(color, lineWidth: 2)
             }
         case "pin", "text":
             if let coords = annotation.coordsJson,
-               let x = coords.x ?? coords.x1,
-               let y = coords.y ?? coords.y1 {
+               let pinX = coords.pinX ?? coords.x1,
+               let pinY = coords.pinY ?? coords.y1 {
                 Circle()
                     .fill(color)
                     .frame(width: 10, height: 10)
-                    .position(x: x * size.width, y: y * size.height)
+                    .position(x: pinX * size.width, y: pinY * size.height)
             }
         default:
             EmptyView()
@@ -72,9 +72,9 @@ private extension Color {
         var cleaned = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if cleaned.hasPrefix("#") { cleaned.removeFirst() }
         guard cleaned.count == 6, let value = UInt64(cleaned, radix: 16) else { return nil }
-        let r = Double((value >> 16) & 0xFF) / 255
-        let g = Double((value >> 8) & 0xFF) / 255
-        let b = Double(value & 0xFF) / 255
-        self.init(red: r, green: g, blue: b)
+        let red = Double((value >> 16) & 0xFF) / 255
+        let green = Double((value >> 8) & 0xFF) / 255
+        let blue = Double(value & 0xFF) / 255
+        self.init(red: red, green: green, blue: blue)
     }
 }

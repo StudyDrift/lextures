@@ -101,8 +101,13 @@ struct QuizCodeSubmission: Codable, Hashable {
 }
 
 struct QuizHotspotClick: Codable, Hashable {
-    var x: Double
-    var y: Double
+    var normalizedX: Double
+    var normalizedY: Double
+
+    enum CodingKeys: String, CodingKey {
+        case normalizedX = "x"
+        case normalizedY = "y"
+    }
 }
 
 struct QuizQuestionResponseItem: Codable {
@@ -286,156 +291,75 @@ enum QuizLogic {
         return out
     }
 
+    private static func baseResponseItem(questionId: String) -> QuizQuestionResponseItem {
+        QuizQuestionResponseItem(
+            questionId: questionId,
+            selectedChoiceIndex: nil,
+            selectedChoiceIndices: nil,
+            textAnswer: nil,
+            matchingPairs: nil,
+            orderingSequence: nil,
+            hotspotClick: nil,
+            numericValue: nil,
+            formulaLatex: nil,
+            codeSubmission: nil,
+            fileKey: nil
+        )
+    }
+
     static func buildResponseItem(
         question: QuizQuestion,
         answer: QuizAnswerState?
     ) -> QuizQuestionResponseItem {
         let kind = QuizQuestionKind(raw: question.questionType)
+        let questionId = question.id
         switch kind {
         case .multipleChoice, .trueFalse:
             if question.multipleAnswer == true, let selected = answer?.choices {
-                return QuizQuestionResponseItem(
-                    questionId: question.id,
-                    selectedChoiceIndex: nil,
-                    selectedChoiceIndices: selected.sorted(),
-                    textAnswer: nil,
-                    matchingPairs: nil,
-                    orderingSequence: nil,
-                    hotspotClick: nil,
-                    numericValue: nil,
-                    formulaLatex: nil,
-                    codeSubmission: nil,
-                    fileKey: nil
-                )
+                var item = baseResponseItem(questionId: questionId)
+                item.selectedChoiceIndices = selected.sorted()
+                return item
             }
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: answer?.choice,
-                selectedChoiceIndices: nil,
-                textAnswer: nil,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.selectedChoiceIndex = answer?.choice
+            return item
         case .numeric:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: answer?.text,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: answer?.numeric,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.textAnswer = answer?.text
+            item.numericValue = answer?.numeric
+            return item
         case .formula:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: nil,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: answer?.text,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.formulaLatex = answer?.text
+            return item
         case .ordering:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: nil,
-                matchingPairs: nil,
-                orderingSequence: answer?.ordering ?? orderingItems(question),
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.orderingSequence = answer?.ordering ?? orderingItems(question)
+            return item
         case .matching:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: nil,
-                matchingPairs: buildMatchingPairsPayload(question: question, answer: answer),
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.matchingPairs = buildMatchingPairsPayload(question: question, answer: answer)
+            return item
         case .hotspot:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: nil,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: answer?.hotspot,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.hotspotClick = answer?.hotspot
+            return item
         case .code:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: nil,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: QuizCodeSubmission(
-                    language: question.typeConfig?.language ?? "text",
-                    code: answer?.text ?? ""
-                ),
-                fileKey: nil
+            var item = baseResponseItem(questionId: questionId)
+            item.codeSubmission = QuizCodeSubmission(
+                language: question.typeConfig?.language ?? "text",
+                code: answer?.text ?? ""
             )
+            return item
         case .fileUpload, .audioResponse, .videoResponse:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: answer?.text,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: answer?.text
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.textAnswer = answer?.text
+            item.fileKey = answer?.text
+            return item
         default:
-            return QuizQuestionResponseItem(
-                questionId: question.id,
-                selectedChoiceIndex: nil,
-                selectedChoiceIndices: nil,
-                textAnswer: answer?.text,
-                matchingPairs: nil,
-                orderingSequence: nil,
-                hotspotClick: nil,
-                numericValue: nil,
-                formulaLatex: nil,
-                codeSubmission: nil,
-                fileKey: nil
-            )
+            var item = baseResponseItem(questionId: questionId)
+            item.textAnswer = answer?.text
+            return item
         }
     }
 

@@ -21,6 +21,14 @@ enum GradeCalculator {
         var replaceLowestWithFinal: Bool = false
     }
 
+    struct GroupGradeLine: Hashable {
+        var itemId: String
+        var max: Double
+        var earned: Double
+        var neverDrop: Bool
+        var isFinal: Bool
+    }
+
     struct ComputeOptions {
         var mode: Mode = .actual
         var whatIfOverrides: [String: String] = [:]
@@ -47,7 +55,7 @@ enum GradeCalculator {
 
     static func groupEffectiveEarnedAndMax(
         policy: GroupWeight,
-        lines: [(itemId: String, max: Double, earned: Double, neverDrop: Bool, isFinal: Bool)]
+        lines: [GroupGradeLine]
     ) -> (effectiveEarned: Double, effectiveMax: Double, droppedIds: Set<String>) {
         struct Scored {
             var id: String
@@ -76,9 +84,9 @@ enum GradeCalculator {
             )
         }.filter { $0.max > 0 }
 
-        rows.sort { a, b in
-            if a.pct != b.pct { return a.pct < b.pct }
-            return a.id < b.id
+        rows.sort { lhs, rhs in
+            if lhs.pct != rhs.pct { return lhs.pct < rhs.pct }
+            return lhs.id < rhs.id
         }
 
         var work = rows.filter(\.canDrop)
@@ -101,9 +109,9 @@ enum GradeCalculator {
         if policy.replaceLowestWithFinal {
             if let finalRow = rows.first(where: { $0.isFinal && !dropped.contains($0.id) && $0.pct > 0 }) {
                 let others = rows.filter { !$0.isFinal && !dropped.contains($0.id) }
-                if let lowest = others.min(by: { a, b in
-                    if a.pct != b.pct { return a.pct < b.pct }
-                    return a.id < b.id
+                if let lowest = others.min(by: { lhs, rhs in
+                    if lhs.pct != rhs.pct { return lhs.pct < rhs.pct }
+                    return lhs.id < rhs.id
                 }), finalRow.pct > lowest.pct + 1e-12 {
                     effectiveEarned -= lowest.earned
                     effectiveEarned += lowest.max * finalRow.pct
@@ -138,7 +146,7 @@ enum GradeCalculator {
 
         var maxByBucket: [String: Double] = [:]
         var earnedByBucket: [String: Double] = [:]
-        var byGroup: [String: [(itemId: String, max: Double, earned: Double, neverDrop: Bool, isFinal: Bool)]] = [:]
+        var byGroup: [String: [GroupGradeLine]] = [:]
         let nowMs = options.now.timeIntervalSince1970 * 1000
 
         for col in columns {
@@ -160,13 +168,15 @@ enum GradeCalculator {
                 maxByBucket[bucket, default: 0] += max
                 earnedByBucket[bucket, default: 0] += earned
             } else {
-                byGroup[bucket, default: []].append((
-                    itemId: col.id,
-                    max: max,
-                    earned: earned,
-                    neverDrop: col.neverDrop,
-                    isFinal: col.replaceWithFinal
-                ))
+                byGroup[bucket, default: []].append(
+                    GroupGradeLine(
+                        itemId: col.id,
+                        max: max,
+                        earned: earned,
+                        neverDrop: col.neverDrop,
+                        isFinal: col.replaceWithFinal
+                    )
+                )
             }
         }
 
@@ -189,24 +199,24 @@ enum GradeCalculator {
         let bucketsWithColumns = Set(maxByBucket.filter { $0.value > 0 }.map(\.key))
         guard !bucketsWithColumns.isEmpty else { return nil }
 
-        let configuredSum = assignmentGroups.reduce(0.0) { acc, g in
-            let w = g.weightPercent.isFinite && g.weightPercent > 0 ? g.weightPercent : 0
-            return acc + w
+        let configuredSum = assignmentGroups.reduce(0.0) { acc, group in
+            let weight = group.weightPercent.isFinite && group.weightPercent > 0 ? group.weightPercent : 0
+            return acc + weight
         }
         let remainder = max(0, 100 - configuredSum)
 
         var lostConfiguredWeight = 0.0
         for group in assignmentGroups {
-            let w = group.weightPercent.isFinite && group.weightPercent > 0 ? group.weightPercent : 0
-            if w <= 0 { continue }
-            if !bucketsWithColumns.contains(group.id) { lostConfiguredWeight += w }
+            let weight = group.weightPercent.isFinite && group.weightPercent > 0 ? group.weightPercent : 0
+            if weight <= 0 { continue }
+            if !bucketsWithColumns.contains(group.id) { lostConfiguredWeight += weight }
         }
 
         let maxUngrouped = maxByBucket[ungrouped] ?? 0
         var rawWeight: [String: Double] = [:]
         for group in assignmentGroups where bucketsWithColumns.contains(group.id) {
-            let w = group.weightPercent.isFinite && group.weightPercent > 0 ? group.weightPercent : 0
-            if w > 0 { rawWeight[group.id] = w }
+            let weight = group.weightPercent.isFinite && group.weightPercent > 0 ? group.weightPercent : 0
+            if weight > 0 { rawWeight[group.id] = weight }
         }
 
         if bucketsWithColumns.contains(ungrouped) {
@@ -278,7 +288,7 @@ enum GradeCalculator {
         var polByG: [String: GroupWeight] = [:]
         for group in assignmentGroups { polByG[group.id] = group }
 
-        var byGroup: [String: [(itemId: String, max: Double, earned: Double, neverDrop: Bool, isFinal: Bool)]] = [:]
+        var byGroup: [String: [GroupGradeLine]] = [:]
         let nowMs = options.now.timeIntervalSince1970 * 1000
         var dropped: [String: Bool] = [:]
 
@@ -298,13 +308,15 @@ enum GradeCalculator {
             let bucket = (gid.flatMap { settingsIds.contains($0) ? $0 : nil }) ?? ungrouped
             guard bucket != ungrouped else { continue }
 
-            byGroup[bucket, default: []].append((
-                itemId: col.id,
-                max: max,
-                earned: earned,
-                neverDrop: col.neverDrop,
-                isFinal: col.replaceWithFinal
-            ))
+            byGroup[bucket, default: []].append(
+                GroupGradeLine(
+                    itemId: col.id,
+                    max: max,
+                    earned: earned,
+                    neverDrop: col.neverDrop,
+                    isFinal: col.replaceWithFinal
+                )
+            )
         }
 
         for (gid, lines) in byGroup {
@@ -325,81 +337,6 @@ enum GradeCalculator {
         guard let pct, pct.isFinite else { return "—" }
         let rounded = (pct * 10).rounded() / 10
         return String(format: "%.1f%%", rounded)
-    }
-
-    // MARK: - MyGradesResponse helpers
-
-    static func columns(from response: MyGradesResponse) -> [ColumnForFinal] {
-        response.columns.map { col in
-            ColumnForFinal(
-                id: col.id,
-                maxPoints: col.maxPoints,
-                assignmentGroupId: col.assignmentGroupId,
-                neverDrop: col.neverDrop,
-                replaceWithFinal: col.replaceWithFinal,
-                dueAt: col.dueAt
-            )
-        }
-    }
-
-    static func groups(from response: MyGradesResponse) -> [GroupWeight] {
-        response.assignmentGroups.map { group in
-            GroupWeight(
-                id: group.id,
-                weightPercent: group.weightPercent,
-                dropLowest: group.dropLowest,
-                dropHighest: group.dropHighest,
-                replaceLowestWithFinal: group.replaceLowestWithFinal
-            )
-        }
-    }
-
-    static func excusedByItemId(from response: MyGradesResponse) -> [String: Bool] {
-        var out: [String: Bool] = [:]
-        for (id, status) in response.gradeStatuses where status == "excused" {
-            out[id] = true
-        }
-        return out
-    }
-
-    static func heldSet(from response: MyGradesResponse) -> Set<String> {
-        Set(response.heldGradeItemIds)
-    }
-
-    static func calcColumns(from response: MyGradesResponse) -> [ColumnForFinal] {
-        let held = heldSet(from: response)
-        return columns(from: response).filter { !held.contains($0.id) }
-    }
-
-    static func overallPercent(_ response: MyGradesResponse, options: ComputeOptions = ComputeOptions()) -> Double? {
-        computeCourseFinalPercent(
-            columns: calcColumns(from: response),
-            gradesByItemId: response.grades,
-            assignmentGroups: groups(from: response),
-            excusedByItemId: excusedByItemId(from: response),
-            options: options
-        )
-    }
-
-    static func activeDroppedGrades(
-        response: MyGradesResponse,
-        whatIfMode: Bool,
-        whatIfOverrides: [String: String]
-    ) -> [String: Bool] {
-        if whatIfMode && !whatIfOverrides.isEmpty {
-            var opts = ComputeOptions()
-            opts.mode = .whatIf
-            opts.whatIfOverrides = whatIfOverrides
-            opts.heldItemIds = heldSet(from: response)
-            return computeDroppedGrades(
-                columns: calcColumns(from: response),
-                gradesByItemId: response.grades,
-                assignmentGroups: groups(from: response),
-                excusedByItemId: excusedByItemId(from: response),
-                options: opts
-            )
-        }
-        return response.droppedGrades
     }
 
     // MARK: - Private
