@@ -15,6 +15,8 @@ enum ModuleItemDestination: Equatable {
     case externalLink
     case webContent
     case interactive
+    case vibeActivity
+    case libraryResource
     case file
     case unsupported
 }
@@ -45,8 +47,10 @@ enum ModuleContentLogic {
         case "quiz": return .quiz
         case "assignment": return .assignment
         case "external_link": return .externalLink
-        case "textbook_resource", "library_resource": return .webContent
-        case "h5p", "scorm", "lti_link", "vibe_activity": return .interactive
+        case "library_resource": return .libraryResource
+        case "textbook_resource": return .webContent
+        case "h5p", "scorm", "lti_link": return .interactive
+        case "vibe_activity": return .vibeActivity
         case "file", "file_item": return .file
         default: return .unsupported
         }

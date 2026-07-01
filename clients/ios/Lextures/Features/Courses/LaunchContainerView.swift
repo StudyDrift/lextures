@@ -239,19 +239,6 @@ enum LaunchContainerLoader {
                 packageId: nil,
                 hasResume: false
             )
-        case .vibeActivity:
-            let payload = try await LMSAPI.fetchModuleVibeActivity(
-                courseCode: courseCode,
-                itemId: item.id,
-                accessToken: accessToken
-            )
-            return InteractiveLaunchTarget(
-                title: payload.title.isEmpty ? item.title : payload.title,
-                kind: .vibeActivity,
-                content: .html(InteractiveLaunchLogic.vibeActivityHTML(payload.html)),
-                packageId: nil,
-                hasResume: false
-            )
         }
     }
 }

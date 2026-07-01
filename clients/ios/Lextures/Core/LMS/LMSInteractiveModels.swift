@@ -62,7 +62,7 @@ struct LtiEmbedTicketResponse: Decodable {
     var ticket: String
 }
 
-struct ModuleVibeActivityPayload: Decodable {
+struct ModuleVibeActivityPayload: Codable {
     var id: String
     var title: String
     var html: String?

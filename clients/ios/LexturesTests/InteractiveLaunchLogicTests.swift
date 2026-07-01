@@ -6,7 +6,7 @@ final class InteractiveLaunchLogicTests: XCTestCase {
         XCTAssertEqual(InteractiveLaunchLogic.kind(for: "h5p"), .h5p)
         XCTAssertEqual(InteractiveLaunchLogic.kind(for: "scorm"), .scorm)
         XCTAssertEqual(InteractiveLaunchLogic.kind(for: "lti_link"), .ltiLink)
-        XCTAssertEqual(InteractiveLaunchLogic.kind(for: "vibe_activity"), .vibeActivity)
+        XCTAssertNil(InteractiveLaunchLogic.kind(for: "vibe_activity"))
         XCTAssertNil(InteractiveLaunchLogic.kind(for: "quiz"))
     }
 

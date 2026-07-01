@@ -114,6 +114,11 @@ object LmsApi {
         decode<MeProfile>(body)
     }
 
+    suspend fun fetchMyPermissions(accessToken: String): List<String> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/permissions", accessToken = accessToken)
+        decode<MyPermissionsResponse>(body).permissionStrings
+    }
+
     // Account settings (editable profile)
 
     suspend fun fetchAccountProfile(accessToken: String): AccountProfile = withContext(Dispatchers.IO) {
@@ -137,6 +142,67 @@ object LmsApi {
     suspend fun fetchMyAccommodations(accessToken: String): List<MyAccommodation> = withContext(Dispatchers.IO) {
         val (body, _) = client.request("/api/v1/me/accommodations", accessToken = accessToken)
         decode<MyAccommodationsResponse>(body).accommodations
+    }
+
+    // Profile depth (M1.5)
+
+    suspend fun fetchMyProfileFields(accessToken: String): ProfileFieldsResponse = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/profile-fields", accessToken = accessToken)
+        decode<ProfileFieldsResponse>(body)
+    }
+
+    suspend fun updateMyProfileFields(
+        patch: ProfileFieldsPatch,
+        accessToken: String,
+    ): Map<String, kotlinx.serialization.json.JsonElement> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/me/profile-fields",
+            method = "PATCH",
+            body = client.encodeBody(patch, ProfileFieldsPatch.serializer()),
+            accessToken = accessToken,
+        )
+        decode<ProfileFieldsValuesResponse>(body).values
+    }
+
+    suspend fun fetchMyDemographics(accessToken: String): StudentDemographics = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/demographics", accessToken = accessToken)
+        decode<StudentDemographics>(body)
+    }
+
+    suspend fun updateMyDemographics(
+        patch: StudentDemographicsPatch,
+        accessToken: String,
+    ): StudentDemographics = withContext(Dispatchers.IO) {
+        val (body, _) = client.request(
+            path = "/api/v1/me/demographics",
+            method = "PATCH",
+            body = client.encodeBody(patch, StudentDemographicsPatch.serializer()),
+            accessToken = accessToken,
+        )
+        decode<StudentDemographics>(body)
+    }
+
+    suspend fun fetchPendingConsentStudies(accessToken: String): List<ConsentStudy> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/consent-studies", accessToken = accessToken)
+        decode<ConsentStudiesResponse>(body).studies
+    }
+
+    suspend fun fetchConsentHistory(accessToken: String): List<ConsentHistoryEntry> = withContext(Dispatchers.IO) {
+        val (body, _) = client.request("/api/v1/me/consent-studies/history", accessToken = accessToken)
+        decode<ConsentHistoryResponse>(body).history
+    }
+
+    suspend fun respondToConsentStudy(
+        studyId: String,
+        decision: ConsentDecision,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        client.request(
+            path = "/api/v1/me/consent-studies/${encodePath(studyId)}/respond",
+            method = "POST",
+            body = client.encodeBody(ConsentRespondBody(decision), ConsentRespondBody.serializer()),
+            accessToken = accessToken,
+        )
     }
 
     // Notifications
@@ -555,6 +621,65 @@ object LmsApi {
         }
     }
 
+    suspend fun createAttendanceSession(
+        courseCode: String,
+        body: CreateAttendanceSessionBody,
+        accessToken: String,
+    ): AttendanceSession = withContext(Dispatchers.IO) {
+        val (responseBody, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/attendance/sessions",
+            method = "POST",
+            body = client.encodeBody(body, CreateAttendanceSessionBody.serializer()),
+            accessToken = accessToken,
+        )
+        decode(responseBody)
+    }
+
+    suspend fun saveAttendanceRecords(
+        courseCode: String,
+        sessionId: String,
+        records: List<AttendanceRecordUpsert>,
+        accessToken: String,
+    ): SaveAttendanceRecordsResponse = withContext(Dispatchers.IO) {
+        val (responseBody, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/attendance/sessions/${encodePath(sessionId)}/records",
+            method = "PUT",
+            body = client.encodeBody(
+                SaveAttendanceRecordsBody(records),
+                SaveAttendanceRecordsBody.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        decode(responseBody)
+    }
+
+    suspend fun closeAttendanceSession(
+        courseCode: String,
+        sessionId: String,
+        accessToken: String,
+    ): AttendanceSession = withContext(Dispatchers.IO) {
+        val (responseBody, _) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/attendance/sessions/${encodePath(sessionId)}/close",
+            method = "POST",
+            body = client.encodeBody(
+                CloseAttendanceSessionBody(),
+                CloseAttendanceSessionBody.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        decode(responseBody)
+    }
+
+    suspend fun fetchCourseSections(courseCode: String, accessToken: String): List<CourseSection> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/sections",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext emptyList()
+            decode<CourseSectionsResponse>(body).sections
+        }
+
     // Onboarding (plan 15.11 / M1.3)
 
     /** Returns null when the onboarding feature flag is off (HTTP 404). */
@@ -879,5 +1004,86 @@ object LmsApi {
         )
         if (code !in 200..299) return@withContext null
         decode<MeetingJoinResponse>(body).joinUrl?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    suspend fun fetchSearchIndex(accessToken: String): SearchIndexResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw("/api/v1/search", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchSearchQuery(
+        query: String,
+        scope: String? = null,
+        accessToken: String,
+    ): SearchQueryResponse = withContext(Dispatchers.IO) {
+        var path = "/api/v1/search/query?q=${encodeQuery(query)}"
+        if (!scope.isNullOrBlank()) {
+            path += "&scope=${encodeQuery(scope)}"
+        }
+        val (body, code) = client.requestRaw(path, accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    // Library & OER (M3.6)
+
+    suspend fun searchLibraryCatalog(query: String, accessToken: String): List<LibraryCatalogResult> =
+        withContext(Dispatchers.IO) {
+            val q = query.trim()
+            val (body, code) = client.requestRaw(
+                "/api/v1/library/search?q=${encodeQuery(q)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<LibrarySearchResponse>(body).results
+        }
+
+    suspend fun fetchOerProviders(accessToken: String): List<String> = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw("/api/v1/oer/providers", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<List<OERProviderRow>>(body).map { it.provider }
+    }
+
+    suspend fun searchOer(
+        provider: String,
+        query: String,
+        accessToken: String,
+    ): OERSearchResponse = withContext(Dispatchers.IO) {
+        var path = "/api/v1/oer/search?provider=${encodeQuery(provider)}"
+        val q = query.trim()
+        if (q.isNotEmpty()) path += "&q=${encodeQuery(q)}"
+        val (body, code) = client.requestRaw(path, accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchModuleLibraryResource(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ): LibraryResourcePayload? = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/library-resources/${encodePath(itemId)}",
+            accessToken = accessToken,
+        )
+        if (code == 404) return@withContext null
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun recordLibraryResourceAccess(
+        courseCode: String,
+        itemId: String,
+        accessToken: String,
+    ) = withContext(Dispatchers.IO) {
+        val (_, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/library-resources/${encodePath(itemId)}/access",
+            method = "POST",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299 && code != 204) {
+            throw ApiError.HttpStatus(code, "Failed to record library access")
+        }
     }
 }

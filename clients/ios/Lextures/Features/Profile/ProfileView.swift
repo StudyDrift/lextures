@@ -10,6 +10,8 @@ struct ProfileView: View {
     @Environment(\.accessibilityPreferences) private var accessibilityPreferences
     @State private var confirmingSignOut = false
     @State private var confirmingClearCache = false
+    @State private var confirmingClearSearchHistory = false
+    @State private var navigatedMoreDestination: MoreDestination?
     @State private var localeError: String?
 
     var body: some View {
@@ -20,10 +22,15 @@ struct ProfileView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
                         identityHero
+                        if shell.iaRedesignEnabled {
+                            iaContextCard
+                            moreHubCard
+                        }
                         if offline.pendingCount > 0 {
                             offlineSyncCard
                         }
                         ProfilePersonalCard()
+                        ProfileDepthCards()
                         offlineStorageCard
                         ProfileAppearanceCard()
                         localeCard
@@ -55,6 +62,21 @@ struct ProfileView: View {
             .navigationDestination(for: MyAccommodationsRoute.self) { _ in
                 MyAccommodationsView()
             }
+            .navigationDestination(for: ProfilePersonalDetailsRoute.self) { _ in
+                ProfilePersonalDetailsView()
+            }
+            .navigationDestination(for: ResearchStudiesRoute.self) { _ in
+                ResearchStudiesView()
+            }
+            .navigationDestination(for: MoreHubRoute.self) { _ in
+                MoreHubView()
+            }
+            .navigationDestination(for: MoreDestination.self) { destination in
+                moreDestinationView(destination)
+            }
+            .navigationDestination(item: $navigatedMoreDestination) { destination in
+                moreDestinationView(destination)
+            }
             .confirmationDialog(
                 L.text("mobile.profile.signOutConfirm"),
                 isPresented: $confirmingSignOut,
@@ -75,7 +97,19 @@ struct ProfileView: View {
             } message: {
                 Text(L.text("mobile.profile.clearCacheMessage"))
             }
+            .confirmationDialog(
+                L.text("mobile.search.clearHistoryConfirm"),
+                isPresented: $confirmingClearSearchHistory,
+                titleVisibility: .visible
+            ) {
+                Button(L.text("mobile.search.clearHistory"), role: .destructive) {
+                    SearchRecentsStore.clearAll()
+                }
+            } message: {
+                Text(L.text("mobile.search.clearHistoryMessage"))
+            }
             .task { await offline.refreshState() }
+            .onAppear { openPendingMoreDestinationIfNeeded() }
         }
     }
 
@@ -120,6 +154,54 @@ struct ProfileView: View {
 
     private var profileInitials: String {
         shell.accountProfile?.resolvedInitials ?? shell.profile?.initials ?? "··"
+    }
+
+    private var iaContextCard: some View {
+        Group {
+            if shell.roleSnapshot.availableContexts.count > 1 {
+                LMSCard {
+                    Text(L.text("mobile.ia.context.title"))
+                        .font(LexturesTheme.displayFont(17))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    Picker(L.text("mobile.ia.context.title"), selection: Binding(
+                        get: { shell.activeRoleContext },
+                        set: { shell.setRoleContext($0) }
+                    )) {
+                        ForEach(shell.roleSnapshot.availableContexts, id: \.self) { context in
+                            Text(context.label).tag(context)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+        }
+    }
+
+    private var moreHubCard: some View {
+        Group {
+            if !MobileDestinations.moreDestinations(
+                context: shell.activeRoleContext,
+                platform: shell.platformFeatures
+            ).isEmpty {
+                LMSCard {
+                    NavigationLink(value: MoreHubRoute()) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "square.grid.2x2.fill")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.accent(for: colorScheme))
+                            Text(L.text("mobile.ia.more.title"))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                            Spacer(minLength: 0)
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme).opacity(0.6))
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 
     private var offlineSyncCard: some View {
@@ -217,6 +299,32 @@ struct ProfileView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.plain)
+            if shell.universalSearchEnabled {
+                Divider()
+                Button {
+                    confirmingClearSearchHistory = true
+                } label: {
+                    Label(L.text("mobile.search.clearHistory"), systemImage: "clock.arrow.circlepath")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.error)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func openPendingMoreDestinationIfNeeded() {
+        guard let destination = shell.consumePendingMoreDestination() else { return }
+        navigatedMoreDestination = destination
+    }
+
+    @ViewBuilder
+    private func moreDestinationView(_ destination: MoreDestination) -> some View {
+        if destination == .library && shell.platformFeatures.libraryBrowseEnabled {
+            LibraryBrowseView()
+        } else {
+            MoreDestinationPlaceholder(destination: destination)
         }
     }
 

@@ -232,6 +232,9 @@ struct DashboardView: View {
                     }
                     Spacer(minLength: 8)
                     HStack(spacing: 10) {
+                        if shell.iaRedesignEnabled && shell.universalSearchEnabled {
+                            searchButton
+                        }
                         bellButton
                         LMSAvatarButton()
                     }
@@ -263,6 +266,21 @@ struct DashboardView: View {
         .background(LexturesTheme.heroGradient)
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .shadow(color: LexturesTheme.primaryDeep.opacity(0.25), radius: 14, y: 7)
+    }
+
+    private var searchButton: some View {
+        Button {
+            shell.showUniversalSearch = true
+        } label: {
+            Image(systemName: "magnifyingglass")
+                .font(.subheadline)
+                .foregroundStyle(.white)
+                .frame(width: 34, height: 34)
+                .background(.white.opacity(0.16))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L.text("mobile.ia.search"))
     }
 
     private var bellButton: some View {

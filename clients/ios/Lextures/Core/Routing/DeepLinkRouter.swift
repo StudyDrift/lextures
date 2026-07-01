@@ -14,6 +14,12 @@ enum CourseDeepLinkSection: String, Equatable {
     case officeHours
     case feed
     case discussions
+    case live
+    case files
+    case attendance
+    case people
+    case evaluations
+    case library
 }
 
 /// Maps web-style action URLs and `lextures://` links to native navigation intents.
@@ -70,6 +76,20 @@ enum DeepLinkRouter {
             return .course(code: courseCode, section: .feed, itemId: nil)
         case "discussions":
             return .course(code: courseCode, section: .discussions, itemId: nil)
+        case "live", "live-sessions":
+            return .course(code: courseCode, section: .live, itemId: nil)
+        case "files":
+            return .course(code: courseCode, section: .files, itemId: nil)
+        case "attendance":
+            return .course(code: courseCode, section: .attendance, itemId: nil)
+        case "people", "enrollments":
+            return .course(code: courseCode, section: .people, itemId: nil)
+        case "evaluations", "evaluation-results":
+            return .course(code: courseCode, section: .evaluations, itemId: nil)
+        case "library", "reading-dashboard":
+            return .course(code: courseCode, section: .library, itemId: nil)
+        case "gradebook":
+            return .course(code: courseCode, section: .grades, itemId: nil)
         case "assignments", "quizzes", "modules":
             if segments.count >= 4 {
                 return .course(code: courseCode, section: .modules, itemId: segments[3])

@@ -405,10 +405,137 @@ data class FeedbackPlaybackInfo(
     val expiresAt: String? = null,
 )
 
+/** GET `/api/v1/me/permissions`. */
+@Serializable
+data class MyPermissionsResponse(
+    val permissionStrings: List<String> = emptyList(),
+)
+
 @Serializable
 data class PlatformFeatures(
     val ffWhatifGrades: Boolean? = null,
     val feedbackMediaEnabled: Boolean? = null,
+    val ffLibrary: Boolean? = null,
+    val ffCourseEvaluations: Boolean? = null,
+    val ffMobileIaRedesign: Boolean? = null,
+    val ffMobileVibeActivities: Boolean? = null,
+    val ffMobileUniversalSearch: Boolean? = null,
+    val ffMobileProfileDepth: Boolean? = null,
+    val ffMobileLibraryEreserves: Boolean? = null,
+    val oerLibraryEnabled: Boolean? = null,
+    val customFieldsEnabled: Boolean? = null,
+    val ffDemographics: Boolean? = null,
+    val ffResearchConsent: Boolean? = null,
+)
+
+@Serializable
+data class LibraryCatalogResult(
+    val mmsId: String? = null,
+    val title: String,
+    val author: String? = null,
+    val issn: String? = null,
+    val isbn: String? = null,
+)
+
+@Serializable
+data class LibrarySearchResponse(
+    val results: List<LibraryCatalogResult> = emptyList(),
+)
+
+@Serializable
+data class LibraryResourceMeta(
+    val title: String? = null,
+    val author: String? = null,
+    val issn: String? = null,
+    val isbn: String? = null,
+    val source: String? = null,
+    val almaMmsId: String? = null,
+    val legantoListId: String? = null,
+    val ezproxyUrl: String? = null,
+)
+
+@Serializable
+data class LibraryResourcePayload(
+    val itemId: String,
+    val resourceType: String,
+    val metadata: LibraryResourceMeta? = null,
+    val ezproxyUrl: String? = null,
+    val updatedAt: String? = null,
+)
+
+@Serializable
+data class OERSearchResult(
+    val id: String,
+    val title: String,
+    val description: String? = null,
+    val url: String,
+    val previewUrl: String? = null,
+    val provider: String,
+    val licenseSpdx: String? = null,
+    val licenseLabel: String? = null,
+    val gradeLevel: String? = null,
+    val subject: String? = null,
+    val attribution: String? = null,
+)
+
+@Serializable
+data class OERSearchResponse(
+    val results: List<OERSearchResult> = emptyList(),
+    val provider: String? = null,
+    val fromCache: Boolean? = null,
+    val cacheAsOf: String? = null,
+    val staleCache: Boolean? = null,
+)
+
+@Serializable
+data class OERProviderRow(
+    val provider: String,
+)
+
+@Serializable
+data class SearchCourseItem(
+    val courseCode: String,
+    val title: String,
+)
+
+@Serializable
+data class SearchPersonItem(
+    val userId: String,
+    val email: String,
+    val displayName: String? = null,
+    val role: String,
+    val courseCode: String,
+    val courseTitle: String,
+)
+
+@Serializable
+data class SearchIndexResponse(
+    val courses: List<SearchCourseItem> = emptyList(),
+    val people: List<SearchPersonItem> = emptyList(),
+)
+
+@Serializable
+data class SearchQueryResultItem(
+    val id: String,
+    val type: String,
+    val title: String,
+    val subtitle: String,
+    val path: String,
+    val score: Double? = null,
+)
+
+@Serializable
+data class SearchQueryGroup(
+    val type: String,
+    val label: String,
+    val total: Int,
+    val items: List<SearchQueryResultItem> = emptyList(),
+)
+
+@Serializable
+data class SearchQueryResponse(
+    val groups: List<SearchQueryGroup> = emptyList(),
+    val tookMs: Long = 0,
 )
 
 /** Navigation target for grade feedback detail (M6.1). */
@@ -546,6 +673,57 @@ data class AttendanceSessionsResponse(
 
 @Serializable
 data class SelfReportBody(val status: String)
+
+@Serializable
+data class CreateAttendanceSessionBody(
+    val collectionMethod: String,
+    val title: String? = null,
+    val sessionDate: String? = null,
+    val sectionId: String? = null,
+)
+
+@Serializable
+data class AttendanceRecordUpsert(
+    val studentUserId: String,
+    val status: String,
+    val source: String = "instructor",
+)
+
+@Serializable
+data class SaveAttendanceRecordsBody(
+    val records: List<AttendanceRecordUpsert>,
+)
+
+@Serializable
+data class CloseAttendanceSessionBody(
+    val finalizeMissingAsAbsent: Boolean = true,
+)
+
+@Serializable
+data class SaveAttendanceRecordsResponse(
+    val saved: Int? = null,
+    val message: String? = null,
+)
+
+@Serializable
+data class CourseSection(
+    val id: String,
+    val sectionCode: String,
+    val name: String? = null,
+) {
+    val displayName: String
+        get() = name?.trim()?.takeIf { it.isNotEmpty() } ?: sectionCode
+}
+
+@Serializable
+data class CourseSectionsResponse(
+    val sections: List<CourseSection> = emptyList(),
+)
+
+/** Staff navigation into take-attendance mode (optional existing session). */
+data class TakeAttendanceRequest(
+    val sessionId: String? = null,
+)
 
 // region Office hours (M7.3)
 

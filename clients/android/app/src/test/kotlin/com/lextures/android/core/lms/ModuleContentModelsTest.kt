@@ -48,6 +48,7 @@ class ModuleContentModelsTest {
         assertEquals(ModuleItemDestination.ContentPage, ModuleContentLogic.destination("content_page"))
         assertEquals(ModuleItemDestination.Quiz, ModuleContentLogic.destination("quiz"))
         assertEquals(ModuleItemDestination.Interactive, ModuleContentLogic.destination("h5p"))
+        assertEquals(ModuleItemDestination.VibeActivity, ModuleContentLogic.destination("vibe_activity"))
         assertTrue(ModuleContentLogic.isNavigable("external_link"))
         assertFalse(ModuleContentLogic.isNavigable("heading"))
     }

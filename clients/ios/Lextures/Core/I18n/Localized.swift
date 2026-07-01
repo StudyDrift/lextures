@@ -13,4 +13,12 @@ enum L {
     static func plural(_ key: String.LocalizationValue, count: Int) -> String {
         String(format: String(localized: key, locale: LocalePreferences.effectiveLocaleValue()), locale: LocalePreferences.effectiveLocaleValue(), count)
     }
+
+    /// Resolve a runtime string table key (e.g. profile-field metadata).
+    static func dynamicText(_ key: String) -> String {
+        String(
+            localized: String.LocalizationValue(stringLiteral: key),
+            locale: LocalePreferences.effectiveLocaleValue()
+        )
+    }
 }

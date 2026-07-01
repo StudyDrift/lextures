@@ -250,16 +250,6 @@ object LaunchContainerLoader {
                     ),
                 )
             }
-            InteractiveLaunchKind.VibeActivity -> {
-                val payload = LmsApi.fetchModuleVibeActivity(courseCode, item.id, accessToken)
-                InteractiveLaunchTarget(
-                    title = payload.title.ifBlank { item.title },
-                    kind = kind,
-                    content = InteractiveLaunchContent.Html(
-                        InteractiveLaunchLogic.vibeActivityHtml(payload.html),
-                    ),
-                )
-            }
         }
     }
 }

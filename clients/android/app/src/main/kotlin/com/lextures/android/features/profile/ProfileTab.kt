@@ -25,6 +25,9 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -38,6 +41,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +81,12 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.features.home.HomeShellState
 import com.lextures.android.features.home.LmsCard
+import com.lextures.android.features.home.MoreDestinationPlaceholder
+import com.lextures.android.features.home.MoreHubScreen
+import com.lextures.android.core.search.SearchRecentsStore
+
+import com.lextures.android.core.lms.LmsApi
+import com.lextures.android.core.lms.ProfileDepthLogic
 import com.lextures.android.core.lms.resolvedDisplayName
 import com.lextures.android.core.lms.resolvedInitials
 import com.lextures.android.core.design.ProfileAvatar
@@ -100,6 +110,13 @@ fun ProfileTab(
     var showDeviceSessions by remember { mutableStateOf(false) }
     var showEditProfile by remember { mutableStateOf(false) }
     var showAccommodations by remember { mutableStateOf(false) }
+    var showPersonalDetails by remember { mutableStateOf(false) }
+    var showResearchStudies by remember { mutableStateOf(false) }
+    var personalDetailsVisible by remember { mutableStateOf(false) }
+    var researchVisible by remember { mutableStateOf(false) }
+    var showMoreHub by remember { mutableStateOf(false) }
+    var confirmingClearSearchHistory by remember { mutableStateOf(false) }
+    var openMoreDestination by remember { mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null) }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val themePreference = remember { ThemePreference.get(context) }
@@ -113,6 +130,46 @@ fun ProfileTab(
     val localePreferences = LocalLocalePreferences.current
     var localeExpanded by remember { mutableStateOf(false) }
     var localeError by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(shell.profileDepthEnabled, accessToken, shell.platformFeatures) {
+        if (!shell.profileDepthEnabled || accessToken == null) {
+            personalDetailsVisible = false
+            researchVisible = false
+            return@LaunchedEffect
+        }
+        val token = accessToken!!
+        var fields = 0
+        if (shell.platformFeatures.customFieldsEnabled) {
+            fields = try {
+                LmsApi.fetchMyProfileFields(token).fields.size
+            } catch (_: Exception) {
+                0
+            }
+        }
+        personalDetailsVisible = ProfileDepthLogic.shouldShowPersonalDetails(
+            demographicsEnabled = shell.platformFeatures.ffDemographics,
+            fieldCount = fields,
+        )
+        if (shell.platformFeatures.ffResearchConsent) {
+            val pending = try {
+                LmsApi.fetchPendingConsentStudies(token).size
+            } catch (_: Exception) {
+                0
+            }
+            val history = try {
+                LmsApi.fetchConsentHistory(token).size
+            } catch (_: Exception) {
+                0
+            }
+            researchVisible = ProfileDepthLogic.shouldShowResearchStudies(
+                researchConsentEnabled = true,
+                pendingCount = pending,
+                historyCount = history,
+            )
+        } else {
+            researchVisible = false
+        }
+    }
 
     if (showNotificationPreferences) {
         NotificationPreferencesScreen(
@@ -159,6 +216,62 @@ fun ProfileTab(
             onBack = { showAccommodations = false },
             modifier = modifier,
         )
+        return
+    }
+
+    if (showPersonalDetails) {
+        ProfilePersonalDetailsScreen(
+            session = session,
+            shell = shell,
+            onBack = { showPersonalDetails = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showResearchStudies) {
+        ResearchStudiesScreen(
+            session = session,
+            onBack = { showResearchStudies = false },
+            modifier = modifier,
+        )
+        return
+    }
+
+    openMoreDestination?.let { destination ->
+        Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+            TextButton(onClick = { openMoreDestination = null }) {
+                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+            }
+            if (destination == com.lextures.android.core.navigation.MoreDestination.Library &&
+                shell.platformFeatures.libraryBrowseEnabled
+            ) {
+                com.lextures.android.features.library.LibraryBrowseScreen(
+                    session = session,
+                    shell = shell,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else {
+                MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+            }
+        }
+        return
+    }
+
+    if (showMoreHub) {
+        Column(modifier = modifier.fillMaxSize()) {
+            TextButton(
+                onClick = { showMoreHub = false },
+                modifier = Modifier.padding(horizontal = 8.dp),
+            ) {
+                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+            }
+            MoreHubScreen(
+                shell = shell,
+                onOpenDestination = { openMoreDestination = it },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
         return
     }
 
@@ -212,6 +325,48 @@ fun ProfileTab(
             }
         }
 
+        if (shell.iaRedesignEnabled && shell.roleSnapshot.availableContexts.size > 1) {
+            LmsCard {
+                Text(
+                    text = L.text(context, localePreferences, R.string.mobile_ia_context_title),
+                    style = LexturesType.display(17),
+                    color = textPrimary(),
+                )
+                shell.roleSnapshot.availableContexts.forEach { roleContext ->
+                    val selected = shell.activeRoleContext == roleContext
+                    TextButton(onClick = { shell.setRoleContext(roleContext) { } }) {
+                        Text(
+                            text = when (roleContext) {
+                                com.lextures.android.core.navigation.MobileRoleContext.Learning ->
+                                    L.text(context, localePreferences, R.string.mobile_ia_context_learning)
+                                com.lextures.android.core.navigation.MobileRoleContext.Teaching ->
+                                    L.text(context, localePreferences, R.string.mobile_ia_context_teaching)
+                                com.lextures.android.core.navigation.MobileRoleContext.Parent ->
+                                    L.text(context, localePreferences, R.string.mobile_ia_context_parent)
+                            },
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                        )
+                    }
+                }
+            }
+        }
+
+        if (shell.iaRedesignEnabled &&
+            com.lextures.android.core.navigation.MobileDestinations.moreDestinations(
+                shell.activeRoleContext,
+                shell.platformFeatures,
+            ).isNotEmpty()
+        ) {
+            LmsCard {
+                SettingsNavRow(
+                    icon = Icons.Default.Apps,
+                    title = L.text(context, localePreferences, R.string.mobile_ia_more_title),
+                    subtitle = L.text(context, localePreferences, R.string.mobile_ia_more_search),
+                    onClick = { showMoreHub = true },
+                )
+            }
+        }
+
         // Personal: edit profile + accommodations
         LmsCard {
             SettingsNavRow(
@@ -227,6 +382,28 @@ fun ProfileTab(
                 onClick = { showAccommodations = true },
                 modifier = Modifier.padding(top = 4.dp),
             )
+        }
+
+        if (shell.profileDepthEnabled && (personalDetailsVisible || researchVisible)) {
+            LmsCard {
+                if (personalDetailsVisible) {
+                    SettingsNavRow(
+                        icon = Icons.AutoMirrored.Filled.FormatListBulleted,
+                        title = L.text(R.string.mobile_profileDepth_personalDetails_title),
+                        subtitle = L.text(R.string.mobile_profileDepth_personalDetails_subtitle),
+                        onClick = { showPersonalDetails = true },
+                    )
+                }
+                if (researchVisible) {
+                    SettingsNavRow(
+                        icon = Icons.Default.Security,
+                        title = L.text(R.string.mobile_profileDepth_research_title),
+                        subtitle = L.text(R.string.mobile_profileDepth_research_subtitle),
+                        onClick = { showResearchStudies = true },
+                        modifier = if (personalDetailsVisible) Modifier.padding(top = 4.dp) else Modifier,
+                    )
+                }
+            }
         }
 
         if (pendingCount > 0) {
@@ -330,6 +507,25 @@ fun ProfileTab(
                     fontWeight = FontWeight.SemiBold,
                     color = LexturesColors.Error,
                 )
+            }
+            if (shell?.universalSearchEnabled == true) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { confirmingClearSearchHistory = true }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Default.Search, contentDescription = null, tint = LexturesColors.Error)
+                    Text(
+                        text = L.text(context, localePreferences, R.string.mobile_search_clearHistory),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = LexturesColors.Error,
+                    )
+                }
             }
         }
 
@@ -614,6 +810,29 @@ fun ProfileTab(
                 color = LexturesColors.Error,
             )
         }
+    }
+
+    androidx.compose.runtime.LaunchedEffect(shell?.pendingMoreDestination) {
+        shell?.consumePendingMoreDestination()?.let { showMoreHub = true }
+    }
+
+    if (confirmingClearSearchHistory) {
+        AlertDialog(
+            onDismissRequest = { confirmingClearSearchHistory = false },
+            title = { Text(L.text(context, localePreferences, R.string.mobile_search_clearHistoryConfirm)) },
+            text = { Text(L.text(context, localePreferences, R.string.mobile_search_clearHistoryMessage)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmingClearSearchHistory = false
+                    SearchRecentsStore.clearAll(context)
+                }) {
+                    Text(L.text(context, localePreferences, R.string.mobile_search_clearHistory), color = LexturesColors.Error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingClearSearchHistory = false }) { Text("Cancel") }
+            },
+        )
     }
 
     if (confirmingClearCache) {

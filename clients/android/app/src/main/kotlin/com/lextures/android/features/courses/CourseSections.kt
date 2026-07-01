@@ -52,7 +52,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lextures.android.R
 import com.lextures.android.core.auth.AuthSession
+import com.lextures.android.core.i18n.L
 import com.lextures.android.core.design.LexturesColors
 import com.lextures.android.core.design.LexturesType
 import com.lextures.android.core.design.accentColor
@@ -491,12 +493,13 @@ private fun formatPts(points: Double): String =
 
 // region Attendance
 
-/** Session list; students self-report from the detail screen. */
+/** Session list; staff take roll from [TakeAttendanceScreen]; students self-report from detail. */
 @Composable
 fun CourseAttendanceSection(
     session: AuthSession,
     course: CourseSummary,
     onOpenSession: (AttendanceSession) -> Unit,
+    onTakeAttendance: (() -> Unit)? = null,
 ) {
     val accessToken by session.accessToken.collectAsState()
     var sessions by remember { mutableStateOf<List<AttendanceSession>>(emptyList()) }
@@ -517,6 +520,30 @@ fun CourseAttendanceSection(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        if (course.viewerIsStaff && onTakeAttendance != null) {
+            LmsCard(accent = LexturesColors.BrandTeal, onClick = onTakeAttendance) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Default.FactCheck, contentDescription = null, tint = accentColor())
+                    Text(
+                        text = L.text(R.string.mobile_attendance_take_title),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = accentColor(),
+                        modifier = Modifier.weight(1f),
+                    )
+                    Icon(
+                        Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = null,
+                        tint = textSecondary().copy(alpha = 0.6f),
+                        modifier = Modifier.size(16.dp),
+                    )
+                }
+            }
+        }
+
         errorMessage?.let { LmsErrorBanner(it) }
         when {
             loading && sessions.isEmpty() -> LmsSkeletonList(count = 3)

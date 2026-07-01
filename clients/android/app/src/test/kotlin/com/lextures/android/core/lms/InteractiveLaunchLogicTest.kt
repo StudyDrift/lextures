@@ -11,7 +11,7 @@ class InteractiveLaunchLogicTest {
         assertTrue(InteractiveLaunchLogic.kindFor("h5p") == InteractiveLaunchKind.H5p)
         assertTrue(InteractiveLaunchLogic.kindFor("scorm") == InteractiveLaunchKind.Scorm)
         assertTrue(InteractiveLaunchLogic.kindFor("lti_link") == InteractiveLaunchKind.LtiLink)
-        assertTrue(InteractiveLaunchLogic.kindFor("vibe_activity") == InteractiveLaunchKind.VibeActivity)
+        assertNull(InteractiveLaunchLogic.kindFor("vibe_activity"))
         assertNull(InteractiveLaunchLogic.kindFor("quiz"))
     }
 

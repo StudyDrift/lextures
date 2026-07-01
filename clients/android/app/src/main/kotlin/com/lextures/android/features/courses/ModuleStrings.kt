@@ -41,6 +41,18 @@ import com.lextures.android.core.i18n.L
 
 @Composable fun moduleOpenExternalLabel(): String = L.text(R.string.mobile_modules_openExternal)
 
+@Composable fun vibeActivityLabel(): String = L.text(R.string.mobile_vibe_activityLabel)
+
+@Composable fun vibeRevealLabel(): String = L.text(R.string.mobile_vibe_reveal)
+
+@Composable fun vibeFreeResponsePlaceholder(): String = L.text(R.string.mobile_vibe_freeResponsePlaceholder)
+
+@Composable fun vibeOpenOnWebLabel(): String = L.text(R.string.mobile_vibe_openOnWeb)
+
+@Composable fun vibeWebOnlyMessage(): String = L.text(R.string.mobile_vibe_webOnlyMessage)
+
+@Composable fun vibeWebOnlyHint(): String = L.text(R.string.mobile_vibe_webOnlyHint)
+
 @Composable fun moduleWebLoadErrorLabel(): String = L.text(R.string.mobile_modules_webLoadError)
 
 @Composable fun moduleInteractiveOfflineLabel(): String = L.text(R.string.mobile_modules_interactive_offline)

@@ -54,6 +54,7 @@ final class ModuleContentModelsTests: XCTestCase {
         XCTAssertEqual(ModuleContentLogic.destination(for: "content_page"), .contentPage)
         XCTAssertEqual(ModuleContentLogic.destination(for: "quiz"), .quiz)
         XCTAssertEqual(ModuleContentLogic.destination(for: "h5p"), .interactive)
+        XCTAssertEqual(ModuleContentLogic.destination(for: "vibe_activity"), .vibeActivity)
         XCTAssertTrue(ModuleContentLogic.isNavigable("external_link"))
         XCTAssertFalse(ModuleContentLogic.isNavigable("heading"))
     }

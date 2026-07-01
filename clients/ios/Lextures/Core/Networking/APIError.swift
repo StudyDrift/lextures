@@ -28,6 +28,11 @@ func parseAPIErrorMessage(from data: Data) -> String? {
     guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
         return nil
     }
+    if let error = json["error"] as? [String: Any],
+       let message = error["message"] as? String,
+       !message.isEmpty {
+        return message
+    }
     if let message = json["message"] as? String, !message.isEmpty {
         return message
     }

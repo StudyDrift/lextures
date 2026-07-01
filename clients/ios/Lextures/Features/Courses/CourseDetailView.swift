@@ -1,26 +1,16 @@
 import SwiftUI
 
-/// Course home: gradient hero + segmented sections
-/// (Overview · Modules · Grades · Attendance · Grading by role).
+/// Course home: gradient hero + registry-driven workspace sections.
 struct CourseDetailView: View {
     @Environment(AuthSession.self) private var session
+    @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
     let course: CourseSummary
-    var initialSection: Section?
+    var initialSection: CourseWorkspaceSection?
     var initialItemId: String?
 
-    enum Section: String, CaseIterable {
-        case overview = "Overview"
-        case modules = "Modules"
-        case files = "Files"
-        case grades = "Grades"
-        case officeHours = "Office Hours"
-        case attendance = "Attendance"
-        case grading = "Grading"
-    }
-
-    @State private var section: Section = .modules
+    @State private var section: CourseWorkspaceSection = .modules
     @State private var items: [CourseStructureItem] = []
     @State private var progress: ModulesProgressSnapshot?
     @State private var cacheLabel: String?
@@ -29,8 +19,15 @@ struct CourseDetailView: View {
     @State private var loading = false
     @State private var linkedItem: CourseStructureItem?
     @State private var lockedItem: CourseStructureItem?
+    @State private var showCourseSearch = false
+    @State private var takeAttendanceRoute: TakeAttendanceRoute?
+    @State private var selectedAttendanceSession: AttendanceSession?
 
-    init(course: CourseSummary, initialSection: Section? = nil, initialItemId: String? = nil) {
+    init(
+        course: CourseSummary,
+        initialSection: CourseWorkspaceSection? = nil,
+        initialItemId: String? = nil
+    ) {
         self.course = course
         self.initialSection = initialSection
         self.initialItemId = initialItemId
@@ -39,13 +36,21 @@ struct CourseDetailView: View {
         }
     }
 
-    private var sections: [Section] {
-        var out: [Section] = [.overview, .modules, .files]
-        if course.viewerIsStudent { out.append(.grades) }
-        if course.isOfficeHoursEnabled { out.append(.officeHours) }
-        if course.viewerIsStaff || hasAttendanceSessions { out.append(.attendance) }
-        if course.viewerIsStaff { out.append(.grading) }
-        return out
+    private var workspaceContext: CourseWorkspaceContext {
+        CourseWorkspaceContext(
+            course: course,
+            hasAttendanceSessions: hasAttendanceSessions,
+            hasLibraryResources: LibraryResourceLogic.hasLibraryResources(in: items),
+            platformFeatures: shell.platformFeatures
+        )
+    }
+
+    private var allSections: [CourseWorkspaceSection] {
+        MobileDestinations.courseWorkspaceSections(workspaceContext)
+    }
+
+    private var chipSplit: (visible: [CourseWorkspaceSection], overflow: [CourseWorkspaceSection]) {
+        MobileDestinations.splitCourseChips(allSections)
     }
 
     private var moduleGroups: [ModuleGroup] {
@@ -60,11 +65,11 @@ struct CourseDetailView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     CourseBanner(course: course)
 
-                    LMSSegmentedChips(
-                        options: sections,
-                        selection: $section,
-                        label: \.rawValue
-                    )
+                    if shell.iaRedesignEnabled {
+                        CourseWorkspaceNav(split: chipSplit, selection: $section)
+                    } else {
+                        legacyChips
+                    }
 
                     if let errorMessage {
                         LMSErrorBanner(message: errorMessage)
@@ -74,22 +79,7 @@ struct CourseDetailView: View {
                         StalenessChip(label: cacheLabel)
                     }
 
-                    switch section {
-                    case .overview:
-                        CourseSyllabusSection(course: course)
-                    case .modules:
-                        modulesSection
-                    case .files:
-                        CourseFilesView(course: course)
-                    case .grades:
-                        CourseGradesSection(course: course)
-                    case .officeHours:
-                        CourseOfficeHoursSection(course: course)
-                    case .attendance:
-                        CourseAttendanceSection(course: course)
-                    case .grading:
-                        GradingBacklogSection(course: course)
-                    }
+                    sectionContent
                 }
                 .padding(16)
             }
@@ -97,11 +87,27 @@ struct CourseDetailView: View {
         }
         .navigationTitle(course.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            if shell.universalSearchEnabled {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showCourseSearch = true } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                    .accessibilityLabel(L.text("mobile.search.inThisCourse"))
+                }
+            }
+        }
+        .sheet(isPresented: $showCourseSearch) {
+            UniversalSearchView(courseScope: course.courseCode)
+        }
         .navigationDestination(for: CourseStructureItem.self) { item in
             ModuleItemRouteView(course: course, item: item, onProgressChanged: refreshProgress)
         }
-        .navigationDestination(for: AttendanceSession.self) { attendanceSession in
+        .navigationDestination(item: $selectedAttendanceSession) { attendanceSession in
             AttendanceSessionDetailView(course: course, attendanceSession: attendanceSession)
+        }
+        .navigationDestination(item: $takeAttendanceRoute) { route in
+            TakeAttendanceView(course: course, initialSessionId: route.sessionId)
         }
         .navigationDestination(for: GradingBacklogItem.self) { backlogItem in
             SubmissionsListView(course: course, backlogItem: backlogItem)
@@ -122,15 +128,64 @@ struct CourseDetailView: View {
             )
         }
         .task { await load() }
+        .onChange(of: allSections) { _, sections in
+            if !sections.contains(section), let first = sections.first {
+                section = first
+            }
+        }
         .onChange(of: items) { _, loaded in
             guard linkedItem == nil,
                   let itemId = initialItemId,
                   let match = loaded.first(where: { $0.id == itemId }) else { return }
             linkedItem = match
         }
+        .onAppear {
+            if let initialSection, allSections.contains(initialSection) {
+                section = initialSection
+            }
+        }
     }
 
-    // MARK: Modules
+    @ViewBuilder
+    private var legacyChips: some View {
+        LMSSegmentedChips(
+            options: legacySections,
+            selection: $section,
+            label: { $0.label }
+        )
+    }
+
+    private var legacySections: [CourseWorkspaceSection] {
+        allSections
+    }
+
+    @ViewBuilder
+    private var sectionContent: some View {
+        switch section {
+        case .overview:
+            CourseSyllabusSection(course: course)
+        case .modules:
+            modulesSection
+        case .files:
+            CourseFilesView(course: course)
+        case .grades:
+            CourseGradesSection(course: course)
+        case .officeHours:
+            CourseOfficeHoursSection(course: course)
+        case .attendance:
+            CourseAttendanceSection(
+                course: course,
+                onTakeAttendance: course.viewerIsStaff ? { takeAttendanceRoute = TakeAttendanceRoute() } : nil,
+                onOpenSession: openAttendanceSession
+            )
+        case .grading:
+            GradingBacklogSection(course: course)
+        case .library:
+            CourseLibraryView(course: course, items: items, onSelectItem: { linkedItem = $0 })
+        case .discussions, .feed, .live, .people, .evaluations:
+            CourseDestinationPlaceholder(section: section)
+        }
+    }
 
     @ViewBuilder
     private var modulesSection: some View {
@@ -197,6 +252,14 @@ struct CourseDetailView: View {
             progress = result.value.modules.isEmpty && result.value.enrollmentId.isEmpty ? nil : result.value
         } catch {
             progress = nil
+        }
+    }
+
+    private func openAttendanceSession(_ attendanceSession: AttendanceSession) {
+        if TakeAttendanceLogic.shouldTakeSession(attendanceSession, isStaff: course.viewerIsStaff) {
+            takeAttendanceRoute = TakeAttendanceRoute(sessionId: attendanceSession.id)
+        } else {
+            selectedAttendanceSession = attendanceSession
         }
     }
 }

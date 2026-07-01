@@ -25,6 +25,12 @@ data class CourseSummary(
     val orgId: String? = null,
     val termId: String? = null,
     val viewerEnrollmentRoles: List<String>? = null,
+    val feedEnabled: Boolean? = null,
+    val discussionsEnabled: Boolean? = null,
+    val liveSessionsEnabled: Boolean? = null,
+    val filesEnabled: Boolean? = null,
+    val attendanceEnabled: Boolean? = null,
+    val sectionsEnabled: Boolean? = null,
 ) {
     val displayTitle: String
         get() = catalogNickname?.trim()?.takeIf { it.isNotEmpty() } ?: title
@@ -36,6 +42,18 @@ data class CourseSummary(
         get() = viewerEnrollmentRoles?.any {
             it.lowercase() in setOf("teacher", "ta", "designer", "grader")
         } == true
+
+    val isFeedEnabled: Boolean get() = feedEnabled != false
+
+    val isDiscussionsEnabled: Boolean get() = discussionsEnabled == true
+
+    val isLiveSessionsEnabled: Boolean get() = liveSessionsEnabled == true
+
+    val isFilesEnabled: Boolean get() = filesEnabled != false
+
+    val isAttendanceEnabled: Boolean get() = attendanceEnabled != false
+
+    val isSectionsEnabled: Boolean get() = sectionsEnabled != false
 }
 
 @Serializable

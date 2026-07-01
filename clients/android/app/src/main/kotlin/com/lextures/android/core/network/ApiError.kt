@@ -30,8 +30,9 @@ fun parseApiErrorMessage(body: String): String? {
     return runCatching {
         val json = Json.parseToJsonElement(body)
         if (json !is JsonObject) return@runCatching null
-        listOf("message", "error", "detail").firstNotNullOfOrNull { key ->
-            json[key]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
-        }
+        (json["error"] as? JsonObject)?.get("message")?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+            ?: listOf("message", "error", "detail").firstNotNullOfOrNull { key ->
+                json[key]?.jsonPrimitive?.content?.takeIf { it.isNotBlank() }
+            }
     }.getOrNull()
 }

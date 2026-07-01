@@ -13,6 +13,8 @@ enum class ModuleItemDestination {
     ExternalLink,
     WebContent,
     Interactive,
+    VibeActivity,
+    LibraryResource,
     File,
     Unsupported,
 }
@@ -35,8 +37,10 @@ object ModuleContentLogic {
         "quiz" -> ModuleItemDestination.Quiz
         "assignment" -> ModuleItemDestination.Assignment
         "external_link" -> ModuleItemDestination.ExternalLink
-        "textbook_resource", "library_resource" -> ModuleItemDestination.WebContent
-        "h5p", "scorm", "lti_link", "vibe_activity" -> ModuleItemDestination.Interactive
+        "library_resource" -> ModuleItemDestination.LibraryResource
+        "textbook_resource" -> ModuleItemDestination.WebContent
+        "h5p", "scorm", "lti_link" -> ModuleItemDestination.Interactive
+        "vibe_activity" -> ModuleItemDestination.VibeActivity
         "file", "file_item" -> ModuleItemDestination.File
         else -> ModuleItemDestination.Unsupported
     }
