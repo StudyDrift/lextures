@@ -5,6 +5,7 @@ enum DeepLinkDestination: Equatable {
     case home
     case inbox
     case review
+    case insights
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
 }
 
@@ -21,6 +22,8 @@ enum CourseDeepLinkSection: String, Equatable {
     case people
     case evaluations
     case library
+    case groups
+    case collabDocs
 }
 
 /// Maps web-style action URLs and `lextures://` links to native navigation intents.
@@ -57,53 +60,78 @@ enum DeepLinkRouter {
     private static func resolvePath(_ path: String) -> DeepLinkDestination {
         let segments = path.split(separator: "/").map(String.init)
         guard let first = segments.first?.lowercased(), first == "courses", segments.count >= 2 else {
-            if segments.first?.lowercased() == "inbox" {
-                return .inbox
-            }
-            if segments.first?.lowercased() == "review" {
-                return .review
+            return resolveNonCoursePath(segments)
+        }
+        return resolveCoursePath(segments)
+    }
+
+    private static func resolveNonCoursePath(_ segments: [String]) -> DeepLinkDestination {
+        switch segments.first?.lowercased() {
+        case "inbox":
+            return .inbox
+        case "review":
+            return .review
+        default:
+            if segments.count >= 2,
+               segments[0].lowercased() == "me",
+               segments[1].lowercased() == "study-insights" {
+                return .insights
             }
             return .home
         }
+    }
 
+    private static func resolveCoursePath(_ segments: [String]) -> DeepLinkDestination {
         let courseCode = segments[1]
-        if segments.count == 2 {
+        guard segments.count > 2 else {
             return .course(code: courseCode, section: .overview, itemId: nil)
         }
+        return resolveCourseSection(courseCode: courseCode, segments: segments)
+    }
 
+    private static func resolveCourseSection(courseCode: String, segments: [String]) -> DeepLinkDestination {
         switch segments[2].lowercased() {
-        case "grades":
-            return .course(code: courseCode, section: .grades, itemId: nil)
-        case "office-hours":
-            return .course(code: courseCode, section: .officeHours, itemId: nil)
-        case "feed":
-            return .course(code: courseCode, section: .feed, itemId: nil)
         case "discussions":
-            if segments.count >= 5, segments[3].lowercased() == "threads" {
-                return .course(code: courseCode, section: .discussions, itemId: segments[4])
-            }
-            return .course(code: courseCode, section: .discussions, itemId: nil)
-        case "live", "live-sessions":
-            return .course(code: courseCode, section: .live, itemId: nil)
-        case "files":
-            return .course(code: courseCode, section: .files, itemId: nil)
-        case "attendance":
-            return .course(code: courseCode, section: .attendance, itemId: nil)
-        case "people", "enrollments":
-            return .course(code: courseCode, section: .people, itemId: nil)
-        case "evaluations", "evaluation-results":
-            return .course(code: courseCode, section: .evaluations, itemId: nil)
-        case "library", "reading-dashboard":
-            return .course(code: courseCode, section: .library, itemId: nil)
+            let itemId = segments.count >= 5 && segments[3].lowercased() == "threads" ? segments[4] : nil
+            return .course(code: courseCode, section: .discussions, itemId: itemId)
+        case "collab-docs":
+            let itemId = segments.count >= 4 ? segments[3] : nil
+            return .course(code: courseCode, section: .collabDocs, itemId: itemId)
+        case "assignments", "quizzes", "modules":
+            let itemId = segments.count >= 4 ? segments[3] : nil
+            return .course(code: courseCode, section: .modules, itemId: itemId)
         case "gradebook":
             return .course(code: courseCode, section: .grades, itemId: nil)
-        case "assignments", "quizzes", "modules":
-            if segments.count >= 4 {
-                return .course(code: courseCode, section: .modules, itemId: segments[3])
-            }
-            return .course(code: courseCode, section: .modules, itemId: nil)
         default:
-            return .course(code: courseCode, section: .overview, itemId: nil)
+            let section = simpleCourseSection(for: segments[2].lowercased())
+            return .course(code: courseCode, section: section, itemId: nil)
+        }
+    }
+
+    private static func simpleCourseSection(for key: String) -> CourseDeepLinkSection {
+        switch key {
+        case "grades":
+            return .grades
+        case "office-hours":
+            return .officeHours
+        case "feed":
+            return .feed
+        case "live", "live-sessions":
+            return .live
+        case "files":
+            return .files
+        case "attendance":
+            return .attendance
+        case "people", "enrollments":
+            return .people
+        case "evaluations", "evaluation-results":
+            return .evaluations
+        case "library", "reading-dashboard":
+            return .library
+        case "groups":
+            return .groups
+        default:
+            return .overview
         }
     }
 }

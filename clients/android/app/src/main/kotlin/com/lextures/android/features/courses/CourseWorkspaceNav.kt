@@ -84,6 +84,8 @@ private fun sectionLabel(
         CourseWorkspaceSection.Evaluations -> R.string.mobile_ia_course_evaluations
         CourseWorkspaceSection.Library -> R.string.mobile_ia_course_library
         CourseWorkspaceSection.OfficeHours -> R.string.mobile_ia_course_officeHours
+        CourseWorkspaceSection.Groups -> R.string.mobile_ia_course_groups
+        CourseWorkspaceSection.CollabDocs -> R.string.mobile_ia_course_collabDocs
         CourseWorkspaceSection.Grading -> R.string.mobile_ia_course_grading
     }
     return L.text(context, localePrefs, res)

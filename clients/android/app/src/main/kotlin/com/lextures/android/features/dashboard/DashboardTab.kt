@@ -142,6 +142,13 @@ fun DashboardTab(
     var showAnnouncements by remember { mutableStateOf(false) }
     var showPlanner by remember { mutableStateOf(false) }
     var showReview by remember { mutableStateOf(false) }
+    var showInsights by remember { mutableStateOf(false) }
+    var showPaths by remember { mutableStateOf(false) }
+    var showPathsCatalog by remember { mutableStateOf(false) }
+    var openPathProgress by remember { mutableStateOf<com.lextures.android.core.lms.PathProgress?>(null) }
+    var openPathLandingSlug by remember { mutableStateOf<String?>(null) }
+    var openPathCourse by remember { mutableStateOf<CourseSummary?>(null) }
+    var openRecommendedItem by remember { mutableStateOf<Pair<CourseSummary, CourseStructureItem>?>(null) }
     var reviewStats by remember { mutableStateOf<com.lextures.android.core.lms.ReviewStats?>(null) }
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
@@ -225,6 +232,88 @@ fun DashboardTab(
         }
     }
 
+    openRecommendedItem?.let { (course, item) ->
+        ItemDetailScreen(
+            session = session,
+            course = course,
+            item = item,
+            onBack = { openRecommendedItem = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    openPathCourse?.let { course ->
+        CourseDetailScreen(
+            session = session,
+            course = course,
+            onBack = { openPathCourse = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    openPathLandingSlug?.let { slug ->
+        com.lextures.android.features.paths.PathLandingScreen(
+            session = session,
+            slug = slug,
+            onEnrolled = {
+                openPathLandingSlug = null
+                showPathsCatalog = false
+                showPaths = true
+            },
+            onBack = { openPathLandingSlug = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    openPathProgress?.let { path ->
+        com.lextures.android.features.paths.PathRunnerScreen(
+            session = session,
+            initialPath = path,
+            onOpenCourse = { openPathCourse = it },
+            onBack = { openPathProgress = null },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showPathsCatalog) {
+        com.lextures.android.features.paths.PathsCatalogScreen(
+            session = session,
+            onOpenPath = { openPathLandingSlug = it },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showPaths) {
+        com.lextures.android.features.paths.MyPathsScreen(
+            session = session,
+            onOpenPath = { openPathProgress = it },
+            onBrowseCatalog = { showPathsCatalog = true },
+            modifier = modifier,
+        )
+        return
+    }
+
+    if (showInsights) {
+        com.lextures.android.features.insights.InsightsScreen(
+            session = session,
+            onOpenCourse = { course ->
+                openCourse = course
+                showInsights = false
+            },
+            onOpenReview = {
+                showInsights = false
+                showReview = true
+            },
+            modifier = modifier,
+        )
+        return
+    }
+
     openDueItem?.let { due ->
         ItemDetailScreen(
             session = session,
@@ -288,6 +377,12 @@ fun DashboardTab(
     LaunchedEffect(shell.pendingReview) {
         if (shell.consumePendingReview()) {
             showReview = true
+        }
+    }
+
+    LaunchedEffect(shell.pendingInsights) {
+        if (shell.consumePendingInsights()) {
+            showInsights = true
         }
     }
 
@@ -360,6 +455,28 @@ fun DashboardTab(
                         }
                     },
                     onSeeAll = { showAnnouncements = true },
+                )
+            }
+        }
+
+        if (shell.platformFeatures.selfReflectionEnabled) {
+            item {
+                com.lextures.android.features.insights.DashboardInsightsSection(
+                    session = session,
+                    onOpenInsights = { showInsights = true },
+                )
+            }
+        }
+
+        if (shell.platformFeatures.ffLearningPaths || courses.any { it.viewerIsStudent }) {
+            item {
+                com.lextures.android.features.paths.DashboardStudySection(
+                    session = session,
+                    studentCourses = courses.filter { it.viewerIsStudent },
+                    learningPathsEnabled = shell.platformFeatures.ffLearningPaths,
+                    onOpenReview = { showReview = true },
+                    onOpenRecommendation = { course, item -> openRecommendedItem = course to item },
+                    onOpenPaths = { showPaths = true },
                 )
             }
         }

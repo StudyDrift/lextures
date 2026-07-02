@@ -79,15 +79,6 @@ struct ProfileView: View {
                 ProfileMoreDestinationScreen(destination: destination)
             }
             .confirmationDialog(
-                L.text("mobile.profile.signOutConfirm"),
-                isPresented: $confirmingSignOut,
-                titleVisibility: .visible
-            ) {
-                Button(L.text("mobile.profile.signOut"), role: .destructive) {
-                    session.signOut()
-                }
-            }
-            .confirmationDialog(
                 L.text("mobile.profile.clearCacheConfirm"),
                 isPresented: $confirmingClearCache,
                 titleVisibility: .visible
@@ -290,6 +281,15 @@ struct ProfileView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
+        .confirmationDialog(
+            L.text("mobile.profile.signOutConfirm"),
+            isPresented: $confirmingSignOut,
+            titleVisibility: .visible
+        ) {
+            Button(L.text("mobile.profile.signOut"), role: .destructive) {
+                session.signOut()
+            }
+        }
     }
 
     @MainActor

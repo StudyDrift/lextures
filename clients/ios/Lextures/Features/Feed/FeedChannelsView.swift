@@ -7,6 +7,7 @@ struct FeedChannelsView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     let course: CourseSummary
+    var groupContext: GroupFeedContext?
 
     @State private var channels: [FeedChannel] = []
     @State private var cacheLabel: String?
@@ -30,7 +31,7 @@ struct FeedChannelsView: View {
                 LMSErrorBanner(message: errorMessage)
             }
 
-            if course.viewerIsStaff {
+            if course.viewerIsStaff && groupContext == nil {
                 HStack {
                     Spacer()
                     Button {
@@ -53,7 +54,16 @@ struct FeedChannelsView: View {
             } else {
                 ForEach(channels.sorted { $0.sortOrder < $1.sortOrder }) { channel in
                     Button {
-                        openChannel = FeedChannelRoute(channelId: channel.id, channelName: channel.name)
+                        if let groupContext {
+                            openChannel = FeedChannelRoute(
+                                channelId: channel.id,
+                                channelName: channel.name,
+                                groupId: groupContext.groupId,
+                                groupName: groupContext.groupName
+                            )
+                        } else {
+                            openChannel = FeedChannelRoute(channelId: channel.id, channelName: channel.name)
+                        }
                     } label: {
                         channelRow(channel)
                     }
@@ -62,7 +72,14 @@ struct FeedChannelsView: View {
             }
         }
         .navigationDestination(item: $openChannel) { route in
-            FeedChannelView(course: course, channelId: route.channelId, channelName: route.channelName)
+            FeedChannelView(
+                course: course,
+                channelId: route.channelId,
+                channelName: route.channelName,
+                groupContext: route.groupId.map {
+                    GroupFeedContext(groupId: $0, groupName: route.groupName ?? "")
+                }
+            )
         }
         .alert(L.text("mobile.feed.newChannel"), isPresented: $showNewChannel) {
             TextField(L.text("mobile.feed.channelNamePlaceholder"), text: $newChannelName)
@@ -107,12 +124,27 @@ struct FeedChannelsView: View {
         errorMessage = nil
         defer { loading = false }
         do {
-            let result = try await offline.cachedFetch(
-                key: OfflineCacheKey.feedChannels(course.courseCode),
-                accessToken: token
-            ) {
-                try await LMSAPI.fetchFeedChannels(courseCode: course.courseCode, accessToken: token)
+            let cacheKey: String
+            let fetchChannels: () async throws -> [FeedChannel]
+            if let groupContext {
+                cacheKey = OfflineCacheKey.groupFeedChannels(
+                    courseCode: course.courseCode,
+                    groupId: groupContext.groupId
+                )
+                fetchChannels = {
+                    try await LMSAPI.fetchGroupFeedChannels(
+                        courseCode: course.courseCode,
+                        groupId: groupContext.groupId,
+                        accessToken: token
+                    )
+                }
+            } else {
+                cacheKey = OfflineCacheKey.feedChannels(course.courseCode)
+                fetchChannels = {
+                    try await LMSAPI.fetchFeedChannels(courseCode: course.courseCode, accessToken: token)
+                }
             }
+            let result = try await offline.cachedFetch(key: cacheKey, accessToken: token, fetch: fetchChannels)
             channels = result.value
             if let cached = result.cached, cached.isStale(isOnline: NetworkMonitor.shared.isOnline) {
                 cacheLabel = cached.lastUpdatedLabel
@@ -143,4 +175,6 @@ struct FeedChannelsView: View {
 struct FeedChannelRoute: Hashable {
     var channelId: String
     var channelName: String
+    var groupId: String?
+    var groupName: String?
 }

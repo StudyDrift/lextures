@@ -23,6 +23,8 @@ struct CourseDestinationPlaceholder: View {
         case .people: return "person.3"
         case .evaluations: return "star"
         case .library: return "books.vertical"
+        case .groups: return "person.3"
+        case .collabDocs: return "doc.text"
         default: return "sparkles"
         }
     }

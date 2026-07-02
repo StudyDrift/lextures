@@ -33,6 +33,23 @@ final class MobileDestinationsTests: XCTestCase {
         XCTAssertFalse(sections.contains(.attendance))
     }
 
+    func testCourseWorkspaceShowsGroupsAndCollabDocsWhenEnabled() {
+        let course = CourseSummary(
+            id: "1",
+            courseCode: "demo",
+            title: "Demo",
+            description: "",
+            viewerEnrollmentRoles: ["student"],
+            groupSpacesEnabled: true,
+            collabDocsEnabled: true
+        )
+        let sections = MobileDestinations.courseWorkspaceSections(
+            CourseWorkspaceContext(course: course)
+        )
+        XCTAssertTrue(sections.contains(.groups))
+        XCTAssertTrue(sections.contains(.collabDocs))
+    }
+
     func testCourseWorkspaceHidesDisabledFeatures() {
         let course = CourseSummary(
             id: "1",

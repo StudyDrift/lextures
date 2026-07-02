@@ -442,6 +442,8 @@ data class PlatformFeatures(
     val aiStudyBuddyEnabled: Boolean? = null,
     val aiDisclosureEnabled: Boolean? = null,
     val ffPeerReview: Boolean? = null,
+    val ffLearningPaths: Boolean? = null,
+    val selfReflectionEnabled: Boolean? = null,
 )
 
 @Serializable

@@ -18,8 +18,10 @@ struct QuizIntroView: View {
     @State private var errorMessage: String?
     @State private var startResponse: QuizStartResponse?
     @State private var showTaker = false
+    @State private var showPreview = false
 
     private var courseCode: String { course.courseCode }
+    private var isStaff: Bool { course.viewerIsStaff }
 
     var body: some View {
         ZStack {
@@ -74,6 +76,11 @@ struct QuizIntroView: View {
                         }
                     }
                 )
+            }
+        }
+        .navigationDestination(isPresented: $showPreview) {
+            if let payload = quizPayload {
+                QuizPreviewView(title: item.title, quiz: payload)
             }
         }
     }
@@ -166,6 +173,14 @@ struct QuizIntroView: View {
                     .font(.subheadline)
                     .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
             }
+        } else if isStaff {
+            Button {
+                showPreview = true
+            } label: {
+                Text(L.text("mobile.quiz.previewQuiz"))
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(AuthPrimaryButtonStyle())
         } else if !canStartAttempt {
             LMSCard {
                 Label(L.text("mobile.quiz.noAttemptsRemaining"), systemImage: "exclamationmark.circle")
@@ -265,5 +280,55 @@ struct QuizIntroView: View {
         } catch {
             errorMessage = (error as? LocalizedError)?.errorDescription ?? L.text("mobile.quiz.startError")
         }
+    }
+}
+
+/// Read-only teacher preview of a quiz. Renders every question with the shared
+/// question view using ephemeral local answers; nothing is saved and no attempt
+/// is started. Mirrors the web "Student preview" modal.
+private struct QuizPreviewView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    let title: String
+    let quiz: ModuleQuizPayload
+
+    @State private var answers: [String: QuizAnswerState] = [:]
+
+    var body: some View {
+        ZStack {
+            LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 14) {
+                    LMSCard {
+                        Text(L.text("mobile.quiz.previewNote"))
+                            .font(.subheadline)
+                            .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                    }
+                    let questions = quiz.questions ?? []
+                    if questions.isEmpty {
+                        LMSCard {
+                            Text(L.text("mobile.quiz.previewEmpty"))
+                                .font(.subheadline)
+                                .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+                        }
+                    } else {
+                        ForEach(Array(questions.enumerated()), id: \.offset) { _, question in
+                            QuizQuestionView(
+                                question: question,
+                                answer: answers[question.id] ?? QuizAnswerState(),
+                                saveState: .idle,
+                                onChange: { answers[question.id] = $0 },
+                                isFlagged: false,
+                                onToggleFlag: {}
+                            )
+                        }
+                    }
+                }
+                .padding(16)
+            }
+        }
+        .navigationTitle(title)
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

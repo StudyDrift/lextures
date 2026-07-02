@@ -123,6 +123,7 @@ class HomeShellState {
     var profileDepthEnabled by mutableStateOf(false)
     var pendingMoreDestination by mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null)
     var pendingReview by mutableStateOf(false)
+    var pendingInsights by mutableStateOf(false)
 
     // Drawer navigation (web-parity sidebar)
     var drawerState by mutableStateOf(DrawerState.None)
@@ -208,6 +209,10 @@ class HomeShellState {
                     pendingReview = true
                     RootDestination.Dashboard
                 }
+                DeepLinkDestination.Insights -> {
+                    pendingInsights = true
+                    RootDestination.Dashboard
+                }
                 is DeepLinkDestination.Course -> RootDestination.Courses
             },
         )
@@ -216,6 +221,12 @@ class HomeShellState {
     fun consumePendingReview(): Boolean {
         val pending = pendingReview
         pendingReview = false
+        return pending
+    }
+
+    fun consumePendingInsights(): Boolean {
+        val pending = pendingInsights
+        pendingInsights = false
         return pending
     }
 
@@ -530,6 +541,17 @@ private fun RootPane(
             session = session,
             shell = shell,
             onBack = { shell.select(RootDestination.Dashboard) },
+            modifier = modifier,
+        )
+        RootDestination.Insights -> com.lextures.android.features.insights.InsightsScreen(
+            session = session,
+            onOpenCourse = { course ->
+                shell.activeCourse = course
+                shell.activeCourseRoot = RootDestination.Dashboard
+                shell.activeCourseSection = com.lextures.android.core.navigation.CourseWorkspaceSection.Modules
+                shell.select(RootDestination.Courses)
+            },
+            onOpenReview = { shell.select(RootDestination.Review) },
             modifier = modifier,
         )
         RootDestination.Accommodations -> com.lextures.android.features.profile.MyAccommodationsScreen(

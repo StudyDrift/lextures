@@ -83,6 +83,7 @@ enum RootDestination: String, CaseIterable, Equatable, Identifiable {
     case calendar
     case todos
     case review
+    case insights
     case notebooks
     case globalNotebook
     case accommodations
@@ -101,6 +102,7 @@ enum RootDestination: String, CaseIterable, Equatable, Identifiable {
         case .calendar: return L.text("mobile.ia.tabs.calendar")
         case .todos: return L.text("mobile.drawer.todos")
         case .review: return L.text("mobile.drawer.review")
+        case .insights: return L.text("mobile.drawer.insights")
         case .notebooks: return L.text("mobile.drawer.notebooks")
         case .globalNotebook: return L.text("mobile.drawer.globalNotebook")
         case .accommodations: return L.text("mobile.drawer.accommodations")
@@ -119,6 +121,7 @@ enum RootDestination: String, CaseIterable, Equatable, Identifiable {
         case .calendar: return "calendar"
         case .todos: return "checklist"
         case .review: return "arrow.triangle.2.circlepath"
+        case .insights: return "chart.line.uptrend.xyaxis"
         case .notebooks: return "book.closed.fill"
         case .globalNotebook: return "globe"
         case .accommodations: return "accessibility"
@@ -168,6 +171,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case askAi
     case peerReviews
     case reportCards
+    case insights
 
     var id: String { rawValue }
 
@@ -176,6 +180,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .askAi: return L.text("mobile.tutor.askAi")
         case .peerReviews: return L.text("mobile.peerReview.title")
         case .reportCards: return L.text("mobile.mastery.reportCards")
+        case .insights: return L.text("mobile.ia.more.insights")
         case .calendar: return L.text("mobile.ia.more.calendar")
         case .planner: return L.text("mobile.ia.more.planner")
         case .catalog: return L.text("mobile.ia.more.catalog")
@@ -194,6 +199,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .askAi: return "sparkles"
         case .peerReviews: return "person.2.wave.2.fill"
         case .reportCards: return "doc.text.fill"
+        case .insights: return "chart.line.uptrend.xyaxis"
         case .calendar: return "calendar"
         case .planner: return "list.bullet.rectangle"
         case .catalog: return "books.vertical"
@@ -225,6 +231,8 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
     case evaluations
     case library
     case officeHours
+    case groups
+    case collabDocs
     case grading
 
     var label: String {
@@ -242,6 +250,8 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .evaluations: return L.text("mobile.ia.course.evaluations")
         case .library: return L.text("mobile.ia.course.library")
         case .officeHours: return L.text("mobile.ia.course.officeHours")
+        case .groups: return L.text("mobile.ia.course.groups")
+        case .collabDocs: return L.text("mobile.ia.course.collabDocs")
         case .grading: return L.text("mobile.ia.course.grading")
         }
     }
@@ -262,6 +272,8 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .evaluations: return "evaluations"
         case .library: return "library"
         case .officeHours: return "office-hours"
+        case .groups: return "groups"
+        case .collabDocs: return "collab-docs"
         case .grading: return "grading"
         }
     }
@@ -280,6 +292,8 @@ enum CourseWorkspaceSection: String, CaseIterable, Equatable, Hashable {
         case .people: return .people
         case .evaluations: return .evaluations
         case .library: return .library
+        case .groups: return .groups
+        case .collabDocs: return .collabDocs
         }
     }
 }
@@ -329,6 +343,8 @@ struct MobilePlatformFeatures: Equatable {
     var aiStudyBuddyEnabled = false
     var aiDisclosureEnabled = false
     var ffPeerReview = false
+    var ffLearningPaths = false
+    var selfReflectionEnabled = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -348,7 +364,9 @@ struct MobilePlatformFeatures: Equatable {
             ragNotebookEnabled: features?.ragNotebookEnabled == true,
             aiStudyBuddyEnabled: features?.aiStudyBuddyEnabled == true,
             aiDisclosureEnabled: features?.aiDisclosureEnabled == true,
-            ffPeerReview: features?.ffPeerReview == true
+            ffPeerReview: features?.ffPeerReview == true,
+            ffLearningPaths: features?.ffLearningPaths == true,
+            selfReflectionEnabled: features?.selfReflectionEnabled == true
         )
     }
 
@@ -393,7 +411,10 @@ enum MobileDestinations {
         case .learning:
             return [
                 DrawerGroup(titleKey: nil, items: [.dashboard, .courses, .calendar, .todos]),
-                DrawerGroup(titleKey: "mobile.drawer.group.learning", items: [.review]),
+                DrawerGroup(
+                    titleKey: "mobile.drawer.group.learning",
+                    items: learningDrawerItems(platform: platform)
+                ),
                 DrawerGroup(titleKey: "mobile.drawer.group.notes", items: [.notebooks, .globalNotebook]),
                 DrawerGroup(titleKey: "mobile.drawer.group.administration", items: [.accommodations]),
                 DrawerGroup(titleKey: "mobile.drawer.group.account", items: [.inbox, .settings]),
@@ -420,7 +441,9 @@ enum MobileDestinations {
     /// appear, so per-role gating is inherited unchanged.
     static func courseDrawerGroups(_ sections: [CourseWorkspaceSection]) -> [CourseDrawerGroup] {
         let content: [CourseWorkspaceSection] = [.overview, .modules, .files, .library]
-        let collaboration: [CourseWorkspaceSection] = [.discussions, .feed, .live, .officeHours]
+        let collaboration: [CourseWorkspaceSection] = [
+            .discussions, .feed, .groups, .collabDocs, .live, .officeHours,
+        ]
         let grades: [CourseWorkspaceSection] = [.grades, .mastery]
         let people: [CourseWorkspaceSection] = [.people]
         let manage: [CourseWorkspaceSection] = [.grading, .attendance, .evaluations]
@@ -439,6 +462,12 @@ enum MobileDestinations {
         return groups.compactMap { key, list in
             list.isEmpty ? nil : CourseDrawerGroup(titleKey: key, sections: list)
         }
+    }
+
+    private static func learningDrawerItems(platform: MobilePlatformFeatures) -> [RootDestination] {
+        var items: [RootDestination] = [.review]
+        if platform.selfReflectionEnabled { items.append(.insights) }
+        return items
     }
 
     static func legacyTab(from shell: ShellTab) -> AppTab? {
@@ -462,6 +491,7 @@ enum MobileDestinations {
             if TutorLogic.askAiEnabled(platform: platform) { out.append(.askAi) }
             if platform.ffPeerReview { out.append(.peerReviews) }
             out.append(.reportCards)
+            if platform.selfReflectionEnabled { out.append(.insights) }
             out += [.calendar, .planner, .catalog, .paths, .reading]
             if platform.libraryBrowseEnabled { out.append(.library) }
             out += [.portfolio, .credentials, .advising, .settings]
@@ -489,6 +519,8 @@ enum MobileDestinations {
         if course.isLiveSessionsEnabled { out.append(.live) }
         if course.viewerIsStaff && course.isSectionsEnabled { out.append(.people) }
         if course.isOfficeHoursEnabled { out.append(.officeHours) }
+        if course.isGroupSpacesEnabled { out.append(.groups) }
+        if course.isCollabDocsEnabled { out.append(.collabDocs) }
         if course.isAttendanceEnabled && (course.viewerIsStaff || ctx.hasAttendanceSessions) {
             out.append(.attendance)
         }

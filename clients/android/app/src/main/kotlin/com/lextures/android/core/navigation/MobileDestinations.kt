@@ -50,6 +50,7 @@ enum class RootDestination(val labelRes: String, val iconName: String) {
     Calendar("mobile_ia_tabs_calendar", "calendar"),
     Todos("mobile_drawer_todos", "todos"),
     Review("mobile_drawer_review", "review"),
+    Insights("mobile_drawer_insights", "insights"),
     Notebooks("mobile_drawer_notebooks", "notebooks"),
     GlobalNotebook("mobile_drawer_globalNotebook", "globalNotebook"),
     Accommodations("mobile_drawer_accommodations", "accommodations"),
@@ -84,6 +85,7 @@ enum class MoreDestination(val labelRes: String) {
     AskAi("mobile_tutor_askAi"),
     PeerReviews("mobile_peerReview_title"),
     ReportCards("mobile_mastery_reportCards"),
+    Insights("mobile_ia_more_insights"),
 }
 
 /** Course-scoped workspace chips (registry-driven). */
@@ -101,6 +103,8 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
     Evaluations("mobile_ia_course_evaluations", "evaluations"),
     Library("mobile_ia_course_library", "library"),
     OfficeHours("mobile_ia_course_officeHours", "office-hours"),
+    Groups("mobile_ia_course_groups", "groups"),
+    CollabDocs("mobile_ia_course_collabDocs", "collab-docs"),
     Grading("mobile_ia_course_grading", "grading"),
     ;
 
@@ -118,6 +122,8 @@ enum class CourseWorkspaceSection(val labelRes: String, val deepLinkSegment: Str
             CourseDeepLinkSection.People -> People
             CourseDeepLinkSection.Evaluations -> Evaluations
             CourseDeepLinkSection.Library -> Library
+            CourseDeepLinkSection.Groups -> Groups
+            CourseDeepLinkSection.CollabDocs -> CollabDocs
             null -> null
         }
     }
@@ -163,6 +169,8 @@ data class MobilePlatformFeatures(
     val aiStudyBuddyEnabled: Boolean = false,
     val aiDisclosureEnabled: Boolean = false,
     val ffPeerReview: Boolean = false,
+    val ffLearningPaths: Boolean = false,
+    val selfReflectionEnabled: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -186,6 +194,8 @@ data class MobilePlatformFeatures(
             aiStudyBuddyEnabled = features?.aiStudyBuddyEnabled == true,
             aiDisclosureEnabled = features?.aiDisclosureEnabled == true,
             ffPeerReview = features?.ffPeerReview == true,
+            ffLearningPaths = features?.ffLearningPaths == true,
+            selfReflectionEnabled = features?.selfReflectionEnabled == true,
         )
     }
 }
@@ -233,7 +243,7 @@ object MobileDestinations {
     ): List<DrawerGroup> = when (context) {
         MobileRoleContext.Learning -> listOf(
             DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar, RootDestination.Todos)),
-            DrawerGroup("mobile_drawer_group_learning", listOf(RootDestination.Review)),
+            DrawerGroup("mobile_drawer_group_learning", learningDrawerItems(platform)),
             DrawerGroup("mobile_drawer_group_notes", listOf(RootDestination.Notebooks, RootDestination.GlobalNotebook)),
             DrawerGroup("mobile_drawer_group_administration", listOf(RootDestination.Accommodations)),
             DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
@@ -261,7 +271,14 @@ object MobileDestinations {
                 listOf(CourseWorkspaceSection.Overview, CourseWorkspaceSection.Modules, CourseWorkspaceSection.Files, CourseWorkspaceSection.Library),
             ),
             "mobile_drawer_course_collaboration" to filtered(
-                listOf(CourseWorkspaceSection.Discussions, CourseWorkspaceSection.Feed, CourseWorkspaceSection.Live, CourseWorkspaceSection.OfficeHours),
+                listOf(
+                    CourseWorkspaceSection.Discussions,
+                    CourseWorkspaceSection.Feed,
+                    CourseWorkspaceSection.Groups,
+                    CourseWorkspaceSection.CollabDocs,
+                    CourseWorkspaceSection.Live,
+                    CourseWorkspaceSection.OfficeHours,
+                ),
             ),
             "mobile_drawer_course_grades" to filtered(
                 listOf(CourseWorkspaceSection.Grades, CourseWorkspaceSection.Mastery),
@@ -273,6 +290,11 @@ object MobileDestinations {
         ).mapNotNull { (key, list) -> if (list.isEmpty()) null else CourseDrawerGroup(key, list) }
     }
 
+    private fun learningDrawerItems(platform: MobilePlatformFeatures): List<RootDestination> = buildList {
+        add(RootDestination.Review)
+        if (platform.selfReflectionEnabled) add(RootDestination.Insights)
+    }
+
     fun moreDestinations(
         context: MobileRoleContext,
         platform: MobilePlatformFeatures,
@@ -282,6 +304,7 @@ object MobileDestinations {
                 if (TutorLogic.askAiEnabled(platform)) add(MoreDestination.AskAi)
                 if (platform.ffPeerReview) add(MoreDestination.PeerReviews)
                 add(MoreDestination.ReportCards)
+                if (platform.selfReflectionEnabled) add(MoreDestination.Insights)
                 add(MoreDestination.Calendar)
                 add(MoreDestination.Planner)
                 add(MoreDestination.Catalog)
@@ -319,6 +342,8 @@ object MobileDestinations {
         if (ctx.course.isLiveSessionsEnabled) add(CourseWorkspaceSection.Live)
         if (ctx.course.viewerIsStaff && ctx.course.isSectionsEnabled) add(CourseWorkspaceSection.People)
         if (ctx.course.isOfficeHoursEnabled) add(CourseWorkspaceSection.OfficeHours)
+        if (ctx.course.isGroupSpacesEnabled) add(CourseWorkspaceSection.Groups)
+        if (ctx.course.isCollabDocsEnabled) add(CourseWorkspaceSection.CollabDocs)
         if (ctx.course.isAttendanceEnabled && (ctx.course.viewerIsStaff || ctx.hasAttendanceSessions)) {
             add(CourseWorkspaceSection.Attendance)
         }

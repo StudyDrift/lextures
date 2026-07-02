@@ -18,6 +18,7 @@ struct AuthFieldRepresentable: UIViewRepresentable {
         field.backgroundColor = .clear
         field.autocorrectionType = .no
         field.spellCheckingType = .no
+        field.inlinePredictionType = .no
         field.smartDashesType = .no
         field.smartInsertDeleteType = .no
         field.smartQuotesType = .no
@@ -47,6 +48,9 @@ struct AuthFieldRepresentable: UIViewRepresentable {
         uiView.keyboardType = keyboard
         uiView.textContentType = textContentType
         uiView.autocapitalizationType = autocapitalization
+        uiView.autocorrectionType = .no
+        uiView.spellCheckingType = .no
+        uiView.inlinePredictionType = .no
 
         if uiView.isSecureTextEntry != isSecure {
             let current = uiView.text

@@ -50,6 +50,7 @@ import com.lextures.android.core.design.textPrimary
 import com.lextures.android.core.design.textSecondary
 import com.lextures.android.core.lms.CourseSummary
 import com.lextures.android.core.lms.FeedChannel
+import com.lextures.android.core.lms.GroupFeedContext
 import com.lextures.android.core.lms.FeedLogic
 import com.lextures.android.core.lms.FeedMessage
 import com.lextures.android.core.lms.FileDownloadManager
@@ -78,7 +79,12 @@ fun CourseFeedSection(session: AuthSession, course: CourseSummary, modifier: Mod
 }
 
 @Composable
-fun FeedChannelsScreen(session: AuthSession, course: CourseSummary, modifier: Modifier = Modifier) {
+fun FeedChannelsScreen(
+    session: AuthSession,
+    course: CourseSummary,
+    groupContext: GroupFeedContext? = null,
+    modifier: Modifier = Modifier,
+) {
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
@@ -98,11 +104,22 @@ fun FeedChannelsScreen(session: AuthSession, course: CourseSummary, modifier: Mo
         loading = true
         errorMessage = null
         try {
+            val cacheKey = if (groupContext != null) {
+                OfflineCacheKey.groupFeedChannels(course.courseCode, groupContext.groupId)
+            } else {
+                OfflineCacheKey.feedChannels(course.courseCode)
+            }
             val result = offline.cachedFetch(
-                key = OfflineCacheKey.feedChannels(course.courseCode),
+                key = cacheKey,
                 accessToken = token,
                 serializer = FeedChannel.serializer().let { kotlinx.serialization.builtins.ListSerializer(it) },
-            ) { LmsApi.fetchFeedChannels(course.courseCode, token) }
+            ) {
+                if (groupContext != null) {
+                    LmsApi.fetchGroupFeedChannels(course.courseCode, groupContext.groupId, token)
+                } else {
+                    LmsApi.fetchFeedChannels(course.courseCode, token)
+                }
+            }
             channels = result.first
             cacheLabel = result.second?.takeIf { it.isStale(isOnline) }?.lastUpdatedLabel()
         } catch (e: Exception) {
@@ -124,6 +141,7 @@ fun FeedChannelsScreen(session: AuthSession, course: CourseSummary, modifier: Mo
             course = course,
             channel = channel,
             socket = socket,
+            groupContext = groupContext,
             onBack = { openChannel = null },
         )
         return
@@ -134,7 +152,7 @@ fun FeedChannelsScreen(session: AuthSession, course: CourseSummary, modifier: Mo
         cacheLabel?.let { StalenessChip(label = it) }
         errorMessage?.let { LmsErrorBanner(message = it) }
 
-        if (course.viewerIsStaff) {
+        if (course.viewerIsStaff && groupContext == null) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = { showNewChannel = true }) {
                     Icon(Icons.Default.Add, contentDescription = null)
@@ -206,6 +224,7 @@ fun FeedChannelScreen(
     course: CourseSummary,
     channel: FeedChannel,
     socket: FeedSocket,
+    groupContext: GroupFeedContext? = null,
     onBack: () -> Unit,
 ) {
     val accessToken by session.accessToken.collectAsState()
@@ -233,11 +252,22 @@ fun FeedChannelScreen(
         loading = true
         errorMessage = null
         try {
+            val cacheKey = if (groupContext != null) {
+                OfflineCacheKey.groupFeedMessages(course.courseCode, groupContext.groupId, channel.id)
+            } else {
+                OfflineCacheKey.feedMessages(course.courseCode, channel.id)
+            }
             val result = offline.cachedFetch(
-                key = OfflineCacheKey.feedMessages(course.courseCode, channel.id),
+                key = cacheKey,
                 accessToken = token,
                 serializer = FeedMessage.serializer().let { kotlinx.serialization.builtins.ListSerializer(it) },
-            ) { LmsApi.fetchFeedMessages(course.courseCode, channel.id, token) }
+            ) {
+                if (groupContext != null) {
+                    LmsApi.fetchGroupFeedMessages(course.courseCode, groupContext.groupId, channel.id, token)
+                } else {
+                    LmsApi.fetchFeedMessages(course.courseCode, channel.id, token)
+                }
+            }
             roots = result.first
             cacheLabel = result.second?.takeIf { it.isStale(isOnline) }?.lastUpdatedLabel()
         } catch (e: Exception) {
@@ -400,12 +430,28 @@ fun FeedChannelScreen(
                                         body = if (body.isEmpty()) markdown else "$body\n\n$markdown"
                                     }
                                     if (isOnline) {
-                                        LmsApi.postFeedMessage(course.courseCode, channel.id, body, token)
+                                        if (groupContext != null) {
+                                            LmsApi.postGroupFeedMessage(
+                                                course.courseCode,
+                                                groupContext.groupId,
+                                                channel.id,
+                                                body,
+                                                token,
+                                            )
+                                        } else {
+                                            LmsApi.postFeedMessage(course.courseCode, channel.id, body, token)
+                                        }
                                         load()
                                     } else {
+                                        val path = if (groupContext != null) {
+                                            "/api/v1/courses/${course.courseCode}/groups/${groupContext.groupId}" +
+                                                "/feed/channels/${channel.id}/messages"
+                                        } else {
+                                            "/api/v1/courses/${course.courseCode}/feed/channels/${channel.id}/messages"
+                                        }
                                         offline.enqueueMutation(
                                             method = "POST",
-                                            path = "/api/v1/courses/${course.courseCode}/feed/channels/${channel.id}/messages",
+                                            path = path,
                                             bodyJson = offlineJson.encodeToString(PostFeedMessageBody(body)),
                                             label = feedLabel,
                                             accessToken = token,

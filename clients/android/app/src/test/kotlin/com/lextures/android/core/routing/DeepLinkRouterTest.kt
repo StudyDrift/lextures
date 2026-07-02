@@ -34,4 +34,10 @@ class DeepLinkRouterTest {
         val destination = DeepLinkRouter.resolve("/review")
         assertTrue(destination is DeepLinkDestination.Review)
     }
+
+    @Test
+    fun resolvesStudyInsightsPath() {
+        val destination = DeepLinkRouter.resolve("/me/study-insights")
+        assertTrue(destination is DeepLinkDestination.Insights)
+    }
 }

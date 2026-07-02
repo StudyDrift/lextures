@@ -118,6 +118,10 @@ fun ProfileTab(
     var confirmingClearSearchHistory by remember { mutableStateOf(false) }
     var openMoreDestination by remember { mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null) }
     var openPeerReviewAllocationId by remember { mutableStateOf<String?>(null) }
+    var openPathProgress by remember { mutableStateOf<com.lextures.android.core.lms.PathProgress?>(null) }
+    var showPathsCatalog by remember { mutableStateOf(false) }
+    var openPathLandingSlug by remember { mutableStateOf<String?>(null) }
+    var openPathCourse by remember { mutableStateOf<com.lextures.android.core.lms.CourseSummary?>(null) }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val themePreference = remember { ThemePreference.get(context) }
@@ -280,6 +284,66 @@ fun ProfileTab(
                     session = session,
                     modifier = Modifier.fillMaxSize(),
                 )
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Insights) {
+                if (shell.platformFeatures.selfReflectionEnabled) {
+                    com.lextures.android.features.insights.InsightsScreen(
+                        session = session,
+                        onOpenCourse = { course ->
+                            openMoreDestination = null
+                            shell.select(com.lextures.android.core.navigation.RootDestination.Courses)
+                            shell.activeCourse = course
+                            shell.activeCourseSection = com.lextures.android.core.navigation.CourseWorkspaceSection.Modules
+                        },
+                        onOpenReview = {
+                            openMoreDestination = null
+                            shell.select(com.lextures.android.core.navigation.RootDestination.Review)
+                        },
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Paths) {
+                if (shell.platformFeatures.ffLearningPaths) {
+                    when {
+                        openPathCourse != null -> com.lextures.android.features.courses.CourseDetailScreen(
+                            session = session,
+                            course = openPathCourse!!,
+                            onBack = { openPathCourse = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        openPathLandingSlug != null -> com.lextures.android.features.paths.PathLandingScreen(
+                            session = session,
+                            slug = openPathLandingSlug!!,
+                            onEnrolled = {
+                                openPathLandingSlug = null
+                                showPathsCatalog = false
+                            },
+                            onBack = { openPathLandingSlug = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        openPathProgress != null -> com.lextures.android.features.paths.PathRunnerScreen(
+                            session = session,
+                            initialPath = openPathProgress!!,
+                            onOpenCourse = { openPathCourse = it },
+                            onBack = { openPathProgress = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        showPathsCatalog -> com.lextures.android.features.paths.PathsCatalogScreen(
+                            session = session,
+                            onOpenPath = { openPathLandingSlug = it },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        else -> com.lextures.android.features.paths.MyPathsScreen(
+                            session = session,
+                            onOpenPath = { openPathProgress = it },
+                            onBrowseCatalog = { showPathsCatalog = true },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
             } else {
                 MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
             }

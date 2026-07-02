@@ -557,6 +557,8 @@ struct PlatformFeatures: Decodable {
     var aiStudyBuddyEnabled: Bool?
     var aiDisclosureEnabled: Bool?
     var ffPeerReview: Bool?
+    var ffLearningPaths: Bool?
+    var selfReflectionEnabled: Bool?
 }
 
 /// Navigation target for grade feedback detail (M6.1).

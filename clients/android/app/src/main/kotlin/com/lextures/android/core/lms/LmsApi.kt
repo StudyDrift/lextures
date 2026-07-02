@@ -42,6 +42,30 @@ object LmsApi {
         decode<CourseSummary>(body)
     }
 
+    /** Accept a pending enrollment invitation, activating the viewer's enrollment. */
+    suspend fun approveCourseInvitation(courseCode: String, enrollmentId: String, accessToken: String) {
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/invitation/approve",
+                method = "POST",
+                body = "{}",
+                accessToken = accessToken,
+            )
+        }
+    }
+
+    /** Decline a pending enrollment invitation, removing the viewer's enrollment. */
+    suspend fun declineCourseInvitation(courseCode: String, enrollmentId: String, accessToken: String) {
+        withContext(Dispatchers.IO) {
+            client.request(
+                path = "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/invitation/decline",
+                method = "POST",
+                body = "{}",
+                accessToken = accessToken,
+            )
+        }
+    }
+
     suspend fun fetchCourseStructure(courseCode: String, accessToken: String): List<CourseStructureItem> =
         withContext(Dispatchers.IO) {
             val (body, _) = client.request(
@@ -1525,6 +1549,44 @@ object LmsApi {
         decode<PostFeedMessageResponse>(responseBody).id
     }
 
+    // Group spaces & collab docs (M7.4)
+
+    suspend fun fetchMyGroups(courseCode: String, accessToken: String): List<GroupPublic> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/my-groups",
+                accessToken = accessToken,
+            )
+            decode<GroupsListResponse>(body).groups
+        }
+
+    suspend fun fetchAllGroups(courseCode: String, accessToken: String): List<GroupPublic> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/groups",
+                accessToken = accessToken,
+            )
+            decode<GroupsListResponse>(body).groups
+        }
+
+    suspend fun fetchCollabDocs(courseCode: String, accessToken: String): List<CollabDoc> =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/collab-docs",
+                accessToken = accessToken,
+            )
+            decode<CollabDocsListResponse>(body).docs
+        }
+
+    suspend fun fetchCollabDoc(courseCode: String, docId: String, accessToken: String): CollabDoc =
+        withContext(Dispatchers.IO) {
+            val (body, _) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/collab-docs/${encodePath(docId)}",
+                accessToken = accessToken,
+            )
+            decode(body)
+        }
+
     // AI tutor (M7.2)
 
     suspend fun fetchTutorConversation(courseCode: String, accessToken: String): TutorConversationResponse =
@@ -1698,4 +1760,161 @@ object LmsApi {
         ),
         accessToken = accessToken,
     )
+
+    // Learning paths (M8.2)
+
+    suspend fun fetchCatalogPaths(
+        query: String = "",
+        sort: String = "",
+        accessToken: String? = null,
+    ): List<CatalogPathSummary> = withContext(Dispatchers.IO) {
+        val params = buildList {
+            val q = query.trim()
+            if (q.isNotEmpty()) add("q=${encodeQuery(q)}")
+            val s = sort.trim()
+            if (s.isNotEmpty()) add("sort=${encodeQuery(s)}")
+        }.joinToString("&")
+        val suffix = if (params.isNotEmpty()) "?$params" else ""
+        val (body, code) = client.request("/api/v1/catalog/paths$suffix", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CatalogPathsListResponse>(body).paths
+    }
+
+    suspend fun fetchCatalogPathDetail(slug: String, accessToken: String? = null): LearningPathDetail? =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/catalog/paths/${encodePath(slug)}",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext null
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchMyPaths(accessToken: String): List<PathProgress> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/paths", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<MyPathsListResponse>(body).paths
+    }
+
+    suspend fun fetchPathProgress(pathId: String, accessToken: String): PathProgress = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            "/api/v1/me/paths/${encodePath(pathId)}/progress",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun enrollInPath(pathId: String, accessToken: String): PathEnrollResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            "/api/v1/paths/${encodePath(pathId)}/enroll",
+            method = "POST",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun postRecommendationEvent(body: RecommendationEventBody, accessToken: String) = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/recommendations/event",
+            method = "POST",
+            body = json.encodeToString(RecommendationEventBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+    }
+
+    // region Study insights (M8.3)
+
+    suspend fun fetchStudyStats(accessToken: String): StudyStats = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/study-stats", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchStudyGoal(accessToken: String): StudyGoal = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/study-goal", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun putStudyGoal(body: PutStudyGoalBody, accessToken: String): StudyGoal = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/me/study-goal",
+            method = "PUT",
+            body = json.encodeToString(PutStudyGoalBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    suspend fun fetchReflectionJournal(accessToken: String): List<ReflectionJournalEntry> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/reflection-journal", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<ReflectionJournalListResponse>(body).entries
+    }
+
+    suspend fun createReflectionJournalEntry(
+        body: PostReflectionJournalBody,
+        accessToken: String,
+    ): String = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/me/reflection-journal",
+            method = "POST",
+            body = json.encodeToString(PostReflectionJournalBody.serializer(), body),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode<PostReflectionJournalResponse>(responseBody).id
+    }
+
+    suspend fun deleteReflectionJournalEntry(id: String, accessToken: String) = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/reflection-journal/${encodePath(id)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun fetchCoachingTips(accessToken: String): CoachingTipsResponse = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/coaching-tips", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun rateCoachingTip(id: String, rating: Int, accessToken: String) = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/coaching-tips/${encodePath(id)}/rating",
+            method = "POST",
+            body = json.encodeToString(RateCoachingTipBody.serializer(), RateCoachingTipBody(rating)),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun fetchReminderConfig(accessToken: String): ReminderConfig = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/reminder-config", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun patchReminderConfig(enabled: Boolean, accessToken: String): ReminderConfig = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/me/reminder-config",
+            method = "PATCH",
+            body = json.encodeToString(
+                PatchReminderConfigBody.serializer(),
+                PatchReminderConfigBody(enabled = enabled),
+            ),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode(responseBody)
+    }
+
+    // endregion
 }

@@ -41,9 +41,26 @@ enum OfflineCacheKey {
     static func feedMessages(courseCode: String, channelId: String) -> String {
         "course:\(courseCode):feed-messages:\(channelId)"
     }
+    static func myGroups(_ courseCode: String) -> String { "course:\(courseCode):my-groups" }
+    static func groupFeedChannels(courseCode: String, groupId: String) -> String {
+        "course:\(courseCode):group:\(groupId):feed-channels"
+    }
+    static func groupFeedMessages(courseCode: String, groupId: String, channelId: String) -> String {
+        "course:\(courseCode):group:\(groupId):feed-messages:\(channelId)"
+    }
+    static func collabDocs(_ courseCode: String) -> String { "course:\(courseCode):collab-docs" }
+    static func collabDoc(courseCode: String, docId: String) -> String {
+        "course:\(courseCode):collab-doc:\(docId)"
+    }
     static func courseEnrollments(_ courseCode: String) -> String {
         "course:\(courseCode):enrollments"
     }
+    static func myPaths() -> String { "paths:my" }
+    static func pathProgress(_ pathId: String) -> String { "paths:progress:\(pathId)" }
+    static func catalogPaths(query: String) -> String { "paths:catalog:\(query)" }
+    static func studyStats() -> String { "insights:study-stats" }
+    static func reflectionJournal() -> String { "insights:reflection-journal" }
+    static func coachingTips() -> String { "insights:coaching-tips" }
 }
 
 /// A cached value plus freshness metadata for read screens.

@@ -49,6 +49,7 @@ final class AppShellModel {
     var profileDepthEnabled = MobileProfileDepthPreferences.isEnabled
     var pendingMoreDestination: MoreDestination?
     var pendingReview = false
+    var pendingInsights = false
 
     // MARK: Drawer navigation
 
@@ -168,6 +169,9 @@ final class AppShellModel {
         case .review:
             selectShellTab(.home)
             pendingReview = true
+        case .insights:
+            selectShellTab(.home)
+            pendingInsights = true
         case .course:
             selectShellTab(.courses)
         }
@@ -208,6 +212,11 @@ final class AppShellModel {
     func consumePendingReview() -> Bool {
         defer { pendingReview = false }
         return pendingReview
+    }
+
+    func consumePendingInsights() -> Bool {
+        defer { pendingInsights = false }
+        return pendingInsights
     }
 
     func navigateFromSearch(path: String) {
@@ -406,6 +415,20 @@ struct MainTabView: View {
                 }
                 secondaryPane(.review, width: width) {
                     NavigationStack { ReviewHomeView().globalDrawerToolbar() }
+                }
+                secondaryPane(.insights, width: width) {
+                    NavigationStack {
+                        InsightsView(
+                            onOpenCourse: { course in
+                                shell.activeCourse = course
+                                shell.activeCourseRoot = .dashboard
+                                shell.activeCourseSection = .modules
+                                shell.select(.courses)
+                            },
+                            onOpenReview: { shell.select(.review) }
+                        )
+                        .globalDrawerToolbar()
+                    }
                 }
                 secondaryPane(.globalNotebook, width: width) {
                     NavigationStack {

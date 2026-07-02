@@ -29,8 +29,19 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var viewerStudentEnrollmentId: String?
     var standardsAlignmentEnabled: Bool?
     var reportCardsEnabled: Bool?
+    var groupSpacesEnabled: Bool?
+    var collabDocsEnabled: Bool?
+    var viewerEnrollmentInvitationPending: Bool?
+    var viewerPendingEnrollmentId: String?
 
     var isCalendarEnabled: Bool { calendarEnabled != false }
+
+    /// True when the viewer has an unaccepted enrollment invitation for this course.
+    /// The enrolled-courses list surfaces such courses, but course content (structure,
+    /// grades, …) is gated until the invitation is accepted.
+    var hasPendingInvitation: Bool {
+        viewerEnrollmentInvitationPending == true && viewerPendingEnrollmentId != nil
+    }
 
     var isMasteryEnabled: Bool { standardsAlignmentEnabled == true }
 
@@ -49,6 +60,10 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var isAttendanceEnabled: Bool { attendanceEnabled != false }
 
     var isSectionsEnabled: Bool { sectionsEnabled != false }
+
+    var isGroupSpacesEnabled: Bool { groupSpacesEnabled == true }
+
+    var isCollabDocsEnabled: Bool { collabDocsEnabled == true }
 
     var isPinned: Bool { catalogPinned == true }
 

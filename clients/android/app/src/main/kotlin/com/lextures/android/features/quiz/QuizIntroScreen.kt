@@ -71,6 +71,8 @@ fun QuizIntroScreen(
     var error by remember { mutableStateOf<String?>(null) }
     var startResponse by remember { mutableStateOf<QuizStartResponse?>(null) }
     var showTaker by remember { mutableStateOf(false) }
+    var showPreview by remember { mutableStateOf(false) }
+    val isStaff = course.viewerIsStaff
 
     LaunchedEffect(accessToken, item.id) {
         val token = accessToken ?: return@LaunchedEffect
@@ -88,6 +90,17 @@ fun QuizIntroScreen(
     }
 
     val scope = rememberCoroutineScope()
+
+    val previewQuiz = quiz
+    if (showPreview && previewQuiz != null) {
+        QuizPreviewScreen(
+            title = item.title,
+            quiz = previewQuiz,
+            onBack = { showPreview = false },
+            modifier = modifier,
+        )
+        return
+    }
 
     if (showTaker && startResponse != null) {
         QuizTakerScreen(
@@ -160,6 +173,12 @@ fun QuizIntroScreen(
                 val canStart = quiz?.isAdaptive != true && (unlimited || attempts.size < (detail?.maxAttempts ?: quiz?.maxAttempts ?: 1))
                 if (quiz?.isAdaptive == true) {
                     LmsCard { Text(quizAdaptiveWebOnlyLabel()) }
+                } else if (isStaff) {
+                    AuthPrimaryButton(
+                        text = quizPreviewLabel(),
+                        onClick = { showPreview = true },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 } else if (!canStart) {
                     LmsCard { Text(quizNoAttemptsLabel()) }
                 } else {
@@ -184,6 +203,47 @@ fun QuizIntroScreen(
                         },
                         enabled = !starting,
                         modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Read-only teacher preview of a quiz. Renders every question with the shared
+ * question renderer using ephemeral local answers; nothing is saved and no
+ * attempt is started. Mirrors the web "Student preview" modal.
+ */
+@Composable
+fun QuizPreviewScreen(
+    title: String,
+    quiz: ModuleQuizPayload,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val answers = remember { mutableStateMapOf<String, QuizAnswerState>() }
+    Column(modifier = modifier.fillMaxSize()) {
+        RowHeader(title = title, onBack = onBack)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            LmsCard { Text(quizPreviewNoteLabel()) }
+            val questions = quiz.questions.orEmpty()
+            if (questions.isEmpty()) {
+                LmsCard { Text(quizPreviewEmptyLabel()) }
+            } else {
+                questions.forEachIndexed { index, question ->
+                    Text(quizQuestionNumberLabel(index + 1), fontWeight = FontWeight.SemiBold)
+                    QuizQuestionContent(
+                        question = question,
+                        answer = answers[question.id] ?: QuizAnswerState(),
+                        saveState = QuizSaveState.Idle,
+                        onChange = { answers[question.id] = it },
                     )
                 }
             }

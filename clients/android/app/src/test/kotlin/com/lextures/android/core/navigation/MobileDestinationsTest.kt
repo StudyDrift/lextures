@@ -25,6 +25,21 @@ class MobileDestinationsTest {
     }
 
     @Test
+    fun courseWorkspaceShowsGroupsAndCollabDocsWhenEnabled() {
+        val course = CourseSummary(
+            id = "1",
+            courseCode = "demo",
+            title = "Demo",
+            viewerEnrollmentRoles = listOf("student"),
+            groupSpacesEnabled = true,
+            collabDocsEnabled = true,
+        )
+        val sections = MobileDestinations.courseWorkspaceSections(CourseWorkspaceContext(course = course))
+        assertTrue(sections.contains(CourseWorkspaceSection.Groups))
+        assertTrue(sections.contains(CourseWorkspaceSection.CollabDocs))
+    }
+
+    @Test
     fun courseWorkspaceHidesDisabledFeatures() {
         val course = CourseSummary(
             id = "1",
@@ -59,6 +74,8 @@ class MobileDestinationsTest {
     fun deepLinkMapsToWorkspaceSection() {
         assertEquals(CourseWorkspaceSection.Feed, CourseWorkspaceSection.from(CourseDeepLinkSection.Feed))
         assertEquals(CourseWorkspaceSection.Attendance, CourseWorkspaceSection.from(CourseDeepLinkSection.Attendance))
+        assertEquals(CourseWorkspaceSection.Groups, CourseWorkspaceSection.from(CourseDeepLinkSection.Groups))
+        assertEquals(CourseWorkspaceSection.CollabDocs, CourseWorkspaceSection.from(CourseDeepLinkSection.CollabDocs))
     }
 
     @Test
