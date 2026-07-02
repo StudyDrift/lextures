@@ -229,6 +229,12 @@ export function buildGlobalSearchItems(
   if (canManageRbac) {
     const systemPages: SearchPageDef[] = [
       {
+        title: 'People',
+        subtitle: 'System settings',
+        path: '/settings/people',
+        hint: 'people users search invite suspend delete accounts enrollments activity admin',
+      },
+      {
         title: 'Roles and Permissions',
         subtitle: 'System settings',
         path: '/settings/roles',

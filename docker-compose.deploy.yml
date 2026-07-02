@@ -56,6 +56,9 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       JWT_SECRET: ${JWT_SECRET}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      # First password Global Admin only when signup email matches (see docs/getting-started.md).
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
       RUN_MIGRATIONS: "true"
       # Demo DB may retain checksums from migrations 120/135 after follow-up PR edits; align before migrate.
       MIGRATE_REPAIR_CHECKSUMS: "1"

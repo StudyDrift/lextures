@@ -20,6 +20,7 @@ import {
   ShieldCheck,
   Store,
   User,
+  Users,
   Workflow,
   Lock,
 } from 'lucide-react'
@@ -151,6 +152,13 @@ export function SideNavSettingsLinks() {
           )}
           {canManageRbac && (
             <>
+              <SideNavLink
+                to="/settings/people"
+                className={() => (view === 'people' ? sideNavActiveClass : '')}
+                icon={<Users className="h-5 w-5" />}
+              >
+                People
+              </SideNavLink>
               <SideNavLink
                 to="/settings/roles"
                 className={() => (view === 'roles' ? sideNavActiveClass : '')}

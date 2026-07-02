@@ -117,15 +117,16 @@ module "digitalocean" {
   data_volume_size_gb    = var.digitalocean_data_volume_size_gb
   enable_droplet_backups = var.digitalocean_enable_droplet_backups
 
-  deploy_enabled           = var.deploy_enabled
-  deploy_server_image      = var.deploy_server_image
-  deploy_web_image         = var.deploy_web_image
-  deploy_public_origin     = var.deploy_public_origin
-  deploy_postgres_password = var.deploy_postgres_password
-  deploy_jwt_secret        = var.deploy_jwt_secret
-  deploy_registry_host     = var.deploy_registry_host
-  deploy_registry_username = var.deploy_registry_username
-  deploy_registry_password = var.deploy_registry_password
+  deploy_enabled              = var.deploy_enabled
+  deploy_server_image         = var.deploy_server_image
+  deploy_web_image            = var.deploy_web_image
+  deploy_public_origin        = var.deploy_public_origin
+  deploy_postgres_password    = var.deploy_postgres_password
+  deploy_jwt_secret           = var.deploy_jwt_secret
+  deploy_turnstile_secret_key = var.deploy_turnstile_secret_key
+  deploy_registry_host        = var.deploy_registry_host
+  deploy_registry_username    = var.deploy_registry_username
+  deploy_registry_password    = var.deploy_registry_password
 
   tags = [for k, v in var.tags : "${k}:${v}"]
 }
@@ -146,15 +147,16 @@ module "oracle" {
   boot_volume_size_gb = var.oci_boot_volume_size_gb
   data_volume_size_gb = var.oci_data_volume_size_gb
 
-  deploy_enabled           = var.deploy_enabled
-  deploy_server_image      = var.deploy_server_image
-  deploy_web_image         = var.deploy_web_image
-  deploy_public_origin     = var.deploy_public_origin
-  deploy_postgres_password = var.deploy_postgres_password
-  deploy_jwt_secret        = var.deploy_jwt_secret
-  deploy_registry_host     = var.deploy_registry_host
-  deploy_registry_username = var.deploy_registry_username
-  deploy_registry_password = var.deploy_registry_password
+  deploy_enabled              = var.deploy_enabled
+  deploy_server_image         = var.deploy_server_image
+  deploy_web_image            = var.deploy_web_image
+  deploy_public_origin        = var.deploy_public_origin
+  deploy_postgres_password    = var.deploy_postgres_password
+  deploy_jwt_secret           = var.deploy_jwt_secret
+  deploy_turnstile_secret_key = var.deploy_turnstile_secret_key
+  deploy_registry_host        = var.deploy_registry_host
+  deploy_registry_username    = var.deploy_registry_username
+  deploy_registry_password    = var.deploy_registry_password
 
   tags = var.tags
 }

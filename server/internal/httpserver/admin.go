@@ -557,4 +557,5 @@ func (d Deps) registerAdminRoutes(r chi.Router) {
 	r.Get("/api/v1/admin/reviews", d.handleAdminReviewsList())
 	r.Delete("/api/v1/admin/reviews/{review_id}", d.handleAdminReviewDelete())
 	d.registerAdminTokenRoutes(r)
+	d.registerPlatformPeopleRoutes(r)
 }

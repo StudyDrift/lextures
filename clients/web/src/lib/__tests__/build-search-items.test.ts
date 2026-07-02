@@ -92,6 +92,7 @@ describe('buildSearchItems', () => {
     expect(items.some((i) => i.path === '/settings/ai/system-prompts')).toBe(true)
     expect(items.some((i) => i.path === '/settings/ai/reports')).toBe(true)
     expect(items.some((i) => i.path === '/settings/archive')).toBe(true)
+    expect(items.some((i) => i.path === '/settings/people')).toBe(true)
   })
 
   it('matches system settings by title (e.g. Global platform)', () => {

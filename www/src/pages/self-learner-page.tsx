@@ -46,8 +46,8 @@ export function SelfLearnerPage() {
       <AudienceHero
         eyebrow="Self-learner"
         title="An adaptive study system that runs without a classroom"
-        lead="Create or enroll in courses, practice with IRT-routed quizzes, and clear spaced-repetition reviews from your phone. Self-host the full stack for free, or use the hosted demo with optional paid tiers."
-        primaryHref="/get-started"
+        lead="Create or enroll in courses, practice with IRT-routed quizzes, and clear spaced-repetition reviews from your phone. Self-host the full stack for free, or sign up at self.lextures.com with optional paid tiers."
+        primaryHref={SITE_LINKS.selfLearner}
         primaryLabel="Start studying"
         secondaryHref="/pricing"
         secondaryLabel="Hosted pricing"
@@ -76,18 +76,18 @@ export function SelfLearnerPage() {
           <p className="text-[15px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
             <strong style={{ color: 'var(--ink-nav)' }}>Self-host:</strong> clone the repo and run
             without course or student limits.{' '}
-            <strong style={{ color: 'var(--ink-nav)' }}>Hosted demo:</strong> free tier limits apply
-            on demo.lextures.com; see pricing for details. Public course catalog and paid enrollment
+            <strong style={{ color: 'var(--ink-nav)' }}>Hosted:</strong> free tier limits apply
+            on self.lextures.com; see pricing for details. Public course catalog and paid enrollment
             require your administrator to enable those platform features.
           </p>
         </div>
       </section>
 
       <AudienceCta
-        title="Try it on the hosted demo or your own server"
-        body="Sign up on demo.lextures.com to start immediately, or follow the self-hosting guide to run Lextures on your hardware with full control."
-        primaryHref="/get-started"
-        primaryLabel="Get started"
+        title="Try it on self.lextures.com or your own server"
+        body="Sign up on self.lextures.com to start immediately, or follow the self-hosting guide to run Lextures on your hardware with full control."
+        primaryHref={SITE_LINKS.selfLearner}
+        primaryLabel="Open self.lextures.com"
         secondaryHref={SITE_LINKS.github}
         secondaryLabel="View on GitHub"
       />

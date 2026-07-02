@@ -198,6 +198,8 @@ terraform output -raw deploy_postgres_password   # generated when unset in tfvar
 terraform output -raw deploy_jwt_secret
 ```
 
+Set `deploy_turnstile_secret_key` in `terraform.tfvars` (or export `TF_VAR_deploy_turnstile_secret_key`) so the API receives `TURNSTILE_SECRET_KEY` for signup Turnstile verification.
+
 Changing `deploy_server_image`, `deploy_web_image`, or `deploy_public_origin` replaces the compute instance so cloud-init re-runs (Postgres data persists on the block volume). When `deploy_enabled = true`, Terraform also SSHes after apply and runs `/usr/local/bin/lextures-deploy-app.sh`, failing the apply if `/health` is not ready.
 
 If the server logs `invalid IP-literal` for `DATABASE_URL`, the Postgres volume may have been initialized with an old URL-unsafe password — stop the stack, clear `/mnt/lextures-db/postgres/*`, and re-run `terraform apply`.

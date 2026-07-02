@@ -21,6 +21,7 @@ export type SettingsNavView =
   | 'transcripts'
   | 'advising'
   | 'archive'
+  | 'people'
 
 export function settingsViewFromPathname(pathname: string): SettingsNavView {
   if (pathname.startsWith('/settings/ai/system-prompts')) return 'ai-prompts'
@@ -45,7 +46,8 @@ export function settingsViewFromPathname(pathname: string): SettingsNavView {
     raw === 'oer-providers' ||
     raw === 'transcripts' ||
     raw === 'advising' ||
-    raw === 'archive'
+    raw === 'archive' ||
+    raw === 'people'
   )
     return raw
   return 'account'

@@ -34,8 +34,9 @@
 # deploy_public_origin      = "https://school.example.com"                   # or leave empty for http://<public-ip>
 # deploy_registry_username  = "github-username"                                # required for private ghcr.io images
 # deploy_registry_password  = "ghp_..."                                        # GitHub PAT with read:packages
-# deploy_postgres_password  = ""                                               # auto-generated when empty
-# deploy_jwt_secret         = ""                                               # auto-generated when empty
+# deploy_postgres_password      = ""                                           # auto-generated when empty
+# deploy_jwt_secret             = ""                                           # auto-generated when empty
+# deploy_turnstile_secret_key   = ""                                           # Cloudflare Turnstile secret (signup CAPTCHA); prefer TF_VAR_deploy_turnstile_secret_key
 
 # ---------------------------------------------------------------------------
 # Enterprise (multi-school / district, AWS EKS + managed services)

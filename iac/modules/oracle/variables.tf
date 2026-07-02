@@ -110,6 +110,13 @@ variable "deploy_jwt_secret" {
   default     = ""
 }
 
+variable "deploy_turnstile_secret_key" {
+  description = "Cloudflare Turnstile secret key for signup CAPTCHA verification (TURNSTILE_SECRET_KEY on the API)."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "deploy_registry_host" {
   description = "Registry hostname for docker login before pulling private images (e.g. ghcr.io)."
   type        = string

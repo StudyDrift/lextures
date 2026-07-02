@@ -23,6 +23,7 @@ locals {
     "POSTGRES_PASSWORD=${local.deploy_postgres_password}",
     "DATABASE_URL=postgres://studydrift:${urlencode(local.deploy_postgres_password)}@postgres:5432/studydrift?sslmode=disable",
     "JWT_SECRET=${local.deploy_jwt_secret}",
+    "TURNSTILE_SECRET_KEY=${var.deploy_turnstile_secret_key}",
     "LEXTURES_SERVER_IMAGE=${var.deploy_server_image}",
     "LEXTURES_WEB_IMAGE=${var.deploy_web_image}",
     "",
