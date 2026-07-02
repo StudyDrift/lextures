@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Apply LB traffic weights for blue/green and canary deploys (plan 17.9 FR-2 / FR-5 / AC-6).
 #
-# Production uses Terraform variables in iac/production/deploy-traffic.tf.
+# Production uses Terraform variables in iac/self/deploy-traffic.tf.
 # Demo/staging may use DigitalOcean weighted backends via the same variables.
 #
 # Usage:
@@ -28,7 +28,7 @@ case "$MODE" in
     export TF_VAR_deploy_stable_weight="$STABLE_PERCENT"
     echo "applying traffic split: canary=${CANARY_PERCENT}% stable=${STABLE_PERCENT}% (${ENVIRONMENT})"
     (
-      cd "$ROOT/iac/production"
+      cd "$ROOT/iac/self"
       terraform workspace select "$ENVIRONMENT" 2>/dev/null || terraform workspace new "$ENVIRONMENT"
       terraform apply -auto-approve \
         -var="deploy_canary_weight=${CANARY_PERCENT}" \

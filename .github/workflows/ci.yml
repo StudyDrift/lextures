@@ -689,9 +689,17 @@ jobs:
           terraform_version: 1.9.0
           terraform_wrapper: false
 
-      - name: Terraform init (production)
+      - name: Stage Terraform modules for remote execution
         if: steps.gate.outputs.skip != 'true'
-        working-directory: iac/production
+        run: |
+          set -euo pipefail
+          rm -f iac/self/modules iac/self/docker-compose.deploy.yml
+          cp -R iac/modules iac/self/modules
+          cp docker-compose.deploy.yml iac/self/docker-compose.deploy.yml
+
+      - name: Terraform init (self)
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: iac/self
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4; do
@@ -704,10 +712,10 @@ jobs:
             sleep 30
           done
 
-      - name: Terraform plan (production)
+      - name: Terraform plan (self)
         id: plan
         if: steps.gate.outputs.skip != 'true'
-        working-directory: iac/production
+        working-directory: iac/self
         run: |
           set -euo pipefail
           terraform plan -no-color -input=false -out=tfplan 2>&1 | tee plan.txt
@@ -724,7 +732,7 @@ jobs:
           script: |
             const plan = `${{ steps.plan.outputs.plan }}`;
             const body = [
-              '## Terraform plan (`iac/production`)',
+              '## Terraform plan (`iac/self`)',
               '',
               '<details><summary>Plan output</summary>',
               '',

@@ -29,7 +29,7 @@ locals {
   ]) : ""
 
   deploy_env_b64     = base64encode(local.deploy_env_content)
-  deploy_compose_b64 = base64encode(file("${path.module}/../../../docker-compose.deploy.yml"))
+  deploy_compose_b64 = base64encode(file("${path.root}/docker-compose.deploy.yml"))
 
   deploy_cloud_init_vars = {
     deploy_enabled           = var.deploy_enabled

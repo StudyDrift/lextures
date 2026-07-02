@@ -76,7 +76,7 @@ check "small_tier_ghcr_registry_auth" {
 
 module "aws" {
   count  = var.cloud_provider == "aws" ? 1 : 0
-  source = "../modules/aws"
+  source = "./modules/aws"
 
   project_name = var.project_name
   environment  = var.environment
@@ -107,7 +107,7 @@ module "aws" {
 
 module "digitalocean" {
   count  = var.cloud_provider == "digitalocean" ? 1 : 0
-  source = "../modules/digitalocean"
+  source = "./modules/digitalocean"
 
   project_name = var.project_name
   environment  = var.environment
@@ -132,7 +132,7 @@ module "digitalocean" {
 
 module "oracle" {
   count  = local.oracle_module_enabled ? 1 : 0
-  source = "../modules/oracle"
+  source = "./modules/oracle"
 
   project_name   = var.project_name
   environment    = var.environment

@@ -75,6 +75,15 @@ jobs:
           terraform_version: 1.9.0
           terraform_wrapper: false
 
+      # HCP Terraform uploads only iac/self to remote runners; sibling iac/modules is not
+      # included unless it lives under the root module directory.
+      - name: Stage Terraform modules for remote execution
+        run: |
+          set -euo pipefail
+          rm -f iac/self/modules iac/self/docker-compose.deploy.yml
+          cp -R iac/modules iac/self/modules
+          cp docker-compose.deploy.yml iac/self/docker-compose.deploy.yml
+
       # Registry provider installs occasionally fail with 5xx (e.g. GitHub 502 during
       # signature fetch). Retries help both local init and remote-run init on HCP Terraform.
       - name: Terraform init
