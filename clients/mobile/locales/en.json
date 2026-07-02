@@ -900,7 +900,27 @@
         "tabs.home": "Home",
         "tabs.inbox": "Inbox",
         "tabs.notebooks": "Notebooks",
-        "tabs.profile": "Profile"
+        "tabs.profile": "Profile",
+        "mobile.drawer.accommodations": "Accommodations",
+        "mobile.drawer.back": "Back",
+        "mobile.drawer.course.collaboration": "Collaboration",
+        "mobile.drawer.course.content": "Content",
+        "mobile.drawer.course.grades": "Grades & insights",
+        "mobile.drawer.course.manage": "Manage",
+        "mobile.drawer.course.people": "People",
+        "mobile.drawer.courseMenu": "Course menu",
+        "mobile.drawer.dashboard": "Dashboard",
+        "mobile.drawer.globalNotebook": "Global notebook",
+        "mobile.drawer.group.account": "Account",
+        "mobile.drawer.group.administration": "Administration",
+        "mobile.drawer.group.learning": "Learning",
+        "mobile.drawer.group.notes": "Notes & portfolio",
+        "mobile.drawer.group.teaching": "Teaching",
+        "mobile.drawer.menu": "Menu",
+        "mobile.drawer.notebooks": "My Notebooks",
+        "mobile.drawer.pinned": "Pinned",
+        "mobile.drawer.review": "Review practice",
+        "mobile.drawer.todos": "Todos"
     },
     "plurals": {
         "mobile.pendingSync.waiting": {

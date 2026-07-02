@@ -900,7 +900,27 @@
         "tabs.home": "الرئيسية",
         "tabs.inbox": "البريد",
         "tabs.notebooks": "دفاتر الملاحظات",
-        "tabs.profile": "الملف الشخصي"
+        "tabs.profile": "الملف الشخصي",
+        "mobile.drawer.accommodations": "التسهيلات",
+        "mobile.drawer.back": "رجوع",
+        "mobile.drawer.course.collaboration": "التعاون",
+        "mobile.drawer.course.content": "المحتوى",
+        "mobile.drawer.course.grades": "الدرجات والرؤى",
+        "mobile.drawer.course.manage": "إدارة",
+        "mobile.drawer.course.people": "الأشخاص",
+        "mobile.drawer.courseMenu": "قائمة المقرر",
+        "mobile.drawer.dashboard": "لوحة التحكم",
+        "mobile.drawer.globalNotebook": "الدفتر العام",
+        "mobile.drawer.group.account": "الحساب",
+        "mobile.drawer.group.administration": "الإدارة",
+        "mobile.drawer.group.learning": "التعلّم",
+        "mobile.drawer.group.notes": "الملاحظات والحافظة",
+        "mobile.drawer.group.teaching": "التدريس",
+        "mobile.drawer.menu": "القائمة",
+        "mobile.drawer.notebooks": "دفاتري",
+        "mobile.drawer.pinned": "المثبتة",
+        "mobile.drawer.review": "مراجعة",
+        "mobile.drawer.todos": "المهام"
     },
     "plurals": {
         "mobile.dashboard.dueThisWeek.count": {

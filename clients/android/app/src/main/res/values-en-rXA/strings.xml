@@ -214,6 +214,26 @@
     <string name="mobile_discussions_threadTitle">[Ţîţľë]</string>
     <string name="mobile_discussions_threadTitlePlaceholder">[Ţĥŕëäḑ ţîţľë]</string>
     <string name="mobile_discussions_upvote">[Ûþṽôţë]</string>
+    <string name="mobile_drawer_accommodations">[Äççöḿḿöḑäţïöñš]</string>
+    <string name="mobile_drawer_back">[βäçḳ]</string>
+    <string name="mobile_drawer_course_collaboration">[Çöľľäḅöṛäţïöñ]</string>
+    <string name="mobile_drawer_course_content">[Çöñţëñţ]</string>
+    <string name="mobile_drawer_course_grades">[Ġṛäḑëš &amp; ïñšïġĥţš]</string>
+    <string name="mobile_drawer_course_manage">[Ḿäñäġë]</string>
+    <string name="mobile_drawer_course_people">[Ṗëöṗľë]</string>
+    <string name="mobile_drawer_courseMenu">[Çöüṛšë ḿëñü]</string>
+    <string name="mobile_drawer_dashboard">[Ḋäšĥḅöäṛḑ]</string>
+    <string name="mobile_drawer_globalNotebook">[Ġľöḅäľ ñöţëḅööḳ]</string>
+    <string name="mobile_drawer_group_account">[Äççöüñţ]</string>
+    <string name="mobile_drawer_group_administration">[Äḑḿïñïšţṛäţïöñ]</string>
+    <string name="mobile_drawer_group_learning">[Ļëäṛñïñġ]</string>
+    <string name="mobile_drawer_group_notes">[Ñöţëš &amp; ṗöṛţḟöľïö]</string>
+    <string name="mobile_drawer_group_teaching">[Ţëäçĥïñġ]</string>
+    <string name="mobile_drawer_menu">[Ḿëñü]</string>
+    <string name="mobile_drawer_notebooks">[Ḿÿ Ñöţëḅööḳš]</string>
+    <string name="mobile_drawer_pinned">[Ṗïññëḑ]</string>
+    <string name="mobile_drawer_review">[Ṙëṽïëẅ ṗṛäçţïçë]</string>
+    <string name="mobile_drawer_todos">[Ţöḑöš]</string>
     <string name="mobile_editProfile_avatarHint">[Þäšţë äñ ĥţţþš ľîñķ ţö ä šǫûäŕë îɱäğë.]</string>
     <string name="mobile_editProfile_avatarUrl">[Äṽäţäŕ îɱäğë ÛŔĽ]</string>
     <string name="mobile_editProfile_firstName">[Ƒîŕšţ ñäɱë]</string>
