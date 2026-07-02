@@ -194,6 +194,7 @@
 		D35463BAA0DF4B368CF0A638 /* ModuleItemRouteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C586E1B6A9164A3CA49244AD /* ModuleItemRouteView.swift */; };
 		D4E5F6A7B8C9488990ABCDEF18 /* LibraryBrowseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6A7B8C9488990ABCDEF17 /* LibraryBrowseView.swift */; };
 		D4SHCC010000000000000002 /* DashboardCoursesCarousel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4SHCC010000000000000001 /* DashboardCoursesCarousel.swift */; };
+		D4SHHP010000000000000002 /* DashboardHeroPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4SHHP010000000000000001 /* DashboardHeroPanel.swift */; };
 		D592E24AC90241009951E220 /* LMSAPITutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7034DAA0F439465CA60F01D6 /* LMSAPITutor.swift */; };
 		D5A63B554FDC4029B307B67A /* PlannerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B89A3472A0F420CBC06B92A /* PlannerModel.swift */; };
 		D60EAA5D43DA44E09070A340 /* NotebookEditorSupportViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18CF9C1B90746CF83FCB803 /* NotebookEditorSupportViews.swift */; };
@@ -456,6 +457,7 @@
 		D4E5F6A7B8C94091D2E3F4A5B6C7 /* LMSFeatureModelsPeerReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPeerReview.swift; sourceTree = "<group>"; };
 		D4E5F6A7B8C9488990ABCDEF17 /* LibraryBrowseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryBrowseView.swift; sourceTree = "<group>"; };
 		D4SHCC010000000000000001 /* DashboardCoursesCarousel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardCoursesCarousel.swift; sourceTree = "<group>"; };
+		D4SHHP010000000000000001 /* DashboardHeroPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardHeroPanel.swift; sourceTree = "<group>"; };
 		D515368C1CD34078B10ED8DD /* NetworkAuthContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkAuthContext.swift; sourceTree = "<group>"; };
 		D53D79A8D657C6AF9091C834 /* LMSFeatureModelsFeed.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsFeed.swift; sourceTree = "<group>"; };
 		D59BBA6832654A9397F03221 /* TutorLauncher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLauncher.swift; sourceTree = "<group>"; };
@@ -601,6 +603,7 @@
 			isa = PBXGroup;
 			children = (
 				D4SHCC010000000000000001 /* DashboardCoursesCarousel.swift */,
+				D4SHHP010000000000000001 /* DashboardHeroPanel.swift */,
 				4D13F98A21FF4CB380B9C497 /* DashboardView.swift */,
 			);
 			path = Dashboard;
@@ -1415,6 +1418,7 @@
 				F3ACFD5AC0DF497D8C15A2D7 /* RequirementsView.swift in Sources */,
 				F38D2C2FA73949169B412987 /* WebItemView.swift in Sources */,
 				D4SHCC010000000000000002 /* DashboardCoursesCarousel.swift in Sources */,
+				D4SHHP010000000000000002 /* DashboardHeroPanel.swift in Sources */,
 				2FAF22A2658C4DE5978936E3 /* DashboardView.swift in Sources */,
 				A7CA07D35AC14825B67F2938 /* CourseFilesView.swift in Sources */,
 				DA40A1F51A2A48B4A33E251D /* FilePreviewView.swift in Sources */,

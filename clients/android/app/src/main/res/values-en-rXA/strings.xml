@@ -933,24 +933,4 @@
         <item quantity="one">[Ýöû ŕëṽîëŵëđ %1$d îţëɱ]</item>
         <item quantity="other">[Ýöû ŕëṽîëŵëđ %1$d îţëɱš]</item>
     </plurals>
-    <string name="mobile_drawer_dashboard">Dashboard</string>
-    <string name="mobile_drawer_todos">Todos</string>
-    <string name="mobile_drawer_review">Review practice</string>
-    <string name="mobile_drawer_notebooks">My Notebooks</string>
-    <string name="mobile_drawer_globalNotebook">Global notebook</string>
-    <string name="mobile_drawer_accommodations">Accommodations</string>
-    <string name="mobile_drawer_back">Back</string>
-    <string name="mobile_drawer_menu">Menu</string>
-    <string name="mobile_drawer_courseMenu">Course menu</string>
-    <string name="mobile_drawer_group_learning">Learning</string>
-    <string name="mobile_drawer_group_notes">Notes &amp; portfolio</string>
-    <string name="mobile_drawer_group_administration">Administration</string>
-    <string name="mobile_drawer_group_account">Account</string>
-    <string name="mobile_drawer_group_teaching">Teaching</string>
-    <string name="mobile_drawer_course_content">Content</string>
-    <string name="mobile_drawer_course_collaboration">Collaboration</string>
-    <string name="mobile_drawer_course_grades">Grades &amp; insights</string>
-    <string name="mobile_drawer_course_people">People</string>
-    <string name="mobile_drawer_course_manage">Manage</string>
-    <string name="mobile_drawer_pinned">Pinned</string>
 </resources>

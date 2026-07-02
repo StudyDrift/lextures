@@ -933,24 +933,4 @@
         <item quantity="one">Repasaste %1$d elemento</item>
         <item quantity="other">Repasaste %1$d elementos</item>
     </plurals>
-    <string name="mobile_drawer_dashboard">Panel</string>
-    <string name="mobile_drawer_todos">Tareas</string>
-    <string name="mobile_drawer_review">Práctica de repaso</string>
-    <string name="mobile_drawer_notebooks">Mis cuadernos</string>
-    <string name="mobile_drawer_globalNotebook">Cuaderno global</string>
-    <string name="mobile_drawer_accommodations">Adaptaciones</string>
-    <string name="mobile_drawer_back">Atrás</string>
-    <string name="mobile_drawer_menu">Menú</string>
-    <string name="mobile_drawer_courseMenu">Menú del curso</string>
-    <string name="mobile_drawer_group_learning">Aprendizaje</string>
-    <string name="mobile_drawer_group_notes">Notas y portafolio</string>
-    <string name="mobile_drawer_group_administration">Administración</string>
-    <string name="mobile_drawer_group_account">Cuenta</string>
-    <string name="mobile_drawer_group_teaching">Enseñanza</string>
-    <string name="mobile_drawer_course_content">Contenido</string>
-    <string name="mobile_drawer_course_collaboration">Colaboración</string>
-    <string name="mobile_drawer_course_grades">Calificaciones e informes</string>
-    <string name="mobile_drawer_course_people">Personas</string>
-    <string name="mobile_drawer_course_manage">Gestionar</string>
-    <string name="mobile_drawer_pinned">Fijados</string>
 </resources>
