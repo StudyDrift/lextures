@@ -607,7 +607,7 @@ jobs:
             deploy:
               - 'deploy/**'
               - 'docker-compose.scale.yml'
-              - '.github/workflows/deploy-production.yml'
+              - '.github/workflows/deploy-self.yml'
 
   deploy-scripts:
     name: Deploy scripts (canary unit tests)

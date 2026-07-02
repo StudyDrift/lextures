@@ -56,15 +56,10 @@ if id ubuntu >/dev/null 2>&1; then
   usermod -aG docker ubuntu || true
 fi
 
-if [ "${deploy_enabled}" = "true" ] && [ -x /usr/local/bin/lextures-deploy-app.sh ]; then
-  if /usr/local/bin/lextures-deploy-app.sh; then
-    echo "deploy: ready" >>"$LOG"
-  else
-    echo "WARN: app deploy failed — see /var/log/lextures-deploy.log" >>"$LOG"
-    echo "failed" > /var/lib/lextures-deploy-status
-  fi
+if [ "${deploy_enabled}" = "true" ]; then
+  echo "pending" > /var/lib/lextures-deploy-status
 else
-  echo "skipped: deploy_enabled=false" > /var/lib/lextures-deploy-status
+  echo "skipped" > /var/lib/lextures-deploy-status
 fi
 
 touch /var/lib/lextures-provisioned

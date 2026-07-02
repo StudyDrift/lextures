@@ -33,6 +33,68 @@ if [ -n "$HOST" ]; then
   echo "TLS_CERT_CN=$HOST" >> /opt/lextures/.env
 fi
 
+PG_MARKER="/mnt/lextures-db/.lextures-postgres-password"
+PG_DATA="/mnt/lextures-db/postgres/PG_VERSION"
+
+python3 <<'PY'
+from pathlib import Path
+from urllib.parse import quote
+
+env_path = Path("/opt/lextures/.env")
+marker_path = Path("/mnt/lextures-db/.lextures-postgres-password")
+pg_data_path = Path("/mnt/lextures-db/postgres/PG_VERSION")
+
+values = {}
+for line in env_path.read_text().splitlines():
+    if not line or line.lstrip().startswith("#") or "=" not in line:
+        continue
+    key, val = line.split("=", 1)
+    values[key] = val.strip().strip('"')
+
+password = values.get("POSTGRES_PASSWORD", "")
+if not password:
+    raise SystemExit("POSTGRES_PASSWORD missing from .env")
+
+if pg_data_path.exists() and marker_path.exists():
+    stored = marker_path.read_text().strip()
+    if stored and stored != password:
+        print(
+            "Postgres password marker on data volume differs from Terraform .env; "
+            "using stored password for existing database",
+            flush=True,
+        )
+        password = stored
+        values["POSTGRES_PASSWORD"] = stored
+
+values["DATABASE_URL"] = (
+    "postgres://studydrift:"
+    + quote(password, safe="")
+    + "@postgres:5432/studydrift?sslmode=disable"
+)
+
+priority = [
+    "POSTGRES_PASSWORD",
+    "DATABASE_URL",
+    "JWT_SECRET",
+    "LEXTURES_SERVER_IMAGE",
+    "LEXTURES_WEB_IMAGE",
+    "PUBLIC_WEB_ORIGIN",
+    "TLS_CERT_CN",
+    "REDIS_URL",
+]
+written = set()
+lines_out = []
+for key in priority:
+    if key in values:
+        lines_out.append(f"{key}={values[key]}")
+        written.add(key)
+for key, val in values.items():
+    if key not in written:
+        lines_out.append(f"{key}={val}")
+
+env_path.write_text("\n".join(lines_out) + "\n")
+PY
+
 SERVER_IMAGE="$(grep '^LEXTURES_SERVER_IMAGE=' /opt/lextures/.env | cut -d= -f2- | tr -d '"')"
 WEB_IMAGE="$(grep '^LEXTURES_WEB_IMAGE=' /opt/lextures/.env | cut -d= -f2- | tr -d '"')"
 case "$SERVER_IMAGE$WEB_IMAGE" in
@@ -59,17 +121,58 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
+if [ -f "$PG_DATA" ] && [ ! -f "$PG_MARKER" ]; then
+  echo "WARNING: Postgres data exists without password marker; reinitializing database on block volume"
+  cd /opt/lextures
+  docker compose -f docker-compose.deploy.yml --env-file .env down 2>/dev/null || true
+  rm -rf /mnt/lextures-db/postgres/*
+  chown -R 70:70 /mnt/lextures-db/postgres
+  chmod 700 /mnt/lextures-db/postgres
+fi
+
+verify_postgres_tcp_auth() {
+  local pgpass="$1"
+  docker compose -f docker-compose.deploy.yml --env-file .env exec -T -e PGPASSWORD="$pgpass" redis sh -c \
+    'command -v psql >/dev/null 2>&1 || apk add --no-cache postgresql-client >/dev/null 2>&1; psql -h postgres -U studydrift -d studydrift -c "select 1" >/dev/null 2>&1'
+}
+
+reinit_postgres_data() {
+  echo "WARNING: reinitializing Postgres data on block volume"
+  cd /opt/lextures
+  docker compose -f docker-compose.deploy.yml --env-file .env down 2>/dev/null || true
+  rm -rf /mnt/lextures-db/postgres/*
+  chown -R 70:70 /mnt/lextures-db/postgres
+  chmod 700 /mnt/lextures-db/postgres
+}
+
 if [ -n "${deploy_registry_password}" ] && [ -n "${deploy_registry_username}" ] && [ -n "${deploy_registry_host}" ]; then
   printf '%s' "${deploy_registry_password}" | docker login "${deploy_registry_host}" -u "${deploy_registry_username}" --password-stdin
 fi
 
 cd /opt/lextures
+POSTGRES_PASSWORD="$(grep '^POSTGRES_PASSWORD=' .env | cut -d= -f2- | tr -d '"')"
+
+if [ -f "$PG_DATA" ]; then
+  docker compose -f docker-compose.deploy.yml --env-file .env up -d postgres redis
+  for i in $(seq 1 60); do
+    if docker compose -f docker-compose.deploy.yml --env-file .env exec -T postgres pg_isready -U studydrift -d studydrift >/dev/null 2>&1; then
+      break
+    fi
+    sleep 2
+  done
+  if ! verify_postgres_tcp_auth "$POSTGRES_PASSWORD"; then
+    reinit_postgres_data
+  else
+    docker compose -f docker-compose.deploy.yml --env-file .env down 2>/dev/null || true
+  fi
+fi
+
 if ! docker compose -f docker-compose.deploy.yml --env-file .env pull; then
   echo "ERROR: docker compose pull failed" >&2
   echo "failed: compose pull" > /var/lib/lextures-deploy-status
   exit 1
 fi
-if ! docker compose -f docker-compose.deploy.yml --env-file .env up -d --wait --wait-timeout 600; then
+if ! docker compose -f docker-compose.deploy.yml --env-file .env up -d --wait --wait-timeout 600 --force-recreate; then
   echo "ERROR: docker compose up failed" >&2
   docker compose -f docker-compose.deploy.yml --env-file .env ps -a || true
   echo "failed: compose up" > /var/lib/lextures-deploy-status
@@ -86,9 +189,21 @@ done
 if ! curl -fsS --max-time 10 http://127.0.0.1/health >/dev/null 2>&1; then
   echo "ERROR: nginx /health did not become ready on port 80" >&2
   docker compose -f docker-compose.deploy.yml --env-file .env ps -a || true
+  if docker compose -f docker-compose.deploy.yml --env-file .env logs server 2>/dev/null | grep -q 'password authentication failed'; then
+    echo "ERROR: Postgres password mismatch. If this persists after redeploy, clear /mnt/lextures-db/postgres/* and redeploy." >&2
+  fi
   echo "failed: health check" > /var/lib/lextures-deploy-status
   exit 1
 fi
+
+POSTGRES_PASSWORD="$(grep '^POSTGRES_PASSWORD=' /opt/lextures/.env | cut -d= -f2- | tr -d '"')"
+if ! verify_postgres_tcp_auth "$POSTGRES_PASSWORD"; then
+  echo "ERROR: Postgres TCP authentication failed after deploy" >&2
+  echo "failed: postgres tcp auth" > /var/lib/lextures-deploy-status
+  exit 1
+fi
+printf '%s' "$POSTGRES_PASSWORD" > "$PG_MARKER"
+chmod 600 "$PG_MARKER"
 
 if command -v ss >/dev/null 2>&1; then
   ss -tln | grep -E ':80 |:443 ' || {

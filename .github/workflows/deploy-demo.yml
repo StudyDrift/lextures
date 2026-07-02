@@ -1,6 +1,9 @@
 # Deploy Demo: provision/update the DigitalOcean droplet with Terraform, sync this repo,
 # run docker-compose.deploy.yml on the droplet, then verify /health.
 #
+# Container images are published first by "Publish container images" on merge to main;
+# this workflow pulls those immutable :<git-sha> tags (no on-workflow image builds).
+#
 # Required repository secrets:
 #   DIGITALOCEAN_TOKEN   — DigitalOcean API token (write)
 #   TF_TOKEN             — HCP Terraform / Terraform Cloud API token (non-interactive auth).
@@ -20,7 +23,11 @@ name: Deploy Demo
 
 on:
   workflow_dispatch:
-  push:
+  workflow_run:
+    workflows:
+      - Publish container images
+    types:
+      - completed
     branches:
       - main
 
@@ -38,58 +45,41 @@ env:
 
 permissions:
   contents: read
-  packages: write
+  packages: read
 
 jobs:
   deploy:
     name: Deploy Demo
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
 
     steps:
+      - name: Resolve deploy SHA
+        id: deploy
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            echo "sha=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.deploy.outputs.sha }}
 
       - name: Set image tags
         id: images
         run: |
           REPO_LOWER="$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')"
-          echo "server_go=ghcr.io/${REPO_LOWER}/server-go-demo:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-          echo "web=ghcr.io/${REPO_LOWER}/web-demo:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
-      - name: Build and push Go server image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile
-          push: true
-          tags: ${{ steps.images.outputs.server_go }}
-          cache-from: type=gha,scope=deploy-demo-server-go
-          cache-to: type=gha,mode=max,scope=deploy-demo-server-go
-
-      - name: Build and push web image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./clients/web
-          file: ./clients/web/Dockerfile
-          build-args: |
-            VITE_API_URL=${{ secrets.DEMO_PUBLIC_ORIGIN != '' && secrets.DEMO_PUBLIC_ORIGIN || 'https://demo.lextures.com' }}
-          push: true
-          tags: ${{ steps.images.outputs.web }}
-          cache-from: type=gha,scope=deploy-demo-web
-          cache-to: type=gha,mode=max,scope=deploy-demo-web
+          SHA="${{ steps.deploy.outputs.sha }}"
+          echo "server=ghcr.io/${REPO_LOWER}/server:${SHA}" >> "$GITHUB_OUTPUT"
+          echo "web=ghcr.io/${REPO_LOWER}/web:${SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -239,7 +229,7 @@ jobs:
           DEMO_POSTGRES_PASSWORD: ${{ secrets.DEMO_POSTGRES_PASSWORD }}
           DEMO_JWT_SECRET: ${{ secrets.DEMO_JWT_SECRET }}
           OPEN_ROUTER_API_KEY: ${{ secrets.OPEN_ROUTER_API_KEY }}
-          LEXTURES_SERVER_IMAGE: ${{ steps.images.outputs.server_go }}
+          LEXTURES_SERVER_IMAGE: ${{ steps.images.outputs.server }}
           LEXTURES_WEB_IMAGE: ${{ steps.images.outputs.web }}
         run: |
           set -euo pipefail
@@ -263,6 +253,7 @@ jobs:
           import os
           import re
           import sys
+          from urllib.parse import quote
 
           def line(key: str, value: str) -> str:
               if value == "":
@@ -279,8 +270,15 @@ jobs:
           path = os.environ["TMP_ENV"]
           # Browser origin must be HTTPS when using Cloudflare; same-origin API calls.
           public_origin = os.environ.get("DEMO_PUBLIC_ORIGIN") or "https://demo.lextures.com"
+          pg_password = os.environ["DEMO_POSTGRES_PASSWORD"]
+          database_url = (
+              "postgres://studydrift:"
+              + quote(pg_password, safe="")
+              + "@postgres:5432/studydrift?sslmode=disable"
+          )
           with open(path, "w", encoding="utf-8") as f:
-              f.write(line("POSTGRES_PASSWORD", os.environ["DEMO_POSTGRES_PASSWORD"]))
+              f.write(line("POSTGRES_PASSWORD", pg_password))
+              f.write(line("DATABASE_URL", database_url))
               f.write(line("JWT_SECRET", os.environ["DEMO_JWT_SECRET"]))
               f.write(line("VITE_API_URL", public_origin))
               f.write(line("OPENROUTER_API_KEY", os.environ.get("OPEN_ROUTER_API_KEY", "")))

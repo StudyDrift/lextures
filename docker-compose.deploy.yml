@@ -54,7 +54,7 @@ services:
     image: ${LEXTURES_SERVER_IMAGE:?LEXTURES_SERVER_IMAGE is required}
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://studydrift:${POSTGRES_PASSWORD}@postgres:5432/studydrift?sslmode=disable
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       JWT_SECRET: ${JWT_SECRET}
       RUN_MIGRATIONS: "true"
       # Demo DB may retain checksums from migrations 120/135 after follow-up PR edits; align before migrate.
