@@ -436,8 +436,10 @@ fun CourseDetailScreen(
                     CourseWorkspaceSection.Feed -> item {
                         CourseFeedSection(session = session, course = course)
                     }
+                    CourseWorkspaceSection.People -> item {
+                        CoursePeopleSection(session = session, course = course)
+                    }
                     CourseWorkspaceSection.Live,
-                    CourseWorkspaceSection.People,
                     CourseWorkspaceSection.Evaluations,
                     -> item { CourseDestinationPlaceholder(section = selectedSection) }
                     CourseWorkspaceSection.Modules -> {

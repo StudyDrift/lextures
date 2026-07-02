@@ -41,6 +41,9 @@ enum OfflineCacheKey {
     static func feedMessages(courseCode: String, channelId: String) -> String {
         "course:\(courseCode):feed-messages:\(channelId)"
     }
+    static func courseEnrollments(_ courseCode: String) -> String {
+        "course:\(courseCode):enrollments"
+    }
 }
 
 /// A cached value plus freshness metadata for read screens.

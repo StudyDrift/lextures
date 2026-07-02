@@ -134,6 +134,9 @@
 		A1B2C3D4E5F6478990ABCD01 /* TakeAttendanceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6478990ABCD02 /* TakeAttendanceLogic.swift */; };
 		A1B2C3D4E5F6478990ABCD03 /* TakeAttendanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6478990ABCD04 /* TakeAttendanceView.swift */; };
 		A1B2C3D4E5F6478990ABCD05 /* TakeAttendanceLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6478990ABCD06 /* TakeAttendanceLogicTests.swift */; };
+		B1C2D3E4F5A6478990ABCDE02 /* CoursePeopleLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6478990ABCDE01 /* CoursePeopleLogic.swift */; };
+		B1C2D3E4F5A6478990ABCDE04 /* CoursePeopleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6478990ABCDE03 /* CoursePeopleView.swift */; };
+		B1C2D3E4F5A6478990ABCDE06 /* CoursePeopleLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6478990ABCDE05 /* CoursePeopleLogicTests.swift */; };
 		A1B2C3D4E5F6478990ABCDEF2 /* LibraryResourceLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6478990ABCDEF1 /* LibraryResourceLogic.swift */; };
 		A21DC8C95B43455E85B848E0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9400F5E47944B47BA675323 /* Assets.xcassets */; };
 		A3B4C5D6E7F8491A2B3C4D5E6F7A8 /* RubricScorerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4C5D6E7F8A942B3C4D5E6F7A8B9 /* RubricScorerView.swift */; };
@@ -388,6 +391,9 @@
 		A1B2C3D4E5F6478990ABCD02 /* TakeAttendanceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceLogic.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6478990ABCD04 /* TakeAttendanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceView.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6478990ABCD06 /* TakeAttendanceLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TakeAttendanceLogicTests.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6478990ABCDE01 /* CoursePeopleLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogic.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6478990ABCDE03 /* CoursePeopleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleView.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5A6478990ABCDE05 /* CoursePeopleLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoursePeopleLogicTests.swift; sourceTree = "<group>"; };
 		A1B2C3D4E5F6478990ABCDEF1 /* LibraryResourceLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryResourceLogic.swift; sourceTree = "<group>"; };
 		A1D042F4851840AF800AAA3F /* SearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTests.swift; sourceTree = "<group>"; };
 		A22E05A962DA46299D974659 /* ProfileAvatarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileAvatarView.swift; sourceTree = "<group>"; };
@@ -663,6 +669,7 @@
 				2E652DD63C264C229E710A2F /* CourseWorkspaceNav.swift */,
 				FA691DEE27894A699194AC9C /* VibeActivityView.swift */,
 				A1B2C3D4E5F6478990ABCD04 /* TakeAttendanceView.swift */,
+				B1C2D3E4F5A6478990ABCDE03 /* CoursePeopleView.swift */,
 				B2C3D4E5F6A7488990ABCDEF13 /* LibraryResourceView.swift */,
 				C3D4E5F6A7B8488990ABCDEF15 /* CourseLibraryView.swift */,
 			);
@@ -983,6 +990,7 @@
 				A1D042F4851840AF800AAA3F /* SearchTests.swift */,
 				3725F7E11A3F46C5BA00638F /* VibeActivityLogicTests.swift */,
 				A1B2C3D4E5F6478990ABCD06 /* TakeAttendanceLogicTests.swift */,
+				B1C2D3E4F5A6478990ABCDE05 /* CoursePeopleLogicTests.swift */,
 				F6A7B8C9D0E1488990ABCDEF1A /* LibraryResourceLogicTests.swift */,
 			);
 			path = LexturesTests;
@@ -1093,6 +1101,7 @@
 				F94DB62A3EA34777A28ADBA6 /* ModuleLastVisited.swift */,
 				AEFA4D7A664D4FE4BB630B4E /* VibeActivityLogic.swift */,
 				A1B2C3D4E5F6478990ABCD02 /* TakeAttendanceLogic.swift */,
+				B1C2D3E4F5A6478990ABCDE01 /* CoursePeopleLogic.swift */,
 				A1B2C3D4E5F6478990ABCDEF1 /* LibraryResourceLogic.swift */,
 				1A2B3C4D5E6F708192A3B4C5C /* ProfileDepthModels.swift */,
 				5E6F708192A3B4C5D6E7F8090 /* ProfileDepthLogic.swift */,
@@ -1348,7 +1357,9 @@
 				DE08D86A101E4319B85564E5 /* CourseWorkspaceNav.swift in Sources */,
 				23B2DFDA8988468EA63CB271 /* VibeActivityView.swift in Sources */,
 				A1B2C3D4E5F6478990ABCD01 /* TakeAttendanceLogic.swift in Sources */,
+				B1C2D3E4F5A6478990ABCDE02 /* CoursePeopleLogic.swift in Sources */,
 				A1B2C3D4E5F6478990ABCD03 /* TakeAttendanceView.swift in Sources */,
+				B1C2D3E4F5A6478990ABCDE04 /* CoursePeopleView.swift in Sources */,
 				B2C3D4E5F6A7488990ABCDEF14 /* LibraryResourceView.swift in Sources */,
 				C3D4E5F6A7B8488990ABCDEF16 /* CourseLibraryView.swift in Sources */,
 				D4E5F6A7B8C9488990ABCDEF18 /* LibraryBrowseView.swift in Sources */,
@@ -1462,6 +1473,7 @@
 				EE53904DA3004B628CCF048C /* SearchTests.swift in Sources */,
 				131998D4EE1C414EA2FBF393 /* VibeActivityLogicTests.swift in Sources */,
 				A1B2C3D4E5F6478990ABCD05 /* TakeAttendanceLogicTests.swift in Sources */,
+				B1C2D3E4F5A6478990ABCDE06 /* CoursePeopleLogicTests.swift in Sources */,
 				F6A7B8C9D0E1488990ABCDEF1B /* LibraryResourceLogicTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -736,6 +736,42 @@ data class CourseSectionsResponse(
     val sections: List<CourseSection> = emptyList(),
 )
 
+// region Course roster (M11.4)
+
+@Serializable
+data class CourseEnrollment(
+    val id: String,
+    val userId: String,
+    val displayName: String? = null,
+    val avatarUrl: String? = null,
+    val role: String,
+    val roleDisplay: String? = null,
+    val lastCourseAccessAt: String? = null,
+    val sectionId: String? = null,
+    val sectionCode: String? = null,
+    val sectionName: String? = null,
+    val state: String? = null,
+    val invitationPending: Boolean? = null,
+)
+
+@Serializable
+data class CourseEnrollmentsResponse(
+    val enrollments: List<CourseEnrollment> = emptyList(),
+)
+
+@Serializable
+data class EnrollmentMessageBody(
+    val subject: String,
+    val body: String,
+)
+
+@Serializable
+data class EnrollmentMessageResponse(
+    val id: String? = null,
+)
+
+// endregion
+
 /** Staff navigation into take-attendance mode (optional existing session). */
 data class TakeAttendanceRequest(
     val sessionId: String? = null,

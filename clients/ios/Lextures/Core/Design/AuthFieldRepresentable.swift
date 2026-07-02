@@ -4,6 +4,7 @@ import UIKit
 /// UITextField wrapper that avoids SwiftUI keyboard accessory layout conflicts on recent iOS versions.
 struct AuthFieldRepresentable: UIViewRepresentable {
     @Binding var text: String
+    var onFocusChange: ((Bool) -> Void)?
     var placeholder: String
     var isSecure: Bool
     var keyboard: UIKeyboardType
@@ -61,18 +62,28 @@ struct AuthFieldRepresentable: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(text: $text)
+        Coordinator(text: $text, onFocusChange: onFocusChange)
     }
 
     final class Coordinator: NSObject, UITextFieldDelegate {
         @Binding var text: String
+        var onFocusChange: ((Bool) -> Void)?
 
-        init(text: Binding<String>) {
+        init(text: Binding<String>, onFocusChange: ((Bool) -> Void)?) {
             _text = text
+            self.onFocusChange = onFocusChange
         }
 
         @objc func textDidChange(_ sender: UITextField) {
             text = sender.text ?? ""
+        }
+
+        func textFieldDidBeginEditing(_ textField: UITextField) {
+            onFocusChange?(true)
+        }
+
+        func textFieldDidEndEditing(_ textField: UITextField) {
+            onFocusChange?(false)
         }
     }
 }

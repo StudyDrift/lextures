@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lextures.android.core.design.BrandLogo
 import com.lextures.android.core.design.PublicAuthBackground
-import com.lextures.android.core.design.accentColor
 import com.lextures.android.core.design.textPrimary
 
 @Composable
@@ -71,15 +70,6 @@ fun SplashScreen(modifier: Modifier = Modifier) {
                 fontFamily = FontFamily.Serif,
                 fontWeight = FontWeight.SemiBold,
                 color = textPrimary(),
-                modifier = Modifier.alpha(titleAlpha),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "BY STUDYDRIFT",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                letterSpacing = 2.sp,
-                color = accentColor(),
                 modifier = Modifier.alpha(titleAlpha),
             )
         }
