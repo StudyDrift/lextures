@@ -1,8 +1,12 @@
 # Statuspage.io configuration (plan 17.13).
 # The page itself is created in the Statuspage admin UI; import it before first apply.
 #
-#   terraform import statuspage_page.lextures <page_id>
-#   terraform import statuspage_component.api <page_id>/<component_id>
+#   terraform import 'statuspage_page.lextures[0]' <page_id>
+#   terraform import 'statuspage_component.service["api"]' <page_id>/<component_id>
+#
+# If apply fails with "inconsistent result after apply", re-run apply after pulling
+# this config (non-round-tripping page fields and component position are omitted).
+# If the page was removed from state during destroy, re-import it with the command above.
 #
 # Set STATUSPAGE_API_KEY in Terraform Cloud / secrets manager (never commit the key).
 
@@ -26,26 +30,14 @@ provider "statuspage" {
 resource "statuspage_page" "lextures" {
   count = var.statuspage_page_id != "" ? 1 : 0
 
-  id                      = var.statuspage_page_id
-  name                    = "Lextures Status"
-  page_description        = "Current operational status for Lextures platform services."
-  subdomain               = "lextures"
-  time_zone               = "America/New_York"
+  id = var.statuspage_page_id
+
+  # Page branding (name, domain, description, timezone) is configured in the
+  # Statuspage admin UI. The API does not round-trip those fields, and setting
+  # them here triggers "inconsistent result after apply" from the provider.
   allow_page_subscribers  = true
   allow_email_subscribers = true
   allow_rss_atom_feeds    = true
-  domain                  = "status.lextures.io"
-
-  lifecycle {
-    # Statuspage API does not round-trip several page fields managed in the admin UI.
-    ignore_changes = [
-      name,
-      page_description,
-      time_zone,
-      domain,
-      subdomain,
-    ]
-  }
 }
 
 locals {
@@ -67,10 +59,7 @@ resource "statuspage_component" "service" {
   description = "${each.value} component for Lextures."
   status      = "operational"
   showcase    = true
-  position    = index(keys(local.statuspage_components), each.key)
 
-  lifecycle {
-    # Statuspage reorders components; position is not stable across reads.
-    ignore_changes = [position]
-  }
+  # Omit position: Statuspage assigns order on create and the API read does not
+  # match Terraform's planned value (ignore_changes does not fix apply-time drift).
 }
