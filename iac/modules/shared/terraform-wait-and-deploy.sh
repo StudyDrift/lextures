@@ -45,7 +45,9 @@ done
 
 log "Waiting for deploy script..."
 for i in $(seq 1 60); do
-  if [ -x /usr/local/bin/lextures-deploy-app.sh ]; then
+  if [ -f /usr/local/bin/lextures-deploy-app.sh ]; then
+    chmod 0755 /usr/local/bin/lextures-deploy-app.sh 2>/dev/null \
+      || sudo chmod 0755 /usr/local/bin/lextures-deploy-app.sh
     break
   fi
   if [ "$i" -eq 60 ]; then

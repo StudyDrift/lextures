@@ -7,9 +7,18 @@ exec >>"$LOG" 2>&1
 echo "=== lextures deploy $(date -Is) ==="
 
 install -d -m 0755 /opt/lextures
+%{ if install_compose_env ~}
 echo "${deploy_env_b64}" | base64 -d > /opt/lextures/.env
 echo "${deploy_compose_b64}" | base64 -d > /opt/lextures/docker-compose.deploy.yml
 chmod 600 /opt/lextures/.env
+%{ else ~}
+if [ ! -f /opt/lextures/.env ] || [ ! -f /opt/lextures/docker-compose.deploy.yml ]; then
+  echo "ERROR: /opt/lextures/.env and docker-compose.deploy.yml must exist before deploy" >&2
+  echo "failed: missing deploy files" > /var/lib/lextures-deploy-status
+  exit 1
+fi
+chmod 600 /opt/lextures/.env
+%{ endif ~}
 
 if [ -z "${deploy_public_origin}" ]; then
   PUBLIC_IP=""

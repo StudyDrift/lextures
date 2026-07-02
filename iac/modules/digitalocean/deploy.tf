@@ -39,6 +39,7 @@ locals {
     deploy_registry_host     = var.deploy_registry_host
     deploy_registry_username = var.deploy_registry_username
     deploy_registry_password = var.deploy_registry_password
+    install_compose_env      = true
   }
 
   mount_script_b64 = base64encode(templatefile("${path.module}/mount-db-volume.sh.tftpl", {

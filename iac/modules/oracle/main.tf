@@ -125,7 +125,7 @@ resource "oci_core_instance" "app" {
 
   metadata = {
     ssh_authorized_keys = tls_private_key.app.public_key_openssh
-    user_data           = base64encode(templatefile("${path.module}/cloud-init.yaml.tftpl", local.cloud_init_vars))
+    user_data           = base64encode(templatefile("${path.module}/cloud-init-bootstrap.yaml.tftpl", local.cloud_init_vars))
   }
 
   freeform_tags = local.common_freeform_tags

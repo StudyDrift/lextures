@@ -31,7 +31,7 @@ locals {
   deploy_env_b64     = base64encode(local.deploy_env_content)
   deploy_compose_b64 = base64encode(file("${path.root}/docker-compose.deploy.yml"))
 
-  deploy_cloud_init_vars = {
+  deploy_template_vars = {
     deploy_enabled           = var.deploy_enabled
     deploy_env_b64           = local.deploy_env_b64
     deploy_compose_b64       = local.deploy_compose_b64
@@ -39,39 +39,46 @@ locals {
     deploy_registry_host     = var.deploy_registry_host
     deploy_registry_username = var.deploy_registry_username
     deploy_registry_password = var.deploy_registry_password
+    install_compose_env      = false
   }
 
   mount_script_b64 = base64encode(templatefile("${path.module}/mount-db-volume.sh.tftpl", {}))
 
-  deploy_script_b64 = base64encode(templatefile(
+  deploy_script_content = templatefile(
     "${path.module}/../shared/small-vm-deploy.sh.tftpl",
-    local.deploy_cloud_init_vars,
-  ))
+    local.deploy_template_vars,
+  )
 
   bootstrap_script_b64 = base64encode(templatefile("${path.module}/../shared/small-vm-bootstrap.sh.tftpl", {
     deploy_enabled = var.deploy_enabled
   }))
 
-  compose_service_b64 = base64encode(file("${path.module}/../shared/lextures-compose.service"))
+  compose_service_content = file("${path.module}/../shared/lextures-compose.service")
 
-  cloud_init_vars = merge(local.deploy_cloud_init_vars, {
+  cloud_init_vars = {
     mount_script_b64     = local.mount_script_b64
-    deploy_script_b64    = local.deploy_script_b64
     bootstrap_script_b64 = local.bootstrap_script_b64
-    compose_service_b64  = local.compose_service_b64
-  })
+  }
 }
 
 resource "terraform_data" "cloud_init_revision" {
   input = md5(jsonencode({
     mount     = local.mount_script_b64
     bootstrap = local.bootstrap_script_b64
-    deploy    = local.deploy_script_b64
-    service   = local.compose_service_b64
     enabled   = var.deploy_enabled
-    server    = var.deploy_server_image
-    web       = var.deploy_web_image
-    origin    = var.deploy_public_origin
-    registry  = "${var.deploy_registry_username}@${var.deploy_registry_host}"
+  }))
+}
+
+resource "terraform_data" "deploy_revision" {
+  input = md5(jsonencode({
+    deploy   = local.deploy_script_content
+    service  = local.compose_service_content
+    env      = local.deploy_env_content
+    compose  = file("${path.root}/docker-compose.deploy.yml")
+    enabled  = var.deploy_enabled
+    server   = var.deploy_server_image
+    web      = var.deploy_web_image
+    origin   = var.deploy_public_origin
+    registry = "${var.deploy_registry_username}@${var.deploy_registry_host}"
   }))
 }

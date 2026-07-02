@@ -6,7 +6,7 @@ terraform {
   #
   cloud {
     organization = "Lextures"
-    
+
     workspaces {
       name = "lextures-production"
     }

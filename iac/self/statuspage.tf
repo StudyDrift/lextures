@@ -35,6 +35,17 @@ resource "statuspage_page" "lextures" {
   allow_email_subscribers = true
   allow_rss_atom_feeds    = true
   domain                  = "status.lextures.io"
+
+  lifecycle {
+    # Statuspage API does not round-trip several page fields managed in the admin UI.
+    ignore_changes = [
+      name,
+      page_description,
+      time_zone,
+      domain,
+      subdomain,
+    ]
+  }
 }
 
 locals {
@@ -57,4 +68,9 @@ resource "statuspage_component" "service" {
   status      = "operational"
   showcase    = true
   position    = index(keys(local.statuspage_components), each.key)
+
+  lifecycle {
+    # Statuspage reorders components; position is not stable across reads.
+    ignore_changes = [position]
+  }
 }
