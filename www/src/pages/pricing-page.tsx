@@ -58,8 +58,8 @@ const FAQS = [
     a: 'Institutions receive a dedicated environment — hosted by us or on infrastructure you control — with SSO, provisioning, and support scoped to your rollout. Use the request information form on the pricing page to describe your enrollment and integration needs.',
   },
   {
-    q: 'When will self-learner accounts be available?',
-    a: 'Individual hosted accounts for independent learners are coming soon. Until then, self-host the stack for free or use an institution account if your school provides access.',
+    q: 'How do self-learner accounts work?',
+    a: 'Sign up at self.lextures.com for a hosted individual account with adaptive practice and spaced-repetition review. You can also self-host the stack for free or use an institution account if your school provides access.',
   },
   {
     q: 'Does AI cost extra?',
@@ -138,8 +138,8 @@ export function PricingPage() {
           </h1>
           <p className="mx-auto mt-5 max-w-[680px] text-[18px] leading-relaxed" style={{ color: 'var(--text-soft)' }}>
             Lextures is AGPL-3.0 open source. Run it yourself on Postgres, open a university or
-            district account for production hosting and support, or — soon — subscribe as an
-            independent learner.
+            district account for production hosting and support, or sign up as an independent
+            learner at self.lextures.com.
           </p>
         </div>
       </section>
@@ -170,8 +170,6 @@ export function PricingPage() {
 
             <PricingCard
               label="Self-learner"
-              badge="Coming soon"
-              muted
               price={
                 <p className="font-display text-2xl font-semibold" style={{ color: 'var(--ink)' }}>
                   Individual accounts
@@ -180,14 +178,9 @@ export function PricingPage() {
               description="For certification prep, language study, and independent learners who want adaptive practice without running their own server."
               features={SELF_LEARNER_FEATURES}
               cta={
-                <button
-                  type="button"
-                  disabled
-                  className="btn-secondary w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-disabled="true"
-                >
-                  Coming soon
-                </button>
+                <a href={SITE_LINKS.selfLearner} className="btn-primary w-full justify-center">
+                  Sign up at self.lextures.com
+                </a>
               }
             />
 

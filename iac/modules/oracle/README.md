@@ -7,7 +7,7 @@ Single Ampere A1 compute instance with attached block storage for small-school d
 
 **Default sizing** targets OCI **Always Free**: `VM.Standard.A1.Flex` with 2 OCPUs and 12 GB RAM, 50 GB boot + 100 GB data volume (150 GB total block storage within the 200 GB free quota).
 
-When `deploy_enabled = true` (default in `iac/production/`), cloud-init also writes `/opt/lextures/docker-compose.deploy.yml` and `.env`, pulls container images, and runs `docker compose up -d --wait` on first boot. Set `deploy_server_image` and `deploy_web_image` in `terraform.tfvars` (Arm64 images required). Generated secrets are available via `terraform output -raw deploy_postgres_password` and `deploy_jwt_secret`.
+When `deploy_enabled = true` (default in `iac/production/`), cloud-init also writes `/opt/lextures/docker-compose.deploy.yml` and `.env`, pulls container images, and runs `docker compose up -d --wait` on first boot. Set `deploy_server_image` and `deploy_web_image` in `terraform.tfvars` (Arm64 images required). Generated secrets are available via `terraform output -raw deploy_postgres_password` and `deploy_jwt_secret`. Set `deploy_turnstile_secret_key` (or `TF_VAR_deploy_turnstile_secret_key`) to pass Cloudflare Turnstile verification to the API as `TURNSTILE_SECRET_KEY`.
 
 **Important:** Always Free resources must be created in the tenancy **home region**. Build and deploy **linux/arm64** container images (Ampere is Arm). If instance creation fails with "out of host capacity", retry another availability domain or upgrade to Pay As You Go (Always Free resources remain free).
 

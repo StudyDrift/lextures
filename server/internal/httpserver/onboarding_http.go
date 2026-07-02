@@ -94,7 +94,7 @@ func (d Deps) handlePublicOnboardingTrack() http.HandlerFunc {
 		}
 
 		switch req.Program {
-		case "k-12", "higher-ed", "self-learner":
+		case "k-12", "higher-ed", "self-learner", "school":
 		default:
 			apierr.WriteJSON(w, http.StatusBadRequest, apierr.CodeInvalidInput, "Invalid program value")
 			return

@@ -1,12 +1,12 @@
-import { ArrowLeft, BookOpen, BrainCircuit, GraduationCap, Search } from 'lucide-react'
+import { ArrowLeft, BrainCircuit, GraduationCap, KeyRound } from 'lucide-react'
 import { useState } from 'react'
 import { Header } from '../components/header'
 import { SiteFooter } from '../components/site-footer'
-
-const LOGIN_URL = 'https://demo.lextures.com/'
+import { isValidSchoolCode, normalizeSchoolCode, schoolCodeError } from '../lib/school-code'
+import { SITE_LINKS, TENANT_HOST_SUFFIX, tenantOrigin } from '../lib/site-links'
 
 // Fire-and-forget — never awaited, never surfaces errors to the user.
-function trackOnboarding(program: string, schoolName?: string) {
+function trackOnboarding(program: string, schoolCode?: string) {
   try {
     const apiBase = import.meta.env.VITE_API_BASE_URL ?? ''
     navigator.sendBeacon(
@@ -14,7 +14,7 @@ function trackOnboarding(program: string, schoolName?: string) {
       new Blob(
         [JSON.stringify({
           program,
-          school_name: schoolName ?? '',
+          school_name: schoolCode ?? '',
           language: navigator.language ?? '',
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone ?? '',
           screen_width: window.screen.width,
@@ -29,31 +29,41 @@ function trackOnboarding(program: string, schoolName?: string) {
   }
 }
 
-type Program = 'k-12' | 'higher-ed' | 'self-learner'
-type Step = 'program' | 'school'
+type Path = 'self-learner' | 'school'
+type Step = 'choose' | 'school-code'
 
-const PROGRAMS = [
+const PATHS = [
   {
-    id: 'k-12' as Program,
-    icon: BookOpen,
-    title: 'K–12',
-    description: "I'm a student or teacher at a primary or secondary school.",
-  },
-  {
-    id: 'higher-ed' as Program,
-    icon: GraduationCap,
-    title: 'Higher Education',
-    description: "I'm a student or instructor at a college or university.",
-  },
-  {
-    id: 'self-learner' as Program,
+    id: 'self-learner' as Path,
     icon: BrainCircuit,
-    title: 'Self-Learner',
+    title: 'Self-learner',
     description: "I'm studying independently, for a certification, or on my own schedule.",
+  },
+  {
+    id: 'school' as Path,
+    icon: GraduationCap,
+    title: 'School',
+    description: "I'm a student or educator at a school that uses Lextures.",
   },
 ]
 
-function ProgramStep({ onSelect }: { onSelect: (p: Program) => void }) {
+const fieldClass =
+  'block w-full rounded-xl border border-slate-200 bg-white py-3 text-base text-slate-900 shadow-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20'
+
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mb-8 flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+    >
+      <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+      Back
+    </button>
+  )
+}
+
+function ChooseStep({ onSelect }: { onSelect: (path: Path) => void }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="text-center">
@@ -61,17 +71,17 @@ function ProgramStep({ onSelect }: { onSelect: (p: Program) => void }) {
           How are you using Lextures?
         </h1>
         <p className="mt-3 text-base leading-relaxed text-slate-500">
-          Select the option that best describes you so we can point you in the right direction.
+          Choose the option that matches how you sign in.
         </p>
       </div>
 
-      <div className="mt-12 grid gap-4 sm:grid-cols-3">
-        {PROGRAMS.map(({ id, icon: Icon, title, description }) => (
+      <div className="mx-auto mt-12 grid max-w-2xl gap-4 sm:grid-cols-2">
+        {PATHS.map(({ id, icon: Icon, title, description }) => (
           <button
             key={id}
             type="button"
             onClick={() => onSelect(id)}
-            className="group flex flex-col items-start gap-4 rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-[0_1px_3px_rgba(28,25,23,0.05)] transition-all duration-150 hover:border-accent hover:shadow-[0_4px_16px_rgba(15,118,110,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 cursor-pointer"
+            className="group flex cursor-pointer flex-col items-start gap-4 rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-[0_1px_3px_rgba(28,25,23,0.05)] transition-all duration-150 hover:border-accent hover:shadow-[0_4px_16px_rgba(15,118,110,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200 transition-colors group-hover:bg-accent group-hover:text-white">
               <Icon className="h-5 w-5" aria-hidden />
@@ -87,57 +97,78 @@ function ProgramStep({ onSelect }: { onSelect: (p: Program) => void }) {
   )
 }
 
-function SchoolStep({ program, onBack }: { program: 'k-12' | 'higher-ed'; onBack: () => void }) {
-  const [query, setQuery] = useState('')
-
-  const isK12 = program === 'k-12'
-  const label = isK12 ? 'school' : 'institution'
-  const placeholder = isK12 ? 'e.g. Lincoln Middle School' : 'e.g. University of Michigan'
+function SchoolCodeStep({ onBack }: { onBack: () => void }) {
+  const [code, setCode] = useState('')
+  const normalizedCode = normalizeSchoolCode(code)
+  const error = code ? schoolCodeError(code) : null
+  const previewHost = normalizedCode ? `${normalizedCode}.${TENANT_HOST_SUFFIX}` : `your-school.${TENANT_HOST_SUFFIX}`
 
   function handleContinue() {
-    if (!query.trim()) return
-    trackOnboarding(program, query.trim())
-    window.location.href = LOGIN_URL
+    if (!isValidSchoolCode(code)) return
+    const schoolCode = normalizeSchoolCode(code)
+    trackOnboarding('school', schoolCode)
+    window.location.href = tenantOrigin(schoolCode)
   }
 
   return (
     <div className="mx-auto max-w-lg px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-      <button
-        type="button"
-        onClick={onBack}
-        className="mb-8 flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-        Back
-      </button>
+      <BackButton onClick={onBack} />
 
       <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-        Find your {label}
+        Enter your school code
       </h1>
       <p className="mt-3 text-base leading-relaxed text-slate-500">
-        Enter the name of your {label} so your account is connected to the right place.
+        Your school or district provides a short code for sign-in. Enter it below and we&apos;ll take
+        you to your school&apos;s Lextures site.
       </p>
 
       <div className="mt-10 space-y-4">
-        <div className="relative">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-            <Search className="h-4 w-4 text-slate-400" aria-hidden />
+        <div>
+          <label htmlFor="school-code" className="sr-only">
+            School code
+          </label>
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+              <KeyRound className="h-4 w-4 text-slate-400" aria-hidden />
+            </div>
+            <input
+              id="school-code"
+              type="text"
+              autoFocus
+              autoComplete="organization"
+              spellCheck={false}
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleContinue()}
+              placeholder="e.g. example"
+              className={`${fieldClass} pl-10 pr-4 placeholder-stone-400`}
+              aria-invalid={error ? true : undefined}
+              aria-describedby="school-code-help school-code-preview"
+            />
           </div>
-          <input
-            type="text"
-            autoFocus
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleContinue()}
-            placeholder={placeholder}
-            className="block w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-base text-slate-900 placeholder-stone-400 shadow-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20"
-          />
+          <p id="school-code-help" className="mt-2 text-sm text-slate-500">
+            Example: <span className="font-medium text-slate-700">example</span> opens{' '}
+            <span className="font-medium text-slate-700">example.lextures.com</span>.
+          </p>
+          {error && (
+            <p className="mt-2 text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          )}
+        </div>
+
+        <div
+          id="school-code-preview"
+          className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600"
+        >
+          You&apos;ll go to{' '}
+          <span className="font-medium text-slate-900">{previewHost}</span>
         </div>
 
         <button
           type="button"
           onClick={handleContinue}
-          disabled={!query.trim()}
+          disabled={!isValidSchoolCode(code)}
           className="btn-primary w-full justify-center py-3 text-base disabled:cursor-not-allowed disabled:opacity-40"
         >
           Continue
@@ -148,17 +179,15 @@ function SchoolStep({ program, onBack }: { program: 'k-12' | 'higher-ed'; onBack
 }
 
 export function GetStartedPage() {
-  const [step, setStep] = useState<Step>('program')
-  const [program, setProgram] = useState<Program | null>(null)
+  const [step, setStep] = useState<Step>('choose')
 
-  function handleProgramSelect(p: Program) {
-    if (p === 'self-learner') {
+  function handleChoose(path: Path) {
+    if (path === 'self-learner') {
       trackOnboarding('self-learner')
-      window.location.href = LOGIN_URL
+      window.location.href = SITE_LINKS.selfLearner
       return
     }
-    setProgram(p)
-    setStep('school')
+    setStep('school-code')
   }
 
   return (
@@ -166,15 +195,8 @@ export function GetStartedPage() {
       <Header />
 
       <main className="flex min-h-[calc(100vh-4rem)] items-start justify-center">
-        {step === 'program' && (
-          <ProgramStep onSelect={handleProgramSelect} />
-        )}
-        {step === 'school' && program && program !== 'self-learner' && (
-          <SchoolStep
-            program={program}
-            onBack={() => setStep('program')}
-          />
-        )}
+        {step === 'choose' && <ChooseStep onSelect={handleChoose} />}
+        {step === 'school-code' && <SchoolCodeStep onBack={() => setStep('choose')} />}
       </main>
 
       <SiteFooter />

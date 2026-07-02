@@ -300,6 +300,13 @@ variable "deploy_jwt_secret" {
   default     = ""
 }
 
+variable "deploy_turnstile_secret_key" {
+  description = "Cloudflare Turnstile secret key for signup CAPTCHA verification (TURNSTILE_SECRET_KEY on the API). Set via TF_VAR_deploy_turnstile_secret_key or terraform.tfvars (do not commit)."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
 variable "deploy_registry_host" {
   description = "Container registry host for docker login (e.g. ghcr.io)."
   type        = string

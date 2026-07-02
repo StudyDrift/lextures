@@ -35,6 +35,7 @@ import { LearningGoalsPanel } from '../../components/onboarding/learning-goals-p
 import { AiGovernancePanel } from '../../components/settings/ai-governance-panel'
 import { AiProviderSettingsPanel } from '../../components/settings/ai-provider-settings-panel'
 import { ArchivedCoursesPanel } from '../../components/settings/archived-courses-panel'
+import { PeoplePanel } from '../../components/settings/people-panel'
 import { AiReportsPanel } from '../../components/settings/ai-reports-panel'
 import { LmsPage } from './lms-page'
 import OrgBranding from './admin/org-branding'
@@ -60,7 +61,8 @@ function isSystemSettingsPath(pathname: string): boolean {
     pathname === '/settings/oer-providers' ||
     pathname === '/settings/transcripts' ||
     pathname === '/settings/advising' ||
-    pathname === '/settings/archive'
+    pathname === '/settings/archive' ||
+    pathname === '/settings/people'
   )
 }
 
@@ -450,7 +452,8 @@ export default function Settings() {
           activeView === 'oer-providers' ||
           activeView === 'transcripts' ||
           activeView === 'advising' ||
-          activeView === 'archive'
+          activeView === 'archive' ||
+          activeView === 'people'
             ? 'max-w-4xl'
             : activeView === 'integrations'
               ? 'max-w-3xl'
@@ -950,6 +953,26 @@ export default function Settings() {
               }
             >
               <ArchivedCoursesPanel />
+            </RequirePermission>
+          </div>
+        )}
+
+        {activeView === 'people' && (
+          <div>
+            <h2 className="text-base font-semibold text-slate-900 dark:text-neutral-100">People</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-neutral-400">
+              Search, invite, suspend, and manage user accounts across the platform.
+            </p>
+            <RequirePermission
+              permission={PERM_RBAC_MANAGE}
+              fallback={
+                <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 dark:border-neutral-600 dark:bg-neutral-800/50 dark:text-neutral-300">
+                  You need permission to manage people (
+                  <code className="font-mono text-xs">{PERM_RBAC_MANAGE}</code>).
+                </p>
+              }
+            >
+              <PeoplePanel />
             </RequirePermission>
           </div>
         )}

@@ -7,7 +7,7 @@ const NAV_COLUMNS = [
       { label: 'Features', href: '/#features' },
       { label: 'Pricing', href: '/pricing' },
       { label: 'Documentation', href: '/docs' },
-      { label: 'Live demo', href: SITE_LINKS.demo },
+      { label: 'Start studying', href: SITE_LINKS.selfLearner },
     ],
   },
   {

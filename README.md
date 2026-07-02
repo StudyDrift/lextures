@@ -26,7 +26,7 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://demo.lextures.com/">Live Demo</a>
+  <a href="https://self.lextures.com/">Start studying</a>
 </p>
 <!-- TEXT_SECTION:header:END -->
 

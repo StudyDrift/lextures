@@ -28,8 +28,8 @@ export function HeroSection() {
             audit trails into one platform.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <a href={SITE_LINKS.demo} className="btn-primary" target="_blank" rel="noopener noreferrer">
-              Try the demo
+            <a href={SITE_LINKS.selfLearner} className="btn-primary" target="_blank" rel="noopener noreferrer">
+              Start studying
             </a>
             <a href="/docs" className="btn-secondary">
               Read the docs →

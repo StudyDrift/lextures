@@ -73,9 +73,9 @@ Lextures offers optional AI-assisted features (tutoring, feedback suggestions, c
 
 Before content is sent to AI providers, Lextures applies **PII redaction** and institutional policy controls where configured. Prompts should not include unnecessary sensitive data. Your institution may disable AI features or specific providers.
 
-**Opt-out:** You can opt out of AI processing in **Settings → Account → AI processing**, or avoid AI tools entirely. Institutions can disable AI at the organization level. See the [AI usage disclosure](https://demo.lextures.com/ai-disclosure) page for model cards and retention details. Contact your administrator or **privacy@lextures.com** for questions.
+**Opt-out:** You can opt out of AI processing in **Settings → Account → AI processing**, or avoid AI tools entirely. Institutions can disable AI at the organization level. See the [AI usage disclosure](https://self.lextures.com/ai-disclosure) page for model cards and retention details. Contact your administrator or **privacy@lextures.com** for questions.
 
-For a full list of infrastructure and service sub-processors, see our [Trust Center](https://demo.lextures.com/trust).
+For a full list of infrastructure and service sub-processors, see our [Trust Center](https://self.lextures.com/trust).
 
 ## Data Retention
 

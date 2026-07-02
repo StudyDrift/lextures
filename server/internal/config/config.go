@@ -116,6 +116,9 @@ type Config struct {
 	// MagicLinkEnrolledOnly when true: only users with an active course enrollment receive a link.
 	MagicLinkEnrolledOnly bool
 
+	// TurnstileSecretKey is the Cloudflare Turnstile secret for signup CAPTCHA server-side verification.
+	TurnstileSecretKey string
+
 	// SessionManagementUIEnabled gates /api/v1/me/sessions and related UI (plan 4.9).
 	SessionManagementUIEnabled bool
 
@@ -812,7 +815,9 @@ func Load() Config {
 		TeamsBotAppID:        firstNonEmptyTrimmed("TEAMS_BOT_APP_ID"),
 		TeamsBotAppPassword:  firstNonEmptyTrimmed("TEAMS_BOT_APP_PASSWORD"),
 
-		StripeSecretKey:      strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
+		TurnstileSecretKey: strings.TrimSpace(os.Getenv("TURNSTILE_SECRET_KEY")),
+
+		StripeSecretKey: strings.TrimSpace(os.Getenv("STRIPE_SECRET_KEY")),
 		StripeWebhookSecret:  strings.TrimSpace(os.Getenv("STRIPE_WEBHOOK_SECRET")),
 		StripeMonthlyPriceID: strings.TrimSpace(os.Getenv("STRIPE_MONTHLY_PRICE_ID")),
 		StripeAnnualPriceID:  strings.TrimSpace(os.Getenv("STRIPE_ANNUAL_PRICE_ID")),

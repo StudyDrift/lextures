@@ -122,10 +122,11 @@ module "digitalocean" {
   deploy_web_image         = var.deploy_web_image
   deploy_public_origin     = var.deploy_public_origin
   deploy_postgres_password = var.deploy_postgres_password
-  deploy_jwt_secret        = var.deploy_jwt_secret
-  deploy_registry_host     = var.deploy_registry_host
-  deploy_registry_username = var.deploy_registry_username
-  deploy_registry_password = var.deploy_registry_password
+  deploy_jwt_secret             = var.deploy_jwt_secret
+  deploy_turnstile_secret_key   = var.deploy_turnstile_secret_key
+  deploy_registry_host          = var.deploy_registry_host
+  deploy_registry_username      = var.deploy_registry_username
+  deploy_registry_password      = var.deploy_registry_password
 
   tags = [for k, v in var.tags : "${k}:${v}"]
 }
@@ -151,10 +152,11 @@ module "oracle" {
   deploy_web_image         = var.deploy_web_image
   deploy_public_origin     = var.deploy_public_origin
   deploy_postgres_password = var.deploy_postgres_password
-  deploy_jwt_secret        = var.deploy_jwt_secret
-  deploy_registry_host     = var.deploy_registry_host
-  deploy_registry_username = var.deploy_registry_username
-  deploy_registry_password = var.deploy_registry_password
+  deploy_jwt_secret             = var.deploy_jwt_secret
+  deploy_turnstile_secret_key   = var.deploy_turnstile_secret_key
+  deploy_registry_host          = var.deploy_registry_host
+  deploy_registry_username      = var.deploy_registry_username
+  deploy_registry_password      = var.deploy_registry_password
 
   tags = var.tags
 }
