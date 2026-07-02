@@ -46,6 +46,8 @@ object OfflineCacheKey {
     fun studyStats(): String = "insights:study-stats"
     fun reflectionJournal(): String = "insights:reflection-journal"
     fun coachingTips(): String = "insights:coaching-tips"
+    fun readingLog(): String = "reading:log"
+    fun libraryBooks(orgId: String, gradeBand: String): String = "reading:library:$orgId:$gradeBand"
 }
 
 data class Cached<T>(

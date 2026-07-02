@@ -492,7 +492,8 @@ enum MobileDestinations {
             if platform.ffPeerReview { out.append(.peerReviews) }
             out.append(.reportCards)
             if platform.selfReflectionEnabled { out.append(.insights) }
-            out += [.calendar, .planner, .catalog, .paths, .reading]
+            out += [.calendar, .planner, .catalog, .paths]
+            if platform.ffLibrary { out.append(.reading) }
             if platform.libraryBrowseEnabled { out.append(.library) }
             out += [.portfolio, .credentials, .advising, .settings]
         case .teaching:

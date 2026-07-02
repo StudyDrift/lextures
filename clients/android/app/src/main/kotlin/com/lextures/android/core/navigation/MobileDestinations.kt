@@ -309,7 +309,7 @@ object MobileDestinations {
                 add(MoreDestination.Planner)
                 add(MoreDestination.Catalog)
                 add(MoreDestination.Paths)
-                add(MoreDestination.Reading)
+                if (platform.ffLibrary) add(MoreDestination.Reading)
                 if (platform.libraryBrowseEnabled) add(MoreDestination.Library)
                 add(MoreDestination.Portfolio)
                 add(MoreDestination.Credentials)

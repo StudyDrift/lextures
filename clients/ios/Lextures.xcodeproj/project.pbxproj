@@ -137,6 +137,13 @@
 		8B304C2D3E4F5061728394 /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B304D3E4F5061728394A5 /* InsightsView.swift */; };
 		8B305C2D3E4F5061728394 /* DashboardInsightsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B305D3E4F5061728394A5 /* DashboardInsightsSection.swift */; };
 		8B306C2D3E4F5061728394 /* InsightsLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B306D3E4F5061728394A5 /* InsightsLogicTests.swift */; };
+		8B4R01C2D3E4F5061728394 /* LMSFeatureModelsReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R01D3E4F5061728394A5 /* LMSFeatureModelsReading.swift */; };
+		8B4R02C2D3E4F5061728394 /* LMSAPIReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R02D3E4F5061728394A5 /* LMSAPIReading.swift */; };
+		8B4R03C2D3E4F5061728394 /* ReadingLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R03D3E4F5061728394A5 /* ReadingLogic.swift */; };
+		8B4R04C2D3E4F5061728394 /* ReadingDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R04D3E4F5061728394A5 /* ReadingDashboardView.swift */; };
+		8B4R05C2D3E4F5061728394 /* LogReadingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R05D3E4F5061728394A5 /* LogReadingSheet.swift */; };
+		8B4R06C2D3E4F5061728394 /* LeveledLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R06D3E4F5061728394A5 /* LeveledLibraryView.swift */; };
+		8B4R07C2D3E4F5061728394 /* ReadingLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4R07D3E4F5061728394A5 /* ReadingLogicTests.swift */; };
 		8B899D9E74854F38842664DE /* LexturesTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7074C467D97442CFAB8E959D /* LexturesTheme.swift */; };
 		8ECE083BD68046DD8F67C5AA /* SettingsAccommodationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B76AC917774144F6A4945261 /* SettingsAccommodationsTests.swift */; };
 		8F4E2A1B9C3D45E6A7B8C9D1 /* CourseBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4E2A1B9C3D45E6A7B8C9D0 /* CourseBanner.swift */; };
@@ -423,6 +430,13 @@
 		8B304D3E4F5061728394A5 /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsView.swift; sourceTree = "<group>"; };
 		8B305D3E4F5061728394A5 /* DashboardInsightsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardInsightsSection.swift; sourceTree = "<group>"; };
 		8B306D3E4F5061728394A5 /* InsightsLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightsLogicTests.swift; sourceTree = "<group>"; };
+		8B4R01D3E4F5061728394A5 /* LMSFeatureModelsReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsReading.swift; sourceTree = "<group>"; };
+		8B4R02D3E4F5061728394A5 /* LMSAPIReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReading.swift; sourceTree = "<group>"; };
+		8B4R03D3E4F5061728394A5 /* ReadingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingLogic.swift; sourceTree = "<group>"; };
+		8B4R04D3E4F5061728394A5 /* ReadingDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingDashboardView.swift; sourceTree = "<group>"; };
+		8B4R05D3E4F5061728394A5 /* LogReadingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogReadingSheet.swift; sourceTree = "<group>"; };
+		8B4R06D3E4F5061728394A5 /* LeveledLibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeveledLibraryView.swift; sourceTree = "<group>"; };
+		8B4R07D3E4F5061728394A5 /* ReadingLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingLogicTests.swift; sourceTree = "<group>"; };
 		8B8F0773C46E44AFA266FF3E /* OfflineModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineModels.swift; sourceTree = "<group>"; };
 		8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorLogic.swift; sourceTree = "<group>"; };
 		8C748C447E9D477A83339C94 /* Localized.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localized.swift; sourceTree = "<group>"; };
@@ -843,6 +857,16 @@
 			path = Insights;
 			sourceTree = "<group>";
 		};
+		8B4RGRP5C6D7E8F901234568 /* Reading */ = {
+			isa = PBXGroup;
+			children = (
+				8B4R04D3E4F5061728394A5 /* ReadingDashboardView.swift */,
+				8B4R05D3E4F5061728394A5 /* LogReadingSheet.swift */,
+				8B4R06D3E4F5061728394A5 /* LeveledLibraryView.swift */,
+			);
+			path = Reading;
+			sourceTree = "<group>";
+		};
 		8FC78893EFC640819DA205B8 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -870,6 +894,7 @@
 		9675A7A45CC240A0A4F7B883 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B4RGRP5C6D7E8F901234568 /* Reading */,
 				8B3INSI5C6D7E8F901234567 /* Insights */,
 				8B2PATH5C6D7E8F901234567 /* Paths */,
 				7A4BGRP5C6D7E8F901234567 /* Groups */,
@@ -1058,6 +1083,7 @@
 		D177268EB0164406B86F0376 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B4R07D3E4F5061728394A5 /* ReadingLogicTests.swift */,
 				8B306D3E4F5061728394A5 /* InsightsLogicTests.swift */,
 				8B209D3E4F5061728394A5 /* PathsLogicTests.swift */,
 				7A4B08D3E4F5061728394A5 /* GroupsLogicTests.swift */,
@@ -1168,6 +1194,9 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B4R01D3E4F5061728394A5 /* LMSFeatureModelsReading.swift */,
+				8B4R02D3E4F5061728394A5 /* LMSAPIReading.swift */,
+				8B4R03D3E4F5061728394A5 /* ReadingLogic.swift */,
 				8B303D3E4F5061728394A5 /* LMSFeatureModelsInsights.swift */,
 				8B302D3E4F5061728394A5 /* LMSAPIInsights.swift */,
 				8B301D3E4F5061728394A5 /* InsightsLogic.swift */,
@@ -1350,6 +1379,12 @@
 				8B304C2D3E4F5061728394 /* InsightsView.swift in Sources */,
 				8B303C2D3E4F5061728394 /* LMSFeatureModelsInsights.swift in Sources */,
 				8B302C2D3E4F5061728394 /* LMSAPIInsights.swift in Sources */,
+				8B4R01C2D3E4F5061728394 /* LMSFeatureModelsReading.swift in Sources */,
+				8B4R02C2D3E4F5061728394 /* LMSAPIReading.swift in Sources */,
+				8B4R03C2D3E4F5061728394 /* ReadingLogic.swift in Sources */,
+				8B4R04C2D3E4F5061728394 /* ReadingDashboardView.swift in Sources */,
+				8B4R05C2D3E4F5061728394 /* LogReadingSheet.swift in Sources */,
+				8B4R06C2D3E4F5061728394 /* LeveledLibraryView.swift in Sources */,
 				8B301C2D3E4F5061728394 /* InsightsLogic.swift in Sources */,
 				8B208C2D3E4F5061728394 /* DashboardStudySection.swift in Sources */,
 				8B207C2D3E4F5061728394 /* PathLandingView.swift in Sources */,
@@ -1589,6 +1624,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8B4R07C2D3E4F5061728394 /* ReadingLogicTests.swift in Sources */,
 				8B306C2D3E4F5061728394 /* InsightsLogicTests.swift in Sources */,
 				8B209C2D3E4F5061728394 /* PathsLogicTests.swift in Sources */,
 				7A4B08C2D3E4F5061728394 /* GroupsLogicTests.swift in Sources */,

@@ -61,6 +61,10 @@ enum OfflineCacheKey {
     static func studyStats() -> String { "insights:study-stats" }
     static func reflectionJournal() -> String { "insights:reflection-journal" }
     static func coachingTips() -> String { "insights:coaching-tips" }
+    static func readingLog() -> String { "reading:log" }
+    static func libraryBooks(orgId: String, gradeBand: String) -> String {
+        "reading:library:\(orgId):\(gradeBand)"
+    }
 }
 
 /// A cached value plus freshness metadata for read screens.

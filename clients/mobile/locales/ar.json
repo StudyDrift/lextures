@@ -1043,7 +1043,43 @@
         "tabs.home": "الرئيسية",
         "tabs.inbox": "البريد",
         "tabs.notebooks": "دفاتر الملاحظات",
-        "tabs.profile": "الملف الشخصي"
+        "tabs.profile": "الملف الشخصي",
+        "mobile.reading.allLevels": "All levels",
+        "mobile.reading.bookClubEmpty": "Join a course group to discuss this week's book with classmates.",
+        "mobile.reading.bookClubHint": "Book clubs use your course groups. Open a group to post and reply.",
+        "mobile.reading.bookClubTitle": "Book clubs",
+        "mobile.reading.disabledMessage": "Reading log and leveled library are not enabled for your school.",
+        "mobile.reading.disabledTitle": "Reading unavailable",
+        "mobile.reading.error.load": "Could not load reading data.",
+        "mobile.reading.error.save": "Could not save your reading entry.",
+        "mobile.reading.error.validation": "Enter a book title and date.",
+        "mobile.reading.historyEmptyMessage": "Log your first book to start tracking progress.",
+        "mobile.reading.historyEmptyTitle": "No entries yet",
+        "mobile.reading.historyTitle": "Recent entries",
+        "mobile.reading.libraryEmptyMessage": "Your school has not added leveled readers yet, or try another grade band.",
+        "mobile.reading.libraryEmptyTitle": "No books found",
+        "mobile.reading.libraryHint": "Browse books at your reading level.",
+        "mobile.reading.libraryTitle": "Leveled library",
+        "mobile.reading.logAction": "Log reading",
+        "mobile.reading.logBookPlaceholder": "e.g. Charlotte's Web",
+        "mobile.reading.logBookTitle": "Book title",
+        "mobile.reading.logDate": "Date",
+        "mobile.reading.logPages": "Pages read",
+        "mobile.reading.logPagesPlaceholder": "Optional",
+        "mobile.reading.logReflection": "Reflection",
+        "mobile.reading.logReflectionPlaceholder": "What did you think?",
+        "mobile.reading.logSave": "Save entry",
+        "mobile.reading.logThisBook": "Log this book",
+        "mobile.reading.logTitle": "Log a reading entry",
+        "mobile.reading.loginStreak": "Login streak",
+        "mobile.reading.pagesCount": "%d pages",
+        "mobile.reading.previewOpen": "Preview cover",
+        "mobile.reading.previewTitle": "Book preview",
+        "mobile.reading.readingStreak": "Reading streak",
+        "mobile.reading.saving": "Saving…",
+        "mobile.reading.title": "Reading log",
+        "mobile.reading.unknownBook": "Untitled book",
+        "mobile.reading.weeklyPages": "Pages this week"
     },
     "plurals": {
         "mobile.dashboard.dueThisWeek.count": {
@@ -1101,6 +1137,10 @@
             "few": "راجعت %d عناصر",
             "many": "راجعت %d عنصرًا",
             "other": "راجعت %d عنصر"
+        },
+        "mobile.reading.streakDays": {
+            "one": "%d day",
+            "other": "%d days"
         }
     }
 }

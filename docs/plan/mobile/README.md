@@ -70,7 +70,7 @@ sessions, quiz **attempts (read)**, syllabus, notebooks, me.
 assignment ✅, rendering module content types (pages/files/links/LTI/H5P/SCORM),
 **discussions** ✅, calendar/to-dos, viewing rich feedback (annotations, audio/video,
 rubrics), what-if grades, **the AI tutor** ✅, adaptive review/paths, native push +
-deep links, and offline. **Peer review** ✅ (M5.2).
+deep links, and offline. **Peer review** ✅ (M5.2). **Reading log & leveled library** ✅ (M8.4).
 
 ## 4. Epics & numbering
 
@@ -131,7 +131,7 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M7.4 Group spaces & collab docs](../completed/mobile/M7.4-groups-collab.md) ✅ | 6.6 groups, 6.5 collab docs | **Done** |
 | [M8.2 Adaptive paths & recommendations](../completed/mobile/M8.2-paths-recommendations.md) ✅ | 1.4 paths, 1.8 recommendations, my-paths | **Done** |
 | [M8.3 Study insights & self-reflection](../completed/mobile/M8.3-study-insights.md) ✅ | 9.1 progress, 9.9 reflection, study-insights | **Done** |
-| [M8.4 Reading log & book club](M8.4-reading-log.md) | 13.8 leveled reader, reading-log/dashboard | **P1** |
+| [M8.4 Reading log & book club](../completed/mobile/M8.4-reading-log.md) ✅ | 13.8 leveled reader, reading-log/dashboard | **Done** |
 | [M9.1 Catalog browse & enroll](M9.1-catalog-enroll.md) | 15.1 catalog, 15.2 self-paced enroll, 14.2 registration | **P1** |
 | [M9.2 Checkout & billing](M9.2-checkout-billing.md) | 15.3 Stripe billing, checkout, 16.8 payment abstraction | **P1** |
 | [M9.3 Certificates, badges & gamification](M9.3-certificates-gamification.md) | 15.5 certs/badges, 15.9 gamification, leaderboard | **P1** |
@@ -208,7 +208,7 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
 2. **Wave 2 — Breadth (P1).** Auth depth (M1.x ✅), interactive content (M3.3 ✅) +
    M3.5 vibe activities ✅ + M3.6 library/e-reserves ✅, standards/mastery (M6.2 ✅),
    M6.3 immersive reader, groups/office-hours (M7.3 ✅/M7.4 ✅) + M7.5 live classes +
-   M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2 ✅/M8.3 ✅/M8.4), self-learner commerce
+   M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2 ✅/M8.3 ✅/M8.4 ✅), self-learner commerce
    (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
    instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk + M11.4 course
    people/roster.

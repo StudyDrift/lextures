@@ -122,6 +122,8 @@ fun ProfileTab(
     var showPathsCatalog by remember { mutableStateOf(false) }
     var openPathLandingSlug by remember { mutableStateOf<String?>(null) }
     var openPathCourse by remember { mutableStateOf<com.lextures.android.core.lms.CourseSummary?>(null) }
+    var openReadingLibraryOrgId by remember { mutableStateOf<String?>(null) }
+    var readingLogBook by remember { mutableStateOf<com.lextures.android.core.lms.LibraryBook?>(null) }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
     val themePreference = remember { ThemePreference.get(context) }
@@ -300,6 +302,40 @@ fun ProfileTab(
                         },
                         modifier = Modifier.fillMaxSize(),
                     )
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Reading) {
+                if (shell.platformFeatures.ffLibrary) {
+                    when {
+                        openReadingLibraryOrgId != null -> Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                            TextButton(onClick = { openReadingLibraryOrgId = null }) {
+                                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+                            }
+                            com.lextures.android.features.reading.LeveledLibraryScreen(
+                                session = session,
+                                orgId = openReadingLibraryOrgId!!,
+                                onLogBook = { book ->
+                                    readingLogBook = book
+                                    openReadingLibraryOrgId = null
+                                },
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                        else -> com.lextures.android.features.reading.ReadingDashboardScreen(
+                            session = session,
+                            onOpenBookClub = { course ->
+                                openMoreDestination = null
+                                shell.select(com.lextures.android.core.navigation.RootDestination.Courses)
+                                shell.activeCourse = course
+                                shell.activeCourseSection = com.lextures.android.core.navigation.CourseWorkspaceSection.Groups
+                            },
+                            onOpenLibrary = { openReadingLibraryOrgId = it },
+                            initialLogBook = readingLogBook,
+                            onConsumeInitialLogBook = { readingLogBook = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
                 } else {
                     MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
                 }
