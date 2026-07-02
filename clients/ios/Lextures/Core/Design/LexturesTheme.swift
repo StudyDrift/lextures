@@ -200,7 +200,7 @@ struct AuthPrimaryButtonStyle: ButtonStyle {
                     startPoint: .leading,
                     endPoint: .trailing
                 )
-                .opacity(isEnabled ? 1 : 0.55)
+//                .opacity(isEnabled ? 1 : 0.55)
             )
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .shadow(

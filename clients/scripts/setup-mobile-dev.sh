@@ -18,6 +18,10 @@ API_HOST="${API_HOST:-localhost}"
 API_PORT="${API_PORT:-8080}"
 
 resolve_ios_url() {
+  if [[ -n "${API_BASE_URL:-}" ]]; then
+    echo "$API_BASE_URL"
+    return
+  fi
   case "$API_HOST" in
     localhost | 127.0.0.1) echo "http://127.0.0.1:${API_PORT}" ;;
     *) echo "http://${API_HOST}:${API_PORT}" ;;
@@ -25,6 +29,10 @@ resolve_ios_url() {
 }
 
 resolve_android_url() {
+  if [[ -n "${API_BASE_URL:-}" ]]; then
+    echo "$API_BASE_URL"
+    return
+  fi
   case "$API_HOST" in
     localhost | 127.0.0.1) echo "http://10.0.2.2:${API_PORT}" ;;
     *) echo "http://${API_HOST}:${API_PORT}" ;;
