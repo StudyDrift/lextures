@@ -50,6 +50,108 @@ final class AppShellModel {
     var pendingMoreDestination: MoreDestination?
     var pendingReview = false
 
+    // MARK: Drawer navigation
+
+    /// Current left-drawer state (two-level: course menu → global menu).
+    var drawer: DrawerState = .none
+    /// Selected top-level destination shown behind the drawer.
+    var rootDestination: RootDestination = .dashboard
+    /// The course currently being viewed, if any. Enables the course-scoped drawer
+    /// and the "swipe once → course menu, swipe again → global menu" behavior.
+    var activeCourse: CourseSummary?
+    /// The top-level pane the active course was opened under (courses can open from
+    /// Dashboard or Courses). The course drawer is only offered while that pane is shown.
+    var activeCourseRoot: RootDestination = .courses
+    /// Selected section within the active course (driven by the course drawer).
+    var activeCourseSection: CourseWorkspaceSection = .modules
+    /// Sections available for the active course (published by `CourseDetailView`).
+    var activeCourseSections: [CourseWorkspaceSection] = []
+
+    /// Courses the user pinned on web/mobile — surfaced in the global drawer.
+    var pinnedCourses: [CourseSummary] = []
+
+    /// Active root-pane push (outgoing screen + whether progress tracks drawer close).
+    var rootNavigationTransition: RootNavigationTransition?
+
+    var globalDrawerGroups: [DrawerGroup] {
+        MobileDestinations.globalDrawerGroups(context: activeRoleContext, platform: platformFeatures)
+    }
+
+    /// Selects a top-level destination and dismisses any open drawer.
+    func select(_ destination: RootDestination) {
+        let closingDrawer = drawer != .none
+        if sharesRootPane(destination, rootDestination) {
+            if closingDrawer {
+                withAnimation(Self.drawerAnimation) { drawer = .none }
+            }
+            return
+        }
+        if closingDrawer {
+            rootNavigationTransition = RootNavigationTransition(
+                outgoing: rootDestination,
+                drivenByDrawer: true
+            )
+            withAnimation(Self.drawerAnimation) { drawer = .none }
+            rootDestination = destination
+            return
+        }
+        rootNavigationTransition = RootNavigationTransition(
+            outgoing: rootDestination,
+            drivenByDrawer: false
+        )
+        rootDestination = destination
+    }
+
+    func completeRootNavigationTransition() {
+        rootNavigationTransition = nil
+    }
+
+    private static let drawerAnimation = Animation.easeInOut(duration: 0.35)
+
+    private func sharesRootPane(_ lhs: RootDestination, _ rhs: RootDestination) -> Bool {
+        let profilePane: Set<RootDestination> = [.profile, .settings]
+        if profilePane.contains(lhs), profilePane.contains(rhs) { return true }
+        return lhs == rhs
+    }
+
+    /// Leading-edge swipe entry point implementing the two-level state machine.
+    func edgeSwipeOpen() {
+        switch drawer {
+        case .none:
+            drawer = activeCourse != nil ? .course : .global
+        case .course:
+            drawer = .global
+        case .global:
+            break
+        }
+    }
+
+    func openGlobalDrawer() {
+        withAnimation(Self.drawerAnimation) { drawer = .global }
+    }
+    func closeDrawer() {
+        withAnimation(Self.drawerAnimation) { drawer = .none }
+    }
+
+    /// Leaves the active course and returns to the Dashboard (course drawer "Dashboard").
+    func exitCourseToDashboard() {
+        activeCourse = nil
+        select(.dashboard)
+    }
+
+    private func rootDestination(for tab: ShellTab) -> RootDestination {
+        switch tab {
+        case .home: return .dashboard
+        case .courses: return .courses
+        case .notebooks: return .notebooks
+        case .inbox: return .inbox
+        case .profile: return .profile
+        case .teach: return .teach
+        case .children: return .children
+        case .calendar: return .calendar
+        }
+    }
+
     var shellTabs: [ShellTab] {
         iaRedesignEnabled
             ? MobileDestinations.shellTabs(context: activeRoleContext)
@@ -76,6 +178,7 @@ final class AppShellModel {
         if let legacy = MobileDestinations.legacyTab(from: tab) {
             selectedTab = legacy
         }
+        select(rootDestination(for: tab))
     }
 
     func selectLegacyTab(_ tab: AppTab) {
@@ -150,6 +253,7 @@ final class AppShellModel {
             profileDepthEnabled = MobileProfileDepthPreferences.isEnabled
         }
         let courseList = await courses ?? []
+        pinnedCourses = courseList.filter(\.isPinned)
         roleSnapshot = MobileDestinations.buildRoleSnapshot(
             permissions: await permissions ?? [],
             courses: courseList
@@ -174,29 +278,35 @@ final class AppShellModel {
     }
 }
 
+/// Tracks an in-flight root destination change (drawer-driven or tab-bar-driven).
+struct RootNavigationTransition: Equatable {
+    var outgoing: RootDestination
+    var drivenByDrawer: Bool
+}
+
 /// Post-auth shell: Home, Courses, Notebooks, Inbox, Profile behind a floating pill tab bar.
 struct MainTabView: View {
     @Environment(AuthSession.self) private var session
     var initialDeepLink: DeepLinkDestination?
     @State private var shell = AppShellModel()
     @Bindable private var realtime = RealtimeManager.shared
+    /// 0 = drawer fully open, 1 = fully closed — reported by `DrawerScaffold`.
+    @State private var drawerOpenProgress: CGFloat = 0
+    /// 0 = transition start, 1 = settled — used for non-drawer root changes.
+    @State private var paneTransitionProgress: CGFloat = 1
 
     var body: some View {
-        VStack(spacing: 0) {
-            tabContent
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            if shell.iaRedesignEnabled {
-                IaShellTabBar(shell: shell)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 6)
-            } else {
-                LexturesTabBar(shell: shell)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, 6)
-            }
-        }
+        DrawerScaffold(
+            state: Bindable(shell).drawer,
+            openProgress: $drawerOpenProgress,
+            courseAvailable: shell.activeCourse != nil && shell.rootDestination == shell.activeCourseRoot,
+            main: {
+                tabContent
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            },
+            globalPanel: { GlobalDrawer() },
+            coursePanel: { CourseDrawer() }
+        )
         .environment(shell)
         .sheet(isPresented: Bindable(shell).showUniversalSearch) {
             if shell.universalSearchEnabled {
@@ -238,47 +348,135 @@ struct MainTabView: View {
         .onChange(of: realtime.notificationsRevision) { _, _ in
             Task { await shell.refresh(accessToken: session.accessToken) }
         }
+        .onChange(of: shell.rootNavigationTransition) { _, transition in
+            guard let transition, !transition.drivenByDrawer else { return }
+            paneTransitionProgress = 0
+            withAnimation(.easeInOut(duration: 0.35)) {
+                paneTransitionProgress = 1
+            }
+            Task {
+                try? await Task.sleep(for: .milliseconds(360))
+                if paneTransitionProgress >= 0.99 {
+                    shell.completeRootNavigationTransition()
+                }
+            }
+        }
+        .onChange(of: drawerOpenProgress) { _, progress in
+            guard shell.rootNavigationTransition?.drivenByDrawer == true else { return }
+            if progress <= 0.01 {
+                shell.completeRootNavigationTransition()
+            }
+        }
     }
 
-    /// Keeps every tab's view (and its NavigationStack) alive so switching
-    /// tabs never loses scroll position or navigation state.
+    /// 0 = transition just started, 1 = navigation complete.
+    private var navigationCompletion: CGFloat {
+        if shell.rootNavigationTransition?.drivenByDrawer == true {
+            return 1 - drawerOpenProgress
+        }
+        if shell.rootNavigationTransition != nil {
+            return paneTransitionProgress
+        }
+        return 1
+    }
+
+    private var outgoingDestination: RootDestination? {
+        shell.rootNavigationTransition?.outgoing
+    }
+
+    /// Primary panes stay alive (state preserved); lighter secondary destinations
+    /// render lazily. Selection is driven by the global drawer via `rootDestination`.
     private var tabContent: some View {
-        Group {
-            if shell.iaRedesignEnabled {
-                ZStack {
-                    iaPane(.home) { DashboardView() }
-                    iaPane(.courses) { CoursesListView() }
-                    iaPane(.notebooks) { NotebooksListView() }
-                    iaPane(.inbox) { InboxView() }
-                    iaPane(.profile) { ProfileView() }
-                    iaPane(.teach) { TeachHubView() }
-                    iaPane(.children) { ChildrenPlaceholderView() }
-                    iaPane(.calendar) { PlannerView(initialTab: .calendar) }
+        GeometryReader { geo in
+            let width = geo.size.width
+            ZStack {
+                iaPane(.dashboard, width: width) { DashboardView() }
+                iaPane(.courses, width: width) { CoursesListView() }
+                iaPane(.notebooks, width: width) { NotebooksListView() }
+                iaPane(.inbox, width: width) { InboxView() }
+                profilePane(width: width)
+                iaPane(.teach, width: width) { TeachHubView() }
+                iaPane(.children, width: width) { ChildrenPlaceholderView() }
+
+                secondaryPane(.calendar, width: width) {
+                    NavigationStack { PlannerView(initialTab: .calendar).globalDrawerToolbar() }
                 }
-            } else {
-                ZStack {
-                    pane(.home) { DashboardView() }
-                    pane(.courses) { CoursesListView() }
-                    pane(.notebooks) { NotebooksListView() }
-                    pane(.inbox) { InboxView() }
-                    pane(.profile) { ProfileView() }
+                secondaryPane(.todos, width: width) {
+                    NavigationStack { PlannerView(initialTab: .todos).globalDrawerToolbar() }
+                }
+                secondaryPane(.review, width: width) {
+                    NavigationStack { ReviewHomeView().globalDrawerToolbar() }
+                }
+                secondaryPane(.globalNotebook, width: width) {
+                    NavigationStack {
+                        NotebookPagesView(
+                            courseCode: NotebookStore.globalKey,
+                            title: NotebookStore.globalTitle
+                        )
+                        .globalDrawerToolbar()
+                    }
+                }
+                secondaryPane(.accommodations, width: width) {
+                    NavigationStack { MyAccommodationsView().globalDrawerToolbar() }
                 }
             }
         }
     }
 
-    private func pane<Content: View>(_ tab: AppTab, @ViewBuilder content: () -> Content) -> some View {
-        content()
-            .opacity(shell.selectedTab == tab ? 1 : 0)
-            .allowsHitTesting(shell.selectedTab == tab)
-            .accessibilityHidden(shell.selectedTab != tab)
+    /// Profile also backs the "Settings" destination (mobile Profile is the account hub).
+    private func profilePane(width: CGFloat) -> some View {
+        let active = shell.rootDestination == .profile || shell.rootDestination == .settings
+        let outgoing = outgoingDestination == .profile || outgoingDestination == .settings
+        let visible = active || outgoing
+        return ProfileView()
+            .offset(x: paneOffset(for: .profile, width: width, active: active, outgoing: outgoing))
+            .opacity(visible ? 1 : 0)
+            .allowsHitTesting(active && navigationCompletion >= 0.99)
+            .accessibilityHidden(!active)
     }
 
-    private func iaPane<Content: View>(_ tab: ShellTab, @ViewBuilder content: () -> Content) -> some View {
-        content()
-            .opacity(shell.selectedShellTab == tab ? 1 : 0)
-            .allowsHitTesting(shell.selectedShellTab == tab)
-            .accessibilityHidden(shell.selectedShellTab != tab)
+    private func iaPane<Content: View>(
+        _ dest: RootDestination,
+        width: CGFloat,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        let active = shell.rootDestination == dest
+        let outgoing = outgoingDestination == dest
+        let visible = active || outgoing
+        return content()
+            .offset(x: paneOffset(for: dest, width: width, active: active, outgoing: outgoing))
+            .opacity(visible ? 1 : 0)
+            .allowsHitTesting(active && navigationCompletion >= 0.99)
+            .accessibilityHidden(!active)
+    }
+
+    @ViewBuilder
+    private func secondaryPane<Content: View>(
+        _ dest: RootDestination,
+        width: CGFloat,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        let active = shell.rootDestination == dest
+        let outgoing = outgoingDestination == dest
+        if active || outgoing {
+            content()
+                .offset(x: paneOffset(for: dest, width: width, active: active, outgoing: outgoing))
+                .allowsHitTesting(active && navigationCompletion >= 0.99)
+                .accessibilityHidden(!active)
+        }
+    }
+
+    private func paneOffset(
+        for dest: RootDestination,
+        width: CGFloat,
+        active: Bool,
+        outgoing: Bool
+    ) -> CGFloat {
+        guard shell.rootNavigationTransition != nil else { return 0 }
+        let completion = navigationCompletion
+        if active { return width * (1 - completion) }
+        if outgoing { return -width * completion }
+        return 0
     }
 }
 
@@ -594,11 +792,7 @@ struct LMSAvatarButton: View {
 
     var body: some View {
         Button {
-            if shell.iaRedesignEnabled {
-                shell.selectShellTab(.profile)
-            } else {
-                shell.selectLegacyTab(.profile)
-            }
+            shell.select(.profile)
         } label: {
             ProfileAvatarView(
                 avatarUrl: shell.accountProfile?.avatarUrl,

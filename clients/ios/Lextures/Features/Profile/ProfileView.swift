@@ -50,6 +50,7 @@ struct ProfileView: View {
             }
             .navigationTitle(L.text("mobile.profile.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .globalDrawerToolbar()
             .navigationDestination(for: NotificationsRoute.self) { _ in
                 NotificationsView()
             }

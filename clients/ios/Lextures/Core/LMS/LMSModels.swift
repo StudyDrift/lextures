@@ -11,6 +11,7 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var endsAt: String?
     var published: Bool?
     var catalogNickname: String?
+    var catalogPinned: Bool?
     var notebookEnabled: Bool?
     var calendarEnabled: Bool?
     var officeHoursEnabled: Bool?
@@ -48,6 +49,8 @@ struct CourseSummary: Codable, Identifiable, Hashable {
     var isAttendanceEnabled: Bool { attendanceEnabled != false }
 
     var isSectionsEnabled: Bool { sectionsEnabled != false }
+
+    var isPinned: Bool { catalogPinned == true }
 
     var displayTitle: String {
         let nick = catalogNickname?.trimmingCharacters(in: .whitespacesAndNewlines)

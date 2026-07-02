@@ -965,4 +965,24 @@
         <item quantity="many">راجعت %1$d عنصرًا</item>
         <item quantity="other">راجعت %1$d عنصر</item>
     </plurals>
+    <string name="mobile_drawer_dashboard">لوحة التحكم</string>
+    <string name="mobile_drawer_todos">المهام</string>
+    <string name="mobile_drawer_review">مراجعة</string>
+    <string name="mobile_drawer_notebooks">دفاتري</string>
+    <string name="mobile_drawer_globalNotebook">الدفتر العام</string>
+    <string name="mobile_drawer_accommodations">التسهيلات</string>
+    <string name="mobile_drawer_back">رجوع</string>
+    <string name="mobile_drawer_menu">القائمة</string>
+    <string name="mobile_drawer_courseMenu">قائمة المقرر</string>
+    <string name="mobile_drawer_group_learning">التعلّم</string>
+    <string name="mobile_drawer_group_notes">الملاحظات والحافظة</string>
+    <string name="mobile_drawer_group_administration">الإدارة</string>
+    <string name="mobile_drawer_group_account">الحساب</string>
+    <string name="mobile_drawer_group_teaching">التدريس</string>
+    <string name="mobile_drawer_course_content">المحتوى</string>
+    <string name="mobile_drawer_course_collaboration">التعاون</string>
+    <string name="mobile_drawer_course_grades">الدرجات والرؤى</string>
+    <string name="mobile_drawer_course_people">الأشخاص</string>
+    <string name="mobile_drawer_course_manage">إدارة</string>
+    <string name="mobile_drawer_pinned">المثبتة</string>
 </resources>

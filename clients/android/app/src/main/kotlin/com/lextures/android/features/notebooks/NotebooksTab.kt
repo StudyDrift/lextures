@@ -68,14 +68,18 @@ private sealed interface NotebooksNav {
 
 /** My Notebooks: the global notebook plus one notebook per enrolled course (device-local). */
 @Composable
-fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier) {
+fun NotebooksTab(session: AuthSession, modifier: Modifier = Modifier, initialGlobal: Boolean = false) {
     val context = LocalContext.current
     val accessToken by session.accessToken.collectAsState()
     val store = remember(accessToken) { NotebookStore(context, accessToken) }
 
     val scope = rememberCoroutineScope()
     var courses by remember { mutableStateOf<List<CourseSummary>>(emptyList()) }
-    var nav by remember { mutableStateOf<NotebooksNav>(NotebooksNav.Home) }
+    var nav by remember {
+        mutableStateOf<NotebooksNav>(
+            if (initialGlobal) NotebooksNav.Pages(NotebookStore.GLOBAL_KEY, NotebookStore.GLOBAL_TITLE) else NotebooksNav.Home,
+        )
+    }
     // Bumped after pages/editor close so previews re-read from the store.
     var revision by remember { mutableIntStateOf(0) }
 

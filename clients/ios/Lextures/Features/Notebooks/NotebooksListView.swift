@@ -72,6 +72,7 @@ struct NotebooksListView: View {
             }
             .navigationTitle("Notebooks")
             .navigationBarTitleDisplayMode(.inline)
+            .globalDrawerToolbar()
             .navigationDestination(for: NotebookRoute.self) { route in
                 NotebookPagesView(courseCode: route.courseCode, title: route.title)
             }

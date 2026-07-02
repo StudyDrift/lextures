@@ -68,6 +68,7 @@ struct CoursesListView: View {
             }
             .navigationTitle(L.text("mobile.courses.title"))
             .navigationBarTitleDisplayMode(.inline)
+            .globalDrawerToolbar()
             .toolbar {
                 if shell.iaRedesignEnabled && shell.universalSearchEnabled {
                     ToolbarItem(placement: .topBarTrailing) {

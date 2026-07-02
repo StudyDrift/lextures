@@ -48,6 +48,7 @@ struct InboxView: View {
             }
             .navigationTitle("Inbox")
             .navigationBarTitleDisplayMode(.inline)
+            .globalDrawerToolbar()
             .searchable(text: $searchText, prompt: "Search mail")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

@@ -12,7 +12,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import com.lextures.android.R
+import com.lextures.android.core.i18n.L
+import com.lextures.android.features.navigation.courseSectionLabelRes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -238,30 +242,26 @@ fun CourseDetailScreen(
         platformFeatures = shell?.platformFeatures ?: MobilePlatformFeatures(),
     )
     val allSections = MobileDestinations.courseWorkspaceSections(workspaceContext)
-    val chipSplit = MobileDestinations.splitCourseChips(allSections)
-    val selectedSection = CourseWorkspaceSection.entries.firstOrNull { it.name == section }
-        ?: CourseWorkspaceSection.Modules
+    val selectedSection = shell?.activeCourseSection
+        ?: (CourseWorkspaceSection.entries.firstOrNull { it.name == section } ?: CourseWorkspaceSection.Modules)
 
-    if (showOverflow) {
-        AlertDialog(
-            onDismissRequest = { showOverflow = false },
-            title = { Text("More") },
-            text = {
-                Column {
-                    chipSplit.overflow.forEach { item ->
-                        TextButton(onClick = {
-                            section = item.name
-                            showOverflow = false
-                        }) {
-                            Text(item.name)
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showOverflow = false }) { Text("Close") }
-            },
-        )
+    // Publish the active course + available sections so the course drawer can drive navigation.
+    // DisposableEffect clears the course context when this screen leaves the composition.
+    androidx.compose.runtime.DisposableEffect(course.courseCode) {
+        if (shell != null) {
+            shell.activeCourse = course
+            shell.activeCourseRoot = shell.rootDestination
+            val initial = initialSection?.takeIf { it in allSections }
+            if (initial != null) shell.activeCourseSection = initial
+        }
+        onDispose { shell?.activeCourse = null }
+    }
+    LaunchedEffect(allSections) {
+        shell?.activeCourseSections = allSections
+        val current = shell?.activeCourseSection
+        if (current != null && current !in allSections) {
+            shell.activeCourseSection = allSections.firstOrNull() ?: CourseWorkspaceSection.Modules
+        }
     }
 
     if (showCourseSearch && shell != null) {
@@ -305,6 +305,11 @@ fun CourseDetailScreen(
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
             }
+            if (shell != null) {
+                IconButton(onClick = { shell.drawerState = com.lextures.android.core.navigation.DrawerState.Course }) {
+                    Icon(Icons.Default.Menu, contentDescription = L.text(R.string.mobile_drawer_courseMenu), tint = textPrimary())
+                }
+            }
             Text(
                 text = course.displayTitle,
                 fontSize = 18.sp,
@@ -334,21 +339,12 @@ fun CourseDetailScreen(
             }
 
             item {
-                if (shell?.iaRedesignEnabled == true) {
-                    CourseWorkspaceNav(
-                        sections = chipSplit.visible,
-                        overflow = chipSplit.overflow,
-                        selected = selectedSection,
-                        onSelect = { section = it.name },
-                        onOpenOverflow = { showOverflow = true },
-                    )
-                } else {
-                    LmsSegmentedChips(
-                        options = legacySections(course, hasAttendanceSessions),
-                        selectedId = section,
-                        onSelect = { section = it },
-                    )
-                }
+                Text(
+                    text = L.text(courseSectionLabelRes(selectedSection)),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textPrimary(),
+                )
             }
 
             errorMessage?.let { message ->

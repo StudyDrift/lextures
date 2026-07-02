@@ -261,7 +261,14 @@ struct DashboardView: View {
                 .offset(x: -28, y: 26)
 
             VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .top) {
+                HStack(alignment: .top, spacing: 12) {
+                    Button { shell.openGlobalDrawer() } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(.white)
+                    }
+                    .accessibilityLabel(L.text("mobile.drawer.menu"))
+                    .padding(.top, 2)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(greetingText + ",")
                             .font(LexturesTheme.displayFont(26))

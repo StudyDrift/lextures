@@ -33,6 +33,42 @@ enum class ShellTab(val labelRes: String, val iconName: String) {
     Calendar("mobile_ia_tabs_calendar", "calendar"),
 }
 
+/**
+ * Two-level left-drawer state machine shared by the shell.
+ * None = no drawer; Course = course-scoped menu; Global = app-wide menu.
+ */
+enum class DrawerState { None, Course, Global }
+
+/**
+ * Top-level app destinations reachable from the global drawer.
+ * Replaces the former bottom-bar [ShellTab] selection. `labelRes`/`iconName`
+ * are resolved to R.string / ImageVector in the Compose layer.
+ */
+enum class RootDestination(val labelRes: String, val iconName: String) {
+    Dashboard("mobile_drawer_dashboard", "dashboard"),
+    Courses("tabs_courses", "courses"),
+    Calendar("mobile_ia_tabs_calendar", "calendar"),
+    Todos("mobile_drawer_todos", "todos"),
+    Review("mobile_drawer_review", "review"),
+    Notebooks("mobile_drawer_notebooks", "notebooks"),
+    GlobalNotebook("mobile_drawer_globalNotebook", "globalNotebook"),
+    Accommodations("mobile_drawer_accommodations", "accommodations"),
+    Inbox("tabs_inbox", "inbox"),
+    Settings("mobile_ia_more_settings", "settings"),
+    Profile("tabs_profile", "profile"),
+    Teach("mobile_ia_tabs_teach", "teach"),
+    Children("mobile_ia_tabs_children", "children"),
+    ;
+
+    val showsInboxBadge: Boolean get() = this == Inbox
+}
+
+/** A titled section of the global drawer. `titleRes == null` renders header-less. */
+data class DrawerGroup(val titleRes: String?, val items: List<RootDestination>)
+
+/** A titled section of the course drawer, grouping existing workspace sections. */
+data class CourseDrawerGroup(val titleRes: String, val sections: List<CourseWorkspaceSection>)
+
 /** Secondary destinations surfaced from Profile / More hub. */
 enum class MoreDestination(val labelRes: String) {
     Calendar("mobile_ia_more_calendar"),
@@ -188,6 +224,53 @@ object MobileDestinations {
             ShellTab.Inbox,
             ShellTab.Profile,
         )
+    }
+
+    /** Role-aware grouped destinations for the global drawer, mirroring the web sidebar. */
+    fun globalDrawerGroups(
+        context: MobileRoleContext,
+        platform: MobilePlatformFeatures,
+    ): List<DrawerGroup> = when (context) {
+        MobileRoleContext.Learning -> listOf(
+            DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar, RootDestination.Todos)),
+            DrawerGroup("mobile_drawer_group_learning", listOf(RootDestination.Review)),
+            DrawerGroup("mobile_drawer_group_notes", listOf(RootDestination.Notebooks, RootDestination.GlobalNotebook)),
+            DrawerGroup("mobile_drawer_group_administration", listOf(RootDestination.Accommodations)),
+            DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
+        )
+        MobileRoleContext.Teaching -> listOf(
+            DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Courses, RootDestination.Calendar)),
+            DrawerGroup("mobile_drawer_group_teaching", listOf(RootDestination.Teach)),
+            DrawerGroup("mobile_drawer_group_notes", listOf(RootDestination.Notebooks)),
+            DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
+        )
+        MobileRoleContext.Parent -> listOf(
+            DrawerGroup(null, listOf(RootDestination.Dashboard, RootDestination.Children, RootDestination.Calendar)),
+            DrawerGroup("mobile_drawer_group_account", listOf(RootDestination.Inbox, RootDestination.Settings)),
+        )
+    }
+
+    /**
+     * Regroups the existing course workspace sections under web-style headers.
+     * Only sections available for the viewer (from [courseWorkspaceSections]) appear.
+     */
+    fun courseDrawerGroups(sections: List<CourseWorkspaceSection>): List<CourseDrawerGroup> {
+        fun filtered(group: List<CourseWorkspaceSection>) = group.filter { it in sections }
+        return listOf(
+            "mobile_drawer_course_content" to filtered(
+                listOf(CourseWorkspaceSection.Overview, CourseWorkspaceSection.Modules, CourseWorkspaceSection.Files, CourseWorkspaceSection.Library),
+            ),
+            "mobile_drawer_course_collaboration" to filtered(
+                listOf(CourseWorkspaceSection.Discussions, CourseWorkspaceSection.Feed, CourseWorkspaceSection.Live, CourseWorkspaceSection.OfficeHours),
+            ),
+            "mobile_drawer_course_grades" to filtered(
+                listOf(CourseWorkspaceSection.Grades, CourseWorkspaceSection.Mastery),
+            ),
+            "mobile_drawer_course_people" to filtered(listOf(CourseWorkspaceSection.People)),
+            "mobile_drawer_course_manage" to filtered(
+                listOf(CourseWorkspaceSection.Grading, CourseWorkspaceSection.Attendance, CourseWorkspaceSection.Evaluations),
+            ),
+        ).mapNotNull { (key, list) -> if (list.isEmpty()) null else CourseDrawerGroup(key, list) }
     }
 
     fun moreDestinations(

@@ -10,7 +10,6 @@ struct CourseDetailView: View {
     var initialSection: CourseWorkspaceSection?
     var initialItemId: String?
 
-    @State private var section: CourseWorkspaceSection = .modules
     @State private var items: [CourseStructureItem] = []
     @State private var progress: ModulesProgressSnapshot?
     @State private var cacheLabel: String?
@@ -32,10 +31,10 @@ struct CourseDetailView: View {
         self.course = course
         self.initialSection = initialSection
         self.initialItemId = initialItemId
-        if let initialSection {
-            _section = State(initialValue: initialSection)
-        }
     }
+
+    /// Selected section is owned by the shell so the course drawer can drive it.
+    private var section: CourseWorkspaceSection { shell.activeCourseSection }
 
     private var workspaceContext: CourseWorkspaceContext {
         CourseWorkspaceContext(
@@ -50,10 +49,6 @@ struct CourseDetailView: View {
         MobileDestinations.courseWorkspaceSections(workspaceContext)
     }
 
-    private var chipSplit: (visible: [CourseWorkspaceSection], overflow: [CourseWorkspaceSection]) {
-        MobileDestinations.splitCourseChips(allSections)
-    }
-
     private var moduleGroups: [ModuleGroup] {
         ModuleContentLogic.buildModuleGroups(from: items)
     }
@@ -66,11 +61,9 @@ struct CourseDetailView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     CourseBanner(course: course)
 
-                    if shell.iaRedesignEnabled {
-                        CourseWorkspaceNav(split: chipSplit, selection: $section)
-                    } else {
-                        legacyChips
-                    }
+                    Text(section.label)
+                        .font(LexturesTheme.displayFont(20))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
 
                     if let errorMessage {
                         LMSErrorBanner(message: errorMessage)
@@ -89,6 +82,12 @@ struct CourseDetailView: View {
         .navigationTitle(course.displayTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { shell.drawer = .course } label: {
+                    Image(systemName: "line.3.horizontal")
+                }
+                .accessibilityLabel(L.text("mobile.drawer.courseMenu"))
+            }
             if shell.universalSearchEnabled {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showCourseSearch = true } label: {
@@ -133,13 +132,18 @@ struct CourseDetailView: View {
         .task {
             structureSocket.connect(courseCode: course.courseCode, accessToken: { session.accessToken })
         }
-        .onDisappear { structureSocket.disconnect() }
+        .onDisappear {
+            structureSocket.disconnect()
+            // Leaving the course view (pop to list, or push a child): drop course context.
+            shell.activeCourse = nil
+        }
         .onChange(of: structureSocket.revision) { _, _ in
             Task { await load() }
         }
         .onChange(of: allSections) { _, sections in
-            if !sections.contains(section), let first = sections.first {
-                section = first
+            shell.activeCourseSections = sections
+            if !sections.contains(shell.activeCourseSection), let first = sections.first {
+                shell.activeCourseSection = first
             }
         }
         .onChange(of: items) { _, loaded in
@@ -149,23 +153,15 @@ struct CourseDetailView: View {
             linkedItem = match
         }
         .onAppear {
+            shell.activeCourse = course
+            shell.activeCourseRoot = shell.rootDestination
+            shell.activeCourseSections = allSections
             if let initialSection, allSections.contains(initialSection) {
-                section = initialSection
+                shell.activeCourseSection = initialSection
+            } else if !allSections.contains(shell.activeCourseSection) {
+                shell.activeCourseSection = allSections.first ?? .modules
             }
         }
-    }
-
-    @ViewBuilder
-    private var legacyChips: some View {
-        LMSSegmentedChips(
-            options: legacySections,
-            selection: $section,
-            label: { $0.label }
-        )
-    }
-
-    private var legacySections: [CourseWorkspaceSection] {
-        allSections
     }
 
     @ViewBuilder

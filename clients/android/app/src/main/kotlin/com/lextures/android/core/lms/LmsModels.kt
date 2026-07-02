@@ -19,6 +19,7 @@ data class CourseSummary(
     val endsAt: String? = null,
     val published: Boolean? = null,
     val catalogNickname: String? = null,
+    val catalogPinned: Boolean = false,
     val notebookEnabled: Boolean? = null,
     val calendarEnabled: Boolean? = null,
     val officeHoursEnabled: Boolean? = null,
@@ -41,6 +42,9 @@ data class CourseSummary(
     val isMasteryEnabled: Boolean get() = standardsAlignmentEnabled == true
     val displayTitle: String
         get() = catalogNickname?.trim()?.takeIf { it.isNotEmpty() } ?: title
+
+    val isPinned: Boolean
+        get() = catalogPinned
 
     val viewerIsStudent: Boolean
         get() = viewerEnrollmentRoles?.any { it.equals("student", ignoreCase = true) } == true

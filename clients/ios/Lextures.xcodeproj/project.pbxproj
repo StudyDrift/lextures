@@ -205,6 +205,10 @@
 		DC329F62031E423FA26E0633 /* NotebookDrawingViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 516B16E03CA640E48C2175A1 /* NotebookDrawingViews.swift */; };
 		DC77B194F2D34F4D80003E86 /* ModuleContentModelsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AE243175E04F3A8FCB823E /* ModuleContentModelsTests.swift */; };
 		DE08D86A101E4319B85564E5 /* CourseWorkspaceNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E652DD63C264C229E710A2F /* CourseWorkspaceNav.swift */; };
+		DA0022220000000000000001 /* DrawerScaffold.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0011110000000000000001 /* DrawerScaffold.swift */; };
+		DA0022220000000000000002 /* GlobalDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0011110000000000000002 /* GlobalDrawer.swift */; };
+		DA0022220000000000000003 /* CourseDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0011110000000000000003 /* CourseDrawer.swift */; };
+		DA0022220000000000000004 /* DrawerToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0011110000000000000004 /* DrawerToolbar.swift */; };
 		E04DE250969449BAAD797198 /* TutorLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BCDAC98B9E74C4DBFE626EF /* TutorLogic.swift */; };
 		E1467E4BC026A4C6614C0100 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF379CA3E59CE1FCFAAE231D /* WebSocketClient.swift */; };
 		E1F2A3B4C5D647F8E9F0A1B2C3D4 /* ReviewsReceivedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2A3B4C5D6E748091A2B3C4D5E6F7 /* ReviewsReceivedView.swift */; };
@@ -301,6 +305,10 @@
 		2C2723B9F80F759EA3979790 /* CourseFilesSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseFilesSocket.swift; sourceTree = "<group>"; };
 		2CD614342B6D4F8A9FCA9EB8 /* LaunchContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchContainerView.swift; sourceTree = "<group>"; };
 		2E652DD63C264C229E710A2F /* CourseWorkspaceNav.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseWorkspaceNav.swift; sourceTree = "<group>"; };
+		DA0011110000000000000001 /* DrawerScaffold.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerScaffold.swift; sourceTree = "<group>"; };
+		DA0011110000000000000002 /* GlobalDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalDrawer.swift; sourceTree = "<group>"; };
+		DA0011110000000000000003 /* CourseDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseDrawer.swift; sourceTree = "<group>"; };
+		DA0011110000000000000004 /* DrawerToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawerToolbar.swift; sourceTree = "<group>"; };
 		2E7DF19692574689A9021422 /* AuthFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFlowView.swift; sourceTree = "<group>"; };
 		3117A6FB75B84E32950A937B /* SearchActionRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchActionRegistry.swift; sourceTree = "<group>"; };
 		31D5130817D345F0A1EEBC82 /* ChildrenPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChildrenPlaceholderView.swift; sourceTree = "<group>"; };
@@ -685,6 +693,17 @@
 			path = Grading;
 			sourceTree = "<group>";
 		};
+		DA0033330000000000000001 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				DA0011110000000000000001 /* DrawerScaffold.swift */,
+				DA0011110000000000000002 /* GlobalDrawer.swift */,
+				DA0011110000000000000003 /* CourseDrawer.swift */,
+				DA0011110000000000000004 /* DrawerToolbar.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
 		63897271FAA0466E88695B30 /* Config */ = {
 			isa = PBXGroup;
 			children = (
@@ -794,6 +813,7 @@
 				A6B1C0010000000000000020 /* Grades */,
 				5A7AFDA4E0A548199C128273 /* Grading */,
 				CC186303A2264D71861AE01A /* Home */,
+				DA0033330000000000000001 /* Navigation */,
 				E5F6A7B8C9D0488990ABCDEF19 /* Library */,
 				182B70176F3249FB900BF89D /* Inbox */,
 				8622ABBABD0D42349249935D /* Notebooks */,
@@ -1355,6 +1375,10 @@
 				BAF86F3506EA40BDABCA34A1 /* SearchRecentsStore.swift in Sources */,
 				1CDD47366EE040F79035853E /* CourseDestinationPlaceholder.swift in Sources */,
 				DE08D86A101E4319B85564E5 /* CourseWorkspaceNav.swift in Sources */,
+				DA0022220000000000000001 /* DrawerScaffold.swift in Sources */,
+				DA0022220000000000000002 /* GlobalDrawer.swift in Sources */,
+				DA0022220000000000000003 /* CourseDrawer.swift in Sources */,
+				DA0022220000000000000004 /* DrawerToolbar.swift in Sources */,
 				23B2DFDA8988468EA63CB271 /* VibeActivityView.swift in Sources */,
 				A1B2C3D4E5F6478990ABCD01 /* TakeAttendanceLogic.swift in Sources */,
 				B1C2D3E4F5A6478990ABCDE02 /* CoursePeopleLogic.swift in Sources */,
