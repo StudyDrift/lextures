@@ -176,6 +176,17 @@ struct ProfileMoreDestinationScreen: View {
             } else {
                 MoreDestinationPlaceholder(destination: destination)
             }
+        } else if destination == .reading {
+            if shell.platformFeatures.ffLibrary {
+                ReadingDashboardView { course in
+                    shell.activeCourse = course
+                    shell.activeCourseRoot = .profile
+                    shell.activeCourseSection = .groups
+                    shell.select(.courses)
+                }
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else {
             MoreDestinationPlaceholder(destination: destination)
         }

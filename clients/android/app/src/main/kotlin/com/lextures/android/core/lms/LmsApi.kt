@@ -1251,6 +1251,53 @@ object LmsApi {
         }
     }
 
+    // Reading log & leveled library (M8.4)
+
+    suspend fun fetchReadingLogEntries(limit: Int = 100, accessToken: String): List<ReadingLogEntry> =
+        withContext(Dispatchers.IO) {
+            val capped = limit.coerceIn(1, 500)
+            val (body, code) = client.requestRaw(
+                "/api/v1/me/reading-log?limit=$capped",
+                accessToken = accessToken,
+            )
+            if (code == 501) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<ReadingLogListResponse>(body).entries.orEmpty()
+        }
+
+    suspend fun createReadingLogEntry(body: PostReadingLogBody, accessToken: String): ReadingLogEntry =
+        withContext(Dispatchers.IO) {
+            val payload = client.encodeBody(body, PostReadingLogBody.serializer())
+            val (responseBody, code) = client.requestRaw(
+                "/api/v1/me/reading-log",
+                method = "POST",
+                body = payload,
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+            decode<PostReadingLogResponse>(responseBody).entry
+        }
+
+    suspend fun fetchLibraryBooks(
+        orgId: String,
+        lexileMin: Int? = null,
+        lexileMax: Int? = null,
+        gradeBand: String? = null,
+        accessToken: String,
+    ): List<LibraryBook> = withContext(Dispatchers.IO) {
+        var path = "/api/v1/orgs/${encodePath(orgId)}/library"
+        val query = buildList {
+            lexileMin?.let { add("lexile_min=$it") }
+            lexileMax?.let { add("lexile_max=$it") }
+            gradeBand?.trim()?.takeIf { it.isNotEmpty() }?.let { add("grade_band=${encodeQuery(it)}") }
+        }
+        if (query.isNotEmpty()) path += "?" + query.joinToString("&")
+        val (body, code) = client.requestRaw(path, accessToken = accessToken)
+        if (code == 501) return@withContext emptyList()
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<LibraryBooksResponse>(body).books.orEmpty()
+    }
+
     // Discussions (M7.1)
 
     suspend fun fetchDiscussionForums(courseCode: String, accessToken: String): List<DiscussionForum> =
