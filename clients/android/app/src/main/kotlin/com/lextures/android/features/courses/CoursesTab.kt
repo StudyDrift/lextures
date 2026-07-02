@@ -116,7 +116,7 @@ fun CoursesTab(
         CourseDetailScreen(
             session = session,
             course = course,
-            onBack = { openCourse = null; deepLinkSection = null; deepLinkThreadId = null },
+            onBack = { openCourse = null; deepLinkSection = null; deepLinkThreadId = null; shell?.activeCourse = null },
             shell = shell,
             initialSection = deepLinkSection,
             initialThreadId = deepLinkThreadId,

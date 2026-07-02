@@ -64,6 +64,7 @@ struct TeachHubView: View {
             }
             .navigationTitle(L.text("mobile.ia.tabs.teach"))
             .navigationBarTitleDisplayMode(.inline)
+            .globalDrawerToolbar()
             .navigationDestination(for: StaffBacklog.self) { backlog in
                 GradingBacklogView(course: backlog.course)
             }

@@ -24,6 +24,7 @@ struct ChildrenPlaceholderView: View {
             }
             .navigationTitle(L.text("mobile.ia.tabs.children"))
             .navigationBarTitleDisplayMode(.inline)
+            .globalDrawerToolbar()
             .navigationDestination(for: NotificationsRoute.self) { _ in
                 NotificationsView()
             }

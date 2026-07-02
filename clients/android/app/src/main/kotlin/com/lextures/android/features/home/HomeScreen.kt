@@ -1,10 +1,14 @@
 package com.lextures.android.features.home
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,6 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,6 +50,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -58,6 +65,11 @@ import com.lextures.android.core.i18n.LocalLocalePreferences
 import com.lextures.android.core.lms.AccountProfile
 import com.lextures.android.core.lms.LmsApi
 import com.lextures.android.core.lms.MeProfile
+import com.lextures.android.core.lms.CourseSummary
+import com.lextures.android.core.navigation.CourseWorkspaceSection
+import com.lextures.android.core.navigation.DrawerGroup
+import com.lextures.android.core.navigation.DrawerState
+import com.lextures.android.core.navigation.RootDestination
 import com.lextures.android.core.navigation.MobileDestinations
 import com.lextures.android.core.navigation.MobileIaPreferences
 import com.lextures.android.core.navigation.MobileProfileDepthPreferences
@@ -77,6 +89,12 @@ import com.lextures.android.features.planner.PlannerScreen
 import com.lextures.android.features.planner.PlannerTab
 import com.lextures.android.features.profile.ProfileTab
 import com.lextures.android.features.search.UniversalSearchScreen
+import kotlin.math.roundToInt
+
+data class RootNavigationTransition(
+    val outgoing: RootDestination,
+    val drivenByDrawer: Boolean,
+)
 
 enum class HomeTab(val labelRes: Int, val icon: ImageVector) {
     Dashboard(R.string.tabs_home, Icons.Default.Home),
@@ -106,6 +124,67 @@ class HomeShellState {
     var pendingMoreDestination by mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null)
     var pendingReview by mutableStateOf(false)
 
+    // Drawer navigation (web-parity sidebar)
+    var drawerState by mutableStateOf(DrawerState.None)
+    var rootDestination by mutableStateOf(RootDestination.Dashboard)
+    var activeCourse by mutableStateOf<CourseSummary?>(null)
+    /** The top-level pane the active course was opened under (Dashboard or Courses). */
+    var activeCourseRoot by mutableStateOf(RootDestination.Courses)
+    var activeCourseSection by mutableStateOf(CourseWorkspaceSection.Modules)
+    var activeCourseSections by mutableStateOf<List<CourseWorkspaceSection>>(emptyList())
+
+    /** Courses the user pinned on web/mobile — surfaced in the global drawer. */
+    var pinnedCourses by mutableStateOf<List<CourseSummary>>(emptyList())
+
+    /** Active root-pane push (outgoing screen + whether progress tracks drawer close). */
+    var rootNavigationTransition by mutableStateOf<RootNavigationTransition?>(null)
+
+    val globalDrawerGroups: List<DrawerGroup>
+        get() = MobileDestinations.globalDrawerGroups(activeRoleContext, platformFeatures)
+
+    /** Whether the course drawer is reachable (course open and its host pane visible). */
+    val courseAvailable: Boolean
+        get() = activeCourse != null && rootDestination == activeCourseRoot
+
+    fun select(destination: RootDestination) {
+        val closingDrawer = drawerState != DrawerState.None
+        if (sharesRootPane(destination, rootDestination)) {
+            if (closingDrawer) drawerState = DrawerState.None
+            return
+        }
+        if (closingDrawer) {
+            rootNavigationTransition = RootNavigationTransition(
+                outgoing = rootDestination,
+                drivenByDrawer = true,
+            )
+            drawerState = DrawerState.None
+            rootDestination = destination
+            return
+        }
+        rootNavigationTransition = RootNavigationTransition(
+            outgoing = rootDestination,
+            drivenByDrawer = false,
+        )
+        rootDestination = destination
+    }
+
+    fun completeRootNavigationTransition() {
+        rootNavigationTransition = null
+    }
+
+    fun openGlobalDrawer() { drawerState = DrawerState.Global }
+    fun closeDrawer() { drawerState = DrawerState.None }
+
+    private fun sharesRootPane(lhs: RootDestination, rhs: RootDestination): Boolean {
+        val profilePane = setOf(RootDestination.Profile, RootDestination.Settings)
+        if (lhs in profilePane && rhs in profilePane) return true
+        return lhs == rhs
+    }
+    fun exitCourseToDashboard() {
+        activeCourse = null
+        select(RootDestination.Dashboard)
+    }
+
     val shellTabs: List<ShellTab>
         get() = if (iaRedesignEnabled) {
             MobileDestinations.shellTabs(activeRoleContext)
@@ -121,15 +200,17 @@ class HomeShellState {
 
     fun openDeepLink(destination: DeepLinkDestination) {
         pendingDeepLink = destination
-        selectedTabOverride = when (destination) {
-            DeepLinkDestination.Home -> shellTabKey(ShellTab.Home)
-            DeepLinkDestination.Inbox -> shellTabKey(ShellTab.Inbox)
-            DeepLinkDestination.Review -> {
-                pendingReview = true
-                shellTabKey(ShellTab.Home)
-            }
-            is DeepLinkDestination.Course -> shellTabKey(ShellTab.Courses)
-        }
+        select(
+            when (destination) {
+                DeepLinkDestination.Home -> RootDestination.Dashboard
+                DeepLinkDestination.Inbox -> RootDestination.Inbox
+                DeepLinkDestination.Review -> {
+                    pendingReview = true
+                    RootDestination.Dashboard
+                }
+                is DeepLinkDestination.Course -> RootDestination.Courses
+            },
+        )
     }
 
     fun consumePendingReview(): Boolean {
@@ -142,16 +223,27 @@ class HomeShellState {
         val target = com.lextures.android.core.search.SearchPathNavigator.resolve(path) ?: return
         when (target) {
             is com.lextures.android.core.search.SearchNavigationTarget.ShellTabTarget -> {
-                selectedTabOverride = shellTabKey(target.tab)
+                select(rootFor(target.tab))
             }
             is com.lextures.android.core.search.SearchNavigationTarget.DeepLinkTarget -> {
                 openDeepLink(target.destination)
             }
             is com.lextures.android.core.search.SearchNavigationTarget.MoreTarget -> {
-                selectedTabOverride = shellTabKey(ShellTab.Profile)
+                select(RootDestination.Profile)
                 pendingMoreDestination = target.destination
             }
         }
+    }
+
+    private fun rootFor(tab: ShellTab): RootDestination = when (tab) {
+        ShellTab.Home -> RootDestination.Dashboard
+        ShellTab.Courses -> RootDestination.Courses
+        ShellTab.Notebooks -> RootDestination.Notebooks
+        ShellTab.Inbox -> RootDestination.Inbox
+        ShellTab.Profile -> RootDestination.Profile
+        ShellTab.Teach -> RootDestination.Teach
+        ShellTab.Children -> RootDestination.Children
+        ShellTab.Calendar -> RootDestination.Calendar
     }
 
     fun consumePendingMoreDestination(): com.lextures.android.core.navigation.MoreDestination? {
@@ -160,11 +252,12 @@ class HomeShellState {
         return destination
     }
 
-    fun setRoleContext(context: MobileRoleContext, onTabChanged: (String) -> Unit) {
+    fun setRoleContext(context: MobileRoleContext, onTabChanged: (String) -> Unit = {}) {
         activeRoleContext = context
         MobileIaPreferences.saveRoleContext(androidContext, context)
-        if (!shellTabs.any { shellTabKey(it) == selectedTabOverride }) {
-            shellTabs.firstOrNull()?.let { onTabChanged(shellTabKey(it)) }
+        val available = globalDrawerGroups.flatMap { it.items }
+        if (rootDestination !in available) {
+            available.firstOrNull()?.let { select(it) }
         }
     }
 
@@ -200,6 +293,7 @@ class HomeShellState {
             profileDepthEnabled = MobileProfileDepthPreferences.isEnabled(androidContext)
         }
         val courses = runCatching { LmsApi.fetchCourses(token) }.getOrDefault(emptyList())
+        pinnedCourses = courses.filter { it.isPinned }
         val permissions = runCatching { LmsApi.fetchMyPermissions(token) }.getOrDefault(emptyList())
         roleSnapshot = MobileDestinations.buildRoleSnapshot(permissions, courses)
         activeRoleContext = roleSnapshot.resolvedContext(MobileIaPreferences.loadRoleContext(androidContext))
@@ -213,7 +307,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     initialDeepLink: DeepLinkDestination? = null,
 ) {
-    var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Dashboard.name) }
     val shell = remember { HomeShellState() }
     val accessToken by session.accessToken.collectAsState()
     val context = LocalContext.current
@@ -244,13 +337,6 @@ fun HomeScreen(
     LaunchedEffect(realtimeRevisionSum) {
         if (realtimeRevisionSum > 0) {
             shell.refresh(accessToken)
-        }
-    }
-
-    LaunchedEffect(shell.selectedTabOverride) {
-        shell.selectedTabOverride?.let {
-            selectedTab = it
-            shell.selectedTabOverride = null
         }
     }
 
@@ -287,41 +373,25 @@ fun HomeScreen(
             .fillMaxSize()
             .background(sceneBackground()),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding(),
+        var drawerOpenProgress by remember { mutableFloatStateOf(0f) }
+        com.lextures.android.features.navigation.DrawerScaffold(
+            state = shell.drawerState,
+            courseAvailable = shell.courseAvailable,
+            onStateChange = { shell.drawerState = it },
+            onDrawerProgress = { drawerOpenProgress = it },
+            globalPanel = { com.lextures.android.features.navigation.GlobalDrawer(shell, accessToken) },
+            coursePanel = { com.lextures.android.features.navigation.CourseDrawer(shell) },
         ) {
-            Box(modifier = Modifier.weight(1f)) {
-                if (shell.iaRedesignEnabled) {
-                    IaTabContent(selectedTab = selectedTab, session = session, shell = shell)
-                } else {
-                    LegacyTabContent(
-                        selectedTab = selectedTab,
-                        session = session,
-                        shell = shell,
-                        onSelectTab = { selectedTab = it },
-                    )
-                }
-            }
-
-            if (shell.iaRedesignEnabled) {
-                IaShellTabBar(
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding(),
+            ) {
+                RootContent(
+                    destination = shell.rootDestination,
+                    drawerOpenProgress = drawerOpenProgress,
+                    session = session,
                     shell = shell,
-                    selected = selectedTab,
-                    onSelect = { selectedTab = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 6.dp),
-                )
-            } else {
-                LexturesTabBar(
-                    selected = selectedTab,
-                    unreadInbox = shell.unreadInbox,
-                    onSelect = { selectedTab = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 6.dp),
                 )
             }
         }
@@ -329,62 +399,143 @@ fun HomeScreen(
 }
 
 @Composable
-private fun LegacyTabContent(
-    selectedTab: String,
-    session: AuthSession,
-    shell: HomeShellState,
-    onSelectTab: (String) -> Unit,
-) {
-    when (selectedTab) {
-        HomeTab.Dashboard.name -> DashboardTab(
-            session = session,
-            shell = shell,
-            onOpenProfile = { onSelectTab(HomeTab.Profile.name) },
-            modifier = Modifier.fillMaxSize(),
-        )
-        HomeTab.Courses.name -> CoursesTab(session = session, shell = shell, modifier = Modifier.fillMaxSize())
-        HomeTab.Notebooks.name -> NotebooksTab(session = session, modifier = Modifier.fillMaxSize())
-        HomeTab.Inbox.name -> InboxTab(
-            session = session,
-            onUnreadChanged = { shell.unreadInbox = it },
-            modifier = Modifier.fillMaxSize(),
-        )
-        HomeTab.Profile.name -> ProfileTab(session = session, shell = shell, modifier = Modifier.fillMaxSize())
-    }
-}
-
-@Composable
-private fun IaTabContent(
-    selectedTab: String,
+private fun RootContent(
+    destination: RootDestination,
+    drawerOpenProgress: Float,
     session: AuthSession,
     shell: HomeShellState,
 ) {
     val context = LocalContext.current
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
-    when (selectedTab) {
-        shellTabKey(ShellTab.Home) -> DashboardTab(
+    val transition = shell.rootNavigationTransition
+    val paneTransitionTarget = if (transition != null && !transition.drivenByDrawer) 1f else 0f
+    val paneTransitionProgress by animateFloatAsState(
+        targetValue = paneTransitionTarget,
+        animationSpec = tween(durationMillis = 350, easing = FastOutSlowInEasing),
+        label = "paneTransition",
+    )
+    val navigationCompletion = when {
+        transition?.drivenByDrawer == true -> 1f - drawerOpenProgress
+        transition != null -> paneTransitionProgress
+        else -> 1f
+    }
+
+    LaunchedEffect(transition?.drivenByDrawer, drawerOpenProgress) {
+        if (transition?.drivenByDrawer == true && drawerOpenProgress <= 0.01f) {
+            shell.completeRootNavigationTransition()
+        }
+    }
+    LaunchedEffect(transition, paneTransitionProgress) {
+        if (transition != null && !transition.drivenByDrawer && paneTransitionProgress >= 0.99f) {
+            shell.completeRootNavigationTransition()
+        }
+    }
+
+    if (transition != null) {
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val widthPx = constraints.maxWidth.toFloat()
+            val incomingOffset = (widthPx * (1f - navigationCompletion)).roundToInt()
+            val outgoingOffset = (-widthPx * navigationCompletion).roundToInt()
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(outgoingOffset, 0) },
+            ) {
+                RootPane(
+                    destination = transition.outgoing,
+                    session = session,
+                    shell = shell,
+                    offline = offline,
+                    isOnline = isOnline,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .offset { IntOffset(incomingOffset, 0) },
+            ) {
+                RootPane(
+                    destination = destination,
+                    session = session,
+                    shell = shell,
+                    offline = offline,
+                    isOnline = isOnline,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+        }
+    } else {
+        RootPane(
+            destination = destination,
             session = session,
             shell = shell,
-            onOpenProfile = { shell.selectedTabOverride = shellTabKey(ShellTab.Profile) },
+            offline = offline,
+            isOnline = isOnline,
             modifier = Modifier.fillMaxSize(),
         )
-        shellTabKey(ShellTab.Courses) -> CoursesTab(session = session, shell = shell, modifier = Modifier.fillMaxSize())
-        shellTabKey(ShellTab.Notebooks) -> NotebooksTab(session = session, modifier = Modifier.fillMaxSize())
-        shellTabKey(ShellTab.Inbox) -> InboxTab(
+    }
+}
+
+@Composable
+private fun RootPane(
+    destination: RootDestination,
+    session: AuthSession,
+    shell: HomeShellState,
+    offline: OfflineService,
+    isOnline: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    when (destination) {
+        RootDestination.Dashboard -> DashboardTab(
+            session = session,
+            shell = shell,
+            onOpenProfile = { shell.select(RootDestination.Profile) },
+            modifier = modifier,
+        )
+        RootDestination.Courses -> CoursesTab(session = session, shell = shell, modifier = modifier)
+        RootDestination.Notebooks -> NotebooksTab(session = session, modifier = modifier)
+        RootDestination.GlobalNotebook -> NotebooksTab(
+            session = session,
+            initialGlobal = true,
+            modifier = modifier,
+        )
+        RootDestination.Inbox -> InboxTab(
             session = session,
             onUnreadChanged = { shell.unreadInbox = it },
-            modifier = Modifier.fillMaxSize(),
+            modifier = modifier,
         )
-        shellTabKey(ShellTab.Profile) -> ProfileTab(session = session, shell = shell, modifier = Modifier.fillMaxSize())
-        shellTabKey(ShellTab.Teach) -> TeachHubScreen(session = session, shell = shell, modifier = Modifier.fillMaxSize())
-        shellTabKey(ShellTab.Children) -> ChildrenPlaceholderScreen(modifier = Modifier.fillMaxSize())
-        shellTabKey(ShellTab.Calendar) -> PlannerScreen(
+        RootDestination.Profile, RootDestination.Settings ->
+            ProfileTab(session = session, shell = shell, modifier = modifier)
+        RootDestination.Teach -> TeachHubScreen(session = session, shell = shell, modifier = modifier)
+        RootDestination.Children -> ChildrenPlaceholderScreen(modifier = modifier)
+        RootDestination.Calendar -> PlannerScreen(
             session = session,
             offline = offline,
             isOnline = isOnline,
             initialTab = PlannerTab.Calendar,
-            modifier = Modifier.fillMaxSize(),
+            onBack = { shell.select(RootDestination.Dashboard) },
+            modifier = modifier,
+        )
+        RootDestination.Todos -> PlannerScreen(
+            session = session,
+            offline = offline,
+            isOnline = isOnline,
+            initialTab = PlannerTab.Todos,
+            onBack = { shell.select(RootDestination.Dashboard) },
+            modifier = modifier,
+        )
+        RootDestination.Review -> com.lextures.android.features.review.ReviewHomeScreen(
+            session = session,
+            shell = shell,
+            onBack = { shell.select(RootDestination.Dashboard) },
+            modifier = modifier,
+        )
+        RootDestination.Accommodations -> com.lextures.android.features.profile.MyAccommodationsScreen(
+            session = session,
+            onBack = { shell.select(RootDestination.Dashboard) },
+            modifier = modifier,
         )
     }
 }

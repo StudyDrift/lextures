@@ -65,6 +65,94 @@ enum ShellTab: String, CaseIterable, Equatable, Identifiable {
     }
 }
 
+// MARK: - Drawer navigation (web-parity sidebar)
+
+/// Two-level left-drawer state machine shared by the shell.
+/// `.none` = no drawer; `.course` = course-scoped menu; `.global` = app-wide menu.
+enum DrawerState: Equatable {
+    case none
+    case course
+    case global
+}
+
+/// Top-level app destinations reachable from the global drawer.
+/// Replaces the former bottom-bar `ShellTab` selection.
+enum RootDestination: String, CaseIterable, Equatable, Identifiable {
+    case dashboard
+    case courses
+    case calendar
+    case todos
+    case review
+    case notebooks
+    case globalNotebook
+    case accommodations
+    case inbox
+    case settings
+    case profile
+    case teach
+    case children
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .dashboard: return L.text("mobile.drawer.dashboard")
+        case .courses: return L.text("tabs.courses")
+        case .calendar: return L.text("mobile.ia.tabs.calendar")
+        case .todos: return L.text("mobile.drawer.todos")
+        case .review: return L.text("mobile.drawer.review")
+        case .notebooks: return L.text("mobile.drawer.notebooks")
+        case .globalNotebook: return L.text("mobile.drawer.globalNotebook")
+        case .accommodations: return L.text("mobile.drawer.accommodations")
+        case .inbox: return L.text("tabs.inbox")
+        case .settings: return L.text("mobile.ia.more.settings")
+        case .profile: return L.text("tabs.profile")
+        case .teach: return L.text("mobile.ia.tabs.teach")
+        case .children: return L.text("mobile.ia.tabs.children")
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .dashboard: return "square.grid.2x2.fill"
+        case .courses: return "books.vertical.fill"
+        case .calendar: return "calendar"
+        case .todos: return "checklist"
+        case .review: return "arrow.triangle.2.circlepath"
+        case .notebooks: return "book.closed.fill"
+        case .globalNotebook: return "globe"
+        case .accommodations: return "accessibility"
+        case .inbox: return "tray.fill"
+        case .settings: return "gearshape.fill"
+        case .profile: return "person.fill"
+        case .teach: return "checkmark.circle.fill"
+        case .children: return "figure.2.and.child.holdinghands"
+        }
+    }
+
+    /// Whether the inbox unread badge should render on this row.
+    var showsInboxBadge: Bool { self == .inbox }
+}
+
+/// A titled section of the global drawer. `titleKey == nil` renders header-less
+/// (the top block of primary destinations, mirroring the web sidebar).
+struct DrawerGroup: Identifiable, Equatable {
+    let titleKey: String?
+    let items: [RootDestination]
+
+    var id: String { titleKey ?? "primary" }
+    var title: String? { titleKey.map { L.text(String.LocalizationValue($0)) } }
+}
+
+/// A titled section of the course drawer, grouping existing workspace sections.
+struct CourseDrawerGroup: Identifiable, Equatable {
+    let titleKey: String
+    let sections: [CourseWorkspaceSection]
+
+    var id: String { titleKey }
+    var title: String { L.text(String.LocalizationValue(titleKey)) }
+}
+
 /// Secondary destinations surfaced from Profile / More hub.
 enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case calendar
@@ -291,6 +379,65 @@ enum MobileDestinations {
             return [.home, .children, .calendar, .inbox, .profile]
         case .learning:
             return [.home, .courses, .notebooks, .inbox, .profile]
+        }
+    }
+
+    // MARK: Global drawer
+
+    /// Role-aware grouped destinations for the global drawer, mirroring the web sidebar.
+    static func globalDrawerGroups(
+        context: MobileRoleContext,
+        platform: MobilePlatformFeatures
+    ) -> [DrawerGroup] {
+        switch context {
+        case .learning:
+            return [
+                DrawerGroup(titleKey: nil, items: [.dashboard, .courses, .calendar, .todos]),
+                DrawerGroup(titleKey: "mobile.drawer.group.learning", items: [.review]),
+                DrawerGroup(titleKey: "mobile.drawer.group.notes", items: [.notebooks, .globalNotebook]),
+                DrawerGroup(titleKey: "mobile.drawer.group.administration", items: [.accommodations]),
+                DrawerGroup(titleKey: "mobile.drawer.group.account", items: [.inbox, .settings]),
+            ]
+        case .teaching:
+            return [
+                DrawerGroup(titleKey: nil, items: [.dashboard, .courses, .calendar]),
+                DrawerGroup(titleKey: "mobile.drawer.group.teaching", items: [.teach]),
+                DrawerGroup(titleKey: "mobile.drawer.group.notes", items: [.notebooks]),
+                DrawerGroup(titleKey: "mobile.drawer.group.account", items: [.inbox, .settings]),
+            ]
+        case .parent:
+            return [
+                DrawerGroup(titleKey: nil, items: [.dashboard, .children, .calendar]),
+                DrawerGroup(titleKey: "mobile.drawer.group.account", items: [.inbox, .settings]),
+            ]
+        }
+    }
+
+    // MARK: Course drawer
+
+    /// Regroups the existing course workspace sections under web-style headers.
+    /// Only sections already available for the viewer (from `courseWorkspaceSections`)
+    /// appear, so per-role gating is inherited unchanged.
+    static func courseDrawerGroups(_ sections: [CourseWorkspaceSection]) -> [CourseDrawerGroup] {
+        let content: [CourseWorkspaceSection] = [.overview, .modules, .files, .library]
+        let collaboration: [CourseWorkspaceSection] = [.discussions, .feed, .live, .officeHours]
+        let grades: [CourseWorkspaceSection] = [.grades, .mastery]
+        let people: [CourseWorkspaceSection] = [.people]
+        let manage: [CourseWorkspaceSection] = [.grading, .attendance, .evaluations]
+
+        func filtered(_ group: [CourseWorkspaceSection]) -> [CourseWorkspaceSection] {
+            group.filter(sections.contains)
+        }
+
+        let groups: [(String, [CourseWorkspaceSection])] = [
+            ("mobile.drawer.course.content", filtered(content)),
+            ("mobile.drawer.course.collaboration", filtered(collaboration)),
+            ("mobile.drawer.course.grades", filtered(grades)),
+            ("mobile.drawer.course.people", filtered(people)),
+            ("mobile.drawer.course.manage", filtered(manage)),
+        ]
+        return groups.compactMap { key, list in
+            list.isEmpty ? nil : CourseDrawerGroup(titleKey: key, sections: list)
         }
     }
 

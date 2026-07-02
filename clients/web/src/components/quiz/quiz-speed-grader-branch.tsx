@@ -12,6 +12,7 @@ import {
 } from '../../lib/courses-api'
 import { queueCanvasQuizGradeSync } from '../canvas/canvas-quiz-grade-sync'
 import { ResizableSplitPane } from '../layout/resizable-split-pane'
+import { FullScreenModalShell } from '../ui/fullscreen-modal-shell'
 import { SubmissionNavigator } from '../annotation/submission-navigator'
 import { useSpeedGraderHotkeys } from '../annotation/speed-grader-shortcuts'
 import type { GradedFilter } from '../annotation/submission-navigator-utils'
@@ -370,14 +371,11 @@ export function QuizSpeedGraderBranch({
 
   if (presentation === 'modal') {
     return (
-      <div className="fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6" role="presentation">
-        <button
-          type="button"
-          aria-label="Close SpeedGrader backdrop"
-          className="absolute inset-0 cursor-default border-0 bg-slate-950/55 p-0 backdrop-blur-[2px] dark:bg-black/80"
-          onClick={onModalClose}
-          tabIndex={-1}
-        />
+      <FullScreenModalShell
+        open={modalOpen}
+        onClose={onModalClose}
+        backdropLabel="Close SpeedGrader backdrop"
+      >
         <div
           role="dialog"
           aria-modal="true"
@@ -413,7 +411,7 @@ export function QuizSpeedGraderBranch({
             secondary={gradingSidebar}
           />
         </div>
-      </div>
+      </FullScreenModalShell>
     )
   }
 

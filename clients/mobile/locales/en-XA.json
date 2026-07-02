@@ -900,7 +900,27 @@
         "tabs.home": "[Ħöɱë]",
         "tabs.inbox": "[Îñɓöẍ]",
         "tabs.notebooks": "[Ñöţëɓööĸš]",
-        "tabs.profile": "[Þŕöƒîľë]"
+        "tabs.profile": "[Þŕöƒîľë]",
+        "mobile.drawer.accommodations": "[Äççöḿḿöḑäţïöñš]",
+        "mobile.drawer.back": "[βäçḳ]",
+        "mobile.drawer.course.collaboration": "[Çöľľäḅöṛäţïöñ]",
+        "mobile.drawer.course.content": "[Çöñţëñţ]",
+        "mobile.drawer.course.grades": "[Ġṛäḑëš & ïñšïġĥţš]",
+        "mobile.drawer.course.manage": "[Ḿäñäġë]",
+        "mobile.drawer.course.people": "[Ṗëöṗľë]",
+        "mobile.drawer.courseMenu": "[Çöüṛšë ḿëñü]",
+        "mobile.drawer.dashboard": "[Ḋäšĥḅöäṛḑ]",
+        "mobile.drawer.globalNotebook": "[Ġľöḅäľ ñöţëḅööḳ]",
+        "mobile.drawer.group.account": "[Äççöüñţ]",
+        "mobile.drawer.group.administration": "[Äḑḿïñïšţṛäţïöñ]",
+        "mobile.drawer.group.learning": "[Ļëäṛñïñġ]",
+        "mobile.drawer.group.notes": "[Ñöţëš & ṗöṛţḟöľïö]",
+        "mobile.drawer.group.teaching": "[Ţëäçĥïñġ]",
+        "mobile.drawer.menu": "[Ḿëñü]",
+        "mobile.drawer.notebooks": "[Ḿÿ Ñöţëḅööḳš]",
+        "mobile.drawer.pinned": "[Ṗïññëḑ]",
+        "mobile.drawer.review": "[Ṙëṽïëẅ ṗṛäçţïçë]",
+        "mobile.drawer.todos": "[Ţöḑöš]"
     },
     "plurals": {
         "mobile.dashboard.dueThisWeek.count": {

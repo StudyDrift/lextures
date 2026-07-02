@@ -53,6 +53,7 @@ import { ResizableSplitPane } from '../layout/resizable-split-pane'
 import { SubmissionPreviewSidebar } from './submission-preview-sidebar'
 import type { RubricDefinition } from '../../lib/courses-api'
 import { QuizSpeedGraderBranch } from '../quiz/quiz-speed-grader-branch'
+import { FullScreenModalShell } from '../ui/fullscreen-modal-shell'
 
 function submissionContentPath(contentPath?: string | null): string | null {
   const trimmed = contentPath?.trim()
@@ -924,17 +925,11 @@ function AssignmentAnnotationWorkbenchInner({
 
   if (presentation === 'modal') {
     return (
-      <div
-        className="fixed inset-0 z-[500] flex items-center justify-center p-3 sm:p-6"
-        role="presentation"
+      <FullScreenModalShell
+        open={modalOpen}
+        onClose={onModalClose}
+        backdropLabel="Close submission preview backdrop"
       >
-        <button
-          type="button"
-          aria-label="Close submission preview backdrop"
-          className="absolute inset-0 cursor-default border-0 bg-slate-950/55 p-0 backdrop-blur-[2px] dark:bg-black/80"
-          onClick={onModalClose}
-          tabIndex={-1}
-        />
         <div
           role="dialog"
           aria-modal="true"
@@ -1016,7 +1011,7 @@ function AssignmentAnnotationWorkbenchInner({
             secondary={gradingSidebar}
           />
         </div>
-      </div>
+      </FullScreenModalShell>
     )
   }
 

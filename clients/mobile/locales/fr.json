@@ -900,7 +900,27 @@
         "tabs.home": "Accueil",
         "tabs.inbox": "Boîte",
         "tabs.notebooks": "Carnets",
-        "tabs.profile": "Profil"
+        "tabs.profile": "Profil",
+        "mobile.drawer.accommodations": "Aménagements",
+        "mobile.drawer.back": "Retour",
+        "mobile.drawer.course.collaboration": "Collaboration",
+        "mobile.drawer.course.content": "Contenu",
+        "mobile.drawer.course.grades": "Notes et analyses",
+        "mobile.drawer.course.manage": "Gérer",
+        "mobile.drawer.course.people": "Personnes",
+        "mobile.drawer.courseMenu": "Menu du cours",
+        "mobile.drawer.dashboard": "Tableau de bord",
+        "mobile.drawer.globalNotebook": "Carnet global",
+        "mobile.drawer.group.account": "Compte",
+        "mobile.drawer.group.administration": "Administration",
+        "mobile.drawer.group.learning": "Apprentissage",
+        "mobile.drawer.group.notes": "Notes et portfolio",
+        "mobile.drawer.group.teaching": "Enseignement",
+        "mobile.drawer.menu": "Menu",
+        "mobile.drawer.notebooks": "Mes carnets",
+        "mobile.drawer.pinned": "Épinglés",
+        "mobile.drawer.review": "Révision",
+        "mobile.drawer.todos": "À faire"
     },
     "plurals": {
         "mobile.dashboard.dueThisWeek.count": {
