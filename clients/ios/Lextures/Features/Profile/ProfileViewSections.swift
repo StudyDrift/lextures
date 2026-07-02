@@ -156,6 +156,26 @@ struct ProfileMoreDestinationScreen: View {
             PeerReviewListView()
         } else if destination == .reportCards {
             ReportCardListView()
+        } else if destination == .paths {
+            if shell.platformFeatures.ffLearningPaths {
+                MyPathsView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
+        } else if destination == .insights {
+            if shell.platformFeatures.selfReflectionEnabled {
+                InsightsView(
+                    onOpenCourse: { course in
+                        shell.activeCourse = course
+                        shell.activeCourseRoot = .profile
+                        shell.activeCourseSection = .modules
+                        shell.select(.courses)
+                    },
+                    onOpenReview: { shell.select(.review) }
+                )
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else {
             MoreDestinationPlaceholder(destination: destination)
         }

@@ -50,6 +50,7 @@ fun rootDestinationIcon(dest: RootDestination): ImageVector = when (dest) {
     RootDestination.Calendar -> Icons.Filled.CalendarMonth
     RootDestination.Todos -> Icons.Filled.Checklist
     RootDestination.Review -> Icons.Filled.Autorenew
+    RootDestination.Insights -> Icons.Filled.BarChart
     RootDestination.Notebooks -> Icons.Filled.Book
     RootDestination.GlobalNotebook -> Icons.Filled.Public
     RootDestination.Accommodations -> Icons.Filled.Accessible
@@ -72,6 +73,8 @@ fun courseSectionIcon(section: CourseWorkspaceSection): ImageVector = when (sect
     CourseWorkspaceSection.Grades -> Icons.Filled.Assignment
     CourseWorkspaceSection.Mastery -> Icons.Filled.BarChart
     CourseWorkspaceSection.People -> Icons.Filled.Group
+    CourseWorkspaceSection.Groups -> Icons.Filled.Group
+    CourseWorkspaceSection.CollabDocs -> Icons.Filled.Description
     CourseWorkspaceSection.Grading -> Icons.Filled.FactCheck
     CourseWorkspaceSection.Attendance -> Icons.Filled.EventAvailable
     CourseWorkspaceSection.Evaluations -> Icons.Filled.RateReview
@@ -92,5 +95,7 @@ fun courseSectionLabelRes(section: CourseWorkspaceSection): Int = when (section)
     CourseWorkspaceSection.Evaluations -> R.string.mobile_ia_course_evaluations
     CourseWorkspaceSection.Library -> R.string.mobile_ia_course_library
     CourseWorkspaceSection.OfficeHours -> R.string.mobile_ia_course_officeHours
+    CourseWorkspaceSection.Groups -> R.string.mobile_ia_course_groups
+    CourseWorkspaceSection.CollabDocs -> R.string.mobile_ia_course_collabDocs
     CourseWorkspaceSection.Grading -> R.string.mobile_ia_course_grading
 }

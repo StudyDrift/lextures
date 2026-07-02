@@ -8,6 +8,10 @@
 	<array>
 		<string>applinks:lextures.com</string>
 		<string>applinks:www.lextures.com</string>
+		<string>applinks:self.lextures.com</string>
+		<string>webcredentials:self.lextures.com</string>
+		<string>self.lextures.com</string>
+		<string>lextures.com</string>
 	</array>
 </dict>
 </plist>

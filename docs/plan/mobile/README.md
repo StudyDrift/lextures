@@ -53,7 +53,7 @@ Verified in the iOS/Android trees as of this plan:
 | Area | iOS | Android | Notes |
 |---|---|---|---|
 | Auth (email/password, signup, secure token store, session, biometric lock, session mgmt, SSO/MFA/magic link) | ✅ | ✅ | Keychain / encrypted store; SSO/MFA/magic link ([M1.1](../completed/mobile/M1.1-sso-mfa-magic-link.md)) |
-| Navigation shell (Home, Courses, Notebooks, Inbox, Profile tabs) | ✅ | ✅ | 5-tab bar; no deep-link routing yet |
+| Navigation shell (role-aware two-level left drawer: global + course) | ✅ | ✅ | Web-parity drawer replaced the bottom tab bar (#419); deep links wired ([M0.1](../completed/mobile/M0.1-push-deep-links.md)) |
 | Dashboard / Home + announcements | ✅ | ✅ | Read-only |
 | Courses: list, detail, syllabus, **grades (feedback, what-if)**, attendance (read), item detail | ✅ | ✅ | Student grades with rubric/annotation/a-v feedback |
 | Grading: backlog, submissions list, **Speed Grader** | ✅ | ✅ | Instructor; see `../speed-grader-mobile.md` |
@@ -128,9 +128,9 @@ desktop-bound), reachable via an in-app web view when a student truly needs it.
 | [M5.2 Peer review](../completed/mobile/M5.2-peer-review.md) ✅ | 3.15 peer review | **DONE** | **P1** |
 | [M6.2 Standards-based grades & mastery](../completed/mobile/M6.2-standards-mastery.md) ✅ | 3.7 SBG, 9.3 mastery heatmap, 13.4 report cards (student) | **Done** |
 | [M7.3 Office hours booking](../completed/mobile/M7.3-office-hours.md) ✅ | 6.7 office hours | **Done** |
-| [M7.4 Group spaces & collab docs](M7.4-groups-collab.md) | 6.6 groups, 6.5 collab docs | **P1** |
-| [M8.2 Adaptive paths & recommendations](M8.2-paths-recommendations.md) | 1.4 paths, 1.8 recommendations, my-paths | **P1** |
-| [M8.3 Study insights & self-reflection](M8.3-study-insights.md) | 9.1 progress, 9.9 reflection, study-insights | **P1** |
+| [M7.4 Group spaces & collab docs](../completed/mobile/M7.4-groups-collab.md) ✅ | 6.6 groups, 6.5 collab docs | **Done** |
+| [M8.2 Adaptive paths & recommendations](../completed/mobile/M8.2-paths-recommendations.md) ✅ | 1.4 paths, 1.8 recommendations, my-paths | **Done** |
+| [M8.3 Study insights & self-reflection](../completed/mobile/M8.3-study-insights.md) ✅ | 9.1 progress, 9.9 reflection, study-insights | **Done** |
 | [M8.4 Reading log & book club](M8.4-reading-log.md) | 13.8 leveled reader, reading-log/dashboard | **P1** |
 | [M9.1 Catalog browse & enroll](M9.1-catalog-enroll.md) | 15.1 catalog, 15.2 self-paced enroll, 14.2 registration | **P1** |
 | [M9.2 Checkout & billing](M9.2-checkout-billing.md) | 15.3 Stripe billing, checkout, 16.8 payment abstraction | **P1** |
@@ -176,11 +176,12 @@ covered**, plus the navigation redesign needed to hold them. Added as stories:
 | [M11.4 Course People (roster) for teachers](M11.4-course-people-roster.md) | `course-enrollments-page` ("People" tab); `CourseWorkspaceSection.people` (registered, placeholder) | `/courses/{c}/enrollments`, `/courses/{c}/enrollments/{id}` (DELETE), `/courses/{c}/enrollments/{id}/message` | **P1** |
 | [M1.5 Profile depth: demographics, custom fields & research consent](../completed/mobile/M1.5-profile-depth-demographics-consent.md) | demographics, custom fields, research studies | demographics, custom-fields, research-consent | **DONE** |
 
-> **The redesign ([M0.5](M0.5-redesign-information-architecture.md)) is the keystone.**
-> The current flat 5-tab shell + four-chip course detail cannot surface the breadth above.
-> M0.5 introduces a role-aware shell, a scalable course **workspace** sub-nav, a **More**
-> hub, and a header **search** entry — and defines the destination-registry contract every
-> story above plugs into. Sequence it first within its wave.
+> **The redesign ([M0.5](../completed/mobile/M0.5-redesign-information-architecture.md)) is the keystone.**
+> The former flat 5-tab shell + chip-based course detail could not surface the breadth above.
+> M0.5 landed the role-aware destination registry, and the web-parity **two-level left drawer**
+> (a global drawer + a course-scoped drawer, replacing the bottom tab bar and workspace chips; #419)
+> now hosts it — plus a **More** hub and a header **search** entry. Every story above plugs into
+> that destination-registry contract.
 
 ### Stays web-only (reachable via in-app web view)
 
@@ -206,8 +207,8 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    Exit criteria: a student completes a full week of coursework with no browser.
 2. **Wave 2 — Breadth (P1).** Auth depth (M1.x ✅), interactive content (M3.3 ✅) +
    M3.5 vibe activities ✅ + M3.6 library/e-reserves ✅, standards/mastery (M6.2 ✅),
-   M6.3 immersive reader, groups/office-hours (M7.3 ✅/M7.4) + M7.5 live classes +
-   M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2–M8.4), self-learner commerce
+   M6.3 immersive reader, groups/office-hours (M7.3 ✅/M7.4 ✅) + M7.5 live classes +
+   M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2 ✅/M8.3 ✅/M8.4), self-learner commerce
    (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
    instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk + M11.4 course
    people/roster.

@@ -5,6 +5,7 @@ sealed class DeepLinkDestination {
     data object Home : DeepLinkDestination()
     data object Inbox : DeepLinkDestination()
     data object Review : DeepLinkDestination()
+    data object Insights : DeepLinkDestination()
     data class Course(
         val code: String,
         val section: CourseDeepLinkSection? = null,
@@ -25,6 +26,8 @@ enum class CourseDeepLinkSection {
     People,
     Evaluations,
     Library,
+    Groups,
+    CollabDocs,
 }
 
 /** Maps web-style action URLs and `lextures://` links to native navigation intents. */
@@ -65,9 +68,12 @@ object DeepLinkRouter {
     private fun resolvePath(path: String): DeepLinkDestination {
         val segments = path.trim('/').split('/').filter { it.isNotEmpty() }
         if (segments.firstOrNull()?.lowercase() != "courses" || segments.size < 2) {
-            return when (segments.firstOrNull()?.lowercase()) {
-                "inbox" -> DeepLinkDestination.Inbox
-                "review" -> DeepLinkDestination.Review
+            return when {
+                segments.firstOrNull()?.lowercase() == "inbox" -> DeepLinkDestination.Inbox
+                segments.firstOrNull()?.lowercase() == "review" -> DeepLinkDestination.Review
+                segments.size >= 2 &&
+                    segments[0].equals("me", ignoreCase = true) &&
+                    segments[1].equals("study-insights", ignoreCase = true) -> DeepLinkDestination.Insights
                 else -> DeepLinkDestination.Home
             }
         }
@@ -94,6 +100,12 @@ object DeepLinkRouter {
             "people", "enrollments" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.People)
             "evaluations", "evaluation-results" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Evaluations)
             "library", "reading-dashboard" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Library)
+            "groups" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Groups)
+            "collab-docs" -> DeepLinkDestination.Course(
+                code = courseCode,
+                section = CourseDeepLinkSection.CollabDocs,
+                itemId = segments.getOrNull(3),
+            )
             "gradebook" -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Grades)
             "assignments", "quizzes", "modules" -> DeepLinkDestination.Course(
                 code = courseCode,

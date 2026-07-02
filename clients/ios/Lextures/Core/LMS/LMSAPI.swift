@@ -33,6 +33,26 @@ enum LMSAPI {
         return try decode(CourseSummary.self, from: data)
     }
 
+    /// Accept a pending enrollment invitation, activating the viewer's enrollment.
+    static func approveCourseInvitation(courseCode: String, enrollmentId: String, accessToken: String) async throws {
+        _ = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments/\(encodePath(enrollmentId))/invitation/approve",
+            method: "POST",
+            authorized: true,
+            accessToken: accessToken
+        )
+    }
+
+    /// Decline a pending enrollment invitation, removing the viewer's enrollment.
+    static func declineCourseInvitation(courseCode: String, enrollmentId: String, accessToken: String) async throws {
+        _ = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments/\(encodePath(enrollmentId))/invitation/decline",
+            method: "POST",
+            authorized: true,
+            accessToken: accessToken
+        )
+    }
+
     static func fetchCourseStructure(courseCode: String, accessToken: String) async throws -> [CourseStructureItem] {
         let (data, _) = try await client.request(
             path: "/api/v1/courses/\(encodePath(courseCode))/structure",

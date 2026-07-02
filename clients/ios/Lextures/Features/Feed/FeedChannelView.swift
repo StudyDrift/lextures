@@ -11,6 +11,7 @@ struct FeedChannelView: View {
     let course: CourseSummary
     let channelId: String
     let channelName: String
+    var groupContext: GroupFeedContext?
 
     @State private var roots: [FeedMessage] = []
     @State private var cacheLabel: String?
@@ -182,12 +183,33 @@ struct FeedChannelView: View {
         errorMessage = nil
         defer { loading = false }
         do {
-            let result = try await offline.cachedFetch(
-                key: OfflineCacheKey.feedMessages(courseCode: course.courseCode, channelId: channelId),
-                accessToken: token
-            ) {
-                try await LMSAPI.fetchFeedMessages(courseCode: course.courseCode, channelId: channelId, accessToken: token)
+            let cacheKey: String
+            let fetchMessages: () async throws -> [FeedMessage]
+            if let groupContext {
+                cacheKey = OfflineCacheKey.groupFeedMessages(
+                    courseCode: course.courseCode,
+                    groupId: groupContext.groupId,
+                    channelId: channelId
+                )
+                fetchMessages = {
+                    try await LMSAPI.fetchGroupFeedMessages(
+                        courseCode: course.courseCode,
+                        groupId: groupContext.groupId,
+                        channelId: channelId,
+                        accessToken: token
+                    )
+                }
+            } else {
+                cacheKey = OfflineCacheKey.feedMessages(courseCode: course.courseCode, channelId: channelId)
+                fetchMessages = {
+                    try await LMSAPI.fetchFeedMessages(
+                        courseCode: course.courseCode,
+                        channelId: channelId,
+                        accessToken: token
+                    )
+                }
             }
+            let result = try await offline.cachedFetch(key: cacheKey, accessToken: token, fetch: fetchMessages)
             roots = result.value
             if let cached = result.cached, cached.isStale(isOnline: NetworkMonitor.shared.isOnline) {
                 cacheLabel = cached.lastUpdatedLabel
@@ -236,12 +258,22 @@ struct FeedChannelView: View {
             }
 
             if NetworkMonitor.shared.isOnline {
-                _ = try await LMSAPI.postFeedMessage(
-                    courseCode: course.courseCode,
-                    channelId: channelId,
-                    body: body,
-                    accessToken: token
-                )
+                if let groupContext {
+                    _ = try await LMSAPI.postGroupFeedMessage(
+                        courseCode: course.courseCode,
+                        groupId: groupContext.groupId,
+                        channelId: channelId,
+                        body: body,
+                        accessToken: token
+                    )
+                } else {
+                    _ = try await LMSAPI.postFeedMessage(
+                        courseCode: course.courseCode,
+                        channelId: channelId,
+                        body: body,
+                        accessToken: token
+                    )
+                }
                 await load(force: true)
             } else {
                 let request = PostFeedMessageRequest(
@@ -250,11 +282,20 @@ struct FeedChannelView: View {
                     mentionUserIds: [],
                     mentionsEveryone: false
                 )
+                let path: String
+                if let groupContext {
+                    path = "/api/v1/courses/\(course.courseCode)/groups/\(groupContext.groupId)"
+                        + "/feed/channels/\(channelId)/messages"
+                } else {
+                    path = "/api/v1/courses/\(course.courseCode)/feed/channels/\(channelId)/messages"
+                }
                 _ = try await offline.enqueueMutation(
                     method: "POST",
-                    path: "/api/v1/courses/\(course.courseCode)/feed/channels/\(channelId)/messages",
+                    path: path,
                     body: request,
-                    label: L.text("mobile.feed.title"),
+                    label: groupContext == nil
+                        ? L.text("mobile.feed.title")
+                        : L.text("mobile.groups.discussionTitle"),
                     accessToken: token,
                     preferQueue: true
                 )

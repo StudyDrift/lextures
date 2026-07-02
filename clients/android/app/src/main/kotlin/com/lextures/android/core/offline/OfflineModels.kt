@@ -34,6 +34,18 @@ object OfflineCacheKey {
     fun feedMessages(courseCode: String, channelId: String): String =
         "course:$courseCode:feed-messages:$channelId"
     fun courseEnrollments(courseCode: String): String = "course:$courseCode:enrollments"
+    fun myGroups(courseCode: String): String = "course:$courseCode:my-groups"
+    fun groupFeedChannels(courseCode: String, groupId: String): String =
+        "course:$courseCode:group:$groupId:feed-channels"
+    fun groupFeedMessages(courseCode: String, groupId: String, channelId: String): String =
+        "course:$courseCode:group:$groupId:feed-messages:$channelId"
+    fun collabDocs(courseCode: String): String = "course:$courseCode:collab-docs"
+    fun myPaths(): String = "paths:my"
+    fun pathProgress(pathId: String): String = "paths:progress:$pathId"
+    fun catalogPaths(query: String): String = "paths:catalog:$query"
+    fun studyStats(): String = "insights:study-stats"
+    fun reflectionJournal(): String = "insights:reflection-journal"
+    fun coachingTips(): String = "insights:coaching-tips"
 }
 
 data class Cached<T>(

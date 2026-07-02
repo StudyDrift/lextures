@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Search
 import com.lextures.android.R
 import com.lextures.android.core.i18n.L
 import com.lextures.android.features.navigation.courseSectionLabelRes
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -28,8 +29,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.lextures.android.features.tutor.TutorChatMode
@@ -78,6 +81,8 @@ import com.lextures.android.features.grades.GradeFeedbackScreen
 import com.lextures.android.features.officehours.CourseOfficeHoursSection
 import com.lextures.android.features.discussions.CourseDiscussionsSection
 import com.lextures.android.features.feed.CourseFeedSection
+import com.lextures.android.features.groups.CourseCollabDocsSection
+import com.lextures.android.features.groups.CourseGroupsSection
 import com.lextures.android.core.navigation.CourseWorkspaceContext
 import com.lextures.android.core.navigation.CourseWorkspaceSection
 import com.lextures.android.core.navigation.MobileDestinations
@@ -105,6 +110,23 @@ fun CourseDetailScreen(
     val offline = remember { OfflineService.get(context) }
     val isOnline by offline.networkMonitor.isOnline.collectAsState()
     val deepLinkThreadId = initialThreadId
+
+    // A course reached with an unaccepted invitation: gate content behind accept/decline.
+    // Accepting swaps in the refreshed (active) course so the rest of the screen loads normally.
+    var resolvedCourse by remember(course.courseCode) { mutableStateOf(course) }
+    if (resolvedCourse.hasPendingInvitation) {
+        CourseInvitationScreen(
+            session = session,
+            course = resolvedCourse,
+            onAccepted = { resolvedCourse = it },
+            onDeclined = onBack,
+            onBack = onBack,
+            modifier = modifier,
+        )
+        return
+    }
+    @Suppress("NAME_SHADOWING")
+    val course = resolvedCourse
 
     var section by rememberSaveable(course.courseCode) {
         mutableStateOf(initialSection?.name ?: "modules")
@@ -432,6 +454,12 @@ fun CourseDetailScreen(
                     CourseWorkspaceSection.Feed -> item {
                         CourseFeedSection(session = session, course = course)
                     }
+                    CourseWorkspaceSection.Groups -> item {
+                        CourseGroupsSection(session = session, course = course)
+                    }
+                    CourseWorkspaceSection.CollabDocs -> item {
+                        CourseCollabDocsSection(session = session, course = course)
+                    }
                     CourseWorkspaceSection.People -> item {
                         CoursePeopleSection(session = session, course = course)
                     }
@@ -549,6 +577,121 @@ fun CourseDetailScreen(
                 RequirementsLogic.findItem(itemId, groups)?.let { openItem = it }
             },
         )
+    }
+}
+
+/**
+ * Shown when the viewer opens a course they were invited to but have not yet accepted.
+ * Accepting activates the enrollment and hands back the refreshed (active) course; declining
+ * removes the enrollment and pops back to the courses list.
+ */
+@Composable
+private fun CourseInvitationScreen(
+    session: AuthSession,
+    course: CourseSummary,
+    onAccepted: (CourseSummary) -> Unit,
+    onDeclined: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accessToken by session.accessToken.collectAsState()
+    val scope = rememberCoroutineScope()
+    var submitting by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    BackHandler(onBack = onBack)
+
+    Column(modifier = modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp, end = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = textPrimary())
+            }
+            Text(
+                text = course.displayTitle,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = textPrimary(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+        }
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            item { CourseBanner(course = course, accessToken = accessToken) }
+            item {
+                Text(
+                    text = L.text(R.string.mobile_courseInvite_title),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textPrimary(),
+                )
+            }
+            item {
+                Text(text = L.text(R.string.mobile_courseInvite_body), color = textPrimary())
+            }
+            errorMessage?.let { message ->
+                item { LmsErrorBanner(message) }
+            }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(
+                        onClick = {
+                            val token = accessToken ?: return@Button
+                            val enrollmentId = course.viewerPendingEnrollmentId ?: return@Button
+                            submitting = true
+                            errorMessage = null
+                            scope.launch {
+                                try {
+                                    LmsApi.approveCourseInvitation(course.courseCode, enrollmentId, token)
+                                    val refreshed = runCatching {
+                                        LmsApi.fetchCourse(course.courseCode, token)
+                                    }.getOrNull() ?: course.copy(
+                                        viewerEnrollmentInvitationPending = false,
+                                        viewerPendingEnrollmentId = null,
+                                    )
+                                    onAccepted(refreshed)
+                                } catch (e: Exception) {
+                                    errorMessage = session.mapError(e)
+                                    submitting = false
+                                }
+                            }
+                        },
+                        enabled = !submitting,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(L.text(R.string.mobile_courseInvite_accept)) }
+
+                    TextButton(
+                        onClick = {
+                            val token = accessToken ?: return@TextButton
+                            val enrollmentId = course.viewerPendingEnrollmentId ?: return@TextButton
+                            submitting = true
+                            errorMessage = null
+                            scope.launch {
+                                try {
+                                    LmsApi.declineCourseInvitation(course.courseCode, enrollmentId, token)
+                                    onDeclined()
+                                } catch (e: Exception) {
+                                    errorMessage = session.mapError(e)
+                                    submitting = false
+                                }
+                            }
+                        },
+                        enabled = !submitting,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(L.text(R.string.mobile_courseInvite_decline)) }
+                }
+            }
+        }
     }
 }
 

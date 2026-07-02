@@ -5,6 +5,7 @@ enum DeepLinkDestination: Equatable {
     case home
     case inbox
     case review
+    case insights
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
 }
 
@@ -21,6 +22,8 @@ enum CourseDeepLinkSection: String, Equatable {
     case people
     case evaluations
     case library
+    case groups
+    case collabDocs
 }
 
 /// Maps web-style action URLs and `lextures://` links to native navigation intents.
@@ -63,6 +66,11 @@ enum DeepLinkRouter {
             if segments.first?.lowercased() == "review" {
                 return .review
             }
+            if segments.count >= 2,
+               segments[0].lowercased() == "me",
+               segments[1].lowercased() == "study-insights" {
+                return .insights
+            }
             return .home
         }
 
@@ -95,6 +103,13 @@ enum DeepLinkRouter {
             return .course(code: courseCode, section: .evaluations, itemId: nil)
         case "library", "reading-dashboard":
             return .course(code: courseCode, section: .library, itemId: nil)
+        case "groups":
+            return .course(code: courseCode, section: .groups, itemId: nil)
+        case "collab-docs":
+            if segments.count >= 4 {
+                return .course(code: courseCode, section: .collabDocs, itemId: segments[3])
+            }
+            return .course(code: courseCode, section: .collabDocs, itemId: nil)
         case "gradebook":
             return .course(code: courseCode, section: .grades, itemId: nil)
         case "assignments", "quizzes", "modules":

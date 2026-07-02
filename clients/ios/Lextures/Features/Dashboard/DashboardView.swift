@@ -1,5 +1,10 @@
 import SwiftUI
 
+struct RecommendedNavigationTarget: Hashable {
+    let course: CourseSummary
+    let item: CourseStructureItem
+}
+
 struct DueItem: Identifiable, Hashable {
     var id: String { "\(course.courseCode)/\(item.id)" }
     let course: CourseSummary
@@ -163,7 +168,14 @@ struct DashboardView: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var model = DashboardModel()
     @State private var openReview = false
+    @State private var openPaths = false
+    @State private var openInsights = false
+    @State private var openRecommendedItem: RecommendedNavigationTarget?
     @Bindable private var realtime = RealtimeManager.shared
+
+    private var studentCourses: [CourseSummary] {
+        model.courses.filter(\.viewerIsStudent)
+    }
 
     var body: some View {
         NavigationStack {
@@ -186,6 +198,19 @@ struct DashboardView: View {
                         } else {
                             announcementCard
                             reviewCard
+                            if shell.platformFeatures.selfReflectionEnabled {
+                                DashboardInsightsSection(onOpenInsights: { openInsights = true })
+                            }
+                            if shell.platformFeatures.ffLearningPaths || !studentCourses.isEmpty {
+                                DashboardStudySection(
+                                    studentCourses: studentCourses,
+                                    onOpenReview: { openReview = true },
+                                    onOpenRecommendation: { course, item in
+                                        openRecommendedItem = RecommendedNavigationTarget(course: course, item: item)
+                                    },
+                                    onOpenPaths: { openPaths = true }
+                                )
+                            }
                             statsRow
                             teacherSnapshot
                             dueSoonSection
@@ -230,6 +255,27 @@ struct DashboardView: View {
             .navigationDestination(isPresented: $openReview) {
                 ReviewHomeView()
             }
+            .navigationDestination(isPresented: $openPaths) {
+                MyPathsView()
+            }
+            .navigationDestination(isPresented: $openInsights) {
+                InsightsView(
+                    onOpenCourse: { course in
+                        openInsights = false
+                        shell.activeCourse = course
+                        shell.activeCourseRoot = .dashboard
+                        shell.activeCourseSection = .modules
+                        shell.select(.courses)
+                    },
+                    onOpenReview: {
+                        openInsights = false
+                        openReview = true
+                    }
+                )
+            }
+            .navigationDestination(item: $openRecommendedItem) { target in
+                ItemDetailView(course: target.course, item: target.item)
+            }
             .task {
                 await model.load(accessToken: session.accessToken)
             }
@@ -239,13 +285,21 @@ struct DashboardView: View {
             .onChange(of: realtime.enrollmentsRevision) { _, _ in
                 Task { await model.load(accessToken: session.accessToken, force: true) }
             }
-            .onAppear { openPendingReviewIfNeeded() }
+            .onAppear {
+                openPendingReviewIfNeeded()
+                openPendingInsightsIfNeeded()
+            }
         }
     }
 
     private func openPendingReviewIfNeeded() {
         guard shell.consumePendingReview() else { return }
         openReview = true
+    }
+
+    private func openPendingInsightsIfNeeded() {
+        guard shell.consumePendingInsights() else { return }
+        openInsights = true
     }
 
     // MARK: Announcements

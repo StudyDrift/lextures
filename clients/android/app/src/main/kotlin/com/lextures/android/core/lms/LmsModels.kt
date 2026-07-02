@@ -37,7 +37,19 @@ data class CourseSummary(
     val viewerStudentEnrollmentId: String? = null,
     val standardsAlignmentEnabled: Boolean? = null,
     val reportCardsEnabled: Boolean? = null,
+    val groupSpacesEnabled: Boolean? = null,
+    val collabDocsEnabled: Boolean? = null,
+    val viewerEnrollmentInvitationPending: Boolean? = null,
+    val viewerPendingEnrollmentId: String? = null,
 ) {
+    /**
+     * True when the viewer has an unaccepted enrollment invitation for this course. The
+     * enrolled-courses list surfaces such courses, but course content (structure, grades, …)
+     * is gated until the invitation is accepted.
+     */
+    val hasPendingInvitation: Boolean
+        get() = viewerEnrollmentInvitationPending == true && viewerPendingEnrollmentId != null
+
     val isAiTutorEnabled: Boolean get() = aiTutorEnabled == true
     val isMasteryEnabled: Boolean get() = standardsAlignmentEnabled == true
     val displayTitle: String
@@ -65,6 +77,10 @@ data class CourseSummary(
     val isAttendanceEnabled: Boolean get() = attendanceEnabled != false
 
     val isSectionsEnabled: Boolean get() = sectionsEnabled != false
+
+    val isGroupSpacesEnabled: Boolean get() = groupSpacesEnabled == true
+
+    val isCollabDocsEnabled: Boolean get() = collabDocsEnabled == true
 }
 
 @Serializable

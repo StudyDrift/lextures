@@ -7,6 +7,9 @@ import com.lextures.android.core.i18n.L
 
 @Composable fun quizLabel(): String = L.text(R.string.mobile_quiz_label)
 @Composable fun quizStartLabel(): String = L.text(R.string.mobile_quiz_startAttempt)
+@Composable fun quizPreviewLabel(): String = L.text(R.string.mobile_quiz_previewQuiz)
+@Composable fun quizPreviewNoteLabel(): String = L.text(R.string.mobile_quiz_previewNote)
+@Composable fun quizPreviewEmptyLabel(): String = L.text(R.string.mobile_quiz_previewEmpty)
 @Composable fun quizPreviousLabel(): String = L.text(R.string.mobile_quiz_previous)
 @Composable fun quizNextLabel(): String = L.text(R.string.mobile_quiz_next)
 @Composable fun quizSubmitLabel(): String = L.text(R.string.mobile_quiz_submit)

@@ -6,7 +6,9 @@ struct CourseDetailView: View {
     @Environment(AppShellModel.self) private var shell
     @Environment(OfflineService.self) private var offline
     @Environment(\.colorScheme) private var colorScheme
-    let course: CourseSummary
+    @Environment(\.dismiss) private var dismiss
+    /// Mutable so accepting a pending invitation can swap in the refreshed (active) course.
+    @State private var course: CourseSummary
     var initialSection: CourseWorkspaceSection?
     var initialItemId: String?
 
@@ -28,10 +30,14 @@ struct CourseDetailView: View {
         initialSection: CourseWorkspaceSection? = nil,
         initialItemId: String? = nil
     ) {
-        self.course = course
+        _course = State(initialValue: course)
         self.initialSection = initialSection
         self.initialItemId = initialItemId
     }
+
+    // Pending-invitation acceptance state.
+    @State private var invitationSubmitting = false
+    @State private var invitationError: String?
 
     /// Selected section is owned by the shell so the course drawer can drive it.
     private var section: CourseWorkspaceSection { shell.activeCourseSection }
@@ -54,6 +60,14 @@ struct CourseDetailView: View {
     }
 
     var body: some View {
+        if course.hasPendingInvitation {
+            invitationScreen
+        } else {
+            courseContent
+        }
+    }
+
+    private var courseContent: some View {
         ZStack {
             LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
 
@@ -196,6 +210,10 @@ struct CourseDetailView: View {
             )
         case .feed:
             CourseFeedSection(course: course)
+        case .groups:
+            CourseGroupsSection(course: course)
+        case .collabDocs:
+            CourseCollabDocsSection(course: course)
         case .people:
             CoursePeopleSection(course: course)
         case .live, .evaluations:
@@ -276,6 +294,99 @@ struct CourseDetailView: View {
             takeAttendanceRoute = TakeAttendanceRoute(sessionId: attendanceSession.id)
         } else {
             selectedAttendanceSession = attendanceSession
+        }
+    }
+
+    // MARK: - Pending invitation
+
+    private var invitationScreen: some View {
+        ZStack {
+            LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    CourseBanner(course: course)
+
+                    Text(L.text("mobile.courseInvite.title"))
+                        .font(LexturesTheme.displayFont(22))
+                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+
+                    Text(L.text("mobile.courseInvite.body"))
+                        .font(.body)
+                        .foregroundStyle(LexturesTheme.textSecondary(for: colorScheme))
+
+                    if let invitationError {
+                        LMSErrorBanner(message: invitationError)
+                    }
+
+                    VStack(spacing: 10) {
+                        Button {
+                            Task { await respondToInvitation(accept: true) }
+                        } label: {
+                            Text(L.text("mobile.courseInvite.accept"))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        .disabled(invitationSubmitting)
+
+                        Button(role: .destructive) {
+                            Task { await respondToInvitation(accept: false) }
+                        } label: {
+                            Text(L.text("mobile.courseInvite.decline"))
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.large)
+                        .disabled(invitationSubmitting)
+                    }
+                    .overlay(alignment: .center) {
+                        if invitationSubmitting {
+                            ProgressView()
+                        }
+                    }
+                }
+                .padding(16)
+            }
+        }
+        .navigationTitle(course.displayTitle)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func respondToInvitation(accept: Bool) async {
+        guard let token = session.accessToken,
+              let enrollmentId = course.viewerPendingEnrollmentId else { return }
+        invitationSubmitting = true
+        invitationError = nil
+        defer { invitationSubmitting = false }
+        do {
+            if accept {
+                try await LMSAPI.approveCourseInvitation(
+                    courseCode: course.courseCode,
+                    enrollmentId: enrollmentId,
+                    accessToken: token
+                )
+                // Refetch so the course loads with active enrollment roles; falls back to
+                // clearing the pending flags locally if the refetch fails.
+                if let refreshed = try? await LMSAPI.fetchCourse(courseCode: course.courseCode, accessToken: token) {
+                    course = refreshed
+                } else {
+                    course.viewerEnrollmentInvitationPending = false
+                    course.viewerPendingEnrollmentId = nil
+                }
+                // The server pushes `courses_updated` over the realtime socket on approve,
+                // so the courses list refreshes on its own.
+            } else {
+                try await LMSAPI.declineCourseInvitation(
+                    courseCode: course.courseCode,
+                    enrollmentId: enrollmentId,
+                    accessToken: token
+                )
+                dismiss()
+            }
+        } catch {
+            invitationError = (error as? LocalizedError)?.errorDescription
+                ?? L.text("mobile.courseInvite.error")
         }
     }
 }

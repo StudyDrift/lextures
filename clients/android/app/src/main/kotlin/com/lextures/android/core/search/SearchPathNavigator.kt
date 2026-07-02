@@ -55,6 +55,13 @@ object SearchPathNavigator {
             "advising" -> SearchNavigationTarget.MoreTarget(MoreDestination.Advising)
             "peer-reviews" -> SearchNavigationTarget.MoreTarget(MoreDestination.PeerReviews)
             "report-cards" -> SearchNavigationTarget.MoreTarget(MoreDestination.ReportCards)
+            "me" -> {
+                if (segments.getOrNull(1)?.equals("study-insights", ignoreCase = true) == true) {
+                    SearchNavigationTarget.DeepLinkTarget(DeepLinkDestination.Insights)
+                } else {
+                    SearchNavigationTarget.DeepLinkTarget(DeepLinkRouter.resolve(path))
+                }
+            }
             "settings" -> SearchNavigationTarget.ShellTabTarget(ShellTab.Profile)
             else -> {
                 val deep = DeepLinkRouter.resolve(path)
