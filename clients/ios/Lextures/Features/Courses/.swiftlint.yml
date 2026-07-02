@@ -1,0 +1,4 @@
+# Course People roster is a large single-file SwiftUI screen (M11.4).
+type_body_length:
+  warning: 350
+  error: 750

@@ -33,6 +33,7 @@ object OfflineCacheKey {
     fun feedChannels(courseCode: String): String = "course:$courseCode:feed-channels"
     fun feedMessages(courseCode: String, channelId: String): String =
         "course:$courseCode:feed-messages:$channelId"
+    fun courseEnrollments(courseCode: String): String = "course:$courseCode:enrollments"
 }
 
 data class Cached<T>(

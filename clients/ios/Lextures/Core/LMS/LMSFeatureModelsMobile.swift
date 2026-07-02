@@ -144,6 +144,36 @@ struct CourseSectionsResponse: Decodable {
     var sections: [CourseSection]
 }
 
+// MARK: - Course roster (M11.4)
+
+struct CourseEnrollment: Codable, Identifiable, Hashable {
+    var id: String
+    var userId: String
+    var displayName: String?
+    var avatarUrl: String?
+    var role: String
+    var roleDisplay: String?
+    var lastCourseAccessAt: String?
+    var sectionId: String?
+    var sectionCode: String?
+    var sectionName: String?
+    var state: String?
+    var invitationPending: Bool?
+}
+
+struct CourseEnrollmentsResponse: Codable {
+    var enrollments: [CourseEnrollment]
+}
+
+struct EnrollmentMessageBody: Encodable {
+    var subject: String
+    var body: String
+}
+
+struct EnrollmentMessageResponse: Decodable {
+    var id: String?
+}
+
 /// Staff navigation into take-attendance mode (optional existing session).
 struct TakeAttendanceRoute: Hashable {
     var sessionId: String?

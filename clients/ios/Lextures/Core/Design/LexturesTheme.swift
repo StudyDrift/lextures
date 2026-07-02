@@ -233,13 +233,13 @@ struct AuthTextField: View {
 
             AuthFieldRepresentable(
                 text: $text,
+                onFocusChange: { focused = $0 },
                 placeholder: placeholder,
                 isSecure: isSecure,
                 keyboard: keyboard,
                 textContentType: textContentType,
                 autocapitalization: isSecure ? .none : autocapitalization
             )
-            .focused($focused)
             .frame(maxWidth: .infinity, minHeight: 20, alignment: .leading)
             .padding(.horizontal, 14)
             .padding(.vertical, 12)

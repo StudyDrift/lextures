@@ -779,6 +779,47 @@ object LmsApi {
             decode<CourseSectionsResponse>(body).sections
         }
 
+    // Course roster (M11.4)
+
+    suspend fun fetchCourseEnrollments(courseCode: String, accessToken: String): List<CourseEnrollment> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.requestRaw(
+                "/api/v1/courses/${encodePath(courseCode)}/enrollments",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<CourseEnrollmentsResponse>(body).enrollments
+        }
+
+    suspend fun removeCourseEnrollment(
+        courseCode: String,
+        enrollmentId: String,
+        accessToken: String,
+    ): Unit = withContext(Dispatchers.IO) {
+        val (body, code) = client.requestRaw(
+            "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}",
+            method = "DELETE",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+    }
+
+    suspend fun sendEnrollmentMessage(
+        courseCode: String,
+        enrollmentId: String,
+        payload: EnrollmentMessageBody,
+        accessToken: String,
+    ): String = withContext(Dispatchers.IO) {
+        val (responseBody, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/enrollments/${encodePath(enrollmentId)}/message",
+            method = "POST",
+            body = client.encodeBody(payload, EnrollmentMessageBody.serializer()),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
+        decode<EnrollmentMessageResponse>(responseBody).id.orEmpty()
+    }
+
     // Onboarding (plan 15.11 / M1.3)
 
     /** Returns null when the onboarding feature flag is off (HTTP 404). */

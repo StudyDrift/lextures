@@ -200,7 +200,9 @@ struct CourseDetailView: View {
             )
         case .feed:
             CourseFeedSection(course: course)
-        case .live, .people, .evaluations:
+        case .people:
+            CoursePeopleSection(course: course)
+        case .live, .evaluations:
             CourseDestinationPlaceholder(section: section)
         }
     }

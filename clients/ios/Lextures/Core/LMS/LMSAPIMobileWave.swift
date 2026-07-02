@@ -167,6 +167,55 @@ extension LMSAPI {
         return try decode(CourseSectionsResponse.self, from: data).sections
     }
 
+    // MARK: - Course roster (M11.4)
+
+    static func fetchCourseEnrollments(courseCode: String, accessToken: String) async throws -> [CourseEnrollment] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(CourseEnrollmentsResponse.self, from: data).enrollments
+    }
+
+    static func removeCourseEnrollment(
+        courseCode: String,
+        enrollmentId: String,
+        accessToken: String
+    ) async throws {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments/\(encodePath(enrollmentId))",
+            method: "DELETE",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+    }
+
+    static func sendEnrollmentMessage(
+        courseCode: String,
+        enrollmentId: String,
+        body: EnrollmentMessageBody,
+        accessToken: String
+    ) async throws -> String {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/enrollments/\(encodePath(enrollmentId))/message",
+            method: "POST",
+            body: body,
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(EnrollmentMessageResponse.self, from: data).id ?? ""
+    }
+
     // MARK: - Universal search (M0.6)
 
     static func fetchSearchIndex(accessToken: String) async throws -> SearchIndexResponse {

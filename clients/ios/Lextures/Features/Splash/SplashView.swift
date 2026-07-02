@@ -16,17 +16,10 @@ struct SplashView: View {
                     .scaleEffect(logoScale)
                     .offset(y: logoOffset)
 
-                VStack(spacing: 4) {
-                    Text("Lextures")
-                        .font(LexturesTheme.displayFont(30))
-                        .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
-                    Text("by StudyDrift")
-                        .font(.caption.weight(.medium))
-                        .tracking(2)
-                        .textCase(.uppercase)
-                        .foregroundStyle(LexturesTheme.accent(for: colorScheme))
-                }
-                .opacity(titleOpacity)
+                Text("Lextures")
+                    .font(LexturesTheme.displayFont(30))
+                    .foregroundStyle(LexturesTheme.textPrimary(for: colorScheme))
+                    .opacity(titleOpacity)
             }
         }
         .onAppear {

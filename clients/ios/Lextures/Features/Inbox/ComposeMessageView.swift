@@ -28,35 +28,35 @@ struct ComposeMessageView: View {
             ZStack {
                 LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
 
-                VStack(spacing: 12) {
-                    if let errorMessage {
-                        LMSErrorBanner(message: errorMessage)
+                ScrollView {
+                    VStack(spacing: 12) {
+                        if let errorMessage {
+                            LMSErrorBanner(message: errorMessage)
+                        }
+
+                        AuthTextField(
+                            title: "To",
+                            text: $to,
+                            placeholder: "name@school.edu",
+                            keyboard: .asciiCapable
+                        )
+
+                        AuthTextField(
+                            title: "Subject",
+                            text: $subject,
+                            placeholder: "Subject",
+                            autocapitalization: .sentences
+                        )
+
+                        DictationField(
+                            title: "Message",
+                            text: $bodyText,
+                            placeholder: "Write your message…"
+                        )
                     }
-
-                    AuthTextField(
-                        title: "To",
-                        text: $to,
-                        placeholder: "name@school.edu",
-                        keyboard: .emailAddress,
-                        textContentType: .emailAddress
-                    )
-
-                    AuthTextField(
-                        title: "Subject",
-                        text: $subject,
-                        placeholder: "Subject",
-                        autocapitalization: .sentences
-                    )
-
-                    DictationField(
-                        title: "Message",
-                        text: $bodyText,
-                        placeholder: "Write your message…"
-                    )
-
-                    Spacer()
+                    .padding(16)
                 }
-                .padding(16)
+                .scrollDismissesKeyboard(.interactively)
             }
             .navigationTitle("New message")
             .navigationBarTitleDisplayMode(.inline)

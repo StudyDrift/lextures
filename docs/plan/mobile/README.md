@@ -173,6 +173,7 @@ covered**, plus the navigation redesign needed to hold them. Added as stories:
 | [M7.7 Course evaluations & surveys](M7.7-course-evaluations-surveys.md) | 14.7 course evaluations, surveys | `/courses/{c}/evaluations/status\|submit\|results` | **P1** |
 | [M7.8 Academic advising (student)](M7.8-academic-advising.md) | advising notes + appointments (HE) | `/me/advising-notes`, `/me/advising/config`, scheduler | **P2** |
 | [M11.3 Instructor insights & at-risk](M11.3-instructor-insights-at-risk.md) | `course-at-risk`, `course-whats-working`, student-progress | at-risk, instructor-insights, student-progress | **P1** |
+| [M11.4 Course People (roster) for teachers](M11.4-course-people-roster.md) | `course-enrollments-page` ("People" tab); `CourseWorkspaceSection.people` (registered, placeholder) | `/courses/{c}/enrollments`, `/courses/{c}/enrollments/{id}` (DELETE), `/courses/{c}/enrollments/{id}/message` | **P1** |
 | [M1.5 Profile depth: demographics, custom fields & research consent](../completed/mobile/M1.5-profile-depth-demographics-consent.md) | demographics, custom fields, research studies | demographics, custom-fields, research-consent | **DONE** |
 
 > **The redesign ([M0.5](M0.5-redesign-information-architecture.md)) is the keystone.**
@@ -208,7 +209,8 @@ authoring/import (QTI/Common Cartridge 2.13, Canvas import), proctoring config
    M6.3 immersive reader, groups/office-hours (M7.3 ✅/M7.4) + M7.5 live classes +
    M7.6 course feed ✅ + M7.7 evaluations, adaptive (M8.2–M8.4), self-learner commerce
    (M9.x), parent (M10.1/M10.2), accessibility & i18n (M0.3 ✅/M0.4 ✅), settings (M1.4 ✅),
-   instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk.
+   instructor attendance (M11.1 ✅) + M11.3 instructor insights/at-risk + M11.4 course
+   people/roster.
 3. **Wave 3 — Situational (P2).** Lockdown, code exec, behavior/hall-pass,
    age-appropriate UI, e-portfolio/credentials, instructor broadcast, M7.8 advising,
    M1.5 profile depth (demographics/custom fields/research consent).

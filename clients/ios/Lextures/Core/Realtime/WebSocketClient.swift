@@ -1,5 +1,60 @@
 import Foundation
 
+/// Shared `URLSession` delegate that signals when a WebSocket handshake completes.
+///
+/// `URLSessionWebSocketTask` connects asynchronously after `resume()`; sending before
+/// `urlSession(_:webSocketTask:didOpenWithProtocol:)` returns POSIX 57 ("Socket is not connected")
+/// on device. Android and the web SPA wait for `onOpen` before the auth frame — this does the same.
+private final class WebSocketSessionSupport: NSObject, URLSessionWebSocketDelegate, @unchecked Sendable {
+    static let shared = WebSocketSessionSupport()
+
+    lazy var session: URLSession = {
+        NetworkBootstrap.warmup()
+        return URLSession(configuration: .ephemeral, delegate: self, delegateQueue: nil)
+    }()
+
+    private let lock = NSLock()
+    private var openContinuations: [ObjectIdentifier: CheckedContinuation<Bool, Never>] = [:]
+    private var openedTasks: Set<ObjectIdentifier> = []
+
+    /// Suspends until the handshake completes. Returns `true` when `didOpen` fires, `false` when
+    /// the task ends before the socket is connected (server down, TLS failure, etc.).
+    func waitForOpen(_ task: URLSessionWebSocketTask) async -> Bool {
+        await withCheckedContinuation { continuation in
+            lock.lock()
+            openContinuations[ObjectIdentifier(task)] = continuation
+            lock.unlock()
+        }
+    }
+
+    func urlSession(
+        _ session: URLSession,
+        webSocketTask: URLSessionWebSocketTask,
+        didOpenWithProtocol protocol: String?
+    ) {
+        lock.lock()
+        openedTasks.insert(ObjectIdentifier(webSocketTask))
+        lock.unlock()
+        resumeOpenWaiter(for: webSocketTask, opened: true)
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        guard let webSocketTask = task as? URLSessionWebSocketTask else { return }
+        lock.lock()
+        let hadOpened = openedTasks.remove(ObjectIdentifier(webSocketTask)) != nil
+        lock.unlock()
+        guard !hadOpened else { return }
+        resumeOpenWaiter(for: webSocketTask, opened: false)
+    }
+
+    private func resumeOpenWaiter(for task: URLSessionWebSocketTask, opened: Bool) {
+        lock.lock()
+        let continuation = openContinuations.removeValue(forKey: ObjectIdentifier(task))
+        lock.unlock()
+        continuation?.resume(returning: opened)
+    }
+}
+
 /// Reconnecting JSON WebSocket client for the server's realtime hubs.
 ///
 /// Mirrors the web client's handshake (`clients/web/src/context/inbox-unread-provider.tsx`):
@@ -10,7 +65,6 @@ import Foundation
 @MainActor
 final class WebSocketClient {
     private let path: String
-    private let session: URLSession
     private let accessTokenProvider: () -> String?
     private let onMessage: (Data) -> Void
 
@@ -21,12 +75,10 @@ final class WebSocketClient {
 
     init(
         path: String,
-        session: URLSession = NetworkBootstrap.makeSession(),
         accessTokenProvider: @escaping () -> String?,
         onMessage: @escaping (Data) -> Void
     ) {
         self.path = path
-        self.session = session
         self.accessTokenProvider = accessTokenProvider
         self.onMessage = onMessage
     }
@@ -55,7 +107,9 @@ final class WebSocketClient {
         task?.cancel(with: .normalClosure, reason: nil)
         connectedToken = token
 
-        let newTask = session.webSocketTask(with: AppConfiguration.webSocketURL(path: path))
+        let newTask = WebSocketSessionSupport.shared.session.webSocketTask(
+            with: AppConfiguration.webSocketURL(path: path)
+        )
         task = newTask
         newTask.resume()
 
@@ -67,6 +121,11 @@ final class WebSocketClient {
         Task { [weak self] in
             guard let self else { return }
             do {
+                let opened = await WebSocketSessionSupport.shared.waitForOpen(newTask)
+                guard opened, !self.isStopped, self.task === newTask else {
+                    await self.scheduleReconnect(after: newTask)
+                    return
+                }
                 try await newTask.send(.string(authString))
                 try await self.receiveLoop(task: newTask)
             } catch {
