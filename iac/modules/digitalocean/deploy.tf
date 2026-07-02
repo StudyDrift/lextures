@@ -1,7 +1,7 @@
 resource "random_password" "deploy_postgres" {
   count   = var.deploy_enabled && var.deploy_postgres_password == "" ? 1 : 0
   length  = 32
-  special = true
+  special = false
 }
 
 resource "random_password" "deploy_jwt" {
@@ -21,6 +21,7 @@ locals {
 
   deploy_env_content = var.deploy_enabled ? join("\n", [
     "POSTGRES_PASSWORD=${local.deploy_postgres_password}",
+    "DATABASE_URL=postgres://studydrift:${urlencode(local.deploy_postgres_password)}@postgres:5432/studydrift?sslmode=disable",
     "JWT_SECRET=${local.deploy_jwt_secret}",
     "LEXTURES_SERVER_IMAGE=${var.deploy_server_image}",
     "LEXTURES_WEB_IMAGE=${var.deploy_web_image}",

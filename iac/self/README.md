@@ -198,7 +198,18 @@ terraform output -raw deploy_postgres_password   # generated when unset in tfvar
 terraform output -raw deploy_jwt_secret
 ```
 
-Changing `deploy_server_image`, `deploy_web_image`, or `deploy_public_origin` replaces the compute instance so cloud-init re-runs (Postgres data persists on the block volume). To redeploy without changing images, SSH and run `sudo /usr/local/bin/lextures-deploy-app.sh`.
+Changing `deploy_server_image`, `deploy_web_image`, or `deploy_public_origin` replaces the compute instance so cloud-init re-runs (Postgres data persists on the block volume). When `deploy_enabled = true`, Terraform also SSHes after apply and runs `/usr/local/bin/lextures-deploy-app.sh`, failing the apply if `/health` is not ready.
+
+If the server logs `invalid IP-literal` for `DATABASE_URL`, the Postgres volume may have been initialized with an old URL-unsafe password — stop the stack, clear `/mnt/lextures-db/postgres/*`, and re-run `terraform apply`.
+
+If the server logs `password authentication failed for user "studydrift"`, Postgres on the block volume was initialized with a different password than `.env` (Postgres only reads `POSTGRES_PASSWORD` on first init). `pg_isready` can still pass. Re-run `terraform apply` — deploy detects failed TCP auth and reinitializes the database. To reset manually:
+
+```bash
+sudo docker compose -f /opt/lextures/docker-compose.deploy.yml --env-file /opt/lextures/.env down
+sudo rm -rf /mnt/lextures-db/postgres/*
+sudo chown -R 70:70 /mnt/lextures-db/postgres && sudo chmod 700 /mnt/lextures-db/postgres
+sudo /usr/local/bin/lextures-deploy-app.sh
+```
 
 After apply, SSH as `ubuntu` (not `root`). Outputs are shared with the DigitalOcean small tier (`droplet_reserved_ipv4`, `deploy_compose_command`, etc.).
 
