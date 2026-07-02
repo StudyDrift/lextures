@@ -899,6 +899,9 @@
     <string name="mobile_quiz_pendingReview">Pending review</string>
     <string name="mobile_quiz_pendingReviewHint">Some answers need manual grading. Check back later.</string>
     <string name="mobile_quiz_points">%1$d pts</string>
+    <string name="mobile_quiz_previewEmpty">There are no questions in this quiz yet.</string>
+    <string name="mobile_quiz_previewNote">This is how the quiz appears to learners. Nothing you enter here is saved.</string>
+    <string name="mobile_quiz_previewQuiz">Preview quiz</string>
     <string name="mobile_quiz_previous">Previous</string>
     <string name="mobile_quiz_previousAttempts">Previous attempts</string>
     <string name="mobile_quiz_progress">Question %1$d of %2$d</string>
