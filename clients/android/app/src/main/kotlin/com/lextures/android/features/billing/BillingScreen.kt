@@ -216,9 +216,12 @@ fun BillingScreen(
                                         fontWeight = FontWeight.SemiBold,
                                     )
                                     item.taxAmountCents?.takeIf { it > 0 }?.let { tax ->
+                                        val taxLabel = item.taxType?.takeIf { it.isNotBlank() }
+                                            ?: L.text(context, localePrefs, com.lextures.android.R.string.mobile_billing_tax)
                                         Text(
                                             context.getString(
                                                 com.lextures.android.R.string.mobile_billing_taxLine,
+                                                taxLabel,
                                                 BillingLogic.formatMoney(tax, item.currency),
                                             ),
                                             fontSize = 11.sp,
