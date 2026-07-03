@@ -306,6 +306,7 @@
 		8B507C2D3E4F5061728394 /* LMSAPICredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B507D3E4F5061728394A5 /* LMSAPICredentials.swift */; };
 		8B508C2D3E4F5061728394 /* LMSAPIGamification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B508D3E4F5061728394A5 /* LMSAPIGamification.swift */; };
 		8B509C2D3E4F5061728394 /* LMSAPICourseReviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */; };
+		8B510C2D3E4F5061728394 /* LMSFeatureModelsPlatform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B510D3E4F5061728394A5 /* LMSFeatureModelsPlatform.swift */; };
 		8B50AC2D3E4F5061728394 /* CredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50AD3E4F5061728394A5 /* CredentialsView.swift */; };
 		8B50BC2D3E4F5061728394 /* CredentialDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50BD3E4F5061728394A5 /* CredentialDetailView.swift */; };
 		8B50CC2D3E4F5061728394 /* GamificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CD3E4F5061728394A5 /* GamificationView.swift */; };
@@ -630,6 +631,7 @@
 		8B507D3E4F5061728394A5 /* LMSAPICredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICredentials.swift; sourceTree = "<group>"; };
 		8B508D3E4F5061728394A5 /* LMSAPIGamification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIGamification.swift; sourceTree = "<group>"; };
 		8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseReviews.swift; sourceTree = "<group>"; };
+		8B510D3E4F5061728394A5 /* LMSFeatureModelsPlatform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPlatform.swift; sourceTree = "<group>"; };
 		8B50AD3E4F5061728394A5 /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
 		8B50BD3E4F5061728394A5 /* CredentialDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialDetailView.swift; sourceTree = "<group>"; };
 		8B50CD3E4F5061728394A5 /* GamificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationView.swift; sourceTree = "<group>"; };
@@ -1262,6 +1264,7 @@
 			isa = PBXGroup;
 			children = (
 				8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */,
+				8B510D3E4F5061728394A5 /* LMSFeatureModelsPlatform.swift */,
 				8B508D3E4F5061728394A5 /* LMSAPIGamification.swift */,
 				8B507D3E4F5061728394A5 /* LMSAPICredentials.swift */,
 				8B506D3E4F5061728394A5 /* LMSFeatureModelsCourseReviews.swift */,
@@ -1503,6 +1506,7 @@
 				8B50BC2D3E4F5061728394 /* CredentialDetailView.swift in Sources */,
 				8B50AC2D3E4F5061728394 /* CredentialsView.swift in Sources */,
 				8B509C2D3E4F5061728394 /* LMSAPICourseReviews.swift in Sources */,
+				8B510C2D3E4F5061728394 /* LMSFeatureModelsPlatform.swift in Sources */,
 				8B508C2D3E4F5061728394 /* LMSAPIGamification.swift in Sources */,
 				8B507C2D3E4F5061728394 /* LMSAPICredentials.swift in Sources */,
 				8B506C2D3E4F5061728394 /* LMSFeatureModelsCourseReviews.swift in Sources */,
