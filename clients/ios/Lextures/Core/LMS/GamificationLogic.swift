@@ -25,7 +25,8 @@ enum GamificationLogic {
         case "first_course_complete":
             return L.text("mobile.gamification.badge.firstCourse")
         default:
-            return badgeType.replacingOccurrences(of: "_", with: " ").capitalized
+            let spaced = badgeType.replacingOccurrences(of: "_", with: " ")
+            return spaced.prefix(1).uppercased() + spaced.dropFirst()
         }
     }
 
