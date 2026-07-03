@@ -156,6 +156,12 @@ struct ProfileMoreDestinationScreen: View {
             PeerReviewListView()
         } else if destination == .reportCards {
             ReportCardListView()
+        } else if destination == .catalog {
+            if shell.platformFeatures.ffPublicCatalog {
+                CatalogView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
         } else if destination == .paths {
             if shell.platformFeatures.ffLearningPaths {
                 MyPathsView()
@@ -184,6 +190,18 @@ struct ProfileMoreDestinationScreen: View {
                     shell.activeCourseSection = .groups
                     shell.select(.courses)
                 }
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
+        } else if destination == .credentials {
+            if CredentialsLogic.credentialsEnabled(shell.platformFeatures) {
+                CredentialsView()
+            } else {
+                MoreDestinationPlaceholder(destination: destination)
+            }
+        } else if destination == .gamification {
+            if GamificationLogic.gamificationEnabled(shell.platformFeatures) {
+                GamificationView()
             } else {
                 MoreDestinationPlaceholder(destination: destination)
             }

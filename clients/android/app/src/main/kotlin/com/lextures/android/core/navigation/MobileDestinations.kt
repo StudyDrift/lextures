@@ -80,6 +80,7 @@ enum class MoreDestination(val labelRes: String) {
     Reading("mobile_ia_more_reading"),
     Portfolio("mobile_ia_more_portfolio"),
     Credentials("mobile_ia_more_credentials"),
+    Gamification("mobile_ia_more_gamification"),
     Advising("mobile_ia_more_advising"),
     Settings("mobile_ia_more_settings"),
     AskAi("mobile_tutor_askAi"),
@@ -171,6 +172,14 @@ data class MobilePlatformFeatures(
     val ffPeerReview: Boolean = false,
     val ffLearningPaths: Boolean = false,
     val selfReflectionEnabled: Boolean = false,
+    val ffPublicCatalog: Boolean = false,
+    val ffSelfPacedMode: Boolean = false,
+    val ffCourseReviews: Boolean = false,
+    val ffCompletionCredentials: Boolean = false,
+    val ffGamification: Boolean = false,
+    val ffStripeBilling: Boolean = false,
+    val ffPaymentsEnabled: Boolean = false,
+    val ffTaxCollection: Boolean = false,
 ) {
     val libraryBrowseEnabled: Boolean
         get() = ffMobileLibraryEreserves && (ffLibrary || oerLibraryEnabled)
@@ -196,6 +205,14 @@ data class MobilePlatformFeatures(
             ffPeerReview = features?.ffPeerReview == true,
             ffLearningPaths = features?.ffLearningPaths == true,
             selfReflectionEnabled = features?.selfReflectionEnabled == true,
+            ffPublicCatalog = features?.ffPublicCatalog == true,
+            ffSelfPacedMode = features?.ffSelfPacedMode == true,
+            ffCourseReviews = features?.ffCourseReviews == true,
+            ffCompletionCredentials = features?.ffCompletionCredentials == true,
+            ffGamification = features?.ffGamification == true,
+            ffStripeBilling = features?.ffStripeBilling == true,
+            ffPaymentsEnabled = features?.ffPaymentsEnabled == true,
+            ffTaxCollection = features?.ffTaxCollection == true,
         )
     }
 }
@@ -312,7 +329,8 @@ object MobileDestinations {
                 if (platform.ffLibrary) add(MoreDestination.Reading)
                 if (platform.libraryBrowseEnabled) add(MoreDestination.Library)
                 add(MoreDestination.Portfolio)
-                add(MoreDestination.Credentials)
+                if (platform.ffCompletionCredentials) add(MoreDestination.Credentials)
+                if (platform.ffGamification) add(MoreDestination.Gamification)
                 add(MoreDestination.Advising)
                 add(MoreDestination.Settings)
             }

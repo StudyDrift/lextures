@@ -284,6 +284,36 @@
 		R8V1EW140000000000000020 /* ReviewSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8V1EW030000000000000020 /* ReviewSessionView.swift */; };
 		R8V1EW150000000000000020 /* ReviewReminderScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8V1EW040000000000000020 /* ReviewReminderScheduler.swift */; };
 		R8V1EW160000000000000020 /* ReviewLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = R8V1EW070000000000000020 /* ReviewLogicTests.swift */; };
+		8B391C2D3E4F5061728394 /* CatalogLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B391D3E4F5061728394A5 /* CatalogLogic.swift */; };
+		8B392C2D3E4F5061728394 /* LMSAPICatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B392D3E4F5061728394A5 /* LMSAPICatalog.swift */; };
+		8B393C2D3E4F5061728394 /* LMSFeatureModelsCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B393D3E4F5061728394A5 /* LMSFeatureModelsCatalog.swift */; };
+		8B394C2D3E4F5061728394 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B394D3E4F5061728394A5 /* CatalogView.swift */; };
+		8B395C2D3E4F5061728394 /* CourseLandingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B395D3E4F5061728394A5 /* CourseLandingView.swift */; };
+		8B396C2D3E4F5061728394 /* CatalogLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B396D3E4F5061728394A5 /* CatalogLogicTests.swift */; };
+		8B401C2D3E4F5061728394 /* BillingLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B401D3E4F5061728394A5 /* BillingLogic.swift */; };
+		8B402C2D3E4F5061728394 /* LMSAPIBilling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B402D3E4F5061728394A5 /* LMSAPIBilling.swift */; };
+		8B403C2D3E4F5061728394 /* LMSFeatureModelsBilling.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B403D3E4F5061728394A5 /* LMSFeatureModelsBilling.swift */; };
+		8B404C2D3E4F5061728394 /* BillingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B404D3E4F5061728394A5 /* BillingView.swift */; };
+		8B405C2D3E4F5061728394 /* PurchaseFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B405D3E4F5061728394A5 /* PurchaseFlow.swift */; };
+		8B406C2D3E4F5061728394 /* CheckoutReturnHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B406D3E4F5061728394A5 /* CheckoutReturnHandler.swift */; };
+		8B407C2D3E4F5061728394 /* BillingLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B407D3E4F5061728394A5 /* BillingLogicTests.swift */; };
+		8B501C2D3E4F5061728394 /* CredentialsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B501D3E4F5061728394A5 /* CredentialsLogic.swift */; };
+		8B502C2D3E4F5061728394 /* GamificationLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B502D3E4F5061728394A5 /* GamificationLogic.swift */; };
+		8B503C2D3E4F5061728394 /* CourseReviewLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B503D3E4F5061728394A5 /* CourseReviewLogic.swift */; };
+		8B504C2D3E4F5061728394 /* LMSFeatureModelsCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B504D3E4F5061728394A5 /* LMSFeatureModelsCredentials.swift */; };
+		8B505C2D3E4F5061728394 /* LMSFeatureModelsGamification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B505D3E4F5061728394A5 /* LMSFeatureModelsGamification.swift */; };
+		8B506C2D3E4F5061728394 /* LMSFeatureModelsCourseReviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B506D3E4F5061728394A5 /* LMSFeatureModelsCourseReviews.swift */; };
+		8B507C2D3E4F5061728394 /* LMSAPICredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B507D3E4F5061728394A5 /* LMSAPICredentials.swift */; };
+		8B508C2D3E4F5061728394 /* LMSAPIGamification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B508D3E4F5061728394A5 /* LMSAPIGamification.swift */; };
+		8B509C2D3E4F5061728394 /* LMSAPICourseReviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */; };
+		8B511C2D3E4F5061728394 /* LMSFeatureModelsPlatform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B511D3E4F5061728394A5 /* LMSFeatureModelsPlatform.swift */; };
+		8B50AC2D3E4F5061728394 /* CredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50AD3E4F5061728394A5 /* CredentialsView.swift */; };
+		8B50BC2D3E4F5061728394 /* CredentialDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50BD3E4F5061728394A5 /* CredentialDetailView.swift */; };
+		8B50CC2D3E4F5061728394 /* GamificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50CD3E4F5061728394A5 /* GamificationView.swift */; };
+		8B50DC2D3E4F5061728394 /* ReviewComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50DD3E4F5061728394A5 /* ReviewComposer.swift */; };
+		8B50EC2D3E4F5061728394 /* CredentialsLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50ED3E4F5061728394A5 /* CredentialsLogicTests.swift */; };
+		8B50FC2D3E4F5061728394 /* GamificationLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B50FD3E4F5061728394A5 /* GamificationLogicTests.swift */; };
+		8B510C2D3E4F5061728394 /* CourseReviewLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B510D3E4F5061728394A5 /* CourseReviewLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -579,6 +609,36 @@
 		R8V1EW050000000000000020 /* ReviewModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewModels.swift; sourceTree = "<group>"; };
 		R8V1EW060000000000000020 /* LMSAPIReview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIReview.swift; sourceTree = "<group>"; };
 		R8V1EW070000000000000020 /* ReviewLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewLogicTests.swift; sourceTree = "<group>"; };
+		8B391D3E4F5061728394A5 /* CatalogLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogLogic.swift; sourceTree = "<group>"; };
+		8B392D3E4F5061728394A5 /* LMSAPICatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICatalog.swift; sourceTree = "<group>"; };
+		8B393D3E4F5061728394A5 /* LMSFeatureModelsCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsCatalog.swift; sourceTree = "<group>"; };
+		8B394D3E4F5061728394A5 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
+		8B395D3E4F5061728394A5 /* CourseLandingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseLandingView.swift; sourceTree = "<group>"; };
+		8B396D3E4F5061728394A5 /* CatalogLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogLogicTests.swift; sourceTree = "<group>"; };
+		8B401D3E4F5061728394A5 /* BillingLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingLogic.swift; sourceTree = "<group>"; };
+		8B402D3E4F5061728394A5 /* LMSAPIBilling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIBilling.swift; sourceTree = "<group>"; };
+		8B403D3E4F5061728394A5 /* LMSFeatureModelsBilling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsBilling.swift; sourceTree = "<group>"; };
+		8B404D3E4F5061728394A5 /* BillingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingView.swift; sourceTree = "<group>"; };
+		8B405D3E4F5061728394A5 /* PurchaseFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PurchaseFlow.swift; sourceTree = "<group>"; };
+		8B406D3E4F5061728394A5 /* CheckoutReturnHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckoutReturnHandler.swift; sourceTree = "<group>"; };
+		8B407D3E4F5061728394A5 /* BillingLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BillingLogicTests.swift; sourceTree = "<group>"; };
+		8B501D3E4F5061728394A5 /* CredentialsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsLogic.swift; sourceTree = "<group>"; };
+		8B502D3E4F5061728394A5 /* GamificationLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationLogic.swift; sourceTree = "<group>"; };
+		8B503D3E4F5061728394A5 /* CourseReviewLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseReviewLogic.swift; sourceTree = "<group>"; };
+		8B504D3E4F5061728394A5 /* LMSFeatureModelsCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsCredentials.swift; sourceTree = "<group>"; };
+		8B505D3E4F5061728394A5 /* LMSFeatureModelsGamification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsGamification.swift; sourceTree = "<group>"; };
+		8B506D3E4F5061728394A5 /* LMSFeatureModelsCourseReviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsCourseReviews.swift; sourceTree = "<group>"; };
+		8B507D3E4F5061728394A5 /* LMSAPICredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICredentials.swift; sourceTree = "<group>"; };
+		8B508D3E4F5061728394A5 /* LMSAPIGamification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPIGamification.swift; sourceTree = "<group>"; };
+		8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSAPICourseReviews.swift; sourceTree = "<group>"; };
+		8B511D3E4F5061728394A5 /* LMSFeatureModelsPlatform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsPlatform.swift; sourceTree = "<group>"; };
+		8B50AD3E4F5061728394A5 /* CredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsView.swift; sourceTree = "<group>"; };
+		8B50BD3E4F5061728394A5 /* CredentialDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialDetailView.swift; sourceTree = "<group>"; };
+		8B50CD3E4F5061728394A5 /* GamificationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationView.swift; sourceTree = "<group>"; };
+		8B50DD3E4F5061728394A5 /* ReviewComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewComposer.swift; sourceTree = "<group>"; };
+		8B50ED3E4F5061728394A5 /* CredentialsLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsLogicTests.swift; sourceTree = "<group>"; };
+		8B50FD3E4F5061728394A5 /* GamificationLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationLogicTests.swift; sourceTree = "<group>"; };
+		8B510D3E4F5061728394A5 /* CourseReviewLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CourseReviewLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -894,6 +954,10 @@
 		9675A7A45CC240A0A4F7B883 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				8B50GAM5C6D7E8F9012345678 /* Gamification */,
+				8B50CRED5C6D7E8F901234567 /* Credentials */,
+				8B40BIL5C6D7E8F901234567 /* Billing */,
+				8B39CAT5C6D7E8F901234567 /* Catalog */,
 				8B4RGRP5C6D7E8F901234568 /* Reading */,
 				8B3INSI5C6D7E8F901234567 /* Insights */,
 				8B2PATH5C6D7E8F901234567 /* Paths */,
@@ -1083,6 +1147,11 @@
 		D177268EB0164406B86F0376 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				8B510D3E4F5061728394A5 /* CourseReviewLogicTests.swift */,
+				8B50FD3E4F5061728394A5 /* GamificationLogicTests.swift */,
+				8B50ED3E4F5061728394A5 /* CredentialsLogicTests.swift */,
+				8B407D3E4F5061728394A5 /* BillingLogicTests.swift */,
+				8B396D3E4F5061728394A5 /* CatalogLogicTests.swift */,
 				8B4R07D3E4F5061728394A5 /* ReadingLogicTests.swift */,
 				8B306D3E4F5061728394A5 /* InsightsLogicTests.swift */,
 				8B209D3E4F5061728394A5 /* PathsLogicTests.swift */,
@@ -1194,6 +1263,22 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */,
+				8B511D3E4F5061728394A5 /* LMSFeatureModelsPlatform.swift */,
+				8B508D3E4F5061728394A5 /* LMSAPIGamification.swift */,
+				8B507D3E4F5061728394A5 /* LMSAPICredentials.swift */,
+				8B506D3E4F5061728394A5 /* LMSFeatureModelsCourseReviews.swift */,
+				8B505D3E4F5061728394A5 /* LMSFeatureModelsGamification.swift */,
+				8B504D3E4F5061728394A5 /* LMSFeatureModelsCredentials.swift */,
+				8B503D3E4F5061728394A5 /* CourseReviewLogic.swift */,
+				8B502D3E4F5061728394A5 /* GamificationLogic.swift */,
+				8B501D3E4F5061728394A5 /* CredentialsLogic.swift */,
+				8B403D3E4F5061728394A5 /* LMSFeatureModelsBilling.swift */,
+				8B402D3E4F5061728394A5 /* LMSAPIBilling.swift */,
+				8B401D3E4F5061728394A5 /* BillingLogic.swift */,
+				8B393D3E4F5061728394A5 /* LMSFeatureModelsCatalog.swift */,
+				8B392D3E4F5061728394A5 /* LMSAPICatalog.swift */,
+				8B391D3E4F5061728394A5 /* CatalogLogic.swift */,
 				8B4R01D3E4F5061728394A5 /* LMSFeatureModelsReading.swift */,
 				8B4R02D3E4F5061728394A5 /* LMSAPIReading.swift */,
 				8B4R03D3E4F5061728394A5 /* ReadingLogic.swift */,
@@ -1287,6 +1372,46 @@
 			path = Review;
 			sourceTree = "<group>";
 		};
+
+		8B39CAT5C6D7E8F901234567 /* Catalog */ = {
+			isa = PBXGroup;
+			children = (
+				8B394D3E4F5061728394A5 /* CatalogView.swift */,
+				8B395D3E4F5061728394A5 /* CourseLandingView.swift */,
+				8B50DD3E4F5061728394A5 /* ReviewComposer.swift */,
+			);
+			path = Catalog;
+			sourceTree = "<group>";
+		};
+
+		8B40BIL5C6D7E8F901234567 /* Billing */ = {
+			isa = PBXGroup;
+			children = (
+				8B404D3E4F5061728394A5 /* BillingView.swift */,
+				8B405D3E4F5061728394A5 /* PurchaseFlow.swift */,
+				8B406D3E4F5061728394A5 /* CheckoutReturnHandler.swift */,
+			);
+			path = Billing;
+			sourceTree = "<group>";
+		};
+
+		8B50CRED5C6D7E8F901234567 /* Credentials */ = {
+			isa = PBXGroup;
+			children = (
+				8B50AD3E4F5061728394A5 /* CredentialsView.swift */,
+				8B50BD3E4F5061728394A5 /* CredentialDetailView.swift */,
+			);
+			path = Credentials;
+			sourceTree = "<group>";
+		};
+		8B50GAM5C6D7E8F9012345678 /* Gamification */ = {
+			isa = PBXGroup;
+			children = (
+				8B50CD3E4F5061728394A5 /* GamificationView.swift */,
+			);
+			path = Gamification;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1375,7 +1500,32 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B305C2D3E4F5061728394 /* DashboardInsightsSection.swift in Sources */,
+
+				8B50DC2D3E4F5061728394 /* ReviewComposer.swift in Sources */,
+				8B50CC2D3E4F5061728394 /* GamificationView.swift in Sources */,
+				8B50BC2D3E4F5061728394 /* CredentialDetailView.swift in Sources */,
+				8B50AC2D3E4F5061728394 /* CredentialsView.swift in Sources */,
+				8B509C2D3E4F5061728394 /* LMSAPICourseReviews.swift in Sources */,
+				8B511C2D3E4F5061728394 /* LMSFeatureModelsPlatform.swift in Sources */,
+				8B508C2D3E4F5061728394 /* LMSAPIGamification.swift in Sources */,
+				8B507C2D3E4F5061728394 /* LMSAPICredentials.swift in Sources */,
+				8B506C2D3E4F5061728394 /* LMSFeatureModelsCourseReviews.swift in Sources */,
+				8B505C2D3E4F5061728394 /* LMSFeatureModelsGamification.swift in Sources */,
+				8B504C2D3E4F5061728394 /* LMSFeatureModelsCredentials.swift in Sources */,
+				8B503C2D3E4F5061728394 /* CourseReviewLogic.swift in Sources */,
+				8B502C2D3E4F5061728394 /* GamificationLogic.swift in Sources */,
+				8B501C2D3E4F5061728394 /* CredentialsLogic.swift in Sources */,
+				8B406C2D3E4F5061728394 /* CheckoutReturnHandler.swift in Sources */,
+				8B405C2D3E4F5061728394 /* PurchaseFlow.swift in Sources */,
+				8B404C2D3E4F5061728394 /* BillingView.swift in Sources */,
+				8B403C2D3E4F5061728394 /* LMSFeatureModelsBilling.swift in Sources */,
+				8B402C2D3E4F5061728394 /* LMSAPIBilling.swift in Sources */,
+				8B401C2D3E4F5061728394 /* BillingLogic.swift in Sources */,
+				8B395C2D3E4F5061728394 /* CourseLandingView.swift in Sources */,
+				8B394C2D3E4F5061728394 /* CatalogView.swift in Sources */,
+				8B393C2D3E4F5061728394 /* LMSFeatureModelsCatalog.swift in Sources */,
+				8B392C2D3E4F5061728394 /* LMSAPICatalog.swift in Sources */,
+				8B391C2D3E4F5061728394 /* CatalogLogic.swift in Sources */,				8B305C2D3E4F5061728394 /* DashboardInsightsSection.swift in Sources */,
 				8B304C2D3E4F5061728394 /* InsightsView.swift in Sources */,
 				8B303C2D3E4F5061728394 /* LMSFeatureModelsInsights.swift in Sources */,
 				8B302C2D3E4F5061728394 /* LMSAPIInsights.swift in Sources */,
@@ -1624,7 +1774,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8B4R07C2D3E4F5061728394 /* ReadingLogicTests.swift in Sources */,
+
+				8B510C2D3E4F5061728394 /* CourseReviewLogicTests.swift in Sources */,
+				8B50FC2D3E4F5061728394 /* GamificationLogicTests.swift in Sources */,
+				8B50EC2D3E4F5061728394 /* CredentialsLogicTests.swift in Sources */,
+				8B407C2D3E4F5061728394 /* BillingLogicTests.swift in Sources */,
+				8B396C2D3E4F5061728394 /* CatalogLogicTests.swift in Sources */,				8B4R07C2D3E4F5061728394 /* ReadingLogicTests.swift in Sources */,
 				8B306C2D3E4F5061728394 /* InsightsLogicTests.swift in Sources */,
 				8B209C2D3E4F5061728394 /* PathsLogicTests.swift in Sources */,
 				7A4B08C2D3E4F5061728394 /* GroupsLogicTests.swift in Sources */,

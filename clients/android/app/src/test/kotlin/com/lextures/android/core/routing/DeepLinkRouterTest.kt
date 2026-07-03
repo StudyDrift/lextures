@@ -40,4 +40,22 @@ class DeepLinkRouterTest {
         val destination = DeepLinkRouter.resolve("/me/study-insights")
         assertTrue(destination is DeepLinkDestination.Insights)
     }
+
+    @Test
+    fun resolvesCheckoutSuccessWithCourseId() {
+        val destination = DeepLinkRouter.resolve("/checkout/success?course_id=abc-123")
+        assertTrue(destination is DeepLinkDestination.CheckoutSuccess)
+        assertEquals("abc-123", (destination as DeepLinkDestination.CheckoutSuccess).courseId)
+    }
+
+    @Test
+    fun resolvesCheckoutCancelAndBilling() {
+        assertTrue(DeepLinkRouter.resolve("/checkout/cancel") is DeepLinkDestination.CheckoutCancel)
+        assertTrue(DeepLinkRouter.resolve("/me/billing") is DeepLinkDestination.Billing)
+    }
+
+    @Test
+    fun resolvesCredentialsPath() {
+        assertTrue(DeepLinkRouter.resolve("/me/credentials") is DeepLinkDestination.Credentials)
+    }
 }

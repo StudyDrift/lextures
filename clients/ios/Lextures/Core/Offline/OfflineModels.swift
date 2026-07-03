@@ -58,12 +58,20 @@ enum OfflineCacheKey {
     static func myPaths() -> String { "paths:my" }
     static func pathProgress(_ pathId: String) -> String { "paths:progress:\(pathId)" }
     static func catalogPaths(query: String) -> String { "paths:catalog:\(query)" }
+    static func catalogCourses(key: String) -> String { "catalog:courses:\(key)" }
+    static func catalogCourseDetail(slug: String) -> String { "catalog:course:\(slug)" }
+    static func catalogCategories() -> String { "catalog:categories" }
     static func studyStats() -> String { "insights:study-stats" }
     static func reflectionJournal() -> String { "insights:reflection-journal" }
     static func coachingTips() -> String { "insights:coaching-tips" }
     static func readingLog() -> String { "reading:log" }
     static func libraryBooks(orgId: String, gradeBand: String) -> String {
         "reading:library:\(orgId):\(gradeBand)"
+    }
+    static func credentialsList() -> String { "credentials:list" }
+    static func gamificationProfile() -> String { "gamification:profile" }
+    static func gamificationLeaderboard(courseCode: String) -> String {
+        "gamification:leaderboard:\(courseCode)"
     }
 }
 

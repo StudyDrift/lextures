@@ -112,6 +112,7 @@ enum SearchActionRegistry {
         case .reading: return "/reading"
         case .portfolio: return "/portfolios"
         case .credentials: return "/credentials"
+        case .gamification: return "/gamification"
         case .advising: return "/advising"
         case .settings: return "/settings/account"
         case .askAi: return "/ask-ai"
