@@ -43,11 +43,17 @@ object OfflineCacheKey {
     fun myPaths(): String = "paths:my"
     fun pathProgress(pathId: String): String = "paths:progress:$pathId"
     fun catalogPaths(query: String): String = "paths:catalog:$query"
+    fun catalogCourses(key: String): String = "catalog:courses:$key"
+    fun catalogCourseDetail(slug: String): String = "catalog:course:$slug"
+    fun catalogCategories(): String = "catalog:categories"
     fun studyStats(): String = "insights:study-stats"
     fun reflectionJournal(): String = "insights:reflection-journal"
     fun coachingTips(): String = "insights:coaching-tips"
     fun readingLog(): String = "reading:log"
     fun libraryBooks(orgId: String, gradeBand: String): String = "reading:library:$orgId:$gradeBand"
+    fun credentialsList(): String = "credentials:list"
+    fun gamificationProfile(): String = "gamification:profile"
+    fun gamificationLeaderboard(courseCode: String): String = "gamification:leaderboard:$courseCode"
 }
 
 data class Cached<T>(

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Notifications
@@ -122,6 +123,10 @@ fun ProfileTab(
     var showPathsCatalog by remember { mutableStateOf(false) }
     var openPathLandingSlug by remember { mutableStateOf<String?>(null) }
     var openPathCourse by remember { mutableStateOf<com.lextures.android.core.lms.CourseSummary?>(null) }
+    var openCatalogCourseSlug by remember { mutableStateOf<String?>(null) }
+    var showBilling by remember { mutableStateOf(false) }
+    var openCredential by remember { mutableStateOf<com.lextures.android.core.lms.IssuedCredentialSummary?>(null) }
+    var openCatalogPathSlug by remember { mutableStateOf<String?>(null) }
     var openReadingLibraryOrgId by remember { mutableStateOf<String?>(null) }
     var readingLogBook by remember { mutableStateOf<com.lextures.android.core.lms.LibraryBook?>(null) }
     val accessToken by session.accessToken.collectAsState()
@@ -195,6 +200,21 @@ fun ProfileTab(
             onOpenPreferences = { showNotificationPreferences = true },
             modifier = modifier,
         )
+        return
+    }
+
+    if (showBilling) {
+        Column(modifier = modifier.fillMaxSize()) {
+            TextButton(onClick = { showBilling = false }) {
+                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+            }
+            com.lextures.android.features.billing.BillingScreen(
+                session = session,
+                shell = shell,
+                localePrefs = localePreferences,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
         return
     }
 
@@ -339,6 +359,34 @@ fun ProfileTab(
                 } else {
                     MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
                 }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Catalog) {
+                if (shell.platformFeatures.ffPublicCatalog) {
+                    when {
+                        openCatalogCourseSlug != null -> com.lextures.android.features.catalog.CourseLandingScreen(
+                            session = session,
+                            shell = shell,
+                            slug = openCatalogCourseSlug!!,
+                            onBack = { openCatalogCourseSlug = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        openCatalogPathSlug != null -> com.lextures.android.features.paths.PathLandingScreen(
+                            session = session,
+                            slug = openCatalogPathSlug!!,
+                            onEnrolled = { openCatalogPathSlug = null },
+                            onBack = { openCatalogPathSlug = null },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                        else -> com.lextures.android.features.catalog.CatalogScreen(
+                            session = session,
+                            shell = shell,
+                            onOpenCourse = { openCatalogCourseSlug = it },
+                            onOpenPath = { openCatalogPathSlug = it },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
             } else if (destination == com.lextures.android.core.navigation.MoreDestination.Paths) {
                 if (shell.platformFeatures.ffLearningPaths) {
                     when {
@@ -377,6 +425,40 @@ fun ProfileTab(
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Credentials) {
+                if (com.lextures.android.core.lms.CredentialsLogic.credentialsEnabled(shell.platformFeatures)) {
+                    when {
+                        openCredential != null -> Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+                            TextButton(onClick = { openCredential = null }) {
+                                Text(L.text(context, localePreferences, R.string.mobile_ia_close))
+                            }
+                            com.lextures.android.features.credentials.CredentialDetailScreen(
+                                session = session,
+                                localePrefs = localePreferences,
+                                credential = openCredential!!,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                        else -> com.lextures.android.features.credentials.CredentialsScreen(
+                            session = session,
+                            localePrefs = localePreferences,
+                            onOpenCredential = { openCredential = it },
+                            modifier = Modifier.fillMaxSize(),
+                        )
+                    }
+                } else {
+                    MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
+                }
+            } else if (destination == com.lextures.android.core.navigation.MoreDestination.Gamification) {
+                if (com.lextures.android.core.lms.GamificationLogic.gamificationEnabled(shell.platformFeatures)) {
+                    com.lextures.android.features.gamification.GamificationScreen(
+                        session = session,
+                        localePrefs = localePreferences,
+                        modifier = Modifier.fillMaxSize(),
+                    )
                 } else {
                     MoreDestinationPlaceholder(destination = destination, modifier = Modifier.fillMaxSize())
                 }
@@ -826,6 +908,27 @@ fun ProfileTab(
             Text(text = "Account", style = LexturesType.display(17), color = textPrimary())
             InfoRow(Icons.Default.Person, "Display name", displayName)
             InfoRow(Icons.Default.Email, "Email", email.ifEmpty { "—" })
+            if (com.lextures.android.core.lms.BillingLogic.billingEnabled(shell.platformFeatures)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showBilling = true }
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.CreditCard, contentDescription = null, tint = accentColor())
+                        Text(
+                            L.text(context, localePreferences, R.string.mobile_billing_title),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = textPrimary(),
+                        )
+                    }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = textSecondary())
+                }
+            }
         }
 
         // Notifications
@@ -941,8 +1044,14 @@ fun ProfileTab(
         }
     }
 
-    androidx.compose.runtime.LaunchedEffect(shell?.pendingMoreDestination) {
-        shell?.consumePendingMoreDestination()?.let { showMoreHub = true }
+    androidx.compose.runtime.LaunchedEffect(shell.pendingMoreDestination) {
+        shell.consumePendingMoreDestination()?.let { showMoreHub = true }
+    }
+
+    androidx.compose.runtime.LaunchedEffect(shell.pendingBilling) {
+        if (shell.consumePendingBilling()) {
+            showBilling = true
+        }
     }
 
     if (confirmingClearSearchHistory) {

@@ -444,6 +444,14 @@ data class PlatformFeatures(
     val ffPeerReview: Boolean? = null,
     val ffLearningPaths: Boolean? = null,
     val selfReflectionEnabled: Boolean? = null,
+    val ffPublicCatalog: Boolean? = null,
+    val ffSelfPacedMode: Boolean? = null,
+    val ffCourseReviews: Boolean? = null,
+    val ffCompletionCredentials: Boolean? = null,
+    val ffGamification: Boolean? = null,
+    val ffStripeBilling: Boolean? = null,
+    val ffPaymentsEnabled: Boolean? = null,
+    val ffTaxCollection: Boolean? = null,
 )
 
 @Serializable

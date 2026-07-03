@@ -6,6 +6,10 @@ sealed class DeepLinkDestination {
     data object Inbox : DeepLinkDestination()
     data object Review : DeepLinkDestination()
     data object Insights : DeepLinkDestination()
+    data object Billing : DeepLinkDestination()
+    data object Credentials : DeepLinkDestination()
+    data class CheckoutSuccess(val courseId: String? = null) : DeepLinkDestination()
+    data object CheckoutCancel : DeepLinkDestination()
     data class Course(
         val code: String,
         val section: CourseDeepLinkSection? = null,
@@ -35,6 +39,7 @@ object DeepLinkRouter {
     fun resolve(raw: String?): DeepLinkDestination {
         val trimmed = raw?.trim().orEmpty()
         if (trimmed.isEmpty()) return DeepLinkDestination.Home
+        resolveCheckout(trimmed)?.let { return it }
         val path = extractPath(trimmed) ?: return DeepLinkDestination.Home
         return resolvePath(path)
     }
@@ -71,9 +76,11 @@ object DeepLinkRouter {
             return when {
                 segments.firstOrNull()?.lowercase() == "inbox" -> DeepLinkDestination.Inbox
                 segments.firstOrNull()?.lowercase() == "review" -> DeepLinkDestination.Review
-                segments.size >= 2 &&
-                    segments[0].equals("me", ignoreCase = true) &&
+                segments.size >= 2 && segments[0].equals("me", ignoreCase = true) -> when {
                     segments[1].equals("study-insights", ignoreCase = true) -> DeepLinkDestination.Insights
+                    segments[1].equals("credentials", ignoreCase = true) -> DeepLinkDestination.Credentials
+                    else -> DeepLinkDestination.Home
+                }
                 else -> DeepLinkDestination.Home
             }
         }
@@ -113,6 +120,25 @@ object DeepLinkRouter {
                 itemId = segments.getOrNull(3),
             )
             else -> DeepLinkDestination.Course(courseCode, CourseDeepLinkSection.Overview)
+        }
+    }
+
+    private fun resolveCheckout(raw: String): DeepLinkDestination? {
+        val urlString = if (raw.startsWith("/")) "https://lextures.com$raw" else raw
+        val uri = runCatching { java.net.URI(urlString) }.getOrNull() ?: return null
+        val query = uri.rawQuery.orEmpty()
+        return when (uri.path) {
+            "/checkout/success" -> {
+                val courseId = query.split("&")
+                    .map { it.split("=", limit = 2) }
+                    .firstOrNull { it.getOrNull(0) == "course_id" }
+                    ?.getOrNull(1)
+                DeepLinkDestination.CheckoutSuccess(courseId)
+            }
+            "/checkout/cancel" -> DeepLinkDestination.CheckoutCancel
+            "/me/billing" -> DeepLinkDestination.Billing
+            "/me/credentials" -> DeepLinkDestination.Credentials
+            else -> null
         }
     }
 }

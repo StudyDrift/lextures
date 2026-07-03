@@ -1808,6 +1808,86 @@ object LmsApi {
         accessToken = accessToken,
     )
 
+    // Public course catalog (M9.1)
+
+    suspend fun fetchPublicCatalogCourses(
+        query: String = "",
+        category: String = "",
+        level: String = "",
+        sort: String = "popular",
+        priceMax: Int? = null,
+        cursor: String = "",
+        accessToken: String? = null,
+    ): PublicCatalogSearchResponse = withContext(Dispatchers.IO) {
+        val params = buildList {
+            val q = query.trim()
+            if (q.isNotEmpty()) add("q=${encodeQuery(q)}")
+            val c = category.trim()
+            if (c.isNotEmpty()) add("category=${encodeQuery(c)}")
+            val l = level.trim()
+            if (l.isNotEmpty()) add("level=${encodeQuery(l)}")
+            val s = sort.trim()
+            if (s.isNotEmpty()) add("sort=${encodeQuery(s)}")
+            priceMax?.let { add("price_max=$it") }
+            val cur = cursor.trim()
+            if (cur.isNotEmpty()) add("cursor=${encodeQuery(cur)}")
+        }.joinToString("&")
+        val suffix = if (params.isNotEmpty()) "?$params" else ""
+        val (body, code) = client.request(
+            "/api/v1/public/catalog/courses$suffix",
+            accessToken = accessToken,
+        )
+        if (code == 404) throw ApiError.HttpStatus(404, "Course catalog is not available.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchPublicCatalogCategories(accessToken: String? = null): List<CatalogCategory> =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request("/api/v1/public/catalog/categories", accessToken = accessToken)
+            if (code == 404) return@withContext emptyList()
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<CatalogCategoriesResponse>(body).categories
+        }
+
+    suspend fun fetchPublicCatalogCourseDetail(slug: String, accessToken: String? = null): PublicCatalogCourse? =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/public/catalog/courses/${encodePath(slug)}",
+                accessToken = accessToken,
+            )
+            if (code == 404) return@withContext null
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode<PublicCatalogCourseDetailResponse>(body).course
+        }
+
+    suspend fun fetchPublicCatalogCourseReviews(
+        slug: String,
+        cursor: String = "",
+        accessToken: String? = null,
+    ): CourseReviewsListResponse? = withContext(Dispatchers.IO) {
+        val params = cursor.trim().takeIf { it.isNotEmpty() }?.let { "cursor=${encodeQuery(it)}" }.orEmpty()
+        val suffix = if (params.isNotEmpty()) "?$params" else ""
+        val (body, code) = client.request(
+            "/api/v1/public/catalog/courses/${encodePath(slug)}/reviews$suffix",
+            accessToken = accessToken,
+        )
+        if (code == 404) return@withContext null
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun selfEnrollInCourse(courseCode: String, accessToken: String): CourseSelfEnrollResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/self-enroll",
+                method = "POST",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
     // Learning paths (M8.2)
 
     suspend fun fetchCatalogPaths(
@@ -1961,6 +2041,186 @@ object LmsApi {
         )
         if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(responseBody))
         decode(responseBody)
+    }
+
+    // Billing (M9.2)
+
+    suspend fun fetchMyEntitlements(accessToken: String): List<BillingEntitlement> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/entitlements", accessToken = accessToken)
+        if (code == 404) return@withContext emptyList()
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<BillingEntitlementsResponse>(body).entitlements.orEmpty()
+    }
+
+    suspend fun fetchMyTransactions(accessToken: String): List<BillingTransaction> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/transactions", accessToken = accessToken)
+        if (code == 404) return@withContext emptyList()
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<BillingTransactionsResponse>(body).transactions.orEmpty()
+    }
+
+    suspend fun startCheckout(
+        courseId: String,
+        successUrl: String,
+        cancelUrl: String,
+        usePaymentsAbstraction: Boolean,
+        accessToken: String,
+    ): CheckoutSessionResponse = withContext(Dispatchers.IO) {
+        val path = BillingLogic.checkoutEndpoint(usePaymentsAbstraction)
+        val (body, code) = client.request(
+            path = path,
+            method = "POST",
+            body = client.encodeBody(
+                CheckoutSessionRequest(courseId = courseId, successUrl = successUrl, cancelUrl = cancelUrl),
+                CheckoutSessionRequest.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchCheckoutQuote(courseId: String, accessToken: String): CheckoutTaxQuote =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/checkout/quote",
+                method = "POST",
+                body = client.encodeBody(
+                    CheckoutTaxQuoteRequest(courseId = courseId),
+                    CheckoutTaxQuoteRequest.serializer(),
+                ),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun openBillingPortal(returnUrl: String?, accessToken: String): String = withContext(Dispatchers.IO) {
+        val suffix = returnUrl?.takeIf { it.isNotBlank() }?.let {
+            "?return_url=${encodeQuery(it)}"
+        }.orEmpty()
+        val (body, code) = client.request("/api/v1/billing/portal$suffix", accessToken = accessToken)
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<BillingPortalResponse>(body).portalUrl
+    }
+
+    suspend fun checkEntitlement(userId: String, courseId: String, accessToken: String): Boolean =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/internal/entitlements/check?user_id=${encodeQuery(userId)}&course_id=${encodeQuery(courseId)}",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) return@withContext false
+            decode<EntitlementCheckResponse>(body).entitled == true
+        }
+
+    // Credentials (M9.3)
+
+    suspend fun fetchMyCredentials(accessToken: String): List<IssuedCredentialSummary> = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/credentials", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Completion credentials are not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode<CredentialsListResponse>(body).credentials.orEmpty()
+    }
+
+    suspend fun fetchCredentialLinkedInParams(credentialId: String, accessToken: String): CredentialLinkedInParams =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/credentials/${encodePath(credentialId)}/linkedin-params",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun fetchCredentialBadgeExportUrl(credentialId: String, accessToken: String): CredentialBadgeExportResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/credentials/${encodePath(credentialId)}/badge-export",
+                accessToken = accessToken,
+            )
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun recordCredentialShare(credentialId: String, channel: String, accessToken: String) =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                path = "/api/v1/credentials/${encodePath(credentialId)}/share",
+                method = "POST",
+                body = client.encodeBody(CredentialShareRequest(channel), CredentialShareRequest.serializer()),
+                accessToken = accessToken,
+            )
+            if (code !in 200..299 && code != 204) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        }
+
+    fun credentialPdfPath(credentialId: String): String =
+        "/api/v1/credentials/${encodePath(credentialId)}/download"
+
+    // Gamification (M9.3)
+
+    suspend fun fetchGamificationProfile(accessToken: String): GamificationProfile = withContext(Dispatchers.IO) {
+        val (body, code) = client.request("/api/v1/me/gamification", accessToken = accessToken)
+        if (code == 404) throw ApiError.HttpStatus(code, "Gamification is not enabled.")
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun freezeGamificationStreak(accessToken: String): GamificationProfile = withContext(Dispatchers.IO) {
+        val (body, code) = client.request(
+            path = "/api/v1/me/gamification/freeze-streak",
+            method = "POST",
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
+    }
+
+    suspend fun fetchCourseLeaderboard(courseCode: String, accessToken: String): CourseLeaderboardResponse =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/leaderboard",
+                accessToken = accessToken,
+            )
+            if (code == 404) throw ApiError.HttpStatus(code, "Leaderboard is not available for this course.")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    // Course reviews submit (M9.3)
+
+    suspend fun fetchReviewEligibility(courseCode: String, accessToken: String): ReviewEligibility =
+        withContext(Dispatchers.IO) {
+            val (body, code) = client.request(
+                "/api/v1/courses/${encodePath(courseCode)}/reviews/eligibility",
+                accessToken = accessToken,
+            )
+            if (code == 404) throw ApiError.HttpStatus(code, "Course reviews are not enabled.")
+            if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+            decode(body)
+        }
+
+    suspend fun submitCourseReview(
+        courseCode: String,
+        rating: Int,
+        reviewText: String?,
+        accessToken: String,
+    ): SubmittedCourseReview = withContext(Dispatchers.IO) {
+        val trimmed = reviewText?.trim().orEmpty()
+        val (body, code) = client.request(
+            path = "/api/v1/courses/${encodePath(courseCode)}/reviews",
+            method = "POST",
+            body = client.encodeBody(
+                SubmitCourseReviewRequest(
+                    rating = rating,
+                    reviewText = trimmed.takeIf { it.isNotEmpty() },
+                ),
+                SubmitCourseReviewRequest.serializer(),
+            ),
+            accessToken = accessToken,
+        )
+        if (code !in 200..299) throw ApiError.HttpStatus(code, parseApiErrorMessage(body))
+        decode(body)
     }
 
     // endregion

@@ -50,6 +50,10 @@
                 <data android:scheme="https" android:host="www.lextures.com" />
                 <data android:scheme="https" android:host="lextures.com" android:pathPrefix="/login/magic-link" />
                 <data android:scheme="https" android:host="www.lextures.com" android:pathPrefix="/login/magic-link" />
+                <data android:scheme="https" android:host="lextures.com" android:pathPrefix="/checkout/success" />
+                <data android:scheme="https" android:host="www.lextures.com" android:pathPrefix="/checkout/success" />
+                <data android:scheme="https" android:host="lextures.com" android:pathPrefix="/checkout/cancel" />
+                <data android:scheme="https" android:host="www.lextures.com" android:pathPrefix="/checkout/cancel" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

@@ -12,6 +12,7 @@ struct ProfileView: View {
     @State private var confirmingClearCache = false
     @State private var confirmingClearSearchHistory = false
     @State private var navigatedMoreDestination: MoreDestination?
+    @State private var billingNav: BillingRoute?
     @State private var localeError: String?
 
     var body: some View {
@@ -72,6 +73,9 @@ struct ProfileView: View {
             .navigationDestination(for: MoreHubRoute.self) { _ in
                 MoreHubView()
             }
+            .navigationDestination(item: $billingNav) { _ in
+                BillingView()
+            }
             .navigationDestination(for: MoreDestination.self) { destination in
                 ProfileMoreDestinationScreen(destination: destination)
             }
@@ -101,7 +105,12 @@ struct ProfileView: View {
                 Text(L.text("mobile.search.clearHistoryMessage"))
             }
             .task { await offline.refreshState() }
-            .onAppear { openPendingMoreDestinationIfNeeded() }
+            .onAppear {
+                openPendingMoreDestinationIfNeeded()
+                if shell.consumePendingBilling() {
+                    billingNav = BillingRoute()
+                }
+            }
         }
     }
 
@@ -247,6 +256,18 @@ struct ProfileView: View {
                 value: shell.profile?.email ?? session.userEmail ?? L.text("mobile.emDash"),
                 systemImage: "envelope"
             )
+            if BillingLogic.billingEnabled(shell.platformFeatures) {
+                Divider()
+                Button {
+                    billingNav = BillingRoute()
+                } label: {
+                    Label(L.text("mobile.billing.title"), systemImage: "creditcard")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(LexturesTheme.primary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.plain)
+            }
         }
     }
 

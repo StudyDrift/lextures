@@ -4,6 +4,8 @@ struct PathsCatalogView: View {
     @Environment(AuthSession.self) private var session
     @Environment(\.colorScheme) private var colorScheme
 
+    var embedded = false
+
     @State private var query = ""
     @State private var paths: [CatalogPathSummary] = []
     @State private var loading = false
@@ -11,8 +13,27 @@ struct PathsCatalogView: View {
     @State private var hasSearched = false
 
     var body: some View {
+        Group {
+            if embedded {
+                content
+            } else {
+                content
+                    .navigationTitle(L.text("mobile.paths.catalogTitle"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .searchable(text: $query, prompt: L.text("mobile.paths.catalogSearch"))
+                    .onSubmit(of: .search) { Task { await search() } }
+            }
+        }
+        .navigationDestination(for: String.self) { slug in
+            PathLandingView(slug: slug)
+        }
+        .task { await search() }
+    }
+
+    private var content: some View {
         ZStack {
-            LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea()
+            if embedded { Color.clear }
+            else { LexturesTheme.sceneBackground(for: colorScheme).ignoresSafeArea() }
 
             if loading && paths.isEmpty {
                 LMSSkeletonList(count: 4)
@@ -33,6 +54,11 @@ struct PathsCatalogView: View {
             } else {
                 ScrollView {
                     LazyVStack(spacing: 12) {
+                        if embedded {
+                            TextField(L.text("mobile.paths.catalogSearch"), text: $query)
+                                .textFieldStyle(.roundedBorder)
+                                .onSubmit { Task { await search() } }
+                        }
                         ForEach(paths) { path in
                             NavigationLink(value: path.slug) {
                                 catalogCard(path)
@@ -40,18 +66,10 @@ struct PathsCatalogView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(16)
+                    .padding(embedded ? 0 : 16)
                 }
             }
         }
-        .navigationTitle(L.text("mobile.paths.catalogTitle"))
-        .navigationBarTitleDisplayMode(.inline)
-        .searchable(text: $query, prompt: L.text("mobile.paths.catalogSearch"))
-        .onSubmit(of: .search) { Task { await search() } }
-        .navigationDestination(for: String.self) { slug in
-            PathLandingView(slug: slug)
-        }
-        .task { await search() }
     }
 
     private func catalogCard(_ path: CatalogPathSummary) -> some View {

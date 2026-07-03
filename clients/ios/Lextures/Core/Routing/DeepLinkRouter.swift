@@ -6,6 +6,10 @@ enum DeepLinkDestination: Equatable {
     case inbox
     case review
     case insights
+    case billing
+    case credentials
+    case checkoutSuccess(courseId: String?)
+    case checkoutCancel
     case course(code: String, section: CourseDeepLinkSection?, itemId: String?)
 }
 
@@ -33,6 +37,9 @@ enum DeepLinkRouter {
             return .home
         }
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let checkout = resolveCheckout(from: trimmed) {
+            return checkout
+        }
         if let path = extractPath(from: trimmed) {
             return resolvePath(path)
         }
@@ -65,6 +72,27 @@ enum DeepLinkRouter {
         return resolveCoursePath(segments)
     }
 
+    private static func resolveCheckout(from raw: String) -> DeepLinkDestination? {
+        let urlString = raw.hasPrefix("/") ? "https://lextures.com\(raw)" : raw
+        guard let url = URL(string: urlString),
+              let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            return nil
+        }
+        switch components.path {
+        case "/checkout/success":
+            let courseId = components.queryItems?.first(where: { $0.name == "course_id" })?.value
+            return .checkoutSuccess(courseId: courseId)
+        case "/checkout/cancel":
+            return .checkoutCancel
+        case "/me/billing":
+            return .billing
+        case "/me/credentials":
+            return .credentials
+        default:
+            return nil
+        }
+    }
+
     private static func resolveNonCoursePath(_ segments: [String]) -> DeepLinkDestination {
         switch segments.first?.lowercased() {
         case "inbox":
@@ -72,10 +100,15 @@ enum DeepLinkRouter {
         case "review":
             return .review
         default:
-            if segments.count >= 2,
-               segments[0].lowercased() == "me",
-               segments[1].lowercased() == "study-insights" {
-                return .insights
+            if segments.count >= 2, segments[0].lowercased() == "me" {
+                switch segments[1].lowercased() {
+                case "study-insights":
+                    return .insights
+                case "credentials":
+                    return .credentials
+                default:
+                    break
+                }
             }
             return .home
         }

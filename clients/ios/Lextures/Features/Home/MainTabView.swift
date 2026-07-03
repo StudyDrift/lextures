@@ -50,6 +50,8 @@ final class AppShellModel {
     var pendingMoreDestination: MoreDestination?
     var pendingReview = false
     var pendingInsights = false
+    var pendingCheckout: PendingCheckoutContext?
+    var checkoutReturnPhase: CheckoutReturnPhase?
 
     // MARK: Drawer navigation
 
@@ -172,9 +174,27 @@ final class AppShellModel {
         case .insights:
             selectShellTab(.home)
             pendingInsights = true
+        case .billing:
+            selectShellTab(.profile)
+            pendingBilling = true
+        case .credentials:
+            selectShellTab(.profile)
+            pendingMoreDestination = .credentials
+        case let .checkoutSuccess(courseId):
+            checkoutReturnPhase = .success(courseId: courseId)
+        case .checkoutCancel:
+            pendingCheckout = nil
+            checkoutReturnPhase = .cancel
         case .course:
             selectShellTab(.courses)
         }
+    }
+
+    var pendingBilling = false
+
+    func consumePendingBilling() -> Bool {
+        defer { pendingBilling = false }
+        return pendingBilling
     }
 
     func selectShellTab(_ tab: ShellTab) {
@@ -317,6 +337,11 @@ struct MainTabView: View {
             coursePanel: { CourseDrawer() }
         )
         .environment(shell)
+        .overlay {
+            if let phase = shell.checkoutReturnPhase {
+                CheckoutReturnOverlay(phase: phase)
+            }
+        }
         .sheet(isPresented: Bindable(shell).showUniversalSearch) {
             if shell.universalSearchEnabled {
                 UniversalSearchView()

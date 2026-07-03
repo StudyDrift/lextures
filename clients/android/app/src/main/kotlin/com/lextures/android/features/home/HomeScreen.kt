@@ -124,6 +124,9 @@ class HomeShellState {
     var pendingMoreDestination by mutableStateOf<com.lextures.android.core.navigation.MoreDestination?>(null)
     var pendingReview by mutableStateOf(false)
     var pendingInsights by mutableStateOf(false)
+    var pendingCheckout by mutableStateOf<com.lextures.android.core.lms.PendingCheckoutContext?>(null)
+    var checkoutReturnPhase by mutableStateOf<com.lextures.android.core.lms.CheckoutReturnPhase?>(null)
+    var pendingBilling by mutableStateOf(false)
 
     // Drawer navigation (web-parity sidebar)
     var drawerState by mutableStateOf(DrawerState.None)
@@ -213,9 +216,32 @@ class HomeShellState {
                     pendingInsights = true
                     RootDestination.Dashboard
                 }
+                DeepLinkDestination.Billing -> {
+                    pendingBilling = true
+                    RootDestination.Profile
+                }
+                DeepLinkDestination.Credentials -> {
+                    pendingMoreDestination = com.lextures.android.core.navigation.MoreDestination.Credentials
+                    RootDestination.Profile
+                }
+                is DeepLinkDestination.CheckoutSuccess -> {
+                    checkoutReturnPhase = com.lextures.android.core.lms.CheckoutReturnPhase.Success(destination.courseId)
+                    RootDestination.Dashboard
+                }
+                DeepLinkDestination.CheckoutCancel -> {
+                    pendingCheckout = null
+                    checkoutReturnPhase = com.lextures.android.core.lms.CheckoutReturnPhase.Cancel
+                    RootDestination.Dashboard
+                }
                 is DeepLinkDestination.Course -> RootDestination.Courses
             },
         )
+    }
+
+    fun consumePendingBilling(): Boolean {
+        val pending = pendingBilling
+        pendingBilling = false
+        return pending
     }
 
     fun consumePendingReview(): Boolean {
@@ -405,6 +431,17 @@ fun HomeScreen(
                     shell = shell,
                 )
             }
+        }
+
+        shell.checkoutReturnPhase?.let { phase ->
+            val localePrefs = com.lextures.android.core.i18n.LocalLocalePreferences.current
+            com.lextures.android.features.billing.CheckoutReturnOverlay(
+                session = session,
+                shell = shell,
+                localePrefs = localePrefs,
+                phase = phase,
+                onDismiss = { shell.checkoutReturnPhase = null },
+            )
         }
     }
 }

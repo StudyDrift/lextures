@@ -166,6 +166,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
     case reading
     case portfolio
     case credentials
+    case gamification
     case advising
     case settings
     case askAi
@@ -189,6 +190,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .reading: return L.text("mobile.ia.more.reading")
         case .portfolio: return L.text("mobile.ia.more.portfolio")
         case .credentials: return L.text("mobile.ia.more.credentials")
+        case .gamification: return L.text("mobile.ia.more.gamification")
         case .advising: return L.text("mobile.ia.more.advising")
         case .settings: return L.text("mobile.ia.more.settings")
         }
@@ -208,6 +210,7 @@ enum MoreDestination: String, CaseIterable, Equatable, Identifiable {
         case .reading: return "book.fill"
         case .portfolio: return "folder.fill"
         case .credentials: return "rosette"
+        case .gamification: return "flame.fill"
         case .advising: return "person.2.fill"
         case .settings: return "gearshape.fill"
         }
@@ -345,6 +348,14 @@ struct MobilePlatformFeatures: Equatable {
     var ffPeerReview = false
     var ffLearningPaths = false
     var selfReflectionEnabled = false
+    var ffPublicCatalog = false
+    var ffSelfPacedMode = false
+    var ffCourseReviews = false
+    var ffCompletionCredentials = false
+    var ffGamification = false
+    var ffStripeBilling = false
+    var ffPaymentsEnabled = false
+    var ffTaxCollection = false
 
     static func from(_ features: PlatformFeatures?) -> MobilePlatformFeatures {
         MobilePlatformFeatures(
@@ -366,7 +377,15 @@ struct MobilePlatformFeatures: Equatable {
             aiDisclosureEnabled: features?.aiDisclosureEnabled == true,
             ffPeerReview: features?.ffPeerReview == true,
             ffLearningPaths: features?.ffLearningPaths == true,
-            selfReflectionEnabled: features?.selfReflectionEnabled == true
+            selfReflectionEnabled: features?.selfReflectionEnabled == true,
+            ffPublicCatalog: features?.ffPublicCatalog == true,
+            ffSelfPacedMode: features?.ffSelfPacedMode == true,
+            ffCourseReviews: features?.ffCourseReviews == true,
+            ffCompletionCredentials: features?.ffCompletionCredentials == true,
+            ffGamification: features?.ffGamification == true,
+            ffStripeBilling: features?.ffStripeBilling == true,
+            ffPaymentsEnabled: features?.ffPaymentsEnabled == true,
+            ffTaxCollection: features?.ffTaxCollection == true
         )
     }
 
@@ -495,7 +514,9 @@ enum MobileDestinations {
             out += [.calendar, .planner, .catalog, .paths]
             if platform.ffLibrary { out.append(.reading) }
             if platform.libraryBrowseEnabled { out.append(.library) }
-            out += [.portfolio, .credentials, .advising, .settings]
+            if platform.ffCompletionCredentials { out.append(.credentials) }
+            if platform.ffGamification { out.append(.gamification) }
+            out += [.portfolio, .advising, .settings]
         case .teaching:
             out += [.calendar, .planner]
             if platform.libraryBrowseEnabled { out.append(.library) }
