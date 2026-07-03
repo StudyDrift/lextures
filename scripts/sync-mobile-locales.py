@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -41,6 +42,13 @@ def android_format(value: str) -> str:
     arg = 1
     while "%@" in out:
         out = out.replace("%@", f"%{arg}$s", 1)
+        arg += 1
+    while True:
+        match = re.search(r"%\.\d+f", out)
+        if match is None:
+            break
+        spec = match.group()[1:]  # e.g. .1f
+        out = out[: match.start()] + f"%{arg}${spec}" + out[match.end() :]
         arg += 1
     while "%d" in out:
         out = out.replace("%d", f"%{arg}$d", 1)
