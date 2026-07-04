@@ -130,6 +130,7 @@ final class PlannerModel {
         let notebookTasks = try await notebookTasksTask
         var academic: [AcademicCalendarEvent] = []
         var officeHoursByCourse: [String: OfficeHoursAvailability] = [:]
+        var liveMeetingsByCourse: [String: [VirtualMeeting]] = [:]
         var seenKeys = Set<String>()
         for course in studentCourses {
             guard let orgId = course.orgId else { continue }
@@ -158,6 +159,21 @@ final class PlannerModel {
             }
         }
 
+        await withTaskGroup(of: (String, [VirtualMeeting]?).self) { group in
+            for course in studentCourses where course.isLiveSessionsEnabled {
+                group.addTask {
+                    let meetings = try? await LMSAPI.fetchCourseMeetings(
+                        courseCode: course.courseCode,
+                        accessToken: accessToken
+                    )
+                    return (course.courseCode, meetings)
+                }
+            }
+            for await (code, meetings) in group {
+                if let meetings { liveMeetingsByCourse[code] = meetings }
+            }
+        }
+
         let todos = PlannerLogic.collectTodos(
             studentCourses: studentCourses,
             structureByCourseCode: structures,
@@ -169,7 +185,8 @@ final class PlannerModel {
             structureByCourseCode: structures,
             notebookTasks: notebookTasks,
             academicEvents: academic,
-            officeHoursByCourseCode: officeHoursByCourse
+            officeHoursByCourseCode: officeHoursByCourse,
+            liveMeetingsByCourseCode: liveMeetingsByCourse
         )
         return PlannerLogic.encodeSnapshot(todos: todos, events: events)
     }

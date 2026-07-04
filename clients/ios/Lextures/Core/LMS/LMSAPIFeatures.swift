@@ -905,15 +905,96 @@ extension LMSAPI {
     }
 
     static func fetchMeetingJoinURL(meetingId: String, accessToken: String) async throws -> String? {
+        let info = try await fetchMeetingJoinInfo(meetingId: meetingId, accessToken: accessToken)
+        return info?.joinUrl
+    }
+
+    // MARK: - Live meetings (M7.5)
+
+    static func fetchCourseMeetings(courseCode: String, accessToken: String) async throws -> [VirtualMeeting] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/meetings",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(CourseMeetingsResponse.self, from: data).meetings ?? []
+    }
+
+    static func fetchMeetingJoinInfo(meetingId: String, accessToken: String) async throws -> MeetingJoinInfo? {
         let (data, response) = try await client.request(
             path: "/api/v1/meetings/\(encodePath(meetingId))/join",
             authorized: true,
             accessToken: accessToken
         )
         guard (200 ... 299).contains(response.statusCode) else { return nil }
-        let join = try decode(MeetingJoinResponse.self, from: data).joinUrl?
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return join?.isEmpty == false ? join : nil
+        let raw = try decode(MeetingJoinResponse.self, from: data)
+        guard let join = raw.joinUrl?.trimmingCharacters(in: .whitespacesAndNewlines), !join.isEmpty else {
+            return nil
+        }
+        let host = raw.hostUrl?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return MeetingJoinInfo(
+            joinUrl: join,
+            hostUrl: (host?.isEmpty == false) ? host : nil,
+            meetingId: raw.meetingId ?? meetingId,
+            status: raw.status ?? "scheduled"
+        )
+    }
+
+    static func patchMeeting(meetingId: String, status: String, accessToken: String) async throws -> VirtualMeeting {
+        let (data, response) = try await client.request(
+            path: "/api/v1/meetings/\(encodePath(meetingId))",
+            method: "PATCH",
+            body: PatchMeetingBody(status: status),
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(VirtualMeeting.self, from: data)
+    }
+
+    static func fetchMeetingAttendance(meetingId: String, accessToken: String) async throws -> [MeetingAttendanceRecord] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/meetings/\(encodePath(meetingId))/attendance",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(MeetingAttendanceResponse.self, from: data).attendance ?? []
+    }
+
+    static func fetchCourseWhiteboards(courseCode: String, accessToken: String) async throws -> [CourseWhiteboard] {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/whiteboards",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(CourseWhiteboardsResponse.self, from: data).whiteboards ?? []
+    }
+
+    static func fetchCourseWhiteboard(
+        courseCode: String,
+        boardId: String,
+        accessToken: String
+    ) async throws -> CourseWhiteboard {
+        let (data, response) = try await client.request(
+            path: "/api/v1/courses/\(encodePath(courseCode))/whiteboards/\(encodePath(boardId))",
+            authorized: true,
+            accessToken: accessToken
+        )
+        guard (200 ... 299).contains(response.statusCode) else {
+            throw APIError.httpStatus(response.statusCode, message: parseAPIErrorMessage(from: data))
+        }
+        return try decode(CourseWhiteboard.self, from: data)
     }
 
 }

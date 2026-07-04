@@ -324,6 +324,14 @@
 		8B6R08C2D3E4F5061728394 /* CaptionedPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6R08D3E4F5061728394A5 /* CaptionedPlayerView.swift */; };
 		8B6R09C2D3E4F5061728394 /* ReaderToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6R09D3E4F5061728394A5 /* ReaderToolbar.swift */; };
 		8B6R10C2D3E4F5061728394 /* ReaderLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6R10D3E4F5061728394A5 /* ReaderLogicTests.swift */; };
+		M750L01C2D3E4F5061728394 /* LiveMeetingsLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L01D3E4F5061728394A5 /* LiveMeetingsLogic.swift */; };
+		M750L08C2D3E4F5061728394 /* LMSFeatureModelsLive.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L08D3E4F5061728394A5 /* LMSFeatureModelsLive.swift */; };
+		M750L02C2D3E4F5061728394 /* WhiteboardRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L02D3E4F5061728394A5 /* WhiteboardRenderer.swift */; };
+		M750L03C2D3E4F5061728394 /* MeetingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L03D3E4F5061728394A5 /* MeetingListView.swift */; };
+		M750L04C2D3E4F5061728394 /* MeetingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L04D3E4F5061728394A5 /* MeetingDetailView.swift */; };
+		M750L05C2D3E4F5061728394 /* WhiteboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L05D3E4F5061728394A5 /* WhiteboardView.swift */; };
+		M750L06C2D3E4F5061728394 /* LiveMeetingsRail.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L06D3E4F5061728394A5 /* LiveMeetingsRail.swift */; };
+		M750L07C2D3E4F5061728394 /* LiveMeetingsLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = M750L07D3E4F5061728394A5 /* LiveMeetingsLogicTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -659,6 +667,14 @@
 		8B6R08D3E4F5061728394A5 /* CaptionedPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptionedPlayerView.swift; sourceTree = "<group>"; };
 		8B6R09D3E4F5061728394A5 /* ReaderToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderToolbar.swift; sourceTree = "<group>"; };
 		8B6R10D3E4F5061728394A5 /* ReaderLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderLogicTests.swift; sourceTree = "<group>"; };
+		M750L01D3E4F5061728394A5 /* LiveMeetingsLogic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMeetingsLogic.swift; sourceTree = "<group>"; };
+		M750L08D3E4F5061728394A5 /* LMSFeatureModelsLive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LMSFeatureModelsLive.swift; sourceTree = "<group>"; };
+		M750L02D3E4F5061728394A5 /* WhiteboardRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardRenderer.swift; sourceTree = "<group>"; };
+		M750L03D3E4F5061728394A5 /* MeetingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingListView.swift; sourceTree = "<group>"; };
+		M750L04D3E4F5061728394A5 /* MeetingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingDetailView.swift; sourceTree = "<group>"; };
+		M750L05D3E4F5061728394A5 /* WhiteboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardView.swift; sourceTree = "<group>"; };
+		M750L06D3E4F5061728394A5 /* LiveMeetingsRail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMeetingsRail.swift; sourceTree = "<group>"; };
+		M750L07D3E4F5061728394A5 /* LiveMeetingsLogicTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveMeetingsLogicTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -743,6 +759,7 @@
 		1920B879A116481BA2D9B736 /* Dashboard */ = {
 			isa = PBXGroup;
 			children = (
+				M750L06D3E4F5061728394A5 /* LiveMeetingsRail.swift */,
 				D4SHCC010000000000000001 /* DashboardCoursesCarousel.swift */,
 				D4SHHP010000000000000001 /* DashboardHeroPanel.swift */,
 				4D13F98A21FF4CB380B9C497 /* DashboardView.swift */,
@@ -974,6 +991,7 @@
 		9675A7A45CC240A0A4F7B883 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				M750LGRP5C6D7E8F901234568 /* Live */,
 				8B6RGRP5C6D7E8F901234569 /* Reader */,
 				8B50GAM5C6D7E8F9012345678 /* Gamification */,
 				8B50CRED5C6D7E8F901234567 /* Credentials */,
@@ -1168,6 +1186,7 @@
 		D177268EB0164406B86F0376 /* LexturesTests */ = {
 			isa = PBXGroup;
 			children = (
+				M750L07D3E4F5061728394A5 /* LiveMeetingsLogicTests.swift */,
 				8B6R10D3E4F5061728394A5 /* ReaderLogicTests.swift */,
 				8B510D3E4F5061728394A5 /* CourseReviewLogicTests.swift */,
 				8B50FD3E4F5061728394A5 /* GamificationLogicTests.swift */,
@@ -1285,6 +1304,9 @@
 		EE4734853C3443449D42D6DC /* LMS */ = {
 			isa = PBXGroup;
 			children = (
+				M750L02D3E4F5061728394A5 /* WhiteboardRenderer.swift */,
+				M750L01D3E4F5061728394A5 /* LiveMeetingsLogic.swift */,
+				M750L08D3E4F5061728394A5 /* LMSFeatureModelsLive.swift */,
 				8B6R02D3E4F5061728394A5 /* LMSAPIReader.swift */,
 				8B6R01D3E4F5061728394A5 /* LMSFeatureModelsReader.swift */,
 				8B509D3E4F5061728394A5 /* LMSAPICourseReviews.swift */,
@@ -1451,6 +1473,17 @@
 			path = Reader;
 			sourceTree = "<group>";
 		};
+
+		M750LGRP5C6D7E8F901234568 /* Live */ = {
+			isa = PBXGroup;
+			children = (
+				M750L03D3E4F5061728394A5 /* MeetingListView.swift */,
+				M750L04D3E4F5061728394A5 /* MeetingDetailView.swift */,
+				M750L05D3E4F5061728394A5 /* WhiteboardView.swift */,
+			);
+			path = Live;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1539,6 +1572,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				M750L06C2D3E4F5061728394 /* LiveMeetingsRail.swift in Sources */,
+
+				M750L05C2D3E4F5061728394 /* WhiteboardView.swift in Sources */,
+
+				M750L04C2D3E4F5061728394 /* MeetingDetailView.swift in Sources */,
+
+				M750L03C2D3E4F5061728394 /* MeetingListView.swift in Sources */,
+
+				M750L02C2D3E4F5061728394 /* WhiteboardRenderer.swift in Sources */,
+
+				M750L01C2D3E4F5061728394 /* LiveMeetingsLogic.swift in Sources */,
+				M750L08C2D3E4F5061728394 /* LMSFeatureModelsLive.swift in Sources */,
+
 				8B6R09C2D3E4F5061728394 /* ReaderToolbar.swift in Sources */,
 				8B6R08C2D3E4F5061728394 /* CaptionedPlayerView.swift in Sources */,
 				8B6R07C2D3E4F5061728394 /* ContentTranslationControls.swift in Sources */,
@@ -1823,6 +1869,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				M750L07C2D3E4F5061728394 /* LiveMeetingsLogicTests.swift in Sources */,
+
 				8B6R10C2D3E4F5061728394 /* ReaderLogicTests.swift in Sources */,
 				8B510C2D3E4F5061728394 /* CourseReviewLogicTests.swift in Sources */,
 				8B50FC2D3E4F5061728394 /* GamificationLogicTests.swift in Sources */,

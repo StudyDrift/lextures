@@ -433,6 +433,7 @@ data class PlatformFeatures(
     val ffMobileProfileDepth: Boolean? = null,
     val ffMobileLibraryEreserves: Boolean? = null,
     val ffMobileImmersiveReader: Boolean? = null,
+    val ffMobileLiveMeetings: Boolean? = null,
     val readAloudEnabled: Boolean? = null,
     val ffReadAloud: Boolean? = null,
     val videoCaptionsEnabled: Boolean? = null,
@@ -851,6 +852,96 @@ data class BookOfficeHoursSlotBody(
 data class MeetingJoinResponse(
     val joinUrl: String? = null,
     val hostUrl: String? = null,
+    val meetingId: String? = null,
+    val status: String? = null,
+)
+
+@Serializable
+data class VirtualMeeting(
+    val id: String,
+    val courseId: String,
+    val sectionId: String? = null,
+    val provider: String,
+    val title: String,
+    val scheduledStart: String? = null,
+    val scheduledEnd: String? = null,
+    val joinUrl: String? = null,
+    val hostUrl: String? = null,
+    val externalMeetingId: String? = null,
+    val status: String,
+    val createdBy: String,
+    val createdAt: String,
+)
+
+@Serializable
+data class CourseMeetingsResponse(
+    val meetings: List<VirtualMeeting>? = null,
+)
+
+@Serializable
+data class MeetingJoinInfo(
+    val joinUrl: String,
+    val hostUrl: String? = null,
+    val meetingId: String,
+    val status: String,
+)
+
+@Serializable
+data class MeetingAttendanceRecord(
+    val id: String,
+    val meetingId: String,
+    val userId: String,
+    val joinedAt: String,
+    val leftAt: String? = null,
+    val durationSeconds: Int? = null,
+)
+
+@Serializable
+data class MeetingAttendanceResponse(
+    val attendance: List<MeetingAttendanceRecord>? = null,
+)
+
+@Serializable
+data class PatchMeetingBody(
+    val status: String? = null,
+)
+
+@Serializable
+data class WhiteboardElement(
+    val type: String,
+    val color: String,
+    val width: Double,
+    val pts: List<List<Double>>? = null,
+    val x: Double? = null,
+    val y: Double? = null,
+    val w: Double? = null,
+    val h: Double? = null,
+    val cx: Double? = null,
+    val cy: Double? = null,
+    val rx: Double? = null,
+    val ry: Double? = null,
+    val x1: Double? = null,
+    val y1: Double? = null,
+    val x2: Double? = null,
+    val y2: Double? = null,
+    val x3: Double? = null,
+    val y3: Double? = null,
+)
+
+@Serializable
+data class CourseWhiteboard(
+    val id: String,
+    val courseId: String,
+    val title: String,
+    val canvasData: List<WhiteboardElement>? = null,
+    val createdBy: String? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+@Serializable
+data class CourseWhiteboardsResponse(
+    val whiteboards: List<CourseWhiteboard>? = null,
 )
 
 // endregion

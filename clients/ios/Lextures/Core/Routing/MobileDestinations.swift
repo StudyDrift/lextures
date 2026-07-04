@@ -337,6 +337,7 @@ struct MobilePlatformFeatures: Equatable {
     var ffMobileProfileDepth = false
     var ffMobileLibraryEreserves = true
     var ffMobileImmersiveReader = true
+    var ffMobileLiveMeetings = true
     var readAloudEnabled = false
     var ffReadAloud = false
     var videoCaptionsEnabled = false
@@ -374,6 +375,7 @@ struct MobilePlatformFeatures: Equatable {
             ffMobileProfileDepth: features?.ffMobileProfileDepth == true,
             ffMobileLibraryEreserves: features?.ffMobileLibraryEreserves != false,
             ffMobileImmersiveReader: features?.ffMobileImmersiveReader != false,
+            ffMobileLiveMeetings: features?.ffMobileLiveMeetings != false,
             readAloudEnabled: features?.readAloudEnabled == true,
             ffReadAloud: features?.ffReadAloud == true,
             videoCaptionsEnabled: features?.videoCaptionsEnabled == true || features?.autoCaptioningEnabled == true,

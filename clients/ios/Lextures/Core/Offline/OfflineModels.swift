@@ -25,6 +25,7 @@ enum OfflineCacheKey {
     static func notificationsPage() -> String { "notifications:page" }
     static func notificationPreferences() -> String { "notifications:preferences" }
     static func officeHours(_ courseCode: String) -> String { "course:\(courseCode):office-hours" }
+    static func liveMeetings(_ courseCode: String) -> String { "course:\(courseCode):live-meetings" }
     static func discussionForums(_ courseCode: String) -> String { "course:\(courseCode):discussion-forums" }
     static func discussionThreads(courseCode: String, forumId: String) -> String {
         "course:\(courseCode):discussion-threads:\(forumId)"

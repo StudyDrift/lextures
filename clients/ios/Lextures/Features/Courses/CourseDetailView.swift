@@ -216,7 +216,9 @@ struct CourseDetailView: View {
             CourseCollabDocsSection(course: course)
         case .people:
             CoursePeopleSection(course: course)
-        case .live, .evaluations:
+        case .live:
+            CourseLiveSection(course: course)
+        case .evaluations:
             CourseDestinationPlaceholder(section: section)
         }
     }
